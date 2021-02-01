@@ -1,4 +1,4 @@
-name: ssplayer
+name: jidoujishi
 description: A new Flutter project.
 
 # The following line prevents the package from being accidentally published to
@@ -25,6 +25,7 @@ dependencies:
     sdk: flutter
   subtitle_wrapper_package: ^1.0.4
   chewie: ^0.12.2
+  ext_video_player:
   gx_file_picker:
   flutter_phoenix: ^0.1.0
   clipboard_monitor: ^0.9.1
@@ -32,8 +33,12 @@ dependencies:
   path_provider:
   file_utils: ^0.1.4
   permission_handler: ^5.0.1+1
-
-
+  mecab_dart: 0.1.2
+  package_info: ^0.4.0+16
+  http:
+  xml:
+  xml2json:
+  youtube_player_flutter: ^6.1.0+4
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

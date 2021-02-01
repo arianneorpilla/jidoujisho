@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.ssplayer">
+    package="com.lrorpilla.jidoujisho">
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
    <application
-        android:label="ssplayer"
+        android:label="jidoujisho"
         android:icon="@mipmap/ic_launcher"
         android:requestLegacyExternalStorage="true">
         <activity

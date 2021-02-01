@@ -141,6 +141,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.2.5"
+  ext_video_player:
+    dependency: "direct main"
+    description:
+      name: ext_video_player
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.4"
   fake_async:
     dependency: transitive
     description:
@@ -251,7 +258,7 @@ packages:
     source: hosted
     version: "1.0.2"
   http:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: http
       url: "https://pub.dartlang.org"
@@ -311,6 +318,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.12.10-nullsafety.3"
+  mecab_dart:
+    dependency: "direct main"
+    description:
+      name: mecab_dart
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.2"
   meta:
     dependency: transitive
     description:
@@ -346,6 +360,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.9.3"
+  package_info:
+    dependency: "direct main"
+    description:
+      name: package_info
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.4.3+4"
   path:
     dependency: transitive
     description:
@@ -409,6 +430,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.1"
+  petitparser:
+    dependency: transitive
+    description:
+      name: petitparser
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.1.0"
   platform:
     dependency: transitive
     description:
@@ -624,6 +652,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.2"
+  webview_media:
+    dependency: transitive
+    description:
+      name: webview_media
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.2"
   win32:
     dependency: transitive
     description:
@@ -638,6 +673,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.1.2"
+  xml:
+    dependency: "direct main"
+    description:
+      name: xml
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.5.1"
+  xml2json:
+    dependency: "direct main"
+    description:
+      name: xml2json
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.4.0"
   yaml:
     dependency: transitive
     description:
@@ -645,6 +694,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.2.1"
+  youtube_player_flutter:
+    dependency: "direct main"
+    description:
+      name: youtube_player_flutter
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "6.1.1"
 sdks:
   dart: ">=2.12.0-0.0 <3.0.0"
   flutter: ">=1.22.0 <2.0.0"

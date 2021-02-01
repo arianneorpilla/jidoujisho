@@ -1,4 +1,4 @@
-# ssplayer
+# jidoujisho
 
 A new Flutter project.
 
