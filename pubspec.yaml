@@ -1,4 +1,4 @@
-name: jidoujishi
+name: jidoujisho
 description: A new Flutter project.
 
 # The following line prevents the package from being accidentally published to
@@ -15,7 +15,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.0+1
+version: 0.3.0+1
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -24,7 +24,6 @@ dependencies:
   flutter:
     sdk: flutter
   subtitle_wrapper_package: ^1.0.4
-  chewie: ^0.12.2
   ext_video_player:
   gx_file_picker:
   flutter_phoenix: ^0.1.0
@@ -32,13 +31,32 @@ dependencies:
   unofficial_jisho_api: ^1.1.0
   path_provider:
   file_utils: ^0.1.4
-  permission_handler: ^5.0.1+1
-  mecab_dart: 0.1.2
-  package_info: ^0.4.0+16
+  permission_handler: ^5.0.1+1 
+  package_info: ^0.4.3+4
   http:
   xml:
+  intl:
   xml2json:
   youtube_player_flutter: ^6.1.0+4
+  url_launcher:
+  flutter_ffmpeg:
+  chewie: any
+  video_player:
+    git:
+      url: https://github.com/balvinderz/plugins
+      ref: features/change_audio
+      path: packages/video_player/video_player
+  bordered_text: ^1.0.1
+  audioplayers: ^0.10.0
+  share: ^0.6.5+4
+  scrollable_positioned_list: ^0.1.9
+  transparent_image: ^1.0.0
+dependency_overrides:
+  video_player:
+    git:
+      url: https://github.com/balvinderz/plugins
+      ref: features/change_audio
+      path: packages/video_player/video_player
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -49,6 +67,12 @@ dev_dependencies:
     sdk: flutter
   integration_test:
     sdk: flutter
+  flutter_launcher_icons: "^0.8.0"
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/icon.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -61,10 +85,8 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-  # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+    - assets/icon/icon.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

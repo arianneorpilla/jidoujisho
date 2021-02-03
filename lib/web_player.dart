@@ -1,398 +1,331 @@
-import 'dart:convert';
-import 'dart:ffi';
-import 'dart:io';
+// import 'dart:convert';
 
-import 'package:chewie/chewie.dart';
-import 'package:flutter/material.dart';
-import 'package:jidoujishi/main.dart';
-import 'package:subtitle_wrapper_package/subtitle_controller.dart';
-import 'package:subtitle_wrapper_package/subtitle_wrapper_package.dart';
-import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
-import 'package:flutter_phoenix/flutter_phoenix.dart';
-import 'package:unofficial_jisho_api/api.dart' as jisho;
-import 'package:ext_video_player/ext_video_player.dart';
-import 'package:html/parser.dart';
-import 'package:http/http.dart' as http;
-import 'package:xml/xml.dart';
-import 'package:xml2json/xml2json.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+// import 'package:chewie/chewie.dart';
+// import 'package:flutter/material.dart';
+// import 'package:jidoujisho/main.dart';
+// import 'package:subtitle_wrapper_package/subtitle_controller.dart';
+// import 'package:subtitle_wrapper_package/subtitle_wrapper_package.dart';
+// import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
+// import 'package:flutter_phoenix/flutter_phoenix.dart';
+// import 'package:unofficial_jisho_api/api.dart' as jisho;
+// import 'package:ext_video_player/ext_video_player.dart';
+// import 'package:http/http.dart' as http;
+// import 'package:xml2json/xml2json.dart';
+// import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
-String subtitles;
+// import 'package:jidoujisho/main.dart';
+// import 'package:jidoujisho/util.dart';
 
-class WebPlayer extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    String videoID = "";
+// class WebPlayer extends StatelessWidget {
+//   WebPlayer({this.webURL});
 
-    try {
-      videoID = YoutubePlayer.convertUrlToId(webURL);
-      print(videoID);
-    } on Exception catch (exception) {
-      print("Invalid link");
-    } catch (error) {
-      print("Invalid link");
-    }
+//   final String webURL;
 
-    return new FutureBuilder(
-      future: http.read(
-        "https://www.youtube.com/api/timedtext?lang=ja&v=" + videoID,
-      ),
-      builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.waiting:
-            return Scaffold(
-              backgroundColor: Colors.black,
-              body: Center(
-                child: Container(
-                  height: 30,
-                  width: 30,
-                  child: CircularProgressIndicator(),
-                ),
-              ),
-            );
-          default:
-            print("https://www.youtube.com/api/timedtext?lang=ja&v=" + videoID);
-            subtitles = timedTextToSRT(snapshot.data);
-            return WebVideoPlayer();
-        }
-      },
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     String videoID = "";
 
-String timedTextToSRT(String timedText) {
-  final Xml2Json xml2Json = Xml2Json();
+//     try {
+//       videoID = YoutubePlayer.convertUrlToId(webURL);
+//       print(videoID);
+//     } catch (error) {
+//       print("Invalid link");
+//       return Container();
+//     }
 
-  xml2Json.parse(timedText);
-  var jsonString = xml2Json.toBadgerfish();
-  var data = jsonDecode(jsonString);
+//     return new FutureBuilder(
+//       future: http.read(
+//         "https://www.youtube.com/api/timedtext?lang=ja&v=" + videoID,
+//       ),
+//       builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+//         switch (snapshot.connectionState) {
+//           case ConnectionState.waiting:
+//             return Scaffold(
+//               backgroundColor: Colors.black,
+//               body: Center(
+//                 child: Container(
+//                   height: 30,
+//                   width: 30,
+//                   child: CircularProgressIndicator(),
+//                 ),
+//               ),
+//             );
+//           default:
+//             print("https://www.youtube.com/api/timedtext?lang=ja&v=" + videoID);
 
-  List<dynamic> lines = (data["transcript"]["text"]);
+//             if (!snapshot.hasData || snapshot.data.isEmpty) {
+//               subtitles = "";
+//             } else {
+//               subtitles = timedTextToSRT(snapshot.data);
+//             }
 
-  String convertedLines = "";
-  int lineCount = 0;
+//             return WebVideoPlayer(webURL: webURL);
+//         }
+//       },
+//     );
+//   }
+// }
 
-  lines.forEach((line) {
-    String convertedLine = timedLineToSRT(line, lineCount++);
-    convertedLines = convertedLines + convertedLine;
-  });
+// class WebVideoPlayer extends StatefulWidget {
+//   WebVideoPlayer({
+//     this.webURL,
+//     this.webSubtitles,
+//     Key key,
+//   }) : super(key: key);
 
-  return convertedLines;
-}
+//   final String webURL;
+//   final String webSubtitles;
 
-String timedLineToSRT(Map<String, dynamic> line, int lineCount) {
-  double start = double.parse(line["\@start"]);
-  double duration = double.parse(line["\@dur"]);
-  String text = line["\$"];
+//   @override
+//   _WebVideoPlayerState createState() =>
+//       _WebVideoPlayerState(this.webURL, this.webSubtitles);
+// }
 
-  String startTime = formatTimeString(start);
-  String endTime = formatTimeString(start + duration);
+// class _WebVideoPlayerState extends State<WebVideoPlayer> {
+//   _WebVideoPlayerState(String webURL, String webSubtitles) {
+//     _webURL = webURL;
+//     _webSubtitles = webSubtitles;
+//   }
 
-  String srtLine = lineCount.toString() +
-      "\n" +
-      startTime +
-      " --> " +
-      endTime +
-      "\n" +
-      text +
-      "\n\n";
+//   VideoPlayerController _videoPlayerController;
+//   ChewieController _chewieController;
+//   SubTitleWrapper _subTitleWrapper;
 
-  return srtLine;
-}
+//   String _webURL;
+//   String _webSubtitles;
 
-String formatTimeString(double time) {
-  double msDouble = time * 1000;
-  int milliseconds = (msDouble % 1000).floor();
-  int seconds = (time % 60).floor();
-  int minutes = (time / 60 % 60).floor();
-  int hours = (time / 60 / 60 % 60).floor();
+//   Future<bool> _onWillPop() async {
+//     return (await showDialog(
+//           context: context,
+//           builder: (context) => new AlertDialog(
+//             title: new Text('End Playback?'),
+//             actions: <Widget>[
+//               new FlatButton(
+//                 onPressed: () => Navigator.of(context).pop(false),
+//                 child: new Text('NO'),
+//               ),
+//               new FlatButton(
+//                 onPressed: () async {
+//                   Phoenix.rebirth(context);
+//                 },
+//                 child: new Text('YES'),
+//               ),
+//             ],
+//           ),
+//         )) ??
+//         false;
+//   }
 
-  String millisecondsPadded = milliseconds.toString().padLeft(3, "0");
-  String secondsPadded = seconds.toString().padLeft(2, "0");
-  String minutesPadded = minutes.toString().padLeft(2, "0");
-  String hoursPadded = hours.toString().padLeft(2, "0");
+//   @override
+//   Widget build(BuildContext context) {
+//     return new WillPopScope(
+//       onWillPop: _onWillPop,
+//       child: new Scaffold(
+//         backgroundColor: Colors.black,
+//         body: Stack(
+//           children: [
+//             GestureDetector(
+//               onHorizontalDragUpdate: (details) {
+//                 if (details.delta.dx > 20) {
+//                   getVideoPlayerController().seekTo(currentSubtitle.endTime);
+//                 } else if (details.delta.dx < -20) {
+//                   getVideoPlayerController().seekTo(currentSubtitle.startTime);
+//                 }
+//               },
+//               child: getSubtitleWrapper(),
+//             ),
+//             buildDictionary(),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
 
-  String formatted = hoursPadded +
-      ":" +
-      minutesPadded +
-      ":" +
-      secondsPadded +
-      "," +
-      millisecondsPadded;
-  return formatted;
-}
+//   @override
+//   void dispose() {
+//     super.dispose();
+//     if (_videoPlayerController != null && _chewieController != null) {
+//       _videoPlayerController?.dispose();
+//       _chewieController?.dispose();
+//     }
+//   }
 
-Future<List<String>> getWordDetails(String searchTerm) async {
-  jisho.JishoAPIResult results = await jisho.searchForPhrase(searchTerm);
-  jisho.JishoResult bestResult = results.data.first;
+//   VideoPlayerController getVideoPlayerController() {
+//     _videoPlayerController ??=
+//         VideoPlayerController.network(_webURL, _subTitleWrapper);
+//     return _videoPlayerController;
+//   }
 
-  print(bestResult.toJson());
+//   ChewieController getChewieController() {
+//     _chewieController ??= ChewieController(
+//       videoPlayerController: getVideoPlayerController(),
+//       aspectRatio: getVideoPlayerController().value.aspectRatio,
+//       autoPlay: true,
+//       autoInitialize: true,
+//       allowFullScreen: false,
+//       allowMuting: false,
+//       materialProgressColors: ChewieProgressColors(
+//         playedColor: Colors.redAccent,
+//         handleColor: Colors.redAccent,
+//         backgroundColor: Colors.grey,
+//         bufferedColor: Colors.redAccent[100],
+//       ),
+//       fullScreenByDefault: false,
+//       allowedScreenSleep: false,
+//     );
+//     return _chewieController;
+//   }
 
-  List<String> details = [];
+//   SubTitleWrapper getSubtitleWrapper() {
+//     _subTitleWrapper ??= SubTitleWrapper(
+//       videoPlayerController: getVideoPlayerController(),
+//       subtitleController: SubtitleController(
+//         subtitlesContent: _webSubtitles,
+//         showSubtitles: true,
+//         subtitleDecoder: SubtitleDecoder.utf8,
+//         subtitleType: SubtitleType.srt,
+//       ),
+//       subtitleStyle: SubtitleStyle(
+//         textColor: Colors.white,
+//         hasBorder: true,
+//         fontSize: 24,
+//       ),
+//       videoChild: FutureBuilder(
+//         future: getVideoPlayerController().initialize(),
+//         builder: (BuildContext context, AsyncSnapshot snapshot) {
+//           switch (snapshot.connectionState) {
+//             case ConnectionState.waiting:
+//               return Container();
+//             default:
+//               _chewieController = getChewieController();
+//               return FutureBuilder(
+//                 future: getVideoPlayerController().setAudioByIndex(0),
+//                 builder: (BuildContext context, AsyncSnapshot snapshot) {
+//                   switch (snapshot.connectionState) {
+//                     case ConnectionState.waiting:
+//                       return Container();
+//                     default:
+//                       return Chewie(
+//                         controller: _chewieController,
+//                       );
+//                   }
+//                 },
+//               );
+//           }
+//         },
+//       ),
+//     );
 
-  details.add(bestResult.slug ?? searchTerm);
+//     return _subTitleWrapper;
+//   }
 
-  String readings = "";
-  bestResult.japanese.forEach((f) {
-    if (!readings.contains(f.reading + "; ")) {
-      readings = readings + f.reading + "; ";
-    }
-  });
-  if (readings.isNotEmpty) {
-    readings = readings.substring(0, readings.length - 2);
-  }
-  if (readings == bestResult.slug) {
-    readings = "";
-  }
+//   Widget buildDictionaryLoading(String clipboard) {
+//     return Column(
+//       children: [
+//         Padding(
+//           padding: EdgeInsets.all(16.0),
+//           child: Container(
+//             padding: EdgeInsets.all(16.0),
+//             color: Theme.of(context).backgroundColor.withOpacity(0.6),
+//             child: Column(
+//               children: [
+//                 Text("Looking up \"" + clipboard + "\" on Jisho.org...")
+//               ],
+//             ),
+//           ),
+//         ),
+//         Expanded(child: Container()),
+//       ],
+//     );
+//   }
 
-  details.add(readings);
+//   Widget buildDictionaryNoMatch(String clipboard) {
+//     return Column(
+//       children: [
+//         Padding(
+//           padding: EdgeInsets.all(16.0),
+//           child: InkWell(
+//             onTap: () {
+//               globalClipboard.value = "";
+//               currentDefinition = "";
+//             },
+//             child: Container(
+//               padding: EdgeInsets.all(16.0),
+//               color: Theme.of(context).backgroundColor.withOpacity(0.6),
+//               child:
+//                   Text("No matches for \"" + clipboard + "\" could be queried"),
+//             ),
+//           ),
+//         ),
+//         Expanded(child: Container()),
+//       ],
+//     );
+//   }
 
-  String senses = "\n";
-  int senseCount = 0;
+//   Widget buildDictionaryMatch(List<String> results) {
+//     String slug = results[0];
+//     String readings = results[1];
+//     String definitions = results[2];
 
-  bestResult.senses.forEach(
-    (sense) {
-      senseCount++;
+//     return Column(
+//       children: [
+//         Padding(
+//           padding: EdgeInsets.all(16.0),
+//           child: GestureDetector(
+//             onTap: () {
+//               globalClipboard.value = "";
+//               currentDefinition = "";
+//             },
+//             child: Container(
+//               padding: EdgeInsets.all(16.0),
+//               color: Theme.of(context).backgroundColor.withOpacity(0.6),
+//               child: Column(
+//                 children: [
+//                   Text(
+//                     slug,
+//                     style: TextStyle(
+//                       fontWeight: FontWeight.bold,
+//                       fontSize: 20,
+//                     ),
+//                   ),
+//                   Text(readings),
+//                   Text("\n$definitions\n"),
+//                 ],
+//               ),
+//             ),
+//           ),
+//         ),
+//         Expanded(child: Container()),
+//       ],
+//     );
+//   }
 
-      String partsOfSpeech = "";
-      sense.parts_of_speech.forEach(
-        (part) => {partsOfSpeech = partsOfSpeech + part + "; "},
-      );
-      if (partsOfSpeech.isNotEmpty) {
-        partsOfSpeech = partsOfSpeech.substring(0, partsOfSpeech.length - 2);
-      }
+//   Widget buildDictionary() {
+//     return ValueListenableBuilder(
+//       valueListenable: globalClipboard,
+//       builder: (context, clipboard, widget) {
+//         return FutureBuilder(
+//           future: getWordDetails(clipboard),
+//           builder:
+//               (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
+//             if (globalClipboard.value == "") {
+//               return Container();
+//             }
+//             switch (snapshot.connectionState) {
+//               case ConnectionState.waiting:
+//                 return buildDictionaryLoading(clipboard);
+//               default:
+//                 List<String> results = snapshot.data;
 
-      String definitions = "";
-      sense.english_definitions.forEach(
-        (part) => {definitions = definitions + part + "; "},
-      );
-      if (definitions.isNotEmpty) {
-        definitions = definitions.substring(0, definitions.length - 2);
-      }
-
-      senses = senses +
-          senseCount.toString() +
-          ") " +
-          definitions +
-          " - " +
-          partsOfSpeech +
-          "\n";
-    },
-  );
-
-  details.add(senses);
-
-  return details;
-}
-
-class WebVideoPlayer extends StatefulWidget {
-  WebVideoPlayer({
-    Key key,
-  }) : super(key: key);
-
-  @override
-  _WebVideoPlayerState createState() => _WebVideoPlayerState();
-}
-
-class _WebVideoPlayerState extends State<WebVideoPlayer> {
-  Future<bool> _onWillPop() async {
-    return (await showDialog(
-          context: context,
-          builder: (context) => new AlertDialog(
-            title: new Text('End Playback?'),
-            actions: <Widget>[
-              new FlatButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: new Text('NO'),
-              ),
-              new FlatButton(
-                onPressed: () async {
-                  Phoenix.rebirth(context);
-                },
-                child: new Text('YES'),
-              ),
-            ],
-          ),
-        )) ??
-        false;
-  }
-
-  VideoPlayerController videoPlayerController;
-  ChewieController chewieController;
-
-  VideoPlayerController getVideoPlayerController() {
-    videoPlayerController ??= VideoPlayerController.network(webURL);
-    //videoPlayerController ??= VideoPlayerController.file(videoFile);
-    return videoPlayerController;
-  }
-
-  ChewieController getChewieController() {
-    chewieController ??= ChewieController(
-      videoPlayerController: getVideoPlayerController(),
-      aspectRatio: getVideoPlayerController().value.aspectRatio,
-      autoPlay: true,
-      autoInitialize: true,
-      allowFullScreen: false,
-      allowMuting: false,
-      materialProgressColors: ChewieProgressColors(
-        playedColor: Colors.blue,
-        handleColor: Colors.blue,
-        backgroundColor: Colors.grey,
-        bufferedColor: Colors.grey,
-      ),
-      fullScreenByDefault: false,
-      allowedScreenSleep: false,
-    );
-    return chewieController;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return new WillPopScope(
-      onWillPop: _onWillPop,
-      child: new Scaffold(
-        backgroundColor: Colors.black,
-        body: Stack(
-          children: [
-            SubTitleWrapper(
-              videoPlayerController: getVideoPlayerController(),
-              subtitleController: SubtitleController(
-                subtitlesContent: subtitles,
-                showSubtitles: true,
-                subtitleDecoder: SubtitleDecoder.utf8,
-                subtitleType: SubtitleType.srt,
-              ),
-              subtitleStyle: SubtitleStyle(
-                textColor: Colors.white,
-                hasBorder: true,
-                fontSize: 24,
-              ),
-              videoChild: FutureBuilder(
-                  future: getVideoPlayerController().initialize(),
-                  builder: (BuildContext context, AsyncSnapshot snapshot) {
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.waiting:
-                        return Container();
-                      default:
-                        chewieController = getChewieController();
-                        return Chewie(
-                          controller: chewieController,
-                        );
-                    }
-                  }),
-            ),
-            ValueListenableBuilder(
-              valueListenable: globalClipboard,
-              builder: (context, value, widget) {
-                return FutureBuilder(
-                  future: getWordDetails(value),
-                  builder: (BuildContext context,
-                      AsyncSnapshot<List<String>> snapshot) {
-                    if (globalClipboard.value == "") {
-                      return Container();
-                    }
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.waiting:
-                        return Column(
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.all(16.0),
-                              child: Container(
-                                padding: EdgeInsets.all(16.0),
-                                color: Theme.of(context)
-                                    .backgroundColor
-                                    .withOpacity(0.6),
-                                child: Column(
-                                  children: [
-                                    Text("Looking up \"" +
-                                        value +
-                                        "\" on Jisho.org...")
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Expanded(child: Container()),
-                          ],
-                        );
-
-                      default:
-                        if (!snapshot.hasData) {
-                          return Column(
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.all(16.0),
-                                child: InkWell(
-                                  onTap: () {
-                                    globalClipboard.value = "";
-                                  },
-                                  child: Container(
-                                    padding: EdgeInsets.all(16.0),
-                                    color: Theme.of(context)
-                                        .backgroundColor
-                                        .withOpacity(0.6),
-                                    child: Column(
-                                      children: [
-                                        Text("No match for \"" +
-                                            value +
-                                            "\" found")
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Expanded(child: Container()),
-                            ],
-                          );
-                        }
-                        return Column(
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.all(16.0),
-                              child: GestureDetector(
-                                onTap: () {
-                                  globalClipboard.value = "";
-                                },
-                                child: Container(
-                                  padding: EdgeInsets.all(16.0),
-                                  color: Theme.of(context)
-                                      .backgroundColor
-                                      .withOpacity(0.6),
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        snapshot.data[0],
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20,
-                                        ),
-                                      ),
-                                      Text(snapshot.data[1]),
-                                      Text(snapshot.data[2]),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(child: Container()),
-                          ],
-                        );
-                    }
-                  },
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    if (videoPlayerController != null && chewieController != null) {
-      videoPlayerController?.dispose();
-      chewieController?.dispose();
-    }
-  }
-}
+//                 if (snapshot.hasData) {
+//                   return buildDictionaryMatch(results);
+//                 } else {
+//                   return buildDictionaryNoMatch(clipboard);
+//                 }
+//             }
+//           },
+//         );
+//       },
+//     );
+//   }
+// }
