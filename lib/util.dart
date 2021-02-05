@@ -203,7 +203,7 @@ void showAnkiDialog(BuildContext context, String sentence, String answer,
                   prefixIcon: Icon(Icons.surround_sound_outlined),
                   suffixIcon: IconButton(
                     iconSize: 12,
-                    onPressed: () => _answerController.clear(),
+                    onPressed: () => _readingController.clear(),
                     icon: Icon(Icons.clear),
                   ),
                   labelText: "Reading",

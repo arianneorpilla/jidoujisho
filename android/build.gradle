@@ -31,6 +31,6 @@ task clean(type: Delete) {
 }
 
 ext {
-    flutterFFmpegPackage = "audio"
+    flutterFFmpegPackage = "audio-lts"
 }
 
