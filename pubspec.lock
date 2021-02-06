@@ -155,6 +155,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.2.5"
+  ext_storage:
+    dependency: "direct main"
+    description:
+      name: ext_storage
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.3"
   ext_video_player:
     dependency: "direct main"
     description:
@@ -176,6 +183,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "6.0.0-nullsafety.4"
+  file_picker:
+    dependency: "direct main"
+    description:
+      name: file_picker
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.1.6"
   file_utils:
     dependency: "direct main"
     description:
@@ -257,13 +271,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.3.1"
-  gx_file_picker:
-    dependency: "direct main"
-    description:
-      name: gx_file_picker
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.9.0+2"
   html:
     dependency: transitive
     description:

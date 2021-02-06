@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:chewie/chewie.dart';
 import 'package:clipboard_monitor/clipboard_monitor.dart';
 import 'package:flutter/material.dart';
-import 'package:gx_file_picker/gx_file_picker.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
 import 'package:subtitle_wrapper_package/subtitle_controller.dart';
@@ -33,14 +33,20 @@ class Player extends StatelessWidget {
 
   Widget localPlayer() {
     return new FutureBuilder(
-      future: FilePicker.getFilePath(type: FileType.video),
-      builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+      future: FilePicker.platform.pickFiles(
+        type: FileType.video,
+        allowMultiple: false,
+        allowCompression: false,
+      ),
+      builder:
+          (BuildContext context, AsyncSnapshot<FilePickerResult> snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
             return loadingCircle();
           default:
             if (snapshot.hasData) {
-              File videoFile = File(snapshot.data);
+              File videoFile = File(snapshot.data.files.single.path);
+              print(videoFile.path);
 
               return FutureBuilder(
                   future: extractSubtitles(videoFile),
@@ -268,6 +274,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
         _currentReading,
         _currentSubtitle,
         _currentSubTrack,
+        playExternalSubtitles,
       );
     } else {
       _videoPlayerController ??= VideoPlayerController.network(
@@ -277,6 +284,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
         _currentReading,
         _currentSubtitle,
         _currentSubTrack,
+        playExternalSubtitles,
       );
     }
     return _videoPlayerController;
@@ -314,6 +322,22 @@ class _VideoPlayerState extends State<VideoPlayer> {
     } else {
       _subTitleController.updateSubtitleContent(content: "");
       print("Turn Off");
+    }
+  }
+
+  void playExternalSubtitles() async {
+    FilePickerResult result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ["srt"],
+      allowMultiple: false,
+    );
+
+    if (result != null) {
+      File subFile = File(result.files.single.path);
+      getSubtitleWrapper()
+          .subtitleController
+          .updateSubtitleContent(content: subFile.readAsStringSync());
+      print("Switch Subtitle to External SRT");
     }
   }
 

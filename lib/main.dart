@@ -6,12 +6,12 @@ import 'package:package_info/package_info.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:path_provider/path_provider.dart' as ph;
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:transparent_image/transparent_image.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'package:jidoujisho/player.dart';
 
-String extDirPath;
+String appDirPath;
 String previewImageDir;
 String previewAudioDir;
 
@@ -24,20 +24,19 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIOverlays([]);
 
-  Directory extDir = await ph.getExternalStorageDirectory();
-  extDirPath = extDir.path;
-  previewImageDir =
-      extDirPath + "/Android/data/com.lrorpilla.jidoujisho/exportImage.jpg";
-  previewAudioDir =
-      extDirPath + "/Android/data/com.lrorpilla.jidoujisho/exportAudio.mp3";
+  Directory appDirDoc = await ph.getApplicationDocumentsDirectory();
+  appDirPath = appDirDoc.path;
+
+  previewImageDir = appDirPath + "/exportImage.jpg";
+  previewAudioDir = appDirPath + "/exportAudio.mp3";
+
+  await Permission.storage.status;
 
   PackageInfo packageInfo = await PackageInfo.fromPlatform();
   appName = packageInfo.appName;
   packageName = packageInfo.packageName;
   version = packageInfo.version;
   buildNumber = packageInfo.buildNumber;
-
-  await Permission.storage.request();
 
   runApp(Phoenix(child: App()));
 }

@@ -64,8 +64,7 @@ Future exportCurrentFrame(VideoPlayerController controller) async {
   final FlutterFFmpeg _flutterFFmpeg = new FlutterFFmpeg();
 
   String inputPath = controller.dataSource;
-  String exportPath =
-      "\"$extDirPath/Android/data/com.lrorpilla.jidoujisho/exportImage.jpg\"";
+  String exportPath = "\"$appDirPath/exportImage.jpg\"";
 
   String command =
       "-ss $formatted -y -i \"$inputPath\" -frames:v 1 -q:v 2 $exportPath";
@@ -94,8 +93,7 @@ Future exportCurrentAudio(
   final FlutterFFmpeg _flutterFFmpeg = new FlutterFFmpeg();
 
   String inputPath = controller.dataSource;
-  String outputPath =
-      "\"$extDirPath/Android/data/com.lrorpilla.jidoujisho/exportAudio.mp3\"";
+  String outputPath = "\"$appDirPath/exportAudio.mp3\"";
   String command =
       "-ss $timeStart -to $timeEnd -y -i \"$inputPath\" -map 0:a:$audioIndex $outputPath";
 
@@ -115,13 +113,11 @@ Future<List<File>> extractSubtitles(File file) async {
   String inputPath = file.path;
 
   for (int i = 0; i < 10; i++) {
-    String outputPath =
-        "\"$extDirPath/Android/data/com.lrorpilla.jidoujisho/extractSrt$i.srt\"";
+    String outputPath = "\"$appDirPath/extractSrt$i.srt\"";
     String command =
         "-loglevel quiet -i \"$inputPath\" -map 0:s:$i $outputPath";
 
-    String subPath =
-        "$extDirPath/Android/data/com.lrorpilla.jidoujisho/extractSrt$i.srt";
+    String subPath = "$appDirPath/extractSrt$i.srt";
     File subFile = File(subPath);
 
     if (subFile.existsSync()) {
@@ -280,11 +276,11 @@ void exportAnkiCard(
   String addAudio = "";
 
   if (imageFile.existsSync()) {
-    imageFile.renameSync(newImagePath);
+    imageFile.copySync(newImagePath);
     addImage = "<img src=\"$newFileName.jpg\">";
   }
   if (audioFile.existsSync()) {
-    audioFile.renameSync(newAudioPath);
+    audioFile.copySync(newAudioPath);
     addAudio = "[sound:$newFileName.mp3]";
   }
 
