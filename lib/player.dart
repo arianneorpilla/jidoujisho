@@ -198,6 +198,9 @@ class _VideoPlayerState extends State<VideoPlayer> {
     return (await showDialog(
           context: context,
           builder: (context) => new AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.zero,
+            ),
             title: new Text('End Playback?'),
             actions: <Widget>[
               new FlatButton(
@@ -453,21 +456,23 @@ class _VideoPlayerState extends State<VideoPlayer> {
               _currentReading.value = "";
               _currentDefinition.value = "";
             },
-            child: Container(
-              padding: EdgeInsets.all(16.0),
-              color: Theme.of(context).backgroundColor.withOpacity(0.6),
-              child: Column(
-                children: [
-                  Text(
-                    slug,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
+            child: SingleChildScrollView(
+              child: Container(
+                padding: EdgeInsets.all(16.0),
+                color: Theme.of(context).backgroundColor.withOpacity(0.6),
+                child: Column(
+                  children: [
+                    Text(
+                      slug,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
                     ),
-                  ),
-                  Text(readings),
-                  Text("\n$definitions\n"),
-                ],
+                    Text(readings),
+                    Text("\n$definitions\n"),
+                  ],
+                ),
               ),
             ),
           ),

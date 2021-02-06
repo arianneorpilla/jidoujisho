@@ -157,6 +157,9 @@ void showAnkiDialog(BuildContext context, String sentence, String answer,
     context: context,
     builder: (context) {
       return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.zero,
+        ),
         contentPadding: EdgeInsets.all(8),
         content: SingleChildScrollView(
           child: Column(
@@ -397,7 +400,7 @@ Future<List<String>> getWordDetails(String searchTerm) async {
   print("SEARCH TERM: $searchTerm");
   print("EXPORT TERM: $exportTerm");
 
-  if (customDictionary.isNotEmpty && forceJisho) {
+  if (customDictionary.isEmpty || forceJisho) {
     details.add(exportTerm ?? searchTerm);
     details.add(exportReadings);
     details.add(exportDefinitions);
