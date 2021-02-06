@@ -401,7 +401,9 @@ class _VideoPlayerState extends State<VideoPlayer> {
             color: Theme.of(context).backgroundColor.withOpacity(0.6),
             child: Column(
               children: [
-                Text("Looking up \"" + clipboard + "\" on Jisho.org...")
+                Text("Looking up \"" +
+                    clipboard.replaceAll("@usejisho@", "") +
+                    "\"...")
               ],
             ),
           ),
@@ -425,8 +427,9 @@ class _VideoPlayerState extends State<VideoPlayer> {
             child: Container(
               padding: EdgeInsets.all(16.0),
               color: Theme.of(context).backgroundColor.withOpacity(0.6),
-              child:
-                  Text("No matches for \"" + clipboard + "\" could be queried"),
+              child: Text("No matches for \"" +
+                  clipboard.replaceAll("@usejisho@", "") +
+                  "\" could be queried"),
             ),
           ),
         ),

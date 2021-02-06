@@ -5,6 +5,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:ext_video_player/ext_video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
+import 'package:fuzzy/fuzzy.dart';
 import 'package:intl/intl.dart';
 import 'package:share/share.dart';
 import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
@@ -309,6 +310,9 @@ Future exportToAnki(
 }
 
 Future<List<String>> getWordDetails(String searchTerm) async {
+  bool forceJisho = searchTerm.contains("@usejisho@");
+  searchTerm = searchTerm.replaceAll("@usejisho@", "");
+
   String removeLastNewline(String n) => n = n.substring(0, n.length - 2);
   bool hasDuplicateReading(String readings, String reading) =>
       readings.contains("$reading; ");
@@ -390,9 +394,52 @@ Future<List<String>> getWordDetails(String searchTerm) async {
 
   List<String> details = [];
 
-  details.add(exportTerm ?? searchTerm);
-  details.add(exportReadings);
-  details.add(exportDefinitions);
+  print("SEARCH TERM: $searchTerm");
+  print("EXPORT TERM: $exportTerm");
+
+  if (customDictionary.isNotEmpty && forceJisho) {
+    details.add(exportTerm ?? searchTerm);
+    details.add(exportReadings);
+    details.add(exportDefinitions);
+  } else {
+    int resultIndex;
+
+    final searchResult = customDictionaryFuzzy.search(searchTerm, 1);
+    print(searchResult);
+
+    if (searchResult.isNotEmpty && searchResult.first.score == 0) {
+      resultIndex = searchResult.first.matches.first.arrayIndex;
+
+      details.add(customDictionary[resultIndex].word);
+      details.add(customDictionary[resultIndex].reading);
+      details.add(customDictionary[resultIndex].meaning);
+
+      return details;
+    } else {
+      words.forEach((word) {
+        String term = word.word;
+
+        if (term != null) {
+          final termResult = customDictionaryFuzzy.search(term, 1);
+
+          print(termResult);
+
+          if (termResult.isNotEmpty && termResult.first.score == 0.0) {
+            resultIndex = termResult.first.matches.first.arrayIndex;
+            print("$resultIndex set - $term");
+          }
+        }
+      });
+    }
+
+    if (resultIndex == null) {
+      resultIndex = searchResult.first.matches.first.arrayIndex;
+    }
+
+    details.add(customDictionary[resultIndex].word);
+    details.add(customDictionary[resultIndex].reading);
+    details.add(customDictionary[resultIndex].meaning);
+  }
 
   return details;
 }
@@ -459,4 +506,45 @@ String formatTimeString(double time) {
       "," +
       millisecondsPadded;
   return formatted;
+}
+
+class DictionaryEntry {
+  String word;
+  String reading;
+  String meaning;
+
+  DictionaryEntry(
+    this.word,
+    this.reading,
+    this.meaning,
+  );
+}
+
+List<DictionaryEntry> importCustomDictionary() {
+  List<DictionaryEntry> entries = [];
+
+  for (int i = 0; i < 999; i++) {
+    String outputPath =
+        "storage/emulated/0/Android/data/com.lrorpilla.jidoujisho/files/term_bank_$i.json";
+    File dictionaryFile = File(outputPath);
+
+    if (dictionaryFile.existsSync()) {
+      List<dynamic> dictionary = jsonDecode(dictionaryFile.readAsStringSync());
+      dictionary.forEach((entry) {
+        entries.add(DictionaryEntry(
+            entry[0].toString(), entry[1].toString(), entry[5].toString()));
+      });
+    }
+  }
+
+  return entries;
+}
+
+List<String> getAllImportedWords() {
+  List<String> allWords = [];
+  for (DictionaryEntry entry in customDictionary) {
+    allWords.add(entry.word);
+  }
+
+  return allWords;
 }

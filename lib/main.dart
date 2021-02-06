@@ -1,7 +1,9 @@
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fuzzy/fuzzy.dart';
 import 'package:package_info/package_info.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:path_provider/path_provider.dart' as ph;
@@ -10,6 +12,10 @@ import 'package:transparent_image/transparent_image.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'package:jidoujisho/player.dart';
+import 'package:jidoujisho/util.dart';
+
+List<DictionaryEntry> customDictionary;
+Fuzzy customDictionaryFuzzy;
 
 String appDirPath;
 String previewImageDir;
@@ -23,6 +29,7 @@ String buildNumber;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIOverlays([]);
+  await FilePicker.platform.clearTemporaryFiles();
 
   Directory appDirDoc = await ph.getApplicationDocumentsDirectory();
   appDirPath = appDirDoc.path;
@@ -37,6 +44,9 @@ void main() async {
   packageName = packageInfo.packageName;
   version = packageInfo.version;
   buildNumber = packageInfo.buildNumber;
+
+  customDictionary = importCustomDictionary();
+  customDictionaryFuzzy = Fuzzy(getAllImportedWords());
 
   runApp(Phoenix(child: App()));
 }
@@ -103,13 +113,6 @@ class Home extends StatelessWidget {
     });
   }
 
-  // Widget showContinueButton(BuildContext context) {
-  //   return showButton(context, "Continue Playback", Icons.refresh_outlined, () {
-  //     Navigator.push(
-  //         context, MaterialPageRoute(builder: (context) => Player("")));
-  //   });
-  // }
-
   Widget showWatchYouTubeButton(BuildContext context) {
     return showButton(
         context, "Play YouTube Video", Icons.ondemand_video_outlined, () {
@@ -119,6 +122,9 @@ class Home extends StatelessWidget {
         context: context,
         builder: (context) {
           return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.zero,
+            ),
             title: Text("Play YouTube Video"),
             content: TextField(
               controller: _textFieldController,
