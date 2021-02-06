@@ -66,7 +66,7 @@ Web support for YouTube is **currently experimental**. YouTube subtitles are tak
 
 A primer on the basics of the application is as follows.
 
-* 📲 <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/beta"/>**Download and install the latest beta**</a> onto your Android device
+* 📲 <a href="https://github.com/lrorpilla/jidoujisho/releases/"/>**Download and install the latest beta**</a> onto your Android device
 * ⏯️ Play a video by selecting from your **local media library or entering a YouTube URL**
 * 📋 Select text by simply holding on them, and **copy them to clipboard when prompted**
 * 📔 When the **dictionary definition** for the text shows up, the text is the **current context**
