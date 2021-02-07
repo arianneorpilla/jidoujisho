@@ -1,0 +1,47 @@
+# The name of your workflow.
+name: Test and publish package
+# Trigger the workflow on push or pull request
+on:
+  release:
+    types: # This configuration does not affect the page_build event above
+      - created
+#A workflow run is made up of one or more jobs. Jobs run in parallel by default.
+jobs:
+  test:
+    #The type of machine to run the job on. [windows,macos, ubuntu , self-hosted]
+    runs-on: ubuntu-latest
+    #sequence of tasks called
+    steps:
+      # The branch or tag ref that triggered the workflow will be checked out.
+      # https://github.com/actions/checkout
+      - uses: actions/checkout@v1
+      # Setup a flutter environment.
+      # https://github.com/marketplace/actions/flutter-action
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: "dev"
+      - run: flutter pub get
+      - name: Format
+        run: flutter format --set-exit-if-changed lib test example
+      - name: Analyze
+        run: flutter analyze lib test example
+      - name: Run tests
+        run: flutter test --no-pub --coverage --test-randomize-ordering-seed random
+      - name: Check Code Coverage
+        uses: ChicagoFlutter/lcov-cop@v1.0.0
+        with:
+          min_coverage: 85
+          path: coverage/lcov.info
+      # Upload coverage reports to Codecov
+      # https://github.com/marketplace/actions/codecov
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          file: coverage/lcov.info
+      - name: Publish
+        uses: sakebook/actions-flutter-pub-publisher@v1.3.1
+        with:
+          credential: ${{ secrets.PUBSPEC_CREDENTIALS }}
+          flutter_package: true
+          skip_test: true
+          dry_run: false

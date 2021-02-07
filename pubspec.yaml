@@ -1,0 +1,65 @@
+name: jidoujisho
+description: A mobile video player tailored for Japanese language learners. 
+
+publish_to: none
+
+version: 0.4.2+1
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  subtitle_wrapper_package:
+    path: ./subtitle_wrapper_package-1.0.4/
+  chewie:
+    path: ./chewie-0.12.2
+  ext_video_player:
+    path: ./ext_video_player-0.0.4/
+  file_picker:
+  flutter_phoenix: ^0.1.0
+  clipboard_monitor: ^0.9.1
+  unofficial_jisho_api: ^1.1.0
+  path_provider:
+  file_utils: ^0.1.4
+  permission_handler: ^5.0.1+1 
+  package_info: ^0.4.3+4
+  http:
+  xml:
+  intl:
+  xml2json:
+  youtube_player_flutter: ^6.1.0+4
+  url_launcher:
+  flutter_ffmpeg:
+  video_player:
+    path: ./video_player/video_player # Fork by balvinderz
+  bordered_text: ^1.0.1
+  audioplayers: ^0.10.0
+  share: ^0.6.5+4
+  scrollable_positioned_list: ^0.1.9
+  transparent_image: ^1.0.0
+  ext_storage:
+  fuzzy:
+dependency_overrides:
+  video_player:
+    path: ./video_player/video_player # Fork by balvinderz
+      
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^1.0.1
+
+dev_dependencies:
+  flutter_launcher_icons: "^0.8.0"
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/icon.png"
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/icon/icon.png
