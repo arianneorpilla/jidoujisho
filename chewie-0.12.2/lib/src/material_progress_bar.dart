@@ -1,7 +1,7 @@
 import 'package:chewie/src/chewie_progress_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:ext_video_player/ext_video_player.dart';
+import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 
 class MaterialVideoProgressBar extends StatefulWidget {
   MaterialVideoProgressBar(
@@ -14,7 +14,7 @@ class MaterialVideoProgressBar extends StatefulWidget {
   })  : colors = colors ?? ChewieProgressColors(),
         super(key: key);
 
-  final VideoPlayerController controller;
+  final VlcPlayerController controller;
   final ChewieProgressColors colors;
   final Function() onDragStart;
   final Function() onDragEnd;
@@ -37,7 +37,7 @@ class _VideoProgressBarState extends State<MaterialVideoProgressBar> {
   VoidCallback listener;
   bool _controllerWasPlaying = false;
 
-  VideoPlayerController get controller => widget.controller;
+  VlcPlayerController get controller => widget.controller;
 
   @override
   void initState() {
@@ -54,6 +54,10 @@ class _VideoProgressBarState extends State<MaterialVideoProgressBar> {
   @override
   Widget build(BuildContext context) {
     void seekToRelativePosition(Offset globalPosition) {
+      if (controller.value.isEnded) {
+        controller.stop();
+      }
+
       final box = context.findRenderObject() as RenderBox;
       final Offset tapPos = box.globalToLocal(globalPosition);
       final double relative = tapPos.dx / box.size.width;
@@ -63,7 +67,7 @@ class _VideoProgressBarState extends State<MaterialVideoProgressBar> {
 
     return GestureDetector(
       onHorizontalDragStart: (DragStartDetails details) {
-        if (!controller.value.initialized) {
+        if (!controller.value.isInitialized) {
           return;
         }
         _controllerWasPlaying = controller.value.isPlaying;
@@ -76,7 +80,7 @@ class _VideoProgressBarState extends State<MaterialVideoProgressBar> {
         }
       },
       onHorizontalDragUpdate: (DragUpdateDetails details) {
-        if (!controller.value.initialized) {
+        if (!controller.value.isInitialized) {
           return;
         }
         seekToRelativePosition(details.globalPosition);
@@ -95,7 +99,7 @@ class _VideoProgressBarState extends State<MaterialVideoProgressBar> {
         }
       },
       onTapDown: (TapDownDetails details) {
-        if (!controller.value.initialized) {
+        if (!controller.value.isInitialized) {
           return;
         }
         seekToRelativePosition(details.globalPosition);
@@ -120,7 +124,7 @@ class _VideoProgressBarState extends State<MaterialVideoProgressBar> {
 class _ProgressBarPainter extends CustomPainter {
   _ProgressBarPainter(this.value, this.colors);
 
-  VideoPlayerValue value;
+  VlcPlayerValue value;
   ChewieProgressColors colors;
 
   @override
@@ -142,27 +146,27 @@ class _ProgressBarPainter extends CustomPainter {
       ),
       colors.backgroundPaint,
     );
-    if (!value.initialized) {
+    if (!value.isInitialized) {
       return;
     }
     final double playedPartPercent =
         value.position.inMilliseconds / value.duration.inMilliseconds;
     final double playedPart =
         playedPartPercent > 1 ? size.width : playedPartPercent * size.width;
-    for (final DurationRange range in value.buffered) {
-      final double start = range.startFraction(value.duration) * size.width;
-      final double end = range.endFraction(value.duration) * size.width;
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          Rect.fromPoints(
-            Offset(start, size.height / 2),
-            Offset(end, size.height / 2 + height),
-          ),
-          const Radius.circular(4.0),
-        ),
-        colors.bufferedPaint,
-      );
-    }
+    // for (final DurationRange range in value.bufferPercent) {
+    //   final double start = range.startFraction(value.duration) * size.width;
+    //   final double end = range.endFraction(value.duration) * size.width;
+    //   canvas.drawRRect(
+    //     RRect.fromRectAndRadius(
+    //       Rect.fromPoints(
+    //         Offset(start, size.height / 2),
+    //         Offset(end, size.height / 2 + height),
+    //       ),
+    //       const Radius.circular(4.0),
+    //     ),
+    //     colors.bufferedPaint,
+    //   );
+    // }
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromPoints(

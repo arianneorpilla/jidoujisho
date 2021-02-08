@@ -28,6 +28,7 @@ dependencies:
   jidoujisho:
     path: ../
   audioplayers:
+  flutter_vlc_player: ^5.0.3
 
 dev_dependencies:
   flutter_test:

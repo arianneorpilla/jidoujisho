@@ -2,6 +2,7 @@ import 'package:chewie/src/chewie_progress_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:ext_video_player/ext_video_player.dart';
+import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 
 class CupertinoVideoProgressBar extends StatefulWidget {
   CupertinoVideoProgressBar(
@@ -14,7 +15,7 @@ class CupertinoVideoProgressBar extends StatefulWidget {
   })  : colors = colors ?? ChewieProgressColors(),
         super(key: key);
 
-  final VideoPlayerController controller;
+  final VlcPlayerController controller;
   final ChewieProgressColors colors;
   final Function() onDragStart;
   final Function() onDragEnd;
@@ -29,7 +30,7 @@ class CupertinoVideoProgressBar extends StatefulWidget {
 class _VideoProgressBarState extends State<CupertinoVideoProgressBar> {
   bool _controllerWasPlaying = false;
 
-  VideoPlayerController get controller => widget.controller;
+  VlcPlayerController get controller => widget.controller;
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +44,7 @@ class _VideoProgressBarState extends State<CupertinoVideoProgressBar> {
 
     return GestureDetector(
       onHorizontalDragStart: (DragStartDetails details) {
-        if (!controller.value.initialized) {
+        if (!controller.value.isInitialized) {
           return;
         }
         _controllerWasPlaying = controller.value.isPlaying;
@@ -56,7 +57,7 @@ class _VideoProgressBarState extends State<CupertinoVideoProgressBar> {
         }
       },
       onHorizontalDragUpdate: (DragUpdateDetails details) {
-        if (!controller.value.initialized) {
+        if (!controller.value.isInitialized) {
           return;
         }
         seekToRelativePosition(details.globalPosition);
@@ -75,7 +76,7 @@ class _VideoProgressBarState extends State<CupertinoVideoProgressBar> {
         }
       },
       onTapDown: (TapDownDetails details) {
-        if (!controller.value.initialized) {
+        if (!controller.value.isInitialized) {
           return;
         }
         seekToRelativePosition(details.globalPosition);
@@ -100,7 +101,7 @@ class _VideoProgressBarState extends State<CupertinoVideoProgressBar> {
 class _ProgressBarPainter extends CustomPainter {
   _ProgressBarPainter(this.value, this.colors);
 
-  VideoPlayerValue value;
+  VlcPlayerValue value;
   ChewieProgressColors colors;
 
   @override
@@ -124,27 +125,27 @@ class _ProgressBarPainter extends CustomPainter {
       ),
       colors.backgroundPaint,
     );
-    if (!value.initialized) {
+    if (!value.isInitialized) {
       return;
     }
     final double playedPartPercent =
         value.position.inMilliseconds / value.duration.inMilliseconds;
     final double playedPart =
         playedPartPercent > 1 ? size.width : playedPartPercent * size.width;
-    for (final DurationRange range in value.buffered) {
-      final double start = range.startFraction(value.duration) * size.width;
-      final double end = range.endFraction(value.duration) * size.width;
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          Rect.fromPoints(
-            Offset(start, baseOffset),
-            Offset(end, baseOffset + barHeight),
-          ),
-          const Radius.circular(4.0),
-        ),
-        colors.bufferedPaint,
-      );
-    }
+    // for (final DurationRange range in value.buffered) {
+    //   final double start = range.startFraction(value.duration) * size.width;
+    //   final double end = range.endFraction(value.duration) * size.width;
+    //   canvas.drawRRect(
+    //     RRect.fromRectAndRadius(
+    //       Rect.fromPoints(
+    //         Offset(start, baseOffset),
+    //         Offset(end, baseOffset + barHeight),
+    //       ),
+    //       const Radius.circular(4.0),
+    //     ),
+    //     colors.bufferedPaint,
+    //   );
+    // }
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromPoints(

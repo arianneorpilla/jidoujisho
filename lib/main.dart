@@ -7,9 +7,11 @@ import 'package:fuzzy/fuzzy.dart';
 import 'package:package_info/package_info.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:path_provider/path_provider.dart' as ph;
+import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:jidoujisho/player.dart';
 import 'package:jidoujisho/util.dart';
@@ -138,28 +140,27 @@ class Home extends StatelessWidget {
                 },
               ),
               FlatButton(
-                child: Text('OK'),
-                onPressed: () {
-                  String _webURL = _textFieldController.text;
+                  child: Text('OK'),
+                  onPressed: () async {
+                    String _webURL = _textFieldController.text;
 
-                  try {
-                    if (YoutubePlayer.convertUrlToId(_webURL) != null) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Player(_webURL),
-                        ),
-                      );
+                    try {
+                      if (YoutubePlayer.convertUrlToId(_webURL) != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Player(_webURL),
+                          ),
+                        );
+                      }
+                    } on Exception {
+                      Navigator.pop(context);
+                      print("Invalid link");
+                    } catch (error) {
+                      Navigator.pop(context);
+                      print("Invalid link");
                     }
-                  } on Exception {
-                    Navigator.pop(context);
-                    print("Invalid link");
-                  } catch (error) {
-                    Navigator.pop(context);
-                    print("Invalid link");
-                  }
-                },
-              ),
+                  }),
             ],
           );
         },

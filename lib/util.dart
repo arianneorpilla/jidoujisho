@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
-import 'package:ext_video_player/ext_video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
+import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:intl/intl.dart';
 import 'package:share/share.dart';
 import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
@@ -13,6 +13,8 @@ import 'package:unofficial_jisho_api/api.dart';
 import 'package:xml2json/xml2json.dart';
 
 import 'package:jidoujisho/main.dart';
+import 'package:youtube_explode_dart/youtube_explode_dart.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 String getTimestampFromDuration(Duration duration) {
   String twoDigits(int n) => n.toString().padLeft(2, "0");
@@ -52,7 +54,7 @@ bool hasExternalSubtitles(File file) {
   return subtitleFile.existsSync();
 }
 
-Future exportCurrentFrame(VideoPlayerController controller) async {
+Future exportCurrentFrame(VlcPlayerController controller) async {
   File imageFile = File(previewImageDir);
   if (imageFile.existsSync()) {
     imageFile.deleteSync();
@@ -75,7 +77,7 @@ Future exportCurrentFrame(VideoPlayerController controller) async {
 }
 
 Future exportCurrentAudio(
-    VideoPlayerController controller, Subtitle subtitle) async {
+    VlcPlayerController controller, Subtitle subtitle) async {
   File audioFile = File(previewAudioDir);
   if (audioFile.existsSync()) {
     audioFile.deleteSync();
@@ -88,7 +90,7 @@ Future exportCurrentAudio(
   timeStart = getTimestampFromDuration(subtitle.startTime);
   timeEnd = getTimestampFromDuration(subtitle.endTime);
 
-  audioIndex = controller.getCurrentAudioIndex().toString();
+  audioIndex = controller.getAudioTracksCount().toString();
 
   final FlutterFFmpeg _flutterFFmpeg = new FlutterFFmpeg();
 
@@ -104,10 +106,6 @@ Future exportCurrentAudio(
 
 Future<List<File>> extractSubtitles(File file) async {
   List<File> files = [];
-  if (hasExternalSubtitles(file)) {
-    files.add(getExternalSubtitles(file));
-  }
-
   final FlutterFFmpeg _flutterFFmpeg = new FlutterFFmpeg();
 
   String inputPath = file.path;
@@ -300,7 +298,7 @@ void exportAnkiCard(
 
 Future exportToAnki(
     BuildContext context,
-    VideoPlayerController controller,
+    VlcPlayerController controller,
     Subtitle subtitle,
     String clipboard,
     String definition,
@@ -549,4 +547,18 @@ List<String> getAllImportedWords() {
   }
 
   return allWords;
+}
+
+Future<String> getPlayerYouTubeInfo(String webURL) async {
+  var videoID = YoutubePlayer.convertUrlToId(webURL);
+  if (videoID != null) {
+    YoutubeExplode yt = YoutubeExplode();
+    var streamManifest = await yt.videos.streamsClient.getManifest(webURL);
+    var streamInfo = streamManifest.muxed.withHighestBitrate();
+    var streamURL = streamInfo.url.toString();
+
+    return streamURL;
+  } else {
+    return null;
+  }
 }

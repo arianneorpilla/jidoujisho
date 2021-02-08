@@ -5,7 +5,7 @@ import 'package:chewie/src/player_with_controls.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:ext_video_player/ext_video_player.dart';
+import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:wakelock/wakelock.dart';
 
 typedef ChewieRoutePageBuilder = Widget Function(
@@ -241,7 +241,7 @@ class ChewieController extends ChangeNotifier {
   }
 
   /// The controller for the video you want to play
-  final VideoPlayerController videoPlayerController;
+  final VlcPlayerController videoPlayerController;
 
   /// Initialize the Video on Startup. This will prep the video for playback.
   final bool autoInitialize;
@@ -340,20 +340,12 @@ class ChewieController extends ChangeNotifier {
   bool get isPlaying => videoPlayerController.value.isPlaying;
 
   Future _initialize() async {
-    await videoPlayerController.setLooping(looping);
-
     if ((autoInitialize || autoPlay) &&
-        !videoPlayerController.value.initialized) {
+        !videoPlayerController.value.isInitialized) {
       await videoPlayerController.initialize();
     }
 
-    if (autoPlay) {
-      if (fullScreenByDefault) {
-        enterFullScreen();
-      }
-
-      await videoPlayerController.play();
-    }
+    await videoPlayerController.setLooping(looping);
 
     if (startAt != null) {
       await videoPlayerController.seekTo(startAt);
@@ -362,6 +354,8 @@ class ChewieController extends ChangeNotifier {
     if (fullScreenByDefault) {
       videoPlayerController.addListener(_fullScreenListener);
     }
+
+    await videoPlayerController.play();
   }
 
   Future<void> _fullScreenListener() async {
@@ -408,7 +402,7 @@ class ChewieController extends ChangeNotifier {
   }
 
   Future<void> setVolume(double volume) async {
-    await videoPlayerController.setVolume(volume);
+    await videoPlayerController.setVolume(volume.floor());
   }
 }
 

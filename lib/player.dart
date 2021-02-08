@@ -2,9 +2,9 @@ import 'dart:io';
 
 import 'package:chewie/chewie.dart';
 import 'package:clipboard_monitor/clipboard_monitor.dart';
-import 'package:ext_video_player/ext_video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
 import 'package:subtitle_wrapper_package/subtitle_controller.dart';
@@ -16,8 +16,19 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import 'package:jidoujisho/util.dart';
 
+final currentClipboard = ValueNotifier<String>("");
+final currentDefinition = ValueNotifier<String>("");
+final currentReading = ValueNotifier<String>("");
+final currentSubtitle = ValueNotifier<Subtitle>(
+  Subtitle(startTime: Duration.zero, endTime: Duration.zero, text: ""),
+);
+final currentSubTrack = ValueNotifier<int>(0);
+VoidCallback callback;
+
 class Player extends StatelessWidget {
-  Player(this.webURL);
+  Player(
+    this.webURL,
+  );
 
   final String webURL;
 
@@ -87,9 +98,7 @@ class Player extends StatelessWidget {
     }
 
     return new FutureBuilder(
-      future: http.read(
-        "https://www.youtube.com/api/timedtext?lang=ja&v=" + videoID,
-      ),
+      future: getPlayerYouTubeInfo(webURL),
       builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
@@ -104,18 +113,40 @@ class Player extends StatelessWidget {
               ),
             );
           default:
-            String webSubtitles;
+            String webStream = snapshot.data;
+            return new FutureBuilder(
+              future: http.read(
+                "https://www.youtube.com/api/timedtext?lang=ja&v=" + videoID,
+              ),
+              builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+                switch (snapshot.connectionState) {
+                  case ConnectionState.waiting:
+                    return Scaffold(
+                      backgroundColor: Colors.black,
+                      body: Center(
+                        child: Container(
+                          height: 30,
+                          width: 30,
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                    );
+                  default:
+                    String webSubtitles;
 
-            if (!snapshot.hasData || snapshot.data.isEmpty) {
-              webSubtitles = "";
-            } else {
-              webSubtitles = timedTextToSRT(snapshot.data);
-            }
+                    if (!snapshot.hasData || snapshot.data.isEmpty) {
+                      webSubtitles = "";
+                    } else {
+                      webSubtitles = timedTextToSRT(snapshot.data);
+                    }
 
-            return VideoPlayer(
-              webURL: webURL,
-              defaultSubtitles: webSubtitles,
-              internalSubs: [],
+                    return VideoPlayer(
+                      webStream: webStream,
+                      defaultSubtitles: webSubtitles,
+                      internalSubs: [],
+                    );
+                }
+              },
             );
         }
       },
@@ -141,21 +172,21 @@ class VideoPlayer extends StatefulWidget {
     this.videoFile,
     this.internalSubs,
     this.defaultSubtitles,
-    this.webURL,
+    this.webStream,
     Key key,
   }) : super(key: key);
 
   final File videoFile;
   final List<File> internalSubs;
   final String defaultSubtitles;
-  final String webURL;
+  final String webStream;
 
   @override
   _VideoPlayerState createState() => _VideoPlayerState(
         this.videoFile,
         this.internalSubs,
         this.defaultSubtitles,
-        this.webURL,
+        this.webStream,
       );
 }
 
@@ -164,23 +195,15 @@ class _VideoPlayerState extends State<VideoPlayer> {
     File videoFile,
     List<File> internalSubs,
     String defaultSubtitles,
-    String webURL,
+    String webStream,
   ) {
     _videoFile = videoFile;
     _internalSubs = internalSubs;
     _defaultSubtitles = defaultSubtitles;
-    _webURL = webURL;
+    _webStream = webStream;
   }
 
-  final _clipboard = ValueNotifier<String>("");
-  final _currentDefinition = ValueNotifier<String>("");
-  final _currentReading = ValueNotifier<String>("");
-  final _currentSubtitle = ValueNotifier<Subtitle>(
-    Subtitle(startTime: Duration.zero, endTime: Duration.zero, text: ""),
-  );
-  final _currentSubTrack = ValueNotifier<int>(0);
-
-  VideoPlayerController _videoPlayerController;
+  VlcPlayerController _videoPlayerController;
   ChewieController _chewieController;
   SubTitleWrapper _subTitleWrapper;
   SubtitleController _subTitleController;
@@ -188,10 +211,10 @@ class _VideoPlayerState extends State<VideoPlayer> {
   File _videoFile;
   List<File> _internalSubs;
   String _defaultSubtitles;
-  String _webURL;
+  String _webStream;
 
   bool isWeb() {
-    return _webURL == null;
+    return _webStream == null;
   }
 
   Future<bool> _onWillPop() async {
@@ -221,6 +244,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   @override
   Widget build(BuildContext context) {
+    callback = playExternalSubtitles;
     startClipboardMonitor();
 
     return new WillPopScope(
@@ -233,10 +257,10 @@ class _VideoPlayerState extends State<VideoPlayer> {
               onHorizontalDragUpdate: (details) {
                 if (details.delta.dx > 20) {
                   getVideoPlayerController()
-                      .seekTo(_currentSubtitle.value.endTime);
+                      .seekTo(currentSubtitle.value.endTime);
                 } else if (details.delta.dx < -20) {
                   getVideoPlayerController()
-                      .seekTo(_currentSubtitle.value.startTime);
+                      .seekTo(currentSubtitle.value.startTime);
                 }
               },
               onVerticalDragUpdate: (details) {
@@ -267,27 +291,14 @@ class _VideoPlayerState extends State<VideoPlayer> {
     }
   }
 
-  VideoPlayerController getVideoPlayerController() {
-    if (_webURL == null) {
-      _videoPlayerController ??= VideoPlayerController.file(
-        _videoFile,
-        _internalSubs,
-        _clipboard,
-        _currentDefinition,
-        _currentReading,
-        _currentSubtitle,
-        _currentSubTrack,
-        playExternalSubtitles,
-      );
+  VlcPlayerController getVideoPlayerController() {
+    if (_webStream == null) {
+      _videoPlayerController ??= VlcPlayerController.file(_videoFile,
+          options: VlcPlayerOptions(
+              audio: VlcAudioOptions(["--audio-track=0", "--sub-track=999"])));
     } else {
-      _videoPlayerController ??= VideoPlayerController.network(
-        _webURL,
-        _clipboard,
-        _currentDefinition,
-        _currentReading,
-        _currentSubtitle,
-        _currentSubTrack,
-        playExternalSubtitles,
+      _videoPlayerController ??= VlcPlayerController.network(
+        _webStream,
       );
     }
     return _videoPlayerController;
@@ -357,7 +368,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   SubTitleWrapper getSubtitleWrapper() {
     _subTitleWrapper ??= SubTitleWrapper(
-      subtitleNotifier: _currentSubtitle,
+      subtitleNotifier: currentSubtitle,
       videoPlayerController: getVideoPlayerController(),
       subtitleController: getSubtitleController(),
       subtitleStyle: SubtitleStyle(
@@ -373,18 +384,8 @@ class _VideoPlayerState extends State<VideoPlayer> {
               return Container();
             default:
               _chewieController = getChewieController();
-              return FutureBuilder(
-                future: getVideoPlayerController().setAudioByIndex(0),
-                builder: (BuildContext context, AsyncSnapshot snapshot) {
-                  switch (snapshot.connectionState) {
-                    case ConnectionState.waiting:
-                      return Container();
-                    default:
-                      return Chewie(
-                        controller: _chewieController,
-                      );
-                  }
-                },
+              return Chewie(
+                controller: _chewieController,
               );
           }
         },
@@ -423,9 +424,9 @@ class _VideoPlayerState extends State<VideoPlayer> {
           padding: EdgeInsets.all(16.0),
           child: InkWell(
             onTap: () {
-              _clipboard.value = "";
-              _currentDefinition.value = "";
-              _currentReading.value = "";
+              currentClipboard.value = "";
+              currentDefinition.value = "";
+              currentReading.value = "";
             },
             child: Container(
               padding: EdgeInsets.all(16.0),
@@ -452,9 +453,9 @@ class _VideoPlayerState extends State<VideoPlayer> {
           padding: EdgeInsets.all(16.0),
           child: GestureDetector(
             onTap: () {
-              _clipboard.value = "";
-              _currentReading.value = "";
-              _currentDefinition.value = "";
+              currentClipboard.value = "";
+              currentReading.value = "";
+              currentDefinition.value = "";
             },
             child: SingleChildScrollView(
               child: Container(
@@ -484,13 +485,13 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   Widget buildDictionary() {
     return ValueListenableBuilder(
-      valueListenable: _clipboard,
+      valueListenable: currentClipboard,
       builder: (context, clipboard, widget) {
         return FutureBuilder(
           future: getWordDetails(clipboard),
           builder:
               (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
-            if (_clipboard.value == "") {
+            if (currentClipboard.value == "") {
               return Container();
             }
             switch (snapshot.connectionState) {
@@ -500,8 +501,8 @@ class _VideoPlayerState extends State<VideoPlayer> {
                 List<String> results = snapshot.data;
 
                 if (snapshot.hasData) {
-                  _currentReading.value = snapshot.data[1];
-                  _currentDefinition.value = snapshot.data[2];
+                  currentReading.value = snapshot.data[1];
+                  currentDefinition.value = snapshot.data[2];
                   return buildDictionaryMatch(results);
                 } else {
                   return buildDictionaryNoMatch(clipboard);
@@ -515,7 +516,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   Widget buildSubTrackChanger() {
     return ValueListenableBuilder(
-      valueListenable: _currentSubTrack,
+      valueListenable: currentSubTrack,
       builder: (context, index, widget) {
         playEmbeddedSubtitles(index);
         return Container();
@@ -532,7 +533,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   void onClipboardText(String text) {
-    _clipboard.value = text;
+    currentClipboard.value = text;
     print("clipboard changed: $text");
   }
 
@@ -540,10 +541,11 @@ class _VideoPlayerState extends State<VideoPlayer> {
     ClipboardMonitor.unregisterAllCallbacks();
   }
 
-  void openTranscript(List<dynamic> subtitles) async {
+  void openTranscript(List<dynamic> subtitles) {
     ItemScrollController itemScrollController = ItemScrollController();
     ItemPositionsListener itemPositionsListener =
         ItemPositionsListener.create();
+
     _videoPlayerController.pause();
 
     int subIndex = 0;
@@ -566,33 +568,66 @@ class _VideoPlayerState extends State<VideoPlayer> {
         context: context,
         isScrollControlled: true,
         useRootNavigator: true,
-        builder: (context) => transcriptDialog(
-            subtitles, subIndex, itemScrollController, itemPositionsListener));
+        builder: (context) {
+          return Stack(children: [
+            transcriptDialog(subtitles, subIndex, itemScrollController,
+                itemPositionsListener),
+            Container(
+              height: 64,
+              color: Colors.grey[900].withOpacity(0.9),
+              child: InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: Center(
+                  child: Row(
+                    children: [
+                      SizedBox(width: 12),
+                      Icon(
+                        Icons.text_snippet_outlined,
+                        size: 18,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        "Transcript",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ]);
+        });
   }
 
   Widget transcriptDialog(
-      List<dynamic> subtitles,
-      int i,
-      ItemScrollController itemScrollController,
-      ItemPositionsListener itemPositionsListener) {
+    List<dynamic> subtitles,
+    int i,
+    ItemScrollController itemScrollController,
+    ItemPositionsListener itemPositionsListener,
+  ) {
     if (subtitles.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.subtitles_off_outlined, color: Colors.white, size: 72),
-            SizedBox(height: 6),
-            Text(
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.subtitles_off_outlined, color: Colors.white, size: 72),
+          SizedBox(height: 6),
+          Center(
+            child: Text(
               "The transcript is empty.",
               style: TextStyle(fontSize: 20, color: Colors.white),
             ),
-          ],
-        ),
+          ),
+        ],
       );
     }
 
     return ScrollablePositionedList.builder(
-      initialScrollIndex: (i - 2 > 0) ? i - 2 : 0,
+      padding: EdgeInsets.only(top: 64, bottom: 64),
+      initialScrollIndex: (i - 3 > 0) ? i - 3 : 0,
       itemCount: subtitles.length,
       itemBuilder: (context, index) {
         Subtitle _subtitle = subtitles[index];
