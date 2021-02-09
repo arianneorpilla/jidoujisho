@@ -372,48 +372,6 @@ class _MaterialControlsState extends State<MaterialControls>
     );
   }
 
-  // Widget _buildSpeedButton(
-  //   VideoPlayerController controller,
-  // ) {
-  //   return GestureDetector(
-  //     onTap: () async {
-  //       _hideTimer?.cancel();
-
-  //       final chosenSpeed = await showModalBottomSheet<double>(
-  //         context: context,
-  //         isScrollControlled: true,
-  //         useRootNavigator: true,
-  //         builder: (context) => _PlaybackSpeedDialog(
-  //           speeds: chewieController.videoPlayerController,
-  //           selected: _latestValue.playbackSpeed,
-  //         ),
-  //       );
-
-  //       if (chosenSpeed != null) {
-  //         controller.setPlaybackSpeed(chosenSpeed);
-  //       }
-
-  //       if (_latestValue.isPlaying) {
-  //         _startHideTimer();
-  //       }
-  //     },
-  //     child: AnimatedOpacity(
-  //       opacity: _hideStuff ? 0.0 : 1.0,
-  //       duration: const Duration(milliseconds: 300),
-  //       child: ClipRect(
-  //         child: Container(
-  //           height: barHeight,
-  //           padding: const EdgeInsets.only(
-  //             left: 8.0,
-  //             right: 8.0,
-  //           ),
-  //           child: const Icon(Icons.speed),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
-
   GestureDetector _buildPlayPause(VlcPlayerController controller) {
     return GestureDetector(
       onTap: _playPause,
@@ -582,8 +540,6 @@ class _MoreOptionsDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color selectedColor = Theme.of(context).primaryColor;
-
     return ListView.builder(
       shrinkWrap: true,
       physics: const ScrollPhysics(),

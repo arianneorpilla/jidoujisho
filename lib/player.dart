@@ -294,11 +294,13 @@ class _VideoPlayerState extends State<VideoPlayer> {
   VlcPlayerController getVideoPlayerController() {
     if (_webStream == null) {
       _videoPlayerController ??= VlcPlayerController.file(_videoFile,
+          hwAcc: HwAcc.FULL,
           options: VlcPlayerOptions(
               audio: VlcAudioOptions(["--audio-track=0", "--sub-track=999"])));
     } else {
       _videoPlayerController ??= VlcPlayerController.network(
         _webStream,
+        hwAcc: HwAcc.FULL,
       );
     }
     return _videoPlayerController;
