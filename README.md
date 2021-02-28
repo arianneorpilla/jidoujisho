@@ -6,7 +6,7 @@
 <h3 align="center">jidoujisho</h3>
 <p align="center">A mobile video player tailored for Japanese language learners.</p>
 
-<p align="center"><b>Latest Beta: <a href="https://github.com/lrorpilla/jidoujisho/releases/">0.4.2</a></p></b><br>
+<p align="center"><b>Latest Beta: <a href="https://github.com/lrorpilla/jidoujisho/releases/">0.4.3</a></p></b><br>
 
 # 📚 Uninterrupted language immersion at your fingertips
 
@@ -18,14 +18,13 @@
 - [x] Selecting a word allows export to AnkiDroid with the **sentence, answer, meaning and reading**
 - [x] **Repeat the current subtitle from the beginning** by flicking horizontally
 - [x] Swipe vertically to open the **transcript to jump to time and review subtitles**
-- [x] **(Experimental)** YouTube support for videos with Japanese user-generated subtitles
+- [x] **YouTube support** for videos with **Japanese user-generated subtitles**
 - [x] **(Experimental)** Custom Japanese-Japanese dictionary support **(tested for Shinmeikai)**
 
 # 🛠️ More features are on the way
 
 **jidoujisho is still in active development.** The app will be available publicly to download in GitHub at an early stage, and will be free to download on the Google Play Store. Current features planned on the roadmap listed below, but as of now there is no estimate on any updates.
 
-- [ ] **Further web support** and fixes for experimental YouTube and auto-generated subtitles
 - [ ] **Use of the AnkiDroid API** instead of share intent to streamline card export
 - [ ] **User interface, layout, video playback preferences** and Anki output customisation
 - [ ] Multiple subtitle tracks at a given time, and **immersion difficulty levels** for oral practice
@@ -58,7 +57,7 @@
 
 jidoujisho will take **video and audio formats as supported by ExoPlayer**. Subtitles may be embedded within the video being played and selected during playback. 
 
-If you wish to use external subtitles, they may be in **.SRT format** and you may import them during playback through the menu. You may switch between different audio and subtitle tracks. Image-based subtitles such as PGS are not currently supported.
+If you wish to use external subtitles, they may be in **.SRT or .ASS format** and you may import them during playback through the menu. You may switch between different audio and subtitle tracks. Image-based subtitles such as PGS are not currently supported.
 
 Web support for YouTube is **currently experimental**. YouTube subtitles are taken from TimedText XML, which is only publicly exposed to videos that have user-generated Japanese subtitles. Unfortunately, some particular videos cannot be streamed. Regardless, <a href="https://www.youtube.com/watch?v=mZ0sJQC8qkE">the app appears to be functional</a> <a href="https://www.youtube.com/watch?v=X9zw0QF12Kc">and has been tested with a fair sample</a> <a href="https://www.youtube.com/watch?v=t1yXDcuwzpY">of practical application use cases.</a>
 
