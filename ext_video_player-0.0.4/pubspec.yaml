@@ -35,14 +35,7 @@ dev_dependencies:
   
 dependency_overrides:
   video_player:
-<<<<<<< HEAD
     path: ../video_player/video_player # Fork by balvinderz
-=======
-    git:
-      url: https://github.com/balvinderz/plugins
-      ref: features/change_audio
-      path: packages/video_player/video_player
->>>>>>> 38a9e92 (Fixed up modified dependencies used in project, should be buildable from clone now)
 
 environment:
   sdk: '>=2.10.0 <3.0.0'

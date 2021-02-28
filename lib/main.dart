@@ -131,13 +131,13 @@ class Home extends StatelessWidget {
               decoration: InputDecoration(hintText: "Enter a YouTube URL"),
             ),
             actions: <Widget>[
-              FlatButton(
+              TextButton(
                 child: Text('CANCEL'),
                 onPressed: () {
                   Navigator.pop(context);
                 },
               ),
-              FlatButton(
+              TextButton(
                 child: Text('OK'),
                 onPressed: () {
                   String _webURL = _textFieldController.text;

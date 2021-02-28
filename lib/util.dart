@@ -13,6 +13,8 @@ import 'package:unofficial_jisho_api/api.dart';
 import 'package:xml2json/xml2json.dart';
 
 import 'package:jidoujisho/main.dart';
+import 'package:youtube_explode_dart/youtube_explode_dart.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 String getTimestampFromDuration(Duration duration) {
   String twoDigits(int n) => n.toString().padLeft(2, "0");
@@ -138,6 +140,30 @@ Future<List<File>> extractSubtitles(File file) async {
   return files;
 }
 
+Future<String> extractAssSubtitles(File file) async {
+  List<File> files = [];
+  if (hasExternalSubtitles(file)) {
+    files.add(getExternalSubtitles(file));
+  }
+
+  final FlutterFFmpeg _flutterFFmpeg = new FlutterFFmpeg();
+
+  String inputPath = file.path;
+  String outputPath = "\"$appDirPath/extractAss.srt\"";
+  String command =
+      "-f ass -c:s ass -i \"$inputPath\" -map 0:s:0 -c:s subrip $outputPath";
+
+  String subPath = "$appDirPath/extractAss.srt";
+  File subFile = File(subPath);
+
+  if (subFile.existsSync()) {
+    subFile.deleteSync();
+  }
+
+  await _flutterFFmpeg.execute(command);
+  return subFile.readAsStringSync();
+}
+
 void showAnkiDialog(BuildContext context, String sentence, String answer,
     String reading, String meaning) {
   TextEditingController _sentenceController =
@@ -228,20 +254,20 @@ void showAnkiDialog(BuildContext context, String sentence, String answer,
           ),
         ),
         actions: <Widget>[
-          FlatButton(
+          TextButton(
             child: Text('PREVIEW AUDIO'),
             onPressed: () async {
               await audioPlayer.stop();
               await audioPlayer.play(previewAudioDir, isLocal: true);
             },
           ),
-          FlatButton(
+          TextButton(
             child: Text('CANCEL'),
             onPressed: () {
               Navigator.pop(context);
             },
           ),
-          FlatButton(
+          TextButton(
             child: Text('EXPORT'),
             onPressed: () {
               exportAnkiCard(
@@ -549,4 +575,18 @@ List<String> getAllImportedWords() {
   }
 
   return allWords;
+}
+
+Future<String> getPlayerYouTubeInfo(String webURL) async {
+  var videoID = YoutubePlayer.convertUrlToId(webURL);
+  if (videoID != null) {
+    YoutubeExplode yt = YoutubeExplode();
+    var streamManifest = await yt.videos.streamsClient.getManifest(webURL);
+    var streamInfo = streamManifest.muxed.withHighestBitrate();
+    var streamURL = streamInfo.url.toString();
+
+    return streamURL;
+  } else {
+    return null;
+  }
 }

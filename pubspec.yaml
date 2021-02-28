@@ -3,7 +3,7 @@ description: A mobile video player tailored for Japanese language learners.
 
 publish_to: none
 
-version: 0.4.2+1
+version: 0.4.3+1
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -41,6 +41,7 @@ dependencies:
   transparent_image: ^1.0.0
   ext_storage:
   fuzzy:
+  youtube_explode_dart:
 dependency_overrides:
   video_player:
     path: ./video_player/video_player # Fork by balvinderz

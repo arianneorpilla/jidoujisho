@@ -87,9 +87,7 @@ class Player extends StatelessWidget {
     }
 
     return new FutureBuilder(
-      future: http.read(
-        "https://www.youtube.com/api/timedtext?lang=ja&v=" + videoID,
-      ),
+      future: getPlayerYouTubeInfo(webURL),
       builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
@@ -104,18 +102,40 @@ class Player extends StatelessWidget {
               ),
             );
           default:
-            String webSubtitles;
+            String webStream = snapshot.data;
+            return new FutureBuilder(
+              future: http.read(
+                "https://www.youtube.com/api/timedtext?lang=ja&v=" + videoID,
+              ),
+              builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+                switch (snapshot.connectionState) {
+                  case ConnectionState.waiting:
+                    return Scaffold(
+                      backgroundColor: Colors.black,
+                      body: Center(
+                        child: Container(
+                          height: 30,
+                          width: 30,
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                    );
+                  default:
+                    String webSubtitles;
 
-            if (!snapshot.hasData || snapshot.data.isEmpty) {
-              webSubtitles = "";
-            } else {
-              webSubtitles = timedTextToSRT(snapshot.data);
-            }
+                    if (!snapshot.hasData || snapshot.data.isEmpty) {
+                      webSubtitles = "";
+                    } else {
+                      webSubtitles = timedTextToSRT(snapshot.data);
+                    }
 
-            return VideoPlayer(
-              webURL: webURL,
-              defaultSubtitles: webSubtitles,
-              internalSubs: [],
+                    return VideoPlayer(
+                      webStream: webStream,
+                      defaultSubtitles: webSubtitles,
+                      internalSubs: [],
+                    );
+                }
+              },
             );
         }
       },
@@ -141,21 +161,21 @@ class VideoPlayer extends StatefulWidget {
     this.videoFile,
     this.internalSubs,
     this.defaultSubtitles,
-    this.webURL,
+    this.webStream,
     Key key,
   }) : super(key: key);
 
   final File videoFile;
   final List<File> internalSubs;
   final String defaultSubtitles;
-  final String webURL;
+  final String webStream;
 
   @override
   _VideoPlayerState createState() => _VideoPlayerState(
         this.videoFile,
         this.internalSubs,
         this.defaultSubtitles,
-        this.webURL,
+        this.webStream,
       );
 }
 
@@ -164,12 +184,12 @@ class _VideoPlayerState extends State<VideoPlayer> {
     File videoFile,
     List<File> internalSubs,
     String defaultSubtitles,
-    String webURL,
+    String webStream,
   ) {
     _videoFile = videoFile;
     _internalSubs = internalSubs;
     _defaultSubtitles = defaultSubtitles;
-    _webURL = webURL;
+    _webStream = webStream;
   }
 
   final _clipboard = ValueNotifier<String>("");
@@ -188,10 +208,10 @@ class _VideoPlayerState extends State<VideoPlayer> {
   File _videoFile;
   List<File> _internalSubs;
   String _defaultSubtitles;
-  String _webURL;
+  String _webStream;
 
   bool isWeb() {
-    return _webURL == null;
+    return _webStream == null;
   }
 
   Future<bool> _onWillPop() async {
@@ -203,11 +223,11 @@ class _VideoPlayerState extends State<VideoPlayer> {
             ),
             title: new Text('End Playback?'),
             actions: <Widget>[
-              new FlatButton(
+              new TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
                 child: new Text('NO'),
               ),
-              new FlatButton(
+              new TextButton(
                 onPressed: () async {
                   Phoenix.rebirth(context);
                 },
@@ -268,7 +288,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   VideoPlayerController getVideoPlayerController() {
-    if (_webURL == null) {
+    if (_webStream == null) {
       _videoPlayerController ??= VideoPlayerController.file(
         _videoFile,
         _internalSubs,
@@ -281,7 +301,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       );
     } else {
       _videoPlayerController ??= VideoPlayerController.network(
-        _webURL,
+        _webStream,
         _clipboard,
         _currentDefinition,
         _currentReading,
@@ -330,17 +350,23 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   void playExternalSubtitles() async {
     FilePickerResult result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ["srt"],
+      type: FileType.any,
       allowMultiple: false,
     );
 
     if (result != null) {
       File subFile = File(result.files.single.path);
-      getSubtitleWrapper()
-          .subtitleController
-          .updateSubtitleContent(content: subFile.readAsStringSync());
-      print("Switch Subtitle to External SRT");
+      if (subFile.path.endsWith("srt")) {
+        getSubtitleWrapper()
+            .subtitleController
+            .updateSubtitleContent(content: subFile.readAsStringSync());
+        print("Switch Subtitle to External SRT");
+      } else {
+        getSubtitleWrapper()
+            .subtitleController
+            .updateSubtitleContent(content: await extractAssSubtitles(subFile));
+        print("Switch Subtitle to External ASS");
+      }
     }
   }
 
@@ -462,14 +488,14 @@ class _VideoPlayerState extends State<VideoPlayer> {
                 color: Theme.of(context).backgroundColor.withOpacity(0.6),
                 child: Column(
                   children: [
-                    SelectableText(
+                    Text(
                       slug,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 20,
                       ),
                     ),
-                    SelectableText(readings),
+                    Text(readings),
                     SelectableText("\n$definitions\n"),
                   ],
                 ),
