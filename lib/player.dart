@@ -10,7 +10,6 @@ import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
 import 'package:subtitle_wrapper_package/subtitle_controller.dart';
 import 'package:subtitle_wrapper_package/subtitle_wrapper_package.dart';
 import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
-import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:http/http.dart' as http;
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
@@ -97,7 +96,9 @@ class Player extends StatelessWidget {
                 child: Container(
                   height: 30,
                   width: 30,
-                  child: CircularProgressIndicator(),
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+                  ),
                 ),
               ),
             );
@@ -116,7 +117,10 @@ class Player extends StatelessWidget {
                         child: Container(
                           height: 30,
                           width: 30,
-                          child: CircularProgressIndicator(),
+                          child: CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.red),
+                          ),
                         ),
                       ),
                     );
@@ -149,7 +153,9 @@ class Player extends StatelessWidget {
         child: Container(
           height: 30,
           width: 30,
-          child: CircularProgressIndicator(),
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+          ),
         ),
       ),
     );
@@ -193,6 +199,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   final _clipboard = ValueNotifier<String>("");
+  final _currentWord = ValueNotifier<String>("");
   final _currentDefinition = ValueNotifier<String>("");
   final _currentReading = ValueNotifier<String>("");
   final _currentSubtitle = ValueNotifier<Subtitle>(
@@ -223,13 +230,15 @@ class _VideoPlayerState extends State<VideoPlayer> {
             ),
             title: new Text('End Playback?'),
             actions: <Widget>[
-              new TextButton(
+              new FlatButton(
                 onPressed: () => Navigator.of(context).pop(false),
                 child: new Text('NO'),
               ),
-              new TextButton(
+              new FlatButton(
                 onPressed: () async {
-                  Phoenix.rebirth(context);
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                  print("POP!");
                 },
                 child: new Text('YES'),
               ),
@@ -288,11 +297,12 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   VideoPlayerController getVideoPlayerController() {
-    if (_webStream == null) {
+    if (_videoFile != null) {
       _videoPlayerController ??= VideoPlayerController.file(
         _videoFile,
         _internalSubs,
         _clipboard,
+        _currentWord,
         _currentDefinition,
         _currentReading,
         _currentSubtitle,
@@ -303,6 +313,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       _videoPlayerController ??= VideoPlayerController.network(
         _webStream,
         _clipboard,
+        _currentWord,
         _currentDefinition,
         _currentReading,
         _currentSubtitle,
@@ -322,10 +333,10 @@ class _VideoPlayerState extends State<VideoPlayer> {
       allowFullScreen: false,
       allowMuting: false,
       materialProgressColors: ChewieProgressColors(
-        playedColor: Colors.redAccent,
-        handleColor: Colors.redAccent,
+        playedColor: Colors.red,
+        handleColor: Colors.red,
         backgroundColor: Colors.grey,
-        bufferedColor: Colors.redAccent[100],
+        bufferedColor: Colors.red[100],
       ),
       fullScreenByDefault: false,
       allowedScreenSleep: false,
@@ -427,7 +438,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
           padding: EdgeInsets.all(16.0),
           child: Container(
             padding: EdgeInsets.all(16.0),
-            color: Theme.of(context).backgroundColor.withOpacity(0.6),
+            color: Colors.grey[800].withOpacity(0.6),
             child: Column(
               children: [
                 Text("Looking up \"" +
@@ -450,12 +461,13 @@ class _VideoPlayerState extends State<VideoPlayer> {
           child: InkWell(
             onTap: () {
               _clipboard.value = "";
+              _currentWord.value = "";
               _currentDefinition.value = "";
               _currentReading.value = "";
             },
             child: Container(
               padding: EdgeInsets.all(16.0),
-              color: Theme.of(context).backgroundColor.withOpacity(0.6),
+              color: Colors.grey[800].withOpacity(0.6),
               child: Text("No matches for \"" +
                   clipboard.replaceAll("@usejisho@", "") +
                   "\" could be queried"),
@@ -479,13 +491,14 @@ class _VideoPlayerState extends State<VideoPlayer> {
           child: GestureDetector(
             onTap: () {
               _clipboard.value = "";
+              _currentWord.value = "";
               _currentReading.value = "";
               _currentDefinition.value = "";
             },
             child: SingleChildScrollView(
               child: Container(
                 padding: EdgeInsets.all(16.0),
-                color: Theme.of(context).backgroundColor.withOpacity(0.6),
+                color: Colors.grey[800].withOpacity(0.6),
                 child: Column(
                   children: [
                     Text(
@@ -526,8 +539,10 @@ class _VideoPlayerState extends State<VideoPlayer> {
                 List<String> results = snapshot.data;
 
                 if (snapshot.hasData) {
+                  _currentWord.value = snapshot.data[0];
                   _currentReading.value = snapshot.data[1];
                   _currentDefinition.value = snapshot.data[2];
+
                   return buildDictionaryMatch(results);
                 } else {
                   return buildDictionaryNoMatch(clipboard);
@@ -629,7 +644,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
         return ListTile(
           selected: i == index,
-          selectedTileColor: Colors.redAccent.withOpacity(0.15),
+          selectedTileColor: Colors.red.withOpacity(0.15),
           dense: true,
           title: Column(
             children: [
@@ -639,7 +654,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
                   Icon(
                     Icons.textsms_outlined,
                     size: 12.0,
-                    color: Colors.redAccent,
+                    color: Colors.red,
                   ),
                   const SizedBox(width: 16.0),
                   Text(

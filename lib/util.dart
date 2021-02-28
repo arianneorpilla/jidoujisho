@@ -11,6 +11,7 @@ import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
 import 'package:path/path.dart' as path;
 import 'package:unofficial_jisho_api/api.dart';
 import 'package:xml2json/xml2json.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:jidoujisho/main.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
@@ -254,20 +255,20 @@ void showAnkiDialog(BuildContext context, String sentence, String answer,
           ),
         ),
         actions: <Widget>[
-          TextButton(
+          FlatButton(
             child: Text('PREVIEW AUDIO'),
             onPressed: () async {
               await audioPlayer.stop();
               await audioPlayer.play(previewAudioDir, isLocal: true);
             },
           ),
-          TextButton(
+          FlatButton(
             child: Text('CANCEL'),
             onPressed: () {
               Navigator.pop(context);
             },
           ),
-          TextButton(
+          FlatButton(
             child: Text('EXPORT'),
             onPressed: () {
               exportAnkiCard(
@@ -324,17 +325,12 @@ void exportAnkiCard(
   );
 }
 
-Future exportToAnki(
-    BuildContext context,
-    VideoPlayerController controller,
-    Subtitle subtitle,
-    String clipboard,
-    String definition,
-    String reading) async {
+Future exportToAnki(BuildContext context, VideoPlayerController controller,
+    Subtitle subtitle, String word, String definition, String reading) async {
   await exportCurrentFrame(controller);
   await exportCurrentAudio(controller, subtitle);
 
-  showAnkiDialog(context, subtitle.text, clipboard, reading, definition);
+  showAnkiDialog(context, subtitle.text, word, reading, definition);
 }
 
 Future<List<String>> getWordDetails(String searchTerm) async {
@@ -495,9 +491,9 @@ String timedTextToSRT(String timedText) {
 String timedLineToSRT(Map<String, dynamic> line, int lineCount) {
   double start = double.parse(line["\@start"]);
   double duration = double.parse(line["\@dur"]);
-  String text = line["\$"];
+  String text = line["\$"] ?? "";
 
-  text.replaceAll("\\n", "\n");
+  text = text.replaceAll("\\n", "\n");
 
   String startTime = formatTimeString(start);
   String endTime = formatTimeString(start + duration);
@@ -589,4 +585,65 @@ Future<String> getPlayerYouTubeInfo(String webURL) async {
   } else {
     return null;
   }
+}
+
+String displayTimeAgoFromTimestamp(String timestamp) {
+  final year = int.parse(timestamp.substring(0, 4));
+  final month = int.parse(timestamp.substring(5, 7));
+  final day = int.parse(timestamp.substring(8, 10));
+  final hour = int.parse(timestamp.substring(11, 13));
+  final minute = int.parse(timestamp.substring(14, 16));
+
+  final DateTime videoDate = DateTime(year, month, day, hour, minute);
+  final int diffInHours = DateTime.now().difference(videoDate).inHours;
+
+  String timeAgo = '';
+  String timeUnit = '';
+  int timeValue = 0;
+
+  if (diffInHours < 1) {
+    final diffInMinutes = DateTime.now().difference(videoDate).inMinutes;
+    timeValue = diffInMinutes;
+    timeUnit = 'minute';
+  } else if (diffInHours < 24) {
+    timeValue = diffInHours;
+    timeUnit = 'hour';
+  } else if (diffInHours >= 24 && diffInHours < 24 * 7) {
+    timeValue = (diffInHours / 24).floor();
+    timeUnit = 'day';
+  } else if (diffInHours >= 24 * 7 && diffInHours < 24 * 30) {
+    timeValue = (diffInHours / (24 * 7)).floor();
+    timeUnit = 'week';
+  } else if (diffInHours >= 24 * 30 && diffInHours < 24 * 12 * 30) {
+    timeValue = (diffInHours / (24 * 30)).floor();
+    timeUnit = 'month';
+  } else {
+    timeValue = (diffInHours / (24 * 365)).floor();
+    timeUnit = 'year';
+  }
+
+  timeAgo = timeValue.toString() + ' ' + timeUnit;
+  timeAgo += timeValue > 1 ? 's' : '';
+
+  return timeAgo + ' ago';
+}
+
+String getViewCountFormatted(int num) {
+  if (num > 999 && num < 99999) {
+    return "${(num / 1000).toStringAsFixed(1)}K";
+  } else if (num > 99999 && num < 999999) {
+    return "${(num / 1000).toStringAsFixed(0)}K";
+  } else if (num > 999999 && num < 999999999) {
+    return "${(num / 1000000).toStringAsFixed(1)}M";
+  } else if (num > 999999999) {
+    return "${(num / 1000000000).toStringAsFixed(1)}B";
+  } else {
+    return num.toString();
+  }
+}
+
+Future<bool> doesYouTubeIDHaveSubtitles(String videoID) async {
+  String httpSubs = await http
+      .read("https://www.youtube.com/api/timedtext?lang=ja&v=" + videoID);
+  return (httpSubs.isNotEmpty);
 }

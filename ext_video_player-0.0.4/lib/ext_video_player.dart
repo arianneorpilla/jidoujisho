@@ -190,6 +190,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   VideoPlayerController.asset(
       this.dataSource,
       ValueNotifier<String> clip,
+      ValueNotifier<String> word,
       ValueNotifier<String> def,
       ValueNotifier<String> read,
       ValueNotifier<Subtitle> sub,
@@ -200,6 +201,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
       : dataSourceType = DataSourceType.asset,
         formatHint = null,
         clipboard = clip,
+        currentWord = word,
         currentDefinition = def,
         currentReading = read,
         currentSubtitle = sub,
@@ -217,6 +219,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   VideoPlayerController.network(
       this.dataSource,
       ValueNotifier<String> clip,
+      ValueNotifier<String> word,
       ValueNotifier<String> def,
       ValueNotifier<String> read,
       ValueNotifier<Subtitle> sub,
@@ -227,6 +230,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
       : dataSourceType = DataSourceType.network,
         package = null,
         clipboard = clip,
+        currentWord = word,
         currentDefinition = def,
         currentReading = read,
         currentSubtitle = sub,
@@ -243,6 +247,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
       File file,
       List<File> subtitles,
       ValueNotifier<String> clip,
+      ValueNotifier<String> word,
       ValueNotifier<String> def,
       ValueNotifier<String> read,
       ValueNotifier<Subtitle> sub,
@@ -255,6 +260,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
         formatHint = null,
         internalSubs = subtitles,
         clipboard = clip,
+        currentWord = word,
         currentDefinition = def,
         currentReading = read,
         currentSubtitle = sub,
@@ -267,6 +273,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   List<File> internalSubs;
 
   final ValueNotifier<String> clipboard;
+  final ValueNotifier<String> currentWord;
   final ValueNotifier<String> currentDefinition;
   final ValueNotifier<String> currentReading;
   final ValueNotifier<Subtitle> currentSubtitle;

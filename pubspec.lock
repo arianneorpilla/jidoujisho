@@ -15,6 +15,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.6.0"
+  async:
+    dependency: "direct main"
+    description:
+      name: async
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.5.0"
   audioplayers:
     dependency: "direct main"
     description:
@@ -552,13 +559,24 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.2.1"
+  youtube_api:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "0ef61e5c5ce3db904ece70490909122cff155330"
+      url: "https://github.com/szepetry/youtube_api"
+    source: git
+    version: "0.8.0"
   youtube_explode_dart:
     dependency: "direct main"
     description:
-      name: youtube_explode_dart
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.7.5"
+      path: "."
+      ref: HEAD
+      resolved-ref: fff8719fdf7087fbfef784b046cad90e4d96b342
+      url: "https://github.com/Hexer10/youtube_explode_dart"
+    source: git
+    version: "1.8.0-beta.2"
   youtube_player_flutter:
     dependency: "direct main"
     description:

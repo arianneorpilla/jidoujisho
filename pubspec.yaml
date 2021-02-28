@@ -3,7 +3,7 @@ description: A mobile video player tailored for Japanese language learners.
 
 publish_to: none
 
-version: 0.4.3+1
+version: 0.5.0+1
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -42,6 +42,12 @@ dependencies:
   ext_storage:
   fuzzy:
   youtube_explode_dart:
+    git:
+      url: https://github.com/Hexer10/youtube_explode_dart
+  youtube_api:
+    git:
+      url: https://github.com/szepetry/youtube_api
+  async:
 dependency_overrides:
   video_player:
     path: ./video_player/video_player # Fork by balvinderz

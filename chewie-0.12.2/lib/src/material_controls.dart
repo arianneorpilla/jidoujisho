@@ -73,7 +73,9 @@ class _MaterialControlsState extends State<MaterialControls>
                   _latestValue.isBuffering)
                 const Expanded(
                   child: Center(
-                    child: CircularProgressIndicator(),
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+                    ),
                   ),
                 )
               else
@@ -295,7 +297,7 @@ class _MaterialControlsState extends State<MaterialControls>
               context,
               controller,
               controller.currentSubtitle.value,
-              controller.clipboard.value,
+              controller.currentWord.value,
               controller.currentDefinition.value,
               controller.currentReading.value,
             );
@@ -634,7 +636,7 @@ class _MoreOptionsDialog extends StatelessWidget {
               Icon(
                 _icon,
                 size: 20.0,
-                color: Colors.redAccent,
+                color: Colors.red,
               ),
               const SizedBox(width: 16.0),
               Text(_option),
@@ -678,7 +680,7 @@ class _SelectAudioDialog extends StatelessWidget {
           Icon(
             Icons.audiotrack_outlined,
             size: 20.0,
-            color: Colors.redAccent,
+            color: Colors.red,
           ),
           const SizedBox(width: 16.0),
           Text("Audio - $_option"),
@@ -690,7 +692,7 @@ class _SelectAudioDialog extends StatelessWidget {
           Icon(
             Icons.subtitles_outlined,
             size: 20.0,
-            color: Colors.redAccent,
+            color: Colors.red,
           ),
           const SizedBox(width: 16.0),
           Text("Subtitle - Track $_subIndex"),
@@ -702,7 +704,7 @@ class _SelectAudioDialog extends StatelessWidget {
           Icon(
             Icons.subtitles_off_outlined,
             size: 20.0,
-            color: Colors.redAccent,
+            color: Colors.red,
           ),
           const SizedBox(width: 16.0),
           Text("Subtitle - None"),

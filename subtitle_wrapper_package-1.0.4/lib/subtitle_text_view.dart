@@ -27,7 +27,7 @@ class SubtitleTextView extends StatelessWidget {
                 subtitleStyle.hasBorder
                     ? Center(
                         child: Text(
-                          state.subtitle.text.replaceAll('\\n', '\n'),
+                          state.subtitle.text,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: subtitleStyle.fontSize,
@@ -44,7 +44,7 @@ class SubtitleTextView extends StatelessWidget {
                       ),
                 Center(
                   child: SelectableText(
-                    state.subtitle.text.replaceAll('\\n', '\n'),
+                    state.subtitle.text,
                     key: ViewKeys.SUBTITLE_TEXT_CONTENT,
                     textAlign: TextAlign.center,
                     style: TextStyle(
