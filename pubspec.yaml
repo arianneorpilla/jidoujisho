@@ -48,6 +48,7 @@ dependencies:
     git:
       url: https://github.com/szepetry/youtube_api
   async:
+  wakelock:
 dependency_overrides:
   video_player:
     path: ./video_player/video_player # Fork by balvinderz

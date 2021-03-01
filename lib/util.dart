@@ -265,7 +265,13 @@ void showAnkiDialog(BuildContext context, String sentence, String answer,
         ),
         actions: <Widget>[
           TextButton(
-            child: Text('PREVIEW AUDIO'),
+            child: Text(
+              'PREVIEW AUDIO',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
             style: TextButton.styleFrom(
               textStyle: TextStyle(
                 color: Colors.white,
@@ -277,7 +283,13 @@ void showAnkiDialog(BuildContext context, String sentence, String answer,
             },
           ),
           TextButton(
-            child: Text('CANCEL'),
+            child: Text(
+              'CANCEL',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
             style: TextButton.styleFrom(
               textStyle: TextStyle(
                 color: Colors.white,
@@ -288,10 +300,17 @@ void showAnkiDialog(BuildContext context, String sentence, String answer,
             },
           ),
           TextButton(
-            child: Text('EXPORT'),
+            child: Text(
+              'EXPORT',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
             style: TextButton.styleFrom(
               textStyle: TextStyle(
                 color: Colors.white,
+                fontWeight: FontWeight.w500,
               ),
             ),
             onPressed: () {
@@ -316,7 +335,8 @@ void exportAnkiCard(
   String backText;
 
   DateTime now = DateTime.now();
-  String newFileName = DateFormat('yyyyMMddTkkmmss').format(now);
+  String newFileName =
+      "jidoujisho-" + DateFormat('yyyyMMddTkkmmss').format(now);
 
   File imageFile = File(previewImageDir);
   File audioFile = File(previewAudioDir);
@@ -556,14 +576,25 @@ String getTimestampFromDuration(Duration duration) {
   return "$hours:$mins:$secs.$mills";
 }
 
-String getTimeAgoFormatted(String timestamp) {
-  final year = int.parse(timestamp.substring(0, 4));
-  final month = int.parse(timestamp.substring(5, 7));
-  final day = int.parse(timestamp.substring(8, 10));
-  final hour = int.parse(timestamp.substring(11, 13));
-  final minute = int.parse(timestamp.substring(14, 16));
+String getYouTubeDuration(Duration duration) {
+  String twoDigits(int n) => n.toString().padLeft(2, "0");
 
-  final DateTime videoDate = DateTime(year, month, day, hour, minute);
+  String hours = twoDigits(duration.inHours);
+  String mins = twoDigits(duration.inMinutes.remainder(60));
+  String secs = twoDigits(duration.inSeconds.remainder(60));
+
+  if (duration.inHours != 0) {
+    return "  $hours:$mins:$secs  ";
+  } else {
+    if ("$secs" == "00") {
+      return "  0:$mins  ";
+    } else {
+      return "  $secs:$mins  ";
+    }
+  }
+}
+
+String getTimeAgoFormatted(DateTime videoDate) {
   final int diffInHours = DateTime.now().difference(videoDate).inHours;
 
   String timeAgo = '';
@@ -631,4 +662,14 @@ String formatTimeString(double time) {
       "," +
       millisecondsPadded;
   return formatted;
+}
+
+Future<SearchList> searchYouTubeVideos(String searchQuery) {
+  YoutubeExplode yt = YoutubeExplode();
+  return yt.search.getVideos(searchQuery);
+}
+
+Future<ClosedCaptionManifest> getCaptions(String videoID) async {
+  YoutubeExplode yt = YoutubeExplode();
+  return yt.videos.closedCaptions.getManifest(videoID);
 }

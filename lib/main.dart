@@ -10,7 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:youtube_api/youtube_api.dart';
+import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 import 'package:jidoujisho/player.dart';
 import 'package:jidoujisho/util.dart';
@@ -26,6 +26,10 @@ String buildNumber;
 
 List<DictionaryEntry> customDictionary;
 Fuzzy customDictionaryFuzzy;
+
+final AsyncMemoizer trendingCache = AsyncMemoizer();
+Map<String, AsyncMemoizer> searchCache = {};
+Map<String, AsyncMemoizer> captioningCache = {};
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,12 +54,38 @@ void main() async {
   runApp(App());
 }
 
+fetchTrendingCache() {
+  return trendingCache.runOnce(() async {
+    // I want to direct the
+    return searchYouTubeVideos("日本語");
+  });
+}
+
+fetchSearchCache(String searchQuery) {
+  if (searchCache[searchQuery] == null) {
+    searchCache[searchQuery] = AsyncMemoizer();
+  }
+  return searchCache[searchQuery].runOnce(() async {
+    return searchYouTubeVideos(searchQuery);
+  });
+}
+
+fetchCaptioningCache(String videoID) {
+  if (captioningCache[videoID] == null) {
+    captioningCache[videoID] = AsyncMemoizer();
+  }
+  return captioningCache[videoID].runOnce(() async {
+    return checkYouTubeClosedCaptionAvailable(videoID);
+  });
+}
+
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        accentColor: Colors.red,
         brightness: Brightness.dark,
         backgroundColor: Colors.black,
         cardColor: Colors.black,
@@ -72,12 +102,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  //todo: Enter your own API Key here
-  YoutubeAPI ytApi =
-      new YoutubeAPI("ENTER YOUR OWN API KEY", maxResults: 10, type: "video");
-  final AsyncMemoizer _trendingCache = AsyncMemoizer();
-  Map<String, AsyncMemoizer> _captioningCache = {};
-
   TextEditingController _searchQueryController = TextEditingController();
   bool _isSearching = false;
   String searchQuery = "";
@@ -199,6 +223,10 @@ class _HomeState extends State<Home> {
       "Enter keyword to search",
       Icons.youtube_searched_for,
     );
+    Widget searchingMessage = centerMessage(
+      "Searching for \"$searchQuery\"...",
+      Icons.youtube_searched_for,
+    );
     Widget queryMessage = centerMessage(
       "Querying trending videos...",
       Icons.youtube_searched_for,
@@ -214,14 +242,16 @@ class _HomeState extends State<Home> {
 
     return FutureBuilder(
       future: _isSearching && searchQuery != ""
-          ? ytApi.search(searchQuery)
-          : _fetchTrendingCache(),
+          ? fetchSearchCache(searchQuery)
+          : fetchTrendingCache(),
       builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-        List<YT_API> results = snapshot.data;
+        SearchList results = snapshot.data;
 
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
             if (_isSearching && searchQuery != "") {
+              return searchingMessage;
+            } else if (_isSearching && searchQuery != "") {
               return searchMessage;
             } else {
               return queryMessage;
@@ -235,11 +265,15 @@ class _HomeState extends State<Home> {
               addAutomaticKeepAlives: true,
               itemCount: snapshot.data.length,
               itemBuilder: (BuildContext context, int index) {
-                YT_API result = results[index];
+                Video result = results[index];
+                if (index > 10) {
+                  return Container();
+                }
                 return YouTubeResult(
                   result,
-                  _captioningCache[result.id],
-                  _fetchCaptioningCache(result.id),
+                  captioningCache[result.id],
+                  fetchCaptioningCache(result.id.value),
+                  index,
                 );
               },
             );
@@ -365,51 +399,41 @@ class _HomeState extends State<Home> {
       updateSearchQuery("");
     });
   }
-
-  _fetchTrendingCache() {
-    return this._trendingCache.runOnce(() async {
-      return ytApi.getTrends(regionCode: "JP");
-    });
-  }
-
-  _fetchCaptioningCache(String videoID) {
-    if (_captioningCache[videoID] == null) {
-      _captioningCache[videoID] = AsyncMemoizer();
-    }
-    return this._captioningCache[videoID].runOnce(() async {
-      return checkYouTubeClosedCaptionAvailable(videoID);
-    });
-  }
 }
 
 class YouTubeResult extends StatefulWidget {
-  final YT_API result;
+  final Video result;
   final AsyncMemoizer cache;
   final cacheCallback;
+  final int index;
 
   YouTubeResult(
     this.result,
     this.cache,
     this.cacheCallback,
+    this.index,
   );
 
   _YouTubeResultState createState() => _YouTubeResultState(
         this.result,
         this.cache,
         this.cacheCallback,
+        this.index,
       );
 }
 
 class _YouTubeResultState extends State<YouTubeResult>
     with AutomaticKeepAliveClientMixin {
-  final YT_API result;
+  final Video result;
   final AsyncMemoizer cache;
   final cacheCallback;
+  final int index;
 
   _YouTubeResultState(
     this.result,
     this.cache,
     this.cacheCallback,
+    this.index,
   );
 
   @override
@@ -420,25 +444,31 @@ class _YouTubeResultState extends State<YouTubeResult>
     super.build(context);
 
     String videoStreamURL = result.url;
-    String videoThumbnailURL = result.thumbnail["high"]["url"];
+    String videoThumbnailURL = result.thumbnails.highResUrl;
 
     String videoTitle = result.title;
-    String videoChannel = result.channelTitle;
-    String videoPublishTime = getTimeAgoFormatted(result.publishedAt);
-    String videoViewCount = getViewCountFormatted(int.parse(result.viewCount));
-    String videoDetails = "$videoPublishTime · $videoViewCount";
-    String videoDuration = result.duration.contains(":")
-        ? "  ${result.duration}  "
-        : "  0:${result.duration}  ";
+    String videoChannel = result.author;
+    String videoPublishTime = result.uploadDate == null
+        ? "Livestream"
+        : getTimeAgoFormatted(result.uploadDate);
+    String videoViewCount = getViewCountFormatted(result.engagement.viewCount);
+    String videoDetails = "$videoPublishTime · $videoViewCount views";
+    String videoDuration = result.duration == null
+        ? "  STREAM  "
+        : getYouTubeDuration(result.duration);
 
     Widget displayThumbnail() {
       return Stack(
         alignment: Alignment.bottomRight,
         children: [
-          FadeInImage(
-            image: NetworkImage(videoThumbnailURL),
-            placeholder: MemoryImage(kTransparentImage),
-            height: 480,
+          AspectRatio(
+            aspectRatio: 4 / 3,
+            child: FadeInImage(
+              image: NetworkImage(videoThumbnailURL),
+              placeholder: MemoryImage(kTransparentImage),
+              height: 480,
+              fit: BoxFit.fitHeight,
+            ),
           ),
           Positioned(
             right: 5.0,
@@ -458,6 +488,10 @@ class _YouTubeResultState extends State<YouTubeResult>
           ),
         ],
       );
+    }
+
+    if (result.uploadDate == null || result.duration == null) {
+      return Container();
     }
 
     Widget displayVideoInformation() {
@@ -492,7 +526,11 @@ class _YouTubeResultState extends State<YouTubeResult>
                 maxLines: 1,
                 overflow: TextOverflow.clip,
               ),
-              showClosedCaptionStatus(context, result.id),
+              showClosedCaptionStatus(
+                context,
+                result.id.value,
+                index,
+              ),
             ],
           ),
         ),
@@ -521,7 +559,11 @@ class _YouTubeResultState extends State<YouTubeResult>
     );
   }
 
-  FutureBuilder showClosedCaptionStatus(BuildContext context, String videoID) {
+  FutureBuilder showClosedCaptionStatus(
+    BuildContext context,
+    String videoID,
+    int index,
+  ) {
     Widget closedCaptionRow(String text, Color color, IconData icon) {
       return Row(
         children: [
@@ -552,7 +594,7 @@ class _YouTubeResultState extends State<YouTubeResult>
     );
     Widget errorMessage = closedCaptionRow(
       "Error querying closed captions",
-      Colors.green[200],
+      Colors.grey,
       Icons.error,
     );
     Widget availableMessage = closedCaptionRow(

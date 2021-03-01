@@ -218,6 +218,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   /// the video format detection code.
   VideoPlayerController.network(
       this.dataSource,
+      List<File> subtitles,
       ValueNotifier<String> clip,
       ValueNotifier<String> word,
       ValueNotifier<String> def,
@@ -235,7 +236,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
         currentReading = read,
         currentSubtitle = sub,
         currentSubTrack = track,
-        internalSubs = [],
+        internalSubs = subtitles,
         callback = call,
         super(VideoPlayerValue(duration: null));
 

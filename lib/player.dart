@@ -5,6 +5,7 @@ import 'package:clipboard_monitor/clipboard_monitor.dart';
 import 'package:ext_video_player/ext_video_player.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
@@ -12,6 +13,7 @@ import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
 import 'package:subtitle_wrapper_package/subtitle_controller.dart';
 import 'package:subtitle_wrapper_package/subtitle_wrapper_package.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:wakelock/wakelock.dart';
 
 import 'package:jidoujisho/util.dart';
 
@@ -22,6 +24,9 @@ class Player extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setEnabledSystemUIOverlays([]);
+    Wakelock.enable();
+
     // If webURL is empty, then use a local player.
     if (this.streamURL == null) {
       return localPlayer();
@@ -284,6 +289,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
             'NO',
             style: TextStyle(
               color: Colors.white,
+              fontWeight: FontWeight.w500,
             ),
           ),
           style: TextButton.styleFrom(
@@ -298,6 +304,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
             'YES',
             style: TextStyle(
               color: Colors.white,
+              fontWeight: FontWeight.w500,
             ),
           ),
           style: TextButton.styleFrom(
@@ -306,6 +313,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
             ),
           ),
           onPressed: () async {
+            Wakelock.disable();
             Navigator.pop(context);
             Navigator.pop(context);
           },
@@ -336,6 +344,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
     } else {
       _videoPlayerController ??= VideoPlayerController.network(
         _webStream,
+        _internalSubs,
         _clipboard,
         _currentWord,
         _currentDefinition,
@@ -356,14 +365,14 @@ class _VideoPlayerState extends State<VideoPlayer> {
       autoInitialize: true,
       allowFullScreen: false,
       allowMuting: false,
+      allowedScreenSleep: false,
+      fullScreenByDefault: false,
       materialProgressColors: ChewieProgressColors(
         playedColor: Colors.red,
         handleColor: Colors.red,
         backgroundColor: Colors.grey,
-        bufferedColor: Colors.red[100],
+        bufferedColor: Colors.red[200],
       ),
-      fullScreenByDefault: false,
-      allowedScreenSleep: false,
     );
     return _chewieController;
   }
