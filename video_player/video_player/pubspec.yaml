@@ -6,6 +6,7 @@ description: Flutter plugin for displaying inline video with other Flutter
 # See more details: https://github.com/flutter/flutter/wiki/Package-migration-to-1.0.0
 version: 0.10.11+2
 homepage: https://github.com/flutter/plugins/tree/master/packages/video_player/video_player
+publish_to: none
 
 flutter:
   plugin:

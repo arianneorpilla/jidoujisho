@@ -162,7 +162,6 @@ class VideoPlayerValue {
 ///
 /// After [dispose] all further calls are ignored.
 class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
-
   /// Constructs a [VideoPlayerController] playing a video from an asset.
   ///
   /// The name of the asset is given by the [dataSource] argument and must not be
@@ -348,21 +347,17 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
     value = value.copyWith(isPlaying: true);
     await _applyPlayPause();
   }
-  Future<List<dynamic>> getAudios() async
-  {
 
+  Future<List<dynamic>> getAudios() async {
     return _videoPlayerPlatform.getAudios(_textureId);
-
   }
-  Future<void> setAudioByIndex(int index) async{
-    return _videoPlayerPlatform.setAudioByIndex(_textureId,index);
 
+  Future<void> setAudioByIndex(int index) async {
+    return _videoPlayerPlatform.setAudioByIndex(_textureId, index);
   }
-  Future<void> setAudio(String audio) async
-  {
 
+  Future<void> setAudio(String audio) async {
     return _videoPlayerPlatform.setAudio(_textureId, [audio]);
-
   }
 
   /// Sets whether or not the video should loop after playing once. See also

@@ -3,27 +3,27 @@ import 'dart:io';
 import 'package:chewie/chewie.dart';
 import 'package:clipboard_monitor/clipboard_monitor.dart';
 import 'package:ext_video_player/ext_video_player.dart';
-import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
 import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
 import 'package:subtitle_wrapper_package/subtitle_controller.dart';
 import 'package:subtitle_wrapper_package/subtitle_wrapper_package.dart';
-import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
-import 'package:http/http.dart' as http;
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import 'package:jidoujisho/util.dart';
 
 class Player extends StatelessWidget {
-  Player(this.webURL);
+  Player({this.streamURL});
 
-  final String webURL;
+  final String streamURL;
 
   @override
   Widget build(BuildContext context) {
     // If webURL is empty, then use a local player.
-    if (this.webURL == "") {
+    if (this.streamURL == null) {
       return localPlayer();
     } else {
       return webPlayer();
@@ -45,27 +45,28 @@ class Player extends StatelessWidget {
           default:
             if (snapshot.hasData) {
               File videoFile = File(snapshot.data.files.single.path);
-              print(videoFile.path);
+              print("VIDEO FILE: ${videoFile.path}");
 
               return FutureBuilder(
-                  future: extractSubtitles(videoFile),
-                  builder: (BuildContext context,
-                      AsyncSnapshot<List<File>> snapshot) {
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.waiting:
-                        return loadingCircle();
-                      default:
-                        List<File> internalSubs = snapshot.data;
-                        String defaultSubtitles =
-                            loadDefaultSubtitles(videoFile, internalSubs);
+                future: extractSubtitles(videoFile),
+                builder:
+                    (BuildContext context, AsyncSnapshot<List<File>> snapshot) {
+                  switch (snapshot.connectionState) {
+                    case ConnectionState.waiting:
+                      return loadingCircle();
+                    default:
+                      List<File> internalSubs = snapshot.data;
+                      String defaultSubtitles =
+                          getDefaultSubtitles(videoFile, internalSubs);
 
-                        return VideoPlayer(
-                          videoFile: videoFile,
-                          internalSubs: internalSubs,
-                          defaultSubtitles: defaultSubtitles,
-                        );
-                    }
-                  });
+                      return VideoPlayer(
+                        videoFile: videoFile,
+                        internalSubs: internalSubs,
+                        defaultSubtitles: defaultSubtitles,
+                      );
+                  }
+                },
+              );
             }
             Navigator.pop(context);
             return Container();
@@ -78,7 +79,7 @@ class Player extends StatelessWidget {
     String videoID = "";
 
     try {
-      videoID = YoutubePlayer.convertUrlToId(webURL);
+      videoID = YoutubePlayer.convertUrlToId(streamURL);
       print(videoID);
     } catch (error) {
       print("Invalid link");
@@ -86,7 +87,7 @@ class Player extends StatelessWidget {
     }
 
     return new FutureBuilder(
-      future: getPlayerYouTubeInfo(webURL),
+      future: getPlayerYouTubeInfo(streamURL),
       builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
@@ -106,8 +107,7 @@ class Player extends StatelessWidget {
             String webStream = snapshot.data;
             return new FutureBuilder(
               future: http.read(
-                "https://www.youtube.com/api/timedtext?lang=ja&v=" + videoID,
-              ),
+                  "https://www.youtube.com/api/timedtext?lang=ja&v=$videoID"),
               builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                 switch (snapshot.connectionState) {
                   case ConnectionState.waiting:
@@ -126,17 +126,20 @@ class Player extends StatelessWidget {
                     );
                   default:
                     String webSubtitles;
+                    List<File> internalSubs;
 
                     if (!snapshot.hasData || snapshot.data.isEmpty) {
                       webSubtitles = "";
+                      internalSubs = [];
                     } else {
                       webSubtitles = timedTextToSRT(snapshot.data);
+                      internalSubs = extractWebSubtitle(webSubtitles);
                     }
 
                     return VideoPlayer(
                       webStream: webStream,
                       defaultSubtitles: webSubtitles,
-                      internalSubs: [],
+                      internalSubs: internalSubs,
                     );
                 }
               },
@@ -203,7 +206,11 @@ class _VideoPlayerState extends State<VideoPlayer> {
   final _currentDefinition = ValueNotifier<String>("");
   final _currentReading = ValueNotifier<String>("");
   final _currentSubtitle = ValueNotifier<Subtitle>(
-    Subtitle(startTime: Duration.zero, endTime: Duration.zero, text: ""),
+    Subtitle(
+      startTime: Duration.zero,
+      endTime: Duration.zero,
+      text: "",
+    ),
   );
   final _currentSubTrack = ValueNotifier<int>(0);
 
@@ -217,35 +224,13 @@ class _VideoPlayerState extends State<VideoPlayer> {
   String _defaultSubtitles;
   String _webStream;
 
-  bool isWeb() {
-    return _webStream == null;
-  }
-
-  Future<bool> _onWillPop() async {
-    return (await showDialog(
-          context: context,
-          builder: (context) => new AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.zero,
-            ),
-            title: new Text('End Playback?'),
-            actions: <Widget>[
-              new FlatButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: new Text('NO'),
-              ),
-              new FlatButton(
-                onPressed: () async {
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-                  print("POP!");
-                },
-                child: new Text('YES'),
-              ),
-            ],
-          ),
-        )) ??
-        false;
+  @override
+  void dispose() {
+    super.dispose();
+    if (_videoPlayerController != null && _chewieController != null) {
+      _videoPlayerController?.dispose();
+      _chewieController?.dispose();
+    }
   }
 
   @override
@@ -287,13 +272,52 @@ class _VideoPlayerState extends State<VideoPlayer> {
     );
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    if (_videoPlayerController != null && _chewieController != null) {
-      _videoPlayerController?.dispose();
-      _chewieController?.dispose();
-    }
+  Future<bool> _onWillPop() async {
+    Widget alertDialog = AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+      title: new Text('End Playback?'),
+      actions: <Widget>[
+        new TextButton(
+          child: Text(
+            'NO',
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+          style: TextButton.styleFrom(
+            textStyle: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+          onPressed: () => Navigator.of(context).pop(false),
+        ),
+        new TextButton(
+          child: Text(
+            'YES',
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+          style: TextButton.styleFrom(
+            textStyle: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+          onPressed: () async {
+            Navigator.pop(context);
+            Navigator.pop(context);
+          },
+        ),
+      ],
+    );
+
+    return (await showDialog(
+          context: context,
+          builder: (context) => alertDialog,
+        )) ??
+        false;
   }
 
   VideoPlayerController getVideoPlayerController() {
@@ -342,43 +366,6 @@ class _VideoPlayerState extends State<VideoPlayer> {
       allowedScreenSleep: false,
     );
     return _chewieController;
-  }
-
-  void playEmbeddedSubtitles(int index) {
-    if (_internalSubs.isEmpty) {
-      return;
-    }
-
-    if (index < _internalSubs.length) {
-      getSubtitleWrapper().subtitleController.updateSubtitleContent(
-          content: _internalSubs[index].readAsStringSync());
-      print("Switch Subtitle to Track $index");
-    } else {
-      _subTitleController.updateSubtitleContent(content: "");
-      print("Turn Off");
-    }
-  }
-
-  void playExternalSubtitles() async {
-    FilePickerResult result = await FilePicker.platform.pickFiles(
-      type: FileType.any,
-      allowMultiple: false,
-    );
-
-    if (result != null) {
-      File subFile = File(result.files.single.path);
-      if (subFile.path.endsWith("srt")) {
-        getSubtitleWrapper()
-            .subtitleController
-            .updateSubtitleContent(content: subFile.readAsStringSync());
-        print("Switch Subtitle to External SRT");
-      } else {
-        getSubtitleWrapper()
-            .subtitleController
-            .updateSubtitleContent(content: await extractAssSubtitles(subFile));
-        print("Switch Subtitle to External ASS");
-      }
-    }
   }
 
   SubtitleController getSubtitleController() {
@@ -431,7 +418,46 @@ class _VideoPlayerState extends State<VideoPlayer> {
     return _subTitleWrapper;
   }
 
+  void playEmbeddedSubtitles(int index) {
+    if (_internalSubs.isEmpty) {
+      return;
+    }
+
+    if (index < _internalSubs.length) {
+      getSubtitleWrapper().subtitleController.updateSubtitleContent(
+          content: _internalSubs[index].readAsStringSync());
+      print("SUBTITLES SWITCHED TO TRACK $index");
+    } else {
+      _subTitleController.updateSubtitleContent(content: "");
+      print("SUBTITLES SWITCHED OFF");
+    }
+  }
+
+  void playExternalSubtitles() async {
+    FilePickerResult result = await FilePicker.platform.pickFiles(
+      type: FileType.any,
+      allowMultiple: false,
+    );
+
+    if (result != null) {
+      File subFile = File(result.files.single.path);
+      if (subFile.path.endsWith("srt")) {
+        getSubtitleWrapper()
+            .subtitleController
+            .updateSubtitleContent(content: subFile.readAsStringSync());
+        print("SUBTITLES SWITCHED TO EXTERNAL SRT");
+      } else {
+        getSubtitleWrapper().subtitleController.updateSubtitleContent(
+            content: await extractNonSrtSubtitles(subFile));
+        print("SUBTITLES SWITCHED TO EXTERNAL ASS");
+      }
+    }
+  }
+
   Widget buildDictionaryLoading(String clipboard) {
+    String clipboardText = clipboard.replaceAll("@usejisho@", "");
+    String lookupText = "Looking up \"$clipboardText\"...";
+
     return Column(
       children: [
         Padding(
@@ -439,13 +465,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
           child: Container(
             padding: EdgeInsets.all(16.0),
             color: Colors.grey[800].withOpacity(0.6),
-            child: Column(
-              children: [
-                Text("Looking up \"" +
-                    clipboard.replaceAll("@usejisho@", "") +
-                    "\"...")
-              ],
-            ),
+            child: Text(lookupText),
           ),
         ),
         Expanded(child: Container()),
@@ -454,6 +474,9 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   Widget buildDictionaryNoMatch(String clipboard) {
+    String clipboardText = clipboard.replaceAll("@usejisho@", "");
+    String lookupText = "No matches for \"$clipboardText\" could be queried";
+
     return Column(
       children: [
         Padding(
@@ -468,9 +491,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
             child: Container(
               padding: EdgeInsets.all(16.0),
               color: Colors.grey[800].withOpacity(0.6),
-              child: Text("No matches for \"" +
-                  clipboard.replaceAll("@usejisho@", "") +
-                  "\" could be queried"),
+              child: Text(lookupText),
             ),
           ),
         ),
@@ -539,9 +560,9 @@ class _VideoPlayerState extends State<VideoPlayer> {
                 List<String> results = snapshot.data;
 
                 if (snapshot.hasData) {
-                  _currentWord.value = snapshot.data[0];
-                  _currentReading.value = snapshot.data[1];
-                  _currentDefinition.value = snapshot.data[2];
+                  _currentWord.value = results[0];
+                  _currentReading.value = results[1];
+                  _currentDefinition.value = results[2];
 
                   return buildDictionaryMatch(results);
                 } else {
@@ -574,7 +595,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   void onClipboardText(String text) {
     _clipboard.value = text;
-    print("clipboard changed: $text");
+    print("CLIPBOARD CHANGED: $text");
   }
 
   void stopAllClipboardMonitoring() {
@@ -589,12 +610,6 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
     int subIndex = 0;
 
-    List<Subtitle> resorted = [];
-    for (Subtitle sub in subtitles) {
-      resorted.add(sub);
-    }
-    resorted.sort((a, b) => a.startTime.compareTo(b.startTime));
-
     for (int i = 0; i < subtitles.length; i++) {
       if (subtitles[i].startTime.inMilliseconds <
           _videoPlayerController.value.position.inMilliseconds) {
@@ -603,17 +618,22 @@ class _VideoPlayerState extends State<VideoPlayer> {
     }
 
     showModalBottomSheet<int>(
-        backgroundColor: Theme.of(context).primaryColor.withOpacity(0.8),
-        context: context,
-        isScrollControlled: true,
-        useRootNavigator: true,
-        builder: (context) => transcriptDialog(
-            subtitles, subIndex, itemScrollController, itemPositionsListener));
+      backgroundColor: Theme.of(context).primaryColor.withOpacity(0.8),
+      context: context,
+      isScrollControlled: true,
+      useRootNavigator: true,
+      builder: (context) => transcriptDialog(
+        subIndex,
+        subtitles,
+        itemScrollController,
+        itemPositionsListener,
+      ),
+    );
   }
 
   Widget transcriptDialog(
-      List<dynamic> subtitles,
       int i,
+      List<dynamic> subtitles,
       ItemScrollController itemScrollController,
       ItemPositionsListener itemPositionsListener) {
     if (subtitles.isEmpty) {
@@ -622,7 +642,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.subtitles_off_outlined, color: Colors.white, size: 72),
-            SizedBox(height: 6),
+            const SizedBox(height: 6),
             Text(
               "The transcript is empty.",
               style: TextStyle(fontSize: 20, color: Colors.white),
@@ -633,14 +653,17 @@ class _VideoPlayerState extends State<VideoPlayer> {
     }
 
     return ScrollablePositionedList.builder(
+      itemScrollController: itemScrollController,
+      itemPositionsListener: itemPositionsListener,
       initialScrollIndex: (i - 2 > 0) ? i - 2 : 0,
       itemCount: subtitles.length,
       itemBuilder: (context, index) {
-        Subtitle _subtitle = subtitles[index];
+        Subtitle subtitle = subtitles[index];
 
-        String _text = _subtitle.text;
-        String _startTime = getTimestampFromDuration(_subtitle.startTime);
-        String _endTime = getTimestampFromDuration(_subtitle.endTime);
+        String subtitleText = "『 ${subtitle.text} 』";
+        String subtitleStart = getTimestampFromDuration(subtitle.startTime);
+        String subtitleEnd = getTimestampFromDuration(subtitle.endTime);
+        String subtitleDuration = "$subtitleStart - $subtitleEnd";
 
         return ListTile(
           selected: i == index,
@@ -658,7 +681,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
                   ),
                   const SizedBox(width: 16.0),
                   Text(
-                    "$_startTime - $_endTime",
+                    subtitleDuration,
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -669,7 +692,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
               ),
               const SizedBox(height: 6),
               Text(
-                "『 $_text 』",
+                subtitleText,
                 style: TextStyle(fontSize: 20, color: Colors.white),
               ),
               const SizedBox(height: 6),
@@ -682,8 +705,6 @@ class _VideoPlayerState extends State<VideoPlayer> {
           },
         );
       },
-      itemScrollController: itemScrollController,
-      itemPositionsListener: itemPositionsListener,
     );
   }
 }

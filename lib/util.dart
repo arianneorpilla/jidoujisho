@@ -5,54 +5,59 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:ext_video_player/ext_video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:share/share.dart';
 import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
-import 'package:path/path.dart' as path;
 import 'package:unofficial_jisho_api/api.dart';
 import 'package:xml2json/xml2json.dart';
-import 'package:http/http.dart' as http;
-
-import 'package:jidoujisho/main.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
-String getTimestampFromDuration(Duration duration) {
-  String twoDigits(int n) => n.toString().padLeft(2, "0");
-  String threeDigits(int n) => n.toString().padLeft(3, "0");
+import 'package:jidoujisho/main.dart';
 
-  String hours = twoDigits(duration.inHours);
-  String mins = twoDigits(duration.inMinutes.remainder(60));
-  String secs = twoDigits(duration.inSeconds.remainder(60));
-  String mills = threeDigits(duration.inMilliseconds.remainder(1000));
-  return "$hours:$mins:$secs.$mills";
-}
-
-String loadDefaultSubtitles(File file, List<File> internalSubtitles) {
-  String content = "";
-
-  if (hasExternalSubtitles(file)) {
-    content = getExternalSubtitles(file).readAsStringSync();
-  } else if (internalSubtitles.isNotEmpty) {
-    content = (internalSubtitles[0]).readAsStringSync();
+String getDefaultSubtitles(File file, List<File> internalSubtitles) {
+  if (internalSubtitles.isNotEmpty) {
+    return internalSubtitles.first.readAsStringSync();
+  } else {
+    return "";
   }
-
-  return content;
 }
 
-File getExternalSubtitles(File file) {
-  String videoDir = path.dirname(file.path);
-  String videoBasename = path.basenameWithoutExtension(file.path);
-  String subtitlePath = "$videoDir/$videoBasename.srt";
+String timedTextToSRT(String timedText) {
+  final Xml2Json xml2Json = Xml2Json();
 
-  return File(subtitlePath);
+  xml2Json.parse(timedText);
+  var jsonString = xml2Json.toBadgerfish();
+  var data = jsonDecode(jsonString);
+
+  List<dynamic> lines = (data["transcript"]["text"]);
+
+  String convertedLines = "";
+  int lineCount = 0;
+
+  lines.forEach((line) {
+    String convertedLine = timedLineToSRT(line, lineCount++);
+    convertedLines = convertedLines + convertedLine;
+  });
+
+  return convertedLines;
 }
 
-bool hasExternalSubtitles(File file) {
-  String subtitlePath = getExternalSubtitles(file).path;
-  File subtitleFile = File(subtitlePath);
+String timedLineToSRT(Map<String, dynamic> line, int lineCount) {
+  double start = double.parse(line["\@start"]);
+  double duration = double.parse(line["\@dur"]);
+  String text = line["\$"] ?? "";
 
-  return subtitleFile.existsSync();
+  text = text.replaceAll("\\n", "\n");
+
+  String startTime = formatTimeString(start);
+  String endTime = formatTimeString(start + duration);
+  String lineNumber = lineCount.toString();
+
+  String srtLine = "$lineNumber\n$startTime --> $endTime\n$text\n\n";
+
+  return srtLine;
 }
 
 Future exportCurrentFrame(VideoPlayerController controller) async {
@@ -70,11 +75,27 @@ Future exportCurrentFrame(VideoPlayerController controller) async {
   String exportPath = "\"$appDirPath/exportImage.jpg\"";
 
   String command =
-      "-ss $formatted -y -i \"$inputPath\" -frames:v 1 -q:v 2 $exportPath";
+      "-loglevel quiet -ss $formatted -y -i \"$inputPath\" -frames:v 1 -q:v 2 $exportPath";
 
   await _flutterFFmpeg.execute(command);
 
   return;
+}
+
+List<File> extractWebSubtitle(String webSubtitle) {
+  List<File> files = [];
+
+  String subPath = "$appDirPath/extractWebSrt.srt";
+  File subFile = File(subPath);
+  if (subFile.existsSync()) {
+    subFile.deleteSync();
+  }
+
+  subFile.createSync();
+  subFile.writeAsStringSync(webSubtitle);
+  files.add(subFile);
+
+  return files;
 }
 
 Future exportCurrentAudio(
@@ -98,7 +119,7 @@ Future exportCurrentAudio(
   String inputPath = controller.dataSource;
   String outputPath = "\"$appDirPath/exportAudio.mp3\"";
   String command =
-      "-ss $timeStart -to $timeEnd -y -i \"$inputPath\" -map 0:a:$audioIndex $outputPath";
+      "-loglevel quiet -ss $timeStart -to $timeEnd -y -i \"$inputPath\" -map 0:a:$audioIndex $outputPath";
 
   await _flutterFFmpeg.execute(command);
 
@@ -106,14 +127,10 @@ Future exportCurrentAudio(
 }
 
 Future<List<File>> extractSubtitles(File file) async {
+  String inputPath = file.path;
   List<File> files = [];
-  if (hasExternalSubtitles(file)) {
-    files.add(getExternalSubtitles(file));
-  }
 
   final FlutterFFmpeg _flutterFFmpeg = new FlutterFFmpeg();
-
-  String inputPath = file.path;
 
   for (int i = 0; i < 10; i++) {
     String outputPath = "\"$appDirPath/extractSrt$i.srt\"";
@@ -141,20 +158,15 @@ Future<List<File>> extractSubtitles(File file) async {
   return files;
 }
 
-Future<String> extractAssSubtitles(File file) async {
-  List<File> files = [];
-  if (hasExternalSubtitles(file)) {
-    files.add(getExternalSubtitles(file));
-  }
-
+Future<String> extractNonSrtSubtitles(File file) async {
   final FlutterFFmpeg _flutterFFmpeg = new FlutterFFmpeg();
 
   String inputPath = file.path;
-  String outputPath = "\"$appDirPath/extractAss.srt\"";
+  String outputPath = "\"$appDirPath/extractNonSrt.srt\"";
   String command =
-      "-f ass -c:s ass -i \"$inputPath\" -map 0:s:0 -c:s subrip $outputPath";
+      "-loglevel quiet -f ass -c:s ass -i \"$inputPath\" -map 0:s:0 -c:s subrip $outputPath";
 
-  String subPath = "$appDirPath/extractAss.srt";
+  String subPath = "$appDirPath/extractNonSrt.srt";
   File subFile = File(subPath);
 
   if (subFile.existsSync()) {
@@ -163,6 +175,14 @@ Future<String> extractAssSubtitles(File file) async {
 
   await _flutterFFmpeg.execute(command);
   return subFile.readAsStringSync();
+}
+
+Future exportToAnki(BuildContext context, VideoPlayerController controller,
+    Subtitle subtitle, String word, String definition, String reading) async {
+  await exportCurrentFrame(controller);
+  await exportCurrentAudio(controller, subtitle);
+
+  showAnkiDialog(context, subtitle.text, word, reading, definition);
 }
 
 void showAnkiDialog(BuildContext context, String sentence, String answer,
@@ -175,6 +195,51 @@ void showAnkiDialog(BuildContext context, String sentence, String answer,
       new TextEditingController(text: reading);
   TextEditingController _meaningController =
       new TextEditingController(text: meaning);
+
+  Widget displayField(
+    String labelText,
+    String hintText,
+    IconData icon,
+    TextEditingController controller,
+  ) {
+    return TextFormField(
+      keyboardType: TextInputType.multiline,
+      maxLines: null,
+      controller: controller,
+      decoration: InputDecoration(
+        prefixIcon: Icon(icon),
+        suffixIcon: IconButton(
+          iconSize: 12,
+          onPressed: () => controller.clear(),
+          icon: Icon(Icons.clear),
+        ),
+        labelText: labelText,
+        hintText: hintText,
+      ),
+    );
+  }
+
+  Widget sentenceField = displayField(
+      "Sentence",
+      "Enter front of card or sentence here",
+      Icons.format_align_center_rounded,
+      _sentenceController);
+  Widget answerField = displayField(
+    "Word",
+    "Enter the word in the back here",
+    Icons.speaker_notes_outlined,
+    _answerController,
+  );
+  Widget readingField = displayField(
+      "Reading",
+      "Enter the reading of the word here",
+      Icons.surround_sound_outlined,
+      _readingController);
+  Widget meaningField = displayField(
+      "Meaning",
+      "Enter the meaning in the back here",
+      Icons.translate_rounded,
+      _meaningController);
 
   AudioPlayer audioPlayer = AudioPlayer();
   imageCache.clear();
@@ -191,85 +256,44 @@ void showAnkiDialog(BuildContext context, String sentence, String answer,
           child: Column(
             children: [
               Image.file(File(previewImageDir)),
-              TextFormField(
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
-                controller: _sentenceController,
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.format_align_center_rounded),
-                  suffixIcon: IconButton(
-                    iconSize: 12,
-                    onPressed: () => _sentenceController.clear(),
-                    icon: Icon(Icons.clear),
-                  ),
-                  labelText: "Sentence",
-                  hintText: "Enter front of card or sentence here",
-                ),
-              ),
-              TextFormField(
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
-                controller: _answerController,
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.speaker_notes_outlined),
-                  suffixIcon: IconButton(
-                    iconSize: 12,
-                    onPressed: () => _answerController.clear(),
-                    icon: Icon(Icons.clear),
-                  ),
-                  labelText: "Word",
-                  hintText: "Enter the word in the back here",
-                ),
-              ),
-              TextFormField(
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
-                controller: _readingController,
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.surround_sound_outlined),
-                  suffixIcon: IconButton(
-                    iconSize: 12,
-                    onPressed: () => _readingController.clear(),
-                    icon: Icon(Icons.clear),
-                  ),
-                  labelText: "Reading",
-                  hintText: "Enter the reading of the word here",
-                ),
-              ),
-              TextFormField(
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
-                controller: _meaningController,
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.translate_rounded),
-                  suffixIcon: IconButton(
-                    iconSize: 12,
-                    onPressed: () => _meaningController.clear(),
-                    icon: Icon(Icons.clear),
-                  ),
-                  labelText: "Meaning",
-                  hintText: "Enter the meaning in the back here",
-                ),
-              ),
+              sentenceField,
+              answerField,
+              readingField,
+              meaningField,
             ],
           ),
         ),
         actions: <Widget>[
-          FlatButton(
+          TextButton(
             child: Text('PREVIEW AUDIO'),
+            style: TextButton.styleFrom(
+              textStyle: TextStyle(
+                color: Colors.white,
+              ),
+            ),
             onPressed: () async {
               await audioPlayer.stop();
               await audioPlayer.play(previewAudioDir, isLocal: true);
             },
           ),
-          FlatButton(
+          TextButton(
             child: Text('CANCEL'),
+            style: TextButton.styleFrom(
+              textStyle: TextStyle(
+                color: Colors.white,
+              ),
+            ),
             onPressed: () {
               Navigator.pop(context);
             },
           ),
-          FlatButton(
+          TextButton(
             child: Text('EXPORT'),
+            style: TextButton.styleFrom(
+              textStyle: TextStyle(
+                color: Colors.white,
+              ),
+            ),
             onPressed: () {
               exportAnkiCard(
                 _sentenceController.text,
@@ -323,14 +347,6 @@ void exportAnkiCard(
     backText,
     subject: frontText,
   );
-}
-
-Future exportToAnki(BuildContext context, VideoPlayerController controller,
-    Subtitle subtitle, String word, String definition, String reading) async {
-  await exportCurrentFrame(controller);
-  await exportCurrentAudio(controller, subtitle);
-
-  showAnkiDialog(context, subtitle.text, word, reading, definition);
 }
 
 Future<List<String>> getWordDetails(String searchTerm) async {
@@ -468,70 +484,6 @@ Future<List<String>> getWordDetails(String searchTerm) async {
   return details;
 }
 
-String timedTextToSRT(String timedText) {
-  final Xml2Json xml2Json = Xml2Json();
-
-  xml2Json.parse(timedText);
-  var jsonString = xml2Json.toBadgerfish();
-  var data = jsonDecode(jsonString);
-
-  List<dynamic> lines = (data["transcript"]["text"]);
-
-  String convertedLines = "";
-  int lineCount = 0;
-
-  lines.forEach((line) {
-    String convertedLine = timedLineToSRT(line, lineCount++);
-    convertedLines = convertedLines + convertedLine;
-  });
-
-  return convertedLines;
-}
-
-String timedLineToSRT(Map<String, dynamic> line, int lineCount) {
-  double start = double.parse(line["\@start"]);
-  double duration = double.parse(line["\@dur"]);
-  String text = line["\$"] ?? "";
-
-  text = text.replaceAll("\\n", "\n");
-
-  String startTime = formatTimeString(start);
-  String endTime = formatTimeString(start + duration);
-
-  String srtLine = lineCount.toString() +
-      "\n" +
-      startTime +
-      " --> " +
-      endTime +
-      "\n" +
-      text +
-      "\n\n";
-
-  return srtLine;
-}
-
-String formatTimeString(double time) {
-  double msDouble = time * 1000;
-  int milliseconds = (msDouble % 1000).floor();
-  int seconds = (time % 60).floor();
-  int minutes = (time / 60 % 60).floor();
-  int hours = (time / 60 / 60 % 60).floor();
-
-  String millisecondsPadded = milliseconds.toString().padLeft(3, "0");
-  String secondsPadded = seconds.toString().padLeft(2, "0");
-  String minutesPadded = minutes.toString().padLeft(2, "0");
-  String hoursPadded = hours.toString().padLeft(2, "0");
-
-  String formatted = hoursPadded +
-      ":" +
-      minutesPadded +
-      ":" +
-      secondsPadded +
-      "," +
-      millisecondsPadded;
-  return formatted;
-}
-
 class DictionaryEntry {
   String word;
   String reading;
@@ -587,7 +539,24 @@ Future<String> getPlayerYouTubeInfo(String webURL) async {
   }
 }
 
-String displayTimeAgoFromTimestamp(String timestamp) {
+Future<bool> checkYouTubeClosedCaptionAvailable(String videoID) async {
+  String httpSubs = await http
+      .read("https://www.youtube.com/api/timedtext?lang=ja&v=" + videoID);
+  return (httpSubs.isNotEmpty);
+}
+
+String getTimestampFromDuration(Duration duration) {
+  String twoDigits(int n) => n.toString().padLeft(2, "0");
+  String threeDigits(int n) => n.toString().padLeft(3, "0");
+
+  String hours = twoDigits(duration.inHours);
+  String mins = twoDigits(duration.inMinutes.remainder(60));
+  String secs = twoDigits(duration.inSeconds.remainder(60));
+  String mills = threeDigits(duration.inMilliseconds.remainder(1000));
+  return "$hours:$mins:$secs.$mills";
+}
+
+String getTimeAgoFormatted(String timestamp) {
   final year = int.parse(timestamp.substring(0, 4));
   final month = int.parse(timestamp.substring(5, 7));
   final day = int.parse(timestamp.substring(8, 10));
@@ -642,8 +611,24 @@ String getViewCountFormatted(int num) {
   }
 }
 
-Future<bool> doesYouTubeIDHaveSubtitles(String videoID) async {
-  String httpSubs = await http
-      .read("https://www.youtube.com/api/timedtext?lang=ja&v=" + videoID);
-  return (httpSubs.isNotEmpty);
+String formatTimeString(double time) {
+  double msDouble = time * 1000;
+  int milliseconds = (msDouble % 1000).floor();
+  int seconds = (time % 60).floor();
+  int minutes = (time / 60 % 60).floor();
+  int hours = (time / 60 / 60 % 60).floor();
+
+  String millisecondsPadded = milliseconds.toString().padLeft(3, "0");
+  String secondsPadded = seconds.toString().padLeft(2, "0");
+  String minutesPadded = minutes.toString().padLeft(2, "0");
+  String hoursPadded = hours.toString().padLeft(2, "0");
+
+  String formatted = hoursPadded +
+      ":" +
+      minutesPadded +
+      ":" +
+      secondsPadded +
+      "," +
+      millisecondsPadded;
+  return formatted;
 }

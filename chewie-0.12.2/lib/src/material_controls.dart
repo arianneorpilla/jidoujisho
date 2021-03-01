@@ -247,7 +247,7 @@ class _MaterialControlsState extends State<MaterialControls>
           context: context,
           isScrollControlled: true,
           useRootNavigator: true,
-          builder: (context) => _MoreOptionsDialog(options: [
+          builder: (context) => const _MoreOptionsDialog(options: [
             "Call Jisho.org Instant Dictionary",
             "Jisho.org Lookup Clipboard",
             "Translate Clipboard with DeepL",
@@ -266,22 +266,21 @@ class _MaterialControlsState extends State<MaterialControls>
           ]),
         );
 
-        String clip = controller.clipboard.value;
+        final String clip = controller.clipboard.value;
 
         switch (chosenOption) {
           case 0:
             controller.clipboard.value = "@usejisho@$clip";
             break;
           case 1:
-            await launch("https://jisho.org/search/" + clip);
+            await launch("https://jisho.org/search/$clip");
             break;
           case 2:
-            await launch("https://www.deepl.com/translator#ja/en/" + clip);
+            await launch("https://www.deepl.com/translator#ja/en/$clip");
             break;
           case 3:
-            await launch("https://translate.google.com/?sl=ja&tl=en&text=" +
-                clip +
-                "&op=translate");
+            await launch(
+                "https://translate.google.com/?sl=ja&tl=en&text=$clip&op=translate");
             break;
           case 4:
             if (controller.clipboard.value.isNotEmpty) {
@@ -328,7 +327,7 @@ class _MaterialControlsState extends State<MaterialControls>
       onTap: () async {
         _hideTimer?.cancel();
 
-        List<dynamic> audioTracks = await controller.getAudios();
+        final List<dynamic> audioTracks = await controller.getAudios();
 
         final chosenOption = await showModalBottomSheet<int>(
           context: context,
@@ -370,48 +369,6 @@ class _MaterialControlsState extends State<MaterialControls>
       ),
     );
   }
-
-  // Widget _buildSpeedButton(
-  //   VideoPlayerController controller,
-  // ) {
-  //   return GestureDetector(
-  //     onTap: () async {
-  //       _hideTimer?.cancel();
-
-  //       final chosenSpeed = await showModalBottomSheet<double>(
-  //         context: context,
-  //         isScrollControlled: true,
-  //         useRootNavigator: true,
-  //         builder: (context) => _PlaybackSpeedDialog(
-  //           speeds: chewieController.videoPlayerController,
-  //           selected: _latestValue.playbackSpeed,
-  //         ),
-  //       );
-
-  //       if (chosenSpeed != null) {
-  //         controller.setPlaybackSpeed(chosenSpeed);
-  //       }
-
-  //       if (_latestValue.isPlaying) {
-  //         _startHideTimer();
-  //       }
-  //     },
-  //     child: AnimatedOpacity(
-  //       opacity: _hideStuff ? 0.0 : 1.0,
-  //       duration: const Duration(milliseconds: 300),
-  //       child: ClipRect(
-  //         child: Container(
-  //           height: barHeight,
-  //           padding: const EdgeInsets.only(
-  //             left: 8.0,
-  //             right: 8.0,
-  //           ),
-  //           child: const Icon(Icons.speed),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
 
   GestureDetector _buildMuteButton(
     VideoPlayerController controller,
@@ -621,8 +578,6 @@ class _MoreOptionsDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color selectedColor = Theme.of(context).primaryColor;
-
     return ListView.builder(
       shrinkWrap: true,
       physics: const ScrollPhysics(),
@@ -677,7 +632,7 @@ class _SelectAudioDialog extends StatelessWidget {
     if (index < _options.length) {
       return Row(
         children: [
-          Icon(
+          const Icon(
             Icons.audiotrack_outlined,
             size: 20.0,
             color: Colors.red,
@@ -689,7 +644,7 @@ class _SelectAudioDialog extends StatelessWidget {
     } else if (index < _options.length + _subtitles.length) {
       return Row(
         children: [
-          Icon(
+          const Icon(
             Icons.subtitles_outlined,
             size: 20.0,
             color: Colors.red,
@@ -700,13 +655,13 @@ class _SelectAudioDialog extends StatelessWidget {
       );
     } else {
       return Row(
-        children: [
+        children: const [
           Icon(
             Icons.subtitles_off_outlined,
             size: 20.0,
             color: Colors.red,
           ),
-          const SizedBox(width: 16.0),
+          SizedBox(width: 16.0),
           Text("Subtitle - None"),
         ],
       );
@@ -715,8 +670,6 @@ class _SelectAudioDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color selectedColor = Theme.of(context).primaryColor;
-
     return ListView.builder(
       shrinkWrap: true,
       physics: const ScrollPhysics(),
@@ -730,7 +683,7 @@ class _SelectAudioDialog extends StatelessWidget {
         );
       },
       itemCount: (_subtitles.isEmpty)
-          ? _options.length
+          ? _options.length + 1
           : _options.length + _subtitles.length + 1,
     );
   }
