@@ -220,10 +220,11 @@ void showAnkiDialog(BuildContext context, String sentence, String answer,
   }
 
   Widget sentenceField = displayField(
-      "Sentence",
-      "Enter front of card or sentence here",
-      Icons.format_align_center_rounded,
-      _sentenceController);
+    "Sentence",
+    "Enter front of card or sentence here",
+    Icons.format_align_center_rounded,
+    _sentenceController,
+  );
   Widget answerField = displayField(
     "Word",
     "Enter the word in the back here",
@@ -231,15 +232,17 @@ void showAnkiDialog(BuildContext context, String sentence, String answer,
     _answerController,
   );
   Widget readingField = displayField(
-      "Reading",
-      "Enter the reading of the word here",
-      Icons.surround_sound_outlined,
-      _readingController);
+    "Reading",
+    "Enter the reading of the word here",
+    Icons.surround_sound_outlined,
+    _readingController,
+  );
   Widget meaningField = displayField(
-      "Meaning",
-      "Enter the meaning in the back here",
-      Icons.translate_rounded,
-      _meaningController);
+    "Meaning",
+    "Enter the meaning in the back here",
+    Icons.translate_rounded,
+    _meaningController,
+  );
 
   AudioPlayer audioPlayer = AudioPlayer();
   imageCache.clear();

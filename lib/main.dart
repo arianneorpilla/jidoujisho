@@ -14,6 +14,7 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 import 'package:jidoujisho/player.dart';
 import 'package:jidoujisho/util.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 String appDirPath;
 String previewImageDir;
@@ -56,7 +57,6 @@ void main() async {
 
 fetchTrendingCache() {
   return trendingCache.runOnce(() async {
-    // I want to direct the
     return searchYouTubeVideos("日本語");
   });
 }
@@ -184,7 +184,7 @@ class _HomeState extends State<Home> {
         children: [
           Text("jidoujisho"),
           Text(
-            " $version beta",
+            " $version preview",
             style: TextStyle(
               fontWeight: FontWeight.w200,
               fontSize: 12,
@@ -259,6 +259,7 @@ class _HomeState extends State<Home> {
             break;
           default:
             if (!snapshot.hasData) {
+              print(snapshot.data);
               return errorMessage;
             }
             return ListView.builder(
@@ -291,6 +292,8 @@ class _HomeState extends State<Home> {
       position: RelativeRect.fromLTRB(left, top, 0, 0),
       items: [
         PopupMenuItem<String>(
+            child: const Text('Enter YouTube URL'), value: 'Enter YouTube URL'),
+        PopupMenuItem<String>(
             child: const Text('View on GitHub'), value: 'View on GitHub'),
         PopupMenuItem<String>(
             child: const Text('Report a bug'), value: 'Report a bug'),
@@ -301,6 +304,55 @@ class _HomeState extends State<Home> {
     );
 
     switch (option) {
+      case "Enter YouTube URL":
+        TextEditingController _textFieldController = TextEditingController();
+
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.zero,
+              ),
+              content: TextField(
+                controller: _textFieldController,
+                decoration: InputDecoration(hintText: "Enter YouTube URL"),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('CANCEL', style: TextStyle(color: Colors.white)),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                TextButton(
+                  child: Text('OK', style: TextStyle(color: Colors.white)),
+                  onPressed: () {
+                    String _webURL = _textFieldController.text;
+
+                    try {
+                      if (YoutubePlayer.convertUrlToId(_webURL) != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Player(streamURL: _webURL),
+                          ),
+                        );
+                      }
+                    } on Exception {
+                      Navigator.pop(context);
+                      print("Invalid link");
+                    } catch (error) {
+                      Navigator.pop(context);
+                      print("Invalid link");
+                    }
+                  },
+                ),
+              ],
+            );
+          },
+        );
+        break;
       case "View on GitHub":
         await launch("https://github.com/lrorpilla/jidoujisho");
         break;
