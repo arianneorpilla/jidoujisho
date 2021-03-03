@@ -59,7 +59,7 @@ jidoujisho will take **video and audio formats as supported by ExoPlayer**. Subt
 
 If you wish to use external subtitles, they may be in **SRT, ASS or SSA format** and you may import them during playback through the menu. You may switch between different audio and subtitle tracks. Image-based subtitles such as PGS are not currently supported.
 
-Web support for YouTube is **currently experimental**. YouTube subtitles are taken from TimedText XML, which is only publicly exposed to videos that have user-generated Japanese subtitles. Unfortunately, some particular videos cannot be streamed. Regardless, <a href="https://www.youtube.com/watch?v=mZ0sJQC8qkE">the app appears to be functional</a> <a href="https://www.youtube.com/watch?v=X9zw0QF12Kc">and has been tested with a fair sample</a> <a href="https://www.youtube.com/watch?v=t1yXDcuwzpY">of practical application use cases.</a>
+YouTube subtitles are taken from TimedText XML, which is only publicly exposed to videos that have user-generated Japanese subtitles. <a href="https://www.youtube.com/watch?v=mZ0sJQC8qkE">Here are a fair sample of</a> <a href="https://www.youtube.com/watch?v=X9zw0QF12Kc">YouTube videos with such subtitles</a> <a href="https://www.youtube.com/watch?v=t1yXDcuwzpY">showcasing some very practical application use cases.</a>
 
 ### ☝️ Important Notes
 
