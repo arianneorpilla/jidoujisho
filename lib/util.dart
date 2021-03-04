@@ -665,12 +665,19 @@ String formatTimeString(double time) {
   return formatted;
 }
 
-Future<SearchList> searchYouTubeVideos(String searchQuery) {
+Future<List<Video>> searchYouTubeVideos(String searchQuery) async {
   YoutubeExplode yt = YoutubeExplode();
-  return yt.search.getVideos(searchQuery);
+  SearchList searchResults = await yt.search.getVideos(searchQuery);
+
+  List<Video> videos = [];
+  for (Video video in searchResults) {
+    videos.add(video);
+  }
+
+  return videos;
 }
 
-Future<ClosedCaptionManifest> getCaptions(String videoID) async {
+Future<List<Video>> searchYouTubeTrendingVideos() {
   YoutubeExplode yt = YoutubeExplode();
-  return yt.videos.closedCaptions.getManifest(videoID);
+  return yt.playlists.getVideos("PLuXL6NS58Dyx-wTr5o7NiC7CZRbMA91DC").toList();
 }

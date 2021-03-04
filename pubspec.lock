@@ -572,11 +572,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: HEAD
-      resolved-ref: fff8719fdf7087fbfef784b046cad90e4d96b342
+      ref: "5385ba1628c109312fc452162e32ebc20961b1dd"
+      resolved-ref: "5385ba1628c109312fc452162e32ebc20961b1dd"
       url: "https://github.com/Hexer10/youtube_explode_dart"
     source: git
-    version: "1.8.0-beta.2"
+    version: "1.8.0-beta.5"
   youtube_player_flutter:
     dependency: "direct main"
     description:

@@ -57,7 +57,7 @@ void main() async {
 
 fetchTrendingCache() {
   return trendingCache.runOnce(() async {
-    return searchYouTubeVideos("日本語");
+    return searchYouTubeTrendingVideos();
   });
 }
 
@@ -184,7 +184,7 @@ class _HomeState extends State<Home> {
         children: [
           Text("jidoujisho"),
           Text(
-            " $version preview",
+            " $version beta",
             style: TextStyle(
               fontWeight: FontWeight.w200,
               fontSize: 12,
@@ -245,7 +245,7 @@ class _HomeState extends State<Home> {
           ? fetchSearchCache(searchQuery)
           : fetchTrendingCache(),
       builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-        SearchList results = snapshot.data;
+        List<Video> results = snapshot.data;
 
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
@@ -259,7 +259,6 @@ class _HomeState extends State<Home> {
             break;
           default:
             if (!snapshot.hasData) {
-              print(snapshot.data);
               return errorMessage;
             }
             return ListView.builder(
@@ -267,9 +266,8 @@ class _HomeState extends State<Home> {
               itemCount: snapshot.data.length,
               itemBuilder: (BuildContext context, int index) {
                 Video result = results[index];
-                if (index > 10) {
-                  return Container();
-                }
+                print(result);
+
                 return YouTubeResult(
                   result,
                   captioningCache[result.id],
@@ -500,14 +498,12 @@ class _YouTubeResultState extends State<YouTubeResult>
 
     String videoTitle = result.title;
     String videoChannel = result.author;
-    String videoPublishTime = result.uploadDate == null
-        ? "Livestream"
-        : getTimeAgoFormatted(result.uploadDate);
+    String videoPublishTime =
+        result.uploadDate == null ? "" : getTimeAgoFormatted(result.uploadDate);
     String videoViewCount = getViewCountFormatted(result.engagement.viewCount);
     String videoDetails = "$videoPublishTime · $videoViewCount views";
-    String videoDuration = result.duration == null
-        ? "  STREAM  "
-        : getYouTubeDuration(result.duration);
+    String videoDuration =
+        result.duration == null ? "" : getYouTubeDuration(result.duration);
 
     Widget displayThumbnail() {
       return Stack(
@@ -542,9 +538,10 @@ class _YouTubeResultState extends State<YouTubeResult>
       );
     }
 
-    if (result.uploadDate == null || result.duration == null) {
-      return Container();
-    }
+    // if (result.uploadDate == null || result.duration == null) {
+    //   print("Fuck");
+    //   return Container();
+    // }
 
     Widget displayVideoInformation() {
       return Expanded(
@@ -570,7 +567,9 @@ class _YouTubeResultState extends State<YouTubeResult>
                 ),
               ),
               Text(
-                videoDetails,
+                videoDetails == "$videoPublishTime · 0 views"
+                    ? "Trending #${index + 1} in Japan"
+                    : videoDetails,
                 style: TextStyle(
                   color: Colors.grey,
                   fontSize: 12,
