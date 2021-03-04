@@ -588,12 +588,10 @@ String getYouTubeDuration(Duration duration) {
 
   if (duration.inHours != 0) {
     return "  $hours:$mins:$secs  ";
+  } else if (duration.inMinutes != 0) {
+    return "  $mins:$secs  ";
   } else {
-    if ("$secs" == "00") {
-      return "  0:$mins  ";
-    } else {
-      return "  $secs:$mins  ";
-    }
+    return "  0:$secs";
   }
 }
 
