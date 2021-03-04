@@ -134,6 +134,13 @@ packages:
       relative: true
     source: path
     version: "0.0.4"
+  ffi:
+    dependency: transitive
+    description:
+      name: ffi
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.3"
   file_picker:
     dependency: "direct main"
     description:
@@ -277,6 +284,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.0.2"
+  mecab_dart:
+    dependency: "direct main"
+    description:
+      name: mecab_dart
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.0"
   meta:
     dependency: transitive
     description:

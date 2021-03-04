@@ -14,6 +14,9 @@ dependencies:
   equatable: ^1.2.5
   bloc: ^6.1.0
   flutter_bloc: ^6.1.1
+  mecab_dart:
+  jidoujisho:
+    path: ../
 
 dev_dependencies:
   flutter_test:
@@ -23,6 +26,5 @@ dev_dependencies:
   bloc_test: ^7.1.0
   mockito: ^4.1.2
   pedantic: ^1.10.0-nullsafety.2
-  video_player: ^2.0.0-nullsafety.2
-
+  
 flutter:

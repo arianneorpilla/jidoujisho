@@ -465,7 +465,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   Widget buildDictionaryLoading(String clipboard) {
     String clipboardText = clipboard.replaceAll("@usejisho@", "");
-    String lookupText = "Looking up \"$clipboardText\"...";
+    String lookupText = "Querying Jisho.org for definition...";
 
     return Column(
       children: [

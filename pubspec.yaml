@@ -49,6 +49,7 @@ dependencies:
       url: https://github.com/szepetry/youtube_api
   async:
   wakelock:
+  mecab_dart:
 dependency_overrides:
   video_player:
     path: ./video_player/video_player # Fork by balvinderz
@@ -71,3 +72,4 @@ flutter:
 
   assets:
     - assets/icon/icon.png
+    - assets/ipadic/
