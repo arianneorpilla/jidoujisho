@@ -28,7 +28,7 @@ String buildNumber;
 List<DictionaryEntry> customDictionary;
 Fuzzy customDictionaryFuzzy;
 
-bool isGooglePlayLimited = false;
+bool isGooglePlayLimited = true;
 
 final AsyncMemoizer trendingCache = AsyncMemoizer();
 Map<String, AsyncMemoizer> searchCache = {};
@@ -276,8 +276,10 @@ class _HomeState extends State<Home> {
                     "🔗 To finalise the export, share the exported text to AnkiDroid\n" +
                     "🃏 The front of the card will include the audio, video and sentence\n" +
                     "🎴 The back of the card will include the reading, word and meaning\n" +
-                    "📑 You may apply text formatting to the card with the AnkiDroid editor once shared\n"
-                        "⚛️ Extensive customisation of the Anki export is planned",
+                    "📑 You may apply text formatting to the card with the AnkiDroid editor once shared\n\n" +
+                    "USING THE APP ON ANDROID 11 AND ABOVE\n📱 Approve Storage permission and then go to your Settings app\n" +
+                    "⚙️ Find jidoujisho under Settings -> All apps.\n" +
+                    "✅ Set the Storage permission to say Allow management of all files\n\n",
                 style: TextStyle(
                   color: Colors.grey,
                   fontSize: 12,
