@@ -490,6 +490,8 @@ class _VideoPlayerState extends State<VideoPlayer> {
     String clipboardText = clipboard.replaceAll("@usejisho@", "");
     String lookupText = "No matches for \"$clipboardText\" could be queried";
 
+    _subtitleFocusNode.unfocus();
+
     return Column(
       children: [
         Padding(
@@ -500,7 +502,6 @@ class _VideoPlayerState extends State<VideoPlayer> {
               _currentWord.value = "";
               _currentDefinition.value = "";
               _currentReading.value = "";
-              _subtitleFocusNode.unfocus();
             },
             child: Container(
               padding: EdgeInsets.all(16.0),
@@ -519,6 +520,8 @@ class _VideoPlayerState extends State<VideoPlayer> {
     String readings = results[1];
     String definitions = results[2];
 
+    _subtitleFocusNode.unfocus();
+
     return Column(
       children: [
         Padding(
@@ -529,7 +532,6 @@ class _VideoPlayerState extends State<VideoPlayer> {
               _currentWord.value = "";
               _currentReading.value = "";
               _currentDefinition.value = "";
-              _subtitleFocusNode.unfocus();
             },
             child: SingleChildScrollView(
               child: Container(
