@@ -6,7 +6,7 @@
 <h3 align="center">jidoujisho</h3>
 <p align="center">A mobile video player tailored for Japanese language learners.</p>
 
-<p align="center"><b>Latest Release: <a href="https://github.com/lrorpilla/jidoujisho/releases/">0.5.0</a></p></b><br>
+<p align="center"><b>Latest Release: <a href="https://github.com/lrorpilla/jidoujisho/releases/">0.5.1-beta</a></p></b><br>
 
 # 📚 Uninterrupted language immersion at your fingertips
 

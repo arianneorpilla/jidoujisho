@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:subtitle_wrapper_package/bloc/subtitle/subtitle_bloc.dart';
 import 'package:subtitle_wrapper_package/data/constants/view_keys.dart';
@@ -6,9 +7,13 @@ import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
 
 class SubtitleTextView extends StatelessWidget {
   final SubtitleStyle subtitleStyle;
+  final FocusNode focusNode;
 
-  const SubtitleTextView({Key key, @required this.subtitleStyle})
-      : super(key: key);
+  const SubtitleTextView({
+    Key key,
+    @required this.subtitleStyle,
+    @required this.focusNode,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -47,12 +52,20 @@ class SubtitleTextView extends StatelessWidget {
                     state.subtitle.text,
                     key: ViewKeys.SUBTITLE_TEXT_CONTENT,
                     textAlign: TextAlign.center,
+                    onSelectionChanged: (selection, cause) {
+                      Clipboard.setData(ClipboardData(
+                          text: selection.textInside(state.subtitle.text)));
+                    },
                     style: TextStyle(
                       fontSize: subtitleStyle.fontSize,
                       color: subtitleStyle.textColor,
                     ),
+                    focusNode: focusNode,
                     toolbarOptions: ToolbarOptions(
-                        copy: true, cut: false, selectAll: false, paste: false),
+                        copy: false,
+                        cut: false,
+                        selectAll: false,
+                        paste: false),
                   ),
                 ),
               ],

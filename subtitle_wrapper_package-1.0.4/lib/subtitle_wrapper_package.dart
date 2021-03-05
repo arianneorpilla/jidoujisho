@@ -10,20 +10,22 @@ import 'package:subtitle_wrapper_package/subtitle_controller.dart';
 import 'package:subtitle_wrapper_package/subtitle_text_view.dart';
 
 class SubTitleWrapper extends StatelessWidget {
-  final Widget videoChild;
-  final SubtitleController subtitleController;
-  final dynamic videoPlayerController;
-  final SubtitleStyle subtitleStyle;
-  final ValueNotifier<Subtitle> subtitleNotifier;
-
   SubTitleWrapper({
     Key key,
     @required this.videoChild,
     @required this.subtitleController,
     @required this.videoPlayerController,
     @required this.subtitleNotifier,
+    @required this.focusNode,
     this.subtitleStyle = const SubtitleStyle(),
   }) : super(key: key);
+
+  final Widget videoChild;
+  final SubtitleController subtitleController;
+  final dynamic videoPlayerController;
+  final SubtitleStyle subtitleStyle;
+  final ValueNotifier<Subtitle> subtitleNotifier;
+  final FocusNode focusNode;
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +53,7 @@ class SubTitleWrapper extends StatelessWidget {
                     ),
                   child: SubtitleTextView(
                     subtitleStyle: subtitleStyle,
+                    focusNode: focusNode,
                   ),
                 ),
               )

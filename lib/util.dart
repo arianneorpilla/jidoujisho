@@ -419,7 +419,8 @@ Future<List<String>> getWordDetails(String searchTerm) async {
     }
   }
 
-  if (exportReadings == searchTerm || bestResult.slug == exportReadings) {
+  if (exportReadings == "null" ||
+      exportReadings == searchTerm && bestResult.slug == exportReadings) {
     exportReadings = "";
   }
 

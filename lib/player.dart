@@ -223,6 +223,9 @@ class _VideoPlayerState extends State<VideoPlayer> {
   ChewieController _chewieController;
   SubTitleWrapper _subTitleWrapper;
   SubtitleController _subTitleController;
+  bool _isSelectionVolatile = false;
+  String _volatileText = "";
+  FocusNode _subtitleFocusNode = new FocusNode();
 
   File _videoFile;
   List<File> _internalSubs;
@@ -398,6 +401,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
         hasBorder: true,
         fontSize: 24,
       ),
+      focusNode: _subtitleFocusNode,
       videoChild: FutureBuilder(
         future: getVideoPlayerController().initialize(),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -496,6 +500,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
               _currentWord.value = "";
               _currentDefinition.value = "";
               _currentReading.value = "";
+              _subtitleFocusNode.unfocus();
             },
             child: Container(
               padding: EdgeInsets.all(16.0),
@@ -524,6 +529,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
               _currentWord.value = "";
               _currentReading.value = "";
               _currentDefinition.value = "";
+              _subtitleFocusNode.unfocus();
             },
             child: SingleChildScrollView(
               child: Container(
@@ -603,8 +609,17 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   void onClipboardText(String text) {
-    _clipboard.value = text;
-    print("CLIPBOARD CHANGED: $text");
+    _volatileText = text;
+
+    Future.delayed(
+        text.length == 1
+            ? Duration(milliseconds: 1000)
+            : Duration(milliseconds: 500), () {
+      if (_volatileText == text) {
+        print("CLIPBOARD CHANGED: $text");
+        _clipboard.value = text;
+      }
+    });
   }
 
   void stopAllClipboardMonitoring() {
