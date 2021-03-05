@@ -248,15 +248,13 @@ class _MaterialControlsState extends State<MaterialControls>
           isScrollControlled: true,
           useRootNavigator: true,
           builder: (context) => const _MoreOptionsDialog(options: [
-            "Call Jisho.org Instant Dictionary",
-            "Jisho.org Lookup Clipboard",
-            "Translate Clipboard with DeepL",
-            "Translate Clipboard with Google Translate",
-            "Share Clipboard to App",
+            "Jisho.org Search Current Subtitle",
+            "Translate Current Subtitle with DeepL",
+            "Translate Current Subtitle with Google Translate",
+            "Share Current Subtitle to App",
             "Load External Subtitles",
             "Export Current Context to Anki",
           ], icons: [
-            Icons.book_rounded,
             Icons.menu_book_rounded,
             Icons.translate_rounded,
             Icons.g_translate_rounded,
@@ -266,31 +264,27 @@ class _MaterialControlsState extends State<MaterialControls>
           ]),
         );
 
-        final String clip = controller.clipboard.value;
+        final String subtitleText = controller.currentSubtitle.value.text;
 
         switch (chosenOption) {
           case 0:
-            controller.clipboard.value = "@usejisho@$clip";
+            await launch("https://jisho.org/search/$subtitleText");
             break;
           case 1:
-            await launch("https://jisho.org/search/$clip");
+            await launch(
+                "https://www.deepl.com/translator#ja/en/$subtitleText");
             break;
           case 2:
-            await launch("https://www.deepl.com/translator#ja/en/$clip");
+            await launch(
+                "https://translate.google.com/?sl=ja&tl=en&text=$subtitleText&op=translate");
             break;
           case 3:
-            await launch(
-                "https://translate.google.com/?sl=ja&tl=en&text=$clip&op=translate");
+            Share.share(subtitleText);
             break;
           case 4:
-            if (controller.clipboard.value.isNotEmpty) {
-              Share.share(controller.clipboard.value);
-            }
-            break;
-          case 5:
             controller.callback();
             break;
-          case 6:
+          case 5:
             controller.pause();
             await exportToAnki(
               context,
