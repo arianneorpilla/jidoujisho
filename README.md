@@ -6,7 +6,7 @@
 <h3 align="center">jidoujisho</h3>
 <p align="center">A mobile video player tailored for Japanese language learners.</p>
 
-<p align="center"><b>Latest Release: <a href="https://github.com/lrorpilla/jidoujisho/releases/">0.5.3-beta</a></p></b><br>
+<p align="center"><b>Latest Release: <a href="https://github.com/lrorpilla/jidoujisho/releases/">0.5.2-beta</a></p></b><br>
 
 # 📚 Uninterrupted language immersion at your fingertips
 
@@ -23,12 +23,12 @@
 
 # 🛠️ More features are on the way
 
-**jidoujisho is still in active development.** The app will be available publicly to download in GitHub at an early stage, and will be free to download on the Google Play Store. Current features planned on the roadmap listed below, but as of now there is no estimate on any updates.
+**jidoujisho is still in active development.** The app is available to download here on GitHub and is ready for use, while a lite version of the application will be available on the Google Play Store. Current features planned on the roadmap listed below, but as of now there is no estimate on any updates.
 
+- [ ] **Morphological analysis of subtitles** for better text selection and **offline dictionary use**
 - [ ] **Use of the AnkiDroid API** instead of share intent to streamline card export
 - [ ] **User interface, layout, video playback preferences** and Anki output customisation
 - [ ] Multiple subtitle tracks at a given time, and **immersion difficulty levels** for oral practice
-- [ ] **Morphological analysis of subtitles** for better text selection and **offline dictionary use**
 - [ ] **Support for more languages,** and more easier ways for contributors to extend language support
 - [ ] Tinker around with releasing the app on **other platforms if possible**
 
@@ -95,7 +95,7 @@ A primer on the basics of the application is as follows.
 
 # 👥 Contribution and attribution
 
-jidoujisho is written in <b><a href="https://dart.dev/">Dart</a></b> and powered by <b><a href="https://flutter.dev/">Flutter</a></b>. At present, the project may still need to be refactored and cleaned up as well as setting up of forks for the modified imports used in the project. Regardless, the app is ready for use and feedback in these early stages is much appreciated.
+jidoujisho is written in <b><a href="https://dart.dev/">Dart</a></b> and powered by <b><a href="https://flutter.dev/">Flutter</a></b>. The application queries dictionary definitions from <b><a href="https://dart.dev/">Jisho.org</a></b>.
 
 If you like what I've done so far, you can help me out by testing the application on various so that I can gauge the compatibility of the application with different versions of Android, <b><a href="https://www.buymeacoffee.com/lrorpilla">making a donation</a></b> or collaborating with me on further improvements.
 
