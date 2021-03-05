@@ -177,24 +177,31 @@ Future<String> extractNonSrtSubtitles(File file) async {
   return subFile.readAsStringSync();
 }
 
-Future exportToAnki(BuildContext context, VideoPlayerController controller,
-    Subtitle subtitle, String word, String definition, String reading) async {
+Future exportToAnki(
+  BuildContext context,
+  VideoPlayerController controller,
+  Subtitle subtitle,
+  DictionaryEntry dictionaryEntry,
+) async {
   await exportCurrentFrame(controller);
   await exportCurrentAudio(controller, subtitle);
 
-  showAnkiDialog(context, subtitle.text, word, reading, definition);
+  showAnkiDialog(context, subtitle.text, dictionaryEntry);
 }
 
-void showAnkiDialog(BuildContext context, String sentence, String answer,
-    String reading, String meaning) {
+void showAnkiDialog(
+  BuildContext context,
+  String sentence,
+  DictionaryEntry dictionaryEntry,
+) {
   TextEditingController _sentenceController =
       new TextEditingController(text: sentence);
-  TextEditingController _answerController =
-      new TextEditingController(text: answer);
+  TextEditingController _wordController =
+      new TextEditingController(text: dictionaryEntry.word);
   TextEditingController _readingController =
-      new TextEditingController(text: reading);
+      new TextEditingController(text: dictionaryEntry.reading);
   TextEditingController _meaningController =
-      new TextEditingController(text: meaning);
+      new TextEditingController(text: dictionaryEntry.meaning);
 
   Widget displayField(
     String labelText,
@@ -225,11 +232,11 @@ void showAnkiDialog(BuildContext context, String sentence, String answer,
     Icons.format_align_center_rounded,
     _sentenceController,
   );
-  Widget answerField = displayField(
+  Widget wordField = displayField(
     "Word",
     "Enter the word in the back here",
     Icons.speaker_notes_outlined,
-    _answerController,
+    _wordController,
   );
   Widget readingField = displayField(
     "Reading",
@@ -260,7 +267,7 @@ void showAnkiDialog(BuildContext context, String sentence, String answer,
             children: [
               Image.file(File(previewImageDir)),
               sentenceField,
-              answerField,
+              wordField,
               readingField,
               meaningField,
             ],
@@ -319,7 +326,7 @@ void showAnkiDialog(BuildContext context, String sentence, String answer,
             onPressed: () {
               exportAnkiCard(
                 _sentenceController.text,
-                _answerController.text,
+                _wordController.text,
                 _readingController.text,
                 _meaningController.text,
               );
@@ -372,7 +379,51 @@ void exportAnkiCard(
   );
 }
 
-Future<List<String>> getWordDetails(String searchTerm) async {
+class DictionaryEntry {
+  String word;
+  String reading;
+  String meaning;
+
+  DictionaryEntry({
+    this.word,
+    this.reading,
+    this.meaning,
+  });
+}
+
+List<DictionaryEntry> importCustomDictionary() {
+  List<DictionaryEntry> entries = [];
+
+  for (int i = 0; i < 999; i++) {
+    String outputPath =
+        "storage/emulated/0/Android/data/com.lrorpilla.jidoujisho/files/term_bank_$i.json";
+    File dictionaryFile = File(outputPath);
+
+    if (dictionaryFile.existsSync()) {
+      List<dynamic> dictionary = jsonDecode(dictionaryFile.readAsStringSync());
+      dictionary.forEach((entry) {
+        entries.add(DictionaryEntry(
+          word: entry[0].toString(),
+          reading: entry[1].toString(),
+          meaning: entry[5].toString(),
+        ));
+      });
+    }
+  }
+
+  return entries;
+}
+
+List<String> getAllImportedWords() {
+  List<String> allWords = [];
+  for (DictionaryEntry entry in customDictionary) {
+    allWords.add(entry.word);
+  }
+
+  return allWords;
+}
+
+Future<DictionaryEntry> getWordDetails(String searchTerm) async {
   bool forceJisho = searchTerm.contains("@usejisho@");
   searchTerm = searchTerm.replaceAll("@usejisho@", "");
 
@@ -388,7 +439,7 @@ Future<List<String>> getWordDetails(String searchTerm) async {
 
   String exportTerm = "";
   String exportReadings = "";
-  String exportDefinitions = "";
+  String exportMeanings = "";
 
   words.forEach((word) {
     String term = word.word;
@@ -450,35 +501,38 @@ Future<List<String>> getWordDetails(String searchTerm) async {
         definitions = removeLastNewline(definitions);
       }
 
-      exportDefinitions =
-          "$exportDefinitions$i) $definitions -$partsOfSpeech \n";
+      exportMeanings = "$exportMeanings$i) $definitions -$partsOfSpeech \n";
     },
   );
-  exportDefinitions = removeLastNewline(exportDefinitions);
+  exportMeanings = removeLastNewline(exportMeanings);
 
-  List<String> details = [];
+  DictionaryEntry dictionaryEntry;
 
   print("SEARCH TERM: $searchTerm");
   print("EXPORT TERM: $exportTerm");
 
   if (customDictionary.isEmpty || forceJisho) {
-    details.add(exportTerm ?? searchTerm);
-    details.add(exportReadings);
-    details.add(exportDefinitions);
+    dictionaryEntry = DictionaryEntry(
+      word: exportTerm ?? searchTerm,
+      reading: exportReadings,
+      meaning: exportMeanings,
+    );
   } else {
     int resultIndex;
 
     final searchResult = customDictionaryFuzzy.search(searchTerm, 1);
-    print(searchResult);
+    print("SEARCH RESULT: $searchResult");
 
     if (searchResult.isNotEmpty && searchResult.first.score == 0) {
       resultIndex = searchResult.first.matches.first.arrayIndex;
 
-      details.add(customDictionary[resultIndex].word);
-      details.add(customDictionary[resultIndex].reading);
-      details.add(customDictionary[resultIndex].meaning);
+      dictionaryEntry = DictionaryEntry(
+        word: customDictionary[resultIndex].word,
+        reading: customDictionary[resultIndex].reading,
+        meaning: customDictionary[resultIndex].meaning,
+      );
 
-      return details;
+      return dictionaryEntry;
     } else {
       words.forEach((word) {
         String term = word.word;
@@ -486,11 +540,9 @@ Future<List<String>> getWordDetails(String searchTerm) async {
         if (term != null) {
           final termResult = customDictionaryFuzzy.search(term, 1);
 
-          print(termResult);
-
           if (termResult.isNotEmpty && termResult.first.score == 0.0) {
             resultIndex = termResult.first.matches.first.arrayIndex;
-            print("$resultIndex set - $term");
+            print("TERM RESULT: $searchResult");
           }
         }
       });
@@ -500,53 +552,14 @@ Future<List<String>> getWordDetails(String searchTerm) async {
       resultIndex = searchResult.first.matches.first.arrayIndex;
     }
 
-    details.add(customDictionary[resultIndex].word);
-    details.add(customDictionary[resultIndex].reading);
-    details.add(customDictionary[resultIndex].meaning);
+    dictionaryEntry = DictionaryEntry(
+      word: exportTerm ?? searchTerm,
+      reading: exportReadings,
+      meaning: exportMeanings,
+    );
   }
 
-  return details;
-}
-
-class DictionaryEntry {
-  String word;
-  String reading;
-  String meaning;
-
-  DictionaryEntry(
-    this.word,
-    this.reading,
-    this.meaning,
-  );
-}
-
-List<DictionaryEntry> importCustomDictionary() {
-  List<DictionaryEntry> entries = [];
-
-  for (int i = 0; i < 999; i++) {
-    String outputPath =
-        "storage/emulated/0/Android/data/com.lrorpilla.jidoujisho/files/term_bank_$i.json";
-    File dictionaryFile = File(outputPath);
-
-    if (dictionaryFile.existsSync()) {
-      List<dynamic> dictionary = jsonDecode(dictionaryFile.readAsStringSync());
-      dictionary.forEach((entry) {
-        entries.add(DictionaryEntry(
-            entry[0].toString(), entry[1].toString(), entry[5].toString()));
-      });
-    }
-  }
-
-  return entries;
-}
-
-List<String> getAllImportedWords() {
-  List<String> allWords = [];
-  for (DictionaryEntry entry in customDictionary) {
-    allWords.add(entry.word);
-  }
-
-  return allWords;
+  return dictionaryEntry;
 }
 
 Future<String> getPlayerYouTubeInfo(String webURL) async {

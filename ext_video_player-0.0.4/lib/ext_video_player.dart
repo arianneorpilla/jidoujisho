@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 import 'package:video_player_platform_interface/video_player_platform_interface.dart';
 import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
+import 'package:jidoujisho/util.dart';
 
 export 'package:video_player_platform_interface/video_player_platform_interface.dart'
     show DurationRange, DataSourceType, VideoFormat;
@@ -189,10 +190,8 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   /// package and null otherwise.
   VideoPlayerController.asset(
       this.dataSource,
-      ValueNotifier<String> clip,
-      ValueNotifier<String> word,
-      ValueNotifier<String> def,
-      ValueNotifier<String> read,
+      ValueNotifier<String> clipboard,
+      ValueNotifier<DictionaryEntry> dictionary,
       ValueNotifier<Subtitle> sub,
       ValueNotifier<int> track,
       VoidCallback call,
@@ -200,10 +199,8 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
       this.closedCaptionFile})
       : dataSourceType = DataSourceType.asset,
         formatHint = null,
-        clipboard = clip,
-        currentWord = word,
-        currentDefinition = def,
-        currentReading = read,
+        currentClipboard = clipboard,
+        currentDictionaryEntry = dictionary,
         currentSubtitle = sub,
         currentSubTrack = track,
         callback = call,
@@ -219,22 +216,18 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   VideoPlayerController.network(
       this.dataSource,
       List<File> subtitles,
-      ValueNotifier<String> clip,
-      ValueNotifier<String> word,
-      ValueNotifier<String> def,
-      ValueNotifier<String> read,
-      ValueNotifier<Subtitle> sub,
+      ValueNotifier<String> clipboard,
+      ValueNotifier<DictionaryEntry> dictionary,
+      ValueNotifier<Subtitle> subtitle,
       ValueNotifier<int> track,
       VoidCallback call,
       {this.formatHint,
       this.closedCaptionFile})
       : dataSourceType = DataSourceType.network,
         package = null,
-        clipboard = clip,
-        currentWord = word,
-        currentDefinition = def,
-        currentReading = read,
-        currentSubtitle = sub,
+        currentClipboard = clipboard,
+        currentDictionaryEntry = dictionary,
+        currentSubtitle = subtitle,
         currentSubTrack = track,
         internalSubs = subtitles,
         callback = call,
@@ -247,11 +240,9 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   VideoPlayerController.file(
       File file,
       List<File> subtitles,
-      ValueNotifier<String> clip,
-      ValueNotifier<String> word,
-      ValueNotifier<String> def,
-      ValueNotifier<String> read,
-      ValueNotifier<Subtitle> sub,
+      ValueNotifier<String> clipboard,
+      ValueNotifier<DictionaryEntry> dictionary,
+      ValueNotifier<Subtitle> subtitle,
       ValueNotifier<int> track,
       VoidCallback call,
       {this.closedCaptionFile})
@@ -260,11 +251,9 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
         package = null,
         formatHint = null,
         internalSubs = subtitles,
-        clipboard = clip,
-        currentWord = word,
-        currentDefinition = def,
-        currentReading = read,
-        currentSubtitle = sub,
+        currentClipboard = clipboard,
+        currentDictionaryEntry = dictionary,
+        currentSubtitle = subtitle,
         currentSubTrack = track,
         callback = call,
         super(VideoPlayerValue(duration: null));
@@ -273,10 +262,8 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
 
   List<File> internalSubs;
 
-  final ValueNotifier<String> clipboard;
-  final ValueNotifier<String> currentWord;
-  final ValueNotifier<String> currentDefinition;
-  final ValueNotifier<String> currentReading;
+  final ValueNotifier<String> currentClipboard;
+  final ValueNotifier<DictionaryEntry> currentDictionaryEntry;
   final ValueNotifier<Subtitle> currentSubtitle;
   final ValueNotifier<int> currentSubTrack;
   final VoidCallback callback;

@@ -28,6 +28,8 @@ String buildNumber;
 List<DictionaryEntry> customDictionary;
 Fuzzy customDictionaryFuzzy;
 
+bool isGooglePlayLimited = false;
+
 final AsyncMemoizer trendingCache = AsyncMemoizer();
 Map<String, AsyncMemoizer> searchCache = {};
 Map<String, AsyncMemoizer> captioningCache = {};
@@ -235,9 +237,65 @@ class _HomeState extends State<Home> {
       "Error getting videos",
       Icons.error,
     );
+    Widget featureLockedMessage = ColorFiltered(
+      child: Center(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FadeInImage(
+                image: AssetImage("assets/icon/icon.png"),
+                placeholder: MemoryImage(kTransparentImage),
+                height: 72,
+                fit: BoxFit.fitHeight,
+              ),
+              const SizedBox(height: 6),
+              Text(
+                "A video player for language learners",
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 20,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                "GETTING STARTED\n📲 Play a local media file with the lower right button to get started\n" +
+                    "⏯️  Select subtitles by simply holding and drag to change selection\n" +
+                    "📋 When the dictionary definition for the text shows up, the text is the current context\n" +
+                    "📔 Closing the dictionary prompt will clear the clipboard\n" +
+                    "🗑️ The current context may be used to open browser links to third-party websites\n" +
+                    "🌐 You may swipe vertically to open the transcript, and you can pick a time or read subtitles\n" +
+                    "↔️ Swipe horizontally to repeat the current subtitle audio\n\n" +
+                    "EXPORTING TO ANKIDROID\n📤 You may also export the current context to an AnkiDroid card, including the current frame and audio\n" +
+                    "🔤 Having a word in the clipboard will include the sentence, word, meaning and reading in the export\n" +
+                    "📝 You may edit the sentence, word, meaning and reading text fields before sharing to AnkiDroid\n" +
+                    "🔗 To finalise the export, share the exported text to AnkiDroid\n" +
+                    "🃏 The front of the card will include the audio, video and sentence\n" +
+                    "🎴 The back of the card will include the reading, word and meaning\n" +
+                    "📑 You may apply text formatting to the card with the AnkiDroid editor once shared\n"
+                        "⚛️ Extensive customisation of the Anki export is planned",
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      colorFilter: ColorFilter.mode(Colors.black, BlendMode.saturation),
+    );
 
     if (_isSearching && searchQuery == "") {
       return searchMessage;
+    }
+
+    if (isGooglePlayLimited) {
+      return featureLockedMessage;
     }
 
     return FutureBuilder(
@@ -266,7 +324,7 @@ class _HomeState extends State<Home> {
               itemCount: snapshot.data.length,
               itemBuilder: (BuildContext context, int index) {
                 Video result = results[index];
-                print(result);
+                print("VIDEO LISTED: $result");
 
                 return YouTubeResult(
                   result,
@@ -288,16 +346,26 @@ class _HomeState extends State<Home> {
       color: Colors.grey[900],
       context: context,
       position: RelativeRect.fromLTRB(left, top, 0, 0),
-      items: [
-        PopupMenuItem<String>(
-            child: const Text('Enter YouTube URL'), value: 'Enter YouTube URL'),
-        PopupMenuItem<String>(
-            child: const Text('View on GitHub'), value: 'View on GitHub'),
-        PopupMenuItem<String>(
-            child: const Text('Report a bug'), value: 'Report a bug'),
-        PopupMenuItem<String>(
-            child: const Text('About this app'), value: 'About this app'),
-      ],
+      items: isGooglePlayLimited
+          ? [
+              PopupMenuItem<String>(
+                  child: const Text('View on GitHub'), value: 'View on GitHub'),
+              PopupMenuItem<String>(
+                  child: const Text('Report a bug'), value: 'Report a bug'),
+              PopupMenuItem<String>(
+                  child: const Text('About this app'), value: 'About this app'),
+            ]
+          : [
+              PopupMenuItem<String>(
+                  child: const Text('Enter YouTube URL'),
+                  value: 'Enter YouTube URL'),
+              PopupMenuItem<String>(
+                  child: const Text('View on GitHub'), value: 'View on GitHub'),
+              PopupMenuItem<String>(
+                  child: const Text('Report a bug'), value: 'Report a bug'),
+              PopupMenuItem<String>(
+                  child: const Text('About this app'), value: 'About this app'),
+            ],
       elevation: 8.0,
     );
 
@@ -339,10 +407,10 @@ class _HomeState extends State<Home> {
                       }
                     } on Exception {
                       Navigator.pop(context);
-                      print("Invalid link");
+                      print("INVALID LINK");
                     } catch (error) {
                       Navigator.pop(context);
-                      print("Invalid link");
+                      print("INVALID LINK");
                     }
                   },
                 ),
@@ -404,10 +472,12 @@ class _HomeState extends State<Home> {
     }
 
     return <Widget>[
-      IconButton(
-        icon: const Icon(Icons.search),
-        onPressed: _startSearch,
-      ),
+      isGooglePlayLimited
+          ? Container()
+          : IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: _startSearch,
+            ),
       const SizedBox(width: 12),
       GestureDetector(
         child: const Icon(Icons.more_vert),
@@ -537,11 +607,6 @@ class _YouTubeResultState extends State<YouTubeResult>
         ],
       );
     }
-
-    // if (result.uploadDate == null || result.duration == null) {
-    //   print("Fuck");
-    //   return Container();
-    // }
 
     Widget displayVideoInformation() {
       return Expanded(

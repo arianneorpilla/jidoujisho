@@ -248,7 +248,7 @@ class _MaterialControlsState extends State<MaterialControls>
           isScrollControlled: true,
           useRootNavigator: true,
           builder: (context) => const _MoreOptionsDialog(options: [
-            "Jisho.org Search Current Subtitle",
+            "Search Current Subtitle with Jisho.org",
             "Translate Current Subtitle with DeepL",
             "Translate Current Subtitle with Google Translate",
             "Share Current Subtitle to App",
@@ -290,9 +290,7 @@ class _MaterialControlsState extends State<MaterialControls>
               context,
               controller,
               controller.currentSubtitle.value,
-              controller.currentWord.value,
-              controller.currentDefinition.value,
-              controller.currentReading.value,
+              controller.currentDictionaryEntry.value,
             );
             break;
         }

@@ -85,9 +85,9 @@ class Player extends StatelessWidget {
 
     try {
       videoID = YoutubePlayer.convertUrlToId(streamURL);
-      print(videoID);
+      print("VIDEO YOUTUBE ID: $videoID");
     } catch (error) {
-      print("Invalid link");
+      print("INVALID LINK");
       return Container();
     }
 
@@ -206,10 +206,25 @@ class _VideoPlayerState extends State<VideoPlayer> {
     _webStream = webStream;
   }
 
+  File _videoFile;
+  List<File> _internalSubs;
+  String _defaultSubtitles;
+  String _webStream;
+
+  VideoPlayerController _videoPlayerController;
+  ChewieController _chewieController;
+  SubTitleWrapper _subTitleWrapper;
+  SubtitleController _subTitleController;
+  String _volatileText = "";
+  FocusNode _subtitleFocusNode = new FocusNode();
+
   final _clipboard = ValueNotifier<String>("");
-  final _currentWord = ValueNotifier<String>("");
-  final _currentDefinition = ValueNotifier<String>("");
-  final _currentReading = ValueNotifier<String>("");
+  final _currentDictionaryEntry =
+      ValueNotifier<DictionaryEntry>(DictionaryEntry(
+    word: "",
+    reading: "",
+    meaning: "",
+  ));
   final _currentSubtitle = ValueNotifier<Subtitle>(
     Subtitle(
       startTime: Duration.zero,
@@ -218,19 +233,6 @@ class _VideoPlayerState extends State<VideoPlayer> {
     ),
   );
   final _currentSubTrack = ValueNotifier<int>(0);
-
-  VideoPlayerController _videoPlayerController;
-  ChewieController _chewieController;
-  SubTitleWrapper _subTitleWrapper;
-  SubtitleController _subTitleController;
-  bool _isSelectionVolatile = false;
-  String _volatileText = "";
-  FocusNode _subtitleFocusNode = new FocusNode();
-
-  File _videoFile;
-  List<File> _internalSubs;
-  String _defaultSubtitles;
-  String _webStream;
 
   @override
   void dispose() {
@@ -337,9 +339,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
         _videoFile,
         _internalSubs,
         _clipboard,
-        _currentWord,
-        _currentDefinition,
-        _currentReading,
+        _currentDictionaryEntry,
         _currentSubtitle,
         _currentSubTrack,
         playExternalSubtitles,
@@ -349,9 +349,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
         _webStream,
         _internalSubs,
         _clipboard,
-        _currentWord,
-        _currentDefinition,
-        _currentReading,
+        _currentDictionaryEntry,
         _currentSubtitle,
         _currentSubTrack,
         playExternalSubtitles,
@@ -499,9 +497,11 @@ class _VideoPlayerState extends State<VideoPlayer> {
           child: InkWell(
             onTap: () {
               _clipboard.value = "";
-              _currentWord.value = "";
-              _currentDefinition.value = "";
-              _currentReading.value = "";
+              _currentDictionaryEntry.value = DictionaryEntry(
+                word: "",
+                reading: "",
+                meaning: "",
+              );
             },
             child: Container(
               padding: EdgeInsets.all(16.0),
@@ -515,11 +515,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
     );
   }
 
-  Widget buildDictionaryMatch(List<String> results) {
-    String slug = results[0];
-    String readings = results[1];
-    String definitions = results[2];
-
+  Widget buildDictionaryMatch(DictionaryEntry results) {
     _subtitleFocusNode.unfocus();
 
     return Column(
@@ -529,9 +525,11 @@ class _VideoPlayerState extends State<VideoPlayer> {
           child: GestureDetector(
             onTap: () {
               _clipboard.value = "";
-              _currentWord.value = "";
-              _currentReading.value = "";
-              _currentDefinition.value = "";
+              _currentDictionaryEntry.value = DictionaryEntry(
+                word: "",
+                reading: "",
+                meaning: "",
+              );
             },
             child: SingleChildScrollView(
               child: Container(
@@ -540,14 +538,14 @@ class _VideoPlayerState extends State<VideoPlayer> {
                 child: Column(
                   children: [
                     Text(
-                      slug,
+                      results.word,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 20,
                       ),
                     ),
-                    Text(readings),
-                    SelectableText("\n$definitions\n"),
+                    Text(results.reading),
+                    SelectableText("\n${results.meaning}\n"),
                   ],
                 ),
               ),
@@ -566,7 +564,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
         return FutureBuilder(
           future: getWordDetails(clipboard),
           builder:
-              (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
+              (BuildContext context, AsyncSnapshot<DictionaryEntry> snapshot) {
             if (_clipboard.value == "") {
               return Container();
             }
@@ -574,14 +572,11 @@ class _VideoPlayerState extends State<VideoPlayer> {
               case ConnectionState.waiting:
                 return buildDictionaryLoading(clipboard);
               default:
-                List<String> results = snapshot.data;
+                DictionaryEntry entry = snapshot.data;
 
                 if (snapshot.hasData) {
-                  _currentWord.value = results[0];
-                  _currentReading.value = results[1];
-                  _currentDefinition.value = results[2];
-
-                  return buildDictionaryMatch(results);
+                  _currentDictionaryEntry.value = entry;
+                  return buildDictionaryMatch(entry);
                 } else {
                   return buildDictionaryNoMatch(clipboard);
                 }

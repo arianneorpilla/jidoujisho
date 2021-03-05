@@ -21,6 +21,8 @@ dependencies:
   meta: "^1.0.5"
   subtitle_wrapper_package:
     path: ../subtitle_wrapper_package-1.0.4
+  jidoujisho:
+    path: ../
   
   flutter:
     sdk: flutter
