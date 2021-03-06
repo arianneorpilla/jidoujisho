@@ -6,7 +6,9 @@
 <h3 align="center">jidoujisho</h3>
 <p align="center">A mobile video player tailored for Japanese language learners.</p>
 
-<p align="center"><b>Latest Release: <a href="https://github.com/lrorpilla/jidoujisho/releases/">0.5.2-beta</a></p></b><br>
+<p align="center" style="margin:0"><b>Latest Release:<br>
+<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.5.2-beta">0.5.2-beta (🇯🇵 → 🇬🇧)</a><br>
+<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.5.3-enjp-beta">0.5.3-beta (🇬🇧 → 🇯🇵)</a></p></b><br>
 
 # 📚 Uninterrupted language immersion at your fingertips
 
@@ -20,6 +22,7 @@
 - [x] Swipe vertically to open the **transcript to jump to time and review subtitles**
 - [x] **YouTube support** for videos with **Japanese user-generated subtitles**
 - [x] **(Experimental)** Custom Japanese-Japanese dictionary support **(tested for Shinmeikai)**
+- [x] **(Experimental)** Weblio.jp **English to Japanese support** and full Japanese localization
 
 # 🛠️ More features are on the way
 
