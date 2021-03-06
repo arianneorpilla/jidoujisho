@@ -5,6 +5,8 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:ext_video_player/ext_video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
+import 'package:html/dom.dart' as dom;
+import 'package:html/parser.dart' as parser;
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:share/share.dart';
@@ -15,6 +17,56 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import 'package:jidoujisho/main.dart';
+
+bool isNumeric(String s) {
+  if (s == null) {
+    return false;
+  }
+  return double.parse(s) != null;
+}
+
+Future<DictionaryEntry> getWeblioEntry(String searchTerm) async {
+  var client = http.Client();
+  http.Response response =
+      await client.get('https://ejje.weblio.jp/content/$searchTerm');
+
+  var document = parser.parse(response.body);
+
+  bool isValidWord = document.getElementsByClassName("kiji") != null;
+  DictionaryEntry entry;
+
+  if (isValidWord) {
+    var details = document.getElementsByClassName("kiji").first;
+
+    String word = details.getElementsByClassName("KejjeOs").first.text;
+    String reading = details.getElementsByClassName("KejjeHt").first.text;
+    String meaning = "";
+
+    var definitions = details.getElementsByClassName("level0");
+    definitions[0].text;
+
+    for (int i = 0; i < definitions.length; i++) {
+      String nextLine = definitions[i].text;
+      if (nextLine[0].contains(new RegExp(r'[a-z]'))) {
+        meaning = meaning + " " + nextLine + "\n";
+      } else {
+        meaning = meaning + nextLine + "\n";
+      }
+    }
+
+    entry = DictionaryEntry(
+      word: word,
+      reading: reading,
+      meaning: meaning,
+    );
+    debugPrint(meaning, wrapWidth: 1024);
+  } else {
+    print("INVALID WORD");
+    return null;
+  }
+
+  return entry;
+}
 
 String getDefaultSubtitles(File file, List<File> internalSubtitles) {
   if (internalSubtitles.isNotEmpty) {
