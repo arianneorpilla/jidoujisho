@@ -8,7 +8,7 @@
 
 <p align="center" style="margin:0"><b>Latest Release:<br>
 <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.5.2-beta">0.5.2-beta (🇯🇵 → 🇬🇧)</a><br>
-<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.5.3-enjp-beta">0.5.3-beta (🇬🇧 → 🇯🇵)</a></p></b><br>
+<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.5.3-enjp-beta">0.5.3-beta (🇬🇧 → 🇯🇵)</a></p></b>
 
 # 📚 Uninterrupted language immersion at your fingertips
 
