@@ -32,13 +32,14 @@ Future<DictionaryEntry> getWeblioEntry(String searchTerm) async {
 
   var document = parser.parse(response.body);
 
-  bool isValidWord = document.getElementsByClassName("kiji") != null;
+  bool isValidWord = document.getElementsByClassName("KejjeOs").isNotEmpty;
+  print(isValidWord);
   DictionaryEntry entry;
 
   if (isValidWord) {
     var details = document.getElementsByClassName("kiji").first;
 
-    String word = details.getElementsByClassName("KejjeOs").first.text;
+    String word = document.getElementById("h1Query").innerHtml;
     String reading = details.getElementsByClassName("KejjeHt").first.text;
     String meaning = "";
 
@@ -59,10 +60,29 @@ Future<DictionaryEntry> getWeblioEntry(String searchTerm) async {
       reading: reading,
       meaning: meaning,
     );
+
     debugPrint(meaning, wrapWidth: 1024);
   } else {
-    print("INVALID WORD");
-    return null;
+    print("INVALID WORD - SEARCHING ALTERNATIVE");
+    var crosslink = document.getElementsByClassName("crosslink");
+    var level0 = document.getElementsByClassName("level0");
+
+    if (level0.isNotEmpty) {
+      entry = await getWeblioEntry(crosslink.first.text);
+    } else if (document.getElementById("h1Query") != null) {
+      String word = document.getElementById("h1Query").innerHtml;
+      String reading = "";
+      String meaning =
+          document.getElementsByClassName("content-explanation ej").first.text;
+
+      entry = DictionaryEntry(
+        word: word,
+        reading: reading,
+        meaning: meaning,
+      );
+    } else {
+      return null;
+    }
   }
 
   return entry;
@@ -102,6 +122,8 @@ String timedLineToSRT(Map<String, dynamic> line, int lineCount) {
   String text = line["\$"] ?? "";
 
   text = text.replaceAll("\\n", "\n");
+  text = text.replaceAll("&#39;", "'");
+  text = text.replaceAll("&quot;", "\"");
 
   String startTime = formatTimeString(start);
   String endTime = formatTimeString(start + duration);
@@ -279,26 +301,26 @@ void showAnkiDialog(
   }
 
   Widget sentenceField = displayField(
-    "Sentence",
-    "Enter front of card or sentence here",
+    "文",
+    "ここにカードの前面または文章を入力してください",
     Icons.format_align_center_rounded,
     _sentenceController,
   );
   Widget wordField = displayField(
-    "Word",
-    "Enter the word in the back here",
+    "単語",
+    "ここでカードの後ろに単語を入力してください",
     Icons.speaker_notes_outlined,
     _wordController,
   );
   Widget readingField = displayField(
-    "Reading",
-    "Enter the reading of the word here",
+    "読み方",
+    "ここでカードの後ろに読み方を入力してください",
     Icons.surround_sound_outlined,
     _readingController,
   );
   Widget meaningField = displayField(
-    "Meaning",
-    "Enter the meaning in the back here",
+    "意味",
+    "ここでカードの後ろに意味を入力してください",
     Icons.translate_rounded,
     _meaningController,
   );
@@ -328,7 +350,7 @@ void showAnkiDialog(
         actions: <Widget>[
           TextButton(
             child: Text(
-              'PREVIEW AUDIO',
+              'オーディオを再生',
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w500,
@@ -346,7 +368,7 @@ void showAnkiDialog(
           ),
           TextButton(
             child: Text(
-              'CANCEL',
+              'キャンセル',
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w500,
@@ -363,7 +385,7 @@ void showAnkiDialog(
           ),
           TextButton(
             child: Text(
-              'EXPORT',
+              'エクスポート',
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w500,
@@ -630,7 +652,7 @@ Future<String> getPlayerYouTubeInfo(String webURL) async {
 
 Future<bool> checkYouTubeClosedCaptionAvailable(String videoID) async {
   String httpSubs = await http
-      .read("https://www.youtube.com/api/timedtext?lang=ja&v=" + videoID);
+      .read("https://www.youtube.com/api/timedtext?lang=en&v=" + videoID);
   return (httpSubs.isNotEmpty);
 }
 
@@ -671,39 +693,38 @@ String getTimeAgoFormatted(DateTime videoDate) {
   if (diffInHours < 1) {
     final diffInMinutes = DateTime.now().difference(videoDate).inMinutes;
     timeValue = diffInMinutes;
-    timeUnit = 'minute';
+    timeUnit = '分';
   } else if (diffInHours < 24) {
     timeValue = diffInHours;
-    timeUnit = 'hour';
+    timeUnit = '時間';
   } else if (diffInHours >= 24 && diffInHours < 24 * 7) {
     timeValue = (diffInHours / 24).floor();
-    timeUnit = 'day';
+    timeUnit = '日';
   } else if (diffInHours >= 24 * 7 && diffInHours < 24 * 30) {
     timeValue = (diffInHours / (24 * 7)).floor();
-    timeUnit = 'week';
+    timeUnit = '週間';
   } else if (diffInHours >= 24 * 30 && diffInHours < 24 * 12 * 30) {
     timeValue = (diffInHours / (24 * 30)).floor();
-    timeUnit = 'month';
+    timeUnit = 'か月';
   } else {
     timeValue = (diffInHours / (24 * 365)).floor();
-    timeUnit = 'year';
+    timeUnit = '年';
   }
 
   timeAgo = timeValue.toString() + ' ' + timeUnit;
-  timeAgo += timeValue > 1 ? 's' : '';
 
-  return timeAgo + ' ago';
+  return timeAgo + '前';
 }
 
 String getViewCountFormatted(int num) {
-  if (num > 999 && num < 99999) {
-    return "${(num / 1000).toStringAsFixed(1)}K";
-  } else if (num > 99999 && num < 999999) {
-    return "${(num / 1000).toStringAsFixed(0)}K";
-  } else if (num > 999999 && num < 999999999) {
-    return "${(num / 1000000).toStringAsFixed(1)}M";
+  if (num > 9999 && num < 999999) {
+    return "${(num / 10000).toStringAsFixed(1)}万";
+  } else if (num > 999999 && num < 99999999) {
+    return "${(num / 10000).toStringAsFixed(0)}万";
+  } else if (num > 99999999 && num < 999999999) {
+    return "${(num / 100000000).toStringAsFixed(1)}億";
   } else if (num > 999999999) {
-    return "${(num / 1000000000).toStringAsFixed(1)}B";
+    return "${(num / 100000000).toStringAsFixed(0)}億";
   } else {
     return num.toString();
   }
@@ -745,5 +766,5 @@ Future<List<Video>> searchYouTubeVideos(String searchQuery) async {
 
 Future<List<Video>> searchYouTubeTrendingVideos() {
   YoutubeExplode yt = YoutubeExplode();
-  return yt.playlists.getVideos("PLuXL6NS58Dyx-wTr5o7NiC7CZRbMA91DC").toList();
+  return yt.playlists.getVideos("PLrEnWoR732-DtKgaDdnPkezM_nDidBU9H").toList();
 }

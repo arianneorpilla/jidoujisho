@@ -112,7 +112,7 @@ class Player extends StatelessWidget {
             String webStream = snapshot.data;
             return new FutureBuilder(
               future: http.read(
-                  "https://www.youtube.com/api/timedtext?lang=ja&v=$videoID"),
+                  "https://www.youtube.com/api/timedtext?lang=en&v=$videoID"),
               builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                 switch (snapshot.connectionState) {
                   case ConnectionState.waiting:
@@ -287,11 +287,11 @@ class _VideoPlayerState extends State<VideoPlayer> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.zero,
       ),
-      title: new Text('End Playback?'),
+      title: new Text('再生を終了しますか？'),
       actions: <Widget>[
         new TextButton(
           child: Text(
-            'NO',
+            'いいえ',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w500,
@@ -306,7 +306,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
         ),
         new TextButton(
           child: Text(
-            'YES',
+            'はい',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w500,
@@ -467,7 +467,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   Widget buildDictionaryLoading(String clipboard) {
     String clipboardText = clipboard.replaceAll("@usejisho@", "");
-    String lookupText = "Looking up \"$clipboardText\"...";
+    String lookupText = "『$clipboard』を探す...";
 
     return Column(
       children: [
@@ -486,7 +486,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   Widget buildDictionaryNoMatch(String clipboard) {
     String clipboardText = clipboard.replaceAll("@usejisho@", "");
-    String lookupText = "No matches for \"$clipboardText\" could be queried";
+    String lookupText = "『$clipboard』に該当する検索結果はありませんでした。";
 
     _subtitleFocusNode.unfocus();
 
@@ -518,42 +518,38 @@ class _VideoPlayerState extends State<VideoPlayer> {
   Widget buildDictionaryMatch(DictionaryEntry results) {
     _subtitleFocusNode.unfocus();
 
-    return Column(
-      children: [
-        Padding(
-          padding: EdgeInsets.all(16.0),
-          child: GestureDetector(
-            onTap: () {
-              _clipboard.value = "";
-              _currentDictionaryEntry.value = DictionaryEntry(
-                word: "",
-                reading: "",
-                meaning: "",
-              );
-            },
-            child: SingleChildScrollView(
-              child: Container(
-                padding: EdgeInsets.all(16.0),
-                color: Colors.grey[800].withOpacity(0.6),
-                child: Column(
-                  children: [
-                    Text(
-                      results.word,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
-                    ),
-                    Text(results.reading),
-                    SelectableText("\n${results.meaning}\n"),
-                  ],
+    return Container(
+      alignment: Alignment.topCenter,
+      padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 150),
+      child: GestureDetector(
+        onTap: () {
+          _clipboard.value = "";
+          _currentDictionaryEntry.value = DictionaryEntry(
+            word: "",
+            reading: "",
+            meaning: "",
+          );
+        },
+        child: SingleChildScrollView(
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            color: Colors.grey[800].withOpacity(0.6),
+            child: Column(
+              children: [
+                Text(
+                  results.word,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
                 ),
-              ),
+                Text(results.reading),
+                Text("\n${results.meaning}"),
+              ],
             ),
           ),
         ),
-        Expanded(child: Container()),
-      ],
+      ),
     );
   }
 
@@ -562,7 +558,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       valueListenable: _clipboard,
       builder: (context, clipboard, widget) {
         return FutureBuilder(
-          future: getWordDetails(clipboard),
+          future: getWeblioEntry(clipboard),
           builder:
               (BuildContext context, AsyncSnapshot<DictionaryEntry> snapshot) {
             if (_clipboard.value == "") {

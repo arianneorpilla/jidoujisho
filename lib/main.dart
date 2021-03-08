@@ -28,7 +28,7 @@ String buildNumber;
 List<DictionaryEntry> customDictionary;
 Fuzzy customDictionaryFuzzy;
 
-bool isGooglePlayLimited = true;
+bool isGooglePlayLimited = false;
 
 final AsyncMemoizer trendingCache = AsyncMemoizer();
 Map<String, AsyncMemoizer> searchCache = {};
@@ -172,7 +172,7 @@ class _HomeState extends State<Home> {
         controller: _searchQueryController,
         autofocus: true,
         decoration: InputDecoration(
-          hintText: "Search YouTube...",
+          hintText: "検索...",
           border: InputBorder.none,
           hintStyle: TextStyle(color: Colors.white30),
         ),
@@ -222,19 +222,19 @@ class _HomeState extends State<Home> {
     }
 
     Widget searchMessage = centerMessage(
-      "Enter keyword to search",
+      "検索するために入力してください",
       Icons.youtube_searched_for,
     );
     Widget searchingMessage = centerMessage(
-      "Searching for \"$searchQuery\"...",
+      "『$searchQuery』を探す...",
       Icons.youtube_searched_for,
     );
     Widget queryMessage = centerMessage(
-      "Querying trending videos...",
+      "トレンド動画の読み込み...",
       Icons.youtube_searched_for,
     );
     Widget errorMessage = centerMessage(
-      "Error getting videos",
+      "動画の取得中にエラーが発生しました",
       Icons.error,
     );
     Widget featureLockedMessage = ColorFiltered(
@@ -255,7 +255,7 @@ class _HomeState extends State<Home> {
               ),
               const SizedBox(height: 6),
               Text(
-                "A video player for language learners",
+                "言語学習者のために作られたビデオプレーヤー",
                 style: TextStyle(
                   color: Colors.grey,
                   fontSize: 20,
@@ -351,22 +351,22 @@ class _HomeState extends State<Home> {
       items: isGooglePlayLimited
           ? [
               PopupMenuItem<String>(
-                  child: const Text('View on GitHub'), value: 'View on GitHub'),
+                  child: const Text('GitHubで見る'), value: 'View on GitHub'),
               PopupMenuItem<String>(
-                  child: const Text('Report a bug'), value: 'Report a bug'),
+                  child: const Text('バグ報告'), value: 'Report a bug'),
               PopupMenuItem<String>(
-                  child: const Text('About this app'), value: 'About this app'),
+                  child: const Text('このアプリについて'), value: 'About this app'),
             ]
           : [
               PopupMenuItem<String>(
-                  child: const Text('Enter YouTube URL'),
+                  child: const Text('YouTubeのURLを入力'),
                   value: 'Enter YouTube URL'),
               PopupMenuItem<String>(
-                  child: const Text('View on GitHub'), value: 'View on GitHub'),
+                  child: const Text('GitHubで見る'), value: 'View on GitHub'),
               PopupMenuItem<String>(
-                  child: const Text('Report a bug'), value: 'Report a bug'),
+                  child: const Text('バグ報告'), value: 'Report a bug'),
               PopupMenuItem<String>(
-                  child: const Text('About this app'), value: 'About this app'),
+                  child: const Text('このアプリについて'), value: 'About this app'),
             ],
       elevation: 8.0,
     );
@@ -384,17 +384,17 @@ class _HomeState extends State<Home> {
               ),
               content: TextField(
                 controller: _textFieldController,
-                decoration: InputDecoration(hintText: "Enter YouTube URL"),
+                decoration: InputDecoration(hintText: "YouTubeのURLを入力..."),
               ),
               actions: <Widget>[
                 TextButton(
-                  child: Text('CANCEL', style: TextStyle(color: Colors.white)),
+                  child: Text('キャンセル', style: TextStyle(color: Colors.white)),
                   onPressed: () {
                     Navigator.pop(context);
                   },
                 ),
                 TextButton(
-                  child: Text('OK', style: TextStyle(color: Colors.white)),
+                  child: Text('エンター', style: TextStyle(color: Colors.white)),
                   onPressed: () {
                     String _webURL = _textFieldController.text;
 
@@ -428,12 +428,9 @@ class _HomeState extends State<Home> {
         await launch("https://github.com/lrorpilla/jidoujisho/issues/new");
         break;
       case "About this app":
-        const String legalese = "A video player for language learners.\n\n" +
-            "Built for the Japanese language learning community by Leo " +
-            "Rafael Orpilla. Word definitions queried from Jisho.org. Logo " +
-            "by Aaron Marbella.\n\nIf you like my work, you can help me out " +
-            "by providing feedback, making a donation, reporting issues or " +
-            "collaborating with me on further improvements on GitHub.";
+        const String legalese = "言語学習者のために設計されたビデオプレーヤー。\n\n" +
+            "Leo Rafael Orpilla が言語学習コミュニティのために開発しました。" +
+            "Weblio.jpからクエリされた辞書定義。Aaron Marbella が作ったロゴです。\n\n私の作品を気に入っていただけたら、フィードバックを提供したり、寄付をしたり、バグを報告したり、GitHub のさらなる改善に向けて私と協力したりすることで、私を支援することができます。";
 
         showLicensePage(
           context: context,
@@ -573,7 +570,7 @@ class _YouTubeResultState extends State<YouTubeResult>
     String videoPublishTime =
         result.uploadDate == null ? "" : getTimeAgoFormatted(result.uploadDate);
     String videoViewCount = getViewCountFormatted(result.engagement.viewCount);
-    String videoDetails = "$videoPublishTime · $videoViewCount views";
+    String videoDetails = "$videoViewCount 回視聴 · $videoPublishTime";
     String videoDuration =
         result.duration == null ? "" : getYouTubeDuration(result.duration);
 
@@ -634,8 +631,8 @@ class _YouTubeResultState extends State<YouTubeResult>
                 ),
               ),
               Text(
-                videoDetails == "$videoPublishTime · 0 views"
-                    ? "Trending #${index + 1} in Japan"
+                result.duration != null
+                    ? "アメリカのトレンド${index + 1}位"
                     : videoDetails,
                 style: TextStyle(
                   color: Colors.grey,
@@ -706,22 +703,22 @@ class _YouTubeResultState extends State<YouTubeResult>
     }
 
     Widget queryMessage = closedCaptionRow(
-      "Querying for closed captions...",
+      "字幕を検索中...",
       Colors.grey,
       Icons.youtube_searched_for,
     );
     Widget errorMessage = closedCaptionRow(
-      "Error querying closed captions",
+      "字幕のクエリ中にエラーが発生しました",
       Colors.grey,
       Icons.error,
     );
     Widget availableMessage = closedCaptionRow(
-      "Closed captioning available",
+      "字幕あり",
       Colors.green[200],
       Icons.closed_caption,
     );
     Widget unavailableMessage = closedCaptionRow(
-      "No closed captioning",
+      "字幕なし",
       Colors.red[200],
       Icons.closed_caption_disabled,
     );

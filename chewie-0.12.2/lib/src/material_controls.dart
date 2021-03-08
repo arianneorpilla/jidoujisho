@@ -248,12 +248,12 @@ class _MaterialControlsState extends State<MaterialControls>
           isScrollControlled: true,
           useRootNavigator: true,
           builder: (context) => const _MoreOptionsDialog(options: [
-            "Search Current Subtitle with Jisho.org",
-            "Translate Current Subtitle with DeepL",
-            "Translate Current Subtitle with Google Translate",
-            "Share Current Subtitle to App",
-            "Load External Subtitles",
-            "Export Current Context to Anki",
+            "Weblioで現在の字幕を検索する",
+            "DeepLで現在の字幕を翻訳する",
+            "Google翻訳で現在の字幕を翻訳する",
+            "現在の字幕を共有する",
+            "外部字幕を読み込む",
+            "現在のコンテキストをAnkiにエクスポート",
           ], icons: [
             Icons.menu_book_rounded,
             Icons.translate_rounded,
@@ -268,15 +268,15 @@ class _MaterialControlsState extends State<MaterialControls>
 
         switch (chosenOption) {
           case 0:
-            await launch("https://jisho.org/search/$subtitleText");
+            await launch("https://ejje.weblio.jp/content/$subtitleText");
             break;
           case 1:
             await launch(
-                "https://www.deepl.com/translator#ja/en/$subtitleText");
+                "https://www.deepl.com/translator#en/ja/$subtitleText");
             break;
           case 2:
             await launch(
-                "https://translate.google.com/?sl=ja&tl=en&text=$subtitleText&op=translate");
+                "https://translate.google.com/?sl=en&tl=ja&text=$subtitleText&op=translate");
             break;
           case 3:
             Share.share(subtitleText);
@@ -630,7 +630,7 @@ class _SelectAudioDialog extends StatelessWidget {
             color: Colors.red,
           ),
           const SizedBox(width: 16.0),
-          Text("Audio - $_option"),
+          Text("オーディオ - $_option"),
         ],
       );
     } else if (index < _options.length + _subtitles.length) {
@@ -642,7 +642,7 @@ class _SelectAudioDialog extends StatelessWidget {
             color: Colors.red,
           ),
           const SizedBox(width: 16.0),
-          Text("Subtitle - Track $_subIndex"),
+          Text("字幕 - トラック $_subIndex"),
         ],
       );
     } else {
@@ -654,7 +654,7 @@ class _SelectAudioDialog extends StatelessWidget {
             color: Colors.red,
           ),
           SizedBox(width: 16.0),
-          Text("Subtitle - None"),
+          Text("字幕 - オフ"),
         ],
       );
     }
