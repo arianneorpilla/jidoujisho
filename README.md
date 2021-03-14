@@ -6,9 +6,13 @@
 <h3 align="center">jidoujisho</h3>
 <p align="center">A mobile video player tailored for Japanese language learners.</p>
 
-<p align="center" style="margin:0"><b>Latest Release:<br>
+<p align="center" style="margin:0"><b>Latest Full Release:<br>
 <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.5.2-beta">0.5.2-beta 🇯🇵 → 🇬🇧</a><br>
-<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.5.3-enjp-beta">0.5.3-beta 🇬🇧 → 🇯🇵</a></p></b><br>
+<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.5.3-enjp-beta">0.5.3-beta 🇬🇧 → 🇯🇵</a></b><br></p>
+
+<p align="center" style="margin:0"><b>Latest Lite Release:</b><br>
+<a href='https://play.google.com/store/apps/details?id=com.lrorpilla.jidoujisho&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' width="150" src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png'/></a></p>
+
 
 # 📚 Uninterrupted language immersion at your fingertips
 
@@ -26,7 +30,7 @@
 
 # 🛠️ More features are on the way
 
-**jidoujisho is still in active development.** The app is available to download here on GitHub and is ready for use, while a lite version of the application will be available on the Google Play Store. Current features planned on the roadmap listed below, but as of now there is no estimate on any updates.
+**jidoujisho is still in active development.** The full app is available to download here on GitHub and is ready for use. <b><a href="https://play.google.com/store/apps/details?id=com.lrorpilla.jidoujisho">A lite version of the application without YouTube features is now available on the Google Play Store</b></a>. Current features planned on the roadmap are listed below, but as of now there is no estimate on any updates.
 
 - [ ] **Morphological analysis of subtitles** for better text selection and **offline dictionary use**
 - [ ] **Use of the AnkiDroid API** instead of share intent to streamline card export
