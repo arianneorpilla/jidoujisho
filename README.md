@@ -24,7 +24,7 @@
 - [x] Selecting a word allows export to AnkiDroid with the **sentence, answer, meaning and reading**
 - [x] **Repeat the current subtitle from the beginning** by flicking horizontally
 - [x] Swipe vertically to open the **transcript to jump to time and review subtitles**
-- [x] **(GitHub Version Only)** **YouTube support** for videos with **Japanese user-generated subtitles**
+- [x] **(GitHub Version)** **YouTube support** for videos with **Japanese user-generated subtitles**
 - [x] **(Experimental)** Custom Japanese-Japanese dictionary support **(tested for Shinmeikai)**
 - [x] **(Experimental)** Weblio.jp **English to Japanese support** and full Japanese localization
 
