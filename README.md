@@ -33,7 +33,7 @@ Please note that the development of the app switches between changes being imple
 
 ### Next Up
 - [ ] **YouTube playback** is currently broken and under investigation for a fix
-- [ ] **User interface, layout, video playback preferences** and Anki output customisation, with **broader custom dictionary and language support**
+- [ ] User preferences and Anki output customisation, with **broader custom dictionary and language support**
 - [ ] Fixes for **slow video loading due to scoped storage** are planned at some point
 
 ### Coming Soon
