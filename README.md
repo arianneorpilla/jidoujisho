@@ -29,14 +29,14 @@
 
 **jidoujisho is still in active development.** The full app is available to download here on GitHub and is ready for use. <b><a href="https://play.google.com/store/apps/details?id=com.lrorpilla.jidoujisho">A lite version of the application without YouTube features is now available on the Google Play Store</b></a>. Current features planned on the roadmap are listed below, but as of now there is no estimate on any updates.
 
-Please note that the development of the app switches between changes being implemented and being left alone for daily use. Update frequency may depend on the greviousness of any issues that arise. **Hiatuses provide practical insight on usage and where development should go next.**
+Please note that the development of the app switches between changes being implemented and being left alone for daily use. Update frequency may depend on the gravity of any issues that arise. **Hiatuses provide practical insight on usage and where development should go next.**
 
-### Next Up
+### 💨 Next Up
 - [ ] **YouTube playback** is currently broken and under investigation for a fix
 - [ ] User preferences and Anki output customisation, with **broader custom dictionary and language support**
 - [ ] Fixes for **slow video loading due to scoped storage** are planned at some point
 
-### Coming Soon
+### 🛣️ Coming Soon
 - [ ] **Morphological analysis of subtitles** for better text selection and **offline dictionary use**
 - [ ] **Use of the AnkiDroid API** instead of share intent to streamline card export
 - [ ] Multiple subtitle tracks at a given time, and **immersion difficulty levels** for oral practice
