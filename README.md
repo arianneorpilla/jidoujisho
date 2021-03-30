@@ -31,7 +31,7 @@
 
 Please note that the development of the app switches between changes being implemented and being left alone for daily use. Update frequency may depend on the gravity of any issues that arise. **Hiatuses provide practical insight on usage and where development should go next.**
 
-### 💨 Next Up
+### 🚅 Next Up
 - [ ] **YouTube playback** is currently broken and under investigation for a fix
 - [ ] User preferences and Anki output customisation, with **broader custom dictionary and language support**
 - [ ] Fixes for **slow video loading due to scoped storage** are planned at some point
