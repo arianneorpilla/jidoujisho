@@ -24,6 +24,15 @@
 - [x] **(Experimental)** Custom Japanese-Japanese dictionary support **(tested for Shinmeikai)**
 - [x] **(Experimental)** Weblio.jp **English to Japanese support** and full Japanese localization
 
+
+# ⚕️ Current state of the project
+
+Please note that the development of the app switches between changes being implemented and being left alone for daily use. Update frequency may depend on the greviousness of any issues that arise. Hiatuses provide practical insight on usage and where development should go next. 
+
+* **YouTube playback** is currently broken and under investigation for a fix
+* **Customisation of the user experience** is next on the roadmap, with **broader custom dictionary and language support**
+* Fixes for **slow video loading due to scoped storage** are planned at some point
+
 # 🛠️ More features are on the way
 
 **jidoujisho is still in active development.** The full app is available to download here on GitHub and is ready for use. <b><a href="https://play.google.com/store/apps/details?id=com.lrorpilla.jidoujisho">A lite version of the application without YouTube features is now available on the Google Play Store</b></a>. Current features planned on the roadmap are listed below, but as of now there is no estimate on any updates.
