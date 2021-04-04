@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
-import 'package:ext_video_player/ext_video_player.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
+import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:share/share.dart';
@@ -60,7 +61,7 @@ String timedLineToSRT(Map<String, dynamic> line, int lineCount) {
   return srtLine;
 }
 
-Future exportCurrentFrame(VideoPlayerController controller) async {
+Future exportCurrentFrame(VlcPlayerController controller) async {
   File imageFile = File(previewImageDir);
   if (imageFile.existsSync()) {
     imageFile.deleteSync();
@@ -99,7 +100,7 @@ List<File> extractWebSubtitle(String webSubtitle) {
 }
 
 Future exportCurrentAudio(
-    VideoPlayerController controller, Subtitle subtitle) async {
+    VlcPlayerController controller, Subtitle subtitle) async {
   File audioFile = File(previewAudioDir);
   if (audioFile.existsSync()) {
     audioFile.deleteSync();
@@ -112,7 +113,14 @@ Future exportCurrentAudio(
   timeStart = getTimestampFromDuration(subtitle.startTime);
   timeEnd = getTimestampFromDuration(subtitle.endTime);
 
-  audioIndex = controller.getCurrentAudioIndex().toString();
+  switch (controller.dataSourceType) {
+    case DataSourceType.network:
+      audioIndex = "0";
+      break;
+    default:
+      audioIndex = (controller.value.activeAudioTrack - 1).toString();
+      break;
+  }
 
   final FlutterFFmpeg _flutterFFmpeg = new FlutterFFmpeg();
 
@@ -179,7 +187,7 @@ Future<String> extractNonSrtSubtitles(File file) async {
 
 Future exportToAnki(
   BuildContext context,
-  VideoPlayerController controller,
+  VlcPlayerController controller,
   Subtitle subtitle,
   DictionaryEntry dictionaryEntry,
 ) async {
@@ -251,9 +259,6 @@ void showAnkiDialog(
     _meaningController,
   );
 
-  AudioPlayer audioPlayer = AudioPlayer();
-  imageCache.clear();
-
   showDialog(
     context: context,
     builder: (context) {
@@ -262,14 +267,25 @@ void showAnkiDialog(
           borderRadius: BorderRadius.zero,
         ),
         contentPadding: EdgeInsets.all(8),
-        content: SingleChildScrollView(
-          child: Column(
-            children: [
-              Image.file(File(previewImageDir)),
-              sentenceField,
-              wordField,
-              readingField,
-              meaningField,
+        content: new SingleChildScrollView(
+          child: Row(
+            children: <Widget>[
+              new Expanded(
+                flex: 30,
+                child: Image.file(File(previewImageDir), fit: BoxFit.contain),
+              ),
+              new Expanded(flex: 1, child: Container()),
+              new Expanded(
+                flex: 30,
+                child: Column(
+                  children: [
+                    sentenceField,
+                    wordField,
+                    readingField,
+                    meaningField,
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -288,6 +304,9 @@ void showAnkiDialog(
               ),
             ),
             onPressed: () async {
+              AudioPlayer audioPlayer = AudioPlayer();
+              imageCache.clear();
+
               await audioPlayer.stop();
               await audioPlayer.play(previewAudioDir, isLocal: true);
             },
@@ -369,9 +388,9 @@ void exportAnkiCard(
   }
 
   frontText =
-      "$addAudio\n$addImage\n<p style=\"font-size:30px;\">$sentence</p>";
+      "$addAudio\n$addImage\n<p id=\"sentence\" style=\"font-size:30px;\">$sentence</p>";
   backText =
-      "<p style=\"margin: 0\">$reading</h6>\n<h2 style=\"margin: 0\">$answer</h2><p><small>$meaning</p></small>";
+      "<p id=\"reading\" style=\"margin: 0\">$reading</h6>\n<h2 id=\"answer\"style=\"margin: 0\">$answer</h2>\n<p id=\"meaning\" style=\"margin: 0\"><small>$meaning</p></small>";
 
   Share.share(
     backText,

@@ -1,13 +1,13 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:chewie/src/chewie_player.dart';
 import 'package:chewie/src/chewie_progress_colors.dart';
 import 'package:chewie/src/material_progress_bar.dart';
 import 'package:chewie/src/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:ext_video_player/ext_video_player.dart';
+import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:share/share.dart';
+import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
@@ -24,7 +24,7 @@ class MaterialControls extends StatefulWidget {
 
 class _MaterialControlsState extends State<MaterialControls>
     with SingleTickerProviderStateMixin {
-  VideoPlayerValue _latestValue;
+  VlcPlayerValue _latestValue;
   double _latestVolume;
   bool _hideStuff = true;
   Timer _hideTimer;
@@ -36,7 +36,7 @@ class _MaterialControlsState extends State<MaterialControls>
   final barHeight = 48.0;
   final marginSize = 5.0;
 
-  VideoPlayerController controller;
+  VlcPlayerController controller;
   ChewieController chewieController;
   AnimationController playPauseIconAnimationController;
 
@@ -145,7 +145,6 @@ class _MaterialControlsState extends State<MaterialControls>
             //   _buildSpeedButton(controller),
             _buildToolsButton(controller),
             _buildMoreButton(controller),
-            if (chewieController.allowMuting) _buildMuteButton(controller),
             if (chewieController.allowFullScreen) _buildExpandButton(),
           ],
         ),
@@ -238,7 +237,7 @@ class _MaterialControlsState extends State<MaterialControls>
     );
   }
 
-  Widget _buildMoreButton(VideoPlayerController controller) {
+  Widget _buildMoreButton(VlcPlayerController controller) {
     return GestureDetector(
       onTap: () async {
         _hideTimer?.cancel();
@@ -264,7 +263,7 @@ class _MaterialControlsState extends State<MaterialControls>
           ]),
         );
 
-        final String subtitleText = controller.currentSubtitle.value.text;
+        final String subtitleText = chewieController.currentSubtitle.value.text;
 
         switch (chosenOption) {
           case 0:
@@ -282,16 +281,19 @@ class _MaterialControlsState extends State<MaterialControls>
             Share.share(subtitleText);
             break;
           case 4:
-            controller.callback();
+            chewieController.playExternalSubtitles();
             break;
           case 5:
             controller.pause();
-            await exportToAnki(
-              context,
-              controller,
-              controller.currentSubtitle.value,
-              controller.currentDictionaryEntry.value,
-            );
+
+            final Subtitle currentSubtitle =
+                chewieController.currentSubtitle.value;
+            final DictionaryEntry currentDictionaryEntry =
+                chewieController.currentDictionaryEntry.value;
+
+            exportToAnki(
+                context, controller, currentSubtitle, currentDictionaryEntry);
+
             break;
         }
       },
@@ -313,30 +315,36 @@ class _MaterialControlsState extends State<MaterialControls>
   }
 
   Widget _buildToolsButton(
-    VideoPlayerController controller,
+    VlcPlayerController controller,
   ) {
     return GestureDetector(
       onTap: () async {
         _hideTimer?.cancel();
 
-        final List<dynamic> audioTracks = await controller.getAudios();
+        final audioTracks = await controller.getAudioTracks();
+        final List<String> audioTrackNames = [];
+
+        final subtitleTracks = await controller.getSpuTracks();
+        final List<String> subtitleTrackNames = [];
+
+        audioTracks.forEach((index, name) => audioTrackNames.add(name));
+        subtitleTracks.forEach((index, name) => subtitleTrackNames.add(name));
 
         final chosenOption = await showModalBottomSheet<int>(
           context: context,
           isScrollControlled: true,
           useRootNavigator: true,
           builder: (context) => _SelectAudioDialog(
-            options: audioTracks,
-            subtitles: controller.internalSubs,
+            options: audioTrackNames,
+            subtitles: subtitleTrackNames,
           ),
         );
 
         if (chosenOption != null) {
           if (chosenOption < audioTracks.length) {
-            await controller.setAudioByIndex(chosenOption);
-            controller.setCurrentAudioIndex(chosenOption);
+            await controller.setAudioTrack(chosenOption + 1);
           } else {
-            controller.currentSubTrack.value =
+            chewieController.currentSubTrack.value =
                 chosenOption - audioTracks.length;
           }
         }
@@ -362,42 +370,7 @@ class _MaterialControlsState extends State<MaterialControls>
     );
   }
 
-  GestureDetector _buildMuteButton(
-    VideoPlayerController controller,
-  ) {
-    return GestureDetector(
-      onTap: () {
-        _cancelAndRestartTimer();
-
-        if (_latestValue.volume == 0) {
-          controller.setVolume(_latestVolume ?? 0.5);
-        } else {
-          _latestVolume = controller.value.volume;
-          controller.setVolume(0.0);
-        }
-      },
-      child: AnimatedOpacity(
-        opacity: _hideStuff ? 0.0 : 1.0,
-        duration: const Duration(milliseconds: 300),
-        child: ClipRect(
-          child: Container(
-            height: barHeight,
-            padding: const EdgeInsets.only(
-              left: 8.0,
-              right: 8.0,
-            ),
-            child: Icon(
-              (_latestValue != null && _latestValue.volume > 0)
-                  ? Icons.volume_up
-                  : Icons.volume_off,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  GestureDetector _buildPlayPause(VideoPlayerController controller) {
+  GestureDetector _buildPlayPause(VlcPlayerController controller) {
     return GestureDetector(
       onTap: _playPause,
       child: Container(
@@ -478,12 +451,7 @@ class _MaterialControlsState extends State<MaterialControls>
   }
 
   void _playPause() {
-    bool isFinished;
-    if (_latestValue.duration != null) {
-      isFinished = _latestValue.position >= _latestValue.duration;
-    } else {
-      isFinished = false;
-    }
+    final isFinished = controller.value.isEnded;
 
     setState(() {
       if (controller.value.isPlaying) {
@@ -494,14 +462,14 @@ class _MaterialControlsState extends State<MaterialControls>
       } else {
         _cancelAndRestartTimer();
 
-        if (!controller.value.initialized) {
+        if (!controller.value.isInitialized) {
           controller.initialize().then((_) {
             controller.play();
             playPauseIconAnimationController.forward();
           });
         } else {
           if (isFinished) {
-            controller.seekTo(const Duration());
+            controller.stop();
           }
           playPauseIconAnimationController.forward();
           controller.play();
@@ -602,47 +570,40 @@ class _MoreOptionsDialog extends StatelessWidget {
 class _SelectAudioDialog extends StatelessWidget {
   const _SelectAudioDialog({
     Key key,
-    @required List<dynamic> options,
-    @required List<File> subtitles,
+    @required List<String> options,
+    @required List<String> subtitles,
   })  : _options = options,
         _subtitles = subtitles,
         super(key: key);
 
-  final List<dynamic> _options;
-  final List<File> _subtitles;
+  final List<String> _options;
+  final List<String> _subtitles;
 
   Widget buildRow(int index) {
-    String _option;
-    int _subIndex = 0;
-
     if (index < _options.length) {
-      _option = _options[index].toString();
-    } else {
-      _subIndex = index - _options.length;
-    }
-
-    if (index < _options.length) {
+      final String _text = _options[index];
       return Row(
         children: [
           const Icon(
             Icons.audiotrack_outlined,
             size: 20.0,
-            color: Colors.red,
+            color: Colors.redAccent,
           ),
           const SizedBox(width: 16.0),
-          Text("Audio - $_option"),
+          Text("Audio - $_text"),
         ],
       );
     } else if (index < _options.length + _subtitles.length) {
+      final String _text = _subtitles[index - _options.length];
       return Row(
         children: [
           const Icon(
             Icons.subtitles_outlined,
             size: 20.0,
-            color: Colors.red,
+            color: Colors.redAccent,
           ),
           const SizedBox(width: 16.0),
-          Text("Subtitle - Track $_subIndex"),
+          Text("Subtitle - $_text"),
         ],
       );
     } else {
@@ -651,7 +612,7 @@ class _SelectAudioDialog extends StatelessWidget {
           Icon(
             Icons.subtitles_off_outlined,
             size: 20.0,
-            color: Colors.red,
+            color: Colors.redAccent,
           ),
           SizedBox(width: 16.0),
           Text("Subtitle - None"),
@@ -675,7 +636,7 @@ class _SelectAudioDialog extends StatelessWidget {
         );
       },
       itemCount: (_subtitles.isEmpty)
-          ? _options.length + 1
+          ? _options.length
           : _options.length + _subtitles.length + 1,
     );
   }

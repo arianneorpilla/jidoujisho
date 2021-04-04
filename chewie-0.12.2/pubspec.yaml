@@ -11,13 +11,11 @@ environment:
 
 dependencies:
   audioplayers:
-  cupertino_icons: ^1.0.0
-  ext_video_player:
-    path: ../ext_video_player-0.0.4
   file_picker:
   flutter:
     sdk: flutter
   flutter_ffmpeg:
+  flutter_vlc_player: ^6.0.1
   intl:
   jidoujisho:
     path: ../

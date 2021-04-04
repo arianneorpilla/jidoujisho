@@ -1,11 +1,14 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:chewie/src/chewie_progress_colors.dart';
 import 'package:chewie/src/player_with_controls.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:ext_video_player/ext_video_player.dart';
+import 'package:flutter_vlc_player/flutter_vlc_player.dart';
+import 'package:jidoujisho/util.dart';
+import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
 import 'package:wakelock/wakelock.dart';
 
 typedef ChewieRoutePageBuilder = Widget Function(
@@ -208,6 +211,12 @@ class ChewieState extends State<Chewie> {
 class ChewieController extends ChangeNotifier {
   ChewieController({
     @required this.videoPlayerController,
+    @required this.internalSubs,
+    @required this.clipboard,
+    @required this.currentDictionaryEntry,
+    @required this.currentSubtitle,
+    @required this.currentSubTrack,
+    @required this.playExternalSubtitles,
     this.aspectRatio,
     this.autoInitialize = false,
     this.autoPlay = false,
@@ -241,7 +250,13 @@ class ChewieController extends ChangeNotifier {
   }
 
   /// The controller for the video you want to play
-  final VideoPlayerController videoPlayerController;
+  final VlcPlayerController videoPlayerController;
+  final List<File> internalSubs;
+  final ValueNotifier<String> clipboard;
+  final ValueNotifier<Subtitle> currentSubtitle;
+  final ValueNotifier<DictionaryEntry> currentDictionaryEntry;
+  final ValueNotifier<int> currentSubTrack;
+  final VoidCallback playExternalSubtitles;
 
   /// Initialize the Video on Startup. This will prep the video for playback.
   final bool autoInitialize;
@@ -340,11 +355,9 @@ class ChewieController extends ChangeNotifier {
   bool get isPlaying => videoPlayerController.value.isPlaying;
 
   Future _initialize() async {
-    await videoPlayerController.setLooping(looping);
-
     if ((autoInitialize || autoPlay) &&
-        !videoPlayerController.value.initialized) {
-      await videoPlayerController.initialize();
+        !videoPlayerController.value.isInitialized) {
+      videoPlayerController.initialize();
     }
 
     if (autoPlay) {
@@ -408,7 +421,7 @@ class ChewieController extends ChangeNotifier {
   }
 
   Future<void> setVolume(double volume) async {
-    await videoPlayerController.setVolume(volume);
+    await videoPlayerController.setVolume(volume.floor());
   }
 }
 
