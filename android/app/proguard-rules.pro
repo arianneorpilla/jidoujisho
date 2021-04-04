@@ -11,3 +11,4 @@
 -keep class com.arthenica.mobileffmpeg.AbiDetect {
     native <methods>;
 }
+-keep class org.videolan.libvlc.** { *; }

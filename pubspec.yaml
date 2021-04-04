@@ -3,7 +3,7 @@ description: A mobile video player tailored for Japanese language learners.
 
 publish_to: none
 
-version: 0.5.4+beta
+version: 0.6.0+beta
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -16,7 +16,7 @@ dependencies:
   chewie:
     path: ./chewie-0.12.2
   device_info:
-  file_picker: <=3.0.1
+  gx_file_picker:
   flutter_vlc_player: ^6.0.1
   clipboard_monitor: ^0.9.1
   unofficial_jisho_api: ^1.1.0

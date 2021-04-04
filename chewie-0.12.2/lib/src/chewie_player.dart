@@ -355,26 +355,22 @@ class ChewieController extends ChangeNotifier {
   bool get isPlaying => videoPlayerController.value.isPlaying;
 
   Future _initialize() async {
-    if ((autoInitialize || autoPlay) &&
-        !videoPlayerController.value.isInitialized) {
-      videoPlayerController.initialize();
-    }
+    // if ((autoInitialize || autoPlay) &&
+    //     !videoPlayerController.value.isInitialized) {
+    //   videoPlayerController.initialize();
+    // }
 
-    if (autoPlay) {
-      if (fullScreenByDefault) {
-        enterFullScreen();
-      }
+    // await videoPlayerController.setLooping(looping);
 
-      await videoPlayerController.play();
-    }
+    // if (startAt != null) {
+    //   await videoPlayerController.seekTo(startAt);
+    // }
 
-    if (startAt != null) {
-      await videoPlayerController.seekTo(startAt);
-    }
+    // if (fullScreenByDefault) {
+    //   videoPlayerController.addListener(_fullScreenListener);
+    // }
 
-    if (fullScreenByDefault) {
-      videoPlayerController.addListener(_fullScreenListener);
-    }
+    // await videoPlayerController.play();
   }
 
   Future<void> _fullScreenListener() async {

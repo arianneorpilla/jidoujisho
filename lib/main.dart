@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:async/async.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:gx_file_picker/gx_file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fuzzy/fuzzy.dart';
@@ -39,7 +39,6 @@ Map<String, AsyncMemoizer> captioningCache = {};
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIOverlays([]);
-  await FilePicker.platform.clearTemporaryFiles();
 
   PackageInfo packageInfo = await PackageInfo.fromPlatform();
   appName = packageInfo.appName;
