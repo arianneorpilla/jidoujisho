@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:async/async.dart';
-import 'package:gx_file_picker/gx_file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fuzzy/fuzzy.dart';
@@ -111,6 +110,13 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+
     return new WillPopScope(
       onWillPop: _onWillPop,
       child: new Scaffold(

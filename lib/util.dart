@@ -259,6 +259,9 @@ void showAnkiDialog(
     _meaningController,
   );
 
+  AudioPlayer audioPlayer = AudioPlayer();
+  imageCache.clear();
+
   showDialog(
     context: context,
     builder: (context) {
@@ -304,9 +307,6 @@ void showAnkiDialog(
               ),
             ),
             onPressed: () async {
-              AudioPlayer audioPlayer = AudioPlayer();
-              imageCache.clear();
-
               await audioPlayer.stop();
               await audioPlayer.play(previewAudioDir, isLocal: true);
             },

@@ -127,13 +127,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.3"
-  file_picker:
-    dependency: "direct main"
-    description:
-      name: file_picker
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.10.0"
   file_utils:
     dependency: "direct main"
     description:
@@ -207,6 +200,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.3.1"
+  gx_file_picker:
+    dependency: "direct main"
+    description:
+      name: gx_file_picker
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.9.0+2"
   html:
     dependency: transitive
     description:

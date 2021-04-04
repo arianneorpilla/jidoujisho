@@ -178,7 +178,21 @@ class _MaterialControlsState extends State<MaterialControls>
   }
 
   Expanded _buildHitArea() {
-    final bool isFinished = _latestValue.position >= _latestValue.duration;
+    Widget getIcon() {
+      if (_latestValue.isEnded) {
+        return const Icon(Icons.replay, size: 32.0);
+      } else {
+        if (!_latestValue.isInitialized) {
+          return const Icon(Icons.play_arrow, color: Colors.transparent);
+        }
+
+        return AnimatedIcon(
+          icon: AnimatedIcons.play_pause,
+          progress: playPauseIconAnimationController,
+          size: 32.0,
+        );
+      }
+    }
 
     return Expanded(
       child: GestureDetector(
@@ -211,19 +225,15 @@ class _MaterialControlsState extends State<MaterialControls>
               child: GestureDetector(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Theme.of(context).dialogBackgroundColor,
+                    color: (_latestValue.isInitialized)
+                        ? Theme.of(context).dialogBackgroundColor
+                        : Colors.transparent,
                     borderRadius: BorderRadius.circular(48.0),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: IconButton(
-                        icon: isFinished
-                            ? const Icon(Icons.replay, size: 32.0)
-                            : AnimatedIcon(
-                                icon: AnimatedIcons.play_pause,
-                                progress: playPauseIconAnimationController,
-                                size: 32.0,
-                              ),
+                        icon: getIcon(),
                         onPressed: () {
                           _playPause();
                         }),
@@ -399,7 +409,9 @@ class _MaterialControlsState extends State<MaterialControls>
     return Padding(
       padding: const EdgeInsets.only(right: 24.0),
       child: Text(
-        '${formatDuration(position)} / ${formatDuration(duration)}',
+        duration != Duration.zero
+            ? '${formatDuration(position)} / ${formatDuration(duration)}'
+            : '',
         style: const TextStyle(
           fontSize: 14.0,
         ),
