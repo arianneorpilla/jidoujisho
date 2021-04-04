@@ -16,7 +16,7 @@ dependencies:
   chewie:
     path: ./chewie-0.12.2
   device_info:
-  gx_file_picker:
+  file_picker:
   flutter_vlc_player: ^6.0.1
   clipboard_monitor: ^0.9.1
   unofficial_jisho_api: ^1.1.0

@@ -7,7 +7,7 @@
 <p align="center">A mobile video player tailored for Japanese language learners.</p>
 
 <p align="center" style="margin:0"><b>Latest GitHub Release:<br>
-<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.6.0-beta">0.6.0-beta 🇯🇵 → 🇬🇧</a><br>
+<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.6.1-beta">0.6.1-beta 🇯🇵 → 🇬🇧</a><br>
 <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.5.3-enjp-beta">0.5.3-beta 🇬🇧 → 🇯🇵</a></b><br></p>
 
 # 📚 Uninterrupted language immersion at your fingertips
@@ -32,8 +32,8 @@
 Please note that the development of the app switches between changes being implemented and being left alone for daily use. Update frequency may depend on the gravity of any issues that arise. **Hiatuses provide practical insight on usage and where development should go next.**
 
 ### 🚅 Next Up
+- [x] Fixes for **slow video loading due to scoped storage** and **H.265 video playback**
 - [ ] User preferences and Anki output customisation, with **broader custom dictionary and language support**
-- [ ] Fixes for **slow video loading due to scoped storage** are planned at some point
 
 ### 🛣️ Coming Soon
 - [ ] **Morphological analysis of subtitles** for better text selection and **offline dictionary use**
