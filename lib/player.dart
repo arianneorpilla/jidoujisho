@@ -110,6 +110,7 @@ class Player extends StatelessWidget {
             );
           default:
             String webStream = snapshot.data;
+
             return new FutureBuilder(
               future: http.read(
                   "https://www.youtube.com/api/timedtext?lang=ja&v=$videoID"),

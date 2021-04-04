@@ -10,24 +10,24 @@ environment:
   flutter: ">=1.22.0 <2.0.0"
 
 dependencies:
+  audioplayers:
   cupertino_icons: ^1.0.0
-  flutter:
-    sdk: flutter
   ext_video_player:
     path: ../ext_video_player-0.0.4
-  wakelock: ^0.2.1+1
-  share:
-  intl:
-  subtitle_wrapper_package:
-    path: ../subtitle_wrapper_package-1.0.4
   file_picker:
-  url_launcher:
+  flutter:
+    sdk: flutter
   flutter_ffmpeg:
-  path:
-  path_provider:
+  intl:
   jidoujisho:
     path: ../
-  audioplayers:
+  path:
+  path_provider:
+  share:
+  subtitle_wrapper_package:
+    path: ../subtitle_wrapper_package-1.0.4
+  url_launcher:
+  wakelock: ^0.2.1+1
 
 dev_dependencies:
   flutter_test:

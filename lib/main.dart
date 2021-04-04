@@ -11,10 +11,10 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import 'package:jidoujisho/player.dart';
 import 'package:jidoujisho/util.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 String appDirPath;
 String previewImageDir;

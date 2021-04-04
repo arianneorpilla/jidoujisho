@@ -567,6 +567,7 @@ Future<String> getPlayerYouTubeInfo(String webURL) async {
   if (videoID != null) {
     YoutubeExplode yt = YoutubeExplode();
     var streamManifest = await yt.videos.streamsClient.getManifest(webURL);
+    print(streamManifest);
     var streamInfo = streamManifest.muxed.withHighestBitrate();
     var streamURL = streamInfo.url.toString();
 
