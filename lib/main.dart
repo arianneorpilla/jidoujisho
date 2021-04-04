@@ -25,6 +25,8 @@ String packageName;
 String version;
 String buildNumber;
 
+int sdkInt;
+
 List<DictionaryEntry> customDictionary;
 Fuzzy customDictionaryFuzzy;
 
@@ -124,7 +126,15 @@ class _HomeState extends State<Home> {
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             Navigator.push(
-                context, MaterialPageRoute(builder: (context) => Player()));
+                    context, MaterialPageRoute(builder: (context) => Player()))
+                .then((returnValue) {
+              SystemChrome.setPreferredOrientations([
+                DeviceOrientation.portraitDown,
+                DeviceOrientation.portraitUp,
+                DeviceOrientation.landscapeLeft,
+                DeviceOrientation.landscapeRight,
+              ]);
+            });
           },
           child: Icon(Icons.video_collection_sharp),
           backgroundColor: Colors.red,
@@ -403,7 +413,14 @@ class _HomeState extends State<Home> {
                           MaterialPageRoute(
                             builder: (context) => Player(streamURL: _webURL),
                           ),
-                        );
+                        ).then((returnValue) {
+                          SystemChrome.setPreferredOrientations([
+                            DeviceOrientation.portraitDown,
+                            DeviceOrientation.portraitUp,
+                            DeviceOrientation.landscapeLeft,
+                            DeviceOrientation.landscapeRight,
+                          ]);
+                        });
                       }
                     } on Exception {
                       Navigator.pop(context);
@@ -660,7 +677,14 @@ class _YouTubeResultState extends State<YouTubeResult>
           MaterialPageRoute(
             builder: (context) => Player(streamURL: videoStreamURL),
           ),
-        );
+        ).then((returnValue) {
+          SystemChrome.setPreferredOrientations([
+            DeviceOrientation.portraitDown,
+            DeviceOrientation.portraitUp,
+            DeviceOrientation.landscapeLeft,
+            DeviceOrientation.landscapeRight,
+          ]);
+        });
       },
       child: Container(
         height: 128,

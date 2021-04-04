@@ -15,15 +15,14 @@ dependencies:
     path: ./subtitle_wrapper_package-1.0.4/
   chewie:
     path: ./chewie-0.12.2
-  ext_video_player:
-    path: ./ext_video_player-0.0.4/
-  file_picker:
-  flutter_phoenix: ^0.1.0
+  device_info:
+  file_picker: <=3.0.1
+  flutter_vlc_player: ^6.0.1
   clipboard_monitor: ^0.9.1
   unofficial_jisho_api: ^1.1.0
   path_provider:
   file_utils: ^0.1.4
-  permission_handler: ^5.0.1+1 
+  permission_handler:
   package_info: ^0.4.3+4
   http:
   xml:
@@ -32,9 +31,6 @@ dependencies:
   youtube_player_flutter: ^6.1.0+4
   url_launcher:
   flutter_ffmpeg:
-  video_player:
-    path: ./video_player/video_player # Fork by balvinderz
-  bordered_text: ^1.0.1
   audioplayers: ^0.10.0
   share: ^0.6.5+4
   scrollable_positioned_list: ^0.1.9
@@ -51,13 +47,6 @@ dependencies:
   async:
   wakelock:
 dependency_overrides:
-  video_player:
-    path: ./video_player/video_player # Fork by balvinderz
-      
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.1
 
 dev_dependencies:
   flutter_launcher_icons: "^0.8.0"

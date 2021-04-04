@@ -2,11 +2,12 @@ import 'dart:io';
 
 import 'package:chewie/chewie.dart';
 import 'package:clipboard_monitor/clipboard_monitor.dart';
-import 'package:ext_video_player/ext_video_player.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:http/http.dart' as http;
+import 'package:jidoujisho/main.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
 import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
@@ -24,6 +25,11 @@ class Player extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+
     SystemChrome.setEnabledSystemUIOverlays([]);
     Wakelock.enable();
 
@@ -212,7 +218,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
   String _defaultSubtitles;
   String _webStream;
 
-  VideoPlayerController _videoPlayerController;
+  VlcPlayerController _videoPlayerController;
   ChewieController _chewieController;
   SubTitleWrapper _subTitleWrapper;
   SubtitleController _subTitleController;
@@ -251,6 +257,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
     return new WillPopScope(
       onWillPop: _onWillPop,
       child: new Scaffold(
+        resizeToAvoidBottomInset: false,
         backgroundColor: Colors.black,
         body: Stack(
           children: [
@@ -334,34 +341,55 @@ class _VideoPlayerState extends State<VideoPlayer> {
         false;
   }
 
-  VideoPlayerController getVideoPlayerController() {
-    if (_videoFile != null) {
-      _videoPlayerController ??= VideoPlayerController.file(
-        _videoFile,
-        _internalSubs,
-        _clipboard,
-        _currentDictionaryEntry,
-        _currentSubtitle,
-        _currentSubTrack,
-        playExternalSubtitles,
-      );
+  VlcPlayerController getVideoPlayerController() {
+    if (_webStream == null) {
+      _videoPlayerController ??= VlcPlayerController.file(_videoFile,
+          hwAcc: HwAcc.FULL,
+          options: VlcPlayerOptions(
+              audio: VlcAudioOptions(["--audio-track=0", "--sub-track=999"])));
     } else {
-      _videoPlayerController ??= VideoPlayerController.network(
+      _videoPlayerController ??= VlcPlayerController.network(
         _webStream,
-        _internalSubs,
-        _clipboard,
-        _currentDictionaryEntry,
-        _currentSubtitle,
-        _currentSubTrack,
-        playExternalSubtitles,
+        hwAcc: HwAcc.FULL,
       );
     }
     return _videoPlayerController;
   }
 
+  // VlcPlayerController getVideoPlayerController() {
+  //   if (_videoFile != null) {
+  //     _videoPlayerController ??= VlcPlayerController.file(file).file(
+  //       _videoFile,
+  //       _internalSubs,
+  //       _clipboard,
+  //       _currentDictionaryEntry,
+  //       _currentSubtitle,
+  //       _currentSubTrack,
+  //       playExternalSubtitles,
+  //     );
+  //   } else {
+  //     _videoPlayerController ??= VideoPlayerController.network(
+  //       _webStream,
+  //       _internalSubs,
+  //       _clipboard,
+  //       _currentDictionaryEntry,
+  //       _currentSubtitle,
+  //       _currentSubTrack,
+  //       playExternalSubtitles,
+  //     );
+  //   }
+  //   return _videoPlayerController;
+  // }
+
   ChewieController getChewieController() {
     _chewieController ??= ChewieController(
       videoPlayerController: getVideoPlayerController(),
+      internalSubs: _internalSubs,
+      clipboard: _clipboard,
+      currentDictionaryEntry: _currentDictionaryEntry,
+      currentSubtitle: _currentSubtitle,
+      currentSubTrack: _currentSubTrack,
+      playExternalSubtitles: playExternalSubtitles,
       aspectRatio: getVideoPlayerController().value.aspectRatio,
       autoPlay: true,
       autoInitialize: true,
@@ -392,6 +420,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   SubTitleWrapper getSubtitleWrapper() {
     _subTitleWrapper ??= SubTitleWrapper(
+      focusNode: _subtitleFocusNode,
       subtitleNotifier: _currentSubtitle,
       videoPlayerController: getVideoPlayerController(),
       subtitleController: getSubtitleController(),
@@ -400,7 +429,6 @@ class _VideoPlayerState extends State<VideoPlayer> {
         hasBorder: true,
         fontSize: 24,
       ),
-      focusNode: _subtitleFocusNode,
       videoChild: FutureBuilder(
         future: getVideoPlayerController().initialize(),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -409,18 +437,8 @@ class _VideoPlayerState extends State<VideoPlayer> {
               return Container();
             default:
               _chewieController = getChewieController();
-              return FutureBuilder(
-                future: getVideoPlayerController().setAudioByIndex(0),
-                builder: (BuildContext context, AsyncSnapshot snapshot) {
-                  switch (snapshot.connectionState) {
-                    case ConnectionState.waiting:
-                      return Container();
-                    default:
-                      return Chewie(
-                        controller: _chewieController,
-                      );
-                  }
-                },
+              return Chewie(
+                controller: _chewieController,
               );
           }
         },
