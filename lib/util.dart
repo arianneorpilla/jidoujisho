@@ -2,13 +2,14 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flash/flash.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:share/share.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
 import 'package:unofficial_jisho_api/api.dart';
 import 'package:xml2json/xml2json.dart';
@@ -70,7 +71,7 @@ Future exportCurrentFrame(VlcPlayerController controller) async {
   Duration currentTime = controller.value.position;
   String formatted = getTimestampFromDuration(currentTime);
 
-  final FlutterFFmpeg _flutterFFmpeg = new FlutterFFmpeg();
+  final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
 
   String inputPath = controller.dataSource;
   String exportPath = "\"$appDirPath/exportImage.jpg\"";
@@ -122,7 +123,7 @@ Future exportCurrentAudio(
       break;
   }
 
-  final FlutterFFmpeg _flutterFFmpeg = new FlutterFFmpeg();
+  final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
 
   String inputPath = controller.dataSource;
   String outputPath = "\"$appDirPath/exportAudio.mp3\"";
@@ -138,7 +139,7 @@ Future<List<File>> extractSubtitles(File file) async {
   String inputPath = file.path;
   List<File> files = [];
 
-  final FlutterFFmpeg _flutterFFmpeg = new FlutterFFmpeg();
+  final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
 
   for (int i = 0; i < 10; i++) {
     String outputPath = "\"$appDirPath/extractSrt$i.srt\"";
@@ -167,7 +168,7 @@ Future<List<File>> extractSubtitles(File file) async {
 }
 
 Future<String> extractNonSrtSubtitles(File file) async {
-  final FlutterFFmpeg _flutterFFmpeg = new FlutterFFmpeg();
+  final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
 
   String inputPath = file.path;
   String outputPath = "\"$appDirPath/extractNonSrt.srt\"";
@@ -188,28 +189,50 @@ Future<String> extractNonSrtSubtitles(File file) async {
 Future exportToAnki(
   BuildContext context,
   VlcPlayerController controller,
+  ValueNotifier<String> clipboard,
   Subtitle subtitle,
   DictionaryEntry dictionaryEntry,
+  bool wasPlaying,
 ) async {
+  final prefs = await SharedPreferences.getInstance();
+  String lastDeck = prefs.getString("lastDeck") ?? "Default";
+
   await exportCurrentFrame(controller);
   await exportCurrentAudio(controller, subtitle);
+  List<String> decks = await getDecks();
 
-  showAnkiDialog(context, subtitle.text, dictionaryEntry);
+  clipboard.value = "";
+
+  showAnkiDialog(
+    context,
+    subtitle.text,
+    dictionaryEntry,
+    decks,
+    lastDeck,
+    controller,
+    clipboard,
+    wasPlaying,
+  );
 }
 
 void showAnkiDialog(
   BuildContext context,
   String sentence,
   DictionaryEntry dictionaryEntry,
+  List<String> decks,
+  String lastDeck,
+  VlcPlayerController controller,
+  ValueNotifier<String> clipboard,
+  bool wasPlaying,
 ) {
   TextEditingController _sentenceController =
-      new TextEditingController(text: sentence);
+      TextEditingController(text: sentence);
   TextEditingController _wordController =
-      new TextEditingController(text: dictionaryEntry.word);
+      TextEditingController(text: dictionaryEntry.word);
   TextEditingController _readingController =
-      new TextEditingController(text: dictionaryEntry.reading);
+      TextEditingController(text: dictionaryEntry.reading);
   TextEditingController _meaningController =
-      new TextEditingController(text: dictionaryEntry.meaning);
+      TextEditingController(text: dictionaryEntry.meaning);
 
   Widget displayField(
     String labelText,
@@ -265,21 +288,33 @@ void showAnkiDialog(
   showDialog(
     context: context,
     builder: (context) {
+      ValueNotifier<String> _selectedDeck = new ValueNotifier<String>(lastDeck);
+
       return AlertDialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.zero,
         ),
         contentPadding: EdgeInsets.all(8),
-        content: new SingleChildScrollView(
-          child: Row(
-            children: <Widget>[
-              new Expanded(
-                flex: 30,
-                child: Image.file(File(previewImageDir), fit: BoxFit.contain),
+        content: Row(
+          children: <Widget>[
+            Expanded(
+              flex: 30,
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Image.file(File(previewImageDir), fit: BoxFit.contain),
+                    DeckDropDown(
+                      decks: decks,
+                      selectedDeck: _selectedDeck,
+                    ),
+                  ],
+                ),
               ),
-              new Expanded(flex: 1, child: Container()),
-              new Expanded(
-                flex: 30,
+            ),
+            Expanded(flex: 1, child: Container()),
+            Expanded(
+              flex: 30,
+              child: SingleChildScrollView(
                 child: Column(
                   children: [
                     sentenceField,
@@ -289,8 +324,8 @@ void showAnkiDialog(
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
         actions: <Widget>[
           TextButton(
@@ -344,12 +379,23 @@ void showAnkiDialog(
             ),
             onPressed: () {
               exportAnkiCard(
+                _selectedDeck.value,
                 _sentenceController.text,
                 _wordController.text,
                 _readingController.text,
                 _meaningController.text,
               );
+
               Navigator.pop(context);
+
+              if (wasPlaying) {
+                controller.play();
+              }
+
+              clipboard.value = "&<&>exported${_selectedDeck.value}&<&>";
+              Future.delayed(Duration(seconds: 2), () {
+                clipboard.value = "";
+              });
             },
           ),
         ],
@@ -358,11 +404,8 @@ void showAnkiDialog(
   );
 }
 
-void exportAnkiCard(
-    String sentence, String answer, String reading, String meaning) {
-  String frontText;
-  String backText;
-
+void exportAnkiCard(String deck, String sentence, String answer, String reading,
+    String meaning) {
   DateTime now = DateTime.now();
   String newFileName =
       "jidoujisho-" + DateFormat('yyyyMMddTkkmmss').format(now);
@@ -387,15 +430,8 @@ void exportAnkiCard(
     addAudio = "[sound:$newFileName.mp3]";
   }
 
-  frontText =
-      "$addAudio\n$addImage\n<p id=\"sentence\" style=\"font-size:30px;\">$sentence</p>";
-  backText =
-      "<p id=\"reading\" style=\"margin: 0\">$reading</h6>\n<h2 id=\"answer\"style=\"margin: 0\">$answer</h2>\n<p id=\"meaning\" style=\"margin: 0\"><small>$meaning</p></small>";
-
-  Share.share(
-    backText,
-    subject: frontText,
-  );
+  requestPermissions();
+  addNote(deck, addImage, addAudio, sentence, answer, meaning, reading);
 }
 
 class DictionaryEntry {
@@ -713,4 +749,83 @@ Future<List<Video>> searchYouTubeVideos(String searchQuery) async {
 Future<List<Video>> searchYouTubeTrendingVideos() {
   YoutubeExplode yt = YoutubeExplode();
   return yt.playlists.getVideos("PLuXL6NS58Dyx-wTr5o7NiC7CZRbMA91DC").toList();
+}
+
+Future<void> requestPermissions() async {
+  const platform = const MethodChannel('com.lrorpilla.api/ankidroid');
+  await platform.invokeMethod('requestPermissions');
+}
+
+Future<void> addNote(
+  String deck,
+  String image,
+  String audio,
+  String sentence,
+  String answer,
+  String meaning,
+  String reading,
+) async {
+  const platform = const MethodChannel('com.lrorpilla.api/ankidroid');
+
+  try {
+    await platform.invokeMethod('addNote', <String, dynamic>{
+      'deck': deck,
+      'image': image,
+      'audio': audio,
+      'sentence': sentence,
+      'answer': answer,
+      'meaning': meaning,
+      'reading': reading,
+    });
+  } on PlatformException catch (e) {
+    print("Failed to add note via AnkiDroid API");
+    print(e);
+  }
+}
+
+Future<List<String>> getDecks() async {
+  const platform = const MethodChannel('com.lrorpilla.api/ankidroid');
+  Map<dynamic, dynamic> deckMap = await platform.invokeMethod('getDecks');
+
+  return deckMap.values.toList().cast<String>();
+}
+
+class DeckDropDown extends StatefulWidget {
+  final List<String> decks;
+  final ValueNotifier<String> selectedDeck;
+
+  const DeckDropDown({this.decks, this.selectedDeck});
+
+  @override
+  _DeckDropDownState createState() =>
+      _DeckDropDownState(this.selectedDeck, this.decks);
+}
+
+class _DeckDropDownState extends State<DeckDropDown> {
+  final ValueNotifier<String> _selectedDeck;
+  final List<String> _decks;
+
+  _DeckDropDownState(this._selectedDeck, this._decks);
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButton<String>(
+      isExpanded: true,
+      value: _selectedDeck.value,
+      items: _decks.map((String value) {
+        return new DropdownMenuItem<String>(
+          value: value,
+          child: new Text("  $value"),
+        );
+      }).toList(),
+      onChanged: (selectedDeck) async {
+        final prefs = await SharedPreferences.getInstance();
+        prefs.setString("lastDeck", selectedDeck);
+
+        setState(() {
+          _selectedDeck.value = selectedDeck;
+        });
+      },
+    );
+  }
 }

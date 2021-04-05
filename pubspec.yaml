@@ -19,6 +19,7 @@ dependencies:
   device_info:
   ext_storage:
   file_picker:
+  flash: ^1.5.1
   flutter_ffmpeg:
   flutter_vlc_player: ^6.0.1
   fuzzy:
@@ -28,7 +29,7 @@ dependencies:
   path_provider:
   permission_handler:
   scrollable_positioned_list: ^0.1.9
-  share: ^0.6.5+4
+  shared_preferences: ^2.0.5
   subtitle_wrapper_package:
     path: ./subtitle_wrapper_package
   transparent_image: ^1.0.0

@@ -418,7 +418,6 @@ class _HomeState extends State<Home> {
                           ),
                         ).then((returnValue) {
                           SystemChrome.setPreferredOrientations([
-                            DeviceOrientation.portraitDown,
                             DeviceOrientation.portraitUp,
                             DeviceOrientation.landscapeLeft,
                             DeviceOrientation.landscapeRight,

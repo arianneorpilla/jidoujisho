@@ -373,13 +373,6 @@ class ChewieController extends ChangeNotifier {
     // await videoPlayerController.play();
   }
 
-  Future<void> _fullScreenListener() async {
-    if (videoPlayerController.value.isPlaying && !_isFullScreen) {
-      enterFullScreen();
-      videoPlayerController.removeListener(_fullScreenListener);
-    }
-  }
-
   void enterFullScreen() {
     _isFullScreen = true;
     notifyListeners();

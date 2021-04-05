@@ -552,9 +552,46 @@ class _VideoPlayerState extends State<VideoPlayer> {
     );
   }
 
+  Widget buildDictionaryExporting(String clipboard) {
+    String lookupText = "Preparing to export...";
+
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            color: Colors.grey[800].withOpacity(0.6),
+            child: Text(lookupText),
+          ),
+        ),
+        Expanded(child: Container()),
+      ],
+    );
+  }
+
+  Widget buildDictionaryExported(String clipboard) {
+    String deckName = clipboard.substring(12, clipboard.length - 4);
+    String lookupText = "Card exported to \"$deckName\".";
+
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            color: Colors.grey[800].withOpacity(0.6),
+            child: Text(lookupText),
+          ),
+        ),
+        Expanded(child: Container()),
+      ],
+    );
+  }
+
   Widget buildDictionaryNoMatch(String clipboard) {
     String clipboardText = clipboard.replaceAll("@usejisho@", "");
-    String lookupText = "No matches for \"$clipboardText\" could be queried";
+    String lookupText = "No matches for \"$clipboardText\" could be queried.";
 
     _subtitleFocusNode.unfocus();
 
@@ -633,6 +670,12 @@ class _VideoPlayerState extends State<VideoPlayer> {
           future: getWordDetails(clipboard),
           builder:
               (BuildContext context, AsyncSnapshot<DictionaryEntry> snapshot) {
+            if (_clipboard.value == "&<&>export&<&>") {
+              return buildDictionaryExporting(clipboard);
+            }
+            if (_clipboard.value.startsWith("&<&>exported")) {
+              return buildDictionaryExported(clipboard);
+            }
             if (_clipboard.value == "") {
               return Container();
             }

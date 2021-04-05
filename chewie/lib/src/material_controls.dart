@@ -292,6 +292,7 @@ class _MaterialControlsState extends State<MaterialControls>
             chewieController.playExternalSubtitles();
             break;
           case 5:
+            final bool wasPlaying = await controller.isPlaying();
             controller.pause();
 
             final Subtitle currentSubtitle =
@@ -299,8 +300,16 @@ class _MaterialControlsState extends State<MaterialControls>
             final DictionaryEntry currentDictionaryEntry =
                 chewieController.currentDictionaryEntry.value;
 
+            chewieController.clipboard.value = "&<&>export&<&>";
+
             exportToAnki(
-                context, controller, currentSubtitle, currentDictionaryEntry);
+              context,
+              controller,
+              chewieController.clipboard,
+              currentSubtitle,
+              currentDictionaryEntry,
+              wasPlaying,
+            );
 
             break;
         }
