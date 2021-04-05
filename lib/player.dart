@@ -80,6 +80,7 @@ class Player extends StatelessWidget {
       },
     );
   }
+
   //Widget localPlayer() {
   //   return new FutureBuilder(
   //     future: FilePicker.getFile(
@@ -381,7 +382,6 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
             SystemChrome.setPreferredOrientations([
               DeviceOrientation.portraitUp,
-              DeviceOrientation.portraitDown,
               DeviceOrientation.landscapeLeft,
               DeviceOrientation.landscapeRight,
             ]);
@@ -411,31 +411,6 @@ class _VideoPlayerState extends State<VideoPlayer> {
     }
     return _videoPlayerController;
   }
-
-  // VlcPlayerController getVideoPlayerController() {
-  //   if (_videoFile != null) {
-  //     _videoPlayerController ??= VlcPlayerController.file(file).file(
-  //       _videoFile,
-  //       _internalSubs,
-  //       _clipboard,
-  //       _currentDictionaryEntry,
-  //       _currentSubtitle,
-  //       _currentSubTrack,
-  //       playExternalSubtitles,
-  //     );
-  //   } else {
-  //     _videoPlayerController ??= VideoPlayerController.network(
-  //       _webStream,
-  //       _internalSubs,
-  //       _clipboard,
-  //       _currentDictionaryEntry,
-  //       _currentSubtitle,
-  //       _currentSubTrack,
-  //       playExternalSubtitles,
-  //     );
-  //   }
-  //   return _videoPlayerController;
-  // }
 
   ChewieController getChewieController() {
     _chewieController ??= ChewieController(

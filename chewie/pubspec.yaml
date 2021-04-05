@@ -22,7 +22,7 @@ dependencies:
   path_provider:
   share:
   subtitle_wrapper_package:
-    path: ../subtitle_wrapper_package-1.0.4
+    path: ../subtitle_wrapper_package
   url_launcher:
   wakelock: ^0.2.1+1
 

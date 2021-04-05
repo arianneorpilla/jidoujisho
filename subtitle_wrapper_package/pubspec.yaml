@@ -9,12 +9,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  bloc: ^6.1.0
+  equatable: ^1.2.5
+  flutter_bloc: ^6.1.1
   http: ^0.12.2
   http_parser: ^3.1.4
-  equatable: ^1.2.5
-  bloc: ^6.1.0
-  flutter_bloc: ^6.1.1
-
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter

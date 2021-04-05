@@ -1,6 +1,5 @@
 name: jidoujisho
 description: A mobile video player tailored for Japanese language learners. 
-
 publish_to: none
 
 version: 0.6.1+beta
@@ -11,42 +10,37 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  subtitle_wrapper_package:
-    path: ./subtitle_wrapper_package-1.0.4/
-  chewie:
-    path: ./chewie-0.12.2
-  device_info:
-  file_picker:
-  flutter_vlc_player: ^6.0.1
-  clipboard_monitor: ^0.9.1
-  unofficial_jisho_api: ^1.1.0
-  path_provider:
-  file_utils: ^0.1.4
-  permission_handler:
-  package_info: ^0.4.3+4
-  http:
-  xml:
-  intl:
-  xml2json:
-  youtube_player_flutter: ^6.1.0+4
-  url_launcher:
-  flutter_ffmpeg:
+
   audioplayers: ^0.10.0
-  share: ^0.6.5+4
-  scrollable_positioned_list: ^0.1.9
-  transparent_image: ^1.0.0
+  async:
+  chewie:
+    path: ./chewie
+  clipboard_monitor: ^0.9.1
+  device_info:
   ext_storage:
+  file_picker:
+  flutter_ffmpeg:
+  flutter_vlc_player: ^6.0.1
   fuzzy:
+  intl:
+  http:
+  package_info: ^0.4.3+4
+  path_provider:
+  permission_handler:
+  scrollable_positioned_list: ^0.1.9
+  share: ^0.6.5+4
+  subtitle_wrapper_package:
+    path: ./subtitle_wrapper_package
+  transparent_image: ^1.0.0
+  unofficial_jisho_api: ^1.1.0
+  url_launcher:
+  xml2json:
   youtube_explode_dart:
     git:
       url: https://github.com/Hexer10/youtube_explode_dart
       ref: 5385ba1628c109312fc452162e32ebc20961b1dd
-  youtube_api:
-    git:
-      url: https://github.com/szepetry/youtube_api
-  async:
+  youtube_player_flutter:
   wakelock:
-dependency_overrides:
 
 dev_dependencies:
   flutter_launcher_icons: "^0.8.0"

@@ -112,7 +112,6 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
@@ -134,7 +133,6 @@ class _HomeState extends State<Home> {
                     context, MaterialPageRoute(builder: (context) => Player()))
                 .then((returnValue) {
               SystemChrome.setPreferredOrientations([
-                DeviceOrientation.portraitDown,
                 DeviceOrientation.portraitUp,
                 DeviceOrientation.landscapeLeft,
                 DeviceOrientation.landscapeRight,

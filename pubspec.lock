@@ -53,7 +53,7 @@ packages:
   chewie:
     dependency: "direct main"
     description:
-      path: "chewie-0.12.2"
+      path: chewie
       relative: true
     source: path
     version: "0.12.2"
@@ -134,13 +134,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.1"
-  file_utils:
-    dependency: "direct main"
-    description:
-      name: file_utils
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.1.4"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -160,6 +153,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.3.1"
+  flutter_inappwebview:
+    dependency: transitive
+    description:
+      name: flutter_inappwebview
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "5.3.1"
   flutter_launcher_icons:
     dependency: "direct dev"
     description:
@@ -200,13 +200,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.3.0"
-  globbing:
-    dependency: transitive
-    description:
-      name: globbing
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.3.1"
   html:
     dependency: transitive
     description:
@@ -397,7 +390,7 @@ packages:
   subtitle_wrapper_package:
     dependency: "direct main"
     description:
-      path: "subtitle_wrapper_package-1.0.4"
+      path: subtitle_wrapper_package
       relative: true
     source: path
     version: "1.0.4"
@@ -506,15 +499,8 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.1.0+3"
-  webview_media:
-    dependency: transitive
-    description:
-      name: webview_media
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.1.2"
   xml:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: xml
       url: "https://pub.dartlang.org"
@@ -534,15 +520,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.2.1"
-  youtube_api:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "0ef61e5c5ce3db904ece70490909122cff155330"
-      url: "https://github.com/szepetry/youtube_api"
-    source: git
-    version: "0.8.0"
   youtube_explode_dart:
     dependency: "direct main"
     description:
@@ -558,7 +535,7 @@ packages:
       name: youtube_player_flutter
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.1.1"
+    version: "8.0.0"
 sdks:
   dart: ">=2.12.0 <3.0.0"
-  flutter: ">=1.22.0"
+  flutter: ">=1.22.2"
