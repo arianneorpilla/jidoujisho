@@ -141,13 +141,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "6.1.0"
-  file_picker:
-    dependency: "direct main"
-    description:
-      name: file_picker
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "3.0.1"
   flash:
     dependency: "direct main"
     description:
@@ -194,7 +187,7 @@ packages:
       name: flutter_plugin_android_lifecycle
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.1"
+    version: "1.0.11"
   flutter_vlc_player:
     dependency: "direct main"
     description:
@@ -221,6 +214,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.3.0"
+  gx_file_picker:
+    dependency: "direct main"
+    description:
+      name: gx_file_picker
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.9.0+2"
   html:
     dependency: transitive
     description:
