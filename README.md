@@ -7,7 +7,7 @@
 <p align="center">A mobile video player tailored for Japanese language learners.</p>
 
 <p align="center" style="margin:0"><b>Latest GitHub Release:<br>
-<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.6.1-beta">0.6.1-beta 🇯🇵 → 🇬🇧</a><br>
+<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.7.0-beta">0.7.0-beta 🇯🇵 → 🇬🇧</a><br>
 <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.5.3-enjp-beta">0.5.3-beta 🇬🇧 → 🇯🇵</a></b><br></p>
 
 # 📚 Uninterrupted language immersion at your fingertips
@@ -33,11 +33,11 @@ Please note that the development of the app switches between changes being imple
 
 ### 🚅 Next Up
 - [x] Fixes for **slow video loading due to scoped storage** and **H.265 video playback**
-- [ ] User preferences and Anki output customisation, with **broader custom dictionary and language support**
+- [x] **Use of the AnkiDroid API** instead of share intent to streamline card export and Anki output customisation
+- [] User preferences and **broader custom dictionary and language support**
 
 ### 🛣️ Coming Soon
 - [ ] **Morphological analysis of subtitles** for better text selection and **offline dictionary use**
-- [ ] **Use of the AnkiDroid API** instead of share intent to streamline card export
 - [ ] Multiple subtitle tracks at a given time, and **immersion difficulty levels** for oral practice
 - [ ] Tinker around with releasing the app on **other platforms if possible**
 
@@ -95,12 +95,12 @@ A primer on the basics of the application is as follows.
 
 * 📤 You may also export the current context to an **AnkiDroid card, including the current frame and audio**
 * 🔤 Having a word in the clipboard **will include the sentence, word, meaning and reading** in the export
-* 📝 **You may edit the sentence, word, meaning and reading text fields** before sharing to AnkiDroid
+* 📝 **You may edit the sentence, word, meaning and reading text fields** before exporting to AnkiDroid
 * 🔗 To finalise the export, **share the exported text to AnkiDroid**
 * 🃏 The **front of the card** will include the **audio, video and sentence**
 * 🎴 The **back of the card** will include the **reading, word and meaning**
-* 📑 You may apply **text formatting to the card with the AnkiDroid editor once shared**
-* ⚛️ **Extensive customisation of the Anki export is planned**
+* 📑 You may apply **text formatting to the card with the AnkiDroid editor once exported**
+* ⚛️ **Customisation of the Anki export** is possible by changing the default template in AnkiDroid 
 
 # 👥 Contribution and attribution
 
