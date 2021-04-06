@@ -18,8 +18,8 @@ dependencies:
   clipboard_monitor: ^0.9.1
   device_info:
   ext_storage:
-  # gx_file_picker:
-  file_picker: ^3.0.1
+  gx_file_picker:
+  # file_picker: ^3.0.1
   flash: ^1.5.1
   flutter_ffmpeg:
   flutter_vlc_player: ^6.0.1
