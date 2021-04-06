@@ -35,9 +35,9 @@ Please note that the development of the app switches between changes being imple
 - [x] Fixes for **slow video loading due to scoped storage** and **H.265 video playback**
 - [x] **Use of the AnkiDroid API** instead of share intent to streamline card export and Anki output customisation
 - [ ] User preferences and **broader custom dictionary and language support**
+- [ ] **Morphological analysis of subtitles** for better text selection and **offline dictionary use**
 
 ### 🛣️ Coming Soon
-- [ ] **Morphological analysis of subtitles** for better text selection and **offline dictionary use**
 - [ ] Multiple subtitle tracks at a given time, and **immersion difficulty levels** for oral practice
 - [ ] Tinker around with releasing the app on **other platforms if possible**
 
