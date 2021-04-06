@@ -7,7 +7,7 @@
 <p align="center">A mobile video player tailored for Japanese language learners.</p>
 
 <p align="center" style="margin:0"><b>Latest GitHub Release:<br>
-<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.7.2-beta">0.7.2-beta 🇯🇵 → 🇬🇧</a><br>
+<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.8.0-beta">0.8.0-beta 🇯🇵 → 🇬🇧</a><br>
 <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.5.3-enjp-beta">0.5.3-beta 🇬🇧 → 🇯🇵</a></b><br></p>
 
 # 📚 Uninterrupted language immersion at your fingertips
@@ -21,6 +21,7 @@
 - [x] **Repeat the current subtitle from the beginning** by flicking horizontally
 - [x] Swipe vertically to open the **transcript to jump to time and review subtitles**
 - [x] **YouTube support** for videos with **Japanese user-generated subtitles**
+- [x] Morphological analysis of subtitles allows either **tap selection** or **drag selection** of subtitles
 - [x] **(Experimental)** Custom Japanese-Japanese dictionary support **(tested for Shinmeikai)**
 - [x] **(Experimental)** Weblio.jp **English to Japanese support** and full Japanese localization
 
@@ -34,8 +35,8 @@ Please note that the development of the app switches between changes being imple
 ### 🚅 Next Up
 - [x] Fixes for **slow video loading due to scoped storage** and **H.265 video playback**
 - [x] **Use of the AnkiDroid API** instead of share intent to streamline card export and Anki output customisation
-- [ ] User preferences and **broader custom dictionary and language support**
-- [ ] **Morphological analysis of subtitles** for better text selection and **offline dictionary use**
+- [x] **Morphological analysis of subtitles** for better text selection
+- [ ] User preferences, **broader language and custom dictionary support and offline use**
 
 ### 🛣️ Coming Soon
 - [ ] Multiple subtitle tracks at a given time, and **immersion difficulty levels** for oral practice
@@ -85,7 +86,7 @@ A primer on the basics of the application is as follows.
 
 * 📲 <a href="https://github.com/lrorpilla/jidoujisho/releases/"/>**Download and install the latest beta**</a> onto your Android device
 * ⏯️ Play a video by selecting from your **local media library or entering a YouTube URL**
-* 📋 Select text by simply holding on them, and **copy them to clipboard when prompted**
+* 📋 Select text with any of the two modes: **tap to select** or **drag to select**
 * 📔 When the **dictionary definition** for the text shows up, the text is the **current context**
 * 🗑️ Closing the dictionary prompt will **clear the clipboard**
 * 🌐 The current context may be used to **open browser links to third-party websites**
