@@ -46,6 +46,8 @@ void main() async {
   buildNumber = packageInfo.buildNumber;
 
   await Permission.storage.request();
+  requestPermissions();
+
   Directory appDirDoc = await getApplicationDocumentsDirectory();
   appDirPath = appDirDoc.path;
   previewImageDir = appDirPath + "/exportImage.jpg";
