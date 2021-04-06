@@ -2,7 +2,7 @@
 
 This page documents the HTML and CSS used in the Anki templates for any users that might already have an existing template and wish to update.
 
-The jidoujisho template has six fields in order:
+**The jidoujisho template has six fields in order:**
 * Image
 * Audio
 * Sentence
@@ -11,7 +11,9 @@ The jidoujisho template has six fields in order:
 * Reading
 
 ### Editing the template
-You may edit the template on AnkiDroid by editing a card and selecting the card type `jidoujisho Default` at the bottom of the editor. This will take you to the template editor.
+* You may edit the template on AnkiDroid by **editing any jidoujisho exported card**
+* **Select the card type `jidoujisho Default`** at the bottom of the AnkiDroid editor
+* This will take you to the template editor where you can **replace the text with the ones below**
 
 ### Front Template
 ```html
