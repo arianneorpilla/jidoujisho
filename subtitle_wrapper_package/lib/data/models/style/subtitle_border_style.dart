@@ -6,7 +6,7 @@ class SubtitleBorderStyle {
   final Color color;
 
   const SubtitleBorderStyle(
-      {this.strokeWidth = 2,
+      {this.strokeWidth = 3,
       this.style = PaintingStyle.stroke,
       this.color = Colors.black});
 }

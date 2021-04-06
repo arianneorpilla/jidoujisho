@@ -6,7 +6,9 @@ import 'package:chewie/src/material_progress_bar.dart';
 import 'package:chewie/src/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
+import 'package:jidoujisho/main.dart';
 import 'package:share/share.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -254,11 +256,14 @@ class _MaterialControlsState extends State<MaterialControls>
           context: context,
           isScrollControlled: true,
           useRootNavigator: true,
-          builder: (context) => const _MoreOptionsDialog(options: [
+          builder: (context) => _MoreOptionsDialog(options: [
             "Search Current Subtitle with Jisho.org",
             "Translate Current Subtitle with DeepL",
             "Translate Current Subtitle with Google Translate",
             "Share Current Subtitle to App",
+            globalSelectMode.value
+                ? "Use Tap to Select Subtitle Selection"
+                : "Use Drag to Select Subtitle Selection",
             "Load External Subtitles",
             "Export Current Context to Anki",
           ], icons: [
@@ -266,6 +271,9 @@ class _MaterialControlsState extends State<MaterialControls>
             Icons.translate_rounded,
             Icons.g_translate_rounded,
             Icons.share_outlined,
+            globalSelectMode.value
+                ? Icons.touch_app_rounded
+                : Icons.select_all_rounded,
             Icons.subtitles_outlined,
             Icons.mobile_screen_share_rounded,
           ]),
@@ -289,9 +297,16 @@ class _MaterialControlsState extends State<MaterialControls>
             Share.share(subtitleText);
             break;
           case 4:
-            chewieController.playExternalSubtitles();
+            globalSelectMode.value = !globalSelectMode.value;
+
+            final SharedPreferences prefs =
+                await SharedPreferences.getInstance();
+            prefs.setBool("selectMode", globalSelectMode.value);
             break;
           case 5:
+            chewieController.playExternalSubtitles();
+            break;
+          case 6:
             final bool wasPlaying = await controller.isPlaying();
             controller.pause();
 
@@ -606,7 +621,7 @@ class _SelectAudioDialog extends StatelessWidget {
           const Icon(
             Icons.audiotrack_outlined,
             size: 20.0,
-            color: Colors.redAccent,
+            color: Colors.red,
           ),
           const SizedBox(width: 16.0),
           Text("Audio - $_text"),
@@ -619,7 +634,7 @@ class _SelectAudioDialog extends StatelessWidget {
           const Icon(
             Icons.subtitles_outlined,
             size: 20.0,
-            color: Colors.redAccent,
+            color: Colors.red,
           ),
           const SizedBox(width: 16.0),
           Text("Subtitle - $_text"),
@@ -631,7 +646,7 @@ class _SelectAudioDialog extends StatelessWidget {
           Icon(
             Icons.subtitles_off_outlined,
             size: 20.0,
-            color: Colors.redAccent,
+            color: Colors.red,
           ),
           SizedBox(width: 16.0),
           Text("Subtitle - None"),

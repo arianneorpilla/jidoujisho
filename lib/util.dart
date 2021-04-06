@@ -8,6 +8,7 @@ import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:mecab_dart/mecab_dart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
 import 'package:unofficial_jisho_api/api.dart';
@@ -51,6 +52,7 @@ String timedLineToSRT(Map<String, dynamic> line, int lineCount) {
   String text = line["\$"] ?? "";
 
   text = text.replaceAll("\\n", "\n");
+  text = text.replaceAll("&quot;", "\"");
 
   String startTime = formatTimeString(start);
   String endTime = formatTimeString(start + duration);
@@ -200,6 +202,9 @@ Future exportToAnki(
   await exportCurrentAudio(controller, subtitle);
   List<String> decks = await getDecks();
 
+  Clipboard.setData(
+    ClipboardData(text: ""),
+  );
   clipboard.value = "";
 
   showAnkiDialog(
@@ -478,9 +483,6 @@ List<String> getAllImportedWords() {
 }
 
 Future<DictionaryEntry> getWordDetails(String searchTerm) async {
-  bool forceJisho = searchTerm.contains("@usejisho@");
-  searchTerm = searchTerm.replaceAll("@usejisho@", "");
-
   String removeLastNewline(String n) => n = n.substring(0, n.length - 2);
   bool hasDuplicateReading(String readings, String reading) =>
       readings.contains("$reading; ");
@@ -565,7 +567,7 @@ Future<DictionaryEntry> getWordDetails(String searchTerm) async {
   print("SEARCH TERM: $searchTerm");
   print("EXPORT TERM: $exportTerm");
 
-  if (customDictionary.isEmpty || forceJisho) {
+  if (customDictionary.isEmpty) {
     dictionaryEntry = DictionaryEntry(
       word: exportTerm ?? searchTerm,
       reading: exportReadings,
@@ -827,4 +829,58 @@ class _DeckDropDownState extends State<DeckDropDown> {
       },
     );
   }
+}
+
+List<List<dynamic>> getLinesFromTokens(List<dynamic> tokens) {
+  List<List<dynamic>> lines = [];
+  List<dynamic> working = [];
+  String concatenate = "";
+  for (int i = 0; i < tokens.length; i++) {
+    TokenNode token = tokens[i];
+    if (token.surface == '␜' ||
+        i == tokens.length - 1 ||
+        concatenate.length >= 30) {
+      List<dynamic> line = [];
+      for (int i = 0; i < working.length; i++) {
+        line.add(working[i]);
+      }
+
+      lines.add(line);
+      working = [];
+      concatenate = "";
+    } else {
+      working.add(token);
+      concatenate += token.surface;
+      print(token.surface);
+    }
+  }
+
+  return lines;
+}
+
+List<List<int>> getIndexesFromTokens(List<dynamic> tokens) {
+  List<List<int>> lines = [];
+  List<int> working = [];
+  String concatenate = "";
+  for (int i = 0; i < tokens.length; i++) {
+    TokenNode token = tokens[i];
+    if (token.surface == '␜' ||
+        i == tokens.length - 1 ||
+        concatenate.length >= 30) {
+      List<int> line = [];
+      for (int i = 0; i < working.length; i++) {
+        line.add(working[i]);
+      }
+
+      lines.add(line);
+      working = [];
+      concatenate = "";
+    } else {
+      working.add(i);
+      concatenate += token.surface;
+      print(token.surface);
+    }
+  }
+
+  return lines;
 }

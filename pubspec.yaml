@@ -22,10 +22,11 @@ dependencies:
   # file_picker: ^3.0.1
   flash: ^1.5.1
   flutter_ffmpeg:
-  flutter_vlc_player: ^6.0.1
+  flutter_vlc_player:
   fuzzy:
   intl:
   http:
+  mecab_dart: ^0.1.2
   package_info: ^0.4.3+4
   path_provider:
   permission_handler:
@@ -57,3 +58,4 @@ flutter:
 
   assets:
     - assets/icon/icon.png
+    - assets/ipadic/

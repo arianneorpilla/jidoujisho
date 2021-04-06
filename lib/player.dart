@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:http/http.dart' as http;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
 import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
 import 'package:subtitle_wrapper_package/subtitle_controller.dart';
@@ -16,6 +17,7 @@ import 'package:subtitle_wrapper_package/subtitle_wrapper_package.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:wakelock/wakelock.dart';
 
+import 'package:jidoujisho/main.dart';
 import 'package:jidoujisho/util.dart';
 
 class Player extends StatelessWidget {
@@ -535,8 +537,12 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   Widget buildDictionaryLoading(String clipboard) {
-    String clipboardText = clipboard.replaceAll("@usejisho@", "");
-    String lookupText = "Looking up \"$clipboardText\"...";
+    String lookupText;
+    if (globalSelectMode.value) {
+      lookupText = "Looking up \"$clipboard\"...";
+    } else {
+      lookupText = "Looking up definition...";
+    }
 
     return Column(
       children: [
@@ -556,9 +562,25 @@ class _VideoPlayerState extends State<VideoPlayer> {
   Widget buildDictionaryExporting(String clipboard) {
     String lookupText = "Preparing to export...";
 
-    Future.delayed(Duration(seconds: 10), () {
+    Future.delayed(Duration(seconds: 2), () {
       if (_clipboard.value == "&<&>export&<&>") {
-        _clipboard.value = "&<&>exportlong&<&>";
+        Future.delayed(Duration(seconds: 2), () {
+          if (_clipboard.value == "&<&>export&<&>") {
+            Future.delayed(Duration(seconds: 2), () {
+              if (_clipboard.value == "&<&>export&<&>") {
+                Future.delayed(Duration(seconds: 2), () {
+                  if (_clipboard.value == "&<&>export&<&>") {
+                    Future.delayed(Duration(seconds: 2), () {
+                      if (_clipboard.value == "&<&>export&<&>") {
+                        _clipboard.value = "&<&>exportlong&<&>";
+                      }
+                    });
+                  }
+                });
+              }
+            });
+          }
+        });
       }
     });
 
@@ -616,8 +638,12 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   Widget buildDictionaryNoMatch(String clipboard) {
-    String clipboardText = clipboard.replaceAll("@usejisho@", "");
-    String lookupText = "No matches for \"$clipboardText\" could be queried.";
+    String lookupText;
+    if (globalSelectMode.value) {
+      lookupText = "No matches for \"$clipboard\" could be queried.";
+    } else {
+      lookupText = "No matches for the selection could be queried.";
+    }
 
     _subtitleFocusNode.unfocus();
 

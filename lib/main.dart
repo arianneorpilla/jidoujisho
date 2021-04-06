@@ -4,9 +4,11 @@ import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fuzzy/fuzzy.dart';
+import 'package:mecab_dart/mecab_dart.dart';
 import 'package:package_info/package_info.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
@@ -24,12 +26,13 @@ String packageName;
 String version;
 String buildNumber;
 
-int sdkInt;
+Mecab mecabTagger;
 
 List<DictionaryEntry> customDictionary;
 Fuzzy customDictionaryFuzzy;
 
 bool isGooglePlayLimited = false;
+ValueNotifier<bool> globalSelectMode;
 
 final AsyncMemoizer trendingCache = AsyncMemoizer();
 Map<String, AsyncMemoizer> searchCache = {};
@@ -44,6 +47,14 @@ void main() async {
   packageName = packageInfo.packageName;
   version = packageInfo.version;
   buildNumber = packageInfo.buildNumber;
+
+  mecabTagger = Mecab();
+  await mecabTagger.init("assets/ipadic", true);
+
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  bool selectMode = prefs.getBool("selectMode") ?? false;
+
+  globalSelectMode = ValueNotifier<bool>(selectMode);
 
   await Permission.storage.request();
   requestPermissions();
