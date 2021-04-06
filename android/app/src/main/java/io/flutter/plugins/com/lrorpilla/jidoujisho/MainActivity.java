@@ -93,6 +93,7 @@ public class MainActivity extends FlutterActivity {
                             ".card {\n" +
                             "  font-family: arial;\n" +
                             "  font-size: 20px;\n" +
+                            "  white-space: pre-line;\n" +
                             "  text-align: center;\n" +
                             "  color: black;\n" +
                             "  background-color: white;\n" +

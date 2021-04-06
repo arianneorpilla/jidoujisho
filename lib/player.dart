@@ -556,6 +556,31 @@ class _VideoPlayerState extends State<VideoPlayer> {
   Widget buildDictionaryExporting(String clipboard) {
     String lookupText = "Preparing to export...";
 
+    Future.delayed(Duration(seconds: 10), () {
+      if (_clipboard.value == "&<&>export&<&>") {
+        _clipboard.value = "&<&>exportlong&<&>";
+      }
+    });
+
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            color: Colors.grey[800].withOpacity(0.6),
+            child: Text(lookupText),
+          ),
+        ),
+        Expanded(child: Container()),
+      ],
+    );
+  }
+
+  Widget buildDictionaryExportingLong(String clipboard) {
+    String lookupText =
+        "Preparing to export... This is taking too long...\nPlease ensure AnkiDroid is launched in the background.";
+
     return Column(
       children: [
         Padding(
@@ -673,6 +698,9 @@ class _VideoPlayerState extends State<VideoPlayer> {
               (BuildContext context, AsyncSnapshot<DictionaryEntry> snapshot) {
             if (_clipboard.value == "&<&>export&<&>") {
               return buildDictionaryExporting(clipboard);
+            }
+            if (_clipboard.value == "&<&>exportlong&<&>") {
+              return buildDictionaryExportingLong(clipboard);
             }
             if (_clipboard.value.startsWith("&<&>exported")) {
               return buildDictionaryExported(clipboard);
