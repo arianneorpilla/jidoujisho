@@ -35,9 +35,9 @@ Please note that the development of the app switches between changes being imple
 - [x] Fixes for **slow video loading due to scoped storage** and **H.265 video playback**
 - [x] **Use of the AnkiDroid API** instead of share intent to streamline card export and Anki output customisation
 - [ ] User preferences and **broader custom dictionary and language support**
+- [ ] **Morphological analysis of subtitles** for better text selection and **offline dictionary use**
 
 ### 🛣️ Coming Soon
-- [ ] **Morphological analysis of subtitles** for better text selection and **offline dictionary use**
 - [ ] Multiple subtitle tracks at a given time, and **immersion difficulty levels** for oral practice
 - [ ] Tinker around with releasing the app on **other platforms if possible**
 
@@ -76,6 +76,7 @@ Below are some links that some users might find useful.
 
 * <b><a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.3.2-beta">Using the app on Android 11</a></b>
 * <b><a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.4-beta">Using a custom dictionary</a></b>
+* <b><a href="https://github.com/lrorpilla/jidoujisho/blob/main/TEMPLATE.md">jidoujisho Anki Template</a></b>
 * <b><a href="https://reddit.com/r/LearnJapanese/comments/lcf9wi/jidoujisho_a_mobile_video_player_tailored_for/">Debut Reddit discussion thread</a></b>
 
 ### 🚀 Getting Started
