@@ -55,8 +55,10 @@ String timedLineToSRT(Map<String, dynamic> line, int lineCount) {
   double duration = double.parse(line["\@dur"]);
   String text = line["\$"] ?? "";
 
-  text = text = text.replaceAll("\\n", "\n");
-  text = text = text.replaceAll("&quot;", "\"");
+  text = text.replaceAll("\\n", "\n");
+  text = text.replaceAll("&quot;", "\"");
+
+  text = text.replaceAll("​", "");
 
   String startTime = formatTimeString(start);
   String endTime = formatTimeString(start + duration);
@@ -1036,6 +1038,13 @@ Future<List<DictionaryEntry>> getJishoSegmentAndSearch(
     for (int j = 0; j < words[i].length; j++) {
       indexTape.add(i);
     }
+  }
+
+  print(fullTerm.length);
+  print(searchTerm.length);
+
+  for (int i = 0; i < fullTerm.length; i++) {
+    print("A{${fullTerm[i]}}B");
   }
 
   int startIndex = fullTerm.length - searchTerm.length;
