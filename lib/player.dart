@@ -2,14 +2,13 @@ import 'dart:io';
 
 import 'package:chewie/chewie.dart';
 import 'package:clipboard_monitor/clipboard_monitor.dart';
-import 'package:file_picker/file_picker.dart';
-// import 'package:gx_file_picker/gx_file_picker.dart';
+// import 'package:file_picker/file_picker.dart';
+import 'package:gx_file_picker/gx_file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:http/http.dart' as http;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
 import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
 import 'package:subtitle_wrapper_package/subtitle_controller.dart';
@@ -38,67 +37,22 @@ class Player extends StatelessWidget {
     }
   }
 
-  Widget localPlayer() {
-    return new FutureBuilder(
-      future: FilePicker.platform.pickFiles(
-        type: Platform.isIOS ? FileType.any : FileType.video,
-        allowMultiple: false,
-        allowCompression: false,
-      ),
-      builder:
-          (BuildContext context, AsyncSnapshot<FilePickerResult> snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.waiting:
-            return loadingCircle();
-          default:
-            if (snapshot.hasData) {
-              File videoFile = File(snapshot.data.files.single.path);
-              print("VIDEO FILE: ${videoFile.path}");
-
-              return FutureBuilder(
-                future: extractSubtitles(videoFile),
-                builder:
-                    (BuildContext context, AsyncSnapshot<List<File>> snapshot) {
-                  switch (snapshot.connectionState) {
-                    case ConnectionState.waiting:
-                      return loadingCircle();
-                    default:
-                      List<File> internalSubs = snapshot.data;
-                      String defaultSubtitles =
-                          getDefaultSubtitles(videoFile, internalSubs);
-
-                      return VideoPlayer(
-                        videoFile: videoFile,
-                        internalSubs: internalSubs,
-                        defaultSubtitles: defaultSubtitles,
-                      );
-                  }
-                },
-              );
-            }
-            Navigator.pop(context);
-            return Container();
-        }
-      },
-    );
-  }
-
   // Widget localPlayer() {
   //   return new FutureBuilder(
-  //     future: FilePicker.getFile(
-  //         type: Platform.isIOS ? FileType.any : FileType.video),
-  //     builder: (BuildContext context, AsyncSnapshot<File> snapshot) {
+  //     future: FilePicker.platform.pickFiles(
+  //       type: Platform.isIOS ? FileType.any : FileType.video,
+  //       allowMultiple: false,
+  //       allowCompression: false,
+  //     ),
+  //     builder:
+  //         (BuildContext context, AsyncSnapshot<FilePickerResult> snapshot) {
   //       switch (snapshot.connectionState) {
   //         case ConnectionState.waiting:
   //           return loadingCircle();
   //         default:
   //           if (snapshot.hasData) {
-  //             File videoFile = snapshot.data;
+  //             File videoFile = File(snapshot.data.files.single.path);
   //             print("VIDEO FILE: ${videoFile.path}");
-
-  //             if (videoFile == null) {
-  //               Navigator.pop(context);
-  //             }
 
   //             return FutureBuilder(
   //               future: extractSubtitles(videoFile),
@@ -111,11 +65,6 @@ class Player extends StatelessWidget {
   //                     List<File> internalSubs = snapshot.data;
   //                     String defaultSubtitles =
   //                         getDefaultSubtitles(videoFile, internalSubs);
-
-  //                     SystemChrome.setPreferredOrientations([
-  //                       DeviceOrientation.landscapeLeft,
-  //                       DeviceOrientation.landscapeRight,
-  //                     ]);
 
   //                     return VideoPlayer(
   //                       videoFile: videoFile,
@@ -132,6 +81,56 @@ class Player extends StatelessWidget {
   //     },
   //   );
   // }
+
+  Widget localPlayer() {
+    return new FutureBuilder(
+      future: FilePicker.getFile(
+          type: Platform.isIOS ? FileType.any : FileType.video),
+      builder: (BuildContext context, AsyncSnapshot<File> snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.waiting:
+            return loadingCircle();
+          default:
+            if (snapshot.hasData) {
+              File videoFile = snapshot.data;
+              print("VIDEO FILE: ${videoFile.path}");
+
+              if (videoFile == null) {
+                Navigator.pop(context);
+              }
+
+              return FutureBuilder(
+                future: extractSubtitles(videoFile),
+                builder:
+                    (BuildContext context, AsyncSnapshot<List<File>> snapshot) {
+                  switch (snapshot.connectionState) {
+                    case ConnectionState.waiting:
+                      return loadingCircle();
+                    default:
+                      List<File> internalSubs = snapshot.data;
+                      String defaultSubtitles =
+                          getDefaultSubtitles(videoFile, internalSubs);
+
+                      SystemChrome.setPreferredOrientations([
+                        DeviceOrientation.landscapeLeft,
+                        DeviceOrientation.landscapeRight,
+                      ]);
+
+                      return VideoPlayer(
+                        videoFile: videoFile,
+                        internalSubs: internalSubs,
+                        defaultSubtitles: defaultSubtitles,
+                      );
+                  }
+                },
+              );
+            }
+            Navigator.pop(context);
+            return Container();
+        }
+      },
+    );
+  }
 
   Widget webPlayer() {
     String videoID = "";
@@ -496,45 +495,46 @@ class _VideoPlayerState extends State<VideoPlayer> {
     }
   }
 
+  // void playExternalSubtitles() async {
+  //   FilePickerResult result = await FilePicker.platform.pickFiles(
+  //     type: FileType.any,
+  //     allowMultiple: false,
+  //   );
+
+  //   if (result != null) {
+  //     File subFile = File(result.files.single.path);
+  //     if (subFile.path.endsWith("srt")) {
+  //       getSubtitleWrapper()
+  //           .subtitleController
+  //           .updateSubtitleContent(content: subFile.readAsStringSync());
+  //       print("SUBTITLES SWITCHED TO EXTERNAL SRT");
+  //     } else {
+  //       getSubtitleWrapper().subtitleController.updateSubtitleContent(
+  //           content: await extractNonSrtSubtitles(subFile));
+  //       print("SUBTITLES SWITCHED TO EXTERNAL ASS");
+  //     }
+  //   }
+  // }
+
   void playExternalSubtitles() async {
-    FilePickerResult result = await FilePicker.platform.pickFiles(
+    File result = await FilePicker.getFile(
       type: FileType.any,
-      allowMultiple: false,
     );
 
     if (result != null) {
-      File subFile = File(result.files.single.path);
-      if (subFile.path.endsWith("srt")) {
+      if (result.path.endsWith("srt")) {
         getSubtitleWrapper()
             .subtitleController
-            .updateSubtitleContent(content: subFile.readAsStringSync());
+            .updateSubtitleContent(content: result.readAsStringSync());
         print("SUBTITLES SWITCHED TO EXTERNAL SRT");
       } else {
         getSubtitleWrapper().subtitleController.updateSubtitleContent(
-            content: await extractNonSrtSubtitles(subFile));
+            content: await extractNonSrtSubtitles(result));
         print("SUBTITLES SWITCHED TO EXTERNAL ASS");
       }
     }
   }
 
-  // void playExternalSubtitles() async {
-  //   File result = await FilePicker.getFile(
-  //     type: FileType.any,
-  //   );
-
-  //   if (result != null) {
-  //     if (result.path.endsWith("srt")) {
-  //       getSubtitleWrapper()
-  //           .subtitleController
-  //           .updateSubtitleContent(content: result.readAsStringSync());
-  //       print("SUBTITLES SWITCHED TO EXTERNAL SRT");
-  //     } else {
-  //       getSubtitleWrapper().subtitleController.updateSubtitleContent(
-  //           content: await extractNonSrtSubtitles(result));
-  //       print("SUBTITLES SWITCHED TO EXTERNAL ASS");
-  //     }
-  //   }
-  // }
   Widget buildDictionaryLoading(String clipboard) {
     String lookupText;
     if (globalSelectMode.value) {
