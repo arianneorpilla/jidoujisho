@@ -535,11 +535,10 @@ class _VideoPlayerState extends State<VideoPlayer> {
   //     }
   //   }
   // }
-
   Widget buildDictionaryLoading(String clipboard) {
     String lookupText;
     if (globalSelectMode.value) {
-      lookupText = "Looking up \"$clipboard\"...";
+      lookupText = "Looking up『$clipboard』...";
     } else {
       lookupText = "Looking up definition...";
     }
@@ -672,56 +671,141 @@ class _VideoPlayerState extends State<VideoPlayer> {
     );
   }
 
-  Widget buildDictionaryMatch(DictionaryEntry results) {
+  Widget buildDictionaryMatch(List<DictionaryEntry> results) {
     _subtitleFocusNode.unfocus();
+    ValueNotifier<int> selectedIndex = ValueNotifier<int>(0);
 
-    return Column(
-      children: [
-        Padding(
-          padding: EdgeInsets.all(16.0),
-          child: GestureDetector(
-            onTap: () {
-              _clipboard.value = "";
-              _currentDictionaryEntry.value = DictionaryEntry(
-                word: "",
-                reading: "",
-                meaning: "",
-              );
-            },
-            child: SingleChildScrollView(
-              child: Container(
-                padding: EdgeInsets.all(16.0),
-                color: Colors.grey[800].withOpacity(0.6),
+    return ValueListenableBuilder(
+        valueListenable: selectedIndex,
+        builder: (BuildContext context, int _, Widget widget) {
+          _currentDictionaryEntry.value = results[selectedIndex.value];
+
+          return Container(
+            padding: EdgeInsets.all(16.0),
+            alignment: Alignment.topCenter,
+            child: Container(
+              padding: EdgeInsets.all(16),
+              margin: EdgeInsets.only(bottom: 84),
+              color: Colors.grey[800].withOpacity(0.6),
+              child: GestureDetector(
+                onHorizontalDragEnd: (details) {
+                  if (details.primaryVelocity == 0) return;
+
+                  if (details.primaryVelocity.compareTo(0) == -1) {
+                    if (selectedIndex.value == results.length - 1) {
+                      selectedIndex.value = 0;
+                    } else {
+                      selectedIndex.value += 1;
+                    }
+                  } else {
+                    if (selectedIndex.value == 0) {
+                      selectedIndex.value = results.length - 1;
+                    } else {
+                      selectedIndex.value -= 1;
+                    }
+                  }
+                },
+                onTap: () {
+                  _clipboard.value = "";
+                  _currentDictionaryEntry.value = DictionaryEntry(
+                    word: "",
+                    reading: "",
+                    meaning: "",
+                  );
+                },
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      results.word,
+                      results[selectedIndex.value].word,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 20,
                       ),
                     ),
-                    Text(results.reading),
-                    SelectableText("\n${results.meaning}\n"),
+                    Text(results[selectedIndex.value].reading),
+                    Flexible(
+                      child: SingleChildScrollView(
+                        child:
+                            Text("\n${results[selectedIndex.value].meaning}\n"),
+                      ),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Showing search result ",
+                          style: TextStyle(
+                            fontSize: 11,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        Text(
+                          "${selectedIndex.value + 1} ",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        Text(
+                          "out of ",
+                          style: TextStyle(
+                            fontSize: 11,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        Text(
+                          "${results.length} ",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        Text(
+                          "found for",
+                          style: TextStyle(
+                            fontSize: 11,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        Text(
+                          "『${results[selectedIndex.value].searchTerm}』",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    )
                   ],
                 ),
               ),
             ),
-          ),
-        ),
-        Expanded(child: Container()),
-      ],
-    );
+          );
+        });
   }
 
   Widget buildDictionary() {
     return ValueListenableBuilder(
       valueListenable: _clipboard,
       builder: (context, clipboard, widget) {
+        Future<List<DictionaryEntry>> getDictionaryFuture;
+        if (globalSelectMode.value) {
+          getDictionaryFuture = getWordDetails(clipboard);
+        } else {
+          getDictionaryFuture = getJishoSegmentAndSearch(
+              _clipboard.value, _currentSubtitle.value.text);
+        }
+
         return FutureBuilder(
-          future: getWordDetails(clipboard),
-          builder:
-              (BuildContext context, AsyncSnapshot<DictionaryEntry> snapshot) {
+          future: getDictionaryFuture,
+          builder: (BuildContext context,
+              AsyncSnapshot<List<DictionaryEntry>> snapshot) {
             if (_clipboard.value == "&<&>export&<&>") {
               return buildDictionaryExporting(clipboard);
             }
@@ -738,11 +822,11 @@ class _VideoPlayerState extends State<VideoPlayer> {
               case ConnectionState.waiting:
                 return buildDictionaryLoading(clipboard);
               default:
-                DictionaryEntry entry = snapshot.data;
+                List<DictionaryEntry> entries = snapshot.data;
 
-                if (snapshot.hasData) {
-                  _currentDictionaryEntry.value = entry;
-                  return buildDictionaryMatch(entry);
+                if (snapshot.hasData && snapshot.data.isNotEmpty) {
+                  _currentDictionaryEntry.value = entries.first;
+                  return buildDictionaryMatch(entries);
                 } else {
                   return buildDictionaryNoMatch(clipboard);
                 }

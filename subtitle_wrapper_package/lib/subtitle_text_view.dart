@@ -119,8 +119,10 @@ class SubtitleTextView extends StatelessWidget {
                 var pretokens = state.subtitle.text.replaceAll('\n', '␜');
                 var tokens = mecabTagger.parse(pretokens.replaceAll(' ', '␝'));
 
-                List<List<dynamic>> lines = getLinesFromTokens(tokens);
-                List<List<int>> indexes = getIndexesFromTokens(tokens);
+                List<List<dynamic>> lines =
+                    getLinesFromTokens(context, subtitleStyle, tokens);
+                List<List<int>> indexes =
+                    getIndexesFromTokens(context, subtitleStyle, tokens);
                 print("MECAB TOKENS");
                 print(lines);
 
@@ -129,27 +131,26 @@ class SubtitleTextView extends StatelessWidget {
                     children: <Widget>[
                       subtitleStyle.hasBorder
                           ? Center(
-                              child: SingleChildScrollView(
-                                child: ListView.builder(
-                                  shrinkWrap: true,
-                                  itemCount: lines.length,
-                                  itemBuilder:
-                                      (BuildContext context, int lineIndex) {
-                                    List<dynamic> line = lines[lineIndex];
-                                    List<Widget> textWidgets = [];
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: lines.length,
+                                physics: BouncingScrollPhysics(),
+                                itemBuilder:
+                                    (BuildContext context, int lineIndex) {
+                                  List<dynamic> line = lines[lineIndex];
+                                  List<Widget> textWidgets = [];
 
-                                    for (int i = 0; i < line.length; i++) {
-                                      TokenNode token = line[i];
-                                      textWidgets.add(getOutlineText(token));
-                                    }
+                                  for (int i = 0; i < line.length; i++) {
+                                    TokenNode token = line[i];
+                                    textWidgets.add(getOutlineText(token));
+                                  }
 
-                                    return Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: textWidgets,
-                                    );
-                                  },
-                                ),
+                                  return Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: textWidgets,
+                                  );
+                                },
                               ),
                             )
                           : Container(
@@ -157,130 +158,33 @@ class SubtitleTextView extends StatelessWidget {
                             ),
                       Center(
                         child: Center(
-                          child: SingleChildScrollView(
-                            child: ListView.builder(
-                              shrinkWrap: true,
-                              itemCount: lines.length,
-                              itemBuilder:
-                                  (BuildContext context, int lineIndex) {
-                                List<dynamic> line = lines[lineIndex];
-                                List<int> indexList = indexes[lineIndex];
-                                List<Widget> textWidgets = [];
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: lines.length,
+                            physics: BouncingScrollPhysics(),
+                            itemBuilder: (BuildContext context, int lineIndex) {
+                              List<dynamic> line = lines[lineIndex];
+                              List<int> indexList = indexes[lineIndex];
+                              List<Widget> textWidgets = [];
 
-                                for (int i = 0; i < line.length; i++) {
-                                  TokenNode token = line[i];
-                                  int index = indexList[i];
-                                  textWidgets
-                                      .add(getText(tokens, token, index));
-                                }
+                              for (int i = 0; i < line.length; i++) {
+                                TokenNode token = line[i];
+                                int index = indexList[i];
+                                textWidgets.add(getText(tokens, token, index));
+                              }
 
-                                return Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: textWidgets,
-                                );
-                              },
-                            ),
+                              return Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: textWidgets,
+                              );
+                            },
                           ),
                         ),
                       ),
-                      // Center(
-                      //   child: SelectableText(
-                      //     state.subtitle.text,
-                      //     key: ViewKeys.SUBTITLE_TEXT_CONTENT,
-                      //     textAlign: TextAlign.center,
-                      //     style: TextStyle(
-                      //       fontSize: subtitleStyle.fontSize,
-                      //       color: subtitleStyle.textColor,
-                      //     ),
-                      //     toolbarOptions: ToolbarOptions(
-                      //         copy: true, cut: false, selectAll: false, paste: false),
-                      //   ),
-                      // ),
                     ],
                   ),
                 );
-
-                // return Container(
-                //   child: Stack(
-                //     children: <Widget>[
-                //       subtitleStyle.hasBorder
-                //           ? Center(
-                //               child: SingleChildScrollView(
-                //                 scrollDirection: Axis.horizontal,
-                //                 child: Wrap(
-                //                   crossAxisAlignment: WrapCrossAlignment.end,
-                //                   children: List<Widget>.generate(
-                //                       tokens.length - 1, (index) {
-                //                     TokenNode token = tokens[index];
-
-                //                     return Text(
-                //                       token.surface.replaceAll('␝', ' '),
-                //                       style: TextStyle(
-                //                         fontSize: subtitleStyle.fontSize,
-                //                         foreground: Paint()
-                //                           ..style =
-                //                               subtitleStyle.borderStyle.style
-                //                           ..strokeWidth = subtitleStyle
-                //                               .borderStyle.strokeWidth
-                //                           ..color =
-                //                               Colors.black.withOpacity(0.75),
-                //                       ),
-                //                     );
-                //                   }),
-                //                 ),
-                //               ),
-                //             )
-                //           : Container(
-                //               child: null,
-                //             ),
-                //       Center(
-                //         child: SingleChildScrollView(
-                //           scrollDirection: Axis.horizontal,
-                //           child: Wrap(
-                //             crossAxisAlignment: WrapCrossAlignment.end,
-                //             children: List<Widget>.generate(tokens.length - 1,
-                //                 (index) {
-                //               TokenNode token = tokens[index];
-
-                //               return GestureDetector(
-                //                 onTap: () {
-                //                   String allText = "";
-                //                   for (int i = index; i < tokens.length; i++) {
-                //                     allText +=
-                //                         tokens[i].surface.replaceAll('␝', ' ');
-                //                   }
-
-                //                   Clipboard.setData(
-                //                     ClipboardData(text: allText),
-                //                   );
-                //                 },
-                //                 child: Text(
-                //                   token.surface.replaceAll('␝', ' '),
-                //                   style: TextStyle(
-                //                     fontSize: subtitleStyle.fontSize,
-                //                   ),
-                //                 ),
-                //               );
-                //             }),
-                //           ),
-                //         ),
-                //       ),
-                //       // Center(
-                //       //   child: SelectableText(
-                //       //     state.subtitle.text,
-                //       //     key: ViewKeys.SUBTITLE_TEXT_CONTENT,
-                //       //     textAlign: TextAlign.center,
-                //       //     style: TextStyle(
-                //       //       fontSize: subtitleStyle.fontSize,
-                //       //       color: subtitleStyle.textColor,
-                //       //     ),
-                //       //     toolbarOptions: ToolbarOptions(
-                //       //         copy: true, cut: false, selectAll: false, paste: false),
-                //       //   ),
-                //       // ),
-                //     ],
-                //   ),
-                // );
               }
             },
           );
