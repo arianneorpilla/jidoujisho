@@ -134,6 +134,10 @@ class SubtitleDataRepository extends SubtitleRepository {
   Subtitles getSubtitlesData(
       String subtitlesContent, SubtitleType subtitleType) {
     RegExp regExp;
+    // Remove square bracket artifacts.
+    subtitlesContent = subtitlesContent.replaceAll(
+        RegExp(r'{(.*?)}', caseSensitive: false), '');
+
     if (subtitleType == SubtitleType.webvtt) {
       regExp = RegExp(
         r'((\d{2}):(\d{2}):(\d{2})\.(\d+)) +--> +((\d{2}):(\d{2}):(\d{2})\.(\d{3})).*[\r\n]+\s*((?:(?!\r?\n\r?).)*(\r\n|\r|\n)(?:.*))',
@@ -179,6 +183,71 @@ class SubtitleDataRepository extends SubtitleRepository {
       subtitleList.add(
           Subtitle(startTime: startTime, endTime: endTime, text: text.trim()));
     });
+
+    for (var i = 1; i < subtitleList.length; i++) {
+      var previousSubtitle = subtitleList[i - 1];
+      var currentSubtitle = subtitleList[i];
+
+      if (previousSubtitle.startTime == currentSubtitle.startTime &&
+          previousSubtitle.endTime == currentSubtitle.endTime) {
+        // Recombine only if they are not the same subtitle
+        var newSubtitle = Subtitle(
+          text: previousSubtitle.text == currentSubtitle.text
+              ? '${previousSubtitle.text}'
+              : '${previousSubtitle.text}\n${currentSubtitle.text}',
+          startTime: currentSubtitle.startTime,
+          endTime: currentSubtitle.endTime,
+        );
+
+        subtitleList.insert(i, newSubtitle);
+        subtitleList.remove(previousSubtitle);
+        subtitleList.remove(currentSubtitle);
+      }
+    }
+
+    // Attempt this recombination a lot to stamp out persistent values
+    for (int i = 0; i < 10; i++) {
+      // Recombine subtitles if they are the same value and next to each other
+      for (var i = 1; i < subtitleList.length; i++) {
+        var previousSubtitle = subtitleList[i - 1];
+        var currentSubtitle = subtitleList[i];
+
+        if (previousSubtitle.text == currentSubtitle.text &&
+            previousSubtitle.endTime.inMilliseconds ==
+                currentSubtitle.startTime.inMilliseconds) {
+          var newSubtitle = Subtitle(
+            text: '${previousSubtitle.text}',
+            startTime: previousSubtitle.startTime,
+            endTime: currentSubtitle.endTime,
+          );
+
+          subtitleList.insert(i, newSubtitle);
+          subtitleList.remove(previousSubtitle);
+          subtitleList.remove(currentSubtitle);
+        }
+      }
+
+      // Recombine subtitles if they are the same value and next to each other
+      for (var i = 1; i < subtitleList.length; i++) {
+        var previousSubtitle = subtitleList[i - 1];
+        var currentSubtitle = subtitleList[i];
+
+        if (previousSubtitle.text == currentSubtitle.text &&
+            500 >
+                (currentSubtitle.startTime.inMilliseconds -
+                    previousSubtitle.endTime.inMilliseconds)) {
+          var newSubtitle = Subtitle(
+            text: '${previousSubtitle.text}',
+            startTime: previousSubtitle.startTime,
+            endTime: currentSubtitle.endTime,
+          );
+
+          subtitleList.insert(i, newSubtitle);
+          subtitleList.remove(previousSubtitle);
+          subtitleList.remove(currentSubtitle);
+        }
+      }
+    }
 
     var subtitles = Subtitles(subtitles: subtitleList);
     return subtitles;

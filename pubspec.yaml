@@ -31,18 +31,23 @@ dependencies:
   path_provider:
   permission_handler:
   scrollable_positioned_list: ^0.1.9
+  sqflite:
   shared_preferences:
   subtitle_wrapper_package:
     path: ./subtitle_wrapper_package
   transparent_image: ^1.0.0
   unofficial_jisho_api: ^1.1.0
   url_launcher:
+  js:
+  ve_dart: ^0.2.1
   xml2json:
+
   youtube_explode_dart:
     git:
       url: https://github.com/Hexer10/youtube_explode_dart
       ref: 5385ba1628c109312fc452162e32ebc20961b1dd
   youtube_player_flutter:
+ 
   wakelock:
 
 dev_dependencies:
@@ -59,3 +64,4 @@ flutter:
   assets:
     - assets/icon/icon.png
     - assets/ipadic/
+    - assets/jmdict.db

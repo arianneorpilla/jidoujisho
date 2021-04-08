@@ -536,12 +536,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
   // }
 
   Widget buildDictionaryLoading(String clipboard) {
-    String lookupText;
-    if (globalSelectMode.value) {
-      lookupText = "Looking up『$clipboard』...";
-    } else {
-      lookupText = "Looking up definition...";
-    }
+    String lookupText = "Looking up『$clipboard』...";
 
     return Column(
       children: [
@@ -794,16 +789,12 @@ class _VideoPlayerState extends State<VideoPlayer> {
     return ValueListenableBuilder(
       valueListenable: _clipboard,
       builder: (context, clipboard, widget) {
-        Future<List<DictionaryEntry>> getDictionaryFuture;
-        if (globalSelectMode.value) {
-          getDictionaryFuture = getWordDetails(clipboard);
-        } else {
-          getDictionaryFuture = getJishoSegmentAndSearch(
-              _clipboard.value, _currentSubtitle.value.text);
-        }
+        String query =
+            "SELECT * FROM entry WHERE kanji LIKE '$clipboard%' LIMIT 20";
+        db.rawQuery(query).then((result) => print(result));
 
         return FutureBuilder(
-          future: getDictionaryFuture,
+          future: getWordDetails(clipboard),
           builder: (BuildContext context,
               AsyncSnapshot<List<DictionaryEntry>> snapshot) {
             if (_clipboard.value == "&<&>export&<&>") {

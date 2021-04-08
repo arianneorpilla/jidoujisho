@@ -6,16 +6,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
-import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as parser;
 import 'package:http/http.dart' as http;
-import 'package:http/http.dart' as http;
+import 'package:import_js_library/import_js_library.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
 import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
 import 'package:unofficial_jisho_api/api.dart';
+import 'package:ve_dart/ve_dart.dart';
 import 'package:xml2json/xml2json.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -564,8 +564,8 @@ DictionaryEntry getEntryFromJishoResult(JishoResult result, String searchTerm) {
 
   DictionaryEntry dictionaryEntry;
 
-  print("SEARCH TERM: $searchTerm");
-  print("EXPORT TERM: $exportTerm");
+  // print("SEARCH TERM: $searchTerm");
+  // print("EXPORT TERM: $exportTerm");
 
   if (customDictionary.isEmpty) {
     dictionaryEntry = DictionaryEntry(
@@ -577,7 +577,7 @@ DictionaryEntry getEntryFromJishoResult(JishoResult result, String searchTerm) {
     int resultIndex;
 
     final searchResult = customDictionaryFuzzy.search(searchTerm, 1);
-    print("SEARCH RESULT: $searchResult");
+    // print("SEARCH RESULT: $searchResult");
 
     if (searchResult.isNotEmpty && searchResult.first.score == 0) {
       resultIndex = searchResult.first.matches.first.arrayIndex;
@@ -870,27 +870,27 @@ class _DeckDropDownState extends State<DeckDropDown> {
   }
 }
 
-List<List<dynamic>> getLinesFromTokens(
-    BuildContext context, SubtitleStyle style, List<dynamic> tokens) {
-  List<List<dynamic>> lines = [];
-  List<dynamic> working = [];
+List<List<Word>> getLinesFromWords(
+    BuildContext context, SubtitleStyle style, List<Word> words) {
+  List<List<Word>> lines = [];
+  List<Word> working = [];
   String concatenate = "";
   TextPainter textPainter;
-
   double width = MediaQuery.of(context).size.width;
+  words.add(Word("", "", Grammar.Unassigned, "", Pos.TBD, "", TokenNode("")));
 
-  for (int i = 0; i < tokens.length; i++) {
-    TokenNode token = tokens[i];
+  for (int i = 0; i < words.length; i++) {
+    Word word = words[i];
     textPainter = TextPainter()
       ..text = TextSpan(text: concatenate, style: TextStyle(fontSize: 24))
       ..textDirection = TextDirection.ltr
       ..layout(minWidth: 0, maxWidth: double.infinity);
 
-    if (token.surface == '␜' ||
-        i == tokens.length - 1 ||
+    if (word.word == '␜' ||
+        i == words.length - 1 ||
         textPainter.width >=
             width - style.position.left - style.position.right) {
-      List<dynamic> line = [];
+      List<Word> line = [];
       for (int i = 0; i < working.length; i++) {
         line.add(working[i]);
       }
@@ -899,19 +899,21 @@ List<List<dynamic>> getLinesFromTokens(
       working = [];
       concatenate = "";
 
-      working.add(token);
-      concatenate += token.surface;
+      working.add(word);
+      concatenate += word.word;
     } else {
-      working.add(token);
-      concatenate += token.surface;
+      working.add(word);
+      concatenate += word.word;
     }
   }
 
   return lines;
 }
 
-List<List<int>> getIndexesFromTokens(
-    BuildContext context, SubtitleStyle style, List<dynamic> tokens) {
+List<List<int>> getIndexesFromWords(
+    BuildContext context, SubtitleStyle style, List<Word> words) {
+  words.add(Word("", "", Grammar.Unassigned, "", Pos.TBD, "", TokenNode("")));
+
   List<List<int>> lines = [];
   List<int> working = [];
   String concatenate = "";
@@ -919,15 +921,15 @@ List<List<int>> getIndexesFromTokens(
 
   double width = MediaQuery.of(context).size.width;
 
-  for (int i = 0; i < tokens.length; i++) {
-    TokenNode token = tokens[i];
+  for (int i = 0; i < words.length; i++) {
+    Word word = words[i];
     textPainter = TextPainter()
       ..text = TextSpan(text: concatenate, style: TextStyle(fontSize: 24))
       ..textDirection = TextDirection.ltr
       ..layout(minWidth: 0, maxWidth: double.infinity);
 
-    if (token.surface == '␜' ||
-        i == tokens.length - 1 ||
+    if (word.word == '␜' ||
+        i == words.length - 1 ||
         textPainter.width >=
             width - style.position.left - style.position.right) {
       List<int> line = [];
@@ -938,13 +940,15 @@ List<List<int>> getIndexesFromTokens(
       lines.add(line);
       working = [];
       concatenate = "";
+
       working.add(i);
-      concatenate += token.surface;
+      concatenate += word.word;
     } else {
       working.add(i);
-      concatenate += token.surface;
+      concatenate += word.word;
     }
   }
+
   return lines;
 }
 
@@ -1000,62 +1004,4 @@ String getBetterNumberTag(String text) {
   text = text.replaceAll("1)", "①");
 
   return text;
-}
-
-Future<List<DictionaryEntry>> getJishoSegmentAndSearch(
-    String searchTerm, String fullTerm) async {
-  var client = http.Client();
-  http.Response response =
-      await client.get('https://jisho.org/search/$fullTerm');
-
-  var document = parser.parse(response.body);
-
-  List<String> words = [];
-
-  var elements = document.getElementsByClassName("clearfix japanese_word");
-  if (elements.isEmpty) {
-    return getWordDetails(fullTerm);
-  }
-
-  for (var element in elements) {
-    var wordWrapper =
-        element.getElementsByClassName("japanese_word__text_wrapper").first;
-
-    String word;
-
-    var linkElement = wordWrapper.getElementsByTagName("a");
-    if (linkElement.isNotEmpty) {
-      word = linkElement.first.attributes["data-word"];
-    } else {
-      word = wordWrapper.text;
-    }
-
-    words.add(word.trim());
-  }
-
-  List<int> indexTape = [];
-  for (int i = 0; i < words.length; i++) {
-    for (int j = 0; j < words[i].length; j++) {
-      indexTape.add(i);
-    }
-  }
-
-  print(fullTerm.length);
-  print(searchTerm.length);
-
-  for (int i = 0; i < fullTerm.length; i++) {
-    print("A{${fullTerm[i]}}B");
-  }
-
-  int startIndex = fullTerm.length - searchTerm.length;
-
-  print("WEB SCRAPING TEXT SEGMENTATION");
-  print("WORDS: $words");
-  print("INDEX TAPE: $indexTape");
-  print("START INDEX: $startIndex");
-  print("INDEX OF ENTRY WORD: ${indexTape[startIndex]}");
-
-  print("ENTRY WORD: ${words[indexTape[startIndex]]}");
-
-  return getWordDetails(words[indexTape[startIndex]]);
 }

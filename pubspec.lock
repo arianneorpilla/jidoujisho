@@ -271,7 +271,7 @@ packages:
     source: hosted
     version: "0.17.0"
   js:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: js
       url: "https://pub.dartlang.org"
@@ -457,6 +457,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.8.1"
+  sqflite:
+    dependency: "direct main"
+    description:
+      name: sqflite
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.0+3"
+  sqflite_common:
+    dependency: transitive
+    description:
+      name: sqflite_common
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.0+2"
   string_scanner:
     dependency: transitive
     description:
@@ -471,6 +485,13 @@ packages:
       relative: true
     source: path
     version: "1.0.4"
+  synchronized:
+    dependency: transitive
+    description:
+      name: synchronized
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.0"
   term_glyph:
     dependency: transitive
     description:
@@ -548,6 +569,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.2.2"
+  ve_dart:
+    dependency: "direct main"
+    description:
+      name: ve_dart
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.1"
   vector_math:
     dependency: transitive
     description:
@@ -615,4 +643,4 @@ packages:
     version: "7.0.0+7"
 sdks:
   dart: ">=2.12.0 <3.0.0"
-  flutter: ">=1.22.0"
+  flutter: ">=1.24.0-10"

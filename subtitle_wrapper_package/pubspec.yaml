@@ -19,7 +19,7 @@ dependencies:
   flutter_bloc: ^6.1.1
   http: ^0.12.2
   http_parser: ^3.1.4
-  
+  ve_dart: ^0.2.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -29,5 +29,4 @@ dev_dependencies:
   mockito: ^4.1.2
   pedantic: ^1.10.0-nullsafety.2
   video_player: ^2.0.0-nullsafety.2
-
 flutter:

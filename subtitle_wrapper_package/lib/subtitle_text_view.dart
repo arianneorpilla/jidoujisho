@@ -6,6 +6,7 @@ import 'package:mecab_dart/mecab_dart.dart';
 import 'package:subtitle_wrapper_package/bloc/subtitle/subtitle_bloc.dart';
 import 'package:subtitle_wrapper_package/data/constants/view_keys.dart';
 import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
+import 'package:ve_dart/ve_dart.dart';
 
 import 'package:jidoujisho/main.dart';
 
@@ -19,9 +20,9 @@ class SubtitleTextView extends StatelessWidget {
     @required this.focusNode,
   }) : super(key: key);
 
-  Widget getOutlineText(TokenNode token) {
+  Widget getOutlineText(Word word) {
     return Text(
-      token.surface.replaceAll('␝', ' '),
+      word.word,
       style: TextStyle(
         fontSize: subtitleStyle.fontSize,
         foreground: Paint()
@@ -32,20 +33,15 @@ class SubtitleTextView extends StatelessWidget {
     );
   }
 
-  Widget getText(List<dynamic> tokens, TokenNode token, int index) {
+  Widget getText(Word word, int index) {
     return InkWell(
       onTap: () {
-        String allText = '';
-        for (int i = index; i < tokens.length - 1; i++) {
-          allText += tokens[i].surface.replaceAll('␝', ' ');
-        }
-
         Clipboard.setData(
-          ClipboardData(text: allText),
+          ClipboardData(text: word.word),
         );
       },
       child: Text(
-        token.surface.replaceAll('␝', ' '),
+        word.word,
         style: TextStyle(
           fontSize: subtitleStyle.fontSize,
         ),
@@ -116,15 +112,22 @@ class SubtitleTextView extends StatelessWidget {
                   ),
                 );
               } else {
-                var pretokens = state.subtitle.text.replaceAll('\n', '␜');
-                var tokens = mecabTagger.parse(pretokens.replaceAll(' ', '␝'));
+                String processedSubtitles;
+                processedSubtitles = state.subtitle.text.replaceAll('\n', '␜');
+                processedSubtitles = processedSubtitles.replaceAll(' ', '␝');
 
-                List<List<dynamic>> lines =
-                    getLinesFromTokens(context, subtitleStyle, tokens);
+                List<Word> words = parseVe(mecabTagger, processedSubtitles);
+                print(words);
+
+                List<List<Word>> lines =
+                    getLinesFromWords(context, subtitleStyle, words);
                 List<List<int>> indexes =
-                    getIndexesFromTokens(context, subtitleStyle, tokens);
-                print("MECAB TOKENS");
-                print(lines);
+                    getIndexesFromWords(context, subtitleStyle, words);
+
+                for (Word word in words) {
+                  word.word = word.word.replaceAll('␝', ' ');
+                  word.word = word.word.replaceAll('␜', '');
+                }
 
                 return Container(
                   child: Stack(
@@ -141,8 +144,8 @@ class SubtitleTextView extends StatelessWidget {
                                   List<Widget> textWidgets = [];
 
                                   for (int i = 0; i < line.length; i++) {
-                                    TokenNode token = line[i];
-                                    textWidgets.add(getOutlineText(token));
+                                    Word word = line[i];
+                                    textWidgets.add(getOutlineText(word));
                                   }
 
                                   return Row(
@@ -168,9 +171,9 @@ class SubtitleTextView extends StatelessWidget {
                               List<Widget> textWidgets = [];
 
                               for (int i = 0; i < line.length; i++) {
-                                TokenNode token = line[i];
+                                Word word = line[i];
                                 int index = indexList[i];
-                                textWidgets.add(getText(tokens, token, index));
+                                textWidgets.add(getText(word, index));
                               }
 
                               return Row(
