@@ -1,9 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:chewie/chewie.dart';
 import 'package:clipboard_monitor/clipboard_monitor.dart';
-import 'package:file_picker/file_picker.dart';
-// import 'package:gx_file_picker/gx_file_picker.dart';
+// import 'package:file_picker/file_picker.dart';
+import 'package:gx_file_picker/gx_file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
@@ -20,9 +21,10 @@ import 'package:jidoujisho/main.dart';
 import 'package:jidoujisho/util.dart';
 
 class Player extends StatelessWidget {
-  Player({this.streamURL});
+  Player({this.url, this.initialPosition});
 
-  final String streamURL;
+  final int initialPosition;
+  final String url;
 
   @override
   Widget build(BuildContext context) {
@@ -30,74 +32,29 @@ class Player extends StatelessWidget {
     Wakelock.enable();
 
     // If webURL is empty, then use a local player.
-    if (this.streamURL == null) {
-      return localPlayer();
+    if (this.url != null && YoutubePlayer.convertUrlToId(url) != null) {
+      return webPlayer(initialPosition);
     } else {
-      return webPlayer();
+      return localPlayer(context, url, initialPosition);
     }
-  }
-
-  Widget localPlayer() {
-    return new FutureBuilder(
-      future: FilePicker.platform.pickFiles(
-        type: Platform.isIOS ? FileType.any : FileType.video,
-        allowMultiple: false,
-        allowCompression: false,
-      ),
-      builder:
-          (BuildContext context, AsyncSnapshot<FilePickerResult> snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.waiting:
-            return loadingCircle();
-          default:
-            if (snapshot.hasData) {
-              File videoFile = File(snapshot.data.files.single.path);
-              print("VIDEO FILE: ${videoFile.path}");
-
-              return FutureBuilder(
-                future: extractSubtitles(videoFile),
-                builder:
-                    (BuildContext context, AsyncSnapshot<List<File>> snapshot) {
-                  switch (snapshot.connectionState) {
-                    case ConnectionState.waiting:
-                      return loadingCircle();
-                    default:
-                      List<File> internalSubs = snapshot.data;
-                      String defaultSubtitles =
-                          getDefaultSubtitles(videoFile, internalSubs);
-
-                      return VideoPlayer(
-                        videoFile: videoFile,
-                        internalSubs: internalSubs,
-                        defaultSubtitles: defaultSubtitles,
-                      );
-                  }
-                },
-              );
-            }
-            Navigator.pop(context);
-            return Container();
-        }
-      },
-    );
   }
 
   // Widget localPlayer() {
   //   return new FutureBuilder(
-  //     future: FilePicker.getFile(
-  //         type: Platform.isIOS ? FileType.any : FileType.video),
-  //     builder: (BuildContext context, AsyncSnapshot<File> snapshot) {
+  //     future: FilePicker.platform.pickFiles(
+  //       type: Platform.isIOS ? FileType.any : FileType.video,
+  //       allowMultiple: false,
+  //       allowCompression: false,
+  //     ),
+  //     builder:
+  //         (BuildContext context, AsyncSnapshot<FilePickerResult> snapshot) {
   //       switch (snapshot.connectionState) {
   //         case ConnectionState.waiting:
   //           return loadingCircle();
   //         default:
   //           if (snapshot.hasData) {
-  //             File videoFile = snapshot.data;
+  //             File videoFile = File(snapshot.data.files.single.path);
   //             print("VIDEO FILE: ${videoFile.path}");
-
-  //             if (videoFile == null) {
-  //               Navigator.pop(context);
-  //             }
 
   //             return FutureBuilder(
   //               future: extractSubtitles(videoFile),
@@ -110,11 +67,6 @@ class Player extends StatelessWidget {
   //                     List<File> internalSubs = snapshot.data;
   //                     String defaultSubtitles =
   //                         getDefaultSubtitles(videoFile, internalSubs);
-
-  //                     SystemChrome.setPreferredOrientations([
-  //                       DeviceOrientation.landscapeLeft,
-  //                       DeviceOrientation.landscapeRight,
-  //                     ]);
 
   //                     return VideoPlayer(
   //                       videoFile: videoFile,
@@ -132,11 +84,85 @@ class Player extends StatelessWidget {
   //   );
   // }
 
-  Widget webPlayer() {
+  Widget localPlayer(BuildContext context, String url, int initialPosition) {
+    if (initialPosition != -1) {
+      return localPlayerHelper(
+        context,
+        File(url),
+        initialPosition,
+      );
+    } else {
+      return new FutureBuilder(
+        future: FilePicker.getFile(
+            type: Platform.isIOS ? FileType.any : FileType.video),
+        builder: (BuildContext context, AsyncSnapshot<File> snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+              return loadingCircle();
+            default:
+              if (snapshot.hasData) {
+                File videoFile = snapshot.data;
+                if (videoFile == null) {
+                  Navigator.pop(context);
+                }
+
+                return localPlayerHelper(context, videoFile, initialPosition);
+              }
+              Navigator.pop(context);
+              return Container();
+          }
+        },
+      );
+    }
+  }
+
+  Widget localPlayerHelper(
+    BuildContext context,
+    File videoFile,
+    int initialPosition,
+  ) {
+    print("VIDEO FILE: ${videoFile.path}");
+
+    if (videoFile == null) {
+      Navigator.pop(context);
+    }
+
+    return FutureBuilder(
+      future: extractSubtitles(videoFile),
+      builder: (BuildContext context, AsyncSnapshot<List<File>> snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.waiting:
+            return loadingCircle();
+          default:
+            List<File> internalSubs = snapshot.data;
+            String defaultSubtitles =
+                getDefaultSubtitles(videoFile, internalSubs);
+
+            globalPrefs.setString("lastPlayedPath", videoFile.path);
+            globalPrefs.setInt("lastPlayedPosition", 0);
+            globalResumable.value = true;
+
+            SystemChrome.setPreferredOrientations([
+              DeviceOrientation.landscapeLeft,
+              DeviceOrientation.landscapeRight,
+            ]);
+
+            return VideoPlayer(
+              videoFile: videoFile,
+              internalSubs: internalSubs,
+              defaultSubtitles: defaultSubtitles,
+              initialPosition: initialPosition,
+            );
+        }
+      },
+    );
+  }
+
+  Widget webPlayer(int initialPosition) {
     String videoID = "";
 
     try {
-      videoID = YoutubePlayer.convertUrlToId(streamURL);
+      videoID = YoutubePlayer.convertUrlToId(url);
       print("VIDEO YOUTUBE ID: $videoID");
     } catch (error) {
       print("INVALID LINK");
@@ -144,7 +170,7 @@ class Player extends StatelessWidget {
     }
 
     return new FutureBuilder(
-      future: getPlayerYouTubeInfo(streamURL),
+      future: getPlayerYouTubeInfo(url),
       builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
@@ -203,6 +229,7 @@ class Player extends StatelessWidget {
                       webStream: webStream,
                       defaultSubtitles: webSubtitles,
                       internalSubs: internalSubs,
+                      initialPosition: initialPosition,
                     );
                 }
               },
@@ -234,6 +261,7 @@ class VideoPlayer extends StatefulWidget {
     this.internalSubs,
     this.defaultSubtitles,
     this.webStream,
+    this.initialPosition,
     Key key,
   }) : super(key: key);
 
@@ -241,6 +269,7 @@ class VideoPlayer extends StatefulWidget {
   final List<File> internalSubs;
   final String defaultSubtitles;
   final String webStream;
+  final int initialPosition;
 
   @override
   _VideoPlayerState createState() => _VideoPlayerState(
@@ -248,26 +277,24 @@ class VideoPlayer extends StatefulWidget {
         this.internalSubs,
         this.defaultSubtitles,
         this.webStream,
+        this.initialPosition,
       );
 }
 
 class _VideoPlayerState extends State<VideoPlayer> {
   _VideoPlayerState(
-    File videoFile,
-    List<File> internalSubs,
-    String defaultSubtitles,
-    String webStream,
-  ) {
-    _videoFile = videoFile;
-    _internalSubs = internalSubs;
-    _defaultSubtitles = defaultSubtitles;
-    _webStream = webStream;
-  }
+    this.videoFile,
+    this.internalSubs,
+    this.defaultSubtitles,
+    this.webStream,
+    this.initialPosition,
+  );
 
-  File _videoFile;
-  List<File> _internalSubs;
-  String _defaultSubtitles;
-  String _webStream;
+  final File videoFile;
+  final List<File> internalSubs;
+  final String defaultSubtitles;
+  final String webStream;
+  int initialPosition;
 
   VlcPlayerController _videoPlayerController;
   ChewieController _chewieController;
@@ -275,6 +302,33 @@ class _VideoPlayerState extends State<VideoPlayer> {
   SubtitleController _subTitleController;
   String _volatileText = "";
   FocusNode _subtitleFocusNode = new FocusNode();
+
+  Timer timer;
+
+  @override
+  void initState() {
+    super.initState();
+    timer = Timer.periodic(
+        Duration(seconds: 1), (Timer t) => updateDurationOrSeek());
+  }
+
+  void updateDurationOrSeek() {
+    globalPrefs.setInt("lastPlayedPosition",
+        getVideoPlayerController().value.position.inSeconds ?? 0);
+
+    if (initialPosition != -1 &&
+        getVideoPlayerController().value.isInitialized) {
+      getVideoPlayerController().isSeekable().then((isSeekable) {
+        if (isSeekable && initialPosition != -1) {
+          getVideoPlayerController()
+              .seekTo(Duration(seconds: initialPosition))
+              .then((result) {
+            initialPosition = -1;
+          });
+        }
+      });
+    }
+  }
 
   final _clipboard = ValueNotifier<String>("");
   final _currentDictionaryEntry =
@@ -290,7 +344,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       text: "",
     ),
   );
-  final _currentSubTrack = ValueNotifier<int>(0);
+  final _currentSubTrack = ValueNotifier<int>(-1);
 
   @override
   void dispose() {
@@ -299,6 +353,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       _videoPlayerController?.dispose();
       _chewieController?.dispose();
     }
+    timer.cancel();
   }
 
   @override
@@ -399,14 +454,17 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   VlcPlayerController getVideoPlayerController() {
-    if (_webStream == null) {
-      _videoPlayerController ??= VlcPlayerController.file(_videoFile,
-          hwAcc: HwAcc.FULL,
-          options: VlcPlayerOptions(
-              audio: VlcAudioOptions(["--audio-track=0", "--sub-track=999"])));
+    if (webStream == null) {
+      _videoPlayerController ??= VlcPlayerController.file(
+        videoFile,
+        hwAcc: HwAcc.FULL,
+        options: VlcPlayerOptions(
+          audio: VlcAudioOptions(["--audio-track=0", "--sub-track=999"]),
+        ),
+      );
     } else {
       _videoPlayerController ??= VlcPlayerController.network(
-        _webStream,
+        webStream,
         hwAcc: HwAcc.FULL,
       );
     }
@@ -416,7 +474,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
   ChewieController getChewieController() {
     _chewieController ??= ChewieController(
       videoPlayerController: getVideoPlayerController(),
-      internalSubs: _internalSubs,
+      internalSubs: internalSubs,
       clipboard: _clipboard,
       currentDictionaryEntry: _currentDictionaryEntry,
       currentSubtitle: _currentSubtitle,
@@ -441,7 +499,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   SubtitleController getSubtitleController() {
     _subTitleController ??= SubtitleController(
-      subtitlesContent: _defaultSubtitles,
+      subtitlesContent: defaultSubtitles,
       showSubtitles: true,
       subtitleDecoder: SubtitleDecoder.utf8,
       subtitleType: SubtitleType.srt,
@@ -481,13 +539,13 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   void playEmbeddedSubtitles(int index) {
-    if (_internalSubs.isEmpty) {
+    if (internalSubs.isEmpty) {
       return;
     }
 
-    if (index < _internalSubs.length) {
+    if (index < internalSubs.length) {
       getSubtitleWrapper().subtitleController.updateSubtitleContent(
-          content: _internalSubs[index].readAsStringSync());
+          content: internalSubs[index].readAsStringSync());
       print("SUBTITLES SWITCHED TO TRACK $index");
     } else {
       _subTitleController.updateSubtitleContent(content: "");
@@ -495,45 +553,45 @@ class _VideoPlayerState extends State<VideoPlayer> {
     }
   }
 
-  void playExternalSubtitles() async {
-    FilePickerResult result = await FilePicker.platform.pickFiles(
-      type: FileType.any,
-      allowMultiple: false,
-    );
-
-    if (result != null) {
-      File subFile = File(result.files.single.path);
-      if (subFile.path.endsWith("srt")) {
-        getSubtitleWrapper()
-            .subtitleController
-            .updateSubtitleContent(content: subFile.readAsStringSync());
-        print("SUBTITLES SWITCHED TO EXTERNAL SRT");
-      } else {
-        getSubtitleWrapper().subtitleController.updateSubtitleContent(
-            content: await extractNonSrtSubtitles(subFile));
-        print("SUBTITLES SWITCHED TO EXTERNAL ASS");
-      }
-    }
-  }
-
   // void playExternalSubtitles() async {
-  //   File result = await FilePicker.getFile(
+  //   FilePickerResult result = await FilePicker.platform.pickFiles(
   //     type: FileType.any,
+  //     allowMultiple: false,
   //   );
 
   //   if (result != null) {
-  //     if (result.path.endsWith("srt")) {
+  //     File subFile = File(result.files.single.path);
+  //     if (subFile.path.endsWith("srt")) {
   //       getSubtitleWrapper()
   //           .subtitleController
-  //           .updateSubtitleContent(content: result.readAsStringSync());
+  //           .updateSubtitleContent(content: subFile.readAsStringSync());
   //       print("SUBTITLES SWITCHED TO EXTERNAL SRT");
   //     } else {
   //       getSubtitleWrapper().subtitleController.updateSubtitleContent(
-  //           content: await extractNonSrtSubtitles(result));
+  //           content: await extractNonSrtSubtitles(subFile));
   //       print("SUBTITLES SWITCHED TO EXTERNAL ASS");
   //     }
   //   }
   // }
+
+  void playExternalSubtitles() async {
+    File result = await FilePicker.getFile(
+      type: FileType.any,
+    );
+
+    if (result != null) {
+      if (result.path.endsWith("srt")) {
+        getSubtitleWrapper()
+            .subtitleController
+            .updateSubtitleContent(content: result.readAsStringSync());
+        print("SUBTITLES SWITCHED TO EXTERNAL SRT");
+      } else {
+        getSubtitleWrapper().subtitleController.updateSubtitleContent(
+            content: await extractNonSrtSubtitles(result));
+        print("SUBTITLES SWITCHED TO EXTERNAL ASS");
+      }
+    }
+  }
 
   Widget buildDictionaryLoading(String clipboard) {
     String lookupText = "Looking up『$clipboard』...";
@@ -594,8 +652,8 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   Widget buildDictionaryExportingLong(String clipboard) {
-    String lookupText =
-        "Preparing to export... This is taking too long...\nPlease ensure AnkiDroid is launched in the background.";
+    String lookupText = "Preparing to export... This is taking too long...\n" +
+        "Please ensure AnkiDroid is launched in the background.";
 
     return Column(
       children: [
@@ -828,7 +886,10 @@ class _VideoPlayerState extends State<VideoPlayer> {
     return ValueListenableBuilder(
       valueListenable: _currentSubTrack,
       builder: (context, index, widget) {
-        playEmbeddedSubtitles(index);
+        if (_currentSubTrack.value != -1) {
+          playEmbeddedSubtitles(index);
+        }
+
         return Container();
       },
     );

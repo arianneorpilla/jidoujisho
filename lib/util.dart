@@ -8,10 +8,10 @@ import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:html/parser.dart' as parser;
 import 'package:http/http.dart' as http;
-import 'package:import_js_library/import_js_library.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path/path.dart' as path;
 import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
 import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
 import 'package:unofficial_jisho_api/api.dart';
@@ -23,11 +23,47 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:jidoujisho/main.dart';
 
 String getDefaultSubtitles(File file, List<File> internalSubtitles) {
-  if (internalSubtitles.isNotEmpty) {
-    return internalSubtitles.first.readAsStringSync();
-  } else {
-    return "";
+  String content = "";
+
+  if (hasExternalSubtitles(file)) {
+    content = getExternalSubtitles(file).readAsStringSync();
+  } else if (internalSubtitles.isNotEmpty) {
+    content = (internalSubtitles[0]).readAsStringSync();
   }
+
+  print(content);
+
+  return content;
+}
+
+bool hasExternalSubtitles(File file) {
+  String subtitlePath = getExternalSubtitles(file).path;
+  File subtitleFile = File(subtitlePath);
+
+  return subtitleFile.existsSync();
+}
+
+File getExternalSubtitles(File file) {
+  String videoDir = path.dirname(file.path);
+  String videoBasename = path.basenameWithoutExtension(file.path);
+  String subtitlePath;
+
+  subtitlePath = "$videoDir/$videoBasename.srt";
+  if (File(subtitlePath).existsSync()) {
+    return File(subtitlePath);
+  }
+
+  subtitlePath = "$videoDir/$videoBasename.ass";
+  if (File(subtitlePath).existsSync()) {
+    return File(subtitlePath);
+  }
+
+  subtitlePath = "$videoDir/$videoBasename.ssa";
+  if (File(subtitlePath).existsSync()) {
+    return File(subtitlePath);
+  }
+
+  return File(subtitlePath);
 }
 
 String timedTextToSRT(String timedText) {

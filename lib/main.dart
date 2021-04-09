@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:async/async.dart';
@@ -12,7 +11,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:ve_dart/ve_dart.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
@@ -34,7 +32,10 @@ List<DictionaryEntry> customDictionary;
 Fuzzy customDictionaryFuzzy;
 
 bool isGooglePlayLimited = false;
+
+SharedPreferences globalPrefs;
 ValueNotifier<bool> globalSelectMode;
+ValueNotifier<bool> globalResumable;
 
 final AsyncMemoizer trendingCache = AsyncMemoizer();
 Map<String, AsyncMemoizer> searchCache = {};
@@ -53,9 +54,12 @@ void main() async {
   mecabTagger = Mecab();
   await mecabTagger.init("assets/ipadic", true);
 
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  bool selectMode = prefs.getBool("selectMode") ?? false;
+  globalPrefs = await SharedPreferences.getInstance();
 
+  String lastPlayedPath = globalPrefs.getString("lastPlayedPath") ?? "-1";
+  globalResumable = ValueNotifier<bool>(lastPlayedPath != "-1");
+
+  bool selectMode = globalPrefs.getBool("selectMode") ?? false;
   globalSelectMode = ValueNotifier<bool>(selectMode);
 
   await Permission.storage.request();
@@ -65,23 +69,6 @@ void main() async {
   appDirPath = appDirDoc.path;
   previewImageDir = appDirPath + "/exportImage.jpg";
   previewAudioDir = appDirPath + "/exportAudio.mp3";
-
-  /// Construct a file path to copy database to
-  Directory documentsDirectory = await getApplicationDocumentsDirectory();
-  String path = documentsDirectory.path + "/" "jmdict.db";
-
-  // Only copy if the database doesn't exist
-  if (FileSystemEntity.typeSync(path) == FileSystemEntityType.notFound) {
-    // Load database from asset and copy
-    ByteData data = await rootBundle.load('assets/jmdict.db');
-    List<int> bytes =
-        data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-
-    // Save copied asset to documents
-    await new File(path).writeAsBytes(bytes);
-  }
-
-  Directory appDocDir = await getApplicationDocumentsDirectory();
 
   customDictionary = importCustomDictionary();
   customDictionaryFuzzy = Fuzzy(getAllImportedWords());
@@ -162,13 +149,20 @@ class _HomeState extends State<Home> {
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => Player()))
-                .then((returnValue) {
-              SystemChrome.setPreferredOrientations([
-                DeviceOrientation.portraitUp,
-                DeviceOrientation.landscapeLeft,
-                DeviceOrientation.landscapeRight,
-              ]);
+              context,
+              MaterialPageRoute(
+                builder: (context) => Player(
+                  initialPosition: -1,
+                ),
+              ),
+            ).then((returnValue) {
+              setState(() {
+                SystemChrome.setPreferredOrientations([
+                  DeviceOrientation.portraitUp,
+                  DeviceOrientation.landscapeLeft,
+                  DeviceOrientation.landscapeRight,
+                ]);
+              });
             });
           },
           child: Icon(Icons.video_collection_sharp),
@@ -446,14 +440,23 @@ class _HomeState extends State<Home> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => Player(streamURL: _webURL),
+                            builder: (context) => Player(
+                              url: _webURL,
+                              initialPosition: -1,
+                            ),
                           ),
                         ).then((returnValue) {
-                          SystemChrome.setPreferredOrientations([
-                            DeviceOrientation.portraitUp,
-                            DeviceOrientation.landscapeLeft,
-                            DeviceOrientation.landscapeRight,
-                          ]);
+                          setState(() {
+                            SystemChrome.setPreferredOrientations([
+                              DeviceOrientation.portraitUp,
+                              DeviceOrientation.landscapeLeft,
+                              DeviceOrientation.landscapeRight,
+                            ]);
+                          });
+
+                          globalPrefs.setString("lastPlayedPath", _webURL);
+                          globalPrefs.setInt("lastPlayedPosition", 0);
+                          globalResumable.value = true;
                         });
                       }
                     } on Exception {
@@ -502,9 +505,52 @@ class _HomeState extends State<Home> {
     }
   }
 
+  Widget _buildResume() {
+    return ValueListenableBuilder(
+      valueListenable: globalResumable,
+      builder: (_, __, ___) {
+        if (globalResumable.value) {
+          return IconButton(
+            icon: const Icon(Icons.restore),
+            onPressed: () async {
+              int lastPlayedPosition =
+                  globalPrefs.getInt("lastPlayedPosition") ?? 0;
+              String globalLastPlayedPath =
+                  globalPrefs.getString("lastPlayedPath") ?? "-1";
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Player(
+                    url: globalLastPlayedPath,
+                    initialPosition: lastPlayedPosition,
+                  ),
+                ),
+              ).then((returnValue) {
+                SystemChrome.setPreferredOrientations([
+                  DeviceOrientation.portraitUp,
+                  DeviceOrientation.landscapeLeft,
+                  DeviceOrientation.landscapeRight,
+                ]);
+              });
+            },
+          );
+        } else {
+          return IconButton(
+            icon: Icon(
+              Icons.restore,
+              color: Colors.grey[800],
+            ),
+          );
+        }
+      },
+    );
+  }
+
   List<Widget> _buildActions() {
     if (_isSearching) {
       return <Widget>[
+        _buildResume(),
         IconButton(
           icon: const Icon(Icons.clear),
           onPressed: () {
@@ -523,6 +569,7 @@ class _HomeState extends State<Home> {
     }
 
     return <Widget>[
+      _buildResume(),
       isGooglePlayLimited
           ? Container()
           : IconButton(
@@ -709,15 +756,21 @@ class _YouTubeResultState extends State<YouTubeResult>
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => Player(streamURL: videoStreamURL),
+            builder: (context) => Player(
+              url: videoStreamURL,
+              initialPosition: -1,
+            ),
           ),
         ).then((returnValue) {
           SystemChrome.setPreferredOrientations([
-            DeviceOrientation.portraitDown,
             DeviceOrientation.portraitUp,
             DeviceOrientation.landscapeLeft,
             DeviceOrientation.landscapeRight,
           ]);
+
+          globalPrefs.setString("lastPlayedPath", videoStreamURL);
+          globalPrefs.setInt("lastPlayedPosition", 0);
+          globalResumable.value = true;
         });
       },
       child: Container(
