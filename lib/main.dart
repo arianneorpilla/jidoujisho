@@ -5,12 +5,12 @@ import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fuzzy/fuzzy.dart';
+import 'package:jidoujisho/export.dart';
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:package_info/package_info.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:ve_dart/ve_dart.dart';
@@ -40,7 +40,6 @@ ValueNotifier<bool> globalSelectMode;
 final AsyncMemoizer trendingCache = AsyncMemoizer();
 Map<String, AsyncMemoizer> searchCache = {};
 Map<String, AsyncMemoizer> captioningCache = {};
-Database db;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -67,27 +66,6 @@ void main() async {
   appDirPath = appDirDoc.path;
   previewImageDir = appDirPath + "/exportImage.jpg";
   previewAudioDir = appDirPath + "/exportAudio.mp3";
-
-  /// Construct a file path to copy database to
-  Directory documentsDirectory = await getApplicationDocumentsDirectory();
-  String path = documentsDirectory.path + "/" "jmdict.db";
-
-  // Only copy if the database doesn't exist
-  if (FileSystemEntity.typeSync(path) == FileSystemEntityType.notFound) {
-    // Load database from asset and copy
-    ByteData data = await rootBundle.load('assets/jmdict.db');
-    List<int> bytes =
-        data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-
-    // Save copied asset to documents
-    await new File(path).writeAsBytes(bytes);
-  }
-
-  Directory appDocDir = await getApplicationDocumentsDirectory();
-
-  String databasePath = appDocDir.path + '/' + 'jmdict.db';
-  print(databasePath);
-  db = await openDatabase(databasePath);
 
   customDictionary = importCustomDictionary();
   customDictionaryFuzzy = Fuzzy(getAllImportedWords());
@@ -132,7 +110,7 @@ class App extends StatelessWidget {
         appBarTheme: AppBarTheme(backgroundColor: Colors.black),
         canvasColor: Colors.grey[900],
       ),
-      home: Home(),
+      home: Export(imageFile: null, defaultSentence: "wow"),
     );
   }
 }

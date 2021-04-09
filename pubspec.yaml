@@ -2,7 +2,7 @@ name: jidoujisho
 description: A mobile video player tailored for Japanese language learners. 
 publish_to: none
 
-version: 0.8.1+beta
+version: 0.9.0+beta
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -31,7 +31,6 @@ dependencies:
   path_provider:
   permission_handler:
   scrollable_positioned_list: ^0.1.9
-  sqflite:
   shared_preferences:
   subtitle_wrapper_package:
     path: ./subtitle_wrapper_package
@@ -41,12 +40,13 @@ dependencies:
   js:
   ve_dart: ^0.2.1
   xml2json:
-
+  flutter_qjs: ^0.3.5
   youtube_explode_dart:
     git:
       url: https://github.com/Hexer10/youtube_explode_dart
       ref: 5385ba1628c109312fc452162e32ebc20961b1dd
   youtube_player_flutter:
+  pixabay_picker:
  
   wakelock:
 
@@ -64,4 +64,3 @@ flutter:
   assets:
     - assets/icon/icon.png
     - assets/ipadic/
-    - assets/jmdict.db

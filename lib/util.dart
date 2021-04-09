@@ -7,8 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:html/parser.dart' as parser;
+import 'package:html/dom.dart' as dom;
 import 'package:http/http.dart' as http;
-import 'package:import_js_library/import_js_library.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -1004,4 +1004,31 @@ String getBetterNumberTag(String text) {
   text = text.replaceAll("1)", "①");
 
   return text;
+}
+
+Future<List<String>> getImages(String searchTerm) async {
+  final Map<String, String> headers = {
+    HttpHeaders.userAgentHeader:
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.122 Safari/537.36'
+  };
+
+  final response = await http.get(
+      'https://www.google.com/search?q=$searchTerm&tbm=isch',
+      headers: headers);
+
+  if (response.statusCode != HttpStatus.ok) {
+    return [];
+  }
+
+  var document = parser.parse(response.body);
+
+  final elements = document.querySelectorAll('.bRMDJf');
+
+  print(elements.map((a) => a.querySelector('img').attributes['src']).toList());
+
+  return elements.map((a) => a.querySelector('img').attributes['src']).toList();
+}
+
+Image imageFromBase64String(String base64String) {
+  return Image.memory(base64Decode(base64String.substring(22)));
 }
