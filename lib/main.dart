@@ -10,7 +10,6 @@ import 'package:package_info/package_info.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:ve_dart/ve_dart.dart';
@@ -40,7 +39,6 @@ ValueNotifier<bool> globalSelectMode;
 final AsyncMemoizer trendingCache = AsyncMemoizer();
 Map<String, AsyncMemoizer> searchCache = {};
 Map<String, AsyncMemoizer> captioningCache = {};
-Database db;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -84,10 +82,6 @@ void main() async {
   }
 
   Directory appDocDir = await getApplicationDocumentsDirectory();
-
-  String databasePath = appDocDir.path + '/' + 'jmdict.db';
-  print(databasePath);
-  db = await openDatabase(databasePath);
 
   customDictionary = importCustomDictionary();
   customDictionaryFuzzy = Fuzzy(getAllImportedWords());

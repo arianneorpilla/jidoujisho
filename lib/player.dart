@@ -789,10 +789,6 @@ class _VideoPlayerState extends State<VideoPlayer> {
     return ValueListenableBuilder(
       valueListenable: _clipboard,
       builder: (context, clipboard, widget) {
-        String query =
-            "SELECT * FROM entry WHERE kanji LIKE '$clipboard%' LIMIT 20";
-        db.rawQuery(query).then((result) => print(result));
-
         return FutureBuilder(
           future: getWordDetails(clipboard),
           builder: (BuildContext context,
