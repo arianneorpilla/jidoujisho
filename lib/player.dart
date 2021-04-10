@@ -191,7 +191,7 @@ class Player extends StatelessWidget {
 
             return new FutureBuilder(
               future: http.read(
-                  "https://www.youtube.com/api/timedtext?lang=ja&v=$videoID"),
+                  "https://www.youtube.com/api/timedtext?lang=zh&v=$videoID"),
               builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                 switch (snapshot.connectionState) {
                   case ConnectionState.waiting:
@@ -594,7 +594,12 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   Widget buildDictionaryLoading(String clipboard) {
-    String lookupText = "Looking up『$clipboard』...";
+    String lookupText;
+    if (globalSelectMode.value) {
+      lookupText = "Looking up『$clipboard』...";
+    } else {
+      lookupText = "Looking up definition...";
+    }
 
     return Column(
       children: [
@@ -818,21 +823,6 @@ class _VideoPlayerState extends State<VideoPlayer> {
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        Text(
-                          "found for",
-                          style: TextStyle(
-                            fontSize: 11,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        Text(
-                          "『${results[selectedIndex.value].searchTerm}』",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 11,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
                       ],
                     )
                   ],
@@ -847,8 +837,17 @@ class _VideoPlayerState extends State<VideoPlayer> {
     return ValueListenableBuilder(
       valueListenable: _clipboard,
       builder: (context, clipboard, widget) {
+        Future<List<DictionaryEntry>> futureDictionary;
+        if (globalSelectMode.value) {
+          futureDictionary = getExactWordAnalysis(_clipboard.value);
+        } else {
+          futureDictionary = getSentenceAnalysis(
+              _currentSubtitle.value.text, _clipboard.value.length - 1);
+          print(_currentSubtitle.value.text);
+        }
+
         return FutureBuilder(
-          future: getWordDetails(clipboard),
+          future: futureDictionary,
           builder: (BuildContext context,
               AsyncSnapshot<List<DictionaryEntry>> snapshot) {
             if (_clipboard.value == "&<&>export&<&>") {

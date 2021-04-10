@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:jidoujisho/util.dart';
-import 'package:mecab_dart/mecab_dart.dart';
+
 import 'package:subtitle_wrapper_package/bloc/subtitle/subtitle_bloc.dart';
 import 'package:subtitle_wrapper_package/data/constants/view_keys.dart';
 import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
 import 'package:ve_dart/ve_dart.dart';
 
 import 'package:jidoujisho/main.dart';
+import 'package:jidoujisho/util.dart';
 
 class SubtitleTextView extends StatelessWidget {
   final SubtitleStyle subtitleStyle;
@@ -20,9 +20,9 @@ class SubtitleTextView extends StatelessWidget {
     @required this.focusNode,
   }) : super(key: key);
 
-  Widget getOutlineText(Word word) {
+  Widget getOutlineText(String word) {
     return Text(
-      word.word,
+      word,
       style: TextStyle(
         fontSize: subtitleStyle.fontSize,
         foreground: Paint()
@@ -33,15 +33,16 @@ class SubtitleTextView extends StatelessWidget {
     );
   }
 
-  Widget getText(Word word, int index) {
+  Widget getText(String subtitle, String word, int index) {
     return InkWell(
       onTap: () {
+        String allText = "i" * (index + 1);
         Clipboard.setData(
-          ClipboardData(text: word.word),
+          ClipboardData(text: allText),
         );
       },
       child: Text(
-        word.word,
+        word,
         style: TextStyle(
           fontSize: subtitleStyle.fontSize,
         ),
@@ -116,18 +117,16 @@ class SubtitleTextView extends StatelessWidget {
                 processedSubtitles = state.subtitle.text.replaceAll('\n', '␜');
                 processedSubtitles = processedSubtitles.replaceAll(' ', '␝');
 
-                List<Word> words = parseVe(mecabTagger, processedSubtitles);
-                print(words);
+                List<String> words = [];
+                processedSubtitles.runes.forEach((int rune) {
+                  String character = new String.fromCharCode(rune);
+                  words.add(character);
+                });
 
-                List<List<Word>> lines =
+                List<List<String>> lines =
                     getLinesFromWords(context, subtitleStyle, words);
                 List<List<int>> indexes =
                     getIndexesFromWords(context, subtitleStyle, words);
-
-                for (Word word in words) {
-                  word.word = word.word.replaceAll('␝', ' ');
-                  word.word = word.word.replaceAll('␜', '');
-                }
 
                 return Container(
                   child: Stack(
@@ -144,7 +143,7 @@ class SubtitleTextView extends StatelessWidget {
                                   List<Widget> textWidgets = [];
 
                                   for (int i = 0; i < line.length; i++) {
-                                    Word word = line[i];
+                                    String word = line[i];
                                     textWidgets.add(getOutlineText(word));
                                   }
 
@@ -171,9 +170,10 @@ class SubtitleTextView extends StatelessWidget {
                               List<Widget> textWidgets = [];
 
                               for (int i = 0; i < line.length; i++) {
-                                Word word = line[i];
+                                String word = line[i];
                                 int index = indexList[i];
-                                textWidgets.add(getText(word, index));
+                                textWidgets.add(
+                                    getText(state.subtitle.text, word, index));
                               }
 
                               return Row(

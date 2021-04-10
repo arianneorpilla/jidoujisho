@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
+import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as parser;
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart' as intl;
@@ -709,7 +710,7 @@ Future<String> getPlayerYouTubeInfo(String webURL) async {
 
 Future<bool> checkYouTubeClosedCaptionAvailable(String videoID) async {
   String httpSubs = await http
-      .read("https://www.youtube.com/api/timedtext?lang=ja&v=" + videoID);
+      .read("https://www.youtube.com/api/timedtext?lang=zh&v=" + videoID);
   return (httpSubs.isNotEmpty);
 }
 
@@ -824,7 +825,7 @@ Future<List<Video>> searchYouTubeVideos(String searchQuery) async {
 
 Future<List<Video>> searchYouTubeTrendingVideos() {
   YoutubeExplode yt = YoutubeExplode();
-  return yt.playlists.getVideos("PLuXL6NS58Dyx-wTr5o7NiC7CZRbMA91DC").toList();
+  return yt.playlists.getVideos("PLWahjRCqyk72ta8EG8Jn0Ii-UV0JwnZVG").toList();
 }
 
 Future<void> requestPermissions() async {
@@ -906,49 +907,68 @@ class _DeckDropDownState extends State<DeckDropDown> {
   }
 }
 
-List<List<Word>> getLinesFromWords(
-    BuildContext context, SubtitleStyle style, List<Word> words) {
-  List<List<Word>> lines = [];
-  List<Word> working = [];
+// From a list of words outputted by the Ve parser, return a List of
+// List<Word> which will represent a single line of the subtitle widget.
+List<List<String>> getLinesFromWords(
+    BuildContext context, SubtitleStyle style, List<String> words) {
+  // The list of List<Words> that will be passed to the Row generator.
+  List<List<String>> lines = [];
+  // The current List<Word> being filled up.
+  List<String> working = [];
+  // The current List<Word> when all combined in String form.
   String concatenate = "";
+  // A widget used to dynamically measure the current width of concatenate.
   TextPainter textPainter;
+  // The width of the device.
   double width = MediaQuery.of(context).size.width;
-  words.add(Word("", "", Grammar.Unassigned, "", Pos.TBD, "", TokenNode("")));
 
+  // ve_dart output needs to be concatenated by 1 value
+  // For every subtitle to be seen for some arcane reason.
+  words.add("");
+
+  // Iterate on every word of the ve_dart output.
   for (int i = 0; i < words.length; i++) {
-    Word word = words[i];
+    String word = words[i];
     textPainter = TextPainter()
       ..text = TextSpan(text: concatenate, style: TextStyle(fontSize: 24))
       ..textDirection = TextDirection.ltr
       ..layout(minWidth: 0, maxWidth: double.infinity);
-
-    if (word.word == '␜' ||
-        i == words.length - 1 ||
-        textPainter.width >=
+    // LINE BREAK
+    if (word == '␜' || // If we find our line break delimiter
+        i == words.length - 1 || // If the last word is found
+        textPainter
+                .width >= // If concatenate is getting too long for the device
             width - style.position.left - style.position.right) {
-      List<Word> line = [];
+      List<String> line = [];
+
+      // Copy all the elements in working to a line.
       for (int i = 0; i < working.length; i++) {
         line.add(working[i]);
       }
 
+      // Add the line to our working list of List<Word> objects.
       lines.add(line);
+      // Result the working List<Word> and concatenate
       working = [];
       concatenate = "";
 
-      working.add(word);
-      concatenate += word.word;
+      // Remember to add the last element to the List<Word>
+      working.add(word.replaceAll('␝', ' ').replaceAll('␜', ''));
+      concatenate += word;
+      // DO NOT LINE BREAK
     } else {
-      working.add(word);
-      concatenate += word.word;
+      // Add the element to the working List<Word>
+      working.add(word.replaceAll('␝', ' ').replaceAll('␜', ''));
+      concatenate += word;
     }
   }
-
+  // Return the List of List<Word> objects to be passed to the Row generator.
   return lines;
 }
 
 List<List<int>> getIndexesFromWords(
-    BuildContext context, SubtitleStyle style, List<Word> words) {
-  words.add(Word("", "", Grammar.Unassigned, "", Pos.TBD, "", TokenNode("")));
+    BuildContext context, SubtitleStyle style, List<String> words) {
+  words.add("");
 
   List<List<int>> lines = [];
   List<int> working = [];
@@ -958,13 +978,13 @@ List<List<int>> getIndexesFromWords(
   double width = MediaQuery.of(context).size.width;
 
   for (int i = 0; i < words.length; i++) {
-    Word word = words[i];
+    String word = words[i];
     textPainter = TextPainter()
       ..text = TextSpan(text: concatenate, style: TextStyle(fontSize: 24))
       ..textDirection = TextDirection.ltr
       ..layout(minWidth: 0, maxWidth: double.infinity);
 
-    if (word.word == '␜' ||
+    if (word == '␜' ||
         i == words.length - 1 ||
         textPainter.width >=
             width - style.position.left - style.position.right) {
@@ -978,10 +998,10 @@ List<List<int>> getIndexesFromWords(
       concatenate = "";
 
       working.add(i);
-      concatenate += word.word;
+      concatenate += word;
     } else {
       working.add(i);
-      concatenate += word.word;
+      concatenate += word;
     }
   }
 
@@ -1038,6 +1058,212 @@ String getBetterNumberTag(String text) {
   text = text.replaceAll("3)", "③");
   text = text.replaceAll("2)", "②");
   text = text.replaceAll("1)", "①");
+  Future<List<DictionaryEntry>> getWordDetails(String searchTerm) async {
+    List<DictionaryEntry> entries = [];
+
+    List<JishoResult> results = (await searchForPhrase(searchTerm)).data;
+    if (results.isEmpty) {
+      var client = http.Client();
+      http.Response response =
+          await client.get('https://jisho.org/search/$searchTerm');
+
+      var document = parser.parse(response.body);
+
+      var breakdown = document.getElementsByClassName("fact grammar-breakdown");
+      if (breakdown.isEmpty) {
+        return [];
+      } else {
+        String inflection = breakdown.first.querySelector("a").text;
+        return getWordDetails(inflection);
+      }
+    }
+
+    if (customDictionary.isNotEmpty) {
+      List<JishoResult> onlyFirst = [];
+      onlyFirst.add(results.first);
+      results = onlyFirst;
+    }
+
+    for (JishoResult result in results) {
+      DictionaryEntry entry = getEntryFromJishoResult(result, searchTerm);
+      entries.add(entry);
+    }
+
+    for (DictionaryEntry entry in entries) {
+      entry.searchTerm = searchTerm;
+      entry.meaning = getBetterNumberTag(entry.meaning);
+    }
+
+    return entries;
+  }
 
   return text;
+}
+
+Future<List<DictionaryEntry>> getSentenceAnalysis(
+    String fullSubtitle, int startIndex) async {
+  fullSubtitle = fullSubtitle.replaceAll(" ", ";");
+  List<DictionaryEntry> entries = [];
+
+  print(fullSubtitle);
+  print(startIndex);
+
+  http.Client client = http.Client();
+  http.Response response = await client.get(
+      'https://www.mdbg.net/chinese/dictionary?page=worddict&wdrst=0&wdqb=$fullSubtitle');
+
+  dom.Document document = parser.parse(response.body);
+  if (getWordAnalysis(document).isNotEmpty) {
+    return getWordAnalysis(document);
+  }
+
+  List<dom.Element> breakdown = document.getElementsByTagName("tr");
+  List<dom.Element> notTrash = [];
+  for (dom.Element element in breakdown) {
+    if (element.innerHtml.contains("otxtbot") ||
+        element.innerHtml.contains("otxtmid") ||
+        element.innerHtml.contains("otxttop")) {
+      notTrash.add(element);
+    }
+  }
+
+  List<dom.Element> notEmpty = [];
+  for (dom.Element element in notTrash) {
+    if (!element.innerHtml
+            .contains("<td class=\"otxttop\" colspan=\"5\"></td>") &&
+        element.getElementsByClassName("separator").isEmpty &&
+        !element.innerHtml
+            .contains("<td width=\"12%\" class=\"otxtbot\">&nbsp;</td>") &&
+        !element.innerHtml
+            .contains("<td width=\"12%\" class=\"otxtmid\">&nbsp;</td>")) {
+      notEmpty.add(element);
+      // print(element.innerHtml + "\n\n");
+    }
+  }
+
+  List<String> words = [];
+  for (dom.Element element in notEmpty) {
+    if (element.children.length == 5) {
+      if (getOriginalWord(element) != '') {
+        words.add(getOriginalWord(element));
+      }
+    } else {
+      words.add(element.children.first.text);
+    }
+  }
+  print(words);
+
+  List<int> indexTape = [];
+  for (int i = 0; i < words.length; i++) {
+    for (int j = 0; j < words[i].length; j++) {
+      indexTape.add(i);
+    }
+  }
+
+  return await getExactWordAnalysis((words[indexTape[startIndex]]));
+}
+
+List<DictionaryEntry> getWordAnalysis(dom.Document document) {
+  List<DictionaryEntry> entries = [];
+
+  List<dom.Element> wordResults =
+      document.getElementsByClassName("wordresults");
+  if (wordResults.isEmpty ||
+      document.body.innerHtml.contains(
+          "<th class=\"first\" style=\"text-align: left\">Original Text</th>")) {
+    return entries;
+  } else {
+    List<dom.Element> rows = document.getElementsByClassName("row");
+
+    for (dom.Element row in rows) {
+      DictionaryEntry entry = unwrapRow(row);
+      entries.add(entry);
+    }
+  }
+
+  return entries;
+}
+
+Future<List<DictionaryEntry>> getExactWordAnalysis(String searchTerm) async {
+  http.Client client = http.Client();
+  http.Response response = await client.get(
+      'https://www.mdbg.net/chinese/dictionary?page=worddict&wdrst=0&wdqb=c:$searchTerm');
+
+  dom.Document document = parser.parse(response.body);
+  List<DictionaryEntry> entries = [];
+
+  List<dom.Element> rows = document.getElementsByClassName("row");
+
+  for (dom.Element row in rows) {
+    if (row.getElementsByClassName("hanzi").isNotEmpty) {
+      DictionaryEntry entry = unwrapRow(row);
+      entries.add(entry);
+    }
+  }
+
+  return entries;
+}
+
+String getOriginalWord(dom.Element element) {
+  String originalWord = "";
+
+  List<dom.Element> originalElement;
+  originalElement = element.getElementsByClassName("otxtbot");
+
+  if (originalElement.isNotEmpty) {
+    originalWord = originalElement.first.text;
+  }
+
+  originalElement = element.getElementsByClassName("otxtmid");
+  if (originalElement.isNotEmpty) {
+    originalWord = originalElement.first.text;
+  }
+
+  return originalWord;
+}
+
+DictionaryEntry unwrapRow(dom.Element element) {
+  String reading = "";
+  String meaning = "";
+  String word = "";
+
+  List<dom.Element> hanzi = element.getElementsByClassName("hanzi");
+  List<dom.Element> pinyin = element.getElementsByClassName("pinyin");
+  List<dom.Element> defs = element.getElementsByClassName("defs");
+
+  if (hanzi.isNotEmpty) {
+    word = "";
+    print(hanzi.first.getElementsByTagName("span"));
+    hanzi.first.getElementsByTagName("span").forEach((element) {
+      word += element.text;
+    });
+  }
+  if (pinyin.isNotEmpty) {
+    reading = "";
+    pinyin.first.getElementsByTagName("span").forEach((element) {
+      reading += element.text;
+    });
+  }
+
+  if (defs.isNotEmpty) {
+    meaning = defs.first.innerHtml.replaceAll(RegExp(r"<[^>]*>"), "");
+  }
+
+  List<String> meanings = meaning.split("/");
+  meanings[0] = " " + meanings[0];
+  String removeLastNewline(String n) => n = n.substring(0, n.length - 2);
+  String finalMeaning = "";
+  for (int i = 0; i < meanings.length; i++) {
+    meanings[i] = "${i + 1})${meanings[i]}\n";
+    finalMeaning += meanings[i];
+  }
+
+  finalMeaning = removeLastNewline(finalMeaning);
+  finalMeaning = getBetterNumberTag(finalMeaning);
+
+  return DictionaryEntry(
+    word: word,
+    reading: reading,
+    meaning: finalMeaning,
+  );
 }

@@ -731,7 +731,7 @@ class _YouTubeResultState extends State<YouTubeResult>
               ),
               Text(
                 videoDetails == "$videoPublishTime · 0 views"
-                    ? "Trending #${index + 1} in Japan"
+                    ? "Trending #${index + 1} in Hong Kong"
                     : videoDetails,
                 style: TextStyle(
                   color: Colors.grey,
