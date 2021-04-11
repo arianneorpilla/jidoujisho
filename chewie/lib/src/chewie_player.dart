@@ -242,6 +242,8 @@ class ChewieController extends ChangeNotifier {
     this.systemOverlaysAfterFullScreen = SystemUiOverlay.values,
     this.deviceOrientationsAfterFullScreen = DeviceOrientation.values,
     this.routePageBuilder,
+    this.videoQualities,
+    this.currentVideoQuality,
   })  : assert(videoPlayerController != null,
             'You must provide a controller to play a video'),
         assert(playbackSpeeds.every((speed) => speed > 0),
@@ -257,6 +259,8 @@ class ChewieController extends ChangeNotifier {
   final ValueNotifier<DictionaryEntry> currentDictionaryEntry;
   final ValueNotifier<int> currentSubTrack;
   final VoidCallback playExternalSubtitles;
+  final List<YouTubeQualityOption> videoQualities;
+  final YouTubeQualityOption currentVideoQuality;
 
   /// Initialize the Video on Startup. This will prep the video for playback.
   final bool autoInitialize;

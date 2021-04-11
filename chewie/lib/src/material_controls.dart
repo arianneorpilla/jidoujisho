@@ -9,6 +9,7 @@ import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:jidoujisho/main.dart';
 import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:subtitle_wrapper_package/data/constants/view_keys.dart';
 import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -143,6 +144,10 @@ class _MaterialControlsState extends State<MaterialControls>
               _buildProgressBar(),
             // if (chewieController.allowPlaybackSpeedChanging)
             //   _buildSpeedButton(controller),
+            if (chewieController.videoQualities.isNotEmpty)
+              _buildQualityButton(controller)
+            else
+              Container(),
             _buildToolsButton(controller),
             _buildMoreButton(controller),
             if (chewieController.allowFullScreen) _buildExpandButton(),
@@ -340,6 +345,56 @@ class _MaterialControlsState extends State<MaterialControls>
               right: 8.0,
             ),
             child: const Icon(Icons.more_vert),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQualityButton(
+    VlcPlayerController controller,
+  ) {
+    return GestureDetector(
+      onTap: () async {
+        _hideTimer?.cancel();
+
+        final List<String> qualityTags = [];
+        for (YouTubeQualityOption quality in chewieController.videoQualities) {
+          qualityTags.add(quality.resolution);
+        }
+
+        final chosenOption = await showModalBottomSheet<int>(
+          context: context,
+          isScrollControlled: true,
+          useRootNavigator: true,
+          builder: (context) => _SelectQualityDialog(qualityTags),
+        );
+
+        if (chosenOption != null) {
+          await globalPrefs.setString(
+              "lastPlayedQuality", qualityTags[chosenOption]);
+          Duration position = await controller.getPosition();
+          await controller.setMediaFromNetwork(
+              chewieController.videoQualities[chosenOption].videoURL);
+
+          await controller.seekTo(position);
+        }
+
+        if (_latestValue.isPlaying) {
+          _startHideTimer();
+        }
+      },
+      child: AnimatedOpacity(
+        opacity: _hideStuff ? 0.0 : 1.0,
+        duration: const Duration(milliseconds: 300),
+        child: ClipRect(
+          child: Container(
+            height: barHeight,
+            padding: const EdgeInsets.only(
+              left: 8.0,
+              right: 8.0,
+            ),
+            child: const Icon(Icons.video_settings_rounded),
           ),
         ),
       ),
@@ -597,6 +652,57 @@ class _MoreOptionsDialog extends StatelessWidget {
         );
       },
       itemCount: _options.length,
+    );
+  }
+}
+
+IconData getIconFromQualityTag(String qualityTag) {
+  switch (qualityTag) {
+    case "144p":
+    case "240p":
+    case "360p":
+    case "480p":
+      return Icons.sd;
+    case "720p":
+    case "1080p":
+    case "1440p":
+      return Icons.hd;
+    default:
+      return Icons.four_k;
+  }
+}
+
+class _SelectQualityDialog extends StatelessWidget {
+  const _SelectQualityDialog(this.qualityTags);
+
+  final List<String> qualityTags;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const ScrollPhysics(),
+      itemBuilder: (context, index) {
+        String qualityTag = qualityTags[index];
+        return ListTile(
+          dense: true,
+          title: Row(
+            children: [
+              Icon(
+                getIconFromQualityTag(qualityTag),
+                size: 20.0,
+                color: Colors.red,
+              ),
+              const SizedBox(width: 16.0),
+              Text(qualityTag),
+            ],
+          ),
+          onTap: () {
+            Navigator.of(context).pop(index);
+          },
+        );
+      },
+      itemCount: qualityTags.length,
     );
   }
 }

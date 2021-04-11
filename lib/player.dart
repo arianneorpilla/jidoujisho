@@ -171,7 +171,7 @@ class Player extends StatelessWidget {
 
     return new FutureBuilder(
       future: getPlayerYouTubeInfo(url),
-      builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+      builder: (BuildContext context, AsyncSnapshot<YouTubeMux> snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
             return Scaffold(
@@ -187,7 +187,7 @@ class Player extends StatelessWidget {
               ),
             );
           default:
-            String webStream = snapshot.data;
+            YouTubeMux streamData = snapshot.data;
 
             return new FutureBuilder(
               future: http.read(
@@ -226,7 +226,7 @@ class Player extends StatelessWidget {
                     ]);
 
                     return VideoPlayer(
-                      webStream: webStream,
+                      streamData: streamData,
                       defaultSubtitles: webSubtitles,
                       internalSubs: internalSubs,
                       initialPosition: initialPosition,
@@ -258,25 +258,25 @@ class Player extends StatelessWidget {
 class VideoPlayer extends StatefulWidget {
   VideoPlayer({
     this.videoFile,
+    this.streamData,
     this.internalSubs,
     this.defaultSubtitles,
-    this.webStream,
     this.initialPosition,
     Key key,
   }) : super(key: key);
 
   final File videoFile;
+  final YouTubeMux streamData;
   final List<File> internalSubs;
   final String defaultSubtitles;
-  final String webStream;
   final int initialPosition;
 
   @override
   _VideoPlayerState createState() => _VideoPlayerState(
         this.videoFile,
+        this.streamData,
         this.internalSubs,
         this.defaultSubtitles,
-        this.webStream,
         this.initialPosition,
       );
 }
@@ -284,16 +284,16 @@ class VideoPlayer extends StatefulWidget {
 class _VideoPlayerState extends State<VideoPlayer> {
   _VideoPlayerState(
     this.videoFile,
+    this.streamData,
     this.internalSubs,
     this.defaultSubtitles,
-    this.webStream,
     this.initialPosition,
   );
 
   final File videoFile;
+  final YouTubeMux streamData;
   final List<File> internalSubs;
   final String defaultSubtitles;
-  final String webStream;
   int initialPosition;
 
   VlcPlayerController _videoPlayerController;
@@ -454,7 +454,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   VlcPlayerController getVideoPlayerController() {
-    if (webStream == null) {
+    if (streamData == null) {
       _videoPlayerController ??= VlcPlayerController.file(
         videoFile,
         hwAcc: HwAcc.FULL,
@@ -464,8 +464,11 @@ class _VideoPlayerState extends State<VideoPlayer> {
       );
     } else {
       _videoPlayerController ??= VlcPlayerController.network(
-        webStream,
+        getLastPlayedQuality(streamData.videoQualities).videoURL,
         hwAcc: HwAcc.FULL,
+        options: VlcPlayerOptions(
+          audio: VlcAudioOptions(["--input-slave=${streamData.audioURL}"]),
+        ),
       );
     }
     return _videoPlayerController;
@@ -480,6 +483,10 @@ class _VideoPlayerState extends State<VideoPlayer> {
       currentSubtitle: _currentSubtitle,
       currentSubTrack: _currentSubTrack,
       playExternalSubtitles: playExternalSubtitles,
+      videoQualities: (streamData != null) ? streamData.videoQualities : [],
+      currentVideoQuality: (streamData != null)
+          ? getLastPlayedQuality(streamData.videoQualities)
+          : null,
       aspectRatio: getVideoPlayerController().value.aspectRatio,
       autoPlay: true,
       autoInitialize: true,

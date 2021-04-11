@@ -693,15 +693,60 @@ Future<List<DictionaryEntry>> getWordDetails(String searchTerm) async {
   return entries;
 }
 
-Future<String> getPlayerYouTubeInfo(String webURL) async {
+class YouTubeQualityOption {
+  final String videoURL;
+  final String resolution;
+
+  YouTubeQualityOption({
+    this.videoURL,
+    this.resolution,
+  });
+}
+
+class YouTubeMux {
+  final List<YouTubeQualityOption> videoQualities;
+  final String audioURL;
+
+  YouTubeMux({
+    this.videoQualities,
+    this.audioURL,
+  });
+}
+
+Future<YouTubeMux> getPlayerYouTubeInfo(String webURL) async {
   var videoID = YoutubePlayer.convertUrlToId(webURL);
   if (videoID != null) {
     YoutubeExplode yt = YoutubeExplode();
-    var streamManifest = await yt.videos.streamsClient.getManifest(webURL);
-    var streamInfo = streamManifest.muxed.withHighestBitrate();
-    var streamURL = streamInfo.url.toString();
+    StreamManifest streamManifest =
+        await yt.videos.streamsClient.getManifest(webURL);
 
-    return streamURL;
+    VideoOnlyStreamInfo streamVideoInfo =
+        streamManifest.videoOnly.sortByVideoQuality().first;
+
+    List<YouTubeQualityOption> videoQualities = [];
+    List<String> videoResolutions = [];
+    for (VideoOnlyStreamInfo stream
+        in streamManifest.videoOnly.sortByBitrate()) {
+      if (!videoResolutions.contains(stream.videoQualityLabel)) {
+        videoQualities.add(
+          YouTubeQualityOption(
+              videoURL: stream.url.toString(),
+              resolution: stream.videoQualityLabel),
+        );
+        videoResolutions.add(stream.videoQualityLabel);
+      }
+
+      print(stream.videoQualityLabel);
+    }
+
+    AudioStreamInfo streamAudioInfo =
+        streamManifest.audio.sortByBitrate().first;
+    String audioURL = streamAudioInfo.url.toString();
+
+    return YouTubeMux(
+      videoQualities: videoQualities,
+      audioURL: audioURL,
+    );
   } else {
     return null;
   }
@@ -1040,4 +1085,26 @@ String getBetterNumberTag(String text) {
   text = text.replaceAll("1)", "①");
 
   return text;
+}
+
+YouTubeQualityOption getLastPlayedQuality(
+    List<YouTubeQualityOption> qualities) {
+  String lastPlayedQuality = globalPrefs.getString("lastPlayedQuality");
+
+  if (lastPlayedQuality != null) {
+    for (YouTubeQualityOption quality in qualities) {
+      // If we find the quality they last played, we return that.
+      if (quality.resolution == lastPlayedQuality) {
+        return quality;
+      }
+    }
+    // In this case, we know that they have set a quality that doesn't exist,
+    // maybe it's a low quality video -- so we take the best quality.
+    print(lastPlayedQuality);
+    return qualities.last;
+  } else {
+    // We don't know if we could abuse their mobile data,
+    // let's try the average.
+    return (qualities[(qualities.length - 2).ceil()]);
+  }
 }
