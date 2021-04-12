@@ -118,7 +118,9 @@ Future exportCurrentFrame(
 
   final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
 
-  String inputPath = chewie.currentVideoQuality.videoURL;
+  String inputPath = (controller.dataSourceType == DataSourceType.network)
+      ? chewie.currentVideoQuality.videoURL
+      : controller.dataSource;
   String exportPath = "\"$appDirPath/exportImage.jpg\"";
 
   String command =

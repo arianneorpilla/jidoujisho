@@ -660,13 +660,20 @@ class _MoreOptionsDialog extends StatelessWidget {
 IconData getIconFromQualityTag(String qualityTag) {
   switch (qualityTag) {
     case "144p":
+    case "144p60":
     case "240p":
+    case "240p60":
     case "360p":
+    case "360p60":
     case "480p":
+    case "480p60":
     case "720p":
+    case "720p60":
       return Icons.sd;
     case "1080p":
+    case "1080p60":
     case "1440p":
+    case "1440p60":
       return Icons.hd;
     default:
       return Icons.four_k;
