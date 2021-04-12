@@ -121,6 +121,24 @@ class _VideoProgressBarState extends State<MaterialVideoProgressBar> {
   }
 }
 
+class DurationRange {
+  DurationRange(this.start, this.end);
+
+  final Duration start;
+  final Duration end;
+
+  double startFraction(Duration duration) {
+    return start.inMilliseconds / duration.inMilliseconds;
+  }
+
+  double endFraction(Duration duration) {
+    return end.inMilliseconds / duration.inMilliseconds;
+  }
+
+  @override
+  String toString() => '$runtimeType(start: $start, end: $end)';
+}
+
 class _ProgressBarPainter extends CustomPainter {
   _ProgressBarPainter(this.value, this.colors);
 
@@ -153,6 +171,7 @@ class _ProgressBarPainter extends CustomPainter {
         value.position.inMilliseconds / value.duration.inMilliseconds;
     final double playedPart =
         playedPartPercent > 1 ? size.width : playedPartPercent * size.width;
+
     // for (final DurationRange range in value.bufferPercent) {
     //   final double start = range.startFraction(value.duration) * size.width;
     //   final double end = range.endFraction(value.duration) * size.width;

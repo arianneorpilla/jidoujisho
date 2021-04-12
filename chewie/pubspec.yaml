@@ -15,13 +15,13 @@ dependencies:
     sdk: flutter
   flutter_ffmpeg:
   flutter_vlc_player:
-  intl:
-  shared_preferences:
   jidoujisho:
     path: ../
+  intl:
   path:
   path_provider:
   share:
+  shared_preferences:
   subtitle_wrapper_package:
     path: ../subtitle_wrapper_package
   url_launcher:

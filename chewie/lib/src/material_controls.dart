@@ -68,10 +68,8 @@ class _MaterialControlsState extends State<MaterialControls>
           absorbing: _hideStuff,
           child: Column(
             children: <Widget>[
-              if (_latestValue != null &&
-                      !_latestValue.isPlaying &&
-                      _latestValue.duration == null ||
-                  _latestValue.isBuffering)
+              if (_latestValue != null && _latestValue.isBuffering ||
+                  !_latestValue.isPlaying && _latestValue.duration == null)
                 const Expanded(
                   child: Center(
                     child: CircularProgressIndicator(
@@ -147,8 +145,7 @@ class _MaterialControlsState extends State<MaterialControls>
             if (chewieController.videoQualities.isNotEmpty)
               _buildQualityButton(controller)
             else
-              Container(),
-            _buildToolsButton(controller),
+              _buildToolsButton(controller),
             _buildMoreButton(controller),
             if (chewieController.allowFullScreen) _buildExpandButton(),
           ],
@@ -324,6 +321,7 @@ class _MaterialControlsState extends State<MaterialControls>
 
             exportToAnki(
               context,
+              chewieController,
               controller,
               chewieController.clipboard,
               currentSubtitle,
@@ -374,6 +372,9 @@ class _MaterialControlsState extends State<MaterialControls>
           await globalPrefs.setString(
               "lastPlayedQuality", qualityTags[chosenOption]);
           Duration position = await controller.getPosition();
+
+          chewieController.currentVideoQuality =
+              chewieController.videoQualities[chosenOption];
           await controller.setMediaFromNetwork(
               chewieController.videoQualities[chosenOption].videoURL);
 
@@ -394,7 +395,7 @@ class _MaterialControlsState extends State<MaterialControls>
               left: 8.0,
               right: 8.0,
             ),
-            child: const Icon(Icons.video_settings_rounded),
+            child: const Icon(Icons.video_settings_sharp),
           ),
         ),
       ),
@@ -662,8 +663,8 @@ IconData getIconFromQualityTag(String qualityTag) {
     case "240p":
     case "360p":
     case "480p":
-      return Icons.sd;
     case "720p":
+      return Icons.sd;
     case "1080p":
     case "1440p":
       return Icons.hd;

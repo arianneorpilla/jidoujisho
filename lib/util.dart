@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
@@ -105,7 +106,8 @@ String timedLineToSRT(Map<String, dynamic> line, int lineCount) {
   return srtLine;
 }
 
-Future exportCurrentFrame(VlcPlayerController controller) async {
+Future exportCurrentFrame(
+    ChewieController chewie, VlcPlayerController controller) async {
   File imageFile = File(previewImageDir);
   if (imageFile.existsSync()) {
     imageFile.deleteSync();
@@ -116,7 +118,7 @@ Future exportCurrentFrame(VlcPlayerController controller) async {
 
   final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
 
-  String inputPath = controller.dataSource;
+  String inputPath = chewie.currentVideoQuality.videoURL;
   String exportPath = "\"$appDirPath/exportImage.jpg\"";
 
   String command =
@@ -143,7 +145,7 @@ List<File> extractWebSubtitle(String webSubtitle) {
   return files;
 }
 
-Future exportCurrentAudio(
+Future exportCurrentAudio(ChewieController chewie,
     VlcPlayerController controller, Subtitle subtitle) async {
   File audioFile = File(previewAudioDir);
   if (audioFile.existsSync()) {
@@ -168,7 +170,7 @@ Future exportCurrentAudio(
 
   final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
 
-  String inputPath = controller.dataSource;
+  String inputPath = chewie.audioSource;
   String outputPath = "\"$appDirPath/exportAudio.mp3\"";
   String command =
       "-loglevel quiet -ss $timeStart -to $timeEnd -y -i \"$inputPath\" -map 0:a:$audioIndex $outputPath";
@@ -231,6 +233,7 @@ Future<String> extractNonSrtSubtitles(File file) async {
 
 Future exportToAnki(
   BuildContext context,
+  ChewieController chewie,
   VlcPlayerController controller,
   ValueNotifier<String> clipboard,
   Subtitle subtitle,
@@ -240,8 +243,8 @@ Future exportToAnki(
   final prefs = await SharedPreferences.getInstance();
   String lastDeck = prefs.getString("lastDeck") ?? "Default";
 
-  await exportCurrentFrame(controller);
-  await exportCurrentAudio(controller, subtitle);
+  await exportCurrentFrame(chewie, controller);
+  await exportCurrentAudio(chewie, controller, subtitle);
   List<String> decks = await getDecks();
 
   Clipboard.setData(
@@ -720,13 +723,9 @@ Future<YouTubeMux> getPlayerYouTubeInfo(String webURL) async {
     StreamManifest streamManifest =
         await yt.videos.streamsClient.getManifest(webURL);
 
-    VideoOnlyStreamInfo streamVideoInfo =
-        streamManifest.videoOnly.sortByVideoQuality().first;
-
     List<YouTubeQualityOption> videoQualities = [];
     List<String> videoResolutions = [];
-    for (VideoOnlyStreamInfo stream
-        in streamManifest.videoOnly.sortByBitrate()) {
+    for (var stream in streamManifest.videoOnly.sortByBitrate()) {
       if (!videoResolutions.contains(stream.videoQualityLabel)) {
         videoQualities.add(
           YouTubeQualityOption(
@@ -740,7 +739,7 @@ Future<YouTubeMux> getPlayerYouTubeInfo(String webURL) async {
     }
 
     AudioStreamInfo streamAudioInfo =
-        streamManifest.audio.sortByBitrate().first;
+        streamManifest.audioOnly.sortByBitrate().last;
     String audioURL = streamAudioInfo.url.toString();
 
     return YouTubeMux(

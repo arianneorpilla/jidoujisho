@@ -302,6 +302,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
   SubtitleController _subTitleController;
   String _volatileText = "";
   FocusNode _subtitleFocusNode = new FocusNode();
+  bool networkNotSet = true;
 
   Timer timer;
 
@@ -313,20 +314,39 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   void updateDurationOrSeek() {
+    if (getVideoPlayerController().value.isInitialized &&
+        this.videoFile == null &&
+        networkNotSet) {
+      networkNotSet = false;
+      _videoPlayerController.setMediaFromNetwork(
+          getLastPlayedQuality(streamData.videoQualities).videoURL);
+      _chewieController.currentVideoQuality =
+          getLastPlayedQuality(streamData.videoQualities);
+    }
+
     globalPrefs.setInt("lastPlayedPosition",
         getVideoPlayerController().value.position.inSeconds ?? 0);
 
     if (initialPosition != -1 &&
         getVideoPlayerController().value.isInitialized) {
-      getVideoPlayerController().isSeekable().then((isSeekable) {
-        if (isSeekable && initialPosition != -1) {
-          getVideoPlayerController()
-              .seekTo(Duration(seconds: initialPosition))
-              .then((result) {
-            initialPosition = -1;
-          });
-        }
-      });
+      getVideoPlayerController().isSeekable().then(
+        (isSeekable) {
+          if (isSeekable && initialPosition != -1) {
+            getVideoPlayerController()
+                .seekTo(Duration(seconds: initialPosition))
+                .then(
+              (result) {
+                getVideoPlayerController().getPosition().then(
+                      (position) => {
+                        if (position >= Duration(seconds: initialPosition - 1))
+                          {initialPosition = -1}
+                      },
+                    );
+              },
+            );
+          }
+        },
+      );
     }
   }
 
@@ -464,7 +484,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       );
     } else {
       _videoPlayerController ??= VlcPlayerController.network(
-        getLastPlayedQuality(streamData.videoQualities).videoURL,
+        streamData.audioURL,
         hwAcc: HwAcc.FULL,
         options: VlcPlayerOptions(
           audio: VlcAudioOptions(["--input-slave=${streamData.audioURL}"]),
@@ -487,6 +507,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       currentVideoQuality: (streamData != null)
           ? getLastPlayedQuality(streamData.videoQualities)
           : null,
+      audioSource: (streamData != null) ? streamData.audioURL : videoFile.path,
       aspectRatio: getVideoPlayerController().value.aspectRatio,
       autoPlay: true,
       autoInitialize: true,
