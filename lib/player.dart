@@ -486,6 +486,9 @@ class _VideoPlayerState extends State<VideoPlayer> {
       _videoPlayerController ??= VlcPlayerController.network(
         streamData.audioURL,
         hwAcc: HwAcc.FULL,
+        options: VlcPlayerOptions(
+          audio: VlcAudioOptions(["--input-slave=${streamData.audioURL}"]),
+        ),
       );
     }
     return _videoPlayerController;
@@ -500,11 +503,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       currentSubtitle: _currentSubtitle,
       currentSubTrack: _currentSubTrack,
       playExternalSubtitles: playExternalSubtitles,
-      videoQualities: (streamData != null) ? streamData.videoQualities : [],
-      currentVideoQuality: (streamData != null)
-          ? getLastPlayedQuality(streamData.videoQualities)
-          : null,
-      audioSource: (streamData != null) ? streamData.audioURL : videoFile.path,
+      streamData: streamData,
       aspectRatio: getVideoPlayerController().value.aspectRatio,
       autoPlay: true,
       autoInitialize: true,

@@ -249,11 +249,13 @@ class SubtitleDataRepository extends SubtitleRepository {
       }
     }
 
-    Subtitle secondLastSubtitle = subtitleList[subtitleList.length - 2];
-    Subtitle lastSubtitle = subtitleList[subtitleList.length - 1];
-    if (lastSubtitle.endTime.inMilliseconds <
-        secondLastSubtitle.startTime.inMilliseconds) {
-      subtitleList.remove(lastSubtitle);
+    if (subtitleList.length >= 2) {
+      Subtitle secondLastSubtitle = subtitleList[subtitleList.length - 2];
+      Subtitle lastSubtitle = subtitleList[subtitleList.length - 1];
+      if (lastSubtitle.endTime.inMilliseconds <
+          secondLastSubtitle.startTime.inMilliseconds) {
+        subtitleList.remove(lastSubtitle);
+      }
     }
 
     var subtitles = Subtitles(subtitles: subtitleList);

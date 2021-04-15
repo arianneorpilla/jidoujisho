@@ -172,7 +172,14 @@ Future exportCurrentAudio(ChewieController chewie,
 
   final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
 
-  String inputPath = chewie.audioSource;
+  String inputPath;
+
+  if (controller.dataSourceType == DataSourceType.file) {
+    inputPath = controller.dataSource;
+  } else {
+    inputPath = chewie.streamData.audioURL;
+  }
+
   String outputPath = "\"$appDirPath/exportAudio.mp3\"";
   String command =
       "-loglevel quiet -ss $timeStart -to $timeEnd -y -i \"$inputPath\" -map 0:a:$audioIndex $outputPath";
@@ -700,21 +707,23 @@ Future<List<DictionaryEntry>> getWordDetails(String searchTerm) async {
 
 class YouTubeQualityOption {
   final String videoURL;
-  final String resolution;
+  final String videoResolution;
 
   YouTubeQualityOption({
     this.videoURL,
-    this.resolution,
+    this.videoResolution,
   });
 }
 
 class YouTubeMux {
   final List<YouTubeQualityOption> videoQualities;
   final String audioURL;
+  final String audioMetadata;
 
   YouTubeMux({
     this.videoQualities,
     this.audioURL,
+    this.audioMetadata,
   });
 }
 
@@ -727,26 +736,27 @@ Future<YouTubeMux> getPlayerYouTubeInfo(String webURL) async {
 
     List<YouTubeQualityOption> videoQualities = [];
     List<String> videoResolutions = [];
-    for (var stream in streamManifest.muxed.sortByBitrate()) {
+    for (var stream in streamManifest.videoOnly.sortByBitrate()) {
       if (!videoResolutions.contains(stream.videoQualityLabel)) {
         videoQualities.add(
           YouTubeQualityOption(
               videoURL: stream.url.toString(),
-              resolution: stream.videoQualityLabel),
+              videoResolution: stream.videoQualityLabel.replaceAll("p60", "")),
         );
         videoResolutions.add(stream.videoQualityLabel);
       }
-
-      print(stream.videoQualityLabel);
     }
 
     AudioStreamInfo streamAudioInfo =
         streamManifest.audioOnly.sortByBitrate().last;
     String audioURL = streamAudioInfo.url.toString();
+    String audioMetadata =
+        "[${streamAudioInfo.container.name}] - [${streamAudioInfo.bitrate.kiloBitsPerSecond.floor()} Kbps]";
 
     return YouTubeMux(
       videoQualities: videoQualities,
       audioURL: audioURL,
+      audioMetadata: audioMetadata,
     );
   } else {
     return null;
@@ -1095,17 +1105,18 @@ YouTubeQualityOption getLastPlayedQuality(
   if (lastPlayedQuality != null) {
     for (YouTubeQualityOption quality in qualities) {
       // If we find the quality they last played, we return that.
-      if (quality.resolution == lastPlayedQuality) {
+      if (quality.videoResolution == lastPlayedQuality) {
         return quality;
       }
     }
     // In this case, we know that they have set a quality that doesn't exist,
     // maybe it's a low quality video -- so we take the best quality.
-    print(lastPlayedQuality);
     return qualities.last;
   } else {
     // We don't know if we could abuse their mobile data,
     // let's try the average.
-    return (qualities[(qualities.length - 2).ceil()]);
+    return qualities
+            .firstWhere((element) => element.videoResolution == "360p") ??
+        qualities.first;
   }
 }

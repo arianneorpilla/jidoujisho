@@ -142,10 +142,9 @@ class _MaterialControlsState extends State<MaterialControls>
               _buildProgressBar(),
             // if (chewieController.allowPlaybackSpeedChanging)
             //   _buildSpeedButton(controller),
-            if (chewieController.videoQualities.isNotEmpty)
-              _buildQualityButton(controller)
-            else
-              _buildToolsButton(controller),
+            if (controller.dataSourceType == DataSourceType.network)
+              _buildQualityButton(controller),
+            _buildToolsButton(controller),
             _buildMoreButton(controller),
             if (chewieController.allowFullScreen) _buildExpandButton(),
           ],
@@ -357,8 +356,9 @@ class _MaterialControlsState extends State<MaterialControls>
         _hideTimer?.cancel();
 
         final List<String> qualityTags = [];
-        for (YouTubeQualityOption quality in chewieController.videoQualities) {
-          qualityTags.add(quality.resolution);
+        for (YouTubeQualityOption quality
+            in chewieController.streamData.videoQualities) {
+          qualityTags.add(quality.videoResolution);
         }
 
         final chosenOption = await showModalBottomSheet<int>(
@@ -374,9 +374,9 @@ class _MaterialControlsState extends State<MaterialControls>
           Duration position = await controller.getPosition();
 
           chewieController.currentVideoQuality =
-              chewieController.videoQualities[chosenOption];
-          await controller.setMediaFromNetwork(
-              chewieController.videoQualities[chosenOption].videoURL);
+              chewieController.streamData.videoQualities[chosenOption];
+          await controller.setMediaFromNetwork(chewieController
+              .streamData.videoQualities[chosenOption].videoURL);
 
           await controller.seekTo(position);
         }
@@ -409,14 +409,22 @@ class _MaterialControlsState extends State<MaterialControls>
       onTap: () async {
         _hideTimer?.cancel();
 
-        final audioTracks = await controller.getAudioTracks();
         final List<String> audioTrackNames = [];
-
-        final subtitleTracks = await controller.getSpuTracks();
         final List<String> subtitleTrackNames = [];
 
-        audioTracks.forEach((index, name) => audioTrackNames.add(name));
-        subtitleTracks.forEach((index, name) => subtitleTrackNames.add(name));
+        if (controller.dataSourceType == DataSourceType.file) {
+          final audioTracks = await controller.getAudioTracks();
+          final subtitleTracks = await controller.getSpuTracks();
+
+          audioTracks.forEach((index, name) => audioTrackNames.add(name));
+          subtitleTracks.forEach((index, name) => subtitleTrackNames.add(name));
+        } else {
+          if (chewieController.internalSubs.isNotEmpty) {
+            subtitleTrackNames.add("YouTube - [CC] - [Japanese]");
+          }
+          audioTrackNames
+              .add("YouTube - ${chewieController.streamData.audioMetadata}");
+        }
 
         final chosenOption = await showModalBottomSheet<int>(
           context: context,
@@ -429,11 +437,11 @@ class _MaterialControlsState extends State<MaterialControls>
         );
 
         if (chosenOption != null) {
-          if (chosenOption < audioTracks.length) {
+          if (chosenOption < audioTrackNames.length) {
             await controller.setAudioTrack(chosenOption + 1);
           } else {
             chewieController.currentSubTrack.value =
-                chosenOption - audioTracks.length;
+                chosenOption - audioTrackNames.length;
           }
         }
 
@@ -660,20 +668,13 @@ class _MoreOptionsDialog extends StatelessWidget {
 IconData getIconFromQualityTag(String qualityTag) {
   switch (qualityTag) {
     case "144p":
-    case "144p60":
     case "240p":
-    case "240p60":
     case "360p":
-    case "360p60":
     case "480p":
-    case "480p60":
       return Icons.sd;
     case "720p":
-    case "720p60":
     case "1080p":
-    case "1080p60":
     case "1440p":
-    case "1440p60":
       return Icons.hd;
     default:
       return Icons.four_k;
@@ -784,7 +785,7 @@ class _SelectAudioDialog extends StatelessWidget {
         );
       },
       itemCount: (_subtitles.isEmpty)
-          ? _options.length
+          ? _options.length + 1
           : _options.length + _subtitles.length + 1,
     );
   }

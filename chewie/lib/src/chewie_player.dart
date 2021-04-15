@@ -242,9 +242,7 @@ class ChewieController extends ChangeNotifier {
     this.systemOverlaysAfterFullScreen = SystemUiOverlay.values,
     this.deviceOrientationsAfterFullScreen = DeviceOrientation.values,
     this.routePageBuilder,
-    this.videoQualities,
-    this.currentVideoQuality,
-    this.audioSource,
+    this.streamData,
   })  : assert(videoPlayerController != null,
             'You must provide a controller to play a video'),
         assert(playbackSpeeds.every((speed) => speed > 0),
@@ -260,9 +258,7 @@ class ChewieController extends ChangeNotifier {
   final ValueNotifier<DictionaryEntry> currentDictionaryEntry;
   final ValueNotifier<int> currentSubTrack;
   final VoidCallback playExternalSubtitles;
-  final List<YouTubeQualityOption> videoQualities;
-
-  final String audioSource;
+  final YouTubeMux streamData;
 
   /// Initialize the Video on Startup. This will prep the video for playback.
   final bool autoInitialize;
@@ -354,13 +350,13 @@ class ChewieController extends ChangeNotifier {
     return chewieControllerProvider.controller;
   }
 
+  YouTubeQualityOption currentVideoQuality;
+
   bool _isFullScreen = false;
 
   bool get isFullScreen => _isFullScreen;
 
   bool get isPlaying => videoPlayerController.value.isPlaying;
-
-  YouTubeQualityOption currentVideoQuality;
 
   Future _initialize() async {
     // if ((autoInitialize || autoPlay) &&
