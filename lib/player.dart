@@ -486,9 +486,6 @@ class _VideoPlayerState extends State<VideoPlayer> {
       _videoPlayerController ??= VlcPlayerController.network(
         streamData.audioURL,
         hwAcc: HwAcc.FULL,
-        options: VlcPlayerOptions(
-          audio: VlcAudioOptions(["--input-slave=${streamData.audioURL}"]),
-        ),
       );
     }
     return _videoPlayerController;

@@ -727,7 +727,7 @@ Future<YouTubeMux> getPlayerYouTubeInfo(String webURL) async {
 
     List<YouTubeQualityOption> videoQualities = [];
     List<String> videoResolutions = [];
-    for (var stream in streamManifest.videoOnly.sortByBitrate()) {
+    for (var stream in streamManifest.muxed.sortByBitrate()) {
       if (!videoResolutions.contains(stream.videoQualityLabel)) {
         videoQualities.add(
           YouTubeQualityOption(

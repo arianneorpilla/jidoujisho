@@ -667,9 +667,9 @@ IconData getIconFromQualityTag(String qualityTag) {
     case "360p60":
     case "480p":
     case "480p60":
+      return Icons.sd;
     case "720p":
     case "720p60":
-      return Icons.sd;
     case "1080p":
     case "1080p60":
     case "1440p":
