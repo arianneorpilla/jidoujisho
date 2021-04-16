@@ -138,6 +138,14 @@ class SubtitleDataRepository extends SubtitleRepository {
     subtitlesContent = subtitlesContent.replaceAll(
         RegExp(r'{(.*?)}', caseSensitive: false), '');
 
+    subtitlesContent = subtitlesContent.replaceAll('&amp;', '&');
+    subtitlesContent = subtitlesContent.replaceAll('&apos;', '\'');
+    subtitlesContent = subtitlesContent.replaceAll('&#39;', '\'');
+    subtitlesContent = subtitlesContent.replaceAll('&quot;', '\"');
+    subtitlesContent = subtitlesContent.replaceAll('&amp;', '');
+    subtitlesContent = subtitlesContent.replaceAll('\\n', '\n');
+    subtitlesContent = subtitlesContent.replaceAll('​', '');
+
     if (subtitleType == SubtitleType.webvtt) {
       regExp = RegExp(
         r'((\d{2}):(\d{2}):(\d{2})\.(\d+)) +--> +((\d{2}):(\d{2}):(\d{2})\.(\d{3})).*[\r\n]+\s*((?:(?!\r?\n\r?).)*(\r\n|\r|\n)(?:.*))',

@@ -17,6 +17,8 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:jidoujisho/player.dart';
 import 'package:jidoujisho/util.dart';
 
+typedef void SearchCallback(String id, String name);
+
 String appDirPath;
 String previewImageDir;
 String previewAudioDir;
@@ -37,9 +39,13 @@ SharedPreferences globalPrefs;
 ValueNotifier<bool> globalSelectMode;
 ValueNotifier<bool> globalResumable;
 
-final AsyncMemoizer trendingCache = AsyncMemoizer();
+AsyncMemoizer trendingCache = AsyncMemoizer();
+AsyncMemoizer channelCache = AsyncMemoizer();
 Map<String, AsyncMemoizer> searchCache = {};
 Map<String, AsyncMemoizer> captioningCache = {};
+Map<String, AsyncMemoizer> channelVideoCache = {};
+Map<String, AsyncMemoizer> playlistVideoCache = {};
+Map<String, AsyncMemoizer> metadataCache = {};
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -82,6 +88,12 @@ fetchTrendingCache() {
   });
 }
 
+fetchChannelCache() {
+  return channelCache.runOnce(() async {
+    return getSubscribedChannels();
+  });
+}
+
 fetchSearchCache(String searchQuery) {
   if (searchCache[searchQuery] == null) {
     searchCache[searchQuery] = AsyncMemoizer();
@@ -91,12 +103,39 @@ fetchSearchCache(String searchQuery) {
   });
 }
 
+fetchChannelVideoCache(String channelID) {
+  if (channelVideoCache[channelID] == null) {
+    channelVideoCache[channelID] = AsyncMemoizer();
+  }
+  return channelVideoCache[channelID].runOnce(() async {
+    return getLatestChannelVideos(channelID);
+  });
+}
+
+fetchPlaylistVideoCache(String playlistID) {
+  if (playlistVideoCache[playlistID] == null) {
+    playlistVideoCache[playlistID] = AsyncMemoizer();
+  }
+  return playlistVideoCache[playlistID].runOnce(() async {
+    return getLatestPlaylistVideos(playlistID);
+  });
+}
+
 fetchCaptioningCache(String videoID) {
   if (captioningCache[videoID] == null) {
     captioningCache[videoID] = AsyncMemoizer();
   }
   return captioningCache[videoID].runOnce(() async {
     return checkYouTubeClosedCaptionAvailable(videoID);
+  });
+}
+
+fetchMetadataCache(String videoID, Video video) {
+  if (metadataCache[videoID] == null) {
+    metadataCache[videoID] = AsyncMemoizer();
+  }
+  return metadataCache[videoID].runOnce(() async {
+    return getPublishMetadata(video);
   });
 }
 
@@ -125,7 +164,64 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   TextEditingController _searchQueryController = TextEditingController();
   bool _isSearching = false;
+  bool _isChannelView = false;
+  bool _isPlaylistView = false;
   String searchQuery = "";
+  int _selectedIndex = 0;
+  String leadingContext = "";
+
+  void _onItemTapped(int index) {
+    setState(() {
+      if (index == 2) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Player(
+              initialPosition: -1,
+            ),
+          ),
+        ).then((returnValue) {
+          setState(() {
+            SystemChrome.setPreferredOrientations([
+              DeviceOrientation.portraitUp,
+              DeviceOrientation.landscapeLeft,
+              DeviceOrientation.landscapeRight,
+            ]);
+          });
+        });
+      } else {
+        _selectedIndex = index;
+        if (_isSearching || _isChannelView || _isPlaylistView) {
+          _isSearching = false;
+          _isChannelView = false;
+          _isPlaylistView = false;
+          searchQuery = "";
+        }
+      }
+    });
+  }
+
+  static const TextStyle optionStyle =
+      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+
+  Widget _getWidgetOptions(int index) {
+    if (_isSearching) {
+      return _buildBody();
+    } else if (_isChannelView) {
+      return _buildChannels();
+    } else if (_isPlaylistView) {
+      return _buildPlaylists();
+    }
+
+    switch (index) {
+      case 0:
+        return _buildBody();
+      case 1:
+        return _buildChannels();
+      default:
+        return Text("Nothing");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -145,38 +241,69 @@ class _HomeState extends State<Home> {
           actions: _buildActions(),
         ),
         backgroundColor: Colors.black,
-        body: _buildBody(context),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => Player(
-                  initialPosition: -1,
-                ),
-              ),
-            ).then((returnValue) {
-              setState(() {
-                SystemChrome.setPreferredOrientations([
-                  DeviceOrientation.portraitUp,
-                  DeviceOrientation.landscapeLeft,
-                  DeviceOrientation.landscapeRight,
-                ]);
-              });
-            });
-          },
-          child: Icon(Icons.video_collection_sharp),
-          backgroundColor: Colors.red,
-          foregroundColor: Colors.white,
+        bottomNavigationBar: BottomNavigationBar(
+          backgroundColor: Colors.black,
+          type: BottomNavigationBarType.fixed,
+          selectedFontSize: 10,
+          unselectedFontSize: 10,
+          selectedIconTheme: IconThemeData(color: Colors.white),
+          unselectedIconTheme: IconThemeData(color: Colors.grey),
+          unselectedLabelStyle: TextStyle(color: Colors.grey),
+          selectedLabelStyle: TextStyle(color: Colors.red),
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.whatshot),
+              label: 'Trending',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.subscriptions_sharp),
+              label: 'Channels',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.folder),
+              label: 'Library',
+            ),
+          ],
         ),
+        body: Center(
+          child: _getWidgetOptions(_selectedIndex),
+        ),
+        // floatingActionButton: FloatingActionButton(
+        //   onPressed: () {
+        //     Navigator.push(
+        //       context,
+        //       MaterialPageRoute(
+        //         builder: (context) => Player(
+        //           initialPosition: -1,
+        //         ),
+        //       ),
+        //     ).then((returnValue) {
+        //       setState(() {
+        //         SystemChrome.setPreferredOrientations([
+        //           DeviceOrientation.portraitUp,
+        //           DeviceOrientation.landscapeLeft,
+        //           DeviceOrientation.landscapeRight,
+        //         ]);
+        //       });
+        //     });
+        //   },
+        //   child: Icon(Icons.video_collection_sharp),
+        //   backgroundColor: Colors.red,
+        //   foregroundColor: Colors.white,
+        // ),
       ),
     );
   }
 
   Future<bool> _onWillPop() async {
-    if (_isSearching) {
+    if (_isSearching || _isChannelView || _isPlaylistView) {
       setState(() {
         _isSearching = false;
+        _isChannelView = false;
+        _isPlaylistView = false;
+        searchQuery = "";
       });
     } else {
       SystemChannels.platform.invokeMethod('SystemNavigator.pop');
@@ -185,11 +312,13 @@ class _HomeState extends State<Home> {
   }
 
   Widget _buildAppBarLeading() {
-    if (_isSearching) {
+    if (_isSearching || _isChannelView || _isPlaylistView) {
       return BackButton(
         onPressed: () {
           setState(() {
             _isSearching = false;
+            _isChannelView = false;
+            _isPlaylistView = false;
           });
         },
       );
@@ -219,6 +348,21 @@ class _HomeState extends State<Home> {
         style: TextStyle(color: Colors.white, fontSize: 16.0),
         onSubmitted: (query) => updateSearchQuery(query),
       );
+    } else if (_isChannelView || _isPlaylistView) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            leadingContext,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      );
     } else {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -236,7 +380,332 @@ class _HomeState extends State<Home> {
     }
   }
 
-  Widget _buildBody(BuildContext context) {
+  Widget _buildChannels() {
+    Widget centerMessage(String text, IconData icon) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: Colors.grey,
+              size: 72,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              text,
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 20,
+              ),
+            )
+          ],
+        ),
+      );
+    }
+
+    Widget queryMessage = centerMessage(
+      "Listing channels...",
+      Icons.subscriptions_sharp,
+    );
+    Widget errorMessage = centerMessage(
+      "Error getting channels",
+      Icons.error,
+    );
+    Widget videoMessage = centerMessage(
+      "Listing recent videos...",
+      Icons.subscriptions_sharp,
+    );
+
+    if (_isChannelView && searchQuery != null) {
+      return FutureBuilder(
+        future: fetchChannelVideoCache(searchQuery),
+        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+          var results = snapshot.data;
+
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+            case ConnectionState.none:
+              return videoMessage;
+              break;
+            default:
+              if (!snapshot.hasData) {
+                return errorMessage;
+              }
+              return ListView.builder(
+                addAutomaticKeepAlives: true,
+                itemCount: snapshot.data.length,
+                itemBuilder: (BuildContext context, int index) {
+                  Video result = results[index];
+                  print("VIDEO LISTED: $result");
+
+                  return YouTubeResult(
+                    result,
+                    captioningCache[result.id],
+                    fetchCaptioningCache(result.id.value),
+                    fetchMetadataCache(result.id.value, result),
+                    index,
+                  );
+                },
+              );
+          }
+        },
+      );
+    } else {
+      return FutureBuilder(
+        future: fetchChannelCache(),
+        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+          var results = snapshot.data;
+
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+            case ConnectionState.none:
+              return queryMessage;
+            default:
+              if (!snapshot.hasData) {
+                return errorMessage;
+              }
+              return ListView.builder(
+                addAutomaticKeepAlives: true,
+                itemCount: snapshot.data.length + 1,
+                itemBuilder: (BuildContext context, int index) {
+                  if (index == 0) {
+                    return _buildNewChannelRow();
+                  }
+
+                  Channel result = results[index - 1];
+                  print("CHANNEL LISTED: $result");
+
+                  return ChannelResult(
+                    result,
+                    setChannelVideoSearch,
+                    setStateFromResult,
+                    index,
+                  );
+                },
+              );
+          }
+        },
+      );
+    }
+  }
+
+  Widget _buildPlaylists() {
+    Widget centerMessage(String text, IconData icon) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: Colors.grey,
+              size: 72,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              text,
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 20,
+              ),
+            )
+          ],
+        ),
+      );
+    }
+
+    Widget queryMessage = centerMessage(
+      "Listing channels...",
+      Icons.subscriptions_sharp,
+    );
+    Widget errorMessage = centerMessage(
+      "Error getting channels",
+      Icons.error,
+    );
+    Widget videoMessage = centerMessage(
+      "Listing recent videos...",
+      Icons.subscriptions_sharp,
+    );
+
+    if (_isChannelView && searchQuery != null) {
+      return FutureBuilder(
+        future: fetchChannelVideoCache(searchQuery),
+        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+          var results = snapshot.data;
+
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+            case ConnectionState.none:
+              return videoMessage;
+              break;
+            default:
+              if (!snapshot.hasData) {
+                return errorMessage;
+              }
+              return ListView.builder(
+                addAutomaticKeepAlives: true,
+                itemCount: snapshot.data.length,
+                itemBuilder: (BuildContext context, int index) {
+                  Video result = results[index];
+                  print("VIDEO LISTED: $result");
+
+                  return YouTubeResult(
+                    result,
+                    captioningCache[result.id],
+                    fetchCaptioningCache(result.id.value),
+                    fetchMetadataCache(result.id.value, result),
+                    index,
+                  );
+                },
+              );
+          }
+        },
+      );
+    } else {
+      return FutureBuilder(
+        future: fetchChannelCache(),
+        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+          var results = snapshot.data;
+
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+            case ConnectionState.none:
+              return queryMessage;
+            default:
+              if (!snapshot.hasData) {
+                return errorMessage;
+              }
+              return ListView.builder(
+                addAutomaticKeepAlives: true,
+                itemCount: snapshot.data.length + 1,
+                itemBuilder: (BuildContext context, int index) {
+                  if (index == 0) {
+                    return _buildNewChannelRow();
+                  }
+
+                  Channel result = results[index - 1];
+                  print("CHANNEL LISTED: $result");
+
+                  return ChannelResult(
+                    result,
+                    setChannelVideoSearch,
+                    setStateFromResult,
+                    index,
+                  );
+                },
+              );
+          }
+        },
+      );
+    }
+  }
+
+  void setStateFromResult() {
+    setState(() {});
+  }
+
+  Widget _buildNewChannelRow() {
+    String channelLogoURL = "";
+    String channelTitle = "List new channel";
+
+    Widget displayThumbnail() {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(25.0),
+        child: Container(
+          alignment: Alignment.center,
+          height: 36,
+          width: 36,
+          color: Colors.grey[900],
+          child: Icon(
+            Icons.add,
+            color: Colors.grey,
+            size: 16,
+          ),
+        ),
+      );
+    }
+
+    Widget displayVideoInformation() {
+      return Expanded(
+        child: Container(
+          padding: EdgeInsets.only(left: 12, right: 6),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                channelTitle,
+                style: TextStyle(color: Colors.grey),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return InkWell(
+      onTap: () {
+        TextEditingController _textFieldController = TextEditingController();
+
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.zero,
+              ),
+              content: TextField(
+                controller: _textFieldController,
+                decoration: InputDecoration(
+                    hintText: "Enter link to any video by channel"),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('CANCEL', style: TextStyle(color: Colors.white)),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                TextButton(
+                  child: Text('OK', style: TextStyle(color: Colors.white)),
+                  onPressed: () async {
+                    String _input = _textFieldController.text;
+                    await addNewChannel(_input);
+
+                    setState(() {});
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+      child: Container(
+        padding: EdgeInsets.only(left: 16, right: 16),
+        height: 48,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            displayThumbnail(),
+            displayVideoInformation(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void setChannelVideoSearch(String channelID, String channelName) {
+    setState(() {
+      _isChannelView = true;
+      searchQuery = channelID;
+      leadingContext = channelName;
+    });
+  }
+
+  Widget _buildBody() {
     Widget centerMessage(String text, IconData icon) {
       return Center(
         child: Column(
@@ -342,7 +811,7 @@ class _HomeState extends State<Home> {
           ? fetchSearchCache(searchQuery)
           : fetchTrendingCache(),
       builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-        List<Video> results = snapshot.data;
+        var results = snapshot.data;
 
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
@@ -369,6 +838,7 @@ class _HomeState extends State<Home> {
                   result,
                   captioningCache[result.id],
                   fetchCaptioningCache(result.id.value),
+                  fetchMetadataCache(result.id.value, result),
                   index,
                 );
               },
@@ -623,12 +1093,14 @@ class YouTubeResult extends StatefulWidget {
   final Video result;
   final AsyncMemoizer cache;
   final cacheCallback;
+  final metadataCallback;
   final int index;
 
   YouTubeResult(
     this.result,
     this.cache,
     this.cacheCallback,
+    this.metadataCallback,
     this.index,
   );
 
@@ -636,6 +1108,7 @@ class YouTubeResult extends StatefulWidget {
         this.result,
         this.cache,
         this.cacheCallback,
+        this.metadataCallback,
         this.index,
       );
 }
@@ -645,12 +1118,14 @@ class _YouTubeResultState extends State<YouTubeResult>
   final Video result;
   final AsyncMemoizer cache;
   final cacheCallback;
+  final metadataCallback;
   final int index;
 
   _YouTubeResultState(
     this.result,
     this.cache,
     this.cacheCallback,
+    this.metadataCallback,
     this.index,
   );
 
@@ -729,16 +1204,10 @@ class _YouTubeResultState extends State<YouTubeResult>
                   fontSize: 12,
                 ),
               ),
-              Text(
-                videoDetails == "$videoPublishTime · 0 views"
-                    ? "Trending #${index + 1} in Japan"
-                    : videoDetails,
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 12,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.clip,
+              showVideoPublishStatus(
+                context,
+                result.id.value,
+                index,
               ),
               showClosedCaptionStatus(
                 context,
@@ -751,27 +1220,81 @@ class _YouTubeResultState extends State<YouTubeResult>
       );
     }
 
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => Player(
-              url: videoStreamURL,
-              initialPosition: -1,
-            ),
+    void playVideo() {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Player(
+            url: videoStreamURL,
+            initialPosition: -1,
           ),
-        ).then((returnValue) {
-          SystemChrome.setPreferredOrientations([
-            DeviceOrientation.portraitUp,
-            DeviceOrientation.landscapeLeft,
-            DeviceOrientation.landscapeRight,
-          ]);
+        ),
+      ).then((returnValue) {
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight,
+        ]);
 
-          globalPrefs.setString("lastPlayedPath", videoStreamURL);
-          globalPrefs.setInt("lastPlayedPosition", 0);
-          globalResumable.value = true;
-        });
+        globalPrefs.setString("lastPlayedPath", videoStreamURL);
+        globalPrefs.setInt("lastPlayedPosition", 0);
+        globalResumable.value = true;
+      });
+    }
+
+    return GestureDetector(
+      onLongPress: () {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.zero,
+              ),
+              title: Text(
+                result.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              content: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: FadeInImage(
+                  image: NetworkImage(result.thumbnails.highResUrl),
+                  placeholder: MemoryImage(kTransparentImage),
+                  width: 1280,
+                  fit: BoxFit.fitWidth,
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('CANCEL', style: TextStyle(color: Colors.white)),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                TextButton(
+                  child: Text('LIST CHANNEL',
+                      style: TextStyle(color: Colors.white)),
+                  onPressed: () async {
+                    await addNewChannel(videoStreamURL);
+                    Navigator.pop(context);
+                  },
+                ),
+                TextButton(
+                  child:
+                      Text('PLAY VIDEO', style: TextStyle(color: Colors.white)),
+                  onPressed: () async {
+                    playVideo();
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+      onTap: () {
+        playVideo();
       },
       child: Container(
         height: 128,
@@ -783,6 +1306,57 @@ class _YouTubeResultState extends State<YouTubeResult>
           ],
         ),
       ),
+    );
+  }
+
+  FutureBuilder showVideoPublishStatus(
+    BuildContext context,
+    String videoID,
+    int index,
+  ) {
+    Widget metadataRow(String text, Color color) {
+      return Text(
+        text,
+        style: TextStyle(
+          color: Colors.grey,
+          fontSize: 12,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.clip,
+      );
+    }
+
+    Widget queryMessage = metadataRow(
+      "Waiting for engagement metrics...",
+      Colors.grey,
+    );
+    Widget errorMessage = metadataRow(
+      "Error querying video metadata",
+      Colors.grey,
+    );
+
+    return FutureBuilder(
+      future: metadataCallback,
+      builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          String videoDetails = snapshot.data;
+          if (!snapshot.hasData) {
+            return errorMessage;
+          } else {
+            return Text(
+              videoDetails,
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 12,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.clip,
+            );
+          }
+        } else {
+          return queryMessage;
+        }
+      },
     );
   }
 
@@ -853,6 +1427,134 @@ class _YouTubeResultState extends State<YouTubeResult>
           return queryMessage;
         }
       },
+    );
+  }
+}
+
+class ChannelResult extends StatefulWidget {
+  final Channel result;
+  final SearchCallback callback;
+  final VoidCallback stateCallback;
+  final int index;
+
+  ChannelResult(
+    this.result,
+    this.callback,
+    this.stateCallback,
+    this.index,
+  );
+
+  _ChannelResultState createState() => _ChannelResultState(
+        this.result,
+        this.callback,
+        this.stateCallback,
+        this.index,
+      );
+}
+
+class _ChannelResultState extends State<ChannelResult>
+    with AutomaticKeepAliveClientMixin {
+  final Channel result;
+  final SearchCallback callback;
+  final stateCallback;
+  final int index;
+
+  _ChannelResultState(
+    this.result,
+    this.callback,
+    this.stateCallback,
+    this.index,
+  );
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+
+    String channelLogoURL = result.logoUrl;
+    String channelTitle = result.title;
+
+    Widget displayThumbnail() {
+      return Stack(alignment: Alignment.bottomRight, children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(25.0),
+          child: FadeInImage(
+            fit: BoxFit.cover,
+            width: 36,
+            height: 36,
+            placeholder: MemoryImage(kTransparentImage),
+            image: NetworkImage(channelLogoURL),
+          ),
+        ),
+      ]);
+    }
+
+    Widget displayVideoInformation() {
+      return Expanded(
+        child: Container(
+          padding: EdgeInsets.only(left: 12, right: 6),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                channelTitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return InkWell(
+      onTap: () {
+        callback(result.id.toString(), result.title);
+      },
+      onLongPress: () {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.zero,
+              ),
+              title: Text("Unlist \"${result.title}\"?"),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('CANCEL', style: TextStyle(color: Colors.white)),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                TextButton(
+                  child: Text('OK', style: TextStyle(color: Colors.white)),
+                  onPressed: () async {
+                    await removeChannel(result);
+
+                    stateCallback();
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+      child: Container(
+        padding: EdgeInsets.only(left: 16, right: 16),
+        height: 48,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            displayThumbnail(),
+            displayVideoInformation(),
+          ],
+        ),
+      ),
     );
   }
 }

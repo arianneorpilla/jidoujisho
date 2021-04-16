@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:async/async.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
@@ -91,11 +93,6 @@ String timedLineToSRT(Map<String, dynamic> line, int lineCount) {
   double start = double.parse(line["\@start"]);
   double duration = double.parse(line["\@dur"]);
   String text = line["\$"] ?? "";
-
-  text = text.replaceAll("\\n", "\n");
-  text = text.replaceAll("&quot;", "\"");
-
-  text = text.replaceAll("​", "");
 
   String startTime = formatTimeString(start);
   String endTime = formatTimeString(start + duration);
@@ -673,7 +670,7 @@ Future<List<DictionaryEntry>> getWordDetails(String searchTerm) async {
   if (results.isEmpty) {
     var client = http.Client();
     http.Response response =
-        await client.get('https://jisho.org/search/$searchTerm');
+        await client.get(Uri.parse('https://jisho.org/search/$searchTerm'));
 
     var document = parser.parse(response.body);
 
@@ -764,9 +761,32 @@ Future<YouTubeMux> getPlayerYouTubeInfo(String webURL) async {
 }
 
 Future<bool> checkYouTubeClosedCaptionAvailable(String videoID) async {
-  String httpSubs = await http
-      .read("https://www.youtube.com/api/timedtext?lang=ja&v=" + videoID);
+  String httpSubs = await http.read(
+      Uri.parse("https://www.youtube.com/api/timedtext?lang=ja&v=" + videoID));
   return (httpSubs.isNotEmpty);
+}
+
+FutureOr<String> getPublishMetadata(Video result) async {
+  String videoPublishTime =
+      result.uploadDate == null ? "" : getTimeAgoFormatted(result.uploadDate);
+  String videoViewCount = getViewCountFormatted(result.engagement.viewCount);
+  String videoDetails = "$videoPublishTime · $videoViewCount views";
+
+  if (result.uploadDate != null) {
+    return videoDetails;
+  } else {
+    YoutubeExplode yt = YoutubeExplode();
+    Video video = await yt.videos.get(result.id);
+
+    String videoPublishTime =
+        video.uploadDate == null ? "" : getTimeAgoFormatted(video.uploadDate);
+    String videoViewCount = getViewCountFormatted(video.engagement.viewCount);
+    String videoDetails = "$videoPublishTime · $videoViewCount views";
+
+    print(videoDetails);
+
+    return videoDetails;
+  }
 }
 
 String getTimestampFromDuration(Duration duration) {
@@ -878,9 +898,49 @@ Future<List<Video>> searchYouTubeVideos(String searchQuery) async {
   return videos;
 }
 
+Future<List<Video>> getLatestChannelVideos(String channelID) async {
+  YoutubeExplode yt = YoutubeExplode();
+  List<Video> searchResults =
+      await yt.channels.getUploads(channelID).take(50).toList();
+
+  return searchResults;
+}
+
+Future<List<Video>> getLatestPlaylistVideos(String playlistID) async {
+  YoutubeExplode yt = YoutubeExplode();
+  SearchList searchResults = await yt.playlists.getVideos(playlistID).toList();
+  return searchResults;
+}
+
 Future<List<Video>> searchYouTubeTrendingVideos() {
   YoutubeExplode yt = YoutubeExplode();
   return yt.playlists.getVideos("PLuXL6NS58Dyx-wTr5o7NiC7CZRbMA91DC").toList();
+}
+
+FutureOr<List<Channel>> getSubscribedChannels() {
+  YoutubeExplode yt = YoutubeExplode();
+  String prefsChannels = globalPrefs.getString('subscribedChannels') ?? '[]';
+  List<String> channelIDs =
+      (jsonDecode(prefsChannels) as List<dynamic>).cast<String>();
+
+  List<Future<Channel>> futureChannels = [];
+  channelIDs.forEach(
+      (channelID) async => {futureChannels.add(yt.channels.get(channelID))});
+
+  return Future.wait(futureChannels);
+}
+
+FutureOr<List<Playlist>> getSubscribedPlaylists() {
+  YoutubeExplode yt = YoutubeExplode();
+  String prefsChannels = globalPrefs.getString('subscribedPlaylists') ?? '[]';
+  List<String> playlistIDs =
+      (jsonDecode(prefsChannels) as List<dynamic>).cast<String>();
+
+  List<Future<Playlist>> futurePlaylists = [];
+  playlistIDs.forEach((playlistID) async =>
+      {futurePlaylists.add(yt.playlists.get(playlistID))});
+
+  return Future.wait(futurePlaylists);
 }
 
 Future<void> requestPermissions() async {
@@ -1119,4 +1179,31 @@ YouTubeQualityOption getLastPlayedQuality(
             .firstWhere((element) => element.videoResolution == "360p") ??
         qualities.first;
   }
+}
+
+Future<void> addNewChannel(String videoURL) async {
+  YoutubeExplode yt = YoutubeExplode();
+
+  String channelID = (await yt.channels.getByVideo(videoURL)).id.value;
+  String prefsChannels = globalPrefs.getString('subscribedChannels') ?? '[]';
+  List<String> channelIDs =
+      (jsonDecode(prefsChannels) as List<dynamic>).cast<String>();
+
+  channelCache = AsyncMemoizer();
+  if (!channelIDs.contains(channelID)) {
+    channelIDs.add(channelID);
+  }
+
+  await globalPrefs.setString('subscribedChannels', jsonEncode(channelIDs));
+}
+
+Future<void> removeChannel(Channel channel) async {
+  String channelID = channel.id.value;
+  String prefsChannels = globalPrefs.getString('subscribedChannels') ?? '[]';
+  List<String> channelIDs =
+      (jsonDecode(prefsChannels) as List<dynamic>).cast<String>();
+
+  channelCache = AsyncMemoizer();
+  channelIDs.remove(channelID);
+  await globalPrefs.setString('subscribedChannels', jsonEncode(channelIDs));
 }

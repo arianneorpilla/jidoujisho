@@ -105,7 +105,7 @@ packages:
       name: csslib
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.16.2"
+    version: "0.17.0"
   device_info:
     dependency: "direct main"
     description:
@@ -121,12 +121,12 @@ packages:
     source: hosted
     version: "2.0.0"
   equatable:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: equatable
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.2.6"
+    version: "2.0.0"
   ext_storage:
     dependency: "direct main"
     description:
@@ -215,12 +215,12 @@ packages:
     source: hosted
     version: "1.9.0+2"
   html:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: html
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.14.0+4"
+    version: "0.15.0"
   html_unescape:
     dependency: transitive
     description:
@@ -234,14 +234,14 @@ packages:
       name: http
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.12.2"
+    version: "0.13.1"
   http_parser:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: http_parser
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.1.4"
+    version: "4.0.0"
   image:
     dependency: transitive
     description:
@@ -276,7 +276,7 @@ packages:
       name: json_annotation
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.1.1"
+    version: "4.0.1"
   latinize:
     dependency: transitive
     description:
@@ -488,9 +488,11 @@ packages:
   unofficial_jisho_api:
     dependency: "direct main"
     description:
-      name: unofficial_jisho_api
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "."
+      ref: "80eb2c7872fc4d5a8c4df141cace39f782987ae8"
+      resolved-ref: "80eb2c7872fc4d5a8c4df141cace39f782987ae8"
+      url: "https://github.com/lrorpilla/unofficial_jisho_api_dart"
+    source: git
     version: "1.1.0"
   url_launcher:
     dependency: "direct main"
@@ -577,7 +579,7 @@ packages:
     source: hosted
     version: "0.1.0+3"
   xml:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: xml
       url: "https://pub.dartlang.org"
@@ -601,11 +603,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "5385ba1628c109312fc452162e32ebc20961b1dd"
-      resolved-ref: "5385ba1628c109312fc452162e32ebc20961b1dd"
+      ref: "7ec0098c7fbbfce0bda446bff1145725251d7e3f"
+      resolved-ref: "7ec0098c7fbbfce0bda446bff1145725251d7e3f"
       url: "https://github.com/Hexer10/youtube_explode_dart"
     source: git
-    version: "1.8.0-beta.5"
+    version: "1.9.0"
   youtube_player_flutter:
     dependency: "direct main"
     description:
@@ -614,5 +616,5 @@ packages:
     source: hosted
     version: "7.0.0+7"
 sdks:
-  dart: ">=2.12.0-259.9.beta <3.0.0"
+  dart: ">=2.12.0 <3.0.0"
   flutter: ">=1.22.0"

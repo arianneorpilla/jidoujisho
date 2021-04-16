@@ -190,8 +190,8 @@ class Player extends StatelessWidget {
             YouTubeMux streamData = snapshot.data;
 
             return new FutureBuilder(
-              future: http.read(
-                  "https://www.youtube.com/api/timedtext?lang=ja&v=$videoID"),
+              future: http.read(Uri.parse(
+                  "https://www.youtube.com/api/timedtext?lang=ja&v=$videoID")),
               builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                 switch (snapshot.connectionState) {
                   case ConnectionState.waiting:
