@@ -901,7 +901,7 @@ Future<List<Video>> searchYouTubeVideos(String searchQuery) async {
 Future<List<Video>> getLatestChannelVideos(String channelID) async {
   YoutubeExplode yt = YoutubeExplode();
   List<Video> searchResults =
-      await yt.channels.getUploads(channelID).take(50).toList();
+      await yt.channels.getUploads(channelID).take(100).toList();
 
   return searchResults;
 }
@@ -1206,4 +1206,40 @@ Future<void> removeChannel(Channel channel) async {
   channelCache = AsyncMemoizer();
   channelIDs.remove(channelID);
   await globalPrefs.setString('subscribedChannels', jsonEncode(channelIDs));
+}
+
+List<String> getSearchHistory() {
+  String prefsHistory = globalPrefs.getString('searchHistory') ?? '[]';
+  List<String> history =
+      (jsonDecode(prefsHistory) as List<dynamic>).cast<String>();
+
+  return history;
+}
+
+Future<void> addSearchHistory(String term) async {
+  String prefsHistory = globalPrefs.getString('searchHistory') ?? '[]';
+  List<String> history =
+      (jsonDecode(prefsHistory) as List<dynamic>).cast<String>();
+
+  if (history.contains(term.trim())) {
+    history.remove(term.trim());
+  }
+  if (term.trim() != "") {
+    history.add(term.trim());
+  }
+
+  if (history.length >= 14) {
+    history = history.sublist(history.length - 14);
+  }
+
+  await globalPrefs.setString('searchHistory', jsonEncode(history));
+}
+
+Future<void> removeSearchHistory(String term) async {
+  String prefsHistory = globalPrefs.getString('searchHistory') ?? '[]';
+  List<String> history =
+      (jsonDecode(prefsHistory) as List<dynamic>).cast<String>();
+
+  history.remove(term);
+  await globalPrefs.setString('searchHistory', jsonEncode(history));
 }

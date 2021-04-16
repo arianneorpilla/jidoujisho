@@ -17,7 +17,8 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:jidoujisho/player.dart';
 import 'package:jidoujisho/util.dart';
 
-typedef void SearchCallback(String id, String name);
+typedef void ChannelCallback(String id, String name);
+typedef void SearchCallback(String term);
 
 String appDirPath;
 String previewImageDir;
@@ -166,9 +167,13 @@ class _HomeState extends State<Home> {
   bool _isSearching = false;
   bool _isChannelView = false;
   bool _isPlaylistView = false;
-  String searchQuery = "";
+  ValueNotifier<List<String>> _searchSuggestions =
+      ValueNotifier<List<String>>([]);
+  String _searchQuery = "";
   int _selectedIndex = 0;
   String leadingContext = "";
+
+  YoutubeExplode yt = YoutubeExplode();
 
   void _onItemTapped(int index) {
     setState(() {
@@ -195,7 +200,7 @@ class _HomeState extends State<Home> {
           _isSearching = false;
           _isChannelView = false;
           _isPlaylistView = false;
-          searchQuery = "";
+          _searchQuery = "";
         }
       }
     });
@@ -303,7 +308,9 @@ class _HomeState extends State<Home> {
         _isSearching = false;
         _isChannelView = false;
         _isPlaylistView = false;
-        searchQuery = "";
+        _searchQuery = "";
+        _searchSuggestions.value = [];
+        _searchQueryController.clear();
       });
     } else {
       SystemChannels.platform.invokeMethod('SystemNavigator.pop');
@@ -319,6 +326,9 @@ class _HomeState extends State<Home> {
             _isSearching = false;
             _isChannelView = false;
             _isPlaylistView = false;
+            _searchQuery = "";
+            _searchSuggestions.value = [];
+            _searchQueryController.clear();
           });
         },
       );
@@ -346,26 +356,23 @@ class _HomeState extends State<Home> {
         ),
         textInputAction: TextInputAction.go,
         style: TextStyle(color: Colors.white, fontSize: 16.0),
+        onChanged: (query) => updateSuggestions(query),
         onSubmitted: (query) => updateSearchQuery(query),
       );
     } else if (_isChannelView || _isPlaylistView) {
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            leadingContext,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+      return Text(
+        leadingContext,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
       );
     } else {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text("jidoujisho"),
           Text(
@@ -417,9 +424,9 @@ class _HomeState extends State<Home> {
       Icons.subscriptions_sharp,
     );
 
-    if (_isChannelView && searchQuery != null) {
+    if (_isChannelView && _searchQuery != null) {
       return FutureBuilder(
-        future: fetchChannelVideoCache(searchQuery),
+        future: fetchChannelVideoCache(_searchQuery),
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
           var results = snapshot.data;
 
@@ -527,9 +534,9 @@ class _HomeState extends State<Home> {
       Icons.subscriptions_sharp,
     );
 
-    if (_isChannelView && searchQuery != null) {
+    if (_isChannelView && _searchQuery != null) {
       return FutureBuilder(
-        future: fetchChannelVideoCache(searchQuery),
+        future: fetchChannelVideoCache(_searchQuery),
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
           var results = snapshot.data;
 
@@ -700,9 +707,50 @@ class _HomeState extends State<Home> {
   void setChannelVideoSearch(String channelID, String channelName) {
     setState(() {
       _isChannelView = true;
-      searchQuery = channelID;
+      _searchQuery = channelID;
       leadingContext = channelName;
     });
+  }
+
+  Widget generateSuggestions() {
+    return ValueListenableBuilder(
+      valueListenable: _searchSuggestions,
+      builder: (BuildContext context, List<String> suggestions, ___) {
+        return ListView.builder(
+          key: UniqueKey(),
+          itemCount: suggestions.length,
+          itemBuilder: (BuildContext context, int index) {
+            String result = suggestions[index];
+
+            return SearchResult(
+              result,
+              updateSearchQuery,
+              null,
+              index,
+              Icons.search,
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget generateHistory() {
+    return ListView.builder(
+      key: UniqueKey(),
+      itemCount: getSearchHistory().length,
+      itemBuilder: (BuildContext context, int index) {
+        String result = getSearchHistory().reversed.toList()[index];
+
+        return SearchResult(
+          result,
+          updateSearchQuery,
+          setStateFromResult,
+          index,
+          Icons.history,
+        );
+      },
+    );
   }
 
   Widget _buildBody() {
@@ -734,7 +782,7 @@ class _HomeState extends State<Home> {
       Icons.youtube_searched_for,
     );
     Widget searchingMessage = centerMessage(
-      "Searching for \"$searchQuery\"...",
+      "Searching for \"$_searchQuery\"...",
       Icons.youtube_searched_for,
     );
     Widget queryMessage = centerMessage(
@@ -798,7 +846,17 @@ class _HomeState extends State<Home> {
       colorFilter: ColorFilter.mode(Colors.black, BlendMode.saturation),
     );
 
-    if (_isSearching && searchQuery == "") {
+    if (_isSearching &&
+        _searchQuery == "" &&
+        _searchSuggestions.value.isNotEmpty) {
+      return generateSuggestions();
+    } else if (_isSearching &&
+        _searchQuery == "" &&
+        getSearchHistory().isNotEmpty) {
+      return generateHistory();
+    } else if (_isSearching &&
+        _searchQuery == "" &&
+        getSearchHistory().isEmpty) {
       return searchMessage;
     }
 
@@ -807,24 +865,24 @@ class _HomeState extends State<Home> {
     }
 
     return FutureBuilder(
-      future: _isSearching && searchQuery != ""
-          ? fetchSearchCache(searchQuery)
+      future: _isSearching && _searchQuery != ""
+          ? fetchSearchCache(_searchQuery)
           : fetchTrendingCache(),
       builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
         var results = snapshot.data;
 
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
-            if (_isSearching && searchQuery != "") {
+            if (_isSearching && _searchQuery != "") {
               return searchingMessage;
-            } else if (_isSearching && searchQuery != "") {
+            } else if (_isSearching && _searchQuery != "") {
               return searchMessage;
             } else {
               return queryMessage;
             }
             break;
           default:
-            if (!snapshot.hasData) {
+            if (!snapshot.hasData || snapshot.data.isEmpty) {
               return errorMessage;
             }
             return ListView.builder(
@@ -1060,16 +1118,33 @@ class _HomeState extends State<Home> {
   void _startSearch() {
     ModalRoute.of(context)
         .addLocalHistoryEntry(LocalHistoryEntry(onRemove: _stopSearching));
-    searchQuery = "";
+    _searchQuery = "";
 
     setState(() {
       _isSearching = true;
     });
   }
 
+  void updateSuggestions(String newQuery) {
+    if (newQuery == "") {
+      setState(() {
+        _searchSuggestions.value = [];
+      });
+    }
+
+    yt.search.getQuerySuggestions(newQuery).then((results) {
+      setState(() {
+        _searchSuggestions.value = results;
+      });
+    });
+  }
+
   void updateSearchQuery(String newQuery) {
     setState(() {
-      searchQuery = newQuery;
+      _searchQueryController.text = newQuery;
+      _searchSuggestions.value = [];
+      _searchQuery = newQuery;
+      addSearchHistory(newQuery);
     });
   }
 
@@ -1078,6 +1153,7 @@ class _HomeState extends State<Home> {
 
     setState(() {
       _isSearching = false;
+      _searchSuggestions.value = [];
     });
   }
 
@@ -1433,7 +1509,7 @@ class _YouTubeResultState extends State<YouTubeResult>
 
 class ChannelResult extends StatefulWidget {
   final Channel result;
-  final SearchCallback callback;
+  final ChannelCallback callback;
   final VoidCallback stateCallback;
   final int index;
 
@@ -1455,7 +1531,7 @@ class ChannelResult extends StatefulWidget {
 class _ChannelResultState extends State<ChannelResult>
     with AutomaticKeepAliveClientMixin {
   final Channel result;
-  final SearchCallback callback;
+  final ChannelCallback callback;
   final stateCallback;
   final int index;
 
@@ -1503,6 +1579,9 @@ class _ChannelResultState extends State<ChannelResult>
                 channelTitle,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 16,
+                ),
               ),
             ],
           ),
@@ -1522,7 +1601,26 @@ class _ChannelResultState extends State<ChannelResult>
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.zero,
               ),
-              title: Text("Unlist \"${result.title}\"?"),
+              title: Text(
+                "${result.title}",
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              content: ClipRRect(
+                borderRadius: BorderRadius.circular(25.0),
+                child: Container(
+                  alignment: Alignment.center,
+                  height: 144,
+                  width: 144,
+                  color: Colors.transparent,
+                  child: FadeInImage(
+                    image: NetworkImage(result.logoUrl),
+                    placeholder: MemoryImage(kTransparentImage),
+                    width: 144,
+                    fit: BoxFit.fitWidth,
+                  ),
+                ),
+              ),
               actions: <Widget>[
                 TextButton(
                   child: Text('CANCEL', style: TextStyle(color: Colors.white)),
@@ -1531,7 +1629,8 @@ class _ChannelResultState extends State<ChannelResult>
                   },
                 ),
                 TextButton(
-                  child: Text('OK', style: TextStyle(color: Colors.white)),
+                  child: Text('UNLIST CHANNEL',
+                      style: TextStyle(color: Colors.white)),
                   onPressed: () async {
                     await removeChannel(result);
 
@@ -1552,6 +1651,118 @@ class _ChannelResultState extends State<ChannelResult>
           children: [
             displayThumbnail(),
             displayVideoInformation(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SearchResult extends StatefulWidget {
+  final String result;
+  final SearchCallback callback;
+  final VoidCallback stateCallback;
+  final int index;
+  final IconData icon;
+
+  SearchResult(
+    this.result,
+    this.callback,
+    this.stateCallback,
+    this.index,
+    this.icon,
+  );
+
+  _SearchResultState createState() => _SearchResultState(
+        this.result,
+        this.callback,
+        this.stateCallback,
+        this.index,
+        this.icon,
+      );
+}
+
+class _SearchResultState extends State<SearchResult>
+    with AutomaticKeepAliveClientMixin {
+  final String result;
+  final SearchCallback callback;
+  final VoidCallback stateCallback;
+  final int index;
+  final IconData icon;
+
+  _SearchResultState(
+    this.result,
+    this.callback,
+    this.stateCallback,
+    this.index,
+    this.icon,
+  );
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+
+    Widget displayThumbnail() {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(25.0),
+        child: Container(
+          alignment: Alignment.center,
+          height: 36,
+          width: 36,
+          color: Colors.transparent,
+          child: Icon(
+            icon,
+            color: Colors.grey,
+            size: 16,
+          ),
+        ),
+      );
+    }
+
+    Widget displaySearchTerm() {
+      return Expanded(
+        child: Container(
+          padding: EdgeInsets.only(left: 12, right: 6),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                result,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return InkWell(
+      onTap: () {
+        callback(result);
+      },
+      onLongPress: () {
+        if (icon == Icons.history) {
+          removeSearchHistory(result);
+          stateCallback();
+        }
+      },
+      child: Container(
+        padding: EdgeInsets.only(left: 16, right: 16),
+        height: 48,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            displayThumbnail(),
+            displaySearchTerm(),
           ],
         ),
       ),
