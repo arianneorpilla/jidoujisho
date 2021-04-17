@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +12,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
@@ -1994,22 +1992,24 @@ class _ClipboardState extends State<ClipboardMenu> {
           margin: EdgeInsets.only(bottom: 12),
           color: Colors.grey[800].withOpacity(0.2),
           child: InkWell(
-            onTap: () {},
+            onTap: () {
+              Clipboard.setData(new ClipboardData(text: entry.word));
+            },
             child: Padding(
               padding: EdgeInsets.all(16),
               child: InkWell(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
+                    SelectableText(
                       entry.word,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 20,
                       ),
                     ),
-                    Text(entry.reading),
-                    Text("\n${entry.meaning}\n"),
+                    SelectableText(entry.reading),
+                    SelectableText("\n${entry.meaning}\n"),
                   ],
                 ),
               ),
@@ -2040,10 +2040,10 @@ class _LazyResultsState extends State<LazyResults> {
   _LazyResultsState(this.results);
 
   List<Video> verticalData = [];
-  final int increment = 5;
+  final int increment = 10;
 
   Future _loadMore() async {
-    await new Future.delayed(const Duration(seconds: 1));
+    await new Future.delayed(const Duration(seconds: 2));
 
     int next;
     if (verticalData.length + increment >= results.length) {

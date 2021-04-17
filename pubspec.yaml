@@ -43,7 +43,6 @@ dependencies:
       url: https://github.com/lrorpilla/unofficial_jisho_api_dart
       ref: 80eb2c7872fc4d5a8c4df141cace39f782987ae8
   url_launcher:
-  video_thumbnail:
   ve_dart:
     git:
       url: https://github.com/lrorpilla/ve_dart
