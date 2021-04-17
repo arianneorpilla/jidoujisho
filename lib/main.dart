@@ -771,6 +771,7 @@ class _HomeState extends State<Home> {
             break;
           default:
             if (!snapshot.hasData || snapshot.data.isEmpty) {
+              trendingCache = AsyncMemoizer();
               return errorMessage;
             }
 
@@ -785,8 +786,11 @@ class _HomeState extends State<Home> {
                   result,
                   captioningCache[result.id],
                   fetchCaptioningCache(result.id.value),
-                  fetchMetadataCache(result.id.value, result),
+                  (_isSearching)
+                      ? fetchMetadataCache(result.id.value, result)
+                      : null,
                   index,
+                  true,
                 );
               },
             );
@@ -1060,6 +1064,7 @@ class YouTubeResult extends StatefulWidget {
   final cacheCallback;
   final metadataCallback;
   final int index;
+  final bool trending;
 
   YouTubeResult(
     this.result,
@@ -1067,6 +1072,7 @@ class YouTubeResult extends StatefulWidget {
     this.cacheCallback,
     this.metadataCallback,
     this.index,
+    this.trending,
   );
 
   _YouTubeResultState createState() => _YouTubeResultState(
@@ -1075,6 +1081,7 @@ class YouTubeResult extends StatefulWidget {
         this.cacheCallback,
         this.metadataCallback,
         this.index,
+        this.trending,
       );
 }
 
@@ -1085,6 +1092,7 @@ class _YouTubeResultState extends State<YouTubeResult>
   final cacheCallback;
   final metadataCallback;
   final int index;
+  final bool trending;
 
   _YouTubeResultState(
     this.result,
@@ -1092,6 +1100,7 @@ class _YouTubeResultState extends State<YouTubeResult>
     this.cacheCallback,
     this.metadataCallback,
     this.index,
+    this.trending,
   );
 
   @override
@@ -1274,7 +1283,7 @@ class _YouTubeResultState extends State<YouTubeResult>
     );
   }
 
-  FutureBuilder showVideoPublishStatus(
+  Widget showVideoPublishStatus(
     BuildContext context,
     String videoID,
     int index,
@@ -1291,12 +1300,30 @@ class _YouTubeResultState extends State<YouTubeResult>
       );
     }
 
+    Widget trendingMessage = Text(
+      "Trending #${index + 1} in Japan",
+      style: TextStyle(
+        color: Colors.grey,
+        fontSize: 12,
+      ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+
+    if (metadataCallback == null) {
+      if (trending) {
+        return trendingMessage;
+      } else {
+        return Container();
+      }
+    }
+
     Widget queryMessage = metadataRow(
       "Getting engagement metrics...",
       Colors.grey,
     );
     Widget errorMessage = metadataRow(
-      "Error querying video metadata",
+      "Error querying engagement metrics",
       Colors.grey,
     );
 
@@ -2043,7 +2070,7 @@ class _LazyResultsState extends State<LazyResults> {
   final int increment = 10;
 
   Future _loadMore() async {
-    await new Future.delayed(const Duration(seconds: 2));
+    await new Future.delayed(const Duration(milliseconds: 1000));
 
     int next;
     if (verticalData.length + increment >= results.length) {
@@ -2074,6 +2101,7 @@ class _LazyResultsState extends State<LazyResults> {
     return LazyLoadScrollView(
       onEndOfPage: () => _loadMore(),
       child: ListView.builder(
+        addAutomaticKeepAlives: true,
         itemCount: verticalData.length + 1,
         itemBuilder: (BuildContext context, int index) {
           if (index == verticalData.length) {
@@ -2099,14 +2127,15 @@ class _LazyResultsState extends State<LazyResults> {
           }
 
           Video result = verticalData[index];
-          print("VIDEO LISTED: $result");
+          // print("VIDEO LISTED: $result");
 
           return YouTubeResult(
             result,
             captioningCache[result.id],
             fetchCaptioningCache(result.id.value),
-            fetchMetadataCache(result.id.value, result),
+            null,
             index,
+            false,
           );
         },
       ),

@@ -839,7 +839,7 @@ String getYouTubeDuration(Duration duration) {
   } else if (duration.inMinutes != 0) {
     return "  $mins:$secs  ";
   } else {
-    return "  0:$secs";
+    return "  0:$secs  ";
   }
 }
 
