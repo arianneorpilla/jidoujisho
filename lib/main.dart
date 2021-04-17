@@ -1,9 +1,11 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fuzzy/fuzzy.dart';
+import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:package_info/package_info.dart';
 import 'package:path_provider/path_provider.dart';
@@ -11,6 +13,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
@@ -177,7 +180,7 @@ class _HomeState extends State<Home> {
 
   void _onItemTapped(int index) {
     setState(() {
-      if (index == 2) {
+      if (index == 4) {
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -206,16 +209,11 @@ class _HomeState extends State<Home> {
     });
   }
 
-  static const TextStyle optionStyle =
-      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
-
   Widget _getWidgetOptions(int index) {
     if (_isSearching) {
       return _buildBody();
     } else if (_isChannelView) {
       return _buildChannels();
-    } else if (_isPlaylistView) {
-      return _buildPlaylists();
     }
 
     switch (index) {
@@ -223,6 +221,10 @@ class _HomeState extends State<Home> {
         return _buildBody();
       case 1:
         return _buildChannels();
+      case 2:
+        return History();
+      case 3:
+        return ClipboardMenu();
       default:
         return Text("Nothing");
     }
@@ -259,7 +261,7 @@ class _HomeState extends State<Home> {
           onTap: _onItemTapped,
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-              icon: Icon(Icons.whatshot),
+              icon: Icon(Icons.whatshot_sharp),
               label: 'Trending',
             ),
             BottomNavigationBarItem(
@@ -267,7 +269,15 @@ class _HomeState extends State<Home> {
               label: 'Channels',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.folder),
+              icon: Icon(Icons.history_sharp),
+              label: 'History',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.paste_sharp),
+              label: 'Clipboard',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.folder_sharp),
               label: 'Library',
             ),
           ],
@@ -439,132 +449,8 @@ class _HomeState extends State<Home> {
               if (!snapshot.hasData) {
                 return errorMessage;
               }
-              return ListView.builder(
-                addAutomaticKeepAlives: true,
-                itemCount: snapshot.data.length,
-                itemBuilder: (BuildContext context, int index) {
-                  Video result = results[index];
-                  print("VIDEO LISTED: $result");
 
-                  return YouTubeResult(
-                    result,
-                    captioningCache[result.id],
-                    fetchCaptioningCache(result.id.value),
-                    fetchMetadataCache(result.id.value, result),
-                    index,
-                  );
-                },
-              );
-          }
-        },
-      );
-    } else {
-      return FutureBuilder(
-        future: fetchChannelCache(),
-        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-          var results = snapshot.data;
-
-          switch (snapshot.connectionState) {
-            case ConnectionState.waiting:
-            case ConnectionState.none:
-              return queryMessage;
-            default:
-              if (!snapshot.hasData) {
-                return errorMessage;
-              }
-              return ListView.builder(
-                addAutomaticKeepAlives: true,
-                itemCount: snapshot.data.length + 1,
-                itemBuilder: (BuildContext context, int index) {
-                  if (index == 0) {
-                    return _buildNewChannelRow();
-                  }
-
-                  Channel result = results[index - 1];
-                  print("CHANNEL LISTED: $result");
-
-                  return ChannelResult(
-                    result,
-                    setChannelVideoSearch,
-                    setStateFromResult,
-                    index,
-                  );
-                },
-              );
-          }
-        },
-      );
-    }
-  }
-
-  Widget _buildPlaylists() {
-    Widget centerMessage(String text, IconData icon) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              color: Colors.grey,
-              size: 72,
-            ),
-            const SizedBox(height: 6),
-            Text(
-              text,
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 20,
-              ),
-            )
-          ],
-        ),
-      );
-    }
-
-    Widget queryMessage = centerMessage(
-      "Listing channels...",
-      Icons.subscriptions_sharp,
-    );
-    Widget errorMessage = centerMessage(
-      "Error getting channels",
-      Icons.error,
-    );
-    Widget videoMessage = centerMessage(
-      "Listing recent videos...",
-      Icons.subscriptions_sharp,
-    );
-
-    if (_isChannelView && _searchQuery != null) {
-      return FutureBuilder(
-        future: fetchChannelVideoCache(_searchQuery),
-        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-          var results = snapshot.data;
-
-          switch (snapshot.connectionState) {
-            case ConnectionState.waiting:
-            case ConnectionState.none:
-              return videoMessage;
-              break;
-            default:
-              if (!snapshot.hasData) {
-                return errorMessage;
-              }
-              return ListView.builder(
-                addAutomaticKeepAlives: true,
-                itemCount: snapshot.data.length,
-                itemBuilder: (BuildContext context, int index) {
-                  Video result = results[index];
-                  print("VIDEO LISTED: $result");
-
-                  return YouTubeResult(
-                    result,
-                    captioningCache[result.id],
-                    fetchCaptioningCache(result.id.value),
-                    fetchMetadataCache(result.id.value, result),
-                    index,
-                  );
-                },
-              );
+              return LazyResults(results);
           }
         },
       );
@@ -612,7 +498,6 @@ class _HomeState extends State<Home> {
   }
 
   Widget _buildNewChannelRow() {
-    String channelLogoURL = "";
     String channelTitle = "List new channel";
 
     Widget displayThumbnail() {
@@ -642,7 +527,10 @@ class _HomeState extends State<Home> {
             children: [
               Text(
                 channelTitle,
-                style: TextStyle(color: Colors.grey),
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 14,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -736,11 +624,13 @@ class _HomeState extends State<Home> {
   }
 
   Widget generateHistory() {
+    List<String> searchHistory = getSearchHistory().reversed.toList();
+
     return ListView.builder(
       key: UniqueKey(),
-      itemCount: getSearchHistory().length,
+      itemCount: searchHistory.length,
       itemBuilder: (BuildContext context, int index) {
-        String result = getSearchHistory().reversed.toList()[index];
+        String result = searchHistory[index];
 
         return SearchResult(
           result,
@@ -885,6 +775,7 @@ class _HomeState extends State<Home> {
             if (!snapshot.hasData || snapshot.data.isEmpty) {
               return errorMessage;
             }
+
             return ListView.builder(
               addAutomaticKeepAlives: true,
               itemCount: snapshot.data.length,
@@ -1039,7 +930,7 @@ class _HomeState extends State<Home> {
       builder: (_, __, ___) {
         if (globalResumable.value) {
           return IconButton(
-            icon: const Icon(Icons.restore),
+            icon: const Icon(Icons.update_sharp),
             onPressed: () async {
               int lastPlayedPosition =
                   globalPrefs.getInt("lastPlayedPosition") ?? 0;
@@ -1066,7 +957,7 @@ class _HomeState extends State<Home> {
         } else {
           return IconButton(
             icon: Icon(
-              Icons.restore,
+              Icons.update_sharp,
               color: Colors.grey[800],
             ),
           );
@@ -1217,10 +1108,6 @@ class _YouTubeResultState extends State<YouTubeResult>
 
     String videoTitle = result.title;
     String videoChannel = result.author;
-    String videoPublishTime =
-        result.uploadDate == null ? "" : getTimeAgoFormatted(result.uploadDate);
-    String videoViewCount = getViewCountFormatted(result.engagement.viewCount);
-    String videoDetails = "$videoPublishTime · $videoViewCount views";
     String videoDuration =
         result.duration == null ? "" : getYouTubeDuration(result.duration);
 
@@ -1320,6 +1207,7 @@ class _YouTubeResultState extends State<YouTubeResult>
 
     return GestureDetector(
       onLongPress: () {
+        HapticFeedback.vibrate();
         showDialog(
           context: context,
           builder: (context) {
@@ -1357,11 +1245,14 @@ class _YouTubeResultState extends State<YouTubeResult>
                   },
                 ),
                 TextButton(
-                  child:
-                      Text('PLAY VIDEO', style: TextStyle(color: Colors.white)),
-                  onPressed: () async {
-                    playVideo();
+                  child: Text(
+                    'PLAY VIDEO',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  onPressed: () {
+                    print("doesnt work");
                     Navigator.pop(context);
+                    playVideo();
                   },
                 ),
               ],
@@ -1403,7 +1294,7 @@ class _YouTubeResultState extends State<YouTubeResult>
     }
 
     Widget queryMessage = metadataRow(
-      "Waiting for engagement metrics...",
+      "Getting engagement metrics...",
       Colors.grey,
     );
     Widget errorMessage = metadataRow(
@@ -1594,6 +1485,7 @@ class _ChannelResultState extends State<ChannelResult>
         callback(result.id.toString(), result.title);
       },
       onLongPress: () {
+        HapticFeedback.vibrate();
         showDialog(
           context: context,
           builder: (context) {
@@ -1750,6 +1642,7 @@ class _SearchResultState extends State<SearchResult>
         callback(result);
       },
       onLongPress: () {
+        HapticFeedback.vibrate();
         if (icon == Icons.history) {
           removeSearchHistory(result);
           stateCallback();
@@ -1765,6 +1658,457 @@ class _SearchResultState extends State<SearchResult>
             displaySearchTerm(),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class HistoryResult extends StatefulWidget {
+  final VideoHistory history;
+  final stateCallback;
+  final int index;
+
+  HistoryResult(
+    this.history,
+    this.stateCallback,
+    this.index,
+  );
+
+  _HistoryResultState createState() => _HistoryResultState(
+        this.history,
+        this.stateCallback,
+        this.index,
+      );
+}
+
+class _HistoryResultState extends State<HistoryResult>
+    with AutomaticKeepAliveClientMixin {
+  final VideoHistory history;
+  final stateCallback;
+  final int index;
+
+  _HistoryResultState(
+    this.history,
+    this.stateCallback,
+    this.index,
+  );
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+
+    bool isNetwork() {
+      return (history.thumbnail.startsWith("https://"));
+    }
+
+    Widget displayThumbnail() {
+      return Stack(
+        alignment: Alignment.bottomRight,
+        children: [
+          AspectRatio(
+            aspectRatio: 4 / 3,
+            child: FadeInImage(
+              image: isNetwork()
+                  ? NetworkImage(history.thumbnail)
+                  : FileImage(File(history.thumbnail)),
+              placeholder: MemoryImage(kTransparentImage),
+              height: 480,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ],
+      );
+    }
+
+    Widget closedCaptionRow(String text, Color color, IconData icon) {
+      return Row(
+        children: [
+          Icon(
+            icon,
+            color: color,
+            size: 12,
+          ),
+          const SizedBox(width: 3),
+          Text(
+            text,
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.clip,
+          )
+        ],
+      );
+    }
+
+    Widget displayVideoInformation() {
+      return Expanded(
+        child: Container(
+          padding: EdgeInsets.only(left: 12, right: 6),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                history.heading,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 6),
+              Text(
+                history.subheading,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 12,
+                ),
+              ),
+              isNetwork()
+                  ? closedCaptionRow(
+                      "YouTube", Colors.grey, Icons.ondemand_video_sharp)
+                  : closedCaptionRow(
+                      "Local Storage", Colors.grey, Icons.storage_sharp)
+            ],
+          ),
+        ),
+      );
+    }
+
+    void playVideo() {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Player(
+            url: history.url,
+            initialPosition: -1,
+          ),
+        ),
+      ).then((returnValue) {
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight,
+        ]);
+
+        globalPrefs.setString("lastPlayedPath", history.url);
+        globalPrefs.setInt("lastPlayedPosition", 0);
+        globalResumable.value = true;
+
+        stateCallback();
+      });
+    }
+
+    return GestureDetector(
+      onLongPress: () {
+        HapticFeedback.vibrate();
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.zero,
+              ),
+              title: Text(
+                history.heading,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+              content: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: FadeInImage(
+                  image: (history.thumbnail.startsWith("https://"))
+                      ? NetworkImage(history.thumbnail)
+                      : FileImage(File(history.thumbnail)),
+                  placeholder: MemoryImage(kTransparentImage),
+                  height: 1280,
+                  fit: BoxFit.fitWidth,
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('CANCEL', style: TextStyle(color: Colors.white)),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                TextButton(
+                  child: Text(
+                    'REMOVE HISTORY',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  onPressed: () async {
+                    await removeVideoHistory(history);
+                    stateCallback();
+                    Navigator.pop(context);
+                  },
+                ),
+                TextButton(
+                  child: Text(
+                    'PLAY VIDEO',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    playVideo();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+      onTap: () {
+        playVideo();
+      },
+      child: Container(
+        height: 128,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            displayThumbnail(),
+            displayVideoInformation(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class History extends StatefulWidget {
+  _HistoryState createState() => _HistoryState();
+}
+
+class _HistoryState extends State<History> {
+  @override
+  Widget build(BuildContext context) {
+    List<VideoHistory> histories = getVideoHistory().reversed.toList();
+
+    Widget centerMessage(String text, IconData icon) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: Colors.grey,
+              size: 72,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              text,
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 20,
+              ),
+            )
+          ],
+        ),
+      );
+    }
+
+    Widget emptyMessage = centerMessage(
+      "No videos in history",
+      Icons.history_sharp,
+    );
+
+    if (histories.isEmpty) {
+      return emptyMessage;
+    }
+
+    return ListView.builder(
+      key: UniqueKey(),
+      itemCount: histories.length,
+      itemBuilder: (BuildContext context, int index) {
+        VideoHistory history = histories[index];
+        print("HISTORY LISTED: $history");
+
+        return HistoryResult(
+          history,
+          setStateFromResult,
+          index,
+        );
+      },
+    );
+  }
+
+  void setStateFromResult() {
+    setState(() {});
+  }
+}
+
+class ClipboardMenu extends StatefulWidget {
+  _ClipboardState createState() => _ClipboardState();
+}
+
+class _ClipboardState extends State<ClipboardMenu> {
+  @override
+  Widget build(BuildContext context) {
+    List<DictionaryEntry> entries = getDictionaryHistory().reversed.toList();
+
+    Widget centerMessage(String text, IconData icon) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: Colors.grey,
+              size: 72,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              text,
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 20,
+              ),
+            )
+          ],
+        ),
+      );
+    }
+
+    Widget emptyMessage = centerMessage(
+      "No entries in clipboard history",
+      Icons.paste_sharp,
+    );
+
+    if (entries.isEmpty) {
+      return emptyMessage;
+    }
+
+    return ListView.builder(
+      key: UniqueKey(),
+      itemCount: entries.length,
+      itemBuilder: (BuildContext context, int index) {
+        DictionaryEntry entry = entries[index];
+        print("ENTRY LISTED: $entry");
+
+        return Container(
+          margin: EdgeInsets.only(bottom: 12),
+          color: Colors.grey[800].withOpacity(0.2),
+          child: InkWell(
+            onTap: () {},
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: InkWell(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      entry.word,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
+                    Text(entry.reading),
+                    Text("\n${entry.meaning}\n"),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void setStateFromResult() {
+    setState(() {});
+  }
+}
+
+class LazyResults extends StatefulWidget {
+  final results;
+
+  LazyResults(this.results);
+
+  @override
+  _LazyResultsState createState() => new _LazyResultsState(this.results);
+}
+
+class _LazyResultsState extends State<LazyResults> {
+  final results;
+
+  _LazyResultsState(this.results);
+
+  List<Video> verticalData = [];
+  final int increment = 5;
+
+  Future _loadMore() async {
+    await new Future.delayed(const Duration(seconds: 1));
+
+    int next;
+    if (verticalData.length + increment >= results.length) {
+      next = results.length;
+    } else {
+      next = verticalData.length + increment;
+    }
+    setState(() {
+      verticalData.addAll(results.sublist(verticalData.length, next));
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    int next;
+    if (verticalData.length + 20 >= results.length) {
+      next = results.length;
+    } else {
+      next = verticalData.length + 20;
+    }
+    verticalData.addAll(results.sublist(verticalData.length, next));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LazyLoadScrollView(
+      onEndOfPage: () => _loadMore(),
+      child: ListView.builder(
+        itemCount: verticalData.length + 1,
+        itemBuilder: (BuildContext context, int index) {
+          if (index == verticalData.length) {
+            if (verticalData.length != results.length) {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(top: 16, bottom: 16),
+                    child: SizedBox(
+                      height: 32,
+                      width: 32,
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            } else {
+              return Container();
+            }
+          }
+
+          Video result = verticalData[index];
+          print("VIDEO LISTED: $result");
+
+          return YouTubeResult(
+            result,
+            captioningCache[result.id],
+            fetchCaptioningCache(result.id.value),
+            fetchMetadataCache(result.id.value, result),
+            index,
+          );
+        },
       ),
     );
   }

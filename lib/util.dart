@@ -34,8 +34,6 @@ String getDefaultSubtitles(File file, List<File> internalSubtitles) {
     content = (internalSubtitles[0]).readAsStringSync();
   }
 
-  print(content);
-
   return content;
 }
 
@@ -496,6 +494,22 @@ class DictionaryEntry {
   String searchTerm;
 
   DictionaryEntry({this.word, this.reading, this.meaning, this.searchTerm});
+
+  Map<String, dynamic> toMap() {
+    return {
+      "word": this.word,
+      "reading": this.reading,
+      "meaning": this.meaning,
+      "searchTerm": this.searchTerm,
+    };
+  }
+
+  DictionaryEntry.fromMap(Map<String, dynamic> map) {
+    this.word = map['word'];
+    this.reading = map['reading'];
+    this.meaning = map['meaning'];
+    this.searchTerm = map['searchTerm'];
+  }
 }
 
 List<DictionaryEntry> importCustomDictionary() {
@@ -713,14 +727,20 @@ class YouTubeQualityOption {
 }
 
 class YouTubeMux {
+  final String title;
+  final String channel;
   final List<YouTubeQualityOption> videoQualities;
   final String audioURL;
   final String audioMetadata;
+  final String thumbnailURL;
 
   YouTubeMux({
+    this.title,
+    this.channel,
     this.videoQualities,
     this.audioURL,
     this.audioMetadata,
+    this.thumbnailURL,
   });
 }
 
@@ -733,6 +753,7 @@ Future<YouTubeMux> getPlayerYouTubeInfo(String webURL) async {
 
     List<YouTubeQualityOption> videoQualities = [];
     List<String> videoResolutions = [];
+
     for (var stream in streamManifest.videoOnly.sortByBitrate()) {
       if (!videoResolutions.contains(stream.videoQualityLabel)) {
         videoQualities.add(
@@ -744,6 +765,11 @@ Future<YouTubeMux> getPlayerYouTubeInfo(String webURL) async {
       }
     }
 
+    Video video = await yt.videos.get(videoID);
+    String title = video.title;
+    String channel = video.author;
+    String thumbnailURL = video.thumbnails.highResUrl;
+
     AudioStreamInfo streamAudioInfo =
         streamManifest.audioOnly.sortByBitrate().last;
     String audioURL = streamAudioInfo.url.toString();
@@ -751,9 +777,12 @@ Future<YouTubeMux> getPlayerYouTubeInfo(String webURL) async {
         "[${streamAudioInfo.container.name}] - [${streamAudioInfo.bitrate.kiloBitsPerSecond.floor()} Kbps]";
 
     return YouTubeMux(
+      title: title,
+      channel: channel,
       videoQualities: videoQualities,
       audioURL: audioURL,
       audioMetadata: audioMetadata,
+      thumbnailURL: thumbnailURL,
     );
   } else {
     return null;
@@ -782,8 +811,6 @@ FutureOr<String> getPublishMetadata(Video result) async {
         video.uploadDate == null ? "" : getTimeAgoFormatted(video.uploadDate);
     String videoViewCount = getViewCountFormatted(video.engagement.viewCount);
     String videoDetails = "$videoPublishTime · $videoViewCount views";
-
-    print(videoDetails);
 
     return videoDetails;
   }
@@ -900,8 +927,7 @@ Future<List<Video>> searchYouTubeVideos(String searchQuery) async {
 
 Future<List<Video>> getLatestChannelVideos(String channelID) async {
   YoutubeExplode yt = YoutubeExplode();
-  List<Video> searchResults =
-      await yt.channels.getUploads(channelID).take(100).toList();
+  List<Video> searchResults = await yt.channels.getUploads(channelID).toList();
 
   return searchResults;
 }
@@ -917,7 +943,7 @@ Future<List<Video>> searchYouTubeTrendingVideos() {
   return yt.playlists.getVideos("PLuXL6NS58Dyx-wTr5o7NiC7CZRbMA91DC").toList();
 }
 
-FutureOr<List<Channel>> getSubscribedChannels() {
+FutureOr<List<Channel>> getSubscribedChannels() async {
   YoutubeExplode yt = YoutubeExplode();
   String prefsChannels = globalPrefs.getString('subscribedChannels') ?? '[]';
   List<String> channelIDs =
@@ -927,7 +953,11 @@ FutureOr<List<Channel>> getSubscribedChannels() {
   channelIDs.forEach(
       (channelID) async => {futureChannels.add(yt.channels.get(channelID))});
 
-  return Future.wait(futureChannels);
+  List<Channel> channels = await Future.wait(futureChannels);
+  channels
+      .sort(((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase())));
+
+  return channels;
 }
 
 FutureOr<List<Playlist>> getSubscribedPlaylists() {
@@ -1217,9 +1247,7 @@ List<String> getSearchHistory() {
 }
 
 Future<void> addSearchHistory(String term) async {
-  String prefsHistory = globalPrefs.getString('searchHistory') ?? '[]';
-  List<String> history =
-      (jsonDecode(prefsHistory) as List<dynamic>).cast<String>();
+  List<String> history = getSearchHistory();
 
   if (history.contains(term.trim())) {
     history.remove(term.trim());
@@ -1236,10 +1264,165 @@ Future<void> addSearchHistory(String term) async {
 }
 
 Future<void> removeSearchHistory(String term) async {
-  String prefsHistory = globalPrefs.getString('searchHistory') ?? '[]';
-  List<String> history =
-      (jsonDecode(prefsHistory) as List<dynamic>).cast<String>();
+  List<String> history = getSearchHistory();
 
   history.remove(term);
   await globalPrefs.setString('searchHistory', jsonEncode(history));
+}
+
+class VideoHistory {
+  String url;
+  String heading;
+  String subheading;
+  String thumbnail;
+
+  VideoHistory(
+    this.url,
+    this.heading,
+    this.subheading,
+    this.thumbnail,
+  );
+
+  Map<String, dynamic> toMap() {
+    return {
+      "url": this.url,
+      "heading": this.heading,
+      "subheading": this.subheading,
+      "thumbnail": this.thumbnail,
+    };
+  }
+
+  VideoHistory.fromMap(Map<String, dynamic> map) {
+    this.url = map['url'];
+    this.heading = map['heading'];
+    this.subheading = map['subheading'];
+    this.thumbnail = map['thumbnail'];
+  }
+}
+
+List<VideoHistory> getVideoHistory() {
+  String prefsVideoHistory = globalPrefs.getString('videoHistory') ?? '[]';
+  List<dynamic> history = (jsonDecode(prefsVideoHistory) as List<dynamic>);
+
+  List<VideoHistory> histories = [];
+  history.forEach((entry) {
+    VideoHistory videoHistory = VideoHistory.fromMap(entry);
+    histories.add(videoHistory);
+  });
+
+  return histories;
+}
+
+Future<void> setVideoHistory(List<VideoHistory> videoHistories) async {
+  List<Map<String, dynamic>> maps = [];
+  videoHistories.forEach((entry) {
+    maps.add(entry.toMap());
+  });
+
+  await globalPrefs.setString('videoHistory', jsonEncode(maps));
+}
+
+Future<void> addVideoHistory(VideoHistory videoHistory) async {
+  List<VideoHistory> videoHistories = getVideoHistory();
+
+  if (videoHistory.thumbnail == null) {
+    File videoFile = File(videoHistory.url);
+    String photoFileNameDir =
+        "$appDirPath/" + path.basenameWithoutExtension(videoFile.path) + ".jpg";
+    File photoFile = File(photoFileNameDir);
+    if (photoFile.existsSync()) {
+      photoFile.deleteSync();
+    }
+
+    String formatted = getTimestampFromDuration(Duration(seconds: 5));
+
+    final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
+
+    String inputPath = videoHistory.url;
+    String exportPath = "\"$photoFileNameDir\"";
+
+    String command =
+        "-loglevel quiet -ss $formatted -y -i \"$inputPath\" -frames:v 1 -q:v 2 $exportPath";
+
+    await _flutterFFmpeg.execute(command);
+
+    videoHistory.thumbnail = photoFileNameDir;
+  }
+
+  videoHistories.removeWhere((entry) => entry.url == videoHistory.url);
+  videoHistories.add(videoHistory);
+
+  if (videoHistories.length >= 20) {
+    videoHistories = videoHistories.sublist(videoHistories.length - 20);
+  }
+
+  await setVideoHistory(videoHistories);
+}
+
+Future<void> removeVideoHistory(VideoHistory videoHistory) async {
+  List<VideoHistory> videoHistories = getVideoHistory();
+
+  videoHistories.removeWhere((entry) => entry.url == videoHistory.url);
+  if (videoHistory.thumbnail == null) {
+    File videoFile = File(videoHistory.url);
+    String photoFileNameDir =
+        "$appDirPath/" + path.basenameWithoutExtension(videoFile.path);
+    File photoFile = File(photoFileNameDir);
+    if (photoFile.existsSync()) {
+      photoFile.deleteSync();
+    }
+  }
+
+  await setVideoHistory(videoHistories);
+}
+
+List<DictionaryEntry> getDictionaryHistory() {
+  String prefsDictionary = globalPrefs.getString('dictionaryHistory') ?? '[]';
+  List<dynamic> history = (jsonDecode(prefsDictionary) as List<dynamic>);
+
+  List<DictionaryEntry> entries = [];
+  history.forEach((map) {
+    DictionaryEntry entry = DictionaryEntry.fromMap(map);
+    entries.add(entry);
+  });
+
+  return entries;
+}
+
+Future<void> setDictionaryHistory(
+    List<DictionaryEntry> dictionaryEntries) async {
+  List<Map<String, dynamic>> maps = [];
+  dictionaryEntries.forEach((entry) {
+    maps.add(entry.toMap());
+  });
+
+  await globalPrefs.setString('dictionaryHistory', jsonEncode(maps));
+}
+
+Future<void> addDictionaryEntryToHistory(
+    DictionaryEntry dictionaryEntry) async {
+  List<DictionaryEntry> dictionaryEntries = getDictionaryHistory();
+
+  dictionaryEntries.removeWhere(
+    (entry) => entry.word == dictionaryEntry.word,
+  );
+  dictionaryEntries.add(dictionaryEntry);
+
+  if (dictionaryEntries.length >= 50) {
+    dictionaryEntries =
+        dictionaryEntries.sublist(dictionaryEntries.length - 50);
+  }
+
+  await setDictionaryHistory(dictionaryEntries);
+}
+
+Future<void> removeDictionaryEntryFromHistory(
+    DictionaryEntry dictionaryEntry) async {
+  List<DictionaryEntry> dictionaryEntries = getDictionaryHistory();
+
+  dictionaryEntries.removeWhere(
+    (entry) => entry.word == dictionaryEntry.word,
+  );
+
+  await setDictionaryHistory(dictionaryEntries);
 }

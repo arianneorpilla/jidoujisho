@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as path;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
 import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
@@ -85,7 +86,7 @@ class Player extends StatelessWidget {
   // }
 
   Widget localPlayer(BuildContext context, String url, int initialPosition) {
-    if (initialPosition != -1) {
+    if (url != null) {
       return localPlayerHelper(
         context,
         File(url),
@@ -146,6 +147,15 @@ class Player extends StatelessWidget {
               DeviceOrientation.landscapeLeft,
               DeviceOrientation.landscapeRight,
             ]);
+
+            VideoHistory history = VideoHistory(
+              videoFile.path,
+              path.basenameWithoutExtension(videoFile.path),
+              videoFile.path,
+              null,
+            );
+
+            addVideoHistory(history);
 
             return VideoPlayer(
               videoFile: videoFile,
@@ -224,6 +234,15 @@ class Player extends StatelessWidget {
                       DeviceOrientation.landscapeLeft,
                       DeviceOrientation.landscapeRight,
                     ]);
+
+                    VideoHistory history = VideoHistory(
+                      url,
+                      streamData.title,
+                      streamData.channel,
+                      streamData.thumbnailURL,
+                    );
+
+                    addVideoHistory(history);
 
                     return VideoPlayer(
                       streamData: streamData,
@@ -756,6 +775,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
         valueListenable: selectedIndex,
         builder: (BuildContext context, int _, Widget widget) {
           _currentDictionaryEntry.value = results[selectedIndex.value];
+          addDictionaryEntryToHistory(_currentDictionaryEntry.value);
 
           return Container(
             padding: EdgeInsets.all(16.0),

@@ -13,13 +13,19 @@ dependencies:
 
   jidoujisho:
     path: ../
-  mecab_dart: ^0.1.2
+  mecab_dart:
+    git:
+      url: https://github.com/lrorpilla/mecab_dart
+      ref: a822b1ac54ce1fbde33ca7d445c1bfd7dd51ae7c
   bloc: ^6.1.0
   equatable: ^1.2.5
   flutter_bloc: ^6.1.1
   http: ^0.12.2
   http_parser: ^3.1.4
-  ve_dart: ^0.2.1
+  ve_dart:
+    git:
+      url: https://github.com/lrorpilla/ve_dart
+      ref: ab4fb0f32a99a324c2c3f6aa04ab03701bf617ad
 dev_dependencies:
   flutter_test:
     sdk: flutter
