@@ -35,7 +35,7 @@ Mecab mecabTagger;
 List<DictionaryEntry> customDictionary;
 Fuzzy customDictionaryFuzzy;
 
-bool isGooglePlayLimited = false;
+bool isGooglePlayLimited = true;
 
 SharedPreferences globalPrefs;
 ValueNotifier<bool> globalSelectMode;
@@ -178,7 +178,7 @@ class _HomeState extends State<Home> {
 
   void _onItemTapped(int index) {
     setState(() {
-      if (index == 4) {
+      if (index == 2) {
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -216,12 +216,8 @@ class _HomeState extends State<Home> {
 
     switch (index) {
       case 0:
-        return _buildBody();
-      case 1:
-        return _buildChannels();
-      case 2:
         return History();
-      case 3:
+      case 1:
         return ClipboardMenu();
       default:
         return Text("Nothing");
@@ -258,14 +254,6 @@ class _HomeState extends State<Home> {
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
           items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.whatshot_sharp),
-              label: 'Trending',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.subscriptions_sharp),
-              label: 'Channels',
-            ),
             BottomNavigationBarItem(
               icon: Icon(Icons.history_sharp),
               label: 'History',
