@@ -389,6 +389,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
   void dispose() {
     super.dispose();
     if (_videoPlayerController != null && _chewieController != null) {
+      _videoPlayerController?.stopRendererScanning();
       _videoPlayerController?.dispose();
       _chewieController?.dispose();
     }
@@ -471,15 +472,15 @@ class _VideoPlayerState extends State<VideoPlayer> {
             ),
           ),
           onPressed: () async {
-            Wakelock.disable();
-            Navigator.pop(context);
-            Navigator.pop(context);
-
-            SystemChrome.setPreferredOrientations([
+            await Wakelock.disable();
+            await SystemChrome.setPreferredOrientations([
               DeviceOrientation.portraitUp,
               DeviceOrientation.landscapeLeft,
               DeviceOrientation.landscapeRight,
             ]);
+
+            Navigator.pop(context);
+            Navigator.pop(context);
           },
         ),
       ],
