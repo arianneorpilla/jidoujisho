@@ -18,6 +18,7 @@ dependencies:
   clipboard_monitor: ^0.9.1
   device_info:
   ext_storage:
+  external_app_launcher:
   #file_picker:
   gx_file_picker:
   flutter_ffmpeg:

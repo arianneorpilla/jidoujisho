@@ -247,25 +247,31 @@ Future exportToAnki(
   final prefs = await SharedPreferences.getInstance();
   String lastDeck = prefs.getString("lastDeck") ?? "Default";
 
-  await exportCurrentFrame(chewie, controller);
-  await exportCurrentAudio(chewie, controller, subtitle);
-  List<String> decks = await getDecks();
+  List<String> decks;
+  try {
+    requestPermissions();
+    decks = await getDecks();
+    await exportCurrentFrame(chewie, controller);
+    await exportCurrentAudio(chewie, controller, subtitle);
 
-  Clipboard.setData(
-    ClipboardData(text: ""),
-  );
-  clipboard.value = "";
+    Clipboard.setData(
+      ClipboardData(text: ""),
+    );
+    clipboard.value = "";
 
-  showAnkiDialog(
-    context,
-    subtitle.text,
-    dictionaryEntry,
-    decks,
-    lastDeck,
-    controller,
-    clipboard,
-    wasPlaying,
-  );
+    showAnkiDialog(
+      context,
+      subtitle.text,
+      dictionaryEntry,
+      decks,
+      lastDeck,
+      controller,
+      clipboard,
+      wasPlaying,
+    );
+  } catch (ex) {
+    clipboard.value = "&<&>exportlong&<&>";
+  }
 }
 
 void showAnkiDialog(
@@ -1353,6 +1359,14 @@ Future<void> addVideoHistory(VideoHistory videoHistory) async {
   videoHistories.add(videoHistory);
 
   if (videoHistories.length >= 20) {
+    videoHistories.sublist(0, videoHistories.length - 20).forEach((entry) {
+      if (!entry.thumbnail.startsWith("http")) {
+        File photoFile = File(entry.thumbnail);
+        if (photoFile.existsSync()) {
+          photoFile.deleteSync();
+        }
+      }
+    });
     videoHistories = videoHistories.sublist(videoHistories.length - 20);
   }
 
@@ -1363,11 +1377,8 @@ Future<void> removeVideoHistory(VideoHistory videoHistory) async {
   List<VideoHistory> videoHistories = getVideoHistory();
 
   videoHistories.removeWhere((entry) => entry.url == videoHistory.url);
-  if (videoHistory.thumbnail == null) {
-    File videoFile = File(videoHistory.url);
-    String photoFileNameDir =
-        "$appDirPath/" + path.basenameWithoutExtension(videoFile.path);
-    File photoFile = File(photoFileNameDir);
+  if (!videoHistory.thumbnail.startsWith("http")) {
+    File photoFile = File(videoHistory.thumbnail);
     if (photoFile.existsSync()) {
       photoFile.deleteSync();
     }

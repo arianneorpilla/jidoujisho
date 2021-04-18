@@ -134,6 +134,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.3"
+  external_app_launcher:
+    dependency: "direct main"
+    description:
+      name: external_app_launcher
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.1"
   ffi:
     dependency: transitive
     description:

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:chewie/chewie.dart';
 import 'package:clipboard_monitor/clipboard_monitor.dart';
+import 'package:external_app_launcher/external_app_launcher.dart';
 // import 'package:file_picker/file_picker.dart';
 import 'package:gx_file_picker/gx_file_picker.dart';
 import 'package:flutter/material.dart';
@@ -658,27 +659,27 @@ class _VideoPlayerState extends State<VideoPlayer> {
   Widget buildDictionaryExporting(String clipboard) {
     String lookupText = "Preparing to export...";
 
-    Future.delayed(Duration(seconds: 2), () {
-      if (_clipboard.value == "&<&>export&<&>") {
-        Future.delayed(Duration(seconds: 2), () {
-          if (_clipboard.value == "&<&>export&<&>") {
-            Future.delayed(Duration(seconds: 2), () {
-              if (_clipboard.value == "&<&>export&<&>") {
-                Future.delayed(Duration(seconds: 2), () {
-                  if (_clipboard.value == "&<&>export&<&>") {
-                    Future.delayed(Duration(seconds: 2), () {
-                      if (_clipboard.value == "&<&>export&<&>") {
-                        _clipboard.value = "&<&>exportlong&<&>";
-                      }
-                    });
-                  }
-                });
-              }
-            });
-          }
-        });
-      }
-    });
+    // Future.delayed(Duration(seconds: 2), () {
+    //   if (_clipboard.value == "&<&>export&<&>") {
+    //     Future.delayed(Duration(seconds: 2), () {
+    //       if (_clipboard.value == "&<&>export&<&>") {
+    //         Future.delayed(Duration(seconds: 2), () {
+    //           if (_clipboard.value == "&<&>export&<&>") {
+    //             Future.delayed(Duration(seconds: 2), () {
+    //               if (_clipboard.value == "&<&>export&<&>") {
+    //                 Future.delayed(Duration(seconds: 2), () {
+    //                   if (_clipboard.value == "&<&>export&<&>") {
+    //                     _clipboard.value = "&<&>exportlong&<&>";
+    //                   }
+    //                 });
+    //               }
+    //             });
+    //           }
+    //         });
+    //       }
+    //     });
+    //   }
+    // });
 
     return Column(
       children: [
@@ -696,17 +697,28 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   Widget buildDictionaryExportingLong(String clipboard) {
-    String lookupText = "Preparing to export... This is taking too long...\n" +
-        "Please ensure AnkiDroid is launched in the background.";
+    String lookupText =
+        "Failed to communicate with the AnkiDroid background service.\n" +
+            "If inactive, press here to launch it and try again.";
 
     return Column(
       children: [
-        Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Container(
+        GestureDetector(
+          onTap: () async {
+            await LaunchApp.openApp(
+              androidPackageName: 'com.ichi2.anki',
+              openStore: true,
+            );
+
+            _clipboard.value = "";
+          },
+          child: Padding(
             padding: EdgeInsets.all(16.0),
-            color: Colors.grey[800].withOpacity(0.6),
-            child: Text(lookupText),
+            child: Container(
+              padding: EdgeInsets.all(16.0),
+              color: Colors.grey[800].withOpacity(0.6),
+              child: Text(lookupText),
+            ),
           ),
         ),
         Expanded(child: Container()),
