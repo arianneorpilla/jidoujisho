@@ -7,7 +7,7 @@
 <p align="center">A mobile video player tailored for Japanese language learners.</p>
 
 <p align="center" style="margin:0"><b>Latest GitHub Release:<br>
-<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.11.3-beta">0.11.3-beta 🇯🇵 → 🇬🇧</a><br>
+<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.12.0-beta">0.12.0-beta 🇯🇵 → 🇬🇧</a><br>
 <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.5.3-enjp-beta">0.5.3-beta 🇬🇧 → 🇯🇵</a></b><br></p>
 <div latest></div>
 
@@ -21,7 +21,7 @@
 - [x] Selecting a word allows export to AnkiDroid with the **sentence, answer, meaning and reading**
 - [x] **Repeat the current subtitle from the beginning** by flicking horizontally
 - [x] Swipe vertically to open the **transcript to jump to time and review subtitles**
-- [x] **YouTube support** for videos with **Japanese user-generated subtitles**
+- [x] **YouTube support** for videos with **Japanese closed captions** and **automatically generated subtitles**
 - [x] Morphological analysis of subtitles allows either **tap selection** or **drag selection** of subtitles
 - [x] **(Experimental)** Custom Japanese-Japanese dictionary support **(tested for Shinmeikai)**
 - [x] **(Experimental)** Weblio.jp **English to Japanese support** and full Japanese localization
