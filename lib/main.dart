@@ -73,8 +73,6 @@ void main() async {
   await Permission.storage.request();
   requestPermissions();
 
-  // initialiseYouTubeDL();
-
   Directory appDirDoc = await getApplicationDocumentsDirectory();
   appDirPath = appDirDoc.path;
   previewImageDir = appDirPath + "/exportImage.jpg";
