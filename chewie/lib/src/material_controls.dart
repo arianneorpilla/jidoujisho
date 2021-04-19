@@ -411,6 +411,7 @@ class _MaterialControlsState extends State<MaterialControls>
 
         final List<String> audioTrackNames = [];
         final List<String> subtitleTrackNames = [];
+        final List<String> autoSubtitleTrackNames = [];
 
         if (controller.dataSourceType == DataSourceType.file) {
           final audioTracks = await controller.getAudioTracks();
@@ -424,6 +425,7 @@ class _MaterialControlsState extends State<MaterialControls>
           }
           audioTrackNames
               .add("YouTube - ${chewieController.streamData.audioMetadata}");
+          autoSubtitleTrackNames.add("YouTube - [Automatic] - [Japanese]");
         }
 
         final chosenOption = await showModalBottomSheet<int>(
@@ -431,14 +433,24 @@ class _MaterialControlsState extends State<MaterialControls>
           isScrollControlled: true,
           useRootNavigator: true,
           builder: (context) => _SelectAudioDialog(
-            options: audioTrackNames,
-            subtitles: subtitleTrackNames,
+            audioTrackNames,
+            subtitleTrackNames,
+            autoSubtitleTrackNames,
           ),
         );
 
         if (chosenOption != null) {
           if (chosenOption < audioTrackNames.length) {
             await controller.setAudioTrack(chosenOption + 1);
+          } else if (chosenOption <
+              audioTrackNames.length + subtitleTrackNames.length) {
+            chewieController.currentSubTrack.value =
+                chosenOption - audioTrackNames.length;
+          } else if (chosenOption <
+              audioTrackNames.length +
+                  subtitleTrackNames.length +
+                  autoSubtitleTrackNames.length) {
+            chewieController.currentSubTrack.value = -50;
           } else {
             chewieController.currentSubTrack.value =
                 chosenOption - audioTrackNames.length;
@@ -717,20 +729,15 @@ class _SelectQualityDialog extends StatelessWidget {
 }
 
 class _SelectAudioDialog extends StatelessWidget {
-  const _SelectAudioDialog({
-    Key key,
-    @required List<String> options,
-    @required List<String> subtitles,
-  })  : _options = options,
-        _subtitles = subtitles,
-        super(key: key);
+  const _SelectAudioDialog(this.options, this.subtitles, this.autoSubtitles);
 
-  final List<String> _options;
-  final List<String> _subtitles;
+  final List<String> options;
+  final List<String> subtitles;
+  final List<String> autoSubtitles;
 
   Widget buildRow(int index) {
-    if (index < _options.length) {
-      final String _text = _options[index];
+    if (index < options.length) {
+      final String _text = options[index];
       return Row(
         children: [
           const Icon(
@@ -742,8 +749,23 @@ class _SelectAudioDialog extends StatelessWidget {
           Text("Audio - $_text"),
         ],
       );
-    } else if (index < _options.length + _subtitles.length) {
-      final String _text = _subtitles[index - _options.length];
+    } else if (index < options.length + subtitles.length) {
+      final String _text = subtitles[index - options.length];
+      return Row(
+        children: [
+          const Icon(
+            Icons.subtitles_outlined,
+            size: 20.0,
+            color: Colors.red,
+          ),
+          const SizedBox(width: 16.0),
+          Text("Subtitle - $_text"),
+        ],
+      );
+    } else if (index <
+        options.length + subtitles.length + autoSubtitles.length) {
+      final String _text =
+          autoSubtitles[index - options.length - subtitles.length];
       return Row(
         children: [
           const Icon(
@@ -784,9 +806,7 @@ class _SelectAudioDialog extends StatelessWidget {
           },
         );
       },
-      itemCount: (_subtitles.isEmpty)
-          ? _options.length + 1
-          : _options.length + _subtitles.length + 1,
+      itemCount: options.length + subtitles.length + autoSubtitles.length + 1,
     );
   }
 }

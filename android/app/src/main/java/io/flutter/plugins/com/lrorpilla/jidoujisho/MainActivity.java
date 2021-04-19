@@ -43,7 +43,8 @@ import java.util.Set;
 
 
 public class MainActivity extends FlutterActivity {
-    private static final String CHANNEL = "com.lrorpilla.api/ankidroid";
+    private static final String ANKIDROID_CHANNEL = "com.lrorpilla.api/ankidroid";
+    private static final String YOUTUDEDL_CHANNEL = "flutter_youtube_dl/nativelibdir";
 
     private static final int AD_PERM_REQUEST = 0;
 
@@ -156,7 +157,7 @@ public class MainActivity extends FlutterActivity {
     @Override
     public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
         super.configureFlutterEngine(flutterEngine);
-        new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), CHANNEL)
+        new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), ANKIDROID_CHANNEL)
                 .setMethodCallHandler(
                         (call, result) -> {
                             switch (call.method) {
@@ -186,6 +187,21 @@ public class MainActivity extends FlutterActivity {
                         }
 
                 );
+
+        new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), YOUTUDEDL_CHANNEL)
+        .setMethodCallHandler(
+                (call, result) -> {
+                    switch (call.method) {
+                        case "getNativeDir":
+                            result.success(getApplicationContext().getApplicationInfo().nativeLibraryDir);
+                            break;
+                        default:
+                            result.notImplemented();
+                    }
+                }
+
+        );
     }
+    
 
 }

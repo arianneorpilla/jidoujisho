@@ -73,6 +73,8 @@ void main() async {
   await Permission.storage.request();
   requestPermissions();
 
+  // initialiseYouTubeDL();
+
   Directory appDirDoc = await getApplicationDocumentsDirectory();
   appDirPath = appDirDoc.path;
   previewImageDir = appDirPath + "/exportImage.jpg";
@@ -1197,6 +1199,7 @@ class _YouTubeResultState extends State<YouTubeResult>
           builder: (context) => Player(
             url: videoStreamURL,
             initialPosition: -1,
+            video: result,
           ),
         ),
       ).then((returnValue) {
