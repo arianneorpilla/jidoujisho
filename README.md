@@ -94,7 +94,7 @@ Below are some links that some users might find useful.
 A primer on the basics of the application is as follows.
 
 * 📲 <a href="https://github.com/lrorpilla/jidoujisho/releases/"/>**Download and install the latest beta**</a> onto your Android device
-* ⏯️ Play a video by selecting from your **local media library or entering a YouTube URL**
+* ⏯️ Play a video by selecting from your **local media library** or **picking a YouTube video**
 * 📋 Select text with any of the two modes: **tap to select** or **drag to select**
 * 📔 When the **dictionary definition** for the text shows up, the text is the **current context**
 * 🗑️ Closing the dictionary prompt will **clear the clipboard**
