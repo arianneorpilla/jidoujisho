@@ -26,7 +26,6 @@
 - [x] **(Experimental)** Custom Japanese-Japanese dictionary support **(tested for Shinmeikai)**
 - [x] **(Experimental)** Weblio.jp **English to Japanese support** and full Japanese localization
 
-
 # ⚕️ Current state of the project
 
 **jidoujisho is still in active development.** The full app is available to download here on GitHub and is ready for use. Current features planned on the roadmap are listed below, but as of now there is no estimate on any updates.
@@ -88,7 +87,7 @@ Below are some links that some users might find useful.
 * <b><a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.4-beta">Using a custom dictionary</a></b>
 * <b><a href="https://github.com/lrorpilla/jidoujisho/blob/main/TEMPLATE.md">jidoujisho Anki Template</a></b>
 * <b><a href="https://reddit.com/r/LearnJapanese/comments/lcf9wi/jidoujisho_a_mobile_video_player_tailored_for/">Debut Reddit discussion thread</a></b>
-* <b><a href="https://old.reddit.com/r/LearnJapanese/comments/mp75r3/jidoujisho_09_development_update/">0.9 development update Reddit discussion thread</a></b>
+* <b><a href="https://old.reddit.com/r/LearnJapanese/comments/mp75r3/jidoujisho_09_development_update/">Dev update (0.9) Reddit discussion thread</a></b>
 
 ### 🚀 Getting Started
 
@@ -113,6 +112,17 @@ A primer on the basics of the application is as follows.
 * 🎴 The **back of the card** will include the **reading, word and meaning**
 * 📑 You may apply **text formatting to the card with the AnkiDroid editor once exported**
 * ⚛️ **Customisation of the Anki export** is possible by changing the default template in AnkiDroid 
+
+### 🙌 Advanced User Tips
+
+* 📑 **External subtitles with the same name as the selected video file** will be loaded by default
+* ▶️ A **resume button** is at the top of the main menu, and **returns to the last played video and duration**
+* ⛓️ Channels may be added by **pasting a link of any video by the channel** in *List new channel*
+* 🔎 Holding onto a YouTube video in search, history or trending will show the option to list the channel
+* ⚠️ **If AnkiDroid is not running in the background**, tap on the export message to open it
+* 🗃 **The AnkiDroid deck you last export to will be remembered** for your next export
+* 📹 The quality closest to the **last selected quality** will be selected by default for YouTube videos
+* 📢 **Automatic captions** are more excellent in **podcasts and news programs** with clear speakers
 
 # 👥 Contribution and attribution
 
