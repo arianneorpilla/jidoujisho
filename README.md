@@ -101,6 +101,7 @@ A primer on the basics of the application is as follows.
 * 🌐 The current context may be used to **open browser links to third-party websites**
 * ↕️ You may **swipe vertically to open the transcript**, and you can pick a time or read subtitles from there
 * ↔️ **Swipe horizontally** to repeat the current subtitle audio
+* ➕ **Swipe left or right on the pop-up dictionary** to scroll through multiple definition results
 
 ### 📲 Exporting to AnkiDroid
 
