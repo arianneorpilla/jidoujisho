@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/lrorpilla/jidoujisho/blob/main/assets/icon/icon.png" alt="jidoujisho logo by aaron marbella" width="120" height="120">
+  <img src="https://github.com/lrorpilla/jidoujisho/blob/main/assets/icon/icon.png" width="120" height="120">
 </p>
 
 
@@ -26,10 +26,9 @@
 - [x] **(Experimental)** Custom Japanese-Japanese dictionary support **(tested for Shinmeikai)**
 - [x] **(Experimental)** Weblio.jp **English to Japanese support** and full Japanese localization
 
-
 # ⚕️ Current state of the project
 
-**jidoujisho is still in active development.** The full app is available to download here on GitHub and is ready for use. <b><a href="https://play.google.com/store/apps/details?id=com.lrorpilla.jidoujisho">A lite version of the application without YouTube features is now available on the Google Play Store</b></a>. Current features planned on the roadmap are listed below, but as of now there is no estimate on any updates.
+**jidoujisho is still in active development.** The app is free and open source software, and is <b><a href="https://github.com/lrorpilla/jidoujisho/releases">available to download here on GitHub.</a></b> Current features planned on the roadmap are listed below, but as of now there is no estimate on any updates.
 
 Please note that the development of the app switches between changes being implemented and being left alone for daily use. Update frequency may depend on the gravity of any issues that arise. **Hiatuses provide practical insight on usage and where development should go next.**
 
@@ -45,21 +44,29 @@ Please note that the development of the app switches between changes being imple
 
 # 🎞️ A glimpse of jidoujisho in action
 
-<p align="center">
-  <img src="https://i.postimg.cc/QxB6z8BD/Screenshot-20210201-071958.jpg" width="223"/>
-  <img src="https://i.postimg.cc/zX1sTHtM/Screenshot-20210204-065320.jpg" width="223"/>
-  <img src="https://i.postimg.cc/kMTZZYfQ/Screenshot-20210201-072859.jpg" width="223"/>
+<p align="center" style="margin:0">
+ <img src="https://i.postimg.cc/k53Zgj4t/index11.jpg" height="350">
+ <img src="https://i.postimg.cc/BnszV41v/Screenshot-20210421-082341.jpg" height="350">
+ <img src="https://i.postimg.cc/65qFj2gT/index13.jpg" height="350">
+ <img src="https://i.postimg.cc/L8cdZ9y5/index143.jpg" height="350">
 </p>
-<p align="center">
-  <img src="https://i.postimg.cc/T2Swx0Pb/Screenshot-20210204-081519.jpg" height="350"/>
-  <img src="https://i.postimg.cc/PqtfyFSg/Screenshot-20210204-081552.jpg" height="350"/>
-  <img src="https://i.postimg.cc/DZy6PnVt/Screenshot-20210204-065707.jpg" height="350"/>
-  <img src="https://i.postimg.cc/d09nCDf2/Screenshot-20210204-065728.jpg" height="350"/>
+
+<p align="center" style="margin:0">
+  <img src="https://i.postimg.cc/nV3Mzhpy/Screenshot-20210421-113339.jpg" width="223">
+  <img src="https://i.postimg.cc/ryB35SVx/Screenshot-20210421-112104.jpg" width="223">
+  <img src="https://i.postimg.cc/Dy7dVZ5R/Screenshot-20210421-112206.jpg" width="223">
 </p>
-<p align="center">
-  <img src="https://i.postimg.cc/Y0vxTRCR/Screenshot-20210204-070159.jpg" width="223"/>
-  <img src="https://i.postimg.cc/Y0Tx7F4H/Screenshot-20210204-070337.jpg" width="223"/>
-  <img src="https://i.postimg.cc/8PqyQ2W6/Screenshot-20210201-232317.jpg" width="223"/>
+
+<p align="center" style="margin:0">
+  <img src="https://i.postimg.cc/P547G9mQ/Screenshot-20210421-082347.jpg" height="350">
+  <img src="https://i.postimg.cc/jSsrhv9x/167133538-450387926296671-1989413689582299649-n.jpg" height="350">
+  <img src="https://i.postimg.cc/jq7KqDPb/167282834-787618361872942-1591624056492200688-n.jpg" height="350">
+  <img src="https://i.postimg.cc/fT7NX18q/168707273-122438036525835-4049095217160473956-n.jpg" height="350">
+</p>
+<p align="center" style="margin:0">
+  <img src="https://i.postimg.cc/vm2STn21/Screenshot-20210421-111725.jpg" width="223">
+  <img src="https://i.postimg.cc/zDgPDVCB/Screenshot-20210421-111922.jpg" width="223">
+  <img src="https://i.postimg.cc/KzKpMYC0/Screenshot-20210421-112011.jpg" width="223">
 </p>
 
 # 📖 Using the application
@@ -80,14 +87,14 @@ Below are some links that some users might find useful.
 * <b><a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.4-beta">Using a custom dictionary</a></b>
 * <b><a href="https://github.com/lrorpilla/jidoujisho/blob/main/TEMPLATE.md">jidoujisho Anki Template</a></b>
 * <b><a href="https://reddit.com/r/LearnJapanese/comments/lcf9wi/jidoujisho_a_mobile_video_player_tailored_for/">Debut Reddit discussion thread</a></b>
-* <b><a href="https://old.reddit.com/r/LearnJapanese/comments/mp75r3/jidoujisho_09_development_update/">0.9 development update Reddit discussion thread</a></b>
+* <b><a href="https://old.reddit.com/r/LearnJapanese/comments/mp75r3/jidoujisho_09_development_update/">Dev update (0.9) Reddit discussion thread</a></b>
 
 ### 🚀 Getting Started
 
 A primer on the basics of the application is as follows.
 
 * 📲 <a href="https://github.com/lrorpilla/jidoujisho/releases/"/>**Download and install the latest beta**</a> onto your Android device
-* ⏯️ Play a video by selecting from your **local media library or entering a YouTube URL**
+* ⏯️ Play a video by selecting from your **local media library** or **picking a YouTube video**
 * 📋 Select text with any of the two modes: **tap to select** or **drag to select**
 * 📔 When the **dictionary definition** for the text shows up, the text is the **current context**
 * 🗑️ Closing the dictionary prompt will **clear the clipboard**
@@ -105,6 +112,17 @@ A primer on the basics of the application is as follows.
 * 🎴 The **back of the card** will include the **reading, word and meaning**
 * 📑 You may apply **text formatting to the card with the AnkiDroid editor once exported**
 * ⚛️ **Customisation of the Anki export** is possible by changing the default template in AnkiDroid 
+
+### 🙌 Advanced User Tips
+
+* 📑 **External subtitles with the same name as the selected video file** will be loaded by default
+* ▶️ A **resume button** is at the top of the main menu, and **returns to the last played video and duration**
+* ⛓️ Channels may be added by **pasting a link of any video by the channel** in *List new channel*
+* 🔎 Holding onto a YouTube video in search, history or trending will show the option to list the channel
+* ⚠️ **If AnkiDroid is not running in the background**, tap on the export message to open it
+* 🗃 **The AnkiDroid deck you last export to will be remembered** for your next export
+* 📹 The quality closest to the **last selected quality** will be selected by default for YouTube videos
+* 📢 **Automatic captions** are more excellent in **podcasts and news programs** with clear speakers
 
 # 👥 Contribution and attribution
 
