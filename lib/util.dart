@@ -1086,11 +1086,12 @@ List<List<Word>> getLinesFromWords(
   for (int i = 0; i < words.length; i++) {
     Word word = words[i];
     textPainter = TextPainter()
-      ..text = TextSpan(text: concatenate, style: TextStyle(fontSize: 24))
+      ..text = TextSpan(
+          text: concatenate + word.word, style: TextStyle(fontSize: 24))
       ..textDirection = TextDirection.ltr
       ..layout(minWidth: 0, maxWidth: double.infinity);
 
-    if (word.word == '␜' ||
+    if (word.word.contains('␜') ||
         i == words.length - 1 ||
         textPainter.width >=
             width - style.position.left - style.position.right) {
@@ -1128,11 +1129,12 @@ List<List<int>> getIndexesFromWords(
   for (int i = 0; i < words.length; i++) {
     Word word = words[i];
     textPainter = TextPainter()
-      ..text = TextSpan(text: concatenate, style: TextStyle(fontSize: 24))
+      ..text = TextSpan(
+          text: concatenate + word.word, style: TextStyle(fontSize: 24))
       ..textDirection = TextDirection.ltr
       ..layout(minWidth: 0, maxWidth: double.infinity);
 
-    if (word.word == '␜' ||
+    if (word.word.contains('␜') ||
         i == words.length - 1 ||
         textPainter.width >=
             width - style.position.left - style.position.right) {

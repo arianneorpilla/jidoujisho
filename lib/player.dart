@@ -187,18 +187,7 @@ class Player extends StatelessWidget {
       builder: (BuildContext context, AsyncSnapshot<YouTubeMux> snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
-            return Scaffold(
-              backgroundColor: Colors.black,
-              body: Center(
-                child: Container(
-                  height: 30,
-                  width: 30,
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
-                  ),
-                ),
-              ),
-            );
+            return loadingCircle();
           default:
             YouTubeMux streamData = snapshot.data;
 
@@ -208,19 +197,7 @@ class Player extends StatelessWidget {
               builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                 switch (snapshot.connectionState) {
                   case ConnectionState.waiting:
-                    return Scaffold(
-                      backgroundColor: Colors.black,
-                      body: Center(
-                        child: Container(
-                          height: 30,
-                          width: 30,
-                          child: CircularProgressIndicator(
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.red),
-                          ),
-                        ),
-                      ),
-                    );
+                    return loadingCircle();
                   default:
                     String webSubtitles;
                     List<File> internalSubs;

@@ -1848,7 +1848,7 @@ class _HistoryResultState extends State<HistoryResult>
               content: AspectRatio(
                 aspectRatio: 16 / 9,
                 child: FadeInImage(
-                  image: (history.thumbnail.startsWith("https://"))
+                  image: isNetwork()
                       ? NetworkImage(history.thumbnail)
                       : FileImage(File(history.thumbnail)),
                   placeholder: MemoryImage(kTransparentImage),
@@ -1865,7 +1865,7 @@ class _HistoryResultState extends State<HistoryResult>
                 ),
                 TextButton(
                   child: Text(
-                    'REMOVE HISTORY',
+                    'REMOVE FROM HISTORY',
                     style: TextStyle(color: Colors.white),
                   ),
                   onPressed: () async {
@@ -1874,6 +1874,18 @@ class _HistoryResultState extends State<HistoryResult>
                     Navigator.pop(context);
                   },
                 ),
+                (isNetwork())
+                    ? TextButton(
+                        child: Text(
+                          'LIST CHANNEL',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        onPressed: () async {
+                          await addNewChannel(history.url);
+                          Navigator.pop(context);
+                        },
+                      )
+                    : Container(),
                 TextButton(
                   child: Text(
                     'PLAY VIDEO',

@@ -214,7 +214,7 @@ class SubtitleDataRepository extends SubtitleRepository {
     }
 
     // Attempt this recombination a lot to stamp out persistent values
-    for (int i = 0; i < 10; i++) {
+    for (var i = 0; i < 10; i++) {
       // Recombine subtitles if they are the same value and next to each other
       for (var i = 1; i < subtitleList.length; i++) {
         var previousSubtitle = subtitleList[i - 1];
@@ -252,6 +252,24 @@ class SubtitleDataRepository extends SubtitleRepository {
 
           subtitleList.insert(i, newSubtitle);
           subtitleList.remove(previousSubtitle);
+          subtitleList.remove(currentSubtitle);
+        }
+      }
+
+      // Get rid of duplicate previous values from automatic captions
+      if (subtitleType == SubtitleType.webvtt) {
+        for (var i = 1; i < subtitleList.length; i++) {
+          Subtitle previousSubtitle = subtitleList[i - 1];
+          Subtitle currentSubtitle = subtitleList[i];
+
+          var newSubtitle = Subtitle(
+            text: currentSubtitle.text
+                .replaceAll(previousSubtitle.text + '\n', ''),
+            startTime: currentSubtitle.startTime,
+            endTime: currentSubtitle.endTime,
+          );
+
+          subtitleList.insert(i, newSubtitle);
           subtitleList.remove(currentSubtitle);
         }
       }

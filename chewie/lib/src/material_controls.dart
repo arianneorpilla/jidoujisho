@@ -9,7 +9,6 @@ import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:jidoujisho/main.dart';
 import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:subtitle_wrapper_package/data/constants/view_keys.dart';
 import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -422,10 +421,11 @@ class _MaterialControlsState extends State<MaterialControls>
         } else {
           if (chewieController.internalSubs.isNotEmpty) {
             subtitleTrackNames.add("YouTube - [CC] - [Japanese]");
+          } else {
+            autoSubtitleTrackNames.add("YouTube - [Automatic] - [Japanese]");
           }
           audioTrackNames
               .add("YouTube - ${chewieController.streamData.audioMetadata}");
-          autoSubtitleTrackNames.add("YouTube - [Automatic] - [Japanese]");
         }
 
         final chosenOption = await showModalBottomSheet<int>(
