@@ -440,6 +440,13 @@ class _MaterialControlsState extends State<MaterialControls>
         );
 
         if (chosenOption != null) {
+          if (chosenOption ==
+              audioTrackNames.length +
+                  subtitleTrackNames.length +
+                  autoSubtitleTrackNames.length) {
+            chewieController.currentSubTrack.value =
+                chosenOption - audioTrackNames.length;
+          }
           if (chosenOption < audioTrackNames.length) {
             await controller.setAudioTrack(chosenOption + 1);
           } else if (chosenOption <
@@ -451,9 +458,6 @@ class _MaterialControlsState extends State<MaterialControls>
                   subtitleTrackNames.length +
                   autoSubtitleTrackNames.length) {
             chewieController.currentSubTrack.value = -50;
-          } else {
-            chewieController.currentSubTrack.value =
-                chosenOption - audioTrackNames.length;
           }
         }
 

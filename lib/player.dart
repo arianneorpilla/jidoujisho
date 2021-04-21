@@ -565,10 +565,6 @@ class _VideoPlayerState extends State<VideoPlayer> {
   void playEmbeddedSubtitles(int index) {
     _subTitleController.subtitleType = SubtitleType.srt;
 
-    if (internalSubs.isEmpty) {
-      return;
-    }
-
     if (index < internalSubs.length) {
       getSubtitleWrapper().subtitleController.updateSubtitleContent(
           content: internalSubs[index].readAsStringSync());

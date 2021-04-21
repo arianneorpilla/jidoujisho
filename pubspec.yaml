@@ -2,7 +2,7 @@ name: jidoujisho
 description: A mobile video player tailored for Japanese language learners. 
 publish_to: none
 
-version: 0.12.1+beta
+version: 0.12.2+1
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
