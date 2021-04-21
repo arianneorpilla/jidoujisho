@@ -46,7 +46,7 @@ Please note that the development of the app switches between changes being imple
 
 <p align="center" style="margin:0">
  <img src="https://i.postimg.cc/k53Zgj4t/index11.jpg" height="350">
- <img src="https://i.postimg.cc/66YDfLHD/index12.jpg" height="350">
+ <img src="https://i.postimg.cc/BnszV41v/Screenshot-20210421-082341.jpg" height="350">
  <img src="https://i.postimg.cc/65qFj2gT/index13.jpg" height="350">
  <img src="https://i.postimg.cc/L8cdZ9y5/index143.jpg" height="350">
 </p>
