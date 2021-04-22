@@ -117,10 +117,10 @@ A primer on the basics of the application is as follows.
 ### 🙌 Advanced User Tips
 
 * 🇯🇵 Can't find Japanese subtitles for your media? Try finding what you need at <b><a href="https://kitsunekko.net">kitsunekko</a></b>
-* 🤝 **Sharing is caring.** You can import and export your channel IDs for backup and sharing in the main menu
 * 📑 **External subtitles with the same name as the selected video file** will be loaded by default
 * ▶️ A **resume button** is at the top of the main menu, and **returns to the last played video and duration**
-* ⛓️ Channels may be added by **pasting a link of any video by the channel** in *List new channel*
+* 🤝 **Sharing is caring.** You can import and export your channel IDs for backup and sharing in the main menu
+* ⛓️ Channels may also be added by **pasting a link of any video by the channel** in *List new channel*
 * 🔎 Holding onto a YouTube video in search, history or trending will show the option to list the channel
 * ⚠️ **If AnkiDroid is not running in the background**, tap on the export message to open it
 * 🗃 **The AnkiDroid deck you last export to will be remembered** for your next export
