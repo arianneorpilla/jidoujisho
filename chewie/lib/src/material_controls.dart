@@ -362,12 +362,12 @@ class _MaterialControlsState extends State<MaterialControls>
           String muxTag;
 
           if (quality.muxed) {
-            muxTag = "(seek-friendly)";
+            muxTag = " (seek friendly)";
           } else {
             muxTag = "";
           }
 
-          qualityTags.add("${quality.videoResolution} $muxTag");
+          qualityTags.add("${quality.videoResolution}$muxTag");
         }
 
         final chosenOption = await showModalBottomSheet<int>(
@@ -701,13 +701,20 @@ class _MoreOptionsDialog extends StatelessWidget {
 IconData getIconFromQualityTag(String qualityTag) {
   switch (qualityTag) {
     case "144p":
+    case "144p (seek friendly)":
     case "240p":
+    case "240p (seek friendly)":
     case "360p":
+    case "360p (seek friendly)":
     case "480p":
+    case "480p (seek friendly)":
     case "720p":
+    case "720p (seek friendly)":
       return Icons.sd;
     case "1080p":
+    case "1080p (seek friendly)":
     case "1440p":
+    case "1440p (seek friendly)":
       return Icons.hd;
     default:
       return Icons.four_k;
