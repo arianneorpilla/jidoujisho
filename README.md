@@ -101,6 +101,7 @@ A primer on the basics of the application is as follows.
 * 🌐 The current context may be used to **open browser links to third-party websites**
 * ↕️ You may **swipe vertically to open the transcript**, and you can pick a time or read subtitles from there
 * ↔️ **Swipe horizontally** to repeat the current subtitle audio
+* ➕ **Swipe left or right on the pop-up dictionary** to scroll through multiple definition results
 
 ### 📲 Exporting to AnkiDroid
 
@@ -115,6 +116,7 @@ A primer on the basics of the application is as follows.
 
 ### 🙌 Advanced User Tips
 
+* 🇯🇵 Can't find Japanese subtitles for your media? Try finding what you need at <b><a href="https://kitsunekko.net">kitsunekko</a></b>
 * 📑 **External subtitles with the same name as the selected video file** will be loaded by default
 * 🇯🇵 Can't find Japanese subtitles for your media? Try finding what you need at <b><a href="https://kitsunekko.net">kitsunekko</a></b>
 * ▶️ A **resume button** is at the top of the main menu, and **returns to the last played video and duration**
