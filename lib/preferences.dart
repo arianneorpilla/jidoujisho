@@ -11,6 +11,14 @@ import 'package:jidoujisho/globals.dart';
 import 'package:jidoujisho/util.dart';
 import 'package:jidoujisho/youtube.dart';
 
+List<String> getChannelList() {
+  String prefsChannels = gSharedPrefs.getString('subscribedChannels') ?? '[]';
+  List<String> channelIDs =
+      (jsonDecode(prefsChannels) as List<dynamic>).cast<String>();
+
+  return channelIDs;
+}
+
 Future<void> addNewChannel(String videoURL) async {
   YoutubeExplode yt = YoutubeExplode();
 
@@ -35,6 +43,10 @@ Future<void> removeChannel(Channel channel) async {
 
   gChannelCache = AsyncMemoizer();
   channelIDs.remove(channelID);
+  await gSharedPrefs.setString('subscribedChannels', jsonEncode(channelIDs));
+}
+
+Future<void> setChannelList(List<String> channelIDs) async {
   await gSharedPrefs.setString('subscribedChannels', jsonEncode(channelIDs));
 }
 

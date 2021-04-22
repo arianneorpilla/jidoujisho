@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_youtube_dl/youtube_dl.dart';
 import 'package:http/http.dart' as http;
+import 'package:jidoujisho/preferences.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:shell/shell.dart';
@@ -160,10 +161,8 @@ Future<List<Video>> searchYouTubeTrendingVideos() {
 }
 
 FutureOr<List<Channel>> getSubscribedChannels() async {
+  List<String> channelIDs = getChannelList();
   YoutubeExplode yt = YoutubeExplode();
-  String prefsChannels = gSharedPrefs.getString('subscribedChannels') ?? '[]';
-  List<String> channelIDs =
-      (jsonDecode(prefsChannels) as List<dynamic>).cast<String>();
 
   List<Future<Channel>> futureChannels = [];
   channelIDs.forEach(

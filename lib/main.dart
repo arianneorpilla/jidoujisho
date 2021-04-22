@@ -654,6 +654,11 @@ class _HomeState extends State<Home> {
           enabled: gIsYouTubeAllowed,
         ),
         PopupMenuItem<String>(
+          child: const Text('Import/export channels'),
+          value: 'Import/export channels',
+          enabled: gIsYouTubeAllowed,
+        ),
+        PopupMenuItem<String>(
           child: const Text('View on GitHub'),
           value: 'View on GitHub',
         ),
@@ -737,6 +742,58 @@ class _HomeState extends State<Home> {
           },
         );
         break;
+      case "Import/export channels":
+        String initialText = getChannelList().join("\n");
+        TextEditingController _textFieldController = TextEditingController(
+          text: initialText,
+        );
+
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.zero,
+              ),
+              content: TextField(
+                controller: _textFieldController,
+                keyboardType: TextInputType.multiline,
+                decoration: InputDecoration(
+                    hintText: "Paste channel IDs line by line to import here"),
+                expands: true,
+                maxLines: null,
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('CANCEL', style: TextStyle(color: Colors.white)),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                TextButton(
+                  child: Text('OK', style: TextStyle(color: Colors.white)),
+                  onPressed: () async {
+                    String currentText = _textFieldController.text;
+                    if (initialText == currentText) {
+                      Navigator.pop(context);
+                    } else {
+                      List<String> newChannelIDs = currentText.split("\n");
+                      newChannelIDs.forEach((channelID) => channelID.trim());
+                      newChannelIDs
+                          .removeWhere((channelID) => channelID.isEmpty);
+                      await setChannelList(newChannelIDs);
+                      gChannelCache = AsyncMemoizer();
+
+                      setStateFromResult();
+                      Navigator.pop(context);
+                    }
+                  },
+                ),
+              ],
+            );
+          },
+        );
+        break;
       case "View on GitHub":
         await launch("https://github.com/lrorpilla/jidoujisho");
         break;
@@ -786,12 +843,12 @@ class _HomeState extends State<Home> {
         );
         break;
       case "About this app":
-        const String legalese = "A video player for language learners.\n\n" +
-            "Built for the Japanese language learning community by Leo " +
-            "Rafael Orpilla. Word definitions queried from Jisho.org. Logo " +
-            "by Aaron Marbella.\n\nIf you like my work, you can help me out " +
-            "by providing feedback, making a donation, reporting issues or " +
-            "collaborating with me on further improvements on GitHub.";
+        const String legalese = "A mobile video player for language learners.\n\n" +
+            "Built for the Japanese language learning community by Leo Rafael Orpilla. " +
+            "Word definitions queried from Jisho.org. Logo by Aaron Marbella.\n\n" +
+            "jidoujisho is free and open source software. Liking the application? " +
+            "Help out by providing feedback, makinfg a donation, reporting issues or collaborating " +
+            "for further improvements on GitHub.";
 
         showLicensePage(
           context: context,
@@ -857,6 +914,7 @@ class _HomeState extends State<Home> {
     if (_isSearching) {
       return <Widget>[
         buildResume(),
+        const SizedBox(width: 6),
         IconButton(
           icon: const Icon(Icons.clear),
           onPressed: () {
@@ -876,6 +934,7 @@ class _HomeState extends State<Home> {
 
     return <Widget>[
       buildResume(),
+      const SizedBox(width: 6),
       gIsYouTubeAllowed
           ? IconButton(
               icon: const Icon(Icons.search),
