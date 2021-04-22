@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jidoujisho/util.dart';
-import 'package:mecab_dart/mecab_dart.dart';
 import 'package:subtitle_wrapper_package/bloc/subtitle/subtitle_bloc.dart';
 import 'package:subtitle_wrapper_package/data/constants/view_keys.dart';
 import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
 import 'package:ve_dart/ve_dart.dart';
 
-import 'package:jidoujisho/main.dart';
+import 'package:jidoujisho/globals.dart';
 
 class SubtitleTextView extends StatelessWidget {
   final SubtitleStyle subtitleStyle;
@@ -61,7 +60,7 @@ class SubtitleTextView extends StatelessWidget {
       builder: (context, state) {
         if (state is LoadedSubtitle) {
           return ValueListenableBuilder(
-            valueListenable: globalSelectMode,
+            valueListenable: gIsSelectMode,
             builder: (context, selectMode, widget) {
               if (selectMode) {
                 return Container(
@@ -116,7 +115,8 @@ class SubtitleTextView extends StatelessWidget {
                 processedSubtitles = state.subtitle.text.replaceAll('\n', '␜');
                 processedSubtitles = processedSubtitles.replaceAll(' ', '␝');
 
-                List<Word> words = parseVe(mecabTagger, processedSubtitles);
+                // ignore: omit_local_variable_types
+                List<Word> words = parseVe(gMecabTagger, processedSubtitles);
                 print(words);
 
                 List<List<Word>> lines =

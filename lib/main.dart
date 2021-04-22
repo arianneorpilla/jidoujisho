@@ -4,6 +4,7 @@ import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fuzzy/fuzzy.dart';
+
 import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:package_info/package_info.dart';
@@ -15,130 +16,38 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
+import 'package:jidoujisho/anki.dart';
+import 'package:jidoujisho/cache.dart';
+import 'package:jidoujisho/dictionary.dart';
+import 'package:jidoujisho/globals.dart';
 import 'package:jidoujisho/player.dart';
+import 'package:jidoujisho/preferences.dart';
 import 'package:jidoujisho/util.dart';
 
 typedef void ChannelCallback(String id, String name);
 typedef void SearchCallback(String term);
 
-String appDirPath;
-String previewImageDir;
-String previewAudioDir;
-
-String appName;
-String packageName;
-String version;
-String buildNumber;
-
-Mecab mecabTagger;
-
-List<DictionaryEntry> customDictionary;
-Fuzzy customDictionaryFuzzy;
-
-bool isGooglePlayLimited = false;
-
-SharedPreferences globalPrefs;
-ValueNotifier<bool> globalSelectMode;
-ValueNotifier<bool> globalResumable;
-
-AsyncMemoizer trendingCache = AsyncMemoizer();
-AsyncMemoizer channelCache = AsyncMemoizer();
-Map<String, AsyncMemoizer> searchCache = {};
-Map<String, AsyncMemoizer> captioningCache = {};
-Map<String, AsyncMemoizer> channelVideoCache = {};
-Map<String, AsyncMemoizer> playlistVideoCache = {};
-Map<String, AsyncMemoizer> metadataCache = {};
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIOverlays([]);
 
-  PackageInfo packageInfo = await PackageInfo.fromPlatform();
-  appName = packageInfo.appName;
-  packageName = packageInfo.packageName;
-  version = packageInfo.version;
-  buildNumber = packageInfo.buildNumber;
-
-  mecabTagger = Mecab();
-  await mecabTagger.init("assets/ipadic", true);
-
-  globalPrefs = await SharedPreferences.getInstance();
-
-  String lastPlayedPath = globalPrefs.getString("lastPlayedPath") ?? "-1";
-  globalResumable = ValueNotifier<bool>(lastPlayedPath != "-1");
-
-  bool selectMode = globalPrefs.getBool("selectMode") ?? false;
-  globalSelectMode = ValueNotifier<bool>(selectMode);
-
   await Permission.storage.request();
-  requestPermissions();
+  requestAnkiDroidPermissions();
 
-  Directory appDirDoc = await getApplicationDocumentsDirectory();
-  appDirPath = appDirDoc.path;
-  previewImageDir = appDirPath + "/exportImage.jpg";
-  previewAudioDir = appDirPath + "/exportAudio.mp3";
+  gAppDirPath = (await getApplicationDocumentsDirectory()).path;
+  gPackageInfo = await PackageInfo.fromPlatform();
 
-  customDictionary = importCustomDictionary();
-  customDictionaryFuzzy = Fuzzy(getAllImportedWords());
+  gMecabTagger = Mecab();
+  await gMecabTagger.init("assets/ipadic", true);
+
+  gSharedPrefs = await SharedPreferences.getInstance();
+  gIsResumable = ValueNotifier<bool>(getResumeAvailable());
+  gIsSelectMode = ValueNotifier<bool>(getSelectMode());
+
+  gCustomDictionary = importCustomDictionary();
+  gCustomDictionaryFuzzy = Fuzzy(getAllImportedWords());
 
   runApp(App());
-}
-
-fetchTrendingCache() {
-  return trendingCache.runOnce(() async {
-    return searchYouTubeTrendingVideos();
-  });
-}
-
-fetchChannelCache() {
-  return channelCache.runOnce(() async {
-    return getSubscribedChannels();
-  });
-}
-
-fetchSearchCache(String searchQuery) {
-  if (searchCache[searchQuery] == null) {
-    searchCache[searchQuery] = AsyncMemoizer();
-  }
-  return searchCache[searchQuery].runOnce(() async {
-    return searchYouTubeVideos(searchQuery);
-  });
-}
-
-fetchChannelVideoCache(String channelID) {
-  if (channelVideoCache[channelID] == null) {
-    channelVideoCache[channelID] = AsyncMemoizer();
-  }
-  return channelVideoCache[channelID].runOnce(() async {
-    return getLatestChannelVideos(channelID);
-  });
-}
-
-fetchPlaylistVideoCache(String playlistID) {
-  if (playlistVideoCache[playlistID] == null) {
-    playlistVideoCache[playlistID] = AsyncMemoizer();
-  }
-  return playlistVideoCache[playlistID].runOnce(() async {
-    return getLatestPlaylistVideos(playlistID);
-  });
-}
-
-fetchCaptioningCache(String videoID) {
-  if (captioningCache[videoID] == null) {
-    captioningCache[videoID] = AsyncMemoizer();
-  }
-  return captioningCache[videoID].runOnce(() async {
-    return checkYouTubeClosedCaptionAvailable(videoID);
-  });
-}
-
-fetchMetadataCache(String videoID, Video video) {
-  if (metadataCache[videoID] == null) {
-    metadataCache[videoID] = AsyncMemoizer();
-  }
-  return metadataCache[videoID].runOnce(() async {
-    return getPublishMetadata(video);
-  });
 }
 
 class App extends StatelessWidget {
@@ -167,24 +76,25 @@ class _HomeState extends State<Home> {
   TextEditingController _searchQueryController = TextEditingController();
   bool _isSearching = false;
   bool _isChannelView = false;
-  bool _isPlaylistView = false;
-  ValueNotifier<List<String>> _searchSuggestions =
-      ValueNotifier<List<String>>([]);
+
   String _searchQuery = "";
   int _selectedIndex = 0;
-  String leadingContext = "";
-
+  String _selectedChannelName = "";
+  ValueNotifier<List<String>> _searchSuggestions =
+      ValueNotifier<List<String>>([]);
   YoutubeExplode yt = YoutubeExplode();
 
-  void _onItemTapped(int index) {
+  void setStateFromResult() {
+    setState(() {});
+  }
+
+  void onItemTapped(int index) {
     setState(() {
-      if (index == 4) {
+      if (getNavigationBarItems()[index].label == "Library") {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => Player(
-              initialPosition: -1,
-            ),
+            builder: (context) => Player(),
           ),
         ).then((returnValue) {
           setState(() {
@@ -197,35 +107,72 @@ class _HomeState extends State<Home> {
         });
       } else {
         _selectedIndex = index;
-        if (_isSearching || _isChannelView || _isPlaylistView) {
+        if (_isSearching || _isChannelView) {
           _isSearching = false;
           _isChannelView = false;
-          _isPlaylistView = false;
           _searchQuery = "";
         }
       }
     });
   }
 
-  Widget _getWidgetOptions(int index) {
+  Widget getWidgetOptions(int index) {
     if (_isSearching) {
-      return _buildBody();
+      return buildBody();
     } else if (_isChannelView) {
-      return _buildChannels();
+      return buildChannels();
     }
 
-    switch (index) {
-      case 0:
-        return _buildBody();
-      case 1:
-        return _buildChannels();
-      case 2:
+    switch (getNavigationBarItems()[index].label) {
+      case "Trending":
+        return buildBody();
+      case "Channels":
+        return buildChannels();
+      case "History":
         return History();
-      case 3:
+      case "Clipboard":
         return ClipboardMenu();
       default:
-        return Text("Nothing");
+        return Container();
     }
+  }
+
+  List<BottomNavigationBarItem> getNavigationBarItems() {
+    List<BottomNavigationBarItem> items = [];
+
+    if (gIsYouTubeAllowed) {
+      items.addAll(
+        [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.whatshot_sharp),
+            label: 'Trending',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.subscriptions_sharp),
+            label: 'Channels',
+          ),
+        ],
+      );
+    }
+
+    items.addAll(
+      [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.history_sharp),
+          label: 'History',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.paste_sharp),
+          label: 'Clipboard',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.folder_sharp),
+          label: 'Library',
+        ),
+      ],
+    );
+
+    return items;
   }
 
   @override
@@ -241,9 +188,9 @@ class _HomeState extends State<Home> {
       child: new Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.black,
-          leading: _buildAppBarLeading(),
-          title: _buildAppBarTitleOrSearch(),
-          actions: _buildActions(),
+          leading: buildAppBarLeading(),
+          title: buildAppBarTitleOrSearch(),
+          actions: buildActions(),
         ),
         backgroundColor: Colors.black,
         bottomNavigationBar: BottomNavigationBar(
@@ -256,66 +203,21 @@ class _HomeState extends State<Home> {
           unselectedLabelStyle: TextStyle(color: Colors.grey),
           selectedLabelStyle: TextStyle(color: Colors.red),
           currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.whatshot_sharp),
-              label: 'Trending',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.subscriptions_sharp),
-              label: 'Channels',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.history_sharp),
-              label: 'History',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.paste_sharp),
-              label: 'Clipboard',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.folder_sharp),
-              label: 'Library',
-            ),
-          ],
+          onTap: onItemTapped,
+          items: getNavigationBarItems(),
         ),
         body: Center(
-          child: _getWidgetOptions(_selectedIndex),
+          child: getWidgetOptions(_selectedIndex),
         ),
-        // floatingActionButton: FloatingActionButton(
-        //   onPressed: () {
-        //     Navigator.push(
-        //       context,
-        //       MaterialPageRoute(
-        //         builder: (context) => Player(
-        //           initialPosition: -1,
-        //         ),
-        //       ),
-        //     ).then((returnValue) {
-        //       setState(() {
-        //         SystemChrome.setPreferredOrientations([
-        //           DeviceOrientation.portraitUp,
-        //           DeviceOrientation.landscapeLeft,
-        //           DeviceOrientation.landscapeRight,
-        //         ]);
-        //       });
-        //     });
-        //   },
-        //   child: Icon(Icons.video_collection_sharp),
-        //   backgroundColor: Colors.red,
-        //   foregroundColor: Colors.white,
-        // ),
       ),
     );
   }
 
   Future<bool> _onWillPop() async {
-    if (_isSearching || _isChannelView || _isPlaylistView) {
+    if (_isSearching || _isChannelView) {
       setState(() {
         _isSearching = false;
         _isChannelView = false;
-        _isPlaylistView = false;
         _searchQuery = "";
         _searchSuggestions.value = [];
         _searchQueryController.clear();
@@ -326,14 +228,13 @@ class _HomeState extends State<Home> {
     return false;
   }
 
-  Widget _buildAppBarLeading() {
-    if (_isSearching || _isChannelView || _isPlaylistView) {
+  Widget buildAppBarLeading() {
+    if (_isSearching || _isChannelView) {
       return BackButton(
         onPressed: () {
           setState(() {
             _isSearching = false;
             _isChannelView = false;
-            _isPlaylistView = false;
             _searchQuery = "";
             _searchSuggestions.value = [];
             _searchQueryController.clear();
@@ -351,7 +252,7 @@ class _HomeState extends State<Home> {
     }
   }
 
-  Widget _buildAppBarTitleOrSearch() {
+  Widget buildAppBarTitleOrSearch() {
     if (_isSearching) {
       return TextField(
         cursorColor: Colors.red,
@@ -367,9 +268,9 @@ class _HomeState extends State<Home> {
         onChanged: (query) => updateSuggestions(query),
         onSubmitted: (query) => updateSearchQuery(query),
       );
-    } else if (_isChannelView || _isPlaylistView) {
+    } else if (_isChannelView) {
       return Text(
-        leadingContext,
+        _selectedChannelName,
         style: TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: 16,
@@ -384,7 +285,7 @@ class _HomeState extends State<Home> {
         children: [
           Text("jidoujisho"),
           Text(
-            " $version beta",
+            " ${gPackageInfo.version} beta",
             style: TextStyle(
               fontWeight: FontWeight.w200,
               fontSize: 12,
@@ -395,7 +296,7 @@ class _HomeState extends State<Home> {
     }
   }
 
-  Widget _buildChannels() {
+  Widget buildChannels() {
     Widget centerMessage(String text, IconData icon) {
       return Center(
         child: Column(
@@ -471,7 +372,7 @@ class _HomeState extends State<Home> {
                 itemCount: snapshot.data.length + 1,
                 itemBuilder: (BuildContext context, int index) {
                   if (index == 0) {
-                    return _buildNewChannelRow();
+                    return buildNewChannelRow();
                   }
 
                   Channel result = results[index - 1];
@@ -491,11 +392,7 @@ class _HomeState extends State<Home> {
     }
   }
 
-  void setStateFromResult() {
-    setState(() {});
-  }
-
-  Widget _buildNewChannelRow() {
+  Widget buildNewChannelRow() {
     String channelTitle = "List new channel";
 
     Widget displayThumbnail() {
@@ -594,7 +491,7 @@ class _HomeState extends State<Home> {
     setState(() {
       _isChannelView = true;
       _searchQuery = channelID;
-      leadingContext = channelName;
+      _selectedChannelName = channelName;
     });
   }
 
@@ -641,7 +538,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _buildBody() {
+  Widget buildBody() {
     Widget centerMessage(String text, IconData icon) {
       return Center(
         child: Column(
@@ -681,58 +578,6 @@ class _HomeState extends State<Home> {
       "Error getting videos",
       Icons.error,
     );
-    Widget featureLockedMessage = ColorFiltered(
-      child: Center(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.only(
-            left: 20,
-            right: 20,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              FadeInImage(
-                image: AssetImage("assets/icon/icon.png"),
-                placeholder: MemoryImage(kTransparentImage),
-                height: 72,
-                fit: BoxFit.fitHeight,
-              ),
-              const SizedBox(height: 6),
-              Text(
-                "A video player for language learners",
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 20,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                "GETTING STARTED\n📲 Play a local media file with the lower right button to get started\n" +
-                    "⏯️  Select subtitles by simply holding and drag to change selection\n" +
-                    "📋 When the dictionary definition for the text shows up, the text is the current context\n" +
-                    "📔 Closing the dictionary prompt will clear the clipboard\n" +
-                    "🗑️ The current context may be used to open browser links to third-party websites\n" +
-                    "🌐 You may swipe vertically to open the transcript, and you can pick a time or read subtitles\n" +
-                    "↔️ Swipe horizontally to repeat the current subtitle audio\n\n" +
-                    "EXPORTING TO ANKIDROID\n📤 You may also export the current context to an AnkiDroid card, including the current frame and audio\n" +
-                    "🔤 Having a word in the clipboard will include the sentence, word, meaning and reading in the export\n" +
-                    "📝 You may edit the sentence, word, meaning and reading text fields before sharing to AnkiDroid\n" +
-                    "🔗 To finalise the export, share the exported text to AnkiDroid\n" +
-                    "🃏 The front of the card will include the audio, video and sentence\n" +
-                    "🎴 The back of the card will include the reading, word and meaning\n" +
-                    "📑 You may apply text formatting to the card with the AnkiDroid editor once shared\n"
-                        "⚛️ Extensive customisation of the Anki export is planned",
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-      colorFilter: ColorFilter.mode(Colors.black, BlendMode.saturation),
-    );
 
     if (_isSearching &&
         _searchQuery == "" &&
@@ -746,10 +591,6 @@ class _HomeState extends State<Home> {
         _searchQuery == "" &&
         getSearchHistory().isEmpty) {
       return searchMessage;
-    }
-
-    if (isGooglePlayLimited) {
-      return featureLockedMessage;
     }
 
     return FutureBuilder(
@@ -771,7 +612,7 @@ class _HomeState extends State<Home> {
             break;
           default:
             if (!snapshot.hasData || snapshot.data.isEmpty) {
-              trendingCache = AsyncMemoizer();
+              gTrendingCache = AsyncMemoizer();
               return errorMessage;
             }
 
@@ -784,7 +625,7 @@ class _HomeState extends State<Home> {
 
                 return YouTubeResult(
                   result,
-                  captioningCache[result.id],
+                  gCaptioningCache[result.id],
                   fetchCaptioningCache(result.id.value),
                   (_isSearching)
                       ? fetchMetadataCache(result.id.value, result)
@@ -799,33 +640,36 @@ class _HomeState extends State<Home> {
     );
   }
 
-  _showPopupMenu(Offset offset) async {
+  showPopupMenu(Offset offset) async {
     double left = offset.dx;
     double top = offset.dy;
     String option = await showMenu(
       color: Colors.grey[900],
       context: context,
       position: RelativeRect.fromLTRB(left, top, 0, 0),
-      items: isGooglePlayLimited
-          ? [
-              PopupMenuItem<String>(
-                  child: const Text('View on GitHub'), value: 'View on GitHub'),
-              PopupMenuItem<String>(
-                  child: const Text('Report a bug'), value: 'Report a bug'),
-              PopupMenuItem<String>(
-                  child: const Text('About this app'), value: 'About this app'),
-            ]
-          : [
-              PopupMenuItem<String>(
-                  child: const Text('Enter YouTube URL'),
-                  value: 'Enter YouTube URL'),
-              PopupMenuItem<String>(
-                  child: const Text('View on GitHub'), value: 'View on GitHub'),
-              PopupMenuItem<String>(
-                  child: const Text('Report a bug'), value: 'Report a bug'),
-              PopupMenuItem<String>(
-                  child: const Text('About this app'), value: 'About this app'),
-            ],
+      items: [
+        PopupMenuItem<String>(
+          child: const Text('Enter YouTube URL'),
+          value: 'Enter YouTube URL',
+          enabled: gIsYouTubeAllowed,
+        ),
+        PopupMenuItem<String>(
+          child: const Text('View on GitHub'),
+          value: 'View on GitHub',
+        ),
+        PopupMenuItem<String>(
+          child: const Text('Report a bug'),
+          value: 'Report a bug',
+        ),
+        PopupMenuItem<String>(
+          child: const Text('Set AnkiDroid directory'),
+          value: 'Set AnkiDroid directory',
+        ),
+        PopupMenuItem<String>(
+          child: const Text('About this app'),
+          value: 'About this app',
+        ),
+      ],
       elevation: 8.0,
     );
 
@@ -854,16 +698,15 @@ class _HomeState extends State<Home> {
                 TextButton(
                   child: Text('OK', style: TextStyle(color: Colors.white)),
                   onPressed: () {
-                    String _webURL = _textFieldController.text;
+                    String webURL = _textFieldController.text;
 
                     try {
-                      if (YoutubePlayer.convertUrlToId(_webURL) != null) {
+                      if (YoutubePlayer.convertUrlToId(webURL) != null) {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => Player(
-                              url: _webURL,
-                              initialPosition: -1,
+                              url: webURL,
                             ),
                           ),
                         ).then((returnValue) {
@@ -875,9 +718,9 @@ class _HomeState extends State<Home> {
                             ]);
                           });
 
-                          globalPrefs.setString("lastPlayedPath", _webURL);
-                          globalPrefs.setInt("lastPlayedPosition", 0);
-                          globalResumable.value = true;
+                          setLastPlayedPath(webURL);
+                          setLastPlayedPosition(0);
+                          gIsResumable.value = getResumeAvailable();
                         });
                       }
                     } on Exception {
@@ -900,6 +743,48 @@ class _HomeState extends State<Home> {
       case "Report a bug":
         await launch("https://github.com/lrorpilla/jidoujisho/issues/new");
         break;
+      case "Set AnkiDroid directory":
+        String currentDirectoryPath = getAnkiDroidDirectory().path;
+        TextEditingController _textFieldController = TextEditingController(
+          text: currentDirectoryPath,
+        );
+
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.zero,
+              ),
+              content: TextField(
+                controller: _textFieldController,
+                decoration:
+                    InputDecoration(hintText: "storage/emulated/0/AnkiDroid"),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('CANCEL', style: TextStyle(color: Colors.white)),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                TextButton(
+                  child: Text('OK', style: TextStyle(color: Colors.white)),
+                  onPressed: () async {
+                    String newDirectoryPath = _textFieldController.text;
+                    Directory newDirectory = Directory(newDirectoryPath);
+
+                    if (newDirectory.existsSync()) {
+                      await setAnkiDroidDirectory(newDirectory);
+                      Navigator.pop(context);
+                    }
+                  },
+                ),
+              ],
+            );
+          },
+        );
+        break;
       case "About this app":
         const String legalese = "A video player for language learners.\n\n" +
             "Built for the Japanese language learning community by Leo " +
@@ -919,31 +804,29 @@ class _HomeState extends State<Home> {
               width: 48,
             ),
           ),
-          applicationVersion: version,
+          applicationVersion: gPackageInfo.version,
           applicationLegalese: legalese,
         );
         break;
     }
   }
 
-  Widget _buildResume() {
+  Widget buildResume() {
     return ValueListenableBuilder(
-      valueListenable: globalResumable,
+      valueListenable: gIsResumable,
       builder: (_, __, ___) {
-        if (globalResumable.value) {
+        if (gIsResumable.value) {
           return IconButton(
             icon: const Icon(Icons.update_sharp),
             onPressed: () async {
-              int lastPlayedPosition =
-                  globalPrefs.getInt("lastPlayedPosition") ?? 0;
-              String globalLastPlayedPath =
-                  globalPrefs.getString("lastPlayedPath") ?? "-1";
+              int lastPlayedPosition = getLastPlayedPosition();
+              String lastPlayedPath = getLastPlayedPath();
 
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => Player(
-                    url: globalLastPlayedPath,
+                    url: lastPlayedPath,
                     initialPosition: lastPlayedPosition,
                   ),
                 ),
@@ -957,9 +840,11 @@ class _HomeState extends State<Home> {
             },
           );
         } else {
-          return IconButton(
-            icon: Icon(
+          return Padding(
+            padding: EdgeInsets.all(8),
+            child: Icon(
               Icons.update_sharp,
+              size: 24,
               color: Colors.grey[800],
             ),
           );
@@ -968,10 +853,10 @@ class _HomeState extends State<Home> {
     );
   }
 
-  List<Widget> _buildActions() {
+  List<Widget> buildActions() {
     if (_isSearching) {
       return <Widget>[
-        _buildResume(),
+        buildResume(),
         IconButton(
           icon: const Icon(Icons.clear),
           onPressed: () {
@@ -982,7 +867,7 @@ class _HomeState extends State<Home> {
         GestureDetector(
           child: const Icon(Icons.more_vert),
           onTapDown: (TapDownDetails details) {
-            _showPopupMenu(details.globalPosition);
+            showPopupMenu(details.globalPosition);
           },
         ),
         const SizedBox(width: 12),
@@ -990,25 +875,25 @@ class _HomeState extends State<Home> {
     }
 
     return <Widget>[
-      _buildResume(),
-      isGooglePlayLimited
-          ? Container()
-          : IconButton(
+      buildResume(),
+      gIsYouTubeAllowed
+          ? IconButton(
               icon: const Icon(Icons.search),
-              onPressed: _startSearch,
-            ),
+              onPressed: startSearch,
+            )
+          : Container(),
       const SizedBox(width: 12),
       GestureDetector(
         child: const Icon(Icons.more_vert),
         onTapDown: (TapDownDetails details) {
-          _showPopupMenu(details.globalPosition);
+          showPopupMenu(details.globalPosition);
         },
       ),
       const SizedBox(width: 12),
     ];
   }
 
-  void _startSearch() {
+  void startSearch() {
     ModalRoute.of(context)
         .addLocalHistoryEntry(LocalHistoryEntry(onRemove: _stopSearching));
     _searchQuery = "";
@@ -1196,7 +1081,6 @@ class _YouTubeResultState extends State<YouTubeResult>
         MaterialPageRoute(
           builder: (context) => Player(
             url: videoStreamURL,
-            initialPosition: -1,
             video: result,
           ),
         ),
@@ -1207,9 +1091,9 @@ class _YouTubeResultState extends State<YouTubeResult>
           DeviceOrientation.landscapeRight,
         ]);
 
-        globalPrefs.setString("lastPlayedPath", videoStreamURL);
-        globalPrefs.setInt("lastPlayedPosition", 0);
-        globalResumable.value = true;
+        setLastPlayedPath(videoStreamURL);
+        setLastPlayedPosition(0);
+        gIsResumable.value = getResumeAvailable();
       });
     }
 
@@ -1812,7 +1696,6 @@ class _HistoryResultState extends State<HistoryResult>
         MaterialPageRoute(
           builder: (context) => Player(
             url: history.url,
-            initialPosition: -1,
           ),
         ),
       ).then((returnValue) {
@@ -1822,9 +1705,9 @@ class _HistoryResultState extends State<HistoryResult>
           DeviceOrientation.landscapeRight,
         ]);
 
-        globalPrefs.setString("lastPlayedPath", history.url);
-        globalPrefs.setInt("lastPlayedPosition", 0);
-        globalResumable.value = true;
+        setLastPlayedPath(history.url);
+        setLastPlayedPosition(0);
+        gIsResumable.value = getResumeAvailable();
 
         stateCallback();
       });
@@ -1923,6 +1806,10 @@ class History extends StatefulWidget {
 }
 
 class _HistoryState extends State<History> {
+  void setStateFromResult() {
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     List<VideoHistory> histories = getVideoHistory().reversed.toList();
@@ -1973,10 +1860,6 @@ class _HistoryState extends State<History> {
         );
       },
     );
-  }
-
-  void setStateFromResult() {
-    setState(() {});
   }
 }
 
@@ -2140,11 +2023,11 @@ class _LazyResultsState extends State<LazyResults> {
           }
 
           Video result = verticalData[index];
-          // print("VIDEO LISTED: $result");
+          print("VIDEO LISTED: $result");
 
           return YouTubeResult(
             result,
-            captioningCache[result.id],
+            gCaptioningCache[result.id],
             fetchCaptioningCache(result.id.value),
             null,
             index,

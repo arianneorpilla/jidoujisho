@@ -15,9 +15,9 @@ dependencies:
     sdk: flutter
   flutter_ffmpeg:
   flutter_vlc_player:
+  intl:
   jidoujisho:
     path: ../
-  intl:
   path:
   path_provider:
   share:

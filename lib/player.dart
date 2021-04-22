@@ -4,8 +4,7 @@ import 'dart:io';
 import 'package:chewie/chewie.dart';
 import 'package:clipboard_monitor/clipboard_monitor.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
-// import 'package:file_picker/file_picker.dart';
-import 'package:gx_file_picker/gx_file_picker.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
@@ -20,11 +19,14 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:wakelock/wakelock.dart';
 
-import 'package:jidoujisho/main.dart';
+import 'package:jidoujisho/globals.dart';
+import 'package:jidoujisho/dictionary.dart';
+import 'package:jidoujisho/preferences.dart';
 import 'package:jidoujisho/util.dart';
+import 'package:jidoujisho/youtube.dart';
 
 class Player extends StatelessWidget {
-  Player({this.url, this.initialPosition, this.video});
+  Player({this.url, this.initialPosition = -1, this.video});
 
   final int initialPosition;
   final String url;
@@ -42,51 +44,6 @@ class Player extends StatelessWidget {
       return localPlayer(context, url, initialPosition);
     }
   }
-
-  // Widget localPlayer() {
-  //   return new FutureBuilder(
-  //     future: FilePicker.platform.pickFiles(
-  //       type: Platform.isIOS ? FileType.any : FileType.video,
-  //       allowMultiple: false,
-  //       allowCompression: false,
-  //     ),
-  //     builder:
-  //         (BuildContext context, AsyncSnapshot<FilePickerResult> snapshot) {
-  //       switch (snapshot.connectionState) {
-  //         case ConnectionState.waiting:
-  //           return loadingCircle();
-  //         default:
-  //           if (snapshot.hasData) {
-  //             File videoFile = File(snapshot.data.files.single.path);
-  //             print("VIDEO FILE: ${videoFile.path}");
-
-  //             return FutureBuilder(
-  //               future: extractSubtitles(videoFile),
-  //               builder:
-  //                   (BuildContext context, AsyncSnapshot<List<File>> snapshot) {
-  //                 switch (snapshot.connectionState) {
-  //                   case ConnectionState.waiting:
-  //                     return loadingCircle();
-  //                   default:
-  //                     List<File> internalSubs = snapshot.data;
-  //                     String defaultSubtitles =
-  //                         getDefaultSubtitles(videoFile, internalSubs);
-
-  //                     return VideoPlayer(
-  //                       videoFile: videoFile,
-  //                       internalSubs: internalSubs,
-  //                       defaultSubtitles: defaultSubtitles,
-  //                     );
-  //                 }
-  //               },
-  //             );
-  //           }
-  //           Navigator.pop(context);
-  //           return Container();
-  //       }
-  //     },
-  //   );
-  // }
 
   Widget localPlayer(BuildContext context, String url, int initialPosition) {
     if (url != null) {
@@ -142,9 +99,9 @@ class Player extends StatelessWidget {
             String defaultSubtitles =
                 getDefaultSubtitles(videoFile, internalSubs);
 
-            globalPrefs.setString("lastPlayedPath", videoFile.path);
-            globalPrefs.setInt("lastPlayedPosition", 0);
-            globalResumable.value = true;
+            setLastPlayedPath(videoFile.path);
+            setLastPlayedPosition(0);
+            gIsResumable.value = getResumeAvailable();
 
             SystemChrome.setPreferredOrientations([
               DeviceOrientation.landscapeLeft,
@@ -312,6 +269,32 @@ class _VideoPlayerState extends State<VideoPlayer> {
         Duration(seconds: 1), (Timer t) => updateDurationOrSeek());
   }
 
+  void startClipboardMonitor() {
+    ClipboardMonitor.registerCallback(onClipboardText);
+  }
+
+  void stopClipboardMonitor() {
+    ClipboardMonitor.unregisterCallback(onClipboardText);
+  }
+
+  void onClipboardText(String text) {
+    _volatileText = text;
+
+    Future.delayed(
+        text.length == 1
+            ? Duration(milliseconds: 1000)
+            : Duration(milliseconds: 500), () {
+      if (_volatileText == text) {
+        print("CLIPBOARD CHANGED: $text");
+        _clipboard.value = text;
+      }
+    });
+  }
+
+  void stopAllClipboardMonitoring() {
+    ClipboardMonitor.unregisterAllCallbacks();
+  }
+
   void updateDurationOrSeek() {
     if (getVideoPlayerController().value.isInitialized &&
         this.videoFile == null &&
@@ -323,8 +306,8 @@ class _VideoPlayerState extends State<VideoPlayer> {
           getLastPlayedQuality(streamData.videoQualities);
     }
 
-    globalPrefs.setInt("lastPlayedPosition",
-        getVideoPlayerController().value.position.inSeconds ?? 0);
+    int inSeconds = getVideoPlayerController().value.position.inSeconds ?? 0;
+    setLastPlayedPosition(inSeconds);
 
     if (initialPosition != -1 &&
         getVideoPlayerController().value.isInitialized) {
@@ -575,27 +558,6 @@ class _VideoPlayerState extends State<VideoPlayer> {
     }
   }
 
-  // void playExternalSubtitles() async {
-  //   FilePickerResult result = await FilePicker.platform.pickFiles(
-  //     type: FileType.any,
-  //     allowMultiple: false,
-  //   );
-
-  //   if (result != null) {
-  //     File subFile = File(result.files.single.path);
-  //     if (subFile.path.endsWith("srt")) {
-  //       getSubtitleWrapper()
-  //           .subtitleController
-  //           .updateSubtitleContent(content: subFile.readAsStringSync());
-  //       print("SUBTITLES SWITCHED TO EXTERNAL SRT");
-  //     } else {
-  //       getSubtitleWrapper().subtitleController.updateSubtitleContent(
-  //           content: await extractNonSrtSubtitles(subFile));
-  //       print("SUBTITLES SWITCHED TO EXTERNAL ASS");
-  //     }
-  //   }
-  // }
-
   void playExternalSubtitles() async {
     _subTitleController.subtitleType = SubtitleType.srt;
 
@@ -761,7 +723,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   Widget buildDictionaryNoMatch(String clipboard) {
     String lookupText;
-    if (globalSelectMode.value) {
+    if (gIsSelectMode.value) {
       lookupText = "No matches for \"$clipboard\" could be queried.";
     } else {
       lookupText = "No matches for the selection could be queried.";
@@ -799,119 +761,120 @@ class _VideoPlayerState extends State<VideoPlayer> {
     ValueNotifier<int> selectedIndex = ValueNotifier<int>(0);
 
     return ValueListenableBuilder(
-        valueListenable: selectedIndex,
-        builder: (BuildContext context, int _, Widget widget) {
-          _currentDictionaryEntry.value = results[selectedIndex.value];
-          addDictionaryEntryToHistory(_currentDictionaryEntry.value);
+      valueListenable: selectedIndex,
+      builder: (BuildContext context, int _, Widget widget) {
+        _currentDictionaryEntry.value = results[selectedIndex.value];
+        addDictionaryEntryToHistory(_currentDictionaryEntry.value);
 
-          return Container(
-            padding: EdgeInsets.all(16.0),
-            alignment: Alignment.topCenter,
-            child: GestureDetector(
-              onTap: () {
-                _clipboard.value = "";
-                _currentDictionaryEntry.value = DictionaryEntry(
-                  word: "",
-                  reading: "",
-                  meaning: "",
-                );
-              },
-              onHorizontalDragEnd: (details) {
-                if (details.primaryVelocity == 0) return;
+        return Container(
+          padding: EdgeInsets.all(16.0),
+          alignment: Alignment.topCenter,
+          child: GestureDetector(
+            onTap: () {
+              _clipboard.value = "";
+              _currentDictionaryEntry.value = DictionaryEntry(
+                word: "",
+                reading: "",
+                meaning: "",
+              );
+            },
+            onHorizontalDragEnd: (details) {
+              if (details.primaryVelocity == 0) return;
 
-                if (details.primaryVelocity.compareTo(0) == -1) {
-                  if (selectedIndex.value == results.length - 1) {
-                    selectedIndex.value = 0;
-                  } else {
-                    selectedIndex.value += 1;
-                  }
+              if (details.primaryVelocity.compareTo(0) == -1) {
+                if (selectedIndex.value == results.length - 1) {
+                  selectedIndex.value = 0;
                 } else {
-                  if (selectedIndex.value == 0) {
-                    selectedIndex.value = results.length - 1;
-                  } else {
-                    selectedIndex.value -= 1;
-                  }
+                  selectedIndex.value += 1;
                 }
-              },
-              child: Container(
-                padding: EdgeInsets.all(16),
-                margin: EdgeInsets.only(bottom: 84),
-                color: Colors.grey[800].withOpacity(0.6),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      results[selectedIndex.value].word,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
+              } else {
+                if (selectedIndex.value == 0) {
+                  selectedIndex.value = results.length - 1;
+                } else {
+                  selectedIndex.value -= 1;
+                }
+              }
+            },
+            child: Container(
+              padding: EdgeInsets.all(16),
+              margin: EdgeInsets.only(bottom: 84),
+              color: Colors.grey[800].withOpacity(0.6),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    results[selectedIndex.value].word,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
                     ),
-                    Text(results[selectedIndex.value].reading),
-                    Flexible(
-                      child: SingleChildScrollView(
-                        child:
-                            Text("\n${results[selectedIndex.value].meaning}\n"),
-                      ),
+                  ),
+                  Text(results[selectedIndex.value].reading),
+                  Flexible(
+                    child: SingleChildScrollView(
+                      child:
+                          Text("\n${results[selectedIndex.value].meaning}\n"),
                     ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Showing search result ",
-                          style: TextStyle(
-                            fontSize: 11,
-                          ),
-                          textAlign: TextAlign.center,
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Showing search result ",
+                        style: TextStyle(
+                          fontSize: 11,
                         ),
-                        Text(
-                          "${selectedIndex.value + 1} ",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 11,
-                          ),
-                          textAlign: TextAlign.center,
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        "${selectedIndex.value + 1} ",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
                         ),
-                        Text(
-                          "out of ",
-                          style: TextStyle(
-                            fontSize: 11,
-                          ),
-                          textAlign: TextAlign.center,
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        "out of ",
+                        style: TextStyle(
+                          fontSize: 11,
                         ),
-                        Text(
-                          "${results.length} ",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 11,
-                          ),
-                          textAlign: TextAlign.center,
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        "${results.length} ",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
                         ),
-                        Text(
-                          "found for",
-                          style: TextStyle(
-                            fontSize: 11,
-                          ),
-                          textAlign: TextAlign.center,
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        "found for",
+                        style: TextStyle(
+                          fontSize: 11,
                         ),
-                        Text(
-                          "『${results[selectedIndex.value].searchTerm}』",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 11,
-                          ),
-                          textAlign: TextAlign.center,
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        "『${results[selectedIndex.value].searchTerm}』",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
                         ),
-                      ],
-                    )
-                  ],
-                ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  )
+                ],
               ),
             ),
-          );
-        });
+          ),
+        );
+      },
+    );
   }
 
   Widget buildDictionary() {
@@ -984,7 +947,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   void playAutoGeneratedSubtitles() async {
     _clipboard.value = "&<&>autogendependencies&<&>";
-    await initialiseYouTubeDL();
+    await installYouTubeDLDependencies();
 
     _clipboard.value = "&<&>autogen&<&>";
 
@@ -1021,32 +984,6 @@ class _VideoPlayerState extends State<VideoPlayer> {
     _clipboard.value = "";
     // This is really not good, define this properly.
     _currentSubTrack.value = -51;
-  }
-
-  void startClipboardMonitor() {
-    ClipboardMonitor.registerCallback(onClipboardText);
-  }
-
-  void stopClipboardMonitor() {
-    ClipboardMonitor.unregisterCallback(onClipboardText);
-  }
-
-  void onClipboardText(String text) {
-    _volatileText = text;
-
-    Future.delayed(
-        text.length == 1
-            ? Duration(milliseconds: 1000)
-            : Duration(milliseconds: 500), () {
-      if (_volatileText == text) {
-        print("CLIPBOARD CHANGED: $text");
-        _clipboard.value = text;
-      }
-    });
-  }
-
-  void stopAllClipboardMonitoring() {
-    ClipboardMonitor.unregisterAllCallbacks();
   }
 
   void openTranscript(List<dynamic> subtitles) async {

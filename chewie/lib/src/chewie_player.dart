@@ -7,9 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
-import 'package:jidoujisho/util.dart';
 import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
 import 'package:wakelock/wakelock.dart';
+
+import 'package:jidoujisho/dictionary.dart';
+import 'package:jidoujisho/youtube.dart';
 
 typedef ChewieRoutePageBuilder = Widget Function(
   BuildContext context,

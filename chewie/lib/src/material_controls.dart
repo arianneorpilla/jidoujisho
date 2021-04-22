@@ -6,13 +6,16 @@ import 'package:chewie/src/material_progress_bar.dart';
 import 'package:chewie/src/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
-import 'package:jidoujisho/main.dart';
+
 import 'package:share/share.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:jidoujisho/util.dart';
+import 'package:jidoujisho/anki.dart';
+import 'package:jidoujisho/dictionary.dart';
+import 'package:jidoujisho/globals.dart';
+import 'package:jidoujisho/preferences.dart';
+import 'package:jidoujisho/youtube.dart';
 
 class MaterialControls extends StatefulWidget {
   const MaterialControls({Key key}) : super(key: key);
@@ -261,9 +264,10 @@ class _MaterialControlsState extends State<MaterialControls>
             "Translate Current Subtitle with DeepL",
             "Translate Current Subtitle with Google Translate",
             "Share Current Subtitle to App",
-            globalSelectMode.value
-                ? "Use Tap to Select Subtitle Selection"
-                : "Use Drag to Select Subtitle Selection",
+            if (gIsSelectMode.value)
+              "Use Tap to Select Subtitle Selection"
+            else
+              "Use Drag to Select Subtitle Selection",
             "Load External Subtitles",
             "Export Current Context to Anki",
           ], icons: [
@@ -271,9 +275,10 @@ class _MaterialControlsState extends State<MaterialControls>
             Icons.translate_rounded,
             Icons.g_translate_rounded,
             Icons.share_outlined,
-            globalSelectMode.value
-                ? Icons.touch_app_rounded
-                : Icons.select_all_rounded,
+            if (gIsSelectMode.value)
+              Icons.touch_app_rounded
+            else
+              Icons.select_all_rounded,
             Icons.subtitles_outlined,
             Icons.mobile_screen_share_rounded,
           ]),
@@ -297,11 +302,8 @@ class _MaterialControlsState extends State<MaterialControls>
             Share.share(subtitleText);
             break;
           case 4:
-            globalSelectMode.value = !globalSelectMode.value;
-
-            final SharedPreferences prefs =
-                await SharedPreferences.getInstance();
-            prefs.setBool("selectMode", globalSelectMode.value);
+            toggleSelectMode();
+            gIsSelectMode.value = getSelectMode();
             break;
           case 5:
             chewieController.playExternalSubtitles();
@@ -355,7 +357,7 @@ class _MaterialControlsState extends State<MaterialControls>
         _hideTimer?.cancel();
 
         final List<String> qualityTags = [];
-        for (YouTubeQualityOption quality
+        for (final YouTubeQualityOption quality
             in chewieController.streamData.videoQualities) {
           qualityTags.add(quality.videoResolution);
         }
@@ -368,9 +370,9 @@ class _MaterialControlsState extends State<MaterialControls>
         );
 
         if (chosenOption != null) {
-          await globalPrefs.setString(
+          await gSharedPrefs.setString(
               "lastPlayedQuality", qualityTags[chosenOption]);
-          Duration position = await controller.getPosition();
+          final Duration position = await controller.getPosition();
 
           chewieController.currentVideoQuality =
               chewieController.streamData.videoQualities[chosenOption];
@@ -708,7 +710,7 @@ class _SelectQualityDialog extends StatelessWidget {
       shrinkWrap: true,
       physics: const ScrollPhysics(),
       itemBuilder: (context, index) {
-        String qualityTag = qualityTags[index];
+        final String qualityTag = qualityTags[index];
         return ListTile(
           dense: true,
           title: Row(

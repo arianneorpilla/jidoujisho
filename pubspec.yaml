@@ -19,8 +19,7 @@ dependencies:
   device_info:
   ext_storage:
   external_app_launcher:
-  #file_picker:
-  gx_file_picker:
+  file_picker: 1.13.3
   flutter_ffmpeg:
   flutter_vlc_player: ^5.0.5
   flutter_youtube_dl:
