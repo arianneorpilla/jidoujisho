@@ -269,12 +269,12 @@ YouTubeQualityOption getLastPlayedQuality(
     }
     // In this case, we know that they have set a quality that doesn't exist,
     // maybe it's a low quality video -- so we take the best quality.
-    return qualities.last;
+    return qualities.lastWhere((element) => element.muxed) ?? qualities.last;
   } else {
     // We don't know if we could abuse their mobile data,
     // let's try the average.
-    return qualities
-            .firstWhere((element) => element.videoResolution == "360p") ??
+    return qualities.firstWhere(
+            (element) => element.videoResolution == "360p" || element.muxed) ??
         qualities.first;
   }
 }

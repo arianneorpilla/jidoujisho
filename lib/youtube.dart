@@ -19,10 +19,12 @@ import 'package:jidoujisho/util.dart';
 class YouTubeQualityOption {
   final String videoURL;
   final String videoResolution;
+  final bool muxed;
 
   YouTubeQualityOption({
     this.videoURL,
     this.videoResolution,
+    this.muxed,
   });
 }
 
@@ -96,6 +98,27 @@ Future<YouTubeMux> getPlayerYouTubeInfo(String webURL) async {
     List<YouTubeQualityOption> videoQualities = [];
     List<String> videoResolutions = [];
 
+    for (var stream in streamManifest.muxed.sortByBitrate()) {
+      String resolutionLabel = stream.videoQualityLabel;
+      if (!stream.videoQualityLabel.contains("p")) {
+        resolutionLabel = stream.videoQualityLabel + "p";
+      }
+      if (stream.videoQualityLabel.contains("p60")) {
+        resolutionLabel = stream.videoQualityLabel.replaceAll("p60", "p");
+      }
+
+      if (!videoResolutions.contains(resolutionLabel)) {
+        videoQualities.add(
+          YouTubeQualityOption(
+            videoURL: stream.url.toString(),
+            videoResolution: resolutionLabel,
+            muxed: true,
+          ),
+        );
+        videoResolutions.add(resolutionLabel);
+      }
+    }
+
     for (var stream in streamManifest.videoOnly.sortByBitrate()) {
       String resolutionLabel = stream.videoQualityLabel;
       if (!stream.videoQualityLabel.contains("p")) {
@@ -110,11 +133,21 @@ Future<YouTubeMux> getPlayerYouTubeInfo(String webURL) async {
           YouTubeQualityOption(
             videoURL: stream.url.toString(),
             videoResolution: resolutionLabel,
+            muxed: false,
           ),
         );
         videoResolutions.add(resolutionLabel);
       }
     }
+
+    videoQualities.sort((a, b) {
+      int aHeight = int.parse(
+          a.videoResolution.substring(0, a.videoResolution.length - 1));
+      int bHeight = int.parse(
+          b.videoResolution.substring(0, b.videoResolution.length - 1));
+
+      return aHeight.compareTo(bHeight);
+    });
 
     AudioStreamInfo streamAudioInfo =
         streamManifest.audioOnly.sortByBitrate().last;

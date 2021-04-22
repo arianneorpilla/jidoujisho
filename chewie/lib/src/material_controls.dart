@@ -359,7 +359,15 @@ class _MaterialControlsState extends State<MaterialControls>
         final List<String> qualityTags = [];
         for (final YouTubeQualityOption quality
             in chewieController.streamData.videoQualities) {
-          qualityTags.add(quality.videoResolution);
+          String muxTag;
+
+          if (quality.muxed) {
+            muxTag = "(seek-friendly)";
+          } else {
+            muxTag = "";
+          }
+
+          qualityTags.add("${quality.videoResolution} $muxTag");
         }
 
         final chosenOption = await showModalBottomSheet<int>(
@@ -374,10 +382,17 @@ class _MaterialControlsState extends State<MaterialControls>
               "lastPlayedQuality", qualityTags[chosenOption]);
           final Duration position = await controller.getPosition();
 
-          chewieController.currentVideoQuality =
+          final YouTubeQualityOption chosenQuality =
               chewieController.streamData.videoQualities[chosenOption];
+
+          chewieController.currentVideoQuality = chosenQuality;
+
           await controller.setMediaFromNetwork(chewieController
               .streamData.videoQualities[chosenOption].videoURL);
+          if (!chosenQuality.muxed) {
+            await controller
+                .addAudioFromNetwork(chewieController.streamData.audioURL);
+          }
 
           await controller.seekTo(position);
         }
