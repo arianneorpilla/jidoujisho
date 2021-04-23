@@ -113,6 +113,7 @@ A primer on the basics of the application is as follows.
 * 🎴 The **back of the card** will include the **reading, word and meaning**
 * 📑 You may apply **text formatting to the card with the AnkiDroid editor once exported**
 * ⚛️ **Customisation of the Anki export** is possible by changing the default template in AnkiDroid 
+* 🔄 Once in AnkiDroid, **cards may be synced to AnkiWeb**, use *Check Media* to include all exported media 
 
 ### 🙌 Advanced User Tips
 
