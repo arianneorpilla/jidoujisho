@@ -194,6 +194,10 @@ Future<List<Video>> searchYouTubeTrendingVideos() {
 }
 
 FutureOr<List<Channel>> getSubscribedChannels() async {
+  if (getChannelCache().isNotEmpty) {
+    return getChannelCache();
+  }
+
   List<String> channelIDs = getChannelList();
   YoutubeExplode yt = YoutubeExplode();
 
@@ -204,6 +208,8 @@ FutureOr<List<Channel>> getSubscribedChannels() async {
   List<Channel> channels = await Future.wait(futureChannels);
   channels
       .sort(((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase())));
+
+  setChannelCache(channels);
 
   return channels;
 }

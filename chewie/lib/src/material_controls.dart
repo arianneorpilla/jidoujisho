@@ -268,6 +268,7 @@ class _MaterialControlsState extends State<MaterialControls>
               "Use Tap to Select Subtitle Selection"
             else
               "Use Drag to Select Subtitle Selection",
+            "Adjust Subtitle Delay",
             "Load External Subtitles",
             "Export Current Context to Anki",
           ], icons: [
@@ -279,6 +280,7 @@ class _MaterialControlsState extends State<MaterialControls>
               Icons.touch_app_rounded
             else
               Icons.select_all_rounded,
+            Icons.timer_sharp,
             Icons.subtitles_outlined,
             Icons.mobile_screen_share_rounded,
           ]),
@@ -306,9 +308,13 @@ class _MaterialControlsState extends State<MaterialControls>
             gIsSelectMode.value = getSelectMode();
             break;
           case 5:
-            chewieController.playExternalSubtitles();
+            controller.pause();
+            chewieController.retimeSubtitles();
             break;
           case 6:
+            chewieController.playExternalSubtitles();
+            break;
+          case 7:
             final bool wasPlaying = await controller.isPlaying();
             controller.pause();
 
@@ -525,14 +531,16 @@ class _MaterialControlsState extends State<MaterialControls>
         ? _latestValue.duration
         : Duration.zero;
 
-    return Padding(
-      padding: const EdgeInsets.only(right: 24.0),
-      child: Text(
-        duration != Duration.zero
-            ? '${formatDuration(position)} / ${formatDuration(duration)}'
-            : '',
-        style: const TextStyle(
-          fontSize: 14.0,
+    return GestureDetector(
+      child: Padding(
+        padding: const EdgeInsets.only(right: 24.0),
+        child: Text(
+          duration != Duration.zero
+              ? '${formatDuration(position)} / ${formatDuration(duration)}'
+              : '',
+          style: const TextStyle(
+            fontSize: 14.0,
+          ),
         ),
       ),
     );

@@ -28,6 +28,7 @@ Future<void> addNewChannel(String videoURL) async {
       (jsonDecode(prefsChannels) as List<dynamic>).cast<String>();
 
   gChannelCache = AsyncMemoizer();
+  setChannelCache([]);
   if (!channelIDs.contains(channelID)) {
     channelIDs.add(channelID);
   }
@@ -42,12 +43,51 @@ Future<void> removeChannel(Channel channel) async {
       (jsonDecode(prefsChannels) as List<dynamic>).cast<String>();
 
   gChannelCache = AsyncMemoizer();
+  setChannelCache([]);
   channelIDs.remove(channelID);
   await gSharedPrefs.setString('subscribedChannels', jsonEncode(channelIDs));
 }
 
 Future<void> setChannelList(List<String> channelIDs) async {
   await gSharedPrefs.setString('subscribedChannels', jsonEncode(channelIDs));
+}
+
+Map<String, dynamic> channelToMap(Channel channel) {
+  return {
+    "id": channel.id.value,
+    "title": channel.title,
+    "logoUrl": channel.logoUrl,
+  };
+}
+
+Channel mapToChannel(Map<String, dynamic> map) {
+  ChannelId id = ChannelId.fromString(map['id']);
+  String title = map['title'];
+  String logoUrl = map['logoUrl'];
+
+  return Channel(id, title, logoUrl);
+}
+
+Future<void> setChannelCache(List<Channel> channels) async {
+  List<Map<String, dynamic>> maps = [];
+  channels.forEach((channel) {
+    maps.add(channelToMap(channel));
+  });
+
+  await gSharedPrefs.setString('channelCache', jsonEncode(maps));
+}
+
+List<Channel> getChannelCache() {
+  String prefsChannelCache = gSharedPrefs.getString('channelCache') ?? '[]';
+  List<dynamic> maps = (jsonDecode(prefsChannelCache) as List<dynamic>);
+
+  List<Channel> channels = [];
+  maps.forEach((map) {
+    Channel channel = mapToChannel(map);
+    channels.add(channel);
+  });
+
+  return channels;
 }
 
 List<String> getSearchHistory() {

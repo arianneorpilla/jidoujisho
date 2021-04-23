@@ -783,6 +783,7 @@ class _HomeState extends State<Home> {
                           .removeWhere((channelID) => channelID.isEmpty);
                       await setChannelList(newChannelIDs);
                       gChannelCache = AsyncMemoizer();
+                      setChannelCache([]);
 
                       setStateFromResult();
                       Navigator.pop(context);
@@ -847,7 +848,7 @@ class _HomeState extends State<Home> {
             "Built for the Japanese language learning community by Leo Rafael Orpilla. " +
             "Word definitions queried from Jisho.org. Logo by Aaron Marbella.\n\n" +
             "jidoujisho is free and open source software. Liking the application? " +
-            "Help out by providing feedback, makinfg a donation, reporting issues or collaborating " +
+            "Help out by providing feedback, making a donation, reporting issues or collaborating " +
             "for further improvements on GitHub.";
 
         showLicensePage(

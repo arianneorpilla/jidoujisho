@@ -19,6 +19,7 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:wakelock/wakelock.dart';
 
+import 'package:jidoujisho/anki.dart';
 import 'package:jidoujisho/globals.dart';
 import 'package:jidoujisho/dictionary.dart';
 import 'package:jidoujisho/preferences.dart';
@@ -486,6 +487,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       currentSubtitle: _currentSubtitle,
       currentSubTrack: _currentSubTrack,
       playExternalSubtitles: playExternalSubtitles,
+      retimeSubtitles: retimeSubtitles,
       streamData: streamData,
       aspectRatio: getVideoPlayerController().value.aspectRatio,
       autoPlay: true,
@@ -510,6 +512,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       showSubtitles: true,
       subtitleDecoder: SubtitleDecoder.utf8,
       subtitleType: SubtitleType.srt,
+      subtitlesOffset: 0,
     );
 
     return _subTitleController;
@@ -577,6 +580,69 @@ class _VideoPlayerState extends State<VideoPlayer> {
         print("SUBTITLES SWITCHED TO EXTERNAL ASS");
       }
     }
+  }
+
+  void retimeSubtitles() async {
+    TextEditingController _textFieldController = TextEditingController(
+        text: getSubtitleController().subtitlesOffset.toString());
+
+    void setSubtitleOffset() {
+      String offsetText = _textFieldController.text;
+      int newOffset = int.tryParse(offsetText);
+
+      if (newOffset != null) {
+        getSubtitleController().subtitlesOffset = newOffset;
+        getSubtitleController().updateSubtitleContent(
+            content: getSubtitleController().subtitlesContent);
+
+        Navigator.pop(context);
+      }
+    }
+
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.zero,
+            ),
+            content: SingleChildScrollView(
+              physics: NeverScrollableScrollPhysics(),
+              child: Container(
+                width: MediaQuery.of(context).size.width * (1 / 3),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: _textFieldController,
+                      keyboardType: TextInputType.numberWithOptions(
+                        signed: true,
+                        decimal: false,
+                      ),
+                      maxLines: 1,
+                      decoration: InputDecoration(
+                          hintText: "Enter subtitle delay", suffixText: " ms"),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text('CANCEL', style: TextStyle(color: Colors.white)),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              TextButton(
+                child: Text('SET DELAY', style: TextStyle(color: Colors.white)),
+                onPressed: () {
+                  setSubtitleOffset();
+                },
+              ),
+            ],
+          );
+        });
   }
 
   Widget buildDictionaryLoading(String clipboard) {
@@ -1011,6 +1077,9 @@ class _VideoPlayerState extends State<VideoPlayer> {
         subtitles,
         itemScrollController,
         itemPositionsListener,
+        getChewieController(),
+        getVideoPlayerController(),
+        _currentDictionaryEntry.value,
       ),
     );
   }
@@ -1019,7 +1088,10 @@ class _VideoPlayerState extends State<VideoPlayer> {
       int i,
       List<dynamic> subtitles,
       ItemScrollController itemScrollController,
-      ItemPositionsListener itemPositionsListener) {
+      ItemPositionsListener itemPositionsListener,
+      ChewieController chewie,
+      VlcPlayerController controller,
+      DictionaryEntry currentDictionaryEntry) {
     if (subtitles.isEmpty) {
       return Center(
         child: Column(
@@ -1049,45 +1121,82 @@ class _VideoPlayerState extends State<VideoPlayer> {
         String subtitleEnd = getTimestampFromDuration(subtitle.endTime);
         String subtitleDuration = "$subtitleStart - $subtitleEnd";
 
+        int endSubtitleIndex;
+
         return ListTile(
-          selected: i == index,
-          selectedTileColor: Colors.red.withOpacity(0.15),
-          dense: true,
-          title: Column(
-            children: [
-              const SizedBox(height: 6),
-              Row(
-                children: [
-                  Icon(
-                    Icons.textsms_outlined,
-                    size: 12.0,
-                    color: Colors.red,
-                  ),
-                  const SizedBox(width: 16.0),
-                  Text(
-                    subtitleDuration,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey,
+            selected: (endSubtitleIndex == null)
+                ? i == index
+                : i <= index && i >= endSubtitleIndex,
+            selectedTileColor: Colors.red.withOpacity(0.15),
+            dense: true,
+            title: Column(
+              children: [
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.textsms_outlined,
+                      size: 12.0,
+                      color: Colors.red,
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Text(
-                subtitleText,
-                style: TextStyle(fontSize: 20, color: Colors.white),
-              ),
-              const SizedBox(height: 6),
-            ],
-          ),
-          onTap: () {
-            Navigator.pop(context);
-            _videoPlayerController.seekTo(subtitles[index].startTime);
-            _videoPlayerController.play();
-          },
-        );
+                    const SizedBox(width: 16.0),
+                    Text(
+                      subtitleDuration,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  subtitleText,
+                  style: TextStyle(fontSize: 20, color: Colors.white),
+                ),
+                const SizedBox(height: 6),
+              ],
+            ),
+            onTap: () {
+              Navigator.pop(context);
+              _videoPlayerController.seekTo(subtitles[index].startTime);
+              _videoPlayerController.play();
+            },
+            onLongPress: () {
+              if (i <= index) {
+                List<Subtitle> selectedSubtitles = [];
+                for (int subIndex = i; subIndex < index; subIndex++) {
+                  selectedSubtitles.add(subtitles[subIndex]);
+                }
+
+                String selectedText = "";
+                String removeLastNewline(String n) =>
+                    n = n.substring(0, n.length - 2);
+                selectedSubtitles.forEach(
+                    (subtitle) => selectedText += subtitle.text + "\n");
+                selectedText = removeLastNewline(selectedText);
+
+                Duration selectedStartTime = selectedSubtitles.first.startTime;
+                Duration selectedEndTime = selectedSubtitles.last.endTime;
+
+                Subtitle selectedSubtitle = Subtitle(
+                  text: selectedText,
+                  startTime: selectedStartTime,
+                  endTime: selectedEndTime,
+                );
+
+                exportToAnki(
+                  context,
+                  chewie,
+                  controller,
+                  chewie.clipboard,
+                  selectedSubtitle,
+                  currentDictionaryEntry,
+                  false,
+                );
+              }
+            });
       },
     );
   }

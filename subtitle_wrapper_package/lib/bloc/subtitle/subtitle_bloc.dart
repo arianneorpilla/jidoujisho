@@ -53,9 +53,11 @@ class SubtitleBloc extends Bloc<SubtitleEvent, SubtitleState> {
       var videoPlayerPosition = videoPlayerController.value.position;
       if (videoPlayerPosition != null) {
         for (var subtitleItem in subtitles.subtitles) {
-          if (videoPlayerPosition.inMilliseconds >
+          if (videoPlayerPosition.inMilliseconds -
+                      subtitleController.subtitlesOffset >
                   subtitleItem.startTime.inMilliseconds &&
-              videoPlayerPosition.inMilliseconds <
+              videoPlayerPosition.inMilliseconds -
+                      subtitleController.subtitlesOffset <
                   subtitleItem.endTime.inMilliseconds) {
             add(UpdateLoadedSubtitle(subtitle: subtitleItem));
             subtitleNotifier.value = subtitleItem;

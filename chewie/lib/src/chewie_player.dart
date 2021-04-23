@@ -219,6 +219,7 @@ class ChewieController extends ChangeNotifier {
     @required this.currentSubtitle,
     @required this.currentSubTrack,
     @required this.playExternalSubtitles,
+    @required this.retimeSubtitles,
     this.aspectRatio,
     this.autoInitialize = false,
     this.autoPlay = false,
@@ -260,6 +261,7 @@ class ChewieController extends ChangeNotifier {
   final ValueNotifier<DictionaryEntry> currentDictionaryEntry;
   final ValueNotifier<int> currentSubTrack;
   final VoidCallback playExternalSubtitles;
+  final VoidCallback retimeSubtitles;
   final YouTubeMux streamData;
 
   /// Initialize the Video on Startup. This will prep the video for playback.
