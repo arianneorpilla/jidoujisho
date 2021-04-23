@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:audio_service/audio_service.dart';
 import 'package:chewie/chewie.dart';
 import 'package:clipboard_monitor/clipboard_monitor.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
@@ -32,6 +33,15 @@ class Player extends StatelessWidget {
   final int initialPosition;
   final String url;
   final Video video;
+
+  void lockLandscape() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+
+    SystemChrome.setEnabledSystemUIOverlays([]);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,10 +114,7 @@ class Player extends StatelessWidget {
             setLastPlayedPosition(0);
             gIsResumable.value = getResumeAvailable();
 
-            SystemChrome.setPreferredOrientations([
-              DeviceOrientation.landscapeLeft,
-              DeviceOrientation.landscapeRight,
-            ]);
+            lockLandscape();
 
             VideoHistory history = VideoHistory(
               videoFile.path,
@@ -168,10 +175,7 @@ class Player extends StatelessWidget {
                       internalSubs = extractWebSubtitle(webSubtitles);
                     }
 
-                    SystemChrome.setPreferredOrientations([
-                      DeviceOrientation.landscapeLeft,
-                      DeviceOrientation.landscapeRight,
-                    ]);
+                    lockLandscape();
 
                     VideoHistory history = VideoHistory(
                       url,
@@ -260,6 +264,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
   String _volatileText = "";
   FocusNode _subtitleFocusNode = new FocusNode();
   bool networkNotSet = true;
+  ValueNotifier<bool> _wasPlaying = ValueNotifier<bool>(false);
 
   Timer timer;
 
@@ -268,6 +273,31 @@ class _VideoPlayerState extends State<VideoPlayer> {
     super.initState();
     timer = Timer.periodic(
         Duration(seconds: 1), (Timer t) => updateDurationOrSeek());
+  }
+
+  Future<void> playPause() async {
+    _wasPlaying.value = false;
+
+    if (getVideoPlayerController().value.isPlaying) {
+      await getVideoPlayerController().pause();
+    } else {
+      await getVideoPlayerController().play();
+    }
+  }
+
+  Future<void> rewindFastForward() async {
+    await getVideoPlayerController().seekTo(_currentSubtitle.value.startTime);
+  }
+
+  @override
+  void dispose() {
+    if (_videoPlayerController != null && _chewieController != null) {
+      _videoPlayerController?.stopRendererScanning();
+      _videoPlayerController?.dispose();
+      _chewieController?.dispose();
+    }
+    timer.cancel();
+    super.dispose();
   }
 
   void startClipboardMonitor() {
@@ -350,17 +380,6 @@ class _VideoPlayerState extends State<VideoPlayer> {
   final _currentSubTrack = ValueNotifier<int>(-1);
 
   @override
-  void dispose() {
-    super.dispose();
-    if (_videoPlayerController != null && _chewieController != null) {
-      _videoPlayerController?.stopRendererScanning();
-      _videoPlayerController?.dispose();
-      _chewieController?.dispose();
-    }
-    timer.cancel();
-  }
-
-  @override
   Widget build(BuildContext context) {
     startClipboardMonitor();
 
@@ -375,7 +394,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
               onHorizontalDragUpdate: (details) {
                 if (details.delta.dx > 20) {
                   getVideoPlayerController()
-                      .seekTo(_currentSubtitle.value.endTime);
+                      .seekTo(_currentSubtitle.value.startTime);
                 } else if (details.delta.dx < -20) {
                   getVideoPlayerController()
                       .seekTo(_currentSubtitle.value.startTime);
@@ -392,11 +411,41 @@ class _VideoPlayerState extends State<VideoPlayer> {
               },
               child: getSubtitleWrapper(),
             ),
+            StreamBuilder(
+              stream: AudioService.customEventStream,
+              builder: (context, snapshot) {
+                String response = snapshot.data;
+                switch (response) {
+                  case "playPause":
+                    playPause();
+                    break;
+                  case "rewindFastForward":
+                    rewindFastForward();
+                    break;
+                  default:
+                }
+                return Container();
+              },
+            ),
             buildSubTrackChanger(),
             buildDictionary(),
           ],
         ),
       ),
+    );
+  }
+
+  void exportLongCallback(
+    Subtitle selectedSubtitle,
+  ) {
+    exportToAnki(
+      context,
+      getChewieController(),
+      getVideoPlayerController(),
+      _clipboard,
+      selectedSubtitle,
+      _currentDictionaryEntry.value,
+      false,
     );
   }
 
@@ -486,6 +535,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       currentDictionaryEntry: _currentDictionaryEntry,
       currentSubtitle: _currentSubtitle,
       currentSubTrack: _currentSubTrack,
+      wasPlaying: _wasPlaying,
       playExternalSubtitles: playExternalSubtitles,
       retimeSubtitles: retimeSubtitles,
       streamData: streamData,
@@ -803,6 +853,11 @@ class _VideoPlayerState extends State<VideoPlayer> {
           padding: EdgeInsets.all(16.0),
           child: InkWell(
             onTap: () {
+              if (getFocusMode() && _wasPlaying.value) {
+                _videoPlayerController.play();
+                _wasPlaying.value = false;
+              }
+
               _clipboard.value = "";
               _currentDictionaryEntry.value = DictionaryEntry(
                 word: "",
@@ -837,6 +892,11 @@ class _VideoPlayerState extends State<VideoPlayer> {
           alignment: Alignment.topCenter,
           child: GestureDetector(
             onTap: () {
+              if (getFocusMode() && _wasPlaying.value) {
+                _videoPlayerController.play();
+                _wasPlaying.value = false;
+              }
+
               _clipboard.value = "";
               _currentDictionaryEntry.value = DictionaryEntry(
                 word: "",
@@ -972,8 +1032,15 @@ class _VideoPlayerState extends State<VideoPlayer> {
             if (_clipboard.value == "") {
               return Container();
             }
+
             switch (snapshot.connectionState) {
               case ConnectionState.waiting:
+                if (getFocusMode()) {
+                  _wasPlaying.value =
+                      getVideoPlayerController().value.isPlaying;
+                  _videoPlayerController.pause();
+                }
+
                 return buildDictionaryLoading(clipboard);
               default:
                 List<DictionaryEntry> entries = snapshot.data;
@@ -1067,7 +1134,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       }
     }
 
-    showModalBottomSheet<int>(
+    await showModalBottomSheet<int>(
       backgroundColor: Theme.of(context).primaryColor.withOpacity(0.8),
       context: context,
       isScrollControlled: true,
@@ -1121,12 +1188,8 @@ class _VideoPlayerState extends State<VideoPlayer> {
         String subtitleEnd = getTimestampFromDuration(subtitle.endTime);
         String subtitleDuration = "$subtitleStart - $subtitleEnd";
 
-        int endSubtitleIndex;
-
         return ListTile(
-            selected: (endSubtitleIndex == null)
-                ? i == index
-                : i <= index && i >= endSubtitleIndex,
+            selected: i == index,
             selectedTileColor: Colors.red.withOpacity(0.15),
             dense: true,
             title: Column(
@@ -1166,13 +1229,13 @@ class _VideoPlayerState extends State<VideoPlayer> {
             onLongPress: () {
               if (i <= index) {
                 List<Subtitle> selectedSubtitles = [];
-                for (int subIndex = i; subIndex < index; subIndex++) {
+                for (int subIndex = i; subIndex <= index; subIndex++) {
                   selectedSubtitles.add(subtitles[subIndex]);
                 }
 
                 String selectedText = "";
                 String removeLastNewline(String n) =>
-                    n = n.substring(0, n.length - 2);
+                    n = n.substring(0, n.length - 1);
                 selectedSubtitles.forEach(
                     (subtitle) => selectedText += subtitle.text + "\n");
                 selectedText = removeLastNewline(selectedText);
@@ -1186,15 +1249,36 @@ class _VideoPlayerState extends State<VideoPlayer> {
                   endTime: selectedEndTime,
                 );
 
-                exportToAnki(
-                  context,
-                  chewie,
-                  controller,
-                  chewie.clipboard,
-                  selectedSubtitle,
-                  currentDictionaryEntry,
-                  false,
+                chewie.clipboard.value = "&<&>export&<&>";
+
+                exportLongCallback(selectedSubtitle);
+                Navigator.pop(context);
+              } else if (i > index) {
+                List<Subtitle> selectedSubtitles = [];
+                for (int subIndex = index; subIndex <= i; subIndex++) {
+                  selectedSubtitles.add(subtitles[subIndex]);
+                }
+
+                String selectedText = "";
+                String removeLastNewline(String n) =>
+                    n = n.substring(0, n.length - 1);
+                selectedSubtitles.forEach(
+                    (subtitle) => selectedText += subtitle.text + "\n");
+                selectedText = removeLastNewline(selectedText);
+
+                Duration selectedStartTime = selectedSubtitles.first.startTime;
+                Duration selectedEndTime = selectedSubtitles.last.endTime;
+
+                Subtitle selectedSubtitle = Subtitle(
+                  text: selectedText,
+                  startTime: selectedStartTime,
+                  endTime: selectedEndTime,
                 );
+
+                chewie.clipboard.value = "&<&>export&<&>";
+
+                exportLongCallback(selectedSubtitle);
+                Navigator.pop(context);
               }
             });
       },

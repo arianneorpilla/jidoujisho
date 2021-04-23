@@ -1,5 +1,6 @@
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:package_info/package_info.dart';
@@ -29,3 +30,5 @@ Map<String, AsyncMemoizer> gMetadataCache = {};
 
 List<DictionaryEntry> gCustomDictionary;
 Fuzzy gCustomDictionaryFuzzy;
+
+ValueNotifier<bool> gPlayPause = ValueNotifier<bool>(true);

@@ -142,6 +142,14 @@ bool getSelectMode() {
   return gSharedPrefs.getBool("selectMode") ?? false;
 }
 
+Future<void> toggleFocusMode() async {
+  await gSharedPrefs.setBool("focusMode", !getFocusMode());
+}
+
+bool getFocusMode() {
+  return gSharedPrefs.getBool("focusMode") ?? false;
+}
+
 bool getResumeAvailable() {
   String lastPlayedPath = getLastPlayedPath();
   return lastPlayedPath != "-1";

@@ -220,9 +220,12 @@ void showAnkiDialog(
               flex: 30,
               child: SingleChildScrollView(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Image.file(File(getPreviewImagePath()),
-                        fit: BoxFit.contain),
+                    Image.file(
+                      File(getPreviewImagePath()),
+                      fit: BoxFit.fitWidth,
+                    ),
                     DeckDropDown(
                       decks: decks,
                       selectedDeck: _selectedDeck,

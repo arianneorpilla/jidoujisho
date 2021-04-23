@@ -250,6 +250,43 @@ class _MaterialControlsState extends State<MaterialControls>
     );
   }
 
+  Future<void> openExtraShare() async {
+    final chosenOption = await showModalBottomSheet<int>(
+      context: context,
+      isScrollControlled: true,
+      useRootNavigator: true,
+      builder: (context) => const _MoreOptionsDialog(options: [
+        "Search Current Subtitle with Jisho.org",
+        "Translate Current Subtitle with DeepL",
+        "Translate Current Subtitle with Google Translate",
+        "Share Current Subtitle with Menu",
+      ], icons: [
+        Icons.menu_book_rounded,
+        Icons.translate_rounded,
+        Icons.g_translate_rounded,
+        Icons.share_outlined,
+      ]),
+    );
+
+    final String subtitleText = chewieController.currentSubtitle.value.text;
+
+    switch (chosenOption) {
+      case 0:
+        await launch("https://jisho.org/search/$subtitleText");
+        break;
+      case 1:
+        await launch("https://www.deepl.com/translator#ja/en/$subtitleText");
+        break;
+      case 2:
+        await launch(
+            "https://translate.google.com/?sl=ja&tl=en&text=$subtitleText&op=translate");
+        break;
+      case 3:
+        Share.share(subtitleText);
+        break;
+    }
+  }
+
   Widget _buildMoreButton(VlcPlayerController controller) {
     return GestureDetector(
       onTap: () async {
@@ -260,62 +297,53 @@ class _MaterialControlsState extends State<MaterialControls>
           isScrollControlled: true,
           useRootNavigator: true,
           builder: (context) => _MoreOptionsDialog(options: [
-            "Search Current Subtitle with Jisho.org",
-            "Translate Current Subtitle with DeepL",
-            "Translate Current Subtitle with Google Translate",
-            "Share Current Subtitle to App",
-            if (gIsSelectMode.value)
+            "Share Current Subtitle to Applications",
+            if (getSelectMode())
               "Use Tap to Select Subtitle Selection"
             else
               "Use Drag to Select Subtitle Selection",
+            if (getFocusMode())
+              "Turn Off Definition Focus Mode"
+            else
+              "Turn On Definition Focus Mode",
             "Adjust Subtitle Delay",
             "Load External Subtitles",
             "Export Current Context to Anki",
           ], icons: [
-            Icons.menu_book_rounded,
-            Icons.translate_rounded,
-            Icons.g_translate_rounded,
             Icons.share_outlined,
-            if (gIsSelectMode.value)
+            if (getSelectMode())
               Icons.touch_app_rounded
             else
               Icons.select_all_rounded,
-            Icons.timer_sharp,
+            if (getFocusMode())
+              Icons.lightbulb_outline_rounded
+            else
+              Icons.lightbulb,
+            Icons.timer_rounded,
             Icons.subtitles_outlined,
             Icons.mobile_screen_share_rounded,
           ]),
         );
 
-        final String subtitleText = chewieController.currentSubtitle.value.text;
-
         switch (chosenOption) {
           case 0:
-            await launch("https://jisho.org/search/$subtitleText");
+            openExtraShare();
             break;
           case 1:
-            await launch(
-                "https://www.deepl.com/translator#ja/en/$subtitleText");
-            break;
-          case 2:
-            await launch(
-                "https://translate.google.com/?sl=ja&tl=en&text=$subtitleText&op=translate");
-            break;
-          case 3:
-            Share.share(subtitleText);
-            break;
-          case 4:
             toggleSelectMode();
             gIsSelectMode.value = getSelectMode();
             break;
-          case 5:
+          case 2:
+            toggleFocusMode();
+            break;
+          case 3:
             controller.pause();
             chewieController.retimeSubtitles();
             break;
-          case 6:
+          case 4:
             chewieController.playExternalSubtitles();
             break;
-          case 7:
-            final bool wasPlaying = await controller.isPlaying();
+          case 5:
             controller.pause();
 
             final Subtitle currentSubtitle =
@@ -332,7 +360,7 @@ class _MaterialControlsState extends State<MaterialControls>
               chewieController.clipboard,
               currentSubtitle,
               currentDictionaryEntry,
-              wasPlaying,
+              chewieController.wasPlaying.value,
             );
 
             break;
@@ -591,6 +619,7 @@ class _MaterialControlsState extends State<MaterialControls>
 
   void _playPause() {
     final isFinished = controller.value.isEnded;
+    chewieController.wasPlaying.value = false;
 
     setState(() {
       if (controller.value.isPlaying) {

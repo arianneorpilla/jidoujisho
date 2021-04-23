@@ -1,8 +1,10 @@
 import 'dart:io';
 
 import 'package:async/async.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:fuzzy/fuzzy.dart';
 
 import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
@@ -29,7 +31,8 @@ typedef void SearchCallback(String term);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setEnabledSystemUIOverlays([]);
+  SystemChrome.setEnabledSystemUIOverlays(
+      [SystemUiOverlay.bottom, SystemUiOverlay.top]);
 
   await Permission.storage.request();
   requestAnkiDroidPermissions();
@@ -47,7 +50,49 @@ void main() async {
   gCustomDictionary = importCustomDictionary();
   gCustomDictionaryFuzzy = Fuzzy(getAllImportedWords());
 
+  await AudioService.connect();
+  await AudioService.start(backgroundTaskEntrypoint: _backgroundTaskEntrypoint);
+
   runApp(App());
+}
+
+_backgroundTaskEntrypoint() {
+  AudioServiceBackground.run(() => AudioPlayerTask());
+}
+
+class AudioPlayerTask extends BackgroundAudioTask {
+  AudioPlayerTask();
+
+  @override
+  Future<void> onPlay() async {
+    AudioServiceBackground.sendCustomEvent("playPause");
+  }
+
+  @override
+  Future<void> onPause() async {
+    AudioServiceBackground.sendCustomEvent("playPause");
+  }
+
+  @override
+  Future<void> onFastForward() async {
+    AudioServiceBackground.sendCustomEvent("rewindFastForward");
+  }
+
+  @override
+  Future<void> onRewind() async {
+    AudioServiceBackground.sendCustomEvent("rewindFastForward");
+  }
+}
+
+void unlockLandscape() {
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
+
+  SystemChrome.setEnabledSystemUIOverlays(
+      [SystemUiOverlay.bottom, SystemUiOverlay.top]);
 }
 
 class App extends StatelessWidget {
@@ -63,7 +108,7 @@ class App extends StatelessWidget {
         appBarTheme: AppBarTheme(backgroundColor: Colors.black),
         canvasColor: Colors.grey[900],
       ),
-      home: Home(),
+      home: AudioServiceWidget(child: Home()),
     );
   }
 }
@@ -97,13 +142,7 @@ class _HomeState extends State<Home> {
             builder: (context) => Player(),
           ),
         ).then((returnValue) {
-          setState(() {
-            SystemChrome.setPreferredOrientations([
-              DeviceOrientation.portraitUp,
-              DeviceOrientation.landscapeLeft,
-              DeviceOrientation.landscapeRight,
-            ]);
-          });
+          unlockLandscape();
         });
       } else {
         _selectedIndex = index;
@@ -177,11 +216,7 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
+    unlockLandscape();
 
     return new WillPopScope(
       onWillPop: _onWillPop,
@@ -716,11 +751,7 @@ class _HomeState extends State<Home> {
                           ),
                         ).then((returnValue) {
                           setState(() {
-                            SystemChrome.setPreferredOrientations([
-                              DeviceOrientation.portraitUp,
-                              DeviceOrientation.landscapeLeft,
-                              DeviceOrientation.landscapeRight,
-                            ]);
+                            unlockLandscape();
                           });
 
                           setLastPlayedPath(webURL);
@@ -889,11 +920,7 @@ class _HomeState extends State<Home> {
                   ),
                 ),
               ).then((returnValue) {
-                SystemChrome.setPreferredOrientations([
-                  DeviceOrientation.portraitUp,
-                  DeviceOrientation.landscapeLeft,
-                  DeviceOrientation.landscapeRight,
-                ]);
+                unlockLandscape();
               });
             },
           );
@@ -1145,11 +1172,7 @@ class _YouTubeResultState extends State<YouTubeResult>
           ),
         ),
       ).then((returnValue) {
-        SystemChrome.setPreferredOrientations([
-          DeviceOrientation.portraitUp,
-          DeviceOrientation.landscapeLeft,
-          DeviceOrientation.landscapeRight,
-        ]);
+        unlockLandscape();
 
         setLastPlayedPath(videoStreamURL);
         setLastPlayedPosition(0);
@@ -1759,11 +1782,7 @@ class _HistoryResultState extends State<HistoryResult>
           ),
         ),
       ).then((returnValue) {
-        SystemChrome.setPreferredOrientations([
-          DeviceOrientation.portraitUp,
-          DeviceOrientation.landscapeLeft,
-          DeviceOrientation.landscapeRight,
-        ]);
+        unlockLandscape();
 
         setLastPlayedPath(history.url);
         setLastPlayedPosition(0);

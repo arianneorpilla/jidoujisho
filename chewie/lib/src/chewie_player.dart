@@ -218,6 +218,7 @@ class ChewieController extends ChangeNotifier {
     @required this.currentDictionaryEntry,
     @required this.currentSubtitle,
     @required this.currentSubTrack,
+    @required this.wasPlaying,
     @required this.playExternalSubtitles,
     @required this.retimeSubtitles,
     this.aspectRatio,
@@ -260,6 +261,7 @@ class ChewieController extends ChangeNotifier {
   final ValueNotifier<Subtitle> currentSubtitle;
   final ValueNotifier<DictionaryEntry> currentDictionaryEntry;
   final ValueNotifier<int> currentSubTrack;
+  final ValueNotifier<bool> wasPlaying;
   final VoidCallback playExternalSubtitles;
   final VoidCallback retimeSubtitles;
   final YouTubeMux streamData;

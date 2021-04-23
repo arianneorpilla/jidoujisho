@@ -149,8 +149,12 @@ Future<YouTubeMux> getPlayerYouTubeInfo(String webURL) async {
       return aHeight.compareTo(bHeight);
     });
 
+    for (var stream in streamManifest.audioOnly.sortByBitrate()) {
+      print(stream.audioCodec);
+    }
     AudioStreamInfo streamAudioInfo =
         streamManifest.audioOnly.sortByBitrate().last;
+
     String audioURL = streamAudioInfo.url.toString();
     String audioMetadata =
         "[${streamAudioInfo.container.name}] - [${streamAudioInfo.bitrate.kiloBitsPerSecond.floor()} Kbps]";
