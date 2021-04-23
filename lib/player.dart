@@ -450,6 +450,11 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   Future<bool> _onWillPop() async {
+    if (getVideoPlayerController().value.isEnded) {
+      Navigator.pop(context);
+      return false;
+    }
+
     Widget alertDialog = AlertDialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.zero,
@@ -938,8 +943,10 @@ class _VideoPlayerState extends State<VideoPlayer> {
                   Text(results[selectedIndex.value].reading),
                   Flexible(
                     child: SingleChildScrollView(
-                      child:
-                          Text("\n${results[selectedIndex.value].meaning}\n"),
+                      child: gCustomDictionary.isNotEmpty
+                          ? SelectableText(
+                              "\n${results[selectedIndex.value].meaning}\n")
+                          : Text("\n${results[selectedIndex.value].meaning}\n"),
                     ),
                   ),
                   Row(
