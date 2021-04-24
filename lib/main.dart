@@ -50,9 +50,36 @@ void main() async {
   gCustomDictionaryFuzzy = Fuzzy(getAllImportedWords());
 
   await AudioService.connect();
-  await AudioService.start(backgroundTaskEntrypoint: _backgroundTaskEntrypoint);
+  await AudioService.start(
+    backgroundTaskEntrypoint: _backgroundTaskEntrypoint,
+  );
+
+  handleAppLifecycleState();
 
   runApp(App());
+}
+
+handleAppLifecycleState() {
+  SystemChannels.lifecycle.setMessageHandler((msg) {
+    print(msg);
+
+    switch (msg) {
+      case "AppLifecycleState.paused":
+        AudioService.stop();
+        break;
+      case "AppLifecycleState.inactive":
+        AudioService.stop();
+        break;
+      case "AppLifecycleState.resumed":
+        AudioService.start(
+          backgroundTaskEntrypoint: _backgroundTaskEntrypoint,
+        );
+        break;
+      default:
+    }
+
+    return null;
+  });
 }
 
 _backgroundTaskEntrypoint() {
@@ -81,6 +108,9 @@ class AudioPlayerTask extends BackgroundAudioTask {
   Future<void> onRewind() async {
     AudioServiceBackground.sendCustomEvent("rewindFastForward");
   }
+
+  @override
+  Future<void> onTaskRemoved() async {}
 }
 
 void unlockLandscape() {

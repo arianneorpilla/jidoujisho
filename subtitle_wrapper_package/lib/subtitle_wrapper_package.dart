@@ -53,6 +53,7 @@ class SubTitleWrapper extends StatelessWidget {
                     ),
                   child: SubtitleTextView(
                     subtitleStyle: subtitleStyle,
+                    widgetVisibility: subtitleController.widgetVisibility,
                     focusNode: focusNode,
                   ),
                 ),

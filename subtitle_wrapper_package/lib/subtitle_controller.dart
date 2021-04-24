@@ -10,6 +10,7 @@ class SubtitleController {
   SubtitleDecoder subtitleDecoder;
   SubtitleType subtitleType;
   int subtitlesOffset;
+  ValueNotifier<bool> widgetVisibility;
 
   bool _attached = false;
   SubtitleBloc subtitleBloc;
@@ -22,6 +23,7 @@ class SubtitleController {
     this.subtitleType = SubtitleType.webvtt,
     this.subtitleNotifier,
     this.subtitlesOffset = 0,
+    this.widgetVisibility,
   });
 
   void attach(SubtitleBloc bloc) {

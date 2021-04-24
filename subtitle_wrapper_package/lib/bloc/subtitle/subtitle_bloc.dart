@@ -60,14 +60,10 @@ class SubtitleBloc extends Bloc<SubtitleEvent, SubtitleState> {
                       subtitleController.subtitlesOffset <
                   subtitleItem.endTime.inMilliseconds) {
             add(UpdateLoadedSubtitle(subtitle: subtitleItem));
+            subtitleController.widgetVisibility.value = true;
             subtitleNotifier.value = subtitleItem;
             continue;
           }
-          subtitleNotifier.value = Subtitle(
-            text: "",
-            startTime: videoPlayerController.value.position,
-            endTime: videoPlayerController.value.position,
-          );
         }
       }
     });

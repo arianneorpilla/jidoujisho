@@ -265,15 +265,19 @@ class _VideoPlayerState extends State<VideoPlayer> {
   FocusNode _subtitleFocusNode = new FocusNode();
   bool networkNotSet = true;
   ValueNotifier<bool> _wasPlaying = ValueNotifier<bool>(false);
+  ValueNotifier<bool> _widgetVisbility = ValueNotifier<bool>(false);
   int audioAllowance = getAudioAllowance();
 
-  Timer timer;
+  Timer durationTimer;
+  Timer visibilityTimer;
 
   @override
   void initState() {
     super.initState();
-    timer = Timer.periodic(
+    durationTimer = Timer.periodic(
         Duration(seconds: 1), (Timer t) => updateDurationOrSeek());
+    visibilityTimer = Timer.periodic(
+        Duration(milliseconds: 100), (Timer t) => visibilityTimerAction());
   }
 
   Future<void> playPause() async {
@@ -297,7 +301,8 @@ class _VideoPlayerState extends State<VideoPlayer> {
       _videoPlayerController?.dispose();
       _chewieController?.dispose();
     }
-    timer.cancel();
+    durationTimer.cancel();
+    visibilityTimer.cancel();
     super.dispose();
   }
 
@@ -325,6 +330,21 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   void stopAllClipboardMonitoring() {
     ClipboardMonitor.unregisterAllCallbacks();
+  }
+
+  void visibilityTimerAction() {
+    if (getVideoPlayerController().value.isInitialized) {
+      Duration cutOffStart =
+          _currentSubtitle.value.startTime - Duration(milliseconds: 100);
+      Duration cutOffEnd =
+          _currentSubtitle.value.endTime + Duration(milliseconds: 100);
+      if (getVideoPlayerController().value.position > cutOffStart &&
+          getVideoPlayerController().value.position < cutOffEnd) {
+        getSubtitleController().widgetVisibility.value = true;
+      } else {
+        getSubtitleController().widgetVisibility.value = false;
+      }
+    }
   }
 
   void updateDurationOrSeek() {
@@ -592,6 +612,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       subtitleDecoder: SubtitleDecoder.utf8,
       subtitleType: SubtitleType.srt,
       subtitlesOffset: getSubtitleDelay(),
+      widgetVisibility: _widgetVisbility,
     );
 
     return _subTitleController;
