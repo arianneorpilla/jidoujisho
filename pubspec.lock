@@ -141,13 +141,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.0"
-  drag_select_grid_view:
-    dependency: "direct main"
-    description:
-      name: drag_select_grid_view
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.4.0"
   equatable:
     dependency: "direct overridden"
     description:
@@ -691,8 +684,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: ab4fb0f32a99a324c2c3f6aa04ab03701bf617ad
-      resolved-ref: ab4fb0f32a99a324c2c3f6aa04ab03701bf617ad
+      ref: "3ff2d0dcd5dc0fe7e4983f85f9c540d22af1715d"
+      resolved-ref: "3ff2d0dcd5dc0fe7e4983f85f9c540d22af1715d"
       url: "https://github.com/lrorpilla/ve_dart"
     source: git
     version: "0.2.1"

@@ -25,7 +25,7 @@ dependencies:
   ve_dart:
     git:
       url: https://github.com/lrorpilla/ve_dart
-      ref: ab4fb0f32a99a324c2c3f6aa04ab03701bf617ad
+      ref: 3ff2d0dcd5dc0fe7e4983f85f9c540d22af1715d
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -93,6 +93,8 @@ class Player extends StatelessWidget {
     File videoFile,
     int initialPosition,
   ) {
+    lockLandscape();
+
     print("VIDEO FILE: ${videoFile.path}");
 
     if (videoFile == null) {
@@ -113,8 +115,6 @@ class Player extends StatelessWidget {
             setLastPlayedPath(videoFile.path);
             setLastPlayedPosition(0);
             gIsResumable.value = getResumeAvailable();
-
-            lockLandscape();
 
             VideoHistory history = VideoHistory(
               videoFile.path,
@@ -137,6 +137,8 @@ class Player extends StatelessWidget {
   }
 
   Widget webPlayer(Video video, int initialPosition) {
+    lockLandscape();
+
     String videoID = "";
 
     try {
@@ -174,8 +176,6 @@ class Player extends StatelessWidget {
                       webSubtitles = timedTextToSRT(snapshot.data);
                       internalSubs = extractWebSubtitle(webSubtitles);
                     }
-
-                    lockLandscape();
 
                     VideoHistory history = VideoHistory(
                       url,

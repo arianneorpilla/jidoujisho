@@ -8,11 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 
 import 'package:share/share.dart';
-import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:jidoujisho/anki.dart';
-import 'package:jidoujisho/dictionary.dart';
 import 'package:jidoujisho/globals.dart';
 import 'package:jidoujisho/preferences.dart';
 import 'package:jidoujisho/youtube.dart';

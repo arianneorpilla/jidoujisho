@@ -4,7 +4,6 @@ import 'package:async/async.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:fuzzy/fuzzy.dart';
 
 import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
