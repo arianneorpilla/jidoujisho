@@ -298,6 +298,7 @@ class _MaterialControlsState extends State<MaterialControls>
           useRootNavigator: true,
           builder: (context) => _MoreOptionsDialog(options: [
             "Share Current Subtitle to Applications",
+            "Adjust Subtitle Delay and Audio Allowance",
             if (getSelectMode())
               "Use Tap to Select Subtitle Selection"
             else
@@ -306,11 +307,11 @@ class _MaterialControlsState extends State<MaterialControls>
               "Turn Off Definition Focus Mode"
             else
               "Turn On Definition Focus Mode",
-            "Adjust Subtitle Delay",
             "Load External Subtitles",
             "Export Current Context to Anki",
           ], icons: [
             Icons.share_outlined,
+            Icons.timer_rounded,
             if (getSelectMode())
               Icons.touch_app_rounded
             else
@@ -319,7 +320,6 @@ class _MaterialControlsState extends State<MaterialControls>
               Icons.lightbulb_outline_rounded
             else
               Icons.lightbulb,
-            Icons.timer_rounded,
             Icons.subtitles_outlined,
             Icons.mobile_screen_share_rounded,
           ]),
@@ -330,39 +330,21 @@ class _MaterialControlsState extends State<MaterialControls>
             openExtraShare();
             break;
           case 1:
+            controller.pause();
+            chewieController.retimeSubtitles();
+            break;
+          case 2:
             toggleSelectMode();
             gIsSelectMode.value = getSelectMode();
             break;
-          case 2:
-            toggleFocusMode();
-            break;
           case 3:
-            controller.pause();
-            chewieController.retimeSubtitles();
+            toggleFocusMode();
             break;
           case 4:
             chewieController.playExternalSubtitles();
             break;
           case 5:
-            controller.pause();
-
-            final Subtitle currentSubtitle =
-                chewieController.currentSubtitle.value;
-            final DictionaryEntry currentDictionaryEntry =
-                chewieController.currentDictionaryEntry.value;
-
-            chewieController.clipboard.value = "&<&>export&<&>";
-
-            exportToAnki(
-              context,
-              chewieController,
-              controller,
-              chewieController.clipboard,
-              currentSubtitle,
-              currentDictionaryEntry,
-              chewieController.wasPlaying.value,
-            );
-
+            chewieController.exportSingleCallback();
             break;
         }
       },

@@ -265,6 +265,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
   FocusNode _subtitleFocusNode = new FocusNode();
   bool networkNotSet = true;
   ValueNotifier<bool> _wasPlaying = ValueNotifier<bool>(false);
+  int audioAllowance = getAudioAllowance();
 
   Timer timer;
 
@@ -435,9 +436,12 @@ class _VideoPlayerState extends State<VideoPlayer> {
     );
   }
 
-  void exportLongCallback(
+  void exportMultiCallback(
     Subtitle selectedSubtitle,
+    List<Subtitle> selection,
   ) {
+    _clipboard.value = "&<&>export&<&>";
+
     exportToAnki(
       context,
       getChewieController(),
@@ -446,6 +450,25 @@ class _VideoPlayerState extends State<VideoPlayer> {
       selectedSubtitle,
       _currentDictionaryEntry.value,
       false,
+      selection,
+      audioAllowance,
+    );
+  }
+
+  void exportSingleCallback() {
+    getVideoPlayerController().pause();
+    _clipboard.value = "&<&>export&<&>";
+
+    exportToAnki(
+      context,
+      getChewieController(),
+      getVideoPlayerController(),
+      _clipboard,
+      _currentSubtitle.value,
+      _currentDictionaryEntry.value,
+      _wasPlaying.value,
+      [_currentSubtitle.value],
+      audioAllowance,
     );
   }
 
@@ -543,6 +566,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       wasPlaying: _wasPlaying,
       playExternalSubtitles: playExternalSubtitles,
       retimeSubtitles: retimeSubtitles,
+      exportSingleCallback: exportSingleCallback,
       streamData: streamData,
       aspectRatio: getVideoPlayerController().value.aspectRatio,
       autoPlay: true,
@@ -567,7 +591,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       showSubtitles: true,
       subtitleDecoder: SubtitleDecoder.utf8,
       subtitleType: SubtitleType.srt,
-      subtitlesOffset: 0,
+      subtitlesOffset: getSubtitleDelay(),
     );
 
     return _subTitleController;
@@ -638,17 +662,28 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   void retimeSubtitles() async {
-    TextEditingController _textFieldController = TextEditingController(
+    TextEditingController _offsetController = TextEditingController(
         text: getSubtitleController().subtitlesOffset.toString());
+    TextEditingController _allowanceController =
+        TextEditingController(text: audioAllowance.toString());
 
-    void setSubtitleOffset() {
-      String offsetText = _textFieldController.text;
+    void setValues(bool remember) {
+      String offsetText = _offsetController.text;
       int newOffset = int.tryParse(offsetText);
 
-      if (newOffset != null) {
+      String allowanceText = _allowanceController.text;
+      int newAllowance = int.tryParse(allowanceText);
+
+      if (newOffset != null && newAllowance != null) {
         getSubtitleController().subtitlesOffset = newOffset;
         getSubtitleController().updateSubtitleContent(
             content: getSubtitleController().subtitlesContent);
+        audioAllowance = newAllowance;
+
+        if (remember) {
+          setSubtitleDelay(newOffset);
+          setAudioAllowance(newAllowance);
+        }
 
         Navigator.pop(context);
       }
@@ -662,21 +697,34 @@ class _VideoPlayerState extends State<VideoPlayer> {
               borderRadius: BorderRadius.zero,
             ),
             content: SingleChildScrollView(
-              physics: NeverScrollableScrollPhysics(),
               child: Container(
                 width: MediaQuery.of(context).size.width * (1 / 3),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     TextField(
-                      controller: _textFieldController,
+                      controller: _offsetController,
                       keyboardType: TextInputType.numberWithOptions(
                         signed: true,
                         decimal: false,
                       ),
                       maxLines: 1,
                       decoration: InputDecoration(
-                          hintText: "Enter subtitle delay", suffixText: " ms"),
+                          labelText: "Subtitle delay",
+                          hintText: "Enter subtitle delay",
+                          suffixText: " ms"),
+                    ),
+                    TextField(
+                      controller: _allowanceController,
+                      keyboardType: TextInputType.numberWithOptions(
+                        signed: true,
+                        decimal: false,
+                      ),
+                      maxLines: 1,
+                      decoration: InputDecoration(
+                          labelText: "Audio allowance",
+                          hintText: "Enter audio allowance",
+                          suffixText: " ms"),
                     ),
                   ],
                 ),
@@ -690,9 +738,16 @@ class _VideoPlayerState extends State<VideoPlayer> {
                 },
               ),
               TextButton(
-                child: Text('SET DELAY', style: TextStyle(color: Colors.white)),
+                child: Text('SET AND REMEMBER',
+                    style: TextStyle(color: Colors.white)),
                 onPressed: () {
-                  setSubtitleOffset();
+                  setValues(true);
+                },
+              ),
+              TextButton(
+                child: Text('SET', style: TextStyle(color: Colors.white)),
+                onPressed: () {
+                  setValues(false);
                 },
               ),
             ],
@@ -1255,10 +1310,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
                   startTime: selectedStartTime,
                   endTime: selectedEndTime,
                 );
-
-                chewie.clipboard.value = "&<&>export&<&>";
-
-                exportLongCallback(selectedSubtitle);
+                exportMultiCallback(selectedSubtitle, selectedSubtitles);
                 Navigator.pop(context);
               } else if (i > index) {
                 List<Subtitle> selectedSubtitles = [];
@@ -1282,9 +1334,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
                   endTime: selectedEndTime,
                 );
 
-                chewie.clipboard.value = "&<&>export&<&>";
-
-                exportLongCallback(selectedSubtitle);
+                exportMultiCallback(selectedSubtitle, selectedSubtitles);
                 Navigator.pop(context);
               }
             });

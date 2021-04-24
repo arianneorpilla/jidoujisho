@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:chewie/chewie.dart';
+import 'package:drag_select_grid_view/drag_select_grid_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
@@ -22,6 +23,10 @@ Future<void> requestAnkiDroidPermissions() async {
 
 String getPreviewImagePath() {
   return "$gAppDirPath/exportImage.jpg";
+}
+
+String getPreviewImageMultiPath(int index) {
+  return "$gAppDirPath/exportMulti$index.jpg";
 }
 
 String getPreviewAudioPath() {
@@ -54,8 +59,54 @@ Future exportCurrentFrame(
   return;
 }
 
-Future exportCurrentAudio(ChewieController chewie,
-    VlcPlayerController controller, Subtitle subtitle) async {
+void clearAllMultiFrames() {
+  Directory gAppDir = Directory("$gAppDirPath");
+  gAppDir.listSync().forEach((entity) {
+    if (path.basename(entity.path).startsWith("exportMulti")) {
+      entity.deleteSync(recursive: false);
+    }
+  });
+}
+
+Future exportMultiFrame(
+  ChewieController chewie,
+  VlcPlayerController controller,
+  Subtitle subtitle,
+  int index,
+) async {
+  String previewImagePath = getPreviewImageMultiPath(index);
+  File imageFile = File(previewImagePath);
+  if (imageFile.existsSync()) {
+    imageFile.deleteSync();
+  }
+
+  int msStart = subtitle.startTime.inMilliseconds;
+  int msEnd = subtitle.endTime.inMilliseconds;
+  int msMean = ((msStart + msEnd) / 2).floor();
+  Duration currentTime = Duration(milliseconds: msMean);
+  String formatted = getTimestampFromDuration(currentTime);
+
+  final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
+
+  String inputPath = (controller.dataSourceType == DataSourceType.network)
+      ? chewie.currentVideoQuality.videoURL
+      : controller.dataSource;
+  String exportPath = "\"$previewImagePath\"";
+
+  String command =
+      "-loglevel quiet -ss $formatted -y -i \"$inputPath\" -frames:v 1 -q:v 2 $exportPath";
+
+  await _flutterFFmpeg.execute(command);
+
+  return;
+}
+
+Future exportCurrentAudio(
+  ChewieController chewie,
+  VlcPlayerController controller,
+  Subtitle subtitle,
+  int audioAllowance,
+) async {
   File audioFile = File(getPreviewAudioPath());
   if (audioFile.existsSync()) {
     audioFile.deleteSync();
@@ -65,8 +116,12 @@ Future exportCurrentAudio(ChewieController chewie,
   String timeEnd;
   String audioIndex;
 
-  timeStart = getTimestampFromDuration(subtitle.startTime);
-  timeEnd = getTimestampFromDuration(subtitle.endTime);
+  Duration allowance = Duration(milliseconds: audioAllowance);
+  Duration adjustedStart = subtitle.startTime - allowance;
+  Duration adjustedEnd = subtitle.endTime + allowance;
+
+  timeStart = getTimestampFromDuration(adjustedStart);
+  timeEnd = getTimestampFromDuration(adjustedEnd);
 
   switch (controller.dataSourceType) {
     case DataSourceType.network:
@@ -104,6 +159,8 @@ Future exportToAnki(
   Subtitle subtitle,
   DictionaryEntry dictionaryEntry,
   bool wasPlaying,
+  List<Subtitle> exportSubtitles,
+  int audioAllowance,
 ) async {
   String lastDeck = gSharedPrefs.getString("lastDeck") ?? "Default";
 
@@ -111,8 +168,22 @@ Future exportToAnki(
   try {
     requestAnkiDroidPermissions();
     decks = await getDecks();
-    await exportCurrentFrame(chewie, controller);
-    await exportCurrentAudio(chewie, controller, subtitle);
+
+    imageCache.clear();
+
+    if (exportSubtitles.length == 1) {
+      await exportCurrentFrame(chewie, controller);
+    } else {
+      clearAllMultiFrames();
+      for (int i = 0; i < exportSubtitles.length; i++) {
+        Subtitle subtitle = exportSubtitles[i];
+        await exportMultiFrame(chewie, controller, subtitle, i);
+        await precacheImage(
+            new FileImage(File(getPreviewImageMultiPath(i))), context);
+      }
+    }
+
+    await exportCurrentAudio(chewie, controller, subtitle, audioAllowance);
 
     Clipboard.setData(
       ClipboardData(text: ""),
@@ -128,6 +199,7 @@ Future exportToAnki(
       controller,
       clipboard,
       wasPlaying,
+      exportSubtitles,
     );
   } catch (ex) {
     clipboard.value = "&<&>exportlong&<&>";
@@ -143,6 +215,7 @@ void showAnkiDialog(
   VlcPlayerController controller,
   ValueNotifier<String> clipboard,
   bool wasPlaying,
+  List<Subtitle> exportSubtitles,
 ) {
   TextEditingController _sentenceController =
       TextEditingController(text: sentence);
@@ -202,12 +275,13 @@ void showAnkiDialog(
   );
 
   AudioPlayer audioPlayer = AudioPlayer();
-  imageCache.clear();
 
   showDialog(
     context: context,
     builder: (context) {
       ValueNotifier<String> _selectedDeck = new ValueNotifier<String>(lastDeck);
+      ValueNotifier<int> selectedIndex = ValueNotifier<int>(0);
+      bool isSingle = exportSubtitles.length == 1;
 
       return AlertDialog(
         shape: RoundedRectangleBorder(
@@ -222,10 +296,89 @@ void showAnkiDialog(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Image.file(
-                      File(getPreviewImagePath()),
-                      fit: BoxFit.fitWidth,
-                    ),
+                    (isSingle)
+                        ? Image.file(
+                            File(getPreviewImagePath()),
+                            fit: BoxFit.fitWidth,
+                          )
+                        : GestureDetector(
+                            onTap: () {},
+                            onHorizontalDragEnd: (details) {
+                              if (details.primaryVelocity == 0) return;
+
+                              if (details.primaryVelocity.compareTo(0) == -1) {
+                                if (selectedIndex.value ==
+                                    exportSubtitles.length - 1) {
+                                  selectedIndex.value = 0;
+                                } else {
+                                  selectedIndex.value += 1;
+                                }
+                              } else {
+                                if (selectedIndex.value == 0) {
+                                  selectedIndex.value =
+                                      exportSubtitles.length - 1;
+                                } else {
+                                  selectedIndex.value -= 1;
+                                }
+                              }
+                            },
+                            child: ValueListenableBuilder(
+                              valueListenable: selectedIndex,
+                              builder:
+                                  (BuildContext context, value, Widget child) {
+                                return Image.file(
+                                  File(getPreviewImageMultiPath(
+                                      selectedIndex.value)),
+                                  fit: BoxFit.fitWidth,
+                                );
+                              },
+                            )),
+                    SizedBox(height: 10),
+                    (isSingle)
+                        ? Container()
+                        : ValueListenableBuilder(
+                            valueListenable: selectedIndex,
+                            builder:
+                                (BuildContext context, value, Widget child) {
+                              return Row(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "Selecting preview image ",
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  Text(
+                                    "${selectedIndex.value + 1} ",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 11,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  Text(
+                                    "out of ",
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  Text(
+                                    "${exportSubtitles.length} ",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 11,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
                     DeckDropDown(
                       decks: decks,
                       selectedDeck: _selectedDeck,
@@ -310,6 +463,8 @@ void showAnkiDialog(
                 _wordController.text,
                 _readingController.text,
                 _meaningController.text,
+                isSingle,
+                selectedIndex.value,
               );
 
               Navigator.pop(context);
@@ -327,7 +482,9 @@ void showAnkiDialog(
         ],
       );
     },
-  );
+  ).then((result) {
+    audioPlayer.stop();
+  });
 }
 
 Future<void> addNote(
@@ -404,12 +561,18 @@ class _DeckDropDownState extends State<DeckDropDown> {
 }
 
 void exportAnkiCard(String deck, String sentence, String answer, String reading,
-    String meaning) {
+    String meaning, bool isSingle, int selectedIndex) {
   DateTime now = DateTime.now();
   String newFileName =
       "jidoujisho-" + intl.DateFormat('yyyyMMddTkkmmss').format(now);
 
-  File imageFile = File(getPreviewImagePath());
+  File imageFile;
+  if (isSingle) {
+    imageFile = File(getPreviewImagePath());
+  } else {
+    imageFile = File(getPreviewImageMultiPath(selectedIndex));
+  }
+
   File audioFile = File(getPreviewAudioPath());
 
   String newImagePath = path.join(
@@ -435,4 +598,99 @@ void exportAnkiCard(String deck, String sentence, String answer, String reading,
 
   requestAnkiDroidPermissions();
   addNote(deck, addImage, addAudio, sentence, answer, meaning, reading);
+}
+
+class SelectableItem extends StatefulWidget {
+  const SelectableItem({
+    Key key,
+    @required this.index,
+    @required this.color,
+    @required this.selected,
+  }) : super(key: key);
+
+  final int index;
+  final MaterialColor color;
+  final bool selected;
+
+  @override
+  _SelectableItemState createState() => _SelectableItemState();
+}
+
+class _SelectableItemState extends State<SelectableItem>
+    with SingleTickerProviderStateMixin {
+  AnimationController _controller;
+  Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      value: widget.selected ? 1 : 0,
+      duration: kThemeChangeDuration,
+      vsync: this,
+    );
+
+    _scaleAnimation = Tween<double>(begin: 1, end: 0.8).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.ease,
+      ),
+    );
+  }
+
+  @override
+  void didUpdateWidget(SelectableItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selected != widget.selected) {
+      if (widget.selected) {
+        _controller.forward();
+      } else {
+        _controller.reverse();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _scaleAnimation,
+      builder: (context, child) {
+        return Container(
+          child: Transform.scale(
+            scale: _scaleAnimation.value,
+            child: DecoratedBox(
+              child: child,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(2),
+                color: calculateColor(),
+              ),
+            ),
+          ),
+        );
+      },
+      child: Container(
+        alignment: Alignment.center,
+        child: Text(
+          'Item\n#${widget.index}',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 18, color: Colors.white),
+        ),
+      ),
+    );
+  }
+
+  Color calculateColor() {
+    return Color.lerp(
+      widget.color.shade500,
+      widget.color.shade900,
+      _controller.value,
+    );
+  }
 }

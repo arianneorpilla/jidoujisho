@@ -171,6 +171,22 @@ int getLastPlayedPosition() {
   return gSharedPrefs.getInt("lastPlayedPosition") ?? -1;
 }
 
+Future<void> setAudioAllowance(int ms) async {
+  await gSharedPrefs.setInt("audioAllowance", ms);
+}
+
+int getAudioAllowance() {
+  return gSharedPrefs.getInt("audioAllowance") ?? 0;
+}
+
+Future<void> setSubtitleDelay(int ms) async {
+  await gSharedPrefs.setInt("subtitleDelay", ms);
+}
+
+int getSubtitleDelay() {
+  return gSharedPrefs.getInt("subtitleDelay") ?? 0;
+}
+
 List<VideoHistory> getVideoHistory() {
   String prefsVideoHistory = gSharedPrefs.getString('videoHistory') ?? '[]';
   List<dynamic> history = (jsonDecode(prefsVideoHistory) as List<dynamic>);
