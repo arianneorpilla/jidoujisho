@@ -301,9 +301,9 @@ Future<void> addDictionaryEntryToHistory(
   );
   dictionaryEntries.add(dictionaryEntry);
 
-  if (dictionaryEntries.length >= 50) {
+  if (dictionaryEntries.length >= 100) {
     dictionaryEntries =
-        dictionaryEntries.sublist(dictionaryEntries.length - 50);
+        dictionaryEntries.sublist(dictionaryEntries.length - 100);
   }
 
   await setDictionaryHistory(dictionaryEntries);
