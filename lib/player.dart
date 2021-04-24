@@ -1251,93 +1251,76 @@ class _VideoPlayerState extends State<VideoPlayer> {
         String subtitleDuration = "$subtitleStart - $subtitleEnd";
 
         return ListTile(
-            selected: i == index,
-            selectedTileColor: Colors.red.withOpacity(0.15),
-            dense: true,
-            title: Column(
-              children: [
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.textsms_outlined,
-                      size: 12.0,
-                      color: Colors.red,
+          selected: i == index,
+          selectedTileColor: Colors.red.withOpacity(0.15),
+          dense: true,
+          title: Column(
+            children: [
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  Icon(
+                    Icons.textsms_outlined,
+                    size: 12.0,
+                    color: Colors.red,
+                  ),
+                  const SizedBox(width: 16.0),
+                  Text(
+                    subtitleDuration,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey,
                     ),
-                    const SizedBox(width: 16.0),
-                    Text(
-                      subtitleDuration,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  subtitleText,
-                  style: TextStyle(fontSize: 20, color: Colors.white),
-                ),
-                const SizedBox(height: 6),
-              ],
-            ),
-            onTap: () {
-              Navigator.pop(context);
-              _videoPlayerController.seekTo(subtitles[index].startTime);
-              _videoPlayerController.play();
-            },
-            onLongPress: () {
-              if (i <= index) {
-                List<Subtitle> selectedSubtitles = [];
-                for (int subIndex = i; subIndex <= index; subIndex++) {
-                  selectedSubtitles.add(subtitles[subIndex]);
-                }
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                subtitleText,
+                style: TextStyle(fontSize: 20, color: Colors.white),
+              ),
+              const SizedBox(height: 6),
+            ],
+          ),
+          onTap: () {
+            Navigator.pop(context);
+            _videoPlayerController.seekTo(subtitles[index].startTime);
+            _videoPlayerController.play();
+          },
+          onLongPress: () {
+            List<Subtitle> selectedSubtitles = [];
 
-                String selectedText = "";
-                String removeLastNewline(String n) =>
-                    n = n.substring(0, n.length - 1);
-                selectedSubtitles.forEach(
-                    (subtitle) => selectedText += subtitle.text + "\n");
-                selectedText = removeLastNewline(selectedText);
-
-                Duration selectedStartTime = selectedSubtitles.first.startTime;
-                Duration selectedEndTime = selectedSubtitles.last.endTime;
-
-                Subtitle selectedSubtitle = Subtitle(
-                  text: selectedText,
-                  startTime: selectedStartTime,
-                  endTime: selectedEndTime,
-                );
-                exportMultiCallback(selectedSubtitle, selectedSubtitles);
-                Navigator.pop(context);
-              } else if (i > index) {
-                List<Subtitle> selectedSubtitles = [];
-                for (int subIndex = index; subIndex <= i; subIndex++) {
-                  selectedSubtitles.add(subtitles[subIndex]);
-                }
-
-                String selectedText = "";
-                String removeLastNewline(String n) =>
-                    n = n.substring(0, n.length - 1);
-                selectedSubtitles.forEach(
-                    (subtitle) => selectedText += subtitle.text + "\n");
-                selectedText = removeLastNewline(selectedText);
-
-                Duration selectedStartTime = selectedSubtitles.first.startTime;
-                Duration selectedEndTime = selectedSubtitles.last.endTime;
-
-                Subtitle selectedSubtitle = Subtitle(
-                  text: selectedText,
-                  startTime: selectedStartTime,
-                  endTime: selectedEndTime,
-                );
-
-                exportMultiCallback(selectedSubtitle, selectedSubtitles);
-                Navigator.pop(context);
+            if (i <= index) {
+              for (int subIndex = i; subIndex <= index; subIndex++) {
+                selectedSubtitles.add(subtitles[subIndex]);
               }
-            });
+            } else {
+              for (int subIndex = index; subIndex <= i; subIndex++) {
+                selectedSubtitles.add(subtitles[subIndex]);
+              }
+            }
+
+            String selectedText = "";
+            String removeLastNewline(String n) =>
+                n = n.substring(0, n.length - 1);
+            selectedSubtitles
+                .forEach((subtitle) => selectedText += subtitle.text + "\n");
+            selectedText = removeLastNewline(selectedText);
+
+            Duration selectedStartTime = selectedSubtitles.first.startTime;
+            Duration selectedEndTime = selectedSubtitles.last.endTime;
+
+            Subtitle selectedSubtitle = Subtitle(
+              text: selectedText,
+              startTime: selectedStartTime,
+              endTime: selectedEndTime,
+            );
+
+            exportMultiCallback(selectedSubtitle, selectedSubtitles);
+            Navigator.pop(context);
+          },
+        );
       },
     );
   }
