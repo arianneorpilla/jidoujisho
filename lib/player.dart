@@ -116,13 +116,13 @@ class Player extends StatelessWidget {
             List<dynamic> subtitleFutures = snapshot.data;
             List<File> internalSubs = subtitleFutures[0];
             File externalSubs = subtitleFutures[1];
-            String defaultSubtitles = "";
+            String unsanitized = "";
             if (externalSubs != null) {
-              print(externalSubs);
-              defaultSubtitles = externalSubs.readAsStringSync();
+              unsanitized = externalSubs.readAsStringSync();
             } else if (internalSubs.isNotEmpty) {
-              defaultSubtitles = internalSubs.first.readAsStringSync();
+              unsanitized = internalSubs.first.readAsStringSync();
             }
+            String defaultSubtitles = sanitizeSrtNewlines(unsanitized);
 
             setLastPlayedPath(videoFile.path);
             setLastPlayedPosition(0);

@@ -123,6 +123,45 @@ Future<List<File>> extractSubtitles(File file) async {
   return files;
 }
 
+String sanitizeSrtNewlines(String text) {
+  List<String> split = text.split("\n");
+
+  for (int i = 0; i < 10; i++) {
+    for (int i = 1; i < split.length; i++) {
+      String currentLine = split[i];
+      String previousLine = split[i - 1];
+
+      if (previousLine.contains("-->") && currentLine.trim().isEmpty) {
+        split.removeAt(i);
+        split.removeAt(i - 1);
+        split.removeAt(i - 2);
+      }
+    }
+  }
+
+  return split.join("\n");
+}
+
+String sanitizeVttNewlines(String text) {
+  List<String> split = text.split("\n ");
+
+  for (int i = 0; i < 10; i++) {
+    for (int i = 1; i < split.length; i++) {
+      String currentLine = split[i];
+      String previousLine = split[i - 1];
+
+      if (previousLine.contains("-->") && currentLine.trim().isEmpty) {
+        split.removeAt(i);
+      }
+      if (previousLine.contains("-->") && currentLine.trim().isEmpty) {
+        split.removeAt(i);
+      }
+    }
+  }
+
+  return split.join("\n");
+}
+
 Future<File> extractExternalSubtitles(File file) async {
   if (!file.existsSync()) {
     return null;
