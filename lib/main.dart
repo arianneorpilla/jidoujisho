@@ -71,6 +71,8 @@ handleAppLifecycleState() {
         break;
       default:
     }
+
+    return null;
   });
 }
 

@@ -102,15 +102,27 @@ class Player extends StatelessWidget {
     }
 
     return FutureBuilder(
-      future: extractSubtitles(videoFile),
-      builder: (BuildContext context, AsyncSnapshot<List<File>> snapshot) {
+      future: Future.wait(
+        [
+          extractSubtitles(videoFile),
+          extractExternalSubtitles(getExternalSubtitles(videoFile))
+        ],
+      ),
+      builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
             return loadingCircle();
           default:
-            List<File> internalSubs = snapshot.data;
-            String defaultSubtitles =
-                getDefaultSubtitles(videoFile, internalSubs);
+            List<dynamic> subtitleFutures = snapshot.data;
+            List<File> internalSubs = subtitleFutures[0];
+            File externalSubs = subtitleFutures[1];
+            String defaultSubtitles = "";
+            if (externalSubs != null) {
+              print(externalSubs);
+              defaultSubtitles = externalSubs.readAsStringSync();
+            } else if (internalSubs.isNotEmpty) {
+              defaultSubtitles = internalSubs.first.readAsStringSync();
+            }
 
             setLastPlayedPath(videoFile.path);
             setLastPlayedPosition(0);
@@ -676,7 +688,8 @@ class _VideoPlayerState extends State<VideoPlayer> {
         print("SUBTITLES SWITCHED TO EXTERNAL SRT");
       } else {
         getSubtitleWrapper().subtitleController.updateSubtitleContent(
-            content: await extractNonSrtSubtitles(result));
+            content:
+                (await extractExternalSubtitles(result)).readAsStringSync());
         print("SUBTITLES SWITCHED TO EXTERNAL ASS");
       }
     }

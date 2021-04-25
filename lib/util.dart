@@ -45,18 +45,6 @@ class VideoHistory {
   }
 }
 
-String getDefaultSubtitles(File file, List<File> internalSubtitles) {
-  String content = "";
-
-  if (hasExternalSubtitles(file)) {
-    content = getExternalSubtitles(file).readAsStringSync();
-  } else if (internalSubtitles.isNotEmpty) {
-    content = (internalSubtitles[0]).readAsStringSync();
-  }
-
-  return content;
-}
-
 bool hasExternalSubtitles(File file) {
   String subtitlePath = getExternalSubtitles(file).path;
   File subtitleFile = File(subtitlePath);
@@ -135,15 +123,21 @@ Future<List<File>> extractSubtitles(File file) async {
   return files;
 }
 
-Future<String> extractNonSrtSubtitles(File file) async {
+Future<File> extractExternalSubtitles(File file) async {
+  if (!file.existsSync()) {
+    return null;
+  } else if (file.path.toLowerCase().endsWith("srt")) {
+    return file;
+  }
+
   final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
 
   String inputPath = file.path;
-  String outputPath = "\"$gAppDirPath/extractNonSrt.srt\"";
+  String outputPath = "\"$gAppDirPath/extractExternal.srt\"";
   String command =
       "-loglevel quiet -f ass -c:s ass -i \"$inputPath\" -map 0:s:0 -c:s subrip $outputPath";
 
-  String subPath = "$gAppDirPath/extractNonSrt.srt";
+  String subPath = "$gAppDirPath/extractExternal.srt";
   File subFile = File(subPath);
 
   if (subFile.existsSync()) {
@@ -151,7 +145,7 @@ Future<String> extractNonSrtSubtitles(File file) async {
   }
 
   await _flutterFFmpeg.execute(command);
-  return subFile.readAsStringSync();
+  return subFile;
 }
 
 String getTimestampFromDuration(Duration duration) {
