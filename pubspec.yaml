@@ -85,4 +85,4 @@ flutter:
 
   assets:
     - assets/icon/icon.png
-    - assets/ipadic
+    - assets/ipadic/
