@@ -665,7 +665,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
     if (index < internalSubs.length) {
       getSubtitleWrapper().subtitleController.updateSubtitleContent(
-          content: internalSubs[index].readAsStringSync());
+          content: sanitizeSrtNewlines(internalSubs[index].readAsStringSync()));
       print("SUBTITLES SWITCHED TO TRACK $index");
     } else {
       _subTitleController.updateSubtitleContent(content: "");
@@ -682,14 +682,13 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
     if (result != null) {
       if (result.path.endsWith("srt")) {
-        getSubtitleWrapper()
-            .subtitleController
-            .updateSubtitleContent(content: result.readAsStringSync());
+        getSubtitleWrapper().subtitleController.updateSubtitleContent(
+            content: sanitizeSrtNewlines(result.readAsStringSync()));
         print("SUBTITLES SWITCHED TO EXTERNAL SRT");
       } else {
         getSubtitleWrapper().subtitleController.updateSubtitleContent(
-            content:
-                (await extractExternalSubtitles(result)).readAsStringSync());
+            content: sanitizeSrtNewlines(
+                (await extractExternalSubtitles(result)).readAsStringSync()));
         print("SUBTITLES SWITCHED TO EXTERNAL ASS");
       }
     }
@@ -1188,23 +1187,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       _currentSubTrack,
     );
 
-    List<String> split = unprocessed.split("\n ");
-
-    for (int i = 0; i < 10; i++) {
-      for (int i = 1; i < split.length; i++) {
-        String currentLine = split[i];
-        String previousLine = split[i - 1];
-
-        if (previousLine.contains("-->") && currentLine.trim().isEmpty) {
-          split.removeAt(i);
-        }
-        if (previousLine.contains("-->") && currentLine.trim().isEmpty) {
-          split.removeAt(i);
-        }
-      }
-    }
-
-    String subtitles = split.join("\n");
+    String subtitles = sanitizeVttNewlines(unprocessed);
 
     _subTitleController.updateSubtitleContent(content: subtitles);
 
