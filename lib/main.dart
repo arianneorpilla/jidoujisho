@@ -54,9 +54,9 @@ void main() async {
     backgroundTaskEntrypoint: _backgroundTaskEntrypoint,
   );
 
-  handleAppLifecycleState();
-
   runApp(App());
+
+  handleAppLifecycleState();
 }
 
 handleAppLifecycleState() {
@@ -64,12 +64,6 @@ handleAppLifecycleState() {
     print(msg);
 
     switch (msg) {
-      case "AppLifecycleState.paused":
-        AudioService.stop();
-        break;
-      case "AppLifecycleState.inactive":
-        AudioService.stop();
-        break;
       case "AppLifecycleState.resumed":
         AudioService.start(
           backgroundTaskEntrypoint: _backgroundTaskEntrypoint,
@@ -77,8 +71,6 @@ handleAppLifecycleState() {
         break;
       default:
     }
-
-    return null;
   });
 }
 

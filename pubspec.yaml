@@ -2,7 +2,7 @@ name: jidoujisho
 description: A mobile video player tailored for Japanese language learners. 
 publish_to: none
 
-version: 0.13.3+8
+version: 0.13.4+10
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -85,3 +85,4 @@ flutter:
 
   assets:
     - assets/icon/icon.png
+    - assets/ipadic

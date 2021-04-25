@@ -1120,7 +1120,8 @@ class _VideoPlayerState extends State<VideoPlayer> {
               case ConnectionState.waiting:
                 if (getFocusMode()) {
                   _wasPlaying.value =
-                      getVideoPlayerController().value.isPlaying;
+                      (getVideoPlayerController().value.isPlaying ||
+                          _wasPlaying.value);
                   _videoPlayerController.pause();
                 }
 
@@ -1211,9 +1212,13 @@ class _VideoPlayerState extends State<VideoPlayer> {
     int subIndex = 0;
 
     for (int i = 0; i < subtitles.length; i++) {
-      if (subtitles[i].startTime.inMilliseconds <
-          _videoPlayerController.value.position.inMilliseconds) {
-        subIndex = i++;
+      if (subtitles[i].startTime.inMilliseconds ==
+              _currentSubtitle.value.startTime.inMilliseconds &&
+          subtitles[i].endTime.inMilliseconds ==
+              _currentSubtitle.value.endTime.inMilliseconds &&
+          subtitles[i].text == _currentSubtitle.value.text) {
+        subIndex = i;
+        break;
       }
     }
 
@@ -1235,7 +1240,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   Widget transcriptDialog(
-      int i,
+      int selectedIndex,
       List<dynamic> subtitles,
       ItemScrollController itemScrollController,
       ItemPositionsListener itemPositionsListener,
@@ -1261,7 +1266,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
     return ScrollablePositionedList.builder(
       itemScrollController: itemScrollController,
       itemPositionsListener: itemPositionsListener,
-      initialScrollIndex: (i - 2 > 0) ? i - 2 : 0,
+      initialScrollIndex: (selectedIndex - 2 > 0) ? selectedIndex - 2 : 0,
       itemCount: subtitles.length,
       itemBuilder: (context, index) {
         Subtitle subtitle = subtitles[index];
@@ -1272,7 +1277,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
         String subtitleDuration = "$subtitleStart - $subtitleEnd";
 
         return ListTile(
-          selected: i == index,
+          selected: selectedIndex == index,
           selectedTileColor: Colors.red.withOpacity(0.15),
           dense: true,
           title: Column(
@@ -1312,12 +1317,16 @@ class _VideoPlayerState extends State<VideoPlayer> {
           onLongPress: () {
             List<Subtitle> selectedSubtitles = [];
 
-            if (i <= index) {
-              for (int subIndex = i; subIndex <= index; subIndex++) {
+            if (selectedIndex <= index) {
+              for (int subIndex = selectedIndex;
+                  subIndex <= index;
+                  subIndex++) {
                 selectedSubtitles.add(subtitles[subIndex]);
               }
             } else {
-              for (int subIndex = index; subIndex <= i; subIndex++) {
+              for (int subIndex = index;
+                  subIndex <= selectedIndex;
+                  subIndex++) {
                 selectedSubtitles.add(subtitles[subIndex]);
               }
             }
