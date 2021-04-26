@@ -19,10 +19,12 @@
 - [x] **Search current clipboard and open browser** to Jisho.org, DeepL or Google Translate
 - [x] **Export cards to AnkiDroid**, complete with a snapshot and audio of the current context
 - [x] Selecting a word allows export to AnkiDroid with the **sentence, answer, meaning and reading**
+- [x] Morphological analysis of subtitles allows either **tap selection** or **drag selection** of subtitles
 - [x] **Repeat the current subtitle from the beginning** by flicking horizontally
 - [x] Swipe vertically to open the **transcript to jump to time and review subtitles**
-- [x] **YouTube support** for videos with **Japanese closed captions** and **automatically generated subtitles**
-- [x] Morphological analysis of subtitles allows either **tap selection** or **drag selection** of subtitles
+- [x] Open the app to **trending videos in Japan**, import and export a **channel list** and **search with suggestions** 
+- [x] **YouTube playback support** for videos with **Japanese closed captions** and **automatically generated subtitles**
+- [x] **Clipboard remembers the last hundred words** queried for review in between sessions
 - [x] **(Experimental)** Custom Japanese-Japanese dictionary support **(tested for Shinmeikai)**
 - [x] **(Experimental)** Weblio.jp **English to Japanese support** and full Japanese localization
 
@@ -36,10 +38,13 @@ Please note that the development of the app switches between changes being imple
 - [x] Fixes for **slow video loading due to scoped storage** and **H.265 video playback**
 - [x] **Use of the AnkiDroid API** instead of share intent to streamline card export and Anki output customisation
 - [x] **Morphological analysis of subtitles** for better text selection
-- [ ] User preferences, **broader language and custom dictionary support and offline use**
+- [ ] **Basic support for any languages and offline use** via support of a common dictionary format
+- [ ] Improved **monolingual dictionary support**
+- [ ] **Immersion difficulty levels** for oral practice
 
-### 🛣️ Coming Soon
-- [ ] Multiple subtitle tracks at a given time, and **immersion difficulty levels** for oral practice
+### 🛣️ Stretch Goals
+- [ ] Promote project to stable and **Google Play release**
+- [ ] **Extensive language support with text segmentation** for other CJK languages
 - [ ] Tinker around with releasing the app on **other platforms if possible**
 
 # 🎞️ A glimpse of jidoujisho in action
