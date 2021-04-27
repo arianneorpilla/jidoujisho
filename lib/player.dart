@@ -350,8 +350,12 @@ class _VideoPlayerState extends State<VideoPlayer> {
           _currentSubtitle.value.startTime - Duration(milliseconds: 100);
       Duration cutOffEnd =
           _currentSubtitle.value.endTime + Duration(milliseconds: 100);
-      if (getVideoPlayerController().value.position > cutOffStart &&
-          getVideoPlayerController().value.position < cutOffEnd) {
+      if (getVideoPlayerController().value.position.inMilliseconds -
+                  getSubtitleController().subtitlesOffset >
+              cutOffStart.inMilliseconds &&
+          getVideoPlayerController().value.position.inMilliseconds -
+                  getSubtitleController().subtitlesOffset <
+              cutOffEnd.inMilliseconds) {
         getSubtitleController().widgetVisibility.value = true;
       } else {
         getSubtitleController().widgetVisibility.value = false;
