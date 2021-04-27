@@ -303,7 +303,8 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   Future<void> rewindFastForward() async {
-    await getVideoPlayerController().seekTo(_currentSubtitle.value.startTime);
+    await getVideoPlayerController().seekTo(_currentSubtitle.value.startTime -
+        Duration(seconds: _subTitleController.subtitlesOffset));
   }
 
   @override
@@ -430,11 +431,13 @@ class _VideoPlayerState extends State<VideoPlayer> {
             GestureDetector(
               onHorizontalDragUpdate: (details) {
                 if (details.delta.dx > 20) {
-                  getVideoPlayerController()
-                      .seekTo(_currentSubtitle.value.startTime);
+                  getVideoPlayerController().seekTo(_currentSubtitle
+                          .value.startTime -
+                      Duration(seconds: _subTitleController.subtitlesOffset));
                 } else if (details.delta.dx < -20) {
-                  getVideoPlayerController()
-                      .seekTo(_currentSubtitle.value.startTime);
+                  getVideoPlayerController().seekTo(_currentSubtitle
+                          .value.startTime -
+                      Duration(seconds: _subTitleController.subtitlesOffset));
                 }
               },
               onVerticalDragUpdate: (details) {
@@ -488,6 +491,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       false,
       selection,
       audioAllowance,
+      getSubtitleController().subtitlesOffset,
     );
   }
 
@@ -505,6 +509,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       _wasPlaying.value,
       [_currentSubtitle.value],
       audioAllowance,
+      getSubtitleController().subtitlesOffset,
     );
   }
 
@@ -1311,7 +1316,8 @@ class _VideoPlayerState extends State<VideoPlayer> {
           ),
           onTap: () {
             Navigator.pop(context);
-            _videoPlayerController.seekTo(subtitles[index].startTime);
+            _videoPlayerController.seekTo(subtitles[index].startTime -
+                Duration(seconds: _subTitleController.subtitlesOffset));
             _videoPlayerController.play();
           },
           onLongPress: () {

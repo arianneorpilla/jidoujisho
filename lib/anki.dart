@@ -105,6 +105,7 @@ Future exportCurrentAudio(
   VlcPlayerController controller,
   Subtitle subtitle,
   int audioAllowance,
+  int subtitleDelay,
 ) async {
   File audioFile = File(getPreviewAudioPath());
   if (audioFile.existsSync()) {
@@ -116,8 +117,9 @@ Future exportCurrentAudio(
   String audioIndex;
 
   Duration allowance = Duration(milliseconds: audioAllowance);
-  Duration adjustedStart = subtitle.startTime - allowance;
-  Duration adjustedEnd = subtitle.endTime + allowance;
+  Duration delay = Duration(milliseconds: subtitleDelay);
+  Duration adjustedStart = subtitle.startTime - delay - allowance;
+  Duration adjustedEnd = subtitle.endTime - delay + allowance;
 
   timeStart = getTimestampFromDuration(adjustedStart);
   timeEnd = getTimestampFromDuration(adjustedEnd);
@@ -160,6 +162,7 @@ Future exportToAnki(
   bool wasPlaying,
   List<Subtitle> exportSubtitles,
   int audioAllowance,
+  int subtitleDelay,
 ) async {
   String lastDeck = gSharedPrefs.getString("lastDeck") ?? "Default";
 
@@ -182,7 +185,13 @@ Future exportToAnki(
       }
     }
 
-    await exportCurrentAudio(chewie, controller, subtitle, audioAllowance);
+    await exportCurrentAudio(
+      chewie,
+      controller,
+      subtitle,
+      audioAllowance,
+      subtitleDelay,
+    );
 
     Clipboard.setData(
       ClipboardData(text: ""),
