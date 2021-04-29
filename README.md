@@ -25,7 +25,7 @@
 - [x] Open the app to **trending videos in Japan**, import and export a **channel list** and **search with suggestions** 
 - [x] **YouTube playback support** for videos with **Japanese closed captions** and **automatically generated subtitles**
 - [x] **Clipboard remembers the last hundred words** queried for review in between sessions
-- [x] **(Experimental)** Custom Japanese-Japanese dictionary support **(tested for Shinmeikai)**
+- [x] **(Experimental)** Use monolingual dictionaries with **Yomichan dictionary support**
 - [x] **(Experimental)** Weblio.jp **English to Japanese support** and full Japanese localization
 
 # ⚕️ Current state of the project
@@ -124,10 +124,12 @@ A primer on the basics of the application is as follows.
 
 * 🇯🇵 Can't find Japanese subtitles for your media? Try finding what you need at <b><a href="https://kitsunekko.net">kitsunekko</a></b>
 * 📑 **External subtitles with the same name as the selected video file** will be loaded by default
+* ⏲️ If your subtitles are off, you can **set the delay** or **pad the exported audio time with an allowance**
 * ▶️ A **resume button** is at the top of the main menu, and **returns to the last played video and duration**
 * 🤝 **Sharing is caring.** You can import and export your channel IDs for backup and sharing in the main menu
 * ⛓️ Channels may also be added by **pasting a link of any video by the channel** in *List new channel*
 * 🔎 Holding onto a YouTube video in search, history or trending will show the option to list the channel
+* ✊ **Export a range of multiple subtitles** by holding onto a subtitle aside from the current one in the transcript
 * ⚠️ **If AnkiDroid is not running in the background**, tap on the export message to open it
 * 🗃 **The AnkiDroid deck you last export to will be remembered** for your next export
 * 📹 The quality closest to the **last selected quality** will be selected by default for YouTube videos
