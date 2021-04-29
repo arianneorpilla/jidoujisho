@@ -718,20 +718,20 @@ class _HomeState extends State<Home> {
           enabled: gIsYouTubeAllowed,
         ),
         PopupMenuItem<String>(
-          child: const Text('View on GitHub'),
-          value: 'View project on GitHub',
+          child: const Text('View repository on GitHub'),
+          value: 'View repository on GitHub',
         ),
         PopupMenuItem<String>(
-          child: const Text('Report a bug'),
-          value: 'Report a bug',
+          child: const Text('Report a bug or problem'),
+          value: 'Report a bug or problem',
         ),
         PopupMenuItem<String>(
           child: const Text('Set AnkiDroid directory'),
           value: 'Set AnkiDroid directory',
         ),
         PopupMenuItem<String>(
-          child: const Text('Manage term banks'),
-          value: 'Manage term banks',
+          child: const Text('Set term bank directory'),
+          value: 'Set term bank directory',
         ),
         PopupMenuItem<String>(
           child: const Text('About this app'),
@@ -854,10 +854,10 @@ class _HomeState extends State<Home> {
           },
         );
         break;
-      case "View project on GitHub":
+      case "View repository on GitHub":
         await launch("https://github.com/lrorpilla/jidoujisho");
         break;
-      case "Report a bug":
+      case "Report a bug or problem":
         await launch("https://github.com/lrorpilla/jidoujisho/issues/new");
         break;
       case "Set AnkiDroid directory":
@@ -903,7 +903,7 @@ class _HomeState extends State<Home> {
           },
         );
         break;
-      case "Manage term banks":
+      case "Set term bank directory":
         String currentDirectoryPath = getTermBankDirectory().path;
         TextEditingController _textFieldController = TextEditingController(
           text: currentDirectoryPath,
