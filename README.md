@@ -7,7 +7,7 @@
 <p align="center">A mobile video player tailored for Japanese language learners.</p>
 
 <p align="center" style="margin:0"><b>Latest GitHub Release:<br>
-<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.13.7-beta">0.13.7-beta 🇯🇵 → 🇬🇧</a><br>
+<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.14.0-beta">0.14.0-beta 🇯🇵 → 🇬🇧</a><br>
 <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.5.3-enjp-beta">0.5.3-beta 🇬🇧 → 🇯🇵</a></b><br></p>
 <div latest></div>
 
@@ -25,7 +25,7 @@
 - [x] Open the app to **trending videos in Japan**, import and export a **channel list** and **search with suggestions** 
 - [x] **YouTube playback support** for videos with **Japanese closed captions** and **automatically generated subtitles**
 - [x] **Clipboard remembers the last hundred words** queried for review in between sessions
-- [x] **(Experimental)** Use monolingual dictionaries with **Yomichan dictionary support**
+- [x] **Use monolingual definitions** from Goo.ne.jp or **imported Yomichan dictionaries**
 - [x] **(Experimental)** Weblio.jp **English to Japanese support** and full Japanese localization
 
 # ⚕️ Current state of the project
@@ -38,8 +38,8 @@ Please note that the development of the app switches between changes being imple
 - [x] Fixes for **slow video loading due to scoped storage** and **H.265 video playback**
 - [x] **Use of the AnkiDroid API** instead of share intent to streamline card export and Anki output customisation
 - [x] **Morphological analysis of subtitles** for better text selection
+- [x] Improved **monolingual dictionary support**
 - [ ] **Basic support for any languages and offline use** via support of a common dictionary format
-- [ ] Improved **monolingual dictionary support**
 - [ ] **Immersion difficulty levels** for oral practice
 
 ### 🛣️ Stretch Goals
