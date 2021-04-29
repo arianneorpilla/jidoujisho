@@ -337,6 +337,9 @@ class _MaterialControlsState extends State<MaterialControls>
             break;
           case 2:
             toggleMonolingualMode();
+            String clipboardMemory = chewieController.clipboard.value;
+            chewieController.clipboard.value = "";
+            chewieController.clipboard.value = clipboardMemory;
             break;
           case 3:
             toggleSelectMode();
