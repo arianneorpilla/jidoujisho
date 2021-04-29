@@ -25,7 +25,7 @@
 - [x] Open the app to **trending videos in Japan**, import and export a **channel list** and **search with suggestions** 
 - [x] **YouTube playback support** for videos with **Japanese closed captions** and **automatically generated subtitles**
 - [x] **Clipboard remembers the last hundred words** queried for review in between sessions
-- [x] **(Experimental)** Custom Japanese-Japanese dictionary support **(tested for Shinmeikai)**
+- [x] **(Experimental)** Use monolingual dictionaries with **Yomichan dictionary support**
 - [x] **(Experimental)** Weblio.jp **English to Japanese support** and full Japanese localization
 
 # ⚕️ Current state of the project
