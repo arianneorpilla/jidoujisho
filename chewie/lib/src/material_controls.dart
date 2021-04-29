@@ -296,6 +296,10 @@ class _MaterialControlsState extends State<MaterialControls>
           builder: (context) => _MoreOptionsDialog(options: [
             "Share Current Subtitle to Applications",
             "Adjust Subtitle Delay and Audio Allowance",
+            if (getMonolingualMode())
+              "Get Bilingual Definitions from Jisho.org"
+            else
+              "Get Monolingual Definitions from Goo.ne.jp",
             if (getSelectMode())
               "Use Tap to Select Subtitle Selection"
             else
@@ -309,6 +313,7 @@ class _MaterialControlsState extends State<MaterialControls>
           ], icons: [
             Icons.share_outlined,
             Icons.timer_rounded,
+            Icons.translate_sharp,
             if (getSelectMode())
               Icons.touch_app_rounded
             else
@@ -331,16 +336,19 @@ class _MaterialControlsState extends State<MaterialControls>
             chewieController.retimeSubtitles();
             break;
           case 2:
+            toggleMonolingualMode();
+            break;
+          case 3:
             toggleSelectMode();
             gIsSelectMode.value = getSelectMode();
             break;
-          case 3:
+          case 4:
             toggleFocusMode();
             break;
-          case 4:
+          case 5:
             chewieController.playExternalSubtitles();
             break;
-          case 5:
+          case 6:
             chewieController.exportSingleCallback();
             break;
         }

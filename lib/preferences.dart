@@ -134,12 +134,32 @@ Directory getAnkiDroidDirectory() {
   return directory;
 }
 
+Future<void> setTermBankDirectory(Directory directory) async {
+  await gSharedPrefs.setString('termBankDirectory', directory.path);
+}
+
+Directory getTermBankDirectory() {
+  String directoryPath = gSharedPrefs.getString('termBankDirectory') ??
+      'storage/emulated/0/jidoujisho';
+  Directory directory = Directory(directoryPath);
+
+  return directory;
+}
+
 Future<void> toggleSelectMode() async {
   await gSharedPrefs.setBool("selectMode", !getSelectMode());
 }
 
 bool getSelectMode() {
   return gSharedPrefs.getBool("selectMode") ?? false;
+}
+
+Future<void> toggleMonolingualMode() async {
+  await gSharedPrefs.setBool("monolingualMode", !getMonolingualMode());
+}
+
+bool getMonolingualMode() {
+  return gSharedPrefs.getBool("monolingualMode") ?? false;
 }
 
 Future<void> toggleFocusMode() async {

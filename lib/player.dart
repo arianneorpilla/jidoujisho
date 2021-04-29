@@ -303,8 +303,8 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   Future<void> rewindFastForward() async {
-    await getVideoPlayerController().seekTo(_currentSubtitle.value.startTime -
-        Duration(seconds: _subTitleController.subtitlesOffset));
+    await getVideoPlayerController().seekTo(_currentSubtitle.value.startTime +
+        Duration(milliseconds: _subTitleController.subtitlesOffset));
   }
 
   @override
@@ -432,21 +432,29 @@ class _VideoPlayerState extends State<VideoPlayer> {
               onHorizontalDragUpdate: (details) {
                 if (details.delta.dx > 20) {
                   getVideoPlayerController().seekTo(_currentSubtitle
-                          .value.startTime -
-                      Duration(seconds: _subTitleController.subtitlesOffset));
+                          .value.startTime +
+                      Duration(
+                          milliseconds: _subTitleController.subtitlesOffset));
                 } else if (details.delta.dx < -20) {
                   getVideoPlayerController().seekTo(_currentSubtitle
-                          .value.startTime -
-                      Duration(seconds: _subTitleController.subtitlesOffset));
+                          .value.startTime +
+                      Duration(
+                          milliseconds: _subTitleController.subtitlesOffset));
                 }
               },
               onVerticalDragUpdate: (details) {
+                _wasPlaying.value =
+                    (getVideoPlayerController().value.isPlaying ||
+                        _wasPlaying.value);
+
                 if (details.delta.dy > 20) {
                   openTranscript(
-                      _subTitleController.subtitleBloc.subtitles.subtitles);
+                      _subTitleController.subtitleBloc.subtitles.subtitles,
+                      _wasPlaying.value);
                 } else if (details.delta.dy < -20) {
                   openTranscript(
-                      _subTitleController.subtitleBloc.subtitles.subtitles);
+                      _subTitleController.subtitleBloc.subtitles.subtitles,
+                      _wasPlaying.value);
                 }
               },
               child: getSubtitleWrapper(),
@@ -478,6 +486,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
   void exportMultiCallback(
     Subtitle selectedSubtitle,
     List<Subtitle> selection,
+    bool wasPlaying,
   ) {
     _clipboard.value = "&<&>export&<&>";
 
@@ -488,7 +497,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       _clipboard,
       selectedSubtitle,
       _currentDictionaryEntry.value,
-      false,
+      wasPlaying,
       selection,
       audioAllowance,
       getSubtitleController().subtitlesOffset,
@@ -1040,7 +1049,8 @@ class _VideoPlayerState extends State<VideoPlayer> {
                   Text(results[selectedIndex.value].reading),
                   Flexible(
                     child: SingleChildScrollView(
-                      child: gCustomDictionary.isNotEmpty
+                      child: gCustomDictionary.isNotEmpty ||
+                              getMonolingualMode()
                           ? SelectableText(
                               "\n${results[selectedIndex.value].meaning}\n")
                           : Text("\n${results[selectedIndex.value].meaning}\n"),
@@ -1112,7 +1122,9 @@ class _VideoPlayerState extends State<VideoPlayer> {
       valueListenable: _clipboard,
       builder: (context, clipboard, widget) {
         return FutureBuilder(
-          future: getWordDetails(clipboard),
+          future: getMonolingualMode()
+              ? getMonolingualWordDetails(clipboard, false)
+              : getWordDetails(clipboard),
           builder: (BuildContext context,
               AsyncSnapshot<List<DictionaryEntry>> snapshot) {
             if (_clipboard.value == "&<&>export&<&>") {
@@ -1208,13 +1220,14 @@ class _VideoPlayerState extends State<VideoPlayer> {
     _currentSubTrack.value = -51;
   }
 
-  void openTranscript(List<dynamic> subtitles) async {
+  void openTranscript(List<dynamic> subtitles, bool wasPlaying) async {
     ItemScrollController itemScrollController = ItemScrollController();
     ItemPositionsListener itemPositionsListener =
         ItemPositionsListener.create();
     _videoPlayerController.pause();
 
     int subIndex = 0;
+    bool isExporting = false;
 
     for (int i = 0; i < subtitles.length; i++) {
       if (subtitles[i].startTime.inMilliseconds ==
@@ -1227,137 +1240,144 @@ class _VideoPlayerState extends State<VideoPlayer> {
       }
     }
 
+    Widget transcriptDialog(
+        int selectedIndex,
+        List<dynamic> subtitles,
+        ItemScrollController itemScrollController,
+        ItemPositionsListener itemPositionsListener,
+        ChewieController chewie,
+        VlcPlayerController controller,
+        DictionaryEntry currentDictionaryEntry,
+        bool wasPlaying) {
+      if (subtitles.isEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.subtitles_off_outlined, color: Colors.white, size: 72),
+              const SizedBox(height: 6),
+              Text(
+                "The transcript is empty.",
+                style: TextStyle(fontSize: 20, color: Colors.white),
+              ),
+            ],
+          ),
+        );
+      }
+
+      return ScrollablePositionedList.builder(
+        itemScrollController: itemScrollController,
+        itemPositionsListener: itemPositionsListener,
+        initialScrollIndex: (selectedIndex - 2 > 0) ? selectedIndex - 2 : 0,
+        itemCount: subtitles.length,
+        itemBuilder: (context, index) {
+          Subtitle subtitle = subtitles[index];
+
+          String subtitleText = "『 ${subtitle.text} 』";
+          String subtitleStart = getTimestampFromDuration(subtitle.startTime);
+          String subtitleEnd = getTimestampFromDuration(subtitle.endTime);
+          String subtitleDuration = "$subtitleStart - $subtitleEnd";
+
+          return ListTile(
+            selected: selectedIndex == index,
+            selectedTileColor: Colors.red.withOpacity(0.15),
+            dense: true,
+            title: Column(
+              children: [
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.textsms_outlined,
+                      size: 12.0,
+                      color: Colors.red,
+                    ),
+                    const SizedBox(width: 16.0),
+                    Text(
+                      subtitleDuration,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  subtitleText,
+                  style: TextStyle(fontSize: 20, color: Colors.white),
+                ),
+                const SizedBox(height: 6),
+              ],
+            ),
+            onTap: () {
+              Navigator.pop(context);
+              _videoPlayerController.seekTo(subtitles[index].startTime +
+                  Duration(milliseconds: _subTitleController.subtitlesOffset));
+              _videoPlayerController.play();
+            },
+            onLongPress: () {
+              List<Subtitle> selectedSubtitles = [];
+
+              if (selectedIndex <= index) {
+                for (int subIndex = selectedIndex;
+                    subIndex <= index;
+                    subIndex++) {
+                  selectedSubtitles.add(subtitles[subIndex]);
+                }
+              } else {
+                for (int subIndex = index;
+                    subIndex <= selectedIndex;
+                    subIndex++) {
+                  selectedSubtitles.add(subtitles[subIndex]);
+                }
+              }
+
+              String selectedText = "";
+              String removeLastNewline(String n) =>
+                  n = n.substring(0, n.length - 1);
+              selectedSubtitles
+                  .forEach((subtitle) => selectedText += subtitle.text + "\n");
+              selectedText = removeLastNewline(selectedText);
+
+              Duration selectedStartTime = selectedSubtitles.first.startTime;
+              Duration selectedEndTime = selectedSubtitles.last.endTime;
+
+              Subtitle selectedSubtitle = Subtitle(
+                text: selectedText,
+                startTime: selectedStartTime,
+                endTime: selectedEndTime,
+              );
+
+              exportMultiCallback(
+                  selectedSubtitle, selectedSubtitles, wasPlaying);
+              isExporting = true;
+              Navigator.pop(context);
+            },
+          );
+        },
+      );
+    }
+
     await showModalBottomSheet<int>(
       backgroundColor: Theme.of(context).primaryColor.withOpacity(0.8),
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
       builder: (context) => transcriptDialog(
-        subIndex,
-        subtitles,
-        itemScrollController,
-        itemPositionsListener,
-        getChewieController(),
-        getVideoPlayerController(),
-        _currentDictionaryEntry.value,
-      ),
+          subIndex,
+          subtitles,
+          itemScrollController,
+          itemPositionsListener,
+          getChewieController(),
+          getVideoPlayerController(),
+          _currentDictionaryEntry.value,
+          _wasPlaying.value),
     );
-  }
 
-  Widget transcriptDialog(
-      int selectedIndex,
-      List<dynamic> subtitles,
-      ItemScrollController itemScrollController,
-      ItemPositionsListener itemPositionsListener,
-      ChewieController chewie,
-      VlcPlayerController controller,
-      DictionaryEntry currentDictionaryEntry) {
-    if (subtitles.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.subtitles_off_outlined, color: Colors.white, size: 72),
-            const SizedBox(height: 6),
-            Text(
-              "The transcript is empty.",
-              style: TextStyle(fontSize: 20, color: Colors.white),
-            ),
-          ],
-        ),
-      );
+    if (wasPlaying && !isExporting) {
+      getVideoPlayerController().play();
     }
-
-    return ScrollablePositionedList.builder(
-      itemScrollController: itemScrollController,
-      itemPositionsListener: itemPositionsListener,
-      initialScrollIndex: (selectedIndex - 2 > 0) ? selectedIndex - 2 : 0,
-      itemCount: subtitles.length,
-      itemBuilder: (context, index) {
-        Subtitle subtitle = subtitles[index];
-
-        String subtitleText = "『 ${subtitle.text} 』";
-        String subtitleStart = getTimestampFromDuration(subtitle.startTime);
-        String subtitleEnd = getTimestampFromDuration(subtitle.endTime);
-        String subtitleDuration = "$subtitleStart - $subtitleEnd";
-
-        return ListTile(
-          selected: selectedIndex == index,
-          selectedTileColor: Colors.red.withOpacity(0.15),
-          dense: true,
-          title: Column(
-            children: [
-              const SizedBox(height: 6),
-              Row(
-                children: [
-                  Icon(
-                    Icons.textsms_outlined,
-                    size: 12.0,
-                    color: Colors.red,
-                  ),
-                  const SizedBox(width: 16.0),
-                  Text(
-                    subtitleDuration,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Text(
-                subtitleText,
-                style: TextStyle(fontSize: 20, color: Colors.white),
-              ),
-              const SizedBox(height: 6),
-            ],
-          ),
-          onTap: () {
-            Navigator.pop(context);
-            _videoPlayerController.seekTo(subtitles[index].startTime -
-                Duration(seconds: _subTitleController.subtitlesOffset));
-            _videoPlayerController.play();
-          },
-          onLongPress: () {
-            List<Subtitle> selectedSubtitles = [];
-
-            if (selectedIndex <= index) {
-              for (int subIndex = selectedIndex;
-                  subIndex <= index;
-                  subIndex++) {
-                selectedSubtitles.add(subtitles[subIndex]);
-              }
-            } else {
-              for (int subIndex = index;
-                  subIndex <= selectedIndex;
-                  subIndex++) {
-                selectedSubtitles.add(subtitles[subIndex]);
-              }
-            }
-
-            String selectedText = "";
-            String removeLastNewline(String n) =>
-                n = n.substring(0, n.length - 1);
-            selectedSubtitles
-                .forEach((subtitle) => selectedText += subtitle.text + "\n");
-            selectedText = removeLastNewline(selectedText);
-
-            Duration selectedStartTime = selectedSubtitles.first.startTime;
-            Duration selectedEndTime = selectedSubtitles.last.endTime;
-
-            Subtitle selectedSubtitle = Subtitle(
-              text: selectedText,
-              startTime: selectedStartTime,
-              endTime: selectedEndTime,
-            );
-
-            exportMultiCallback(selectedSubtitle, selectedSubtitles);
-            Navigator.pop(context);
-          },
-        );
-      },
-    );
   }
 }

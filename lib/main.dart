@@ -47,7 +47,8 @@ void main() async {
   gIsSelectMode = ValueNotifier<bool>(getSelectMode());
 
   gCustomDictionary = importCustomDictionary();
-  gCustomDictionaryFuzzy = Fuzzy(getAllImportedWords());
+  gCustomDictionaryFuzzy =
+      Fuzzy(getAllImportedWords(), options: FuzzyOptions());
 
   await AudioService.connect();
   await AudioService.start(
@@ -718,7 +719,7 @@ class _HomeState extends State<Home> {
         ),
         PopupMenuItem<String>(
           child: const Text('View on GitHub'),
-          value: 'View on GitHub',
+          value: 'View project on GitHub',
         ),
         PopupMenuItem<String>(
           child: const Text('Report a bug'),
@@ -727,6 +728,10 @@ class _HomeState extends State<Home> {
         PopupMenuItem<String>(
           child: const Text('Set AnkiDroid directory'),
           value: 'Set AnkiDroid directory',
+        ),
+        PopupMenuItem<String>(
+          child: const Text('Manage term banks'),
+          value: 'Manage term banks',
         ),
         PopupMenuItem<String>(
           child: const Text('About this app'),
@@ -849,7 +854,7 @@ class _HomeState extends State<Home> {
           },
         );
         break;
-      case "View on GitHub":
+      case "View project on GitHub":
         await launch("https://github.com/lrorpilla/jidoujisho");
         break;
       case "Report a bug":
@@ -870,8 +875,9 @@ class _HomeState extends State<Home> {
               ),
               content: TextField(
                 controller: _textFieldController,
-                decoration:
-                    InputDecoration(hintText: "storage/emulated/0/AnkiDroid"),
+                decoration: InputDecoration(
+                    hintText: "storage/emulated/0/AnkiDroid",
+                    labelText: 'AnkiDroid directory path'),
               ),
               actions: <Widget>[
                 TextButton(
@@ -897,10 +903,53 @@ class _HomeState extends State<Home> {
           },
         );
         break;
+      case "Manage term banks":
+        String currentDirectoryPath = getTermBankDirectory().path;
+        TextEditingController _textFieldController = TextEditingController(
+          text: currentDirectoryPath,
+        );
+
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.zero,
+              ),
+              content: TextField(
+                controller: _textFieldController,
+                decoration: InputDecoration(
+                    hintText: "storage/emulated/0/jidoujisho",
+                    labelText: 'Term bank directory path'),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('CANCEL', style: TextStyle(color: Colors.white)),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                TextButton(
+                  child: Text('OK', style: TextStyle(color: Colors.white)),
+                  onPressed: () async {
+                    String newDirectoryPath = _textFieldController.text;
+                    Directory newDirectory = Directory(newDirectoryPath);
+
+                    if (newDirectory.existsSync()) {
+                      await setTermBankDirectory(newDirectory);
+                      Navigator.pop(context);
+                    }
+                  },
+                ),
+              ],
+            );
+          },
+        );
+        break;
       case "About this app":
         const String legalese = "A mobile video player for language learners.\n\n" +
             "Built for the Japanese language learning community by Leo Rafael Orpilla. " +
-            "Word definitions queried from Jisho.org. Logo by Aaron Marbella.\n\n" +
+            "Bilingual definitions queried from Jisho.org. Monolingual definitions queried from Goo.ne.jp. Logo by Aaron Marbella.\n\n" +
             "jidoujisho is free and open source software. Liking the application? " +
             "Help out by providing feedback, making a donation, reporting issues or collaborating " +
             "for further improvements on GitHub.";

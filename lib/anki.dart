@@ -118,8 +118,8 @@ Future exportCurrentAudio(
 
   Duration allowance = Duration(milliseconds: audioAllowance);
   Duration delay = Duration(milliseconds: subtitleDelay);
-  Duration adjustedStart = subtitle.startTime - delay - allowance;
-  Duration adjustedEnd = subtitle.endTime - delay + allowance;
+  Duration adjustedStart = subtitle.startTime + delay - allowance;
+  Duration adjustedEnd = subtitle.endTime + delay + allowance;
 
   timeStart = getTimestampFromDuration(adjustedStart);
   timeEnd = getTimestampFromDuration(adjustedEnd);
@@ -477,10 +477,6 @@ void showAnkiDialog(
 
               Navigator.pop(context);
 
-              if (wasPlaying) {
-                controller.play();
-              }
-
               clipboard.value = "&<&>exported${_selectedDeck.value}&<&>";
               Future.delayed(Duration(seconds: 2), () {
                 clipboard.value = "";
@@ -492,6 +488,9 @@ void showAnkiDialog(
     },
   ).then((result) {
     audioPlayer.stop();
+    if (wasPlaying) {
+      controller.play();
+    }
   });
 }
 
