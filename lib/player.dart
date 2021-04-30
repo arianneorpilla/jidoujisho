@@ -524,8 +524,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   Future<bool> _onWillPop() async {
     if (getVideoPlayerController().value.isEnded) {
-      Navigator.pop(context);
-      return false;
+      Navigator.pop(context, true);
     }
 
     Widget alertDialog = AlertDialog(
@@ -570,8 +569,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
               DeviceOrientation.landscapeRight,
             ]);
 
-            Navigator.pop(context);
-            Navigator.pop(context);
+            Navigator.pop(context, true);
           },
         ),
       ],

@@ -25,7 +25,7 @@ import 'package:jidoujisho/player.dart';
 import 'package:jidoujisho/preferences.dart';
 import 'package:jidoujisho/util.dart';
 
-typedef void ChannelCallback(String id, String name);
+typedef void ChannelCallback(String id, String name, bool isReversed);
 typedef void SearchCallback(String term);
 
 void main() async {
@@ -145,6 +145,7 @@ class _HomeState extends State<Home> {
   TextEditingController _searchQueryController = TextEditingController();
   bool _isSearching = false;
   bool _isChannelView = false;
+  bool _isOldest = false;
 
   String _searchQuery = "";
   int _selectedIndex = 0;
@@ -388,7 +389,7 @@ class _HomeState extends State<Home> {
       Icons.error,
     );
     Widget videoMessage = centerMessage(
-      "Listing recent videos...",
+      _isOldest ? "Listing oldest videos..." : "Listing recent videos...",
       Icons.subscriptions_sharp,
     );
 
@@ -408,7 +409,7 @@ class _HomeState extends State<Home> {
                 return errorMessage;
               }
 
-              return LazyResults(results);
+              return LazyResults(results, _isOldest);
           }
         },
       );
@@ -546,11 +547,16 @@ class _HomeState extends State<Home> {
     );
   }
 
-  void setChannelVideoSearch(String channelID, String channelName) {
+  void setChannelVideoSearch(
+    String channelID,
+    String channelName,
+    bool isOldest,
+  ) {
     setState(() {
       _isChannelView = true;
       _searchQuery = channelID;
       _selectedChannelName = channelName;
+      _isOldest = isOldest;
     });
   }
 
@@ -1011,36 +1017,10 @@ class _HomeState extends State<Home> {
   }
 
   List<Widget> buildActions() {
-    if (_isSearching) {
-      return <Widget>[
-        buildResume(),
-        const SizedBox(width: 6),
-        IconButton(
-          icon: const Icon(Icons.clear),
-          onPressed: () {
-            _clearSearchQuery();
-          },
-        ),
-        const SizedBox(width: 12),
-        GestureDetector(
-          child: const Icon(Icons.more_vert),
-          onTapDown: (TapDownDetails details) {
-            showPopupMenu(details.globalPosition);
-          },
-        ),
-        const SizedBox(width: 12),
-      ];
-    }
-
     return <Widget>[
       buildResume(),
       const SizedBox(width: 6),
-      gIsYouTubeAllowed
-          ? IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: startSearch,
-            )
-          : Container(),
+      buildSearchButton(),
       const SizedBox(width: 12),
       GestureDetector(
         child: const Icon(Icons.more_vert),
@@ -1050,6 +1030,26 @@ class _HomeState extends State<Home> {
       ),
       const SizedBox(width: 12),
     ];
+  }
+
+  Widget buildSearchButton() {
+    if (gIsYouTubeAllowed) {
+      if (_isSearching) {
+        return IconButton(
+          icon: const Icon(Icons.clear),
+          onPressed: () {
+            _clearSearchQuery();
+          },
+        );
+      } else {
+        return IconButton(
+          icon: const Icon(Icons.search),
+          onPressed: startSearch,
+        );
+      }
+    } else {
+      return Container();
+    }
   }
 
   void startSearch() {
@@ -1547,7 +1547,7 @@ class _ChannelResultState extends State<ChannelResult>
 
     return InkWell(
       onTap: () {
-        callback(result.id.toString(), result.title);
+        callback(result.id.toString(), result.title, false);
       },
       onLongPress: () {
         HapticFeedback.vibrate();
@@ -1583,6 +1583,22 @@ class _ChannelResultState extends State<ChannelResult>
                   child: Text('CANCEL', style: TextStyle(color: Colors.white)),
                   onPressed: () {
                     Navigator.pop(context);
+                  },
+                ),
+                TextButton(
+                  child: Text('OLDEST VIDEOS',
+                      style: TextStyle(color: Colors.white)),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    callback(result.id.toString(), result.title, true);
+                  },
+                ),
+                TextButton(
+                  child: Text('LATEST VIDEOS',
+                      style: TextStyle(color: Colors.white)),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    callback(result.id.toString(), result.title, false);
                   },
                 ),
                 TextButton(
@@ -2101,17 +2117,20 @@ class _ClipboardState extends State<ClipboardMenu> {
 
 class LazyResults extends StatefulWidget {
   final results;
+  bool isOldest;
 
-  LazyResults(this.results);
+  LazyResults(this.results, this.isOldest);
 
   @override
-  _LazyResultsState createState() => new _LazyResultsState(this.results);
+  _LazyResultsState createState() =>
+      new _LazyResultsState(this.results, this.isOldest);
 }
 
 class _LazyResultsState extends State<LazyResults> {
-  final results;
+  List<Video> results;
+  bool isOldest;
 
-  _LazyResultsState(this.results);
+  _LazyResultsState(this.results, this.isOldest);
 
   List<Video> verticalData = [];
   final int increment = 10;
@@ -2133,6 +2152,9 @@ class _LazyResultsState extends State<LazyResults> {
   @override
   void initState() {
     super.initState();
+    if (isOldest) {
+      results = results.reversed.toList();
+    }
 
     int next;
     if (verticalData.length + 20 >= results.length) {

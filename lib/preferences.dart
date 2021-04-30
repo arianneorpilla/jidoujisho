@@ -261,7 +261,7 @@ Future<void> addVideoHistory(VideoHistory videoHistory) async {
   videoHistories.add(videoHistory);
 
   if (videoHistories.length >= 20) {
-    videoHistories.sublist(0, videoHistories.length - 20).forEach((entry) {
+    videoHistories.sublist(0, videoHistories.length - 50).forEach((entry) {
       if (!entry.thumbnail.startsWith("http")) {
         File photoFile = File(entry.thumbnail);
         if (photoFile.existsSync()) {
@@ -269,7 +269,7 @@ Future<void> addVideoHistory(VideoHistory videoHistory) async {
         }
       }
     });
-    videoHistories = videoHistories.sublist(videoHistories.length - 20);
+    videoHistories = videoHistories.sublist(videoHistories.length - 50);
   }
 
   await setVideoHistory(videoHistories);
