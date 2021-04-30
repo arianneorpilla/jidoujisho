@@ -196,7 +196,7 @@ packages:
     source: sdk
     version: "0.0.0"
   flutter_archive:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: flutter_archive
       url: "https://pub.dartlang.org"
