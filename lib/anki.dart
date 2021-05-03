@@ -164,7 +164,7 @@ Future exportToAnki(
   int audioAllowance,
   int subtitleDelay,
 ) async {
-  String lastDeck = gSharedPrefs.getString("lastDeck") ?? "Default";
+  String lastDeck = getLastDeck();
 
   List<String> decks;
   try {
@@ -247,9 +247,9 @@ void showAnkiDialog(
       decoration: InputDecoration(
         prefixIcon: Icon(icon),
         suffixIcon: IconButton(
-          iconSize: 12,
+          iconSize: 18,
           onPressed: () => controller.clear(),
-          icon: Icon(Icons.clear),
+          icon: Icon(Icons.clear, color: Colors.white),
         ),
         labelText: labelText,
         hintText: hintText,
@@ -521,6 +521,33 @@ Future<void> addNote(
   }
 }
 
+Future<void> addCreatorNote(
+  String deck,
+  String image,
+  String audio,
+  String sentence,
+  String answer,
+  String meaning,
+  String reading,
+) async {
+  const platform = const MethodChannel('com.lrorpilla.api/ankidroid');
+
+  try {
+    await platform.invokeMethod('addCreatorNote', <String, dynamic>{
+      'deck': deck,
+      'image': image,
+      'audio': audio,
+      'sentence': sentence,
+      'answer': answer,
+      'meaning': meaning,
+      'reading': reading,
+    });
+  } on PlatformException catch (e) {
+    print("Failed to add note via AnkiDroid API");
+    print(e);
+  }
+}
+
 Future<List<String>> getDecks() async {
   const platform = const MethodChannel('com.lrorpilla.api/ankidroid');
   Map<dynamic, dynamic> deckMap = await platform.invokeMethod('getDecks');
@@ -557,7 +584,7 @@ class _DeckDropDownState extends State<DeckDropDown> {
         );
       }).toList(),
       onChanged: (selectedDeck) async {
-        gSharedPrefs.setString("lastDeck", selectedDeck);
+        setLastDeck(selectedDeck);
 
         setState(() {
           _selectedDeck.value = selectedDeck;
@@ -605,4 +632,27 @@ void exportAnkiCard(String deck, String sentence, String answer, String reading,
 
   requestAnkiDroidPermissions();
   addNote(deck, addImage, addAudio, sentence, answer, meaning, reading);
+}
+
+void exportCreatorAnkiCard(String deck, String sentence, String answer,
+    String reading, String meaning, File imageFile) {
+  DateTime now = DateTime.now();
+  String newFileName =
+      "jidoujisho-" + intl.DateFormat('yyyyMMddTkkmmss').format(now);
+
+  String newImagePath = path.join(
+    getAnkiDroidDirectory().path,
+    "collection.media/$newFileName.jpg",
+  );
+
+  String addImage = "";
+  String addAudio = "";
+
+  if (imageFile.existsSync()) {
+    imageFile.copySync(newImagePath);
+    addImage = "<img src=\"$newFileName.jpg\">";
+  }
+
+  requestAnkiDroidPermissions();
+  addCreatorNote(deck, addImage, addAudio, sentence, answer, meaning, reading);
 }

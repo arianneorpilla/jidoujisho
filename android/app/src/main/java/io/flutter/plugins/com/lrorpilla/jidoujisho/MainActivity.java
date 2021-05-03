@@ -59,6 +59,64 @@ public class MainActivity extends FlutterActivity {
         mAnkiDroid = new AnkiDroidHelper(context);
     }
 
+    private void addCreatorNote(String deck, String image, String audio, String sentence, String word, String meaning, String reading) {
+        final AddContentApi api = new AddContentApi(context);
+
+        long deckId;
+        if (deckExists(deck)) {
+            deckId = mAnkiDroid.findDeckIdByName(deck);
+        } else {
+            deckId = api.addNewDeck(deck);
+        }
+
+        long modelId;
+        if (modelExists("jidoujisho (Creator)")) {
+            modelId = mAnkiDroid.findModelIdByName("jidoujisho (Creator)", 6);
+        } else {
+            modelId = api.addNewCustomModel("jidoujisho (Creator)",
+                    new String[] {"Image", "Audio", "Sentence", "Word", "Meaning", "Reading"},
+                    new String[] {"jidoujisho (Creator) Default"},
+                    new String[] {"{{Image}}<br>{{Word}}"},
+                    new String[] {"{{Image}}<br>{{Word}}" +
+                            "<hr id=reading><p id=\"reading\">{{Reading}}</p><h2 id=\"word\">{{Word}}</h2><br><p><small id=\"meaning\">{{Meaning}}</small></p>"},
+                            "p {\n" +
+                            "    margin: 0px\n" +
+                            "}\n" +
+                            "\n" +
+                            "h2 {\n" +
+                            "    margin: 0px\n" +
+                            "}\n" +
+                            "\n" +
+                            "small {\n" +
+                            "    margin: 0px\n" +
+                            "}\n" +
+                            "\n" +
+                            ".card {\n" +
+                            "  font-family: arial;\n" +
+                            "  font-size: 20px;\n" +
+                            "  white-space: pre-line;\n" +
+                            "  text-align: center;\n" +
+                            "  color: black;\n" +
+                            "  background-color: white;\n" +
+                            "}\n" +
+                            "\n" +
+                            "#sentence {\n" +
+                            "    font-size: 30px\n" +
+                            "}",
+                    null,
+                    null
+                    );
+        }
+
+        Set<String> tags = new HashSet<>(Arrays.asList("jidoujisho"));
+
+        api.addNote(modelId, deckId, new String[] {image, audio, sentence, word, meaning, reading}, tags);
+
+        System.out.println("Added note via flutter_ankidroid_api");
+        System.out.println("Model: " + modelId);
+        System.out.println("Deck: " + deckId);
+    }
+
     private void addNote(String deck, String image, String audio, String sentence, String word, String meaning, String reading) {
         final AddContentApi api = new AddContentApi(context);
 
@@ -156,21 +214,26 @@ public class MainActivity extends FlutterActivity {
 
     @Override
     public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+        
         super.configureFlutterEngine(flutterEngine);
         new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), ANKIDROID_CHANNEL)
                 .setMethodCallHandler(
                         (call, result) -> {
+                            final String deck = call.argument("deck");
+                            final String image = call.argument("image");
+                            final String audio = call.argument("audio");
+                            final String sentence = call.argument("sentence");
+                            final String answer = call.argument("answer");
+                            final String meaning = call.argument("meaning");
+                            final String reading = call.argument("reading");
+
                             switch (call.method) {
                                 case "addNote":
-                                    final String deck = call.argument("deck");
-                                    final String image = call.argument("image");
-                                    final String audio = call.argument("audio");
-                                    final String sentence = call.argument("sentence");
-                                    final String answer = call.argument("answer");
-                                    final String meaning = call.argument("meaning");
-                                    final String reading = call.argument("reading");
-
                                     addNote(deck, image, audio, sentence, answer, meaning, reading);
+                                    break;
+                                case "addCreatorNote":
+
+                                    addCreatorNote(deck, image, audio, sentence, answer, meaning, reading);
                                     break;
                                 case "getDecks":
                                     final AddContentApi api = new AddContentApi(context);

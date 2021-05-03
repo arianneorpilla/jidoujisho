@@ -1,6 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:html/parser.dart' as parser;
+import 'package:html/dom.dart' as dom;
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:mecab_dart/mecab_dart.dart';
@@ -421,4 +425,27 @@ String getBetterNumberTag(String text) {
   text = text.replaceAll("1)", "①");
 
   return text;
+}
+
+Future<List<String>> scrapeBingImages(String searchTerm) async {
+  List<String> entries = [];
+
+  var client = http.Client();
+  http.Response response = await client.get(Uri.parse(
+      'https://www.bing.com/images/search?q=$searchTerm&FORM=HDRSC2'));
+  var document = parser.parse(response.body);
+
+  List<dom.Element> imgElements = document.getElementsByClassName("iusc");
+
+  if (imgElements == null) {
+    return [];
+  }
+
+  for (dom.Element imgElement in imgElements) {
+    Map<dynamic, dynamic> imgMap = jsonDecode(imgElement.attributes["m"]);
+    String imageURL = imgMap["turl"];
+    entries.add(imageURL);
+  }
+
+  return entries;
 }

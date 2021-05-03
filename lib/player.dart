@@ -277,7 +277,8 @@ class _VideoPlayerState extends State<VideoPlayer> {
   FocusNode _subtitleFocusNode = new FocusNode();
   bool networkNotSet = true;
   ValueNotifier<bool> _wasPlaying = ValueNotifier<bool>(false);
-  ValueNotifier<bool> _widgetVisbility = ValueNotifier<bool>(false);
+  ValueNotifier<bool> _widgetVisibility = ValueNotifier<bool>(false);
+  ValueNotifier<Subtitle> _shadowingSubtitle = ValueNotifier<Subtitle>(null);
   int audioAllowance = getAudioAllowance();
 
   Timer durationTimer;
@@ -347,6 +348,15 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   void visibilityTimerAction() {
     if (getVideoPlayerController().value.isInitialized) {
+      if (_shadowingSubtitle.value != null) {
+        if (getVideoPlayerController().value.position >
+                _shadowingSubtitle.value.endTime ||
+            getVideoPlayerController().value.position <
+                _shadowingSubtitle.value.startTime - Duration(seconds: 10)) {
+          getVideoPlayerController().seekTo(_shadowingSubtitle.value.startTime);
+        }
+      }
+
       Duration cutOffStart =
           _currentSubtitle.value.startTime - Duration(milliseconds: 100);
       Duration cutOffEnd =
@@ -603,6 +613,14 @@ class _VideoPlayerState extends State<VideoPlayer> {
     return _videoPlayerController;
   }
 
+  void toggleShadowingMode() {
+    if (_shadowingSubtitle.value == null) {
+      _shadowingSubtitle.value = _currentSubtitle.value;
+    } else {
+      _shadowingSubtitle.value = null;
+    }
+  }
+
   ChewieController getChewieController() {
     _chewieController ??= ChewieController(
       videoPlayerController: getVideoPlayerController(),
@@ -615,6 +633,8 @@ class _VideoPlayerState extends State<VideoPlayer> {
       playExternalSubtitles: playExternalSubtitles,
       retimeSubtitles: retimeSubtitles,
       exportSingleCallback: exportSingleCallback,
+      toggleShadowingMode: toggleShadowingMode,
+      shadowingSubtitle: _shadowingSubtitle,
       streamData: streamData,
       aspectRatio: getVideoPlayerController().value.aspectRatio,
       autoPlay: true,
@@ -640,7 +660,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       subtitleDecoder: SubtitleDecoder.utf8,
       subtitleType: SubtitleType.srt,
       subtitlesOffset: getSubtitleDelay(),
-      widgetVisibility: _widgetVisbility,
+      widgetVisibility: _widgetVisibility,
     );
 
     return _subTitleController;

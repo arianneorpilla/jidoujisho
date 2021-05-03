@@ -222,6 +222,8 @@ class ChewieController extends ChangeNotifier {
     @required this.playExternalSubtitles,
     @required this.retimeSubtitles,
     @required this.exportSingleCallback,
+    @required this.toggleShadowingMode,
+    @required this.shadowingSubtitle,
     this.aspectRatio,
     this.autoInitialize = false,
     this.autoPlay = false,
@@ -266,6 +268,8 @@ class ChewieController extends ChangeNotifier {
   final VoidCallback playExternalSubtitles;
   final VoidCallback retimeSubtitles;
   final VoidCallback exportSingleCallback;
+  final VoidCallback toggleShadowingMode;
+  final ValueNotifier<Subtitle> shadowingSubtitle;
   final YouTubeMux streamData;
 
   /// Initialize the Video on Startup. This will prep the video for playback.

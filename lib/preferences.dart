@@ -146,6 +146,16 @@ Directory getTermBankDirectory() {
   return directory;
 }
 
+Future<void> setLastDeck(String selectedDeck) async {
+  await gSharedPrefs.setString("lastDeck", selectedDeck);
+}
+
+String getLastDeck() {
+  String lastDeck = gSharedPrefs.getString('lastDeck') ?? 'Default';
+
+  return lastDeck;
+}
+
 Future<void> toggleSelectMode() async {
   await gSharedPrefs.setBool("selectMode", !getSelectMode());
 }

@@ -1,16 +1,21 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:async/async.dart';
 import 'package:audio_service/audio_service.dart';
+import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fuzzy/fuzzy.dart';
-
+import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
 import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:package_info/package_info.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -26,6 +31,7 @@ import 'package:jidoujisho/preferences.dart';
 import 'package:jidoujisho/util.dart';
 
 typedef void ChannelCallback(String id, String name, bool isReversed);
+typedef void CreatorCallback(DictionaryEntry entry, File file);
 typedef void SearchCallback(String term);
 
 void main() async {
@@ -142,10 +148,22 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  StreamSubscription _intentDataStreamSubscription;
+  List<SharedMediaFile> _sharedFiles;
+  String _sharedText;
+
   TextEditingController _searchQueryController = TextEditingController();
   bool _isSearching = false;
   bool _isChannelView = false;
+  bool _isCreatorView = false;
   bool _isOldest = false;
+
+  DictionaryEntry _creatorDictionaryEntry = DictionaryEntry(
+    word: "",
+    reading: "",
+    meaning: "",
+  );
+  File _creatorFile;
 
   String _searchQuery = "";
   int _selectedIndex = 0;
@@ -153,6 +171,84 @@ class _HomeState extends State<Home> {
   ValueNotifier<List<String>> _searchSuggestions =
       ValueNotifier<List<String>>([]);
   YoutubeExplode yt = YoutubeExplode();
+
+  @override
+  void initState() {
+    super.initState();
+
+    _intentDataStreamSubscription = ReceiveSharingIntent.getMediaStream()
+        .listen((List<SharedMediaFile> value) {
+      if (value == null) {
+        return;
+      }
+
+      setCreatorView(DictionaryEntry(word: "", meaning: "", reading: ""),
+          File(value.first.path));
+    }, onError: (err) {
+      print("getIntentDataStream error: $err");
+    });
+
+    // For sharing images coming from outside the app while the app is closed
+    ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> value) {
+      if (value == null) {
+        return;
+      }
+
+      setCreatorView(DictionaryEntry(word: "", meaning: "", reading: ""),
+          File(value.first.path));
+    });
+
+    // For sharing or opening urls/text coming from outside the app while the app is in the memory
+    _intentDataStreamSubscription =
+        ReceiveSharingIntent.getTextStream().listen((String value) {
+      if (value == null) {
+        return;
+      }
+      if (value.startsWith("https://")) {
+        playYouTubeVideoLink(value);
+      } else {
+        setCreatorView(
+            DictionaryEntry(word: value, meaning: "", reading: ""), null);
+      }
+    }, onError: (err) {
+      print("getLinkStream error: $err");
+    });
+
+    // For sharing or opening urls/text coming from outside the app while the app is closed
+    ReceiveSharingIntent.getInitialText().then((String value) {
+      if (value == null) {
+        return;
+      }
+
+      if (value.startsWith("https://")) {
+        playYouTubeVideoLink(value);
+      } else {
+        setCreatorView(
+            DictionaryEntry(word: value, meaning: "", reading: ""), null);
+      }
+    });
+  }
+
+  void playYouTubeVideoLink(String link) {
+    if (YoutubePlayer.convertUrlToId(link) != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Player(
+            url: link,
+          ),
+        ),
+      ).then((returnValue) {
+        setState(() {
+          unlockLandscape();
+        });
+
+        setLastPlayedPath(link);
+        setLastPlayedPosition(0);
+        gIsResumable.value = getResumeAvailable();
+      });
+    }
+  }
 
   void setStateFromResult() {
     setState(() {});
@@ -171,9 +267,10 @@ class _HomeState extends State<Home> {
         });
       } else {
         _selectedIndex = index;
-        if (_isSearching || _isChannelView) {
+        if (_isSearching || _isChannelView || _isCreatorView) {
           _isSearching = false;
           _isChannelView = false;
+          _isCreatorView = false;
           _searchQuery = "";
         }
       }
@@ -185,6 +282,12 @@ class _HomeState extends State<Home> {
       return buildBody();
     } else if (_isChannelView) {
       return buildChannels();
+    } else if (_isCreatorView) {
+      return Creator(
+        "",
+        _creatorDictionaryEntry,
+        _creatorFile,
+      );
     }
 
     switch (getNavigationBarItems()[index].label) {
@@ -195,7 +298,7 @@ class _HomeState extends State<Home> {
       case "History":
         return History();
       case "Clipboard":
-        return ClipboardMenu();
+        return ClipboardMenu(setCreatorView);
       default:
         return Container();
     }
@@ -266,18 +369,17 @@ class _HomeState extends State<Home> {
           onTap: onItemTapped,
           items: getNavigationBarItems(),
         ),
-        body: Center(
-          child: getWidgetOptions(_selectedIndex),
-        ),
+        body: getWidgetOptions(_selectedIndex),
       ),
     );
   }
 
   Future<bool> _onWillPop() async {
-    if (_isSearching || _isChannelView) {
+    if (_isSearching || _isChannelView || _isCreatorView) {
       setState(() {
         _isSearching = false;
         _isChannelView = false;
+        _isCreatorView = false;
         _searchQuery = "";
         _searchSuggestions.value = [];
         _searchQueryController.clear();
@@ -289,12 +391,13 @@ class _HomeState extends State<Home> {
   }
 
   Widget buildAppBarLeading() {
-    if (_isSearching || _isChannelView) {
+    if (_isSearching || _isChannelView || _isCreatorView) {
       return BackButton(
         onPressed: () {
           setState(() {
             _isSearching = false;
             _isChannelView = false;
+            _isCreatorView = false;
             _searchQuery = "";
             _searchSuggestions.value = [];
             _searchQueryController.clear();
@@ -331,6 +434,16 @@ class _HomeState extends State<Home> {
     } else if (_isChannelView) {
       return Text(
         _selectedChannelName,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      );
+    } else if (_isCreatorView) {
+      return Text(
+        "Card Creator",
         style: TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: 16,
@@ -388,8 +501,12 @@ class _HomeState extends State<Home> {
       "Error getting channels",
       Icons.error,
     );
+    Widget emptyMessage = centerMessage(
+      "No channels listed",
+      Icons.subscriptions_sharp,
+    );
     Widget videoMessage = centerMessage(
-      _isOldest ? "Listing oldest videos..." : "Listing recent videos...",
+      _isOldest ? "Listing oldest videos..." : "Listing latest videos...",
       Icons.subscriptions_sharp,
     );
 
@@ -427,25 +544,33 @@ class _HomeState extends State<Home> {
               if (!snapshot.hasData) {
                 return errorMessage;
               }
-              return ListView.builder(
-                addAutomaticKeepAlives: true,
-                itemCount: snapshot.data.length + 1,
-                itemBuilder: (BuildContext context, int index) {
-                  if (index == 0) {
-                    return buildNewChannelRow();
-                  }
 
-                  Channel result = results[index - 1];
-                  print("CHANNEL LISTED: $result");
+              if (snapshot.data.isNotEmpty) {
+                return ListView.builder(
+                  addAutomaticKeepAlives: true,
+                  itemCount: snapshot.data.length + 1,
+                  itemBuilder: (BuildContext context, int index) {
+                    if (index == 0) {
+                      return buildNewChannelRow();
+                    }
 
-                  return ChannelResult(
-                    result,
-                    setChannelVideoSearch,
-                    setStateFromResult,
-                    index,
-                  );
-                },
-              );
+                    Channel result = results[index - 1];
+                    print("CHANNEL LISTED: $result");
+
+                    return ChannelResult(
+                      result,
+                      setChannelVideoSearch,
+                      setStateFromResult,
+                      index,
+                    );
+                  },
+                );
+              } else {
+                return Column(children: [
+                  buildNewChannelRow(),
+                  Expanded(child: emptyMessage),
+                ]);
+              }
           }
         },
       );
@@ -558,6 +683,76 @@ class _HomeState extends State<Home> {
       _selectedChannelName = channelName;
       _isOldest = isOldest;
     });
+  }
+
+  Future<void> setCreatorView(
+    DictionaryEntry dictionaryEntry,
+    File file,
+  ) async {
+    try {
+      await getDecks();
+      setState(() {
+        _isCreatorView = true;
+        _creatorDictionaryEntry = dictionaryEntry;
+        _creatorFile = file;
+      });
+    } catch (e) {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.zero,
+              ),
+              content: Text(
+                "Failed to communicate with the AnkiDroid background service, "
+                "which is necessary to use the card creator. Please launch "
+                "AnkiDroid and try again.",
+                textAlign: TextAlign.justify,
+              ),
+              actions: <Widget>[
+                new TextButton(
+                  child: Text(
+                    'CANCEL',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  style: TextButton.styleFrom(
+                    textStyle: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                  onPressed: () async {
+                    Navigator.pop(context);
+                  },
+                ),
+                new TextButton(
+                  child: Text(
+                    'LAUNCH ANKIDROID',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  style: TextButton.styleFrom(
+                    textStyle: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                  onPressed: () async {
+                    await LaunchApp.openApp(
+                      androidPackageName: 'com.ichi2.anki',
+                      openStore: true,
+                    );
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            );
+          });
+    }
   }
 
   Widget generateSuggestions() {
@@ -2031,10 +2226,17 @@ class _HistoryState extends State<History> {
 }
 
 class ClipboardMenu extends StatefulWidget {
-  _ClipboardState createState() => _ClipboardState();
+  final CreatorCallback creatorCallback;
+
+  ClipboardMenu(this.creatorCallback);
+
+  _ClipboardState createState() => _ClipboardState(this.creatorCallback);
 }
 
 class _ClipboardState extends State<ClipboardMenu> {
+  final CreatorCallback creatorCallback;
+  _ClipboardState(this.creatorCallback);
+
   @override
   Widget build(BuildContext context) {
     List<DictionaryEntry> entries = getDictionaryHistory().reversed.toList();
@@ -2067,15 +2269,59 @@ class _ClipboardState extends State<ClipboardMenu> {
       Icons.paste_sharp,
     );
 
+    Widget cardCreatorButton() {
+      return Container(
+        width: double.infinity,
+        margin: EdgeInsets.only(bottom: 12),
+        color: Colors.grey[800].withOpacity(0.2),
+        child: InkWell(
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: InkWell(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.note_add_sharp, size: 16),
+                  SizedBox(width: 5),
+                  Text(
+                    "Card Creator",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          onTap: () async {
+            creatorCallback(
+              DictionaryEntry(
+                word: "",
+                reading: "",
+                meaning: "",
+              ),
+              null,
+            );
+          },
+        ),
+      );
+    }
+
     if (entries.isEmpty) {
       return emptyMessage;
     }
 
     return ListView.builder(
       key: UniqueKey(),
-      itemCount: entries.length,
+      itemCount: entries.length + 1,
       itemBuilder: (BuildContext context, int index) {
-        DictionaryEntry entry = entries[index];
+        if (index == 0) {
+          return cardCreatorButton();
+        }
+
+        DictionaryEntry entry = entries[index - 1];
         print("ENTRY LISTED: $entry");
 
         return Container(
@@ -2083,7 +2329,7 @@ class _ClipboardState extends State<ClipboardMenu> {
           color: Colors.grey[800].withOpacity(0.2),
           child: InkWell(
             onTap: () {
-              Clipboard.setData(new ClipboardData(text: entry.word));
+              creatorCallback(entry, null);
             },
             child: Padding(
               padding: EdgeInsets.all(16),
@@ -2091,15 +2337,15 @@ class _ClipboardState extends State<ClipboardMenu> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    SelectableText(
+                    Text(
                       entry.word,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 20,
                       ),
                     ),
-                    SelectableText(entry.reading),
-                    SelectableText("\n${entry.meaning}\n"),
+                    Text(entry.reading),
+                    Text("\n${entry.meaning}\n"),
                   ],
                 ),
               ),
@@ -2207,6 +2453,780 @@ class _LazyResultsState extends State<LazyResults> {
             false,
           );
         },
+      ),
+    );
+  }
+}
+
+class Creator extends StatefulWidget {
+  final String initialSentence;
+  final DictionaryEntry initialDictionaryEntry;
+  final File initialFile;
+
+  Creator(
+    this.initialSentence,
+    this.initialDictionaryEntry,
+    this.initialFile,
+  );
+
+  _CreatorState createState() => _CreatorState(
+        this.initialSentence,
+        this.initialDictionaryEntry,
+        this.initialFile,
+      );
+}
+
+class _CreatorState extends State<Creator> {
+  final String initialSentence;
+  final DictionaryEntry initialDictionaryEntry;
+  final File initialFile;
+
+  List<String> decks;
+  List<String> imageURLs;
+  String searchTerm;
+  TextEditingController _imageSearchController;
+
+  TextEditingController _sentenceController;
+  TextEditingController _wordController;
+  TextEditingController _readingController;
+  TextEditingController _meaningController;
+  ValueNotifier<String> _selectedDeck;
+
+  String lastDeck = getLastDeck();
+
+  ValueNotifier<DictionaryEntry> _selectedEntry;
+  ValueNotifier<int> _selectedIndex = ValueNotifier<int>(0);
+  ValueNotifier<bool> _justExported = ValueNotifier<bool>(false);
+  bool _isFileImage = false;
+  File _fileImage;
+  String _networkImageURL;
+
+  _CreatorState(
+    this.initialSentence,
+    this.initialDictionaryEntry,
+    this.initialFile,
+  );
+
+  @override
+  initState() {
+    super.initState();
+    _imageSearchController = TextEditingController(text: searchTerm);
+    _sentenceController = TextEditingController(text: initialSentence);
+    _wordController = TextEditingController(text: initialDictionaryEntry.word);
+    _readingController =
+        TextEditingController(text: initialDictionaryEntry.reading);
+    _meaningController =
+        TextEditingController(text: initialDictionaryEntry.meaning);
+
+    _selectedEntry = new ValueNotifier<DictionaryEntry>(initialDictionaryEntry);
+    _selectedDeck = new ValueNotifier<String>(lastDeck);
+
+    if (initialDictionaryEntry.word == "") {
+      _isFileImage = true;
+    }
+    if (initialFile != null) {
+      _isFileImage = true;
+      _fileImage = initialFile;
+    }
+
+    if (searchTerm == null) {
+      if (initialDictionaryEntry.word.contains(";")) {
+        searchTerm = initialDictionaryEntry.word.split(";").first;
+      } else if (initialDictionaryEntry.word.contains("／")) {
+        searchTerm = initialDictionaryEntry.word.split("／").first;
+      } else {
+        searchTerm = initialDictionaryEntry.word;
+      }
+    }
+  }
+
+  @override
+  build(BuildContext context) {
+    if (decks == null) {
+      return FutureBuilder(
+        future: getDecks(),
+        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+              return buildWaitingMessage();
+              break;
+            default:
+              decks = snapshot.data;
+              return buildEditor();
+          }
+        },
+      );
+    } else {
+      return buildEditor();
+    }
+  }
+
+  Widget buildWaitingMessage() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.note_add_sharp,
+            color: Colors.grey,
+            size: 72,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            "Preparing card creator...",
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 20,
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget buildSearchingMessage() {
+    return ListView(
+      shrinkWrap: true,
+      children: [
+        Container(
+          height: MediaQuery.of(context).size.height / 5,
+        ),
+        SizedBox(height: 13),
+        Text(
+          "Searching for image...",
+          style: TextStyle(
+            fontSize: 11,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  void showDictionaryDialog(List<DictionaryEntry> results) {
+    ValueNotifier<int> _dialogIndex = ValueNotifier<int>(0);
+    ValueNotifier<DictionaryEntry> _dialogEntry =
+        ValueNotifier<DictionaryEntry>(results[0]);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
+          ),
+          content: ValueListenableBuilder(
+            valueListenable: _dialogIndex,
+            builder: (BuildContext context, int _, Widget widget) {
+              _dialogEntry.value = results[_dialogIndex.value];
+              addDictionaryEntryToHistory(_dialogEntry.value);
+
+              return Container(
+                child: GestureDetector(
+                  onHorizontalDragEnd: (details) {
+                    if (details.primaryVelocity == 0) return;
+
+                    if (details.primaryVelocity.compareTo(0) == -1) {
+                      if (_dialogIndex.value == results.length - 1) {
+                        _dialogIndex.value = 0;
+                      } else {
+                        _dialogIndex.value += 1;
+                      }
+                    } else {
+                      if (_dialogIndex.value == 0) {
+                        _dialogIndex.value = results.length - 1;
+                      } else {
+                        _dialogIndex.value -= 1;
+                      }
+                    }
+                  },
+                  child: Container(
+                    color: Colors.grey[800].withOpacity(0.6),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          results[_dialogIndex.value].word,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        ),
+                        Text(results[_dialogIndex.value].reading),
+                        Flexible(
+                          child: SingleChildScrollView(
+                            child: gCustomDictionary.isNotEmpty ||
+                                    getMonolingualMode()
+                                ? SelectableText(
+                                    "\n${results[_dialogIndex.value].meaning}\n")
+                                : Text(
+                                    "\n${results[_dialogIndex.value].meaning}\n"),
+                          ),
+                        ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Showing search result ",
+                              style: TextStyle(
+                                fontSize: 11,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            Text(
+                              "${_dialogIndex.value + 1} ",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            Text(
+                              "out of ",
+                              style: TextStyle(
+                                fontSize: 11,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            Text(
+                              "${results.length} ",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            Text(
+                              "found for",
+                              style: TextStyle(
+                                fontSize: 11,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            Text(
+                              "『${results[_dialogIndex.value].searchTerm}』",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('CANCEL', style: TextStyle(color: Colors.white)),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              child: Text('SELECT', style: TextStyle(color: Colors.white)),
+              onPressed: () async {
+                _selectedEntry.value = _dialogEntry.value;
+                _wordController =
+                    TextEditingController(text: _selectedEntry.value.word);
+                _readingController =
+                    TextEditingController(text: _selectedEntry.value.reading);
+                _meaningController =
+                    TextEditingController(text: _selectedEntry.value.meaning);
+
+                if (!_isFileImage) {
+                  if (_selectedEntry.value.word.contains(";")) {
+                    searchTerm = _selectedEntry.value.word.split(";").first;
+                  } else if (_selectedEntry.value.word.contains("／")) {
+                    searchTerm = _selectedEntry.value.word.split("／").first;
+                  } else {
+                    searchTerm = _selectedEntry.value.word;
+                  }
+                  _selectedIndex.value = 0;
+                }
+
+                setState(() {});
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget buildEditor() {
+    Widget displayField(
+      String labelText,
+      String hintText,
+      IconData icon,
+      TextEditingController controller,
+    ) {
+      return TextFormField(
+        keyboardType: TextInputType.multiline,
+        maxLines: null,
+        controller: controller,
+        decoration: InputDecoration(
+          prefixIcon: Icon(icon),
+          suffixIcon: IconButton(
+            iconSize: 18,
+            onPressed: () => controller.clear(),
+            icon: Icon(Icons.clear, color: Colors.white),
+          ),
+          labelText: labelText,
+          hintText: hintText,
+        ),
+      );
+    }
+
+    Widget imageSearchField = TextFormField(
+      keyboardType: TextInputType.multiline,
+      maxLines: null,
+      controller: _imageSearchController,
+      decoration: InputDecoration(
+        prefixIcon: Icon(Icons.image, color: Colors.white),
+        suffixIcon: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              iconSize: 18,
+              onPressed: () {
+                setState(() {
+                  _isFileImage = false;
+                  _fileImage = null;
+                  searchTerm = _imageSearchController.text;
+                  _selectedIndex.value = 0;
+                });
+              },
+              icon: Icon(Icons.search, color: Colors.white),
+            ),
+            IconButton(
+              iconSize: 18,
+              onPressed: () async {
+                final _picker = ImagePicker();
+                final pickedFile =
+                    await _picker.getImage(source: ImageSource.camera);
+
+                setState(() {
+                  _fileImage = File(pickedFile.path);
+                  _isFileImage = true;
+                  _networkImageURL = null;
+                });
+              },
+              icon: Icon(Icons.add_a_photo, color: Colors.white),
+            ),
+            IconButton(
+              iconSize: 18,
+              onPressed: () async {
+                final _picker = ImagePicker();
+                final pickedFile =
+                    await _picker.getImage(source: ImageSource.gallery);
+
+                setState(() {
+                  _fileImage = File(pickedFile.path);
+                  _isFileImage = true;
+                  _networkImageURL = null;
+                });
+              },
+              icon: Icon(Icons.file_upload, color: Colors.white),
+            ),
+            IconButton(
+              iconSize: 18,
+              onPressed: () {
+                setState(() {
+                  _isFileImage = true;
+                  _fileImage = null;
+                  _networkImageURL = null;
+                  _imageSearchController.clear();
+                });
+              },
+              icon: Icon(Icons.clear, color: Colors.white),
+            ),
+          ],
+        ),
+        labelText: "Image",
+        hintText: "Enter search term here",
+      ),
+    );
+    Widget sentenceField = displayField(
+      "Sentence",
+      "Enter front of card or sentence here",
+      Icons.format_align_center_rounded,
+      _sentenceController,
+    );
+
+    Widget wordField = displayField(
+      "Word",
+      "Enter the word in the back here",
+      Icons.speaker_notes_outlined,
+      _wordController,
+    );
+
+    wordField = TextFormField(
+      keyboardType: TextInputType.multiline,
+      maxLines: null,
+      controller: _wordController,
+      decoration: InputDecoration(
+        prefixIcon: Icon(
+          Icons.speaker_notes_outlined,
+        ),
+        suffixIcon: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              iconSize: 18,
+              onPressed: () async {
+                String searchTerm = _wordController.text;
+                showDictionaryDialog(await getWordDetails(searchTerm));
+              },
+              icon: Text("A⌕", style: TextStyle(color: Colors.white)),
+            ),
+            IconButton(
+              iconSize: 18,
+              onPressed: () async {
+                String searchTerm = _wordController.text;
+                showDictionaryDialog(
+                    await getMonolingualWordDetails(searchTerm, false));
+              },
+              icon: Text("あ⌕", style: TextStyle(color: Colors.white)),
+            ),
+            IconButton(
+              iconSize: 18,
+              onPressed: () => _wordController.clear(),
+              icon: Icon(Icons.clear, color: Colors.white),
+            ),
+          ],
+        ),
+        labelText: "Word",
+        hintText: "Enter the word in the back here",
+      ),
+    );
+
+    Widget readingField = displayField(
+      "Reading",
+      "Enter the reading of the word here",
+      Icons.surround_sound_outlined,
+      _readingController,
+    );
+    Widget meaningField = displayField(
+      "Meaning",
+      "Enter the meaning in the back here",
+      Icons.translate_rounded,
+      _meaningController,
+    );
+
+    Widget showFileImage() {
+      if (_fileImage == null) {
+        return Container();
+      }
+
+      return ListView(
+        shrinkWrap: true,
+        children: [
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PhotoView(
+                    initialScale: PhotoViewComputedScale.contained * 1,
+                    minScale: PhotoViewComputedScale.contained * 1,
+                    imageProvider: FileImage(_fileImage),
+                  ),
+                ),
+              );
+            },
+            child: FadeInImage(
+              fadeOutDuration: Duration(milliseconds: 10),
+              fadeInDuration: Duration(milliseconds: 50),
+              placeholder: MemoryImage(kTransparentImage),
+              image: FileImage(_fileImage),
+              fit: BoxFit.fitHeight,
+              height: MediaQuery.of(context).size.height / 5,
+            ),
+          ),
+          SizedBox(height: 10),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "Showing local image",
+                style: TextStyle(
+                  fontSize: 11,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ],
+      );
+    }
+
+    Widget showNetworkImage() {
+      return FutureBuilder(
+        future: scrapeBingImages(searchTerm),
+        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+              return buildSearchingMessage();
+              break;
+            default:
+              if (snapshot.data == null || snapshot.data.isEmpty) {
+                _fileImage = null;
+                return showFileImage();
+              }
+
+              imageURLs = snapshot.data;
+              return ListView(
+                shrinkWrap: true,
+                children: [
+                  GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PhotoView(
+                              initialScale:
+                                  PhotoViewComputedScale.contained * 1,
+                              minScale: PhotoViewComputedScale.contained * 1,
+                              imageProvider: NetworkImage(
+                                imageURLs[_selectedIndex.value],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                      onHorizontalDragEnd: (details) {
+                        if (details.primaryVelocity == 0) return;
+
+                        if (details.primaryVelocity.compareTo(0) == -1) {
+                          if (_selectedIndex.value == imageURLs.length - 1) {
+                            _selectedIndex.value = 0;
+                          } else {
+                            _selectedIndex.value += 1;
+                          }
+                        } else {
+                          if (_selectedIndex.value == 0) {
+                            _selectedIndex.value = imageURLs.length - 1;
+                          } else {
+                            _selectedIndex.value -= 1;
+                          }
+                        }
+                      },
+                      child: ValueListenableBuilder(
+                        valueListenable: _selectedIndex,
+                        builder: (BuildContext context, value, Widget child) {
+                          _networkImageURL = imageURLs[_selectedIndex.value];
+
+                          return FadeInImage(
+                            fadeOutDuration: Duration(milliseconds: 10),
+                            fadeInDuration: Duration(milliseconds: 50),
+                            placeholder: MemoryImage(kTransparentImage),
+                            image: NetworkImage(_networkImageURL),
+                            fit: BoxFit.fitHeight,
+                            height: MediaQuery.of(context).size.height / 5,
+                          );
+                        },
+                      )),
+                  SizedBox(height: 10),
+                  ValueListenableBuilder(
+                    valueListenable: _selectedIndex,
+                    builder: (BuildContext context, value, Widget child) {
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Selecting image ",
+                            style: TextStyle(
+                              fontSize: 11,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            "${_selectedIndex.value + 1} ",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            "out of ",
+                            style: TextStyle(
+                              fontSize: 11,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            "${imageURLs.length} ",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            "found for",
+                            style: TextStyle(
+                              fontSize: 11,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            "『$searchTerm』",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ],
+              );
+          }
+        },
+      );
+    }
+
+    Widget showImagePreview() {
+      if (_isFileImage) {
+        return showFileImage();
+      } else {
+        return showNetworkImage();
+      }
+    }
+
+    Widget showExportButton() {
+      return ValueListenableBuilder(
+        valueListenable: _justExported,
+        builder: (BuildContext context, bool exported, ___) {
+          return Container(
+            width: double.infinity,
+            margin: EdgeInsets.only(bottom: 12),
+            color: Colors.grey[800].withOpacity(0.2),
+            child: InkWell(
+              enableFeedback: !exported,
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: InkWell(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.note_add_sharp,
+                          size: 16,
+                          color: exported ? Colors.grey : Colors.white),
+                      SizedBox(width: 5),
+                      Text(
+                        exported ? "Card Exported" : "Export Card",
+                        style: TextStyle(
+                          color: exported ? Colors.grey : Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              onTap: () async {
+                if (_sentenceController.text == "" &&
+                    _wordController.text == "" &&
+                    _readingController.text == "" &&
+                    _meaningController.text == "" &&
+                    _fileImage == null) {
+                  return;
+                }
+
+                if (_fileImage == null && _networkImageURL != null) {
+                  var response = await http.get(Uri.tryParse(_networkImageURL));
+
+                  File previewImageFile = File(getPreviewImagePath());
+                  if (previewImageFile.existsSync()) {
+                    previewImageFile.deleteSync();
+                  }
+
+                  previewImageFile.writeAsBytesSync(response.bodyBytes);
+                  _fileImage = previewImageFile;
+                }
+
+                try {
+                  exportCreatorAnkiCard(
+                    _selectedDeck.value,
+                    _sentenceController.text,
+                    _wordController.text,
+                    _readingController.text,
+                    _meaningController.text,
+                    _fileImage,
+                  );
+
+                  setState(() {
+                    _isFileImage = true;
+                    _fileImage = null;
+
+                    _sentenceController.clear();
+                    _wordController.clear();
+                    _readingController.clear();
+                    _meaningController.clear();
+                  });
+
+                  _justExported.value = true;
+                  Future.delayed(Duration(seconds: 2), () {
+                    _justExported.value = false;
+                  });
+                } catch (e) {
+                  print(e);
+                }
+              },
+            ),
+          );
+        },
+      );
+    }
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  showImagePreview(),
+                  DeckDropDown(
+                    decks: decks,
+                    selectedDeck: _selectedDeck,
+                  ),
+                  imageSearchField,
+                  sentenceField,
+                  wordField,
+                  readingField,
+                  meaningField,
+                  SizedBox(height: 10),
+                ],
+              ),
+            ),
+          ),
+          showExportButton(),
+        ],
       ),
     );
   }

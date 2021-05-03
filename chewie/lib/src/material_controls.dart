@@ -549,19 +549,42 @@ class _MaterialControlsState extends State<MaterialControls>
         ? _latestValue.duration
         : Duration.zero;
 
-    return GestureDetector(
-      child: Padding(
-        padding: const EdgeInsets.only(right: 24.0),
-        child: Text(
-          duration != Duration.zero
-              ? '${formatDuration(position)} / ${formatDuration(duration)}'
-              : '',
-          style: const TextStyle(
-            fontSize: 14.0,
+    if (chewieController.shadowingSubtitle.value != null) {
+      return GestureDetector(
+        onTap: () {
+          chewieController.toggleShadowingMode();
+        },
+        child: Padding(
+          padding: const EdgeInsets.only(right: 24.0),
+          child: Text(
+            duration != Duration.zero
+                ? '${formatDuration(position)} / ${formatDuration(chewieController.shadowingSubtitle.value.endTime)}'
+                : '',
+            style: const TextStyle(
+              fontSize: 14.0,
+              color: Colors.red,
+            ),
           ),
         ),
-      ),
-    );
+      );
+    } else {
+      return GestureDetector(
+        onTap: () {
+          chewieController.toggleShadowingMode();
+        },
+        child: Padding(
+          padding: const EdgeInsets.only(right: 24.0),
+          child: Text(
+            duration != Duration.zero
+                ? '${formatDuration(position)} / ${formatDuration(duration)}'
+                : '',
+            style: const TextStyle(
+              fontSize: 14.0,
+            ),
+          ),
+        ),
+      );
+    }
   }
 
   void _cancelAndRestartTimer() {
