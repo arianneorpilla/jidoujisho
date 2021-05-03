@@ -7,7 +7,7 @@
 <p align="center">A mobile video player tailored for Japanese language learners.</p>
 
 <p align="center" style="margin:0"><b>Latest GitHub Release:<br>
-<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.14.2-beta">0.14.2-beta 🇯🇵 → 🇬🇧</a><br>
+<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.15.0-beta">0.15.0-beta 🇯🇵 → 🇬🇧</a><br>
 <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.5.3-enjp-beta">0.5.3-beta 🇬🇧 → 🇯🇵</a></b><br></p>
 <div latest></div>
 
@@ -24,6 +24,7 @@
 - [x] Swipe vertically to open the **transcript to jump to time and review subtitles**
 - [x] Open the app to **trending videos in Japan**, import and export a **channel list** and **search with suggestions** 
 - [x] **YouTube playback support** for videos with **Japanese closed captions** and **automatically generated subtitles**
+- [x] Use **card creator mode** to quickly **search images and definitions** with imported photos and text 
 - [x] **Clipboard remembers the last hundred words** queried for review in between sessions
 - [x] **Use monolingual definitions** from Goo.ne.jp or **imported Yomichan dictionaries**
 - [x] **(Experimental)** Weblio.jp **English to Japanese support** and full Japanese localization
