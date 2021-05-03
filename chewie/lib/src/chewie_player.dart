@@ -224,6 +224,7 @@ class ChewieController extends ChangeNotifier {
     @required this.exportSingleCallback,
     @required this.toggleShadowingMode,
     @required this.shadowingSubtitle,
+    @required this.audioAllowance,
     this.aspectRatio,
     this.autoInitialize = false,
     this.autoPlay = false,
@@ -270,6 +271,7 @@ class ChewieController extends ChangeNotifier {
   final VoidCallback exportSingleCallback;
   final VoidCallback toggleShadowingMode;
   final ValueNotifier<Subtitle> shadowingSubtitle;
+  final ValueNotifier<int> audioAllowance;
   final YouTubeMux streamData;
 
   /// Initialize the Video on Startup. This will prep the video for playback.

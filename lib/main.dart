@@ -2310,7 +2310,10 @@ class _ClipboardState extends State<ClipboardMenu> {
     }
 
     if (entries.isEmpty) {
-      return emptyMessage;
+      return Column(children: [
+        cardCreatorButton(),
+        Expanded(child: emptyMessage),
+      ]);
     }
 
     return ListView.builder(

@@ -279,7 +279,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
   ValueNotifier<bool> _wasPlaying = ValueNotifier<bool>(false);
   ValueNotifier<bool> _widgetVisibility = ValueNotifier<bool>(false);
   ValueNotifier<Subtitle> _shadowingSubtitle = ValueNotifier<Subtitle>(null);
-  int audioAllowance = getAudioAllowance();
+  ValueNotifier<int> _audioAllowance = ValueNotifier<int>(getAudioAllowance());
 
   Timer durationTimer;
   Timer visibilityTimer;
@@ -349,11 +349,18 @@ class _VideoPlayerState extends State<VideoPlayer> {
   void visibilityTimerAction() {
     if (getVideoPlayerController().value.isInitialized) {
       if (_shadowingSubtitle.value != null) {
-        if (getVideoPlayerController().value.position >
-                _shadowingSubtitle.value.endTime ||
-            getVideoPlayerController().value.position <
-                _shadowingSubtitle.value.startTime - Duration(seconds: 10)) {
-          getVideoPlayerController().seekTo(_shadowingSubtitle.value.startTime);
+        if (getVideoPlayerController().value.position.inMilliseconds +
+                    _audioAllowance.value -
+                    getSubtitleController().subtitlesOffset <
+                _shadowingSubtitle.value.startTime.inMilliseconds - 10000 ||
+            getVideoPlayerController().value.position.inMilliseconds -
+                    _audioAllowance.value -
+                    getSubtitleController().subtitlesOffset >
+                _shadowingSubtitle.value.endTime.inMilliseconds) {
+          getVideoPlayerController().seekTo(Duration(
+              milliseconds: _shadowingSubtitle.value.startTime.inMilliseconds +
+                  getSubtitleController().subtitlesOffset -
+                  _audioAllowance.value));
         }
       }
 
@@ -509,7 +516,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       _currentDictionaryEntry.value,
       wasPlaying,
       selection,
-      audioAllowance,
+      _audioAllowance.value,
       getSubtitleController().subtitlesOffset,
     );
   }
@@ -527,7 +534,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       _currentDictionaryEntry.value,
       _wasPlaying.value,
       [_currentSubtitle.value],
-      audioAllowance,
+      _audioAllowance.value,
       getSubtitleController().subtitlesOffset,
     );
   }
@@ -635,6 +642,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       exportSingleCallback: exportSingleCallback,
       toggleShadowingMode: toggleShadowingMode,
       shadowingSubtitle: _shadowingSubtitle,
+      audioAllowance: _audioAllowance,
       streamData: streamData,
       aspectRatio: getVideoPlayerController().value.aspectRatio,
       autoPlay: true,
@@ -734,7 +742,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
     TextEditingController _offsetController = TextEditingController(
         text: getSubtitleController().subtitlesOffset.toString());
     TextEditingController _allowanceController =
-        TextEditingController(text: audioAllowance.toString());
+        TextEditingController(text: _audioAllowance.value.toString());
 
     void setValues(bool remember) {
       String offsetText = _offsetController.text;
@@ -747,7 +755,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
         getSubtitleController().subtitlesOffset = newOffset;
         getSubtitleController().updateSubtitleContent(
             content: getSubtitleController().subtitlesContent);
-        audioAllowance = newAllowance;
+        _audioAllowance.value = newAllowance;
 
         if (remember) {
           setSubtitleDelay(newOffset);
@@ -1334,6 +1342,10 @@ class _VideoPlayerState extends State<VideoPlayer> {
               _videoPlayerController.seekTo(subtitles[index].startTime +
                   Duration(milliseconds: _subTitleController.subtitlesOffset));
               _videoPlayerController.play();
+
+              if (_shadowingSubtitle.value != null) {
+                _shadowingSubtitle.value = subtitles[index];
+              }
             },
             onLongPress: () {
               List<Subtitle> selectedSubtitles = [];

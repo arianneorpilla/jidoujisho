@@ -550,15 +550,22 @@ class _MaterialControlsState extends State<MaterialControls>
         : Duration.zero;
 
     if (chewieController.shadowingSubtitle.value != null) {
+      final shadowDuration = Duration(
+          milliseconds:
+              chewieController.shadowingSubtitle.value.endTime.inMilliseconds +
+                  chewieController.audioAllowance.value);
+
       return GestureDetector(
         onTap: () {
           chewieController.toggleShadowingMode();
         },
         child: Padding(
-          padding: const EdgeInsets.only(right: 24.0),
+          padding: const EdgeInsets.only(
+            right: 24.0,
+          ),
           child: Text(
             duration != Duration.zero
-                ? '${formatDuration(position)} / ${formatDuration(chewieController.shadowingSubtitle.value.endTime)}'
+                ? '${formatDuration(position)} / ${formatDuration(shadowDuration)}'
                 : '',
             style: const TextStyle(
               fontSize: 14.0,
