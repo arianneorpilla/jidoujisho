@@ -224,6 +224,7 @@ class ChewieController extends ChangeNotifier {
     @required this.exportSingleCallback,
     @required this.toggleShadowingMode,
     @required this.shadowingSubtitle,
+    @required this.comprehensionSubtitle,
     @required this.audioAllowance,
     this.aspectRatio,
     this.autoInitialize = false,
@@ -271,6 +272,7 @@ class ChewieController extends ChangeNotifier {
   final VoidCallback exportSingleCallback;
   final VoidCallback toggleShadowingMode;
   final ValueNotifier<Subtitle> shadowingSubtitle;
+  final ValueNotifier<Subtitle> comprehensionSubtitle;
   final ValueNotifier<int> audioAllowance;
   final YouTubeMux streamData;
 

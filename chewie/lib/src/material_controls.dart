@@ -300,6 +300,10 @@ class _MaterialControlsState extends State<MaterialControls>
               "Get Bilingual Definitions from Jisho.org"
             else
               "Get Monolingual Definitions from Goo.ne.jp",
+            if (getListeningComprehensionMode())
+              "Disable Listening Comprehension Mode"
+            else
+              "Enable Listening Comprehension Mode",
             if (getSelectMode())
               "Use Tap to Select Subtitle Selection"
             else
@@ -314,6 +318,10 @@ class _MaterialControlsState extends State<MaterialControls>
             Icons.share_outlined,
             Icons.timer_rounded,
             Icons.translate_sharp,
+            if (getListeningComprehensionMode())
+              Icons.hearing_disabled
+            else
+              Icons.hearing_sharp,
             if (getSelectMode())
               Icons.touch_app_rounded
             else
@@ -337,21 +345,24 @@ class _MaterialControlsState extends State<MaterialControls>
             break;
           case 2:
             toggleMonolingualMode();
-            String clipboardMemory = chewieController.clipboard.value;
+            final String clipboardMemory = chewieController.clipboard.value;
             chewieController.clipboard.value = "";
             chewieController.clipboard.value = clipboardMemory;
             break;
           case 3:
+            toggleListeningComprehensionMode();
+            break;
+          case 4:
             toggleSelectMode();
             gIsSelectMode.value = getSelectMode();
             break;
-          case 4:
+          case 5:
             toggleFocusMode();
             break;
-          case 5:
+          case 6:
             chewieController.playExternalSubtitles();
             break;
-          case 6:
+          case 7:
             chewieController.exportSingleCallback();
             break;
         }
@@ -469,37 +480,60 @@ class _MaterialControlsState extends State<MaterialControls>
               .add("YouTube - ${chewieController.streamData.audioMetadata}");
         }
 
-        final chosenOption = await showModalBottomSheet<int>(
-          context: context,
-          isScrollControlled: true,
-          useRootNavigator: true,
-          builder: (context) => _SelectAudioDialog(
-            audioTrackNames,
-            subtitleTrackNames,
-            autoSubtitleTrackNames,
+        final List<SubtitleAudioMenuOption> options = [];
+        for (int i = 0; i < audioTrackNames.length; i++) {
+          options.add(
+            SubtitleAudioMenuOption(
+              type: SubtitleAudioMenuOptionType.audioTrack,
+              callbackIndex: i,
+              metadata: audioTrackNames[i],
+            ),
+          );
+        }
+        for (int i = 0; i < subtitleTrackNames.length; i++) {
+          options.add(
+            SubtitleAudioMenuOption(
+              type: SubtitleAudioMenuOptionType.embeddedSubtitle,
+              callbackIndex: i,
+              metadata: subtitleTrackNames[i],
+            ),
+          );
+        }
+        for (int i = 0; i < autoSubtitleTrackNames.length; i++) {
+          options.add(
+            SubtitleAudioMenuOption(
+              type: SubtitleAudioMenuOptionType.autoSubtitle,
+              callbackIndex: -50,
+              metadata: audioTrackNames[i],
+            ),
+          );
+        }
+        options.add(
+          SubtitleAudioMenuOption(
+            type: SubtitleAudioMenuOptionType.noneSubtitle,
+            callbackIndex: 99999,
           ),
         );
 
-        if (chosenOption != null) {
-          if (chosenOption ==
-              audioTrackNames.length +
-                  subtitleTrackNames.length +
-                  autoSubtitleTrackNames.length) {
-            chewieController.currentSubTrack.value =
-                chosenOption - audioTrackNames.length;
-          }
-          if (chosenOption < audioTrackNames.length) {
-            await controller.setAudioTrack(chosenOption + 1);
-          } else if (chosenOption <
-              audioTrackNames.length + subtitleTrackNames.length) {
-            chewieController.currentSubTrack.value =
-                chosenOption - audioTrackNames.length;
-          } else if (chosenOption <
-              audioTrackNames.length +
-                  subtitleTrackNames.length +
-                  autoSubtitleTrackNames.length) {
-            chewieController.currentSubTrack.value = -50;
-          }
+        final chosenOption =
+            await showModalBottomSheet<SubtitleAudioMenuOption>(
+          context: context,
+          isScrollControlled: true,
+          useRootNavigator: true,
+          builder: (context) => _SelectAudioDialog(options),
+        );
+
+        switch (chosenOption.type) {
+          case SubtitleAudioMenuOptionType.audioTrack:
+            await controller.setAudioTrack(chosenOption.callbackIndex + 1);
+            break;
+          case SubtitleAudioMenuOptionType.embeddedSubtitle:
+          case SubtitleAudioMenuOptionType.autoSubtitle:
+          case SubtitleAudioMenuOptionType.noneSubtitle:
+            chewieController.currentSubTrack.value = chosenOption.callbackIndex;
+            break;
+          default:
+            break;
         }
 
         if (_latestValue.isPlaying) {
@@ -814,67 +848,26 @@ class _SelectQualityDialog extends StatelessWidget {
 }
 
 class _SelectAudioDialog extends StatelessWidget {
-  const _SelectAudioDialog(this.options, this.subtitles, this.autoSubtitles);
+  const _SelectAudioDialog(
+    this.options,
+  );
 
-  final List<String> options;
-  final List<String> subtitles;
-  final List<String> autoSubtitles;
+  final List<SubtitleAudioMenuOption> options;
 
   Widget buildRow(int index) {
-    if (index < options.length) {
-      final String _text = options[index];
-      return Row(
-        children: [
-          const Icon(
-            Icons.audiotrack_outlined,
-            size: 20.0,
-            color: Colors.red,
-          ),
-          const SizedBox(width: 16.0),
-          Text("Audio - $_text"),
-        ],
-      );
-    } else if (index < options.length + subtitles.length) {
-      final String _text = subtitles[index - options.length];
-      return Row(
-        children: [
-          const Icon(
-            Icons.subtitles_outlined,
-            size: 20.0,
-            color: Colors.red,
-          ),
-          const SizedBox(width: 16.0),
-          Text("Subtitle - $_text"),
-        ],
-      );
-    } else if (index <
-        options.length + subtitles.length + autoSubtitles.length) {
-      final String _text =
-          autoSubtitles[index - options.length - subtitles.length];
-      return Row(
-        children: [
-          const Icon(
-            Icons.subtitles_outlined,
-            size: 20.0,
-            color: Colors.red,
-          ),
-          const SizedBox(width: 16.0),
-          Text("Subtitle - $_text"),
-        ],
-      );
-    } else {
-      return Row(
-        children: const [
-          Icon(
-            Icons.subtitles_off_outlined,
-            size: 20.0,
-            color: Colors.red,
-          ),
-          SizedBox(width: 16.0),
-          Text("Subtitle - None"),
-        ],
-      );
-    }
+    final SubtitleAudioMenuOption option = options[index];
+
+    return Row(
+      children: [
+        Icon(
+          option.getIcon(),
+          size: 20.0,
+          color: Colors.red,
+        ),
+        const SizedBox(width: 16.0),
+        Text(option.getLabel()),
+      ],
+    );
   }
 
   @override
@@ -887,11 +880,66 @@ class _SelectAudioDialog extends StatelessWidget {
           dense: true,
           title: buildRow(index),
           onTap: () {
-            Navigator.of(context).pop(index);
+            Navigator.of(context).pop(options[index]);
           },
         );
       },
-      itemCount: options.length + subtitles.length + autoSubtitles.length + 1,
+      itemCount: options.length,
     );
   }
+}
+
+class SubtitleAudioMenuOption {
+  SubtitleAudioMenuOption({
+    this.type,
+    this.callbackIndex,
+    this.metadata = "",
+  });
+
+  final SubtitleAudioMenuOptionType type;
+  final int callbackIndex;
+  final String metadata;
+
+  IconData getIcon() {
+    switch (type) {
+      case SubtitleAudioMenuOptionType.audioTrack:
+        return Icons.audiotrack_outlined;
+        break;
+      case SubtitleAudioMenuOptionType.embeddedSubtitle:
+      case SubtitleAudioMenuOptionType.autoSubtitle:
+        return Icons.subtitles_outlined;
+        break;
+      case SubtitleAudioMenuOptionType.noneSubtitle:
+        return Icons.subtitles_off_outlined;
+        break;
+      default:
+        return Icons.error;
+    }
+  }
+
+  String getLabel() {
+    switch (type) {
+      case SubtitleAudioMenuOptionType.audioTrack:
+        return "Audio - $metadata";
+        break;
+      case SubtitleAudioMenuOptionType.embeddedSubtitle:
+        return "Subtitle - $metadata";
+        break;
+      case SubtitleAudioMenuOptionType.autoSubtitle:
+        return "Subtitle - YouTube - [Automatic] - [Japanese]";
+        break;
+      case SubtitleAudioMenuOptionType.noneSubtitle:
+        return "Subtitle - None";
+        break;
+      default:
+        return "Undefined";
+    }
+  }
+}
+
+enum SubtitleAudioMenuOptionType {
+  audioTrack,
+  embeddedSubtitle,
+  autoSubtitle,
+  noneSubtitle,
 }

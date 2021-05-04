@@ -180,6 +180,15 @@ bool getFocusMode() {
   return gSharedPrefs.getBool("focusMode") ?? false;
 }
 
+Future<void> toggleListeningComprehensionMode() async {
+  await gSharedPrefs.setBool(
+      "listeningComprehensionMode", !getListeningComprehensionMode());
+}
+
+bool getListeningComprehensionMode() {
+  return gSharedPrefs.getBool("listeningComprehensionMode") ?? false;
+}
+
 bool getResumeAvailable() {
   String lastPlayedPath = getLastPlayedPath();
   return lastPlayedPath != "-1";
