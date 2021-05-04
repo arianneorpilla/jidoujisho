@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jidoujisho/preferences.dart';
 import 'package:jidoujisho/util.dart';
 import 'package:subtitle_wrapper_package/bloc/subtitle/subtitle_bloc.dart';
 import 'package:subtitle_wrapper_package/data/constants/view_keys.dart';
 import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
+import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
 import 'package:ve_dart/ve_dart.dart';
 
 import 'package:jidoujisho/globals.dart';
@@ -12,12 +14,14 @@ import 'package:jidoujisho/globals.dart';
 class SubtitleTextView extends StatelessWidget {
   final SubtitleStyle subtitleStyle;
   final ValueNotifier<bool> widgetVisibility;
+  final ValueNotifier<Subtitle> comprehensionSubtitle;
   final FocusNode focusNode;
 
   const SubtitleTextView({
     Key key,
     @required this.subtitleStyle,
     @required this.widgetVisibility,
+    @required this.comprehensionSubtitle,
     @required this.focusNode,
   }) : super(key: key);
 
@@ -69,6 +73,19 @@ class SubtitleTextView extends StatelessWidget {
                   builder: (context, visibility, widget) {
                     if (!visibility) {
                       return Container();
+                    }
+
+                    if (getListeningComprehensionMode()) {
+                      if (visibility &&
+                          comprehensionSubtitle.value != null &&
+                          (comprehensionSubtitle.value.startTime -
+                                      Duration(seconds: 10) >
+                                  state.subtitle.startTime ||
+                              comprehensionSubtitle.value.endTime <
+                                  state.subtitle.endTime)) {
+                        widgetVisibility.value = false;
+                        return Container();
+                      }
                     }
 
                     if (selectMode) {

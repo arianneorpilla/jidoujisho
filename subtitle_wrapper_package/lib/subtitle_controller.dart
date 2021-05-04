@@ -11,6 +11,7 @@ class SubtitleController {
   SubtitleType subtitleType;
   int subtitlesOffset;
   ValueNotifier<bool> widgetVisibility;
+  ValueNotifier<Subtitle> comprehensionSubtitle;
 
   bool _attached = false;
   SubtitleBloc subtitleBloc;
@@ -24,6 +25,7 @@ class SubtitleController {
     this.subtitleNotifier,
     this.subtitlesOffset = 0,
     this.widgetVisibility,
+    this.comprehensionSubtitle,
   });
 
   void attach(SubtitleBloc bloc) {

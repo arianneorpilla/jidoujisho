@@ -597,14 +597,18 @@ class _MaterialControlsState extends State<MaterialControls>
           padding: const EdgeInsets.only(
             right: 24.0,
           ),
-          child: Text(
-            duration != Duration.zero
-                ? '${formatDuration(position)} / ${formatDuration(shadowDuration)}'
-                : '',
-            style: const TextStyle(
-              fontSize: 14.0,
-              color: Colors.red,
-            ),
+          child: Row(
+            children: [
+              Text(
+                duration != Duration.zero
+                    ? '${formatDuration(position)} / ${formatDuration(shadowDuration)}'
+                    : '',
+                style: const TextStyle(
+                  fontSize: 14.0,
+                  color: Colors.red,
+                ),
+              ),
+            ],
           ),
         ),
       );
@@ -615,13 +619,17 @@ class _MaterialControlsState extends State<MaterialControls>
         },
         child: Padding(
           padding: const EdgeInsets.only(right: 24.0),
-          child: Text(
-            duration != Duration.zero
-                ? '${formatDuration(position)} / ${formatDuration(duration)}'
-                : '',
-            style: const TextStyle(
-              fontSize: 14.0,
-            ),
+          child: Row(
+            children: [
+              Text(
+                duration != Duration.zero
+                    ? '${formatDuration(position)} / ${formatDuration(duration)}'
+                    : '',
+                style: const TextStyle(
+                  fontSize: 14.0,
+                ),
+              ),
+            ],
           ),
         ),
       );

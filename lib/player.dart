@@ -279,6 +279,8 @@ class _VideoPlayerState extends State<VideoPlayer> {
   ValueNotifier<bool> _wasPlaying = ValueNotifier<bool>(false);
   ValueNotifier<bool> _widgetVisibility = ValueNotifier<bool>(false);
   ValueNotifier<Subtitle> _shadowingSubtitle = ValueNotifier<Subtitle>(null);
+  ValueNotifier<Subtitle> _comprehensionSubtitle =
+      ValueNotifier<Subtitle>(null);
   ValueNotifier<int> _audioAllowance = ValueNotifier<int>(getAudioAllowance());
 
   Timer durationTimer;
@@ -348,6 +350,22 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   void visibilityTimerAction() {
     if (getVideoPlayerController().value.isInitialized) {
+      if (getListeningComprehensionMode() &&
+          _comprehensionSubtitle.value != null) {
+        if (getVideoPlayerController().value.position.inMilliseconds +
+                    _audioAllowance.value -
+                    getSubtitleController().subtitlesOffset <
+                _comprehensionSubtitle.value.startTime.inMilliseconds - 10000 ||
+            getVideoPlayerController().value.position.inMilliseconds -
+                    _audioAllowance.value -
+                    getSubtitleController().subtitlesOffset >
+                _comprehensionSubtitle.value.endTime.inMilliseconds) {
+          if (getSubtitleController().widgetVisibility.value) {
+            getSubtitleController().widgetVisibility.value = false;
+          }
+        }
+      }
+
       if (_shadowingSubtitle.value != null) {
         if (getVideoPlayerController().value.position.inMilliseconds +
                     _audioAllowance.value -
@@ -364,19 +382,22 @@ class _VideoPlayerState extends State<VideoPlayer> {
         }
       }
 
-      Duration cutOffStart =
-          _currentSubtitle.value.startTime - Duration(milliseconds: 100);
-      Duration cutOffEnd =
-          _currentSubtitle.value.endTime + Duration(milliseconds: 100);
-      if (getVideoPlayerController().value.position.inMilliseconds -
-                  getSubtitleController().subtitlesOffset >
-              cutOffStart.inMilliseconds &&
-          getVideoPlayerController().value.position.inMilliseconds -
-                  getSubtitleController().subtitlesOffset <
-              cutOffEnd.inMilliseconds) {
-        getSubtitleController().widgetVisibility.value = true;
-      } else {
-        getSubtitleController().widgetVisibility.value = false;
+      if (!getListeningComprehensionMode()) {
+        Duration cutOffStart =
+            _currentSubtitle.value.startTime - Duration(milliseconds: 100);
+        Duration cutOffEnd =
+            _currentSubtitle.value.endTime + Duration(milliseconds: 100);
+
+        if (getVideoPlayerController().value.position.inMilliseconds -
+                    getSubtitleController().subtitlesOffset >
+                cutOffStart.inMilliseconds &&
+            getVideoPlayerController().value.position.inMilliseconds -
+                    getSubtitleController().subtitlesOffset <
+                cutOffEnd.inMilliseconds) {
+          getSubtitleController().widgetVisibility.value = true;
+        } else {
+          getSubtitleController().widgetVisibility.value = false;
+        }
       }
     }
   }
@@ -447,12 +468,10 @@ class _VideoPlayerState extends State<VideoPlayer> {
           children: [
             GestureDetector(
               onHorizontalDragUpdate: (details) {
-                if (details.delta.dx > 20) {
-                  getVideoPlayerController().seekTo(_currentSubtitle
-                          .value.startTime +
-                      Duration(
-                          milliseconds: _subTitleController.subtitlesOffset));
-                } else if (details.delta.dx < -20) {
+                if (details.delta.dx.abs() > 20) {
+                  _comprehensionSubtitle.value = _currentSubtitle.value;
+                  getSubtitleController().widgetVisibility.value = true;
+
                   getVideoPlayerController().seekTo(_currentSubtitle
                           .value.startTime +
                       Duration(
@@ -464,11 +483,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
                     (getVideoPlayerController().value.isPlaying ||
                         _wasPlaying.value);
 
-                if (details.delta.dy > 20) {
-                  openTranscript(
-                      _subTitleController.subtitleBloc.subtitles.subtitles,
-                      _wasPlaying.value);
-                } else if (details.delta.dy < -20) {
+                if (details.delta.dy.abs() > 20) {
                   openTranscript(
                       _subTitleController.subtitleBloc.subtitles.subtitles,
                       _wasPlaying.value);
@@ -669,6 +684,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       subtitleType: SubtitleType.srt,
       subtitlesOffset: getSubtitleDelay(),
       widgetVisibility: _widgetVisibility,
+      comprehensionSubtitle: _comprehensionSubtitle,
     );
 
     return _subTitleController;
