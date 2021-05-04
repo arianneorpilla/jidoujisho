@@ -76,13 +76,14 @@ class SubtitleTextView extends StatelessWidget {
                     }
 
                     if (getListeningComprehensionMode()) {
-                      if (visibility &&
-                          comprehensionSubtitle.value != null &&
-                          (comprehensionSubtitle.value.startTime -
-                                      Duration(seconds: 10) >
-                                  state.subtitle.startTime ||
-                              comprehensionSubtitle.value.endTime <
-                                  state.subtitle.endTime)) {
+                      if (comprehensionSubtitle.value == null ||
+                          (visibility &&
+                              comprehensionSubtitle.value != null &&
+                              (comprehensionSubtitle.value.startTime -
+                                          Duration(seconds: 10) >
+                                      state.subtitle.startTime ||
+                                  comprehensionSubtitle.value.endTime <
+                                      state.subtitle.endTime))) {
                         widgetVisibility.value = false;
                         return Container();
                       }

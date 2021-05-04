@@ -350,8 +350,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   void visibilityTimerAction() {
     if (getVideoPlayerController().value.isInitialized) {
-      if (getListeningComprehensionMode() &&
-          _comprehensionSubtitle.value != null) {
+      if (_comprehensionSubtitle.value != null) {
         if (getVideoPlayerController().value.position.inMilliseconds +
                     _audioAllowance.value -
                     getSubtitleController().subtitlesOffset <
