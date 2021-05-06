@@ -65,10 +65,11 @@ Please note that the development of the app switches between changes being imple
 
 <p align="center" style="margin:0">
   <img src="https://i.postimg.cc/P547G9mQ/Screenshot-20210421-082347.jpg" height="350">
-  <img src="https://i.postimg.cc/jSsrhv9x/167133538-450387926296671-1989413689582299649-n.jpg" height="350">
-  <img src="https://i.postimg.cc/jq7KqDPb/167282834-787618361872942-1591624056492200688-n.jpg" height="350">
-  <img src="https://i.postimg.cc/fT7NX18q/168707273-122438036525835-4049095217160473956-n.jpg" height="350">
+  <img src="https://i.postimg.cc/6549Nhp9/7.jpg" height="350">
+  <img src="https://i.postimg.cc/7LwD08M6/1.jpg" height="350">
+  <img src="https://i.postimg.cc/KzY2pPWh/2.jpg" height="350">
 </p>
+
 <p align="center" style="margin:0">
   <img src="https://i.postimg.cc/vm2STn21/Screenshot-20210421-111725.jpg" width="223">
   <img src="https://i.postimg.cc/zDgPDVCB/Screenshot-20210421-111922.jpg" width="223">
