@@ -453,6 +453,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
     ),
   );
   final _currentSubTrack = ValueNotifier<int>(-1);
+  final _failureMetadata = ValueNotifier<AnkiExportMetadata>(null);
 
   @override
   Widget build(BuildContext context) {
@@ -532,6 +533,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       selection,
       _audioAllowance.value,
       getSubtitleController().subtitlesOffset,
+      _failureMetadata,
     );
   }
 
@@ -550,6 +552,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       [_currentSubtitle.value],
       _audioAllowance.value,
       getSubtitleController().subtitlesOffset,
+      _failureMetadata,
     );
   }
 
@@ -942,8 +945,8 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   Widget buildDictionaryExportingLong(String clipboard) {
     String lookupText =
-        "Failed to communicate with the AnkiDroid background service.\n" +
-            "If inactive, press here to launch it and try again.";
+        "The AnkiDroid background service must be active for card export.\n" +
+            "Press here to launch AnkiDroid and return to continue.";
 
     return Column(
       children: [
@@ -955,6 +958,31 @@ class _VideoPlayerState extends State<VideoPlayer> {
             );
 
             _clipboard.value = "";
+
+            try {
+              await getDecks();
+              AnkiExportMetadata metadata = _failureMetadata.value;
+
+              _clipboard.value = "&<&>export&<&>";
+
+              exportToAnki(
+                context,
+                metadata.chewie,
+                metadata.controller,
+                metadata.clipboard,
+                metadata.subtitle,
+                metadata.dictionaryEntry,
+                metadata.wasPlaying,
+                metadata.exportSubtitles,
+                metadata.audioAllowance,
+                metadata.subtitleDelay,
+                _failureMetadata,
+              );
+
+              _failureMetadata.value = null;
+            } catch (e) {
+              print(e);
+            }
           },
           child: Padding(
             padding: EdgeInsets.all(16.0),

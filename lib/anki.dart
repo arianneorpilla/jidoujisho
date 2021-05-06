@@ -163,6 +163,7 @@ Future exportToAnki(
   List<Subtitle> exportSubtitles,
   int audioAllowance,
   int subtitleDelay,
+  ValueNotifier<AnkiExportMetadata> failureMetadata,
 ) async {
   String lastDeck = getLastDeck();
 
@@ -209,9 +210,46 @@ Future exportToAnki(
       wasPlaying,
       exportSubtitles,
     );
+
+    failureMetadata.value = null;
   } catch (ex) {
     clipboard.value = "&<&>exportlong&<&>";
+    failureMetadata.value = AnkiExportMetadata(
+      chewie,
+      controller,
+      clipboard,
+      subtitle,
+      dictionaryEntry,
+      wasPlaying,
+      exportSubtitles,
+      audioAllowance,
+      subtitleDelay,
+    );
   }
+}
+
+class AnkiExportMetadata {
+  ChewieController chewie;
+  VlcPlayerController controller;
+  ValueNotifier<String> clipboard;
+  Subtitle subtitle;
+  DictionaryEntry dictionaryEntry;
+  bool wasPlaying;
+  List<Subtitle> exportSubtitles;
+  int audioAllowance;
+  int subtitleDelay;
+
+  AnkiExportMetadata(
+    this.chewie,
+    this.controller,
+    this.clipboard,
+    this.subtitle,
+    this.dictionaryEntry,
+    this.wasPlaying,
+    this.exportSubtitles,
+    this.audioAllowance,
+    this.subtitleDelay,
+  );
 }
 
 void showAnkiDialog(

@@ -707,9 +707,9 @@ class _HomeState extends State<Home> {
                 borderRadius: BorderRadius.zero,
               ),
               content: Text(
-                "Failed to communicate with the AnkiDroid background service, "
-                "which is necessary to use the card creator. Please launch "
-                "AnkiDroid and try again.",
+                "The AnkiDroid background service must be active to use "
+                "the card creator. Please launch AnkiDroid and return "
+                "to continue.",
                 textAlign: TextAlign.justify,
               ),
               actions: <Widget>[
@@ -749,6 +749,17 @@ class _HomeState extends State<Home> {
                       openStore: true,
                     );
                     Navigator.pop(context);
+
+                    try {
+                      await getDecks();
+                      setState(() {
+                        _isCreatorView = true;
+                        _creatorDictionaryEntry = dictionaryEntry;
+                        _creatorFile = file;
+                      });
+                    } catch (e) {
+                      print(e);
+                    }
                   },
                 ),
               ],
