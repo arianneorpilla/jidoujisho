@@ -1186,12 +1186,13 @@ class _HomeState extends State<Home> {
         );
         break;
       case "About this app":
-        const String legalese = "A mobile video player for language learners.\n\n" +
-            "Built for the Japanese language learning community by Leo Rafael Orpilla. " +
-            "Bilingual definitions queried from Jisho.org. Monolingual definitions queried from Goo.ne.jp. Logo by Aaron Marbella.\n\n" +
-            "jidoujisho is free and open source software. Liking the application? " +
-            "Help out by providing feedback, making a donation, reporting issues or collaborating " +
-            "for further improvements on GitHub.";
+        const String legalese =
+            "A mobile video player and card creation toolkit tailored for language learners.\n\n" +
+                "Built for the Japanese language learning community by Leo Rafael Orpilla. " +
+                "Bilingual definitions queried from Jisho.org. Monolingual definitions queried from Goo.ne.jp. Video streaming via YouTube. Image search via Bing Images. Logo by Aaron Marbella.\n\n" +
+                "jidoujisho is free and open source software. Liking the application? " +
+                "Help out by providing feedback, making a donation, reporting issues or collaborating " +
+                "for further improvements on GitHub.";
 
         showLicensePage(
           context: context,
@@ -1795,7 +1796,7 @@ class _ChannelResultState extends State<ChannelResult>
               ),
               title: Text(
                 "${result.title}",
-                maxLines: 1,
+                maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),
               content: ClipRRect(
@@ -2374,6 +2375,10 @@ class _ClipboardState extends State<ClipboardMenu> {
             onTap: () {
               creatorCallback(entry, null);
             },
+            onLongPress: () {
+              removeDictionaryEntryFromHistory(entry);
+              setStateFromResult();
+            },
             child: Padding(
               padding: EdgeInsets.all(16),
               child: InkWell(
@@ -2536,6 +2541,7 @@ class _CreatorState extends State<Creator> {
   ValueNotifier<String> _selectedDeck;
 
   String lastDeck = getLastDeck();
+  bool _isSearching = false;
 
   ValueNotifier<DictionaryEntry> _selectedEntry;
   ValueNotifier<int> _selectedIndex = ValueNotifier<int>(0);
@@ -2636,7 +2642,7 @@ class _CreatorState extends State<Creator> {
         ),
         SizedBox(height: 13),
         Text(
-          "Searching for image...",
+          "Searching for images...",
           style: TextStyle(
             fontSize: 11,
           ),
@@ -2783,7 +2789,8 @@ class _CreatorState extends State<Creator> {
                 _meaningController =
                     TextEditingController(text: _selectedEntry.value.meaning);
 
-                if (!_isFileImage) {
+                if (_fileImage == null) {
+                  _isFileImage = false;
                   if (_selectedEntry.value.word.contains(";")) {
                     searchTerm = _selectedEntry.value.word.split(";").first;
                   } else if (_selectedEntry.value.word.contains("／")) {
@@ -2793,6 +2800,8 @@ class _CreatorState extends State<Creator> {
                   }
                   _selectedIndex.value = 0;
                 }
+
+                print(searchTerm);
 
                 setState(() {});
                 Navigator.pop(context);
@@ -2829,9 +2838,17 @@ class _CreatorState extends State<Creator> {
     }
 
     Widget imageSearchField = TextFormField(
-      keyboardType: TextInputType.multiline,
-      maxLines: null,
+      keyboardType: TextInputType.text,
+      maxLines: 1,
       controller: _imageSearchController,
+      onFieldSubmitted: (result) {
+        setState(() {
+          _isFileImage = false;
+          _fileImage = null;
+          searchTerm = _imageSearchController.text;
+          _selectedIndex.value = 0;
+        });
+      },
       decoration: InputDecoration(
         prefixIcon: Icon(Icons.image, color: Colors.white),
         suffixIcon: Row(
@@ -2900,22 +2917,37 @@ class _CreatorState extends State<Creator> {
     );
     Widget sentenceField = displayField(
       "Sentence",
-      "Enter front of card or sentence here",
+      "Enter sentence here",
       Icons.format_align_center_rounded,
       _sentenceController,
     );
 
-    Widget wordField = displayField(
-      "Word",
-      "Enter the word in the back here",
-      Icons.speaker_notes_outlined,
-      _wordController,
-    );
+    void wordFieldSearch(bool monolingual) async {
+      if (!_isSearching) {
+        _isSearching = true;
+        String searchTerm = _wordController.text;
+        try {
+          List<DictionaryEntry> results;
+          if (monolingual) {
+            results = await getMonolingualWordDetails(searchTerm, false);
+          } else {
+            results = await getWordDetails(searchTerm);
+          }
 
-    wordField = TextFormField(
-      keyboardType: TextInputType.multiline,
-      maxLines: null,
+          showDictionaryDialog(results);
+        } finally {
+          _isSearching = false;
+        }
+      }
+    }
+
+    Widget wordField = TextFormField(
+      keyboardType: TextInputType.text,
+      maxLines: 1,
       controller: _wordController,
+      onFieldSubmitted: (result) {
+        wordFieldSearch(getMonolingualMode());
+      },
       decoration: InputDecoration(
         prefixIcon: Icon(
           Icons.speaker_notes_outlined,
@@ -2927,17 +2959,14 @@ class _CreatorState extends State<Creator> {
             IconButton(
               iconSize: 18,
               onPressed: () async {
-                String searchTerm = _wordController.text;
-                showDictionaryDialog(await getWordDetails(searchTerm));
+                wordFieldSearch(false);
               },
               icon: Text("A⌕", style: TextStyle(color: Colors.white)),
             ),
             IconButton(
               iconSize: 18,
               onPressed: () async {
-                String searchTerm = _wordController.text;
-                showDictionaryDialog(
-                    await getMonolingualWordDetails(searchTerm, false));
+                wordFieldSearch(true);
               },
               icon: Text("あ⌕", style: TextStyle(color: Colors.white)),
             ),
@@ -2949,7 +2978,7 @@ class _CreatorState extends State<Creator> {
           ],
         ),
         labelText: "Word",
-        hintText: "Enter the word in the back here",
+        hintText: "Enter the word here",
       ),
     );
 
@@ -2961,7 +2990,7 @@ class _CreatorState extends State<Creator> {
     );
     Widget meaningField = displayField(
       "Meaning",
-      "Enter the meaning in the back here",
+      "Enter the meaning of the word here",
       Icons.translate_rounded,
       _meaningController,
     );
@@ -3221,7 +3250,9 @@ class _CreatorState extends State<Creator> {
                   setState(() {
                     _isFileImage = true;
                     _fileImage = null;
+                    _networkImageURL = null;
 
+                    _imageSearchController.clear();
                     _sentenceController.clear();
                     _wordController.clear();
                     _readingController.clear();
@@ -3259,10 +3290,10 @@ class _CreatorState extends State<Creator> {
                     selectedDeck: _selectedDeck,
                   ),
                   imageSearchField,
-                  sentenceField,
                   wordField,
                   readingField,
                   meaningField,
+                  sentenceField,
                   SizedBox(height: 10),
                 ],
               ),

@@ -557,6 +557,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
   Future<bool> _onWillPop() async {
     if (getVideoPlayerController().value.isEnded) {
       Navigator.pop(context, true);
+      return false;
     }
 
     Widget alertDialog = AlertDialog(

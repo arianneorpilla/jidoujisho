@@ -78,7 +78,7 @@ public class MainActivity extends FlutterActivity {
                     new String[] {"jidoujisho (Creator) Default"},
                     new String[] {"{{Image}}<br>{{Word}}"},
                     new String[] {"{{Image}}<br>{{Word}}" +
-                            "<hr id=reading><p id=\"reading\">{{Reading}}</p><h2 id=\"word\">{{Word}}</h2><br><p><small id=\"meaning\">{{Meaning}}</small></p>"},
+                            "{{Audio}}<br><hr id=reading><p id=\"reading\">{{Reading}}</p><h2 id=\"word\">{{Word}}</h2><br><p><small id=\"meaning\">{{Meaning}}</small></p><br><p id=\"sentence\">{{Sentence}}</p>"},
                             "p {\n" +
                             "    margin: 0px\n" +
                             "}\n" +

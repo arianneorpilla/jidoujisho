@@ -297,13 +297,13 @@ void showAnkiDialog(
 
   Widget sentenceField = displayField(
     "Sentence",
-    "Enter front of card or sentence here",
+    "Enter the sentence here",
     Icons.format_align_center_rounded,
     _sentenceController,
   );
   Widget wordField = displayField(
     "Word",
-    "Enter the word in the back here",
+    "Enter the word here",
     Icons.speaker_notes_outlined,
     _wordController,
   );
@@ -315,7 +315,7 @@ void showAnkiDialog(
   );
   Widget meaningField = displayField(
     "Meaning",
-    "Enter the meaning in the back here",
+    "Enter the meaning of the word here",
     Icons.translate_rounded,
     _meaningController,
   );
@@ -686,7 +686,7 @@ void exportCreatorAnkiCard(String deck, String sentence, String answer,
   String addImage = "";
   String addAudio = "";
 
-  if (imageFile.existsSync()) {
+  if (imageFile != null && imageFile.existsSync()) {
     imageFile.copySync(newImagePath);
     addImage = "<img src=\"$newFileName.jpg\">";
   }
