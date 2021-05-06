@@ -4,10 +4,10 @@
 
 
 <h3 align="center">jidoujisho</h3>
-<p align="center">A mobile video player tailored for Japanese language learners.</p>
+<p align="center">A mobile video player and card creation toolkit tailored for language learners.</p>
 
 <p align="center" style="margin:0"><b>Latest GitHub Release:<br>
-<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.15.3-beta">0.15.3-beta 🇯🇵 → 🇬🇧</a><br>
+<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.15.4-beta">0.15.4-beta 🇯🇵 → 🇬🇧</a><br>
 <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.5.3-enjp-beta">0.5.3-beta 🇬🇧 → 🇯🇵</a></b><br></p>
 <div latest></div>
 
@@ -31,7 +31,7 @@
 
 # ⚕️ Current state of the project
 
-**jidoujisho is still in active development.** The app is free and open source software, and is <b><a href="https://github.com/lrorpilla/jidoujisho/releases">available to download here on GitHub.</a></b> Current features planned on the roadmap are listed below, but as of now there is no estimate on any updates.
+**jidoujisho is still in active development.** The application is free and open source software, and is <b><a href="https://github.com/lrorpilla/jidoujisho/releases">available to download here on GitHub.</a></b> Current features planned on the roadmap are listed below, but as of now there is no estimate on any updates.
 
 Please note that the development of the app switches between changes being implemented and being left alone for daily use. Update frequency may depend on the gravity of any issues that arise. **Hiatuses provide practical insight on usage and where development should go next.**
 
@@ -138,7 +138,7 @@ A primer on the basics of the application is as follows.
 
 # 👥 Contribution and attribution
 
-jidoujisho is written in <b><a href="https://dart.dev/">Dart</a></b> and powered by <b><a href="https://flutter.dev/">Flutter</a></b>. The application queries bilingual dictionary definitions from <b><a href="https://jisho.org/">Jisho.org</a></b> and monolingual definitions from <b><a href="https://dictionary.goo.ne.jp/">Goo.ne.jp</a></b>.
+jidoujisho is written in <b><a href="https://dart.dev/">Dart</a></b> and powered by <b><a href="https://flutter.dev/">Flutter</a></b>. Bilingual dictionary definitions are queried from <b><a href="https://jisho.org/">Jisho.org</a></b> and monolingual dictionary definitions are from <b><a href="https://dictionary.goo.ne.jp/">Goo.ne.jp</a></b>. Video streaming via <b><a href="https://youtube.com/">YouTube</a></b>. Image search via <b><a href="https://bing.com//">Bing Images</a></b>.
 
 If you like what I've done so far, you can help me out by testing the application on various devices so that I can gauge the compatibility of the application with different versions of Android, <b><a href="https://www.buymeacoffee.com/lrorpilla">making a donation</a></b> or collaborating with me on further improvements.
 
