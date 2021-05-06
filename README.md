@@ -4,7 +4,7 @@
 
 
 <h3 align="center">jidoujisho</h3>
-<p align="center">A mobile video player and card creation toolkit tailored for language learners.</p>
+<p align="center">A mobile video player and card creation toolkit tailored for Japanese language learners.</p>
 
 <p align="center" style="margin:0"><b>Latest GitHub Release:<br>
 <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.15.4-beta">0.15.4-beta 🇯🇵 → 🇬🇧</a><br>
