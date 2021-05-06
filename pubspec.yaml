@@ -2,7 +2,7 @@ name: jidoujisho
 description: A mobile video player tailored for Japanese language learners. 
 publish_to: none
 
-version: 0.15.2+19
+version: 0.15.3+20
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -13,6 +13,7 @@ dependencies:
 
   audioplayers:
   audio_service: ^0.17.0
+  auto_orientation:
   async:
   chewie:
     path: ./chewie

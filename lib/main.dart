@@ -19,6 +19,7 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:wakelock/wakelock.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
@@ -115,6 +116,8 @@ class AudioPlayerTask extends BackgroundAudioTask {
 }
 
 void unlockLandscape() {
+  Wakelock.disable();
+
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.landscapeLeft,
@@ -170,6 +173,7 @@ class _HomeState extends State<Home> {
   String _selectedChannelName = "";
   ValueNotifier<List<String>> _searchSuggestions =
       ValueNotifier<List<String>>([]);
+  ValueNotifier<bool> _isHomeInvisible = ValueNotifier<bool>(false);
   YoutubeExplode yt = YoutubeExplode();
 
   @override
@@ -348,28 +352,45 @@ class _HomeState extends State<Home> {
 
     return new WillPopScope(
       onWillPop: _onWillPop,
-      child: new Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.black,
-          leading: buildAppBarLeading(),
-          title: buildAppBarTitleOrSearch(),
-          actions: buildActions(),
-        ),
-        backgroundColor: Colors.black,
-        bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: Colors.black,
-          type: BottomNavigationBarType.fixed,
-          selectedFontSize: 10,
-          unselectedFontSize: 10,
-          selectedIconTheme: IconThemeData(color: Colors.white),
-          unselectedIconTheme: IconThemeData(color: Colors.grey),
-          unselectedLabelStyle: TextStyle(color: Colors.grey),
-          selectedLabelStyle: TextStyle(color: Colors.red),
-          currentIndex: _selectedIndex,
-          onTap: onItemTapped,
-          items: getNavigationBarItems(),
-        ),
-        body: getWidgetOptions(_selectedIndex),
+      child: Stack(
+        children: [
+          Scaffold(
+            appBar: AppBar(
+              backgroundColor: Colors.black,
+              leading: buildAppBarLeading(),
+              title: buildAppBarTitleOrSearch(),
+              actions: buildActions(),
+            ),
+            backgroundColor: Colors.black,
+            bottomNavigationBar: BottomNavigationBar(
+              backgroundColor: Colors.black,
+              type: BottomNavigationBarType.fixed,
+              selectedFontSize: 10,
+              unselectedFontSize: 10,
+              selectedIconTheme: IconThemeData(color: Colors.white),
+              unselectedIconTheme: IconThemeData(color: Colors.grey),
+              unselectedLabelStyle: TextStyle(color: Colors.grey),
+              selectedLabelStyle: TextStyle(color: Colors.red),
+              currentIndex: _selectedIndex,
+              onTap: onItemTapped,
+              items: getNavigationBarItems(),
+            ),
+            body: getWidgetOptions(_selectedIndex),
+          ),
+          ValueListenableBuilder(
+            valueListenable: _isHomeInvisible,
+            builder: (BuildContext context, bool isHomeVisible, Widget widget) {
+              return Visibility(
+                visible: isHomeVisible,
+                child: Expanded(
+                  child: Container(
+                    color: Colors.black,
+                  ),
+                ),
+              );
+            },
+          )
+        ],
       ),
     );
   }

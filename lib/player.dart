@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
+import 'package:auto_orientation/auto_orientation.dart';
 import 'package:chewie/chewie.dart';
 import 'package:clipboard_monitor/clipboard_monitor.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
@@ -35,10 +36,7 @@ class Player extends StatelessWidget {
   final Video video;
 
   void lockLandscape() {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
+    AutoOrientation.landscapeAutoMode(forceSensor: true);
 
     SystemChrome.setEnabledSystemUIOverlays([]);
   }
@@ -596,13 +594,6 @@ class _VideoPlayerState extends State<VideoPlayer> {
             ),
           ),
           onPressed: () async {
-            await Wakelock.disable();
-            await SystemChrome.setPreferredOrientations([
-              DeviceOrientation.portraitUp,
-              DeviceOrientation.landscapeLeft,
-              DeviceOrientation.landscapeRight,
-            ]);
-
             Navigator.pop(context, true);
           },
         ),
@@ -1389,6 +1380,9 @@ class _VideoPlayerState extends State<VideoPlayer> {
               if (_shadowingSubtitle.value != null) {
                 _shadowingSubtitle.value = subtitles[index];
               }
+
+              _comprehensionSubtitle.value = subtitles[index];
+              getSubtitleController().widgetVisibility.value = true;
             },
             onLongPress: () {
               List<Subtitle> selectedSubtitles = [];
