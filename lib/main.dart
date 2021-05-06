@@ -523,6 +523,7 @@ class _HomeState extends State<Home> {
               break;
             default:
               if (!snapshot.hasData) {
+                gChannelVideoCache[_searchQuery] = AsyncMemoizer();
                 return errorMessage;
               }
 
@@ -542,6 +543,7 @@ class _HomeState extends State<Home> {
               return queryMessage;
             default:
               if (!snapshot.hasData) {
+                gChannelCache = AsyncMemoizer();
                 return errorMessage;
               }
 
@@ -872,7 +874,11 @@ class _HomeState extends State<Home> {
             break;
           default:
             if (!snapshot.hasData || snapshot.data.isEmpty) {
-              gTrendingCache = AsyncMemoizer();
+              if (_isSearching) {
+                gSearchCache[_searchQuery] = AsyncMemoizer();
+              } else {
+                gTrendingCache = AsyncMemoizer();
+              }
               return errorMessage;
             }
 
@@ -1568,6 +1574,7 @@ class _YouTubeResultState extends State<YouTubeResult>
         if (snapshot.connectionState == ConnectionState.done) {
           String videoDetails = snapshot.data;
           if (!snapshot.hasData) {
+            gMetadataCache[result.id.value] = AsyncMemoizer();
             return errorMessage;
           } else {
             return Text(
@@ -1641,6 +1648,7 @@ class _YouTubeResultState extends State<YouTubeResult>
       builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           if (!snapshot.hasData) {
+            gCaptioningCache[result.id.value] = AsyncMemoizer();
             return errorMessage;
           } else {
             bool hasClosedCaptions = snapshot.data;
