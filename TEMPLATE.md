@@ -62,6 +62,7 @@ small {
 ```
 
 <br>
+
 # Creator template
 * `jidoujisho (Creator) Default`, used for the card creator
 * **Intended for manga readers and casual word encounters**: image and word in the front, audio, reading, word, meaning and sentence in the back.
