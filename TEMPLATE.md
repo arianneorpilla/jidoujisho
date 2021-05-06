@@ -17,6 +17,7 @@ There are two templates, one used for video playback and the other used for the 
 * Reading
 
 <br>
+
 # Video playback template
 * `jidoujisho Default`, used when watching a video
 * **Intended for video immersion sentence mining**: audio, image and sentence in the front, back has reading, word and meaning
