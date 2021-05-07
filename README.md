@@ -12,7 +12,7 @@
 
 <p align="center" style="margin:0"><b>Release Archive:<br>
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.3.0-beta">0.3</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.4.3-beta">0.4</a> · 
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.4.0-beta">0.4</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.5.2-beta">0.5</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.6.1-beta">0.6</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.7.2-beta">0.7</a> · 
@@ -22,7 +22,8 @@
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.11.3-beta">0.11</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.12.4-beta">0.12</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.13.7-beta">0.13</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.14.2-beta">0.14</a> 
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.14.2-beta">0.14</a> ·
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.15.5-beta">0.15</a> 
 </p>
 
 # 📚 Uninterrupted language immersion at your fingertips
