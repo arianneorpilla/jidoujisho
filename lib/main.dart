@@ -1397,34 +1397,37 @@ class _YouTubeResultState extends State<YouTubeResult>
         result.duration == null ? "" : getYouTubeDuration(result.duration);
 
     Widget displayThumbnail() {
-      return Stack(
-        alignment: Alignment.bottomRight,
-        children: [
-          AspectRatio(
-            aspectRatio: 4 / 3,
-            child: FadeInImage(
-              image: NetworkImage(videoThumbnailURL),
-              placeholder: MemoryImage(kTransparentImage),
-              fit: BoxFit.contain,
+      return Padding(
+        padding: EdgeInsets.only(left: 16),
+        child: Stack(
+          alignment: Alignment.bottomRight,
+          children: [
+            AspectRatio(
+              aspectRatio: 4 / 3,
+              child: FadeInImage(
+                image: NetworkImage(videoThumbnailURL),
+                placeholder: MemoryImage(kTransparentImage),
+                fit: BoxFit.contain,
+              ),
             ),
-          ),
-          Positioned(
-            right: 5.0,
-            bottom: 20.0,
-            child: Container(
-              height: 20,
-              color: Colors.black.withOpacity(0.8),
-              alignment: Alignment.center,
-              child: Text(
-                videoDuration,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w300,
+            Positioned(
+              right: 5.0,
+              bottom: 20.0,
+              child: Container(
+                height: 20,
+                color: Colors.black.withOpacity(0.8),
+                alignment: Alignment.center,
+                child: Text(
+                  videoDuration,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w300,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
     }
 
@@ -2061,20 +2064,23 @@ class _HistoryResultState extends State<HistoryResult>
     }
 
     Widget displayThumbnail() {
-      return Stack(
-        alignment: Alignment.bottomRight,
-        children: [
-          AspectRatio(
-            aspectRatio: 4 / 3,
-            child: FadeInImage(
-              image: isNetwork()
-                  ? NetworkImage(history.thumbnail)
-                  : FileImage(File(history.thumbnail)),
-              placeholder: MemoryImage(kTransparentImage),
-              fit: BoxFit.contain,
+      return Padding(
+        padding: EdgeInsets.only(left: 16),
+        child: Stack(
+          alignment: Alignment.bottomRight,
+          children: [
+            AspectRatio(
+              aspectRatio: 4 / 3,
+              child: FadeInImage(
+                image: isNetwork()
+                    ? NetworkImage(history.thumbnail)
+                    : FileImage(File(history.thumbnail)),
+                placeholder: MemoryImage(kTransparentImage),
+                fit: BoxFit.contain,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
     }
 
@@ -3374,24 +3380,27 @@ class _CreatorState extends State<Creator> {
       body: Column(
         children: [
           Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  showImagePreview(),
-                  DeckDropDown(
-                    decks: decks,
-                    selectedDeck: _selectedDeck,
-                  ),
-                  imageSearchField,
-                  wordField,
-                  readingField,
-                  meaningField,
-                  sentenceField,
-                  SizedBox(height: 10),
-                ],
+            child: Padding(
+              padding: EdgeInsets.only(left: 8, right: 8),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    showImagePreview(),
+                    DeckDropDown(
+                      decks: decks,
+                      selectedDeck: _selectedDeck,
+                    ),
+                    imageSearchField,
+                    wordField,
+                    readingField,
+                    meaningField,
+                    sentenceField,
+                    SizedBox(height: 10),
+                  ],
+                ),
               ),
             ),
           ),
