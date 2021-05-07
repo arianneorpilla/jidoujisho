@@ -91,6 +91,21 @@ DictionaryEntry getEntryFromJishoResult(JishoResult result, String searchTerm) {
   List<JishoJapaneseWord> words = result.japanese;
   List<JishoWordSense> senses = result.senses;
 
+  List<JishoJapaneseWord> duplicates = [];
+  words.forEach((word) {
+    String reading = word.reading;
+
+    if (reading != null) {
+      if (reading == result.slug) {
+        duplicates.add(word);
+      }
+    }
+  });
+
+  for (JishoJapaneseWord word in duplicates) {
+    words.remove(word);
+  }
+
   String exportTerm = "";
   String exportReadings = "";
   String exportMeanings = "";
@@ -117,10 +132,10 @@ DictionaryEntry getEntryFromJishoResult(JishoResult result, String searchTerm) {
   if (exportTerm.isNotEmpty) {
     exportTerm = removeLastNewline(exportTerm);
   } else {
-    if (exportReadings.isNotEmpty) {
-      exportTerm = exportReadings;
-    } else {
+    if (result.slug.isNotEmpty) {
       exportTerm = result.slug;
+    } else {
+      exportTerm = exportReadings;
     }
   }
 

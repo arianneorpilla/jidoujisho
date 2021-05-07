@@ -336,7 +336,10 @@ Future<void> addDictionaryEntryToHistory(
   List<DictionaryEntry> dictionaryEntries = getDictionaryHistory();
 
   dictionaryEntries.removeWhere(
-    (entry) => entry.word == dictionaryEntry.word,
+    (entry) =>
+        entry.word == dictionaryEntry.word &&
+        entry.reading == dictionaryEntry.reading &&
+        entry.meaning == dictionaryEntry.meaning,
   );
   dictionaryEntries.add(dictionaryEntry);
 
@@ -353,7 +356,10 @@ Future<void> removeDictionaryEntryFromHistory(
   List<DictionaryEntry> dictionaryEntries = getDictionaryHistory();
 
   dictionaryEntries.removeWhere(
-    (entry) => entry.word == dictionaryEntry.word,
+    (entry) =>
+        entry.word == dictionaryEntry.word &&
+        entry.reading == dictionaryEntry.reading &&
+        entry.meaning == dictionaryEntry.meaning,
   );
 
   await setDictionaryHistory(dictionaryEntries);

@@ -2666,8 +2666,14 @@ class _CreatorState extends State<Creator> {
     _imageSearchController = TextEditingController(text: searchTerm);
     _sentenceController = TextEditingController(text: initialSentence);
     _wordController = TextEditingController(text: initialDictionaryEntry.word);
-    _readingController =
-        TextEditingController(text: initialDictionaryEntry.reading);
+
+    if (initialDictionaryEntry.word != initialDictionaryEntry.reading) {
+      _readingController =
+          TextEditingController(text: initialDictionaryEntry.reading);
+    } else {
+      _readingController = TextEditingController(text: "");
+    }
+
     _meaningController =
         TextEditingController(text: initialDictionaryEntry.meaning);
 
@@ -2884,8 +2890,14 @@ class _CreatorState extends State<Creator> {
                 _selectedEntry.value = _dialogEntry.value;
                 _wordController =
                     TextEditingController(text: _selectedEntry.value.word);
-                _readingController =
-                    TextEditingController(text: _selectedEntry.value.reading);
+
+                if (_selectedEntry.value.word != _selectedEntry.value.reading) {
+                  _readingController =
+                      TextEditingController(text: _selectedEntry.value.reading);
+                } else {
+                  _readingController = TextEditingController(text: "");
+                }
+
                 _meaningController =
                     TextEditingController(text: _selectedEntry.value.meaning);
 

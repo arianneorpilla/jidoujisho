@@ -267,8 +267,14 @@ void showAnkiDialog(
       TextEditingController(text: sentence);
   TextEditingController _wordController =
       TextEditingController(text: dictionaryEntry.word);
-  TextEditingController _readingController =
-      TextEditingController(text: dictionaryEntry.reading);
+
+  TextEditingController _readingController;
+  if (dictionaryEntry.word != dictionaryEntry.reading) {
+    _readingController = TextEditingController(text: dictionaryEntry.reading);
+  } else {
+    _readingController = TextEditingController(text: "");
+  }
+
   TextEditingController _meaningController =
       TextEditingController(text: dictionaryEntry.meaning);
 
