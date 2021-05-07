@@ -4,16 +4,16 @@
 
 
 <h3 align="center">jidoujisho</h3>
-<p align="center">A mobile video player tailored for Japanese language learners.</p>
+<p align="center">A mobile video player and card creation toolkit tailored for language learners.</p>
 
 <p align="center" style="margin:0"><b>Latest GitHub Release:<br>
-<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.15.3-beta">0.15.3-beta 🇯🇵 → 🇬🇧</a><br>
+<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.15.4-beta">0.15.4-beta 🇯🇵 → 🇬🇧</a><br>
 <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.5.3-enjp-beta">0.5.3-beta 🇬🇧 → 🇯🇵</a></b><br></p>
 <div latest></div>
 
 # 📚 Uninterrupted language immersion at your fingertips
 
-**jidoujisho** is an Android video player with features specifically helpful for language learners. 
+**jidoujisho** is an Android video player and card creation toolkit with features specifically helpful for language learners. 
 
 - [x] Text selection of subtitles allows for **quick dictionary lookups within the application**
 - [x] **Search current clipboard and open browser** to Jisho.org, DeepL or Google Translate
@@ -31,7 +31,7 @@
 
 # ⚕️ Current state of the project
 
-**jidoujisho is still in active development.** The app is free and open source software, and is <b><a href="https://github.com/lrorpilla/jidoujisho/releases">available to download here on GitHub.</a></b> Current features planned on the roadmap are listed below, but as of now there is no estimate on any updates.
+**jidoujisho is still in active development.** Built for the Japanese language learning community, the application is free and open source software, and is <b><a href="https://github.com/lrorpilla/jidoujisho/releases">available to download here on GitHub.</a></b> Current features planned on the roadmap are listed below, but as of now there is no estimate on any updates.
 
 Please note that the development of the app switches between changes being implemented and being left alone for daily use. Update frequency may depend on the gravity of any issues that arise. **Hiatuses provide practical insight on usage and where development should go next.**
 
@@ -65,10 +65,11 @@ Please note that the development of the app switches between changes being imple
 
 <p align="center" style="margin:0">
   <img src="https://i.postimg.cc/P547G9mQ/Screenshot-20210421-082347.jpg" height="350">
-  <img src="https://i.postimg.cc/jSsrhv9x/167133538-450387926296671-1989413689582299649-n.jpg" height="350">
-  <img src="https://i.postimg.cc/jq7KqDPb/167282834-787618361872942-1591624056492200688-n.jpg" height="350">
-  <img src="https://i.postimg.cc/fT7NX18q/168707273-122438036525835-4049095217160473956-n.jpg" height="350">
+  <img src="https://i.postimg.cc/6549Nhp9/7.jpg" height="350">
+  <img src="https://i.postimg.cc/7LwD08M6/1.jpg" height="350">
+  <img src="https://i.postimg.cc/KzY2pPWh/2.jpg" height="350">
 </p>
+
 <p align="center" style="margin:0">
   <img src="https://i.postimg.cc/vm2STn21/Screenshot-20210421-111725.jpg" width="223">
   <img src="https://i.postimg.cc/zDgPDVCB/Screenshot-20210421-111922.jpg" width="223">
@@ -138,7 +139,7 @@ A primer on the basics of the application is as follows.
 
 # 👥 Contribution and attribution
 
-jidoujisho is written in <b><a href="https://dart.dev/">Dart</a></b> and powered by <b><a href="https://flutter.dev/">Flutter</a></b>. The application queries bilingual dictionary definitions from <b><a href="https://jisho.org/">Jisho.org</a></b> and monolingual definitions from <b><a href="https://dictionary.goo.ne.jp/">Goo.ne.jp</a></b>.
+jidoujisho is written in <b><a href="https://dart.dev/">Dart</a></b> and powered by <b><a href="https://flutter.dev/">Flutter</a></b>. Bilingual dictionary definitions are queried from <b><a href="https://jisho.org/">Jisho.org</a></b> and monolingual dictionary definitions are from <b><a href="https://dictionary.goo.ne.jp/">Goo.ne.jp</a></b>. Video streaming via <b><a href="https://youtube.com/">YouTube</a></b>. Image search via <b><a href="https://bing.com//">Bing</a></b>.
 
 If you like what I've done so far, you can help me out by testing the application on various devices so that I can gauge the compatibility of the application with different versions of Android, <b><a href="https://www.buymeacoffee.com/lrorpilla">making a donation</a></b> or collaborating with me on further improvements.
 
