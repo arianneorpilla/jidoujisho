@@ -90,7 +90,7 @@ Future<YouTubeMux> getPlayerYouTubeInfo(String webURL) async {
     Video video = await yt.videos.get(videoID);
     String title = video.title;
     String channel = video.author;
-    String thumbnailURL = video.thumbnails.highResUrl;
+    String thumbnailURL = video.thumbnails.mediumResUrl;
 
     StreamManifest streamManifest =
         await yt.videos.streamsClient.getManifest(webURL);

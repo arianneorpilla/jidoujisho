@@ -1189,7 +1189,7 @@ class _HomeState extends State<Home> {
         const String legalese =
             "A mobile video player and card creation toolkit tailored for language learners.\n\n" +
                 "Built for the Japanese language learning community by Leo Rafael Orpilla. " +
-                "Bilingual definitions queried from Jisho.org. Monolingual definitions queried from Goo.ne.jp. Video streaming via YouTube. Image search via Bing Images. Logo by Aaron Marbella.\n\n" +
+                "Bilingual definitions queried from Jisho.org. Monolingual definitions queried from Goo.ne.jp. Video streaming via YouTube. Image search via Bing. Logo by Aaron Marbella.\n\n" +
                 "jidoujisho is free and open source software. Liking the application? " +
                 "Help out by providing feedback, making a donation, reporting issues or collaborating " +
                 "for further improvements on GitHub.";
@@ -1389,7 +1389,7 @@ class _YouTubeResultState extends State<YouTubeResult>
     super.build(context);
 
     String videoStreamURL = result.url;
-    String videoThumbnailURL = result.thumbnails.highResUrl;
+    String videoThumbnailURL = result.thumbnails.mediumResUrl;
 
     String videoTitle = result.title;
     String videoChannel = result.author;
@@ -1405,8 +1405,7 @@ class _YouTubeResultState extends State<YouTubeResult>
             child: FadeInImage(
               image: NetworkImage(videoThumbnailURL),
               placeholder: MemoryImage(kTransparentImage),
-              height: 480,
-              fit: BoxFit.fitHeight,
+              fit: BoxFit.contain,
             ),
           ),
           Positioned(
@@ -1486,7 +1485,7 @@ class _YouTubeResultState extends State<YouTubeResult>
       });
     }
 
-    return GestureDetector(
+    return InkWell(
       onLongPress: () {
         HapticFeedback.vibrate();
         showDialog(
@@ -1498,13 +1497,13 @@ class _YouTubeResultState extends State<YouTubeResult>
               ),
               title: Text(
                 result.title,
-                maxLines: 1,
+                maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),
               content: AspectRatio(
                 aspectRatio: 16 / 9,
                 child: FadeInImage(
-                  image: NetworkImage(result.thumbnails.highResUrl),
+                  image: NetworkImage(result.thumbnails.mediumResUrl),
                   placeholder: MemoryImage(kTransparentImage),
                   width: 1280,
                   fit: BoxFit.fitWidth,
@@ -1527,11 +1526,10 @@ class _YouTubeResultState extends State<YouTubeResult>
                 ),
                 TextButton(
                   child: Text(
-                    'PLAY VIDEO',
+                    'PLAY',
                     style: TextStyle(color: Colors.white),
                   ),
                   onPressed: () {
-                    print("doesnt work");
                     Navigator.pop(context);
                     playVideo();
                   },
@@ -1822,6 +1820,16 @@ class _ChannelResultState extends State<ChannelResult>
                   },
                 ),
                 TextButton(
+                  child: Text('UNLIST CHANNEL',
+                      style: TextStyle(color: Colors.white)),
+                  onPressed: () async {
+                    await removeChannel(result);
+
+                    stateCallback();
+                    Navigator.pop(context);
+                  },
+                ),
+                TextButton(
                   child: Text('OLDEST VIDEOS',
                       style: TextStyle(color: Colors.white)),
                   onPressed: () {
@@ -1835,16 +1843,6 @@ class _ChannelResultState extends State<ChannelResult>
                   onPressed: () {
                     Navigator.pop(context);
                     callback(result.id.toString(), result.title, false);
-                  },
-                ),
-                TextButton(
-                  child: Text('UNLIST CHANNEL',
-                      style: TextStyle(color: Colors.white)),
-                  onPressed: () async {
-                    await removeChannel(result);
-
-                    stateCallback();
-                    Navigator.pop(context);
                   },
                 ),
               ],
@@ -1925,7 +1923,7 @@ class _SearchResultState extends State<SearchResult>
           child: Icon(
             icon,
             color: Colors.grey,
-            size: 16,
+            size: 20,
           ),
         ),
       );
@@ -1959,10 +1957,51 @@ class _SearchResultState extends State<SearchResult>
         callback(result);
       },
       onLongPress: () {
-        HapticFeedback.vibrate();
         if (icon == Icons.history) {
-          removeSearchHistory(result);
-          stateCallback();
+          HapticFeedback.vibrate();
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.zero,
+                ),
+                title: Text(
+                  result,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    child:
+                        Text('CANCEL', style: TextStyle(color: Colors.white)),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                  TextButton(
+                    child: Text(
+                      'REMOVE',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    onPressed: () async {
+                      removeSearchHistory(result);
+                      stateCallback();
+                      Navigator.pop(context);
+                    },
+                  ),
+                  TextButton(
+                    child:
+                        Text('SEARCH', style: TextStyle(color: Colors.white)),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      callback(result);
+                    },
+                  ),
+                ],
+              );
+            },
+          );
         }
       },
       child: Container(
@@ -2032,7 +2071,6 @@ class _HistoryResultState extends State<HistoryResult>
                   ? NetworkImage(history.thumbnail)
                   : FileImage(File(history.thumbnail)),
               placeholder: MemoryImage(kTransparentImage),
-              height: 480,
               fit: BoxFit.contain,
             ),
           ),
@@ -2116,7 +2154,7 @@ class _HistoryResultState extends State<HistoryResult>
       });
     }
 
-    return GestureDetector(
+    return InkWell(
       onLongPress: () {
         HapticFeedback.vibrate();
         showDialog(
@@ -2151,7 +2189,7 @@ class _HistoryResultState extends State<HistoryResult>
                 ),
                 TextButton(
                   child: Text(
-                    'REMOVE FROM HISTORY',
+                    'REMOVE',
                     style: TextStyle(color: Colors.white),
                   ),
                   onPressed: () async {
@@ -2174,7 +2212,7 @@ class _HistoryResultState extends State<HistoryResult>
                     : Container(),
                 TextButton(
                   child: Text(
-                    'PLAY VIDEO',
+                    'PLAY',
                     style: TextStyle(color: Colors.white),
                   ),
                   onPressed: () {
@@ -2376,8 +2414,68 @@ class _ClipboardState extends State<ClipboardMenu> {
               creatorCallback(entry, null);
             },
             onLongPress: () {
-              removeDictionaryEntryFromHistory(entry);
-              setStateFromResult();
+              HapticFeedback.vibrate();
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero,
+                    ),
+                    content: Container(
+                      color: Colors.grey[800].withOpacity(0.6),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            entry.word,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
+                          ),
+                          Text(entry.reading),
+                          Flexible(
+                            child: SingleChildScrollView(
+                              child: Text("\n${entry.meaning}"),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    actions: <Widget>[
+                      TextButton(
+                        child: Text('CANCEL',
+                            style: TextStyle(color: Colors.white)),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                      TextButton(
+                        child: Text(
+                          'REMOVE',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        onPressed: () async {
+                          Navigator.pop(context);
+                          removeDictionaryEntryFromHistory(entry);
+                          setStateFromResult();
+                        },
+                      ),
+                      TextButton(
+                        child: Text(
+                          'CREATE CARD',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        onPressed: () {
+                          creatorCallback(entry, null);
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
             },
             child: Padding(
               padding: EdgeInsets.all(16),
@@ -2704,12 +2802,8 @@ class _CreatorState extends State<Creator> {
                         Text(results[_dialogIndex.value].reading),
                         Flexible(
                           child: SingleChildScrollView(
-                            child: gCustomDictionary.isNotEmpty ||
-                                    getMonolingualMode()
-                                ? SelectableText(
-                                    "\n${results[_dialogIndex.value].meaning}\n")
-                                : Text(
-                                    "\n${results[_dialogIndex.value].meaning}\n"),
+                            child: Text(
+                                "\n${results[_dialogIndex.value].meaning}\n"),
                           ),
                         ),
                         Row(
@@ -3011,6 +3105,7 @@ class _CreatorState extends State<Creator> {
                   builder: (context) => PhotoView(
                     initialScale: PhotoViewComputedScale.contained * 1,
                     minScale: PhotoViewComputedScale.contained * 1,
+                    maxScale: PhotoViewComputedScale.contained * 4,
                     imageProvider: FileImage(_fileImage),
                   ),
                 ),
@@ -3071,6 +3166,7 @@ class _CreatorState extends State<Creator> {
                               initialScale:
                                   PhotoViewComputedScale.contained * 1,
                               minScale: PhotoViewComputedScale.contained * 1,
+                              maxScale: PhotoViewComputedScale.contained * 4,
                               imageProvider: NetworkImage(
                                 imageURLs[_selectedIndex.value],
                               ),
