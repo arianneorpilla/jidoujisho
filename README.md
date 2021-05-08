@@ -23,7 +23,7 @@
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.12.4-beta">0.12</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.13.7-beta">0.13</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.14.2-beta">0.14</a> ·
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.15.5-beta">0.15</a> 
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.15.8-beta">0.15</a> 
   </b></p>
 
 # 📚 Uninterrupted language immersion at your fingertips
