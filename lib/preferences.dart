@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:async/async.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:path/path.dart' as path;
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
@@ -308,13 +309,14 @@ Future<void> removeVideoHistory(VideoHistory videoHistory) async {
   await setVideoHistory(videoHistories);
 }
 
-List<DictionaryEntry> getDictionaryHistory() {
-  String prefsDictionary = gSharedPrefs.getString('dictionaryHistory') ?? '[]';
+List<DictionaryHistoryEntry> getDictionaryHistory() {
+  String prefsDictionary = gSharedPrefs.getString('dictionaryEntries') ?? '[]';
+
   List<dynamic> history = (jsonDecode(prefsDictionary) as List<dynamic>);
 
-  List<DictionaryEntry> entries = [];
+  List<DictionaryHistoryEntry> entries = [];
   history.forEach((map) {
-    DictionaryEntry entry = DictionaryEntry.fromMap(map);
+    DictionaryHistoryEntry entry = DictionaryHistoryEntry.fromMap(map);
     entries.add(entry);
   });
 
@@ -322,47 +324,49 @@ List<DictionaryEntry> getDictionaryHistory() {
 }
 
 Future<void> setDictionaryHistory(
-    List<DictionaryEntry> dictionaryEntries) async {
+    List<DictionaryHistoryEntry> dictionaryEntries) async {
   List<Map<String, dynamic>> maps = [];
   dictionaryEntries.forEach((entry) {
     maps.add(entry.toMap());
   });
 
-  await gSharedPrefs.setString('dictionaryHistory', jsonEncode(maps));
+  await gSharedPrefs.setString('dictionaryEntries', jsonEncode(maps));
 }
 
 Future<void> addDictionaryEntryToHistory(
-    DictionaryEntry dictionaryEntry) async {
-  List<DictionaryEntry> dictionaryEntries = getDictionaryHistory();
+    DictionaryHistoryEntry dictionaryHistoryEntry) async {
+  List<DictionaryHistoryEntry> dictionaryHistoryEntries =
+      getDictionaryHistory();
 
-  dictionaryEntries.removeWhere(
-    (entry) =>
-        entry.word == dictionaryEntry.word &&
-        entry.reading == dictionaryEntry.reading &&
-        entry.meaning == dictionaryEntry.meaning,
-  );
-  dictionaryEntries.add(dictionaryEntry);
+  dictionaryHistoryEntries
+      .removeWhere((entry) => dictionaryHistoryEntry == entry);
+  dictionaryHistoryEntries.add(dictionaryHistoryEntry);
 
-  if (dictionaryEntries.length >= 100) {
-    dictionaryEntries =
-        dictionaryEntries.sublist(dictionaryEntries.length - 100);
+  if (dictionaryHistoryEntries.length >= 100) {
+    dictionaryHistoryEntries =
+        dictionaryHistoryEntries.sublist(dictionaryHistoryEntries.length - 100);
   }
 
-  await setDictionaryHistory(dictionaryEntries);
+  await setDictionaryHistory(dictionaryHistoryEntries);
+}
+
+Future<void> updateDictionaryHistorySwipeIndex(
+    DictionaryHistoryEntry toChange, int swipeIndex) async {
+  List<DictionaryHistoryEntry> history = getDictionaryHistory();
+  history.firstWhere((entry) => entry == toChange).swipeIndex = swipeIndex;
+
+  setDictionaryHistory(history);
 }
 
 Future<void> removeDictionaryEntryFromHistory(
-    DictionaryEntry dictionaryEntry) async {
-  List<DictionaryEntry> dictionaryEntries = getDictionaryHistory();
+    DictionaryHistoryEntry dictionaryHistoryEntry) async {
+  List<DictionaryHistoryEntry> dictionaryHistoryEntries =
+      getDictionaryHistory();
 
-  dictionaryEntries.removeWhere(
-    (entry) =>
-        entry.word == dictionaryEntry.word &&
-        entry.reading == dictionaryEntry.reading &&
-        entry.meaning == dictionaryEntry.meaning,
-  );
+  dictionaryHistoryEntries
+      .removeWhere((entry) => dictionaryHistoryEntry == entry);
 
-  await setDictionaryHistory(dictionaryEntries);
+  await setDictionaryHistory(dictionaryHistoryEntries);
 }
 
 YouTubeQualityOption getLastPlayedQuality(

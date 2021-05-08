@@ -843,17 +843,40 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   Widget buildDictionaryLoading(String clipboard) {
-    String lookupText = "Looking up『$clipboard』...";
-
     return Column(
       children: [
         Padding(
           padding: EdgeInsets.all(16.0),
           child: Container(
-            padding: EdgeInsets.all(16.0),
-            color: Colors.grey[800].withOpacity(0.6),
-            child: Text(lookupText),
-          ),
+              padding: EdgeInsets.all(16.0),
+              color: Colors.grey[800].withOpacity(0.6),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "Looking up",
+                    style: TextStyle(),
+                  ),
+                  Text(
+                    "『",
+                    style: TextStyle(
+                      color: Colors.grey[350],
+                    ),
+                  ),
+                  Text(clipboard),
+                  Text(
+                    "』",
+                    style: TextStyle(
+                      color: Colors.grey[350],
+                    ),
+                  ),
+                  Text(
+                    "...",
+                    style: TextStyle(),
+                  ),
+                ],
+              )),
         ),
         Expanded(child: Container()),
       ],
@@ -1049,15 +1072,21 @@ class _VideoPlayerState extends State<VideoPlayer> {
     );
   }
 
-  Widget buildDictionaryMatch(List<DictionaryEntry> results) {
+  Widget buildDictionaryMatch(DictionaryHistoryEntry results) {
     _subtitleFocusNode.unfocus();
     ValueNotifier<int> selectedIndex = ValueNotifier<int>(0);
 
     return ValueListenableBuilder(
       valueListenable: selectedIndex,
       builder: (BuildContext context, int _, Widget widget) {
-        _currentDictionaryEntry.value = results[selectedIndex.value];
-        addDictionaryEntryToHistory(_currentDictionaryEntry.value);
+        _currentDictionaryEntry.value = results.entries[selectedIndex.value];
+        addDictionaryEntryToHistory(
+          DictionaryHistoryEntry(
+            entries: results.entries,
+            searchTerm: results.searchTerm,
+            swipeIndex: selectedIndex.value,
+          ),
+        );
 
         return Container(
           padding: EdgeInsets.all(16.0),
@@ -1080,14 +1109,14 @@ class _VideoPlayerState extends State<VideoPlayer> {
               if (details.primaryVelocity == 0) return;
 
               if (details.primaryVelocity.compareTo(0) == -1) {
-                if (selectedIndex.value == results.length - 1) {
+                if (selectedIndex.value == results.entries.length - 1) {
                   selectedIndex.value = 0;
                 } else {
                   selectedIndex.value += 1;
                 }
               } else {
                 if (selectedIndex.value == 0) {
-                  selectedIndex.value = results.length - 1;
+                  selectedIndex.value = results.entries.length - 1;
                 } else {
                   selectedIndex.value -= 1;
                 }
@@ -1101,31 +1130,32 @@ class _VideoPlayerState extends State<VideoPlayer> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    results[selectedIndex.value].word,
+                    results.entries[selectedIndex.value].word,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
                     ),
                   ),
-                  Text(results[selectedIndex.value].reading),
+                  Text(results.entries[selectedIndex.value].reading),
                   Flexible(
                     child: SingleChildScrollView(
                       child: gCustomDictionary.isNotEmpty ||
                               getMonolingualMode()
                           ? SelectableText(
-                              "\n${results[selectedIndex.value].meaning}\n")
-                          : Text("\n${results[selectedIndex.value].meaning}\n"),
+                              "\n${results.entries[selectedIndex.value].meaning}\n")
+                          : Text(
+                              "\n${results.entries[selectedIndex.value].meaning}\n"),
                     ),
                   ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.end,
+                    alignment: WrapAlignment.center,
                     children: [
                       Text(
-                        "Showing search result ",
+                        "Selecting search result ",
                         style: TextStyle(
                           fontSize: 11,
+                          color: Colors.grey[350],
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -1141,11 +1171,12 @@ class _VideoPlayerState extends State<VideoPlayer> {
                         "out of ",
                         style: TextStyle(
                           fontSize: 11,
+                          color: Colors.grey[350],
                         ),
                         textAlign: TextAlign.center,
                       ),
                       Text(
-                        "${results.length} ",
+                        "${results.entries.length} ",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 11,
@@ -1156,14 +1187,33 @@ class _VideoPlayerState extends State<VideoPlayer> {
                         "found for",
                         style: TextStyle(
                           fontSize: 11,
+                          color: Colors.grey[350],
                         ),
                         textAlign: TextAlign.center,
                       ),
                       Text(
-                        "『${results[selectedIndex.value].searchTerm}』",
+                        "『",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 11,
+                          color: Colors.grey[350],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        "${results.entries[selectedIndex.value].searchTerm}",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        "』",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                          color: Colors.grey[350],
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -1187,7 +1237,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
               ? getMonolingualWordDetails(clipboard, false)
               : getWordDetails(clipboard),
           builder: (BuildContext context,
-              AsyncSnapshot<List<DictionaryEntry>> snapshot) {
+              AsyncSnapshot<DictionaryHistoryEntry> snapshot) {
             if (_clipboard.value == "&<&>export&<&>") {
               return buildDictionaryExporting(clipboard);
             }
@@ -1221,11 +1271,10 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
                 return buildDictionaryLoading(clipboard);
               default:
-                List<DictionaryEntry> entries = snapshot.data;
+                DictionaryHistoryEntry results = snapshot.data;
 
-                if (snapshot.hasData && snapshot.data.isNotEmpty) {
-                  _currentDictionaryEntry.value = entries.first;
-                  return buildDictionaryMatch(entries);
+                if (snapshot.hasData && results.entries.isNotEmpty) {
+                  return buildDictionaryMatch(results);
                 } else {
                   return buildDictionaryNoMatch(clipboard);
                 }

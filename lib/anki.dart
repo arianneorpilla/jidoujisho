@@ -268,13 +268,8 @@ void showAnkiDialog(
   TextEditingController _wordController =
       TextEditingController(text: dictionaryEntry.word);
 
-  TextEditingController _readingController;
-  if (dictionaryEntry.word != dictionaryEntry.reading) {
-    _readingController = TextEditingController(text: dictionaryEntry.reading);
-  } else {
-    _readingController = TextEditingController(text: "");
-  }
-
+  TextEditingController _readingController =
+      TextEditingController(text: dictionaryEntry.reading);
   TextEditingController _meaningController =
       TextEditingController(text: dictionaryEntry.meaning);
 
@@ -392,15 +387,15 @@ void showAnkiDialog(
                             valueListenable: selectedIndex,
                             builder:
                                 (BuildContext context, value, Widget child) {
-                              return Row(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                mainAxisAlignment: MainAxisAlignment.center,
+                              return Wrap(
+                                crossAxisAlignment: WrapCrossAlignment.end,
+                                alignment: WrapAlignment.center,
                                 children: [
                                   Text(
                                     "Selecting preview image ",
                                     style: TextStyle(
                                       fontSize: 11,
+                                      color: Colors.grey[400],
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -416,6 +411,7 @@ void showAnkiDialog(
                                     "out of ",
                                     style: TextStyle(
                                       fontSize: 11,
+                                      color: Colors.grey[400],
                                     ),
                                     textAlign: TextAlign.center,
                                   ),

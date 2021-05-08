@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:html/parser.dart' as parser;
 import 'package:html/dom.dart' as dom;
 import 'package:http/http.dart' as http;
@@ -45,6 +46,67 @@ class DictionaryEntry {
   String toString() {
     return "DictionaryEntry ($word)";
   }
+
+  @override
+  bool operator ==(Object other) =>
+      other is DictionaryEntry &&
+      this.word == other.word &&
+      this.reading == other.reading &&
+      this.meaning == other.meaning;
+
+  @override
+  int get hashCode =>
+      this.word.hashCode ^ this.reading.hashCode ^ this.meaning.hashCode;
+}
+
+class DictionaryHistoryEntry {
+  List<DictionaryEntry> entries;
+  String searchTerm;
+  int swipeIndex;
+
+  DictionaryHistoryEntry({
+    this.entries,
+    this.searchTerm,
+    this.swipeIndex,
+  });
+
+  Map<String, dynamic> toMap() {
+    List<Map<String, dynamic>> entriesMaps = [];
+    for (int i = 0; i < entries.length; i++) {
+      entriesMaps.add(entries[i].toMap());
+    }
+
+    return {
+      "entries": jsonEncode(entriesMaps),
+      "searchTerm": searchTerm,
+      "swipeIndex": swipeIndex,
+    };
+  }
+
+  DictionaryHistoryEntry.fromMap(Map<String, dynamic> map) {
+    List<dynamic> entriesMaps = (jsonDecode(map['entries']) as List<dynamic>);
+    String searchTermFromMap = map['searchTerm'];
+    int swipeIndexFromMap = map['swipeIndex'] as int;
+
+    List<DictionaryEntry> entriesFromMap = [];
+    entriesMaps.forEach((map) {
+      DictionaryEntry entry = DictionaryEntry.fromMap(map);
+      entriesFromMap.add(entry);
+    });
+
+    this.entries = entriesFromMap;
+    this.searchTerm = searchTermFromMap;
+    this.swipeIndex = swipeIndexFromMap;
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is DictionaryHistoryEntry &&
+      listEquals(this.entries, other.entries) &&
+      this.searchTerm == other.searchTerm;
+
+  @override
+  int get hashCode => super.hashCode;
 }
 
 List<DictionaryEntry> importCustomDictionary() {
@@ -132,7 +194,7 @@ DictionaryEntry getEntryFromJishoResult(JishoResult result, String searchTerm) {
   if (exportTerm.isNotEmpty) {
     exportTerm = removeLastNewline(exportTerm);
   } else {
-    if (result.slug.isNotEmpty) {
+    if (result.slug.isNotEmpty && result.slug.length != 24) {
       exportTerm = result.slug;
     } else {
       exportTerm = exportReadings;
@@ -140,7 +202,8 @@ DictionaryEntry getEntryFromJishoResult(JishoResult result, String searchTerm) {
   }
 
   if (exportReadings == "null" ||
-      exportReadings == searchTerm && result.slug == exportReadings) {
+      exportReadings == searchTerm && result.slug == exportReadings ||
+      exportTerm == exportReadings) {
     exportReadings = "";
   }
 
@@ -231,7 +294,7 @@ DictionaryEntry getEntryFromJishoResult(JishoResult result, String searchTerm) {
   return dictionaryEntry;
 }
 
-Future<List<DictionaryEntry>> getWordDetails(String searchTerm) async {
+Future<DictionaryHistoryEntry> getWordDetails(String searchTerm) async {
   List<DictionaryEntry> entries = [];
 
   List<JishoResult> results = (await searchForPhrase(searchTerm)).data;
@@ -244,7 +307,11 @@ Future<List<DictionaryEntry>> getWordDetails(String searchTerm) async {
 
     var breakdown = document.getElementsByClassName("fact grammar-breakdown");
     if (breakdown.isEmpty) {
-      return [];
+      return DictionaryHistoryEntry(
+        entries: [],
+        searchTerm: searchTerm,
+        swipeIndex: 0,
+      );
     } else {
       String inflection = breakdown.first.querySelector("a").text;
       return getWordDetails(inflection);
@@ -267,24 +334,32 @@ Future<List<DictionaryEntry>> getWordDetails(String searchTerm) async {
     entry.meaning = getBetterNumberTag(entry.meaning);
   }
 
-  return entries;
+  return DictionaryHistoryEntry(
+    entries: entries,
+    searchTerm: searchTerm,
+    swipeIndex: 0,
+  );
 }
 
-Future<List<DictionaryEntry>> getMonolingualWordDetails(
+Future<DictionaryHistoryEntry> getMonolingualWordDetails(
     String searchTerm, bool recursive) async {
   List<JishoResult> results = (await searchForPhrase(searchTerm)).data;
   List<DictionaryEntry> entries = [];
 
   var client = http.Client();
   http.Response response = await client
-      .get(Uri.parse('https://dictionary.goo.ne.jp/srch/jn/$searchTerm/m1u/'));
+      .get(Uri.parse('https://dictionary.goo.ne.jp/srch/jn/$searchTerm/m0u/'));
   var document = parser.parse(response.body);
-  bool multiDefinition = document.body.innerHtml.contains("で一致する言葉");
+  bool multiDefinition = document.body.innerHtml.contains("で始まる言葉");
   bool empty = document.body.innerHtml.contains("一致する情報は見つかりませんでした");
 
   if (empty) {
     if (recursive) {
-      return [];
+      return DictionaryHistoryEntry(
+        entries: entries,
+        searchTerm: searchTerm,
+        swipeIndex: 0,
+      );
     }
 
     searchTerm = getEntryFromJishoResult(results.first, searchTerm)
@@ -332,7 +407,11 @@ Future<List<DictionaryEntry>> getMonolingualWordDetails(
 
       for (int i = 0; i < meaningElements.length; i++) {
         if (entries.length >= 10) {
-          return entries;
+          return DictionaryHistoryEntry(
+            entries: entries,
+            searchTerm: searchTerm,
+            swipeIndex: 0,
+          );
         }
 
         DictionaryEntry singleEntry = getEntryFromGooElement(
@@ -377,7 +456,11 @@ Future<List<DictionaryEntry>> getMonolingualWordDetails(
     }
   }
 
-  return entries;
+  return DictionaryHistoryEntry(
+    entries: entries,
+    searchTerm: searchTerm,
+    swipeIndex: 0,
+  );
 }
 
 DictionaryEntry getEntryFromGooElement(

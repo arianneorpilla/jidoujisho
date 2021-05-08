@@ -2320,11 +2320,14 @@ class ClipboardMenu extends StatefulWidget {
 
 class _ClipboardState extends State<ClipboardMenu> {
   final CreatorCallback creatorCallback;
+  final _wordController = TextEditingController(text: "");
+  bool _isSearching = false;
   _ClipboardState(this.creatorCallback);
 
   @override
   Widget build(BuildContext context) {
-    List<DictionaryEntry> entries = getDictionaryHistory().reversed.toList();
+    List<DictionaryHistoryEntry> entries =
+        getDictionaryHistory().reversed.toList();
 
     Widget centerMessage(String text, IconData icon) {
       return Center(
@@ -2361,7 +2364,7 @@ class _ClipboardState extends State<ClipboardMenu> {
         color: Colors.grey[800].withOpacity(0.2),
         child: InkWell(
           child: Padding(
-            padding: EdgeInsets.all(16),
+            padding: EdgeInsets.all(12),
             child: InkWell(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -2394,121 +2397,420 @@ class _ClipboardState extends State<ClipboardMenu> {
       );
     }
 
+    void wordFieldSearch(bool monolingual) async {
+      String searchTerm = _wordController.text;
+      if (!_isSearching && searchTerm.isNotEmpty) {
+        _wordController.clear();
+        _isSearching = true;
+
+        try {
+          DictionaryHistoryEntry results;
+          if (monolingual) {
+            results = await getMonolingualWordDetails(searchTerm, false);
+          } else {
+            results = await getWordDetails(searchTerm);
+          }
+
+          if (results != null && results.entries.isNotEmpty) {
+            addDictionaryEntryToHistory(results);
+            setStateFromResult();
+          }
+        } finally {
+          _isSearching = false;
+        }
+      }
+    }
+
+    Widget wordField = TextFormField(
+      keyboardType: TextInputType.text,
+      maxLines: 1,
+      controller: _wordController,
+      onFieldSubmitted: (result) {
+        wordFieldSearch(getMonolingualMode());
+      },
+      decoration: InputDecoration(
+        contentPadding: EdgeInsets.all(0),
+        prefixIcon: Icon(
+          Icons.search,
+        ),
+        suffixIcon: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              iconSize: 18,
+              onPressed: () async {
+                wordFieldSearch(false);
+              },
+              icon: Text("A⌕", style: TextStyle(color: Colors.white)),
+            ),
+            IconButton(
+              iconSize: 18,
+              onPressed: () async {
+                wordFieldSearch(true);
+              },
+              icon: Text("あ⌕", style: TextStyle(color: Colors.white)),
+            ),
+            IconButton(
+              iconSize: 18,
+              onPressed: () => _wordController.clear(),
+              icon: Icon(Icons.clear, color: Colors.white),
+            ),
+          ],
+        ),
+        labelText: "Search",
+        hintText: "Enter search term here",
+      ),
+    );
+
     if (entries.isEmpty) {
       return Column(children: [
+        Padding(
+          padding: EdgeInsets.only(left: 12, right: 12, bottom: 12),
+          child: wordField,
+        ),
         cardCreatorButton(),
         Expanded(child: emptyMessage),
       ]);
     }
 
     return ListView.builder(
+      addAutomaticKeepAlives: true,
       key: UniqueKey(),
-      itemCount: entries.length + 1,
+      itemCount: entries.length + 2,
       itemBuilder: (BuildContext context, int index) {
         if (index == 0) {
+          return Padding(
+            padding: EdgeInsets.only(left: 12, right: 12, bottom: 12),
+            child: wordField,
+          );
+        }
+        if (index == 1) {
           return cardCreatorButton();
         }
 
-        DictionaryEntry entry = entries[index - 1];
+        DictionaryHistoryEntry entry = entries[index - 2];
         print("ENTRY LISTED: $entry");
 
-        return Container(
-          margin: EdgeInsets.only(bottom: 12),
-          color: Colors.grey[800].withOpacity(0.2),
-          child: InkWell(
-            onTap: () {
-              creatorCallback(entry, null);
-            },
-            onLongPress: () {
-              HapticFeedback.vibrate();
-              showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.zero,
-                    ),
-                    content: Container(
-                      color: Colors.grey[800].withOpacity(0.6),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            entry.word,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                            ),
-                          ),
-                          Text(entry.reading),
-                          Flexible(
-                            child: SingleChildScrollView(
-                              child: Text("\n${entry.meaning}"),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    actions: <Widget>[
-                      TextButton(
-                        child: Text('CANCEL',
-                            style: TextStyle(color: Colors.white)),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                      TextButton(
-                        child: Text(
-                          'REMOVE',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        onPressed: () async {
-                          Navigator.pop(context);
-                          removeDictionaryEntryFromHistory(entry);
-                          setStateFromResult();
-                        },
-                      ),
-                      TextButton(
-                        child: Text(
-                          'CREATE CARD',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        onPressed: () {
-                          creatorCallback(entry, null);
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-            child: Padding(
-              padding: EdgeInsets.all(16),
-              child: InkWell(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      entry.word,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
-                    ),
-                    Text(entry.reading),
-                    Text("\n${entry.meaning}\n"),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
+        return ClipboardHistoryItem(entry, creatorCallback, setStateFromResult);
       },
     );
   }
 
   void setStateFromResult() {
+    setState(() {});
+  }
+}
+
+class ClipboardHistoryItem extends StatefulWidget {
+  final DictionaryHistoryEntry entry;
+  final CreatorCallback creatorCallback;
+  final VoidCallback stateCallback;
+
+  ClipboardHistoryItem(this.entry, this.creatorCallback, this.stateCallback);
+
+  @override
+  _ClipboardHistoryItemState createState() => new _ClipboardHistoryItemState(
+        this.entry,
+        this.creatorCallback,
+        this.stateCallback,
+      );
+}
+
+class _ClipboardHistoryItemState extends State<ClipboardHistoryItem> {
+  _ClipboardHistoryItemState(
+    this.entry,
+    this.creatorCallback,
+    this.stateCallback,
+  );
+
+  final DictionaryHistoryEntry entry;
+  final CreatorCallback creatorCallback;
+  final VoidCallback stateCallback;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 12),
+      color: Colors.grey[800].withOpacity(0.2),
+      child: InkWell(
+        onTap: () {
+          creatorCallback(entry.entries[entry.swipeIndex], null);
+        },
+        onLongPress: () {
+          HapticFeedback.vibrate();
+          showDictionaryDialog(entry, entry.swipeIndex);
+        },
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: InkWell(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onHorizontalDragEnd: (details) {
+                if (details.primaryVelocity == 0) return;
+
+                if (details.primaryVelocity.compareTo(0) == -1) {
+                  if (entry.swipeIndex == entry.entries.length - 1) {
+                    entry.swipeIndex = 0;
+                  } else {
+                    entry.swipeIndex += 1;
+                  }
+                } else {
+                  if (entry.swipeIndex == 0) {
+                    entry.swipeIndex = entry.entries.length - 1;
+                  } else {
+                    entry.swipeIndex -= 1;
+                  }
+                }
+
+                updateDictionaryHistorySwipeIndex(entry, entry.swipeIndex);
+                setState(() {});
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    entry.entries[entry.swipeIndex].word,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                  ),
+                  Text(entry.entries[entry.swipeIndex].reading),
+                  Text("\n${entry.entries[entry.swipeIndex].meaning}\n"),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.end,
+                    children: [
+                      Text(
+                        "Search result ",
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        "${entry.swipeIndex + 1} ",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        "out of ",
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        "${entry.entries.length} ",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        "found for",
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        "『",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                          color: Colors.grey,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        "${entry.searchTerm}",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        "』",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                          color: Colors.grey,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> showDictionaryDialog(
+      DictionaryHistoryEntry results, int swipeIndex) async {
+    ValueNotifier<int> _dialogIndex = ValueNotifier<int>(swipeIndex);
+    ValueNotifier<DictionaryEntry> _dialogEntry =
+        ValueNotifier<DictionaryEntry>(results.entries[swipeIndex]);
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
+          ),
+          content: ValueListenableBuilder(
+            valueListenable: _dialogIndex,
+            builder: (BuildContext context, int _, Widget widget) {
+              _dialogEntry.value = results.entries[_dialogIndex.value];
+
+              return Container(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onHorizontalDragEnd: (details) {
+                    if (details.primaryVelocity == 0) return;
+
+                    if (details.primaryVelocity.compareTo(0) == -1) {
+                      if (_dialogIndex.value == results.entries.length - 1) {
+                        _dialogIndex.value = 0;
+                      } else {
+                        _dialogIndex.value += 1;
+                      }
+                    } else {
+                      if (_dialogIndex.value == 0) {
+                        _dialogIndex.value = results.entries.length - 1;
+                      } else {
+                        _dialogIndex.value -= 1;
+                      }
+                    }
+                  },
+                  child: Container(
+                    color: Colors.grey[800].withOpacity(0.6),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          results.entries[_dialogIndex.value].word,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        ),
+                        Text(results.entries[_dialogIndex.value].reading),
+                        Flexible(
+                          child: SingleChildScrollView(
+                            child: Text(
+                                "\n${results.entries[_dialogIndex.value].meaning}\n"),
+                          ),
+                        ),
+                        Wrap(
+                          alignment: WrapAlignment.center,
+                          crossAxisAlignment: WrapCrossAlignment.end,
+                          children: [
+                            Text(
+                              "Selecting search result ",
+                              style: TextStyle(
+                                fontSize: 11,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            Text(
+                              "${_dialogIndex.value + 1} ",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            Text(
+                              "out of ",
+                              style: TextStyle(
+                                fontSize: 11,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            Text(
+                              "${results.entries.length} ",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            Text(
+                              "found for",
+                              style: TextStyle(
+                                fontSize: 11,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            Text(
+                              "『${results.entries[_dialogIndex.value].searchTerm}』",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('CANCEL', style: TextStyle(color: Colors.white)),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              child: Text(
+                'REMOVE',
+                style: TextStyle(color: Colors.white),
+              ),
+              onPressed: () async {
+                Navigator.pop(context);
+                removeDictionaryEntryFromHistory(results);
+                stateCallback();
+              },
+            ),
+            TextButton(
+              child: Text(
+                'CREATE CARD',
+                style: TextStyle(color: Colors.white),
+              ),
+              onPressed: () {
+                creatorCallback(results.entries[_dialogIndex.value], null);
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+
+    updateDictionaryHistorySwipeIndex(results, _dialogIndex.value);
     setState(() {});
   }
 }
@@ -2666,14 +2968,8 @@ class _CreatorState extends State<Creator> {
     _imageSearchController = TextEditingController(text: searchTerm);
     _sentenceController = TextEditingController(text: initialSentence);
     _wordController = TextEditingController(text: initialDictionaryEntry.word);
-
-    if (initialDictionaryEntry.word != initialDictionaryEntry.reading) {
-      _readingController =
-          TextEditingController(text: initialDictionaryEntry.reading);
-    } else {
-      _readingController = TextEditingController(text: "");
-    }
-
+    _readingController =
+        TextEditingController(text: initialDictionaryEntry.reading);
     _meaningController =
         TextEditingController(text: initialDictionaryEntry.meaning);
 
@@ -2762,10 +3058,10 @@ class _CreatorState extends State<Creator> {
     );
   }
 
-  void showDictionaryDialog(List<DictionaryEntry> results) {
+  void showDictionaryDialog(DictionaryHistoryEntry results) {
     ValueNotifier<int> _dialogIndex = ValueNotifier<int>(0);
     ValueNotifier<DictionaryEntry> _dialogEntry =
-        ValueNotifier<DictionaryEntry>(results[0]);
+        ValueNotifier<DictionaryEntry>(results.entries[0]);
 
     showDialog(
       context: context,
@@ -2777,23 +3073,30 @@ class _CreatorState extends State<Creator> {
           content: ValueListenableBuilder(
             valueListenable: _dialogIndex,
             builder: (BuildContext context, int _, Widget widget) {
-              _dialogEntry.value = results[_dialogIndex.value];
-              addDictionaryEntryToHistory(_dialogEntry.value);
+              _dialogEntry.value = results.entries[_dialogIndex.value];
+              addDictionaryEntryToHistory(
+                DictionaryHistoryEntry(
+                  entries: results.entries,
+                  searchTerm: results.searchTerm,
+                  swipeIndex: _dialogIndex.value,
+                ),
+              );
 
               return Container(
                 child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
                   onHorizontalDragEnd: (details) {
                     if (details.primaryVelocity == 0) return;
 
                     if (details.primaryVelocity.compareTo(0) == -1) {
-                      if (_dialogIndex.value == results.length - 1) {
+                      if (_dialogIndex.value == results.entries.length - 1) {
                         _dialogIndex.value = 0;
                       } else {
                         _dialogIndex.value += 1;
                       }
                     } else {
                       if (_dialogIndex.value == 0) {
-                        _dialogIndex.value = results.length - 1;
+                        _dialogIndex.value = results.entries.length - 1;
                       } else {
                         _dialogIndex.value -= 1;
                       }
@@ -2805,28 +3108,28 @@ class _CreatorState extends State<Creator> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          results[_dialogIndex.value].word,
+                          results.entries[_dialogIndex.value].word,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 20,
                           ),
                         ),
-                        Text(results[_dialogIndex.value].reading),
+                        Text(results.entries[_dialogIndex.value].reading),
                         Flexible(
                           child: SingleChildScrollView(
                             child: Text(
-                                "\n${results[_dialogIndex.value].meaning}\n"),
+                                "\n${results.entries[_dialogIndex.value].meaning}\n"),
                           ),
                         ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          mainAxisAlignment: MainAxisAlignment.center,
+                        Wrap(
+                          alignment: WrapAlignment.center,
+                          crossAxisAlignment: WrapCrossAlignment.end,
                           children: [
                             Text(
-                              "Showing search result ",
+                              "Selecting search result ",
                               style: TextStyle(
                                 fontSize: 11,
+                                color: Colors.grey[400],
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -2842,11 +3145,12 @@ class _CreatorState extends State<Creator> {
                               "out of ",
                               style: TextStyle(
                                 fontSize: 11,
+                                color: Colors.grey[400],
                               ),
                               textAlign: TextAlign.center,
                             ),
                             Text(
-                              "${results.length} ",
+                              "${results.entries.length} ",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 11,
@@ -2857,19 +3161,38 @@ class _CreatorState extends State<Creator> {
                               "found for",
                               style: TextStyle(
                                 fontSize: 11,
+                                color: Colors.grey[400],
                               ),
                               textAlign: TextAlign.center,
                             ),
                             Text(
-                              "『${results[_dialogIndex.value].searchTerm}』",
+                              "『",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
+                                color: Colors.grey[400],
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            Text(
+                              "${results.entries[_dialogIndex.value].searchTerm}",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 11,
                               ),
                               textAlign: TextAlign.center,
                             ),
+                            Text(
+                              "』",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
+                                color: Colors.grey[400],
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
                           ],
-                        )
+                        ),
                       ],
                     ),
                   ),
@@ -2890,14 +3213,8 @@ class _CreatorState extends State<Creator> {
                 _selectedEntry.value = _dialogEntry.value;
                 _wordController =
                     TextEditingController(text: _selectedEntry.value.word);
-
-                if (_selectedEntry.value.word != _selectedEntry.value.reading) {
-                  _readingController =
-                      TextEditingController(text: _selectedEntry.value.reading);
-                } else {
-                  _readingController = TextEditingController(text: "");
-                }
-
+                _readingController =
+                    TextEditingController(text: _selectedEntry.value.reading);
                 _meaningController =
                     TextEditingController(text: _selectedEntry.value.meaning);
 
@@ -3039,7 +3356,7 @@ class _CreatorState extends State<Creator> {
         _isSearching = true;
         String searchTerm = _wordController.text;
         try {
-          List<DictionaryEntry> results;
+          DictionaryHistoryEntry results;
           if (monolingual) {
             results = await getMonolingualWordDetails(searchTerm, false);
           } else {
@@ -3090,7 +3407,7 @@ class _CreatorState extends State<Creator> {
           ],
         ),
         labelText: "Word",
-        hintText: "Enter the word here",
+        hintText: "Enter search term here",
       ),
     );
 
@@ -3228,15 +3545,15 @@ class _CreatorState extends State<Creator> {
                   ValueListenableBuilder(
                     valueListenable: _selectedIndex,
                     builder: (BuildContext context, value, Widget child) {
-                      return Row(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      return Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.end,
+                        alignment: WrapAlignment.center,
                         children: [
                           Text(
                             "Selecting image ",
                             style: TextStyle(
                               fontSize: 11,
+                              color: Colors.grey,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -3252,6 +3569,7 @@ class _CreatorState extends State<Creator> {
                             "out of ",
                             style: TextStyle(
                               fontSize: 11,
+                              color: Colors.grey,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -3267,14 +3585,34 @@ class _CreatorState extends State<Creator> {
                             "found for",
                             style: TextStyle(
                               fontSize: 11,
+                              color: Colors.grey,
                             ),
                             textAlign: TextAlign.center,
                           ),
                           Text(
-                            "『$searchTerm』",
+                            "『",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 11,
+                              color: Colors.grey,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            "$searchTerm",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                              color: Colors.white,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            "』",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                              color: Colors.grey,
                             ),
                             textAlign: TextAlign.center,
                           ),
