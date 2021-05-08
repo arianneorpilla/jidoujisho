@@ -24,7 +24,7 @@
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.13.7-beta">0.13</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.14.2-beta">0.14</a> ·
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.15.8-beta">0.15</a> 
-  </b></p>
+</b></p>
 
 # 📚 Uninterrupted language immersion at your fingertips
 
@@ -40,7 +40,7 @@
 - [x] Open the app to **trending videos in Japan**, import and export a **channel list** and **search with suggestions** 
 - [x] **YouTube playback support** for videos with **Japanese closed captions** and **automatically generated subtitles**
 - [x] Use **card creator mode** to quickly **search images and definitions** with imported photos and text 
-- [x] **Clipboard remembers the last hundred words** queried for review in between sessions
+- [x] **Dictionary tab remembers the last hundred words** queried for review in between sessions
 - [x] **Use monolingual definitions** from Goo.ne.jp or **imported Yomichan dictionaries**
 - [x] **(Experimental)** Weblio.jp **English to Japanese support** and full Japanese localization
 

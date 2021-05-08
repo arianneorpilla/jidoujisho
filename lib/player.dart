@@ -279,6 +279,13 @@ class _VideoPlayerState extends State<VideoPlayer> {
   ValueNotifier<Subtitle> _shadowingSubtitle = ValueNotifier<Subtitle>(null);
   ValueNotifier<Subtitle> _comprehensionSubtitle =
       ValueNotifier<Subtitle>(null);
+  ValueNotifier<Subtitle> _contextSubtitle = ValueNotifier<Subtitle>(
+    Subtitle(
+      text: "",
+      startTime: Duration.zero,
+      endTime: Duration.zero,
+    ),
+  );
   ValueNotifier<int> _audioAllowance = ValueNotifier<int>(getAudioAllowance());
 
   Timer durationTimer;
@@ -338,6 +345,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       if (_volatileText == text) {
         print("CLIPBOARD CHANGED: $text");
         _clipboard.value = text;
+        _contextSubtitle.value = _currentSubtitle.value;
       }
     });
   }
@@ -652,6 +660,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       exportSingleCallback: exportSingleCallback,
       toggleShadowingMode: toggleShadowingMode,
       shadowingSubtitle: _shadowingSubtitle,
+      comprehensionSubtitle: _comprehensionSubtitle,
       audioAllowance: _audioAllowance,
       streamData: streamData,
       aspectRatio: getVideoPlayerController().value.aspectRatio,
@@ -689,6 +698,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
     _subTitleWrapper ??= SubTitleWrapper(
       focusNode: _subtitleFocusNode,
       subtitleNotifier: _currentSubtitle,
+      contextSubtitle: _contextSubtitle,
       videoPlayerController: getVideoPlayerController(),
       subtitleController: getSubtitleController(),
       subtitleStyle: SubtitleStyle(
@@ -859,21 +869,27 @@ class _VideoPlayerState extends State<VideoPlayer> {
                     "Looking up",
                     style: TextStyle(),
                   ),
-                  Text(
-                    "『",
-                    style: TextStyle(
-                      color: Colors.grey[300],
-                    ),
-                  ),
-                  Text(
-                    clipboard,
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    "』",
-                    style: TextStyle(
-                      color: Colors.grey[300],
-                    ),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        "『",
+                        style: TextStyle(
+                          color: Colors.grey[300],
+                        ),
+                      ),
+                      Text(
+                        clipboard,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        "』",
+                        style: TextStyle(
+                          color: Colors.grey[300],
+                        ),
+                      ),
+                    ],
                   ),
                   Text(
                     "...",
@@ -1068,21 +1084,27 @@ class _VideoPlayerState extends State<VideoPlayer> {
                       "No matches for",
                       style: TextStyle(),
                     ),
-                    Text(
-                      "『",
-                      style: TextStyle(
-                        color: Colors.grey[300],
-                      ),
-                    ),
-                    Text(
-                      clipboard,
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      "』",
-                      style: TextStyle(
-                        color: Colors.grey[300],
-                      ),
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          "『",
+                          style: TextStyle(
+                            color: Colors.grey[300],
+                          ),
+                        ),
+                        Text(
+                          clipboard,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          "』",
+                          style: TextStyle(
+                            color: Colors.grey[300],
+                          ),
+                        ),
+                      ],
                     ),
                     Text(
                       "could be queried.",
@@ -1110,6 +1132,8 @@ class _VideoPlayerState extends State<VideoPlayer> {
             entries: results.entries,
             searchTerm: results.searchTerm,
             swipeIndex: selectedIndex.value,
+            contextDataSource: results.contextDataSource,
+            contextPosition: results.contextPosition,
           ),
         );
 
@@ -1173,7 +1197,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
                     ),
                   ),
                   Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.end,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     alignment: WrapAlignment.center,
                     children: [
                       Text(
@@ -1216,31 +1240,37 @@ class _VideoPlayerState extends State<VideoPlayer> {
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      Text(
-                        "『",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                          color: Colors.grey[300],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      Text(
-                        "${results.entries[selectedIndex.value].searchTerm}",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      Text(
-                        "』",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                          color: Colors.grey[300],
-                        ),
-                        textAlign: TextAlign.center,
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          Text(
+                            "『",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                              color: Colors.grey[300],
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            "${results.searchTerm}",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            "』",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                              color: Colors.grey[300],
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
                     ],
                   )
@@ -1259,8 +1289,21 @@ class _VideoPlayerState extends State<VideoPlayer> {
       builder: (context, clipboard, widget) {
         return FutureBuilder(
           future: getMonolingualMode()
-              ? getMonolingualWordDetails(clipboard, false)
-              : getWordDetails(clipboard),
+              ? getMonolingualWordDetails(
+                  searchTerm: clipboard,
+                  recursive: false,
+                  contextDataSource: (streamData == null)
+                      ? videoFile.path
+                      : streamData.videoURL,
+                  contextPosition: _contextSubtitle.value.startTime.inSeconds,
+                )
+              : getWordDetails(
+                  searchTerm: clipboard,
+                  contextDataSource: (streamData == null)
+                      ? videoFile.path
+                      : streamData.videoURL,
+                  contextPosition: _contextSubtitle.value.startTime.inSeconds,
+                ),
           builder: (BuildContext context,
               AsyncSnapshot<DictionaryHistoryEntry> snapshot) {
             if (_clipboard.value == "&<&>export&<&>") {

@@ -265,7 +265,9 @@ class _HomeState extends State<Home> {
             builder: (context) => Player(),
           ),
         ).then((returnValue) {
-          unlockLandscape();
+          setState(() {
+            unlockLandscape();
+          });
         });
       } else {
         _selectedIndex = index;
@@ -1230,7 +1232,9 @@ class _HomeState extends State<Home> {
                   ),
                 ),
               ).then((returnValue) {
-                unlockLandscape();
+                setState(() {
+                  unlockLandscape();
+                });
               });
             },
           );
@@ -1478,11 +1482,13 @@ class _YouTubeResultState extends State<YouTubeResult>
           ),
         ),
       ).then((returnValue) {
-        unlockLandscape();
+        setState(() {
+          unlockLandscape();
 
-        setLastPlayedPath(videoStreamURL);
-        setLastPlayedPosition(0);
-        gIsResumable.value = getResumeAvailable();
+          setLastPlayedPath(videoStreamURL);
+          setLastPlayedPosition(0);
+          gIsResumable.value = getResumeAvailable();
+        });
       });
     }
 
@@ -2404,9 +2410,14 @@ class _ClipboardState extends State<ClipboardMenu> {
         try {
           DictionaryHistoryEntry results;
           if (monolingual) {
-            results = await getMonolingualWordDetails(searchTerm, false);
+            results = await getMonolingualWordDetails(
+              searchTerm: searchTerm,
+              recursive: false,
+            );
           } else {
-            results = await getWordDetails(searchTerm);
+            results = await getWordDetails(
+              searchTerm: searchTerm,
+            );
           }
 
           if (results != null && results.entries.isNotEmpty) {
@@ -2614,6 +2625,15 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem> {
                         ),
                         textAlign: TextAlign.center,
                       ),
+                      if (entry.contextDataSource != "-1")
+                        Text(
+                          "from video ",
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       Text(
                         "found for",
                         style: TextStyle(
@@ -2622,32 +2642,38 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem> {
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      Text(
-                        "『",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                          color: Colors.grey,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      Text(
-                        "${entry.searchTerm}",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                          color: Colors.white,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      Text(
-                        "』",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                          color: Colors.grey,
-                        ),
-                        textAlign: TextAlign.center,
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.end,
+                        children: [
+                          Text(
+                            "『",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                              color: Colors.grey,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            "${entry.searchTerm}",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                              color: Colors.white,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            "』",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                              color: Colors.grey,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -2753,6 +2779,15 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem> {
                               ),
                               textAlign: TextAlign.center,
                             ),
+                            if (entry.contextDataSource != "-1")
+                              Text(
+                                "from video ",
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey[400],
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
                             Text(
                               "found for",
                               style: TextStyle(
@@ -2761,31 +2796,37 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem> {
                               ),
                               textAlign: TextAlign.center,
                             ),
-                            Text(
-                              "『",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 11,
-                                color: Colors.grey[400],
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            Text(
-                              "${results.entries[_dialogIndex.value].searchTerm}",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 11,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            Text(
-                              "』",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 11,
-                                color: Colors.grey[400],
-                              ),
-                              textAlign: TextAlign.center,
+                            Wrap(
+                              alignment: WrapAlignment.center,
+                              crossAxisAlignment: WrapCrossAlignment.end,
+                              children: [
+                                Text(
+                                  "『",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 11,
+                                    color: Colors.grey[400],
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                Text(
+                                  "${results.searchTerm}",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 11,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                Text(
+                                  "』",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 11,
+                                    color: Colors.grey[400],
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -2814,6 +2855,28 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem> {
                 stateCallback();
               },
             ),
+            if (results.contextDataSource != "-1")
+              TextButton(
+                child: Text(
+                  'CONTEXT',
+                  style: TextStyle(color: Colors.white),
+                ),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Player(
+                        url: results.contextDataSource,
+                        initialPosition: results.contextPosition,
+                      ),
+                    ),
+                  ).then((returnValue) {
+                    unlockLandscape();
+                    stateCallback();
+                  });
+                },
+              ),
             TextButton(
               child: Text(
                 'CREATE CARD',
@@ -2836,7 +2899,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem> {
 
 class LazyResults extends StatefulWidget {
   final results;
-  bool isOldest;
+  final bool isOldest;
 
   LazyResults(this.results, this.isOldest);
 
@@ -3098,6 +3161,8 @@ class _CreatorState extends State<Creator> {
                   entries: results.entries,
                   searchTerm: results.searchTerm,
                   swipeIndex: _dialogIndex.value,
+                  contextDataSource: results.contextDataSource,
+                  contextPosition: results.contextPosition,
                 ),
               );
 
@@ -3184,31 +3249,37 @@ class _CreatorState extends State<Creator> {
                               ),
                               textAlign: TextAlign.center,
                             ),
-                            Text(
-                              "『",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 11,
-                                color: Colors.grey[400],
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            Text(
-                              "${results.entries[_dialogIndex.value].searchTerm}",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 11,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            Text(
-                              "』",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 11,
-                                color: Colors.grey[400],
-                              ),
-                              textAlign: TextAlign.center,
+                            Wrap(
+                              alignment: WrapAlignment.center,
+                              crossAxisAlignment: WrapCrossAlignment.end,
+                              children: [
+                                Text(
+                                  "『",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 11,
+                                    color: Colors.grey[400],
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                Text(
+                                  "${results.searchTerm}",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 11,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                Text(
+                                  "』",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 11,
+                                    color: Colors.grey[400],
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -3377,9 +3448,14 @@ class _CreatorState extends State<Creator> {
         try {
           DictionaryHistoryEntry results;
           if (monolingual) {
-            results = await getMonolingualWordDetails(searchTerm, false);
+            results = await getMonolingualWordDetails(
+              searchTerm: searchTerm,
+              recursive: false,
+            );
           } else {
-            results = await getWordDetails(searchTerm);
+            results = await getWordDetails(
+              searchTerm: searchTerm,
+            );
           }
 
           showDictionaryDialog(results);
@@ -3608,32 +3684,38 @@ class _CreatorState extends State<Creator> {
                             ),
                             textAlign: TextAlign.center,
                           ),
-                          Text(
-                            "『",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 11,
-                              color: Colors.grey,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          Text(
-                            "$searchTerm",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 11,
-                              color: Colors.white,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          Text(
-                            "』",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 11,
-                              color: Colors.grey,
-                            ),
-                            textAlign: TextAlign.center,
+                          Wrap(
+                            alignment: WrapAlignment.center,
+                            crossAxisAlignment: WrapCrossAlignment.end,
+                            children: [
+                              Text(
+                                "『",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 11,
+                                  color: Colors.grey,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              Text(
+                                "${searchTerm.trim()}",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 11,
+                                  color: Colors.white,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              Text(
+                                "』",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 11,
+                                  color: Colors.grey,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
                           ),
                         ],
                       );

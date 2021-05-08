@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:async/async.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:path/path.dart' as path;
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
@@ -337,6 +336,17 @@ Future<void> addDictionaryEntryToHistory(
     DictionaryHistoryEntry dictionaryHistoryEntry) async {
   List<DictionaryHistoryEntry> dictionaryHistoryEntries =
       getDictionaryHistory();
+
+  try {
+    DictionaryHistoryEntry sameContext = dictionaryHistoryEntries
+        .firstWhere((entry) => entry == dictionaryHistoryEntry);
+    if (dictionaryHistoryEntries != null) {
+      dictionaryHistoryEntry.contextDataSource = sameContext.contextDataSource;
+      dictionaryHistoryEntry.contextPosition = sameContext.contextPosition;
+    }
+  } catch (e) {
+    print(e);
+  }
 
   dictionaryHistoryEntries
       .removeWhere((entry) => dictionaryHistoryEntry == entry);

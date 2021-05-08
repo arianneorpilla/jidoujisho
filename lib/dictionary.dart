@@ -59,15 +59,24 @@ class DictionaryEntry {
       this.word.hashCode ^ this.reading.hashCode ^ this.meaning.hashCode;
 }
 
+class VideoContext {
+  String dataSource;
+  int position;
+}
+
 class DictionaryHistoryEntry {
   List<DictionaryEntry> entries;
   String searchTerm;
   int swipeIndex;
+  String contextDataSource;
+  int contextPosition;
 
   DictionaryHistoryEntry({
     this.entries,
     this.searchTerm,
     this.swipeIndex,
+    this.contextDataSource,
+    this.contextPosition,
   });
 
   Map<String, dynamic> toMap() {
@@ -80,14 +89,13 @@ class DictionaryHistoryEntry {
       "entries": jsonEncode(entriesMaps),
       "searchTerm": searchTerm,
       "swipeIndex": swipeIndex,
+      "contextDataSource": contextDataSource,
+      "contextPosition": contextPosition,
     };
   }
 
   DictionaryHistoryEntry.fromMap(Map<String, dynamic> map) {
     List<dynamic> entriesMaps = (jsonDecode(map['entries']) as List<dynamic>);
-    String searchTermFromMap = map['searchTerm'];
-    int swipeIndexFromMap = map['swipeIndex'] as int;
-
     List<DictionaryEntry> entriesFromMap = [];
     entriesMaps.forEach((map) {
       DictionaryEntry entry = DictionaryEntry.fromMap(map);
@@ -95,8 +103,10 @@ class DictionaryHistoryEntry {
     });
 
     this.entries = entriesFromMap;
-    this.searchTerm = searchTermFromMap;
-    this.swipeIndex = swipeIndexFromMap;
+    this.searchTerm = map['searchTerm'];
+    this.swipeIndex = map['swipeIndex'] as int;
+    this.contextDataSource = map['contextDataSource'] as String ?? "-1";
+    this.contextPosition = map['contextPosition'] as int ?? -1;
   }
 
   @override
@@ -297,7 +307,11 @@ DictionaryEntry getEntryFromJishoResult(JishoResult result, String searchTerm) {
   return dictionaryEntry;
 }
 
-Future<DictionaryHistoryEntry> getWordDetails(String searchTerm) async {
+Future<DictionaryHistoryEntry> getWordDetails({
+  String searchTerm,
+  String contextDataSource,
+  int contextPosition,
+}) async {
   List<DictionaryEntry> entries = [];
 
   List<JishoResult> results = (await searchForPhrase(searchTerm)).data;
@@ -312,12 +326,18 @@ Future<DictionaryHistoryEntry> getWordDetails(String searchTerm) async {
     if (breakdown.isEmpty) {
       return DictionaryHistoryEntry(
         entries: [],
-        searchTerm: searchTerm,
+        searchTerm: searchTerm.trim(),
         swipeIndex: 0,
+        contextDataSource: contextDataSource,
+        contextPosition: contextPosition,
       );
     } else {
       String inflection = breakdown.first.querySelector("a").text;
-      return getWordDetails(inflection);
+      return getWordDetails(
+        searchTerm: inflection.trim(),
+        contextDataSource: contextDataSource,
+        contextPosition: contextPosition,
+      );
     }
   }
 
@@ -338,13 +358,19 @@ Future<DictionaryHistoryEntry> getWordDetails(String searchTerm) async {
 
   return DictionaryHistoryEntry(
     entries: entries,
-    searchTerm: searchTerm,
+    searchTerm: searchTerm.trim(),
     swipeIndex: 0,
+    contextDataSource: contextDataSource,
+    contextPosition: contextPosition,
   );
 }
 
-Future<DictionaryHistoryEntry> getMonolingualWordDetails(
-    String searchTerm, bool recursive) async {
+Future<DictionaryHistoryEntry> getMonolingualWordDetails({
+  String searchTerm,
+  bool recursive,
+  String contextDataSource = "-1",
+  int contextPosition = -1,
+}) async {
   List<JishoResult> results = (await searchForPhrase(searchTerm)).data;
   List<DictionaryEntry> entries = [];
 
@@ -359,8 +385,10 @@ Future<DictionaryHistoryEntry> getMonolingualWordDetails(
     if (recursive) {
       return DictionaryHistoryEntry(
         entries: entries,
-        searchTerm: searchTerm,
+        searchTerm: searchTerm.trim(),
         swipeIndex: 0,
+        contextDataSource: contextDataSource,
+        contextPosition: contextPosition,
       );
     }
 
@@ -368,7 +396,12 @@ Future<DictionaryHistoryEntry> getMonolingualWordDetails(
         .word
         .split(";")
         .first;
-    return getMonolingualWordDetails(searchTerm, true);
+    return getMonolingualWordDetails(
+      searchTerm: searchTerm,
+      recursive: true,
+      contextDataSource: contextDataSource,
+      contextPosition: contextPosition,
+    );
   }
 
   if (multiDefinition) {
@@ -389,8 +422,8 @@ Future<DictionaryHistoryEntry> getMonolingualWordDetails(
     for (int i = 0; i < wordLinks.length; i++) {
       String wordLink = wordLinks[i];
 
-      futureResponses.add(
-          client.get(Uri.parse('https://dictionary.goo.ne.jp/${wordLink}')));
+      futureResponses
+          .add(client.get(Uri.parse('https://dictionary.goo.ne.jp/$wordLink')));
     }
 
     responses = await Future.wait(futureResponses);
@@ -411,8 +444,10 @@ Future<DictionaryHistoryEntry> getMonolingualWordDetails(
         if (entries.length >= 20) {
           return DictionaryHistoryEntry(
             entries: entries,
-            searchTerm: searchTerm,
+            searchTerm: searchTerm.trim(),
             swipeIndex: 0,
+            contextDataSource: contextDataSource,
+            contextPosition: contextPosition,
           );
         }
 
@@ -460,8 +495,10 @@ Future<DictionaryHistoryEntry> getMonolingualWordDetails(
 
   return DictionaryHistoryEntry(
     entries: entries,
-    searchTerm: searchTerm,
+    searchTerm: searchTerm.trim(),
     swipeIndex: 0,
+    contextDataSource: contextDataSource,
+    contextPosition: contextPosition,
   );
 }
 
@@ -493,15 +530,6 @@ DictionaryEntry getEntryFromGooElement(
   }
   meaningChildrenLines.removeWhere((line) => line.isEmpty);
   meaning = meaningChildrenLines.join("\n\n");
-
-  // String meaningRaw =
-  //     meaningElement.innerHtml.replaceAll(RegExp(r"<[^>]*>"), "");
-  // List<String> meaningLines = meaningRaw.split("\n");
-  // for (int i = 0; i < meaningLines.length; i++) {
-  //   meaningLines[i] = meaningLines[i].trim();
-  // }
-  // meaningLines.removeWhere((line) => line.trim().isEmpty);
-  // meaning = meaningLines.join("\n");
 
   word = word.trim();
   reading = reading.trim();

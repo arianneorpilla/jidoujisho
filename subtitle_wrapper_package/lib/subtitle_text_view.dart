@@ -15,6 +15,7 @@ class SubtitleTextView extends StatelessWidget {
   final SubtitleStyle subtitleStyle;
   final ValueNotifier<bool> widgetVisibility;
   final ValueNotifier<Subtitle> comprehensionSubtitle;
+  final ValueNotifier<Subtitle> contextSubtitle;
   final FocusNode focusNode;
 
   const SubtitleTextView({
@@ -22,6 +23,7 @@ class SubtitleTextView extends StatelessWidget {
     @required this.subtitleStyle,
     @required this.widgetVisibility,
     @required this.comprehensionSubtitle,
+    @required this.contextSubtitle,
     @required this.focusNode,
   }) : super(key: key);
 
@@ -38,12 +40,14 @@ class SubtitleTextView extends StatelessWidget {
     );
   }
 
-  Widget getText(Word word, int index) {
+  Widget getText(Word word, int index, Subtitle currentSubtitle) {
     return InkWell(
       onTap: () {
         Clipboard.setData(
           ClipboardData(text: word.word),
         );
+
+        contextSubtitle.value = currentSubtitle;
       },
       child: Text(
         word.word,
@@ -208,7 +212,13 @@ class SubtitleTextView extends StatelessWidget {
                                     for (int i = 0; i < line.length; i++) {
                                       Word word = line[i];
                                       int index = indexList[i];
-                                      textWidgets.add(getText(word, index));
+                                      textWidgets.add(
+                                        getText(
+                                          word,
+                                          index,
+                                          state.subtitle,
+                                        ),
+                                      );
                                     }
 
                                     return Row(

@@ -16,6 +16,7 @@ class SubTitleWrapper extends StatelessWidget {
     @required this.subtitleController,
     @required this.videoPlayerController,
     @required this.subtitleNotifier,
+    @required this.contextSubtitle,
     @required this.focusNode,
     this.subtitleStyle = const SubtitleStyle(),
   }) : super(key: key);
@@ -25,6 +26,7 @@ class SubTitleWrapper extends StatelessWidget {
   final dynamic videoPlayerController;
   final SubtitleStyle subtitleStyle;
   final ValueNotifier<Subtitle> subtitleNotifier;
+  final ValueNotifier<Subtitle> contextSubtitle;
   final FocusNode focusNode;
 
   @override
@@ -56,6 +58,7 @@ class SubTitleWrapper extends StatelessWidget {
                     widgetVisibility: subtitleController.widgetVisibility,
                     comprehensionSubtitle:
                         subtitleController.comprehensionSubtitle,
+                    contextSubtitle: subtitleController.contextSubtitle,
                     focusNode: focusNode,
                   ),
                 ),
