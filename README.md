@@ -7,9 +7,24 @@
 <p align="center">A mobile video player and card creation toolkit tailored for language learners.</p>
 
 <p align="center" style="margin:0"><b>Latest GitHub Release:<br>
-<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.15.4-beta">0.15.4-beta 🇯🇵 → 🇬🇧</a><br>
+<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.15.5-beta">0.15.5-beta 🇯🇵 → 🇬🇧</a><br>
 <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.5.3-enjp-beta">0.5.3-beta 🇬🇧 → 🇯🇵</a></b><br></p>
-<div latest></div>
+
+<p align="center" style="margin:0"><b>Release Archive:<br>
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.3.0-beta">0.3</a> · 
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.4-beta">0.4</a> · 
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.5.2-beta">0.5</a> · 
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.6.1-beta">0.6</a> · 
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.7.2-beta">0.7</a> · 
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.8.1-beta">0.8</a> · 
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.9.3-beta">0.9</a> · 
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.10.0-beta">0.10</a> · 
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.11.3-beta">0.11</a> · 
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.12.4-beta">0.12</a> · 
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.13.7-beta">0.13</a> · 
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.14.2-beta">0.14</a> ·
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.15.5-beta">0.15</a> 
+  </b></p>
 
 # 📚 Uninterrupted language immersion at your fingertips
 
