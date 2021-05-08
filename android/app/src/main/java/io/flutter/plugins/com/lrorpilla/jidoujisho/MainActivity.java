@@ -102,6 +102,13 @@ public class MainActivity extends FlutterActivity {
                             "\n" +
                             "#sentence {\n" +
                             "    font-size: 30px\n" +
+                            "}\n" +
+                            "\n" +
+                            "#image {\n" +
+                            "  position: static;\n" +
+                            "  height: auto;\n" +
+                            "  width: auto;\n" +
+                            "  max-height: 300px;\n" +
                             "}",
                     null,
                     null

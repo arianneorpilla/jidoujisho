@@ -299,7 +299,7 @@ class _HomeState extends State<Home> {
         return buildChannels();
       case "History":
         return History();
-      case "Clipboard":
+      case "Dictionary":
         return ClipboardMenu(setCreatorView);
       default:
         return Container();
@@ -331,8 +331,8 @@ class _HomeState extends State<Home> {
           label: 'History',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.paste_sharp),
-          label: 'Clipboard',
+          icon: Icon(Icons.auto_stories),
+          label: 'Dictionary',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.folder_sharp),
@@ -2351,8 +2351,8 @@ class _ClipboardState extends State<ClipboardMenu> {
     }
 
     Widget emptyMessage = centerMessage(
-      "No entries in clipboard history",
-      Icons.paste_sharp,
+      "No entries in dictionary history",
+      Icons.auto_stories,
     );
 
     Widget cardCreatorButton() {

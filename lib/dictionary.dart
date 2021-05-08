@@ -350,9 +350,9 @@ Future<DictionaryHistoryEntry> getMonolingualWordDetails(
 
   var client = http.Client();
   http.Response response = await client
-      .get(Uri.parse('https://dictionary.goo.ne.jp/srch/jn/$searchTerm/m0u/'));
+      .get(Uri.parse('https://dictionary.goo.ne.jp/srch/jn/$searchTerm/m1u/'));
   var document = parser.parse(response.body);
-  bool multiDefinition = document.body.innerHtml.contains("で始まる言葉");
+  bool multiDefinition = document.body.innerHtml.contains("で一致する言葉");
   bool empty = document.body.innerHtml.contains("一致する情報は見つかりませんでした");
 
   if (empty) {
