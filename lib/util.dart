@@ -427,6 +427,24 @@ String getBetterNumberTag(String text) {
   return text;
 }
 
+// bool isCharacterFullWidthNumber(String number) {
+//   switch (number.substring(0, 0)) {
+//     case "１":
+//     case "２":
+//     case "３":
+//     case "４":
+//     case "５":
+//     case "６":
+//     case "７":
+//     case "８":
+//     case "９":
+//     case "０":
+//       return true;
+//     default:
+//       return false;
+//   }
+// }
+
 Future<List<String>> scrapeBingImages(String searchTerm) async {
   List<String> entries = [];
 

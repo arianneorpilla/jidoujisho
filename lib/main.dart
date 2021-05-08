@@ -117,13 +117,11 @@ class AudioPlayerTask extends BackgroundAudioTask {
 
 void unlockLandscape() {
   Wakelock.disable();
-
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
-
   SystemChrome.setEnabledSystemUIOverlays(
       [SystemUiOverlay.bottom, SystemUiOverlay.top]);
 }
@@ -2727,6 +2725,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem> {
                               "Selecting search result ",
                               style: TextStyle(
                                 fontSize: 11,
+                                color: Colors.grey[400],
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -2742,6 +2741,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem> {
                               "out of ",
                               style: TextStyle(
                                 fontSize: 11,
+                                color: Colors.grey[400],
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -2757,14 +2757,33 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem> {
                               "found for",
                               style: TextStyle(
                                 fontSize: 11,
+                                color: Colors.grey[400],
                               ),
                               textAlign: TextAlign.center,
                             ),
                             Text(
-                              "『${results.entries[_dialogIndex.value].searchTerm}』",
+                              "『",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 11,
+                                color: Colors.grey[400],
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            Text(
+                              "${results.entries[_dialogIndex.value].searchTerm}",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            Text(
+                              "』",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
+                                color: Colors.grey[400],
                               ),
                               textAlign: TextAlign.center,
                             ),

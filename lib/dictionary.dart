@@ -233,7 +233,10 @@ DictionaryEntry getEntryFromJishoResult(JishoResult result, String searchTerm) {
         definitions = removeLastNewline(definitions);
       }
 
-      exportMeanings = "$exportMeanings$i) $definitions -$partsOfSpeech \n";
+      String numberTag = getBetterNumberTag("$i)");
+
+      exportMeanings =
+          "$exportMeanings$numberTag $definitions -$partsOfSpeech \n";
     },
   );
   exportMeanings = removeLastNewline(exportMeanings);
@@ -331,7 +334,6 @@ Future<DictionaryHistoryEntry> getWordDetails(String searchTerm) async {
 
   for (DictionaryEntry entry in entries) {
     entry.searchTerm = searchTerm;
-    entry.meaning = getBetterNumberTag(entry.meaning);
   }
 
   return DictionaryHistoryEntry(
@@ -406,7 +408,7 @@ Future<DictionaryHistoryEntry> getMonolingualWordDetails(
       }
 
       for (int i = 0; i < meaningElements.length; i++) {
-        if (entries.length >= 10) {
+        if (entries.length >= 20) {
           return DictionaryHistoryEntry(
             entries: entries,
             searchTerm: searchTerm,
@@ -483,14 +485,23 @@ DictionaryEntry getEntryFromGooElement(
     reading = wordAndReadingRaw.substring(0, wordAndReadingRaw.indexOf("【"));
   }
 
-  String meaningRaw =
-      meaningElement.innerHtml.replaceAll(RegExp(r"<[^>]*>"), "");
-  List<String> meaningLines = meaningRaw.split("\n");
-  for (int i = 0; i < meaningLines.length; i++) {
-    meaningLines[i] = meaningLines[i].trim();
+  List<dom.Element> meaningChildren = meaningElement.children.first.children;
+  List<String> meaningChildrenLines = [];
+  for (int i = 0; i < meaningChildren.length; i++) {
+    meaningChildrenLines.add(
+        meaningChildren[i].innerHtml.replaceAll(RegExp(r"<[^>]*>"), "").trim());
   }
-  meaningLines.removeWhere((line) => line.trim().isEmpty);
-  meaning = meaningLines.join("\n");
+  meaningChildrenLines.removeWhere((line) => line.isEmpty);
+  meaning = meaningChildrenLines.join("\n\n");
+
+  // String meaningRaw =
+  //     meaningElement.innerHtml.replaceAll(RegExp(r"<[^>]*>"), "");
+  // List<String> meaningLines = meaningRaw.split("\n");
+  // for (int i = 0; i < meaningLines.length; i++) {
+  //   meaningLines[i] = meaningLines[i].trim();
+  // }
+  // meaningLines.removeWhere((line) => line.trim().isEmpty);
+  // meaning = meaningLines.join("\n");
 
   word = word.trim();
   reading = reading.trim();

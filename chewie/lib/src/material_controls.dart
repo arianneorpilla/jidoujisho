@@ -5,6 +5,7 @@ import 'package:chewie/src/chewie_progress_colors.dart';
 import 'package:chewie/src/material_progress_bar.dart';
 import 'package:chewie/src/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 
 import 'package:share/share.dart';
@@ -413,6 +414,8 @@ class _MaterialControlsState extends State<MaterialControls>
         );
 
         if (chosenOption != null) {
+          chewieController.clipboard.value = "";
+
           await gSharedPrefs.setString(
               "lastPlayedQuality", qualityTags[chosenOption]);
           final Duration position = await controller.getPosition();
@@ -637,6 +640,7 @@ class _MaterialControlsState extends State<MaterialControls>
   }
 
   void _cancelAndRestartTimer() {
+    SystemChrome.setEnabledSystemUIOverlays([]);
     _hideTimer?.cancel();
     _startHideTimer();
 
@@ -680,6 +684,8 @@ class _MaterialControlsState extends State<MaterialControls>
   }
 
   void _playPause() {
+    SystemChrome.setEnabledSystemUIOverlays([]);
+
     final isFinished = controller.value.isEnded;
     chewieController.wasPlaying.value = false;
 
@@ -699,6 +705,7 @@ class _MaterialControlsState extends State<MaterialControls>
           });
         } else {
           if (isFinished) {
+            chewieController.clipboard.value = "";
             controller.stop();
           }
           playPauseIconAnimationController.forward();

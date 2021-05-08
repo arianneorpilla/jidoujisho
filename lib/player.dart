@@ -36,8 +36,8 @@ class Player extends StatelessWidget {
   final Video video;
 
   void lockLandscape() {
+    Wakelock.enable();
     AutoOrientation.landscapeAutoMode(forceSensor: true);
-
     SystemChrome.setEnabledSystemUIOverlays([]);
   }
 
@@ -506,6 +506,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
               },
             ),
             buildSubTrackChanger(),
+            Container(),
             buildDictionary(),
           ],
         ),
@@ -850,9 +851,9 @@ class _VideoPlayerState extends State<VideoPlayer> {
           child: Container(
               padding: EdgeInsets.all(16.0),
               color: Colors.grey[800].withOpacity(0.6),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
+              child: Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   Text(
                     "Looking up",
@@ -861,14 +862,17 @@ class _VideoPlayerState extends State<VideoPlayer> {
                   Text(
                     "『",
                     style: TextStyle(
-                      color: Colors.grey[350],
+                      color: Colors.grey[300],
                     ),
                   ),
-                  Text(clipboard),
+                  Text(
+                    clipboard,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   Text(
                     "』",
                     style: TextStyle(
-                      color: Colors.grey[350],
+                      color: Colors.grey[300],
                     ),
                   ),
                   Text(
@@ -1033,13 +1037,6 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   Widget buildDictionaryNoMatch(String clipboard) {
-    String lookupText;
-    if (gIsSelectMode.value) {
-      lookupText = "No matches for \"$clipboard\" could be queried.";
-    } else {
-      lookupText = "No matches for the selection could be queried.";
-    }
-
     _subtitleFocusNode.unfocus();
 
     return Column(
@@ -1061,10 +1058,38 @@ class _VideoPlayerState extends State<VideoPlayer> {
               );
             },
             child: Container(
-              padding: EdgeInsets.all(16.0),
-              color: Colors.grey[800].withOpacity(0.6),
-              child: Text(lookupText),
-            ),
+                padding: EdgeInsets.all(16.0),
+                color: Colors.grey[800].withOpacity(0.6),
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      "No matches for",
+                      style: TextStyle(),
+                    ),
+                    Text(
+                      "『",
+                      style: TextStyle(
+                        color: Colors.grey[300],
+                      ),
+                    ),
+                    Text(
+                      clipboard,
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      "』",
+                      style: TextStyle(
+                        color: Colors.grey[300],
+                      ),
+                    ),
+                    Text(
+                      "could be queried.",
+                      style: TextStyle(),
+                    ),
+                  ],
+                )),
           ),
         ),
         Expanded(child: Container()),
@@ -1155,7 +1180,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
                         "Selecting search result ",
                         style: TextStyle(
                           fontSize: 11,
-                          color: Colors.grey[350],
+                          color: Colors.grey[300],
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -1171,7 +1196,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
                         "out of ",
                         style: TextStyle(
                           fontSize: 11,
-                          color: Colors.grey[350],
+                          color: Colors.grey[300],
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -1187,7 +1212,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
                         "found for",
                         style: TextStyle(
                           fontSize: 11,
-                          color: Colors.grey[350],
+                          color: Colors.grey[300],
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -1196,7 +1221,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 11,
-                          color: Colors.grey[350],
+                          color: Colors.grey[300],
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -1213,7 +1238,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 11,
-                          color: Colors.grey[350],
+                          color: Colors.grey[300],
                         ),
                         textAlign: TextAlign.center,
                       ),
