@@ -663,7 +663,7 @@ void exportAnkiCard(String deck, String sentence, String answer, String reading,
 
   if (imageFile.existsSync()) {
     imageFile.copySync(newImagePath);
-    addImage = "<img id=\"image\" src=\"$newFileName.jpg\">";
+    addImage = "<img src=\"$newFileName.jpg\">";
   }
   if (audioFile.existsSync()) {
     audioFile.copySync(newAudioPath);
@@ -690,7 +690,7 @@ void exportCreatorAnkiCard(String deck, String sentence, String answer,
 
   if (imageFile != null && imageFile.existsSync()) {
     imageFile.copySync(newImagePath);
-    addImage = "<img id=\"image\" src=\"$newFileName.jpg\">";
+    addImage = "<img src=\"$newFileName.jpg\">";
   }
 
   requestAnkiDroidPermissions();

@@ -76,8 +76,8 @@ public class MainActivity extends FlutterActivity {
             modelId = api.addNewCustomModel("jidoujisho (Creator)",
                     new String[] {"Image", "Audio", "Sentence", "Word", "Meaning", "Reading"},
                     new String[] {"jidoujisho (Creator) Default"},
-                    new String[] {"{{Image}}<br>{{Word}}"},
-                    new String[] {"{{Image}}<br>{{Word}}" +
+                    new String[] {"<div class=\"image\">{{Image}}</div><br>{{Word}}"},
+                    new String[] {"<div class=\"image\">{{Image}}</div><br>{{Word}}" +
                             "{{Audio}}<br><hr id=reading><p id=\"reading\">{{Reading}}</p><h2 id=\"word\">{{Word}}</h2><br><p><small id=\"meaning\">{{Meaning}}</small></p><br><p id=\"sentence\">{{Sentence}}</p>"},
                             "p {\n" +
                             "    margin: 0px\n" +
@@ -104,7 +104,7 @@ public class MainActivity extends FlutterActivity {
                             "    font-size: 30px\n" +
                             "}\n" +
                             "\n" +
-                            "#image {\n" +
+                            ".image img {\n" +
                             "  position: static;\n" +
                             "  height: auto;\n" +
                             "  width: auto;\n" +
