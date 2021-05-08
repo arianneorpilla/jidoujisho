@@ -98,6 +98,13 @@ small {
 #sentence {
     font-size: 30px
 }
+
+.image img {
+    position: static;
+    height: auto;
+    width: auto;
+    max-height: 300px;
+}
 ```
 
 ### Back Template
