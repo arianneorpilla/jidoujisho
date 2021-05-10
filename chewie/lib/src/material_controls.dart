@@ -616,6 +616,7 @@ class _MaterialControlsState extends State<MaterialControls>
             chewieController.currentSubTrack.value = chosenOption.callbackIndex;
             break;
           case SubtitleAudioMenuOptionType.externalSubtitle:
+            chewieController.currentSubTrack.value = chosenOption.callbackIndex;
             chewieController.playExternalSubtitles();
             break;
           case SubtitleAudioMenuOptionType.adjustDelayAndAllowance:
