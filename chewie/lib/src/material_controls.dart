@@ -413,28 +413,8 @@ class _MaterialControlsState extends State<MaterialControls>
 
           qualityTags.add("${quality.videoResolution}$muxTag");
         }
-        String preferredTag;
-        switch (getPreferredQuality()) {
-          case 0:
-            preferredTag = "Last Selected";
-            break;
-          case 1:
-            preferredTag = "Lowest (all streams)";
-            break;
-          case 2:
-            preferredTag = "Lowest (seek friendly)";
-            break;
-          case 3:
-            preferredTag = "Highest (seek friendly)";
-            break;
-          case 4:
-            preferredTag = "Highest (all streams)";
-            break;
-          default:
-            preferredTag = "undefined";
-        }
 
-        qualityTags.add("Preferred Video Quality - $preferredTag");
+        qualityTags.add("Set Preferred Video Quality");
 
         String currentMuxTag;
         if (chewieController.currentVideoQuality.muxed) {
