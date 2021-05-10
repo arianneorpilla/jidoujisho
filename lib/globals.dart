@@ -6,6 +6,7 @@ import 'package:package_info/package_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:jidoujisho/dictionary.dart';
+import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 String gAppDirPath;
 String gPreviewImageDir;
@@ -24,7 +25,7 @@ AsyncMemoizer gTrendingCache = AsyncMemoizer();
 AsyncMemoizer gChannelCache = AsyncMemoizer();
 Map<String, AsyncMemoizer> gSearchCache = {};
 Map<String, AsyncMemoizer> gCaptioningCache = {};
-Map<String, AsyncMemoizer> gChannelVideoCache = {};
+Map<String, List<Video>> gChannelVideoCache = {};
 Map<String, AsyncMemoizer> gMetadataCache = {};
 
 List<DictionaryEntry> gCustomDictionary;

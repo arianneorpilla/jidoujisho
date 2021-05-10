@@ -17,6 +17,13 @@ fetchChannelCache() {
   });
 }
 
+fetchChannelVideoCache(String channelID) {
+  if (gChannelVideoCache[channelID] == null) {
+    gChannelVideoCache[channelID] = [];
+  }
+  return gChannelVideoCache[channelID];
+}
+
 fetchSearchCache(String searchQuery) {
   if (gSearchCache[searchQuery] == null) {
     gSearchCache[searchQuery] = AsyncMemoizer();

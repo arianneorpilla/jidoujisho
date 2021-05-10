@@ -2932,21 +2932,21 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
 }
 
 class LazyResults extends StatefulWidget {
-  final searchQuery;
+  final channelID;
 
-  LazyResults(this.searchQuery);
+  LazyResults(this.channelID);
 
   @override
-  _LazyResultsState createState() => new _LazyResultsState(this.searchQuery);
+  _LazyResultsState createState() => new _LazyResultsState(this.channelID);
 }
 
 class _LazyResultsState extends State<LazyResults> {
-  String searchQuery;
+  String channelID;
   bool isLoading = false;
 
-  _LazyResultsState(this.searchQuery);
+  _LazyResultsState(this.channelID);
 
-  List<Video> verticalData = [];
+  List<Video> verticalData;
   final int increment = 10;
 
   Future _loadMore() async {
@@ -2955,7 +2955,7 @@ class _LazyResultsState extends State<LazyResults> {
         isLoading = true;
       });
 
-      List<Video> channelVideos = await getChannelUploadsStream(searchQuery)
+      List<Video> channelVideos = await getChannelUploadsStream(channelID)
           .skip(verticalData.length)
           .take(increment)
           .toList();
@@ -2970,6 +2970,7 @@ class _LazyResultsState extends State<LazyResults> {
   @override
   void initState() {
     super.initState();
+    verticalData = fetchChannelVideoCache(channelID);
     _loadMore();
   }
 
@@ -3000,7 +3001,7 @@ class _LazyResultsState extends State<LazyResults> {
   Widget build(BuildContext context) {
     if (verticalData.length == 0) {
       return centerMessage(
-        "Listing videos...",
+        "Listing channel videos...",
         Icons.subscriptions_sharp,
       );
     }
