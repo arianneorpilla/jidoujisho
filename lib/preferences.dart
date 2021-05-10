@@ -156,6 +156,14 @@ String getLastDeck() {
   return lastDeck;
 }
 
+Future<void> setPreferredQuality(int preferredQualityIndex) async {
+  await gSharedPrefs.setInt("preferredQuality", preferredQualityIndex);
+}
+
+int getPreferredQuality() {
+  return gSharedPrefs.getInt("preferredQuality") ?? 0;
+}
+
 Future<void> toggleSelectMode() async {
   await gSharedPrefs.setBool("selectMode", !getSelectMode());
 }
@@ -379,25 +387,38 @@ Future<void> removeDictionaryEntryFromHistory(
   await setDictionaryHistory(dictionaryHistoryEntries);
 }
 
-YouTubeQualityOption getLastPlayedQuality(
+YouTubeQualityOption getPreferredYouTubeQuality(
     List<YouTubeQualityOption> qualities) {
-  String lastPlayedQuality = gSharedPrefs.getString("lastPlayedQuality");
+  switch (getPreferredQuality()) {
+    case 1:
+      return qualities.first;
+    case 2:
+      return qualities.firstWhere((quality) => quality.muxed) ??
+          qualities.first;
+    case 3:
+      return qualities.lastWhere((quality) => quality.muxed) ?? qualities.last;
+    case 4:
+      return qualities.last;
+    default:
+      String lastPlayedQuality = gSharedPrefs.getString("lastPlayedQuality");
 
-  if (lastPlayedQuality != null) {
-    for (YouTubeQualityOption quality in qualities) {
-      // If we find the quality they last played, we return that.
-      if (quality.videoResolution == lastPlayedQuality) {
-        return quality;
+      if (lastPlayedQuality != null) {
+        for (YouTubeQualityOption quality in qualities) {
+          // If we find the quality they last played, we return that.
+          if (quality.videoResolution == lastPlayedQuality) {
+            return quality;
+          }
+        }
+        // In this case, we know that they have set a quality that doesn't exist,
+        // maybe it's a low quality video -- so we take the best quality.
+        return qualities.lastWhere((element) => element.muxed) ??
+            qualities.last;
+      } else {
+        // We don't know if we could abuse their mobile data,
+        // let's try the average.
+        return qualities.firstWhere((element) =>
+                element.videoResolution == "360p" || element.muxed) ??
+            qualities.first;
       }
-    }
-    // In this case, we know that they have set a quality that doesn't exist,
-    // maybe it's a low quality video -- so we take the best quality.
-    return qualities.lastWhere((element) => element.muxed) ?? qualities.last;
-  } else {
-    // We don't know if we could abuse their mobile data,
-    // let's try the average.
-    return qualities.firstWhere(
-            (element) => element.videoResolution == "360p" || element.muxed) ??
-        qualities.first;
   }
 }

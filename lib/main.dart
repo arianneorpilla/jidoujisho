@@ -116,17 +116,6 @@ class AudioPlayerTask extends BackgroundAudioTask {
   Future<void> onTaskRemoved() async {}
 }
 
-void unlockLandscape() {
-  Wakelock.disable();
-  SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.landscapeLeft,
-    DeviceOrientation.landscapeRight,
-  ]);
-  SystemChrome.setEnabledSystemUIOverlays(
-      [SystemUiOverlay.bottom, SystemUiOverlay.top]);
-}
-
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -150,10 +139,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  StreamSubscription _intentDataStreamSubscription;
-  List<SharedMediaFile> _sharedFiles;
-  String _sharedText;
-
   TextEditingController _searchQueryController = TextEditingController();
   ValueNotifier<double> _dictionaryScrollOffset = ValueNotifier<double>(0);
   bool _isSearching = false;
@@ -174,6 +159,10 @@ class _HomeState extends State<Home> {
       ValueNotifier<List<String>>([]);
   ValueNotifier<bool> _isHomeInvisible = ValueNotifier<bool>(false);
   YoutubeExplode yt = YoutubeExplode();
+
+  StreamSubscription _intentDataStreamSubscription;
+  List<SharedMediaFile> _sharedFiles;
+  String _sharedText;
 
   @override
   void initState() {
@@ -207,7 +196,9 @@ class _HomeState extends State<Home> {
       if (value == null) {
         return;
       }
+
       if (value.startsWith("https://")) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
         playYouTubeVideoLink(value);
       } else {
         setCreatorView(
@@ -224,6 +215,7 @@ class _HomeState extends State<Home> {
       }
 
       if (value.startsWith("https://")) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
         playYouTubeVideoLink(value);
       } else {
         setCreatorView(
@@ -234,7 +226,7 @@ class _HomeState extends State<Home> {
 
   void playYouTubeVideoLink(String link) {
     if (YoutubePlayer.convertUrlToId(link) != null) {
-      Navigator.pushReplacement(
+      Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => Player(
@@ -242,10 +234,6 @@ class _HomeState extends State<Home> {
           ),
         ),
       ).then((returnValue) {
-        setState(() {
-          unlockLandscape();
-        });
-
         setLastPlayedPath(link);
         setLastPlayedPosition(0);
         gIsResumable.value = getResumeAvailable();
@@ -2955,15 +2943,18 @@ class _LazyResultsState extends State<LazyResults> {
         isLoading = true;
       });
 
-      List<Video> channelVideos = await getChannelUploadsStream(channelID)
-          .skip(verticalData.length)
-          .take(increment)
-          .toList();
-
-      setState(() {
-        channelVideos.forEach((video) => verticalData.add(video));
-        isLoading = false;
-      });
+      List<Video> channelVideos = [];
+      try {
+        channelVideos = await getChannelUploadsStream(channelID)
+            .skip(verticalData.length)
+            .take(increment)
+            .toList();
+      } finally {
+        setState(() {
+          channelVideos.forEach((video) => verticalData.add(video));
+          isLoading = false;
+        });
+      }
     }
   }
 

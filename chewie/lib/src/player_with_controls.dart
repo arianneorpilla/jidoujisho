@@ -3,6 +3,7 @@ import 'package:chewie/src/material_controls.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
+import 'package:jidoujisho/util.dart';
 
 class PlayerWithControls extends StatelessWidget {
   const PlayerWithControls({Key key}) : super(key: key);

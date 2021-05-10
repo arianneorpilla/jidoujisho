@@ -253,17 +253,21 @@ class _MaterialControlsState extends State<MaterialControls>
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
-      builder: (context) => const _MoreOptionsDialog(options: [
-        "Search Current Subtitle with Jisho.org",
-        "Translate Current Subtitle with DeepL",
-        "Translate Current Subtitle with Google Translate",
-        "Share Current Subtitle with Menu",
-      ], icons: [
-        Icons.menu_book_rounded,
-        Icons.translate_rounded,
-        Icons.g_translate_rounded,
-        Icons.share_outlined,
-      ]),
+      builder: (context) => const _MoreOptionsDialog(
+        [
+          "Search Current Subtitle with Jisho.org",
+          "Translate Current Subtitle with DeepL",
+          "Translate Current Subtitle with Google Translate",
+          "Share Current Subtitle with Menu",
+        ],
+        [
+          Icons.menu_book_rounded,
+          Icons.translate_rounded,
+          Icons.g_translate_rounded,
+          Icons.share_outlined,
+        ],
+        [],
+      ),
     );
 
     final String subtitleText = chewieController.currentSubtitle.value.text;
@@ -290,80 +294,83 @@ class _MaterialControlsState extends State<MaterialControls>
       onTap: () async {
         _hideTimer?.cancel();
 
+        List<int> highlightedIndexes = [];
+        if (chewieController.shadowingSubtitle.value != null) {
+          highlightedIndexes.add(2);
+        }
+        if (getFocusMode()) {
+          highlightedIndexes.add(1);
+        }
+        if (getListeningComprehensionMode()) {
+          highlightedIndexes.add(0);
+        }
+
         final chosenOption = await showModalBottomSheet<int>(
           context: context,
           isScrollControlled: true,
           useRootNavigator: true,
-          builder: (context) => _MoreOptionsDialog(options: [
-            "Share Current Subtitle to Applications",
-            "Adjust Subtitle Delay and Audio Allowance",
-            if (getMonolingualMode())
-              "Get Bilingual Definitions from Jisho.org"
-            else
-              "Get Monolingual Definitions from Goo.ne.jp",
-            if (getListeningComprehensionMode())
-              "Disable Listening Comprehension Mode"
-            else
-              "Enable Listening Comprehension Mode",
-            if (getSelectMode())
-              "Use Tap to Select Subtitle Selection"
-            else
-              "Use Drag to Select Subtitle Selection",
-            if (getFocusMode())
-              "Turn Off Definition Focus Mode"
-            else
-              "Turn On Definition Focus Mode",
-            "Load External Subtitles",
-            "Export Current Context to Anki",
-          ], icons: [
-            Icons.share_outlined,
-            Icons.timer_rounded,
-            Icons.translate_sharp,
-            if (getListeningComprehensionMode())
-              Icons.hearing_disabled
-            else
-              Icons.hearing_sharp,
-            if (getSelectMode())
-              Icons.touch_app_rounded
-            else
-              Icons.select_all_rounded,
-            if (getFocusMode())
-              Icons.lightbulb_outline_rounded
-            else
-              Icons.lightbulb,
-            Icons.subtitles_outlined,
-            Icons.mobile_screen_share_rounded,
-          ]),
+          builder: (context) => _MoreOptionsDialog(
+            [
+              "Listening Comprehension Mode",
+              "Definition Focus Mode",
+              "Shadowing Mode",
+              if (getSelectMode())
+                "Use Tap to Select Subtitle Selection"
+              else
+                "Use Drag to Select Subtitle Selection",
+              if (getMonolingualMode())
+                "Use Bilingual Definitions from Jisho.org"
+              else
+                "Use Monolingual Definitions from Goo.ne.jp",
+              "Share Current Subtitle to Applications",
+              "Export Current Context to Anki",
+            ],
+            [
+              if (getListeningComprehensionMode())
+                Icons.hearing_sharp
+              else
+                Icons.hearing_disabled,
+              if (getFocusMode())
+                Icons.lightbulb
+              else
+                Icons.lightbulb_outline_rounded,
+              Icons.loop_sharp,
+              if (getSelectMode())
+                Icons.touch_app_sharp
+              else
+                Icons.select_all_sharp,
+              Icons.translate_sharp,
+              Icons.share_outlined,
+              Icons.mobile_screen_share_rounded,
+            ],
+            highlightedIndexes,
+          ),
         );
 
         switch (chosenOption) {
           case 0:
-            openExtraShare();
+            toggleListeningComprehensionMode();
             break;
           case 1:
-            controller.pause();
-            chewieController.retimeSubtitles();
+            toggleFocusMode();
             break;
           case 2:
+            chewieController.toggleShadowingMode();
+            break;
+          case 3:
+            toggleSelectMode();
+            gIsSelectMode.value = getSelectMode();
+            break;
+          case 4:
             toggleMonolingualMode();
             final String clipboardMemory = chewieController.clipboard.value;
             chewieController.clipboard.value = "";
             chewieController.clipboard.value = clipboardMemory;
             break;
-          case 3:
-            toggleListeningComprehensionMode();
-            break;
-          case 4:
-            toggleSelectMode();
-            gIsSelectMode.value = getSelectMode();
-            break;
           case 5:
-            toggleFocusMode();
+            openExtraShare();
             break;
           case 6:
-            chewieController.playExternalSubtitles();
-            break;
-          case 7:
             chewieController.exportSingleCallback();
             break;
         }
@@ -393,6 +400,7 @@ class _MaterialControlsState extends State<MaterialControls>
         _hideTimer?.cancel();
 
         final List<String> qualityTags = [];
+
         for (final YouTubeQualityOption quality
             in chewieController.streamData.videoQualities) {
           String muxTag;
@@ -405,34 +413,107 @@ class _MaterialControlsState extends State<MaterialControls>
 
           qualityTags.add("${quality.videoResolution}$muxTag");
         }
+        String preferredTag;
+        switch (getPreferredQuality()) {
+          case 0:
+            preferredTag = "Last Selected";
+            break;
+          case 1:
+            preferredTag = "Lowest (all streams)";
+            break;
+          case 2:
+            preferredTag = "Lowest (seek friendly)";
+            break;
+          case 3:
+            preferredTag = "Highest (seek friendly)";
+            break;
+          case 4:
+            preferredTag = "Highest (all streams)";
+            break;
+          default:
+            preferredTag = "undefined";
+        }
 
+        qualityTags.add("Preferred Video Quality - $preferredTag");
+
+        String currentMuxTag;
+        if (chewieController.currentVideoQuality.muxed) {
+          currentMuxTag = " (seek friendly)";
+        } else {
+          currentMuxTag = "";
+        }
+
+        final currentQuality =
+            "${chewieController.currentVideoQuality.videoResolution}$currentMuxTag";
         final chosenOption = await showModalBottomSheet<int>(
           context: context,
           isScrollControlled: true,
           useRootNavigator: true,
-          builder: (context) => _SelectQualityDialog(qualityTags),
+          builder: (context) =>
+              _SelectQualityDialog(qualityTags, currentQuality),
         );
 
         if (chosenOption != null) {
-          chewieController.clipboard.value = "";
+          if (chosenOption != qualityTags.length - 1) {
+            chewieController.clipboard.value = "";
 
-          await gSharedPrefs.setString(
-              "lastPlayedQuality", qualityTags[chosenOption]);
-          final Duration position = await controller.getPosition();
+            await gSharedPrefs.setString(
+                "lastPlayedQuality", qualityTags[chosenOption]);
+            final Duration position = await controller.getPosition();
 
-          final YouTubeQualityOption chosenQuality =
-              chewieController.streamData.videoQualities[chosenOption];
+            final YouTubeQualityOption chosenQuality =
+                chewieController.streamData.videoQualities[chosenOption];
 
-          chewieController.currentVideoQuality = chosenQuality;
+            chewieController.currentVideoQuality = chosenQuality;
 
-          await controller.setMediaFromNetwork(chewieController
-              .streamData.videoQualities[chosenOption].videoURL);
-          if (!chosenQuality.muxed) {
-            await controller
-                .addAudioFromNetwork(chewieController.streamData.audioURL);
+            await controller.setMediaFromNetwork(chewieController
+                .streamData.videoQualities[chosenOption].videoURL);
+            if (!chosenQuality.muxed) {
+              await controller
+                  .addAudioFromNetwork(chewieController.streamData.audioURL);
+            }
+
+            await controller.seekTo(position);
+          } else {
+            final preferredQualityOption = await showModalBottomSheet<int>(
+              context: context,
+              isScrollControlled: true,
+              useRootNavigator: true,
+              builder: (context) => _MoreOptionsDialog(
+                const [
+                  "Prefer Last Selected Quality",
+                  "Prefer Lowest Quality (all streams)",
+                  "Prefer Lowest Quality (seek friendly)",
+                  "Prefer Highest Quality (seek friendly)",
+                  "Prefer Highest Quality (all streams)",
+                ],
+                const [
+                  Icons.history,
+                  Icons.sd,
+                  Icons.sd,
+                  Icons.hd,
+                  Icons.hd,
+                ],
+                [getPreferredQuality()],
+              ),
+            );
+
+            if (preferredQualityOption != null) {
+              setPreferredQuality(preferredQualityOption);
+
+              final YouTubeQualityOption chosenQuality =
+                  getPreferredYouTubeQuality(
+                      chewieController.streamData.videoQualities);
+
+              chewieController.currentVideoQuality = chosenQuality;
+
+              await controller.setMediaFromNetwork(chosenQuality.videoURL);
+              if (!chosenQuality.muxed) {
+                await controller
+                    .addAudioFromNetwork(chewieController.streamData.audioURL);
+              }
+            }
           }
-
-          await controller.seekTo(position);
         }
 
         if (_latestValue.isPlaying) {
@@ -517,23 +598,49 @@ class _MaterialControlsState extends State<MaterialControls>
             callbackIndex: 99999,
           ),
         );
+        options.add(
+          SubtitleAudioMenuOption(
+            type: SubtitleAudioMenuOptionType.adjustDelayAndAllowance,
+          ),
+        );
+        options.add(
+          SubtitleAudioMenuOption(
+            type: SubtitleAudioMenuOptionType.externalSubtitle,
+          ),
+        );
 
         final chosenOption =
             await showModalBottomSheet<SubtitleAudioMenuOption>(
           context: context,
           isScrollControlled: true,
           useRootNavigator: true,
-          builder: (context) => _SelectAudioDialog(options),
+          builder: (context) => _SelectAudioDialog(
+            options,
+            chewieController,
+          ),
         );
+
+        if (chosenOption == null) {
+          return;
+        }
 
         switch (chosenOption.type) {
           case SubtitleAudioMenuOptionType.audioTrack:
+            chewieController.currentAudioTrack.value =
+                chosenOption.callbackIndex;
             await controller.setAudioTrack(chosenOption.callbackIndex + 1);
             break;
           case SubtitleAudioMenuOptionType.embeddedSubtitle:
           case SubtitleAudioMenuOptionType.autoSubtitle:
           case SubtitleAudioMenuOptionType.noneSubtitle:
             chewieController.currentSubTrack.value = chosenOption.callbackIndex;
+            break;
+          case SubtitleAudioMenuOptionType.externalSubtitle:
+            chewieController.playExternalSubtitles();
+            break;
+          case SubtitleAudioMenuOptionType.adjustDelayAndAllowance:
+            controller.pause();
+            chewieController.retimeSubtitles();
             break;
           default:
             break;
@@ -762,16 +869,15 @@ class _MaterialControlsState extends State<MaterialControls>
 }
 
 class _MoreOptionsDialog extends StatelessWidget {
-  const _MoreOptionsDialog({
-    Key key,
-    @required List<String> options,
-    @required List<IconData> icons,
-  })  : _options = options,
-        _icons = icons,
-        super(key: key);
+  const _MoreOptionsDialog(
+    this.options,
+    this.icons,
+    this.highlights,
+  );
 
-  final List<String> _options;
-  final List<IconData> _icons;
+  final List<String> options;
+  final List<IconData> icons;
+  final List<int> highlights;
 
   @override
   Widget build(BuildContext context) {
@@ -779,8 +885,9 @@ class _MoreOptionsDialog extends StatelessWidget {
       shrinkWrap: true,
       physics: const ScrollPhysics(),
       itemBuilder: (context, index) {
-        final _option = _options[index];
-        final _icon = _icons[index];
+        final _option = options[index];
+        final _icon = icons[index];
+
         return ListTile(
           dense: true,
           title: Row(
@@ -791,7 +898,13 @@ class _MoreOptionsDialog extends StatelessWidget {
                 color: Colors.red,
               ),
               const SizedBox(width: 16.0),
-              Text(_option),
+              Text(
+                _option,
+                style: TextStyle(
+                  color:
+                      (highlights.contains(index)) ? Colors.red : Colors.white,
+                ),
+              ),
             ],
           ),
           onTap: () {
@@ -799,7 +912,7 @@ class _MoreOptionsDialog extends StatelessWidget {
           },
         );
       },
-      itemCount: _options.length,
+      itemCount: options.length,
     );
   }
 }
@@ -822,15 +935,19 @@ IconData getIconFromQualityTag(String qualityTag) {
     case "1440p":
     case "1440p (seek friendly)":
       return Icons.hd;
-    default:
+    case "2160p":
+    case "2160p (seek friendly)":
       return Icons.four_k;
+    default:
+      return Icons.settings_applications_outlined;
   }
 }
 
 class _SelectQualityDialog extends StatelessWidget {
-  const _SelectQualityDialog(this.qualityTags);
+  const _SelectQualityDialog(this.qualityTags, this.currentQuality);
 
   final List<String> qualityTags;
+  final String currentQuality;
 
   @override
   Widget build(BuildContext context) {
@@ -849,7 +966,14 @@ class _SelectQualityDialog extends StatelessWidget {
                 color: Colors.red,
               ),
               const SizedBox(width: 16.0),
-              Text(qualityTag),
+              Text(
+                qualityTag,
+                style: TextStyle(
+                  color: (currentQuality == qualityTag)
+                      ? Colors.red
+                      : Colors.white,
+                ),
+              ),
             ],
           ),
           onTap: () {
@@ -865,9 +989,11 @@ class _SelectQualityDialog extends StatelessWidget {
 class _SelectAudioDialog extends StatelessWidget {
   const _SelectAudioDialog(
     this.options,
+    this.chewieController,
   );
 
   final List<SubtitleAudioMenuOption> options;
+  final ChewieController chewieController;
 
   Widget buildRow(int index) {
     final SubtitleAudioMenuOption option = options[index];
@@ -880,7 +1006,12 @@ class _SelectAudioDialog extends StatelessWidget {
           color: Colors.red,
         ),
         const SizedBox(width: 16.0),
-        Text(option.getLabel()),
+        Text(
+          option.getLabel(),
+          style: TextStyle(
+            color: option.getColor(chewieController),
+          ),
+        ),
       ],
     );
   }
@@ -915,6 +1046,41 @@ class SubtitleAudioMenuOption {
   final int callbackIndex;
   final String metadata;
 
+  Color getColor(ChewieController chewie) {
+    switch (type) {
+      case SubtitleAudioMenuOptionType.audioTrack:
+        if (chewie.currentAudioTrack.value == callbackIndex) {
+          return Colors.red;
+        }
+        break;
+      case SubtitleAudioMenuOptionType.embeddedSubtitle:
+        if (chewie.currentSubTrack.value == callbackIndex) {
+          return Colors.red;
+        }
+        break;
+      case SubtitleAudioMenuOptionType.autoSubtitle:
+        if (chewie.currentSubTrack.value == -51) {
+          return Colors.red;
+        }
+        break;
+      case SubtitleAudioMenuOptionType.noneSubtitle:
+        if (chewie.currentSubTrack.value == 99999) {
+          return Colors.red;
+        }
+        break;
+      case SubtitleAudioMenuOptionType.externalSubtitle:
+        return Colors.white;
+        break;
+      case SubtitleAudioMenuOptionType.adjustDelayAndAllowance:
+        return Colors.white;
+        break;
+      default:
+        return Colors.white;
+    }
+
+    return Colors.white;
+  }
+
   IconData getIcon() {
     switch (type) {
       case SubtitleAudioMenuOptionType.audioTrack:
@@ -926,6 +1092,12 @@ class SubtitleAudioMenuOption {
         break;
       case SubtitleAudioMenuOptionType.noneSubtitle:
         return Icons.subtitles_off_outlined;
+        break;
+      case SubtitleAudioMenuOptionType.externalSubtitle:
+        return Icons.upload_file;
+        break;
+      case SubtitleAudioMenuOptionType.adjustDelayAndAllowance:
+        return Icons.timer_sharp;
         break;
       default:
         return Icons.error;
@@ -946,6 +1118,13 @@ class SubtitleAudioMenuOption {
       case SubtitleAudioMenuOptionType.noneSubtitle:
         return "Subtitle - None";
         break;
+      case SubtitleAudioMenuOptionType.externalSubtitle:
+        return "Load External Subtitles";
+        break;
+      case SubtitleAudioMenuOptionType.adjustDelayAndAllowance:
+        return "Adjust Delay and Allowance";
+        break;
+
       default:
         return "Undefined";
     }
@@ -957,4 +1136,6 @@ enum SubtitleAudioMenuOptionType {
   embeddedSubtitle,
   autoSubtitle,
   noneSubtitle,
+  externalSubtitle,
+  adjustDelayAndAllowance,
 }

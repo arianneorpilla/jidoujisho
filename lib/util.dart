@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:auto_orientation/auto_orientation.dart';
+import 'package:flutter/services.dart';
 import 'package:html/parser.dart' as parser;
 import 'package:html/dom.dart' as dom;
 import 'package:http/http.dart' as http;
@@ -13,6 +15,7 @@ import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
 import 'package:ve_dart/ve_dart.dart';
 
 import 'package:jidoujisho/globals.dart';
+import 'package:wakelock/wakelock.dart';
 
 class VideoHistory {
   String url;
@@ -466,4 +469,21 @@ Future<List<String>> scrapeBingImages(String searchTerm) async {
   }
 
   return entries;
+}
+
+void unlockLandscape() {
+  Wakelock.disable();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
+  SystemChrome.setEnabledSystemUIOverlays(
+      [SystemUiOverlay.bottom, SystemUiOverlay.top]);
+}
+
+void lockLandscape() {
+  Wakelock.enable();
+  AutoOrientation.landscapeAutoMode(forceSensor: true);
+  SystemChrome.setEnabledSystemUIOverlays([]);
 }

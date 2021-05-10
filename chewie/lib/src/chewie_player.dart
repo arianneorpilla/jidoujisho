@@ -217,6 +217,7 @@ class ChewieController extends ChangeNotifier {
     @required this.clipboard,
     @required this.currentDictionaryEntry,
     @required this.currentSubtitle,
+    @required this.currentAudioTrack,
     @required this.currentSubTrack,
     @required this.wasPlaying,
     @required this.playExternalSubtitles,
@@ -266,6 +267,7 @@ class ChewieController extends ChangeNotifier {
   final ValueNotifier<Subtitle> currentSubtitle;
   final ValueNotifier<DictionaryEntry> currentDictionaryEntry;
   final ValueNotifier<int> currentSubTrack;
+  final ValueNotifier<int> currentAudioTrack;
   final ValueNotifier<bool> wasPlaying;
   final VoidCallback playExternalSubtitles;
   final VoidCallback retimeSubtitles;

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
-import 'package:auto_orientation/auto_orientation.dart';
 import 'package:chewie/chewie.dart';
 import 'package:clipboard_monitor/clipboard_monitor.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
@@ -19,7 +18,6 @@ import 'package:subtitle_wrapper_package/subtitle_controller.dart';
 import 'package:subtitle_wrapper_package/subtitle_wrapper_package.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
-import 'package:wakelock/wakelock.dart';
 
 import 'package:jidoujisho/anki.dart';
 import 'package:jidoujisho/globals.dart';
@@ -35,16 +33,9 @@ class Player extends StatelessWidget {
   final String url;
   final Video video;
 
-  void lockLandscape() {
-    Wakelock.enable();
-    AutoOrientation.landscapeAutoMode(forceSensor: true);
-    SystemChrome.setEnabledSystemUIOverlays([]);
-  }
-
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setEnabledSystemUIOverlays([]);
-    Wakelock.enable();
+    lockLandscape();
 
     // If webURL is empty, then use a local player.
     if (this.url != null && YoutubePlayer.convertUrlToId(url) != null) {
@@ -134,6 +125,8 @@ class Player extends StatelessWidget {
             );
 
             addVideoHistory(history);
+
+            lockLandscape();
 
             return VideoPlayer(
               videoFile: videoFile,
@@ -290,6 +283,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   Timer durationTimer;
   Timer visibilityTimer;
+  int initialSubTrack;
 
   @override
   void initState() {
@@ -298,6 +292,15 @@ class _VideoPlayerState extends State<VideoPlayer> {
         Duration(seconds: 1), (Timer t) => updateDurationOrSeek());
     visibilityTimer = Timer.periodic(
         Duration(milliseconds: 100), (Timer t) => visibilityTimerAction());
+
+    if (defaultSubtitles.isEmpty ||
+        videoFile != null && !hasExternalSubtitles(videoFile)) {
+      initialSubTrack = 99999;
+    } else {
+      initialSubTrack = 0;
+    }
+
+    _currentSubTrack = ValueNotifier<int>(initialSubTrack);
   }
 
   Future<void> playPause() async {
@@ -418,9 +421,9 @@ class _VideoPlayerState extends State<VideoPlayer> {
         networkNotSet) {
       networkNotSet = false;
       _videoPlayerController.setMediaFromNetwork(
-          getLastPlayedQuality(streamData.videoQualities).videoURL);
+          getPreferredYouTubeQuality(streamData.videoQualities).videoURL);
       _chewieController.currentVideoQuality =
-          getLastPlayedQuality(streamData.videoQualities);
+          getPreferredYouTubeQuality(streamData.videoQualities);
     }
 
     int inSeconds = getVideoPlayerController().value.position.inSeconds ?? 0;
@@ -463,7 +466,8 @@ class _VideoPlayerState extends State<VideoPlayer> {
       text: "",
     ),
   );
-  final _currentSubTrack = ValueNotifier<int>(-1);
+  ValueNotifier<int> _currentSubTrack;
+  final _currentAudioTrack = ValueNotifier<int>(0);
   final _failureMetadata = ValueNotifier<AnkiExportMetadata>(null);
 
   @override
@@ -570,7 +574,8 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   Future<bool> _onWillPop() async {
     if (getVideoPlayerController().value.isEnded) {
-      Navigator.pop(context, true);
+      Navigator.of(context).popUntil((route) => route.isFirst);
+      unlockLandscape();
       return false;
     }
 
@@ -609,7 +614,8 @@ class _VideoPlayerState extends State<VideoPlayer> {
             ),
           ),
           onPressed: () async {
-            Navigator.pop(context, true);
+            Navigator.of(context).popUntil((route) => route.isFirst);
+            unlockLandscape();
           },
         ),
       ],
@@ -659,6 +665,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       currentDictionaryEntry: _currentDictionaryEntry,
       currentSubtitle: _currentSubtitle,
       currentSubTrack: _currentSubTrack,
+      currentAudioTrack: _currentAudioTrack,
       wasPlaying: _wasPlaying,
       playExternalSubtitles: playExternalSubtitles,
       retimeSubtitles: retimeSubtitles,
@@ -792,6 +799,10 @@ class _VideoPlayerState extends State<VideoPlayer> {
       }
     }
 
+    _chewieController.wasPlaying.value =
+        _videoPlayerController.value.isPlaying ||
+            _chewieController.wasPlaying.value;
+
     showDialog(
         context: context,
         builder: (context) {
@@ -855,7 +866,11 @@ class _VideoPlayerState extends State<VideoPlayer> {
               ),
             ],
           );
-        });
+        }).then((result) {
+      if (_wasPlaying.value) {
+        _videoPlayerController.play();
+      }
+    });
   }
 
   Widget buildDictionaryLoading(String clipboard) {
