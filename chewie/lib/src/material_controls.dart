@@ -616,7 +616,6 @@ class _MaterialControlsState extends State<MaterialControls>
             chewieController.currentSubTrack.value = chosenOption.callbackIndex;
             break;
           case SubtitleAudioMenuOptionType.externalSubtitle:
-            chewieController.currentSubTrack.value = 99998;
             chewieController.playExternalSubtitles();
             break;
           case SubtitleAudioMenuOptionType.adjustDelayAndAllowance:
@@ -1035,7 +1034,8 @@ class SubtitleAudioMenuOption {
         }
         break;
       case SubtitleAudioMenuOptionType.embeddedSubtitle:
-        if (chewie.currentSubTrack.value == callbackIndex) {
+        if (chewie.currentSubTrack.value == callbackIndex ||
+            chewie.currentSubTrack.value == -1) {
           return Colors.red;
         }
         break;
