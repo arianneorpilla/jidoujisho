@@ -7,7 +7,7 @@
 <p align="center">A mobile video player and card creation toolkit tailored for language learners.</p>
 
 <p align="center" style="margin:0"><b>Latest GitHub Release:<br>
-<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.16.1-beta">0.16.1-beta 🇯🇵 → 🇬🇧</a><br>
+<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.16.2-beta">0.16.2-beta 🇯🇵 → 🇬🇧</a><br>
 <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.5.3-enjp-beta">0.5.3-beta 🇬🇧 → 🇯🇵</a></b><br></p>
 
 <p align="center" style="margin:0"><b>Release Archive:<br>
@@ -24,7 +24,7 @@
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.13.7-beta">0.13</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.14.2-beta">0.14</a> ·
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.15.8-beta">0.15</a> ·
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.16.1-beta">0.16</a> 
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.16.2-beta">0.16</a> 
 </b></p>
 
 # 📚 Uninterrupted language immersion at your fingertips
