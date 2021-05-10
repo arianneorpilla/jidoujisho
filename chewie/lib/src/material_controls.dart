@@ -296,13 +296,13 @@ class _MaterialControlsState extends State<MaterialControls>
 
         List<int> highlightedIndexes = [];
         if (chewieController.shadowingSubtitle.value != null) {
-          highlightedIndexes.add(2);
+          highlightedIndexes.add(0);
         }
         if (getFocusMode()) {
           highlightedIndexes.add(1);
         }
         if (getListeningComprehensionMode()) {
-          highlightedIndexes.add(0);
+          highlightedIndexes.add(2);
         }
 
         final chosenOption = await showModalBottomSheet<int>(
@@ -311,9 +311,9 @@ class _MaterialControlsState extends State<MaterialControls>
           useRootNavigator: true,
           builder: (context) => _MoreOptionsDialog(
             [
-              "Listening Comprehension Mode",
-              "Definition Focus Mode",
               "Shadowing Mode",
+              "Definition Focus Mode",
+              "Listening Comprehension Mode",
               if (getSelectMode())
                 "Use Tap to Select Subtitle Selection"
               else
@@ -326,15 +326,15 @@ class _MaterialControlsState extends State<MaterialControls>
               "Export Current Context to Anki",
             ],
             [
-              if (getListeningComprehensionMode())
-                Icons.hearing_sharp
-              else
-                Icons.hearing_disabled,
+              Icons.loop_sharp,
               if (getFocusMode())
                 Icons.lightbulb
               else
                 Icons.lightbulb_outline_rounded,
-              Icons.loop_sharp,
+              if (getListeningComprehensionMode())
+                Icons.hearing_sharp
+              else
+                Icons.hearing_disabled,
               if (getSelectMode())
                 Icons.touch_app_sharp
               else
@@ -349,13 +349,13 @@ class _MaterialControlsState extends State<MaterialControls>
 
         switch (chosenOption) {
           case 0:
-            toggleListeningComprehensionMode();
+            chewieController.toggleShadowingMode();
             break;
           case 1:
             toggleFocusMode();
             break;
           case 2:
-            chewieController.toggleShadowingMode();
+            toggleListeningComprehensionMode();
             break;
           case 3:
             toggleSelectMode();
