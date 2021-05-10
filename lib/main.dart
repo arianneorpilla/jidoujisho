@@ -1815,8 +1815,7 @@ class _ChannelResultState extends State<ChannelResult>
                   },
                 ),
                 TextButton(
-                  child: Text('RECENT VIDEOS',
-                      style: TextStyle(color: Colors.white)),
+                  child: Text('VIDEOS', style: TextStyle(color: Colors.white)),
                   onPressed: () {
                     Navigator.pop(context);
                     callback(result.id.toString(), result.title);
@@ -2347,7 +2346,7 @@ class _ClipboardState extends State<ClipboardMenu> {
     }
 
     Widget emptyMessage = centerMessage(
-      "No entries in dictionary history",
+      "No entries in dictionary",
       Icons.auto_stories,
     );
 
@@ -2378,6 +2377,10 @@ class _ClipboardState extends State<ClipboardMenu> {
             ),
           ),
           onTap: () async {
+            if (_dictionaryScroller.hasClients) {
+              dictionaryScrollOffset.value = _dictionaryScroller.offset;
+            }
+
             creatorCallback(
               DictionaryEntry(
                 word: "",
@@ -2386,15 +2389,15 @@ class _ClipboardState extends State<ClipboardMenu> {
               ),
               null,
             );
-
-            dictionaryScrollOffset.value = _dictionaryScroller.offset;
           },
         ),
       );
     }
 
     void wordFieldSearch(bool monolingual) async {
-      dictionaryScrollOffset.value = _dictionaryScroller.offset;
+      if (_dictionaryScroller.hasClients) {
+        dictionaryScrollOffset.value = _dictionaryScroller.offset;
+      }
 
       String searchTerm = _wordController.text;
       if (!_isSearching && searchTerm.isNotEmpty) {
@@ -2997,7 +3000,7 @@ class _LazyResultsState extends State<LazyResults> {
   Widget build(BuildContext context) {
     if (verticalData.length == 0) {
       return centerMessage(
-        "Listing recent videos...",
+        "Listing videos...",
         Icons.subscriptions_sharp,
       );
     }
@@ -3030,7 +3033,7 @@ class _LazyResultsState extends State<LazyResults> {
           }
 
           Video result = verticalData[index];
-          //print("VIDEO LISTED: $result");
+          print("VIDEO LISTED: $result");
 
           return YouTubeResult(
             result,
