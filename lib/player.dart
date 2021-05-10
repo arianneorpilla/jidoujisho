@@ -293,11 +293,14 @@ class _VideoPlayerState extends State<VideoPlayer> {
     visibilityTimer = Timer.periodic(
         Duration(milliseconds: 100), (Timer t) => visibilityTimerAction());
 
-    if (defaultSubtitles.isEmpty ||
-        videoFile != null && !hasExternalSubtitles(videoFile)) {
+    if (defaultSubtitles.isEmpty) {
       initialSubTrack = 99999;
-    } else {
+    } else if (videoFile != null && hasExternalSubtitles(videoFile)) {
+      initialSubTrack = 99998;
+    } else if (videoFile != null) {
       initialSubTrack = 0;
+    } else {
+      initialSubTrack = -1;
     }
 
     _currentSubTrack = ValueNotifier<int>(initialSubTrack);
@@ -758,6 +761,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
     );
 
     if (result != null) {
+      _currentSubTrack.value = 99998;
       if (result.path.endsWith("srt")) {
         getSubtitleWrapper().subtitleController.updateSubtitleContent(
             content: sanitizeSrtNewlines(result.readAsStringSync()));
@@ -1377,7 +1381,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
     return ValueListenableBuilder(
       valueListenable: _currentSubTrack,
       builder: (context, index, widget) {
-        if (_currentSubTrack.value == -51) {
+        if (_currentSubTrack.value == -51 || _currentSubTrack.value == 99998) {
           return Container();
         }
         if (_currentSubTrack.value == -50) {
