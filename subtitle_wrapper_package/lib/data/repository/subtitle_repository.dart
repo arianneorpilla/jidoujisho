@@ -273,6 +273,23 @@ class SubtitleDataRepository extends SubtitleRepository {
           subtitleList.insert(i, newSubtitle);
           subtitleList.remove(currentSubtitle);
         }
+
+        for (var i = 1; i < subtitleList.length; i++) {
+          var previousSubtitle = subtitleList[i - 1];
+          var currentSubtitle = subtitleList[i];
+
+          if (previousSubtitle.text == currentSubtitle.text) {
+            var newSubtitle = Subtitle(
+              text: '${previousSubtitle.text}',
+              startTime: previousSubtitle.startTime,
+              endTime: currentSubtitle.endTime,
+            );
+
+            subtitleList.insert(i, newSubtitle);
+            subtitleList.remove(previousSubtitle);
+            subtitleList.remove(currentSubtitle);
+          }
+        }
       }
     }
 

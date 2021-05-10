@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:jidoujisho/youtube.dart';
 import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:package_info/package_info.dart';
@@ -31,7 +32,7 @@ import 'package:jidoujisho/player.dart';
 import 'package:jidoujisho/preferences.dart';
 import 'package:jidoujisho/util.dart';
 
-typedef void ChannelCallback(String id, String name, bool isReversed);
+typedef void ChannelCallback(String id, String name);
 typedef void CreatorCallback(DictionaryEntry entry, File file);
 typedef void SearchCallback(String term);
 
@@ -154,10 +155,10 @@ class _HomeState extends State<Home> {
   String _sharedText;
 
   TextEditingController _searchQueryController = TextEditingController();
+  ValueNotifier<double> _dictionaryScrollOffset = ValueNotifier<double>(0);
   bool _isSearching = false;
   bool _isChannelView = false;
   bool _isCreatorView = false;
-  bool _isOldest = false;
 
   DictionaryEntry _creatorDictionaryEntry = DictionaryEntry(
     word: "",
@@ -302,7 +303,7 @@ class _HomeState extends State<Home> {
       case "History":
         return History();
       case "Dictionary":
-        return ClipboardMenu(setCreatorView);
+        return ClipboardMenu(setCreatorView, _dictionaryScrollOffset);
       default:
         return Container();
     }
@@ -526,31 +527,10 @@ class _HomeState extends State<Home> {
       "No channels listed",
       Icons.subscriptions_sharp,
     );
-    Widget videoMessage = centerMessage(
-      _isOldest ? "Listing oldest videos..." : "Listing latest videos...",
-      Icons.subscriptions_sharp,
-    );
 
     if (_isChannelView && _searchQuery != null) {
-      return FutureBuilder(
-        future: fetchChannelVideoCache(_searchQuery),
-        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-          var results = snapshot.data;
-
-          switch (snapshot.connectionState) {
-            case ConnectionState.waiting:
-            case ConnectionState.none:
-              return videoMessage;
-              break;
-            default:
-              if (!snapshot.hasData) {
-                gChannelVideoCache[_searchQuery] = AsyncMemoizer();
-                return errorMessage;
-              }
-
-              return LazyResults(results, _isOldest);
-          }
-        },
+      return LazyResults(
+        _searchQuery,
       );
     } else {
       return FutureBuilder(
@@ -698,13 +678,11 @@ class _HomeState extends State<Home> {
   void setChannelVideoSearch(
     String channelID,
     String channelName,
-    bool isOldest,
   ) {
     setState(() {
       _isChannelView = true;
       _searchQuery = channelID;
       _selectedChannelName = channelName;
-      _isOldest = isOldest;
     });
   }
 
@@ -1788,7 +1766,7 @@ class _ChannelResultState extends State<ChannelResult>
 
     return InkWell(
       onTap: () {
-        callback(result.id.toString(), result.title, false);
+        callback(result.id.toString(), result.title);
       },
       onLongPress: () {
         HapticFeedback.vibrate();
@@ -1837,19 +1815,11 @@ class _ChannelResultState extends State<ChannelResult>
                   },
                 ),
                 TextButton(
-                  child: Text('OLDEST VIDEOS',
+                  child: Text('RECENT VIDEOS',
                       style: TextStyle(color: Colors.white)),
                   onPressed: () {
                     Navigator.pop(context);
-                    callback(result.id.toString(), result.title, true);
-                  },
-                ),
-                TextButton(
-                  child: Text('LATEST VIDEOS',
-                      style: TextStyle(color: Colors.white)),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    callback(result.id.toString(), result.title, false);
+                    callback(result.id.toString(), result.title);
                   },
                 ),
               ],
@@ -2316,17 +2286,37 @@ class _HistoryState extends State<History> {
 
 class ClipboardMenu extends StatefulWidget {
   final CreatorCallback creatorCallback;
+  final ValueNotifier<double> dictionaryScrollOffset;
 
-  ClipboardMenu(this.creatorCallback);
+  ClipboardMenu(this.creatorCallback, this.dictionaryScrollOffset);
 
-  _ClipboardState createState() => _ClipboardState(this.creatorCallback);
+  _ClipboardState createState() =>
+      _ClipboardState(this.creatorCallback, this.dictionaryScrollOffset);
 }
 
 class _ClipboardState extends State<ClipboardMenu> {
   final CreatorCallback creatorCallback;
+  final ValueNotifier<double> dictionaryScrollOffset;
+
+  ScrollController _dictionaryScroller;
   final _wordController = TextEditingController(text: "");
   bool _isSearching = false;
-  _ClipboardState(this.creatorCallback);
+
+  _ClipboardState(this.creatorCallback, this.dictionaryScrollOffset);
+
+  @override
+  void initState() {
+    super.initState();
+    _dictionaryScroller =
+        ScrollController(initialScrollOffset: dictionaryScrollOffset.value);
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _dictionaryScroller.position.isScrollingNotifier.addListener(() {
+        if (!_dictionaryScroller.position.isScrollingNotifier.value) {
+          dictionaryScrollOffset.value = _dictionaryScroller.offset;
+        }
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -2396,12 +2386,16 @@ class _ClipboardState extends State<ClipboardMenu> {
               ),
               null,
             );
+
+            dictionaryScrollOffset.value = _dictionaryScroller.offset;
           },
         ),
       );
     }
 
     void wordFieldSearch(bool monolingual) async {
+      dictionaryScrollOffset.value = _dictionaryScroller.offset;
+
       String searchTerm = _wordController.text;
       if (!_isSearching && searchTerm.isNotEmpty) {
         _wordController.clear();
@@ -2484,6 +2478,7 @@ class _ClipboardState extends State<ClipboardMenu> {
     }
 
     return ListView.builder(
+      controller: _dictionaryScroller,
       addAutomaticKeepAlives: true,
       key: UniqueKey(),
       itemCount: entries.length + 2,
@@ -2501,7 +2496,13 @@ class _ClipboardState extends State<ClipboardMenu> {
         DictionaryHistoryEntry entry = entries[index - 2];
         print("ENTRY LISTED: $entry");
 
-        return ClipboardHistoryItem(entry, creatorCallback, setStateFromResult);
+        return ClipboardHistoryItem(
+          entry,
+          creatorCallback,
+          setStateFromResult,
+          _dictionaryScroller,
+          dictionaryScrollOffset,
+        );
       },
     );
   }
@@ -2516,35 +2517,57 @@ class ClipboardHistoryItem extends StatefulWidget {
   final CreatorCallback creatorCallback;
   final VoidCallback stateCallback;
 
-  ClipboardHistoryItem(this.entry, this.creatorCallback, this.stateCallback);
+  final ScrollController dictionaryScroller;
+  final ValueNotifier<double> dictionaryScrollOffset;
+
+  ClipboardHistoryItem(
+    this.entry,
+    this.creatorCallback,
+    this.stateCallback,
+    this.dictionaryScroller,
+    this.dictionaryScrollOffset,
+  );
 
   @override
   _ClipboardHistoryItemState createState() => new _ClipboardHistoryItemState(
         this.entry,
         this.creatorCallback,
         this.stateCallback,
+        this.dictionaryScroller,
+        this.dictionaryScrollOffset,
       );
 }
 
-class _ClipboardHistoryItemState extends State<ClipboardHistoryItem> {
+class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
+    with AutomaticKeepAliveClientMixin {
   _ClipboardHistoryItemState(
     this.entry,
     this.creatorCallback,
     this.stateCallback,
+    this.dictionaryScroller,
+    this.dictionaryScrollOffset,
   );
+
+  @override
+  bool get wantKeepAlive => true;
 
   final DictionaryHistoryEntry entry;
   final CreatorCallback creatorCallback;
   final VoidCallback stateCallback;
 
+  final ScrollController dictionaryScroller;
+  final ValueNotifier<double> dictionaryScrollOffset;
+
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Container(
       margin: EdgeInsets.only(bottom: 12),
       color: Colors.grey[800].withOpacity(0.2),
       child: InkWell(
         onTap: () {
           creatorCallback(entry.entries[entry.swipeIndex], null);
+          dictionaryScrollOffset.value = dictionaryScroller.offset;
         },
         onLongPress: () {
           HapticFeedback.vibrate();
@@ -2853,6 +2876,10 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem> {
                 Navigator.pop(context);
                 removeDictionaryEntryFromHistory(results);
                 stateCallback();
+
+                Future.delayed(Duration(milliseconds: 100), () {
+                  dictionaryScrollOffset.value = dictionaryScroller.offset;
+                });
               },
             ),
             if (results.contextDataSource != "-1")
@@ -2874,6 +2901,8 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem> {
                   ).then((returnValue) {
                     unlockLandscape();
                     stateCallback();
+
+                    dictionaryScrollOffset.value = dictionaryScroller.offset;
                   });
                 },
               ),
@@ -2885,6 +2914,8 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem> {
               onPressed: () {
                 creatorCallback(results.entries[_dialogIndex.value], null);
                 Navigator.pop(context);
+
+                dictionaryScrollOffset.value = dictionaryScroller.offset;
               },
             ),
           ],
@@ -2898,57 +2929,78 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem> {
 }
 
 class LazyResults extends StatefulWidget {
-  final results;
-  final bool isOldest;
+  final searchQuery;
 
-  LazyResults(this.results, this.isOldest);
+  LazyResults(this.searchQuery);
 
   @override
-  _LazyResultsState createState() =>
-      new _LazyResultsState(this.results, this.isOldest);
+  _LazyResultsState createState() => new _LazyResultsState(this.searchQuery);
 }
 
 class _LazyResultsState extends State<LazyResults> {
-  List<Video> results;
-  bool isOldest;
+  String searchQuery;
+  bool isLoading = false;
 
-  _LazyResultsState(this.results, this.isOldest);
+  _LazyResultsState(this.searchQuery);
 
   List<Video> verticalData = [];
   final int increment = 10;
 
   Future _loadMore() async {
-    await new Future.delayed(const Duration(milliseconds: 1000));
+    if (!isLoading) {
+      setState(() {
+        isLoading = true;
+      });
 
-    int next;
-    if (verticalData.length + increment >= results.length) {
-      next = results.length;
-    } else {
-      next = verticalData.length + increment;
+      List<Video> channelVideos = await getChannelUploadsStream(searchQuery)
+          .skip(verticalData.length)
+          .take(increment)
+          .toList();
+
+      setState(() {
+        channelVideos.forEach((video) => verticalData.add(video));
+        isLoading = false;
+      });
     }
-    setState(() {
-      verticalData.addAll(results.sublist(verticalData.length, next));
-    });
   }
 
   @override
   void initState() {
     super.initState();
-    if (isOldest) {
-      results = results.reversed.toList();
-    }
+    _loadMore();
+  }
 
-    int next;
-    if (verticalData.length + 20 >= results.length) {
-      next = results.length;
-    } else {
-      next = verticalData.length + 20;
-    }
-    verticalData.addAll(results.sublist(verticalData.length, next));
+  Widget centerMessage(String text, IconData icon) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            color: Colors.grey,
+            size: 72,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            text,
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 20,
+            ),
+          )
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    if (verticalData.length == 0) {
+      return centerMessage(
+        "Listing recent videos...",
+        Icons.subscriptions_sharp,
+      );
+    }
     return LazyLoadScrollView(
       onEndOfPage: () => _loadMore(),
       child: ListView.builder(
@@ -2956,7 +3008,7 @@ class _LazyResultsState extends State<LazyResults> {
         itemCount: verticalData.length + 1,
         itemBuilder: (BuildContext context, int index) {
           if (index == verticalData.length) {
-            if (verticalData.length != results.length) {
+            if (isLoading) {
               return Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -2978,7 +3030,7 @@ class _LazyResultsState extends State<LazyResults> {
           }
 
           Video result = verticalData[index];
-          print("VIDEO LISTED: $result");
+          //print("VIDEO LISTED: $result");
 
           return YouTubeResult(
             result,

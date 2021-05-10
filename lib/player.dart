@@ -388,10 +388,15 @@ class _VideoPlayerState extends State<VideoPlayer> {
       }
 
       if (!getListeningComprehensionMode()) {
-        Duration cutOffStart =
-            _currentSubtitle.value.startTime - Duration(milliseconds: 100);
-        Duration cutOffEnd =
-            _currentSubtitle.value.endTime + Duration(milliseconds: 100);
+        int cutOffAllowance = 100;
+        if (_currentSubTrack.value == -51) {
+          cutOffAllowance = 10000;
+        }
+
+        Duration cutOffStart = _currentSubtitle.value.startTime -
+            Duration(milliseconds: cutOffAllowance);
+        Duration cutOffEnd = _currentSubtitle.value.endTime +
+            Duration(milliseconds: cutOffAllowance);
 
         if (getVideoPlayerController().value.position.inMilliseconds -
                     getSubtitleController().subtitlesOffset >

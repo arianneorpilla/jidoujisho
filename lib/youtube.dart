@@ -185,11 +185,12 @@ Future<List<Video>> searchYouTubeVideos(String searchQuery) async {
   return videos;
 }
 
-Future<List<Video>> getLatestChannelVideos(String channelID) async {
+Stream<Video> getChannelUploadsStream(String channelID) {
   YoutubeExplode yt = YoutubeExplode();
-  List<Video> searchResults = await yt.channels.getUploads(channelID).toList();
 
-  return searchResults;
+  Stream<Video> uploadsStream = yt.channels.getUploads(channelID);
+
+  return uploadsStream;
 }
 
 Future<List<Video>> searchYouTubeTrendingVideos() {

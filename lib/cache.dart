@@ -26,15 +26,6 @@ fetchSearchCache(String searchQuery) {
   });
 }
 
-fetchChannelVideoCache(String channelID) {
-  if (gChannelVideoCache[channelID] == null) {
-    gChannelVideoCache[channelID] = AsyncMemoizer();
-  }
-  return gChannelVideoCache[channelID].runOnce(() async {
-    return getLatestChannelVideos(channelID);
-  });
-}
-
 fetchCaptioningCache(String videoID) {
   if (gCaptioningCache[videoID] == null) {
     gCaptioningCache[videoID] = AsyncMemoizer();
