@@ -8,6 +8,7 @@
 
 <p align="center" style="margin:0"><b>Latest GitHub Release:<br>
 <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.16.3-beta">0.16.3-beta 🇯🇵 → 🇬🇧</a><br>
+<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.16.3-beta-kr-en">0.16.3-beta 🇰🇷 → 🇬🇧</a><br>
 <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.5.3-enjp-beta">0.5.3-beta 🇬🇧 → 🇯🇵</a></b><br></p>
 
 <p align="center" style="margin:0"><b>Release Archive:<br>
