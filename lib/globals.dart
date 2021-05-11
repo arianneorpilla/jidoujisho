@@ -30,5 +30,6 @@ Map<String, AsyncMemoizer> gMetadataCache = {};
 
 List<DictionaryEntry> gCustomDictionary;
 Fuzzy gCustomDictionaryFuzzy;
+int gSubIndex;
 
 ValueNotifier<bool> gPlayPause = ValueNotifier<bool>(true);

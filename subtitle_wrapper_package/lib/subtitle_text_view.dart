@@ -7,7 +7,6 @@ import 'package:subtitle_wrapper_package/bloc/subtitle/subtitle_bloc.dart';
 import 'package:subtitle_wrapper_package/data/constants/view_keys.dart';
 import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
 import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
-import 'package:ve_dart/ve_dart.dart';
 
 import 'package:jidoujisho/globals.dart';
 
@@ -27,9 +26,9 @@ class SubtitleTextView extends StatelessWidget {
     @required this.focusNode,
   }) : super(key: key);
 
-  Widget getOutlineText(Word word) {
+  Widget getOutlineText(String word) {
     return Text(
-      word.word,
+      word,
       style: TextStyle(
         fontSize: subtitleStyle.fontSize,
         foreground: Paint()
@@ -40,17 +39,18 @@ class SubtitleTextView extends StatelessWidget {
     );
   }
 
-  Widget getText(Word word, int index, Subtitle currentSubtitle) {
+  Widget getText(String word, int index, Subtitle currentSubtitle) {
     return InkWell(
       onTap: () {
+        gSubIndex = index;
         Clipboard.setData(
-          ClipboardData(text: word.word),
+          ClipboardData(text: currentSubtitle.text + index.toString()),
         );
 
         contextSubtitle.value = currentSubtitle;
       },
       child: Text(
-        word.word,
+        word,
         style: TextStyle(
           fontSize: subtitleStyle.fontSize,
         ),
@@ -145,24 +145,28 @@ class SubtitleTextView extends StatelessWidget {
                       );
                     } else {
                       String processedSubtitles;
+
                       processedSubtitles =
                           state.subtitle.text.replaceAll('\n', '␜');
                       processedSubtitles =
                           processedSubtitles.replaceAll(' ', '␝');
 
-                      // ignore: omit_local_variable_types
-                      List<Word> words =
-                          parseVe(gMecabTagger, processedSubtitles);
-                      print(words);
+                      List<String> words = [];
+                      processedSubtitles.runes.forEach((int rune) {
+                        String character = new String.fromCharCode(rune);
+                        words.add(character);
+                      });
 
-                      List<List<Word>> lines =
+                      List<List<String>> lines =
                           getLinesFromWords(context, subtitleStyle, words);
                       List<List<int>> indexes =
                           getIndexesFromWords(context, subtitleStyle, words);
 
-                      for (Word word in words) {
-                        word.word = word.word.replaceAll('␝', ' ');
-                        word.word = word.word.replaceAll('␜', '');
+                      for (int i = 0; i < lines.length; i++) {
+                        for (int j = 0; j < lines[i].length; j++) {
+                          lines[i][j] = lines[i][j].replaceAll('␝', ' ');
+                          lines[i][j] = lines[i][j].replaceAll('␜', '');
+                        }
                       }
 
                       return Container(
@@ -180,7 +184,7 @@ class SubtitleTextView extends StatelessWidget {
                                         List<Widget> textWidgets = [];
 
                                         for (int i = 0; i < line.length; i++) {
-                                          Word word = line[i];
+                                          String word = line[i];
                                           textWidgets.add(getOutlineText(word));
                                         }
 
@@ -210,7 +214,7 @@ class SubtitleTextView extends StatelessWidget {
                                     List<Widget> textWidgets = [];
 
                                     for (int i = 0; i < line.length; i++) {
-                                      Word word = line[i];
+                                      String word = line[i];
                                       int index = indexList[i];
                                       textWidgets.add(
                                         getText(

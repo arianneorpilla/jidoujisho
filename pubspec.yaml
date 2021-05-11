@@ -76,7 +76,7 @@ dependency_overrides:
   file: ^6.0.0
 
 dev_dependencies:
-  flutter_launcher_icons:
+  flutter_launcher_icons: 0.9.0
 
 flutter_icons:
   android: "launcher_icon"

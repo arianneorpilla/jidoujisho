@@ -73,7 +73,7 @@ class _MaterialControlsState extends State<MaterialControls>
                 const Expanded(
                   child: Center(
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
                     ),
                   ),
                 )
@@ -255,13 +255,11 @@ class _MaterialControlsState extends State<MaterialControls>
       useRootNavigator: true,
       builder: (context) => const _MoreOptionsDialog(
         [
-          "Search Current Subtitle with Jisho.org",
           "Translate Current Subtitle with DeepL",
           "Translate Current Subtitle with Google Translate",
           "Share Current Subtitle with Menu",
         ],
         [
-          Icons.menu_book_rounded,
           Icons.translate_rounded,
           Icons.g_translate_rounded,
           Icons.share_outlined,
@@ -274,16 +272,13 @@ class _MaterialControlsState extends State<MaterialControls>
 
     switch (chosenOption) {
       case 0:
-        await launch("https://jisho.org/search/$subtitleText");
-        break;
-      case 1:
         await launch("https://www.deepl.com/translator#ja/en/$subtitleText");
         break;
-      case 2:
+      case 1:
         await launch(
             "https://translate.google.com/?sl=ja&tl=en&text=$subtitleText&op=translate");
         break;
-      case 3:
+      case 2:
         Share.share(subtitleText);
         break;
     }
@@ -319,9 +314,9 @@ class _MaterialControlsState extends State<MaterialControls>
               else
                 "Use Drag to Select Subtitle Selection",
               if (getMonolingualMode())
-                "Use Bilingual Definitions from Jisho.org"
+                "Use Bilingual Definitions from KrDict"
               else
-                "Use Monolingual Definitions from Goo.ne.jp",
+                "Use Monolingual Definitions from KrDict",
               "Share Current Subtitle to Applications",
               "Export Current Context to Anki",
             ],
@@ -535,10 +530,11 @@ class _MaterialControlsState extends State<MaterialControls>
           audioTracks.forEach((index, name) => audioTrackNames.add(name));
           subtitleTracks.forEach((index, name) => subtitleTrackNames.add(name));
         } else {
+          // LOCALIZATION
           if (chewieController.internalSubs.isNotEmpty) {
-            subtitleTrackNames.add("YouTube - [CC] - [Japanese]");
+            subtitleTrackNames.add("YouTube - [CC] - [Korean]");
           } else {
-            autoSubtitleTrackNames.add("YouTube - [Automatic] - [Japanese]");
+            autoSubtitleTrackNames.add("YouTube - [Automatic] - [Korean]");
           }
           audioTrackNames
               .add("YouTube - ${chewieController.streamData.audioMetadata}");
@@ -695,7 +691,7 @@ class _MaterialControlsState extends State<MaterialControls>
                     : '',
                 style: const TextStyle(
                   fontSize: 14.0,
-                  color: Colors.red,
+                  color: Colors.blue,
                 ),
               ),
             ],
@@ -875,14 +871,14 @@ class _MoreOptionsDialog extends StatelessWidget {
               Icon(
                 _icon,
                 size: 20.0,
-                color: Colors.red,
+                color: Colors.blue,
               ),
               const SizedBox(width: 16.0),
               Text(
                 _option,
                 style: TextStyle(
                   color:
-                      (highlights.contains(index)) ? Colors.red : Colors.white,
+                      (highlights.contains(index)) ? Colors.blue : Colors.white,
                 ),
               ),
             ],
@@ -943,14 +939,14 @@ class _SelectQualityDialog extends StatelessWidget {
               Icon(
                 getIconFromQualityTag(qualityTag),
                 size: 20.0,
-                color: Colors.red,
+                color: Colors.blue,
               ),
               const SizedBox(width: 16.0),
               Text(
                 qualityTag,
                 style: TextStyle(
                   color: (currentQuality == qualityTag)
-                      ? Colors.red
+                      ? Colors.blue
                       : Colors.white,
                 ),
               ),
@@ -983,7 +979,7 @@ class _SelectAudioDialog extends StatelessWidget {
         Icon(
           option.getIcon(),
           size: 20.0,
-          color: Colors.red,
+          color: Colors.blue,
         ),
         const SizedBox(width: 16.0),
         Text(
@@ -1030,23 +1026,23 @@ class SubtitleAudioMenuOption {
     switch (type) {
       case SubtitleAudioMenuOptionType.audioTrack:
         if (chewie.currentAudioTrack.value == callbackIndex) {
-          return Colors.red;
+          return Colors.blue;
         }
         break;
       case SubtitleAudioMenuOptionType.embeddedSubtitle:
         if (chewie.currentSubTrack.value == callbackIndex ||
             chewie.currentSubTrack.value == -1) {
-          return Colors.red;
+          return Colors.blue;
         }
         break;
       case SubtitleAudioMenuOptionType.autoSubtitle:
         if (chewie.currentSubTrack.value == -51) {
-          return Colors.red;
+          return Colors.blue;
         }
         break;
       case SubtitleAudioMenuOptionType.noneSubtitle:
         if (chewie.currentSubTrack.value == 99999) {
-          return Colors.red;
+          return Colors.blue;
         }
         break;
       case SubtitleAudioMenuOptionType.externalSubtitle:
@@ -1094,7 +1090,8 @@ class SubtitleAudioMenuOption {
         return "Subtitle - $metadata";
         break;
       case SubtitleAudioMenuOptionType.autoSubtitle:
-        return "Subtitle - YouTube - [Automatic] - [Japanese]";
+        // LOCALIZATION
+        return "Subtitle - YouTube - [Automatic] - [Korean]";
         break;
       case SubtitleAudioMenuOptionType.noneSubtitle:
         return "Subtitle - None";

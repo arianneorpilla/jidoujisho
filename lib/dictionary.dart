@@ -309,51 +309,42 @@ DictionaryEntry getEntryFromJishoResult(JishoResult result, String searchTerm) {
 
 Future<DictionaryHistoryEntry> getWordDetails({
   String searchTerm,
-  String contextDataSource,
-  int contextPosition,
+  String contextDataSource = "-1",
+  int contextPosition = -1,
 }) async {
+  if (!getSelectMode()) {
+    searchTerm = await getTokenizedStringFromSubtitle(searchTerm, gSubIndex);
+  }
+
   List<DictionaryEntry> entries = [];
 
-  List<JishoResult> results = (await searchForPhrase(searchTerm)).data;
-  if (results.isEmpty) {
-    var client = http.Client();
-    http.Response response =
-        await client.get(Uri.parse('https://jisho.org/search/$searchTerm'));
+  var client = http.Client();
+  http.Response response = await client.get(Uri.parse(
+      'https://krdict.korean.go.kr/eng/dicSearch/search?wordMatchFlag=N&mainSearchWord=$searchTerm&currentPage=1&sort=C&searchType=W&proverbType=&exaType=&ParaWordNo=&nation=eng&nationCode=6&viewType=M&blockCount=10&viewTypes=on'));
+  var document = parser.parse(response.body);
 
-    var document = parser.parse(response.body);
-
-    var breakdown = document.getElementsByClassName("fact grammar-breakdown");
-    if (breakdown.isEmpty) {
-      return DictionaryHistoryEntry(
-        entries: [],
-        searchTerm: searchTerm.trim(),
-        swipeIndex: 0,
-        contextDataSource: contextDataSource,
-        contextPosition: contextPosition,
-      );
-    } else {
-      String inflection = breakdown.first.querySelector("a").text;
-      return getWordDetails(
-        searchTerm: inflection.trim(),
-        contextDataSource: contextDataSource,
-        contextPosition: contextPosition,
-      );
-    }
+  if (document.body.innerHtml.contains("No result for ")) {
+    return DictionaryHistoryEntry(
+      entries: entries,
+      searchTerm: searchTerm.trim(),
+      swipeIndex: 0,
+      contextDataSource: contextDataSource,
+      contextPosition: contextPosition,
+    );
   }
 
-  if (gCustomDictionary.isNotEmpty) {
-    List<JishoResult> onlyFirst = [];
-    onlyFirst.add(results.first);
-    results = onlyFirst;
-  }
+  List<dom.Element> searchResultBox =
+      document.getElementsByClassName("search_result mt25 printArea ");
 
-  for (JishoResult result in results) {
-    DictionaryEntry entry = getEntryFromJishoResult(result, searchTerm);
+  List<dom.Element> searchResults = searchResultBox.first.children;
+
+  for (int i = 0; i < searchResults.length; i++) {
+    DictionaryEntry entry = getEntryFromKrDictElement(
+      searchResults[i],
+      searchTerm,
+    );
+
     entries.add(entry);
-  }
-
-  for (DictionaryEntry entry in entries) {
-    entry.searchTerm = searchTerm;
   }
 
   return DictionaryHistoryEntry(
@@ -371,126 +362,38 @@ Future<DictionaryHistoryEntry> getMonolingualWordDetails({
   String contextDataSource = "-1",
   int contextPosition = -1,
 }) async {
-  List<JishoResult> results = (await searchForPhrase(searchTerm)).data;
+  if (!getSelectMode()) {
+    searchTerm = await getTokenizedStringFromSubtitle(searchTerm, gSubIndex);
+  }
   List<DictionaryEntry> entries = [];
 
   var client = http.Client();
-  http.Response response = await client
-      .get(Uri.parse('https://dictionary.goo.ne.jp/srch/jn/$searchTerm/m1u/'));
+  http.Response response = await client.get(Uri.parse(
+      'https://krdict.korean.go.kr/eng/dicSearch/search?wordMatchFlag=N&mainSearchWord=$searchTerm&currentPage=1&sort=W&searchType=W&proverbType=&exaType=&ParaWordNo=&nation=eng&nationCode=6&viewType=K&blockCount=10&viewTypes=on'));
   var document = parser.parse(response.body);
-  bool multiDefinition = document.body.innerHtml.contains("で一致する言葉");
-  bool empty = document.body.innerHtml.contains("一致する情報は見つかりませんでした");
 
-  if (empty) {
-    if (recursive) {
-      return DictionaryHistoryEntry(
-        entries: entries,
-        searchTerm: searchTerm.trim(),
-        swipeIndex: 0,
-        contextDataSource: contextDataSource,
-        contextPosition: contextPosition,
-      );
-    }
-
-    searchTerm = getEntryFromJishoResult(results.first, searchTerm)
-        .word
-        .split(";")
-        .first;
-    return getMonolingualWordDetails(
-      searchTerm: searchTerm,
-      recursive: true,
+  if (document.body.innerHtml.contains("No result for ")) {
+    return DictionaryHistoryEntry(
+      entries: entries,
+      searchTerm: searchTerm.trim(),
+      swipeIndex: 0,
       contextDataSource: contextDataSource,
       contextPosition: contextPosition,
     );
   }
 
-  if (multiDefinition) {
-    List<String> wordLinks = [];
-    List<Future<http.Response>> futureResponses = [];
-    List<http.Response> responses = [];
+  List<dom.Element> searchResultBox =
+      document.getElementsByClassName("search_result mt25 printArea ");
 
-    document
-        .getElementById("NR-main-in")
-        .getElementsByTagName("a")
-        .forEach((element) {
-      String link = element.attributes["href"];
-      if (link.contains("/word/")) {
-        wordLinks.add(link);
-      }
-    });
+  List<dom.Element> searchResults = searchResultBox.first.children;
 
-    for (int i = 0; i < wordLinks.length; i++) {
-      String wordLink = wordLinks[i];
+  for (int i = 0; i < searchResults.length; i++) {
+    DictionaryEntry entry = getMonolingualEntryFromKrDictElement(
+      searchResults[i],
+      searchTerm,
+    );
 
-      futureResponses
-          .add(client.get(Uri.parse('https://dictionary.goo.ne.jp/$wordLink')));
-    }
-
-    responses = await Future.wait(futureResponses);
-
-    for (int i = 0; i < responses.length; i++) {
-      http.Response wordResponse = responses[i];
-      var firstResultDocument = parser.parse(wordResponse.body);
-      List<dom.Element> wordAndReadingElements =
-          firstResultDocument.getElementsByClassName("nolink title paddding");
-      List<dom.Element> meaningElements = firstResultDocument
-          .getElementsByClassName("content-box contents_area meaning_area p10");
-
-      if (wordAndReadingElements == null || meaningElements == null) {
-        continue;
-      }
-
-      for (int i = 0; i < meaningElements.length; i++) {
-        if (entries.length >= 20) {
-          return DictionaryHistoryEntry(
-            entries: entries,
-            searchTerm: searchTerm.trim(),
-            swipeIndex: 0,
-            contextDataSource: contextDataSource,
-            contextPosition: contextPosition,
-          );
-        }
-
-        DictionaryEntry singleEntry = getEntryFromGooElement(
-          meaningElements[i],
-          wordAndReadingElements[i],
-          searchTerm,
-        );
-
-        if (entries.isEmpty) {
-          entries.add(singleEntry);
-        } else {
-          bool found = false;
-          for (int i = 0; i < entries.length; i++) {
-            DictionaryEntry entry = entries[i];
-
-            if (singleEntry.meaning == entry.meaning &&
-                singleEntry.reading == entry.reading &&
-                singleEntry.word == entry.word) {
-              found = true;
-            }
-          }
-
-          if (!found) {
-            entries.add(singleEntry);
-          }
-        }
-      }
-    }
-  } else {
-    List<dom.Element> wordAndReadingElements =
-        document.getElementsByClassName("nolink title paddding");
-    List<dom.Element> meaningElements = document
-        .getElementsByClassName("content-box contents_area meaning_area p10");
-
-    for (int i = 0; i < meaningElements.length; i++) {
-      DictionaryEntry singleEntry = getEntryFromGooElement(
-        meaningElements[i],
-        wordAndReadingElements[i],
-        searchTerm,
-      );
-      entries.add(singleEntry);
-    }
+    entries.add(entry);
   }
 
   return DictionaryHistoryEntry(
@@ -502,42 +405,104 @@ Future<DictionaryHistoryEntry> getMonolingualWordDetails({
   );
 }
 
-DictionaryEntry getEntryFromGooElement(
-  dom.Element meaningElement,
-  dom.Element wordAndReadingElement,
+DictionaryEntry getEntryFromKrDictElement(
+  dom.Element searchResult,
   String searchTerm,
 ) {
   String word = "";
   String reading = "";
   String meaning = "";
 
-  String wordAndReadingRaw =
-      wordAndReadingElement.innerHtml.replaceAll(RegExp(r"<[^>]*>"), "").trim();
+  List<dom.Element> wordElements =
+      searchResult.getElementsByClassName("word_type1_17");
 
-  word = wordAndReadingRaw.replaceAll("の解説", "").trim();
+  if (wordElements.isNotEmpty) {
+    dom.Element wordElement =
+        searchResult.getElementsByClassName("word_type1_17").first;
+    for (dom.Element child in wordElement.children) {
+      wordElement.children.remove(child);
+    }
 
-  if (wordAndReadingRaw.contains("【") && wordAndReadingRaw.contains("】")) {
-    word = wordAndReadingRaw.substring(wordAndReadingRaw.indexOf("【"));
-    word = word.substring(1, word.indexOf("】"));
-    reading = wordAndReadingRaw.substring(0, wordAndReadingRaw.indexOf("【"));
+    word = wordElement.innerHtml.replaceAll(RegExp(r"<[^>]*>"), "").trim();
   }
 
-  List<dom.Element> meaningChildren = meaningElement.children.first.children;
-  List<String> meaningChildrenLines = [];
-  for (int i = 0; i < meaningChildren.length; i++) {
-    meaningChildrenLines.add(
-        meaningChildren[i].innerHtml.replaceAll(RegExp(r"<[^>]*>"), "").trim());
+  List<dom.Element> readingElements =
+      searchResult.getElementsByClassName("search_sub");
+
+  if (readingElements.isNotEmpty) {
+    dom.Element readingElement =
+        searchResult.getElementsByClassName("search_sub").first;
+    for (dom.Element child in readingElement.children) {
+      readingElement.children.remove(child);
+    }
+
+    reading =
+        readingElement.innerHtml.replaceAll(RegExp(r"<[^>]*>"), "").trim();
   }
-  meaningChildrenLines.removeWhere((line) => line.isEmpty);
-  meaning = meaningChildrenLines.join("\n\n");
 
-  word = word.trim();
-  reading = reading.trim();
-  meaning = meaning.trim();
+  List<dom.Element> meaningElements = searchResult.getElementsByTagName("dd");
 
-  print(word);
-  print(reading);
-  print(meaning);
+  meaningElements.removeWhere((element) => element.classes.contains("allview"));
+
+  if (readingElements.isNotEmpty) {
+    for (int i = 0; i < meaningElements.length; i++) {
+      String addendum = meaningElements[i]
+          .innerHtml
+          .replaceAll("\"View All \"", "")
+          .replaceAll(RegExp(r"<[^>]*>"), "")
+          .replaceAll(
+              "																					\n																				\n																				\n																					\n																						",
+              "")
+          .trim();
+
+      List<String> addendumLines = [addendum];
+      if (addendum.contains("\n")) {
+        addendumLines = addendum.split("\n");
+      }
+
+      String couldBeNumber = addendumLines[0];
+
+      if (addendum.contains("(no equivalent expression)")) {
+        meaning += "(no equivalent expression)";
+        meaning += "\n";
+        continue;
+      }
+      if (addendumLines.length == 1) {
+        print(addendumLines);
+        meaning += addendum;
+        meaning += "\n";
+        continue;
+      }
+
+      if (couldBeNumber.length == 2 ||
+          couldBeNumber.length == 3 &&
+              couldBeNumber[couldBeNumber.length - 1] == "." &&
+              int.tryParse(
+                      couldBeNumber.substring(0, couldBeNumber.length - 1)) !=
+                  null) {
+        addendumLines[0] = addendumLines[0].replaceAll(".", ") ");
+        String newAddendum = "";
+
+        for (int i = 0; i < addendumLines.length; i++) {
+          newAddendum += addendumLines[i];
+          if (i == 0) {
+            continue;
+          }
+          newAddendum += "\n";
+        }
+
+        addendum = newAddendum;
+        meaning += addendum;
+      } else {
+        meaning += addendum;
+        meaning += "\n";
+      }
+    }
+  }
+
+  if (word == reading) {
+    reading = "";
+  }
 
   DictionaryEntry singleEntry = DictionaryEntry(
     word: word,
@@ -547,4 +512,145 @@ DictionaryEntry getEntryFromGooElement(
   );
 
   return singleEntry;
+}
+
+DictionaryEntry getMonolingualEntryFromKrDictElement(
+  dom.Element searchResult,
+  String searchTerm,
+) {
+  String word = "";
+  String reading = "";
+  String meaning = "";
+  String partOfSpeech = "";
+
+  List<dom.Element> wordElements =
+      searchResult.getElementsByClassName("word_type1_17");
+
+  if (wordElements.isNotEmpty) {
+    dom.Element wordElement =
+        searchResult.getElementsByClassName("word_type1_17").first;
+    for (dom.Element child in wordElement.children) {
+      wordElement.children.remove(child);
+    }
+
+    word = wordElement.innerHtml.replaceAll(RegExp(r"<[^>]*>"), "").trim();
+  }
+
+  List<dom.Element> readingElements =
+      searchResult.getElementsByClassName("search_sub");
+
+  if (readingElements.isNotEmpty) {
+    dom.Element readingElement =
+        searchResult.getElementsByClassName("search_sub").first;
+    for (dom.Element child in readingElement.children) {
+      readingElement.children.remove(child);
+    }
+
+    reading =
+        readingElement.innerHtml.replaceAll(RegExp(r"<[^>]*>"), "").trim();
+  }
+
+  List<dom.Element> partOfSpeechElements =
+      searchResult.getElementsByClassName("word_att_type1");
+
+  if (partOfSpeechElements.isNotEmpty) {
+    partOfSpeech = searchResult
+        .getElementsByClassName("word_att_type1")
+        .first
+        .text
+        .replaceAll(RegExp(r"<[^>]*>"), "")
+        .trim();
+
+    partOfSpeech =
+        partOfSpeech.substring(0, partOfSpeech.indexOf("」") + 1).trim() +
+            "\n\n";
+  }
+
+  List<dom.Element> meaningElements = searchResult.getElementsByTagName("dd");
+
+  if (readingElements.isNotEmpty) {
+    for (int i = 0; i < meaningElements.length; i++) {
+      String addendum = meaningElements[i]
+          .innerHtml
+          .replaceAll(RegExp(r"<[^>]*>"), "")
+          .replaceAll(" \n																\n																", " ")
+          .trim();
+
+      List<String> addendumLines = [addendum];
+      if (addendum.contains("\n")) {
+        addendumLines = addendum.split("\n");
+      }
+
+      String couldBeNumber = addendumLines[0];
+
+      if (couldBeNumber.length == 2 ||
+          couldBeNumber.length == 3 &&
+              couldBeNumber[couldBeNumber.length - 1] == "." &&
+              int.tryParse(
+                      couldBeNumber.substring(0, couldBeNumber.length - 1)) !=
+                  null) {
+        addendumLines[0] = addendumLines[0].replaceAll(".", ") ");
+        String newAddendum = "";
+
+        for (int i = 0; i < addendumLines.length; i++) {
+          newAddendum += addendumLines[i];
+          if (i == 0) {
+            continue;
+          }
+          newAddendum += "\n";
+        }
+
+        addendum = newAddendum;
+        meaning += addendum;
+      } else {
+        meaning += addendum;
+        meaning += "\n";
+      }
+    }
+  }
+
+  if (word == reading) {
+    reading = "";
+  }
+
+  DictionaryEntry singleEntry = DictionaryEntry(
+    word: word,
+    reading: reading,
+    meaning: partOfSpeech + meaning,
+    searchTerm: searchTerm,
+  );
+
+  return singleEntry;
+}
+
+Future<String> getTokenizedStringFromSubtitle(
+    String fullSubtitle, int index) async {
+  fullSubtitle = fullSubtitle.replaceAll('\n', '␜');
+  fullSubtitle = fullSubtitle.replaceAll(' ', '␝');
+
+  String tokenString = "";
+
+  final response = await http.get(Uri.parse(
+      "https://open-korean-text-api.herokuapp.com/tokenize?text=$fullSubtitle"));
+
+  final jsonData = json.decode(response.body);
+
+  if (response.statusCode == 200) {
+    List<dynamic> tokenStrings = jsonData["token_strings"];
+    List<String> stringTape = [];
+
+    for (int i = 0; i < tokenStrings.length; i++) {
+      for (int j = 0; j < tokenStrings[i].length; j++) {
+        stringTape.add(tokenStrings[i]);
+      }
+    }
+
+    print(stringTape);
+
+    tokenString = stringTape[index];
+    print(tokenString);
+  }
+
+  tokenString = tokenString.replaceAll("␝", " ");
+  return tokenString;
 }

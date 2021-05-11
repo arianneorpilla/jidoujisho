@@ -161,9 +161,10 @@ class Player extends StatelessWidget {
           default:
             YouTubeMux streamData = snapshot.data;
 
+            // LOCALIZATION
             return new FutureBuilder(
               future: http.read(Uri.parse(
-                  "https://www.youtube.com/api/timedtext?lang=ja&v=$videoID")),
+                  "https://www.youtube.com/api/timedtext?lang=ko&v=$videoID")),
               builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                 switch (snapshot.connectionState) {
                   case ConnectionState.waiting:
@@ -211,7 +212,7 @@ class Player extends StatelessWidget {
           height: 30,
           width: 30,
           child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
           ),
         ),
       ),
@@ -686,10 +687,10 @@ class _VideoPlayerState extends State<VideoPlayer> {
       allowedScreenSleep: false,
       fullScreenByDefault: false,
       materialProgressColors: ChewieProgressColors(
-        playedColor: Colors.red,
-        handleColor: Colors.red,
+        playedColor: Colors.blue,
+        handleColor: Colors.blue,
         backgroundColor: Colors.grey,
-        bufferedColor: Colors.red[200],
+        bufferedColor: Colors.blue[200],
       ),
     );
     return _chewieController;
@@ -893,28 +894,29 @@ class _VideoPlayerState extends State<VideoPlayer> {
                     "Looking up",
                     style: TextStyle(),
                   ),
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      Text(
-                        "『",
-                        style: TextStyle(
-                          color: Colors.grey[300],
+                  if (getSelectMode())
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          "『",
+                          style: TextStyle(
+                            color: Colors.grey[300],
+                          ),
                         ),
-                      ),
-                      Text(
-                        clipboard,
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        "』",
-                        style: TextStyle(
-                          color: Colors.grey[300],
+                        Text(
+                          clipboard,
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                      ),
-                    ],
-                  ),
+                        Text(
+                          "』",
+                          style: TextStyle(
+                            color: Colors.grey[300],
+                          ),
+                        ),
+                      ],
+                    ),
                   Text(
                     "...",
                     style: TextStyle(),
@@ -1105,31 +1107,36 @@ class _VideoPlayerState extends State<VideoPlayer> {
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Text(
-                      "No matches for",
+                      "No matches ",
                       style: TextStyle(),
                     ),
-                    Wrap(
-                      alignment: WrapAlignment.center,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Text(
-                          "『",
-                          style: TextStyle(
-                            color: Colors.grey[300],
+                    if (getSelectMode())
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          Text(
+                            " for",
+                            style: TextStyle(),
                           ),
-                        ),
-                        Text(
-                          clipboard,
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          "』",
-                          style: TextStyle(
-                            color: Colors.grey[300],
+                          Text(
+                            "『",
+                            style: TextStyle(
+                              color: Colors.grey[300],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
+                          Text(
+                            clipboard,
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            "』",
+                            style: TextStyle(
+                              color: Colors.grey[300],
+                            ),
+                          ),
+                        ],
+                      ),
                     Text(
                       "could be queried.",
                       style: TextStyle(),
@@ -1311,6 +1318,10 @@ class _VideoPlayerState extends State<VideoPlayer> {
     return ValueListenableBuilder(
       valueListenable: _clipboard,
       builder: (context, clipboard, widget) {
+        if (!getSelectMode()) {
+          clipboard = _currentSubtitle.value.text;
+        }
+
         return FutureBuilder(
           future: getMonolingualMode()
               ? getMonolingualWordDetails(
@@ -1482,7 +1493,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
           return ListTile(
             selected: selectedIndex == index,
-            selectedTileColor: Colors.red.withOpacity(0.15),
+            selectedTileColor: Colors.blue.withOpacity(0.15),
             dense: true,
             title: Column(
               children: [
@@ -1492,7 +1503,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
                     Icon(
                       Icons.textsms_outlined,
                       size: 12.0,
-                      color: Colors.red,
+                      color: Colors.blue,
                     ),
                     const SizedBox(width: 16.0),
                     Text(

@@ -291,28 +291,27 @@ String formatTimeString(double time) {
   return formatted;
 }
 
-List<List<Word>> getLinesFromWords(
-    BuildContext context, SubtitleStyle style, List<Word> words) {
-  List<List<Word>> lines = [];
-  List<Word> working = [];
+List<List<String>> getLinesFromWords(
+    BuildContext context, SubtitleStyle style, List<String> words) {
+  words.add(" ");
+  List<List<String>> lines = [];
+  List<String> working = [];
   String concatenate = "";
   TextPainter textPainter;
   double width = MediaQuery.of(context).size.width;
-  words.add(Word("", "", Grammar.Unassigned, "", Pos.TBD, "", TokenNode("")));
-
   for (int i = 0; i < words.length; i++) {
-    Word word = words[i];
+    String word = words[i];
     textPainter = TextPainter()
-      ..text = TextSpan(
-          text: concatenate + word.word, style: TextStyle(fontSize: 24))
+      ..text =
+          TextSpan(text: concatenate + word, style: TextStyle(fontSize: 24))
       ..textDirection = TextDirection.ltr
       ..layout(minWidth: 0, maxWidth: double.infinity);
 
-    if (word.word.contains('␜') ||
+    if (word.contains('␜') ||
         i == words.length - 1 ||
         textPainter.width >=
             width - style.position.left - style.position.right) {
-      List<Word> line = [];
+      List<String> line = [];
       for (int i = 0; i < working.length; i++) {
         line.add(working[i]);
       }
@@ -322,10 +321,10 @@ List<List<Word>> getLinesFromWords(
       concatenate = "";
 
       working.add(word);
-      concatenate += word.word;
+      concatenate += word;
     } else {
       working.add(word);
-      concatenate += word.word;
+      concatenate += word;
     }
   }
 
@@ -333,8 +332,8 @@ List<List<Word>> getLinesFromWords(
 }
 
 List<List<int>> getIndexesFromWords(
-    BuildContext context, SubtitleStyle style, List<Word> words) {
-  words.add(Word("", "", Grammar.Unassigned, "", Pos.TBD, "", TokenNode("")));
+    BuildContext context, SubtitleStyle style, List<String> words) {
+  words.add(" ");
 
   List<List<int>> lines = [];
   List<int> working = [];
@@ -344,14 +343,14 @@ List<List<int>> getIndexesFromWords(
   double width = MediaQuery.of(context).size.width;
 
   for (int i = 0; i < words.length; i++) {
-    Word word = words[i];
+    String word = words[i];
     textPainter = TextPainter()
-      ..text = TextSpan(
-          text: concatenate + word.word, style: TextStyle(fontSize: 24))
+      ..text =
+          TextSpan(text: concatenate + word, style: TextStyle(fontSize: 24))
       ..textDirection = TextDirection.ltr
       ..layout(minWidth: 0, maxWidth: double.infinity);
 
-    if (word.word.contains('␜') ||
+    if (word.contains('␜') ||
         i == words.length - 1 ||
         textPainter.width >=
             width - style.position.left - style.position.right) {
@@ -365,10 +364,10 @@ List<List<int>> getIndexesFromWords(
       concatenate = "";
 
       working.add(i);
-      concatenate += word.word;
+      concatenate += word;
     } else {
       working.add(i);
-      concatenate += word.word;
+      concatenate += word;
     }
   }
 

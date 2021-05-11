@@ -20,7 +20,6 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:wakelock/wakelock.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
@@ -66,6 +65,9 @@ void main() async {
   runApp(App());
 
   handleAppLifecycleState();
+
+  print((await getWordDetails(searchTerm: "test")).entries[0].meaning);
+  print(await (getTokenizedStringFromSubtitle("좀␝더␝가까이␝좀␝더␝가까이␝그러다␝갑자기␝싹", 6)));
 }
 
 handleAppLifecycleState() {
@@ -122,7 +124,7 @@ class App extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        accentColor: Colors.red,
+        accentColor: Colors.blue,
         brightness: Brightness.dark,
         backgroundColor: Colors.black,
         cardColor: Colors.black,
@@ -359,7 +361,7 @@ class _HomeState extends State<Home> {
               selectedIconTheme: IconThemeData(color: Colors.white),
               unselectedIconTheme: IconThemeData(color: Colors.grey),
               unselectedLabelStyle: TextStyle(color: Colors.grey),
-              selectedLabelStyle: TextStyle(color: Colors.red),
+              selectedLabelStyle: TextStyle(color: Colors.blue),
               currentIndex: _selectedIndex,
               onTap: onItemTapped,
               items: getNavigationBarItems(),
@@ -428,7 +430,7 @@ class _HomeState extends State<Home> {
   Widget buildAppBarTitleOrSearch() {
     if (_isSearching) {
       return TextField(
-        cursorColor: Colors.red,
+        cursorColor: Colors.blue,
         controller: _searchQueryController,
         autofocus: true,
         decoration: InputDecoration(
@@ -1152,10 +1154,11 @@ class _HomeState extends State<Home> {
         );
         break;
       case "About this app":
+        // LOCALIZATION
         const String legalese =
             "A mobile video player and card creation toolkit tailored for language learners.\n\n" +
-                "Built for the Japanese language learning community by Leo Rafael Orpilla. " +
-                "Bilingual definitions queried from Jisho.org. Monolingual definitions queried from Goo.ne.jp. Video streaming via YouTube. Image search via Bing. Logo by Aaron Marbella.\n\n" +
+                "Built for the Korean language learning community by Leo Rafael Orpilla. " +
+                "Bilingual and monolingual definitions queried from the Basic Korean Dictionary hosted by the National Institute of Korean Language. Tokenized through the open-korean-text Web API service. Video streaming via YouTube. Image search via Bing. Logo by Aaron Marbella.\n\n" +
                 "jidoujisho is free and open source software. Liking the application? " +
                 "Help out by providing feedback, making a donation, reporting issues or collaborating " +
                 "for further improvements on GitHub.";
@@ -1545,8 +1548,9 @@ class _YouTubeResultState extends State<YouTubeResult>
       );
     }
 
+    // LOCALIZATION
     Widget trendingMessage = Text(
-      "Trending #${index + 1} in Japan",
+      "Trending #${index + 1} in South Korea",
       style: TextStyle(
         color: Colors.grey,
         fontSize: 12,
