@@ -45,6 +45,7 @@
 - [x] **Dictionary tab remembers last words** queried for review in between sessions and **allows resuming back to context**
 - [x] **Use monolingual definitions** from Goo.ne.jp or **imported Yomichan dictionaries**
 - [x] **(Experimental)** Weblio.jp **English to Japanese support** and full Japanese localization
+- [x] **(Experimental)** **Korean to English support** through the National Institute of Korean Language's KrDict 
 
 # ⚕️ Current state of the project
 
