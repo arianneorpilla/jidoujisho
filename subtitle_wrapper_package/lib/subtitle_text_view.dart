@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jidoujisho/preferences.dart';
 import 'package:jidoujisho/util.dart';
+import 'package:mecab_dart/mecab_dart.dart';
 import 'package:subtitle_wrapper_package/bloc/subtitle/subtitle_bloc.dart';
 import 'package:subtitle_wrapper_package/data/constants/view_keys.dart';
 import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
@@ -39,12 +40,12 @@ class SubtitleTextView extends StatelessWidget {
     );
   }
 
-  Widget getText(String word, int index, Subtitle currentSubtitle) {
+  Widget getText(String word, int index, Subtitle currentSubtitle,
+      List<String> indexTape) {
     return InkWell(
       onTap: () {
-        gSubIndex = index;
         Clipboard.setData(
-          ClipboardData(text: currentSubtitle.text + index.toString()),
+          ClipboardData(text: indexTape[index]),
         );
 
         contextSubtitle.value = currentSubtitle;
@@ -144,16 +145,20 @@ class SubtitleTextView extends StatelessWidget {
                         ),
                       );
                     } else {
+                      List<int> spaceIndexes = [];
                       String processedSubtitles;
 
-                      processedSubtitles =
-                          state.subtitle.text.replaceAll('\n', '␜');
+                      String originalText = state.subtitle.text.trim();
+                      processedSubtitles = originalText.replaceAll('\n', '␜');
                       processedSubtitles =
                           processedSubtitles.replaceAll(' ', '␝');
 
+                      List<String> letters = [];
                       List<String> words = [];
+
                       processedSubtitles.runes.forEach((int rune) {
                         String character = new String.fromCharCode(rune);
+                        letters.add(character);
                         words.add(character);
                       });
 
@@ -168,6 +173,33 @@ class SubtitleTextView extends StatelessWidget {
                           lines[i][j] = lines[i][j].replaceAll('␜', '');
                         }
                       }
+
+                      for (int i = 0; i < letters.length; i++) {
+                        if (letters[i] == '␝') {
+                          spaceIndexes.add(i);
+                        }
+                      }
+
+                      List<dynamic> tokens = gMecabTagger.parse(originalText);
+                      tokens.removeLast();
+                      tokens.forEach((token) => print(token.surface));
+
+                      List<String> tokenTape = [];
+                      for (int i = 0; i < tokens.length; i++) {
+                        TokenNode token = tokens[i];
+                        for (int j = 0; j < token.surface.length; j++) {
+                          tokenTape.add(token.surface);
+                        }
+                      }
+
+                      for (int i = 0; i < tokenTape.length; i++) {
+                        if (spaceIndexes.contains(i)) {
+                          tokenTape.insert(i, " ");
+                        }
+                      }
+
+                      tokenTape.add('');
+                      tokenTape.add('');
 
                       return Container(
                         child: Stack(
@@ -217,11 +249,8 @@ class SubtitleTextView extends StatelessWidget {
                                       String word = line[i];
                                       int index = indexList[i];
                                       textWidgets.add(
-                                        getText(
-                                          word,
-                                          index,
-                                          state.subtitle,
-                                        ),
+                                        getText(word, index, state.subtitle,
+                                            tokenTape),
                                       );
                                     }
 

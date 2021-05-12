@@ -65,9 +65,6 @@ void main() async {
   runApp(App());
 
   handleAppLifecycleState();
-
-  print((await getWordDetails(searchTerm: "test")).entries[0].meaning);
-  print(await (getTokenizedStringFromSubtitle("좀␝더␝가까이␝좀␝더␝가까이␝그러다␝갑자기␝싹", 6)));
 }
 
 handleAppLifecycleState() {
@@ -2397,14 +2394,13 @@ class _ClipboardState extends State<ClipboardMenu> {
         _isSearching = true;
 
         try {
-          DictionaryHistoryEntry results;
+          var results;
           if (monolingual) {
-            results = await getMonolingualWordDetails(
+            results = await fetchMonolingualSearchCache(
               searchTerm: searchTerm,
-              recursive: false,
             );
           } else {
-            results = await getWordDetails(
+            results = await fetchBilingualSearchCache(
               searchTerm: searchTerm,
             );
           }
@@ -3497,14 +3493,13 @@ class _CreatorState extends State<Creator> {
         _isSearching = true;
         String searchTerm = _wordController.text;
         try {
-          DictionaryHistoryEntry results;
+          var results;
           if (monolingual) {
-            results = await getMonolingualWordDetails(
+            results = await fetchMonolingualSearchCache(
               searchTerm: searchTerm,
-              recursive: false,
             );
           } else {
-            results = await getWordDetails(
+            results = await fetchBilingualSearchCache(
               searchTerm: searchTerm,
             );
           }

@@ -312,10 +312,6 @@ Future<DictionaryHistoryEntry> getWordDetails({
   String contextDataSource = "-1",
   int contextPosition = -1,
 }) async {
-  if (!getSelectMode()) {
-    searchTerm = await getTokenizedStringFromSubtitle(searchTerm, gSubIndex);
-  }
-
   List<DictionaryEntry> entries = [];
 
   var client = http.Client();
@@ -358,13 +354,9 @@ Future<DictionaryHistoryEntry> getWordDetails({
 
 Future<DictionaryHistoryEntry> getMonolingualWordDetails({
   String searchTerm,
-  bool recursive,
   String contextDataSource = "-1",
   int contextPosition = -1,
 }) async {
-  if (!getSelectMode()) {
-    searchTerm = await getTokenizedStringFromSubtitle(searchTerm, gSubIndex);
-  }
   List<DictionaryEntry> entries = [];
 
   var client = http.Client();
@@ -623,34 +615,19 @@ DictionaryEntry getMonolingualEntryFromKrDictElement(
   return singleEntry;
 }
 
-Future<String> getTokenizedStringFromSubtitle(
-    String fullSubtitle, int index) async {
-  fullSubtitle = fullSubtitle.replaceAll('\n', '␜');
-  fullSubtitle = fullSubtitle.replaceAll(' ', '␝');
+Future<DictionaryHistoryEntry> getNaverWordDetails({
+  String searchTerm,
+  String contextDataSource = "-1",
+  int contextPosition = -1,
+}) async {
+  List<DictionaryEntry> entries = [];
 
-  String tokenString = "";
+  http.Client client = http.Client();
+  http.Response response = await client
+      .get(Uri.parse(
+          'https://dict.naver.com/enendict/english/#/search?query=test'))
+      .timeout(Duration(seconds: 1));
 
-  final response = await http.get(Uri.parse(
-      "https://open-korean-text-api.herokuapp.com/tokenize?text=$fullSubtitle"));
-
-  final jsonData = json.decode(response.body);
-
-  if (response.statusCode == 200) {
-    List<dynamic> tokenStrings = jsonData["token_strings"];
-    List<String> stringTape = [];
-
-    for (int i = 0; i < tokenStrings.length; i++) {
-      for (int j = 0; j < tokenStrings[i].length; j++) {
-        stringTape.add(tokenStrings[i]);
-      }
-    }
-
-    print(stringTape);
-
-    tokenString = stringTape[index];
-    print(tokenString);
-  }
-
-  tokenString = tokenString.replaceAll("␝", " ");
-  return tokenString;
+  var document = parser.parse(response.body);
+  print("RESPONSE" + document.body.outerHtml);
 }

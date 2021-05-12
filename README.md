@@ -28,7 +28,7 @@
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.16.3-beta">0.16</a> 
 </b></p>
 
-# 📚 Uninterrupted language immersion at your fingertips
+# 📚 Uninterrupted language immersion at your fingertgips
 
 **jidoujisho** is an Android video player and card creation toolkit with features specifically helpful for language learners. 
 

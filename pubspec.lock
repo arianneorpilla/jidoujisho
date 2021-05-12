@@ -377,6 +377,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.3.0"
+  logging:
+    dependency: transitive
+    description:
+      name: logging
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.1"
   mecab_dart:
     dependency: "direct main"
     description:
@@ -478,7 +485,7 @@ packages:
     source: hosted
     version: "2.0.2"
   petitparser:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: petitparser
       url: "https://pub.dartlang.org"
@@ -505,6 +512,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.3"
+  pool:
+    dependency: transitive
+    description:
+      name: pool
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.5.0"
   process:
     dependency: "direct overridden"
     description:
@@ -519,6 +533,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.3.3"
+  puppeteer:
+    dependency: "direct main"
+    description:
+      name: puppeteer
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.0"
   receive_sharing_intent:
     dependency: "direct main"
     description:
@@ -608,6 +629,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.0+2"
+  stack_trace:
+    dependency: transitive
+    description:
+      name: stack_trace
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.10.0"
   string_scanner:
     dependency: transitive
     description:

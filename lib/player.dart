@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:http/http.dart' as http;
+import 'package:jidoujisho/cache.dart';
 import 'package:path/path.dart' as path;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
@@ -894,29 +895,28 @@ class _VideoPlayerState extends State<VideoPlayer> {
                     "Looking up",
                     style: TextStyle(),
                   ),
-                  if (getSelectMode())
-                    Wrap(
-                      alignment: WrapAlignment.center,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Text(
-                          "『",
-                          style: TextStyle(
-                            color: Colors.grey[300],
-                          ),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        "『",
+                        style: TextStyle(
+                          color: Colors.grey[300],
                         ),
-                        Text(
-                          clipboard,
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        clipboard,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        "』",
+                        style: TextStyle(
+                          color: Colors.grey[300],
                         ),
-                        Text(
-                          "』",
-                          style: TextStyle(
-                            color: Colors.grey[300],
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
+                  ),
                   Text(
                     "...",
                     style: TextStyle(),
@@ -1079,6 +1079,12 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   Widget buildDictionaryNoMatch(String clipboard) {
+    if (getMonolingualMode()) {
+      gMonolingualSearchCache[clipboard] = null;
+    } else {
+      gBilingualSearchCache[clipboard] = null;
+    }
+
     _subtitleFocusNode.unfocus();
 
     return Column(
@@ -1110,33 +1116,32 @@ class _VideoPlayerState extends State<VideoPlayer> {
                       "No matches ",
                       style: TextStyle(),
                     ),
-                    if (getSelectMode())
-                      Wrap(
-                        alignment: WrapAlignment.center,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          Text(
-                            " for",
-                            style: TextStyle(),
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          " for",
+                          style: TextStyle(),
+                        ),
+                        Text(
+                          "『",
+                          style: TextStyle(
+                            color: Colors.grey[300],
                           ),
-                          Text(
-                            "『",
-                            style: TextStyle(
-                              color: Colors.grey[300],
-                            ),
+                        ),
+                        Text(
+                          clipboard,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          "』",
+                          style: TextStyle(
+                            color: Colors.grey[300],
                           ),
-                          Text(
-                            clipboard,
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            "』",
-                            style: TextStyle(
-                              color: Colors.grey[300],
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
+                    ),
                     Text(
                       "could be queried.",
                       style: TextStyle(),
@@ -1219,13 +1224,8 @@ class _VideoPlayerState extends State<VideoPlayer> {
                   Text(results.entries[selectedIndex.value].reading),
                   Flexible(
                     child: SingleChildScrollView(
-                      child: gCustomDictionary.isNotEmpty ||
-                              getMonolingualMode()
-                          ? SelectableText(
-                              "\n${results.entries[selectedIndex.value].meaning}\n")
-                          : Text(
-                              "\n${results.entries[selectedIndex.value].meaning}\n"),
-                    ),
+                        child: SelectableText(
+                            "\n${results.entries[selectedIndex.value].meaning}\n")),
                   ),
                   Wrap(
                     crossAxisAlignment: WrapCrossAlignment.center,
@@ -1318,29 +1318,23 @@ class _VideoPlayerState extends State<VideoPlayer> {
     return ValueListenableBuilder(
       valueListenable: _clipboard,
       builder: (context, clipboard, widget) {
-        if (!getSelectMode()) {
-          clipboard = _currentSubtitle.value.text;
-        }
-
         return FutureBuilder(
           future: getMonolingualMode()
-              ? getMonolingualWordDetails(
+              ? fetchMonolingualSearchCache(
                   searchTerm: clipboard,
-                  recursive: false,
                   contextDataSource: (streamData == null)
                       ? videoFile.path
                       : streamData.videoURL,
                   contextPosition: _contextSubtitle.value.startTime.inSeconds,
                 )
-              : getWordDetails(
+              : fetchBilingualSearchCache(
                   searchTerm: clipboard,
                   contextDataSource: (streamData == null)
                       ? videoFile.path
                       : streamData.videoURL,
                   contextPosition: _contextSubtitle.value.startTime.inSeconds,
                 ),
-          builder: (BuildContext context,
-              AsyncSnapshot<DictionaryHistoryEntry> snapshot) {
+          builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
             if (_clipboard.value == "&<&>export&<&>") {
               return buildDictionaryExporting(clipboard);
             }

@@ -25,6 +25,8 @@ AsyncMemoizer gTrendingCache = AsyncMemoizer();
 AsyncMemoizer gChannelCache = AsyncMemoizer();
 Map<String, AsyncMemoizer> gSearchCache = {};
 Map<String, AsyncMemoizer> gCaptioningCache = {};
+Map<String, AsyncMemoizer> gBilingualSearchCache = {};
+Map<String, AsyncMemoizer> gMonolingualSearchCache = {};
 Map<String, List<Video>> gChannelVideoCache = {};
 Map<String, AsyncMemoizer> gMetadataCache = {};
 
