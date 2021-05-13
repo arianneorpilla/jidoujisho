@@ -42,7 +42,7 @@
 - [x] Open the app to **trending videos in Japan**, import and export a **channel list** and **search with suggestions** 
 - [x] **YouTube playback support** for videos with **Japanese closed captions** and **automatically generated subtitles**
 - [x] Use **card creator mode** to quickly **search images and definitions** with imported photos and text 
-- [x] **Dictionary tab remembers last words** queried for review in between sessions and **allows resuming back to context**
+- [x] **Dictionary tab remembers words queried** for review between sessions and **allows resuming back to context**
 - [x] **Use monolingual definitions** from Goo.ne.jp or **imported Yomichan dictionaries**
 - [x] **(Experimental)** Weblio.jp **English to Japanese support** and full Japanese localization
 - [x] **(Experimental)** **Korean to English support** through the National Institute of Korean Language's KrDict 
