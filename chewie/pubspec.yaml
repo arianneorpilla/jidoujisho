@@ -25,8 +25,7 @@ dependencies:
   subtitle_wrapper_package:
     path: ../subtitle_wrapper_package
   url_launcher:
-  wakelock: ^0.2.1+1
-  
+  wakelock:
 dev_dependencies:
   flutter_test:
     sdk: flutter

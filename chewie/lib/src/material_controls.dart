@@ -249,24 +249,29 @@ class _MaterialControlsState extends State<MaterialControls>
   }
 
   Future<void> openExtraShare() async {
+    final bool isYouTube = chewieController.streamData != null;
+
     final chosenOption = await showModalBottomSheet<int>(
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
-      builder: (context) => const _MoreOptionsDialog(
-        [
+      builder: (context) => _MoreOptionsDialog(
+        const [
           "Search Current Subtitle with Jisho.org",
           "Translate Current Subtitle with DeepL",
           "Translate Current Subtitle with Google Translate",
           "Share Current Subtitle with Menu",
+          "Share YouTube Video Link",
         ],
-        [
+        const [
           Icons.menu_book_rounded,
           Icons.translate_rounded,
           Icons.g_translate_rounded,
           Icons.share_outlined,
+          Icons.link_sharp,
         ],
-        [],
+        const [],
+        count: isYouTube ? 5 : 4,
       ),
     );
 
@@ -285,6 +290,9 @@ class _MaterialControlsState extends State<MaterialControls>
         break;
       case 3:
         Share.share(subtitleText);
+        break;
+      case 4:
+        Share.share(chewieController.streamData.videoURL);
         break;
     }
   }
@@ -322,7 +330,7 @@ class _MaterialControlsState extends State<MaterialControls>
                 "Use Bilingual Definitions from Jisho.org"
               else
                 "Use Monolingual Definitions from Goo.ne.jp",
-              "Share Current Subtitle to Applications",
+              "Share Links to Applications",
               "Export Current Context to Anki",
             ],
             [
@@ -365,6 +373,7 @@ class _MaterialControlsState extends State<MaterialControls>
             toggleMonolingualMode();
             final String clipboardMemory = chewieController.clipboard.value;
             chewieController.clipboard.value = "";
+            chewieController.setNoPush();
             chewieController.clipboard.value = clipboardMemory;
             break;
           case 5:
@@ -852,12 +861,14 @@ class _MoreOptionsDialog extends StatelessWidget {
   const _MoreOptionsDialog(
     this.options,
     this.icons,
-    this.highlights,
-  );
+    this.highlights, {
+    this.count = -1,
+  });
 
   final List<String> options;
   final List<IconData> icons;
   final List<int> highlights;
+  final int count;
 
   @override
   Widget build(BuildContext context) {
@@ -892,7 +903,7 @@ class _MoreOptionsDialog extends StatelessWidget {
           },
         );
       },
-      itemCount: options.length,
+      itemCount: (count == -1) ? options.length : count,
     );
   }
 }

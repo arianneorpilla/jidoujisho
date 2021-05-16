@@ -2,7 +2,7 @@ name: jidoujisho
 description: A mobile video player tailored for Japanese language learners. 
 publish_to: none
 
-version: 0.16.3+28
+version: 0.16.4+29
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -41,6 +41,7 @@ dependencies:
   path_provider:
   permission_handler:
   photo_view:
+  progress_indicators:
   receive_sharing_intent:
   scrollable_positioned_list: ^0.1.9
   shell:
@@ -64,7 +65,6 @@ dependencies:
       ref: 7ec0098c7fbbfce0bda446bff1145725251d7e3f
   youtube_player_flutter:
   wakelock:
-
 dependency_overrides:
   html: ^0.15.0
   http: ^0.13.0

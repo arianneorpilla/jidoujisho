@@ -18,10 +18,10 @@ dependencies:
       url: https://github.com/lrorpilla/mecab_dart
       ref: a822b1ac54ce1fbde33ca7d445c1bfd7dd51ae7c
   bloc: ^6.1.0
-  equatable: ^1.2.5
+  equatable:
   flutter_bloc: ^6.1.1
-  http: ^0.12.2
-  http_parser: ^3.1.4
+  http:
+  http_parser:
   ve_dart:
     git:
       url: https://github.com/lrorpilla/ve_dart

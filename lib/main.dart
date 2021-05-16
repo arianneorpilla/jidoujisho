@@ -16,6 +16,7 @@ import 'package:package_info/package_info.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:progress_indicators/progress_indicators.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:transparent_image/transparent_image.dart';
@@ -480,7 +481,7 @@ class _HomeState extends State<Home> {
   }
 
   Widget buildChannels() {
-    Widget centerMessage(String text, IconData icon) {
+    Widget centerMessage(String text, IconData icon, bool dots) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -491,12 +492,27 @@ class _HomeState extends State<Home> {
               size: 72,
             ),
             const SizedBox(height: 6),
-            Text(
-              text,
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 20,
-              ),
+            Wrap(
+              alignment: WrapAlignment.end,
+              crossAxisAlignment: WrapCrossAlignment.end,
+              children: [
+                Text(
+                  text,
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 20,
+                  ),
+                ),
+                (dots)
+                    ? SizedBox(
+                        width: 12,
+                        height: 16,
+                        child: JumpingDotsProgressIndicator(
+                          color: Colors.grey,
+                        ),
+                      )
+                    : SizedBox.shrink()
+              ],
             )
           ],
         ),
@@ -504,16 +520,19 @@ class _HomeState extends State<Home> {
     }
 
     Widget queryMessage = centerMessage(
-      "Listing channels...",
+      "Listing channels",
       Icons.subscriptions_sharp,
+      true,
     );
     Widget errorMessage = centerMessage(
       "Error getting channels",
       Icons.error,
+      false,
     );
     Widget emptyMessage = centerMessage(
       "No channels listed",
       Icons.subscriptions_sharp,
+      false,
     );
 
     if (_isChannelView && _searchQuery != null) {
@@ -799,7 +818,7 @@ class _HomeState extends State<Home> {
   }
 
   Widget buildBody() {
-    Widget centerMessage(String text, IconData icon) {
+    Widget centerMessage(String text, IconData icon, bool dots) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -810,12 +829,27 @@ class _HomeState extends State<Home> {
               size: 72,
             ),
             const SizedBox(height: 6),
-            Text(
-              text,
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 20,
-              ),
+            Wrap(
+              alignment: WrapAlignment.end,
+              crossAxisAlignment: WrapCrossAlignment.end,
+              children: [
+                Text(
+                  text,
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 20,
+                  ),
+                ),
+                (dots)
+                    ? SizedBox(
+                        width: 12,
+                        height: 16,
+                        child: JumpingDotsProgressIndicator(
+                          color: Colors.grey,
+                        ),
+                      )
+                    : SizedBox.shrink()
+              ],
             )
           ],
         ),
@@ -825,18 +859,22 @@ class _HomeState extends State<Home> {
     Widget searchMessage = centerMessage(
       "Enter keyword to search",
       Icons.youtube_searched_for,
+      false,
     );
     Widget searchingMessage = centerMessage(
-      "Searching for \"$_searchQuery\"...",
+      "Searching for \"$_searchQuery\"",
       Icons.youtube_searched_for,
+      true,
     );
     Widget queryMessage = centerMessage(
-      "Querying trending videos...",
+      "Querying trending videos",
       Icons.youtube_searched_for,
+      true,
     );
     Widget errorMessage = centerMessage(
       "Error getting videos",
       Icons.error,
+      false,
     );
 
     if (_isSearching &&
@@ -1533,15 +1571,30 @@ class _YouTubeResultState extends State<YouTubeResult>
     String videoID,
     int index,
   ) {
-    Widget metadataRow(String text, Color color) {
-      return Text(
-        text,
-        style: TextStyle(
-          color: Colors.grey,
-          fontSize: 12,
-        ),
-        maxLines: 1,
-        overflow: TextOverflow.clip,
+    Widget metadataRow(String text, Color color, bool dots) {
+      return Wrap(
+        alignment: WrapAlignment.end,
+        crossAxisAlignment: WrapCrossAlignment.end,
+        children: [
+          Text(
+            text,
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 12,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.clip,
+          ),
+          (dots)
+              ? SizedBox(
+                  width: 12,
+                  height: 14,
+                  child: JumpingDotsProgressIndicator(
+                    color: Colors.grey,
+                  ),
+                )
+              : SizedBox.shrink()
+        ],
       );
     }
 
@@ -1564,12 +1617,14 @@ class _YouTubeResultState extends State<YouTubeResult>
     }
 
     Widget queryMessage = metadataRow(
-      "Getting engagement metrics...",
+      "Getting engagement metrics",
       Colors.grey,
+      true,
     );
     Widget errorMessage = metadataRow(
       "Error querying engagement metrics",
       Colors.grey,
+      false,
     );
 
     return FutureBuilder(
@@ -1603,8 +1658,11 @@ class _YouTubeResultState extends State<YouTubeResult>
     String videoID,
     int index,
   ) {
-    Widget closedCaptionRow(String text, Color color, IconData icon) {
-      return Row(
+    Widget closedCaptionRow(
+        String text, Color color, IconData icon, bool dots) {
+      return Wrap(
+        alignment: WrapAlignment.end,
+        crossAxisAlignment: WrapCrossAlignment.end,
         children: [
           Icon(
             icon,
@@ -1621,30 +1679,41 @@ class _YouTubeResultState extends State<YouTubeResult>
             ),
             maxLines: 1,
             overflow: TextOverflow.clip,
-          )
+          ),
+          (dots)
+              ? SizedBox(
+                  width: 12,
+                  height: 14,
+                  child: JumpingDotsProgressIndicator(color: color),
+                )
+              : SizedBox.shrink()
         ],
       );
     }
 
     Widget queryMessage = closedCaptionRow(
-      "Querying for closed captions...",
+      "Querying for closed captions",
       Colors.grey,
       Icons.youtube_searched_for,
+      true,
     );
     Widget errorMessage = closedCaptionRow(
       "Error querying closed captions",
       Colors.grey,
       Icons.error,
+      false,
     );
     Widget availableMessage = closedCaptionRow(
       "Closed captioning available",
       Colors.green[200],
       Icons.closed_caption,
+      false,
     );
     Widget unavailableMessage = closedCaptionRow(
       "No closed captioning",
       Colors.red[200],
       Icons.closed_caption_disabled,
+      false,
     );
 
     return FutureBuilder(
@@ -2222,7 +2291,7 @@ class _HistoryState extends State<History> {
   Widget build(BuildContext context) {
     List<VideoHistory> histories = getVideoHistory().reversed.toList();
 
-    Widget centerMessage(String text, IconData icon) {
+    Widget centerMessage(String text, IconData icon, bool dots) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -2233,12 +2302,27 @@ class _HistoryState extends State<History> {
               size: 72,
             ),
             const SizedBox(height: 6),
-            Text(
-              text,
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 20,
-              ),
+            Wrap(
+              alignment: WrapAlignment.end,
+              crossAxisAlignment: WrapCrossAlignment.end,
+              children: [
+                Text(
+                  text,
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 20,
+                  ),
+                ),
+                (dots)
+                    ? SizedBox(
+                        width: 12,
+                        height: 16,
+                        child: JumpingDotsProgressIndicator(
+                          color: Colors.grey,
+                        ),
+                      )
+                    : SizedBox.shrink()
+              ],
             )
           ],
         ),
@@ -2248,6 +2332,7 @@ class _HistoryState extends State<History> {
     Widget emptyMessage = centerMessage(
       "No videos in history",
       Icons.history_sharp,
+      false,
     );
 
     if (histories.isEmpty) {
@@ -2287,7 +2372,7 @@ class _ClipboardState extends State<ClipboardMenu> {
 
   ScrollController _dictionaryScroller;
   final _wordController = TextEditingController(text: "");
-  bool _isSearching = false;
+  ValueNotifier<bool> _isSearching = ValueNotifier<bool>(false);
 
   _ClipboardState(this.creatorCallback, this.dictionaryScrollOffset);
 
@@ -2310,7 +2395,7 @@ class _ClipboardState extends State<ClipboardMenu> {
     List<DictionaryHistoryEntry> entries =
         getDictionaryHistory().reversed.toList();
 
-    Widget centerMessage(String text, IconData icon) {
+    Widget centerMessage(String text, IconData icon, bool dots) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -2321,12 +2406,27 @@ class _ClipboardState extends State<ClipboardMenu> {
               size: 72,
             ),
             const SizedBox(height: 6),
-            Text(
-              text,
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 20,
-              ),
+            Wrap(
+              alignment: WrapAlignment.end,
+              crossAxisAlignment: WrapCrossAlignment.end,
+              children: [
+                Text(
+                  text,
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 20,
+                  ),
+                ),
+                (dots)
+                    ? SizedBox(
+                        width: 12,
+                        height: 16,
+                        child: JumpingDotsProgressIndicator(
+                          color: Colors.grey,
+                        ),
+                      )
+                    : SizedBox.shrink()
+              ],
             )
           ],
         ),
@@ -2336,6 +2436,7 @@ class _ClipboardState extends State<ClipboardMenu> {
     Widget emptyMessage = centerMessage(
       "No entries in dictionary",
       Icons.auto_stories,
+      false,
     );
 
     Widget cardCreatorButton() {
@@ -2388,31 +2489,51 @@ class _ClipboardState extends State<ClipboardMenu> {
       }
 
       String searchTerm = _wordController.text;
-      if (!_isSearching && searchTerm.isNotEmpty) {
+      if (!_isSearching.value && searchTerm.isNotEmpty) {
         _wordController.clear();
-        _isSearching = true;
+        _isSearching.value = true;
 
         try {
-          DictionaryHistoryEntry results;
+          var results;
           if (monolingual) {
-            results = await getMonolingualWordDetails(
+            results = await fetchMonolingualSearchCache(
               searchTerm: searchTerm,
               recursive: false,
             );
           } else {
-            results = await getWordDetails(
+            results = await fetchBilingualSearchCache(
               searchTerm: searchTerm,
             );
           }
 
           if (results != null && results.entries.isNotEmpty) {
+            dictionaryScrollOffset.value = _dictionaryScroller.offset;
             addDictionaryEntryToHistory(results);
             setStateFromResult();
           }
         } finally {
-          _isSearching = false;
+          _isSearching.value = false;
         }
       }
+    }
+
+    Widget wordSearchButton({bool monolingual}) {
+      return ValueListenableBuilder(
+        valueListenable: _isSearching,
+        builder: (BuildContext context, bool isSearching, Widget widget) {
+          return IconButton(
+            iconSize: 18,
+            onPressed: () async {
+              wordFieldSearch(monolingual);
+            },
+            icon: Text(
+              (monolingual) ? "あ⌕" : "A⌕",
+              style:
+                  TextStyle(color: (isSearching) ? Colors.grey : Colors.white),
+            ),
+          );
+        },
+      );
     }
 
     Widget wordField = TextFormField(
@@ -2431,20 +2552,8 @@ class _ClipboardState extends State<ClipboardMenu> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(
-              iconSize: 18,
-              onPressed: () async {
-                wordFieldSearch(false);
-              },
-              icon: Text("A⌕", style: TextStyle(color: Colors.white)),
-            ),
-            IconButton(
-              iconSize: 18,
-              onPressed: () async {
-                wordFieldSearch(true);
-              },
-              icon: Text("あ⌕", style: TextStyle(color: Colors.white)),
-            ),
+            wordSearchButton(monolingual: false),
+            wordSearchButton(monolingual: true),
             IconButton(
               iconSize: 18,
               onPressed: () => _wordController.clear(),
@@ -2600,7 +2709,12 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                     ),
                   ),
                   Text(entry.entries[entry.swipeIndex].reading),
-                  Text("\n${entry.entries[entry.swipeIndex].meaning}\n"),
+                  Text(
+                    "\n${entry.entries[entry.swipeIndex].meaning}\n",
+                    style: TextStyle(
+                      fontSize: 15,
+                    ),
+                  ),
                   Wrap(
                     alignment: WrapAlignment.center,
                     crossAxisAlignment: WrapCrossAlignment.end,
@@ -2608,7 +2722,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                       Text(
                         "Search result ",
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 12,
                           color: Colors.grey,
                         ),
                         textAlign: TextAlign.center,
@@ -2617,7 +2731,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                         "${entry.swipeIndex + 1} ",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 11,
+                          fontSize: 12,
                           color: Colors.white,
                         ),
                         textAlign: TextAlign.center,
@@ -2625,7 +2739,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                       Text(
                         "out of ",
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 12,
                           color: Colors.grey,
                         ),
                         textAlign: TextAlign.center,
@@ -2634,7 +2748,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                         "${entry.entries.length} ",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 11,
+                          fontSize: 12,
                           color: Colors.white,
                         ),
                         textAlign: TextAlign.center,
@@ -2643,7 +2757,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                         Text(
                           "from video ",
                           style: TextStyle(
-                            fontSize: 11,
+                            fontSize: 12,
                             color: Colors.grey,
                           ),
                           textAlign: TextAlign.center,
@@ -2651,7 +2765,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                       Text(
                         "found for",
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 12,
                           color: Colors.grey,
                         ),
                         textAlign: TextAlign.center,
@@ -2664,7 +2778,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                             "『",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 11,
+                              fontSize: 12,
                               color: Colors.grey,
                             ),
                             textAlign: TextAlign.center,
@@ -2673,7 +2787,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                             "${entry.searchTerm}",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 11,
+                              fontSize: 12,
                               color: Colors.white,
                             ),
                             textAlign: TextAlign.center,
@@ -2682,7 +2796,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                             "』",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 11,
+                              fontSize: 12,
                               color: Colors.grey,
                             ),
                             textAlign: TextAlign.center,
@@ -2754,7 +2868,11 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                         Flexible(
                           child: SingleChildScrollView(
                             child: Text(
-                                "\n${results.entries[_dialogIndex.value].meaning}\n"),
+                              "\n${results.entries[_dialogIndex.value].meaning}\n",
+                              style: TextStyle(
+                                fontSize: 15,
+                              ),
+                            ),
                           ),
                         ),
                         Wrap(
@@ -2764,7 +2882,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                             Text(
                               "Selecting search result ",
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 12,
                                 color: Colors.grey[400],
                               ),
                               textAlign: TextAlign.center,
@@ -2773,14 +2891,14 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                               "${_dialogIndex.value + 1} ",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 11,
+                                fontSize: 12,
                               ),
                               textAlign: TextAlign.center,
                             ),
                             Text(
                               "out of ",
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 12,
                                 color: Colors.grey[400],
                               ),
                               textAlign: TextAlign.center,
@@ -2789,7 +2907,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                               "${results.entries.length} ",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 11,
+                                fontSize: 12,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -2797,7 +2915,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                               Text(
                                 "from video ",
                                 style: TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 12,
                                   color: Colors.grey[400],
                                 ),
                                 textAlign: TextAlign.center,
@@ -2805,7 +2923,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                             Text(
                               "found for",
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 12,
                                 color: Colors.grey[400],
                               ),
                               textAlign: TextAlign.center,
@@ -2818,7 +2936,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                                   "『",
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 11,
+                                    fontSize: 12,
                                     color: Colors.grey[400],
                                   ),
                                   textAlign: TextAlign.center,
@@ -2827,7 +2945,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                                   "${results.searchTerm}",
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 11,
+                                    fontSize: 12,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
@@ -2835,7 +2953,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                                   "』",
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 11,
+                                    fontSize: 12,
                                     color: Colors.grey[400],
                                   ),
                                   textAlign: TextAlign.center,
@@ -2965,7 +3083,7 @@ class _LazyResultsState extends State<LazyResults> {
     _loadMore();
   }
 
-  Widget centerMessage(String text, IconData icon) {
+  Widget centerMessage(String text, IconData icon, bool dots) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -2976,12 +3094,27 @@ class _LazyResultsState extends State<LazyResults> {
             size: 72,
           ),
           const SizedBox(height: 6),
-          Text(
-            text,
-            style: TextStyle(
-              color: Colors.grey,
-              fontSize: 20,
-            ),
+          Wrap(
+            alignment: WrapAlignment.end,
+            crossAxisAlignment: WrapCrossAlignment.end,
+            children: [
+              Text(
+                text,
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 20,
+                ),
+              ),
+              (dots)
+                  ? SizedBox(
+                      width: 12,
+                      height: 16,
+                      child: JumpingDotsProgressIndicator(
+                        color: Colors.grey,
+                      ),
+                    )
+                  : SizedBox.shrink()
+            ],
           )
         ],
       ),
@@ -2992,8 +3125,9 @@ class _LazyResultsState extends State<LazyResults> {
   Widget build(BuildContext context) {
     if (verticalData.length == 0) {
       return centerMessage(
-        "Listing channel videos...",
+        "Listing channel videos",
         Icons.subscriptions_sharp,
+        true,
       );
     }
     return LazyLoadScrollView(
@@ -3076,7 +3210,7 @@ class _CreatorState extends State<Creator> {
   ValueNotifier<String> _selectedDeck;
 
   String lastDeck = getLastDeck();
-  bool _isSearching = false;
+  ValueNotifier<bool> _isSearching = ValueNotifier<bool>(false);
 
   ValueNotifier<DictionaryEntry> _selectedEntry;
   ValueNotifier<int> _selectedIndex = ValueNotifier<int>(0);
@@ -3156,12 +3290,25 @@ class _CreatorState extends State<Creator> {
             size: 72,
           ),
           const SizedBox(height: 6),
-          Text(
-            "Preparing card creator...",
-            style: TextStyle(
-              color: Colors.grey,
-              fontSize: 20,
-            ),
+          Wrap(
+            alignment: WrapAlignment.end,
+            crossAxisAlignment: WrapCrossAlignment.end,
+            children: [
+              Text(
+                "Preparing card creator",
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 20,
+                ),
+              ),
+              SizedBox(
+                width: 12,
+                height: 16,
+                child: JumpingDotsProgressIndicator(
+                  color: Colors.grey,
+                ),
+              ),
+            ],
           )
         ],
       ),
@@ -3176,12 +3323,25 @@ class _CreatorState extends State<Creator> {
           height: MediaQuery.of(context).size.height / 5,
         ),
         SizedBox(height: 13),
-        Text(
-          "Searching for images...",
-          style: TextStyle(
-            fontSize: 11,
-          ),
-          textAlign: TextAlign.center,
+        Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.end,
+          children: [
+            Text(
+              "Searching for images",
+              style: TextStyle(
+                fontSize: 12,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(
+              width: 12,
+              height: 14,
+              child: JumpingDotsProgressIndicator(
+                color: Colors.white,
+              ),
+            )
+          ],
         ),
       ],
     );
@@ -3249,7 +3409,11 @@ class _CreatorState extends State<Creator> {
                         Flexible(
                           child: SingleChildScrollView(
                             child: Text(
-                                "\n${results.entries[_dialogIndex.value].meaning}\n"),
+                              "\n${results.entries[_dialogIndex.value].meaning}\n",
+                              style: TextStyle(
+                                fontSize: 15,
+                              ),
+                            ),
                           ),
                         ),
                         Wrap(
@@ -3259,7 +3423,7 @@ class _CreatorState extends State<Creator> {
                             Text(
                               "Selecting search result ",
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 12,
                                 color: Colors.grey[400],
                               ),
                               textAlign: TextAlign.center,
@@ -3268,14 +3432,14 @@ class _CreatorState extends State<Creator> {
                               "${_dialogIndex.value + 1} ",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 11,
+                                fontSize: 12,
                               ),
                               textAlign: TextAlign.center,
                             ),
                             Text(
                               "out of ",
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 12,
                                 color: Colors.grey[400],
                               ),
                               textAlign: TextAlign.center,
@@ -3284,14 +3448,14 @@ class _CreatorState extends State<Creator> {
                               "${results.entries.length} ",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 11,
+                                fontSize: 12,
                               ),
                               textAlign: TextAlign.center,
                             ),
                             Text(
                               "found for",
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 12,
                                 color: Colors.grey[400],
                               ),
                               textAlign: TextAlign.center,
@@ -3304,7 +3468,7 @@ class _CreatorState extends State<Creator> {
                                   "『",
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 11,
+                                    fontSize: 12,
                                     color: Colors.grey[400],
                                   ),
                                   textAlign: TextAlign.center,
@@ -3313,7 +3477,7 @@ class _CreatorState extends State<Creator> {
                                   "${results.searchTerm}",
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 11,
+                                    fontSize: 12,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
@@ -3321,7 +3485,7 @@ class _CreatorState extends State<Creator> {
                                   "』",
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 11,
+                                    fontSize: 12,
                                     color: Colors.grey[400],
                                   ),
                                   textAlign: TextAlign.center,
@@ -3489,27 +3653,46 @@ class _CreatorState extends State<Creator> {
     );
 
     void wordFieldSearch(bool monolingual) async {
-      if (!_isSearching) {
-        _isSearching = true;
+      if (!_isSearching.value) {
+        _isSearching.value = true;
         String searchTerm = _wordController.text;
         try {
-          DictionaryHistoryEntry results;
+          var results;
           if (monolingual) {
-            results = await getMonolingualWordDetails(
+            results = await fetchMonolingualSearchCache(
               searchTerm: searchTerm,
               recursive: false,
             );
           } else {
-            results = await getWordDetails(
+            results = await fetchBilingualSearchCache(
               searchTerm: searchTerm,
             );
           }
 
           showDictionaryDialog(results);
         } finally {
-          _isSearching = false;
+          _isSearching.value = false;
         }
       }
+    }
+
+    Widget wordSearchButton({bool monolingual}) {
+      return ValueListenableBuilder(
+        valueListenable: _isSearching,
+        builder: (BuildContext context, bool isSearching, Widget widget) {
+          return IconButton(
+            iconSize: 18,
+            onPressed: () async {
+              wordFieldSearch(monolingual);
+            },
+            icon: Text(
+              (monolingual) ? "あ⌕" : "A⌕",
+              style:
+                  TextStyle(color: (isSearching) ? Colors.grey : Colors.white),
+            ),
+          );
+        },
+      );
     }
 
     Widget wordField = TextFormField(
@@ -3527,20 +3710,8 @@ class _CreatorState extends State<Creator> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(
-              iconSize: 18,
-              onPressed: () async {
-                wordFieldSearch(false);
-              },
-              icon: Text("A⌕", style: TextStyle(color: Colors.white)),
-            ),
-            IconButton(
-              iconSize: 18,
-              onPressed: () async {
-                wordFieldSearch(true);
-              },
-              icon: Text("あ⌕", style: TextStyle(color: Colors.white)),
-            ),
+            wordSearchButton(monolingual: false),
+            wordSearchButton(monolingual: true),
             IconButton(
               iconSize: 18,
               onPressed: () => _wordController.clear(),
@@ -3606,7 +3777,7 @@ class _CreatorState extends State<Creator> {
               Text(
                 "Showing local image",
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: 12,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -3694,7 +3865,7 @@ class _CreatorState extends State<Creator> {
                           Text(
                             "Selecting image ",
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: 12,
                               color: Colors.grey,
                             ),
                             textAlign: TextAlign.center,
@@ -3703,14 +3874,14 @@ class _CreatorState extends State<Creator> {
                             "${_selectedIndex.value + 1} ",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 11,
+                              fontSize: 12,
                             ),
                             textAlign: TextAlign.center,
                           ),
                           Text(
                             "out of ",
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: 12,
                               color: Colors.grey,
                             ),
                             textAlign: TextAlign.center,
@@ -3719,14 +3890,14 @@ class _CreatorState extends State<Creator> {
                             "${imageURLs.length} ",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 11,
+                              fontSize: 12,
                             ),
                             textAlign: TextAlign.center,
                           ),
                           Text(
                             "found for",
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: 12,
                               color: Colors.grey,
                             ),
                             textAlign: TextAlign.center,
@@ -3739,7 +3910,7 @@ class _CreatorState extends State<Creator> {
                                 "『",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 11,
+                                  fontSize: 12,
                                   color: Colors.grey,
                                 ),
                                 textAlign: TextAlign.center,
@@ -3748,7 +3919,7 @@ class _CreatorState extends State<Creator> {
                                 "${searchTerm.trim()}",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 11,
+                                  fontSize: 12,
                                   color: Colors.white,
                                 ),
                                 textAlign: TextAlign.center,
@@ -3757,7 +3928,7 @@ class _CreatorState extends State<Creator> {
                                 "』",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 11,
+                                  fontSize: 12,
                                   color: Colors.grey,
                                 ),
                                 textAlign: TextAlign.center,

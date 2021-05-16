@@ -370,9 +370,14 @@ Future<DictionaryHistoryEntry> getMonolingualWordDetails({
   bool recursive,
   String contextDataSource = "-1",
   int contextPosition = -1,
+  String searchTermOverride = "",
 }) async {
   List<JishoResult> results = (await searchForPhrase(searchTerm)).data;
   List<DictionaryEntry> entries = [];
+
+  if (searchTermOverride.isEmpty) {
+    searchTermOverride = searchTerm;
+  }
 
   var client = http.Client();
   http.Response response = await client
@@ -385,7 +390,7 @@ Future<DictionaryHistoryEntry> getMonolingualWordDetails({
     if (recursive) {
       return DictionaryHistoryEntry(
         entries: entries,
-        searchTerm: searchTerm.trim(),
+        searchTerm: searchTermOverride.trim(),
         swipeIndex: 0,
         contextDataSource: contextDataSource,
         contextPosition: contextPosition,
@@ -397,7 +402,8 @@ Future<DictionaryHistoryEntry> getMonolingualWordDetails({
         .split(";")
         .first;
     return getMonolingualWordDetails(
-      searchTerm: searchTerm,
+      searchTerm: searchTerm.trim(),
+      searchTermOverride: searchTermOverride.trim(),
       recursive: true,
       contextDataSource: contextDataSource,
       contextPosition: contextPosition,
@@ -444,7 +450,7 @@ Future<DictionaryHistoryEntry> getMonolingualWordDetails({
         if (entries.length >= 20) {
           return DictionaryHistoryEntry(
             entries: entries,
-            searchTerm: searchTerm.trim(),
+            searchTerm: searchTermOverride.trim(),
             swipeIndex: 0,
             contextDataSource: contextDataSource,
             contextPosition: contextPosition,
@@ -495,7 +501,7 @@ Future<DictionaryHistoryEntry> getMonolingualWordDetails({
 
   return DictionaryHistoryEntry(
     entries: entries,
-    searchTerm: searchTerm.trim(),
+    searchTerm: searchTermOverride.trim(),
     swipeIndex: 0,
     contextDataSource: contextDataSource,
     contextPosition: contextPosition,

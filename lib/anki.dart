@@ -394,7 +394,7 @@ void showAnkiDialog(
                                   Text(
                                     "Selecting preview image ",
                                     style: TextStyle(
-                                      fontSize: 11,
+                                      fontSize: 12,
                                       color: Colors.grey[400],
                                     ),
                                     textAlign: TextAlign.center,
@@ -403,14 +403,14 @@ void showAnkiDialog(
                                     "${selectedIndex.value + 1} ",
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 11,
+                                      fontSize: 12,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
                                   Text(
                                     "out of ",
                                     style: TextStyle(
-                                      fontSize: 11,
+                                      fontSize: 12,
                                       color: Colors.grey[400],
                                     ),
                                     textAlign: TextAlign.center,
@@ -419,7 +419,7 @@ void showAnkiDialog(
                                     "${exportSubtitles.length} ",
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 11,
+                                      fontSize: 12,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),

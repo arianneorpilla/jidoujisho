@@ -9,7 +9,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
 import 'package:wakelock/wakelock.dart';
-
 import 'package:jidoujisho/dictionary.dart';
 import 'package:jidoujisho/youtube.dart';
 
@@ -227,6 +226,7 @@ class ChewieController extends ChangeNotifier {
     @required this.shadowingSubtitle,
     @required this.comprehensionSubtitle,
     @required this.audioAllowance,
+    @required this.setNoPush,
     this.aspectRatio,
     this.autoInitialize = false,
     this.autoPlay = false,
@@ -272,6 +272,7 @@ class ChewieController extends ChangeNotifier {
   final VoidCallback playExternalSubtitles;
   final VoidCallback retimeSubtitles;
   final VoidCallback exportSingleCallback;
+  final VoidCallback setNoPush;
   final VoidCallback toggleShadowingMode;
   final ValueNotifier<Subtitle> shadowingSubtitle;
   final ValueNotifier<Subtitle> comprehensionSubtitle;

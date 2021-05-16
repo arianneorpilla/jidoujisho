@@ -346,8 +346,9 @@ Future<void> addDictionaryEntryToHistory(
       getDictionaryHistory();
 
   try {
-    DictionaryHistoryEntry sameContext = dictionaryHistoryEntries
-        .firstWhere((entry) => entry == dictionaryHistoryEntry);
+    DictionaryHistoryEntry sameContext = dictionaryHistoryEntries.firstWhere(
+      (entry) => entry == dictionaryHistoryEntry,
+    );
     if (dictionaryHistoryEntries != null) {
       dictionaryHistoryEntry.contextDataSource = sameContext.contextDataSource;
       dictionaryHistoryEntry.contextPosition = sameContext.contextPosition;
