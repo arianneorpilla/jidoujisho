@@ -1155,7 +1155,7 @@ class _HomeState extends State<Home> {
         const String legalese =
             "A mobile video player and card creation toolkit tailored for language learners.\n\n" +
                 "Built for the Korean language learning community by Leo Rafael Orpilla. " +
-                "Bilingual and monolingual definitions queried from the Basic Korean Dictionary hosted by the National Institute of Korean Language. Tokenized through the open-korean-text Web API service. Video streaming via YouTube. Image search via Bing. Logo by Aaron Marbella.\n\n" +
+                "Bilingual and monolingual definitions queried from the Basic Korean Dictionary hosted by the National Institute of Korean Language. Video streaming via YouTube. Image search via Bing. Logo by Aaron Marbella.\n\n" +
                 "jidoujisho is free and open source software. Liking the application? " +
                 "Help out by providing feedback, making a donation, reporting issues or collaborating " +
                 "for further improvements on GitHub.";
