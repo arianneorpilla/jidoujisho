@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
-import 'package:chewie/chewie.dart';
+import 'package:chewie_custom/chewie.dart';
 import 'package:clipboard_monitor/clipboard_monitor.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:gx_file_picker/gx_file_picker.dart';
@@ -1719,7 +1719,9 @@ class _VideoPlayerState extends State<VideoPlayer>
           _wasPlaying.value),
     );
 
-    if (wasPlaying && !isExporting) {
+    if (wasPlaying &&
+        !isExporting &&
+        (!getFocusMode() || _clipboard.value.isEmpty)) {
       getVideoPlayerController().play();
     }
   }

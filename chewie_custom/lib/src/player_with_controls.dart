@@ -1,5 +1,5 @@
-import 'package:chewie/src/chewie_player.dart';
-import 'package:chewie/src/material_controls.dart';
+import 'package:chewie_custom/src/chewie_player.dart';
+import 'package:chewie_custom/src/material_controls.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';

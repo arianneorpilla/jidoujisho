@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:chewie/src/chewie_player.dart';
-import 'package:chewie/src/chewie_progress_colors.dart';
-import 'package:chewie/src/material_progress_bar.dart';
-import 'package:chewie/src/utils.dart';
+import 'package:chewie_custom/src/chewie_player.dart';
+import 'package:chewie_custom/src/chewie_progress_colors.dart';
+import 'package:chewie_custom/src/material_progress_bar.dart';
+import 'package:chewie_custom/src/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';

@@ -1,10 +1,10 @@
-import 'package:chewie/src/chewie_progress_colors.dart';
+import 'package:chewie_custom/src/chewie_progress_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 
-class CupertinoVideoProgressBar extends StatefulWidget {
-  CupertinoVideoProgressBar(
+class MaterialVideoProgressBar extends StatefulWidget {
+  MaterialVideoProgressBar(
     this.controller, {
     ChewieProgressColors colors,
     this.onDragEnd,
@@ -26,14 +26,38 @@ class CupertinoVideoProgressBar extends StatefulWidget {
   }
 }
 
-class _VideoProgressBarState extends State<CupertinoVideoProgressBar> {
+class _VideoProgressBarState extends State<MaterialVideoProgressBar> {
+  _VideoProgressBarState() {
+    listener = () {
+      if (!mounted) return;
+      setState(() {});
+    };
+  }
+
+  VoidCallback listener;
   bool _controllerWasPlaying = false;
 
   VlcPlayerController get controller => widget.controller;
 
   @override
+  void initState() {
+    super.initState();
+    controller.addListener(listener);
+  }
+
+  @override
+  void deactivate() {
+    controller.removeListener(listener);
+    super.deactivate();
+  }
+
+  @override
   Widget build(BuildContext context) {
     void seekToRelativePosition(Offset globalPosition) {
+      if (controller.value.isEnded) {
+        controller.stop();
+      }
+
       final box = context.findRenderObject() as RenderBox;
       final Offset tapPos = box.globalToLocal(globalPosition);
       final double relative = tapPos.dx / box.size.width;
@@ -82,7 +106,7 @@ class _VideoProgressBarState extends State<CupertinoVideoProgressBar> {
       },
       child: Center(
         child: Container(
-          height: MediaQuery.of(context).size.height,
+          height: MediaQuery.of(context).size.height / 2,
           width: MediaQuery.of(context).size.width,
           color: Colors.transparent,
           child: CustomPaint(
@@ -95,6 +119,24 @@ class _VideoProgressBarState extends State<CupertinoVideoProgressBar> {
       ),
     );
   }
+}
+
+class DurationRange {
+  DurationRange(this.start, this.end);
+
+  final Duration start;
+  final Duration end;
+
+  double startFraction(Duration duration) {
+    return start.inMilliseconds / duration.inMilliseconds;
+  }
+
+  double endFraction(Duration duration) {
+    return end.inMilliseconds / duration.inMilliseconds;
+  }
+
+  @override
+  String toString() => '$runtimeType(start: $start, end: $end)';
 }
 
 class _ProgressBarPainter extends CustomPainter {
@@ -110,15 +152,13 @@ class _ProgressBarPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    const barHeight = 5.0;
-    const handleHeight = 6.0;
-    final baseOffset = size.height / 2 - barHeight / 2.0;
+    const height = 2.0;
 
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromPoints(
-          Offset(0.0, baseOffset),
-          Offset(size.width, baseOffset + barHeight),
+          Offset(0.0, size.height / 2),
+          Offset(size.width, size.height / 2 + height),
         ),
         const Radius.circular(4.0),
       ),
@@ -131,14 +171,15 @@ class _ProgressBarPainter extends CustomPainter {
         value.position.inMilliseconds / value.duration.inMilliseconds;
     final double playedPart =
         playedPartPercent > 1 ? size.width : playedPartPercent * size.width;
-    // for (final DurationRange range in value.buffered) {
+
+    // for (final DurationRange range in value.bufferPercent) {
     //   final double start = range.startFraction(value.duration) * size.width;
     //   final double end = range.endFraction(value.duration) * size.width;
     //   canvas.drawRRect(
     //     RRect.fromRectAndRadius(
     //       Rect.fromPoints(
-    //         Offset(start, baseOffset),
-    //         Offset(end, baseOffset + barHeight),
+    //         Offset(start, size.height / 2),
+    //         Offset(end, size.height / 2 + height),
     //       ),
     //       const Radius.circular(4.0),
     //     ),
@@ -148,23 +189,16 @@ class _ProgressBarPainter extends CustomPainter {
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromPoints(
-          Offset(0.0, baseOffset),
-          Offset(playedPart, baseOffset + barHeight),
+          Offset(0.0, size.height / 2),
+          Offset(playedPart, size.height / 2 + height),
         ),
         const Radius.circular(4.0),
       ),
       colors.playedPaint,
     );
-
-    final shadowPath = Path()
-      ..addOval(Rect.fromCircle(
-          center: Offset(playedPart, baseOffset + barHeight / 2),
-          radius: handleHeight));
-
-    canvas.drawShadow(shadowPath, Colors.black, 0.2, false);
     canvas.drawCircle(
-      Offset(playedPart, baseOffset + barHeight / 2),
-      handleHeight,
+      Offset(playedPart, size.height / 2 + height / 2),
+      height * 3,
       colors.handlePaint,
     );
   }
