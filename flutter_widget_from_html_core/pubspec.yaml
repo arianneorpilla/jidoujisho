@@ -1,0 +1,32 @@
+name: flutter_widget_from_html_core
+version: 0.6.1+1
+description: Flutter package for widget tree building from html that focuses on correctness and extensibility.
+homepage: https://github.com/daohoangson/flutter_widget_from_html/tree/master/packages/core
+publish_to: none
+
+environment:
+  flutter: ">=2.0.0"
+  sdk: ">=2.12.0 <3.0.0"
+dependencies:
+  csslib: ^0.17.0
+  flutter:
+    sdk: flutter
+  html: ^0.15.0
+  extended_text:
+    git:
+      url: https://github.com/lrorpilla/extended_text
+      ref: c1112834c7c288833d43e17d7ba1ea74210ff797
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  golden_toolkit: ^0.9.0
+  mocktail_image_network: ^0.1.0
+  pedantic: ^1.10.0
+  test: any
+  extended_text_library:
+    git:
+      url: https://github.com/lrorpilla/extended_text_library
+      ref: master
+  
+flutter:

@@ -31,6 +31,7 @@ import 'package:jidoujisho/dictionary.dart';
 import 'package:jidoujisho/globals.dart';
 import 'package:jidoujisho/player.dart';
 import 'package:jidoujisho/preferences.dart';
+import 'package:jidoujisho/reader.dart';
 import 'package:jidoujisho/util.dart';
 
 typedef void ChannelCallback(String id, String name);
@@ -130,7 +131,7 @@ class App extends StatelessWidget {
         appBarTheme: AppBarTheme(backgroundColor: Colors.black),
         canvasColor: Colors.grey[900],
       ),
-      home: AudioServiceWidget(child: Home()),
+      home: AudioServiceWidget(child: ReaderPicker()),
     );
   }
 }

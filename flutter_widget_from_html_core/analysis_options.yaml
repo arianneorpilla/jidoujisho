@@ -1,0 +1,6 @@
+include: package:pedantic/analysis_options.yaml
+
+analyzer:
+  exclude:
+    # TODO: investigate `include_file_not_found` warning
+    - example

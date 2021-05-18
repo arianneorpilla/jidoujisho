@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:clipboard_monitor/clipboard_monitor.dart';
+import 'package:epub_view/epub_view.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:gx_file_picker/gx_file_picker.dart';
@@ -28,8 +29,7 @@ class ReaderPicker extends StatelessWidget {
       return Reader(bookFile: file, initialPosition: -1);
     } else {
       return new FutureBuilder(
-        future: FilePicker.getFile(
-            type: Platform.isIOS ? FileType.any : FileType.video),
+        future: FilePicker.getFile(type: FileType.any),
         builder: (BuildContext context, AsyncSnapshot<File> snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.waiting:
@@ -91,7 +91,8 @@ class _ReaderState extends State<Reader> with SingleTickerProviderStateMixin {
   );
 
   final File bookFile;
-  int initialPosition;
+  final initialPosition;
+  EpubController _epubController;
 
   String _volatileText = "";
   List<String> recursiveTerms = [];
@@ -102,6 +103,9 @@ class _ReaderState extends State<Reader> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    _epubController = EpubController(
+      document: EpubReader.readBook(bookFile.readAsBytesSync()),
+    );
   }
 
   @override
@@ -162,8 +166,32 @@ class _ReaderState extends State<Reader> with SingleTickerProviderStateMixin {
       child: new Scaffold(
         resizeToAvoidBottomInset: false,
         backgroundColor: Colors.black,
+        appBar: AppBar(
+          title: EpubActualChapter(
+            controller: _epubController,
+            builder: (chapterValue) =>
+                (chapterValue == null || chapterValue.chapter == null)
+                    ? Text('')
+                    : Text(
+                        chapterValue.chapter.Title ?? Text(''),
+                        textAlign: TextAlign.start,
+                      ),
+          ),
+        ),
+        drawer: Drawer(
+          child: EpubReaderTableOfContents(
+            controller: _epubController,
+          ),
+        ),
         body: Stack(
+          alignment: Alignment.bottomCenter,
           children: [
+            Padding(
+              padding: EdgeInsets.only(left: 16, right: 16),
+              child: EpubView(
+                controller: _epubController,
+              ),
+            ),
             buildDictionary(),
           ],
         ),
@@ -222,110 +250,95 @@ class _ReaderState extends State<Reader> with SingleTickerProviderStateMixin {
   }
 
   Widget buildDictionaryLoading(String clipboard) {
-    return Column(
-      children: [
-        Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Container(
-            padding: EdgeInsets.all(16.0),
-            color: Colors.grey[800].withOpacity(0.6),
-            child: Wrap(
+    return Padding(
+      padding: EdgeInsets.all(16.0),
+      child: Container(
+        padding: EdgeInsets.all(16.0),
+        color: Colors.grey[800],
+        child: Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            Text(
+              "Looking up",
+              style: TextStyle(),
+            ),
+            Wrap(
               alignment: WrapAlignment.center,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Text(
-                  "Looking up",
-                  style: TextStyle(),
+                  "『",
+                  style: TextStyle(
+                    color: Colors.grey[300],
+                  ),
                 ),
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    Text(
-                      "『",
-                      style: TextStyle(
-                        color: Colors.grey[300],
-                      ),
-                    ),
-                    Text(
-                      clipboard,
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      "』",
-                      style: TextStyle(
-                        color: Colors.grey[300],
-                      ),
-                    ),
-                  ],
+                Text(
+                  clipboard,
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                SizedBox(
-                  height: 12,
-                  width: 12,
-                  child: JumpingDotsProgressIndicator(color: Colors.white),
+                Text(
+                  "』",
+                  style: TextStyle(
+                    color: Colors.grey[300],
+                  ),
                 ),
               ],
             ),
-          ),
+            SizedBox(
+              height: 12,
+              width: 12,
+              child: JumpingDotsProgressIndicator(color: Colors.white),
+            ),
+          ],
         ),
-        Expanded(child: Container()),
-      ],
+      ),
     );
   }
 
   Widget buildDictionaryExporting(String clipboard) {
     String lookupText = "Preparing to export";
 
-    return Column(
-      children: [
-        Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Container(
-            padding: EdgeInsets.all(16.0),
-            color: Colors.grey[800].withOpacity(0.6),
-            child: Wrap(
-                alignment: WrapAlignment.center,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Text(lookupText),
-                  SizedBox(
-                    height: 12,
-                    width: 12,
-                    child: JumpingDotsProgressIndicator(color: Colors.white),
-                  ),
-                ]),
-          ),
-        ),
-        Expanded(child: Container()),
-      ],
+    return Padding(
+      padding: EdgeInsets.all(16.0),
+      child: Container(
+        padding: EdgeInsets.all(16.0),
+        color: Colors.grey[800],
+        child: Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text(lookupText),
+              SizedBox(
+                height: 12,
+                width: 12,
+                child: JumpingDotsProgressIndicator(color: Colors.white),
+              ),
+            ]),
+      ),
     );
   }
 
   Widget buildDictionaryAutoGenDependencies(String clipboard) {
     String lookupText = "Setting up required dependencies";
 
-    return Column(
-      children: [
-        Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Container(
-            padding: EdgeInsets.all(16.0),
-            color: Colors.grey[800].withOpacity(0.6),
-            child: Wrap(
-                alignment: WrapAlignment.center,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Text(lookupText),
-                  SizedBox(
-                    height: 12,
-                    width: 12,
-                    child: JumpingDotsProgressIndicator(color: Colors.white),
-                  ),
-                ]),
-          ),
-        ),
-        Expanded(child: Container()),
-      ],
+    return Padding(
+      padding: EdgeInsets.all(16.0),
+      child: Container(
+        padding: EdgeInsets.all(16.0),
+        color: Colors.grey[800],
+        child: Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text(lookupText),
+              SizedBox(
+                height: 12,
+                width: 12,
+                child: JumpingDotsProgressIndicator(color: Colors.white),
+              ),
+            ]),
+      ),
     );
   }
 
@@ -335,46 +348,36 @@ class _ReaderState extends State<Reader> with SingleTickerProviderStateMixin {
       _clipboard.value = "";
     });
 
-    return Column(
-      children: [
-        Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Container(
-            padding: EdgeInsets.all(16.0),
-            color: Colors.grey[800].withOpacity(0.6),
-            child: Text(lookupText),
-          ),
-        ),
-        Expanded(child: Container()),
-      ],
+    return Padding(
+      padding: EdgeInsets.all(16.0),
+      child: Container(
+        padding: EdgeInsets.all(16.0),
+        color: Colors.grey[800],
+        child: Text(lookupText),
+      ),
     );
   }
 
   Widget buildDictionaryAutoGenQuery(String clipboard) {
     String lookupText = "Querying for automatic captions";
 
-    return Column(
-      children: [
-        Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Container(
-            padding: EdgeInsets.all(16.0),
-            color: Colors.grey[800].withOpacity(0.6),
-            child: Wrap(
-                alignment: WrapAlignment.center,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Text(lookupText),
-                  SizedBox(
-                    height: 12,
-                    width: 12,
-                    child: JumpingDotsProgressIndicator(color: Colors.white),
-                  ),
-                ]),
-          ),
-        ),
-        Expanded(child: Container()),
-      ],
+    return Padding(
+      padding: EdgeInsets.all(16.0),
+      child: Container(
+        padding: EdgeInsets.all(16.0),
+        color: Colors.grey[800],
+        child: Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text(lookupText),
+              SizedBox(
+                height: 12,
+                width: 12,
+                child: JumpingDotsProgressIndicator(color: Colors.white),
+              ),
+            ]),
+      ),
     );
   }
 
@@ -383,53 +386,48 @@ class _ReaderState extends State<Reader> with SingleTickerProviderStateMixin {
         "The AnkiDroid background service must be active for card export.\n" +
             "Press here to launch AnkiDroid and return to continue.";
 
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: () async {
-            await LaunchApp.openApp(
-              androidPackageName: 'com.ichi2.anki',
-              openStore: true,
-            );
+    return GestureDetector(
+      onTap: () async {
+        await LaunchApp.openApp(
+          androidPackageName: 'com.ichi2.anki',
+          openStore: true,
+        );
 
-            _clipboard.value = "";
+        _clipboard.value = "";
 
-            try {
-              await getDecks();
-              AnkiExportMetadata metadata = _failureMetadata.value;
+        try {
+          await getDecks();
+          AnkiExportMetadata metadata = _failureMetadata.value;
 
-              _clipboard.value = "&<&>export&<&>";
+          _clipboard.value = "&<&>export&<&>";
 
-              exportToAnki(
-                context,
-                metadata.chewie,
-                metadata.controller,
-                metadata.clipboard,
-                metadata.subtitle,
-                metadata.dictionaryEntry,
-                metadata.wasPlaying,
-                metadata.exportSubtitles,
-                metadata.audioAllowance,
-                metadata.subtitleDelay,
-                _failureMetadata,
-              );
+          exportToAnki(
+            context,
+            metadata.chewie,
+            metadata.controller,
+            metadata.clipboard,
+            metadata.subtitle,
+            metadata.dictionaryEntry,
+            metadata.wasPlaying,
+            metadata.exportSubtitles,
+            metadata.audioAllowance,
+            metadata.subtitleDelay,
+            _failureMetadata,
+          );
 
-              _failureMetadata.value = null;
-            } catch (e) {
-              print(e);
-            }
-          },
-          child: Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Container(
-              padding: EdgeInsets.all(16.0),
-              color: Colors.grey[800].withOpacity(0.6),
-              child: Text(lookupText),
-            ),
-          ),
+          _failureMetadata.value = null;
+        } catch (e) {
+          print(e);
+        }
+      },
+      child: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Container(
+          padding: EdgeInsets.all(16.0),
+          color: Colors.grey[800],
+          child: Text(lookupText),
         ),
-        Expanded(child: Container()),
-      ],
+      ),
     );
   }
 
@@ -437,18 +435,13 @@ class _ReaderState extends State<Reader> with SingleTickerProviderStateMixin {
     String deckName = clipboard.substring(12, clipboard.length - 4);
     String lookupText = "Card exported to \"$deckName\".";
 
-    return Column(
-      children: [
-        Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Container(
-            padding: EdgeInsets.all(16.0),
-            color: Colors.grey[800].withOpacity(0.6),
-            child: Text(lookupText),
-          ),
-        ),
-        Expanded(child: Container()),
-      ],
+    return Padding(
+      padding: EdgeInsets.all(16.0),
+      child: Container(
+        padding: EdgeInsets.all(16.0),
+        color: Colors.grey[800],
+        child: Text(lookupText),
+      ),
     );
   }
 
@@ -474,7 +467,7 @@ class _ReaderState extends State<Reader> with SingleTickerProviderStateMixin {
             },
             child: Container(
                 padding: EdgeInsets.all(16.0),
-                color: Colors.grey[800].withOpacity(0.6),
+                color: Colors.grey[800],
                 child: Wrap(
                   alignment: WrapAlignment.center,
                   crossAxisAlignment: WrapCrossAlignment.center,
@@ -544,7 +537,6 @@ class _ReaderState extends State<Reader> with SingleTickerProviderStateMixin {
 
         return Container(
           padding: EdgeInsets.all(16.0),
-          alignment: Alignment.topCenter,
           child: GestureDetector(
             onTap: () {
               _clipboard.value = "";
@@ -573,8 +565,7 @@ class _ReaderState extends State<Reader> with SingleTickerProviderStateMixin {
             },
             child: Container(
               padding: EdgeInsets.all(16),
-              margin: EdgeInsets.only(bottom: 84),
-              color: Colors.grey[800].withOpacity(0.6),
+              color: Colors.grey[800],
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [

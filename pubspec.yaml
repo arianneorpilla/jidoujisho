@@ -12,18 +12,22 @@ dependencies:
     sdk: flutter
 
   audioplayers:
-  audio_service: ^0.17.0
+  audio_service:
   auto_orientation:
   async:
-  chewie_custom:
-    path: ./chewie_custom
+  chewie_fork:
+    path: ./chewie_fork
   clipboard_monitor: ^0.9.1
   device_info:
+  epub_view:
+    path: ./epub_view
   ext_storage:
   external_app_launcher:
   gx_file_picker:
   flutter_ffmpeg:
   flutter_vlc_player: ^5.0.5
+  flutter_widget_from_html_core:
+    path: ./flutter_widget_from_html_core
   flutter_youtube_dl:
     git:
       url: https://github.com/project-violet/flutter-youtube-dl
@@ -43,7 +47,7 @@ dependencies:
   photo_view:
   progress_indicators:
   receive_sharing_intent:
-  scrollable_positioned_list: ^0.1.9
+  scrollable_positioned_list:
   shell:
   shared_preferences:
   subtitle_wrapper_package:
@@ -66,6 +70,7 @@ dependencies:
   youtube_player_flutter:
   wakelock:
 dependency_overrides:
+  cupertino_icons: ^1.0.2
   html: ^0.15.0
   http: ^0.13.0
   http_parser: ^4.0.0
@@ -74,7 +79,6 @@ dependency_overrides:
   process: ^4.0.0
   platform: ^3.0.0
   file: ^6.0.0
-
 dev_dependencies:
   flutter_launcher_icons:
 
