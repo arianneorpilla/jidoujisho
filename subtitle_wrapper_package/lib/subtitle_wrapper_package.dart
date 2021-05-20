@@ -18,6 +18,7 @@ class SubTitleWrapper extends StatelessWidget {
     @required this.subtitleNotifier,
     @required this.contextSubtitle,
     @required this.focusNode,
+    @required this.emptyStack,
     this.subtitleStyle = const SubtitleStyle(),
   }) : super(key: key);
 
@@ -28,6 +29,7 @@ class SubTitleWrapper extends StatelessWidget {
   final ValueNotifier<Subtitle> subtitleNotifier;
   final ValueNotifier<Subtitle> contextSubtitle;
   final FocusNode focusNode;
+  final VoidCallback emptyStack;
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +62,7 @@ class SubTitleWrapper extends StatelessWidget {
                         subtitleController.comprehensionSubtitle,
                     contextSubtitle: subtitleController.contextSubtitle,
                     focusNode: focusNode,
+                    emptyStack: emptyStack,
                   ),
                 ),
               )

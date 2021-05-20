@@ -227,6 +227,7 @@ class ChewieController extends ChangeNotifier {
     @required this.shadowingSubtitle,
     @required this.comprehensionSubtitle,
     @required this.audioAllowance,
+    @required this.setNoPush,
     this.aspectRatio,
     this.autoInitialize = false,
     this.autoPlay = false,
@@ -272,6 +273,7 @@ class ChewieController extends ChangeNotifier {
   final VoidCallback playExternalSubtitles;
   final VoidCallback retimeSubtitles;
   final VoidCallback exportSingleCallback;
+  final VoidCallback setNoPush;
   final VoidCallback toggleShadowingMode;
   final ValueNotifier<Subtitle> shadowingSubtitle;
   final ValueNotifier<Subtitle> comprehensionSubtitle;

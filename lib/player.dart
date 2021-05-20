@@ -12,6 +12,7 @@ import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:http/http.dart' as http;
 import 'package:jidoujisho/cache.dart';
 import 'package:path/path.dart' as path;
+import 'package:progress_indicators/progress_indicators.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
 import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
@@ -21,6 +22,7 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import 'package:jidoujisho/anki.dart';
+import 'package:jidoujisho/cache.dart';
 import 'package:jidoujisho/globals.dart';
 import 'package:jidoujisho/dictionary.dart';
 import 'package:jidoujisho/preferences.dart';
@@ -282,6 +284,8 @@ class _VideoPlayerState extends State<VideoPlayer> {
     ),
   );
   ValueNotifier<int> _audioAllowance = ValueNotifier<int>(getAudioAllowance());
+  List<String> recursiveTerms = [];
+  bool noPush = false;
 
   Timer durationTimer;
   Timer visibilityTimer;
@@ -343,15 +347,24 @@ class _VideoPlayerState extends State<VideoPlayer> {
     ClipboardMonitor.unregisterCallback(onClipboardText);
   }
 
+  void emptyStack() {
+    noPush = false;
+    recursiveTerms = [];
+  }
+
+  void setNoPush() {
+    noPush = true;
+  }
+
   void onClipboardText(String text) {
-    _volatileText = text;
+    text = text.trim();
+    _volatileText = text.trim();
 
     Future.delayed(
         text.length == 1
             ? Duration(milliseconds: 1000)
             : Duration(milliseconds: 500), () {
-      if (_volatileText == text) {
-        print("CLIPBOARD CHANGED: $text");
+      if (_volatileText.trim() == text.trim()) {
         _clipboard.value = text;
         _contextSubtitle.value = _currentSubtitle.value;
       }
@@ -678,6 +691,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       toggleShadowingMode: toggleShadowingMode,
       shadowingSubtitle: _shadowingSubtitle,
       comprehensionSubtitle: _comprehensionSubtitle,
+      setNoPush: setNoPush,
       audioAllowance: _audioAllowance,
       streamData: streamData,
       aspectRatio: getVideoPlayerController().value.aspectRatio,
@@ -714,6 +728,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
   SubTitleWrapper getSubtitleWrapper() {
     _subTitleWrapper ??= SubTitleWrapper(
       focusNode: _subtitleFocusNode,
+      emptyStack: emptyStack,
       subtitleNotifier: _currentSubtitle,
       contextSubtitle: _contextSubtitle,
       videoPlayerController: getVideoPlayerController(),
@@ -885,44 +900,46 @@ class _VideoPlayerState extends State<VideoPlayer> {
         Padding(
           padding: EdgeInsets.all(16.0),
           child: Container(
-              padding: EdgeInsets.all(16.0),
-              color: Colors.grey[800].withOpacity(0.6),
-              child: Wrap(
-                alignment: WrapAlignment.center,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Text(
-                    "Looking up",
-                    style: TextStyle(),
-                  ),
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      Text(
-                        "『",
-                        style: TextStyle(
-                          color: Colors.grey[300],
-                        ),
+            padding: EdgeInsets.all(16.0),
+            color: Colors.grey[800].withOpacity(0.6),
+            child: Wrap(
+              alignment: WrapAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(
+                  "Looking up",
+                  style: TextStyle(),
+                ),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      "『",
+                      style: TextStyle(
+                        color: Colors.grey[300],
                       ),
-                      Text(
-                        clipboard,
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      clipboard,
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      "』",
+                      style: TextStyle(
+                        color: Colors.grey[300],
                       ),
-                      Text(
-                        "』",
-                        style: TextStyle(
-                          color: Colors.grey[300],
-                        ),
-                      ),
-                    ],
-                  ),
-                  Text(
-                    "...",
-                    style: TextStyle(),
-                  ),
-                ],
-              )),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 12,
+                  width: 12,
+                  child: JumpingDotsProgressIndicator(color: Colors.white),
+                ),
+              ],
+            ),
+          ),
         ),
         Expanded(child: Container()),
       ],
@@ -930,7 +947,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   Widget buildDictionaryExporting(String clipboard) {
-    String lookupText = "Preparing to export...";
+    String lookupText = "Preparing to export";
 
     return Column(
       children: [
@@ -939,7 +956,17 @@ class _VideoPlayerState extends State<VideoPlayer> {
           child: Container(
             padding: EdgeInsets.all(16.0),
             color: Colors.grey[800].withOpacity(0.6),
-            child: Text(lookupText),
+            child: Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Text(lookupText),
+                  SizedBox(
+                    height: 12,
+                    width: 12,
+                    child: JumpingDotsProgressIndicator(color: Colors.white),
+                  ),
+                ]),
           ),
         ),
         Expanded(child: Container()),
@@ -948,7 +975,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   Widget buildDictionaryAutoGenDependencies(String clipboard) {
-    String lookupText = "Setting up required dependencies...";
+    String lookupText = "Setting up required dependencies";
 
     return Column(
       children: [
@@ -957,7 +984,17 @@ class _VideoPlayerState extends State<VideoPlayer> {
           child: Container(
             padding: EdgeInsets.all(16.0),
             color: Colors.grey[800].withOpacity(0.6),
-            child: Text(lookupText),
+            child: Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Text(lookupText),
+                  SizedBox(
+                    height: 12,
+                    width: 12,
+                    child: JumpingDotsProgressIndicator(color: Colors.white),
+                  ),
+                ]),
           ),
         ),
         Expanded(child: Container()),
@@ -987,7 +1024,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   Widget buildDictionaryAutoGenQuery(String clipboard) {
-    String lookupText = "Querying for automatic captions...";
+    String lookupText = "Querying for automatic captions";
 
     return Column(
       children: [
@@ -996,7 +1033,17 @@ class _VideoPlayerState extends State<VideoPlayer> {
           child: Container(
             padding: EdgeInsets.all(16.0),
             color: Colors.grey[800].withOpacity(0.6),
-            child: Text(lookupText),
+            child: Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Text(lookupText),
+                  SizedBox(
+                    height: 12,
+                    width: 12,
+                    child: JumpingDotsProgressIndicator(color: Colors.white),
+                  ),
+                ]),
           ),
         ),
         Expanded(child: Container()),
@@ -1113,17 +1160,13 @@ class _VideoPlayerState extends State<VideoPlayer> {
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Text(
-                      "No matches ",
+                      "No matches for",
                       style: TextStyle(),
                     ),
                     Wrap(
                       alignment: WrapAlignment.center,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        Text(
-                          " for",
-                          style: TextStyle(),
-                        ),
                         Text(
                           "『",
                           style: TextStyle(
@@ -1156,6 +1199,13 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   Widget buildDictionaryMatch(DictionaryHistoryEntry results) {
+    if (noPush) {
+      noPush = false;
+    } else if (recursiveTerms.isEmpty ||
+        results.searchTerm != recursiveTerms.last) {
+      recursiveTerms.add(results.searchTerm);
+    }
+
     _subtitleFocusNode.unfocus();
     ValueNotifier<int> selectedIndex = ValueNotifier<int>(0);
 
@@ -1214,18 +1264,46 @@ class _VideoPlayerState extends State<VideoPlayer> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    results.entries[selectedIndex.value].word,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
+                  GestureDetector(
+                    onLongPress: () {
+                      toggleMonolingualMode();
+                      final String clipboardMemory = _clipboard.value;
+                      _clipboard.value = "";
+                      setNoPush();
+                      _clipboard.value = clipboardMemory;
+                    },
+                    child: Text(
+                      results.entries[selectedIndex.value].word,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
                     ),
                   ),
-                  Text(results.entries[selectedIndex.value].reading),
+                  GestureDetector(
+                    onLongPress: () {
+                      toggleMonolingualMode();
+                      final String clipboardMemory = _clipboard.value;
+                      _clipboard.value = "";
+                      setNoPush();
+                      _clipboard.value = clipboardMemory;
+                    },
+                    child: Text(results.entries[selectedIndex.value].reading),
+                  ),
                   Flexible(
                     child: SingleChildScrollView(
-                        child: SelectableText(
-                            "\n${results.entries[selectedIndex.value].meaning}\n")),
+                      child: SelectableText(
+                        "\n${results.entries[selectedIndex.value].meaning}\n",
+                        style: TextStyle(
+                          fontSize: 15,
+                        ),
+                        toolbarOptions: ToolbarOptions(
+                            copy: true,
+                            cut: false,
+                            selectAll: false,
+                            paste: false),
+                      ),
+                    ),
                   ),
                   Wrap(
                     crossAxisAlignment: WrapCrossAlignment.center,
@@ -1234,7 +1312,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
                       Text(
                         "Selecting search result ",
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 12,
                           color: Colors.grey[300],
                         ),
                         textAlign: TextAlign.center,
@@ -1243,14 +1321,14 @@ class _VideoPlayerState extends State<VideoPlayer> {
                         "${selectedIndex.value + 1} ",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 11,
+                          fontSize: 12,
                         ),
                         textAlign: TextAlign.center,
                       ),
                       Text(
                         "out of ",
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 12,
                           color: Colors.grey[300],
                         ),
                         textAlign: TextAlign.center,
@@ -1259,14 +1337,14 @@ class _VideoPlayerState extends State<VideoPlayer> {
                         "${results.entries.length} ",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 11,
+                          fontSize: 12,
                         ),
                         textAlign: TextAlign.center,
                       ),
                       Text(
                         "found for",
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 12,
                           color: Colors.grey[300],
                         ),
                         textAlign: TextAlign.center,
@@ -1279,7 +1357,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
                             "『",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 11,
+                              fontSize: 12,
                               color: Colors.grey[300],
                             ),
                             textAlign: TextAlign.center,
@@ -1288,7 +1366,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
                             "${results.searchTerm}",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 11,
+                              fontSize: 12,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -1296,7 +1374,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
                             "』",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 11,
+                              fontSize: 12,
                               color: Colors.grey[300],
                             ),
                             textAlign: TextAlign.center,
@@ -1304,7 +1382,49 @@ class _VideoPlayerState extends State<VideoPlayer> {
                         ],
                       ),
                     ],
-                  )
+                  ),
+                  (recursiveTerms.length > 1)
+                      ? GestureDetector(
+                          onTap: () {
+                            noPush = true;
+                            recursiveTerms.removeLast();
+                            _clipboard.value = recursiveTerms.last;
+                          },
+                          child: Wrap(
+                            alignment: WrapAlignment.start,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              Text(
+                                "『 ",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  color: Colors.grey[300],
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              Icon(Icons.arrow_back, size: 11),
+                              SizedBox(width: 5),
+                              Text(
+                                "Return to previous definition",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              Text(
+                                " 』",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  color: Colors.grey[300],
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        )
+                      : SizedBox.shrink(),
                 ],
               ),
             ),

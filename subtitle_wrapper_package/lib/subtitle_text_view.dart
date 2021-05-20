@@ -17,6 +17,7 @@ class SubtitleTextView extends StatelessWidget {
   final ValueNotifier<Subtitle> comprehensionSubtitle;
   final ValueNotifier<Subtitle> contextSubtitle;
   final FocusNode focusNode;
+  final VoidCallback emptyStack;
 
   const SubtitleTextView({
     Key key,
@@ -25,6 +26,7 @@ class SubtitleTextView extends StatelessWidget {
     @required this.comprehensionSubtitle,
     @required this.contextSubtitle,
     @required this.focusNode,
+    @required this.emptyStack,
   }) : super(key: key);
 
   Widget getOutlineText(String word) {
@@ -44,6 +46,7 @@ class SubtitleTextView extends StatelessWidget {
       List<String> indexTape) {
     return InkWell(
       onTap: () {
+        emptyStack();
         Clipboard.setData(
           ClipboardData(text: indexTape[index]),
         );
@@ -125,6 +128,7 @@ class SubtitleTextView extends StatelessWidget {
                                 key: ViewKeys.SUBTITLE_TEXT_CONTENT,
                                 textAlign: TextAlign.center,
                                 onSelectionChanged: (selection, cause) {
+                                  emptyStack();
                                   Clipboard.setData(ClipboardData(
                                       text: selection
                                           .textInside(state.subtitle.text)));

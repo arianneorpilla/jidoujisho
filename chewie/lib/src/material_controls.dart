@@ -249,22 +249,27 @@ class _MaterialControlsState extends State<MaterialControls>
   }
 
   Future<void> openExtraShare() async {
+    final bool isYouTube = chewieController.streamData != null;
+
     final chosenOption = await showModalBottomSheet<int>(
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
-      builder: (context) => const _MoreOptionsDialog(
-        [
-          "Translate Current Subtitle with DeepL",
+      builder: (context) => _MoreOptionsDialog(
+        const [
+          "Translate Current Subtitle with Mirinae",
           "Translate Current Subtitle with Google Translate",
           "Share Current Subtitle with Menu",
+          "Share YouTube Video Link",
         ],
-        [
+        const [
           Icons.translate_rounded,
           Icons.g_translate_rounded,
           Icons.share_outlined,
+          Icons.link_sharp,
         ],
-        [],
+        const [],
+        count: isYouTube ? 4 : 3,
       ),
     );
 
@@ -272,14 +277,17 @@ class _MaterialControlsState extends State<MaterialControls>
 
     switch (chosenOption) {
       case 0:
-        await launch("https://www.deepl.com/translator#ja/en/$subtitleText");
+        await launch("https://mirinae.io/#/?text=$subtitleText");
         break;
       case 1:
         await launch(
-            "https://translate.google.com/?sl=ja&tl=en&text=$subtitleText&op=translate");
+            "https://translate.google.com/?sl=ko&tl=en&text=$subtitleText&op=translate");
         break;
       case 2:
         Share.share(subtitleText);
+        break;
+      case 3:
+        Share.share(chewieController.streamData.videoURL);
         break;
     }
   }
@@ -317,7 +325,7 @@ class _MaterialControlsState extends State<MaterialControls>
                 "Use Bilingual Definitions from KrDict"
               else
                 "Use Monolingual Definitions from KrDict",
-              "Share Current Subtitle to Applications",
+              "Share Links to Applications",
               "Export Current Context to Anki",
             ],
             [
@@ -360,6 +368,7 @@ class _MaterialControlsState extends State<MaterialControls>
             toggleMonolingualMode();
             final String clipboardMemory = chewieController.clipboard.value;
             chewieController.clipboard.value = "";
+            chewieController.setNoPush();
             chewieController.clipboard.value = clipboardMemory;
             break;
           case 5:
@@ -848,12 +857,14 @@ class _MoreOptionsDialog extends StatelessWidget {
   const _MoreOptionsDialog(
     this.options,
     this.icons,
-    this.highlights,
-  );
+    this.highlights, {
+    this.count = -1,
+  });
 
   final List<String> options;
   final List<IconData> icons;
   final List<int> highlights;
+  final int count;
 
   @override
   Widget build(BuildContext context) {
@@ -871,14 +882,14 @@ class _MoreOptionsDialog extends StatelessWidget {
               Icon(
                 _icon,
                 size: 20.0,
-                color: Colors.blue,
+                color: Colors.red,
               ),
               const SizedBox(width: 16.0),
               Text(
                 _option,
                 style: TextStyle(
                   color:
-                      (highlights.contains(index)) ? Colors.blue : Colors.white,
+                      (highlights.contains(index)) ? Colors.red : Colors.white,
                 ),
               ),
             ],
@@ -888,7 +899,7 @@ class _MoreOptionsDialog extends StatelessWidget {
           },
         );
       },
-      itemCount: options.length,
+      itemCount: (count == -1) ? options.length : count,
     );
   }
 }
