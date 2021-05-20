@@ -882,7 +882,7 @@ class _MoreOptionsDialog extends StatelessWidget {
               Icon(
                 _icon,
                 size: 20.0,
-                color: Colors.red,
+                color: Colors.blue,
               ),
               const SizedBox(width: 16.0),
               Text(
