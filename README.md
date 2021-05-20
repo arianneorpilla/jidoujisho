@@ -57,8 +57,8 @@ Please note that the development of the app switches between changes being imple
 - [x] **Use of the AnkiDroid API** instead of share intent to streamline card export and Anki output customisation
 - [x] **Morphological analysis of subtitles** for better text selection
 - [x] Improved **monolingual dictionary support**
+- [x] **Alternative immersion modes** for oral practice
 - [ ] **Basic support for any languages and offline use** via support of a common dictionary format
-- [ ] **Immersion difficulty levels** for oral practice
 
 ### 🛣️ Stretch Goals
 - [ ] Promote project to stable and **Google Play release**
