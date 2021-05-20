@@ -9,12 +9,12 @@
 <p align="center" style="margin:0"><b>Latest GitHub Release:<br>
 <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.16.5-beta">0.16.5-beta 🇯🇵 → 🇬🇧</a><br>
 <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.16.5-beta-kren">0.16.5-beta 🇰🇷 → 🇬🇧</a><br>
-<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.5.3-enjp-beta">0.5.3-beta 🇬🇧 → 🇯🇵</a></b><br></p>
 
 <p align="center" style="margin:0"><b>Release Archive:<br>
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.3.0-beta">0.3</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.4-beta">0.4</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.5.2-beta">0.5</a> · 
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.5.3-enjp-beta">0.5.3 (enjp)</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.6.1-beta">0.6</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.7.2-beta">0.7</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.8.1-beta">0.8</a> · 
@@ -44,8 +44,8 @@
 - [x] Use **card creator mode** to quickly **search images and definitions** with imported photos and text 
 - [x] **Dictionary tab remembers words queried** for review between sessions and **allows resuming back to context**
 - [x] **Use monolingual definitions** from Goo.ne.jp or **imported Yomichan dictionaries**
-- [x] **(Experimental)** Weblio.jp **English to Japanese support** and full Japanese localization
-- [x] **(Experimental)** **Korean to English support** through the National Institute of Korean Language's KrDict 
+- [x] **(Experimental)** **Korean to English support** through the National Institute of Korean Language's KrDict
+- [x] **(Legacy)** Weblio.jp **English to Japanese support** and full Japanese localization
 
 # ⚕️ Current state of the project
 
