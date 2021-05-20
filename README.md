@@ -8,7 +8,7 @@
 
 <p align="center" style="margin:0"><b>Latest GitHub Release:<br>
 <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.16.6-beta">0.16.6-beta 🇯🇵 → 🇬🇧</a><br>
-<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.16.5-beta-kren">0.16.5-beta 🇰🇷 → 🇬🇧</a></b><br>
+<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.16.6-beta-kren">0.16.6-beta 🇰🇷 → 🇬🇧</a><br>
 
 <p align="center" style="margin:0"><b>Release Archive:<br>
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.3.0-beta">0.3</a> · 
@@ -27,7 +27,6 @@
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.16.6-beta">0.16</a> 
 </b></p>
 
-
 # 📚 Uninterrupted language immersion at your fingertips
 
 **jidoujisho** is an Android video player and card creation toolkit with features specifically helpful for language learners. 
@@ -44,7 +43,7 @@
 - [x] Use **card creator mode** to quickly **search images and definitions** with imported photos and text 
 - [x] **Dictionary tab remembers words queried** for review between sessions and **allows resuming back to context**
 - [x] **Use monolingual definitions** from Goo.ne.jp or **imported Yomichan dictionaries**
-- [x] **(Experimental)** **Korean to English support** through the National Institute of Korean Language's KrDict
+- [x] **(Experimental)** **Korean to English support** through the National Institute of Korean Language's KrDict 
 
 # ⚕️ Current state of the project
 
@@ -57,8 +56,8 @@ Please note that the development of the app switches between changes being imple
 - [x] **Use of the AnkiDroid API** instead of share intent to streamline card export and Anki output customisation
 - [x] **Morphological analysis of subtitles** for better text selection
 - [x] Improved **monolingual dictionary support**
-- [x] **Alternative immersion modes** for oral practice
 - [ ] **Basic support for any languages and offline use** via support of a common dictionary format
+- [ ] **Immersion difficulty levels** for oral practice
 
 ### 🛣️ Stretch Goals
 - [ ] Promote project to stable and **Google Play release**
