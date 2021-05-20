@@ -145,7 +145,7 @@ Future exportCurrentAudio(
 
   String outputPath = "\"$gAppDirPath/exportAudio.mp3\"";
   String command =
-      "-loglevel quiet -ss $timeStart -to $timeEnd -y -i \"$inputPath\" -map 0:a:$audioIndex $outputPath";
+      "-loglevel verbose -ss $timeStart -to $timeEnd -y -i \"$inputPath\" -map 0:a:$inputPath $outputPath";
 
   await _flutterFFmpeg.execute(command);
 
