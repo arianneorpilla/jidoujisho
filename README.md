@@ -8,7 +8,7 @@
 
 <p align="center" style="margin:0"><b>Latest GitHub Release:<br>
 <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.16.6-beta">0.16.6-beta 🇯🇵 → 🇬🇧</a><br>
-<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.16.6-beta-kren">0.16.6-beta 🇰🇷 → 🇬🇧</a><br>
+<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.16.6-beta-kren">0.16.6-beta 🇰🇷 → 🇬🇧</a></b><br>
 
 <p align="center" style="margin:0"><b>Release Archive:<br>
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.3.0-beta">0.3</a> · 
@@ -56,8 +56,9 @@ Please note that the development of the app switches between changes being imple
 - [x] **Use of the AnkiDroid API** instead of share intent to streamline card export and Anki output customisation
 - [x] **Morphological analysis of subtitles** for better text selection
 - [x] Improved **monolingual dictionary support**
+- [x] **Various immersion modes** for oral practice
 - [ ] **Basic support for any languages and offline use** via support of a common dictionary format
-- [ ] **Immersion difficulty levels** for oral practice
+
 
 ### 🛣️ Stretch Goals
 - [ ] Promote project to stable and **Google Play release**
