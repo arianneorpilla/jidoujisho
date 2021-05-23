@@ -571,6 +571,18 @@ class _VideoPlayerState extends State<VideoPlayer>
     );
   }
 
+  Subtitle getExportSubtitle() {
+    if (_currentSubTrack.value == 99999) {
+      return Subtitle(
+        startTime: _videoPlayerController.value.position,
+        endTime: _videoPlayerController.value.position,
+        text: "",
+      );
+    } else {
+      return _currentSubtitle.value;
+    }
+  }
+
   void exportSingleCallback() {
     getVideoPlayerController().pause();
     _clipboard.value = "&<&>export&<&>";
@@ -580,7 +592,7 @@ class _VideoPlayerState extends State<VideoPlayer>
       getChewieController(),
       getVideoPlayerController(),
       _clipboard,
-      _currentSubtitle.value,
+      getExportSubtitle(),
       _currentDictionaryEntry.value,
       _wasPlaying.value,
       [_currentSubtitle.value],
@@ -669,7 +681,7 @@ class _VideoPlayerState extends State<VideoPlayer>
 
   void toggleShadowingMode() {
     if (_shadowingSubtitle.value == null) {
-      _shadowingSubtitle.value = _currentSubtitle.value;
+      _shadowingSubtitle.value = getExportSubtitle();
     } else {
       _shadowingSubtitle.value = null;
     }
@@ -1719,7 +1731,9 @@ class _VideoPlayerState extends State<VideoPlayer>
           _wasPlaying.value),
     );
 
-    if (wasPlaying && !isExporting) {
+    if (wasPlaying &&
+        !isExporting &&
+        (!getFocusMode() || _clipboard.value == "")) {
       getVideoPlayerController().play();
     }
   }

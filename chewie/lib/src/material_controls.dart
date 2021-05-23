@@ -380,6 +380,9 @@ class _MaterialControlsState extends State<MaterialControls>
             openExtraShare();
             break;
           case 6:
+            chewieController.wasPlaying.value =
+                (chewieController.videoPlayerController.value.isPlaying ||
+                    chewieController.wasPlaying.value);
             chewieController.exportSingleCallback();
             break;
         }
