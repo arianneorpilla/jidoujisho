@@ -25,7 +25,7 @@ There are two templates, one used for video playback and the other used for the 
 
 ### Front Template
 ```html
-{{Audio}}<br>{{Image}}<br><br><p id="sentence">{{Sentence}}</p>
+<p id="sentence">{{Sentence}}</p>
 ```
 
 ### CSS Template
@@ -54,11 +54,27 @@ small {
 #sentence {
     font-size: 30px
 }
+
+You sent Today at 3:28 PM
+.pitch{
+  border-top: solid red 1px;
+  padding-top: 1px;
+}
+
+.pitch_end{
+  border-color: red;
+  border-right: solid red 1px;
+  border-top: solid red 1px;  
+  line-height: 1px;
+  margin-right: 1px;
+  padding-right: 1px;
+  padding-top:1px;
+}
 ```
 
 ### Back Template
 ```html
-{{Audio}}<br>{{Image}}<br><br><p id="sentence">{{Sentence}}</p><br><hr id=reading><p id="reading">{{Reading}}</p><h2 id="word">{{Word}}</h2><br><p><small id="meaning">{{Meaning}}</small></p>
+<p id="sentence">{{Sentence}}</p><br>{{Audio}}<br>{{Image}}<br><br><hr id=reading><p id="reading">{{Reading}}</p><h2 id="word">{{Word}}</h2><br><p><small id="meaning">{{Meaning}}</small></p>
 ```
 
 <br>
@@ -104,6 +120,22 @@ small {
     height: auto;
     width: auto;
     max-height: 300px;
+}
+
+You sent Today at 3:28 PM
+.pitch{
+  border-top: solid red 1px;
+  padding-top: 1px;
+}
+
+.pitch_end{
+  border-color: red;
+  border-right: solid red 1px;
+  border-top: solid red 1px;  
+  line-height: 1px;
+  margin-right: 1px;
+  padding-right: 1px;
+  padding-top:1px;
 }
 ```
 
