@@ -55,7 +55,6 @@ small {
     font-size: 30px
 }
 
-You sent Today at 3:28 PM
 .pitch{
   border-top: solid red 1px;
   padding-top: 1px;
@@ -122,7 +121,6 @@ small {
     max-height: 300px;
 }
 
-You sent Today at 3:28 PM
 .pitch{
   border-top: solid red 1px;
   padding-top: 1px;
