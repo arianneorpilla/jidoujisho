@@ -109,6 +109,20 @@ public class MainActivity extends FlutterActivity {
                             "  height: auto;\n" +
                             "  width: auto;\n" +
                             "  max-height: 300px;\n" +
+                            "}\n" +
+                            ".pitch{\n" +
+                            "  border-top: solid red 1px;\n" +
+                            "  padding-top: 1px;\n" +
+                            "}\n" +
+                            "\n" +
+                            ".pitch_end{\n" +
+                            "  border-color: red;\n" +
+                            "  border-right: solid red 1px;\n" +
+                            "  border-top: solid red 1px;  \n" +
+                            "  line-height: 1px;\n" +
+                            "  margin-right: 1px;\n" +
+                            "  padding-right: 1px;\n" +
+                            "  padding-top:1px;\n" +
                             "}",
                     null,
                     null
@@ -141,8 +155,8 @@ public class MainActivity extends FlutterActivity {
             modelId = api.addNewCustomModel("jidoujisho",
                     new String[] {"Image", "Audio", "Sentence", "Word", "Meaning", "Reading"},
                     new String[] {"jidoujisho Default"},
-                    new String[] {"{{Audio}}<br>{{Image}}<br><br><p id=\"sentence\">{{Sentence}}</p>"},
-                    new String[] {"{{Audio}}<br>{{Image}}<br><br><p id=\"sentence\">{{Sentence}}</p><br>" +
+                    new String[] {"<p id=\"sentence\">{{Sentence}}</p>"},
+                    new String[] {"<p id=\"sentence\">{{Sentence}}</p><br>{{Audio}}<br>{{Image}}<br><br>" +
                             "<hr id=reading><p id=\"reading\">{{Reading}}</p><h2 id=\"word\">{{Word}}</h2><br><p><small id=\"meaning\">{{Meaning}}</small></p>"},
                             "p {\n" +
                             "    margin: 0px\n" +
@@ -167,6 +181,27 @@ public class MainActivity extends FlutterActivity {
                             "\n" +
                             "#sentence {\n" +
                             "    font-size: 30px\n" +
+                            "}\n" +
+                            "\n" +
+                            ".image img {\n" +
+                            "  position: static;\n" +
+                            "  height: auto;\n" +
+                            "  width: auto;\n" +
+                            "  max-height: 300px;\n" +
+                            "}\n" +
+                            ".pitch{\n" +
+                            "  border-top: solid red 1px;\n" +
+                            "  padding-top: 1px;\n" +
+                            "}\n" +
+                            "\n" +
+                            ".pitch_end{\n" +
+                            "  border-color: red;\n" +
+                            "  border-right: solid red 1px;\n" +
+                            "  border-top: solid red 1px;  \n" +
+                            "  line-height: 1px;\n" +
+                            "  margin-right: 1px;\n" +
+                            "  padding-right: 1px;\n" +
+                            "  padding-top:1px;\n" +
                             "}",
                     null,
                     null

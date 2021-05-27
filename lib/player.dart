@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:http/http.dart' as http;
 import 'package:jidoujisho/cache.dart';
+import 'package:jidoujisho/pitch.dart';
 import 'package:path/path.dart' as path;
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -1225,6 +1226,9 @@ class _VideoPlayerState extends State<VideoPlayer>
       valueListenable: selectedIndex,
       builder: (BuildContext context, int _, Widget widget) {
         _currentDictionaryEntry.value = results.entries[selectedIndex.value];
+        DictionaryEntry pitchEntry =
+            getClosestPitchEntry(_currentDictionaryEntry.value);
+
         addDictionaryEntryToHistory(
           DictionaryHistoryEntry(
             entries: results.entries,
@@ -1292,6 +1296,7 @@ class _VideoPlayerState extends State<VideoPlayer>
                       ),
                     ),
                   ),
+                  SizedBox(height: 5),
                   GestureDetector(
                     onLongPress: () {
                       toggleMonolingualMode();
@@ -1300,7 +1305,9 @@ class _VideoPlayerState extends State<VideoPlayer>
                       setNoPush();
                       _clipboard.value = clipboardMemory;
                     },
-                    child: Text(results.entries[selectedIndex.value].reading),
+                    child: (pitchEntry != null)
+                        ? getAllPitchWidgets(pitchEntry)
+                        : Text(results.entries[selectedIndex.value].reading),
                   ),
                   Flexible(
                     child: SingleChildScrollView(

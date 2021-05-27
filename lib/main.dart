@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:jidoujisho/pitch.dart';
 import 'package:jidoujisho/youtube.dart';
 import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
 import 'package:mecab_dart/mecab_dart.dart';
@@ -64,6 +65,7 @@ void main() async {
     backgroundTaskEntrypoint: _backgroundTaskEntrypoint,
   );
 
+  gKanjiumDictionary = await initializeKanjiumEntries();
   runApp(App());
 
   handleAppLifecycleState();
@@ -1193,7 +1195,7 @@ class _HomeState extends State<Home> {
         const String legalese =
             "A mobile video player and card creation toolkit tailored for language learners.\n\n" +
                 "Built for the Japanese language learning community by Leo Rafael Orpilla. " +
-                "Bilingual definitions queried from Jisho.org. Monolingual definitions queried from Goo.ne.jp. Video streaming via YouTube. Image search via Bing. Logo by Aaron Marbella.\n\n" +
+                "Bilingual definitions queried from Jisho.org. Monolingual definitions queried from Goo.ne.jp. Pitch accent patterns from Kanjium. Video streaming via YouTube. Image search via Bing. Logo by Aaron Marbella.\n\n" +
                 "jidoujisho is free and open source software. Liking the application? " +
                 "Help out by providing feedback, making a donation, reporting issues or collaborating " +
                 "for further improvements on GitHub.";
@@ -2507,7 +2509,10 @@ class _ClipboardState extends State<ClipboardMenu> {
           }
 
           if (results != null && results.entries.isNotEmpty) {
-            dictionaryScrollOffset.value = _dictionaryScroller.offset;
+            if (_dictionaryScroller.hasClients) {
+              dictionaryScrollOffset.value = _dictionaryScroller.offset;
+            }
+
             addDictionaryEntryToHistory(results);
             setStateFromResult();
           }
@@ -2661,6 +2666,9 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    DictionaryEntry pitchEntry =
+        getClosestPitchEntry(entry.entries[entry.swipeIndex]);
+
     return Container(
       margin: EdgeInsets.only(bottom: 12),
       color: Colors.grey[800].withOpacity(0.2),
@@ -2708,7 +2716,10 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                       fontSize: 20,
                     ),
                   ),
-                  Text(entry.entries[entry.swipeIndex].reading),
+                  SizedBox(height: 5),
+                  (pitchEntry != null)
+                      ? getAllPitchWidgets(pitchEntry)
+                      : Text(entry.entries[entry.swipeIndex].reading),
                   Text(
                     "\n${entry.entries[entry.swipeIndex].meaning}\n",
                     style: TextStyle(
@@ -2832,6 +2843,12 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
             builder: (BuildContext context, int _, Widget widget) {
               _dialogEntry.value = results.entries[_dialogIndex.value];
 
+              DictionaryEntry pitchEntry =
+                  getClosestPitchEntry(results.entries[_dialogIndex.value]);
+              // if (pitchEntry != null) {
+              //   print(getAllHtmlPitch(pitchEntry));
+              // }
+
               return Container(
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
@@ -2864,7 +2881,10 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                             fontSize: 20,
                           ),
                         ),
-                        Text(results.entries[_dialogIndex.value].reading),
+                        SizedBox(height: 5),
+                        (pitchEntry != null)
+                            ? getAllPitchWidgets(pitchEntry)
+                            : Text(results.entries[_dialogIndex.value].reading),
                         Flexible(
                           child: SingleChildScrollView(
                             child: Text(
@@ -3231,8 +3251,16 @@ class _CreatorState extends State<Creator> {
     _imageSearchController = TextEditingController(text: searchTerm);
     _sentenceController = TextEditingController(text: initialSentence);
     _wordController = TextEditingController(text: initialDictionaryEntry.word);
-    _readingController =
-        TextEditingController(text: initialDictionaryEntry.reading);
+
+    DictionaryEntry pitchEntry = getClosestPitchEntry(initialDictionaryEntry);
+    if (pitchEntry != null) {
+      _readingController =
+          TextEditingController(text: getAllHtmlPitch(pitchEntry));
+    } else {
+      _readingController =
+          TextEditingController(text: initialDictionaryEntry.reading);
+    }
+
     _meaningController =
         TextEditingController(text: initialDictionaryEntry.meaning);
 
@@ -3373,6 +3401,12 @@ class _CreatorState extends State<Creator> {
                 ),
               );
 
+              DictionaryEntry pitchEntry =
+                  getClosestPitchEntry(results.entries[_dialogIndex.value]);
+              // if (pitchEntry != null) {
+              //   print(getAllHtmlPitch(pitchEntry));
+              // }
+
               return Container(
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
@@ -3405,7 +3439,10 @@ class _CreatorState extends State<Creator> {
                             fontSize: 20,
                           ),
                         ),
-                        Text(results.entries[_dialogIndex.value].reading),
+                        SizedBox(height: 5),
+                        (pitchEntry != null)
+                            ? getAllPitchWidgets(pitchEntry)
+                            : Text(results.entries[_dialogIndex.value].reading),
                         Flexible(
                           child: SingleChildScrollView(
                             child: Text(
@@ -3514,8 +3551,17 @@ class _CreatorState extends State<Creator> {
                 _selectedEntry.value = _dialogEntry.value;
                 _wordController =
                     TextEditingController(text: _selectedEntry.value.word);
-                _readingController =
-                    TextEditingController(text: _selectedEntry.value.reading);
+
+                DictionaryEntry pitchEntry =
+                    getClosestPitchEntry(_selectedEntry.value);
+                if (pitchEntry != null) {
+                  _readingController =
+                      TextEditingController(text: getAllHtmlPitch(pitchEntry));
+                } else {
+                  _readingController =
+                      TextEditingController(text: _selectedEntry.value.reading);
+                }
+
                 _meaningController =
                     TextEditingController(text: _selectedEntry.value.meaning);
 

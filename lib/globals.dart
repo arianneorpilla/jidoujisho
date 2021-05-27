@@ -30,6 +30,7 @@ Map<String, AsyncMemoizer> gCaptioningCache = {};
 Map<String, List<Video>> gChannelVideoCache = {};
 Map<String, AsyncMemoizer> gMetadataCache = {};
 
+List<DictionaryEntry> gKanjiumDictionary;
 List<DictionaryEntry> gCustomDictionary;
 Fuzzy gCustomDictionaryFuzzy;
 

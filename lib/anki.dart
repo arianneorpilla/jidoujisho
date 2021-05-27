@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:jidoujisho/pitch.dart';
 import 'package:path/path.dart' as path;
 import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
 
@@ -268,8 +269,16 @@ void showAnkiDialog(
   TextEditingController _wordController =
       TextEditingController(text: dictionaryEntry.word);
 
-  TextEditingController _readingController =
-      TextEditingController(text: dictionaryEntry.reading);
+  DictionaryEntry pitchEntry = getClosestPitchEntry(dictionaryEntry);
+  TextEditingController _readingController;
+
+  if (pitchEntry != null) {
+    _readingController =
+        TextEditingController(text: getAllHtmlPitch(pitchEntry));
+  } else {
+    _readingController = TextEditingController(text: dictionaryEntry.reading);
+  }
+
   TextEditingController _meaningController =
       TextEditingController(text: dictionaryEntry.meaning);
 

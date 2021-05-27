@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:html/parser.dart' as parser;
 import 'package:html/dom.dart' as dom;
 import 'package:http/http.dart' as http;
+import 'package:jidoujisho/pitch.dart';
 import 'package:jidoujisho/preferences.dart';
 import 'package:path/path.dart' as path;
 import 'package:unofficial_jisho_api/api.dart';
@@ -18,28 +19,45 @@ class DictionaryEntry {
   String reading;
   String meaning;
   String searchTerm;
+  List<PitchAccentInformation> pitchAccentEntries;
 
   DictionaryEntry({
     this.word,
     this.reading,
     this.meaning,
     this.searchTerm,
+    this.pitchAccentEntries = const [],
   });
 
   Map<String, dynamic> toMap() {
+    List<Map<String, dynamic>> entriesMaps = [];
+    for (int i = 0; i < pitchAccentEntries.length; i++) {
+      entriesMaps.add(pitchAccentEntries[i].toMap());
+    }
+
     return {
       "word": this.word,
       "reading": this.reading,
       "meaning": this.meaning,
       "searchTerm": this.searchTerm,
+      "pitchAccentEntries": jsonEncode(entriesMaps),
     };
   }
 
   DictionaryEntry.fromMap(Map<String, dynamic> map) {
+    List<dynamic> entriesMaps =
+        (jsonDecode(map['pitchAccentEntries']) as List<dynamic>);
+    List<PitchAccentInformation> entriesFromMap = [];
+    entriesMaps.forEach((map) {
+      PitchAccentInformation entry = PitchAccentInformation.fromMap(map);
+      entriesFromMap.add(entry);
+    });
+
     this.word = map['word'];
     this.reading = map['reading'];
     this.meaning = map['meaning'];
     this.searchTerm = map['searchTerm'];
+    this.pitchAccentEntries = entriesFromMap;
   }
 
   @override
