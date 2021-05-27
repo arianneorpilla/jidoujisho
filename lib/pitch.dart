@@ -116,7 +116,7 @@ String getHtmlPitch(String reading, PitchAccentInformation pitch) {
     htmlPitch += "</span>";
   } else {
     List<int> beforePitchNumbers = [];
-    for (int i = 0; i < units.length; i++) {
+    for (int i = 1; i < units.length; i++) {
       if (i < pitch.number - 1) {
         beforePitchNumbers.add(i);
       }
