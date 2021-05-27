@@ -317,7 +317,8 @@ Future<void> removeVideoHistory(VideoHistory videoHistory) async {
 }
 
 List<DictionaryHistoryEntry> getDictionaryHistory() {
-  String prefsDictionary = gSharedPrefs.getString('dictionaryEntries') ?? '[]';
+  String prefsDictionary =
+      gSharedPrefs.getString('dictionaryEntriesPitch') ?? '[]';
 
   List<dynamic> history = (jsonDecode(prefsDictionary) as List<dynamic>);
 
@@ -337,7 +338,7 @@ Future<void> setDictionaryHistory(
     maps.add(entry.toMap());
   });
 
-  await gSharedPrefs.setString('dictionaryEntries', jsonEncode(maps));
+  await gSharedPrefs.setString('dictionaryEntriesPitch', jsonEncode(maps));
 }
 
 Future<void> addDictionaryEntryToHistory(

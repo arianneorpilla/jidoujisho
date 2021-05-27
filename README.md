@@ -44,7 +44,7 @@
 - [x] Use **card creator mode** to quickly **search images and definitions** with imported photos and text 
 - [x] **Dictionary tab remembers words queried** for review between sessions and **allows resuming back to context**
 - [x] **Use monolingual definitions** from Goo.ne.jp or **imported Yomichan dictionaries**
-- [x] **Export cards with pitch accent information** from Kanjium
+- [x] View dictionary entries and export cards **with pitch accent information** from Kanjium Pitch Dictionaries
 - [x] **(Experimental)** **Korean to English support** through the National Institute of Korean Language's KrDict 
 
 # ⚕️ Current state of the project
@@ -59,6 +59,7 @@ Please note that the development of the app switches between changes being imple
 - [x] **Morphological analysis of subtitles** for better text selection
 - [x] Improved **monolingual dictionary support**
 - [x] **Various immersion modes** for oral practice
+- [x] Include **pitch accent information** in dictionary and exported cards
 - [ ] **Basic support for any languages and offline use** via support of a common dictionary format
 
 
@@ -135,8 +136,8 @@ A primer on the basics of the application is as follows.
 * 🔤 Having a word in the clipboard **will include the sentence, word, meaning and reading** in the export
 * 📝 **You may edit the sentence, word, meaning and reading text fields** before exporting to AnkiDroid
 * 🔗 To finalise the export, **share the exported text to AnkiDroid**
-* 🃏 The **front of the card** will include the **audio, video and sentence**
-* 🎴 The **back of the card** will include the **reading, word and meaning**
+* 🃏 The **front of the card** will include only the **sentence**
+* 🎴 The **back of the card** will include the **audio, image, reading, word and meaning**
 * 📑 You may apply **text formatting to the card with the AnkiDroid editor once exported**
 * ⚛️ **Customisation of the Anki export** is possible by changing the default template in AnkiDroid 
 * 🔄 Once in AnkiDroid, **cards may be synced to AnkiWeb**, use *Check Media* to include all exported media 
@@ -158,7 +159,7 @@ A primer on the basics of the application is as follows.
 
 # 👥 Contribution and attribution
 
-jidoujisho is written in <b><a href="https://dart.dev/">Dart</a></b> and powered by <b><a href="https://flutter.dev/">Flutter</a></b>. Bilingual dictionary definitions are queried from <b><a href="https://jisho.org/">Jisho.org</a></b> and monolingual dictionary definitions are from <b><a href="https://dictionary.goo.ne.jp/">Goo.ne.jp</a></b>. Video streaming via <b><a href="https://youtube.com/">YouTube</a></b>. Image search via <b><a href="https://bing.com//">Bing</a></b>.
+jidoujisho is written in <b><a href="https://dart.dev/">Dart</a></b> and powered by <b><a href="https://flutter.dev/">Flutter</a></b>. Bilingual dictionary definitions are queried from <b><a href="https://jisho.org/">Jisho.org</a></b> and monolingual dictionary definitions are from <b><a href="https://dictionary.goo.ne.jp/">Goo.ne.jp</a></b>. Pitch accent patterns are sourced from <b><a href="https://github.com/mifunetoshiro/kanjium">Kanjium</a></b>. Video streaming via <b><a href="https://youtube.com/">YouTube</a></b>. Image search via <b><a href="https://bing.com//">Bing</a></b>.
 
 If you like what I've done so far, you can help me out by testing the application on various devices so that I can gauge the compatibility of the application with different versions of Android, <b><a href="https://www.buymeacoffee.com/lrorpilla">making a donation</a></b> or collaborating with me on further improvements.
 
