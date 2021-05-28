@@ -13,6 +13,7 @@ import 'package:unofficial_jisho_api/api.dart';
 
 import 'package:jidoujisho/globals.dart';
 import 'package:jidoujisho/util.dart';
+import 'package:jidoujisho/pitch.dart';
 
 class DictionaryEntry {
   String word;
@@ -555,8 +556,23 @@ DictionaryEntry getEntryFromGooElement(
   meaningChildrenLines.removeWhere((line) => line.isEmpty);
   meaning = meaningChildrenLines.join("\n\n");
 
-  word = word.trim();
-  reading = reading.trim();
+  List<String> wordSanitized = sanitizeGooForPitchMatch(word.trim());
+  List<String> readingSanitized = sanitizeGooForPitchMatch(reading.trim());
+
+  word = "";
+  for (int i = 0; i < wordSanitized.length; i++) {
+    word += wordSanitized[i];
+    if (i != wordSanitized.length - 1) {
+      word += "; ";
+    }
+  }
+  reading = "";
+  for (int i = 0; i < readingSanitized.length; i++) {
+    reading += readingSanitized[i];
+    if (i != readingSanitized.length - 1) {
+      reading += "; ";
+    }
+  }
   meaning = meaning.trim();
 
   print(word);

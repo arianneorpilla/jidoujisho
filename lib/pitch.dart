@@ -90,7 +90,7 @@ String getHtmlPitch(String reading, PitchAccentInformation pitch) {
     htmlPitch += "<span>[<b>${pitch.partOfSpeech}</b>]</span> ";
   }
 
-  List<String> units = [];
+  List<String> moras = [];
   for (int i = 0; i < reading.length; i++) {
     String current = reading[i];
     String next;
@@ -98,25 +98,25 @@ String getHtmlPitch(String reading, PitchAccentInformation pitch) {
       next = reading[i + 1];
     }
 
-    if (next != null && "ゃゅょぁぃぅぇぉっャュョァィゥェォッ".contains(next)) {
-      units.add(current + next);
+    if (next != null && "ゃゅょぁぃぅぇぉャュョァィゥェォ".contains(next)) {
+      moras.add(current + next);
       i += 1;
       continue;
     } else {
-      units.add(current);
+      moras.add(current);
     }
   }
 
   if (pitch.number == 0) {
-    htmlPitch += units[0];
+    htmlPitch += moras[0];
     htmlPitch += "<span class=\"pitch\">";
-    for (int i = 1; i < units.length; i++) {
-      htmlPitch += units[i];
+    for (int i = 1; i < moras.length; i++) {
+      htmlPitch += moras[i];
     }
     htmlPitch += "</span>";
   } else {
     List<int> beforePitchNumbers = [];
-    for (int i = 1; i < units.length; i++) {
+    for (int i = 1; i < moras.length; i++) {
       if (i < pitch.number - 1) {
         beforePitchNumbers.add(i);
       }
@@ -129,13 +129,13 @@ String getHtmlPitch(String reading, PitchAccentInformation pitch) {
       lastBeforePitchNumber = beforePitchNumbers.last;
     }
 
-    for (int i = 0; i < units.length; i++) {
+    for (int i = 0; i < moras.length; i++) {
       if (i == firstBeforePitchNumber) {
         htmlPitch += "<span class=\"pitch\">";
       } else if (i == pitch.number - 1) {
         htmlPitch += "<span class=\"pitch_end\">";
       }
-      htmlPitch += units[i];
+      htmlPitch += moras[i];
       if (i == lastBeforePitchNumber || i == pitch.number - 1) {
         htmlPitch += "</span>";
       }
@@ -198,7 +198,7 @@ Widget getPitchWidget(String reading, PitchAccentInformation pitch) {
     listWidgets.add(Text("] "));
   }
 
-  List<String> units = [];
+  List<String> moras = [];
   for (int i = 0; i < reading.length; i++) {
     String current = reading[i];
     String next;
@@ -206,33 +206,33 @@ Widget getPitchWidget(String reading, PitchAccentInformation pitch) {
       next = reading[i + 1];
     }
 
-    if (next != null && "ゃゅょぁぃぅぇぉっャュョァィゥェォッ".contains(next)) {
-      units.add(current + next);
+    if (next != null && "ゃゅょぁぃぅぇぉャュョァィゥェォ".contains(next)) {
+      moras.add(current + next);
       i += 1;
       continue;
     } else {
-      units.add(current);
+      moras.add(current);
     }
   }
 
   if (pitch.number == 0) {
-    for (int i = 0; i < units.length; i++) {
+    for (int i = 0; i < moras.length; i++) {
       if (i == 0) {
-        listWidgets.add(getAccentNone(units[i]));
+        listWidgets.add(getAccentNone(moras[i]));
       } else {
-        listWidgets.add(getAccentTop(units[i]));
+        listWidgets.add(getAccentTop(moras[i]));
       }
     }
   } else {
-    for (int i = 0; i < units.length; i++) {
+    for (int i = 0; i < moras.length; i++) {
       if (i == 0 && i != pitch.number - 1) {
-        listWidgets.add(getAccentNone(units[i]));
+        listWidgets.add(getAccentNone(moras[i]));
       } else if (i < pitch.number - 1) {
-        listWidgets.add(getAccentTop(units[i]));
+        listWidgets.add(getAccentTop(moras[i]));
       } else if (i == pitch.number - 1) {
-        listWidgets.add(getAccentEnd(units[i]));
+        listWidgets.add(getAccentEnd(moras[i]));
       } else {
-        listWidgets.add(getAccentNone(units[i]));
+        listWidgets.add(getAccentNone(moras[i]));
       }
     }
   }
@@ -245,19 +245,21 @@ Widget getPitchWidget(String reading, PitchAccentInformation pitch) {
 }
 
 DictionaryEntry getClosestPitchEntry(DictionaryEntry entry) {
-  String firstReading = sanitizeGooForPitchMatch(entry.reading).first;
+  String firstReading = entry.reading;
+  if (firstReading.contains(";")) {
+    firstReading = entry.reading.split(";").first;
+  }
+
   print(firstReading);
 
   List<DictionaryEntry> readingMatches = gKanjiumDictionary
       .where((pitchEntry) => pitchEntry.reading == firstReading)
       .toList();
 
-  print(sanitizeGooForPitchMatch(entry.word));
+  print(entry.word);
 
   return readingMatches.firstWhere(
-      (pitchEntry) =>
-          sanitizeGooForPitchMatch(entry.word).contains(pitchEntry.word),
-      orElse: () {
+      (pitchEntry) => entry.word.contains(pitchEntry.word), orElse: () {
     return null;
   });
 }
@@ -265,7 +267,7 @@ DictionaryEntry getClosestPitchEntry(DictionaryEntry entry) {
 List<String> sanitizeGooForPitchMatch(String text) {
   List<String> sanitized = [];
   String fixedGooTitle = text.replaceAll("／", ";");
-  fixedGooTitle = fixedGooTitle.replaceAll("×", ";");
+  fixedGooTitle = fixedGooTitle.replaceAll("×", "");
 
   if (fixedGooTitle.contains(";")) {
     List<String> splitLine = fixedGooTitle.split(";");
@@ -275,6 +277,12 @@ List<String> sanitizeGooForPitchMatch(String text) {
       if (line.contains("〔")) {
         sanitizedLine = line.substring(0, line.indexOf("〔"));
       }
+      if (sanitizedLine.contains("（")) {
+        int startParenthesis = sanitizedLine.indexOf("（");
+        int endParenthesis = sanitizedLine.indexOf("）");
+        sanitizedLine = sanitizedLine.replaceRange(
+            startParenthesis, endParenthesis + 1, "");
+      }
 
       sanitizedLine = sanitizedLine.replaceAll(" ", "");
       sanitizedLine = sanitizedLine.replaceAll("‐", "");
@@ -282,6 +290,7 @@ List<String> sanitizeGooForPitchMatch(String text) {
       sanitizedLine = sanitizedLine.replaceAll("△", "");
       sanitizedLine = sanitizedLine.replaceAll("・", "");
       sanitizedLine = sanitizedLine.replaceAll("◦", "");
+      sanitizedLine = sanitizedLine.replaceAll("＝", "");
 
       sanitized.add(sanitizedLine);
     });
@@ -291,6 +300,13 @@ List<String> sanitizeGooForPitchMatch(String text) {
     if (fixedGooTitle.contains("〔")) {
       sanitizedLine = fixedGooTitle.substring(0, fixedGooTitle.indexOf("〔"));
     }
+    if (sanitizedLine.contains("（")) {
+      int startParenthesis = sanitizedLine.indexOf("（");
+      int endParenthesis = sanitizedLine.indexOf("）") + 1;
+
+      sanitizedLine =
+          sanitizedLine.replaceRange(startParenthesis, endParenthesis, "");
+    }
 
     sanitizedLine = sanitizedLine.replaceAll(" ", "");
     sanitizedLine = sanitizedLine.replaceAll("‐", "");
@@ -298,6 +314,7 @@ List<String> sanitizeGooForPitchMatch(String text) {
     sanitizedLine = sanitizedLine.replaceAll("△", "");
     sanitizedLine = sanitizedLine.replaceAll("・", "");
     sanitizedLine = sanitizedLine.replaceAll("◦", "");
+    sanitizedLine = sanitizedLine.replaceAll("＝", "");
 
     sanitized.add(sanitizedLine);
   }
@@ -307,8 +324,13 @@ List<String> sanitizeGooForPitchMatch(String text) {
 
 Widget getAllPitchWidgets(DictionaryEntry entry) {
   List<Widget> listWidgets = [];
+  String reading = entry.reading;
+  if (reading.isEmpty) {
+    reading = entry.word;
+  }
+
   for (int i = 0; i < entry.pitchAccentEntries.length; i++) {
-    listWidgets.add(getPitchWidget(entry.reading, entry.pitchAccentEntries[i]));
+    listWidgets.add(getPitchWidget(reading, entry.pitchAccentEntries[i]));
     listWidgets.add(SizedBox(height: 5));
   }
 
@@ -321,9 +343,13 @@ Widget getAllPitchWidgets(DictionaryEntry entry) {
 
 String getAllHtmlPitch(DictionaryEntry entry) {
   String allPitches = "";
+  String reading = entry.reading;
+  if (reading.isEmpty) {
+    reading = entry.word;
+  }
 
   for (int i = 0; i < entry.pitchAccentEntries.length; i++) {
-    allPitches += getHtmlPitch(entry.reading, entry.pitchAccentEntries[i]);
+    allPitches += getHtmlPitch(reading, entry.pitchAccentEntries[i]);
     if (i != entry.pitchAccentEntries.length - 1) {
       allPitches += "<br>";
     }

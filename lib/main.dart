@@ -2384,8 +2384,13 @@ class _ClipboardState extends State<ClipboardMenu> {
     _dictionaryScroller =
         ScrollController(initialScrollOffset: dictionaryScrollOffset.value);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _dictionaryScroller.addListener(() {
+        dictionaryScrollOffset.value = _dictionaryScroller.offset;
+      });
       _dictionaryScroller.position.isScrollingNotifier.addListener(() {
         if (!_dictionaryScroller.position.isScrollingNotifier.value) {
+          dictionaryScrollOffset.value = _dictionaryScroller.offset;
+        } else {
           dictionaryScrollOffset.value = _dictionaryScroller.offset;
         }
       });
@@ -2468,10 +2473,6 @@ class _ClipboardState extends State<ClipboardMenu> {
             ),
           ),
           onTap: () async {
-            if (_dictionaryScroller.hasClients) {
-              dictionaryScrollOffset.value = _dictionaryScroller.offset;
-            }
-
             creatorCallback(
               DictionaryEntry(
                 word: "",
@@ -2486,10 +2487,6 @@ class _ClipboardState extends State<ClipboardMenu> {
     }
 
     void wordFieldSearch(bool monolingual) async {
-      if (_dictionaryScroller.hasClients) {
-        dictionaryScrollOffset.value = _dictionaryScroller.offset;
-      }
-
       String searchTerm = _wordController.text;
       if (!_isSearching.value && searchTerm.isNotEmpty) {
         _wordController.clear();
@@ -2509,15 +2506,13 @@ class _ClipboardState extends State<ClipboardMenu> {
           }
 
           if (results != null && results.entries.isNotEmpty) {
-            if (_dictionaryScroller.hasClients) {
-              dictionaryScrollOffset.value = _dictionaryScroller.offset;
-            }
-
             addDictionaryEntryToHistory(results);
-            setStateFromResult();
           }
         } finally {
+          print("test");
+          dictionaryScrollOffset.value = 0;
           _isSearching.value = false;
+          setStateFromResult();
         }
       }
     }
@@ -2675,7 +2670,6 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
       child: InkWell(
         onTap: () {
           creatorCallback(entry.entries[entry.swipeIndex], null);
-          dictionaryScrollOffset.value = dictionaryScroller.offset;
         },
         onLongPress: () {
           HapticFeedback.vibrate();
@@ -3005,10 +2999,6 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                 Navigator.pop(context);
                 removeDictionaryEntryFromHistory(results);
                 stateCallback();
-
-                Future.delayed(Duration(milliseconds: 100), () {
-                  dictionaryScrollOffset.value = dictionaryScroller.offset;
-                });
               },
             ),
             if (results.contextDataSource != "-1")
@@ -3030,8 +3020,6 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                   ).then((returnValue) {
                     unlockLandscape();
                     stateCallback();
-
-                    dictionaryScrollOffset.value = dictionaryScroller.offset;
                   });
                 },
               ),
@@ -3043,8 +3031,6 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
               onPressed: () {
                 creatorCallback(results.entries[_dialogIndex.value], null);
                 Navigator.pop(context);
-
-                dictionaryScrollOffset.value = dictionaryScroller.offset;
               },
             ),
           ],
