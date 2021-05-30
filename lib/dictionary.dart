@@ -205,15 +205,15 @@ DictionaryEntry getEntryFromJishoResult(JishoResult result, String searchTerm) {
     String term = word.word;
     String reading = word.reading;
 
-    if (!hasDuplicateReading(exportTerm, term)) {
-      exportTerm = "$exportTerm$term; ";
+    if (term == null) {
+      exportTerm += "";
+    } else {
+      if (!hasDuplicateReading(exportTerm, term)) {
+        exportTerm = "$exportTerm$term; ";
+      }
     }
     if (!hasDuplicateReading(exportReadings, reading)) {
       exportReadings = "$exportReadings$reading; ";
-    }
-
-    if (term == null) {
-      exportTerm = "";
     }
   });
 
@@ -575,9 +575,9 @@ DictionaryEntry getEntryFromGooElement(
   }
   meaning = meaning.trim();
 
-  print(word);
-  print(reading);
-  print(meaning);
+  // print(word);
+  // print(reading);
+  // print(meaning);
 
   DictionaryEntry singleEntry = DictionaryEntry(
     word: word,

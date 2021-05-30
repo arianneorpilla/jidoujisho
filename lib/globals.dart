@@ -33,5 +33,6 @@ Map<String, AsyncMemoizer> gMetadataCache = {};
 List<DictionaryEntry> gKanjiumDictionary;
 List<DictionaryEntry> gCustomDictionary;
 Fuzzy gCustomDictionaryFuzzy;
+ScrollController gCurrentScrollbar;
 
 ValueNotifier<bool> gPlayPause = ValueNotifier<bool>(true);

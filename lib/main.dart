@@ -22,7 +22,6 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:wakelock/wakelock.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
@@ -252,28 +251,43 @@ class _HomeState extends State<Home> {
   }
 
   void onItemTapped(int index) {
-    setState(() {
-      if (getNavigationBarItems()[index].label == "Library") {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => Player(),
-          ),
-        ).then((returnValue) {
-          setState(() {
-            unlockLandscape();
-          });
-        });
-      } else {
-        _selectedIndex = index;
-        if (_isSearching || _isChannelView || _isCreatorView) {
+    if (getNavigationBarItems()[index].label ==
+        getNavigationBarItems()[_selectedIndex].label) {
+      if (_isSearching || _isChannelView || _isCreatorView) {
+        setState(() {
           _isSearching = false;
           _isChannelView = false;
           _isCreatorView = false;
           _searchQuery = "";
-        }
+        });
+      } else {
+        gCurrentScrollbar.animateTo(0,
+            duration: Duration(milliseconds: 200), curve: Curves.easeInOut);
       }
-    });
+    } else {
+      setState(() {
+        if (getNavigationBarItems()[index].label == "Library") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Player(),
+            ),
+          ).then((returnValue) {
+            setState(() {
+              unlockLandscape();
+            });
+          });
+        } else {
+          _selectedIndex = index;
+          if (_isSearching || _isChannelView || _isCreatorView) {
+            _isSearching = false;
+            _isChannelView = false;
+            _isCreatorView = false;
+            _searchQuery = "";
+          }
+        }
+      });
+    }
   }
 
   Widget getWidgetOptions(int index) {
@@ -561,24 +575,31 @@ class _HomeState extends State<Home> {
               }
 
               if (snapshot.data.isNotEmpty) {
-                return ListView.builder(
-                  addAutomaticKeepAlives: true,
-                  itemCount: snapshot.data.length + 1,
-                  itemBuilder: (BuildContext context, int index) {
-                    if (index == 0) {
-                      return buildNewChannelRow();
-                    }
+                ScrollController scrollController = ScrollController();
+                gCurrentScrollbar = scrollController;
 
-                    Channel result = results[index - 1];
-                    print("CHANNEL LISTED: $result");
+                return Scrollbar(
+                  controller: scrollController,
+                  child: ListView.builder(
+                    controller: scrollController,
+                    addAutomaticKeepAlives: true,
+                    itemCount: snapshot.data.length + 1,
+                    itemBuilder: (BuildContext context, int index) {
+                      if (index == 0) {
+                        return buildNewChannelRow();
+                      }
 
-                    return ChannelResult(
-                      result,
-                      setChannelVideoSearch,
-                      setStateFromResult,
-                      index,
-                    );
-                  },
+                      Channel result = results[index - 1];
+                      print("CHANNEL LISTED: $result");
+
+                      return ChannelResult(
+                        result,
+                        setChannelVideoSearch,
+                        setStateFromResult,
+                        index,
+                      );
+                    },
+                  ),
                 );
               } else {
                 return Column(children: [
@@ -726,23 +747,6 @@ class _HomeState extends State<Home> {
               actions: <Widget>[
                 new TextButton(
                   child: Text(
-                    'CANCEL',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  style: TextButton.styleFrom(
-                    textStyle: TextStyle(
-                      color: Colors.white,
-                    ),
-                  ),
-                  onPressed: () async {
-                    Navigator.pop(context);
-                  },
-                ),
-                new TextButton(
-                  child: Text(
                     'LAUNCH ANKIDROID',
                     style: TextStyle(
                       color: Colors.white,
@@ -783,20 +787,25 @@ class _HomeState extends State<Home> {
     return ValueListenableBuilder(
       valueListenable: _searchSuggestions,
       builder: (BuildContext context, List<String> suggestions, ___) {
-        return ListView.builder(
-          key: UniqueKey(),
-          itemCount: suggestions.length,
-          itemBuilder: (BuildContext context, int index) {
-            String result = suggestions[index];
+        ScrollController scrollController = ScrollController();
 
-            return SearchResult(
-              result,
-              updateSearchQuery,
-              null,
-              index,
-              Icons.search,
-            );
-          },
+        return Scrollbar(
+          controller: scrollController,
+          child: ListView.builder(
+            key: UniqueKey(),
+            itemCount: suggestions.length,
+            itemBuilder: (BuildContext context, int index) {
+              String result = suggestions[index];
+
+              return SearchResult(
+                result,
+                updateSearchQuery,
+                null,
+                index,
+                Icons.search,
+              );
+            },
+          ),
         );
       },
     );
@@ -805,20 +814,25 @@ class _HomeState extends State<Home> {
   Widget generateHistory() {
     List<String> searchHistory = getSearchHistory().reversed.toList();
 
-    return ListView.builder(
-      key: UniqueKey(),
-      itemCount: searchHistory.length,
-      itemBuilder: (BuildContext context, int index) {
-        String result = searchHistory[index];
+    ScrollController scrollController = ScrollController();
 
-        return SearchResult(
-          result,
-          updateSearchQuery,
-          setStateFromResult,
-          index,
-          Icons.history,
-        );
-      },
+    return Scrollbar(
+      controller: scrollController,
+      child: ListView.builder(
+        key: UniqueKey(),
+        itemCount: searchHistory.length,
+        itemBuilder: (BuildContext context, int index) {
+          String result = searchHistory[index];
+
+          return SearchResult(
+            result,
+            updateSearchQuery,
+            setStateFromResult,
+            index,
+            Icons.history,
+          );
+        },
+      ),
     );
   }
 
@@ -923,24 +937,31 @@ class _HomeState extends State<Home> {
               return errorMessage;
             }
 
-            return ListView.builder(
-              addAutomaticKeepAlives: true,
-              itemCount: snapshot.data.length,
-              itemBuilder: (BuildContext context, int index) {
-                Video result = results[index];
-                print("VIDEO LISTED: $result");
+            ScrollController scrollController = ScrollController();
+            gCurrentScrollbar = scrollController;
 
-                return YouTubeResult(
-                  result,
-                  gCaptioningCache[result.id],
-                  fetchCaptioningCache(result.id.value),
-                  (_isSearching)
-                      ? fetchMetadataCache(result.id.value, result)
-                      : null,
-                  index,
-                  true,
-                );
-              },
+            return Scrollbar(
+              controller: scrollController,
+              child: ListView.builder(
+                controller: scrollController,
+                addAutomaticKeepAlives: true,
+                itemCount: snapshot.data.length,
+                itemBuilder: (BuildContext context, int index) {
+                  Video result = results[index];
+                  print("VIDEO LISTED: $result");
+
+                  return YouTubeResult(
+                    result,
+                    gCaptioningCache[result.id],
+                    fetchCaptioningCache(result.id.value),
+                    (_isSearching)
+                        ? fetchMetadataCache(result.id.value, result)
+                        : null,
+                    index,
+                    true,
+                  );
+                },
+              ),
             );
         }
       },
@@ -1006,12 +1027,6 @@ class _HomeState extends State<Home> {
               ),
               actions: <Widget>[
                 TextButton(
-                  child: Text('CANCEL', style: TextStyle(color: Colors.white)),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                TextButton(
                   child: Text('OK', style: TextStyle(color: Colors.white)),
                   onPressed: () {
                     String webURL = _textFieldController.text;
@@ -1071,12 +1086,6 @@ class _HomeState extends State<Home> {
                 maxLines: null,
               ),
               actions: <Widget>[
-                TextButton(
-                  child: Text('CANCEL', style: TextStyle(color: Colors.white)),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
                 TextButton(
                   child: Text('OK', style: TextStyle(color: Colors.white)),
                   onPressed: () async {
@@ -1527,12 +1536,6 @@ class _YouTubeResultState extends State<YouTubeResult>
               ),
               actions: <Widget>[
                 TextButton(
-                  child: Text('CANCEL', style: TextStyle(color: Colors.white)),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                TextButton(
                   child: Text('LIST CHANNEL',
                       style: TextStyle(color: Colors.white)),
                   onPressed: () async {
@@ -1861,12 +1864,6 @@ class _ChannelResultState extends State<ChannelResult>
               ),
               actions: <Widget>[
                 TextButton(
-                  child: Text('CANCEL', style: TextStyle(color: Colors.white)),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                TextButton(
                   child: Text('UNLIST CHANNEL',
                       style: TextStyle(color: Colors.white)),
                   onPressed: () async {
@@ -2010,13 +2007,6 @@ class _SearchResultState extends State<SearchResult>
                   overflow: TextOverflow.ellipsis,
                 ),
                 actions: <Widget>[
-                  TextButton(
-                    child:
-                        Text('CANCEL', style: TextStyle(color: Colors.white)),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                  ),
                   TextButton(
                     child: Text(
                       'REMOVE',
@@ -2223,12 +2213,6 @@ class _HistoryResultState extends State<HistoryResult>
               ),
               actions: <Widget>[
                 TextButton(
-                  child: Text('CANCEL', style: TextStyle(color: Colors.white)),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                TextButton(
                   child: Text(
                     'REMOVE',
                     style: TextStyle(color: Colors.white),
@@ -2344,19 +2328,26 @@ class _HistoryState extends State<History> {
       return emptyMessage;
     }
 
-    return ListView.builder(
-      key: UniqueKey(),
-      itemCount: histories.length,
-      itemBuilder: (BuildContext context, int index) {
-        VideoHistory history = histories[index];
-        print("HISTORY LISTED: $history");
+    ScrollController scrollController = ScrollController();
+    gCurrentScrollbar = scrollController;
 
-        return HistoryResult(
-          history,
-          setStateFromResult,
-          index,
-        );
-      },
+    return Scrollbar(
+      controller: scrollController,
+      child: ListView.builder(
+        controller: scrollController,
+        key: UniqueKey(),
+        itemCount: histories.length,
+        itemBuilder: (BuildContext context, int index) {
+          VideoHistory history = histories[index];
+          print("HISTORY LISTED: $history");
+
+          return HistoryResult(
+            history,
+            setStateFromResult,
+            index,
+          );
+        },
+      ),
     );
   }
 }
@@ -2384,8 +2375,13 @@ class _ClipboardState extends State<ClipboardMenu> {
   @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     _dictionaryScroller =
         ScrollController(initialScrollOffset: dictionaryScrollOffset.value);
+    gCurrentScrollbar = _dictionaryScroller;
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _dictionaryScroller.addListener(() {
         dictionaryScrollOffset.value = _dictionaryScroller.offset;
@@ -2398,10 +2394,7 @@ class _ClipboardState extends State<ClipboardMenu> {
         }
       });
     });
-  }
 
-  @override
-  Widget build(BuildContext context) {
     List<DictionaryHistoryEntry> entries =
         getDictionaryHistory().reversed.toList();
 
@@ -2580,33 +2573,36 @@ class _ClipboardState extends State<ClipboardMenu> {
       ]);
     }
 
-    return ListView.builder(
+    return Scrollbar(
       controller: _dictionaryScroller,
-      addAutomaticKeepAlives: true,
-      key: UniqueKey(),
-      itemCount: entries.length + 2,
-      itemBuilder: (BuildContext context, int index) {
-        if (index == 0) {
-          return Padding(
-            padding: EdgeInsets.only(left: 12, right: 12, bottom: 12),
-            child: wordField,
+      child: ListView.builder(
+        controller: _dictionaryScroller,
+        addAutomaticKeepAlives: true,
+        key: UniqueKey(),
+        itemCount: entries.length + 2,
+        itemBuilder: (BuildContext context, int index) {
+          if (index == 0) {
+            return Padding(
+              padding: EdgeInsets.only(left: 12, right: 12, bottom: 12),
+              child: wordField,
+            );
+          }
+          if (index == 1) {
+            return cardCreatorButton();
+          }
+
+          DictionaryHistoryEntry entry = entries[index - 2];
+          print("ENTRY LISTED: $entry");
+
+          return ClipboardHistoryItem(
+            entry,
+            creatorCallback,
+            setStateFromResult,
+            _dictionaryScroller,
+            dictionaryScrollOffset,
           );
-        }
-        if (index == 1) {
-          return cardCreatorButton();
-        }
-
-        DictionaryHistoryEntry entry = entries[index - 2];
-        print("ENTRY LISTED: $entry");
-
-        return ClipboardHistoryItem(
-          entry,
-          creatorCallback,
-          setStateFromResult,
-          _dictionaryScroller,
-          dictionaryScrollOffset,
-        );
-      },
+        },
+      ),
     );
   }
 
@@ -2988,12 +2984,6 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('CANCEL', style: TextStyle(color: Colors.white)),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            TextButton(
               child: Text(
                 'REMOVE',
                 style: TextStyle(color: Colors.white),
@@ -3058,6 +3048,7 @@ class LazyResults extends StatefulWidget {
 class _LazyResultsState extends State<LazyResults> {
   String channelID;
   bool isLoading = false;
+  ScrollController scrollController;
 
   _LazyResultsState(this.channelID);
 
@@ -3088,6 +3079,7 @@ class _LazyResultsState extends State<LazyResults> {
   @override
   void initState() {
     super.initState();
+    scrollController = ScrollController();
     verticalData = fetchChannelVideoCache(channelID);
     _loadMore();
   }
@@ -3139,46 +3131,52 @@ class _LazyResultsState extends State<LazyResults> {
         true,
       );
     }
+
     return LazyLoadScrollView(
       onEndOfPage: () => _loadMore(),
-      child: ListView.builder(
-        addAutomaticKeepAlives: true,
-        itemCount: verticalData.length + 1,
-        itemBuilder: (BuildContext context, int index) {
-          if (index == verticalData.length) {
-            if (isLoading) {
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(top: 16, bottom: 16),
-                    child: SizedBox(
-                      height: 32,
-                      width: 32,
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
+      child: Scrollbar(
+        controller: scrollController,
+        child: ListView.builder(
+          controller: scrollController,
+          addAutomaticKeepAlives: true,
+          itemCount: verticalData.length + 1,
+          itemBuilder: (BuildContext context, int index) {
+            if (index == verticalData.length) {
+              if (isLoading) {
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(top: 16, bottom: 16),
+                      child: SizedBox(
+                        height: 32,
+                        width: 32,
+                        child: CircularProgressIndicator(
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.grey),
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              );
-            } else {
-              return Container();
+                  ],
+                );
+              } else {
+                return Container();
+              }
             }
-          }
 
-          Video result = verticalData[index];
-          print("VIDEO LISTED: $result");
+            Video result = verticalData[index];
+            print("VIDEO LISTED: $result");
 
-          return YouTubeResult(
-            result,
-            gCaptioningCache[result.id],
-            fetchCaptioningCache(result.id.value),
-            null,
-            index,
-            false,
-          );
-        },
+            return YouTubeResult(
+              result,
+              gCaptioningCache[result.id],
+              fetchCaptioningCache(result.id.value),
+              null,
+              index,
+              false,
+            );
+          },
+        ),
       ),
     );
   }
@@ -4079,6 +4077,8 @@ class _CreatorState extends State<Creator> {
       );
     }
 
+    ScrollController scrollController = ScrollController();
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Column(
@@ -4086,24 +4086,28 @@ class _CreatorState extends State<Creator> {
           Expanded(
             child: Padding(
               padding: EdgeInsets.only(left: 8, right: 8),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.max,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    showImagePreview(),
-                    DeckDropDown(
-                      decks: decks,
-                      selectedDeck: _selectedDeck,
-                    ),
-                    imageSearchField,
-                    wordField,
-                    readingField,
-                    meaningField,
-                    sentenceField,
-                    SizedBox(height: 10),
-                  ],
+              child: Scrollbar(
+                controller: scrollController,
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      showImagePreview(),
+                      DeckDropDown(
+                        decks: decks,
+                        selectedDeck: _selectedDeck,
+                      ),
+                      imageSearchField,
+                      wordField,
+                      readingField,
+                      meaningField,
+                      sentenceField,
+                      SizedBox(height: 10),
+                    ],
+                  ),
                 ),
               ),
             ),

@@ -248,16 +248,14 @@ DictionaryEntry getClosestPitchEntry(DictionaryEntry entry) {
     firstReading = entry.reading.split(";").first;
   }
 
-  print(firstReading);
-
   List<DictionaryEntry> readingMatches = gKanjiumDictionary
       .where((pitchEntry) => pitchEntry.reading == firstReading)
       .toList();
 
-  print(entry.word);
-
-  return readingMatches
-      .firstWhere((pitchEntry) => entry.word == pitchEntry.word, orElse: () {
+  return readingMatches.firstWhere(
+      (pitchEntry) =>
+          sanitizeGooForPitchMatch(entry.word).contains(pitchEntry.word),
+      orElse: () {
     return null;
   });
 }
@@ -349,7 +347,7 @@ String getAllHtmlPitch(DictionaryEntry entry) {
   for (int i = 0; i < entry.pitchAccentEntries.length; i++) {
     allPitches += getHtmlPitch(reading, entry.pitchAccentEntries[i]);
     if (i != entry.pitchAccentEntries.length - 1) {
-      allPitches += "<br>";
+      allPitches += "\n";
     }
   }
 

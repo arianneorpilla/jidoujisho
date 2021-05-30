@@ -1228,6 +1228,7 @@ class _VideoPlayerState extends State<VideoPlayer>
         _currentDictionaryEntry.value = results.entries[selectedIndex.value];
         DictionaryEntry pitchEntry =
             getClosestPitchEntry(_currentDictionaryEntry.value);
+        ScrollController scrollController = ScrollController();
 
         addDictionaryEntryToHistory(
           DictionaryHistoryEntry(
@@ -1310,26 +1311,29 @@ class _VideoPlayerState extends State<VideoPlayer>
                         : Text(results.entries[selectedIndex.value].reading),
                   ),
                   Flexible(
-                    child: SingleChildScrollView(
-                      child:
-                          gCustomDictionary.isNotEmpty || getMonolingualMode()
-                              ? SelectableText(
-                                  "\n${results.entries[selectedIndex.value].meaning}\n",
-                                  style: TextStyle(
-                                    fontSize: 15,
+                    child: Scrollbar(
+                      child: SingleChildScrollView(
+                        controller: scrollController,
+                        child:
+                            gCustomDictionary.isNotEmpty || getMonolingualMode()
+                                ? SelectableText(
+                                    "\n${results.entries[selectedIndex.value].meaning}\n",
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                    ),
+                                    toolbarOptions: ToolbarOptions(
+                                        copy: true,
+                                        cut: false,
+                                        selectAll: false,
+                                        paste: false),
+                                  )
+                                : Text(
+                                    "\n${results.entries[selectedIndex.value].meaning}\n",
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                    ),
                                   ),
-                                  toolbarOptions: ToolbarOptions(
-                                      copy: true,
-                                      cut: false,
-                                      selectAll: false,
-                                      paste: false),
-                                )
-                              : Text(
-                                  "\n${results.entries[selectedIndex.value].meaning}\n",
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                  ),
-                                ),
+                      ),
                     ),
                   ),
                   Wrap(
