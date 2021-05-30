@@ -19,7 +19,6 @@ dependencies:
     path: ./chewie
   clipboard_monitor: ^0.9.1
   device_info:
-  draggable_scrollbar:
   ext_storage:
   external_app_launcher:
   gx_file_picker:
