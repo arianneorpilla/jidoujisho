@@ -27,7 +27,7 @@ class PitchAccentInformation {
   }
 }
 
-FutureOr<List<DictionaryEntry>> initializeKanjiumEntries() async {
+Future<List<DictionaryEntry>> initializeKanjiumEntries() async {
   List<DictionaryEntry> entries = [];
 
   String kanjiumRaw = await rootBundle.loadString("assets/kanjium/accents.txt");
@@ -46,12 +46,10 @@ FutureOr<List<DictionaryEntry>> initializeKanjiumEntries() async {
           searchTerm: "",
           pitchAccentEntries: parseKanjiumNumbers(field[2])));
       entries.add(entry);
-
-      print(entry);
     },
   );
 
-  return entries;
+  return Future.value(entries);
 }
 
 List<PitchAccentInformation> parseKanjiumNumbers(String numbers) {
@@ -258,8 +256,8 @@ DictionaryEntry getClosestPitchEntry(DictionaryEntry entry) {
 
   print(entry.word);
 
-  return readingMatches.firstWhere(
-      (pitchEntry) => entry.word.contains(pitchEntry.word), orElse: () {
+  return readingMatches
+      .firstWhere((pitchEntry) => entry.word == pitchEntry.word, orElse: () {
     return null;
   });
 }

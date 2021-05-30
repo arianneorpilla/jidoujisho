@@ -50,7 +50,7 @@ void main() async {
   gPackageInfo = await PackageInfo.fromPlatform();
 
   gMecabTagger = Mecab();
-  await gMecabTagger.init("assets/ipadic", true);
+  gMecabTagger.init("assets/ipadic", true);
 
   gSharedPrefs = await SharedPreferences.getInstance();
   gIsResumable = ValueNotifier<bool>(getResumeAvailable());
@@ -65,7 +65,10 @@ void main() async {
     backgroundTaskEntrypoint: _backgroundTaskEntrypoint,
   );
 
-  gKanjiumDictionary = await initializeKanjiumEntries();
+  initializeKanjiumEntries().then((entries) {
+    gKanjiumDictionary = entries;
+  });
+
   runApp(App());
 
   handleAppLifecycleState();
