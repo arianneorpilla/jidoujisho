@@ -84,7 +84,7 @@ small {
 
 ### Front Template
 ```html
-<div class=\"image\">{{Image}}</div><br>{{Word}}</p>
+{{Audio}}<div class=\"image\">{{Image}}</div><br><p id="sentence">{{Sentence}}</p>
 ```
 
 ### CSS Template
@@ -139,5 +139,5 @@ small {
 
 ### Back Template
 ```html
-<div class=\"image\">{{Image}}</div><br>{{Word}}{{Audio}}<br><hr id=reading><p id="reading">{{Reading}}</p><h2 id="word">{{Word}}</h2><br><p><small id="meaning">{{Meaning}}</small></p><br><p id="sentence">{{Sentence}}</p>
+{{Audio}}<div class=\"image\">{{Image}}</div><br><p id="sentence">{{Sentence}}</p><br><hr id=reading><p id="reading">{{Reading}}</p><h2 id="word">{{Word}}</h2><br><p><small id="meaning">{{Meaning}}</small></p>
 ```
