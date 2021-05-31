@@ -138,9 +138,9 @@ class App extends StatelessWidget {
       theme: ThemeData(
         accentColor: Colors.red,
         brightness: Brightness.dark,
-        backgroundColor: Colors.transparent,
-        cardColor: Colors.transparent,
-        appBarTheme: AppBarTheme(backgroundColor: Colors.transparent),
+        backgroundColor: Colors.black,
+        cardColor: Colors.black,
+        appBarTheme: AppBarTheme(backgroundColor: Colors.black),
         canvasColor: Colors.grey[900],
       ),
       home: AudioServiceWidget(child: Home()),
@@ -398,12 +398,12 @@ class _HomeState extends State<Home> {
         children: [
           Scaffold(
             appBar: AppBar(
-              backgroundColor: Colors.transparent,
+              backgroundColor: Colors.black,
               leading: buildAppBarLeading(),
               title: buildAppBarTitleOrSearch(),
               actions: buildActions(),
             ),
-            backgroundColor: Colors.transparent,
+            backgroundColor: Colors.black,
             bottomNavigationBar:
                 (!_isCreatorView) ? buildNavigationBar() : SizedBox.shrink(),
             body: getWidgetOptions(_selectedIndex),
@@ -436,7 +436,7 @@ class _HomeState extends State<Home> {
 
   Widget buildNavigationBar() {
     return BottomNavigationBar(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.black,
       type: BottomNavigationBarType.fixed,
       selectedFontSize: 10,
       unselectedFontSize: 10,
@@ -1528,7 +1528,7 @@ class _YouTubeResultState extends State<YouTubeResult>
               bottom: 20.0,
               child: Container(
                 height: 20,
-                color: Colors.transparent.withOpacity(0.8),
+                color: Colors.black.withOpacity(0.8),
                 alignment: Alignment.center,
                 child: Text(
                   videoDuration,
@@ -4347,7 +4347,7 @@ class _CreatorState extends State<Creator> {
     ScrollController scrollController = ScrollController();
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.black,
       body: Column(
         children: [
           Expanded(
