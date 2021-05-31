@@ -81,7 +81,7 @@ void main() async {
 }
 
 handleAppLifecycleState() {
-  SystemChannels.lifecycle.setMessageHandler((msg) {
+  SystemChannels.lifecycle.setMessageHandler((msg) async {
     print(msg);
 
     switch (msg) {
@@ -89,6 +89,8 @@ handleAppLifecycleState() {
         AudioService.start(
           backgroundTaskEntrypoint: _backgroundTaskEntrypoint,
         );
+        gShareText.value = await MethodChannel('com.lrorpilla.api/reader')
+            .invokeMethod('getShareText');
         break;
       default:
     }
@@ -171,12 +173,12 @@ class _HomeState extends State<Home> {
   String _selectedChannelName = "";
   ValueNotifier<List<String>> _searchSuggestions =
       ValueNotifier<List<String>>([]);
-  ValueNotifier<bool> _isHomeInvisible = ValueNotifier<bool>(false);
   YoutubeExplode yt = YoutubeExplode();
 
   StreamSubscription _intentDataStreamSubscription;
   List<SharedMediaFile> _sharedFiles;
   String _sharedText;
+  var inputText;
 
   @override
   void initState() {
@@ -407,16 +409,24 @@ class _HomeState extends State<Home> {
             body: getWidgetOptions(_selectedIndex),
           ),
           ValueListenableBuilder(
-            valueListenable: _isHomeInvisible,
-            builder: (BuildContext context, bool isHomeVisible, Widget widget) {
-              return Visibility(
-                visible: isHomeVisible,
-                child: Expanded(
-                  child: Container(
-                    color: Colors.transparent,
-                  ),
-                ),
-              );
+            valueListenable: gShareText,
+            builder: (BuildContext context, String sharedText, Widget widget) {
+              if (gShareTextMatch.value != gShareText.value) {
+                gShareTextMatch.value = gShareText.value;
+
+                if (gShareTextMatch.value != "") {
+                  WidgetsBinding.instance.addPostFrameCallback((result) {
+                    setCreatorView(
+                      sentence: sharedText,
+                      dictionaryEntry:
+                          DictionaryEntry(word: "", meaning: "", reading: ""),
+                      file: null,
+                      isShared: true,
+                    );
+                  });
+                }
+              }
+              return Container();
             },
           )
         ],
@@ -454,6 +464,7 @@ class _HomeState extends State<Home> {
       });
     } else {
       MinimizeApp.minimizeApp();
+      resetMenu();
     }
     return false;
   }
@@ -475,6 +486,7 @@ class _HomeState extends State<Home> {
         onPressed: () {
           if (_isCreatorShared) {
             MinimizeApp.minimizeApp();
+            resetMenu();
           } else {
             setState(() {
               _isSearching = false;
@@ -3339,8 +3351,18 @@ class _CreatorState extends State<Creator> {
   initState() {
     super.initState();
     _imageSearchController = TextEditingController(text: searchTerm);
-    _sentenceController = TextEditingController(text: initialSentence);
     _wordController = TextEditingController(text: initialDictionaryEntry.word);
+    _sentenceController = TextEditingController(text: "");
+
+    if (initialSentence.isNotEmpty) {
+      if (parseVe(gMecabTagger, initialSentence).length != 1) {
+        _sentenceController = TextEditingController(text: initialSentence);
+        _wordController = TextEditingController(text: "");
+      } else {
+        _sentenceController = TextEditingController(text: "");
+        _wordController = TextEditingController(text: initialSentence);
+      }
+    }
 
     DictionaryEntry pitchEntry = getClosestPitchEntry(initialDictionaryEntry);
     if (pitchEntry != null) {

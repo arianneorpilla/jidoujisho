@@ -45,6 +45,7 @@ import java.util.Set;
 
 public class MainActivity extends FlutterActivity {
     private static final String ANKIDROID_CHANNEL = "com.lrorpilla.api/ankidroid";
+    private static final String READER_CHANNEL = "com.lrorpilla.api/reader";
     private static final String YOUTUDEDL_CHANNEL = "flutter_youtube_dl/nativelibdir";
 
     private static final int AD_PERM_REQUEST = 0;
@@ -77,9 +78,9 @@ public class MainActivity extends FlutterActivity {
             modelId = api.addNewCustomModel("jidoujisho (Creator)",
                     new String[] {"Image", "Audio", "Sentence", "Word", "Meaning", "Reading"},
                     new String[] {"jidoujisho (Creator) Default"},
-                    new String[] {"<div class=\"image\">{{Image}}</div><br>{{Word}}"},
-                    new String[] {"<div class=\"image\">{{Image}}</div><br>{{Word}}" +
-                            "{{Audio}}<br><hr id=reading><p id=\"reading\">{{Reading}}</p><h2 id=\"word\">{{Word}}</h2><br><p><small id=\"meaning\">{{Meaning}}</small></p><br><p id=\"sentence\">{{Sentence}}</p>"},
+                    new String[] {"<div class=\"image\">{{Image}}</div><br><p id=\"sentence\">{{Sentence}}</p>"},
+                    new String[] {"<div class=\"image\">{{Image}}</div><br><p id=\"sentence\">{{Sentence}}</p>" +
+                            "{{Audio}}<br><hr id=reading><p id=\"reading\">{{Reading}}</p><h2 id=\"word\">{{Word}}</h2><br><p><small id=\"meaning\">{{Meaning}}</small></p><br>"},
                             "p {\n" +
                             "    margin: 0px\n" +
                             "}\n" +
@@ -303,6 +304,21 @@ public class MainActivity extends FlutterActivity {
                             break;
                         default:
                             result.notImplemented();
+                    }
+                }
+
+        );
+
+        new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), READER_CHANNEL)
+        .setMethodCallHandler(
+                (call, result) -> {
+                    switch (call.method) {
+                        default:
+                            Intent intent = getIntent();
+                            if (intent != null && Intent.ACTION_PROCESS_TEXT.equals(intent.getAction())) {
+                                String selectedText = intent.getStringExtra(Intent.EXTRA_PROCESS_TEXT);
+                                result.success(selectedText);
+                            }
                     }
                 }
 

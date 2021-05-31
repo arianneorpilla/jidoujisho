@@ -35,4 +35,7 @@ List<DictionaryEntry> gCustomDictionary;
 Fuzzy gCustomDictionaryFuzzy;
 ScrollController gCurrentScrollbar;
 
+ValueNotifier<String> gShareText = ValueNotifier<String>("");
+ValueNotifier<String> gShareTextMatch = ValueNotifier<String>("");
+
 ValueNotifier<bool> gPlayPause = ValueNotifier<bool>(true);
