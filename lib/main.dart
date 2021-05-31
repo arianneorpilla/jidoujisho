@@ -89,8 +89,6 @@ handleAppLifecycleState() {
         AudioService.start(
           backgroundTaskEntrypoint: _backgroundTaskEntrypoint,
         );
-        gShareText.value = await MethodChannel('com.lrorpilla.api/reader')
-            .invokeMethod('getShareText');
         break;
       default:
     }
@@ -408,27 +406,6 @@ class _HomeState extends State<Home> {
                 (!_isCreatorView) ? buildNavigationBar() : SizedBox.shrink(),
             body: getWidgetOptions(_selectedIndex),
           ),
-          ValueListenableBuilder(
-            valueListenable: gShareText,
-            builder: (BuildContext context, String sharedText, Widget widget) {
-              if (gShareTextMatch.value != gShareText.value) {
-                gShareTextMatch.value = gShareText.value;
-
-                if (gShareTextMatch.value != "") {
-                  WidgetsBinding.instance.addPostFrameCallback((result) {
-                    setCreatorView(
-                      sentence: sharedText,
-                      dictionaryEntry:
-                          DictionaryEntry(word: "", meaning: "", reading: ""),
-                      file: null,
-                      isShared: true,
-                    );
-                  });
-                }
-              }
-              return Container();
-            },
-          )
         ],
       ),
     );

@@ -45,7 +45,6 @@ import java.util.Set;
 
 public class MainActivity extends FlutterActivity {
     private static final String ANKIDROID_CHANNEL = "com.lrorpilla.api/ankidroid";
-    private static final String READER_CHANNEL = "com.lrorpilla.api/reader";
     private static final String YOUTUDEDL_CHANNEL = "flutter_youtube_dl/nativelibdir";
 
     private static final int AD_PERM_REQUEST = 0;
@@ -304,21 +303,6 @@ public class MainActivity extends FlutterActivity {
                             break;
                         default:
                             result.notImplemented();
-                    }
-                }
-
-        );
-
-        new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), READER_CHANNEL)
-        .setMethodCallHandler(
-                (call, result) -> {
-                    switch (call.method) {
-                        default:
-                            Intent intent = getIntent();
-                            if (intent != null && Intent.ACTION_PROCESS_TEXT.equals(intent.getAction())) {
-                                String selectedText = intent.getStringExtra(Intent.EXTRA_PROCESS_TEXT);
-                                result.success(selectedText);
-                            }
                     }
                 }
 
