@@ -188,6 +188,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_android_pip:
+    dependency: "direct main"
+    description:
+      name: flutter_android_pip
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.2"
   flutter_archive:
     dependency: transitive
     description:
@@ -400,6 +407,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.9.7"
+  minimize_app:
+    dependency: "direct main"
+    description:
+      name: minimize_app
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.1"
   nested:
     dependency: transitive
     description:

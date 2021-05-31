@@ -679,6 +679,9 @@ void exportAnkiCard(String deck, String sentence, String answer, String reading,
     addAudio = "[sound:$newFileName.mp3]";
   }
 
+  if (answer == "") {
+    answer = "​";
+  }
   requestAnkiDroidPermissions();
   addNote(deck, addImage, addAudio, sentence, answer, meaning, reading);
 }
@@ -702,6 +705,9 @@ void exportCreatorAnkiCard(String deck, String sentence, String answer,
     addImage = "<img src=\"$newFileName.jpg\">";
   }
 
+  if (answer == "") {
+    answer = "​";
+  }
   requestAnkiDroidPermissions();
   addCreatorNote(deck, addImage, addAudio, sentence, answer, meaning, reading);
 }

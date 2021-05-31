@@ -208,7 +208,7 @@ class Player extends StatelessWidget {
 
   Widget loadingCircle() {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.transparent,
       body: Center(
         child: Container(
           height: 30,
@@ -497,7 +497,7 @@ class _VideoPlayerState extends State<VideoPlayer>
       onWillPop: _onWillPop,
       child: new Scaffold(
         resizeToAvoidBottomInset: false,
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.transparent,
         body: Stack(
           children: [
             GestureDetector(

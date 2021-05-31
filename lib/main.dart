@@ -13,6 +13,7 @@ import 'package:jidoujisho/pitch.dart';
 import 'package:jidoujisho/youtube.dart';
 import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
 import 'package:mecab_dart/mecab_dart.dart';
+import 'package:minimize_app/minimize_app.dart';
 import 'package:package_info/package_info.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -22,6 +23,7 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:ve_dart/ve_dart.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
@@ -34,7 +36,12 @@ import 'package:jidoujisho/preferences.dart';
 import 'package:jidoujisho/util.dart';
 
 typedef void ChannelCallback(String id, String name);
-typedef void CreatorCallback(DictionaryEntry entry, File file);
+typedef void CreatorCallback({
+  String sentence,
+  DictionaryEntry dictionaryEntry,
+  File file,
+  bool isShared,
+});
 typedef void SearchCallback(String term);
 
 void main() async {
@@ -129,9 +136,9 @@ class App extends StatelessWidget {
       theme: ThemeData(
         accentColor: Colors.red,
         brightness: Brightness.dark,
-        backgroundColor: Colors.black,
-        cardColor: Colors.black,
-        appBarTheme: AppBarTheme(backgroundColor: Colors.black),
+        backgroundColor: Colors.transparent,
+        cardColor: Colors.transparent,
+        appBarTheme: AppBarTheme(backgroundColor: Colors.transparent),
         canvasColor: Colors.grey[900],
       ),
       home: AudioServiceWidget(child: Home()),
@@ -149,12 +156,14 @@ class _HomeState extends State<Home> {
   bool _isSearching = false;
   bool _isChannelView = false;
   bool _isCreatorView = false;
+  bool _isCreatorShared = false;
 
   DictionaryEntry _creatorDictionaryEntry = DictionaryEntry(
     word: "",
     reading: "",
     meaning: "",
   );
+  String _creatorSentence = "";
   File _creatorFile;
 
   String _searchQuery = "";
@@ -179,8 +188,13 @@ class _HomeState extends State<Home> {
         return;
       }
 
-      setCreatorView(DictionaryEntry(word: "", meaning: "", reading: ""),
-          File(value.first.path));
+      setCreatorView(
+        sentence: "",
+        dictionaryEntry: DictionaryEntry(word: "", meaning: "", reading: ""),
+        file: File(value.first.path),
+        isShared: true,
+      );
+      ReceiveSharingIntent.reset();
     }, onError: (err) {
       print("getIntentDataStream error: $err");
     });
@@ -191,8 +205,13 @@ class _HomeState extends State<Home> {
         return;
       }
 
-      setCreatorView(DictionaryEntry(word: "", meaning: "", reading: ""),
-          File(value.first.path));
+      setCreatorView(
+        sentence: "",
+        dictionaryEntry: DictionaryEntry(word: "", meaning: "", reading: ""),
+        file: File(value.first.path),
+        isShared: true,
+      );
+      ReceiveSharingIntent.reset();
     });
 
     // For sharing or opening urls/text coming from outside the app while the app is in the memory
@@ -207,8 +226,13 @@ class _HomeState extends State<Home> {
         playYouTubeVideoLink(value);
       } else {
         setCreatorView(
-            DictionaryEntry(word: value, meaning: "", reading: ""), null);
+          sentence: value,
+          dictionaryEntry: DictionaryEntry(word: "", meaning: "", reading: ""),
+          file: null,
+          isShared: true,
+        );
       }
+      ReceiveSharingIntent.reset();
     }, onError: (err) {
       print("getLinkStream error: $err");
     });
@@ -224,8 +248,13 @@ class _HomeState extends State<Home> {
         playYouTubeVideoLink(value);
       } else {
         setCreatorView(
-            DictionaryEntry(word: value, meaning: "", reading: ""), null);
+          sentence: value,
+          dictionaryEntry: DictionaryEntry(word: "", meaning: "", reading: ""),
+          file: null,
+          isShared: true,
+        );
       }
+      ReceiveSharingIntent.reset();
     });
   }
 
@@ -297,9 +326,11 @@ class _HomeState extends State<Home> {
       return buildChannels();
     } else if (_isCreatorView) {
       return Creator(
-        "",
+        _creatorSentence,
         _creatorDictionaryEntry,
         _creatorFile,
+        _isCreatorShared,
+        resetMenu,
       );
     }
 
@@ -365,25 +396,14 @@ class _HomeState extends State<Home> {
         children: [
           Scaffold(
             appBar: AppBar(
-              backgroundColor: Colors.black,
+              backgroundColor: Colors.transparent,
               leading: buildAppBarLeading(),
               title: buildAppBarTitleOrSearch(),
               actions: buildActions(),
             ),
-            backgroundColor: Colors.black,
-            bottomNavigationBar: BottomNavigationBar(
-              backgroundColor: Colors.black,
-              type: BottomNavigationBarType.fixed,
-              selectedFontSize: 10,
-              unselectedFontSize: 10,
-              selectedIconTheme: IconThemeData(color: Colors.white),
-              unselectedIconTheme: IconThemeData(color: Colors.grey),
-              unselectedLabelStyle: TextStyle(color: Colors.grey),
-              selectedLabelStyle: TextStyle(color: Colors.red),
-              currentIndex: _selectedIndex,
-              onTap: onItemTapped,
-              items: getNavigationBarItems(),
-            ),
+            backgroundColor: Colors.transparent,
+            bottomNavigationBar:
+                (!_isCreatorView) ? buildNavigationBar() : SizedBox.shrink(),
             body: getWidgetOptions(_selectedIndex),
           ),
           ValueListenableBuilder(
@@ -393,7 +413,7 @@ class _HomeState extends State<Home> {
                 visible: isHomeVisible,
                 child: Expanded(
                   child: Container(
-                    color: Colors.black,
+                    color: Colors.transparent,
                   ),
                 ),
               );
@@ -404,8 +424,26 @@ class _HomeState extends State<Home> {
     );
   }
 
+  Widget buildNavigationBar() {
+    return BottomNavigationBar(
+      backgroundColor: Colors.transparent,
+      type: BottomNavigationBarType.fixed,
+      selectedFontSize: 10,
+      unselectedFontSize: 10,
+      selectedIconTheme: IconThemeData(color: Colors.white),
+      unselectedIconTheme: IconThemeData(color: Colors.grey),
+      unselectedLabelStyle: TextStyle(color: Colors.grey),
+      selectedLabelStyle: TextStyle(color: Colors.red),
+      currentIndex: _selectedIndex,
+      onTap: onItemTapped,
+      items: getNavigationBarItems(),
+    );
+  }
+
   Future<bool> _onWillPop() async {
-    if (_isSearching || _isChannelView || _isCreatorView) {
+    if (_isSearching ||
+        _isChannelView ||
+        (_isCreatorView && !_isCreatorShared)) {
       setState(() {
         _isSearching = false;
         _isChannelView = false;
@@ -415,23 +453,38 @@ class _HomeState extends State<Home> {
         _searchQueryController.clear();
       });
     } else {
-      SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+      MinimizeApp.minimizeApp();
     }
     return false;
+  }
+
+  void resetMenu() {
+    setState(() {
+      _isSearching = false;
+      _isChannelView = false;
+      _isCreatorView = false;
+      _searchQuery = "";
+      _searchSuggestions.value = [];
+      _searchQueryController.clear();
+    });
   }
 
   Widget buildAppBarLeading() {
     if (_isSearching || _isChannelView || _isCreatorView) {
       return BackButton(
         onPressed: () {
-          setState(() {
-            _isSearching = false;
-            _isChannelView = false;
-            _isCreatorView = false;
-            _searchQuery = "";
-            _searchSuggestions.value = [];
-            _searchQueryController.clear();
-          });
+          if (_isCreatorShared) {
+            MinimizeApp.minimizeApp();
+          } else {
+            setState(() {
+              _isSearching = false;
+              _isChannelView = false;
+              _isCreatorView = false;
+              _searchQuery = "";
+              _searchSuggestions.value = [];
+              _searchQueryController.clear();
+            });
+          }
         },
       );
     } else {
@@ -719,14 +772,24 @@ class _HomeState extends State<Home> {
     });
   }
 
-  Future<void> setCreatorView(
+  Future<void> setCreatorView({
+    String sentence,
     DictionaryEntry dictionaryEntry,
     File file,
-  ) async {
+    bool isShared,
+  }) async {
     try {
+      setState(() {
+        _isCreatorView = false;
+      });
+      if (isShared) {
+        await Future.delayed(Duration(milliseconds: 100));
+      }
       await getDecks();
       setState(() {
         _isCreatorView = true;
+        _isCreatorShared = isShared;
+        _creatorSentence = sentence;
         _creatorDictionaryEntry = dictionaryEntry;
         _creatorFile = file;
       });
@@ -769,6 +832,8 @@ class _HomeState extends State<Home> {
                       await getDecks();
                       setState(() {
                         _isCreatorView = true;
+                        _isCreatorShared = isShared;
+                        _creatorSentence = sentence;
                         _creatorDictionaryEntry = dictionaryEntry;
                         _creatorFile = file;
                       });
@@ -1283,6 +1348,10 @@ class _HomeState extends State<Home> {
   }
 
   List<Widget> buildActions() {
+    if (_isCreatorView) {
+      return [];
+    }
+
     return <Widget>[
       buildResume(),
       const SizedBox(width: 6),
@@ -1447,7 +1516,7 @@ class _YouTubeResultState extends State<YouTubeResult>
               bottom: 20.0,
               child: Container(
                 height: 20,
-                color: Colors.black.withOpacity(0.8),
+                color: Colors.transparent.withOpacity(0.8),
                 alignment: Alignment.center,
                 child: Text(
                   videoDuration,
@@ -2482,12 +2551,14 @@ class _ClipboardState extends State<ClipboardMenu> {
           ),
           onTap: () async {
             creatorCallback(
-              DictionaryEntry(
+              sentence: "",
+              dictionaryEntry: DictionaryEntry(
                 word: "",
                 reading: "",
                 meaning: "",
               ),
-              null,
+              file: null,
+              isShared: false,
             );
           },
         ),
@@ -2680,7 +2751,12 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
       color: Colors.grey[800].withOpacity(0.2),
       child: InkWell(
         onTap: () {
-          creatorCallback(entry.entries[entry.swipeIndex], null);
+          creatorCallback(
+            sentence: "",
+            dictionaryEntry: entry.entries[entry.swipeIndex],
+            file: null,
+            isShared: false,
+          );
         },
         onLongPress: () {
           HapticFeedback.vibrate();
@@ -3034,7 +3110,12 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                 style: TextStyle(color: Colors.white),
               ),
               onPressed: () {
-                creatorCallback(results.entries[_dialogIndex.value], null);
+                creatorCallback(
+                  sentence: "",
+                  dictionaryEntry: results.entries[_dialogIndex.value],
+                  file: null,
+                  isShared: false,
+                );
                 Navigator.pop(context);
               },
             ),
@@ -3198,17 +3279,23 @@ class Creator extends StatefulWidget {
   final String initialSentence;
   final DictionaryEntry initialDictionaryEntry;
   final File initialFile;
+  final bool isShared;
+  final VoidCallback resetMenu;
 
   Creator(
     this.initialSentence,
     this.initialDictionaryEntry,
     this.initialFile,
+    this.isShared,
+    this.resetMenu,
   );
 
   _CreatorState createState() => _CreatorState(
         this.initialSentence,
         this.initialDictionaryEntry,
         this.initialFile,
+        this.isShared,
+        this.resetMenu,
       );
 }
 
@@ -3216,6 +3303,8 @@ class _CreatorState extends State<Creator> {
   final String initialSentence;
   final DictionaryEntry initialDictionaryEntry;
   final File initialFile;
+  final bool isShared;
+  final VoidCallback resetMenu;
 
   List<String> decks;
   List<String> imageURLs;
@@ -3242,6 +3331,8 @@ class _CreatorState extends State<Creator> {
     this.initialSentence,
     this.initialDictionaryEntry,
     this.initialFile,
+    this.isShared,
+    this.resetMenu,
   );
 
   @override
@@ -3588,6 +3679,105 @@ class _CreatorState extends State<Creator> {
     );
   }
 
+  List<Widget> getTextWidgetsFromWords(
+      List<String> words, ValueNotifier<int> notifier) {
+    List<Widget> widgets = [];
+    for (int i = 0; i < words.length; i++) {
+      widgets.add(
+        GestureDetector(
+          onTap: () {
+            notifier.value = i;
+          },
+          child: ValueListenableBuilder(
+              valueListenable: notifier,
+              builder: (BuildContext context, int value, Widget child) {
+                return Container(
+                    padding: EdgeInsets.all(8),
+                    margin: EdgeInsets.only(top: 10, right: 10),
+                    color: (notifier.value == i)
+                        ? Colors.red.withOpacity(0.3)
+                        : Colors.white.withOpacity(0.1),
+                    child: Text(
+                      words[i],
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 18,
+                      ),
+                    ));
+              }),
+        ),
+      );
+    }
+
+    return widgets;
+  }
+
+  void showSentenceDialog(String sentence) {
+    sentence = sentence.trim();
+
+    ValueNotifier<int> selectedWordIndex = ValueNotifier<int>(-1);
+    List<Word> segments = parseVe(gMecabTagger, sentence);
+    List<String> words = [];
+    segments.forEach((segment) => words.add(segment.word));
+    List<Widget> textWidgets =
+        getTextWidgetsFromWords(words, selectedWordIndex);
+
+    ScrollController scrollController = ScrollController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
+          ),
+          content: ValueListenableBuilder(
+            valueListenable: _selectedIndex,
+            builder: (BuildContext context, int _, Widget widget) {
+              return Container(
+                child: Container(
+                  color: Colors.grey[800].withOpacity(0.6),
+                  child: Scrollbar(
+                    controller: scrollController,
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      child: Wrap(children: textWidgets),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('CANCEL', style: TextStyle(color: Colors.white)),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              child: Text('SELECT', style: TextStyle(color: Colors.white)),
+              onPressed: () async {
+                setState(() {
+                  _wordController.text = words[selectedWordIndex.value];
+                  if (_fileImage == null) {
+                    setState(() {
+                      _isFileImage = false;
+                      _fileImage = null;
+                      searchTerm = _wordController.text;
+                      _selectedIndex.value = 0;
+                    });
+                  }
+                });
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget buildEditor() {
     Widget displayField(
       String labelText,
@@ -3640,7 +3830,7 @@ class _CreatorState extends State<Creator> {
                   _selectedIndex.value = 0;
                 });
               },
-              icon: Icon(Icons.search, color: Colors.white),
+              icon: Icon(Icons.image_search_sharp, color: Colors.white),
             ),
             IconButton(
               iconSize: 18,
@@ -3690,11 +3880,46 @@ class _CreatorState extends State<Creator> {
         hintText: "Enter search term here",
       ),
     );
-    Widget sentenceField = displayField(
-      "Sentence",
-      "Enter sentence here",
-      Icons.format_align_center_rounded,
-      _sentenceController,
+
+    Widget sentenceField = TextFormField(
+      maxLines: null,
+      keyboardType: TextInputType.multiline,
+      controller: _sentenceController,
+      onFieldSubmitted: (result) {
+        if (_sentenceController.text.trim().isNotEmpty) {
+          showSentenceDialog(_sentenceController.text);
+        }
+      },
+      decoration: InputDecoration(
+        prefixIcon:
+            Icon(Icons.format_align_center_rounded, color: Colors.white),
+        suffixIcon: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              iconSize: 18,
+              onPressed: () {
+                if (_sentenceController.text.trim().isNotEmpty) {
+                  showSentenceDialog(_sentenceController.text);
+                }
+              },
+              icon: Icon(Icons.account_tree_outlined, color: Colors.white),
+            ),
+            IconButton(
+              iconSize: 18,
+              onPressed: () {
+                setState(() {
+                  _sentenceController.clear();
+                });
+              },
+              icon: Icon(Icons.clear, color: Colors.white),
+            ),
+          ],
+        ),
+        labelText: "Sentence",
+        hintText: "Enter sentence here",
+      ),
     );
 
     void wordFieldSearch(bool monolingual) async {
@@ -4005,7 +4230,6 @@ class _CreatorState extends State<Creator> {
         builder: (BuildContext context, bool exported, ___) {
           return Container(
             width: double.infinity,
-            margin: EdgeInsets.only(bottom: 12),
             color: Colors.grey[800].withOpacity(0.2),
             child: InkWell(
               enableFeedback: !exported,
@@ -4021,7 +4245,11 @@ class _CreatorState extends State<Creator> {
                           color: exported ? Colors.grey : Colors.white),
                       SizedBox(width: 5),
                       Text(
-                        exported ? "Card Exported" : "Export Card",
+                        exported
+                            ? "Card Exported"
+                            : isShared
+                                ? "Export Card and Return"
+                                : "Export Card",
                         style: TextStyle(
                           color: exported ? Colors.grey : Colors.white,
                           fontSize: 16,
@@ -4033,8 +4261,8 @@ class _CreatorState extends State<Creator> {
                 ),
               ),
               onTap: () async {
-                if (_sentenceController.text == "" &&
-                    _wordController.text == "" &&
+                if (_wordController.text == "" &&
+                    _sentenceController.text == "" &&
                     _readingController.text == "" &&
                     _meaningController.text == "" &&
                     _fileImage == null) {
@@ -4076,9 +4304,14 @@ class _CreatorState extends State<Creator> {
                   });
 
                   _justExported.value = true;
-                  Future.delayed(Duration(seconds: 2), () {
-                    _justExported.value = false;
-                  });
+                  if (isShared) {
+                    MinimizeApp.minimizeApp();
+                    resetMenu();
+                  } else {
+                    Future.delayed(Duration(seconds: 2), () {
+                      _justExported.value = false;
+                    });
+                  }
                 } catch (e) {
                   print(e);
                 }
@@ -4092,7 +4325,7 @@ class _CreatorState extends State<Creator> {
     ScrollController scrollController = ScrollController();
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.transparent,
       body: Column(
         children: [
           Expanded(
@@ -4114,9 +4347,9 @@ class _CreatorState extends State<Creator> {
                       ),
                       imageSearchField,
                       wordField,
+                      sentenceField,
                       readingField,
                       meaningField,
-                      sentenceField,
                       SizedBox(height: 10),
                     ],
                   ),
