@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:auto_orientation/auto_orientation.dart';
-import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/services.dart';
 import 'package:html/parser.dart' as parser;
 import 'package:html/dom.dart' as dom;

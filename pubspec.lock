@@ -148,13 +148,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.0"
-  draggable_scrollbar:
-    dependency: "direct main"
-    description:
-      name: draggable_scrollbar
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.1.0"
   equatable:
     dependency: "direct overridden"
     description:

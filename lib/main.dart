@@ -1027,7 +1027,13 @@ class _HomeState extends State<Home> {
               ),
               actions: <Widget>[
                 TextButton(
-                  child: Text('OK', style: TextStyle(color: Colors.white)),
+                  child: Text('CANCEL', style: TextStyle(color: Colors.white)),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                TextButton(
+                  child: Text('PLAY', style: TextStyle(color: Colors.white)),
                   onPressed: () {
                     String webURL = _textFieldController.text;
 
@@ -1086,6 +1092,12 @@ class _HomeState extends State<Home> {
                 maxLines: null,
               ),
               actions: <Widget>[
+                TextButton(
+                  child: Text('CANCEL', style: TextStyle(color: Colors.white)),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
                 TextButton(
                   child: Text('OK', style: TextStyle(color: Colors.white)),
                   onPressed: () async {
