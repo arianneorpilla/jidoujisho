@@ -46,6 +46,7 @@
 - [x] **Dictionary tab remembers words queried** for review between sessions and **allows resuming back to context**
 - [x] **Use monolingual definitions** from Goo.ne.jp or **imported Yomichan dictionaries**
 - [x] View dictionary entries and export cards **with pitch accent information** from Kanjium Pitch Dictionaries
+- [x] **Frictionless sentence mining workflow for readers** via share action
 - [x] **(Experimental)** **Korean to English support** through the National Institute of Korean Language's KrDict 
 
 # ⚕️ Current state of the project
@@ -61,6 +62,8 @@ Please note that the development of the app switches between changes being imple
 - [x] Improved **monolingual dictionary support**
 - [x] **Various immersion modes** for oral practice
 - [x] Include **pitch accent information** in dictionary and exported cards
+- [x] **Reader enhancements** for manga and novel sentence mining
+- [ ] HTML summary tags for **dual query mode** (bilingual and monolingual)
 - [ ] **Basic support for any languages and offline use** via support of a common dictionary format
 
 
