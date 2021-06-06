@@ -436,14 +436,14 @@ class _MaterialControlsState extends State<MaterialControls>
     await controller.startRendererScanning();
     ValueNotifier<Map<String, String>> castDevices =
         ValueNotifier<Map<String, String>>({});
-    castDevices.value = await controller.getRendererDevices();
+    castDevices.value = await controller.getRendererDevices() ?? {};
 
     void updateRendererList() async {
-      castDevices.value = await controller.getRendererDevices();
+      castDevices.value = await controller.getRendererDevices() ?? {};
     }
 
     Timer updateTimer = Timer.periodic(
-        Duration(milliseconds: 2000), (Timer t) => updateRendererList());
+        Duration(milliseconds: 500), (Timer t) => updateRendererList());
 
     ScrollController scrollController = ScrollController();
 
@@ -591,6 +591,10 @@ class _MaterialControlsState extends State<MaterialControls>
     }
 
     updateTimer.cancel();
+
+    if (!chewieController.isCasting.value) {
+      await controller.stopRendererScanning();
+    }
   }
 
   Widget _buildQualityButton(
