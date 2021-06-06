@@ -20,6 +20,7 @@ dependencies:
     path: ../
   path:
   path_provider:
+  progress_indicators:
   share:
   shared_preferences:
   subtitle_wrapper_package:

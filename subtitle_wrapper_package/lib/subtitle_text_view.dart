@@ -18,6 +18,7 @@ class SubtitleTextView extends StatelessWidget {
   final ValueNotifier<Subtitle> contextSubtitle;
   final VoidCallback emptyStack;
   final FocusNode focusNode;
+  final ValueNotifier<bool> isCasting;
 
   const SubtitleTextView({
     Key key,
@@ -27,13 +28,14 @@ class SubtitleTextView extends StatelessWidget {
     @required this.contextSubtitle,
     @required this.focusNode,
     @required this.emptyStack,
+    @required this.isCasting,
   }) : super(key: key);
 
   Widget getOutlineText(Word word) {
     return Text(
       word.word,
       style: TextStyle(
-        fontSize: subtitleStyle.fontSize,
+        fontSize: returnTextSize(),
         foreground: Paint()
           ..style = subtitleStyle.borderStyle.style
           ..strokeWidth = subtitleStyle.borderStyle.strokeWidth
@@ -55,10 +57,18 @@ class SubtitleTextView extends StatelessWidget {
       child: Text(
         word.word,
         style: TextStyle(
-          fontSize: subtitleStyle.fontSize,
+          fontSize: returnTextSize(),
         ),
       ),
     );
+  }
+
+  double returnTextSize() {
+    if (isCasting.value) {
+      return subtitleStyle.fontSize * 2;
+    } else {
+      return subtitleStyle.fontSize;
+    }
   }
 
   @override
@@ -106,7 +116,7 @@ class SubtitleTextView extends StatelessWidget {
                                       state.subtitle.text,
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
-                                        fontSize: subtitleStyle.fontSize,
+                                        fontSize: returnTextSize(),
                                         foreground: Paint()
                                           ..style =
                                               subtitleStyle.borderStyle.style
@@ -133,7 +143,7 @@ class SubtitleTextView extends StatelessWidget {
                                           .textInside(state.subtitle.text)));
                                 },
                                 style: TextStyle(
-                                  fontSize: subtitleStyle.fontSize,
+                                  fontSize: returnTextSize(),
                                   color: subtitleStyle.textColor,
                                 ),
                                 focusNode: focusNode,

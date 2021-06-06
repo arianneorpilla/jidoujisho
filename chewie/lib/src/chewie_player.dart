@@ -89,7 +89,7 @@ class ChewieState extends State<Chewie> {
       resizeToAvoidBottomInset: false,
       body: Container(
         alignment: Alignment.center,
-        color: Colors.black,
+        color: Colors.transparent,
         child: controllerProvider,
       ),
     );
@@ -227,6 +227,7 @@ class ChewieController extends ChangeNotifier {
     @required this.comprehensionSubtitle,
     @required this.audioAllowance,
     @required this.setNoPush,
+    @required this.isCasting,
     this.aspectRatio,
     this.autoInitialize = false,
     this.autoPlay = false,
@@ -278,6 +279,7 @@ class ChewieController extends ChangeNotifier {
   final ValueNotifier<Subtitle> comprehensionSubtitle;
   final ValueNotifier<int> audioAllowance;
   final YouTubeMux streamData;
+  final ValueNotifier<bool> isCasting;
 
   /// Initialize the Video on Startup. This will prep the video for playback.
   final bool autoInitialize;

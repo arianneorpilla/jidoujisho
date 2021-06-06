@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:math';
 
 import 'package:chewie/src/chewie_player.dart';
 import 'package:chewie/src/chewie_progress_colors.dart';
@@ -7,7 +9,8 @@ import 'package:chewie/src/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
-
+import 'package:path_provider/path_provider.dart';
+import 'package:progress_indicators/progress_indicators.dart';
 import 'package:share/share.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -330,6 +333,10 @@ class _MaterialControlsState extends State<MaterialControls>
                 "Use Bilingual Definitions from Jisho.org"
               else
                 "Use Monolingual Definitions from Goo.ne.jp",
+              if (chewieController.isCasting.value)
+                "Stop Casting to Display Device"
+              else
+                "Cast to Display Device",
               "Share Links to Applications",
               "Export Current Context to Anki",
             ],
@@ -348,6 +355,10 @@ class _MaterialControlsState extends State<MaterialControls>
               else
                 Icons.select_all_sharp,
               Icons.translate_sharp,
+              if (chewieController.isCasting.value)
+                Icons.cast_connected_sharp
+              else
+                Icons.cast_sharp,
               Icons.share_outlined,
               Icons.mobile_screen_share_rounded,
             ],
@@ -377,9 +388,26 @@ class _MaterialControlsState extends State<MaterialControls>
             chewieController.clipboard.value = clipboardMemory;
             break;
           case 5:
-            openExtraShare();
+            bool wasPlaying =
+                chewieController.videoPlayerController.value.isPlaying;
+
+            if (chewieController.isCasting.value) {
+              await controller.castToRenderer(null);
+              chewieController.isCasting.value = false;
+              await controller.stopRendererScanning();
+
+              if (!wasPlaying) {
+                await controller.pause();
+              }
+            } else {
+              getRendererDevices(controller);
+            }
+
             break;
           case 6:
+            openExtraShare();
+            break;
+          case 7:
             chewieController.wasPlaying.value =
                 (chewieController.videoPlayerController.value.isPlaying ||
                     chewieController.wasPlaying.value);
@@ -404,6 +432,167 @@ class _MaterialControlsState extends State<MaterialControls>
     );
   }
 
+  void getRendererDevices(VlcPlayerController controller) async {
+    await controller.startRendererScanning();
+    ValueNotifier<Map<String, String>> castDevices =
+        ValueNotifier<Map<String, String>>({});
+    castDevices.value = await controller.getRendererDevices();
+
+    void updateRendererList() async {
+      castDevices.value = await controller.getRendererDevices();
+    }
+
+    Timer updateTimer = Timer.periodic(
+        Duration(milliseconds: 2000), (Timer t) => updateRendererList());
+
+    ScrollController scrollController = ScrollController();
+
+    String selectedCastDeviceName = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
+          ),
+          title: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text('Scanning for Display Devices'),
+              SizedBox(
+                height: 16,
+                width: 12,
+                child: JumpingDotsProgressIndicator(color: Colors.white),
+              ),
+            ],
+          ),
+          content: Container(
+            width: double.maxFinite,
+            height: 250,
+            child: FooterLayout(
+              body: Container(
+                child: ValueListenableBuilder(
+                  valueListenable: castDevices,
+                  builder: (BuildContext context,
+                      Map<String, String> castDevices, Widget child) {
+                    return Scrollbar(
+                      controller: scrollController,
+                      child: ListView.builder(
+                        controller: scrollController,
+                        shrinkWrap: true,
+                        physics: ClampingScrollPhysics(),
+                        itemCount: castDevices.keys.length,
+                        itemBuilder: (context, index) {
+                          return ListTile(
+                            dense: true,
+                            title: Row(
+                              children: [
+                                Icon(
+                                  Icons.cast_sharp,
+                                  size: 20.0,
+                                  color: Colors.white,
+                                ),
+                                const SizedBox(width: 16.0),
+                                Text(
+                                  castDevices.values
+                                      .elementAt(index)
+                                      .toString(),
+                                  style: TextStyle(fontSize: 16),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                            onTap: () {
+                              Navigator.pop(
+                                  context, castDevices.keys.elementAt(index));
+                            },
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+              footer: Container(
+                child: ListTile(
+                  dense: true,
+                  title: Wrap(
+                    children: [
+                      Icon(Icons.info,
+                          size: 14.0, color: Colors.lightBlue[300]),
+                      const SizedBox(width: 8.0),
+                      Text(
+                        "Casting experience may ",
+                        style: TextStyle(
+                            fontSize: 14, color: Colors.lightBlue[300]),
+                      ),
+                      Text(
+                        "vary based on network ",
+                        style: TextStyle(
+                            fontSize: 14, color: Colors.lightBlue[300]),
+                      ),
+                      Text(
+                        "performance and ",
+                        style: TextStyle(
+                            fontSize: 14, color: Colors.lightBlue[300]),
+                      ),
+                      Text(
+                        "the supported formats ",
+                        style: TextStyle(
+                            fontSize: 14, color: Colors.lightBlue[300]),
+                      ),
+                      Text(
+                        "of the selected ",
+                        style: TextStyle(
+                            fontSize: 14, color: Colors.lightBlue[300]),
+                      ),
+                      Text(
+                        "display device.",
+                        style: TextStyle(
+                            fontSize: 14, color: Colors.lightBlue[300]),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    if (selectedCastDeviceName != null) {
+      Duration position = controller.value.position;
+      int activeAudioTrack = await controller.getAudioTrack();
+
+      chewieController.isCasting.value = true;
+      await controller.castToRenderer(selectedCastDeviceName);
+      Future.delayed(Duration(seconds: 2), () async {
+        if (selectedCastDeviceName != null) {
+          if (chewieController.streamData != null) {
+            YouTubeQualityOption bestMuxed = chewieController
+                .streamData.videoQualities
+                .lastWhere((element) => element.muxed);
+            chewieController.currentVideoQuality = bestMuxed;
+
+            await controller.setMediaFromNetwork(bestMuxed.videoURL);
+          }
+
+          Future.delayed(Duration(seconds: 2), () async {
+            if (chewieController.streamData == null) {
+              await controller.setAudioTrack(activeAudioTrack);
+            } else {
+              await controller.setAudioTrack(1);
+              while (!await controller.isPlaying()) {}
+              await controller.seekTo(position);
+            }
+          });
+        }
+      });
+    }
+
+    updateTimer.cancel();
+  }
+
   Widget _buildQualityButton(
     VlcPlayerController controller,
   ) {
@@ -423,7 +612,9 @@ class _MaterialControlsState extends State<MaterialControls>
             muxTag = "";
           }
 
-          qualityTags.add("${quality.videoResolution}$muxTag");
+          if (!chewieController.isCasting.value) {
+            qualityTags.add("${quality.videoResolution}$muxTag");
+          }
         }
 
         qualityTags.add("Set Preferred Video Quality");
@@ -461,8 +652,10 @@ class _MaterialControlsState extends State<MaterialControls>
             await controller.setMediaFromNetwork(chewieController
                 .streamData.videoQualities[chosenOption].videoURL);
             if (!chosenQuality.muxed) {
-              await controller
-                  .addAudioFromNetwork(chewieController.streamData.audioURL);
+              await controller.addAudioFromNetwork(
+                chewieController.streamData.audioURL,
+                isSelected: true,
+              );
             }
 
             await controller.seekTo(position);
@@ -499,10 +692,14 @@ class _MaterialControlsState extends State<MaterialControls>
 
               chewieController.currentVideoQuality = chosenQuality;
 
-              await controller.setMediaFromNetwork(chosenQuality.videoURL);
-              if (!chosenQuality.muxed) {
-                await controller
-                    .addAudioFromNetwork(chewieController.streamData.audioURL);
+              if (!chewieController.isCasting.value) {
+                await controller.setMediaFromNetwork(chosenQuality.videoURL);
+                if (!chosenQuality.muxed) {
+                  await controller.addAudioFromNetwork(
+                    chewieController.streamData.audioURL,
+                    isSelected: true,
+                  );
+                }
               }
             }
           }
@@ -1133,4 +1330,65 @@ enum SubtitleAudioMenuOptionType {
   noneSubtitle,
   externalSubtitle,
   adjustDelayAndAllowance,
+}
+
+class FooterLayout extends StatelessWidget {
+  const FooterLayout({
+    Key key,
+    @required this.body,
+    @required this.footer,
+  }) : super(key: key);
+
+  final Container body;
+  final Container footer;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomMultiChildLayout(
+      delegate: _FooterLayoutDelegate(MediaQuery.of(context).viewInsets),
+      children: <Widget>[
+        LayoutId(
+          id: _FooterLayout.body,
+          child: body,
+        ),
+        LayoutId(
+          id: _FooterLayout.footer,
+          child: footer,
+        ),
+      ],
+    );
+  }
+}
+
+enum _FooterLayout {
+  footer,
+  body,
+}
+
+class _FooterLayoutDelegate extends MultiChildLayoutDelegate {
+  final EdgeInsets viewInsets;
+
+  _FooterLayoutDelegate(this.viewInsets);
+
+  @override
+  void performLayout(Size size) {
+    size = Size(size.width, size.height + viewInsets.bottom);
+    final footer =
+        layoutChild(_FooterLayout.footer, BoxConstraints.loose(size));
+
+    final bodyConstraints = BoxConstraints.tightFor(
+      height: size.height - max(footer.height, viewInsets.bottom),
+      width: size.width,
+    );
+
+    final body = layoutChild(_FooterLayout.body, bodyConstraints);
+
+    positionChild(_FooterLayout.body, Offset.zero);
+    positionChild(_FooterLayout.footer, Offset(0, body.height));
+  }
+
+  @override
+  bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) {
+    return true;
+  }
 }

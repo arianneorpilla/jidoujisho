@@ -9,8 +9,6 @@ import 'package:flutter/services.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
-import 'package:jidoujisho/pitch.dart';
-import 'package:jidoujisho/youtube.dart';
 import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:minimize_app/minimize_app.dart';
@@ -31,9 +29,11 @@ import 'package:jidoujisho/anki.dart';
 import 'package:jidoujisho/cache.dart';
 import 'package:jidoujisho/dictionary.dart';
 import 'package:jidoujisho/globals.dart';
+import 'package:jidoujisho/pitch.dart';
 import 'package:jidoujisho/player.dart';
 import 'package:jidoujisho/preferences.dart';
 import 'package:jidoujisho/util.dart';
+import 'package:jidoujisho/youtube.dart';
 
 typedef void ChannelCallback(String id, String name);
 typedef void CreatorCallback({
@@ -173,17 +173,11 @@ class _HomeState extends State<Home> {
       ValueNotifier<List<String>>([]);
   YoutubeExplode yt = YoutubeExplode();
 
-  StreamSubscription _intentDataStreamSubscription;
-  List<SharedMediaFile> _sharedFiles;
-  String _sharedText;
-  var inputText;
-
   @override
   void initState() {
     super.initState();
 
-    _intentDataStreamSubscription = ReceiveSharingIntent.getMediaStream()
-        .listen((List<SharedMediaFile> value) {
+    ReceiveSharingIntent.getMediaStream().listen((List<SharedMediaFile> value) {
       if (value == null) {
         return;
       }
@@ -215,8 +209,7 @@ class _HomeState extends State<Home> {
     });
 
     // For sharing or opening urls/text coming from outside the app while the app is in the memory
-    _intentDataStreamSubscription =
-        ReceiveSharingIntent.getTextStream().listen((String value) {
+    ReceiveSharingIntent.getTextStream().listen((String value) {
       if (value == null) {
         return;
       }

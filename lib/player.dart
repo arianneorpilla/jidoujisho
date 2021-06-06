@@ -283,6 +283,7 @@ class _VideoPlayerState extends State<VideoPlayer>
       endTime: Duration.zero,
     ),
   );
+  ValueNotifier<bool> isCasting = ValueNotifier<bool>(false);
   ValueNotifier<int> _audioAllowance = ValueNotifier<int>(getAudioAllowance());
   List<String> recursiveTerms = [];
   bool noPush = false;
@@ -402,10 +403,8 @@ class _VideoPlayerState extends State<VideoPlayer>
                     _audioAllowance.value -
                     getSubtitleController().subtitlesOffset >
                 _shadowingSubtitle.value.endTime.inMilliseconds) {
-          getVideoPlayerController().seekTo(Duration(
-              milliseconds: _shadowingSubtitle.value.startTime.inMilliseconds +
-                  getSubtitleController().subtitlesOffset -
-                  _audioAllowance.value));
+          getVideoPlayerController()
+              .seekTo(getRewindWithDelayAndAllowance(_shadowingSubtitle.value));
         }
       }
 
@@ -506,10 +505,9 @@ class _VideoPlayerState extends State<VideoPlayer>
                   _comprehensionSubtitle.value = _currentSubtitle.value;
                   getSubtitleController().widgetVisibility.value = true;
 
-                  getVideoPlayerController().seekTo(_currentSubtitle
-                          .value.startTime +
-                      Duration(
-                          milliseconds: _subTitleController.subtitlesOffset));
+                  getVideoPlayerController().seekTo(
+                    getRewindWithDelayAndAllowance(getExportSubtitle()),
+                  );
                 }
               },
               onVerticalDragUpdate: (details) {
@@ -574,14 +572,26 @@ class _VideoPlayerState extends State<VideoPlayer>
 
   Subtitle getExportSubtitle() {
     if (_currentSubTrack.value == 99999) {
+      Duration allowanceDuration =
+          Duration(milliseconds: _audioAllowance.value);
+      if (_audioAllowance.value == 0) {
+        allowanceDuration = Duration(milliseconds: 5000);
+      }
+
       return Subtitle(
-        startTime: _videoPlayerController.value.position,
-        endTime: _videoPlayerController.value.position,
+        startTime: _videoPlayerController.value.position - allowanceDuration,
+        endTime: _videoPlayerController.value.position + allowanceDuration,
         text: "",
       );
     } else {
       return _currentSubtitle.value;
     }
+  }
+
+  Duration getRewindWithDelayAndAllowance(Subtitle subtitle) {
+    return Duration(
+        milliseconds: subtitle.startTime.inMilliseconds +
+            getSubtitleController().subtitlesOffset);
   }
 
   void exportSingleCallback() {
@@ -702,6 +712,7 @@ class _VideoPlayerState extends State<VideoPlayer>
       retimeSubtitles: retimeSubtitles,
       exportSingleCallback: exportSingleCallback,
       toggleShadowingMode: toggleShadowingMode,
+      isCasting: isCasting,
       shadowingSubtitle: _shadowingSubtitle,
       comprehensionSubtitle: _comprehensionSubtitle,
       setNoPush: setNoPush,
@@ -751,6 +762,7 @@ class _VideoPlayerState extends State<VideoPlayer>
         hasBorder: true,
         fontSize: 24,
       ),
+      isCasting: isCasting,
       videoChild: FutureBuilder(
         future: getVideoPlayerController().initialize(),
         builder: (BuildContext context, AsyncSnapshot snapshot) {

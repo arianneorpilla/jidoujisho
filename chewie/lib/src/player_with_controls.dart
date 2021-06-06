@@ -3,7 +3,6 @@ import 'package:chewie/src/material_controls.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
-import 'package:jidoujisho/util.dart';
 
 class PlayerWithControls extends StatelessWidget {
   const PlayerWithControls({Key key}) : super(key: key);
@@ -29,6 +28,28 @@ class PlayerWithControls extends StatelessWidget {
               aspectRatio: chewieController.aspectRatio,
             ),
           ),
+        ),
+        ValueListenableBuilder(
+          valueListenable: chewieController.isCasting,
+          builder: (BuildContext context, bool isCasting, Widget child) {
+            if (isCasting) {
+              return Container(
+                padding: EdgeInsets.only(top: 60, bottom: 60),
+                color: Colors.black,
+                child: Center(
+                  child: LayoutBuilder(
+                    builder: (context, constraint) {
+                      return new Icon(Icons.cast_connected_sharp,
+                          color: Colors.white.withOpacity(0.05),
+                          size: constraint.biggest.height);
+                    },
+                  ),
+                ),
+              );
+            } else {
+              return SizedBox.shrink();
+            }
+          },
         ),
         chewieController.overlay ?? Container(),
         if (!chewieController.isFullScreen)

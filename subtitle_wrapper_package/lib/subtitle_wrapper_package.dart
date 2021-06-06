@@ -19,6 +19,7 @@ class SubTitleWrapper extends StatelessWidget {
     @required this.contextSubtitle,
     @required this.focusNode,
     @required this.emptyStack,
+    @required this.isCasting,
     this.subtitleStyle = const SubtitleStyle(),
   }) : super(key: key);
 
@@ -28,6 +29,7 @@ class SubTitleWrapper extends StatelessWidget {
   final SubtitleStyle subtitleStyle;
   final ValueNotifier<Subtitle> subtitleNotifier;
   final ValueNotifier<Subtitle> contextSubtitle;
+  final ValueNotifier<bool> isCasting;
   final FocusNode focusNode;
   final VoidCallback emptyStack;
 
@@ -36,39 +38,70 @@ class SubTitleWrapper extends StatelessWidget {
     return Stack(
       children: <Widget>[
         videoChild,
-        subtitleController.showSubtitles
-            ? Positioned(
-                top: subtitleStyle.position.top,
-                bottom: subtitleStyle.position.bottom,
-                left: subtitleStyle.position.left,
-                right: subtitleStyle.position.right,
-                child: BlocProvider(
-                  create: (context) => SubtitleBloc(
-                    videoPlayerController: videoPlayerController,
-                    subtitleRepository: SubtitleDataRepository(
-                      subtitleController: subtitleController,
-                    ),
-                    subtitleController: subtitleController,
-                    subtitleNotifier: subtitleNotifier,
-                  )..add(
-                      InitSubtitles(
-                        subtitleController: subtitleController,
-                      ),
-                    ),
-                  child: SubtitleTextView(
-                    subtitleStyle: subtitleStyle,
-                    widgetVisibility: subtitleController.widgetVisibility,
-                    comprehensionSubtitle:
-                        subtitleController.comprehensionSubtitle,
-                    contextSubtitle: subtitleController.contextSubtitle,
-                    focusNode: focusNode,
-                    emptyStack: emptyStack,
-                  ),
-                ),
-              )
-            : Container(
-                child: null,
-              )
+        BlocProvider(
+          create: (context) => SubtitleBloc(
+            videoPlayerController: videoPlayerController,
+            subtitleRepository: SubtitleDataRepository(
+              subtitleController: subtitleController,
+            ),
+            subtitleController: subtitleController,
+            subtitleNotifier: subtitleNotifier,
+          )..add(
+              InitSubtitles(
+                subtitleController: subtitleController,
+              ),
+            ),
+          child: ValueListenableBuilder(
+            valueListenable: isCasting,
+            builder: (BuildContext context, bool casting, Widget child) {
+              if (!casting) {
+                return Container(
+                  child: subtitleController.showSubtitles
+                      ? Positioned(
+                          top: subtitleStyle.position.top,
+                          bottom: subtitleStyle.position.bottom,
+                          left: subtitleStyle.position.left,
+                          right: subtitleStyle.position.right,
+                          child: SubtitleTextView(
+                            subtitleStyle: subtitleStyle,
+                            widgetVisibility:
+                                subtitleController.widgetVisibility,
+                            comprehensionSubtitle:
+                                subtitleController.comprehensionSubtitle,
+                            contextSubtitle: subtitleController.contextSubtitle,
+                            focusNode: focusNode,
+                            emptyStack: emptyStack,
+                            isCasting: isCasting,
+                          ),
+                        )
+                      : Container(
+                          child: null,
+                        ),
+                );
+              } else {
+                return Container(
+                  child: subtitleController.showSubtitles
+                      ? Center(
+                          child: SubtitleTextView(
+                            subtitleStyle: subtitleStyle,
+                            widgetVisibility:
+                                subtitleController.widgetVisibility,
+                            comprehensionSubtitle:
+                                subtitleController.comprehensionSubtitle,
+                            contextSubtitle: subtitleController.contextSubtitle,
+                            focusNode: focusNode,
+                            emptyStack: emptyStack,
+                            isCasting: isCasting,
+                          ),
+                        )
+                      : Container(
+                          child: null,
+                        ),
+                );
+              }
+            },
+          ),
+        ),
       ],
     );
   }
