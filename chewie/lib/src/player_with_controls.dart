@@ -34,13 +34,18 @@ class PlayerWithControls extends StatelessWidget {
           builder: (BuildContext context, bool isCasting, Widget child) {
             if (isCasting) {
               return Container(
-                padding: EdgeInsets.only(top: 60, bottom: 60),
+                padding: EdgeInsets.only(
+                  top: 60,
+                  bottom: 60,
+                  left: 40,
+                  right: 40,
+                ),
                 color: Colors.black,
                 child: Center(
                   child: LayoutBuilder(
                     builder: (context, constraint) {
                       return new Icon(Icons.cast_connected_sharp,
-                          color: Colors.white.withOpacity(0.05),
+                          color: Colors.white.withOpacity(0.035),
                           size: constraint.biggest.height);
                     },
                   ),

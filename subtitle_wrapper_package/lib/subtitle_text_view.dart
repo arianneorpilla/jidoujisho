@@ -65,7 +65,7 @@ class SubtitleTextView extends StatelessWidget {
 
   double returnTextSize() {
     if (isCasting.value) {
-      return subtitleStyle.fontSize * 2;
+      return subtitleStyle.fontSize * 1.75;
     } else {
       return subtitleStyle.fontSize;
     }
@@ -169,10 +169,10 @@ class SubtitleTextView extends StatelessWidget {
                           parseVe(gMecabTagger, processedSubtitles);
                       print(words);
 
-                      List<List<Word>> lines =
-                          getLinesFromWords(context, subtitleStyle, words);
-                      List<List<int>> indexes =
-                          getIndexesFromWords(context, subtitleStyle, words);
+                      List<List<Word>> lines = getLinesFromWords(
+                          context, subtitleStyle, words, returnTextSize());
+                      List<List<int>> indexes = getIndexesFromWords(
+                          context, subtitleStyle, words, returnTextSize());
 
                       for (Word word in words) {
                         word.word = word.word.replaceAll('␝', ' ');

@@ -291,8 +291,8 @@ String formatTimeString(double time) {
   return formatted;
 }
 
-List<List<Word>> getLinesFromWords(
-    BuildContext context, SubtitleStyle style, List<Word> words) {
+List<List<Word>> getLinesFromWords(BuildContext context, SubtitleStyle style,
+    List<Word> words, double fontSize) {
   List<List<Word>> lines = [];
   List<Word> working = [];
   String concatenate = "";
@@ -304,7 +304,9 @@ List<List<Word>> getLinesFromWords(
     Word word = words[i];
     textPainter = TextPainter()
       ..text = TextSpan(
-          text: concatenate + word.word, style: TextStyle(fontSize: 24))
+        text: concatenate + word.word,
+        style: TextStyle(fontSize: fontSize),
+      )
       ..textDirection = TextDirection.ltr
       ..layout(minWidth: 0, maxWidth: double.infinity);
 
@@ -333,7 +335,11 @@ List<List<Word>> getLinesFromWords(
 }
 
 List<List<int>> getIndexesFromWords(
-    BuildContext context, SubtitleStyle style, List<Word> words) {
+  BuildContext context,
+  SubtitleStyle style,
+  List<Word> words,
+  double fontSize,
+) {
   words.add(Word("", "", Grammar.Unassigned, "", Pos.TBD, "", TokenNode("")));
 
   List<List<int>> lines = [];
@@ -347,7 +353,10 @@ List<List<int>> getIndexesFromWords(
     Word word = words[i];
     textPainter = TextPainter()
       ..text = TextSpan(
-          text: concatenate + word.word, style: TextStyle(fontSize: 24))
+          text: concatenate + word.word,
+          style: TextStyle(
+            fontSize: fontSize,
+          ))
       ..textDirection = TextDirection.ltr
       ..layout(minWidth: 0, maxWidth: double.infinity);
 

@@ -80,6 +80,9 @@ class SubTitleWrapper extends StatelessWidget {
                 );
               } else {
                 return Container(
+                  padding: EdgeInsets.only(
+                      left: subtitleStyle.position.left,
+                      right: subtitleStyle.position.right),
                   child: subtitleController.showSubtitles
                       ? Center(
                           child: SubtitleTextView(
