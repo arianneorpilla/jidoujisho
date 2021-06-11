@@ -793,6 +793,11 @@ class _MaterialControlsState extends State<MaterialControls>
         );
         options.add(
           SubtitleAudioMenuOption(
+            type: SubtitleAudioMenuOptionType.latinFilterMode,
+          ),
+        );
+        options.add(
+          SubtitleAudioMenuOption(
             type: SubtitleAudioMenuOptionType.adjustDelayAndAllowance,
           ),
         );
@@ -834,6 +839,13 @@ class _MaterialControlsState extends State<MaterialControls>
           case SubtitleAudioMenuOptionType.adjustDelayAndAllowance:
             controller.pause();
             chewieController.retimeSubtitles();
+            break;
+          case SubtitleAudioMenuOptionType.latinFilterMode:
+            await toggleLatinFilterMode();
+            await toggleSelectMode();
+            gIsSelectMode.value = getSelectMode();
+            await toggleSelectMode();
+            gIsSelectMode.value = getSelectMode();
             break;
           default:
             break;
@@ -1270,6 +1282,13 @@ class SubtitleAudioMenuOption {
       case SubtitleAudioMenuOptionType.adjustDelayAndAllowance:
         return Colors.white;
         break;
+      case SubtitleAudioMenuOptionType.latinFilterMode:
+        if (getLatinFilterMode()) {
+          return Colors.red;
+        } else {
+          return Colors.white;
+        }
+        break;
       default:
         return Colors.white;
     }
@@ -1294,6 +1313,13 @@ class SubtitleAudioMenuOption {
         break;
       case SubtitleAudioMenuOptionType.adjustDelayAndAllowance:
         return Icons.timer_sharp;
+        break;
+      case SubtitleAudioMenuOptionType.latinFilterMode:
+        if (getLatinFilterMode()) {
+          return Icons.do_disturb_on_outlined;
+        } else {
+          return Icons.do_disturb_off_outlined;
+        }
         break;
       default:
         return Icons.error;
@@ -1320,7 +1346,8 @@ class SubtitleAudioMenuOption {
       case SubtitleAudioMenuOptionType.adjustDelayAndAllowance:
         return "Adjust Delay and Allowance";
         break;
-
+      case SubtitleAudioMenuOptionType.latinFilterMode:
+        return "Filter Latin Characters";
       default:
         return "Undefined";
     }
@@ -1334,6 +1361,7 @@ enum SubtitleAudioMenuOptionType {
   noneSubtitle,
   externalSubtitle,
   adjustDelayAndAllowance,
+  latinFilterMode,
 }
 
 class FooterLayout extends StatelessWidget {

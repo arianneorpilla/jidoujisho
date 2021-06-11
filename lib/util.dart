@@ -313,7 +313,7 @@ List<List<Word>> getLinesFromWords(BuildContext context, SubtitleStyle style,
     if (word.word.contains('␜') ||
         i == words.length - 1 ||
         textPainter.width >=
-            width - style.position.left - style.position.right) {
+            width - style.position.left - style.position.right - 20) {
       List<Word> line = [];
       for (int i = 0; i < working.length; i++) {
         line.add(working[i]);
@@ -478,6 +478,46 @@ Future<List<String>> scrapeBingImages(String searchTerm) async {
   }
 
   return entries;
+}
+
+String stripLatinCharactersFromText(String subtitleText) {
+  subtitleText =
+      subtitleText.replaceAll(RegExp(r'(?![×])[A-zÀ-ú\u0160-\u0161œû]'), "○");
+  subtitleText = subtitleText.replaceAll(
+      RegExp(r"[-!%^&*_+|~=`;'?,.\/"
+          '"'
+          "]"),
+      "○");
+
+  List<String> splitText = subtitleText.split("\n");
+  splitText.removeWhere((line) {
+    line = line.replaceAll(":", " ");
+    line = line.replaceAll("(", " ");
+    line = line.replaceAll(")", " ");
+    line = line.replaceAll("[", " ");
+    line = line.replaceAll("]", " ");
+    line = line.replaceAll("{", " ");
+    line = line.replaceAll("}", " ");
+    line = line.replaceAll("<", " ");
+    line = line.replaceAll(">", " ");
+    line = line.replaceAll("\$", " ");
+    line = line.replaceAll("…", " ");
+    line = line.replaceAll("’", " ");
+    line = line.replaceAll("○", " ");
+    line = line.replaceAll("«", " ");
+    line = line.replaceAll("»", " ");
+    line = line.replaceAll("“", " ");
+    line = line.replaceAll("”", " ");
+    line = line.replaceAll("—", " ");
+    line = line.replaceAll("♪", " ");
+    line = line.replaceAll(RegExp(r"[0-9]"), " ");
+    line = line.trim();
+
+    return line.isEmpty;
+  });
+  subtitleText = splitText.join("\n");
+
+  return subtitleText;
 }
 
 void unlockLandscape() {

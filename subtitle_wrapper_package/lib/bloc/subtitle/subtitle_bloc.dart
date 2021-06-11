@@ -61,7 +61,9 @@ class SubtitleBloc extends Bloc<SubtitleEvent, SubtitleState> {
                       subtitleController.subtitlesOffset <
                   subtitleItem.endTime.inMilliseconds) {
             add(UpdateLoadedSubtitle(subtitle: subtitleItem));
-            subtitleController.widgetVisibility.value = true;
+            if (!subtitleController.widgetVisibility.value) {
+              subtitleController.widgetVisibility.value = true;
+            }
             subtitleNotifier.value = subtitleItem;
             continue;
           }

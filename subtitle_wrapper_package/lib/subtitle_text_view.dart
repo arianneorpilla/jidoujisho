@@ -88,6 +88,12 @@ class SubtitleTextView extends StatelessWidget {
                 return ValueListenableBuilder(
                   valueListenable: widgetVisibility,
                   builder: (context, visibility, widget) {
+                    Subtitle currentSubtitle = state.subtitle;
+                    String subtitleText = currentSubtitle.text;
+                    if (getLatinFilterMode()) {
+                      subtitleText = stripLatinCharactersFromText(subtitleText);
+                    }
+
                     if (!visibility) {
                       return Container();
                     }
@@ -98,10 +104,12 @@ class SubtitleTextView extends StatelessWidget {
                               comprehensionSubtitle.value != null &&
                               (comprehensionSubtitle.value.startTime -
                                           Duration(seconds: 10) >
-                                      state.subtitle.startTime ||
+                                      currentSubtitle.startTime ||
                                   comprehensionSubtitle.value.endTime <
-                                      state.subtitle.endTime))) {
-                        widgetVisibility.value = false;
+                                      currentSubtitle.endTime))) {
+                        if (widgetVisibility.value) {
+                          widgetVisibility.value = false;
+                        }
                         return Container();
                       }
                     }
@@ -113,7 +121,7 @@ class SubtitleTextView extends StatelessWidget {
                             subtitleStyle.hasBorder
                                 ? Center(
                                     child: SelectableText(
-                                      state.subtitle.text,
+                                      subtitleText,
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         fontSize: returnTextSize(),
@@ -133,14 +141,14 @@ class SubtitleTextView extends StatelessWidget {
                                   ),
                             Center(
                               child: SelectableText(
-                                state.subtitle.text,
+                                subtitleText,
                                 key: ViewKeys.SUBTITLE_TEXT_CONTENT,
                                 textAlign: TextAlign.center,
                                 onSelectionChanged: (selection, cause) {
                                   emptyStack();
                                   Clipboard.setData(ClipboardData(
-                                      text: selection
-                                          .textInside(state.subtitle.text)));
+                                      text:
+                                          selection.textInside(subtitleText)));
                                 },
                                 style: TextStyle(
                                   fontSize: returnTextSize(),
@@ -159,8 +167,7 @@ class SubtitleTextView extends StatelessWidget {
                       );
                     } else {
                       String processedSubtitles;
-                      processedSubtitles =
-                          state.subtitle.text.replaceAll('\n', '␜');
+                      processedSubtitles = subtitleText.replaceAll('\n', '␜');
                       processedSubtitles =
                           processedSubtitles.replaceAll(' ', '␝');
 
@@ -230,7 +237,7 @@ class SubtitleTextView extends StatelessWidget {
                                         getText(
                                           word,
                                           index,
-                                          state.subtitle,
+                                          currentSubtitle,
                                         ),
                                       );
                                     }

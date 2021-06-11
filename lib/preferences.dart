@@ -188,6 +188,14 @@ bool getFocusMode() {
   return gSharedPrefs.getBool("focusMode") ?? false;
 }
 
+Future<void> toggleLatinFilterMode() async {
+  await gSharedPrefs.setBool("latinFilterMode", !getLatinFilterMode());
+}
+
+bool getLatinFilterMode() {
+  return gSharedPrefs.getBool("latinFilterMode") ?? false;
+}
+
 Future<void> toggleListeningComprehensionMode() async {
   await gSharedPrefs.setBool(
       "listeningComprehensionMode", !getListeningComprehensionMode());
@@ -216,6 +224,14 @@ Future<void> setLastPlayedPosition(int positionInSeconds) async {
 
 int getLastPlayedPosition() {
   return gSharedPrefs.getInt("lastPlayedPosition") ?? -1;
+}
+
+Future<void> setScopedStorageDontShow() async {
+  await gSharedPrefs.setBool("scopedStorageDontShow", true);
+}
+
+bool getScopedStorageDontShow() {
+  return gSharedPrefs.getBool("scopedStorageDontShow") ?? false;
 }
 
 Future<void> setAudioAllowance(int ms) async {
@@ -288,7 +304,7 @@ Future<void> addVideoHistory(VideoHistory videoHistory) async {
   videoHistories.add(videoHistory);
 
   if (videoHistories.length >= 20) {
-    videoHistories.sublist(0, videoHistories.length - 50).forEach((entry) {
+    videoHistories.sublist(0, videoHistories.length - 20).forEach((entry) {
       if (!entry.thumbnail.startsWith("http")) {
         File photoFile = File(entry.thumbnail);
         if (photoFile.existsSync()) {
@@ -296,7 +312,7 @@ Future<void> addVideoHistory(VideoHistory videoHistory) async {
         }
       }
     });
-    videoHistories = videoHistories.sublist(videoHistories.length - 50);
+    videoHistories = videoHistories.sublist(videoHistories.length - 20);
   }
 
   await setVideoHistory(videoHistories);

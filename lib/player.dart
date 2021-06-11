@@ -312,6 +312,44 @@ class _VideoPlayerState extends State<VideoPlayer>
     }
 
     _currentSubTrack = ValueNotifier<int>(initialSubTrack);
+    WidgetsBinding.instance.addPostFrameCallback((_) => scopedStorageWarning());
+  }
+
+  void scopedStorageWarning() async {
+    if (!getScopedStorageDontShow() &&
+        videoFile.path.contains("/cache/file_picker")) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.zero,
+            ),
+            title: Text("Scoped Storage Warning"),
+            content: Text(
+              "The selected video file has been cached in the application's scoped storage by the file picker rather than direct play. This redundant duplication of the video file may have caused slower loading. Additionally, default external subtitles were not imported.\n\nFor faster loading and direct video playback, try using a different file picker.",
+              textAlign: TextAlign.justify,
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text('DON\'T SHOW AGAIN',
+                    style: TextStyle(color: Colors.white)),
+                onPressed: () async {
+                  setScopedStorageDontShow();
+                  Navigator.pop(context);
+                },
+              ),
+              TextButton(
+                child: Text('OK', style: TextStyle(color: Colors.white)),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 
   Future<void> playPause() async {
@@ -425,9 +463,13 @@ class _VideoPlayerState extends State<VideoPlayer>
             getVideoPlayerController().value.position.inMilliseconds -
                     getSubtitleController().subtitlesOffset <
                 cutOffEnd.inMilliseconds) {
-          getSubtitleController().widgetVisibility.value = true;
+          if (!getSubtitleController().widgetVisibility.value) {
+            getSubtitleController().widgetVisibility.value = true;
+          }
         } else {
-          getSubtitleController().widgetVisibility.value = false;
+          if (getSubtitleController().widgetVisibility.value) {
+            getSubtitleController().widgetVisibility.value = false;
+          }
         }
       }
     }
@@ -1644,7 +1686,16 @@ class _VideoPlayerState extends State<VideoPlayer>
         itemBuilder: (context, index) {
           Subtitle subtitle = subtitles[index];
 
-          String subtitleText = "『 ${subtitle.text} 』";
+          String subtitleText = subtitle.text;
+          if (getLatinFilterMode()) {
+            subtitleText = stripLatinCharactersFromText(subtitleText);
+          }
+          if (subtitleText.trim().isNotEmpty) {
+            subtitleText = "『 $subtitleText 』";
+          }
+
+          print(subtitleText);
+
           String subtitleStart = getTimestampFromDuration(subtitle.startTime);
           String subtitleEnd = getTimestampFromDuration(subtitle.endTime);
           String subtitleDuration = "$subtitleStart - $subtitleEnd";

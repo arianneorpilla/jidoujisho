@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:async/async.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fuzzy/fuzzy.dart';
@@ -129,10 +130,58 @@ class AudioPlayerTask extends BackgroundAudioTask {
 }
 
 class App extends StatelessWidget {
+  static const Locale kLocale = const Locale("ja", "JP");
+  static const String kFontFamilyAndroid = null;
+  static const String kFontFamilyCupertino = "Hiragino Sans";
+
+  static final bool _android = defaultTargetPlatform == TargetPlatform.android;
+  static final String _kFontFamily =
+      _android ? kFontFamilyAndroid : kFontFamilyCupertino;
+  static final TextTheme _whiteTextTheme =
+      _android ? Typography.whiteMountainView : Typography.whiteCupertino;
+  static final TextTheme _blackTextTheme = _android
+      ? Typography.blackMountainView
+      : Typography.blackCupertino; // This is it!
+
+  static TextStyle _textStyle(TextStyle base) {
+    return base.copyWith(
+      fontFamily: _kFontFamily,
+      locale: kLocale,
+      textBaseline: TextBaseline.ideographic,
+    );
+  }
+
+  static TextTheme _textTheme(TextTheme base) {
+    return base.copyWith(
+      headline1: _textStyle(base.headline1),
+      headline2: _textStyle(base.headline2),
+      headline3: _textStyle(base.headline3),
+      headline4: _textStyle(base.headline4),
+      headline5: _textStyle(base.headline5),
+      headline6: _textStyle(base.headline6),
+      subtitle1: _textStyle(base.subtitle1),
+      bodyText1: _textStyle(base.bodyText1),
+      bodyText2: _textStyle(base.bodyText2),
+      caption: _textStyle(base.caption),
+      button: _textStyle(base.button),
+      overline: _textStyle(base.overline),
+    );
+  }
+
+  static final Typography kTypography = Typography.material2018(
+    platform: defaultTargetPlatform,
+    white: _textTheme(_whiteTextTheme),
+    black: _textTheme(_blackTextTheme),
+    englishLike: _textTheme(Typography.englishLike2018),
+    dense: _textTheme(Typography.dense2018),
+    tall: _textTheme(Typography.tall2018),
+  );
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      locale: Locale("ja", "JP"),
       theme: ThemeData(
         accentColor: Colors.red,
         brightness: Brightness.dark,
@@ -140,6 +189,7 @@ class App extends StatelessWidget {
         cardColor: Colors.black,
         appBarTheme: AppBarTheme(backgroundColor: Colors.black),
         canvasColor: Colors.grey[900],
+        typography: kTypography,
       ),
       home: AudioServiceWidget(child: Home()),
     );
@@ -191,6 +241,7 @@ class _HomeState extends State<Home> {
       ReceiveSharingIntent.reset();
     }, onError: (err) {
       print("getIntentDataStream error: $err");
+      ReceiveSharingIntent.reset();
     });
 
     // For sharing images coming from outside the app while the app is closed
@@ -228,6 +279,7 @@ class _HomeState extends State<Home> {
       ReceiveSharingIntent.reset();
     }, onError: (err) {
       print("getLinkStream error: $err");
+      ReceiveSharingIntent.reset();
     });
 
     // For sharing or opening urls/text coming from outside the app while the app is closed
@@ -2196,6 +2248,10 @@ class _HistoryResultState extends State<HistoryResult>
     }
 
     Widget displayVideoInformation() {
+      bool isScopedStorage() {
+        return history.subheading.contains("/cache/file_picker");
+      }
+
       return Expanded(
         child: Container(
           padding: EdgeInsets.only(left: 12, right: 6),
@@ -2221,8 +2277,11 @@ class _HistoryResultState extends State<HistoryResult>
               isNetwork()
                   ? closedCaptionRow(
                       "YouTube", Colors.grey, Icons.ondemand_video_sharp)
-                  : closedCaptionRow(
-                      "Local Storage", Colors.grey, Icons.storage_sharp)
+                  : isScopedStorage()
+                      ? closedCaptionRow(
+                          "Scoped Storage", Colors.grey, Icons.cached_sharp)
+                      : closedCaptionRow(
+                          "Local Storage", Colors.grey, Icons.storage_sharp)
             ],
           ),
         ),
@@ -3290,7 +3349,7 @@ class _CreatorState extends State<Creator> {
 
   List<String> decks;
   List<String> imageURLs;
-  String searchTerm;
+  String searchTerm = "";
   TextEditingController _imageSearchController;
 
   TextEditingController _sentenceController;
@@ -3355,16 +3414,6 @@ class _CreatorState extends State<Creator> {
     if (initialFile != null) {
       _isFileImage = true;
       _fileImage = initialFile;
-    }
-
-    if (searchTerm == null) {
-      if (initialDictionaryEntry.word.contains(";")) {
-        searchTerm = initialDictionaryEntry.word.split(";").first;
-      } else if (initialDictionaryEntry.word.contains("／")) {
-        searchTerm = initialDictionaryEntry.word.split("／").first;
-      } else {
-        searchTerm = initialDictionaryEntry.word;
-      }
     }
   }
 
@@ -3647,17 +3696,17 @@ class _CreatorState extends State<Creator> {
                 _meaningController =
                     TextEditingController(text: _selectedEntry.value.meaning);
 
-                if (_fileImage == null) {
-                  _isFileImage = false;
-                  if (_selectedEntry.value.word.contains(";")) {
-                    searchTerm = _selectedEntry.value.word.split(";").first;
-                  } else if (_selectedEntry.value.word.contains("／")) {
-                    searchTerm = _selectedEntry.value.word.split("／").first;
-                  } else {
-                    searchTerm = _selectedEntry.value.word;
-                  }
-                  _selectedIndex.value = 0;
-                }
+                // if (_fileImage == null) {
+                //   _isFileImage = false;
+                //   if (_selectedEntry.value.word.contains(";")) {
+                //     searchTerm = _selectedEntry.value.word.split(";").first;
+                //   } else if (_selectedEntry.value.word.contains("／")) {
+                //     searchTerm = _selectedEntry.value.word.split("／").first;
+                //   } else {
+                //     searchTerm = _selectedEntry.value.word;
+                //   }
+                //   _selectedIndex.value = 0;
+                // }
 
                 print(searchTerm);
 
@@ -3752,14 +3801,14 @@ class _CreatorState extends State<Creator> {
               onPressed: () async {
                 setState(() {
                   _wordController.text = words[selectedWordIndex.value];
-                  if (_fileImage == null) {
-                    setState(() {
-                      _isFileImage = false;
-                      _fileImage = null;
-                      searchTerm = _wordController.text;
-                      _selectedIndex.value = 0;
-                    });
-                  }
+                  // if (_fileImage == null) {
+                  //   setState(() {
+                  //     _isFileImage = false;
+                  //     _fileImage = null;
+                  //     searchTerm = _wordController.text;
+                  //     _selectedIndex.value = 0;
+                  //   });
+                  // }
                 });
                 Navigator.pop(context);
               },
@@ -3818,7 +3867,19 @@ class _CreatorState extends State<Creator> {
                 setState(() {
                   _isFileImage = false;
                   _fileImage = null;
-                  searchTerm = _imageSearchController.text;
+                  if (_imageSearchController.text.trim().isEmpty) {
+                    _imageSearchController.clear();
+
+                    if (_wordController.text.contains(";")) {
+                      searchTerm = _wordController.text.split(";").first;
+                    } else if (_selectedEntry.value.word.contains("／")) {
+                      searchTerm = _wordController.text.split("／").first;
+                    } else {
+                      searchTerm = _wordController.text;
+                    }
+                  } else {
+                    searchTerm = _imageSearchController.text;
+                  }
                   _selectedIndex.value = 0;
                 });
               },
@@ -3869,7 +3930,7 @@ class _CreatorState extends State<Creator> {
           ],
         ),
         labelText: "Image",
-        hintText: "Enter search term here",
+        hintText: "Searches word if blank",
       ),
     );
 
@@ -4050,6 +4111,10 @@ class _CreatorState extends State<Creator> {
     }
 
     Widget showNetworkImage() {
+      if (searchTerm.trim().isEmpty) {
+        return Container();
+      }
+
       return FutureBuilder(
         future: scrapeBingImages(searchTerm),
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
