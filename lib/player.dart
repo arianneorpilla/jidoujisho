@@ -1773,6 +1773,10 @@ class _VideoPlayerState extends State<VideoPlayer>
               Duration selectedStartTime = selectedSubtitles.first.startTime;
               Duration selectedEndTime = selectedSubtitles.last.endTime;
 
+              if (getLatinFilterMode()) {
+                selectedText = stripLatinCharactersFromText(selectedText);
+              }
+
               Subtitle selectedSubtitle = Subtitle(
                 text: selectedText,
                 startTime: selectedStartTime,

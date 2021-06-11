@@ -3383,15 +3383,8 @@ class _CreatorState extends State<Creator> {
     _wordController = TextEditingController(text: initialDictionaryEntry.word);
     _sentenceController = TextEditingController(text: "");
 
-    if (initialSentence.isNotEmpty) {
-      if (parseVe(gMecabTagger, initialSentence).length != 1) {
-        _sentenceController = TextEditingController(text: initialSentence);
-        _wordController = TextEditingController(text: "");
-      } else {
-        _sentenceController = TextEditingController(text: "");
-        _wordController = TextEditingController(text: initialSentence);
-      }
-    }
+    _selectedEntry = new ValueNotifier<DictionaryEntry>(initialDictionaryEntry);
+    _selectedDeck = new ValueNotifier<String>(lastDeck);
 
     DictionaryEntry pitchEntry = getClosestPitchEntry(initialDictionaryEntry);
     if (pitchEntry != null) {
@@ -3405,15 +3398,34 @@ class _CreatorState extends State<Creator> {
     _meaningController =
         TextEditingController(text: initialDictionaryEntry.meaning);
 
-    _selectedEntry = new ValueNotifier<DictionaryEntry>(initialDictionaryEntry);
-    _selectedDeck = new ValueNotifier<String>(lastDeck);
-
     if (initialDictionaryEntry.word == "") {
       _isFileImage = true;
     }
     if (initialFile != null) {
       _isFileImage = true;
       _fileImage = initialFile;
+    }
+
+    if (initialSentence.isNotEmpty) {
+      if (parseVe(gMecabTagger, initialSentence).length != 1) {
+        _sentenceController = TextEditingController(text: initialSentence);
+        _wordController = TextEditingController(text: "");
+      } else {
+        _sentenceController = TextEditingController(text: "");
+        _wordController = TextEditingController(text: initialSentence);
+      }
+    } else {
+      if (_fileImage == null) {
+        _isFileImage = false;
+        if (_selectedEntry.value.word.contains(";")) {
+          searchTerm = _selectedEntry.value.word.split(";").first;
+        } else if (_selectedEntry.value.word.contains("／")) {
+          searchTerm = _selectedEntry.value.word.split("／").first;
+        } else {
+          searchTerm = _selectedEntry.value.word;
+        }
+        _selectedIndex.value = 0;
+      }
     }
   }
 
