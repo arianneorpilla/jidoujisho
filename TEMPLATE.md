@@ -51,6 +51,7 @@ small {
   width: auto;
   max-height: 250px;
 }
+
 .pitch{
   border-top: solid red 1px;
   padding-top: 1px;
