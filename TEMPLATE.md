@@ -1,6 +1,6 @@
 # jidoujisho Anki Template
 
-This page documents the HTML and CSS used in the Anki templates for any users that might already have an existing template and wish to update. **There are three templates**, one used for video playback, one for using the card creator from inside the app, and one for reading when sharing to the app.\
+This page documents the HTML and CSS used in the Anki templates for any users that might already have an existing template and wish to update. **There are three templates**, one used for video playback, one for using the card creator from inside the app, and one for reading when sharing to the app.
 
 * **jidoujisho Anki cards have six fields in order:** Image, Audio, Sentence, Word, Meaning, Reading
 * You may edit the template on AnkiDroid by **editing any jidoujisho exported card**
