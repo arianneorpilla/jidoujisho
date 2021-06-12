@@ -3414,18 +3414,18 @@ class _CreatorState extends State<Creator> {
         _sentenceController = TextEditingController(text: "");
         _wordController = TextEditingController(text: initialSentence);
       }
-    } else {
-      if (_fileImage == null) {
-        _isFileImage = false;
-        if (_selectedEntry.value.word.contains(";")) {
-          searchTerm = _selectedEntry.value.word.split(";").first;
-        } else if (_selectedEntry.value.word.contains("／")) {
-          searchTerm = _selectedEntry.value.word.split("／").first;
-        } else {
-          searchTerm = _selectedEntry.value.word;
-        }
-        _selectedIndex.value = 0;
+    }
+
+    if (_fileImage == null) {
+      _isFileImage = false;
+      if (_selectedEntry.value.word.contains(";")) {
+        searchTerm = _selectedEntry.value.word.split(";").first;
+      } else if (_selectedEntry.value.word.contains("／")) {
+        searchTerm = _selectedEntry.value.word.split("／").first;
+      } else {
+        searchTerm = _selectedEntry.value.word;
       }
+      _selectedIndex.value = 0;
     }
   }
 
@@ -3708,17 +3708,17 @@ class _CreatorState extends State<Creator> {
                 _meaningController =
                     TextEditingController(text: _selectedEntry.value.meaning);
 
-                // if (_fileImage == null) {
-                //   _isFileImage = false;
-                //   if (_selectedEntry.value.word.contains(";")) {
-                //     searchTerm = _selectedEntry.value.word.split(";").first;
-                //   } else if (_selectedEntry.value.word.contains("／")) {
-                //     searchTerm = _selectedEntry.value.word.split("／").first;
-                //   } else {
-                //     searchTerm = _selectedEntry.value.word;
-                //   }
-                //   _selectedIndex.value = 0;
-                // }
+                if (_fileImage == null) {
+                  _isFileImage = false;
+                  if (_selectedEntry.value.word.contains(";")) {
+                    searchTerm = _selectedEntry.value.word.split(";").first;
+                  } else if (_selectedEntry.value.word.contains("／")) {
+                    searchTerm = _selectedEntry.value.word.split("／").first;
+                  } else {
+                    searchTerm = _selectedEntry.value.word;
+                  }
+                  _selectedIndex.value = 0;
+                }
 
                 print(searchTerm);
 
@@ -4293,6 +4293,18 @@ class _CreatorState extends State<Creator> {
       }
     }
 
+    bool isReader() {
+      return initialSentence.isNotEmpty;
+    }
+
+    String isReaderText() {
+      if (isReader()) {
+        return "Reader";
+      } else {
+        return "Creator";
+      }
+    }
+
     Widget showExportButton() {
       return ValueListenableBuilder(
         valueListenable: _justExported,
@@ -4317,8 +4329,8 @@ class _CreatorState extends State<Creator> {
                         exported
                             ? "Card Exported"
                             : isShared
-                                ? "Export Card and Return"
-                                : "Export Card",
+                                ? "Export ${isReaderText()} Card and Return"
+                                : "Export ${isReaderText()} Card",
                         style: TextStyle(
                           color: exported ? Colors.grey : Colors.white,
                           fontSize: 16,
@@ -4358,6 +4370,7 @@ class _CreatorState extends State<Creator> {
                     _readingController.text,
                     _meaningController.text,
                     _fileImage,
+                    isReader(),
                   );
 
                   setState(() {

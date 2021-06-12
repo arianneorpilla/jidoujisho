@@ -484,7 +484,7 @@ String stripLatinCharactersFromText(String subtitleText) {
   subtitleText =
       subtitleText.replaceAll(RegExp(r'(?![×])[A-zÀ-ú\u0160-\u0161œû]'), "○");
   subtitleText = subtitleText.replaceAll(
-      RegExp(r"[-!%^&*_+|~=`;'?,.\/"
+      RegExp(r"[-!%^&*_+|=`;'?,.\/"
           '"'
           "]"),
       "○");
@@ -502,6 +502,7 @@ String stripLatinCharactersFromText(String subtitleText) {
     line = line.replaceAll(">", " ");
     line = line.replaceAll("\$", " ");
     line = line.replaceAll("…", " ");
+    line = line.replaceAll("~", " ");
     line = line.replaceAll("’", " ");
     line = line.replaceAll("○", " ");
     line = line.replaceAll("«", " ");

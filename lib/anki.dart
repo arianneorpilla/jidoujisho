@@ -578,11 +578,14 @@ Future<void> addCreatorNote(
   String answer,
   String meaning,
   String reading,
+  bool isReader,
 ) async {
   const platform = const MethodChannel('com.lrorpilla.api/ankidroid');
 
+  String method = (isReader) ? "addReaderNote" : "addCreatorNote";
+
   try {
-    await platform.invokeMethod('addCreatorNote', <String, dynamic>{
+    await platform.invokeMethod(method, <String, dynamic>{
       'deck': deck,
       'image': image,
       'audio': audio,
@@ -682,12 +685,22 @@ void exportAnkiCard(String deck, String sentence, String answer, String reading,
   if (answer == "") {
     answer = "​";
   }
+  if (sentence == "") {
+    sentence = "​";
+  }
+  if (meaning == "") {
+    meaning = "​";
+  }
+  if (reading == "") {
+    reading = "​";
+  }
+
   requestAnkiDroidPermissions();
   addNote(deck, addImage, addAudio, sentence, answer, meaning, reading);
 }
 
 void exportCreatorAnkiCard(String deck, String sentence, String answer,
-    String reading, String meaning, File imageFile) {
+    String reading, String meaning, File imageFile, bool isReader) {
   DateTime now = DateTime.now();
   String newFileName =
       "jidoujisho-" + intl.DateFormat('yyyyMMddTkkmmss').format(now);
@@ -708,6 +721,25 @@ void exportCreatorAnkiCard(String deck, String sentence, String answer,
   if (answer == "") {
     answer = "​";
   }
+  if (isReader && sentence == "") {
+    sentence = "​";
+  }
+  if (meaning == "") {
+    meaning = "​";
+  }
+  if (reading == "") {
+    reading = "​";
+  }
   requestAnkiDroidPermissions();
-  addCreatorNote(deck, addImage, addAudio, sentence, answer, meaning, reading);
+
+  addCreatorNote(
+    deck,
+    addImage,
+    addAudio,
+    sentence,
+    answer,
+    meaning,
+    reading,
+    isReader,
+  );
 }

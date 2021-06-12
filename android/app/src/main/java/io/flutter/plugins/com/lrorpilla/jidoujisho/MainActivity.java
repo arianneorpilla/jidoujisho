@@ -77,9 +77,9 @@ public class MainActivity extends FlutterActivity {
             modelId = api.addNewCustomModel("jidoujisho (Creator)",
                     new String[] {"Image", "Audio", "Sentence", "Word", "Meaning", "Reading"},
                     new String[] {"jidoujisho (Creator) Default"},
-                    new String[] {"<div class=\"image\">{{Image}}</div><br><p id=\"sentence\">{{Sentence}}</p>"},
-                    new String[] {"<div class=\"image\">{{Image}}</div><br><p id=\"sentence\">{{Sentence}}</p>" +
-                            "{{Audio}}<br><hr id=reading><p id=\"reading\">{{Reading}}</p><h2 id=\"word\">{{Word}}</h2><br><p><small id=\"meaning\">{{Meaning}}</small></p><br>"},
+                    new String[] {"{{Audio}}<div class=\"image\">{{Image}}</div><br><p id=\"sentence\">{{Sentence}}</p><div id=\"word\">{{Word}}</div>"},
+                    new String[] {"{{Audio}}<div class=\"image\">{{Image}}</div><br><p id=\"sentence\">{{Sentence}}</p><div id=\"word\">{{Word}}</div>" +
+                            "<hr><p id=\"reading\">{{Reading}}</p><h2 id=\"word\">{{Word}}</h2><br><p><small id=\"meaning\">{{Meaning}}</small></p><br>"},
                             "p {\n" +
                             "    margin: 0px\n" +
                             "}\n" +
@@ -109,17 +109,17 @@ public class MainActivity extends FlutterActivity {
                             "  position: static;\n" +
                             "  height: auto;\n" +
                             "  width: auto;\n" +
-                            "  max-height: 300px;\n" +
+                            "  max-height: 400px;\n" +
                             "}\n" +
                             ".pitch{\n" +
-                            "  border-top: solid red 1px;\n" +
+                            "  border-top: solid red 2px;\n" +
                             "  padding-top: 1px;\n" +
                             "}\n" +
                             "\n" +
                             ".pitch_end{\n" +
                             "  border-color: red;\n" +
-                            "  border-right: solid red 1px;\n" +
-                            "  border-top: solid red 1px;  \n" +
+                            "  border-right: solid red 2px;\n" +
+                            "  border-top: solid red 2px;  \n" +
                             "  line-height: 1px;\n" +
                             "  margin-right: 1px;\n" +
                             "  padding-right: 1px;\n" +
@@ -156,8 +156,87 @@ public class MainActivity extends FlutterActivity {
             modelId = api.addNewCustomModel("jidoujisho",
                     new String[] {"Image", "Audio", "Sentence", "Word", "Meaning", "Reading"},
                     new String[] {"jidoujisho Default"},
-                    new String[] {"<p id=\"sentence\">{{Sentence}}</p>"},
-                    new String[] {"<p id=\"sentence\">{{Sentence}}</p><br>{{Audio}}<br>{{Image}}<br><br>" +
+                    new String[] {"<p id=\"sentence\">{{Sentence}}</p><div id=\"word\">{{Word}}</div>"},
+                    new String[] {"<p id=\"sentence\">{{Sentence}}</p><div id=\"word\">{{Word}}</div><br>{{Audio}}<div class=\"image\">{{Image}}</div>" +
+                    "<hr id=reading><p id=\"reading\">{{Reading}}</p><h2 id=\"word\">{{Word}}</h2><br><p><small id=\"meaning\">{{Meaning}}</small></p>"},
+                            "p {\n" +
+                            "    margin: 0px\n" +
+                            "}\n" +
+                            "\n" +
+                            "h2 {\n" +
+                            "    margin: 0px\n" +
+                            "}\n" +
+                            "\n" +
+                            "small {\n" +
+                            "    margin: 0px\n" +
+                            "}\n" +
+                            "\n" +
+                            ".card {\n" +
+                            "  font-family: arial;\n" +
+                            "  font-size: 20px;\n" +
+                            "  white-space: pre-line;\n" +
+                            "  text-align: center;\n" +
+                            "  color: black;\n" +
+                            "  background-color: white;\n" +
+                            "}\n" +
+                            "\n" +
+                            "#sentence {\n" +
+                            "    font-size: 30px\n" +
+                            "}\n" +
+                            "\n" +
+                            ".image img {\n" +
+                            "  position: static;\n" +
+                            "  height: auto;\n" +
+                            "  width: auto;\n" +
+                            "  max-height: 250px;\n" +
+                            "}\n" +
+                            ".pitch{\n" +
+                            "  border-top: solid red 2px;\n" +
+                            "  padding-top: 1px;\n" +
+                            "}\n" +
+                            "\n" +
+                            ".pitch_end{\n" +
+                            "  border-color: red;\n" +
+                            "  border-right: solid red 2px;\n" +
+                            "  border-top: solid red 2px;  \n" +
+                            "  line-height: 1px;\n" +
+                            "  margin-right: 1px;\n" +
+                            "  padding-right: 1px;\n" +
+                            "  padding-top:1px;\n" +
+                            "}",
+                    null,
+                    null
+                    );
+        }
+
+        Set<String> tags = new HashSet<>(Arrays.asList("jidoujisho"));
+
+        api.addNote(modelId, deckId, new String[] {image, audio, sentence, word, meaning, reading}, tags);
+
+        System.out.println("Added note via flutter_ankidroid_api");
+        System.out.println("Model: " + modelId);
+        System.out.println("Deck: " + deckId);
+    }
+
+    private void addReaderNote(String deck, String image, String audio, String sentence, String word, String meaning, String reading) {
+        final AddContentApi api = new AddContentApi(context);
+
+        long deckId;
+        if (deckExists(deck)) {
+            deckId = mAnkiDroid.findDeckIdByName(deck);
+        } else {
+            deckId = api.addNewDeck(deck);
+        }
+
+        long modelId;
+        if (modelExists("jidoujisho (Reader)")) {
+            modelId = mAnkiDroid.findModelIdByName("jidoujisho (Reader)", 6);
+        } else {
+            modelId = api.addNewCustomModel("jidoujisho (Reader)",
+                    new String[] {"Image", "Audio", "Sentence", "Word", "Meaning", "Reading"},
+                    new String[] {"jidoujisho (Reader) Default"},
+                    new String[] {"<p id=\"sentence\">{{Sentence}}</p><div id=\"word\">{{Word}}</div>"},
+                    new String[] {"<p id=\"sentence\">{{Sentence}}</p><div id=\"word\">{{Word}}</div><br>{{Audio}}<div class=\"image\">{{Image}}</div>" +
                             "<hr id=reading><p id=\"reading\">{{Reading}}</p><h2 id=\"word\">{{Word}}</h2><br><p><small id=\"meaning\">{{Meaning}}</small></p>"},
                             "p {\n" +
                             "    margin: 0px\n" +
@@ -188,17 +267,17 @@ public class MainActivity extends FlutterActivity {
                             "  position: static;\n" +
                             "  height: auto;\n" +
                             "  width: auto;\n" +
-                            "  max-height: 300px;\n" +
+                            "  max-height: 250px;\n" +
                             "}\n" +
                             ".pitch{\n" +
-                            "  border-top: solid red 1px;\n" +
+                            "  border-top: solid red 2px;\n" +
                             "  padding-top: 1px;\n" +
                             "}\n" +
                             "\n" +
                             ".pitch_end{\n" +
                             "  border-color: red;\n" +
-                            "  border-right: solid red 1px;\n" +
-                            "  border-top: solid red 1px;  \n" +
+                            "  border-right: solid red 2px;\n" +
+                            "  border-top: solid red 2px;  \n" +
                             "  line-height: 1px;\n" +
                             "  margin-right: 1px;\n" +
                             "  padding-right: 1px;\n" +
@@ -269,17 +348,19 @@ public class MainActivity extends FlutterActivity {
                             final String answer = call.argument("answer");
                             final String meaning = call.argument("meaning");
                             final String reading = call.argument("reading");
+                            final AddContentApi api = new AddContentApi(context);
 
                             switch (call.method) {
                                 case "addNote":
                                     addNote(deck, image, audio, sentence, answer, meaning, reading);
                                     break;
                                 case "addCreatorNote":
-
                                     addCreatorNote(deck, image, audio, sentence, answer, meaning, reading);
                                     break;
+                                case "addReaderNote":
+                                    addReaderNote(deck, image, audio, sentence, answer, meaning, reading);
+                                    break;
                                 case "getDecks":
-                                    final AddContentApi api = new AddContentApi(context);
                                     result.success(api.getDeckList());
                                     break;
                                 case "requestPermissions":
