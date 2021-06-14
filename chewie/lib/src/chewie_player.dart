@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
+import 'package:jidoujisho/util.dart';
 import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:jidoujisho/dictionary.dart';
@@ -228,6 +229,7 @@ class ChewieController extends ChangeNotifier {
     @required this.audioAllowance,
     @required this.setNoPush,
     @required this.isCasting,
+    @required this.playerMode,
     this.aspectRatio,
     this.autoInitialize = false,
     this.autoPlay = false,
@@ -254,6 +256,7 @@ class ChewieController extends ChangeNotifier {
     this.deviceOrientationsAfterFullScreen = DeviceOrientation.values,
     this.routePageBuilder,
     this.streamData,
+    this.streamUrl,
   })  : assert(videoPlayerController != null,
             'You must provide a controller to play a video'),
         assert(playbackSpeeds.every((speed) => speed > 0),
@@ -279,7 +282,9 @@ class ChewieController extends ChangeNotifier {
   final ValueNotifier<Subtitle> comprehensionSubtitle;
   final ValueNotifier<int> audioAllowance;
   final YouTubeMux streamData;
+  final String streamUrl;
   final ValueNotifier<bool> isCasting;
+  final JidoujishoPlayerMode playerMode;
 
   /// Initialize the Video on Startup. This will prep the video for playback.
   final bool autoInitialize;

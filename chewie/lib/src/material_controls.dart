@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:chewie/src/chewie_player.dart';
@@ -9,7 +8,7 @@ import 'package:chewie/src/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:jidoujisho/util.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:share/share.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -145,7 +144,8 @@ class _MaterialControlsState extends State<MaterialControls>
               _buildProgressBar(),
             // if (chewieController.allowPlaybackSpeedChanging)
             //   _buildSpeedButton(controller),
-            if (controller.dataSourceType == DataSourceType.network)
+            if (chewieController.playerMode ==
+                JidoujishoPlayerMode.youtubeStream)
               _buildQualityButton(controller),
             _buildToolsButton(controller),
             _buildMoreButton(controller),
@@ -252,7 +252,8 @@ class _MaterialControlsState extends State<MaterialControls>
   }
 
   Future<void> openExtraShare() async {
-    final bool isYouTube = chewieController.streamData != null;
+    final bool isYouTube =
+        chewieController.playerMode == JidoujishoPlayerMode.youtubeStream;
 
     final chosenOption = await showModalBottomSheet<int>(
       context: context,
@@ -568,7 +569,8 @@ class _MaterialControlsState extends State<MaterialControls>
       await controller.castToRenderer(selectedCastDeviceName);
       Future.delayed(Duration(seconds: 2), () async {
         if (selectedCastDeviceName != null) {
-          if (chewieController.streamData != null) {
+          if (chewieController.playerMode ==
+              JidoujishoPlayerMode.youtubeStream) {
             YouTubeQualityOption bestMuxed = chewieController
                 .streamData.videoQualities
                 .lastWhere((element) => element.muxed);
@@ -741,7 +743,7 @@ class _MaterialControlsState extends State<MaterialControls>
         final List<String> subtitleTrackNames = [];
         final List<String> autoSubtitleTrackNames = [];
 
-        if (controller.dataSourceType == DataSourceType.file) {
+        if (chewieController.playerMode != JidoujishoPlayerMode.youtubeStream) {
           final audioTracks = await controller.getAudioTracks();
           final subtitleTracks = await controller.getSpuTracks();
 
@@ -767,14 +769,16 @@ class _MaterialControlsState extends State<MaterialControls>
             ),
           );
         }
-        for (int i = 0; i < subtitleTrackNames.length; i++) {
-          options.add(
-            SubtitleAudioMenuOption(
-              type: SubtitleAudioMenuOptionType.embeddedSubtitle,
-              callbackIndex: i,
-              metadata: subtitleTrackNames[i],
-            ),
-          );
+        if (chewieController.playerMode != JidoujishoPlayerMode.networkStream) {
+          for (int i = 0; i < subtitleTrackNames.length; i++) {
+            options.add(
+              SubtitleAudioMenuOption(
+                type: SubtitleAudioMenuOptionType.embeddedSubtitle,
+                callbackIndex: i,
+                metadata: subtitleTrackNames[i],
+              ),
+            );
+          }
         }
         for (int i = 0; i < autoSubtitleTrackNames.length; i++) {
           options.add(

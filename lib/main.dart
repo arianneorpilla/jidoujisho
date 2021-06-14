@@ -7,6 +7,8 @@ import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_absolute_path/flutter_absolute_path.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
@@ -24,7 +26,6 @@ import 'package:transparent_image/transparent_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:ve_dart/ve_dart.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import 'package:jidoujisho/anki.dart';
 import 'package:jidoujisho/cache.dart';
@@ -50,6 +51,7 @@ void main() async {
   SystemChrome.setEnabledSystemUIOverlays(
       [SystemUiOverlay.bottom, SystemUiOverlay.top]);
 
+  await DefaultCacheManager().emptyCache();
   await Permission.storage.request();
   requestAnkiDroidPermissions();
 
@@ -228,16 +230,30 @@ class _HomeState extends State<Home> {
     super.initState();
 
     ReceiveSharingIntent.getMediaStream().listen((List<SharedMediaFile> value) {
+      SharedMediaType type = value.first.type;
+
       if (value == null) {
         return;
       }
 
-      setCreatorView(
-        sentence: "",
-        dictionaryEntry: DictionaryEntry(word: "", meaning: "", reading: ""),
-        file: File(value.first.path),
-        isShared: true,
-      );
+      switch (type) {
+        case SharedMediaType.IMAGE:
+          setCreatorView(
+            sentence: "",
+            dictionaryEntry:
+                DictionaryEntry(word: "", meaning: "", reading: ""),
+            file: File(value.first.path),
+            isShared: true,
+          );
+          break;
+        case SharedMediaType.VIDEO:
+          Navigator.of(context).popUntil((route) => route.isFirst);
+          playVideo(value.first.path);
+          break;
+        case SharedMediaType.FILE:
+          break;
+      }
+
       ReceiveSharingIntent.reset();
     }, onError: (err) {
       print("getIntentDataStream error: $err");
@@ -246,28 +262,46 @@ class _HomeState extends State<Home> {
 
     // For sharing images coming from outside the app while the app is closed
     ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> value) {
+      SharedMediaType type = value.first.type;
+
       if (value == null) {
         return;
       }
 
-      setCreatorView(
-        sentence: "",
-        dictionaryEntry: DictionaryEntry(word: "", meaning: "", reading: ""),
-        file: File(value.first.path),
-        isShared: true,
-      );
+      switch (type) {
+        case SharedMediaType.IMAGE:
+          setCreatorView(
+            sentence: "",
+            dictionaryEntry:
+                DictionaryEntry(word: "", meaning: "", reading: ""),
+            file: File(value.first.path),
+            isShared: true,
+          );
+          break;
+        case SharedMediaType.VIDEO:
+          Navigator.of(context).popUntil((route) => route.isFirst);
+          playVideo(value.first.path);
+          break;
+        case SharedMediaType.FILE:
+          break;
+      }
+
       ReceiveSharingIntent.reset();
     });
 
     // For sharing or opening urls/text coming from outside the app while the app is in the memory
-    ReceiveSharingIntent.getTextStream().listen((String value) {
+    ReceiveSharingIntent.getTextStream().listen((String value) async {
       if (value == null) {
         return;
       }
 
-      if (value.startsWith("https://")) {
+      if (value.startsWith("https://") || value.startsWith("http://")) {
         Navigator.of(context).popUntil((route) => route.isFirst);
-        playYouTubeVideoLink(value);
+        playVideo(value, kill: true);
+      } else if (value.startsWith("content://")) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+        String absolutePath = await FlutterAbsolutePath.getAbsolutePath(value);
+        playVideo(absolutePath, kill: true);
       } else {
         setCreatorView(
           sentence: value,
@@ -283,14 +317,18 @@ class _HomeState extends State<Home> {
     });
 
     // For sharing or opening urls/text coming from outside the app while the app is closed
-    ReceiveSharingIntent.getInitialText().then((String value) {
+    ReceiveSharingIntent.getInitialText().then((String value) async {
       if (value == null) {
         return;
       }
 
-      if (value.startsWith("https://")) {
+      if (value.startsWith("https://") || value.startsWith("http://")) {
         Navigator.of(context).popUntil((route) => route.isFirst);
-        playYouTubeVideoLink(value);
+        playVideo(value, kill: true);
+      } else if (value.startsWith("content://")) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+        String absolutePath = await FlutterAbsolutePath.getAbsolutePath(value);
+        playVideo(absolutePath, kill: true);
       } else {
         setCreatorView(
           sentence: value,
@@ -303,21 +341,23 @@ class _HomeState extends State<Home> {
     });
   }
 
-  void playYouTubeVideoLink(String link) {
-    if (YoutubePlayer.convertUrlToId(link) != null) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => Player(
-            url: link,
-          ),
+  void playVideo(String link, {bool kill = false}) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Player(
+          url: link,
         ),
-      ).then((returnValue) {
-        setLastPlayedPath(link);
-        setLastPlayedPosition(0);
-        gIsResumable.value = getResumeAvailable();
-      });
-    }
+      ),
+    ).then((returnValue) {
+      setLastPlayedPath(link);
+      setLastPlayedPosition(0);
+      gIsResumable.value = getResumeAvailable();
+
+      if (kill) {
+        exit(0);
+      }
+    });
   }
 
   void setStateFromResult() {
@@ -1076,9 +1116,8 @@ class _HomeState extends State<Home> {
       position: RelativeRect.fromLTRB(left, top, 0, 0),
       items: [
         PopupMenuItem<String>(
-          child: const Text('Enter YouTube URL'),
-          value: 'Enter YouTube URL',
-          enabled: gIsYouTubeAllowed,
+          child: const Text('Enter network stream URL'),
+          value: 'Enter network stream URL',
         ),
         PopupMenuItem<String>(
           child: const Text('Import/export channels'),
@@ -1110,7 +1149,7 @@ class _HomeState extends State<Home> {
     );
 
     switch (option) {
-      case "Enter YouTube URL":
+      case "Enter network stream URL":
         TextEditingController _textFieldController = TextEditingController();
 
         showDialog(
@@ -1122,7 +1161,8 @@ class _HomeState extends State<Home> {
               ),
               content: TextField(
                 controller: _textFieldController,
-                decoration: InputDecoration(hintText: "Enter YouTube URL"),
+                decoration:
+                    InputDecoration(hintText: "Enter network stream URL"),
               ),
               actions: <Widget>[
                 TextButton(
@@ -1137,24 +1177,22 @@ class _HomeState extends State<Home> {
                     String webURL = _textFieldController.text;
 
                     try {
-                      if (YoutubePlayer.convertUrlToId(webURL) != null) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => Player(
-                              url: webURL,
-                            ),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Player(
+                            url: webURL,
                           ),
-                        ).then((returnValue) {
-                          setState(() {
-                            unlockLandscape();
-                          });
-
-                          setLastPlayedPath(webURL);
-                          setLastPlayedPosition(0);
-                          gIsResumable.value = getResumeAvailable();
+                        ),
+                      ).then((returnValue) {
+                        setState(() {
+                          unlockLandscape();
                         });
-                      }
+
+                        setLastPlayedPath(webURL);
+                        setLastPlayedPosition(0);
+                        gIsResumable.value = getResumeAvailable();
+                      });
                     } on Exception {
                       Navigator.pop(context);
                       print("INVALID LINK");
@@ -2249,7 +2287,7 @@ class _HistoryResultState extends State<HistoryResult>
 
     Widget displayVideoInformation() {
       bool isScopedStorage() {
-        return history.subheading.contains("/cache/file_picker");
+        return history.subheading.startsWith("/data/");
       }
 
       return Expanded(

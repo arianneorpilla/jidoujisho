@@ -46,9 +46,18 @@ Future exportCurrentFrame(
 
   final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
 
-  String inputPath = (controller.dataSourceType == DataSourceType.network)
-      ? chewie.currentVideoQuality.videoURL
-      : controller.dataSource;
+  String inputPath;
+  switch (chewie.playerMode) {
+    case JidoujishoPlayerMode.localFile:
+    case JidoujishoPlayerMode.networkStream:
+      inputPath = controller.dataSource;
+      break;
+    case JidoujishoPlayerMode.youtubeStream:
+      inputPath = chewie.currentVideoQuality.videoURL;
+      break;
+
+      return chewie.streamUrl;
+  }
   String exportPath = "\"$previewImagePath\"";
 
   String command =
@@ -88,9 +97,19 @@ Future exportMultiFrame(
 
   final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
 
-  String inputPath = (controller.dataSourceType == DataSourceType.network)
-      ? chewie.currentVideoQuality.videoURL
-      : controller.dataSource;
+  String inputPath;
+  switch (chewie.playerMode) {
+    case JidoujishoPlayerMode.localFile:
+    case JidoujishoPlayerMode.networkStream:
+      inputPath = controller.dataSource;
+      break;
+    case JidoujishoPlayerMode.youtubeStream:
+      inputPath = chewie.currentVideoQuality.videoURL;
+      break;
+
+      return chewie.streamUrl;
+  }
+
   String exportPath = "\"$previewImagePath\"";
 
   String command =
@@ -125,12 +144,13 @@ Future exportCurrentAudio(
   timeStart = getTimestampFromDuration(adjustedStart);
   timeEnd = getTimestampFromDuration(adjustedEnd);
 
-  switch (controller.dataSourceType) {
-    case DataSourceType.network:
-      audioIndex = "0";
-      break;
-    default:
+  switch (chewie.playerMode) {
+    case JidoujishoPlayerMode.localFile:
+    case JidoujishoPlayerMode.networkStream:
       audioIndex = (controller.value.activeAudioTrack - 1).toString();
+      break;
+    case JidoujishoPlayerMode.youtubeStream:
+      audioIndex = "0";
       break;
   }
 
@@ -138,10 +158,16 @@ Future exportCurrentAudio(
 
   String inputPath;
 
-  if (controller.dataSourceType == DataSourceType.file) {
-    inputPath = controller.dataSource;
-  } else {
-    inputPath = chewie.streamData.audioURL;
+  switch (chewie.playerMode) {
+    case JidoujishoPlayerMode.localFile:
+      inputPath = controller.dataSource;
+      break;
+    case JidoujishoPlayerMode.youtubeStream:
+      inputPath = chewie.streamData.audioURL;
+      break;
+    case JidoujishoPlayerMode.networkStream:
+      inputPath = chewie.streamUrl;
+      break;
   }
 
   String outputPath = "\"$gAppDirPath/exportAudio.mp3\"";

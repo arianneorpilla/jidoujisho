@@ -41,8 +41,12 @@ class Player extends StatelessWidget {
     lockLandscape();
 
     // If webURL is empty, then use a local player.
-    if (this.url != null && YoutubePlayer.convertUrlToId(url) != null) {
-      return webPlayer(video, initialPosition);
+    if (this.url != null) {
+      if (YoutubePlayer.convertUrlToId(url) != null) {
+        return youtubePlayer(video, initialPosition);
+      } else {
+        return networkPlayer(url);
+      }
     } else {
       return localPlayer(context, url, initialPosition);
     }
@@ -70,7 +74,11 @@ class Player extends StatelessWidget {
                   Navigator.pop(context);
                 }
 
-                return localPlayerHelper(context, videoFile, initialPosition);
+                return localPlayerHelper(
+                  context,
+                  videoFile,
+                  initialPosition,
+                );
               }
               Navigator.pop(context);
               return Container();
@@ -96,7 +104,7 @@ class Player extends StatelessWidget {
     return FutureBuilder(
       future: Future.wait(
         [
-          extractSubtitles(videoFile),
+          extractSubtitles(videoFile.path),
           extractExternalSubtitles(getExternalSubtitles(videoFile))
         ],
       ),
@@ -132,6 +140,7 @@ class Player extends StatelessWidget {
             lockLandscape();
 
             return VideoPlayer(
+              playerMode: JidoujishoPlayerMode.localFile,
               videoFile: videoFile,
               internalSubs: internalSubs,
               defaultSubtitles: defaultSubtitles,
@@ -142,7 +151,17 @@ class Player extends StatelessWidget {
     );
   }
 
-  Widget webPlayer(Video video, int initialPosition) {
+  Widget networkPlayer(String streamUrl) {
+    return VideoPlayer(
+      playerMode: JidoujishoPlayerMode.networkStream,
+      streamUrl: streamUrl,
+      internalSubs: [],
+      defaultSubtitles: "",
+      initialPosition: -1,
+    );
+  }
+
+  Widget youtubePlayer(Video video, int initialPosition) {
     lockLandscape();
 
     String videoID = "";
@@ -193,6 +212,7 @@ class Player extends StatelessWidget {
                     addVideoHistory(history);
 
                     return VideoPlayer(
+                      playerMode: JidoujishoPlayerMode.youtubeStream,
                       streamData: streamData,
                       defaultSubtitles: webSubtitles,
                       internalSubs: internalSubs,
@@ -224,44 +244,55 @@ class Player extends StatelessWidget {
 
 class VideoPlayer extends StatefulWidget {
   VideoPlayer({
+    this.playerMode,
     this.videoFile,
     this.streamData,
     this.internalSubs,
     this.defaultSubtitles,
     this.initialPosition,
+    this.streamUrl,
     Key key,
   }) : super(key: key);
 
+  final JidoujishoPlayerMode playerMode;
   final File videoFile;
   final YouTubeMux streamData;
   final List<File> internalSubs;
   final String defaultSubtitles;
   final int initialPosition;
+  final String streamUrl;
 
   @override
   _VideoPlayerState createState() => _VideoPlayerState(
+        this.playerMode,
         this.videoFile,
         this.streamData,
         this.internalSubs,
         this.defaultSubtitles,
         this.initialPosition,
+        this.streamUrl,
       );
 }
 
 class _VideoPlayerState extends State<VideoPlayer>
     with SingleTickerProviderStateMixin {
   _VideoPlayerState(
+    this.playerMode,
     this.videoFile,
     this.streamData,
     this.internalSubs,
     this.defaultSubtitles,
     this.initialPosition,
+    this.streamUrl,
   );
 
+  final JidoujishoPlayerMode playerMode;
   final File videoFile;
   final YouTubeMux streamData;
   final List<File> internalSubs;
   final String defaultSubtitles;
+  final String streamUrl;
+
   int initialPosition;
 
   VlcPlayerController _videoPlayerController;
@@ -305,7 +336,7 @@ class _VideoPlayerState extends State<VideoPlayer>
       initialSubTrack = 99999;
     } else if (videoFile != null && hasExternalSubtitles(videoFile)) {
       initialSubTrack = 99998;
-    } else if (videoFile != null) {
+    } else if (videoFile != null || streamUrl != null) {
       initialSubTrack = 0;
     } else {
       initialSubTrack = -1;
@@ -316,8 +347,7 @@ class _VideoPlayerState extends State<VideoPlayer>
   }
 
   void scopedStorageWarning() async {
-    if (!getScopedStorageDontShow() &&
-        videoFile.path.contains("/cache/file_picker")) {
+    if (!getScopedStorageDontShow() && videoFile.path.startsWith("/data/")) {
       showDialog(
         context: context,
         builder: (context) {
@@ -327,7 +357,7 @@ class _VideoPlayerState extends State<VideoPlayer>
             ),
             title: Text("Scoped Storage Warning"),
             content: Text(
-              "The selected video file has been cached in the application's scoped storage by the file picker rather than direct play. This redundant duplication of the video file may have caused slower loading. Additionally, default external subtitles were not imported.\n\nFor faster loading and direct video playback, try using a different file picker.",
+              "The selected video file has been cached in the application's scoped storage by the file picker rather than direct play. This redundant duplication of the video file may have caused slower loading. Additionally, default external subtitles were not imported.\n\nFor faster loading and direct video playback, try using a different file picker. You may ignore this warning if playing files externally.",
               textAlign: TextAlign.justify,
             ),
             actions: <Widget>[
@@ -712,22 +742,34 @@ class _VideoPlayerState extends State<VideoPlayer>
   }
 
   VlcPlayerController getVideoPlayerController() {
-    if (streamData == null) {
-      _videoPlayerController ??= VlcPlayerController.file(
-        videoFile,
-        hwAcc: HwAcc.FULL,
-        options: VlcPlayerOptions(
-          audio: VlcAudioOptions(["--audio-track=0", "--sub-track=999"]),
-        ),
-      );
-    } else {
-      _videoPlayerController ??= VlcPlayerController.network(
-        streamData.audioURL,
-        hwAcc: HwAcc.FULL,
-        options: VlcPlayerOptions(
-          audio: VlcAudioOptions(["--input-slave=${streamData.audioURL}"]),
-        ),
-      );
+    switch (playerMode) {
+      case JidoujishoPlayerMode.localFile:
+        _videoPlayerController ??= VlcPlayerController.file(
+          videoFile,
+          hwAcc: HwAcc.FULL,
+          options: VlcPlayerOptions(
+            audio: VlcAudioOptions(["--audio-track=0", "--sub-track=999"]),
+          ),
+        );
+        break;
+      case JidoujishoPlayerMode.youtubeStream:
+        _videoPlayerController ??= VlcPlayerController.network(
+          streamData.audioURL,
+          hwAcc: HwAcc.FULL,
+          options: VlcPlayerOptions(
+            audio: VlcAudioOptions(["--input-slave=${streamData.audioURL}"]),
+          ),
+        );
+        break;
+      case JidoujishoPlayerMode.networkStream:
+        _videoPlayerController ??= VlcPlayerController.network(
+          streamUrl,
+          hwAcc: HwAcc.FULL,
+          options: VlcPlayerOptions(
+            audio: VlcAudioOptions(["--audio-track=0", "--sub-track=999"]),
+          ),
+        );
+        break;
     }
     return _videoPlayerController;
   }
@@ -743,6 +785,7 @@ class _VideoPlayerState extends State<VideoPlayer>
   ChewieController getChewieController() {
     _chewieController ??= ChewieController(
       videoPlayerController: getVideoPlayerController(),
+      playerMode: playerMode,
       internalSubs: internalSubs,
       clipboard: _clipboard,
       currentDictionaryEntry: _currentDictionaryEntry,
@@ -760,6 +803,7 @@ class _VideoPlayerState extends State<VideoPlayer>
       setNoPush: setNoPush,
       audioAllowance: _audioAllowance,
       streamData: streamData,
+      streamUrl: streamUrl,
       aspectRatio: getVideoPlayerController().value.aspectRatio,
       autoPlay: true,
       autoInitialize: true,
@@ -824,10 +868,11 @@ class _VideoPlayerState extends State<VideoPlayer>
     return _subTitleWrapper;
   }
 
-  void playEmbeddedSubtitles(int index) {
+  void playEmbeddedSubtitles(int index) async {
     _subTitleController.subtitleType = SubtitleType.srt;
+    int spuTrackCount = await _videoPlayerController.getSpuTracksCount();
 
-    if (index < internalSubs.length) {
+    if (index < spuTrackCount) {
       getSubtitleWrapper().subtitleController.updateSubtitleContent(
           content: sanitizeSrtNewlines(internalSubs[index].readAsStringSync()));
       print("SUBTITLES SWITCHED TO TRACK $index");
@@ -1043,6 +1088,55 @@ class _VideoPlayerState extends State<VideoPlayer>
 
   Widget buildDictionaryAutoGenDependencies(String clipboard) {
     String lookupText = "Setting up required dependencies";
+
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            color: Colors.grey[800].withOpacity(0.6),
+            child: Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Text(lookupText),
+                  SizedBox(
+                    height: 12,
+                    width: 12,
+                    child: JumpingDotsProgressIndicator(color: Colors.white),
+                  ),
+                ]),
+          ),
+        ),
+        Expanded(child: Container()),
+      ],
+    );
+  }
+
+  Widget buildDictionaryNetworkSubtitlesBad(String clipboard) {
+    String lookupText = "Unable to query subtitles over network stream.";
+    Future.delayed(Duration(seconds: 1), () {
+      _clipboard.value = "";
+    });
+
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            color: Colors.grey[800].withOpacity(0.6),
+            child: Text(lookupText),
+          ),
+        ),
+        Expanded(child: Container()),
+      ],
+    );
+  }
+
+  Widget buildDictionaryNetworkSubtitlesRequest(String clipboard) {
+    String lookupText = "Requesting subtitles over network stream";
 
     return Column(
       children: [
@@ -1519,27 +1613,45 @@ class _VideoPlayerState extends State<VideoPlayer>
     );
   }
 
+  Future dictionaryFutureHelper(String clipboard) {
+    String contextDataSource = getContextDataSource();
+    int contextPosition = _contextSubtitle.value.startTime.inSeconds;
+
+    if (getMonolingualMode()) {
+      return fetchMonolingualSearchCache(
+        searchTerm: clipboard,
+        recursive: false,
+        contextDataSource: contextDataSource,
+        contextPosition: contextPosition,
+      );
+    } else {
+      return fetchBilingualSearchCache(
+        searchTerm: clipboard,
+        contextDataSource: contextDataSource,
+        contextPosition: contextPosition,
+      );
+    }
+  }
+
+  String getContextDataSource() {
+    switch (playerMode) {
+      case JidoujishoPlayerMode.localFile:
+        return videoFile.path;
+      case JidoujishoPlayerMode.youtubeStream:
+        return streamData.videoURL;
+      case JidoujishoPlayerMode.networkStream:
+        return "-1";
+    }
+
+    return "-1";
+  }
+
   Widget buildDictionary() {
     return ValueListenableBuilder(
       valueListenable: _clipboard,
       builder: (context, clipboard, widget) {
         return FutureBuilder(
-          future: getMonolingualMode()
-              ? fetchMonolingualSearchCache(
-                  searchTerm: clipboard,
-                  recursive: false,
-                  contextDataSource: (streamData == null)
-                      ? videoFile.path
-                      : streamData.videoURL,
-                  contextPosition: _contextSubtitle.value.startTime.inSeconds,
-                )
-              : fetchBilingualSearchCache(
-                  searchTerm: clipboard,
-                  contextDataSource: (streamData == null)
-                      ? videoFile.path
-                      : streamData.videoURL,
-                  contextPosition: _contextSubtitle.value.startTime.inSeconds,
-                ),
+          future: dictionaryFutureHelper(clipboard),
           builder: (BuildContext context, AsyncSnapshot snapshot) {
             if (_clipboard.value == "&<&>export&<&>") {
               return buildDictionaryExporting(clipboard);
@@ -1555,6 +1667,12 @@ class _VideoPlayerState extends State<VideoPlayer>
             }
             if (_clipboard.value == "&<&>autogenbad&<&>") {
               return buildDictionaryAutoGenBad(clipboard);
+            }
+            if (_clipboard.value == "&<&>netsubsrequest&<&>") {
+              return buildDictionaryNetworkSubtitlesRequest(clipboard);
+            }
+            if (_clipboard.value == "&<&>netsubsbad&<&>") {
+              return buildDictionaryNetworkSubtitlesBad(clipboard);
             }
             if (_clipboard.value.startsWith("&<&>exported")) {
               return buildDictionaryExported(clipboard);

@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:auto_orientation/auto_orientation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:html/parser.dart' as parser;
 import 'package:html/dom.dart' as dom;
 import 'package:http/http.dart' as http;
@@ -16,6 +17,12 @@ import 'package:ve_dart/ve_dart.dart';
 
 import 'package:jidoujisho/globals.dart';
 import 'package:wakelock/wakelock.dart';
+
+enum JidoujishoPlayerMode {
+  localFile,
+  youtubeStream,
+  networkStream,
+}
 
 class VideoHistory {
   String url;
@@ -98,10 +105,8 @@ List<File> extractWebSubtitle(String webSubtitle) {
   return files;
 }
 
-Future<List<File>> extractSubtitles(File file) async {
-  String inputPath = file.path;
+Future<List<File>> extractSubtitles(String inputPath) async {
   List<File> files = [];
-
   final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
 
   for (int i = 0; i < 10; i++) {
@@ -121,14 +126,44 @@ Future<List<File>> extractSubtitles(File file) async {
     if (await subFile.exists()) {
       if (subFile.readAsStringSync().isEmpty) {
         subFile.deleteSync();
+        break;
       } else {
         files.add(subFile);
       }
+    } else {
+      break;
     }
   }
 
   return files;
 }
+
+// Future<File> extractSingleSubtitle(String inputPath, int i) async {
+//   final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
+
+//   String outputPath = "\"$gAppDirPath/extractSrt$i.srt\"";
+//   String command = "-loglevel quiet -i \"$inputPath\" -map 0:s:$i $outputPath";
+
+//   String subPath = "$gAppDirPath/extractSrt$i.srt";
+//   File subFile = File(subPath);
+
+//   if (subFile.existsSync()) {
+//     subFile.deleteSync();
+//   }
+
+//   await _flutterFFmpeg.execute(command);
+
+//   if (await subFile.exists()) {
+//     if (subFile.readAsStringSync().isEmpty) {
+//       subFile.deleteSync();
+//       return null;
+//     } else {
+//       return subFile;
+//     }
+//   } else {
+//     return null;
+//   }
+// }
 
 String sanitizeSrtNewlines(String text) {
   List<String> split = text.split("\n");
@@ -530,6 +565,7 @@ void unlockLandscape() {
   ]);
   SystemChrome.setEnabledSystemUIOverlays(
       [SystemUiOverlay.bottom, SystemUiOverlay.top]);
+  DefaultCacheManager().emptyCache();
 }
 
 void lockLandscape() {
