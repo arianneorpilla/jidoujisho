@@ -28,7 +28,8 @@
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.17.4-beta">0.17</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.18.1-beta">0.18</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.19.1-beta">0.19</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.21.0-beta">0.20</a>
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.20.1-beta">0.20</a> · 
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.21.0-beta">0.21</a>
 </b></p>
 
 # 📚 Uninterrupted language immersion at your fingertips
@@ -49,6 +50,7 @@
 - [x] **Use monolingual definitions** from Goo.ne.jp or **imported Yomichan dictionaries**
 - [x] View dictionary entries and export cards **with pitch accent information** from Kanjium Pitch Dictionaries
 - [x] **Frictionless sentence mining workflow for readers** via share action
+- [x] Playback support for **network streams** including **Plex external player support**
 - [x] **(Experimental)** **Korean to English support** through the National Institute of Korean Language's KrDict 
 
 # ⚕️ Current state of the project
