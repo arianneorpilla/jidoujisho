@@ -510,6 +510,10 @@ class _VideoPlayerState extends State<VideoPlayer>
   }
 
   void updateDurationOrSeek() {
+    if (playerMode == JidoujishoPlayerMode.networkStream) {
+      return;
+    }
+
     if (getVideoPlayerController().value.isInitialized &&
         this.videoFile == null &&
         networkNotSet) {

@@ -374,9 +374,11 @@ class _HomeState extends State<Home> {
         ),
       ),
     ).then((returnValue) {
-      setLastPlayedPath(link);
-      setLastPlayedPosition(0);
-      gIsResumable.value = getResumeAvailable();
+      if (playerMode != JidoujishoPlayerMode.networkStream) {
+        setLastPlayedPath(link);
+        setLastPlayedPosition(0);
+        gIsResumable.value = getResumeAvailable();
+      }
 
       if (pop) {
         SystemNavigator.pop();
@@ -647,6 +649,7 @@ class _HomeState extends State<Home> {
               fontWeight: FontWeight.w200,
               fontSize: 12,
             ),
+            overflow: TextOverflow.fade,
           ),
         ],
       );
@@ -1216,10 +1219,6 @@ class _HomeState extends State<Home> {
                         setState(() {
                           unlockLandscape();
                         });
-
-                        setLastPlayedPath(webURL);
-                        setLastPlayedPosition(0);
-                        gIsResumable.value = getResumeAvailable();
                       });
                     } on Exception {
                       Navigator.pop(context);
@@ -1859,9 +1858,7 @@ class _YouTubeResultState extends State<YouTubeResult>
   ) {
     Widget closedCaptionRow(
         String text, Color color, IconData icon, bool dots) {
-      return Wrap(
-        alignment: WrapAlignment.end,
-        crossAxisAlignment: WrapCrossAlignment.end,
+      return Row(
         children: [
           Icon(
             icon,
@@ -1877,7 +1874,7 @@ class _YouTubeResultState extends State<YouTubeResult>
               fontWeight: FontWeight.w500,
             ),
             maxLines: 1,
-            overflow: TextOverflow.clip,
+            overflow: TextOverflow.ellipsis,
           ),
           (dots)
               ? SizedBox(
@@ -4447,6 +4444,8 @@ class _CreatorState extends State<Creator> {
                       ),
                     ),
                     onTap: () async {
+                      bool isReader = _isReader.value;
+
                       if (_wordController.text == "" &&
                           _sentenceController.text == "" &&
                           _readingController.text == "" &&
@@ -4476,7 +4475,7 @@ class _CreatorState extends State<Creator> {
                           _readingController.text,
                           _meaningController.text,
                           _fileImage,
-                          _isReader.value,
+                          isReader,
                         );
 
                         setState(() {
@@ -4491,6 +4490,7 @@ class _CreatorState extends State<Creator> {
                           _meaningController.clear();
                         });
 
+                        _isReader.value = false;
                         _justExported.value = true;
                         if (isShared) {
                           MinimizeApp.minimizeApp();
