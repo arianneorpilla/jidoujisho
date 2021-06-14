@@ -36,6 +36,7 @@ import 'package:jidoujisho/player.dart';
 import 'package:jidoujisho/preferences.dart';
 import 'package:jidoujisho/util.dart';
 import 'package:jidoujisho/youtube.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 typedef void ChannelCallback(String id, String name);
 typedef void CreatorCallback({
@@ -225,6 +226,8 @@ class _HomeState extends State<Home> {
       ValueNotifier<List<String>>([]);
   YoutubeExplode yt = YoutubeExplode();
 
+  ValueNotifier<bool> _readerFlipflop = ValueNotifier<bool>(false);
+
   @override
   void initState() {
     super.initState();
@@ -248,7 +251,11 @@ class _HomeState extends State<Home> {
           break;
         case SharedMediaType.VIDEO:
           Navigator.of(context).popUntil((route) => route.isFirst);
-          playVideo(value.first.path);
+          playVideo(
+            JidoujishoPlayerMode.localFile,
+            value.first.path,
+            pop: true,
+          );
           break;
         case SharedMediaType.FILE:
           break;
@@ -280,7 +287,11 @@ class _HomeState extends State<Home> {
           break;
         case SharedMediaType.VIDEO:
           Navigator.of(context).popUntil((route) => route.isFirst);
-          playVideo(value.first.path);
+          playVideo(
+            JidoujishoPlayerMode.localFile,
+            value.first.path,
+            pop: true,
+          );
           break;
         case SharedMediaType.FILE:
           break;
@@ -297,11 +308,15 @@ class _HomeState extends State<Home> {
 
       if (value.startsWith("https://") || value.startsWith("http://")) {
         Navigator.of(context).popUntil((route) => route.isFirst);
-        playVideo(value, kill: true);
+        if (YoutubePlayer.convertUrlToId(value) != null) {
+          playVideo(JidoujishoPlayerMode.youtubeStream, value, pop: true);
+        } else {
+          playVideo(JidoujishoPlayerMode.networkStream, value, pop: true);
+        }
       } else if (value.startsWith("content://")) {
         Navigator.of(context).popUntil((route) => route.isFirst);
         String absolutePath = await FlutterAbsolutePath.getAbsolutePath(value);
-        playVideo(absolutePath, kill: true);
+        playVideo(JidoujishoPlayerMode.localFile, absolutePath, pop: true);
       } else {
         setCreatorView(
           sentence: value,
@@ -324,11 +339,15 @@ class _HomeState extends State<Home> {
 
       if (value.startsWith("https://") || value.startsWith("http://")) {
         Navigator.of(context).popUntil((route) => route.isFirst);
-        playVideo(value, kill: true);
+        if (YoutubePlayer.convertUrlToId(value) != null) {
+          playVideo(JidoujishoPlayerMode.youtubeStream, value, pop: true);
+        } else {
+          playVideo(JidoujishoPlayerMode.networkStream, value, pop: true);
+        }
       } else if (value.startsWith("content://")) {
         Navigator.of(context).popUntil((route) => route.isFirst);
         String absolutePath = await FlutterAbsolutePath.getAbsolutePath(value);
-        playVideo(absolutePath, kill: true);
+        playVideo(JidoujishoPlayerMode.localFile, absolutePath, pop: true);
       } else {
         setCreatorView(
           sentence: value,
@@ -341,11 +360,16 @@ class _HomeState extends State<Home> {
     });
   }
 
-  void playVideo(String link, {bool kill = false}) {
+  void playVideo(
+    JidoujishoPlayerMode playerMode,
+    String link, {
+    bool pop = false,
+  }) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => Player(
+          playerMode,
           url: link,
         ),
       ),
@@ -354,8 +378,8 @@ class _HomeState extends State<Home> {
       setLastPlayedPosition(0);
       gIsResumable.value = getResumeAvailable();
 
-      if (kill) {
-        exit(0);
+      if (pop) {
+        SystemNavigator.pop();
       }
     });
   }
@@ -384,7 +408,9 @@ class _HomeState extends State<Home> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => Player(),
+              builder: (context) => Player(
+                JidoujishoPlayerMode.localFile,
+              ),
             ),
           ).then((returnValue) {
             setState(() {
@@ -416,6 +442,7 @@ class _HomeState extends State<Home> {
         _creatorFile,
         _isCreatorShared,
         resetMenu,
+        _readerFlipflop,
       );
     }
 
@@ -1181,6 +1208,7 @@ class _HomeState extends State<Home> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => Player(
+                            JidoujishoPlayerMode.networkStream,
                             url: webURL,
                           ),
                         ),
@@ -1390,10 +1418,19 @@ class _HomeState extends State<Home> {
               int lastPlayedPosition = getLastPlayedPosition();
               String lastPlayedPath = getLastPlayedPath();
 
+              JidoujishoPlayerMode playerMode;
+              if (lastPlayedPath.startsWith("https://") ||
+                  lastPlayedPath.startsWith("http://")) {
+                playerMode = JidoujishoPlayerMode.youtubeStream;
+              } else {
+                playerMode = JidoujishoPlayerMode.localFile;
+              }
+
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => Player(
+                    playerMode,
                     url: lastPlayedPath,
                     initialPosition: lastPlayedPosition,
                   ),
@@ -1648,6 +1685,7 @@ class _YouTubeResultState extends State<YouTubeResult>
         context,
         MaterialPageRoute(
           builder: (context) => Player(
+            JidoujishoPlayerMode.youtubeStream,
             url: videoStreamURL,
             video: result,
           ),
@@ -2327,10 +2365,19 @@ class _HistoryResultState extends State<HistoryResult>
     }
 
     void playVideo() {
+      JidoujishoPlayerMode playerMode;
+      if (history.url.startsWith("https://") ||
+          history.url.startsWith("http://")) {
+        playerMode = JidoujishoPlayerMode.youtubeStream;
+      } else {
+        playerMode = JidoujishoPlayerMode.localFile;
+      }
+
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => Player(
+            playerMode,
             url: history.url,
           ),
         ),
@@ -3168,11 +3215,20 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                   style: TextStyle(color: Colors.white),
                 ),
                 onPressed: () async {
+                  JidoujishoPlayerMode playerMode;
+                  if (results.contextDataSource.startsWith("https://") ||
+                      results.contextDataSource.startsWith("http://")) {
+                    playerMode = JidoujishoPlayerMode.youtubeStream;
+                  } else {
+                    playerMode = JidoujishoPlayerMode.localFile;
+                  }
+
                   Navigator.pop(context);
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => Player(
+                        playerMode,
                         url: results.contextDataSource,
                         initialPosition: results.contextPosition,
                       ),
@@ -3360,6 +3416,7 @@ class Creator extends StatefulWidget {
   final File initialFile;
   final bool isShared;
   final VoidCallback resetMenu;
+  final ValueNotifier<bool> readerFlipflop;
 
   Creator(
     this.initialSentence,
@@ -3367,6 +3424,7 @@ class Creator extends StatefulWidget {
     this.initialFile,
     this.isShared,
     this.resetMenu,
+    this.readerFlipflop,
   );
 
   _CreatorState createState() => _CreatorState(
@@ -3375,6 +3433,7 @@ class Creator extends StatefulWidget {
         this.initialFile,
         this.isShared,
         this.resetMenu,
+        this.readerFlipflop,
       );
 }
 
@@ -3384,6 +3443,7 @@ class _CreatorState extends State<Creator> {
   final File initialFile;
   final bool isShared;
   final VoidCallback resetMenu;
+  final ValueNotifier<bool> readerFlipflop;
 
   List<String> decks;
   List<String> imageURLs;
@@ -3406,12 +3466,15 @@ class _CreatorState extends State<Creator> {
   File _fileImage;
   String _networkImageURL;
 
+  ValueNotifier<bool> _isReader;
+
   _CreatorState(
     this.initialSentence,
     this.initialDictionaryEntry,
     this.initialFile,
     this.isShared,
     this.resetMenu,
+    this.readerFlipflop,
   );
 
   @override
@@ -3423,6 +3486,7 @@ class _CreatorState extends State<Creator> {
 
     _selectedEntry = new ValueNotifier<DictionaryEntry>(initialDictionaryEntry);
     _selectedDeck = new ValueNotifier<String>(lastDeck);
+    _isReader = ValueNotifier<bool>(false);
 
     DictionaryEntry pitchEntry = getClosestPitchEntry(initialDictionaryEntry);
     if (pitchEntry != null) {
@@ -3448,6 +3512,7 @@ class _CreatorState extends State<Creator> {
       if (parseVe(gMecabTagger, initialSentence).length != 1) {
         _sentenceController = TextEditingController(text: initialSentence);
         _wordController = TextEditingController(text: "");
+        _isReader = ValueNotifier<bool>(true);
       } else {
         _sentenceController = TextEditingController(text: "");
         _wordController = TextEditingController(text: initialSentence);
@@ -3985,45 +4050,48 @@ class _CreatorState extends State<Creator> {
     );
 
     Widget sentenceField = TextFormField(
-      maxLines: null,
-      keyboardType: TextInputType.multiline,
-      controller: _sentenceController,
-      onFieldSubmitted: (result) {
-        if (_sentenceController.text.trim().isNotEmpty) {
-          showSentenceDialog(_sentenceController.text);
-        }
-      },
-      decoration: InputDecoration(
-        prefixIcon:
-            Icon(Icons.format_align_center_rounded, color: Colors.white),
-        suffixIcon: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              iconSize: 18,
-              onPressed: () {
-                if (_sentenceController.text.trim().isNotEmpty) {
-                  showSentenceDialog(_sentenceController.text);
-                }
-              },
-              icon: Icon(Icons.account_tree_outlined, color: Colors.white),
-            ),
-            IconButton(
-              iconSize: 18,
-              onPressed: () {
-                setState(() {
-                  _sentenceController.clear();
-                });
-              },
-              icon: Icon(Icons.clear, color: Colors.white),
-            ),
-          ],
+        maxLines: null,
+        keyboardType: TextInputType.multiline,
+        controller: _sentenceController,
+        onFieldSubmitted: (result) {
+          if (_sentenceController.text.trim().isNotEmpty) {
+            showSentenceDialog(_sentenceController.text);
+          }
+        },
+        decoration: InputDecoration(
+          prefixIcon:
+              Icon(Icons.format_align_center_rounded, color: Colors.white),
+          suffixIcon: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                iconSize: 18,
+                onPressed: () {
+                  if (_sentenceController.text.trim().isNotEmpty) {
+                    showSentenceDialog(_sentenceController.text);
+                  }
+                },
+                icon: Icon(Icons.account_tree_outlined, color: Colors.white),
+              ),
+              IconButton(
+                iconSize: 18,
+                onPressed: () {
+                  setState(() {
+                    _sentenceController.clear();
+                    _isReader.value = false;
+                  });
+                },
+                icon: Icon(Icons.clear, color: Colors.white),
+              ),
+            ],
+          ),
+          labelText: "Sentence",
+          hintText: "Enter sentence here",
         ),
-        labelText: "Sentence",
-        hintText: "Enter sentence here",
-      ),
-    );
+        onChanged: (value) {
+          _isReader.value = value.isNotEmpty;
+        });
 
     void wordFieldSearch(bool monolingual) async {
       if (!_isSearching.value) {
@@ -4331,12 +4399,8 @@ class _CreatorState extends State<Creator> {
       }
     }
 
-    bool isReader() {
-      return initialSentence.isNotEmpty;
-    }
-
     String isReaderText() {
-      if (isReader()) {
+      if (_isReader.value) {
         return "Reader";
       } else {
         return "Creator";
@@ -4345,101 +4409,106 @@ class _CreatorState extends State<Creator> {
 
     Widget showExportButton() {
       return ValueListenableBuilder(
-        valueListenable: _justExported,
-        builder: (BuildContext context, bool exported, ___) {
-          return Container(
-            width: double.infinity,
-            color: Colors.grey[800].withOpacity(0.2),
-            child: InkWell(
-              enableFeedback: !exported,
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: InkWell(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.note_add_sharp,
-                          size: 16,
-                          color: exported ? Colors.grey : Colors.white),
-                      SizedBox(width: 5),
-                      Text(
-                        exported
-                            ? "Card Exported"
-                            : isShared
-                                ? "Export ${isReaderText()} Card and Return"
-                                : "Export ${isReaderText()} Card",
-                        style: TextStyle(
-                          color: exported ? Colors.grey : Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+          valueListenable: _isReader,
+          builder: (BuildContext context, bool exported, ___) {
+            return ValueListenableBuilder(
+              valueListenable: _justExported,
+              builder: (BuildContext context, bool exported, ___) {
+                return Container(
+                  width: double.infinity,
+                  color: Colors.grey[800].withOpacity(0.2),
+                  child: InkWell(
+                    enableFeedback: !exported,
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: InkWell(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.note_add_sharp,
+                                size: 16,
+                                color: exported ? Colors.grey : Colors.white),
+                            SizedBox(width: 5),
+                            Text(
+                              exported
+                                  ? "Card Exported"
+                                  : isShared
+                                      ? "Export ${isReaderText()} Card and Return"
+                                      : "Export ${isReaderText()} Card",
+                              style: TextStyle(
+                                color: exported ? Colors.grey : Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
+                    ),
+                    onTap: () async {
+                      if (_wordController.text == "" &&
+                          _sentenceController.text == "" &&
+                          _readingController.text == "" &&
+                          _meaningController.text == "" &&
+                          _fileImage == null) {
+                        return;
+                      }
+
+                      if (_fileImage == null && _networkImageURL != null) {
+                        var response =
+                            await http.get(Uri.tryParse(_networkImageURL));
+
+                        File previewImageFile = File(getPreviewImagePath());
+                        if (previewImageFile.existsSync()) {
+                          previewImageFile.deleteSync();
+                        }
+
+                        previewImageFile.writeAsBytesSync(response.bodyBytes);
+                        _fileImage = previewImageFile;
+                      }
+
+                      try {
+                        exportCreatorAnkiCard(
+                          _selectedDeck.value,
+                          _sentenceController.text,
+                          _wordController.text,
+                          _readingController.text,
+                          _meaningController.text,
+                          _fileImage,
+                          _isReader.value,
+                        );
+
+                        setState(() {
+                          _isFileImage = true;
+                          _fileImage = null;
+                          _networkImageURL = null;
+
+                          _imageSearchController.clear();
+                          _sentenceController.clear();
+                          _wordController.clear();
+                          _readingController.clear();
+                          _meaningController.clear();
+                        });
+
+                        _justExported.value = true;
+                        if (isShared) {
+                          MinimizeApp.minimizeApp();
+                          resetMenu();
+                        } else {
+                          Future.delayed(Duration(seconds: 2), () {
+                            _justExported.value = false;
+                          });
+                        }
+                      } catch (e) {
+                        print(e);
+                      }
+                    },
                   ),
-                ),
-              ),
-              onTap: () async {
-                if (_wordController.text == "" &&
-                    _sentenceController.text == "" &&
-                    _readingController.text == "" &&
-                    _meaningController.text == "" &&
-                    _fileImage == null) {
-                  return;
-                }
-
-                if (_fileImage == null && _networkImageURL != null) {
-                  var response = await http.get(Uri.tryParse(_networkImageURL));
-
-                  File previewImageFile = File(getPreviewImagePath());
-                  if (previewImageFile.existsSync()) {
-                    previewImageFile.deleteSync();
-                  }
-
-                  previewImageFile.writeAsBytesSync(response.bodyBytes);
-                  _fileImage = previewImageFile;
-                }
-
-                try {
-                  exportCreatorAnkiCard(
-                    _selectedDeck.value,
-                    _sentenceController.text,
-                    _wordController.text,
-                    _readingController.text,
-                    _meaningController.text,
-                    _fileImage,
-                    isReader(),
-                  );
-
-                  setState(() {
-                    _isFileImage = true;
-                    _fileImage = null;
-                    _networkImageURL = null;
-
-                    _imageSearchController.clear();
-                    _sentenceController.clear();
-                    _wordController.clear();
-                    _readingController.clear();
-                    _meaningController.clear();
-                  });
-
-                  _justExported.value = true;
-                  if (isShared) {
-                    MinimizeApp.minimizeApp();
-                    resetMenu();
-                  } else {
-                    Future.delayed(Duration(seconds: 2), () {
-                      _justExported.value = false;
-                    });
-                  }
-                } catch (e) {
-                  print(e);
-                }
+                );
               },
-            ),
-          );
-        },
-      );
+            );
+          });
     }
 
     ScrollController scrollController = ScrollController();

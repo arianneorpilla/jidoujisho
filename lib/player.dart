@@ -30,8 +30,9 @@ import 'package:jidoujisho/util.dart';
 import 'package:jidoujisho/youtube.dart';
 
 class Player extends StatelessWidget {
-  Player({this.url, this.initialPosition = -1, this.video});
+  Player(this.playerMode, {this.url, this.initialPosition = -1, this.video});
 
+  final JidoujishoPlayerMode playerMode;
   final int initialPosition;
   final String url;
   final Video video;
@@ -40,16 +41,19 @@ class Player extends StatelessWidget {
   Widget build(BuildContext context) {
     lockLandscape();
 
-    // If webURL is empty, then use a local player.
-    if (this.url != null) {
-      if (YoutubePlayer.convertUrlToId(url) != null) {
+    switch (playerMode) {
+      case JidoujishoPlayerMode.localFile:
+        return localPlayer(context, url, initialPosition);
+        break;
+      case JidoujishoPlayerMode.youtubeStream:
         return youtubePlayer(video, initialPosition);
-      } else {
+        break;
+      case JidoujishoPlayerMode.networkStream:
         return networkPlayer(url);
-      }
-    } else {
-      return localPlayer(context, url, initialPosition);
+        break;
     }
+
+    return Container();
   }
 
   Widget localPlayer(BuildContext context, String url, int initialPosition) {
