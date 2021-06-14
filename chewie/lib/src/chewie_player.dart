@@ -230,6 +230,8 @@ class ChewieController extends ChangeNotifier {
     @required this.setNoPush,
     @required this.isCasting,
     @required this.playerMode,
+    @required this.verticalDrag,
+    @required this.horizontalDrag,
     this.aspectRatio,
     this.autoInitialize = false,
     this.autoPlay = false,
@@ -285,6 +287,8 @@ class ChewieController extends ChangeNotifier {
   final String streamUrl;
   final ValueNotifier<bool> isCasting;
   final JidoujishoPlayerMode playerMode;
+  final VoidCallback horizontalDrag;
+  final VoidCallback verticalDrag;
 
   /// Initialize the Video on Startup. This will prep the video for playback.
   final bool autoInitialize;

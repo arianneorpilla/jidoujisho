@@ -573,3 +573,23 @@ void lockLandscape() {
   AutoOrientation.landscapeAutoMode(forceSensor: true);
   SystemChrome.setEnabledSystemUIOverlays([]);
 }
+
+class BlurWidgetOptions {
+  double width;
+  double height;
+  double left;
+  double top;
+  Color color;
+  double blurRadius;
+  bool visible;
+
+  BlurWidgetOptions(
+    this.width,
+    this.height,
+    this.left,
+    this.top,
+    this.color,
+    this.blurRadius,
+    this.visible,
+  );
+}

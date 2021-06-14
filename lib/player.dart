@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:chewie/chewie.dart';
@@ -13,6 +14,7 @@ import 'package:http/http.dart' as http;
 import 'package:jidoujisho/cache.dart';
 import 'package:jidoujisho/pitch.dart';
 import 'package:path/path.dart' as path;
+import 'package:blurrycontainer/blurrycontainer.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
@@ -568,6 +570,22 @@ class _VideoPlayerState extends State<VideoPlayer>
   final _currentAudioTrack = ValueNotifier<int>(0);
   final _failureMetadata = ValueNotifier<AnkiExportMetadata>(null);
 
+  void horizontalDrag() {
+    _comprehensionSubtitle.value = _currentSubtitle.value;
+    getSubtitleController().widgetVisibility.value = true;
+
+    getVideoPlayerController().seekTo(
+      getRewindWithDelayAndAllowance(getExportSubtitle()),
+    );
+  }
+
+  void verticalDrag() {
+    _wasPlaying.value =
+        getVideoPlayerController().value.isPlaying || _wasPlaying.value;
+    openTranscript(_subTitleController.subtitleBloc.subtitles.subtitles,
+        _wasPlaying.value);
+  }
+
   @override
   Widget build(BuildContext context) {
     startClipboardMonitor();
@@ -579,30 +597,7 @@ class _VideoPlayerState extends State<VideoPlayer>
         backgroundColor: Colors.black,
         body: Stack(
           children: [
-            GestureDetector(
-              onHorizontalDragUpdate: (details) {
-                if (details.delta.dx.abs() > 20) {
-                  _comprehensionSubtitle.value = _currentSubtitle.value;
-                  getSubtitleController().widgetVisibility.value = true;
-
-                  getVideoPlayerController().seekTo(
-                    getRewindWithDelayAndAllowance(getExportSubtitle()),
-                  );
-                }
-              },
-              onVerticalDragUpdate: (details) {
-                _wasPlaying.value =
-                    (getVideoPlayerController().value.isPlaying ||
-                        _wasPlaying.value);
-
-                if (details.delta.dy.abs() > 20) {
-                  openTranscript(
-                      _subTitleController.subtitleBloc.subtitles.subtitles,
-                      _wasPlaying.value);
-                }
-              },
-              child: getSubtitleWrapper(),
-            ),
+            getSubtitleWrapper(),
             StreamBuilder(
               stream: AudioService.customEventStream,
               builder: (context, snapshot) {
@@ -819,6 +814,8 @@ class _VideoPlayerState extends State<VideoPlayer>
       allowMuting: false,
       allowedScreenSleep: false,
       fullScreenByDefault: false,
+      horizontalDrag: horizontalDrag,
+      verticalDrag: verticalDrag,
       materialProgressColors: ChewieProgressColors(
         playedColor: Colors.red,
         handleColor: Colors.red,

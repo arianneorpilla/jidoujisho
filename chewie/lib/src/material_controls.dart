@@ -4,6 +4,8 @@ import 'dart:math';
 import 'package:chewie/src/chewie_player.dart';
 import 'package:chewie/src/chewie_progress_colors.dart';
 import 'package:chewie/src/material_progress_bar.dart';
+import 'package:chewie/src/player_with_controls.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:chewie/src/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -35,6 +37,8 @@ class _MaterialControlsState extends State<MaterialControls>
   Timer _showAfterExpandCollapseTimer;
   bool _dragging = false;
   bool _displayTapped = false;
+  ValueNotifier<BlurWidgetOptions> _blurWidgetNotifier =
+      ValueNotifier<BlurWidgetOptions>(getBlurWidgetOptions());
 
   final barHeight = 48.0;
   final marginSize = 5.0;
@@ -68,19 +72,21 @@ class _MaterialControlsState extends State<MaterialControls>
         onTap: () => _cancelAndRestartTimer(),
         child: AbsorbPointer(
           absorbing: _hideStuff,
-          child: Column(
+          child: Stack(
+            alignment: Alignment.bottomCenter,
             children: <Widget>[
               if (_latestValue != null && _latestValue.isBuffering ||
                   !_latestValue.isPlaying && _latestValue.duration == null)
-                const Expanded(
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
-                    ),
+                Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
                   ),
                 )
               else
                 _buildHitArea(),
+              ResizeableWidget(
+                blurWidgetNotifier: _blurWidgetNotifier,
+              ),
               _buildBottomBar(context),
             ],
           ),
@@ -181,7 +187,7 @@ class _MaterialControlsState extends State<MaterialControls>
     );
   }
 
-  Expanded _buildHitArea() {
+  Widget _buildHitArea() {
     Widget getIcon() {
       if (_latestValue.isEnded) {
         return const Icon(Icons.replay, size: 32.0);
@@ -198,50 +204,58 @@ class _MaterialControlsState extends State<MaterialControls>
       }
     }
 
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          if (_latestValue != null && _latestValue.isPlaying) {
-            if (_displayTapped) {
-              setState(() {
-                _hideStuff = true;
-              });
-            } else {
-              _cancelAndRestartTimer();
-            }
-          } else {
-            // _playPause();
-
+    return GestureDetector(
+      onTap: () {
+        if (_latestValue != null && _latestValue.isPlaying) {
+          if (_displayTapped) {
             setState(() {
               _hideStuff = true;
             });
+          } else {
+            _cancelAndRestartTimer();
           }
-        },
-        child: Container(
-          color: Colors.transparent,
-          child: Center(
-            child: AnimatedOpacity(
-              opacity:
-                  _latestValue != null && !_latestValue.isPlaying && !_dragging
-                      ? 1.0
-                      : 0.0,
-              duration: const Duration(milliseconds: 300),
-              child: GestureDetector(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: (_latestValue.isInitialized)
-                        ? Theme.of(context).dialogBackgroundColor
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(48.0),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: IconButton(
-                        icon: getIcon(),
-                        onPressed: () {
-                          _playPause();
-                        }),
-                  ),
+        } else {
+          // _playPause();
+
+          setState(() {
+            _hideStuff = true;
+          });
+        }
+      },
+      onHorizontalDragUpdate: (details) {
+        if (details.delta.dx.abs() > 20) {
+          chewieController.horizontalDrag();
+        }
+      },
+      onVerticalDragUpdate: (details) {
+        if (details.delta.dy.abs() > 20) {
+          chewieController.verticalDrag();
+        }
+      },
+      child: Container(
+        color: Colors.transparent,
+        child: Center(
+          child: AnimatedOpacity(
+            opacity:
+                _latestValue != null && !_latestValue.isPlaying && !_dragging
+                    ? 1.0
+                    : 0.0,
+            duration: const Duration(milliseconds: 300),
+            child: GestureDetector(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: (_latestValue.isInitialized)
+                      ? Theme.of(context).dialogBackgroundColor
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(48.0),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: IconButton(
+                      icon: getIcon(),
+                      onPressed: () {
+                        _playPause();
+                      }),
                 ),
               ),
             ),
@@ -802,6 +816,11 @@ class _MaterialControlsState extends State<MaterialControls>
         );
         options.add(
           SubtitleAudioMenuOption(
+            type: SubtitleAudioMenuOptionType.blurWidgetPreferences,
+          ),
+        );
+        options.add(
+          SubtitleAudioMenuOption(
             type: SubtitleAudioMenuOptionType.adjustDelayAndAllowance,
           ),
         );
@@ -850,6 +869,9 @@ class _MaterialControlsState extends State<MaterialControls>
             gIsSelectMode.value = getSelectMode();
             await toggleSelectMode();
             gIsSelectMode.value = getSelectMode();
+            break;
+          case SubtitleAudioMenuOptionType.blurWidgetPreferences:
+            showColorMenu(context);
             break;
           default:
             break;
@@ -1075,6 +1097,174 @@ class _MaterialControlsState extends State<MaterialControls>
       ),
     );
   }
+
+  void showColorMenu(BuildContext context) async {
+    final chosenOption = await showModalBottomSheet<int>(
+      context: context,
+      isScrollControlled: true,
+      useRootNavigator: true,
+      builder: (context) => _MoreOptionsDialog(
+        [
+          "Use Blur Widget",
+          "Set Widget Blurriness",
+          "Set Widget Color",
+          "Reset Widget Size and Position",
+        ],
+        [
+          if (getBlurWidgetOptions().visible)
+            Icons.blur_on_outlined
+          else
+            Icons.blur_off_outlined,
+          Icons.blur_linear_outlined,
+          Icons.color_lens_outlined,
+          Icons.center_focus_strong_outlined,
+        ],
+        (getBlurWidgetOptions().visible) ? [0] : [],
+      ),
+    );
+
+    switch (chosenOption) {
+      case 0:
+        BlurWidgetOptions blurWidgetOptions = getBlurWidgetOptions();
+        blurWidgetOptions.visible = !blurWidgetOptions.visible;
+        await setBlurWidgetOptions(blurWidgetOptions);
+        _blurWidgetNotifier.value = blurWidgetOptions;
+        break;
+      case 1:
+        updateBlurWidgetBlurriness();
+        break;
+      case 2:
+        updateBlurWidgetColor();
+        break;
+      case 3:
+        BlurWidgetOptions blurWidgetOptions = getBlurWidgetOptions();
+        blurWidgetOptions.left = -1;
+        blurWidgetOptions.top = -1;
+        blurWidgetOptions.width = 200;
+        blurWidgetOptions.height = 200;
+        await setBlurWidgetOptions(blurWidgetOptions);
+        _blurWidgetNotifier.value = blurWidgetOptions;
+        break;
+    }
+  }
+
+  void updateBlurWidgetBlurriness() async {
+    TextEditingController _blurrinessController = TextEditingController(
+        text: _blurWidgetNotifier.value.blurRadius.toString());
+
+    void setValues() async {
+      String blurrinessText = _blurrinessController.text;
+      double newBlurriness = double.tryParse(blurrinessText);
+
+      if (newBlurriness != null && newBlurriness >= 0) {
+        BlurWidgetOptions blurWidgetOptions = getBlurWidgetOptions();
+        blurWidgetOptions.blurRadius = newBlurriness;
+        await setBlurWidgetOptions(blurWidgetOptions);
+        _blurWidgetNotifier.value = blurWidgetOptions;
+
+        Navigator.pop(context);
+      }
+    }
+
+    chewieController.wasPlaying.value =
+        controller.value.isPlaying || chewieController.wasPlaying.value;
+    await controller.pause();
+
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.zero,
+            ),
+            content: SingleChildScrollView(
+              child: Container(
+                width: MediaQuery.of(context).size.width * (1 / 3),
+                child: TextField(
+                  controller: _blurrinessController,
+                  keyboardType: TextInputType.numberWithOptions(
+                    signed: false,
+                    decimal: true,
+                  ),
+                  maxLines: 1,
+                  decoration: InputDecoration(
+                    labelText: "Blur radius",
+                    hintText: "Enter blur radius",
+                  ),
+                ),
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text('CANCEL', style: TextStyle(color: Colors.white)),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              TextButton(
+                child: Text('SET', style: TextStyle(color: Colors.white)),
+                onPressed: () async {
+                  await setValues();
+                },
+              ),
+            ],
+          );
+        }).then((result) {
+      if (chewieController.wasPlaying.value) {
+        controller.play();
+      }
+    });
+  }
+
+  void updateBlurWidgetColor() async {
+    Color widgetColor = _blurWidgetNotifier.value.color;
+    chewieController.wasPlaying.value =
+        controller.value.isPlaying || chewieController.wasPlaying.value;
+    await controller.pause();
+
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.zero,
+            ),
+            content: SingleChildScrollView(
+              child: ColorPicker(
+                pickerColor: _blurWidgetNotifier.value.color,
+                onColorChanged: (newColor) async {
+                  widgetColor = newColor;
+                },
+                showLabel: true,
+                pickerAreaHeightPercent: 0.8,
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text('CANCEL', style: TextStyle(color: Colors.white)),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              TextButton(
+                child: Text('SET', style: TextStyle(color: Colors.white)),
+                onPressed: () async {
+                  BlurWidgetOptions blurWidgetOptions = getBlurWidgetOptions();
+                  blurWidgetOptions.color = widgetColor;
+                  await setBlurWidgetOptions(blurWidgetOptions);
+                  _blurWidgetNotifier.value = blurWidgetOptions;
+
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        }).then((result) {
+      if (chewieController.wasPlaying.value) {
+        controller.play();
+      }
+    });
+  }
 }
 
 class _MoreOptionsDialog extends StatelessWidget {
@@ -1293,6 +1483,9 @@ class SubtitleAudioMenuOption {
           return Colors.white;
         }
         break;
+      case SubtitleAudioMenuOptionType.blurWidgetPreferences:
+        return Colors.white;
+        break;
       default:
         return Colors.white;
     }
@@ -1317,6 +1510,9 @@ class SubtitleAudioMenuOption {
         break;
       case SubtitleAudioMenuOptionType.adjustDelayAndAllowance:
         return Icons.timer_sharp;
+        break;
+      case SubtitleAudioMenuOptionType.blurWidgetPreferences:
+        return Icons.blur_circular_sharp;
         break;
       case SubtitleAudioMenuOptionType.latinFilterMode:
         if (getLatinFilterMode()) {
@@ -1352,6 +1548,8 @@ class SubtitleAudioMenuOption {
         break;
       case SubtitleAudioMenuOptionType.latinFilterMode:
         return "Filter Latin Characters";
+      case SubtitleAudioMenuOptionType.blurWidgetPreferences:
+        return "Blur Widget Preferences";
       default:
         return "Undefined";
     }
@@ -1366,6 +1564,7 @@ enum SubtitleAudioMenuOptionType {
   externalSubtitle,
   adjustDelayAndAllowance,
   latinFilterMode,
+  blurWidgetPreferences,
 }
 
 class FooterLayout extends StatelessWidget {

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:async/async.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:path/path.dart' as path;
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
@@ -248,6 +249,47 @@ Future<void> setSubtitleDelay(int ms) async {
 
 int getSubtitleDelay() {
   return gSharedPrefs.getInt("subtitleDelay") ?? 0;
+}
+
+BlurWidgetOptions getBlurWidgetOptions() {
+  double width = gSharedPrefs.getDouble("blurWidgetWidth") ?? 200;
+  double height = gSharedPrefs.getDouble("blurWidgetHeight") ?? 200;
+  double left = gSharedPrefs.getDouble("blurWidgetLeft") ?? -1;
+  double top = gSharedPrefs.getDouble("blurWidthTop") ?? -1;
+
+  int colorRed =
+      gSharedPrefs.getInt("blurWidgetRed") ?? Colors.black.withOpacity(0.5).red;
+  int colorGreen = gSharedPrefs.getInt("blurWidgetGreen") ??
+      Colors.black.withOpacity(0.5).green;
+  int colorBlue = gSharedPrefs.getInt("blurWidgetBlue") ??
+      Colors.black.withOpacity(0.5).blue;
+  double colorOpacity = gSharedPrefs.getDouble("blurWidgetOpacity") ??
+      Colors.black.withOpacity(0.5).opacity;
+
+  Color color = Color.fromRGBO(colorRed, colorGreen, colorBlue, colorOpacity);
+
+  double blurRadius = gSharedPrefs.getDouble("blurWidgetBlurRadius") ?? 5;
+  bool visible = gSharedPrefs.getBool("blurWidgetVisible") ?? false;
+
+  return BlurWidgetOptions(
+      width, height, left, top, color, blurRadius, visible);
+}
+
+Future setBlurWidgetOptions(BlurWidgetOptions blurWidgetOptions) async {
+  await gSharedPrefs.setDouble("blurWidgetWidth", blurWidgetOptions.width);
+  await gSharedPrefs.setDouble("blurWidgetHeight", blurWidgetOptions.height);
+  await gSharedPrefs.setDouble("blurWidgetLeft", blurWidgetOptions.left);
+  await gSharedPrefs.setDouble("blurWidthTop", blurWidgetOptions.top);
+
+  await gSharedPrefs.setInt("blurWidgetRed", blurWidgetOptions.color.red);
+  await gSharedPrefs.setInt("blurWidgetGreen", blurWidgetOptions.color.green);
+  await gSharedPrefs.setInt("blurWidgetBlue", blurWidgetOptions.color.blue);
+  await gSharedPrefs.setDouble(
+      "blurWidgetOpacity", blurWidgetOptions.color.opacity);
+
+  await gSharedPrefs.setDouble(
+      "blurWidgetBlurRadius", blurWidgetOptions.blurRadius);
+  await gSharedPrefs.setBool("blurWidgetVisible", blurWidgetOptions.visible);
 }
 
 List<VideoHistory> getVideoHistory() {

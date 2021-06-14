@@ -11,8 +11,10 @@ environment:
 
 dependencies:
   audioplayers:
+  blurrycontainer:
   flutter:
     sdk: flutter
+  flutter_colorpicker:
   flutter_ffmpeg:
   flutter_vlc_player:
   intl:
