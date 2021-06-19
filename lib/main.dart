@@ -2052,8 +2052,7 @@ class _ChannelResultState extends State<ChannelResult>
               ),
               actions: <Widget>[
                 TextButton(
-                  child: Text('UNLIST CHANNEL',
-                      style: TextStyle(color: Colors.white)),
+                  child: Text('REMOVE', style: TextStyle(color: Colors.white)),
                   onPressed: () async {
                     await removeChannel(result.id.value);
 
@@ -2062,7 +2061,7 @@ class _ChannelResultState extends State<ChannelResult>
                   },
                 ),
                 TextButton(
-                  child: Text('VIDEOS', style: TextStyle(color: Colors.white)),
+                  child: Text('CHANNEL', style: TextStyle(color: Colors.white)),
                   onPressed: () {
                     Navigator.pop(context);
                     callback(result.id.toString(), result.title);
