@@ -1537,25 +1537,24 @@ class _VideoPlayerState extends State<VideoPlayer>
                     child: Scrollbar(
                       child: SingleChildScrollView(
                         controller: scrollController,
-                        child:
-                            gCustomDictionary.isNotEmpty || getMonolingualMode()
-                                ? SelectableText(
-                                    "\n${results.entries[selectedIndex.value].meaning}\n",
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                    ),
-                                    toolbarOptions: ToolbarOptions(
-                                        copy: true,
-                                        cut: false,
-                                        selectAll: false,
-                                        paste: false),
-                                  )
-                                : Text(
-                                    "\n${results.entries[selectedIndex.value].meaning}\n",
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                    ),
-                                  ),
+                        child: getMonolingualMode()
+                            ? SelectableText(
+                                "\n${results.entries[selectedIndex.value].meaning}\n",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                ),
+                                toolbarOptions: ToolbarOptions(
+                                    copy: true,
+                                    cut: false,
+                                    selectAll: false,
+                                    paste: false),
+                              )
+                            : Text(
+                                "\n${results.entries[selectedIndex.value].meaning}\n",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                ),
+                              ),
                       ),
                     ),
                   ),

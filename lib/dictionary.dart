@@ -165,15 +165,6 @@ List<DictionaryEntry> importCustomDictionary() {
   return entries;
 }
 
-List<String> getAllImportedWords() {
-  List<String> allWords = [];
-  for (DictionaryEntry entry in gCustomDictionary) {
-    allWords.add(entry.word);
-  }
-
-  return allWords;
-}
-
 DictionaryEntry getEntryFromJishoResult(JishoResult result, String searchTerm) {
   String removeLastNewline(String n) => n = n.substring(0, n.length - 2);
   bool hasDuplicateReading(String readings, String reading) =>
@@ -270,60 +261,11 @@ DictionaryEntry getEntryFromJishoResult(JishoResult result, String searchTerm) {
   );
   exportMeanings = removeLastNewline(exportMeanings);
 
-  DictionaryEntry dictionaryEntry;
-
-  // print("SEARCH TERM: $searchTerm");
-  // print("EXPORT TERM: $exportTerm");
-
-  if (gCustomDictionary.isEmpty) {
-    dictionaryEntry = DictionaryEntry(
-      word: exportTerm ?? searchTerm,
-      reading: exportReadings,
-      meaning: exportMeanings,
-    );
-  } else {
-    int resultIndex;
-
-    final searchResult = gCustomDictionaryFuzzy.search(searchTerm, 1);
-    // print("SEARCH RESULT: $searchResult");
-
-    if (searchResult.isNotEmpty && searchResult.first.score == 0) {
-      resultIndex = searchResult.first.matches.first.arrayIndex;
-
-      dictionaryEntry = DictionaryEntry(
-        word: gCustomDictionary[resultIndex].word,
-        reading: gCustomDictionary[resultIndex].reading,
-        meaning: gCustomDictionary[resultIndex].meaning,
-      );
-
-      return dictionaryEntry;
-    } else {
-      words.forEach((word) {
-        String term = word.word;
-
-        if (term != null) {
-          final termResult = gCustomDictionaryFuzzy.search(term, 1);
-
-          if (termResult.isNotEmpty && termResult.first.score == 0.0) {
-            resultIndex = termResult.first.matches.first.arrayIndex;
-            print("TERM RESULT: $searchResult");
-          }
-        }
-      });
-    }
-
-    if (resultIndex == null) {
-      resultIndex = searchResult.first.matches.first.arrayIndex;
-    }
-
-    dictionaryEntry = DictionaryEntry(
-      word: exportTerm ?? searchTerm,
-      reading: exportReadings,
-      meaning: exportMeanings,
-    );
-  }
-
-  return dictionaryEntry;
+  return DictionaryEntry(
+    word: exportTerm ?? searchTerm,
+    reading: exportReadings,
+    meaning: exportMeanings,
+  );
 }
 
 Future<DictionaryHistoryEntry> getWordDetails({
@@ -358,12 +300,6 @@ Future<DictionaryHistoryEntry> getWordDetails({
         contextPosition: contextPosition,
       );
     }
-  }
-
-  if (gCustomDictionary.isNotEmpty) {
-    List<JishoResult> onlyFirst = [];
-    onlyFirst.add(results.first);
-    results = onlyFirst;
   }
 
   for (JishoResult result in results) {

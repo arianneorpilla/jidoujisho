@@ -66,10 +66,6 @@ void main() async {
   gIsResumable = ValueNotifier<bool>(getResumeAvailable());
   gIsSelectMode = ValueNotifier<bool>(getSelectMode());
 
-  gCustomDictionary = importCustomDictionary();
-  gCustomDictionaryFuzzy =
-      Fuzzy(getAllImportedWords(), options: FuzzyOptions());
-
   await AudioService.connect();
   await AudioService.start(
     backgroundTaskEntrypoint: _backgroundTaskEntrypoint,
@@ -1163,10 +1159,6 @@ class _HomeState extends State<Home> {
           value: 'Set AnkiDroid directory',
         ),
         PopupMenuItem<String>(
-          child: const Text('Set term bank directory'),
-          value: 'Set term bank directory',
-        ),
-        PopupMenuItem<String>(
           child: const Text('About this app'),
           value: 'About this app',
         ),
@@ -1319,49 +1311,6 @@ class _HomeState extends State<Home> {
 
                     if (newDirectory.existsSync()) {
                       await setAnkiDroidDirectory(newDirectory);
-                      Navigator.pop(context);
-                    }
-                  },
-                ),
-              ],
-            );
-          },
-        );
-        break;
-      case "Set term bank directory":
-        String currentDirectoryPath = getTermBankDirectory().path;
-        TextEditingController _textFieldController = TextEditingController(
-          text: currentDirectoryPath,
-        );
-
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.zero,
-              ),
-              content: TextField(
-                controller: _textFieldController,
-                decoration: InputDecoration(
-                    hintText: "storage/emulated/0/jidoujisho",
-                    labelText: 'Term bank directory path'),
-              ),
-              actions: <Widget>[
-                TextButton(
-                  child: Text('CANCEL', style: TextStyle(color: Colors.white)),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                TextButton(
-                  child: Text('OK', style: TextStyle(color: Colors.white)),
-                  onPressed: () async {
-                    String newDirectoryPath = _textFieldController.text;
-                    Directory newDirectory = Directory(newDirectoryPath);
-
-                    if (newDirectory.existsSync()) {
-                      await setTermBankDirectory(newDirectory);
                       Navigator.pop(context);
                     }
                   },
