@@ -560,9 +560,9 @@ class _CupertinoControlsState extends State<CupertinoControls>
             controller.play();
           });
         } else {
-          if (isFinished) {
-            controller.seekTo(const Duration());
-          }
+          // if (isFinished) {
+          //   controller.seekTo(const Duration());
+          // }
           controller.play();
         }
       }

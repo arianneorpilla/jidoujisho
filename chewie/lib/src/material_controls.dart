@@ -751,6 +751,9 @@ class _MaterialControlsState extends State<MaterialControls>
   ) {
     return GestureDetector(
       onTap: () async {
+        chewieController.currentAudioTrack.value =
+            await controller.getAudioTrack() - 1;
+
         _hideTimer?.cancel();
 
         final List<String> audioTrackNames = [];
@@ -847,8 +850,6 @@ class _MaterialControlsState extends State<MaterialControls>
 
         switch (chosenOption.type) {
           case SubtitleAudioMenuOptionType.audioTrack:
-            chewieController.currentAudioTrack.value =
-                chosenOption.callbackIndex;
             await controller.setAudioTrack(chosenOption.callbackIndex + 1);
             break;
           case SubtitleAudioMenuOptionType.embeddedSubtitle:
