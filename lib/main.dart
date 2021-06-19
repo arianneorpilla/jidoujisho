@@ -1325,7 +1325,7 @@ class _HomeState extends State<Home> {
         const String legalese =
             "A mobile video player and card creation toolkit tailored for language learners.\n\n" +
                 "Built for the Japanese language learning community by Leo Rafael Orpilla. " +
-                "Bilingual definitions queried from Jisho.org. Monolingual definitions queried from Goo.ne.jp. Pitch accent patterns from Kanjium. Video streaming via YouTube. Image search via Bing. Logo by Aaron Marbella.\n\n" +
+                "Bilingual definitions queried from Jisho.org. Monolingual definitions queried from Sora. Pitch accent patterns from Kanjium. Video streaming via YouTube. Image search via Bing. Logo by Aaron Marbella.\n\n" +
                 "jidoujisho is free and open source software. Liking the application? " +
                 "Help out by providing feedback, making a donation, reporting issues or collaborating " +
                 "for further improvements on GitHub.";
@@ -2649,7 +2649,6 @@ class _ClipboardState extends State<ClipboardMenu> {
             addDictionaryEntryToHistory(results);
           }
         } finally {
-          print("test");
           dictionaryScrollOffset.value = 0;
           _isSearching.value = false;
           setStateFromResult();

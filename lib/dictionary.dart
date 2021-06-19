@@ -335,122 +335,35 @@ Future<DictionaryHistoryEntry> getMonolingualWordDetails({
   }
 
   var client = http.Client();
-  http.Response response = await client
-      .get(Uri.parse('https://dictionary.goo.ne.jp/srch/jn/$searchTerm/m1u/'));
-  var document = parser.parse(response.body);
-  bool multiDefinition = document.body.innerHtml.contains("で一致する言葉");
-  bool empty = document.body.innerHtml.contains("一致する情報は見つかりませんでした");
+  http.Response response = await client.get(Uri.parse(
+      'https://sakura-paris.org/dict/?api=1&q=$searchTerm&dict=大辞泉&type=0&romaji=1'));
 
-  if (empty) {
+  if (response.body != "[]") {
+    entries =
+        sakuraJsonToDictionaryEntries(jsonDecode(response.body), searchTerm);
+  }
+
+  if (entries == null || entries.isEmpty) {
     if (recursive) {
       return DictionaryHistoryEntry(
-        entries: entries,
+        entries: [],
         searchTerm: searchTermOverride.trim(),
         swipeIndex: 0,
         contextDataSource: contextDataSource,
         contextPosition: contextPosition,
       );
-    }
-
-    searchTerm = getEntryFromJishoResult(results.first, searchTerm)
-        .word
-        .split(";")
-        .first;
-    return getMonolingualWordDetails(
-      searchTerm: searchTerm.trim(),
-      searchTermOverride: searchTermOverride.trim(),
-      recursive: true,
-      contextDataSource: contextDataSource,
-      contextPosition: contextPosition,
-    );
-  }
-
-  if (multiDefinition) {
-    List<String> wordLinks = [];
-    List<Future<http.Response>> futureResponses = [];
-    List<http.Response> responses = [];
-
-    document
-        .getElementById("NR-main-in")
-        .getElementsByTagName("a")
-        .forEach((element) {
-      String link = element.attributes["href"];
-      if (link.contains("/word/")) {
-        wordLinks.add(link);
-      }
-    });
-
-    for (int i = 0; i < wordLinks.length; i++) {
-      String wordLink = wordLinks[i];
-
-      futureResponses
-          .add(client.get(Uri.parse('https://dictionary.goo.ne.jp/$wordLink')));
-    }
-
-    responses = await Future.wait(futureResponses);
-
-    for (int i = 0; i < responses.length; i++) {
-      http.Response wordResponse = responses[i];
-      var firstResultDocument = parser.parse(wordResponse.body);
-      List<dom.Element> wordAndReadingElements =
-          firstResultDocument.getElementsByClassName("nolink title paddding");
-      List<dom.Element> meaningElements = firstResultDocument
-          .getElementsByClassName("content-box contents_area meaning_area p10");
-
-      if (wordAndReadingElements == null || meaningElements == null) {
-        continue;
-      }
-
-      for (int i = 0; i < meaningElements.length; i++) {
-        if (entries.length >= 20) {
-          return DictionaryHistoryEntry(
-            entries: entries,
-            searchTerm: searchTermOverride.trim(),
-            swipeIndex: 0,
-            contextDataSource: contextDataSource,
-            contextPosition: contextPosition,
-          );
-        }
-
-        DictionaryEntry singleEntry = getEntryFromGooElement(
-          meaningElements[i],
-          wordAndReadingElements[i],
-          searchTerm,
-        );
-
-        if (entries.isEmpty) {
-          entries.add(singleEntry);
-        } else {
-          bool found = false;
-          for (int i = 0; i < entries.length; i++) {
-            DictionaryEntry entry = entries[i];
-
-            if (singleEntry.meaning == entry.meaning &&
-                singleEntry.reading == entry.reading &&
-                singleEntry.word == entry.word) {
-              found = true;
-            }
-          }
-
-          if (!found) {
-            entries.add(singleEntry);
-          }
-        }
-      }
-    }
-  } else {
-    List<dom.Element> wordAndReadingElements =
-        document.getElementsByClassName("nolink title paddding");
-    List<dom.Element> meaningElements = document
-        .getElementsByClassName("content-box contents_area meaning_area p10");
-
-    for (int i = 0; i < meaningElements.length; i++) {
-      DictionaryEntry singleEntry = getEntryFromGooElement(
-        meaningElements[i],
-        wordAndReadingElements[i],
-        searchTerm,
+    } else {
+      searchTerm = getEntryFromJishoResult(results.first, searchTerm)
+          .word
+          .split(";")
+          .first;
+      return getMonolingualWordDetails(
+        searchTerm: searchTerm.trim(),
+        searchTermOverride: searchTermOverride.trim(),
+        recursive: true,
+        contextDataSource: contextDataSource,
+        contextPosition: contextPosition,
       );
-      entries.add(singleEntry);
     }
   }
 
@@ -463,37 +376,44 @@ Future<DictionaryHistoryEntry> getMonolingualWordDetails({
   );
 }
 
-DictionaryEntry getEntryFromGooElement(
-  dom.Element meaningElement,
-  dom.Element wordAndReadingElement,
-  String searchTerm,
-) {
+List<DictionaryEntry> sakuraJsonToDictionaryEntries(
+    Map<String, dynamic> json, String searchTerm) {
+  List<DictionaryEntry> entries = [];
+
+  List<dynamic> words = json['words'];
+  words.forEach((word) {
+    Map<String, dynamic> json = word as Map<String, dynamic>;
+    if (!json['text'].contains('ＪＩＳ')) {
+      entries.add(sakuraJsonToDictionaryEntry(json, searchTerm));
+    }
+  });
+
+  return entries;
+}
+
+DictionaryEntry sakuraJsonToDictionaryEntry(
+    Map<String, dynamic> json, String searchTerm) {
   String word = "";
   String reading = "";
   String meaning = "";
 
-  String wordAndReadingRaw =
-      wordAndReadingElement.innerHtml.replaceAll(RegExp(r"<[^>]*>"), "").trim();
+  String wordAndReadingRaw = json['heading'];
+  String meaningRaw = json['text'];
 
-  word = wordAndReadingRaw.replaceAll("の解説", "").trim();
+  List<String> wordSanitized = [];
+  List<String> readingSanitized = [];
 
   if (wordAndReadingRaw.contains("【") && wordAndReadingRaw.contains("】")) {
     word = wordAndReadingRaw.substring(wordAndReadingRaw.indexOf("【"));
     word = word.substring(1, word.indexOf("】"));
     reading = wordAndReadingRaw.substring(0, wordAndReadingRaw.indexOf("【"));
-  }
 
-  List<dom.Element> meaningChildren = meaningElement.children.first.children;
-  List<String> meaningChildrenLines = [];
-  for (int i = 0; i < meaningChildren.length; i++) {
-    meaningChildrenLines.add(
-        meaningChildren[i].innerHtml.replaceAll(RegExp(r"<[^>]*>"), "").trim());
+    wordSanitized = sanitizeGooForPitchMatch(word.trim(), true);
+    readingSanitized = sanitizeGooForPitchMatch(reading.trim(), false);
+  } else {
+    word = wordAndReadingRaw;
+    wordSanitized = sanitizeGooForPitchMatch(word.trim(), false);
   }
-  meaningChildrenLines.removeWhere((line) => line.isEmpty);
-  meaning = meaningChildrenLines.join("\n\n");
-
-  List<String> wordSanitized = sanitizeGooForPitchMatch(word.trim());
-  List<String> readingSanitized = sanitizeGooForPitchMatch(reading.trim());
 
   word = "";
   for (int i = 0; i < wordSanitized.length; i++) {
@@ -509,18 +429,21 @@ DictionaryEntry getEntryFromGooElement(
       reading += "; ";
     }
   }
+
+  word = word.replaceAll(RegExp(r'{{.*?}}'), "");
+  reading = reading.replaceAll(RegExp(r'{{.*?}}'), "");
+
+  meaning = meaningRaw.substring(meaningRaw.indexOf("\n"));
+  meaning = meaning.replaceAll(RegExp(r"\[subscript\].*?\[\/subscript\]"), "");
+  meaning = meaning.replaceAll(RegExp(r'\[.*?\]'), "");
+  meaning = meaning.replaceAll(RegExp(r'{{.*?}}'), "");
+  meaning = getMonolingualNumberTag(meaning);
   meaning = meaning.trim();
 
-  // print(word);
-  // print(reading);
-  // print(meaning);
-
-  DictionaryEntry singleEntry = DictionaryEntry(
+  return DictionaryEntry(
     word: word,
     reading: reading,
     meaning: meaning,
     searchTerm: searchTerm,
   );
-
-  return singleEntry;
 }

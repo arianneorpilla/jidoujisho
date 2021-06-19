@@ -47,7 +47,7 @@
 - [x] **YouTube playback support** for videos with **Japanese closed captions** and **automatically generated subtitles**
 - [x] Use **card creator mode** to quickly **search images and definitions** with imported photos and text 
 - [x] **Dictionary tab remembers words queried** for review between sessions and **allows resuming back to context**
-- [x] **Use monolingual definitions** from Goo.ne.jp or **imported Yomichan dictionaries**
+- [x] **Use monolingual definitions** or **imported Yomichan dictionaries**
 - [x] View dictionary entries and export cards **with pitch accent information** from Kanjium Pitch Dictionaries
 - [x] **Frictionless sentence mining workflow for readers** via share action
 - [x] Playback support for **network streams** including **Plex external player support**
@@ -167,7 +167,7 @@ A primer on the basics of the application is as follows.
 
 # 👥 Contribution and attribution
 
-jidoujisho is written in <b><a href="https://dart.dev/">Dart</a></b> and powered by <b><a href="https://flutter.dev/">Flutter</a></b>. Bilingual dictionary definitions are queried from <b><a href="https://jisho.org/">Jisho.org</a></b> and monolingual dictionary definitions are from <b><a href="https://dictionary.goo.ne.jp/">Goo.ne.jp</a></b>. Pitch accent patterns are sourced from <b><a href="https://github.com/mifunetoshiro/kanjium">Kanjium</a></b>. Video streaming via <b><a href="https://youtube.com/">YouTube</a></b>. Image search via <b><a href="https://bing.com//">Bing</a></b>.
+jidoujisho is written in <b><a href="https://dart.dev/">Dart</a></b> and powered by <b><a href="https://flutter.dev/">Flutter</a></b>. Bilingual dictionary definitions are queried from <b><a href="https://jisho.org/">Jisho.org</a></b> and monolingual dictionary definitions are from <b><a href="https://sakura-paris.org/">Sora</a></b>. Pitch accent patterns are sourced from <b><a href="https://github.com/mifunetoshiro/kanjium">Kanjium</a></b>. Video streaming via <b><a href="https://youtube.com/">YouTube</a></b>. Image search via <b><a href="https://bing.com//">Bing</a></b>.
 
 If you like what I've done so far, you can help me out by testing the application on various devices so that I can gauge the compatibility of the application with different versions of Android, <b><a href="https://www.buymeacoffee.com/lrorpilla">making a donation</a></b> or collaborating with me on further improvements.
 

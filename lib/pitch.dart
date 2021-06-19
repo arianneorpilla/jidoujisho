@@ -254,15 +254,19 @@ DictionaryEntry getClosestPitchEntry(DictionaryEntry entry) {
 
   return readingMatches.firstWhere(
       (pitchEntry) =>
-          sanitizeGooForPitchMatch(entry.word).contains(pitchEntry.word),
+          sanitizeGooForPitchMatch(entry.word, false).contains(pitchEntry.word),
       orElse: () {
     return null;
   });
 }
 
-List<String> sanitizeGooForPitchMatch(String text) {
+List<String> sanitizeGooForPitchMatch(String text, bool isTitle) {
   List<String> sanitized = [];
-  String fixedGooTitle = text.replaceAll("／", ";");
+  String fixedGooTitle = text;
+  if (isTitle) {
+    fixedGooTitle = text.replaceAll("・", ";");
+  }
+
   fixedGooTitle = fixedGooTitle.replaceAll("×", "");
 
   if (fixedGooTitle.contains(";")) {

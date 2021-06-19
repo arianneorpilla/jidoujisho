@@ -347,7 +347,7 @@ class _MaterialControlsState extends State<MaterialControls>
               if (getMonolingualMode())
                 "Use Bilingual Definitions from Jisho.org"
               else
-                "Use Monolingual Definitions from Goo.ne.jp",
+                "Use Monolingual Definitions from Sora",
               if (chewieController.isCasting.value)
                 "Stop Casting to Display Device"
               else
