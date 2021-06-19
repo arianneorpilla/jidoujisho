@@ -11,10 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:http/http.dart' as http;
-import 'package:jidoujisho/cache.dart';
-import 'package:jidoujisho/pitch.dart';
 import 'package:path/path.dart' as path;
-import 'package:blurrycontainer/blurrycontainer.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
@@ -25,14 +22,43 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import 'package:jidoujisho/anki.dart';
-import 'package:jidoujisho/globals.dart';
+import 'package:jidoujisho/cache.dart';
 import 'package:jidoujisho/dictionary.dart';
+import 'package:jidoujisho/globals.dart';
+import 'package:jidoujisho/pitch.dart';
 import 'package:jidoujisho/preferences.dart';
 import 'package:jidoujisho/util.dart';
 import 'package:jidoujisho/youtube.dart';
 
-class Player extends StatelessWidget {
-  Player(this.playerMode, {this.url, this.initialPosition = -1, this.video});
+class JidoujishoPlayer extends StatefulWidget {
+  JidoujishoPlayer({
+    @required this.playerMode,
+    this.url,
+    this.initialPosition = -1,
+    this.video,
+  });
+
+  final JidoujishoPlayerMode playerMode;
+  final int initialPosition;
+  final String url;
+  final Video video;
+
+  @override
+  JidoujishoPlayerState createState() => JidoujishoPlayerState(
+        playerMode: this.playerMode,
+        initialPosition: this.initialPosition,
+        url: this.url,
+        video: this.video,
+      );
+}
+
+class JidoujishoPlayerState extends State<JidoujishoPlayer> {
+  JidoujishoPlayerState({
+    @required this.playerMode,
+    this.url,
+    this.initialPosition = -1,
+    this.video,
+  });
 
   final JidoujishoPlayerMode playerMode;
   final int initialPosition;
@@ -56,6 +82,12 @@ class Player extends StatelessWidget {
     }
 
     return Container();
+  }
+
+  @override
+  void dispose() {
+    unlockLandscape();
+    super.dispose();
   }
 
   Widget localPlayer(BuildContext context, String url, int initialPosition) {
@@ -188,6 +220,9 @@ class Player extends StatelessWidget {
             return loadingCircle();
           default:
             YouTubeMux streamData = snapshot.data;
+            if (streamData == null) {
+              return youtubeWarning(context, url);
+            }
 
             return new FutureBuilder(
               future: http.read(Uri.parse(
@@ -229,6 +264,41 @@ class Player extends StatelessWidget {
             );
         }
       },
+    );
+  }
+
+  Widget youtubeWarning(BuildContext context, String webURL) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+      title: Text("YouTube Error"),
+      content: Text(
+        "Unable to get the video. If this issue persists, please report the issue.",
+        textAlign: TextAlign.justify,
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text('TRY AGAIN', style: TextStyle(color: Colors.white)),
+          onPressed: () async {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => JidoujishoPlayer(
+                  playerMode: JidoujishoPlayerMode.youtubeStream,
+                  url: webURL,
+                ),
+              ),
+            );
+          },
+        ),
+        TextButton(
+          child: Text('OK', style: TextStyle(color: Colors.white)),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ],
     );
   }
 
@@ -412,6 +482,8 @@ class _VideoPlayerState extends State<VideoPlayer>
     }
     durationTimer.cancel();
     visibilityTimer.cancel();
+
+    unlockLandscape();
     super.dispose();
   }
 
@@ -875,15 +947,13 @@ class _VideoPlayerState extends State<VideoPlayer>
 
   void playEmbeddedSubtitles(int index) async {
     _subTitleController.subtitleType = SubtitleType.srt;
-    int spuTrackCount = await _videoPlayerController.getSpuTracksCount();
-
-    if (index < spuTrackCount) {
+    if (index == 99999) {
+      _subTitleController.updateSubtitleContent(content: "");
+      print("SUBTITLES SWITCHED OFF");
+    } else {
       getSubtitleWrapper().subtitleController.updateSubtitleContent(
           content: sanitizeSrtNewlines(internalSubs[index].readAsStringSync()));
       print("SUBTITLES SWITCHED TO TRACK $index");
-    } else {
-      _subTitleController.updateSubtitleContent(content: "");
-      print("SUBTITLES SWITCHED OFF");
     }
   }
 

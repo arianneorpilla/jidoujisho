@@ -368,8 +368,8 @@ class _HomeState extends State<Home> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => Player(
-          playerMode,
+        builder: (context) => JidoujishoPlayer(
+          playerMode: playerMode,
           url: link,
         ),
       ),
@@ -410,15 +410,11 @@ class _HomeState extends State<Home> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => Player(
-                JidoujishoPlayerMode.localFile,
+              builder: (context) => JidoujishoPlayer(
+                playerMode: JidoujishoPlayerMode.localFile,
               ),
             ),
-          ).then((returnValue) {
-            setState(() {
-              unlockLandscape();
-            });
-          });
+          );
         } else {
           _selectedIndex = index;
           if (_isSearching || _isChannelView || _isCreatorView) {
@@ -1210,16 +1206,12 @@ class _HomeState extends State<Home> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => Player(
-                            JidoujishoPlayerMode.networkStream,
+                          builder: (context) => JidoujishoPlayer(
+                            playerMode: JidoujishoPlayerMode.networkStream,
                             url: webURL,
                           ),
                         ),
-                      ).then((returnValue) {
-                        setState(() {
-                          unlockLandscape();
-                        });
-                      });
+                      );
                     } on Exception {
                       Navigator.pop(context);
                       print("INVALID LINK");
@@ -1428,8 +1420,8 @@ class _HomeState extends State<Home> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => Player(
-                    playerMode,
+                  builder: (context) => JidoujishoPlayer(
+                    playerMode: playerMode,
                     url: lastPlayedPath,
                     initialPosition: lastPlayedPosition,
                   ),
@@ -1683,16 +1675,14 @@ class _YouTubeResultState extends State<YouTubeResult>
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => Player(
-            JidoujishoPlayerMode.youtubeStream,
+          builder: (context) => JidoujishoPlayer(
+            playerMode: JidoujishoPlayerMode.youtubeStream,
             url: videoStreamURL,
             video: result,
           ),
         ),
       ).then((returnValue) {
         setState(() {
-          unlockLandscape();
-
           setLastPlayedPath(videoStreamURL);
           setLastPlayedPosition(0);
           gIsResumable.value = getResumeAvailable();
@@ -2373,14 +2363,12 @@ class _HistoryResultState extends State<HistoryResult>
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => Player(
-            playerMode,
+          builder: (context) => JidoujishoPlayer(
+            playerMode: playerMode,
             url: history.url,
           ),
         ),
       ).then((returnValue) {
-        unlockLandscape();
-
         setLastPlayedPath(history.url);
         setLastPlayedPosition(0);
         gIsResumable.value = getResumeAvailable();
@@ -3224,14 +3212,13 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => Player(
-                        playerMode,
+                      builder: (context) => JidoujishoPlayer(
+                        playerMode: playerMode,
                         url: results.contextDataSource,
                         initialPosition: results.contextPosition,
                       ),
                     ),
                   ).then((returnValue) {
-                    unlockLandscape();
                     stateCallback();
                   });
                 },
