@@ -110,6 +110,7 @@ class JidoujishoPlayerState extends State<JidoujishoPlayer> {
                 File videoFile = snapshot.data;
                 if (videoFile == null) {
                   Navigator.pop(context);
+                  return Container();
                 }
 
                 return localPlayerHelper(
@@ -118,7 +119,9 @@ class JidoujishoPlayerState extends State<JidoujishoPlayer> {
                   initialPosition,
                 );
               }
-              Navigator.pop(context);
+              Future.delayed((Duration(milliseconds: 200)), () {
+                Navigator.pop(context);
+              });
               return Container();
           }
         },
