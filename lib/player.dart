@@ -157,19 +157,6 @@ class JidoujishoPlayerState extends State<JidoujishoPlayer> {
             }
             String defaultSubtitles = sanitizeSrtNewlines(unsanitized);
 
-            setLastPlayedPath(videoFile.path);
-            setLastPlayedPosition(0);
-            gIsResumable.value = getResumeAvailable();
-
-            VideoHistory history = VideoHistory(
-              videoFile.path,
-              path.basenameWithoutExtension(videoFile.path),
-              videoFile.path,
-              null,
-            );
-
-            addVideoHistory(history);
-
             return VideoPlayer(
               playerMode: JidoujishoPlayerMode.localFile,
               videoFile: videoFile,
@@ -235,15 +222,6 @@ class JidoujishoPlayerState extends State<JidoujishoPlayer> {
                       webSubtitles = timedTextToSRT(snapshot.data);
                       internalSubs = extractWebSubtitle(webSubtitles);
                     }
-
-                    VideoHistory history = VideoHistory(
-                      url,
-                      streamData.title,
-                      streamData.channel,
-                      streamData.thumbnailURL,
-                    );
-
-                    addVideoHistory(history);
 
                     return VideoPlayer(
                       playerMode: JidoujishoPlayerMode.youtubeStream,
@@ -371,6 +349,7 @@ class _VideoPlayerState extends State<VideoPlayer>
   String _volatileText = "";
   FocusNode _subtitleFocusNode = new FocusNode();
   bool networkNotSet = true;
+  bool historyNotSet = true;
   ValueNotifier<bool> _wasPlaying = ValueNotifier<bool>(false);
   ValueNotifier<bool> _widgetVisibility = ValueNotifier<bool>(false);
   ValueNotifier<Subtitle> _shadowingSubtitle = ValueNotifier<Subtitle>(null);
@@ -591,8 +570,74 @@ class _VideoPlayerState extends State<VideoPlayer>
           getPreferredYouTubeQuality(streamData.videoQualities);
     }
 
-    int inSeconds = getVideoPlayerController().value.position.inSeconds ?? 0;
-    setLastPlayedPosition(inSeconds);
+    if (getVideoPlayerController().value.isInitialized &&
+        historyNotSet &&
+        getVideoPlayerController().value.duration.inSeconds != 0) {
+      historyNotSet = false;
+
+      if (playerMode == JidoujishoPlayerMode.localFile) {
+        addVideoHistory(
+          VideoHistory(
+            videoFile.path,
+            path.basenameWithoutExtension(videoFile.path),
+            videoFile.path,
+            null,
+            "",
+            getVideoPlayerController().value.duration.inSeconds,
+          ),
+        );
+
+        if (initialPosition == -1) {
+          addVideoHistoryPosition(
+            VideoHistoryPosition(
+              videoFile.path,
+              0,
+            ),
+          );
+        }
+      } else if (playerMode == JidoujishoPlayerMode.youtubeStream) {
+        addVideoHistory(
+          VideoHistory(
+            streamData.videoURL,
+            streamData.title,
+            streamData.channel,
+            streamData.thumbnailURL,
+            streamData.channelId,
+            getVideoPlayerController().value.duration.inSeconds,
+          ),
+        );
+
+        if (initialPosition == -1) {
+          addVideoHistoryPosition(
+            VideoHistoryPosition(
+              videoFile.path,
+              0,
+            ),
+          );
+        }
+      }
+    }
+
+    if (getVideoPlayerController().value.isInitialized &&
+        getVideoPlayerController().value.duration.inSeconds != 0 &&
+        getVideoPlayerController().value.position.inSeconds <
+            getVideoPlayerController().value.duration.inSeconds - 5) {
+      if (playerMode == JidoujishoPlayerMode.localFile) {
+        addVideoHistoryPosition(
+          VideoHistoryPosition(
+            videoFile.path,
+            getVideoPlayerController().value.position.inSeconds,
+          ),
+        );
+      } else if (playerMode == JidoujishoPlayerMode.youtubeStream) {
+        addVideoHistoryPosition(
+          VideoHistoryPosition(
+            streamData.videoURL,
+            getVideoPlayerController().value.position.inSeconds,
+          ),
+        );
+      }
+    }
 
     if (initialPosition != -1 &&
         getVideoPlayerController().value.isInitialized) {

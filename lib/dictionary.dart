@@ -327,7 +327,6 @@ Future<DictionaryHistoryEntry> getMonolingualWordDetails({
   int contextPosition = -1,
   String searchTermOverride = "",
 }) async {
-  List<JishoResult> results = (await searchForPhrase(searchTerm)).data;
   List<DictionaryEntry> entries = [];
 
   if (searchTermOverride.isEmpty) {
@@ -336,7 +335,7 @@ Future<DictionaryHistoryEntry> getMonolingualWordDetails({
 
   var client = http.Client();
   http.Response response = await client.get(Uri.parse(
-      'https://sakura-paris.org/dict/?api=1&q=$searchTerm&dict=大辞泉&type=0&romaji=1'));
+      'https://sakura-paris.org/dict/?api=1&q=$searchTerm&dict=大辞泉&type=2&romaji=1'));
 
   if (response.body != "[]") {
     entries =
@@ -353,6 +352,7 @@ Future<DictionaryHistoryEntry> getMonolingualWordDetails({
         contextPosition: contextPosition,
       );
     } else {
+      List<JishoResult> results = (await searchForPhrase(searchTerm)).data;
       searchTerm = getEntryFromJishoResult(results.first, searchTerm)
           .word
           .split(";")
@@ -432,6 +432,11 @@ DictionaryEntry sakuraJsonToDictionaryEntry(
 
   word = word.replaceAll(RegExp(r'{{.*?}}'), "");
   reading = reading.replaceAll(RegExp(r'{{.*?}}'), "");
+
+  if (word.isEmpty && reading.isNotEmpty) {
+    word = reading;
+    reading = "";
+  }
 
   meaning = meaningRaw.substring(meaningRaw.indexOf("\n"));
   meaning = meaning.replaceAll(RegExp(r"\[subscript\].*?\[\/subscript\]"), "");

@@ -31,6 +31,7 @@ class YouTubeQualityOption {
 class YouTubeMux {
   final String title;
   final String channel;
+  final String channelId;
   final String thumbnailURL;
   final List<YouTubeQualityOption> videoQualities;
   final String videoURL;
@@ -40,6 +41,7 @@ class YouTubeMux {
   YouTubeMux({
     this.title,
     this.channel,
+    this.channelId,
     this.thumbnailURL,
     this.videoQualities,
     this.videoURL,
@@ -90,6 +92,7 @@ Future<YouTubeMux> getPlayerYouTubeInfo(String webURL) async {
     Video video = await yt.videos.get(videoID);
     String title = video.title;
     String channel = video.author;
+    String channelId = video.channelId.value;
     String thumbnailURL = video.thumbnails.mediumResUrl;
 
     StreamManifest streamManifest =
@@ -162,6 +165,7 @@ Future<YouTubeMux> getPlayerYouTubeInfo(String webURL) async {
     return YouTubeMux(
       title: title,
       channel: channel,
+      channelId: channelId,
       videoQualities: videoQualities,
       audioURL: audioURL,
       audioMetadata: audioMetadata,

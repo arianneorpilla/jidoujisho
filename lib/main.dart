@@ -62,8 +62,9 @@ void main() async {
   gMecabTagger.init("assets/ipadic", true);
 
   gSharedPrefs = await SharedPreferences.getInstance();
-  gIsResumable = ValueNotifier<bool>(getResumeAvailable());
+  gIsResumable = ValueNotifier<bool>(getVideoHistory().isNotEmpty);
   gIsSelectMode = ValueNotifier<bool>(getSelectMode());
+  maintainClosedCaptions();
 
   await AudioService.connect();
   await AudioService.start(
@@ -371,12 +372,6 @@ class _HomeState extends State<Home> {
         ),
       ),
     ).then((returnValue) {
-      if (playerMode != JidoujishoPlayerMode.networkStream) {
-        setLastPlayedPath(link);
-        setLastPlayedPosition(0);
-        gIsResumable.value = getResumeAvailable();
-      }
-
       if (pop) {
         SystemNavigator.pop();
       }
@@ -447,7 +442,7 @@ class _HomeState extends State<Home> {
       case "Channels":
         return buildChannels();
       case "History":
-        return History();
+        return History(setChannelVideoSearch);
       case "Dictionary":
         return ClipboardMenu(setCreatorView, _dictionaryScrollOffset);
       default:
@@ -611,15 +606,7 @@ class _HomeState extends State<Home> {
         onSubmitted: (query) => updateSearchQuery(query),
       );
     } else if (_isChannelView) {
-      return Text(
-        _selectedChannelName,
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 16,
-        ),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      );
+      return buildChannelNameRow();
     } else if (_isCreatorView) {
       return Text(
         "Card Creator",
@@ -647,6 +634,62 @@ class _HomeState extends State<Home> {
         ],
       );
     }
+  }
+
+  Widget buildChannelNameRow() {
+    bool isListed = isChannelInList(_searchQuery);
+
+    Widget buildListButton() {
+      if (isListed) {
+        return Container(
+          padding: EdgeInsets.only(left: 10),
+          child: GestureDetector(
+            child: Icon(
+              Icons.star,
+              size: 18,
+            ),
+            onTap: () {
+              setState(() {
+                removeChannel(_searchQuery);
+              });
+            },
+          ),
+        );
+      } else {
+        return Container(
+          padding: EdgeInsets.only(left: 10),
+          child: GestureDetector(
+            child: Icon(
+              Icons.star_border,
+              size: 18,
+            ),
+            onTap: () {
+              setState(() {
+                addNewChannelFromID(_searchQuery);
+              });
+            },
+          ),
+        );
+      }
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        Flexible(
+          child: Text(
+            _selectedChannelName,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.clip,
+          ),
+        ),
+        buildListButton(),
+      ],
+    );
   }
 
   Widget buildChannels() {
@@ -707,6 +750,7 @@ class _HomeState extends State<Home> {
     if (_isChannelView && _searchQuery != null) {
       return LazyResults(
         _searchQuery,
+        setChannelVideoSearch,
       );
     } else {
       return FutureBuilder(
@@ -864,6 +908,7 @@ class _HomeState extends State<Home> {
   ) {
     setState(() {
       _isChannelView = true;
+      _isSearching = false;
       _searchQuery = channelID;
       _selectedChannelName = channelName;
     });
@@ -1116,6 +1161,7 @@ class _HomeState extends State<Home> {
                     result,
                     gCaptioningCache[result.id],
                     fetchCaptioningCache(result.id.value),
+                    setChannelVideoSearch,
                     (_isSearching)
                         ? fetchMetadataCache(result.id.value, result)
                         : null,
@@ -1348,6 +1394,26 @@ class _HomeState extends State<Home> {
     }
   }
 
+  List<Widget> buildActions() {
+    if (_isCreatorView) {
+      return [];
+    }
+
+    return <Widget>[
+      buildResume(),
+      const SizedBox(width: 6),
+      buildSearchButton(),
+      const SizedBox(width: 12),
+      GestureDetector(
+        child: const Icon(Icons.more_vert),
+        onTapDown: (TapDownDetails details) {
+          showPopupMenu(details.globalPosition);
+        },
+      ),
+      const SizedBox(width: 12),
+    ];
+  }
+
   Widget buildResume() {
     return ValueListenableBuilder(
       valueListenable: gIsResumable,
@@ -1395,26 +1461,6 @@ class _HomeState extends State<Home> {
         }
       },
     );
-  }
-
-  List<Widget> buildActions() {
-    if (_isCreatorView) {
-      return [];
-    }
-
-    return <Widget>[
-      buildResume(),
-      const SizedBox(width: 6),
-      buildSearchButton(),
-      const SizedBox(width: 12),
-      GestureDetector(
-        child: const Icon(Icons.more_vert),
-        onTapDown: (TapDownDetails details) {
-          showPopupMenu(details.globalPosition);
-        },
-      ),
-      const SizedBox(width: 12),
-    ];
   }
 
   Widget buildSearchButton() {
@@ -1491,6 +1537,7 @@ class YouTubeResult extends StatefulWidget {
   final Video result;
   final AsyncMemoizer cache;
   final cacheCallback;
+  final ChannelCallback channelCallback;
   final metadataCallback;
   final int index;
   final bool trending;
@@ -1499,6 +1546,7 @@ class YouTubeResult extends StatefulWidget {
     this.result,
     this.cache,
     this.cacheCallback,
+    this.channelCallback,
     this.metadataCallback,
     this.index,
     this.trending,
@@ -1508,6 +1556,7 @@ class YouTubeResult extends StatefulWidget {
         this.result,
         this.cache,
         this.cacheCallback,
+        this.channelCallback,
         this.metadataCallback,
         this.index,
         this.trending,
@@ -1519,6 +1568,7 @@ class _YouTubeResultState extends State<YouTubeResult>
   final Video result;
   final AsyncMemoizer cache;
   final cacheCallback;
+  final ChannelCallback channelCallback;
   final metadataCallback;
   final int index;
   final bool trending;
@@ -1527,6 +1577,7 @@ class _YouTubeResultState extends State<YouTubeResult>
     this.result,
     this.cache,
     this.cacheCallback,
+    this.channelCallback,
     this.metadataCallback,
     this.index,
     this.trending,
@@ -1553,17 +1604,22 @@ class _YouTubeResultState extends State<YouTubeResult>
         child: Stack(
           alignment: Alignment.bottomRight,
           children: [
-            AspectRatio(
-              aspectRatio: 4 / 3,
-              child: FadeInImage(
-                image: NetworkImage(videoThumbnailURL),
-                placeholder: MemoryImage(kTransparentImage),
-                fit: BoxFit.contain,
+            Container(
+              width: MediaQuery.of(context).size.shortestSide * (2 / 5),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FadeInImage(
+                    image: NetworkImage(videoThumbnailURL),
+                    placeholder: MemoryImage(kTransparentImage),
+                    fit: BoxFit.fitWidth,
+                  ),
+                ],
               ),
             ),
             Positioned(
               right: 5.0,
-              bottom: 20.0,
+              bottom: 5.0,
               child: Container(
                 height: 20,
                 color: Colors.black.withOpacity(0.8),
@@ -1631,13 +1687,7 @@ class _YouTubeResultState extends State<YouTubeResult>
             video: result,
           ),
         ),
-      ).then((returnValue) {
-        setState(() {
-          setLastPlayedPath(videoStreamURL);
-          setLastPlayedPosition(0);
-          gIsResumable.value = getResumeAvailable();
-        });
-      });
+      );
     }
 
     return InkWell(
@@ -1666,10 +1716,9 @@ class _YouTubeResultState extends State<YouTubeResult>
               ),
               actions: <Widget>[
                 TextButton(
-                  child: Text('LIST CHANNEL',
-                      style: TextStyle(color: Colors.white)),
+                  child: Text('CHANNEL', style: TextStyle(color: Colors.white)),
                   onPressed: () async {
-                    await addNewChannel(videoStreamURL);
+                    channelCallback(result.channelId.value, result.author);
                     Navigator.pop(context);
                   },
                 ),
@@ -1692,7 +1741,9 @@ class _YouTubeResultState extends State<YouTubeResult>
         playVideo();
       },
       child: Container(
-        height: 128,
+        padding: EdgeInsets.only(top: 16, bottom: 16),
+        height:
+            MediaQuery.of(context).size.shortestSide * (2 / 5) * (9 / 16) + 32,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -1791,7 +1842,7 @@ class _YouTubeResultState extends State<YouTubeResult>
     );
   }
 
-  FutureBuilder showClosedCaptionStatus(
+  Widget showClosedCaptionStatus(
     BuildContext context,
     String videoID,
     int index,
@@ -1852,26 +1903,35 @@ class _YouTubeResultState extends State<YouTubeResult>
       false,
     );
 
-    return FutureBuilder(
-      future: cacheCallback,
-      builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          if (!snapshot.hasData) {
-            gCaptioningCache[result.id.value] = AsyncMemoizer();
-            return errorMessage;
-          } else {
-            bool hasClosedCaptions = snapshot.data;
-            if (hasClosedCaptions) {
-              return availableMessage;
+    try {
+      if (getHasClosedCaptions(result.id.value)) {
+        return availableMessage;
+      } else {
+        return unavailableMessage;
+      }
+    } catch (e) {
+      return FutureBuilder(
+        future: cacheCallback,
+        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            if (!snapshot.hasData) {
+              gCaptioningCache[result.id.value] = AsyncMemoizer();
+              return errorMessage;
             } else {
-              return unavailableMessage;
+              bool hasClosedCaptions = snapshot.data;
+              setHasClosedCaptions(result.id.value, hasClosedCaptions);
+              if (hasClosedCaptions) {
+                return availableMessage;
+              } else {
+                return unavailableMessage;
+              }
             }
+          } else {
+            return queryMessage;
           }
-        } else {
-          return queryMessage;
-        }
-      },
-    );
+        },
+      );
+    }
   }
 }
 
@@ -1995,7 +2055,7 @@ class _ChannelResultState extends State<ChannelResult>
                   child: Text('UNLIST CHANNEL',
                       style: TextStyle(color: Colors.white)),
                   onPressed: () async {
-                    await removeChannel(result);
+                    await removeChannel(result.id.value);
 
                     stateCallback();
                     Navigator.pop(context);
@@ -2177,18 +2237,24 @@ class _SearchResultState extends State<SearchResult>
 
 class HistoryResult extends StatefulWidget {
   final VideoHistory history;
+  final VideoHistoryPosition historyPosition;
   final stateCallback;
+  final channelCallback;
   final int index;
 
   HistoryResult(
     this.history,
+    this.historyPosition,
     this.stateCallback,
+    this.channelCallback,
     this.index,
   );
 
   _HistoryResultState createState() => _HistoryResultState(
         this.history,
+        this.historyPosition,
         this.stateCallback,
+        this.channelCallback,
         this.index,
       );
 }
@@ -2196,12 +2262,16 @@ class HistoryResult extends StatefulWidget {
 class _HistoryResultState extends State<HistoryResult>
     with AutomaticKeepAliveClientMixin {
   final VideoHistory history;
+  final VideoHistoryPosition historyPosition;
   final stateCallback;
+  final channelCallback;
   final int index;
 
   _HistoryResultState(
     this.history,
+    this.historyPosition,
     this.stateCallback,
+    this.channelCallback,
     this.index,
   );
 
@@ -2222,14 +2292,52 @@ class _HistoryResultState extends State<HistoryResult>
         child: Stack(
           alignment: Alignment.bottomRight,
           children: [
-            AspectRatio(
-              aspectRatio: 4 / 3,
-              child: FadeInImage(
-                image: isNetwork()
-                    ? NetworkImage(history.thumbnail)
-                    : FileImage(File(history.thumbnail)),
-                placeholder: MemoryImage(kTransparentImage),
-                fit: BoxFit.contain,
+            Container(
+              width: MediaQuery.of(context).size.shortestSide * (2 / 5),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FadeInImage(
+                    image: isNetwork()
+                        ? NetworkImage(history.thumbnail)
+                        : FileImage(File(history.thumbnail)),
+                    placeholder: MemoryImage(kTransparentImage),
+                    fit: BoxFit.contain,
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              right: 5.0,
+              bottom: 5.0,
+              child: Container(
+                height: 20,
+                color: Colors.black.withOpacity(0.8),
+                alignment: Alignment.center,
+                child: Text(
+                  getYouTubeDuration(Duration(seconds: history.duration)),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w300,
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              child: Container(
+                height: MediaQuery.of(context).size.shortestSide *
+                    (2 / 5) *
+                    (9 / 16),
+                width: MediaQuery.of(context).size.shortestSide * (2 / 5),
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  width: MediaQuery.of(context).size.shortestSide * (2 / 5),
+                  child: LinearProgressIndicator(
+                    value: historyPosition.position / history.duration,
+                    backgroundColor: Colors.white.withOpacity(0.6),
+                    minHeight: 2,
+                  ),
+                ),
               ),
             ),
           ],
@@ -2316,13 +2424,10 @@ class _HistoryResultState extends State<HistoryResult>
           builder: (context) => JidoujishoPlayer(
             playerMode: playerMode,
             url: history.url,
+            initialPosition: historyPosition.position,
           ),
         ),
-      ).then((returnValue) {
-        setLastPlayedPath(history.url);
-        setLastPlayedPosition(0);
-        gIsResumable.value = getResumeAvailable();
-
+      ).then((result) {
         stateCallback();
       });
     }
@@ -2367,13 +2472,13 @@ class _HistoryResultState extends State<HistoryResult>
                 ),
                 (isNetwork())
                     ? TextButton(
-                        child: Text(
-                          'LIST CHANNEL',
-                          style: TextStyle(color: Colors.white),
-                        ),
+                        child: Text('CHANNEL',
+                            style: TextStyle(color: Colors.white)),
                         onPressed: () async {
-                          await addNewChannel(history.url);
+                          channelCallback(
+                              history.channelId, history.subheading);
                           Navigator.pop(context);
+                          print(history.channelId);
                         },
                       )
                     : Container(),
@@ -2396,7 +2501,12 @@ class _HistoryResultState extends State<HistoryResult>
         playVideo();
       },
       child: Container(
-        height: 128,
+        padding: EdgeInsets.only(
+          top: 16,
+          bottom: 16,
+        ),
+        height:
+            MediaQuery.of(context).size.shortestSide * (2 / 5) * (9 / 16) + 32,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -2410,10 +2520,16 @@ class _HistoryResultState extends State<HistoryResult>
 }
 
 class History extends StatefulWidget {
-  _HistoryState createState() => _HistoryState();
+  final ChannelCallback channelCallback;
+  History(this.channelCallback);
+
+  _HistoryState createState() => _HistoryState(this.channelCallback);
 }
 
 class _HistoryState extends State<History> {
+  final ChannelCallback channelCallback;
+  _HistoryState(this.channelCallback);
+
   void setStateFromResult() {
     setState(() {});
   }
@@ -2421,6 +2537,8 @@ class _HistoryState extends State<History> {
   @override
   Widget build(BuildContext context) {
     List<VideoHistory> histories = getVideoHistory().reversed.toList();
+    List<VideoHistoryPosition> historyPositions =
+        getVideoHistoryPosition().reversed.toList();
 
     Widget centerMessage(String text, IconData icon, bool dots) {
       return Center(
@@ -2481,11 +2599,15 @@ class _HistoryState extends State<History> {
         itemCount: histories.length,
         itemBuilder: (BuildContext context, int index) {
           VideoHistory history = histories[index];
+          VideoHistoryPosition position = historyPositions[index];
+
           print("HISTORY LISTED: $history");
 
           return HistoryResult(
             history,
+            position,
             setStateFromResult,
+            channelCallback,
             index,
           );
         },
@@ -3199,19 +3321,29 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
 
 class LazyResults extends StatefulWidget {
   final channelID;
+  final ChannelCallback channelCallback;
 
-  LazyResults(this.channelID);
+  LazyResults(
+    this.channelID,
+    this.channelCallback,
+  );
 
   @override
-  _LazyResultsState createState() => new _LazyResultsState(this.channelID);
+  _LazyResultsState createState() =>
+      new _LazyResultsState(this.channelID, this.channelCallback);
 }
 
 class _LazyResultsState extends State<LazyResults> {
-  String channelID;
+  final String channelID;
+  final ChannelCallback channelCallback;
+
   bool isLoading = false;
   ScrollController scrollController;
 
-  _LazyResultsState(this.channelID);
+  _LazyResultsState(
+    this.channelID,
+    this.channelCallback,
+  );
 
   List<Video> verticalData;
   final int increment = 10;
@@ -3332,6 +3464,7 @@ class _LazyResultsState extends State<LazyResults> {
               result,
               gCaptioningCache[result.id],
               fetchCaptioningCache(result.id.value),
+              channelCallback,
               null,
               index,
               false,

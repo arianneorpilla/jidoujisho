@@ -14,9 +14,10 @@ import 'package:mecab_dart/mecab_dart.dart';
 import 'package:path/path.dart' as path;
 import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
 import 'package:ve_dart/ve_dart.dart';
+import 'package:wakelock/wakelock.dart';
 
 import 'package:jidoujisho/globals.dart';
-import 'package:wakelock/wakelock.dart';
+import 'package:jidoujisho/preferences.dart';
 
 enum JidoujishoPlayerMode {
   localFile,
@@ -24,17 +25,45 @@ enum JidoujishoPlayerMode {
   networkStream,
 }
 
+class VideoHistoryPosition {
+  String url;
+  int position;
+
+  VideoHistoryPosition(this.url, this.position);
+
+  Map<String, dynamic> toMap() {
+    return {
+      "url": this.url,
+      "position": this.position,
+    };
+  }
+
+  VideoHistoryPosition.fromMap(Map<String, dynamic> map) {
+    this.url = map['url'];
+    this.position = map['position'];
+  }
+
+  @override
+  String toString() {
+    return "HistoryPosition ($url)";
+  }
+}
+
 class VideoHistory {
   String url;
   String heading;
   String subheading;
   String thumbnail;
+  String channelId;
+  int duration;
 
   VideoHistory(
     this.url,
     this.heading,
     this.subheading,
     this.thumbnail,
+    this.channelId,
+    this.duration,
   );
 
   Map<String, dynamic> toMap() {
@@ -43,6 +72,8 @@ class VideoHistory {
       "heading": this.heading,
       "subheading": this.subheading,
       "thumbnail": this.thumbnail,
+      "channelId": this.channelId,
+      "duration": this.duration,
     };
   }
 
@@ -51,6 +82,8 @@ class VideoHistory {
     this.heading = map['heading'];
     this.subheading = map['subheading'];
     this.thumbnail = map['thumbnail'];
+    this.channelId = map['channelId'];
+    this.duration = map['duration'];
   }
 
   @override
@@ -615,6 +648,7 @@ String stripLatinCharactersFromText(String subtitleText) {
 }
 
 void unlockLandscape() {
+  gIsResumable = ValueNotifier<bool>(getVideoHistory().isNotEmpty);
   Wakelock.disable();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,

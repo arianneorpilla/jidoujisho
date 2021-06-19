@@ -37,8 +37,21 @@ Future<void> addNewChannel(String videoURL) async {
   await gSharedPrefs.setString('subscribedChannels', jsonEncode(channelIDs));
 }
 
-Future<void> removeChannel(Channel channel) async {
-  String channelID = channel.id.value;
+Future<void> addNewChannelFromID(String channelID) async {
+  String prefsChannels = gSharedPrefs.getString('subscribedChannels') ?? '[]';
+  List<String> channelIDs =
+      (jsonDecode(prefsChannels) as List<dynamic>).cast<String>();
+
+  gChannelCache = AsyncMemoizer();
+  setChannelCache([]);
+  if (!channelIDs.contains(channelID)) {
+    channelIDs.add(channelID);
+  }
+
+  await gSharedPrefs.setString('subscribedChannels', jsonEncode(channelIDs));
+}
+
+Future<void> removeChannel(String channelID) async {
   String prefsChannels = gSharedPrefs.getString('subscribedChannels') ?? '[]';
   List<String> channelIDs =
       (jsonDecode(prefsChannels) as List<dynamic>).cast<String>();
@@ -51,6 +64,10 @@ Future<void> removeChannel(Channel channel) async {
 
 Future<void> setChannelList(List<String> channelIDs) async {
   await gSharedPrefs.setString('subscribedChannels', jsonEncode(channelIDs));
+}
+
+bool isChannelInList(String channelID) {
+  return getChannelList().contains(channelID);
 }
 
 Map<String, dynamic> channelToMap(Channel channel) {
@@ -211,20 +228,14 @@ bool getResumeAvailable() {
   return lastPlayedPath != "-1";
 }
 
-Future<void> setLastPlayedPath(String path) async {
-  await gSharedPrefs.setString("lastPlayedPath", path);
-}
-
 String getLastPlayedPath() {
-  return gSharedPrefs.getString("lastPlayedPath") ?? "-1";
-}
-
-Future<void> setLastPlayedPosition(int positionInSeconds) async {
-  await gSharedPrefs.setInt("lastPlayedPosition", positionInSeconds);
+  return gSharedPrefs.getString("lastPlayedPath") ??
+      getVideoHistoryPosition().last.url;
 }
 
 int getLastPlayedPosition() {
-  return gSharedPrefs.getInt("lastPlayedPosition") ?? -1;
+  return gSharedPrefs.getInt("lastPlayedPosition") ??
+      getVideoHistoryPosition().last.position;
 }
 
 Future<void> setScopedStorageDontShow() async {
@@ -249,6 +260,35 @@ Future<void> setSubtitleDelay(int ms) async {
 
 int getSubtitleDelay() {
   return gSharedPrefs.getInt("subtitleDelay") ?? 0;
+}
+
+Future<void> setHasClosedCaptions(String videoID, bool hasCaptions) async {
+  await gSharedPrefs.setBool("hasCC_$videoID", hasCaptions);
+}
+
+bool getHasClosedCaptions(String videoID) {
+  return gSharedPrefs.getBool("hasCC_$videoID");
+}
+
+void maintainClosedCaptions() {
+  if (gSharedPrefs.getKeys().length < 5100) {
+    return;
+  }
+
+  int ccCount = 0;
+  gSharedPrefs.getKeys().forEach((key) {
+    if (key.startsWith("hasCC")) {
+      ccCount += 1;
+    }
+  });
+
+  if (ccCount > 5000) {
+    gSharedPrefs.getKeys().forEach((key) {
+      if (key.startsWith("hasCC")) {
+        gSharedPrefs.remove(key);
+      }
+    });
+  }
 }
 
 BlurWidgetOptions getBlurWidgetOptions() {
@@ -293,7 +333,8 @@ Future setBlurWidgetOptions(BlurWidgetOptions blurWidgetOptions) async {
 }
 
 List<VideoHistory> getVideoHistory() {
-  String prefsVideoHistory = gSharedPrefs.getString('videoHistory') ?? '[]';
+  String prefsVideoHistory =
+      gSharedPrefs.getString('videoHistoryPrefs') ?? '[]';
   List<dynamic> history = (jsonDecode(prefsVideoHistory) as List<dynamic>);
 
   List<VideoHistory> histories = [];
@@ -311,7 +352,7 @@ Future<void> setVideoHistory(List<VideoHistory> videoHistories) async {
     maps.add(entry.toMap());
   });
 
-  await gSharedPrefs.setString('videoHistory', jsonEncode(maps));
+  await gSharedPrefs.setString('videoHistoryPrefs', jsonEncode(maps));
 }
 
 Future<void> addVideoHistory(VideoHistory videoHistory) async {
@@ -362,8 +403,10 @@ Future<void> addVideoHistory(VideoHistory videoHistory) async {
 
 Future<void> removeVideoHistory(VideoHistory videoHistory) async {
   List<VideoHistory> videoHistories = getVideoHistory();
+  List<VideoHistoryPosition> videoHistoryPositions = getVideoHistoryPosition();
 
   videoHistories.removeWhere((entry) => entry.url == videoHistory.url);
+  videoHistoryPositions.removeWhere((entry) => entry.url == videoHistory.url);
   if (!videoHistory.thumbnail.startsWith("http")) {
     File photoFile = File(videoHistory.thumbnail);
     if (photoFile.existsSync()) {
@@ -372,6 +415,52 @@ Future<void> removeVideoHistory(VideoHistory videoHistory) async {
   }
 
   await setVideoHistory(videoHistories);
+  await setVideoHistoryPosition(videoHistoryPositions);
+}
+
+List<VideoHistoryPosition> getVideoHistoryPosition() {
+  String prefsVideoHistory =
+      gSharedPrefs.getString('videoHistoryPositionPrefs') ?? '[]';
+  List<dynamic> history = (jsonDecode(prefsVideoHistory) as List<dynamic>);
+
+  List<VideoHistoryPosition> histories = [];
+  history.forEach((entry) {
+    VideoHistoryPosition videoHistory = VideoHistoryPosition.fromMap(entry);
+    histories.add(videoHistory);
+  });
+
+  return histories;
+}
+
+Future<void> setVideoHistoryPosition(
+    List<VideoHistoryPosition> videoHistories) async {
+  List<Map<String, dynamic>> maps = [];
+  videoHistories.forEach((entry) {
+    maps.add(entry.toMap());
+  });
+
+  await gSharedPrefs.setString('videoHistoryPositionPrefs', jsonEncode(maps));
+}
+
+Future<void> addVideoHistoryPosition(VideoHistoryPosition videoHistory) async {
+  List<VideoHistoryPosition> videoHistories = getVideoHistoryPosition();
+
+  videoHistories.removeWhere((entry) => entry.url == videoHistory.url);
+  videoHistories.add(videoHistory);
+
+  if (videoHistories.length >= 20) {
+    videoHistories = videoHistories.sublist(videoHistories.length - 20);
+  }
+
+  await setVideoHistoryPosition(videoHistories);
+}
+
+Future<void> removeVideoHistoryPosition(
+    VideoHistoryPosition videoHistory) async {
+  List<VideoHistoryPosition> videoHistories = getVideoHistoryPosition();
+
+  videoHistories.removeWhere((entry) => entry.url == videoHistory.url);
+  await setVideoHistoryPosition(videoHistories);
 }
 
 List<DictionaryHistoryEntry> getDictionaryHistory() {
