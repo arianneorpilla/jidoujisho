@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_absolute_path/flutter_absolute_path.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:fuzzy/fuzzy.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
@@ -221,14 +220,16 @@ class _HomeState extends State<Home> {
   ValueNotifier<List<String>> _searchSuggestions =
       ValueNotifier<List<String>>([]);
   YoutubeExplode yt = YoutubeExplode();
-
   ValueNotifier<bool> _readerFlipflop = ValueNotifier<bool>(false);
+
+  StreamSubscription _intentDataStreamSubscription;
 
   @override
   void initState() {
     super.initState();
 
-    ReceiveSharingIntent.getMediaStream().listen((List<SharedMediaFile> value) {
+    _intentDataStreamSubscription = ReceiveSharingIntent.getMediaStream()
+        .listen((List<SharedMediaFile> value) {
       SharedMediaType type = value.first.type;
 
       if (value == null) {
@@ -256,7 +257,6 @@ class _HomeState extends State<Home> {
         case SharedMediaType.FILE:
           break;
       }
-
       ReceiveSharingIntent.reset();
     }, onError: (err) {
       print("getIntentDataStream error: $err");
@@ -297,7 +297,8 @@ class _HomeState extends State<Home> {
     });
 
     // For sharing or opening urls/text coming from outside the app while the app is in the memory
-    ReceiveSharingIntent.getTextStream().listen((String value) async {
+    _intentDataStreamSubscription =
+        ReceiveSharingIntent.getTextStream().listen((String value) async {
       if (value == null) {
         return;
       }
@@ -4167,7 +4168,7 @@ class _CreatorState extends State<Creator> {
       }
 
       return FutureBuilder(
-        future: scrapeBingImages(searchTerm),
+        future: scrapeBingImages(context, searchTerm),
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.waiting:

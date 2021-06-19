@@ -492,7 +492,8 @@ String getBetterNumberTag(String text) {
 //   }
 // }
 
-Future<List<String>> scrapeBingImages(String searchTerm) async {
+Future<List<String>> scrapeBingImages(
+    BuildContext context, String searchTerm) async {
   List<String> entries = [];
 
   var client = http.Client();
@@ -510,6 +511,8 @@ Future<List<String>> scrapeBingImages(String searchTerm) async {
     Map<dynamic, dynamic> imgMap = jsonDecode(imgElement.attributes["m"]);
     String imageURL = imgMap["turl"];
     entries.add(imageURL);
+
+    precacheImage(new NetworkImage(imageURL), context);
   }
 
   return entries;

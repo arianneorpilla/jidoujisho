@@ -132,12 +132,7 @@ class JidoujishoPlayerState extends State<JidoujishoPlayer> {
     int initialPosition,
   ) {
     lockLandscape();
-
     print("VIDEO FILE: ${videoFile.path}");
-
-    if (videoFile == null) {
-      Navigator.pop(context);
-    }
 
     return FutureBuilder(
       future: Future.wait(
@@ -174,8 +169,6 @@ class JidoujishoPlayerState extends State<JidoujishoPlayer> {
             );
 
             addVideoHistory(history);
-
-            lockLandscape();
 
             return VideoPlayer(
               playerMode: JidoujishoPlayerMode.localFile,
@@ -1172,16 +1165,17 @@ class _VideoPlayerState extends State<VideoPlayer>
             padding: EdgeInsets.all(16.0),
             color: Colors.grey[800].withOpacity(0.6),
             child: Wrap(
-                alignment: WrapAlignment.center,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Text(lookupText),
-                  SizedBox(
-                    height: 12,
-                    width: 12,
-                    child: JumpingDotsProgressIndicator(color: Colors.white),
-                  ),
-                ]),
+              alignment: WrapAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(lookupText),
+                SizedBox(
+                  height: 12,
+                  width: 12,
+                  child: JumpingDotsProgressIndicator(color: Colors.white),
+                ),
+              ],
+            ),
           ),
         ),
         Expanded(child: Container()),
