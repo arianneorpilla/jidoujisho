@@ -48,8 +48,7 @@
 - [x] **YouTube playback support** for videos with **Japanese closed captions** and **automatically generated subtitles**
 - [x] Use **card creator mode** to quickly **search images and definitions** with imported photos and text 
 - [x] **Dictionary tab remembers words queried** for review between sessions and **allows resuming back to context**
-- [x] **Use monolingual definitions** or **imported Yomichan dictionaries**
-- [x] View dictionary entries and export cards **with pitch accent information** from Kanjium Pitch Dictionaries
+- [x] **Use monolingual definitions** from Sora and export cards **with pitch accent information** from Kanjium
 - [x] **Frictionless sentence mining workflow for readers** via share action
 - [x] Playback support for **network streams** including **Plex external player support**
 - [x] **(Experimental)** **Korean to English support** through the National Institute of Korean Language's KrDict 
