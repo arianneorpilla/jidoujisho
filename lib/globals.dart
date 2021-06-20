@@ -16,6 +16,7 @@ PackageInfo gPackageInfo;
 Mecab gMecabTagger;
 
 bool gIsYouTubeAllowed = true;
+bool gIsTapToSelectSupported = true;
 
 SharedPreferences gSharedPrefs;
 ValueNotifier<bool> gIsResumable;

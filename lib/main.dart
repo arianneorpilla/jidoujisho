@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:async/async.dart';
 import 'package:audio_service/audio_service.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +26,7 @@ import 'package:transparent_image/transparent_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:ve_dart/ve_dart.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import 'package:jidoujisho/anki.dart';
 import 'package:jidoujisho/cache.dart';
@@ -35,7 +37,6 @@ import 'package:jidoujisho/player.dart';
 import 'package:jidoujisho/preferences.dart';
 import 'package:jidoujisho/util.dart';
 import 'package:jidoujisho/youtube.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 typedef void ChannelCallback(String id, String name);
 typedef void CreatorCallback({
@@ -57,9 +58,16 @@ void main() async {
 
   gAppDirPath = (await getApplicationDocumentsDirectory()).path;
   gPackageInfo = await PackageInfo.fromPlatform();
-
   gMecabTagger = Mecab();
   gMecabTagger.init("assets/ipadic", true);
+
+  if (Platform.isAndroid) {
+    AndroidDeviceInfo androidInfo = await DeviceInfoPlugin().androidInfo;
+    int sdkInt = androidInfo.version.sdkInt;
+    if (sdkInt <= 23) {
+      gIsTapToSelectSupported = false;
+    }
+  }
 
   gSharedPrefs = await SharedPreferences.getInstance();
   gIsResumable = ValueNotifier<bool>(getVideoHistory().isNotEmpty);

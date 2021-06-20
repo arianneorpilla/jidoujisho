@@ -187,6 +187,10 @@ Future<void> toggleSelectMode() async {
 }
 
 bool getSelectMode() {
+  if (!gIsTapToSelectSupported) {
+    return true;
+  }
+
   return gSharedPrefs.getBool("selectMode") ?? false;
 }
 

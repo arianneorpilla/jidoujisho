@@ -274,22 +274,22 @@ class _MaterialControlsState extends State<MaterialControls>
       isScrollControlled: true,
       useRootNavigator: true,
       builder: (context) => _MoreOptionsDialog(
-        const [
+        options: const [
           "Search Current Subtitle with Jisho.org",
           "Translate Current Subtitle with DeepL",
           "Translate Current Subtitle with Google Translate",
           "Share Current Subtitle with Menu",
           "Share YouTube Video Link",
         ],
-        const [
+        icons: const [
           Icons.menu_book_rounded,
           Icons.translate_rounded,
           Icons.g_translate_rounded,
           Icons.share_outlined,
           Icons.link_sharp,
         ],
-        const [],
-        count: isYouTube ? 5 : 4,
+        highlights: const [],
+        invisibles: isYouTube ? [] : [5],
       ),
     );
 
@@ -336,7 +336,7 @@ class _MaterialControlsState extends State<MaterialControls>
           isScrollControlled: true,
           useRootNavigator: true,
           builder: (context) => _MoreOptionsDialog(
-            [
+            options: [
               "Shadowing Mode",
               "Definition Focus Mode",
               "Listening Comprehension Mode",
@@ -355,7 +355,7 @@ class _MaterialControlsState extends State<MaterialControls>
               "Share Links to Applications",
               "Export Current Context to Anki",
             ],
-            [
+            icons: [
               Icons.loop_sharp,
               if (getFocusMode())
                 Icons.lightbulb
@@ -377,7 +377,8 @@ class _MaterialControlsState extends State<MaterialControls>
               Icons.share_outlined,
               Icons.mobile_screen_share_rounded,
             ],
-            highlightedIndexes,
+            highlights: highlightedIndexes,
+            invisibles: gIsTapToSelectSupported ? [] : [3],
           ),
         );
 
@@ -392,8 +393,10 @@ class _MaterialControlsState extends State<MaterialControls>
             toggleListeningComprehensionMode();
             break;
           case 3:
-            toggleSelectMode();
-            gIsSelectMode.value = getSelectMode();
+            if (gIsTapToSelectSupported) {
+              toggleSelectMode();
+              gIsSelectMode.value = getSelectMode();
+            }
             break;
           case 4:
             toggleMonolingualMode();
@@ -685,21 +688,22 @@ class _MaterialControlsState extends State<MaterialControls>
               isScrollControlled: true,
               useRootNavigator: true,
               builder: (context) => _MoreOptionsDialog(
-                const [
+                options: const [
                   "Prefer Last Selected Quality",
                   "Prefer Lowest Quality (all streams)",
                   "Prefer Lowest Quality (seek friendly)",
                   "Prefer Highest Quality (seek friendly)",
                   "Prefer Highest Quality (all streams)",
                 ],
-                const [
+                icons: const [
                   Icons.history,
                   Icons.sd,
                   Icons.sd,
                   Icons.hd,
                   Icons.hd,
                 ],
-                [getPreferredQuality()],
+                highlights: [getPreferredQuality()],
+                invisibles: [],
               ),
             );
 
@@ -1105,13 +1109,13 @@ class _MaterialControlsState extends State<MaterialControls>
       isScrollControlled: true,
       useRootNavigator: true,
       builder: (context) => _MoreOptionsDialog(
-        [
+        options: [
           "Use Blur Widget",
           "Set Widget Blurriness",
           "Set Widget Color",
           "Reset Widget Size and Position",
         ],
-        [
+        icons: [
           if (getBlurWidgetOptions().visible)
             Icons.blur_on_outlined
           else
@@ -1120,7 +1124,8 @@ class _MaterialControlsState extends State<MaterialControls>
           Icons.color_lens_outlined,
           Icons.center_focus_strong_outlined,
         ],
-        (getBlurWidgetOptions().visible) ? [0] : [],
+        highlights: (getBlurWidgetOptions().visible) ? [0] : [],
+        invisibles: [],
       ),
     );
 
@@ -1269,26 +1274,31 @@ class _MaterialControlsState extends State<MaterialControls>
 }
 
 class _MoreOptionsDialog extends StatelessWidget {
-  const _MoreOptionsDialog(
+  const _MoreOptionsDialog({
     this.options,
     this.icons,
-    this.highlights, {
-    this.count = -1,
+    this.highlights,
+    this.invisibles,
   });
 
   final List<String> options;
   final List<IconData> icons;
   final List<int> highlights;
-  final int count;
+  final List<int> invisibles;
 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
       shrinkWrap: true,
       physics: const ScrollPhysics(),
+      itemCount: options.length,
       itemBuilder: (context, index) {
         final _option = options[index];
         final _icon = icons[index];
+
+        if (invisibles.contains(index)) {
+          return Container();
+        }
 
         return ListTile(
           dense: true,
@@ -1314,7 +1324,6 @@ class _MoreOptionsDialog extends StatelessWidget {
           },
         );
       },
-      itemCount: (count == -1) ? options.length : count,
     );
   }
 }
@@ -1451,7 +1460,8 @@ class SubtitleAudioMenuOption {
   Color getColor(ChewieController chewie) {
     switch (type) {
       case SubtitleAudioMenuOptionType.audioTrack:
-        if (chewie.currentAudioTrack.value == callbackIndex) {
+        if (chewie.currentAudioTrack.value == callbackIndex ||
+            chewie.playerMode == JidoujishoPlayerMode.youtubeStream) {
           return Colors.red;
         }
         break;
