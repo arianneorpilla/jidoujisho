@@ -1451,7 +1451,7 @@ class _VideoPlayerState extends State<VideoPlayer>
                             color: Colors.grey[300],
                           ),
                         ),
-                        SelectableText(
+                        Text(
                           clipboard,
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),

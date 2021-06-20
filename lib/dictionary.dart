@@ -272,8 +272,12 @@ Future<DictionaryHistoryEntry> getWordDetails({
   String searchTerm,
   String contextDataSource,
   int contextPosition,
+  String searchTermOverride = "",
 }) async {
   List<DictionaryEntry> entries = [];
+  if (searchTermOverride.isEmpty) {
+    searchTermOverride = searchTerm;
+  }
 
   List<JishoResult> results = (await searchForPhrase(searchTerm)).data;
   if (results.isEmpty) {
@@ -287,7 +291,7 @@ Future<DictionaryHistoryEntry> getWordDetails({
     if (breakdown.isEmpty) {
       return DictionaryHistoryEntry(
         entries: [],
-        searchTerm: searchTerm.trim(),
+        searchTerm: searchTermOverride.trim(),
         swipeIndex: 0,
         contextDataSource: contextDataSource,
         contextPosition: contextPosition,
@@ -296,6 +300,7 @@ Future<DictionaryHistoryEntry> getWordDetails({
       String inflection = breakdown.first.querySelector("a").text;
       return getWordDetails(
         searchTerm: inflection.trim(),
+        searchTermOverride: searchTermOverride.trim(),
         contextDataSource: contextDataSource,
         contextPosition: contextPosition,
       );
@@ -328,7 +333,8 @@ Future<DictionaryHistoryEntry> getWordDetails({
 
       if (searchTerm != inflection) {
         return getWordDetails(
-          searchTerm: inflection,
+          searchTerm: inflection.trim(),
+          searchTermOverride: searchTermOverride.trim(),
           contextDataSource: contextDataSource,
           contextPosition: contextPosition,
         );
@@ -338,7 +344,7 @@ Future<DictionaryHistoryEntry> getWordDetails({
 
   return DictionaryHistoryEntry(
     entries: entries,
-    searchTerm: searchTerm.trim(),
+    searchTerm: searchTermOverride.trim(),
     swipeIndex: 0,
     contextDataSource: contextDataSource,
     contextPosition: contextPosition,
@@ -377,13 +383,19 @@ Future<DictionaryHistoryEntry> getMonolingualWordDetails({
         contextPosition: contextPosition,
       );
     } else {
-      List<JishoResult> results = (await searchForPhrase(searchTerm)).data;
-      searchTerm = getEntryFromJishoResult(results.first, searchTerm)
+      String newSearchTerm = (await getWordDetails(
+        searchTerm: searchTerm.trim(),
+        contextDataSource: contextDataSource,
+        contextPosition: contextPosition,
+      ))
+          .entries
+          .first
           .word
           .split(";")
           .first;
+
       return getMonolingualWordDetails(
-        searchTerm: searchTerm.trim(),
+        searchTerm: newSearchTerm.trim(),
         searchTermOverride: searchTermOverride.trim(),
         recursive: true,
         contextDataSource: contextDataSource,
