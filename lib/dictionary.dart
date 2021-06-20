@@ -311,6 +311,29 @@ Future<DictionaryHistoryEntry> getWordDetails({
     entry.searchTerm = searchTerm;
   }
 
+  // Fixes inflections
+  if (entries.first.word.contains(searchTerm) &&
+      entries.first.word != searchTerm) {
+    var client = http.Client();
+    http.Response response =
+        await client.get(Uri.parse('https://jisho.org/search/$searchTerm'));
+
+    var document = parser.parse(response.body);
+
+    var breakdown = document.getElementsByClassName("fact grammar-breakdown");
+    if (breakdown.isNotEmpty) {
+      String inflection = breakdown.first.querySelector("a").text;
+
+      if (searchTerm != inflection) {
+        return getWordDetails(
+          searchTerm: inflection,
+          contextDataSource: contextDataSource,
+          contextPosition: contextPosition,
+        );
+      }
+    }
+  }
+
   return DictionaryHistoryEntry(
     entries: entries,
     searchTerm: searchTerm.trim(),
