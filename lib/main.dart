@@ -1657,13 +1657,11 @@ class _YouTubeResultState extends State<YouTubeResult>
               Text(
                 videoTitle,
                 maxLines: 2,
-                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 6),
               Text(
                 videoChannel,
                 maxLines: 1,
-                overflow: TextOverflow.clip,
                 style: TextStyle(
                   color: Colors.grey,
                   fontSize: 12,

@@ -313,7 +313,9 @@ Future<DictionaryHistoryEntry> getWordDetails({
 
   // Fixes inflections
   if (entries.first.word.contains(searchTerm) &&
-      entries.first.word != searchTerm) {
+          entries.first.word != searchTerm ||
+      entries.first.reading.contains(searchTerm) &&
+          entries.first.reading != searchTerm) {
     var client = http.Client();
     http.Response response =
         await client.get(Uri.parse('https://jisho.org/search/$searchTerm'));
