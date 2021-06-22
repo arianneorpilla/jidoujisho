@@ -265,8 +265,12 @@ class ReaderState extends State<Reader> {
                     print("SELECTED: " + searchTerm);
                     // print("reached");
 
+                    clearSelection();
                     _clipboard.value = searchTerm;
                   } catch (e) {
+                    clearSelection();
+                    emptyStack();
+                    _clipboard.value = "";
                     print(e);
                   }
                 }
@@ -276,19 +280,19 @@ class ReaderState extends State<Reader> {
               },
               onLoadStop: (controller, url) async {
                 await controller.evaluateJavascript(source: """
-let isSwiping = false;
-var event = null;
+isSwiping = false;
+event = null;
 
-document.body.addEventListener('touchstart', (e) => {
+document.getElementsByTagName('app-reader')[0].addEventListener('touchstart', (e) => {
   isSwiping = false;
   event = e;
 });
 
-document.body.addEventListener('touchmove', () => {
+document.getElementsByTagName('app-reader')[0].addEventListener('touchmove', () => {
   isSwiping = true;
 });
 
-document.body.addEventListener('touchend', function(e) {
+document.getElementsByTagName('app-reader')[0].addEventListener('touchend', function(e) {
   e.preventDefault();
 
   if (isSwiping) {
@@ -301,7 +305,37 @@ document.body.addEventListener('touchend', function(e) {
   }
 
   isSwiping = false;
+});            
+  """);
+              },
+              onTitleChanged: (controller, title) async {
+                await controller.evaluateJavascript(source: """
+isSwiping = false;
+event = null;
+
+document.getElementsByTagName('app-reader')[0].addEventListener('touchstart', (e) => {
+  isSwiping = false;
+  event = e;
 });
+
+document.getElementsByTagName('app-reader')[0].addEventListener('touchmove', () => {
+  isSwiping = true;
+});
+
+document.getElementsByTagName('app-reader')[0].addEventListener('touchend', function(e) {
+  e.preventDefault();
+
+  if (isSwiping) {
+    console.log('swiping');
+  } else {
+    console.log('not swiping');
+    var touch = event.touches[0];
+    result = document.caretRangeFromPoint(touch.clientX, touch.clientY);
+    console.log(JSON.stringify({"offset": result.startOffset, "text": result.startContainer.textContent, "jidoujisho": "jidoujisho"}));
+  }
+
+  isSwiping = false;
+});            
   """);
               },
             ),
@@ -598,7 +632,7 @@ document.body.addEventListener('touchend', function(e) {
                             color: Colors.grey[300],
                           ),
                         ),
-                        Text(
+                        SelectableText(
                           clipboard,
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
