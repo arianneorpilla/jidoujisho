@@ -12,7 +12,7 @@
 </p>
   
 <p align="center" style="margin:0"><b>Preview Branch:<br>
-<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.23.1-beta-readerpreview">📖 0.23.1-beta-readerpreview 🇯🇵 → 🇬🇧</a></b><br>
+<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.23.2-beta-readerpreview">📖 0.23.2-beta-readerpreview 🇯🇵 → 🇬🇧</a></b><br>
 </p>
 
 <p align="center" style="margin:0"><b>Release Archive:<br>
