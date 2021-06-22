@@ -57,7 +57,7 @@ void main() async {
   requestAnkiDroidPermissions();
 
   gMecabTagger = Mecab();
-  gMecabTagger.init("assets/ipadic", true);
+  await gMecabTagger.init("assets/ipadic", true);
 
   gAppDirPath = (await getApplicationDocumentsDirectory()).path;
   gPackageInfo = await PackageInfo.fromPlatform();

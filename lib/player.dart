@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 
@@ -26,6 +27,7 @@ import 'package:jidoujisho/dictionary.dart';
 import 'package:jidoujisho/globals.dart';
 import 'package:jidoujisho/pitch.dart';
 import 'package:jidoujisho/preferences.dart';
+import 'package:ve_dart/ve_dart.dart';
 
 class Reader extends StatefulWidget {
   @override
@@ -227,10 +229,80 @@ class ReaderState extends State<Reader> {
               },
               contextMenu: contextMenu,
               onConsoleMessage: (controller, consoleMessage) {
-                print(consoleMessage);
+                // print(consoleMessage);
+
+                Map<String, dynamic> messageJson =
+                    jsonDecode(consoleMessage.message);
+
+                if (messageJson["jidoujisho"] == "jidoujisho") {
+                  emptyStack();
+
+                  int index = messageJson["offset"];
+                  String text = messageJson["text"];
+
+                  try {
+                    String processedText = text.replaceAll("﻿", "␝");
+                    processedText = processedText.replaceAll("　", "␝");
+                    processedText = processedText.replaceAll('\n', '␜');
+                    processedText = processedText.replaceAll(' ', '␝');
+
+                    List<Word> tokens = parseVe(gMecabTagger, processedText);
+                    print(tokens);
+
+                    List<String> tokenTape = [];
+                    for (int i = 0; i < tokens.length; i++) {
+                      Word token = tokens[i];
+                      for (int j = 0; j < token.word.length; j++) {
+                        tokenTape.add(token.word);
+                      }
+                    }
+
+                    // print(tokenTape);
+                    String searchTerm = tokenTape[index];
+                    searchTerm = searchTerm.replaceAll('␜', '\n');
+                    searchTerm = searchTerm.replaceAll('␝', ' ');
+                    searchTerm = searchTerm.trim();
+                    print("SELECTED: " + searchTerm);
+                    // print("reached");
+
+                    _clipboard.value = searchTerm;
+                  } catch (e) {
+                    print(e);
+                  }
+                }
               },
               onWebViewCreated: (controller) {
                 webViewController = controller;
+              },
+              onLoadStop: (controller, url) async {
+                await controller.evaluateJavascript(source: """
+let isSwiping = false;
+var event = null;
+
+document.body.addEventListener('touchstart', (e) => {
+  isSwiping = false;
+  event = e;
+});
+
+document.body.addEventListener('touchmove', () => {
+  isSwiping = true;
+});
+
+document.body.addEventListener('touchend', function(e) {
+  e.preventDefault();
+
+  if (isSwiping) {
+    console.log('swiping');
+  } else {
+    console.log('not swiping');
+    var touch = event.touches[0];
+    result = document.caretRangeFromPoint(touch.clientX, touch.clientY);
+    console.log(JSON.stringify({"offset": result.startOffset, "text": result.startContainer.textContent, "jidoujisho": "jidoujisho"}));
+  }
+
+  isSwiping = false;
+});
+  """);
               },
             ),
             Padding(
