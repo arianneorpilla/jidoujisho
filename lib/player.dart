@@ -229,7 +229,7 @@ class ReaderState extends State<Reader> {
               },
               contextMenu: contextMenu,
               onConsoleMessage: (controller, consoleMessage) {
-                // print(consoleMessage);
+                print(consoleMessage);
 
                 Map<String, dynamic> messageJson =
                     jsonDecode(consoleMessage.message);
@@ -279,64 +279,70 @@ class ReaderState extends State<Reader> {
                 webViewController = controller;
               },
               onLoadStop: (controller, url) async {
-                await controller.evaluateJavascript(source: """
-isSwiping = false;
-event = null;
+                await controller.injectJavascriptFileFromUrl(
+                    urlFile: Uri.parse(
+                        'https://code.jquery.com/jquery-3.3.1.min.js'),
+                    scriptHtmlTagAttributes: ScriptHtmlTagAttributes(
+                        id: 'jquery',
+                        onLoad: () async {
+                          print("jQuery loaded and ready to be used!");
+                          await controller.evaluateJavascript(source: """
+\$(document).ready(function(){
+  var touchmoved;
+  var event;
 
-document.getElementsByTagName('app-reader')[0].addEventListener('touchstart', (e) => {
-  isSwiping = false;
-  event = e;
+  \$(document.getElementsByTagName('app-reader')[0]).on('touchend', function(e) {
+      if(touchmoved != true){
+        var touch = event.touches[0];
+        result = document.caretRangeFromPoint(touch.clientX, touch.clientY);
+        console.log(JSON.stringify({"offset": result.startOffset, "text": result.startContainer.textContent, "jidoujisho": "jidoujisho"}));
+      }
+  }).on('touchmove', function(e){
+      touchmoved = true;
+      event = null;
+  }).on('touchstart', function(e){
+      touchmoved = false;
+      event = e;
+  });   
 });
-
-document.getElementsByTagName('app-reader')[0].addEventListener('touchmove', () => {
-  isSwiping = true;
-});
-
-document.getElementsByTagName('app-reader')[0].addEventListener('touchend', function(e) {
-  e.preventDefault();
-
-  if (isSwiping) {
-    console.log('swiping');
-  } else {
-    console.log('not swiping');
-    var touch = event.touches[0];
-    result = document.caretRangeFromPoint(touch.clientX, touch.clientY);
-    console.log(JSON.stringify({"offset": result.startOffset, "text": result.startContainer.textContent, "jidoujisho": "jidoujisho"}));
-  }
-
-  isSwiping = false;
-});            
   """);
+                        },
+                        onError: () {
+                          print("jQuery not available! Some error occurred.");
+                        }));
               },
               onTitleChanged: (controller, title) async {
-                await controller.evaluateJavascript(source: """
-isSwiping = false;
-event = null;
+                await controller.injectJavascriptFileFromUrl(
+                    urlFile: Uri.parse(
+                        'https://code.jquery.com/jquery-3.3.1.min.js'),
+                    scriptHtmlTagAttributes: ScriptHtmlTagAttributes(
+                        id: 'jquery',
+                        onLoad: () async {
+                          print("jQuery loaded and ready to be used!");
+                          await controller.evaluateJavascript(source: """
+\$(document).ready(function() {
+  var touchmoved;
+  var event;
 
-document.getElementsByTagName('app-reader')[0].addEventListener('touchstart', (e) => {
-  isSwiping = false;
-  event = e;
+    \$(document.getElementsByTagName('app-reader')[0]).on('touchend', function(e) {
+        if(touchmoved != true) {
+          var touch = event.touches[0];
+          result = document.caretRangeFromPoint(touch.clientX, touch.clientY);
+          console.log(JSON.stringify({"offset": result.startOffset, "text": result.startContainer.textContent, "jidoujisho": "jidoujisho"}));
+        }
+    }).on('touchmove', function(e){
+        touchmoved = true;
+        event = null;
+    }).on('touchstart', function(e){
+        touchmoved = false;
+        event = e;
+    });    
 });
-
-document.getElementsByTagName('app-reader')[0].addEventListener('touchmove', () => {
-  isSwiping = true;
-});
-
-document.getElementsByTagName('app-reader')[0].addEventListener('touchend', function(e) {
-  e.preventDefault();
-
-  if (isSwiping) {
-    console.log('swiping');
-  } else {
-    console.log('not swiping');
-    var touch = event.touches[0];
-    result = document.caretRangeFromPoint(touch.clientX, touch.clientY);
-    console.log(JSON.stringify({"offset": result.startOffset, "text": result.startContainer.textContent, "jidoujisho": "jidoujisho"}));
-  }
-
-  isSwiping = false;
-});            
   """);
+                        },
+                        onError: () {
+                          print("jQuery not available! Some error occurred.");
+                        }));
               },
             ),
             Padding(
