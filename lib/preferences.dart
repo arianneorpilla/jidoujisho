@@ -194,6 +194,14 @@ bool getSelectMode() {
   return gSharedPrefs.getBool("selectMode") ?? false;
 }
 
+Future<void> useMonolingual() async {
+  await gSharedPrefs.setBool("monolingualMode", true);
+}
+
+Future<void> useBilingual() async {
+  await gSharedPrefs.setBool("monolingualMode", false);
+}
+
 Future<void> toggleMonolingualMode() async {
   await gSharedPrefs.setBool("monolingualMode", !getMonolingualMode());
 }

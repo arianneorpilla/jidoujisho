@@ -383,16 +383,15 @@ Future<DictionaryHistoryEntry> getMonolingualWordDetails({
         contextPosition: contextPosition,
       );
     } else {
-      String newSearchTerm = (await getWordDetails(
+      DictionaryHistoryEntry bilingualResults = await getWordDetails(
         searchTerm: searchTerm.trim(),
         contextDataSource: contextDataSource,
         contextPosition: contextPosition,
-      ))
-          .entries
-          .first
-          .word
-          .split(";")
-          .first;
+      );
+      String newSearchTerm = bilingualResults.entries.first.word;
+      if (newSearchTerm.contains(";")) {
+        newSearchTerm = newSearchTerm.split(";").first;
+      }
 
       return getMonolingualWordDetails(
         searchTerm: newSearchTerm.trim(),

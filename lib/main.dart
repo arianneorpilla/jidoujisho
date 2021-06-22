@@ -56,10 +56,11 @@ void main() async {
   await Permission.storage.request();
   requestAnkiDroidPermissions();
 
-  gAppDirPath = (await getApplicationDocumentsDirectory()).path;
-  gPackageInfo = await PackageInfo.fromPlatform();
   gMecabTagger = Mecab();
   gMecabTagger.init("assets/ipadic", true);
+
+  gAppDirPath = (await getApplicationDocumentsDirectory()).path;
+  gPackageInfo = await PackageInfo.fromPlatform();
 
   if (Platform.isAndroid) {
     AndroidDeviceInfo androidInfo = await DeviceInfoPlugin().androidInfo;
@@ -79,7 +80,7 @@ void main() async {
     backgroundTaskEntrypoint: _backgroundTaskEntrypoint,
   );
 
-  initializeKanjiumEntries().then((entries) {
+  await initializeKanjiumEntries().then((entries) {
     gKanjiumDictionary = entries;
   });
 
@@ -204,16 +205,23 @@ class App extends StatelessWidget {
 }
 
 class Home extends StatefulWidget {
-  _HomeState createState() => _HomeState();
+  Home({this.readerExport = ""});
+  final String readerExport;
+
+  _HomeState createState() => _HomeState(readerExport: this.readerExport);
 }
 
 class _HomeState extends State<Home> {
+  _HomeState({this.readerExport = ""});
+  final String readerExport;
+
   TextEditingController _searchQueryController = TextEditingController();
   ValueNotifier<double> _dictionaryScrollOffset = ValueNotifier<double>(0);
   bool _isSearching = false;
   bool _isChannelView = false;
   bool _isCreatorView = false;
   bool _isCreatorShared = false;
+  bool _isCreatorReaderExport = false;
 
   DictionaryEntry _creatorDictionaryEntry = DictionaryEntry(
     word: "",
@@ -237,153 +245,98 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
 
-    _intentDataStreamSubscription = ReceiveSharingIntent.getMediaStream()
-        .listen((List<SharedMediaFile> value) {
-      SharedMediaType type = value.first.type;
+    if (readerExport.isEmpty) {
+      _intentDataStreamSubscription = ReceiveSharingIntent.getMediaStream()
+          .listen((List<SharedMediaFile> value) {
+        SharedMediaType type = value.first.type;
 
-      if (value == null) {
-        return;
-      }
-
-      switch (type) {
-        case SharedMediaType.IMAGE:
-          setCreatorView(
-            sentence: "",
-            dictionaryEntry:
-                DictionaryEntry(word: "", meaning: "", reading: ""),
-            file: File(value.first.path),
-            isShared: true,
-          );
-          break;
-        case SharedMediaType.VIDEO:
-          Navigator.of(context).popUntil((route) => route.isFirst);
-          playVideo(
-            JidoujishoPlayerMode.localFile,
-            value.first.path,
-            pop: true,
-          );
-          break;
-        case SharedMediaType.FILE:
-          break;
-      }
-      ReceiveSharingIntent.reset();
-    }, onError: (err) {
-      print("getIntentDataStream error: $err");
-      ReceiveSharingIntent.reset();
-    });
-
-    // For sharing images coming from outside the app while the app is closed
-    ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> value) {
-      SharedMediaType type = value.first.type;
-
-      if (value == null) {
-        return;
-      }
-
-      switch (type) {
-        case SharedMediaType.IMAGE:
-          setCreatorView(
-            sentence: "",
-            dictionaryEntry:
-                DictionaryEntry(word: "", meaning: "", reading: ""),
-            file: File(value.first.path),
-            isShared: true,
-          );
-          break;
-        case SharedMediaType.VIDEO:
-          Navigator.of(context).popUntil((route) => route.isFirst);
-          playVideo(
-            JidoujishoPlayerMode.localFile,
-            value.first.path,
-            pop: true,
-          );
-          break;
-        case SharedMediaType.FILE:
-          break;
-      }
-
-      ReceiveSharingIntent.reset();
-    });
-
-    // For sharing or opening urls/text coming from outside the app while the app is in the memory
-    _intentDataStreamSubscription =
-        ReceiveSharingIntent.getTextStream().listen((String value) async {
-      if (value == null) {
-        return;
-      }
-
-      if (value.startsWith("https://") || value.startsWith("http://")) {
-        Navigator.of(context).popUntil((route) => route.isFirst);
-        if (YoutubePlayer.convertUrlToId(value) != null) {
-          playVideo(JidoujishoPlayerMode.youtubeStream, value, pop: true);
-        } else {
-          playVideo(JidoujishoPlayerMode.networkStream, value, pop: true);
+        if (value == null) {
+          return;
         }
-      } else if (value.startsWith("content://")) {
-        Navigator.of(context).popUntil((route) => route.isFirst);
-        String absolutePath = await FlutterAbsolutePath.getAbsolutePath(value);
-        playVideo(JidoujishoPlayerMode.localFile, absolutePath, pop: true);
-      } else {
+
+        switch (type) {
+          case SharedMediaType.IMAGE:
+            setCreatorView(
+              sentence: "",
+              dictionaryEntry:
+                  DictionaryEntry(word: "", meaning: "", reading: ""),
+              file: File(value.first.path),
+              isShared: true,
+              isReaderExport: false,
+            );
+            break;
+          default:
+            break;
+        }
+        ReceiveSharingIntent.reset();
+      }, onError: (err) {
+        print("getIntentDataStream error: $err");
+        ReceiveSharingIntent.reset();
+      });
+
+      // For sharing images coming from outside the app while the app is closed
+      ReceiveSharingIntent.getInitialMedia()
+          .then((List<SharedMediaFile> value) {
+        SharedMediaType type = value.first.type;
+
+        if (value == null) {
+          return;
+        }
+
+        switch (type) {
+          case SharedMediaType.IMAGE:
+            setCreatorView(
+              sentence: "",
+              dictionaryEntry:
+                  DictionaryEntry(word: "", meaning: "", reading: ""),
+              file: File(value.first.path),
+              isShared: true,
+              isReaderExport: false,
+            );
+            break;
+          default:
+            break;
+        }
+
+        ReceiveSharingIntent.reset();
+      });
+
+      // For sharing or opening urls/text coming from outside the app while the app is in the memory
+      _intentDataStreamSubscription =
+          ReceiveSharingIntent.getTextStream().listen((String value) async {
+        if (value == null) {
+          return;
+        }
+
         setCreatorView(
           sentence: value,
           dictionaryEntry: DictionaryEntry(word: "", meaning: "", reading: ""),
           file: null,
           isShared: true,
+          isReaderExport: false,
         );
-      }
-      ReceiveSharingIntent.reset();
-    }, onError: (err) {
-      print("getLinkStream error: $err");
-      ReceiveSharingIntent.reset();
-    });
+        ReceiveSharingIntent.reset();
+      }, onError: (err) {
+        print("getLinkStream error: $err");
+        ReceiveSharingIntent.reset();
+      });
 
-    // For sharing or opening urls/text coming from outside the app while the app is closed
-    ReceiveSharingIntent.getInitialText().then((String value) async {
-      if (value == null) {
-        return;
-      }
-
-      if (value.startsWith("https://") || value.startsWith("http://")) {
-        Navigator.of(context).popUntil((route) => route.isFirst);
-        if (YoutubePlayer.convertUrlToId(value) != null) {
-          playVideo(JidoujishoPlayerMode.youtubeStream, value, pop: true);
-        } else {
-          playVideo(JidoujishoPlayerMode.networkStream, value, pop: true);
+      // For sharing or opening urls/text coming from outside the app while the app is closed
+      ReceiveSharingIntent.getInitialText().then((String value) async {
+        if (value == null) {
+          return;
         }
-      } else if (value.startsWith("content://")) {
-        Navigator.of(context).popUntil((route) => route.isFirst);
-        String absolutePath = await FlutterAbsolutePath.getAbsolutePath(value);
-        playVideo(JidoujishoPlayerMode.localFile, absolutePath, pop: true);
-      } else {
+
         setCreatorView(
           sentence: value,
           dictionaryEntry: DictionaryEntry(word: "", meaning: "", reading: ""),
           file: null,
           isShared: true,
+          isReaderExport: false,
         );
-      }
-      ReceiveSharingIntent.reset();
-    });
-  }
-
-  void playVideo(
-    JidoujishoPlayerMode playerMode,
-    String link, {
-    bool pop = false,
-  }) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => JidoujishoPlayer(
-          playerMode: playerMode,
-          url: link,
-        ),
-      ),
-    ).then((returnValue) {
-      if (pop) {
-        SystemNavigator.pop();
-      }
-    });
+        ReceiveSharingIntent.reset();
+      });
+    }
   }
 
   void setStateFromResult() {
@@ -406,15 +359,18 @@ class _HomeState extends State<Home> {
       }
     } else {
       setState(() {
-        if (getNavigationBarItems()[index].label == "Library") {
+        if (getNavigationBarItems()[index].label == "Reader") {
+          SystemChrome.setEnabledSystemUIOverlays([]);
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => JidoujishoPlayer(
-                playerMode: JidoujishoPlayerMode.localFile,
-              ),
+              builder: (context) => Reader(),
             ),
-          );
+          ).then((result) {
+            SystemChrome.setEnabledSystemUIOverlays(
+                [SystemUiOverlay.bottom, SystemUiOverlay.top]);
+            setState(() {});
+          });
         } else {
           _selectedIndex = index;
           if (_isSearching || _isChannelView || _isCreatorView) {
@@ -429,28 +385,31 @@ class _HomeState extends State<Home> {
   }
 
   Widget getWidgetOptions(int index) {
-    if (_isSearching) {
-      return buildBody();
-    } else if (_isChannelView) {
-      return buildChannels();
-    } else if (_isCreatorView) {
+    if (readerExport.isNotEmpty) {
+      return Creator(
+        readerExport,
+        DictionaryEntry(word: "", reading: "", meaning: ""),
+        null,
+        false,
+        true,
+        resetMenu,
+        _readerFlipflop,
+      );
+    }
+
+    if (_isCreatorView) {
       return Creator(
         _creatorSentence,
         _creatorDictionaryEntry,
         _creatorFile,
         _isCreatorShared,
+        _isCreatorReaderExport,
         resetMenu,
         _readerFlipflop,
       );
     }
 
     switch (getNavigationBarItems()[index].label) {
-      case "Trending":
-        return buildBody();
-      case "Channels":
-        return buildChannels();
-      case "History":
-        return History(setChannelVideoSearch);
       case "Dictionary":
         return ClipboardMenu(setCreatorView, _dictionaryScrollOffset);
       default:
@@ -461,34 +420,15 @@ class _HomeState extends State<Home> {
   List<BottomNavigationBarItem> getNavigationBarItems() {
     List<BottomNavigationBarItem> items = [];
 
-    if (gIsYouTubeAllowed) {
-      items.addAll(
-        [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.whatshot_sharp),
-            label: 'Trending',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.subscriptions_sharp),
-            label: 'Channels',
-          ),
-        ],
-      );
-    }
-
     items.addAll(
       [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.history_sharp),
-          label: 'History',
-        ),
         BottomNavigationBarItem(
           icon: Icon(Icons.auto_stories),
           label: 'Dictionary',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.folder_sharp),
-          label: 'Library',
+          icon: Icon(Icons.chrome_reader_mode),
+          label: 'Reader',
         ),
       ],
     );
@@ -498,8 +438,6 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    unlockLandscape();
-
     return new WillPopScope(
       onWillPop: _onWillPop,
       child: Stack(
@@ -512,8 +450,9 @@ class _HomeState extends State<Home> {
               actions: buildActions(),
             ),
             backgroundColor: Colors.black,
-            bottomNavigationBar:
-                (!_isCreatorView) ? buildNavigationBar() : SizedBox.shrink(),
+            bottomNavigationBar: (!_isCreatorView && !readerExport.isNotEmpty)
+                ? buildNavigationBar()
+                : SizedBox.shrink(),
             body: getWidgetOptions(_selectedIndex),
           ),
         ],
@@ -550,8 +489,12 @@ class _HomeState extends State<Home> {
         _searchQueryController.clear();
       });
     } else {
-      MinimizeApp.minimizeApp();
-      resetMenu();
+      if (readerExport.isEmpty) {
+        MinimizeApp.minimizeApp();
+        resetMenu();
+      } else {
+        Navigator.pop(context);
+      }
     }
     return false;
   }
@@ -568,24 +511,26 @@ class _HomeState extends State<Home> {
   }
 
   Widget buildAppBarLeading() {
-    if (_isSearching || _isChannelView || _isCreatorView) {
-      return BackButton(
-        onPressed: () {
-          if (_isCreatorShared) {
-            MinimizeApp.minimizeApp();
-            resetMenu();
-          } else {
-            setState(() {
-              _isSearching = false;
-              _isChannelView = false;
-              _isCreatorView = false;
-              _searchQuery = "";
-              _searchSuggestions.value = [];
-              _searchQueryController.clear();
-            });
-          }
-        },
-      );
+    if (_isSearching ||
+        _isChannelView ||
+        _isCreatorView ||
+        readerExport.isNotEmpty) {
+      return BackButton(onPressed: () {
+        if (_isCreatorShared) {
+          MinimizeApp.minimizeApp();
+          resetMenu();
+        } else if (readerExport.isNotEmpty) {
+          Navigator.pop(context);
+        }
+        setState(() {
+          _isSearching = false;
+          _isChannelView = false;
+          _isCreatorView = false;
+          _searchQuery = "";
+          _searchSuggestions.value = [];
+          _searchQueryController.clear();
+        });
+      });
     } else {
       return Padding(
         padding: const EdgeInsets.fromLTRB(12, 9, 0, 9),
@@ -613,9 +558,7 @@ class _HomeState extends State<Home> {
         onChanged: (query) => updateSuggestions(query),
         onSubmitted: (query) => updateSearchQuery(query),
       );
-    } else if (_isChannelView) {
-      return buildChannelNameRow();
-    } else if (_isCreatorView) {
+    } else if (_isCreatorView || readerExport.isNotEmpty) {
       return Text(
         "Card Creator",
         style: TextStyle(
@@ -632,7 +575,7 @@ class _HomeState extends State<Home> {
         children: [
           Text("jidoujisho"),
           Text(
-            " ${gPackageInfo.version} beta",
+            " reader assistant",
             style: TextStyle(
               fontWeight: FontWeight.w200,
               fontSize: 12,
@@ -644,546 +587,6 @@ class _HomeState extends State<Home> {
     }
   }
 
-  Widget buildChannelNameRow() {
-    bool isListed = isChannelInList(_searchQuery);
-
-    Widget buildListButton() {
-      if (isListed) {
-        return Container(
-          padding: EdgeInsets.only(left: 10),
-          child: GestureDetector(
-            child: Icon(
-              Icons.star,
-              size: 18,
-            ),
-            onTap: () {
-              setState(() {
-                removeChannel(_searchQuery);
-              });
-            },
-          ),
-        );
-      } else {
-        return Container(
-          padding: EdgeInsets.only(left: 10),
-          child: GestureDetector(
-            child: Icon(
-              Icons.star_border,
-              size: 18,
-            ),
-            onTap: () {
-              setState(() {
-                addNewChannelFromID(_searchQuery);
-              });
-            },
-          ),
-        );
-      }
-    }
-
-    return Row(
-      mainAxisSize: MainAxisSize.max,
-      children: [
-        Flexible(
-          child: Text(
-            _selectedChannelName,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.clip,
-          ),
-        ),
-        buildListButton(),
-      ],
-    );
-  }
-
-  Widget buildChannels() {
-    Widget centerMessage(String text, IconData icon, bool dots) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              color: Colors.grey,
-              size: 72,
-            ),
-            const SizedBox(height: 6),
-            Wrap(
-              alignment: WrapAlignment.end,
-              crossAxisAlignment: WrapCrossAlignment.end,
-              children: [
-                Text(
-                  text,
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 20,
-                  ),
-                ),
-                (dots)
-                    ? SizedBox(
-                        width: 12,
-                        height: 16,
-                        child: JumpingDotsProgressIndicator(
-                          color: Colors.grey,
-                        ),
-                      )
-                    : SizedBox.shrink()
-              ],
-            )
-          ],
-        ),
-      );
-    }
-
-    Widget queryMessage = centerMessage(
-      "Listing channels",
-      Icons.subscriptions_sharp,
-      true,
-    );
-    Widget errorMessage = centerMessage(
-      "Error getting channels",
-      Icons.error,
-      false,
-    );
-    Widget emptyMessage = centerMessage(
-      "No channels listed",
-      Icons.subscriptions_sharp,
-      false,
-    );
-
-    if (_isChannelView && _searchQuery != null) {
-      return LazyResults(
-        _searchQuery,
-        setChannelVideoSearch,
-      );
-    } else {
-      return FutureBuilder(
-        future: fetchChannelCache(),
-        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-          var results = snapshot.data;
-
-          switch (snapshot.connectionState) {
-            case ConnectionState.waiting:
-            case ConnectionState.none:
-              return queryMessage;
-            default:
-              if (!snapshot.hasData) {
-                gChannelCache = AsyncMemoizer();
-                return errorMessage;
-              }
-
-              if (snapshot.data.isNotEmpty) {
-                ScrollController scrollController = ScrollController();
-                gCurrentScrollbar = scrollController;
-
-                return Scrollbar(
-                  controller: scrollController,
-                  child: ListView.builder(
-                    controller: scrollController,
-                    addAutomaticKeepAlives: true,
-                    itemCount: snapshot.data.length + 1,
-                    itemBuilder: (BuildContext context, int index) {
-                      if (index == 0) {
-                        return buildNewChannelRow();
-                      }
-
-                      Channel result = results[index - 1];
-                      print("CHANNEL LISTED: $result");
-
-                      return ChannelResult(
-                        result,
-                        setChannelVideoSearch,
-                        setStateFromResult,
-                        index,
-                      );
-                    },
-                  ),
-                );
-              } else {
-                return Column(children: [
-                  buildNewChannelRow(),
-                  Expanded(child: emptyMessage),
-                ]);
-              }
-          }
-        },
-      );
-    }
-  }
-
-  Widget buildNewChannelRow() {
-    String channelTitle = "List new channel";
-
-    Widget displayThumbnail() {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(25.0),
-        child: Container(
-          alignment: Alignment.center,
-          height: 36,
-          width: 36,
-          color: Colors.grey[900],
-          child: Icon(
-            Icons.add,
-            color: Colors.grey,
-            size: 16,
-          ),
-        ),
-      );
-    }
-
-    Widget displayVideoInformation() {
-      return Expanded(
-        child: Container(
-          padding: EdgeInsets.only(left: 12, right: 6),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                channelTitle,
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 14,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return InkWell(
-      onTap: () {
-        TextEditingController _textFieldController = TextEditingController();
-
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.zero,
-              ),
-              content: TextField(
-                controller: _textFieldController,
-                decoration: InputDecoration(
-                    hintText: "Enter link to any video by channel"),
-              ),
-              actions: <Widget>[
-                TextButton(
-                  child: Text('CANCEL', style: TextStyle(color: Colors.white)),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                TextButton(
-                  child: Text('OK', style: TextStyle(color: Colors.white)),
-                  onPressed: () async {
-                    String _input = _textFieldController.text;
-                    await addNewChannel(_input);
-
-                    setState(() {});
-                    Navigator.pop(context);
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      },
-      child: Container(
-        padding: EdgeInsets.only(left: 16, right: 16),
-        height: 48,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            displayThumbnail(),
-            displayVideoInformation(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void setChannelVideoSearch(
-    String channelID,
-    String channelName,
-  ) {
-    setState(() {
-      _isChannelView = true;
-      _isSearching = false;
-      _searchQuery = channelID;
-      _selectedChannelName = channelName;
-    });
-  }
-
-  Future<void> setCreatorView({
-    String sentence,
-    DictionaryEntry dictionaryEntry,
-    File file,
-    bool isShared,
-  }) async {
-    try {
-      setState(() {
-        _isCreatorView = false;
-      });
-      if (isShared) {
-        await Future.delayed(Duration(milliseconds: 100));
-      }
-      await getDecks();
-      setState(() {
-        _isCreatorView = true;
-        _isCreatorShared = isShared;
-        _creatorSentence = sentence;
-        _creatorDictionaryEntry = dictionaryEntry;
-        _creatorFile = file;
-      });
-    } catch (e) {
-      showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.zero,
-              ),
-              content: Text(
-                "The AnkiDroid background service must be active to use "
-                "the card creator. Please launch AnkiDroid and return "
-                "to continue.",
-                textAlign: TextAlign.justify,
-              ),
-              actions: <Widget>[
-                new TextButton(
-                  child: Text(
-                    'LAUNCH ANKIDROID',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  style: TextButton.styleFrom(
-                    textStyle: TextStyle(
-                      color: Colors.white,
-                    ),
-                  ),
-                  onPressed: () async {
-                    await LaunchApp.openApp(
-                      androidPackageName: 'com.ichi2.anki',
-                      openStore: true,
-                    );
-                    Navigator.pop(context);
-
-                    try {
-                      await getDecks();
-                      setState(() {
-                        _isCreatorView = true;
-                        _isCreatorShared = isShared;
-                        _creatorSentence = sentence;
-                        _creatorDictionaryEntry = dictionaryEntry;
-                        _creatorFile = file;
-                      });
-                    } catch (e) {
-                      print(e);
-                    }
-                  },
-                ),
-              ],
-            );
-          });
-    }
-  }
-
-  Widget generateSuggestions() {
-    return ValueListenableBuilder(
-      valueListenable: _searchSuggestions,
-      builder: (BuildContext context, List<String> suggestions, ___) {
-        ScrollController scrollController = ScrollController();
-
-        return Scrollbar(
-          controller: scrollController,
-          child: ListView.builder(
-            key: UniqueKey(),
-            itemCount: suggestions.length,
-            itemBuilder: (BuildContext context, int index) {
-              String result = suggestions[index];
-
-              return SearchResult(
-                result,
-                updateSearchQuery,
-                null,
-                index,
-                Icons.search,
-              );
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  Widget generateHistory() {
-    List<String> searchHistory = getSearchHistory().reversed.toList();
-
-    ScrollController scrollController = ScrollController();
-
-    return Scrollbar(
-      controller: scrollController,
-      child: ListView.builder(
-        key: UniqueKey(),
-        itemCount: searchHistory.length,
-        itemBuilder: (BuildContext context, int index) {
-          String result = searchHistory[index];
-
-          return SearchResult(
-            result,
-            updateSearchQuery,
-            setStateFromResult,
-            index,
-            Icons.history,
-          );
-        },
-      ),
-    );
-  }
-
-  Widget buildBody() {
-    Widget centerMessage(String text, IconData icon, bool dots) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              color: Colors.grey,
-              size: 72,
-            ),
-            const SizedBox(height: 6),
-            Wrap(
-              alignment: WrapAlignment.end,
-              crossAxisAlignment: WrapCrossAlignment.end,
-              children: [
-                Text(
-                  text,
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 20,
-                  ),
-                ),
-                (dots)
-                    ? SizedBox(
-                        width: 12,
-                        height: 16,
-                        child: JumpingDotsProgressIndicator(
-                          color: Colors.grey,
-                        ),
-                      )
-                    : SizedBox.shrink()
-              ],
-            )
-          ],
-        ),
-      );
-    }
-
-    Widget searchMessage = centerMessage(
-      "Enter keyword to search",
-      Icons.youtube_searched_for,
-      false,
-    );
-    Widget searchingMessage = centerMessage(
-      "Searching for \"$_searchQuery\"",
-      Icons.youtube_searched_for,
-      true,
-    );
-    Widget queryMessage = centerMessage(
-      "Querying trending videos",
-      Icons.youtube_searched_for,
-      true,
-    );
-    Widget errorMessage = centerMessage(
-      "Error getting videos",
-      Icons.error,
-      false,
-    );
-
-    if (_isSearching &&
-        _searchQuery == "" &&
-        _searchSuggestions.value.isNotEmpty) {
-      return generateSuggestions();
-    } else if (_isSearching &&
-        _searchQuery == "" &&
-        getSearchHistory().isNotEmpty) {
-      return generateHistory();
-    } else if (_isSearching &&
-        _searchQuery == "" &&
-        getSearchHistory().isEmpty) {
-      return searchMessage;
-    }
-
-    return FutureBuilder(
-      future: _isSearching && _searchQuery != ""
-          ? fetchSearchCache(_searchQuery)
-          : fetchTrendingCache(),
-      builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-        var results = snapshot.data;
-
-        switch (snapshot.connectionState) {
-          case ConnectionState.waiting:
-            if (_isSearching && _searchQuery != "") {
-              return searchingMessage;
-            } else if (_isSearching && _searchQuery != "") {
-              return searchMessage;
-            } else {
-              return queryMessage;
-            }
-            break;
-          default:
-            if (!snapshot.hasData || snapshot.data.isEmpty) {
-              if (_isSearching) {
-                gSearchCache[_searchQuery] = AsyncMemoizer();
-              } else {
-                gTrendingCache = AsyncMemoizer();
-              }
-              return errorMessage;
-            }
-
-            ScrollController scrollController = ScrollController();
-            gCurrentScrollbar = scrollController;
-
-            return Scrollbar(
-              controller: scrollController,
-              child: ListView.builder(
-                controller: scrollController,
-                addAutomaticKeepAlives: true,
-                itemCount: snapshot.data.length,
-                itemBuilder: (BuildContext context, int index) {
-                  Video result = results[index];
-                  print("VIDEO LISTED: $result");
-
-                  return YouTubeResult(
-                    result,
-                    gCaptioningCache[result.id],
-                    fetchCaptioningCache(result.id.value),
-                    setChannelVideoSearch,
-                    (_isSearching)
-                        ? fetchMetadataCache(result.id.value, result)
-                        : null,
-                    index,
-                    true,
-                  );
-                },
-              ),
-            );
-        }
-      },
-    );
-  }
-
   showPopupMenu(Offset offset) async {
     double left = offset.dx;
     double top = offset.dy;
@@ -1192,15 +595,6 @@ class _HomeState extends State<Home> {
       context: context,
       position: RelativeRect.fromLTRB(left, top, 0, 0),
       items: [
-        PopupMenuItem<String>(
-          child: const Text('Enter network stream URL'),
-          value: 'Enter network stream URL',
-        ),
-        PopupMenuItem<String>(
-          child: const Text('Import/export channels'),
-          value: 'Import/export channels',
-          enabled: gIsYouTubeAllowed,
-        ),
         PopupMenuItem<String>(
           child: const Text('View repository on GitHub'),
           value: 'View repository on GitHub',
@@ -1222,110 +616,6 @@ class _HomeState extends State<Home> {
     );
 
     switch (option) {
-      case "Enter network stream URL":
-        TextEditingController _textFieldController = TextEditingController();
-
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.zero,
-              ),
-              content: TextField(
-                controller: _textFieldController,
-                decoration:
-                    InputDecoration(hintText: "Enter network stream URL"),
-              ),
-              actions: <Widget>[
-                TextButton(
-                  child: Text('CANCEL', style: TextStyle(color: Colors.white)),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                TextButton(
-                  child: Text('PLAY', style: TextStyle(color: Colors.white)),
-                  onPressed: () {
-                    String webURL = _textFieldController.text;
-
-                    try {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => JidoujishoPlayer(
-                            playerMode: JidoujishoPlayerMode.networkStream,
-                            url: webURL,
-                          ),
-                        ),
-                      );
-                    } on Exception {
-                      Navigator.pop(context);
-                      print("INVALID LINK");
-                    } catch (error) {
-                      Navigator.pop(context);
-                      print("INVALID LINK");
-                    }
-                  },
-                ),
-              ],
-            );
-          },
-        );
-        break;
-      case "Import/export channels":
-        String initialText = getChannelList().join("\n");
-        TextEditingController _textFieldController = TextEditingController(
-          text: initialText,
-        );
-
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.zero,
-              ),
-              content: TextField(
-                controller: _textFieldController,
-                keyboardType: TextInputType.multiline,
-                decoration: InputDecoration(
-                    hintText: "Paste channel IDs line by line to import here"),
-                expands: true,
-                maxLines: null,
-              ),
-              actions: <Widget>[
-                TextButton(
-                  child: Text('CANCEL', style: TextStyle(color: Colors.white)),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                TextButton(
-                  child: Text('OK', style: TextStyle(color: Colors.white)),
-                  onPressed: () async {
-                    String currentText = _textFieldController.text;
-                    if (initialText == currentText) {
-                      Navigator.pop(context);
-                    } else {
-                      List<String> newChannelIDs = currentText.split("\n");
-                      newChannelIDs.forEach((channelID) => channelID.trim());
-                      newChannelIDs
-                          .removeWhere((channelID) => channelID.isEmpty);
-                      await setChannelList(newChannelIDs);
-                      gChannelCache = AsyncMemoizer();
-                      setChannelCache([]);
-
-                      setStateFromResult();
-                      Navigator.pop(context);
-                    }
-                  },
-                ),
-              ],
-            );
-          },
-        );
-        break;
       case "View repository on GitHub":
         await launch("https://github.com/lrorpilla/jidoujisho");
         break;
@@ -1377,9 +667,9 @@ class _HomeState extends State<Home> {
         break;
       case "About this app":
         const String legalese =
-            "A mobile video player and card creation toolkit tailored for language learners.\n\n" +
+            "A mobile web reader assistant tailored for language learners.\n\n" +
                 "Built for the Japanese language learning community by Leo Rafael Orpilla. " +
-                "Bilingual definitions queried from Jisho.org. Monolingual definitions queried from Sora. Pitch accent patterns from Kanjium. Video streaming via YouTube. Image search via Bing. Logo by Aaron Marbella.\n\n" +
+                "Bilingual definitions queried from Jisho.org. Monolingual definitions queried from Sora. Pitch accent patterns from Kanjium. Reader WebView linked to Ttu-Ebook. Logo by Aaron Marbella.\n\n" +
                 "jidoujisho is free and open source software. Liking the application? " +
                 "Help out by providing feedback, making a donation, reporting issues or collaborating " +
                 "for further improvements on GitHub.";
@@ -1402,14 +692,91 @@ class _HomeState extends State<Home> {
     }
   }
 
+  Future<void> setCreatorView({
+    String sentence,
+    DictionaryEntry dictionaryEntry,
+    File file,
+    bool isShared,
+    bool isReaderExport,
+  }) async {
+    try {
+      setState(() {
+        _isCreatorView = false;
+      });
+      if (isShared) {
+        await Future.delayed(Duration(milliseconds: 100));
+      }
+      await getDecks();
+      setState(() {
+        _isCreatorView = true;
+        _isCreatorShared = isShared;
+        _isCreatorReaderExport = isReaderExport;
+        _creatorSentence = sentence;
+        _creatorDictionaryEntry = dictionaryEntry;
+        _creatorFile = file;
+      });
+    } catch (e) {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.zero,
+              ),
+              content: Text(
+                "The AnkiDroid background service must be active to use "
+                "the card creator. Please launch AnkiDroid and return "
+                "to continue.",
+                textAlign: TextAlign.justify,
+              ),
+              actions: <Widget>[
+                new TextButton(
+                  child: Text(
+                    'LAUNCH ANKIDROID',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  style: TextButton.styleFrom(
+                    textStyle: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                  onPressed: () async {
+                    await LaunchApp.openApp(
+                      androidPackageName: 'com.ichi2.anki',
+                      openStore: true,
+                    );
+                    Navigator.pop(context);
+
+                    try {
+                      await getDecks();
+                      setState(() {
+                        _isCreatorView = true;
+                        _isCreatorShared = isShared;
+                        _isCreatorReaderExport = isReaderExport;
+                        _creatorSentence = sentence;
+                        _creatorDictionaryEntry = dictionaryEntry;
+                        _creatorFile = file;
+                      });
+                    } catch (e) {
+                      print(e);
+                    }
+                  },
+                ),
+              ],
+            );
+          });
+    }
+  }
+
   List<Widget> buildActions() {
-    if (_isCreatorView) {
+    if (_isCreatorView || readerExport.isNotEmpty) {
       return [];
     }
 
     return <Widget>[
-      buildResume(),
-      const SizedBox(width: 6),
       buildSearchButton(),
       const SizedBox(width: 12),
       GestureDetector(
@@ -1420,55 +787,6 @@ class _HomeState extends State<Home> {
       ),
       const SizedBox(width: 12),
     ];
-  }
-
-  Widget buildResume() {
-    return ValueListenableBuilder(
-      valueListenable: gIsResumable,
-      builder: (_, __, ___) {
-        if (gIsResumable.value) {
-          return IconButton(
-            icon: const Icon(Icons.update_sharp),
-            onPressed: () async {
-              int lastPlayedPosition = getLastPlayedPosition();
-              String lastPlayedPath = getLastPlayedPath();
-
-              JidoujishoPlayerMode playerMode;
-              if (lastPlayedPath.startsWith("https://") ||
-                  lastPlayedPath.startsWith("http://")) {
-                playerMode = JidoujishoPlayerMode.youtubeStream;
-              } else {
-                playerMode = JidoujishoPlayerMode.localFile;
-              }
-
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => JidoujishoPlayer(
-                    playerMode: playerMode,
-                    url: lastPlayedPath,
-                    initialPosition: lastPlayedPosition,
-                  ),
-                ),
-              ).then((returnValue) {
-                setState(() {
-                  unlockLandscape();
-                });
-              });
-            },
-          );
-        } else {
-          return Padding(
-            padding: EdgeInsets.all(8),
-            child: Icon(
-              Icons.update_sharp,
-              size: 24,
-              color: Colors.grey[800],
-            ),
-          );
-        }
-      },
-    );
   }
 
   Widget buildSearchButton() {
@@ -1538,1086 +856,6 @@ class _HomeState extends State<Home> {
       _searchQueryController.clear();
       updateSearchQuery("");
     });
-  }
-}
-
-class YouTubeResult extends StatefulWidget {
-  final Video result;
-  final AsyncMemoizer cache;
-  final cacheCallback;
-  final ChannelCallback channelCallback;
-  final metadataCallback;
-  final int index;
-  final bool trending;
-
-  YouTubeResult(
-    this.result,
-    this.cache,
-    this.cacheCallback,
-    this.channelCallback,
-    this.metadataCallback,
-    this.index,
-    this.trending,
-  );
-
-  _YouTubeResultState createState() => _YouTubeResultState(
-        this.result,
-        this.cache,
-        this.cacheCallback,
-        this.channelCallback,
-        this.metadataCallback,
-        this.index,
-        this.trending,
-      );
-}
-
-class _YouTubeResultState extends State<YouTubeResult>
-    with AutomaticKeepAliveClientMixin {
-  final Video result;
-  final AsyncMemoizer cache;
-  final cacheCallback;
-  final ChannelCallback channelCallback;
-  final metadataCallback;
-  final int index;
-  final bool trending;
-
-  _YouTubeResultState(
-    this.result,
-    this.cache,
-    this.cacheCallback,
-    this.channelCallback,
-    this.metadataCallback,
-    this.index,
-    this.trending,
-  );
-
-  @override
-  bool get wantKeepAlive => true;
-
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-
-    String videoStreamURL = result.url;
-    String videoThumbnailURL = result.thumbnails.mediumResUrl;
-
-    String videoTitle = result.title;
-    String videoChannel = result.author;
-    String videoDuration =
-        result.duration == null ? "" : getYouTubeDuration(result.duration);
-
-    Widget displayThumbnail() {
-      return Padding(
-        padding: EdgeInsets.only(left: 16),
-        child: Stack(
-          alignment: Alignment.bottomRight,
-          children: [
-            Container(
-              width: MediaQuery.of(context).size.shortestSide * (2 / 5),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  FadeInImage(
-                    image: NetworkImage(videoThumbnailURL),
-                    placeholder: MemoryImage(kTransparentImage),
-                    fit: BoxFit.fitWidth,
-                  ),
-                ],
-              ),
-            ),
-            Positioned(
-              right: 5.0,
-              bottom: 5.0,
-              child: Container(
-                height: 20,
-                color: Colors.black.withOpacity(0.8),
-                alignment: Alignment.center,
-                child: Text(
-                  videoDuration,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w300,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    Widget displayVideoInformation() {
-      return Expanded(
-        child: Container(
-          padding: EdgeInsets.only(left: 12, right: 6),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                videoTitle,
-                maxLines: 2,
-              ),
-              const SizedBox(height: 6),
-              Text(
-                videoChannel,
-                maxLines: 1,
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 12,
-                ),
-              ),
-              showVideoPublishStatus(
-                context,
-                result.id.value,
-                index,
-              ),
-              showClosedCaptionStatus(
-                context,
-                result.id.value,
-                index,
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    void playVideo() {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => JidoujishoPlayer(
-            playerMode: JidoujishoPlayerMode.youtubeStream,
-            url: videoStreamURL,
-            video: result,
-          ),
-        ),
-      );
-    }
-
-    return InkWell(
-      onLongPress: () {
-        HapticFeedback.vibrate();
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.zero,
-              ),
-              title: Text(
-                result.title,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-              ),
-              content: AspectRatio(
-                aspectRatio: 16 / 9,
-                child: FadeInImage(
-                  image: NetworkImage(result.thumbnails.mediumResUrl),
-                  placeholder: MemoryImage(kTransparentImage),
-                  width: 1280,
-                  fit: BoxFit.fitWidth,
-                ),
-              ),
-              actions: <Widget>[
-                TextButton(
-                  child: Text('CHANNEL', style: TextStyle(color: Colors.white)),
-                  onPressed: () async {
-                    channelCallback(result.channelId.value, result.author);
-                    Navigator.pop(context);
-                  },
-                ),
-                TextButton(
-                  child: Text(
-                    'PLAY',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    playVideo();
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      },
-      onTap: () {
-        playVideo();
-      },
-      child: Container(
-        padding: EdgeInsets.only(top: 16, bottom: 16),
-        height:
-            MediaQuery.of(context).size.shortestSide * (2 / 5) * (9 / 16) + 32,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            displayThumbnail(),
-            displayVideoInformation(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget showVideoPublishStatus(
-    BuildContext context,
-    String videoID,
-    int index,
-  ) {
-    Widget metadataRow(String text, Color color, bool dots) {
-      return Wrap(
-        alignment: WrapAlignment.end,
-        crossAxisAlignment: WrapCrossAlignment.end,
-        children: [
-          Text(
-            text,
-            style: TextStyle(
-              color: Colors.grey,
-              fontSize: 12,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.clip,
-          ),
-          (dots)
-              ? SizedBox(
-                  width: 12,
-                  height: 14,
-                  child: JumpingDotsProgressIndicator(
-                    color: Colors.grey,
-                  ),
-                )
-              : SizedBox.shrink()
-        ],
-      );
-    }
-
-    Widget trendingMessage = Text(
-      "Trending #${index + 1} in Japan",
-      style: TextStyle(
-        color: Colors.grey,
-        fontSize: 12,
-      ),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-    );
-
-    if (metadataCallback == null) {
-      if (trending) {
-        return trendingMessage;
-      } else {
-        return Container();
-      }
-    }
-
-    Widget queryMessage = metadataRow(
-      "Getting engagement metrics",
-      Colors.grey,
-      true,
-    );
-    Widget errorMessage = metadataRow(
-      "Error querying engagement metrics",
-      Colors.grey,
-      false,
-    );
-
-    return FutureBuilder(
-      future: metadataCallback,
-      builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          String videoDetails = snapshot.data;
-          if (!snapshot.hasData) {
-            gMetadataCache[result.id.value] = AsyncMemoizer();
-            return errorMessage;
-          } else {
-            return Text(
-              videoDetails,
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 12,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.clip,
-            );
-          }
-        } else {
-          return queryMessage;
-        }
-      },
-    );
-  }
-
-  Widget showClosedCaptionStatus(
-    BuildContext context,
-    String videoID,
-    int index,
-  ) {
-    Widget closedCaptionRow(
-        String text, Color color, IconData icon, bool dots) {
-      return Row(
-        children: [
-          Icon(
-            icon,
-            color: color,
-            size: 12,
-          ),
-          const SizedBox(width: 3),
-          Text(
-            text,
-            style: TextStyle(
-              color: color,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          (dots)
-              ? SizedBox(
-                  width: 12,
-                  height: 14,
-                  child: JumpingDotsProgressIndicator(color: color),
-                )
-              : SizedBox.shrink()
-        ],
-      );
-    }
-
-    Widget queryMessage = closedCaptionRow(
-      "Querying for closed captions",
-      Colors.grey,
-      Icons.youtube_searched_for,
-      true,
-    );
-    Widget errorMessage = closedCaptionRow(
-      "Error querying closed captions",
-      Colors.grey,
-      Icons.error,
-      false,
-    );
-    Widget availableMessage = closedCaptionRow(
-      "Closed captioning available",
-      Colors.green[200],
-      Icons.closed_caption,
-      false,
-    );
-    Widget unavailableMessage = closedCaptionRow(
-      "No closed captioning",
-      Colors.red[200],
-      Icons.closed_caption_disabled,
-      false,
-    );
-
-    try {
-      if (getHasClosedCaptions(result.id.value)) {
-        return availableMessage;
-      } else {
-        return unavailableMessage;
-      }
-    } catch (e) {
-      return FutureBuilder(
-        future: cacheCallback,
-        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            if (!snapshot.hasData) {
-              gCaptioningCache[result.id.value] = AsyncMemoizer();
-              return errorMessage;
-            } else {
-              bool hasClosedCaptions = snapshot.data;
-              setHasClosedCaptions(result.id.value, hasClosedCaptions);
-              if (hasClosedCaptions) {
-                return availableMessage;
-              } else {
-                return unavailableMessage;
-              }
-            }
-          } else {
-            return queryMessage;
-          }
-        },
-      );
-    }
-  }
-}
-
-class ChannelResult extends StatefulWidget {
-  final Channel result;
-  final ChannelCallback callback;
-  final VoidCallback stateCallback;
-  final int index;
-
-  ChannelResult(
-    this.result,
-    this.callback,
-    this.stateCallback,
-    this.index,
-  );
-
-  _ChannelResultState createState() => _ChannelResultState(
-        this.result,
-        this.callback,
-        this.stateCallback,
-        this.index,
-      );
-}
-
-class _ChannelResultState extends State<ChannelResult>
-    with AutomaticKeepAliveClientMixin {
-  final Channel result;
-  final ChannelCallback callback;
-  final stateCallback;
-  final int index;
-
-  _ChannelResultState(
-    this.result,
-    this.callback,
-    this.stateCallback,
-    this.index,
-  );
-
-  @override
-  bool get wantKeepAlive => true;
-
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-
-    String channelLogoURL = result.logoUrl;
-    String channelTitle = result.title;
-
-    Widget displayThumbnail() {
-      return Stack(alignment: Alignment.bottomRight, children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(25.0),
-          child: FadeInImage(
-            fit: BoxFit.cover,
-            width: 36,
-            height: 36,
-            placeholder: MemoryImage(kTransparentImage),
-            image: NetworkImage(channelLogoURL),
-          ),
-        ),
-      ]);
-    }
-
-    Widget displayVideoInformation() {
-      return Expanded(
-        child: Container(
-          padding: EdgeInsets.only(left: 12, right: 6),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                channelTitle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 16,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return InkWell(
-      onTap: () {
-        callback(result.id.toString(), result.title);
-      },
-      onLongPress: () {
-        HapticFeedback.vibrate();
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.zero,
-              ),
-              title: Text(
-                "${result.title}",
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-              ),
-              content: ClipRRect(
-                borderRadius: BorderRadius.circular(25.0),
-                child: Container(
-                  alignment: Alignment.center,
-                  height: 144,
-                  width: 144,
-                  color: Colors.transparent,
-                  child: FadeInImage(
-                    image: NetworkImage(result.logoUrl),
-                    placeholder: MemoryImage(kTransparentImage),
-                    width: 144,
-                    fit: BoxFit.fitWidth,
-                  ),
-                ),
-              ),
-              actions: <Widget>[
-                TextButton(
-                  child: Text('REMOVE', style: TextStyle(color: Colors.white)),
-                  onPressed: () async {
-                    await removeChannel(result.id.value);
-
-                    stateCallback();
-                    Navigator.pop(context);
-                  },
-                ),
-                TextButton(
-                  child: Text('CHANNEL', style: TextStyle(color: Colors.white)),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    callback(result.id.toString(), result.title);
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      },
-      child: Container(
-        padding: EdgeInsets.only(left: 16, right: 16),
-        height: 48,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            displayThumbnail(),
-            displayVideoInformation(),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class SearchResult extends StatefulWidget {
-  final String result;
-  final SearchCallback callback;
-  final VoidCallback stateCallback;
-  final int index;
-  final IconData icon;
-
-  SearchResult(
-    this.result,
-    this.callback,
-    this.stateCallback,
-    this.index,
-    this.icon,
-  );
-
-  _SearchResultState createState() => _SearchResultState(
-        this.result,
-        this.callback,
-        this.stateCallback,
-        this.index,
-        this.icon,
-      );
-}
-
-class _SearchResultState extends State<SearchResult>
-    with AutomaticKeepAliveClientMixin {
-  final String result;
-  final SearchCallback callback;
-  final VoidCallback stateCallback;
-  final int index;
-  final IconData icon;
-
-  _SearchResultState(
-    this.result,
-    this.callback,
-    this.stateCallback,
-    this.index,
-    this.icon,
-  );
-
-  @override
-  bool get wantKeepAlive => true;
-
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-
-    Widget displayThumbnail() {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(25.0),
-        child: Container(
-          alignment: Alignment.center,
-          height: 36,
-          width: 36,
-          color: Colors.transparent,
-          child: Icon(
-            icon,
-            color: Colors.grey,
-            size: 20,
-          ),
-        ),
-      );
-    }
-
-    Widget displaySearchTerm() {
-      return Expanded(
-        child: Container(
-          padding: EdgeInsets.only(left: 12, right: 6),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                result,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 16,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return InkWell(
-      onTap: () {
-        callback(result);
-      },
-      onLongPress: () {
-        if (icon == Icons.history) {
-          HapticFeedback.vibrate();
-          showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.zero,
-                ),
-                title: Text(
-                  result,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                actions: <Widget>[
-                  TextButton(
-                    child: Text(
-                      'REMOVE',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    onPressed: () async {
-                      removeSearchHistory(result);
-                      stateCallback();
-                      Navigator.pop(context);
-                    },
-                  ),
-                  TextButton(
-                    child:
-                        Text('SEARCH', style: TextStyle(color: Colors.white)),
-                    onPressed: () {
-                      Navigator.pop(context);
-                      callback(result);
-                    },
-                  ),
-                ],
-              );
-            },
-          );
-        }
-      },
-      child: Container(
-        padding: EdgeInsets.only(left: 16, right: 16),
-        height: 48,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            displayThumbnail(),
-            displaySearchTerm(),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class HistoryResult extends StatefulWidget {
-  final VideoHistory history;
-  final VideoHistoryPosition historyPosition;
-  final stateCallback;
-  final channelCallback;
-  final int index;
-
-  HistoryResult(
-    this.history,
-    this.historyPosition,
-    this.stateCallback,
-    this.channelCallback,
-    this.index,
-  );
-
-  _HistoryResultState createState() => _HistoryResultState(
-        this.history,
-        this.historyPosition,
-        this.stateCallback,
-        this.channelCallback,
-        this.index,
-      );
-}
-
-class _HistoryResultState extends State<HistoryResult>
-    with AutomaticKeepAliveClientMixin {
-  final VideoHistory history;
-  final VideoHistoryPosition historyPosition;
-  final stateCallback;
-  final channelCallback;
-  final int index;
-
-  _HistoryResultState(
-    this.history,
-    this.historyPosition,
-    this.stateCallback,
-    this.channelCallback,
-    this.index,
-  );
-
-  @override
-  bool get wantKeepAlive => true;
-
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-
-    bool isNetwork() {
-      return (history.thumbnail.startsWith("https://"));
-    }
-
-    Widget displayThumbnail() {
-      return Padding(
-        padding: EdgeInsets.only(left: 16),
-        child: Stack(
-          alignment: Alignment.bottomRight,
-          children: [
-            Container(
-              width: MediaQuery.of(context).size.shortestSide * (2 / 5),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  FadeInImage(
-                    image: isNetwork()
-                        ? NetworkImage(history.thumbnail)
-                        : FileImage(File(history.thumbnail)),
-                    placeholder: MemoryImage(kTransparentImage),
-                    fit: BoxFit.contain,
-                  ),
-                ],
-              ),
-            ),
-            Positioned(
-              right: 5.0,
-              bottom: 5.0,
-              child: Container(
-                height: 20,
-                color: Colors.black.withOpacity(0.8),
-                alignment: Alignment.center,
-                child: Text(
-                  getYouTubeDuration(Duration(seconds: history.duration)),
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w300,
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              child: Container(
-                height: MediaQuery.of(context).size.shortestSide *
-                    (2 / 5) *
-                    (9 / 16),
-                width: MediaQuery.of(context).size.shortestSide * (2 / 5),
-                alignment: Alignment.bottomCenter,
-                child: Container(
-                  width: MediaQuery.of(context).size.shortestSide * (2 / 5),
-                  child: LinearProgressIndicator(
-                    value: historyPosition.position / history.duration,
-                    backgroundColor: Colors.white.withOpacity(0.6),
-                    minHeight: 2,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    Widget closedCaptionRow(String text, Color color, IconData icon) {
-      return Row(
-        children: [
-          Icon(
-            icon,
-            color: color,
-            size: 12,
-          ),
-          const SizedBox(width: 3),
-          Text(
-            text,
-            style: TextStyle(
-              color: color,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.clip,
-          )
-        ],
-      );
-    }
-
-    Widget displayVideoInformation() {
-      bool isScopedStorage() {
-        return history.subheading.startsWith("/data/");
-      }
-
-      return Expanded(
-        child: Container(
-          padding: EdgeInsets.only(left: 12, right: 6),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                history.heading,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 6),
-              Text(
-                history.subheading,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 12,
-                ),
-              ),
-              isNetwork()
-                  ? closedCaptionRow(
-                      "YouTube", Colors.grey, Icons.ondemand_video_sharp)
-                  : isScopedStorage()
-                      ? closedCaptionRow(
-                          "Scoped Storage", Colors.grey, Icons.cached_sharp)
-                      : closedCaptionRow(
-                          "Local Storage", Colors.grey, Icons.storage_sharp)
-            ],
-          ),
-        ),
-      );
-    }
-
-    void playVideo() {
-      JidoujishoPlayerMode playerMode;
-      if (history.url.startsWith("https://") ||
-          history.url.startsWith("http://")) {
-        playerMode = JidoujishoPlayerMode.youtubeStream;
-      } else {
-        playerMode = JidoujishoPlayerMode.localFile;
-      }
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => JidoujishoPlayer(
-            playerMode: playerMode,
-            url: history.url,
-            initialPosition: historyPosition.position,
-          ),
-        ),
-      ).then((result) {
-        stateCallback();
-      });
-    }
-
-    return InkWell(
-      onLongPress: () {
-        HapticFeedback.vibrate();
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.zero,
-              ),
-              title: Text(
-                history.heading,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-              ),
-              content: AspectRatio(
-                aspectRatio: 16 / 9,
-                child: FadeInImage(
-                  image: isNetwork()
-                      ? NetworkImage(history.thumbnail)
-                      : FileImage(File(history.thumbnail)),
-                  placeholder: MemoryImage(kTransparentImage),
-                  height: 1280,
-                  fit: BoxFit.fitWidth,
-                ),
-              ),
-              actions: <Widget>[
-                TextButton(
-                  child: Text(
-                    'REMOVE',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  onPressed: () async {
-                    await removeVideoHistory(history);
-                    stateCallback();
-                    Navigator.pop(context);
-                  },
-                ),
-                (isNetwork())
-                    ? TextButton(
-                        child: Text('CHANNEL',
-                            style: TextStyle(color: Colors.white)),
-                        onPressed: () async {
-                          channelCallback(
-                              history.channelId, history.subheading);
-                          Navigator.pop(context);
-                          print(history.channelId);
-                        },
-                      )
-                    : Container(),
-                TextButton(
-                  child: Text(
-                    'PLAY',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    playVideo();
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      },
-      onTap: () {
-        playVideo();
-      },
-      child: Container(
-        padding: EdgeInsets.only(
-          top: 16,
-          bottom: 16,
-        ),
-        height:
-            MediaQuery.of(context).size.shortestSide * (2 / 5) * (9 / 16) + 32,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            displayThumbnail(),
-            displayVideoInformation(),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class History extends StatefulWidget {
-  final ChannelCallback channelCallback;
-  History(this.channelCallback);
-
-  _HistoryState createState() => _HistoryState(this.channelCallback);
-}
-
-class _HistoryState extends State<History> {
-  final ChannelCallback channelCallback;
-  _HistoryState(this.channelCallback);
-
-  void setStateFromResult() {
-    setState(() {});
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    List<VideoHistory> histories = getVideoHistory().reversed.toList();
-    List<VideoHistoryPosition> historyPositions =
-        getVideoHistoryPosition().reversed.toList();
-
-    Widget centerMessage(String text, IconData icon, bool dots) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              color: Colors.grey,
-              size: 72,
-            ),
-            const SizedBox(height: 6),
-            Wrap(
-              alignment: WrapAlignment.end,
-              crossAxisAlignment: WrapCrossAlignment.end,
-              children: [
-                Text(
-                  text,
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 20,
-                  ),
-                ),
-                (dots)
-                    ? SizedBox(
-                        width: 12,
-                        height: 16,
-                        child: JumpingDotsProgressIndicator(
-                          color: Colors.grey,
-                        ),
-                      )
-                    : SizedBox.shrink()
-              ],
-            )
-          ],
-        ),
-      );
-    }
-
-    Widget emptyMessage = centerMessage(
-      "No videos in history",
-      Icons.history_sharp,
-      false,
-    );
-
-    if (histories.isEmpty) {
-      return emptyMessage;
-    }
-
-    ScrollController scrollController = ScrollController();
-    gCurrentScrollbar = scrollController;
-
-    return Scrollbar(
-      controller: scrollController,
-      child: ListView.builder(
-        controller: scrollController,
-        key: UniqueKey(),
-        itemCount: histories.length,
-        itemBuilder: (BuildContext context, int index) {
-          VideoHistory history = histories[index];
-          VideoHistoryPosition position = historyPositions[index];
-
-          print("HISTORY LISTED: $history");
-
-          return HistoryResult(
-            history,
-            position,
-            setStateFromResult,
-            channelCallback,
-            index,
-          );
-        },
-      ),
-    );
   }
 }
 
@@ -3269,36 +1507,6 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                 stateCallback();
               },
             ),
-            if (results.contextDataSource != "-1")
-              TextButton(
-                child: Text(
-                  'CONTEXT',
-                  style: TextStyle(color: Colors.white),
-                ),
-                onPressed: () async {
-                  JidoujishoPlayerMode playerMode;
-                  if (results.contextDataSource.startsWith("https://") ||
-                      results.contextDataSource.startsWith("http://")) {
-                    playerMode = JidoujishoPlayerMode.youtubeStream;
-                  } else {
-                    playerMode = JidoujishoPlayerMode.localFile;
-                  }
-
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => JidoujishoPlayer(
-                        playerMode: playerMode,
-                        url: results.contextDataSource,
-                        initialPosition: results.contextPosition,
-                      ),
-                    ),
-                  ).then((returnValue) {
-                    stateCallback();
-                  });
-                },
-              ),
             TextButton(
               child: Text(
                 'CREATE CARD',
@@ -3324,168 +1532,12 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
   }
 }
 
-class LazyResults extends StatefulWidget {
-  final channelID;
-  final ChannelCallback channelCallback;
-
-  LazyResults(
-    this.channelID,
-    this.channelCallback,
-  );
-
-  @override
-  _LazyResultsState createState() =>
-      new _LazyResultsState(this.channelID, this.channelCallback);
-}
-
-class _LazyResultsState extends State<LazyResults> {
-  final String channelID;
-  final ChannelCallback channelCallback;
-
-  bool isLoading = false;
-  ScrollController scrollController;
-
-  _LazyResultsState(
-    this.channelID,
-    this.channelCallback,
-  );
-
-  List<Video> verticalData;
-  final int increment = 10;
-
-  Future _loadMore() async {
-    if (!isLoading) {
-      setState(() {
-        isLoading = true;
-      });
-
-      List<Video> channelVideos = [];
-      try {
-        channelVideos = await getChannelUploadsStream(channelID)
-            .skip(verticalData.length)
-            .take(increment)
-            .toList();
-      } finally {
-        setState(() {
-          channelVideos.forEach((video) => verticalData.add(video));
-          isLoading = false;
-        });
-      }
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    scrollController = ScrollController();
-    verticalData = fetchChannelVideoCache(channelID);
-    _loadMore();
-  }
-
-  Widget centerMessage(String text, IconData icon, bool dots) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            color: Colors.grey,
-            size: 72,
-          ),
-          const SizedBox(height: 6),
-          Wrap(
-            alignment: WrapAlignment.end,
-            crossAxisAlignment: WrapCrossAlignment.end,
-            children: [
-              Text(
-                text,
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 20,
-                ),
-              ),
-              (dots)
-                  ? SizedBox(
-                      width: 12,
-                      height: 16,
-                      child: JumpingDotsProgressIndicator(
-                        color: Colors.grey,
-                      ),
-                    )
-                  : SizedBox.shrink()
-            ],
-          )
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (verticalData.length == 0) {
-      return centerMessage(
-        "Listing channel videos",
-        Icons.subscriptions_sharp,
-        true,
-      );
-    }
-
-    return LazyLoadScrollView(
-      onEndOfPage: () => _loadMore(),
-      child: Scrollbar(
-        controller: scrollController,
-        child: ListView.builder(
-          controller: scrollController,
-          addAutomaticKeepAlives: true,
-          itemCount: verticalData.length + 1,
-          itemBuilder: (BuildContext context, int index) {
-            if (index == verticalData.length) {
-              if (isLoading) {
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(top: 16, bottom: 16),
-                      child: SizedBox(
-                        height: 32,
-                        width: 32,
-                        child: CircularProgressIndicator(
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.grey),
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              } else {
-                return Container();
-              }
-            }
-
-            Video result = verticalData[index];
-            print("VIDEO LISTED: $result");
-
-            return YouTubeResult(
-              result,
-              gCaptioningCache[result.id],
-              fetchCaptioningCache(result.id.value),
-              channelCallback,
-              null,
-              index,
-              false,
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
-
 class Creator extends StatefulWidget {
   final String initialSentence;
   final DictionaryEntry initialDictionaryEntry;
   final File initialFile;
   final bool isShared;
+  final bool isReaderExport;
   final VoidCallback resetMenu;
   final ValueNotifier<bool> readerFlipflop;
 
@@ -3494,6 +1546,7 @@ class Creator extends StatefulWidget {
     this.initialDictionaryEntry,
     this.initialFile,
     this.isShared,
+    this.isReaderExport,
     this.resetMenu,
     this.readerFlipflop,
   );
@@ -3503,6 +1556,7 @@ class Creator extends StatefulWidget {
         this.initialDictionaryEntry,
         this.initialFile,
         this.isShared,
+        this.isReaderExport,
         this.resetMenu,
         this.readerFlipflop,
       );
@@ -3513,6 +1567,7 @@ class _CreatorState extends State<Creator> {
   final DictionaryEntry initialDictionaryEntry;
   final File initialFile;
   final bool isShared;
+  final bool isReaderExport;
   final VoidCallback resetMenu;
   final ValueNotifier<bool> readerFlipflop;
 
@@ -3544,6 +1599,7 @@ class _CreatorState extends State<Creator> {
     this.initialDictionaryEntry,
     this.initialFile,
     this.isShared,
+    this.isReaderExport,
     this.resetMenu,
     this.readerFlipflop,
   );
@@ -3592,6 +1648,7 @@ class _CreatorState extends State<Creator> {
 
     if (_fileImage == null) {
       _isFileImage = false;
+
       if (_selectedEntry.value.word.contains(";")) {
         searchTerm = _selectedEntry.value.word.split(";").first;
       } else if (_selectedEntry.value.word.contains("／")) {
@@ -4569,6 +2626,8 @@ class _CreatorState extends State<Creator> {
                         if (isShared) {
                           MinimizeApp.minimizeApp();
                           resetMenu();
+                        } else if (isReaderExport) {
+                          Navigator.pop(context);
                         } else {
                           Future.delayed(Duration(seconds: 2), () {
                             _justExported.value = false;

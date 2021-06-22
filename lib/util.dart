@@ -647,25 +647,6 @@ String stripLatinCharactersFromText(String subtitleText) {
   return subtitleText;
 }
 
-void unlockLandscape() {
-  gIsResumable = ValueNotifier<bool>(getVideoHistory().isNotEmpty);
-  Wakelock.disable();
-  SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.landscapeLeft,
-    DeviceOrientation.landscapeRight,
-  ]);
-  SystemChrome.setEnabledSystemUIOverlays(
-      [SystemUiOverlay.bottom, SystemUiOverlay.top]);
-  DefaultCacheManager().emptyCache();
-}
-
-void lockLandscape() {
-  Wakelock.enable();
-  AutoOrientation.landscapeAutoMode(forceSensor: true);
-  SystemChrome.setEnabledSystemUIOverlays([]);
-}
-
 class BlurWidgetOptions {
   double width;
   double height;

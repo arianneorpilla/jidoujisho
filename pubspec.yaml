@@ -2,7 +2,7 @@ name: jidoujisho
 description: A mobile video player tailored for Japanese language learners. 
 publish_to: none
 
-version: 0.22.1+47
+version: 0.23.0+48
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -16,8 +16,6 @@ dependencies:
   auto_orientation:
   async:
   blurrycontainer:
-  chewie:
-    path: ./chewie
   clipboard_monitor: ^0.9.1
   device_info_plus:
   ext_storage:
@@ -31,6 +29,8 @@ dependencies:
     git:
       url: https://github.com/project-violet/flutter-youtube-dl
       ref: 046b5e6c051b3fda333c1f366e2640cd04f763b8
+  flutter_inappwebview:
+    path: ./flutter_inappwebview
   fuzzy:
   image_picker:
   intl:

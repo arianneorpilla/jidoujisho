@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.lrorpilla.jidoujisho">
+    package="com.lrorpilla.jidoujishoreader">
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/> 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/> 
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/> 
@@ -410,6 +410,15 @@
                 <data android:mimeType="text/*" />
             </intent-filter>
         </activity>
+        <provider
+            android:name="com.pichillilorenzo.flutter_inappwebview.InAppWebViewFileProvider"
+            android:authorities="${applicationId}.flutter_inappwebview.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths" />
+        </provider>
         <service android:name="com.ryanheise.audioservice.AudioService">
         <intent-filter>
             <action android:name="android.media.browse.MediaBrowserService" />
