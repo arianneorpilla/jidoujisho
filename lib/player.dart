@@ -116,9 +116,9 @@ class ReaderState extends State<Reader> {
               action: () async {
                 emptyStack();
                 await useBilingual();
-                _clipboard.value =
-                    await webViewController.getSelectedText() ?? "";
-
+                _clipboard.value = (await webViewController.getSelectedText())
+                        .replaceAll("\\n", "\n") ??
+                    "";
                 clearSelection();
               }),
           ContextMenuItem(
@@ -128,9 +128,9 @@ class ReaderState extends State<Reader> {
               action: () async {
                 emptyStack();
                 await useMonolingual();
-                _clipboard.value =
-                    await webViewController.getSelectedText() ?? "";
-
+                _clipboard.value = (await webViewController.getSelectedText())
+                        .replaceAll("\\n", "\n") ??
+                    "";
                 clearSelection();
               }),
           ContextMenuItem(
@@ -143,6 +143,8 @@ class ReaderState extends State<Reader> {
                 String readerExport =
                     await webViewController.getSelectedText() ?? "";
                 print(readerExport);
+
+                stopClipboardMonitor();
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -150,6 +152,8 @@ class ReaderState extends State<Reader> {
                   ),
                 ).then((result) {
                   SystemChrome.setEnabledSystemUIOverlays([]);
+                  _clipboard.value = "";
+                  startClipboardMonitor();
                 });
 
                 clearSelection();
@@ -292,10 +296,13 @@ class ReaderState extends State<Reader> {
   var event;
 
   \$(document.getElementsByTagName('app-reader')[0]).on('touchend', function(e) {
-      if(touchmoved != true){
+      if(touchmoved !== true){
         var touch = event.touches[0];
         result = document.caretRangeFromPoint(touch.clientX, touch.clientY);
-        console.log(JSON.stringify({"offset": result.startOffset, "text": result.startContainer.textContent, "jidoujisho": "jidoujisho"}));
+        console.log(result.startContainer.parentNode.nodeName);
+        if (result.startContainer.parentNode.nodeName !== "SPAN") {  
+          console.log(JSON.stringify({"offset": result.startOffset, "text": result.startContainer.textContent, "jidoujisho": "jidoujisho"}));
+        }
       }
   }).on('touchmove', function(e){
       touchmoved = true;
@@ -320,23 +327,26 @@ class ReaderState extends State<Reader> {
                         onLoad: () async {
                           print("jQuery loaded and ready to be used!");
                           await controller.evaluateJavascript(source: """
-\$(document).ready(function() {
+\$(document).ready(function(){
   var touchmoved;
   var event;
 
-    \$(document.getElementsByTagName('app-reader')[0]).on('touchend', function(e) {
-        if(touchmoved != true) {
-          var touch = event.touches[0];
-          result = document.caretRangeFromPoint(touch.clientX, touch.clientY);
+  \$(document.getElementsByTagName('app-reader')[0]).on('touchend', function(e) {
+      if(touchmoved !== true){
+        var touch = event.touches[0];
+        result = document.caretRangeFromPoint(touch.clientX, touch.clientY);
+        console.log(result.startContainer.parentNode.nodeName);
+        if (result.startContainer.parentNode.nodeName !== "SPAN") {  
           console.log(JSON.stringify({"offset": result.startOffset, "text": result.startContainer.textContent, "jidoujisho": "jidoujisho"}));
         }
-    }).on('touchmove', function(e){
-        touchmoved = true;
-        event = null;
-    }).on('touchstart', function(e){
-        touchmoved = false;
-        event = e;
-    });    
+      }
+  }).on('touchmove', function(e){
+      touchmoved = true;
+      event = null;
+  }).on('touchstart', function(e){
+      touchmoved = false;
+      event = e;
+  });   
 });
   """);
                         },
@@ -347,7 +357,9 @@ class ReaderState extends State<Reader> {
             ),
             Padding(
               padding: EdgeInsets.only(
-                  top: MediaQuery.of(context).size.height * 0.05),
+                top: MediaQuery.of(context).size.height * 0.05,
+                bottom: MediaQuery.of(context).size.height * 0.05,
+              ),
               child: buildDictionary(),
             ),
           ],
@@ -845,6 +857,7 @@ class ReaderState extends State<Reader> {
                               fontSize: 12,
                             ),
                             textAlign: TextAlign.center,
+                            softWrap: true,
                           ),
                           Text(
                             "』",

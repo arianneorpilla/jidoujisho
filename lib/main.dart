@@ -1307,6 +1307,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                               fontSize: 12,
                               color: Colors.white,
                             ),
+                            softWrap: true,
                             textAlign: TextAlign.center,
                           ),
                           Text(
@@ -1473,6 +1474,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                                     fontWeight: FontWeight.bold,
                                     fontSize: 12,
                                   ),
+                                  softWrap: true,
                                   textAlign: TextAlign.center,
                                 ),
                                 Text(
@@ -1882,6 +1884,7 @@ class _CreatorState extends State<Creator> {
                                     fontSize: 12,
                                     color: Colors.grey[400],
                                   ),
+                                  softWrap: true,
                                   textAlign: TextAlign.center,
                                 ),
                                 Text(
@@ -2486,6 +2489,7 @@ class _CreatorState extends State<Creator> {
                                   fontSize: 12,
                                   color: Colors.grey,
                                 ),
+                                softWrap: true,
                                 textAlign: TextAlign.center,
                               ),
                               Text(
@@ -2495,6 +2499,7 @@ class _CreatorState extends State<Creator> {
                                   fontSize: 12,
                                   color: Colors.white,
                                 ),
+                                softWrap: true,
                                 textAlign: TextAlign.center,
                               ),
                               Text(

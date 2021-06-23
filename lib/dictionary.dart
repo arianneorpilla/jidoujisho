@@ -268,12 +268,58 @@ DictionaryEntry getEntryFromJishoResult(JishoResult result, String searchTerm) {
   );
 }
 
+bool searchTermIllegal(searchTerm) {
+  if (searchTerm.trim().isEmpty) {
+    return true;
+  }
+  switch (searchTerm) {
+    case "「":
+    case "」":
+    case "。":
+    case "、":
+    case "『":
+    case "』":
+    case "！":
+    case "…":
+    case "‥":
+    case "・":
+    case "〽":
+    case "〜":
+    case "：":
+    case "？":
+    case "♪":
+    case "，":
+    case "（":
+    case "）":
+    case "｛":
+    case "｝":
+    case "［":
+    case "］":
+    case "【":
+    case "】":
+    case "｛":
+    case "｝":
+      return true;
+  }
+  return false;
+}
+
 Future<DictionaryHistoryEntry> getWordDetails({
   String searchTerm,
   String contextDataSource,
   int contextPosition,
   String searchTermOverride = "",
 }) async {
+  if (searchTermIllegal(searchTerm)) {
+    return DictionaryHistoryEntry(
+      entries: [],
+      searchTerm: searchTermOverride.trim(),
+      swipeIndex: 0,
+      contextDataSource: contextDataSource,
+      contextPosition: contextPosition,
+    );
+  }
+
   List<DictionaryEntry> entries = [];
   if (searchTermOverride.isEmpty) {
     searchTermOverride = searchTerm;
@@ -359,6 +405,15 @@ Future<DictionaryHistoryEntry> getMonolingualWordDetails({
   String searchTermOverride = "",
 }) async {
   List<DictionaryEntry> entries = [];
+  if (searchTermIllegal(searchTerm)) {
+    return DictionaryHistoryEntry(
+      entries: [],
+      searchTerm: searchTermOverride.trim(),
+      swipeIndex: 0,
+      contextDataSource: contextDataSource,
+      contextPosition: contextPosition,
+    );
+  }
 
   if (searchTermOverride.isEmpty) {
     searchTermOverride = searchTerm;
@@ -420,7 +475,10 @@ List<DictionaryEntry> sakuraJsonToDictionaryEntries(
   words.forEach((word) {
     Map<String, dynamic> json = word as Map<String, dynamic>;
     if (!json['text'].contains('ＪＩＳ')) {
-      entries.add(sakuraJsonToDictionaryEntry(json, searchTerm));
+      DictionaryEntry entry = sakuraJsonToDictionaryEntry(json, searchTerm);
+      if (entry.word.isNotEmpty && entry.reading.isNotEmpty) {
+        entries.add(entry);
+      }
     }
   });
 

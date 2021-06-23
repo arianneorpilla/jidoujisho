@@ -284,7 +284,6 @@ List<String> sanitizeGooForPitchMatch(String text, bool isTitle) {
             startParenthesis, endParenthesis + 1, "");
       }
 
-      sanitizedLine = sanitizedLine.replaceAll(" ", "");
       sanitizedLine = sanitizedLine.replaceAll("‐", "");
       sanitizedLine = sanitizedLine.replaceAll("▽", "");
       sanitizedLine = sanitizedLine.replaceAll("△", "");
@@ -308,7 +307,6 @@ List<String> sanitizeGooForPitchMatch(String text, bool isTitle) {
           sanitizedLine.replaceRange(startParenthesis, endParenthesis, "");
     }
 
-    sanitizedLine = sanitizedLine.replaceAll(" ", "");
     sanitizedLine = sanitizedLine.replaceAll("‐", "");
     sanitizedLine = sanitizedLine.replaceAll("▽", "");
     sanitizedLine = sanitizedLine.replaceAll("△", "");
