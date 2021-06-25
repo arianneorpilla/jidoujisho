@@ -122,9 +122,6 @@ If you wish to use external subtitles, they may be in **SRT, ASS or SSA format**
 ### ☝️ Important Links
 
 Below are some links that some users might find useful.
-
-* <b><a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.3.2-beta">Using the app on Android 11</a></b>
-* <b><a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.4-beta">Using a custom dictionary</a></b>
 * <b><a href="https://github.com/lrorpilla/jidoujisho/blob/main/TEMPLATE.md">jidoujisho Anki Template</a></b>
 * <b><a href="https://reddit.com/r/LearnJapanese/comments/lcf9wi/jidoujisho_a_mobile_video_player_tailored_for/">Debut Reddit discussion thread</a></b>
 * <b><a href="https://old.reddit.com/r/LearnJapanese/comments/mp75r3/jidoujisho_09_development_update/">Dev update (0.9) Reddit discussion thread</a></b>
