@@ -299,7 +299,9 @@ class ReaderState extends State<Reader> {
       if(touchmoved !== true){
         var touch = event.touches[0];
         result = document.caretRangeFromPoint(touch.clientX, touch.clientY);
-        console.log(result.startContainer.parentNode.nodeName);
+        resultParent = result.startContainer.parentNode;
+        console.log(resultParent.nodeName);
+        
         if (result.startContainer.parentNode.nodeName !== "SPAN") {  
           console.log(JSON.stringify({"offset": result.startOffset, "text": result.startContainer.textContent, "jidoujisho": "jidoujisho"}));
         }
@@ -335,7 +337,9 @@ class ReaderState extends State<Reader> {
       if(touchmoved !== true){
         var touch = event.touches[0];
         result = document.caretRangeFromPoint(touch.clientX, touch.clientY);
-        console.log(result.startContainer.parentNode.nodeName);
+        resultParent = result.startContainer.parentNode;
+        console.log(resultParent.nodeName);
+        
         if (result.startContainer.parentNode.nodeName !== "SPAN") {  
           console.log(JSON.stringify({"offset": result.startOffset, "text": result.startContainer.textContent, "jidoujisho": "jidoujisho"}));
         }
@@ -346,7 +350,7 @@ class ReaderState extends State<Reader> {
   }).on('touchstart', function(e){
       touchmoved = false;
       event = e;
-  });   
+  });
 });
   """);
                         },
