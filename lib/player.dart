@@ -102,6 +102,118 @@ class ReaderState extends State<Reader> {
     });
   }
 
+  String textClickJs = """
+function getRangeSelectedNodes(range) {
+	var node = range.startContainer;
+	var endNode = range.endContainer;
+	if (node == endNode) return [node];
+	var rangeNodes = [];
+	while (node && node != endNode) rangeNodes.push(node = nextNode(node));
+	node = range.startContainer;
+	while (node && node != range.commonAncestorContainer) {
+		rangeNodes.unshift(node);
+		node = node.parentNode;
+	}
+	return rangeNodes;
+
+	function nextNode(node) {
+		if (node.hasChildNodes()) return node.firstChild;
+		else {
+			while (node && !node.nextSibling) node = node.parentNode;
+			if (!node) return null;
+			return node.nextSibling;
+		}
+	}
+}
+
+\$(document).ready(function() {
+	var touchmoved;
+	var event;
+
+	\$(document.getElementsByTagName('app-reader')[0]).on('touchend', function(e) {
+		if (touchmoved !== true) {
+			var touch = event.touches[0];
+			var result = document.caretRangeFromPoint(touch.clientX, touch.clientY);
+			var resultParent = result.startContainer.parentNode;
+
+			var paragraph;
+			var selectedElement = result.startContainer;
+
+			if (resultParent.nodeName === 'P') {
+				paragraph = result.startContainer.parentNode;
+			} else if (resultParent.nodeName === 'RUBY') {
+				paragraph = result.startContainer.parentNode.parentNode;
+			} else if (resultParent.nodeName === 'RB') {
+        paragraph = result.startContainer.parentNode.parentNode.parentNode;
+      }
+
+			var noFuriganaText = [];
+			var noFuriganaNodes = [];
+      var selectedFound = false;
+			var index = 0;
+      
+			for (var value of paragraph.childNodes.values()) {
+				if (value.nodeName === "#text") {
+					noFuriganaText.push(value.textContent);
+					noFuriganaNodes.push(value);
+
+					if (selectedFound === false) {
+						if (selectedElement !== value) {
+							index = index + value.textContent.length;
+						} else {
+							index = index + result.startOffset;
+							selectedFound = true;
+						}
+					}
+
+				} else {
+					for (var node of value.childNodes.values()) {
+						if (node.nodeName === "#text") {
+							noFuriganaText.push(node.textContent);
+							noFuriganaNodes.push(node);
+
+							if (selectedFound === false) {
+								if (selectedElement !== node) {
+									index = index + node.textContent.length;
+								} else {
+									index = index + result.startOffset;
+									selectedFound = true;
+								}
+							}
+						} else if (node.nodeName === "RB") {
+							noFuriganaText.push(node.firstChild.textContent);
+							noFuriganaNodes.push(node.firstChild);
+
+							if (selectedFound === false) {
+								if (selectedElement !== node.firstChild) {
+									index = index + node.firstChild.textContent.length;
+								} else {
+									index = index + result.startOffset;
+									selectedFound = true;
+								}
+							}
+						}
+					}
+				}
+			}
+
+      text = noFuriganaText.join("");
+      offset = index;
+
+      if (result.startContainer.parentNode.nodeName !== "SPAN") {  
+			  console.log(JSON.stringify({"offset": offset, "text": text, "jidoujisho": "jidoujisho"}));
+			}
+		}
+	}).on('touchmove', function(e) {
+		touchmoved = true;
+		event = null;
+	}).on('touchstart', function(e) {
+		touchmoved = false;
+		event = e;
+	});
+});
+""";
+
   @override
   Widget build(BuildContext context) {
     startClipboardMonitor();
@@ -117,7 +229,8 @@ class ReaderState extends State<Reader> {
                 emptyStack();
                 await useBilingual();
                 _clipboard.value = (await webViewController.getSelectedText())
-                        .replaceAll("\\n", "\n") ??
+                        .replaceAll("\\n", "\n")
+                        .trim() ??
                     "";
                 clearSelection();
               }),
@@ -129,7 +242,8 @@ class ReaderState extends State<Reader> {
                 emptyStack();
                 await useMonolingual();
                 _clipboard.value = (await webViewController.getSelectedText())
-                        .replaceAll("\\n", "\n") ??
+                        .replaceAll("\\n", "\n")
+                        .trim() ??
                     "";
                 clearSelection();
               }),
@@ -290,31 +404,8 @@ class ReaderState extends State<Reader> {
                         id: 'jquery',
                         onLoad: () async {
                           print("jQuery loaded and ready to be used!");
-                          await controller.evaluateJavascript(source: """
-\$(document).ready(function(){
-  var touchmoved;
-  var event;
-
-  \$(document.getElementsByTagName('app-reader')[0]).on('touchend', function(e) {
-      if(touchmoved !== true){
-        var touch = event.touches[0];
-        result = document.caretRangeFromPoint(touch.clientX, touch.clientY);
-        resultParent = result.startContainer.parentNode;
-        console.log(resultParent.nodeName);
-        
-        if (result.startContainer.parentNode.nodeName !== "SPAN") {  
-          console.log(JSON.stringify({"offset": result.startOffset, "text": result.startContainer.textContent, "jidoujisho": "jidoujisho"}));
-        }
-      }
-  }).on('touchmove', function(e){
-      touchmoved = true;
-      event = null;
-  }).on('touchstart', function(e){
-      touchmoved = false;
-      event = e;
-  });   
-});
-  """);
+                          await controller.evaluateJavascript(
+                              source: textClickJs);
                         },
                         onError: () {
                           print("jQuery not available! Some error occurred.");
@@ -328,31 +419,8 @@ class ReaderState extends State<Reader> {
                         id: 'jquery',
                         onLoad: () async {
                           print("jQuery loaded and ready to be used!");
-                          await controller.evaluateJavascript(source: """
-\$(document).ready(function(){
-  var touchmoved;
-  var event;
-
-  \$(document.getElementsByTagName('app-reader')[0]).on('touchend', function(e) {
-      if(touchmoved !== true){
-        var touch = event.touches[0];
-        result = document.caretRangeFromPoint(touch.clientX, touch.clientY);
-        resultParent = result.startContainer.parentNode;
-        console.log(resultParent.nodeName);
-        
-        if (result.startContainer.parentNode.nodeName !== "SPAN") {  
-          console.log(JSON.stringify({"offset": result.startOffset, "text": result.startContainer.textContent, "jidoujisho": "jidoujisho"}));
-        }
-      }
-  }).on('touchmove', function(e){
-      touchmoved = true;
-      event = null;
-  }).on('touchstart', function(e){
-      touchmoved = false;
-      event = e;
-  });
-});
-  """);
+                          await controller.evaluateJavascript(
+                              source: textClickJs);
                         },
                         onError: () {
                           print("jQuery not available! Some error occurred.");
