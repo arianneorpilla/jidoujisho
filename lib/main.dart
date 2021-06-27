@@ -1,18 +1,15 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:async/async.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_absolute_path/flutter_absolute_path.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
-import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:minimize_app/minimize_app.dart';
 import 'package:package_info/package_info.dart';
@@ -26,7 +23,6 @@ import 'package:transparent_image/transparent_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:ve_dart/ve_dart.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import 'package:jidoujisho/anki.dart';
 import 'package:jidoujisho/cache.dart';
@@ -36,7 +32,6 @@ import 'package:jidoujisho/pitch.dart';
 import 'package:jidoujisho/player.dart';
 import 'package:jidoujisho/preferences.dart';
 import 'package:jidoujisho/util.dart';
-import 'package:jidoujisho/youtube.dart';
 
 typedef void ChannelCallback(String id, String name);
 typedef void CreatorCallback({

@@ -3,24 +3,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:audio_service/audio_service.dart';
 import 'package:clipboard_monitor/clipboard_monitor.dart';
-import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:gx_file_picker/gx_file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:jidoujisho/main.dart';
-import 'package:path/path.dart' as path;
 import 'package:progress_indicators/progress_indicators.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
-import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
-import 'package:subtitle_wrapper_package/subtitle_controller.dart';
-import 'package:subtitle_wrapper_package/subtitle_wrapper_package.dart';
 
 import 'package:jidoujisho/cache.dart';
 import 'package:jidoujisho/dictionary.dart';
@@ -103,114 +92,95 @@ class ReaderState extends State<Reader> {
   }
 
   String textClickJs = """
-function getRangeSelectedNodes(range) {
-	var node = range.startContainer;
-	var endNode = range.endContainer;
-	if (node == endNode) return [node];
-	var rangeNodes = [];
-	while (node && node != endNode) rangeNodes.push(node = nextNode(node));
-	node = range.startContainer;
-	while (node && node != range.commonAncestorContainer) {
-		rangeNodes.unshift(node);
-		node = node.parentNode;
-	}
-	return rangeNodes;
+/*jshint esversion: 6 */
+var touchmoved;
+var touchevent;
+var reader = document.getElementsByTagName('app-reader')[0];
 
-	function nextNode(node) {
-		if (node.hasChildNodes()) return node.firstChild;
-		else {
-			while (node && !node.nextSibling) node = node.parentNode;
-			if (!node) return null;
-			return node.nextSibling;
-		}
-	}
-}
+reader.addEventListener('touchend', function() {
+	if (touchmoved !== true) {
+		var touch = touchevent.touches[0];
+		var result = document.caretRangeFromPoint(touch.clientX, touch.clientY);
+		var selectedElement = result.startContainer;
 
-\$(document).ready(function() {
-	var touchmoved;
-	var event;
+    var paragraph = result.startContainer;
+    while (paragraph && paragraph.nodeName !== 'P') {
+      console.log(paragraph.nodeName);
+      paragraph = paragraph.parentNode;
+    }
 
-	\$(document.getElementsByTagName('app-reader')[0]).on('touchend', function(e) {
-		if (touchmoved !== true) {
-			var touch = event.touches[0];
-			var result = document.caretRangeFromPoint(touch.clientX, touch.clientY);
-			var resultParent = result.startContainer.parentNode;
+    console.log(paragraph.nodeName);
 
-			var paragraph;
-			var selectedElement = result.startContainer;
+		var noFuriganaText = [];
+		var noFuriganaNodes = [];
+		var selectedFound = false;
+		var index = 0;
 
-			if (resultParent.nodeName === 'P') {
-				paragraph = result.startContainer.parentNode;
-			} else if (resultParent.nodeName === 'RUBY') {
-				paragraph = result.startContainer.parentNode.parentNode;
-			} else if (resultParent.nodeName === 'RB') {
-        paragraph = result.startContainer.parentNode.parentNode.parentNode;
-      }
+		for (var value of paragraph.childNodes.values()) {
+			if (value.nodeName === "#text") {
+				noFuriganaText.push(value.textContent);
+				noFuriganaNodes.push(value);
 
-			var noFuriganaText = [];
-			var noFuriganaNodes = [];
-      var selectedFound = false;
-			var index = 0;
-      
-			for (var value of paragraph.childNodes.values()) {
-				if (value.nodeName === "#text") {
-					noFuriganaText.push(value.textContent);
-					noFuriganaNodes.push(value);
-
-					if (selectedFound === false) {
-						if (selectedElement !== value) {
-							index = index + value.textContent.length;
-						} else {
-							index = index + result.startOffset;
-							selectedFound = true;
-						}
+				if (selectedFound === false) {
+					if (selectedElement !== value) {
+						index = index + value.textContent.length;
+					} else {
+						index = index + result.startOffset;
+						selectedFound = true;
 					}
+				}
 
-				} else {
-					for (var node of value.childNodes.values()) {
-						if (node.nodeName === "#text") {
-							noFuriganaText.push(node.textContent);
-							noFuriganaNodes.push(node);
+			} else {
+				for (var node of value.childNodes.values()) {
+					if (node.nodeName === "#text") {
+						noFuriganaText.push(node.textContent);
+						noFuriganaNodes.push(node);
 
-							if (selectedFound === false) {
-								if (selectedElement !== node) {
-									index = index + node.textContent.length;
-								} else {
-									index = index + result.startOffset;
-									selectedFound = true;
-								}
+						if (selectedFound === false) {
+							if (selectedElement !== node) {
+								index = index + node.textContent.length;
+							} else {
+								index = index + result.startOffset;
+								selectedFound = true;
 							}
-						} else if (node.nodeName === "RB") {
-							noFuriganaText.push(node.firstChild.textContent);
-							noFuriganaNodes.push(node.firstChild);
+						}
+					} else if (node.firstChild.nodeName === "#text" && node.nodeName !== "RT" && node.nodeName !== "RP") {
+						noFuriganaText.push(node.firstChild.textContent);
+						noFuriganaNodes.push(node.firstChild);
 
-							if (selectedFound === false) {
-								if (selectedElement !== node.firstChild) {
-									index = index + node.firstChild.textContent.length;
-								} else {
-									index = index + result.startOffset;
-									selectedFound = true;
-								}
+						if (selectedFound === false) {
+							if (selectedElement !== node.firstChild) {
+								index = index + node.firstChild.textContent.length;
+							} else {
+								index = index + result.startOffset;
+								selectedFound = true;
 							}
 						}
 					}
 				}
 			}
-
-      text = noFuriganaText.join("");
-      offset = index;
-
-      if (result.startContainer.parentNode.nodeName !== "SPAN") {  
-			  console.log(JSON.stringify({"offset": offset, "text": text, "jidoujisho": "jidoujisho"}));
-			}
 		}
-	}).on('touchmove', function(e) {
-		touchmoved = true;
-		event = null;
-	}).on('touchstart', function(e) {
-		touchmoved = false;
-		event = e;
-	});
+
+		var text = noFuriganaText.join("");
+		var offset = index;
+
+		if (result.startContainer.innerHTML == null ||
+        result.startContainer.innerHTML.innerHTML.indexOf("spoiler-label") === -1) {
+			console.log(JSON.stringify({
+				"offset": offset,
+				"text": text,
+				"jidoujisho": "jidoujisho"
+			}));
+		}
+	}
+});
+reader.addEventListener('touchmove', () => {
+	touchmoved = true;
+	touchevent = null;
+});
+reader.addEventListener('touchstart', (e) => {
+	touchmoved = false;
+	touchevent = e;
 });
 """;
 
@@ -333,7 +303,7 @@ function getRangeSelectedNodes(range) {
         resizeToAvoidBottomInset: false,
         backgroundColor: Colors.black,
         body: Stack(
-          alignment: Alignment.bottomCenter,
+          alignment: Alignment.topCenter,
           children: [
             InAppWebView(
               initialUrlRequest:
@@ -397,34 +367,10 @@ function getRangeSelectedNodes(range) {
                 webViewController = controller;
               },
               onLoadStop: (controller, url) async {
-                await controller.injectJavascriptFileFromUrl(
-                    urlFile: Uri.parse(
-                        'https://code.jquery.com/jquery-3.3.1.min.js'),
-                    scriptHtmlTagAttributes: ScriptHtmlTagAttributes(
-                        id: 'jquery',
-                        onLoad: () async {
-                          print("jQuery loaded and ready to be used!");
-                          await controller.evaluateJavascript(
-                              source: textClickJs);
-                        },
-                        onError: () {
-                          print("jQuery not available! Some error occurred.");
-                        }));
+                await controller.evaluateJavascript(source: textClickJs);
               },
               onTitleChanged: (controller, title) async {
-                await controller.injectJavascriptFileFromUrl(
-                    urlFile: Uri.parse(
-                        'https://code.jquery.com/jquery-3.3.1.min.js'),
-                    scriptHtmlTagAttributes: ScriptHtmlTagAttributes(
-                        id: 'jquery',
-                        onLoad: () async {
-                          print("jQuery loaded and ready to be used!");
-                          await controller.evaluateJavascript(
-                              source: textClickJs);
-                        },
-                        onError: () {
-                          print("jQuery not available! Some error occurred.");
-                        }));
+                await controller.evaluateJavascript(source: textClickJs);
               },
             ),
             Padding(
