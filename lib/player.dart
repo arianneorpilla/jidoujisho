@@ -86,6 +86,7 @@ class JidoujishoPlayerState extends State<JidoujishoPlayer> {
   @override
   void dispose() {
     super.dispose();
+    unlockLandscape();
   }
 
   Widget localPlayer(BuildContext context, String url, int initialPosition) {
@@ -556,7 +557,7 @@ class _VideoPlayerState extends State<VideoPlayer>
     }
   }
 
-  void updateDurationOrSeek() {
+  void updateDurationOrSeek() async {
     if (playerMode == JidoujishoPlayerMode.networkStream) {
       return;
     }
@@ -578,7 +579,7 @@ class _VideoPlayerState extends State<VideoPlayer>
 
       if (playerMode == JidoujishoPlayerMode.localFile) {
         setLastSetVideo();
-        addVideoHistory(
+        await addVideoHistory(
           HistoryItem(
             videoFile.path,
             path.basenameWithoutExtension(videoFile.path),
@@ -587,19 +588,11 @@ class _VideoPlayerState extends State<VideoPlayer>
             "",
             getVideoPlayerController().value.duration.inSeconds,
           ),
+          (initialPosition == -1),
         );
-
-        if (initialPosition == -1) {
-          addVideoHistoryPosition(
-            HistoryItemPosition(
-              videoFile.path,
-              0,
-            ),
-          );
-        }
       } else if (playerMode == JidoujishoPlayerMode.youtubeStream) {
         setLastSetVideo();
-        addVideoHistory(
+        await addVideoHistory(
           HistoryItem(
             streamData.videoURL,
             streamData.title,
@@ -608,16 +601,8 @@ class _VideoPlayerState extends State<VideoPlayer>
             streamData.channelId,
             getVideoPlayerController().value.duration.inSeconds,
           ),
+          (initialPosition == -1),
         );
-
-        if (initialPosition == -1) {
-          addVideoHistoryPosition(
-            HistoryItemPosition(
-              videoFile.path,
-              0,
-            ),
-          );
-        }
       }
     }
 

@@ -80,6 +80,7 @@ class HistoryItem {
   String thumbnail;
   String channelId;
   int duration;
+  int position;
 
   HistoryItem(
     this.url,

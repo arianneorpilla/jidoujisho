@@ -503,7 +503,7 @@ Future<void> setVideoHistory(List<HistoryItem> videoHistories) async {
   await gSharedPrefs.setString('videoHistoryPrefs', jsonEncode(maps));
 }
 
-Future<void> addVideoHistory(HistoryItem videoHistory) async {
+Future<void> addVideoHistory(HistoryItem videoHistory, bool addPosition) async {
   List<HistoryItem> videoHistories = getVideoHistory();
 
   if (videoHistory.thumbnail == null) {
@@ -547,6 +547,16 @@ Future<void> addVideoHistory(HistoryItem videoHistory) async {
   }
 
   print("ADDED");
+
+  if (addPosition) {
+    await addVideoHistoryPosition(
+      HistoryItemPosition(
+        videoHistory.url,
+        0,
+      ),
+    );
+  }
+
   await setVideoHistory(videoHistories);
 }
 

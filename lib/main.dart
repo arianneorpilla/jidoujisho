@@ -3263,6 +3263,9 @@ class _HistoryState extends State<History> {
           HistoryItem history = histories[index];
           HistoryItemPosition position = historyPositions[index];
 
+          print("HISTORY $history");
+          print("POSITION $position");
+
           print("HISTORY LISTED: $history");
 
           return HistoryResult(
