@@ -208,8 +208,12 @@ FutureOr<List<Video>> searchYouTubeTrendingVideos() async {
   List<Video> trendingVideos = await yt.playlists
       .getVideos("PLuXL6NS58Dyx-wTr5o7NiC7CZRbMA91DC")
       .toList();
-  setTrendingVideosCache(trendingVideos);
-  setTrendingExpiration();
+
+  if (trendingVideos != null && trendingVideos.isNotEmpty) {
+    setTrendingVideosCache(trendingVideos);
+    setTrendingExpiration();
+  }
+
   return trendingVideos;
 }
 
@@ -249,7 +253,10 @@ FutureOr<List<Channel>> getTrendingChannels(List<Video> trendingVideos) async {
 
   List<Channel> channels = await Future.wait(futureChannels);
   List<Channel> distinctChannels = channels.toSet().toList();
-  setTrendingChannelCache(distinctChannels);
+
+  if (distinctChannels != null && distinctChannels.isNotEmpty) {
+    setTrendingChannelCache(distinctChannels);
+  }
 
   return distinctChannels;
 }

@@ -26,6 +26,8 @@ dependencies:
   flutter_absolute_path:
   flutter_cache_manager:
   flutter_ffmpeg:
+  flutter_inappwebview:
+    path: ./flutter_inappwebview
   flutter_vlc_player: ^5.0.5
   flutter_youtube_dl:
     git:

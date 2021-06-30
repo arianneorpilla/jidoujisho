@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:async/async.dart';
 import 'package:audio_service/audio_service.dart';
+import 'package:blurrycontainer/blurrycontainer.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:flutter/foundation.dart';
@@ -12,6 +15,7 @@ import 'package:flutter_absolute_path/flutter_absolute_path.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:jidoujisho/reader.dart';
 import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:minimize_app/minimize_app.dart';
@@ -44,6 +48,7 @@ typedef void CreatorCallback({
   DictionaryEntry dictionaryEntry,
   File file,
   bool isShared,
+  bool isReaderExport,
 });
 typedef void SearchCallback(String term);
 
@@ -70,8 +75,14 @@ void main() async {
   }
 
   gSharedPrefs = await SharedPreferences.getInstance();
-  gIsResumable = ValueNotifier<bool>(getVideoHistory().isNotEmpty);
   gIsSelectMode = ValueNotifier<bool>(getSelectMode());
+  bool canResume;
+  if (isLastSetVideo()) {
+    canResume = getVideoHistory().isNotEmpty;
+  } else {
+    canResume = getBookHistory().isNotEmpty;
+  }
+  gIsResumable = ValueNotifier<bool>(canResume);
 
   maintainTrendingCache();
   maintainClosedCaptions();
@@ -206,10 +217,16 @@ class App extends StatelessWidget {
 }
 
 class Home extends StatefulWidget {
-  _HomeState createState() => _HomeState();
+  Home({this.readerExport = ""});
+  final String readerExport;
+
+  _HomeState createState() => _HomeState(readerExport: this.readerExport);
 }
 
 class _HomeState extends State<Home> {
+  _HomeState({this.readerExport = ""});
+  final String readerExport;
+
   TextEditingController _searchQueryController = TextEditingController();
   ValueNotifier<double> _dictionaryScrollOffset = ValueNotifier<double>(0);
   bool _isSearching = false;
@@ -217,6 +234,7 @@ class _HomeState extends State<Home> {
   bool _isChannelFromMenu = false;
   bool _isCreatorView = false;
   bool _isCreatorShared = false;
+  bool _isCreatorReaderExport = false;
 
   DictionaryEntry _creatorDictionaryEntry = DictionaryEntry(
     word: "",
@@ -240,133 +258,140 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
 
-    _intentDataStreamSubscription = ReceiveSharingIntent.getMediaStream()
-        .listen((List<SharedMediaFile> value) {
-      SharedMediaType type = value.first.type;
+    if (readerExport.isEmpty) {
+      _intentDataStreamSubscription = ReceiveSharingIntent.getMediaStream()
+          .listen((List<SharedMediaFile> value) {
+        SharedMediaType type = value.first.type;
 
-      if (value == null) {
-        return;
-      }
+        if (value == null) {
+          return;
+        }
 
-      switch (type) {
-        case SharedMediaType.IMAGE:
+        switch (type) {
+          case SharedMediaType.IMAGE:
+            setCreatorView(
+              sentence: "",
+              dictionaryEntry:
+                  DictionaryEntry(word: "", meaning: "", reading: ""),
+              file: File(value.first.path),
+              isShared: true,
+            );
+            break;
+          case SharedMediaType.VIDEO:
+            Navigator.of(context).popUntil((route) => route.isFirst);
+            playVideo(
+              JidoujishoPlayerMode.localFile,
+              value.first.path,
+              pop: true,
+            );
+            break;
+          case SharedMediaType.FILE:
+            break;
+        }
+        ReceiveSharingIntent.reset();
+      }, onError: (err) {
+        print("getIntentDataStream error: $err");
+        ReceiveSharingIntent.reset();
+      });
+
+      // For sharing images coming from outside the app while the app is closed
+      ReceiveSharingIntent.getInitialMedia()
+          .then((List<SharedMediaFile> value) {
+        SharedMediaType type = value.first.type;
+
+        if (value == null) {
+          return;
+        }
+
+        switch (type) {
+          case SharedMediaType.IMAGE:
+            setCreatorView(
+              sentence: "",
+              dictionaryEntry:
+                  DictionaryEntry(word: "", meaning: "", reading: ""),
+              file: File(value.first.path),
+              isShared: true,
+            );
+            break;
+          case SharedMediaType.VIDEO:
+            Navigator.of(context).popUntil((route) => route.isFirst);
+            playVideo(
+              JidoujishoPlayerMode.localFile,
+              value.first.path,
+              pop: true,
+            );
+            break;
+          case SharedMediaType.FILE:
+            break;
+        }
+
+        ReceiveSharingIntent.reset();
+      });
+
+      // For sharing or opening urls/text coming from outside the app while the app is in the memory
+      _intentDataStreamSubscription =
+          ReceiveSharingIntent.getTextStream().listen((String value) async {
+        if (value == null) {
+          return;
+        }
+
+        if (value.startsWith("https://") || value.startsWith("http://")) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+          if (YoutubePlayer.convertUrlToId(value) != null) {
+            playVideo(JidoujishoPlayerMode.youtubeStream, value, pop: true);
+          } else {
+            playVideo(JidoujishoPlayerMode.networkStream, value, pop: true);
+          }
+        } else if (value.startsWith("content://")) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+          String absolutePath =
+              await FlutterAbsolutePath.getAbsolutePath(value);
+          playVideo(JidoujishoPlayerMode.localFile, absolutePath, pop: true);
+        } else {
           setCreatorView(
-            sentence: "",
+            sentence: value,
             dictionaryEntry:
                 DictionaryEntry(word: "", meaning: "", reading: ""),
-            file: File(value.first.path),
+            file: null,
             isShared: true,
           );
-          break;
-        case SharedMediaType.VIDEO:
+        }
+        ReceiveSharingIntent.reset();
+      }, onError: (err) {
+        print("getLinkStream error: $err");
+        ReceiveSharingIntent.reset();
+      });
+
+      // For sharing or opening urls/text coming from outside the app while the app is closed
+      ReceiveSharingIntent.getInitialText().then((String value) async {
+        if (value == null) {
+          return;
+        }
+
+        if (value.startsWith("https://") || value.startsWith("http://")) {
           Navigator.of(context).popUntil((route) => route.isFirst);
-          playVideo(
-            JidoujishoPlayerMode.localFile,
-            value.first.path,
-            pop: true,
-          );
-          break;
-        case SharedMediaType.FILE:
-          break;
-      }
-      ReceiveSharingIntent.reset();
-    }, onError: (err) {
-      print("getIntentDataStream error: $err");
-      ReceiveSharingIntent.reset();
-    });
-
-    // For sharing images coming from outside the app while the app is closed
-    ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> value) {
-      SharedMediaType type = value.first.type;
-
-      if (value == null) {
-        return;
-      }
-
-      switch (type) {
-        case SharedMediaType.IMAGE:
+          if (YoutubePlayer.convertUrlToId(value) != null) {
+            playVideo(JidoujishoPlayerMode.youtubeStream, value, pop: true);
+          } else {
+            playVideo(JidoujishoPlayerMode.networkStream, value, pop: true);
+          }
+        } else if (value.startsWith("content://")) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+          String absolutePath =
+              await FlutterAbsolutePath.getAbsolutePath(value);
+          playVideo(JidoujishoPlayerMode.localFile, absolutePath, pop: true);
+        } else {
           setCreatorView(
-            sentence: "",
+            sentence: value,
             dictionaryEntry:
                 DictionaryEntry(word: "", meaning: "", reading: ""),
-            file: File(value.first.path),
+            file: null,
             isShared: true,
           );
-          break;
-        case SharedMediaType.VIDEO:
-          Navigator.of(context).popUntil((route) => route.isFirst);
-          playVideo(
-            JidoujishoPlayerMode.localFile,
-            value.first.path,
-            pop: true,
-          );
-          break;
-        case SharedMediaType.FILE:
-          break;
-      }
-
-      ReceiveSharingIntent.reset();
-    });
-
-    // For sharing or opening urls/text coming from outside the app while the app is in the memory
-    _intentDataStreamSubscription =
-        ReceiveSharingIntent.getTextStream().listen((String value) async {
-      if (value == null) {
-        return;
-      }
-
-      if (value.startsWith("https://") || value.startsWith("http://")) {
-        Navigator.of(context).popUntil((route) => route.isFirst);
-        if (YoutubePlayer.convertUrlToId(value) != null) {
-          playVideo(JidoujishoPlayerMode.youtubeStream, value, pop: true);
-        } else {
-          playVideo(JidoujishoPlayerMode.networkStream, value, pop: true);
         }
-      } else if (value.startsWith("content://")) {
-        Navigator.of(context).popUntil((route) => route.isFirst);
-        String absolutePath = await FlutterAbsolutePath.getAbsolutePath(value);
-        playVideo(JidoujishoPlayerMode.localFile, absolutePath, pop: true);
-      } else {
-        setCreatorView(
-          sentence: value,
-          dictionaryEntry: DictionaryEntry(word: "", meaning: "", reading: ""),
-          file: null,
-          isShared: true,
-        );
-      }
-      ReceiveSharingIntent.reset();
-    }, onError: (err) {
-      print("getLinkStream error: $err");
-      ReceiveSharingIntent.reset();
-    });
-
-    // For sharing or opening urls/text coming from outside the app while the app is closed
-    ReceiveSharingIntent.getInitialText().then((String value) async {
-      if (value == null) {
-        return;
-      }
-
-      if (value.startsWith("https://") || value.startsWith("http://")) {
-        Navigator.of(context).popUntil((route) => route.isFirst);
-        if (YoutubePlayer.convertUrlToId(value) != null) {
-          playVideo(JidoujishoPlayerMode.youtubeStream, value, pop: true);
-        } else {
-          playVideo(JidoujishoPlayerMode.networkStream, value, pop: true);
-        }
-      } else if (value.startsWith("content://")) {
-        Navigator.of(context).popUntil((route) => route.isFirst);
-        String absolutePath = await FlutterAbsolutePath.getAbsolutePath(value);
-        playVideo(JidoujishoPlayerMode.localFile, absolutePath, pop: true);
-      } else {
-        setCreatorView(
-          sentence: value,
-          dictionaryEntry: DictionaryEntry(word: "", meaning: "", reading: ""),
-          file: null,
-          isShared: true,
-        );
-      }
-      ReceiveSharingIntent.reset();
-    });
+        ReceiveSharingIntent.reset();
+      });
+    }
   }
 
   void playVideo(
@@ -390,7 +415,9 @@ class _HomeState extends State<Home> {
   }
 
   void setStateFromResult() {
-    setState(() {});
+    setState(() {
+      unlockLandscape();
+    });
   }
 
   void onItemTapped(int index) {
@@ -409,7 +436,7 @@ class _HomeState extends State<Home> {
       }
     } else {
       setState(() {
-        if (getNavigationBarItems()[index].label == "Library") {
+        if (getNavigationBarItems()[index].label == "Player") {
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -417,7 +444,11 @@ class _HomeState extends State<Home> {
                 playerMode: JidoujishoPlayerMode.localFile,
               ),
             ),
-          );
+          ).then((result) {
+            setState(() {
+              unlockLandscape();
+            });
+          });
         } else {
           _selectedIndex = index;
           setLastMenuSeen(index);
@@ -433,6 +464,18 @@ class _HomeState extends State<Home> {
   }
 
   Widget getWidgetOptions(int index) {
+    if (readerExport.isNotEmpty) {
+      return Creator(
+        readerExport,
+        DictionaryEntry(word: "", reading: "", meaning: ""),
+        null,
+        false,
+        true,
+        resetMenu,
+        _readerFlipflop,
+      );
+    }
+
     if (_isSearching) {
       return buildBody();
     } else if (_isChannelView) {
@@ -443,6 +486,7 @@ class _HomeState extends State<Home> {
         _creatorDictionaryEntry,
         _creatorFile,
         _isCreatorShared,
+        _isCreatorReaderExport,
         resetMenu,
         _readerFlipflop,
       );
@@ -451,8 +495,8 @@ class _HomeState extends State<Home> {
     switch (getNavigationBarItems()[index].label) {
       case "Trending":
         return buildBody();
-      case "Channels":
-        return buildChannels();
+      case "Reader":
+        return buildReader();
       case "History":
         return History(setChannelVideoSearch);
       case "Dictionary":
@@ -460,6 +504,284 @@ class _HomeState extends State<Home> {
       default:
         return Container();
     }
+  }
+
+  void startReader(String initialURL, {int initialX}) {
+    SystemChrome.setEnabledSystemUIOverlays([]);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Reader(initialURL, initialX),
+      ),
+    ).then((result) {
+      setState(() {
+        bool canResume;
+        if (isLastSetVideo()) {
+          canResume = getVideoHistory().isNotEmpty;
+        } else {
+          canResume = getBookHistory().isNotEmpty;
+        }
+        gIsResumable.value = canResume;
+      });
+    });
+  }
+
+  Widget buildReader() {
+    Widget centerMessage(String text, IconData icon, bool dots) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: Colors.grey,
+              size: 72,
+            ),
+            const SizedBox(height: 6),
+            Wrap(
+              alignment: WrapAlignment.end,
+              crossAxisAlignment: WrapCrossAlignment.end,
+              children: [
+                Text(
+                  text,
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 20,
+                  ),
+                ),
+                (dots)
+                    ? SizedBox(
+                        width: 12,
+                        height: 16,
+                        child: JumpingDotsProgressIndicator(
+                          color: Colors.grey,
+                        ),
+                      )
+                    : SizedBox.shrink()
+              ],
+            )
+          ],
+        ),
+      );
+    }
+
+    Widget openReaderButton() {
+      String readerMessage;
+      String initialURL;
+
+      if (getBookHistory().isEmpty) {
+        readerMessage = "Start Reading";
+        initialURL = null;
+      } else {
+        readerMessage = "Continue Reading";
+        initialURL = getBookHistory().last.url;
+      }
+
+      return Container(
+        width: double.infinity,
+        margin: EdgeInsets.only(bottom: 12),
+        color: Colors.grey[800].withOpacity(0.2),
+        child: InkWell(
+          child: Padding(
+            padding: EdgeInsets.all(12),
+            child: InkWell(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.chrome_reader_mode, size: 16),
+                  SizedBox(width: 5),
+                  Text(
+                    readerMessage,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          onTap: () async {
+            startReader(initialURL);
+          },
+        ),
+      );
+    }
+
+    Widget emptyMessage = centerMessage(
+      "No books added to reader",
+      Icons.chrome_reader_mode,
+      false,
+    );
+
+    List<HistoryItem> bookHistory = getBookHistory().reversed.toList();
+
+    if (bookHistory.isEmpty) {
+      return Column(children: [
+        openReaderButton(),
+        Expanded(child: emptyMessage),
+      ]);
+    }
+
+    ScrollController scrollController = ScrollController();
+
+    return Scrollbar(
+      controller: scrollController,
+      child: Column(
+        key: UniqueKey(),
+        children: [
+          openReaderButton(),
+          Expanded(
+            child: GridView.builder(
+              itemCount: bookHistory.length,
+              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 200,
+                childAspectRatio: 176 / 250,
+              ),
+              itemBuilder: (BuildContext context, int index) {
+                HistoryItem book = bookHistory[index];
+                print("BOOK LISTED: $book");
+
+                return showBook(book);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget showBook(HistoryItem book) {
+    UriData data = Uri.parse(book.thumbnail).data;
+    ImageProvider imageProvider;
+
+    if (data != null) {
+      imageProvider = MemoryImage(data.contentAsBytes());
+    } else {
+      imageProvider = MemoryImage(kTransparentImage);
+    }
+
+    double progress;
+    if (book.subheading.isNotEmpty) {
+      int currentWord = int.tryParse(book.subheading.split("/")[0]) ?? -1;
+      int wordCount =
+          int.tryParse(book.subheading.split("/")[1].split(" ")[0]) ?? -1;
+      progress = (currentWord / wordCount) ?? 0;
+      if ((wordCount - currentWord) < (wordCount * 0.01)) {
+        progress = 1.0;
+      }
+    } else {
+      progress = 0;
+    }
+
+    return InkWell(
+      child: Stack(
+        alignment: Alignment.bottomLeft,
+        children: [
+          Container(
+            padding: EdgeInsets.all(8),
+            child: Container(
+              color: Colors.grey[800].withOpacity(0.3),
+              child: AspectRatio(
+                aspectRatio: 176 / 250,
+                child: FadeInImage(
+                  image: imageProvider,
+                  placeholder: MemoryImage(kTransparentImage),
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+          ),
+          LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+            return Container(
+              alignment: Alignment.center,
+              margin: EdgeInsets.all(8),
+              padding: EdgeInsets.fromLTRB(2, 2, 2, 4),
+              height: constraints.maxHeight * 0.15,
+              width: double.maxFinite,
+              color: Colors.black.withOpacity(0.6),
+              child: Text(
+                book.heading,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 9,
+                ),
+              ),
+            );
+          }),
+          Container(
+            padding: EdgeInsets.all(8),
+            child: LinearProgressIndicator(
+              value: progress,
+              backgroundColor: Colors.white.withOpacity(0.6),
+              minHeight: 2,
+            ),
+          ),
+        ],
+      ),
+      onLongPress: () {
+        HapticFeedback.vibrate();
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.zero,
+              ),
+              title: Text(
+                book.heading,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+              content: AspectRatio(
+                aspectRatio: 176 / 250,
+                child: FadeInImage(
+                  image: imageProvider,
+                  placeholder: MemoryImage(kTransparentImage),
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text(
+                    'REMOVE',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  onPressed: () async {
+                    await removeBookHistory(book);
+
+                    setState(() {
+                      bool canResume;
+                      if (isLastSetVideo()) {
+                        canResume = getVideoHistory().isNotEmpty;
+                      } else {
+                        canResume = getBookHistory().isNotEmpty;
+                      }
+                      gIsResumable.value = canResume;
+                    });
+                    Navigator.pop(context);
+                  },
+                ),
+                TextButton(
+                  child: Text(
+                    'READ',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    startReader(book.url);
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+      onTap: () {
+        startReader(book.url);
+      },
+    );
   }
 
   List<BottomNavigationBarItem> getNavigationBarItems() {
@@ -491,8 +813,8 @@ class _HomeState extends State<Home> {
           label: 'Reader',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.folder_sharp),
-          label: 'Library',
+          icon: Icon(Icons.play_circle_filled_sharp),
+          label: 'Player',
         ),
       ],
     );
@@ -502,8 +824,6 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    unlockLandscape();
-
     return new WillPopScope(
       onWillPop: _onWillPop,
       child: Stack(
@@ -516,8 +836,9 @@ class _HomeState extends State<Home> {
               actions: buildActions(),
             ),
             backgroundColor: Colors.black,
-            bottomNavigationBar:
-                (!_isCreatorView) ? buildNavigationBar() : SizedBox.shrink(),
+            bottomNavigationBar: (!_isCreatorView && !readerExport.isNotEmpty)
+                ? buildNavigationBar()
+                : SizedBox.shrink(),
             body: getWidgetOptions(_selectedIndex),
           ),
         ],
@@ -560,8 +881,12 @@ class _HomeState extends State<Home> {
         _searchQueryController.clear();
       });
     } else {
-      MinimizeApp.minimizeApp();
-      resetMenu();
+      if (readerExport.isEmpty) {
+        MinimizeApp.minimizeApp();
+        resetMenu();
+      } else {
+        Navigator.pop(context);
+      }
     }
     return false;
   }
@@ -578,12 +903,17 @@ class _HomeState extends State<Home> {
   }
 
   Widget buildAppBarLeading() {
-    if (_isSearching || _isChannelView || _isCreatorView) {
+    if (_isSearching ||
+        _isChannelView ||
+        _isCreatorView ||
+        readerExport.isNotEmpty) {
       return BackButton(
         onPressed: () {
           if (_isCreatorShared) {
             MinimizeApp.minimizeApp();
             resetMenu();
+          } else if (readerExport.isNotEmpty) {
+            Navigator.pop(context);
           } else {
             setState(() {
               _isSearching = false;
@@ -631,7 +961,7 @@ class _HomeState extends State<Home> {
       );
     } else if (_isChannelView) {
       return buildChannelNameRow();
-    } else if (_isCreatorView) {
+    } else if (_isCreatorView || readerExport.isNotEmpty) {
       return Text(
         "Card Creator",
         style: TextStyle(
@@ -963,6 +1293,7 @@ class _HomeState extends State<Home> {
     DictionaryEntry dictionaryEntry,
     File file,
     bool isShared,
+    bool isReaderExport,
   }) async {
     try {
       setState(() {
@@ -975,6 +1306,7 @@ class _HomeState extends State<Home> {
       setState(() {
         _isCreatorView = true;
         _isCreatorShared = isShared;
+        _isCreatorReaderExport = isReaderExport;
         _creatorSentence = sentence;
         _creatorDictionaryEntry = dictionaryEntry;
         _creatorFile = file;
@@ -1261,7 +1593,7 @@ class _HomeState extends State<Home> {
                   channelTitle,
                   style: TextStyle(
                     color: Colors.grey,
-                    fontSize: 12,
+                    fontSize: 11,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -1436,7 +1768,11 @@ class _HomeState extends State<Home> {
                             url: webURL,
                           ),
                         ),
-                      );
+                      ).then((returnValue) {
+                        setState(() {
+                          unlockLandscape();
+                        });
+                      });
                     } on Exception {
                       Navigator.pop(context);
                       print("INVALID LINK");
@@ -1557,7 +1893,7 @@ class _HomeState extends State<Home> {
         const String legalese =
             "A mobile video player, reader assistant and card creation toolkit tailored for language learners.\n\n" +
                 "Built for the Japanese language learning community by Leo Rafael Orpilla. " +
-                "Bilingual definitions queried from Jisho.org. Monolingual definitions queried from Sora. Pitch accent patterns from Kanjium. Reader WebView linked to Ttu-Ebook. Video streaming via YouTube. Image search via Bing. Logo by Aaron Marbella.\n\n" +
+                "Bilingual definitions queried from Jisho.org. Monolingual definitions queried from Sora. Pitch accent patterns from Kanjium. Reader WebView linked to ッツ Ebook Reader. Video streaming via YouTube. Image search via Bing. Logo by Aaron Marbella.\n\n" +
                 "jidoujisho is free and open source software. Liking the application? " +
                 "Help out by providing feedback, making a donation, reporting issues or collaborating " +
                 "for further improvements on GitHub.";
@@ -1581,7 +1917,7 @@ class _HomeState extends State<Home> {
   }
 
   List<Widget> buildActions() {
-    if (_isCreatorView) {
+    if (_isCreatorView || readerExport.isNotEmpty) {
       return [];
     }
 
@@ -1603,36 +1939,40 @@ class _HomeState extends State<Home> {
   Widget buildResume() {
     return ValueListenableBuilder(
       valueListenable: gIsResumable,
-      builder: (_, __, ___) {
-        if (gIsResumable.value) {
+      builder: (BuildContext context, bool value, Widget child) {
+        if (value) {
           return IconButton(
             icon: const Icon(Icons.update_sharp),
             onPressed: () async {
-              int lastPlayedPosition = getLastPlayedPosition();
-              String lastPlayedPath = getLastPlayedPath();
+              if (isLastSetVideo()) {
+                int lastPlayedPosition = getLastPlayedPosition();
+                String lastPlayedPath = getLastPlayedPath();
 
-              JidoujishoPlayerMode playerMode;
-              if (lastPlayedPath.startsWith("https://") ||
-                  lastPlayedPath.startsWith("http://")) {
-                playerMode = JidoujishoPlayerMode.youtubeStream;
-              } else {
-                playerMode = JidoujishoPlayerMode.localFile;
-              }
+                JidoujishoPlayerMode playerMode;
+                if (lastPlayedPath.startsWith("https://") ||
+                    lastPlayedPath.startsWith("http://")) {
+                  playerMode = JidoujishoPlayerMode.youtubeStream;
+                } else {
+                  playerMode = JidoujishoPlayerMode.localFile;
+                }
 
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => JidoujishoPlayer(
-                    playerMode: playerMode,
-                    url: lastPlayedPath,
-                    initialPosition: lastPlayedPosition,
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => JidoujishoPlayer(
+                      playerMode: playerMode,
+                      url: lastPlayedPath,
+                      initialPosition: lastPlayedPosition,
+                    ),
                   ),
-                ),
-              ).then((returnValue) {
-                setState(() {
-                  unlockLandscape();
+                ).then((returnValue) {
+                  setState(() {
+                    unlockLandscape();
+                  });
                 });
-              });
+              } else {
+                startReader(null);
+              }
             },
           );
         } else {
@@ -1797,15 +2137,16 @@ class _YouTubeResultState extends State<YouTubeResult>
           children: [
             Container(
               width: MediaQuery.of(context).size.shortestSide * (2 / 5),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  FadeInImage(
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Container(
+                  color: Colors.black,
+                  child: FadeInImage(
                     image: NetworkImage(videoThumbnailURL),
                     placeholder: MemoryImage(kTransparentImage),
                     fit: BoxFit.fitWidth,
                   ),
-                ],
+                ),
               ),
             ),
             Positioned(
@@ -1876,7 +2217,11 @@ class _YouTubeResultState extends State<YouTubeResult>
             video: result,
           ),
         ),
-      );
+      ).then((returnValue) {
+        setState(() {
+          unlockLandscape();
+        });
+      });
     }
 
     return InkWell(
@@ -2352,7 +2697,7 @@ class _ChannelHorizontalResultState extends State<ChannelHorizontalResult>
                       channelTitle,
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 12,
+                        fontSize: 11,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -2533,8 +2878,8 @@ class _SearchResultState extends State<SearchResult>
 }
 
 class HistoryResult extends StatefulWidget {
-  final VideoHistory history;
-  final VideoHistoryPosition historyPosition;
+  final HistoryItem history;
+  final HistoryItemPosition historyPosition;
   final stateCallback;
   final channelCallback;
   final int index;
@@ -2558,8 +2903,8 @@ class HistoryResult extends StatefulWidget {
 
 class _HistoryResultState extends State<HistoryResult>
     with AutomaticKeepAliveClientMixin {
-  final VideoHistory history;
-  final VideoHistoryPosition historyPosition;
+  final HistoryItem history;
+  final HistoryItemPosition historyPosition;
   final stateCallback;
   final channelCallback;
   final int index;
@@ -2583,6 +2928,25 @@ class _HistoryResultState extends State<HistoryResult>
       return (history.thumbnail.startsWith("https://"));
     }
 
+    bool isScopedStorage() {
+      return history.subheading.startsWith("/data/");
+    }
+
+    bool isReader() {
+      return history.url.startsWith("https://ttu-ebook.web.app/");
+    }
+
+    ImageProvider getImage() {
+      if (isNetwork()) {
+        return NetworkImage(history.thumbnail);
+      } else if (isReader()) {
+        UriData data = Uri.parse(history.thumbnail).data;
+        return MemoryImage(data.contentAsBytes());
+      } else {
+        return FileImage(File(history.thumbnail));
+      }
+    }
+
     Widget displayThumbnail() {
       return Padding(
         padding: EdgeInsets.only(left: 16),
@@ -2591,17 +2955,16 @@ class _HistoryResultState extends State<HistoryResult>
           children: [
             Container(
               width: MediaQuery.of(context).size.shortestSide * (2 / 5),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  FadeInImage(
-                    image: isNetwork()
-                        ? NetworkImage(history.thumbnail)
-                        : FileImage(File(history.thumbnail)),
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Container(
+                  color: Colors.black,
+                  child: FadeInImage(
+                    image: getImage(),
                     placeholder: MemoryImage(kTransparentImage),
                     fit: BoxFit.contain,
                   ),
-                ],
+                ),
               ),
             ),
             Positioned(
@@ -2666,10 +3029,6 @@ class _HistoryResultState extends State<HistoryResult>
     }
 
     Widget displayVideoInformation() {
-      bool isScopedStorage() {
-        return history.subheading.startsWith("/data/");
-      }
-
       return Expanded(
         child: Container(
           padding: EdgeInsets.only(left: 12, right: 6),
@@ -2692,14 +3051,18 @@ class _HistoryResultState extends State<HistoryResult>
                   fontSize: 12,
                 ),
               ),
-              isNetwork()
-                  ? closedCaptionRow(
-                      "YouTube", Colors.grey, Icons.ondemand_video_sharp)
-                  : isScopedStorage()
-                      ? closedCaptionRow(
-                          "Scoped Storage", Colors.grey, Icons.cached_sharp)
-                      : closedCaptionRow(
-                          "Local Storage", Colors.grey, Icons.storage_sharp)
+              if (isNetwork())
+                closedCaptionRow(
+                    "YouTube", Colors.grey, Icons.ondemand_video_sharp)
+              else if (isScopedStorage())
+                closedCaptionRow(
+                    "Scoped Storage", Colors.grey, Icons.cached_sharp)
+              else if (isReader())
+                closedCaptionRow(
+                    "ッツ Ebook Reader", Colors.grey, Icons.auto_stories)
+              else
+                closedCaptionRow(
+                    "Local Storage", Colors.grey, Icons.storage_sharp)
             ],
           ),
         ),
@@ -2828,13 +3191,15 @@ class _HistoryState extends State<History> {
   _HistoryState(this.channelCallback);
 
   void setStateFromResult() {
-    setState(() {});
+    setState(() {
+      unlockLandscape();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    List<VideoHistory> histories = getVideoHistory().reversed.toList();
-    List<VideoHistoryPosition> historyPositions =
+    List<HistoryItem> histories = getVideoHistory().reversed.toList();
+    List<HistoryItemPosition> historyPositions =
         getVideoHistoryPosition().reversed.toList();
 
     Widget centerMessage(String text, IconData icon, bool dots) {
@@ -2895,8 +3260,8 @@ class _HistoryState extends State<History> {
         key: UniqueKey(),
         itemCount: histories.length,
         itemBuilder: (BuildContext context, int index) {
-          VideoHistory history = histories[index];
-          VideoHistoryPosition position = historyPositions[index];
+          HistoryItem history = histories[index];
+          HistoryItemPosition position = historyPositions[index];
 
           print("HISTORY LISTED: $history");
 
@@ -3191,7 +3556,9 @@ class _ClipboardState extends State<ClipboardMenu> {
   }
 
   void setStateFromResult() {
-    setState(() {});
+    setState(() {
+      unlockLandscape();
+    });
   }
 }
 
@@ -3347,14 +3714,25 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                         textAlign: TextAlign.center,
                       ),
                       if (entry.contextDataSource != "-1")
-                        Text(
-                          "from video ",
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
+                        if (entry.contextDataSource
+                            .startsWith("https://ttu-ebook.web.app/"))
+                          Text(
+                            "from book ",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                            textAlign: TextAlign.center,
+                          )
+                        else
+                          Text(
+                            "from video ",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          textAlign: TextAlign.center,
-                        ),
                       Text(
                         "found for",
                         style: TextStyle(
@@ -3514,14 +3892,25 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                               textAlign: TextAlign.center,
                             ),
                             if (entry.contextDataSource != "-1")
-                              Text(
-                                "from video ",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey[400],
+                              if (entry.contextDataSource
+                                  .startsWith("https://ttu-ebook.web.app/"))
+                                Text(
+                                  "from book ",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                )
+                              else
+                                Text(
+                                  "from video ",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                  textAlign: TextAlign.center,
                                 ),
-                                textAlign: TextAlign.center,
-                              ),
                             Text(
                               "found for",
                               style: TextStyle(
@@ -3590,27 +3979,49 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                   style: TextStyle(color: Colors.white),
                 ),
                 onPressed: () async {
-                  JidoujishoPlayerMode playerMode;
-                  if (results.contextDataSource.startsWith("https://") ||
-                      results.contextDataSource.startsWith("http://")) {
-                    playerMode = JidoujishoPlayerMode.youtubeStream;
-                  } else {
-                    playerMode = JidoujishoPlayerMode.localFile;
-                  }
-
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => JidoujishoPlayer(
-                        playerMode: playerMode,
-                        url: results.contextDataSource,
-                        initialPosition: results.contextPosition,
+                  if (entry.contextDataSource
+                      .startsWith("https://ttu-ebook.web.app/")) {
+                    SystemChrome.setEnabledSystemUIOverlays([]);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Reader(
+                            entry.contextDataSource, results.contextPosition),
                       ),
-                    ),
-                  ).then((returnValue) {
-                    stateCallback();
-                  });
+                    ).then((result) {
+                      setState(() {
+                        bool canResume;
+                        if (isLastSetVideo()) {
+                          canResume = getVideoHistory().isNotEmpty;
+                        } else {
+                          canResume = getBookHistory().isNotEmpty;
+                        }
+                        gIsResumable.value = canResume;
+                      });
+                    });
+                  } else {
+                    JidoujishoPlayerMode playerMode;
+                    if (results.contextDataSource.startsWith("https://") ||
+                        results.contextDataSource.startsWith("http://")) {
+                      playerMode = JidoujishoPlayerMode.youtubeStream;
+                    } else {
+                      playerMode = JidoujishoPlayerMode.localFile;
+                    }
+
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => JidoujishoPlayer(
+                          playerMode: playerMode,
+                          url: results.contextDataSource,
+                          initialPosition: results.contextPosition,
+                        ),
+                      ),
+                    ).then((returnValue) {
+                      stateCallback();
+                    });
+                  }
                 },
               ),
             TextButton(
@@ -3801,6 +4212,7 @@ class Creator extends StatefulWidget {
   final DictionaryEntry initialDictionaryEntry;
   final File initialFile;
   final bool isShared;
+  final bool isReaderExport;
   final VoidCallback resetMenu;
   final ValueNotifier<bool> readerFlipflop;
 
@@ -3809,6 +4221,7 @@ class Creator extends StatefulWidget {
     this.initialDictionaryEntry,
     this.initialFile,
     this.isShared,
+    this.isReaderExport,
     this.resetMenu,
     this.readerFlipflop,
   );
@@ -3818,6 +4231,7 @@ class Creator extends StatefulWidget {
         this.initialDictionaryEntry,
         this.initialFile,
         this.isShared,
+        this.isReaderExport,
         this.resetMenu,
         this.readerFlipflop,
       );
@@ -3828,6 +4242,7 @@ class _CreatorState extends State<Creator> {
   final DictionaryEntry initialDictionaryEntry;
   final File initialFile;
   final bool isShared;
+  final bool isReaderExport;
   final VoidCallback resetMenu;
   final ValueNotifier<bool> readerFlipflop;
 
@@ -3859,6 +4274,7 @@ class _CreatorState extends State<Creator> {
     this.initialDictionaryEntry,
     this.initialFile,
     this.isShared,
+    this.isReaderExport,
     this.resetMenu,
     this.readerFlipflop,
   );
@@ -4884,6 +5300,8 @@ class _CreatorState extends State<Creator> {
                         if (isShared) {
                           MinimizeApp.minimizeApp();
                           resetMenu();
+                        } else if (isReaderExport) {
+                          Navigator.pop(context);
                         } else {
                           Future.delayed(Duration(seconds: 2), () {
                             _justExported.value = false;

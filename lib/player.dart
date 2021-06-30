@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:http/http.dart' as http;
+import 'package:jidoujisho/util.dart';
 import 'package:path/path.dart' as path;
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -67,8 +68,6 @@ class JidoujishoPlayerState extends State<JidoujishoPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    lockLandscape();
-
     switch (playerMode) {
       case JidoujishoPlayerMode.localFile:
         return localPlayer(context, url, initialPosition);
@@ -86,7 +85,6 @@ class JidoujishoPlayerState extends State<JidoujishoPlayer> {
 
   @override
   void dispose() {
-    unlockLandscape();
     super.dispose();
   }
 
@@ -134,7 +132,6 @@ class JidoujishoPlayerState extends State<JidoujishoPlayer> {
     File videoFile,
     int initialPosition,
   ) {
-    lockLandscape();
     print("VIDEO FILE: ${videoFile.path}");
 
     return FutureBuilder(
@@ -160,6 +157,8 @@ class JidoujishoPlayerState extends State<JidoujishoPlayer> {
             }
             String defaultSubtitles = sanitizeSrtNewlines(unsanitized);
 
+            lockLandscape();
+
             return VideoPlayer(
               playerMode: JidoujishoPlayerMode.localFile,
               videoFile: videoFile,
@@ -173,6 +172,7 @@ class JidoujishoPlayerState extends State<JidoujishoPlayer> {
   }
 
   Widget networkPlayer(String streamUrl) {
+    lockLandscape();
     return VideoPlayer(
       playerMode: JidoujishoPlayerMode.networkStream,
       streamUrl: streamUrl,
@@ -183,8 +183,6 @@ class JidoujishoPlayerState extends State<JidoujishoPlayer> {
   }
 
   Widget youtubePlayer(Video video, int initialPosition) {
-    lockLandscape();
-
     String videoID = "";
 
     try {
@@ -225,6 +223,8 @@ class JidoujishoPlayerState extends State<JidoujishoPlayer> {
                       webSubtitles = timedTextToSRT(snapshot.data);
                       internalSubs = extractWebSubtitle(webSubtitles);
                     }
+
+                    lockLandscape();
 
                     return VideoPlayer(
                       playerMode: JidoujishoPlayerMode.youtubeStream,
@@ -457,8 +457,6 @@ class _VideoPlayerState extends State<VideoPlayer>
     }
     durationTimer.cancel();
     visibilityTimer.cancel();
-
-    unlockLandscape();
     super.dispose();
   }
 
@@ -579,8 +577,9 @@ class _VideoPlayerState extends State<VideoPlayer>
       historyNotSet = false;
 
       if (playerMode == JidoujishoPlayerMode.localFile) {
+        setLastSetVideo();
         addVideoHistory(
-          VideoHistory(
+          HistoryItem(
             videoFile.path,
             path.basenameWithoutExtension(videoFile.path),
             videoFile.path,
@@ -592,15 +591,16 @@ class _VideoPlayerState extends State<VideoPlayer>
 
         if (initialPosition == -1) {
           addVideoHistoryPosition(
-            VideoHistoryPosition(
+            HistoryItemPosition(
               videoFile.path,
               0,
             ),
           );
         }
       } else if (playerMode == JidoujishoPlayerMode.youtubeStream) {
+        setLastSetVideo();
         addVideoHistory(
-          VideoHistory(
+          HistoryItem(
             streamData.videoURL,
             streamData.title,
             streamData.channel,
@@ -612,7 +612,7 @@ class _VideoPlayerState extends State<VideoPlayer>
 
         if (initialPosition == -1) {
           addVideoHistoryPosition(
-            VideoHistoryPosition(
+            HistoryItemPosition(
               videoFile.path,
               0,
             ),
@@ -627,14 +627,14 @@ class _VideoPlayerState extends State<VideoPlayer>
             getVideoPlayerController().value.duration.inSeconds - 5) {
       if (playerMode == JidoujishoPlayerMode.localFile) {
         addVideoHistoryPosition(
-          VideoHistoryPosition(
+          HistoryItemPosition(
             videoFile.path,
             getVideoPlayerController().value.position.inSeconds,
           ),
         );
       } else if (playerMode == JidoujishoPlayerMode.youtubeStream) {
         addVideoHistoryPosition(
-          VideoHistoryPosition(
+          HistoryItemPosition(
             streamData.videoURL,
             getVideoPlayerController().value.position.inSeconds,
           ),
@@ -804,7 +804,6 @@ class _VideoPlayerState extends State<VideoPlayer>
   Future<bool> _onWillPop() async {
     if (getVideoPlayerController().value.isEnded) {
       Navigator.of(context).popUntil((route) => route.isFirst);
-      unlockLandscape();
       return false;
     }
 
@@ -812,7 +811,7 @@ class _VideoPlayerState extends State<VideoPlayer>
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.zero,
       ),
-      title: new Text('End Playback?'),
+      title: new Text('Exit Player?'),
       actions: <Widget>[
         new TextButton(
           child: Text(
@@ -844,7 +843,6 @@ class _VideoPlayerState extends State<VideoPlayer>
           ),
           onPressed: () async {
             Navigator.of(context).popUntil((route) => route.isFirst);
-            unlockLandscape();
           },
         ),
       ],

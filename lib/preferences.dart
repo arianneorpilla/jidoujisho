@@ -302,6 +302,14 @@ bool getSelectMode() {
   return gSharedPrefs.getBool("selectMode") ?? false;
 }
 
+Future<void> useMonolingual() async {
+  await gSharedPrefs.setBool("monolingualMode", true);
+}
+
+Future<void> useBilingual() async {
+  await gSharedPrefs.setBool("monolingualMode", false);
+}
+
 Future<void> toggleMonolingualMode() async {
   await gSharedPrefs.setBool("monolingualMode", !getMonolingualMode());
 }
@@ -324,6 +332,26 @@ Future<void> toggleLatinFilterMode() async {
 
 bool getLatinFilterMode() {
   return gSharedPrefs.getBool("latinFilterMode") ?? false;
+}
+
+bool getLastSetMediaType() {
+  return gSharedPrefs.getBool("lastSetMediaType") ?? false;
+}
+
+void setLastSetVideo() {
+  gSharedPrefs.setBool("lastSetMediaType", false);
+}
+
+void setLastSetBook() {
+  gSharedPrefs.setBool("lastSetMediaType", true);
+}
+
+bool isLastSetBook() {
+  return (getLastSetMediaType() == true);
+}
+
+bool isLastSetVideo() {
+  return (getLastSetMediaType() == false);
 }
 
 Future<void> toggleListeningComprehensionMode() async {
@@ -452,21 +480,21 @@ Future setBlurWidgetOptions(BlurWidgetOptions blurWidgetOptions) async {
   await gSharedPrefs.setBool("blurWidgetVisible", blurWidgetOptions.visible);
 }
 
-List<VideoHistory> getVideoHistory() {
+List<HistoryItem> getVideoHistory() {
   String prefsVideoHistory =
       gSharedPrefs.getString('videoHistoryPrefs') ?? '[]';
   List<dynamic> history = (jsonDecode(prefsVideoHistory) as List<dynamic>);
 
-  List<VideoHistory> histories = [];
+  List<HistoryItem> histories = [];
   history.forEach((entry) {
-    VideoHistory videoHistory = VideoHistory.fromMap(entry);
+    HistoryItem videoHistory = HistoryItem.fromMap(entry);
     histories.add(videoHistory);
   });
 
   return histories;
 }
 
-Future<void> setVideoHistory(List<VideoHistory> videoHistories) async {
+Future<void> setVideoHistory(List<HistoryItem> videoHistories) async {
   List<Map<String, dynamic>> maps = [];
   videoHistories.forEach((entry) {
     maps.add(entry.toMap());
@@ -475,8 +503,8 @@ Future<void> setVideoHistory(List<VideoHistory> videoHistories) async {
   await gSharedPrefs.setString('videoHistoryPrefs', jsonEncode(maps));
 }
 
-Future<void> addVideoHistory(VideoHistory videoHistory) async {
-  List<VideoHistory> videoHistories = getVideoHistory();
+Future<void> addVideoHistory(HistoryItem videoHistory) async {
+  List<HistoryItem> videoHistories = getVideoHistory();
 
   if (videoHistory.thumbnail == null) {
     File videoFile = File(videoHistory.url);
@@ -518,12 +546,13 @@ Future<void> addVideoHistory(VideoHistory videoHistory) async {
     videoHistories = videoHistories.sublist(videoHistories.length - 20);
   }
 
+  print("ADDED");
   await setVideoHistory(videoHistories);
 }
 
-Future<void> removeVideoHistory(VideoHistory videoHistory) async {
-  List<VideoHistory> videoHistories = getVideoHistory();
-  List<VideoHistoryPosition> videoHistoryPositions = getVideoHistoryPosition();
+Future<void> removeVideoHistory(HistoryItem videoHistory) async {
+  List<HistoryItem> videoHistories = getVideoHistory();
+  List<HistoryItemPosition> videoHistoryPositions = getVideoHistoryPosition();
 
   videoHistories.removeWhere((entry) => entry.url == videoHistory.url);
   videoHistoryPositions.removeWhere((entry) => entry.url == videoHistory.url);
@@ -538,14 +567,14 @@ Future<void> removeVideoHistory(VideoHistory videoHistory) async {
   await setVideoHistoryPosition(videoHistoryPositions);
 }
 
-List<VideoHistoryPosition> getVideoHistoryPosition() {
+List<HistoryItemPosition> getVideoHistoryPosition() {
   String prefsVideoHistory =
       gSharedPrefs.getString('videoHistoryPositionPrefs') ?? '[]';
   List<dynamic> history = (jsonDecode(prefsVideoHistory) as List<dynamic>);
 
-  List<VideoHistoryPosition> histories = [];
+  List<HistoryItemPosition> histories = [];
   history.forEach((entry) {
-    VideoHistoryPosition videoHistory = VideoHistoryPosition.fromMap(entry);
+    HistoryItemPosition videoHistory = HistoryItemPosition.fromMap(entry);
     histories.add(videoHistory);
   });
 
@@ -553,7 +582,7 @@ List<VideoHistoryPosition> getVideoHistoryPosition() {
 }
 
 Future<void> setVideoHistoryPosition(
-    List<VideoHistoryPosition> videoHistories) async {
+    List<HistoryItemPosition> videoHistories) async {
   List<Map<String, dynamic>> maps = [];
   videoHistories.forEach((entry) {
     maps.add(entry.toMap());
@@ -562,8 +591,8 @@ Future<void> setVideoHistoryPosition(
   await gSharedPrefs.setString('videoHistoryPositionPrefs', jsonEncode(maps));
 }
 
-Future<void> addVideoHistoryPosition(VideoHistoryPosition videoHistory) async {
-  List<VideoHistoryPosition> videoHistories = getVideoHistoryPosition();
+Future<void> addVideoHistoryPosition(HistoryItemPosition videoHistory) async {
+  List<HistoryItemPosition> videoHistories = getVideoHistoryPosition();
 
   videoHistories.removeWhere((entry) => entry.url == videoHistory.url);
   videoHistories.add(videoHistory);
@@ -576,8 +605,8 @@ Future<void> addVideoHistoryPosition(VideoHistoryPosition videoHistory) async {
 }
 
 Future<void> removeVideoHistoryPosition(
-    VideoHistoryPosition videoHistory) async {
-  List<VideoHistoryPosition> videoHistories = getVideoHistoryPosition();
+    HistoryItemPosition videoHistory) async {
+  List<HistoryItemPosition> videoHistories = getVideoHistoryPosition();
 
   videoHistories.removeWhere((entry) => entry.url == videoHistory.url);
   await setVideoHistoryPosition(videoHistories);
@@ -690,4 +719,133 @@ YouTubeQualityOption getPreferredYouTubeQuality(
             qualities.first;
       }
   }
+}
+
+List<HistoryItem> getBookHistory() {
+  String prefsBookHistory = gSharedPrefs.getString('bookHistoryPrefs') ?? '[]';
+  List<dynamic> history = (jsonDecode(prefsBookHistory) as List<dynamic>);
+
+  List<HistoryItem> histories = [];
+  history.forEach((entry) {
+    HistoryItem bookHistory = HistoryItem.fromMap(entry);
+    histories.add(bookHistory);
+  });
+
+  return histories;
+}
+
+Future<void> setBookHistory(List<HistoryItem> bookHistories) async {
+  List<Map<String, dynamic>> maps = [];
+  bookHistories.forEach((entry) {
+    maps.add(entry.toMap());
+  });
+
+  await gSharedPrefs.setString('bookHistoryPrefs', jsonEncode(maps));
+}
+
+Future<void> addBookHistory(HistoryItem bookHistory) async {
+  List<HistoryItem> bookHistories = getBookHistory();
+
+  if (bookHistory.thumbnail == null) {
+    File bookFile = File(bookHistory.url);
+    String photoFileNameDir =
+        "$gAppDirPath/" + path.basenameWithoutExtension(bookFile.path) + ".jpg";
+    File photoFile = File(photoFileNameDir);
+    if (photoFile.existsSync()) {
+      photoFile.deleteSync();
+    }
+
+    String formatted = getTimestampFromDuration(Duration(seconds: 5));
+
+    final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
+
+    String inputPath = bookHistory.url;
+    String exportPath = "\"$photoFileNameDir\"";
+
+    String command =
+        "-loglevel quiet -ss $formatted -y -i \"$inputPath\" -frames:v 1 -q:v 2 $exportPath";
+
+    await _flutterFFmpeg.execute(command);
+
+    bookHistory.thumbnail = photoFileNameDir;
+  }
+
+  bookHistories.removeWhere((entry) => entry.url == bookHistory.url);
+  bookHistories.add(bookHistory);
+
+  if (bookHistories.length >= 20) {
+    bookHistories.sublist(0, bookHistories.length - 20).forEach((entry) {
+      if (!entry.thumbnail.startsWith("http")) {
+        File photoFile = File(entry.thumbnail);
+        if (photoFile.existsSync()) {
+          photoFile.deleteSync();
+        }
+      }
+    });
+    bookHistories = bookHistories.sublist(bookHistories.length - 20);
+  }
+
+  print("ADDED");
+  await setBookHistory(bookHistories);
+}
+
+Future<void> removeBookHistory(HistoryItem bookHistory) async {
+  List<HistoryItem> bookHistories = getBookHistory();
+  List<HistoryItemPosition> bookHistoryPositions = getBookHistoryPosition();
+
+  bookHistories.removeWhere((entry) => entry.url == bookHistory.url);
+  bookHistoryPositions.removeWhere((entry) => entry.url == bookHistory.url);
+  if (!bookHistory.thumbnail.startsWith("http")) {
+    File photoFile = File(bookHistory.thumbnail);
+    if (photoFile.existsSync()) {
+      photoFile.deleteSync();
+    }
+  }
+
+  await setBookHistory(bookHistories);
+  await setBookHistoryPosition(bookHistoryPositions);
+}
+
+List<HistoryItemPosition> getBookHistoryPosition() {
+  String prefsBookHistory =
+      gSharedPrefs.getString('bookHistoryPositionPrefs') ?? '[]';
+  List<dynamic> history = (jsonDecode(prefsBookHistory) as List<dynamic>);
+
+  List<HistoryItemPosition> histories = [];
+  history.forEach((entry) {
+    HistoryItemPosition bookHistory = HistoryItemPosition.fromMap(entry);
+    histories.add(bookHistory);
+  });
+
+  return histories;
+}
+
+Future<void> setBookHistoryPosition(
+    List<HistoryItemPosition> bookHistories) async {
+  List<Map<String, dynamic>> maps = [];
+  bookHistories.forEach((entry) {
+    maps.add(entry.toMap());
+  });
+
+  await gSharedPrefs.setString('bookHistoryPositionPrefs', jsonEncode(maps));
+}
+
+Future<void> addBookHistoryPosition(HistoryItemPosition bookHistory) async {
+  List<HistoryItemPosition> bookHistories = getBookHistoryPosition();
+
+  bookHistories.removeWhere((entry) => entry.url == bookHistory.url);
+  bookHistories.add(bookHistory);
+
+  if (bookHistories.length >= 20) {
+    bookHistories = bookHistories.sublist(bookHistories.length - 20);
+  }
+
+  await setBookHistoryPosition(bookHistories);
+}
+
+Future<void> removeBookHistoryPosition(HistoryItemPosition bookHistory) async {
+  List<HistoryItemPosition> bookHistories = getBookHistoryPosition();
+
+  bookHistories.removeWhere((entry) => entry.url == bookHistory.url);
+  await setBookHistoryPosition(bookHistories);
 }

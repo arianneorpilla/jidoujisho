@@ -4,20 +4,44 @@ import 'dart:io';
 
 import 'package:auto_orientation/auto_orientation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:html/parser.dart' as parser;
 import 'package:html/dom.dart' as dom;
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
+import 'package:jidoujisho/preferences.dart';
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:path/path.dart' as path;
 import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
 import 'package:ve_dart/ve_dart.dart';
-import 'package:wakelock/wakelock.dart';
 
 import 'package:jidoujisho/globals.dart';
-import 'package:jidoujisho/preferences.dart';
+import 'package:wakelock/wakelock.dart';
+
+void unlockLandscape() {
+  bool canResume;
+  if (isLastSetVideo()) {
+    canResume = getVideoHistory().isNotEmpty;
+  } else {
+    canResume = getBookHistory().isNotEmpty;
+  }
+  gIsResumable.value = canResume;
+
+  Wakelock.disable();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
+  SystemChrome.setEnabledSystemUIOverlays(
+      [SystemUiOverlay.bottom, SystemUiOverlay.top]);
+}
+
+void lockLandscape() {
+  Wakelock.enable();
+  AutoOrientation.landscapeAutoMode(forceSensor: true);
+  SystemChrome.setEnabledSystemUIOverlays([]);
+}
 
 enum JidoujishoPlayerMode {
   localFile,
@@ -25,11 +49,11 @@ enum JidoujishoPlayerMode {
   networkStream,
 }
 
-class VideoHistoryPosition {
+class HistoryItemPosition {
   String url;
   int position;
 
-  VideoHistoryPosition(this.url, this.position);
+  HistoryItemPosition(this.url, this.position);
 
   Map<String, dynamic> toMap() {
     return {
@@ -38,7 +62,7 @@ class VideoHistoryPosition {
     };
   }
 
-  VideoHistoryPosition.fromMap(Map<String, dynamic> map) {
+  HistoryItemPosition.fromMap(Map<String, dynamic> map) {
     this.url = map['url'];
     this.position = map['position'];
   }
@@ -49,7 +73,7 @@ class VideoHistoryPosition {
   }
 }
 
-class VideoHistory {
+class HistoryItem {
   String url;
   String heading;
   String subheading;
@@ -57,7 +81,7 @@ class VideoHistory {
   String channelId;
   int duration;
 
-  VideoHistory(
+  HistoryItem(
     this.url,
     this.heading,
     this.subheading,
@@ -77,7 +101,7 @@ class VideoHistory {
     };
   }
 
-  VideoHistory.fromMap(Map<String, dynamic> map) {
+  HistoryItem.fromMap(Map<String, dynamic> map) {
     this.url = map['url'];
     this.heading = map['heading'];
     this.subheading = map['subheading'];
@@ -645,25 +669,6 @@ String stripLatinCharactersFromText(String subtitleText) {
   subtitleText = splitText.join("\n");
 
   return subtitleText;
-}
-
-void unlockLandscape() {
-  gIsResumable = ValueNotifier<bool>(getVideoHistory().isNotEmpty);
-  Wakelock.disable();
-  SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.landscapeLeft,
-    DeviceOrientation.landscapeRight,
-  ]);
-  SystemChrome.setEnabledSystemUIOverlays(
-      [SystemUiOverlay.bottom, SystemUiOverlay.top]);
-  DefaultCacheManager().emptyCache();
-}
-
-void lockLandscape() {
-  Wakelock.enable();
-  AutoOrientation.landscapeAutoMode(forceSensor: true);
-  SystemChrome.setEnabledSystemUIOverlays([]);
 }
 
 class BlurWidgetOptions {
