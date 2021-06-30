@@ -108,6 +108,91 @@ List<Channel> getChannelCache() {
   return channels;
 }
 
+Future<void> setTrendingChannelCache(List<Channel> channels) async {
+  List<Map<String, dynamic>> maps = [];
+  channels.forEach((channel) {
+    maps.add(channelToMap(channel));
+  });
+
+  await gSharedPrefs.setString('trendingChannelCache', jsonEncode(maps));
+}
+
+List<Channel> getTrendingChannelCache() {
+  String prefsChannelCache =
+      gSharedPrefs.getString('trendingChannelCache') ?? '[]';
+  List<dynamic> maps = (jsonDecode(prefsChannelCache) as List<dynamic>);
+
+  List<Channel> channels = [];
+  maps.forEach((map) {
+    Channel channel = mapToChannel(map);
+    channels.add(channel);
+  });
+
+  return channels;
+}
+
+Map<String, dynamic> videoToMap(Video video) {
+  return {
+    "id": video.id.toString() ?? "",
+    "title": video.title ?? "",
+    "author": video.author ?? "",
+    "channelId": video.channelId.toString() ?? "",
+    "description": video.description ?? "",
+    "duration": video.duration.inMilliseconds ?? 0,
+    "thumbnails": video.thumbnails.mediumResUrl,
+  };
+}
+
+Video mapToVideo(Map<String, dynamic> map) {
+  VideoId id = VideoId.fromString(map['id']);
+  String title = map['title'];
+  String author = map['author'];
+  ChannelId channelId = ChannelId.fromString(map['channelId']);
+  DateTime uploadDate = DateTime.fromMillisecondsSinceEpoch(0);
+  DateTime publishDate = DateTime.fromMillisecondsSinceEpoch(0);
+  String description = map['description'];
+  Duration duration = Duration(milliseconds: map['duration']);
+  ThumbnailSet thumbnails = ThumbnailSet(map['id']);
+
+  return Video(
+    id,
+    title,
+    author,
+    channelId,
+    uploadDate,
+    publishDate,
+    description,
+    duration,
+    thumbnails,
+    [],
+    Engagement(0, 0, 0),
+    false,
+  );
+}
+
+Future<void> setTrendingVideosCache(List<Video> videos) async {
+  List<Map<String, dynamic>> maps = [];
+  videos.forEach((video) {
+    maps.add(videoToMap(video));
+  });
+
+  await gSharedPrefs.setString('trendingVideosCache', jsonEncode(maps));
+}
+
+List<Video> getTrendingVideosCache() {
+  String prefsChannelCache =
+      gSharedPrefs.getString('trendingVideosCache') ?? '[]';
+  List<dynamic> maps = (jsonDecode(prefsChannelCache) as List<dynamic>);
+
+  List<Video> videos = [];
+  maps.forEach((map) {
+    Video video = mapToVideo(map);
+    videos.add(video);
+  });
+
+  return videos;
+}
+
 List<String> getSearchHistory() {
   String prefsHistory = gSharedPrefs.getString('searchHistory') ?? '[]';
   List<String> history =
@@ -180,6 +265,29 @@ Future<void> setPreferredQuality(int preferredQualityIndex) async {
 
 int getPreferredQuality() {
   return gSharedPrefs.getInt("preferredQuality") ?? 0;
+}
+
+Future<void> setLastMenuSeen(int lastMenuSeen) async {
+  await gSharedPrefs.setInt("lastMenuSeen", lastMenuSeen);
+}
+
+int getLastMenuSeen() {
+  return gSharedPrefs.getInt("lastMenuSeen") ?? 0;
+}
+
+Future<void> setTrendingExpiration() async {
+  await gSharedPrefs.setInt(
+      "trendingExpiration",
+      DateTime.now().millisecondsSinceEpoch +
+          Duration(hours: 3).inMilliseconds);
+}
+
+int getTrendingExpiration() {
+  return gSharedPrefs.getInt("trendingExpiration") ?? 0;
+}
+
+bool isTrendingExpired() {
+  return getTrendingExpiration() < DateTime.now().millisecondsSinceEpoch;
 }
 
 Future<void> toggleSelectMode() async {
@@ -272,6 +380,14 @@ Future<void> setHasClosedCaptions(String videoID, bool hasCaptions) async {
 
 bool getHasClosedCaptions(String videoID) {
   return gSharedPrefs.getBool("hasCC_$videoID");
+}
+
+void maintainTrendingCache() {
+  if (isTrendingExpired()) {
+    setTrendingVideosCache([]);
+    setTrendingChannelCache([]);
+    print("INVALIDATING TRENDING CACHE");
+  }
 }
 
 void maintainClosedCaptions() {

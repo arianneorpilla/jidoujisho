@@ -38,7 +38,7 @@ import 'package:jidoujisho/preferences.dart';
 import 'package:jidoujisho/util.dart';
 import 'package:jidoujisho/youtube.dart';
 
-typedef void ChannelCallback(String id, String name);
+typedef void ChannelCallback(String id, String name, bool fromMenu);
 typedef void CreatorCallback({
   String sentence,
   DictionaryEntry dictionaryEntry,
@@ -72,6 +72,8 @@ void main() async {
   gSharedPrefs = await SharedPreferences.getInstance();
   gIsResumable = ValueNotifier<bool>(getVideoHistory().isNotEmpty);
   gIsSelectMode = ValueNotifier<bool>(getSelectMode());
+
+  maintainTrendingCache();
   maintainClosedCaptions();
 
   await AudioService.connect();
@@ -80,7 +82,7 @@ void main() async {
   );
 
   initializeKanjiumEntries().then((entries) {
-    gKanjiumDictionary = entries;
+    gKanjiumDictionary.value = entries;
   });
 
   runApp(App());
@@ -212,6 +214,7 @@ class _HomeState extends State<Home> {
   ValueNotifier<double> _dictionaryScrollOffset = ValueNotifier<double>(0);
   bool _isSearching = false;
   bool _isChannelView = false;
+  bool _isChannelFromMenu = false;
   bool _isCreatorView = false;
   bool _isCreatorShared = false;
 
@@ -224,7 +227,7 @@ class _HomeState extends State<Home> {
   File _creatorFile;
 
   String _searchQuery = "";
-  int _selectedIndex = 0;
+  int _selectedIndex = getLastMenuSeen();
   String _selectedChannelName = "";
   ValueNotifier<List<String>> _searchSuggestions =
       ValueNotifier<List<String>>([]);
@@ -417,6 +420,7 @@ class _HomeState extends State<Home> {
           );
         } else {
           _selectedIndex = index;
+          setLastMenuSeen(index);
           if (_isSearching || _isChannelView || _isCreatorView) {
             _isSearching = false;
             _isChannelView = false;
@@ -468,10 +472,6 @@ class _HomeState extends State<Home> {
             icon: Icon(Icons.whatshot_sharp),
             label: 'Trending',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.subscriptions_sharp),
-            label: 'Channels',
-          ),
         ],
       );
     }
@@ -485,6 +485,10 @@ class _HomeState extends State<Home> {
         BottomNavigationBarItem(
           icon: Icon(Icons.auto_stories),
           label: 'Dictionary',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.chrome_reader_mode),
+          label: 'Reader',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.folder_sharp),
@@ -543,7 +547,13 @@ class _HomeState extends State<Home> {
         (_isCreatorView && !_isCreatorShared)) {
       setState(() {
         _isSearching = false;
-        _isChannelView = false;
+        if (_isChannelFromMenu) {
+          _isChannelView = true;
+          _isChannelFromMenu = false;
+        } else {
+          _isChannelView = false;
+          _isChannelFromMenu = false;
+        }
         _isCreatorView = false;
         _searchQuery = "";
         _searchSuggestions.value = [];
@@ -577,7 +587,13 @@ class _HomeState extends State<Home> {
           } else {
             setState(() {
               _isSearching = false;
-              _isChannelView = false;
+              if (_isChannelFromMenu) {
+                _isChannelView = true;
+                _isChannelFromMenu = false;
+              } else {
+                _isChannelView = false;
+                _isChannelFromMenu = false;
+              }
               _isCreatorView = false;
               _searchQuery = "";
               _searchSuggestions.value = [];
@@ -645,6 +661,24 @@ class _HomeState extends State<Home> {
   }
 
   Widget buildChannelNameRow() {
+    if (_searchQuery.isEmpty) {
+      return Row(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Flexible(
+            child: Text(
+              "Channels",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.clip,
+            ),
+          ),
+        ],
+      );
+    }
     bool isListed = isChannelInList(_searchQuery);
 
     Widget buildListButton() {
@@ -755,7 +789,7 @@ class _HomeState extends State<Home> {
       false,
     );
 
-    if (_isChannelView && _searchQuery != null) {
+    if (_isChannelView && _searchQuery.isNotEmpty) {
       return LazyResults(
         _searchQuery,
         setChannelVideoSearch,
@@ -913,12 +947,14 @@ class _HomeState extends State<Home> {
   void setChannelVideoSearch(
     String channelID,
     String channelName,
+    bool fromMenu,
   ) {
     setState(() {
       _isChannelView = true;
       _isSearching = false;
       _searchQuery = channelID;
       _selectedChannelName = channelName;
+      _isChannelFromMenu = fromMenu;
     });
   }
 
@@ -1162,7 +1198,15 @@ class _HomeState extends State<Home> {
                 addAutomaticKeepAlives: true,
                 itemCount: snapshot.data.length,
                 itemBuilder: (BuildContext context, int index) {
-                  Video result = results[index];
+                  if (index == 0) {
+                    if (_isSearching) {
+                      return SizedBox.shrink();
+                    } else {
+                      return showChannelCarousel(results);
+                    }
+                  }
+
+                  Video result = results[index - 1];
                   print("VIDEO LISTED: $result");
 
                   return YouTubeResult(
@@ -1175,10 +1219,144 @@ class _HomeState extends State<Home> {
                         : null,
                     index,
                     true,
+                    false,
                   );
                 },
               ),
             );
+        }
+      },
+    );
+  }
+
+  Widget showChannelCarousel(List<Video> trendingVideos) {
+    Widget buildNewChannelColumn() {
+      String channelTitle = "Channels";
+
+      Widget displayThumbnail() {
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(50.0),
+          child: Container(
+            alignment: Alignment.center,
+            height: 64,
+            width: 64,
+            color: Colors.grey[900],
+            child: Icon(
+              Icons.subscriptions_sharp,
+              color: Colors.grey,
+              size: 32,
+            ),
+          ),
+        );
+      }
+
+      Widget displayVideoInformation() {
+        return Expanded(
+          child: Container(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  channelTitle,
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 12,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
+      return InkWell(
+        child: Container(
+          width: 80,
+          padding: EdgeInsets.all(4.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              displayThumbnail(),
+              displayVideoInformation(),
+            ],
+          ),
+        ),
+        onTap: () {
+          setState(() {
+            _isChannelView = true;
+            _isSearching = false;
+            _searchQuery = "";
+            _selectedChannelName = "Channels";
+          });
+        },
+      );
+    }
+
+    Widget queryMessage = Container(
+      height: 100,
+      child: Row(children: [buildNewChannelColumn()]),
+    );
+    Widget errorMessage = Container(
+      height: 100,
+      child: Row(children: [buildNewChannelColumn()]),
+    );
+    Widget emptyMessage = Container(
+      height: 100,
+      child: Row(children: [buildNewChannelColumn()]),
+    );
+
+    return FutureBuilder(
+      future: gTrendingChannelCache.future,
+      builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+        var results = snapshot.data;
+
+        switch (snapshot.connectionState) {
+          case ConnectionState.waiting:
+          case ConnectionState.none:
+            return queryMessage;
+          default:
+            if (!snapshot.hasData) {
+              gChannelCache = AsyncMemoizer();
+              return errorMessage;
+            }
+
+            if (snapshot.data.isNotEmpty) {
+              ScrollController scrollController = ScrollController();
+              gCurrentScrollbar = scrollController;
+
+              return Container(
+                height: 100,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  controller: scrollController,
+                  addAutomaticKeepAlives: true,
+                  itemCount: snapshot.data.length + 1,
+                  itemBuilder: (BuildContext context, int index) {
+                    if (index == 0) {
+                      return buildNewChannelColumn();
+                    }
+
+                    Channel result = results[index - 1];
+                    print("CHANNEL LISTED: $result");
+
+                    return ChannelHorizontalResult(
+                      result,
+                      setChannelVideoSearch,
+                      setStateFromResult,
+                      index,
+                    );
+                  },
+                ),
+              );
+            } else {
+              return Column(children: [
+                buildNewChannelRow(),
+                Expanded(child: emptyMessage),
+              ]);
+            }
         }
       },
     );
@@ -1377,9 +1555,9 @@ class _HomeState extends State<Home> {
         break;
       case "About this app":
         const String legalese =
-            "A mobile video player and card creation toolkit tailored for language learners.\n\n" +
+            "A mobile video player, reader assistant and card creation toolkit tailored for language learners.\n\n" +
                 "Built for the Japanese language learning community by Leo Rafael Orpilla. " +
-                "Bilingual definitions queried from Jisho.org. Monolingual definitions queried from Sora. Pitch accent patterns from Kanjium. Video streaming via YouTube. Image search via Bing. Logo by Aaron Marbella.\n\n" +
+                "Bilingual definitions queried from Jisho.org. Monolingual definitions queried from Sora. Pitch accent patterns from Kanjium. Reader WebView linked to Ttu-Ebook. Video streaming via YouTube. Image search via Bing. Logo by Aaron Marbella.\n\n" +
                 "jidoujisho is free and open source software. Liking the application? " +
                 "Help out by providing feedback, making a donation, reporting issues or collaborating " +
                 "for further improvements on GitHub.";
@@ -1549,6 +1727,7 @@ class YouTubeResult extends StatefulWidget {
   final metadataCallback;
   final int index;
   final bool trending;
+  final bool channelView;
 
   YouTubeResult(
     this.result,
@@ -1558,6 +1737,7 @@ class YouTubeResult extends StatefulWidget {
     this.metadataCallback,
     this.index,
     this.trending,
+    this.channelView,
   );
 
   _YouTubeResultState createState() => _YouTubeResultState(
@@ -1568,6 +1748,7 @@ class YouTubeResult extends StatefulWidget {
         this.metadataCallback,
         this.index,
         this.trending,
+        this.channelView,
       );
 }
 
@@ -1580,6 +1761,7 @@ class _YouTubeResultState extends State<YouTubeResult>
   final metadataCallback;
   final int index;
   final bool trending;
+  final bool channelView;
 
   _YouTubeResultState(
     this.result,
@@ -1589,6 +1771,7 @@ class _YouTubeResultState extends State<YouTubeResult>
     this.metadataCallback,
     this.index,
     this.trending,
+    this.channelView,
   );
 
   @override
@@ -1721,13 +1904,16 @@ class _YouTubeResultState extends State<YouTubeResult>
                 ),
               ),
               actions: <Widget>[
-                TextButton(
-                  child: Text('CHANNEL', style: TextStyle(color: Colors.white)),
-                  onPressed: () async {
-                    channelCallback(result.channelId.value, result.author);
-                    Navigator.pop(context);
-                  },
-                ),
+                if (!channelView)
+                  TextButton(
+                    child:
+                        Text('CHANNEL', style: TextStyle(color: Colors.white)),
+                    onPressed: () async {
+                      channelCallback(
+                          result.channelId.value, result.author, false);
+                      Navigator.pop(context);
+                    },
+                  ),
                 TextButton(
                   child: Text(
                     'PLAY',
@@ -1794,7 +1980,7 @@ class _YouTubeResultState extends State<YouTubeResult>
     }
 
     Widget trendingMessage = Text(
-      "Trending #${index + 1} in Japan",
+      "Trending #$index in Japan",
       style: TextStyle(
         color: Colors.grey,
         fontSize: 12,
@@ -2025,7 +2211,7 @@ class _ChannelResultState extends State<ChannelResult>
 
     return InkWell(
       onTap: () {
-        callback(result.id.toString(), result.title);
+        callback(result.id.toString(), result.title, true);
       },
       onLongPress: () {
         HapticFeedback.vibrate();
@@ -2070,7 +2256,7 @@ class _ChannelResultState extends State<ChannelResult>
                   child: Text('CHANNEL', style: TextStyle(color: Colors.white)),
                   onPressed: () {
                     Navigator.pop(context);
-                    callback(result.id.toString(), result.title);
+                    callback(result.id.toString(), result.title, true);
                   },
                 ),
               ],
@@ -2089,6 +2275,112 @@ class _ChannelResultState extends State<ChannelResult>
           ],
         ),
       ),
+    );
+  }
+}
+
+class ChannelHorizontalResult extends StatefulWidget {
+  final Channel result;
+  final ChannelCallback callback;
+  final VoidCallback stateCallback;
+  final int index;
+
+  ChannelHorizontalResult(
+    this.result,
+    this.callback,
+    this.stateCallback,
+    this.index,
+  );
+
+  _ChannelHorizontalResultState createState() => _ChannelHorizontalResultState(
+        this.result,
+        this.callback,
+        this.stateCallback,
+        this.index,
+      );
+}
+
+class _ChannelHorizontalResultState extends State<ChannelHorizontalResult>
+    with AutomaticKeepAliveClientMixin {
+  final Channel result;
+  final ChannelCallback callback;
+  final stateCallback;
+  final int index;
+
+  _ChannelHorizontalResultState(
+    this.result,
+    this.callback,
+    this.stateCallback,
+    this.index,
+  );
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+
+    String channelLogoURL = result.logoUrl;
+    String channelTitle = result.title;
+
+    Widget displayThumbnail() {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(50.0),
+        child: FadeInImage(
+          fit: BoxFit.cover,
+          width: 64,
+          height: 64,
+          placeholder: MemoryImage(kTransparentImage),
+          image: NetworkImage(channelLogoURL),
+        ),
+      );
+    }
+
+    Widget displayVideoInformation() {
+      return Expanded(
+        child: Container(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      channelTitle,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return InkWell(
+      child: Container(
+        width: 80,
+        padding: EdgeInsets.all(4.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            displayThumbnail(),
+            displayVideoInformation(),
+          ],
+        ),
+      ),
+      onTap: () {
+        callback(result.id.toString(), result.title, false);
+      },
     );
   }
 }
@@ -2481,7 +2773,7 @@ class _HistoryResultState extends State<HistoryResult>
                             style: TextStyle(color: Colors.white)),
                         onPressed: () async {
                           channelCallback(
-                              history.channelId, history.subheading);
+                              history.channelId, history.subheading, false);
                           Navigator.pop(context);
                           print(history.channelId);
                         },
@@ -2711,6 +3003,12 @@ class _ClipboardState extends State<ClipboardMenu> {
       false,
     );
 
+    Widget loadingMessage = centerMessage(
+      "Preparing dictionary",
+      Icons.auto_stories,
+      true,
+    );
+
     Widget cardCreatorButton() {
       return Container(
         width: double.infinity,
@@ -2842,37 +3140,53 @@ class _ClipboardState extends State<ClipboardMenu> {
         Expanded(child: emptyMessage),
       ]);
     }
-
-    return Scrollbar(
-      controller: _dictionaryScroller,
-      child: ListView.builder(
-        controller: _dictionaryScroller,
-        addAutomaticKeepAlives: true,
-        key: UniqueKey(),
-        itemCount: entries.length + 2,
-        itemBuilder: (BuildContext context, int index) {
-          if (index == 0) {
-            return Padding(
+    return ValueListenableBuilder(
+      valueListenable: gKanjiumDictionary,
+      builder:
+          (BuildContext context, List<DictionaryEntry> value, Widget child) {
+        if (value.isEmpty) {
+          return Column(children: [
+            Padding(
               padding: EdgeInsets.only(left: 12, right: 12, bottom: 12),
               child: wordField,
-            );
-          }
-          if (index == 1) {
-            return cardCreatorButton();
-          }
+            ),
+            cardCreatorButton(),
+            Expanded(child: loadingMessage),
+          ]);
+        }
 
-          DictionaryHistoryEntry entry = entries[index - 2];
-          print("ENTRY LISTED: $entry");
+        return Scrollbar(
+          controller: _dictionaryScroller,
+          child: ListView.builder(
+            controller: _dictionaryScroller,
+            addAutomaticKeepAlives: true,
+            key: UniqueKey(),
+            itemCount: entries.length + 2,
+            itemBuilder: (BuildContext context, int index) {
+              if (index == 0) {
+                return Padding(
+                  padding: EdgeInsets.only(left: 12, right: 12, bottom: 12),
+                  child: wordField,
+                );
+              }
+              if (index == 1) {
+                return cardCreatorButton();
+              }
 
-          return ClipboardHistoryItem(
-            entry,
-            creatorCallback,
-            setStateFromResult,
-            _dictionaryScroller,
-            dictionaryScrollOffset,
-          );
-        },
-      ),
+              DictionaryHistoryEntry entry = entries[index - 2];
+              print("ENTRY LISTED: $entry");
+
+              return ClipboardHistoryItem(
+                entry,
+                creatorCallback,
+                setStateFromResult,
+                _dictionaryScroller,
+                dictionaryScrollOffset,
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -3473,6 +3787,7 @@ class _LazyResultsState extends State<LazyResults> {
               null,
               index,
               false,
+              true,
             );
           },
         ),

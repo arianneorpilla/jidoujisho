@@ -8,13 +8,21 @@ import 'package:jidoujisho/youtube.dart';
 
 fetchTrendingCache() {
   return gTrendingCache.runOnce(() async {
-    return searchYouTubeTrendingVideos();
+    List<Video> trendingVideos = await searchYouTubeTrendingVideos();
+    await fetchTrendingChannelCache(trendingVideos);
+    return trendingVideos;
   });
 }
 
 fetchChannelCache() {
   return gChannelCache.runOnce(() async {
     return getSubscribedChannels();
+  });
+}
+
+fetchTrendingChannelCache(List<Video> trendingVideos) {
+  return gTrendingChannelCache.runOnce(() async {
+    return getTrendingChannels(trendingVideos);
   });
 }
 

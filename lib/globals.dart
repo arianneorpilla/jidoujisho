@@ -1,6 +1,5 @@
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
-import 'package:fuzzy/fuzzy.dart';
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:package_info/package_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,6 +23,7 @@ ValueNotifier<bool> gIsSelectMode;
 
 AsyncMemoizer gTrendingCache = AsyncMemoizer();
 AsyncMemoizer gChannelCache = AsyncMemoizer();
+AsyncMemoizer gTrendingChannelCache = AsyncMemoizer();
 Map<String, AsyncMemoizer> gSearchCache = {};
 Map<String, AsyncMemoizer> gBilingualSearchCache = {};
 Map<String, AsyncMemoizer> gMonolingualSearchCache = {};
@@ -31,7 +31,7 @@ Map<String, AsyncMemoizer> gCaptioningCache = {};
 Map<String, List<Video>> gChannelVideoCache = {};
 Map<String, AsyncMemoizer> gMetadataCache = {};
 
-List<DictionaryEntry> gKanjiumDictionary;
+ValueNotifier<List<DictionaryEntry>> gKanjiumDictionary = ValueNotifier([]);
 ScrollController gCurrentScrollbar;
 
 ValueNotifier<String> gShareText = ValueNotifier<String>("");

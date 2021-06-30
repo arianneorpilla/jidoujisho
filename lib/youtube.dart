@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_youtube_dl/youtube_dl.dart';
 import 'package:http/http.dart' as http;
+import 'package:jidoujisho/cache.dart';
 import 'package:jidoujisho/preferences.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -197,9 +198,19 @@ Stream<Video> getChannelUploadsStream(String channelID) {
   return uploadsStream;
 }
 
-Future<List<Video>> searchYouTubeTrendingVideos() {
+FutureOr<List<Video>> searchYouTubeTrendingVideos() async {
+  if (getTrendingVideosCache().isNotEmpty) {
+    print("USING TRENDING VIDEO CACHE");
+    return getTrendingVideosCache();
+  }
+
   YoutubeExplode yt = YoutubeExplode();
-  return yt.playlists.getVideos("PLuXL6NS58Dyx-wTr5o7NiC7CZRbMA91DC").toList();
+  List<Video> trendingVideos = await yt.playlists
+      .getVideos("PLuXL6NS58Dyx-wTr5o7NiC7CZRbMA91DC")
+      .toList();
+  setTrendingVideosCache(trendingVideos);
+  setTrendingExpiration();
+  return trendingVideos;
 }
 
 FutureOr<List<Channel>> getSubscribedChannels() async {
@@ -221,6 +232,26 @@ FutureOr<List<Channel>> getSubscribedChannels() async {
   setChannelCache(channels);
 
   return channels;
+}
+
+FutureOr<List<Channel>> getTrendingChannels(List<Video> trendingVideos) async {
+  if (getTrendingChannelCache().isNotEmpty) {
+    print("USING TRENDING CHANNELS CACHE");
+    return getTrendingChannelCache();
+  }
+
+  YoutubeExplode yt = YoutubeExplode();
+
+  List<Future<Channel>> futureChannels = [];
+  trendingVideos.forEach((trendingVideo) async => {
+        futureChannels.add(yt.channels.get(trendingVideo.channelId.toString()))
+      });
+
+  List<Channel> channels = await Future.wait(futureChannels);
+  List<Channel> distinctChannels = channels.toSet().toList();
+  setTrendingChannelCache(distinctChannels);
+
+  return distinctChannels;
 }
 
 Future<bool> checkYouTubeClosedCaptionAvailable(String videoID) async {

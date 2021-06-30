@@ -289,7 +289,7 @@ class _MaterialControlsState extends State<MaterialControls>
           Icons.link_sharp,
         ],
         highlights: const [],
-        invisibles: isYouTube ? [] : [5],
+        invisibles: isYouTube ? [] : [4],
       ),
     );
 

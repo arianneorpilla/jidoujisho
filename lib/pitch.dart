@@ -248,7 +248,7 @@ DictionaryEntry getClosestPitchEntry(DictionaryEntry entry) {
     firstReading = entry.reading.split(";").first;
   }
 
-  List<DictionaryEntry> readingMatches = gKanjiumDictionary
+  List<DictionaryEntry> readingMatches = gKanjiumDictionary.value
       .where((pitchEntry) => pitchEntry.reading == firstReading)
       .toList();
 
