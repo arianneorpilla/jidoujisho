@@ -4,10 +4,10 @@
 
 
 <h3 align="center">jidoujisho</h3>
-<p align="center">A mobile video player and card creation toolkit tailored for language learners.</p>
+<p align="center">A mobile video player, reader assistant and card creation toolkit tailored for language learners.</p>
 
 <p align="center" style="margin:0"><b>Latest GitHub Release:<br>
-<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.22.1-beta">0.22.1-beta 🇯🇵 → 🇬🇧</a><br>
+<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.23.0-beta">0.23.0-beta 🇯🇵 → 🇬🇧</a><br>
 <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.16.7-beta-kren">0.16.7-beta 🇰🇷 → 🇬🇧</a></b><br>
 </p>
   
@@ -35,15 +35,15 @@
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.19.1-beta">0.19</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.20.1-beta">0.20</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.21.2-beta">0.21</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.22.1-beta">0.22</a>
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.22.1-beta">0.22</a> · 
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.23.0-beta">0.23</a>
 </b></p>
 
 # 📚 Uninterrupted language immersion at your fingertips
 
-**jidoujisho** is an Android video player and card creation toolkit with features specifically helpful for language learners. 
+**jidoujisho** is an Android video player, reader assistant and card creation toolkit with features specifically helpful for language learners. 
 
 - [x] Text selection of subtitles allows for **quick dictionary lookups within the application**
-- [x] **Search current clipboard and open browser** to Jisho.org, DeepL or Google Translate
 - [x] **Export cards to AnkiDroid**, complete with a snapshot and audio of the current context
 - [x] Selecting a word allows export to AnkiDroid with the **sentence, answer, meaning and reading**
 - [x] Morphological analysis of subtitles allows either **tap selection** or **drag selection** of subtitles
@@ -54,7 +54,7 @@
 - [x] Use **card creator mode** to quickly **search images and definitions** with imported photos and text 
 - [x] **Dictionary tab remembers words queried** for review between sessions and **allows resuming back to context**
 - [x] **Use monolingual definitions** from Sora and export cards **with pitch accent information** from Kanjium
-- [x] **Frictionless sentence mining workflow for readers** via share action
+- [x] **Frictionless sentence mining workflow for readers** via ッツ Ebook Reader
 - [x] Playback support for **network streams** including **Plex external player support**
 - [x] **(Experimental)** **Korean to English support** through the National Institute of Korean Language's KrDict 
 
