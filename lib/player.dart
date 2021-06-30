@@ -105,8 +105,11 @@ reader.addEventListener('touchend', function() {
 
     var paragraph = result.startContainer;
     while (paragraph && paragraph.nodeName !== 'P') {
-      console.log(paragraph.nodeName);
       paragraph = paragraph.parentNode;
+    }
+
+    if (paragraph == null) {
+      paragraph = result.startContainer.parentNode;
     }
 
     console.log(paragraph.nodeName);
@@ -163,15 +166,13 @@ reader.addEventListener('touchend', function() {
 
 		var text = noFuriganaText.join("");
 		var offset = index;
+    
 
-		if (result.startContainer.innerHTML == null ||
-        result.startContainer.innerHTML.innerHTML.indexOf("spoiler-label") === -1) {
-			console.log(JSON.stringify({
+		console.log(JSON.stringify({
 				"offset": offset,
 				"text": text,
 				"jidoujisho": "jidoujisho"
 			}));
-		}
 	}
 });
 reader.addEventListener('touchmove', () => {
@@ -225,7 +226,10 @@ reader.addEventListener('touchstart', (e) => {
                 emptyStack();
 
                 String readerExport =
-                    await webViewController.getSelectedText() ?? "";
+                    (await webViewController.getSelectedText())
+                            .replaceAll("\\n", "\n") ??
+                        "";
+                readerExport = readerExport.replaceAll("　", " ");
                 print(readerExport);
 
                 stopClipboardMonitor();
