@@ -19,6 +19,7 @@ class SubtitleTextView extends StatelessWidget {
   final VoidCallback emptyStack;
   final FocusNode focusNode;
   final ValueNotifier<bool> isCasting;
+  final ValueNotifier<double> fontSize;
 
   const SubtitleTextView({
     Key key,
@@ -29,6 +30,7 @@ class SubtitleTextView extends StatelessWidget {
     @required this.focusNode,
     @required this.emptyStack,
     @required this.isCasting,
+    @required this.fontSize,
   }) : super(key: key);
 
   Widget getOutlineText(Word word) {
@@ -65,9 +67,9 @@ class SubtitleTextView extends StatelessWidget {
 
   double returnTextSize() {
     if (isCasting.value) {
-      return subtitleStyle.fontSize * 1.75;
+      return this.fontSize.value * 1.75;
     } else {
-      return subtitleStyle.fontSize;
+      return this.fontSize.value;
     }
   }
 

@@ -1555,7 +1555,7 @@ class SubtitleAudioMenuOption {
         return "Load External Subtitles";
         break;
       case SubtitleAudioMenuOptionType.adjustDelayAndAllowance:
-        return "Adjust Delay and Allowance";
+        return "Subtitle Timing and Appearance";
         break;
       case SubtitleAudioMenuOptionType.latinFilterMode:
         return "Filter Latin Characters";

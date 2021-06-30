@@ -394,6 +394,14 @@ int getAudioAllowance() {
   return gSharedPrefs.getInt("audioAllowance") ?? 0;
 }
 
+Future<void> setFontSize(double px) async {
+  await gSharedPrefs.setDouble("fontSize", px);
+}
+
+double getFontSize() {
+  return gSharedPrefs.getDouble("fontSize") ?? 24;
+}
+
 Future<void> setSubtitleDelay(int ms) async {
   await gSharedPrefs.setInt("subtitleDelay", ms);
 }

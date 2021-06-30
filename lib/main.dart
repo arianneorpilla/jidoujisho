@@ -4314,7 +4314,8 @@ class _CreatorState extends State<Creator> {
     }
 
     if (initialSentence.isNotEmpty) {
-      if (parseVe(gMecabTagger, initialSentence).length != 1) {
+      if (!gIsTapToSelectSupported ||
+          parseVe(gMecabTagger, initialSentence).length != 1) {
         _sentenceController = TextEditingController(text: initialSentence);
         _wordController = TextEditingController(text: "");
         _isReader = ValueNotifier<bool>(true);
@@ -4870,15 +4871,16 @@ class _CreatorState extends State<Creator> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             mainAxisSize: MainAxisSize.min,
             children: [
-              IconButton(
-                iconSize: 18,
-                onPressed: () {
-                  if (_sentenceController.text.trim().isNotEmpty) {
-                    showSentenceDialog(_sentenceController.text);
-                  }
-                },
-                icon: Icon(Icons.account_tree_outlined, color: Colors.white),
-              ),
+              if (gIsTapToSelectSupported)
+                IconButton(
+                  iconSize: 18,
+                  onPressed: () {
+                    if (_sentenceController.text.trim().isNotEmpty) {
+                      showSentenceDialog(_sentenceController.text);
+                    }
+                  },
+                  icon: Icon(Icons.account_tree_outlined, color: Colors.white),
+                ),
               IconButton(
                 iconSize: 18,
                 onPressed: () {

@@ -368,6 +368,7 @@ class _VideoPlayerState extends State<VideoPlayer>
   );
   ValueNotifier<bool> isCasting = ValueNotifier<bool>(false);
   ValueNotifier<int> _audioAllowance = ValueNotifier<int>(getAudioAllowance());
+  ValueNotifier<double> _fontSize = ValueNotifier<double>(getFontSize());
   List<String> recursiveTerms = [];
   bool noPush = false;
 
@@ -949,6 +950,7 @@ class _VideoPlayerState extends State<VideoPlayer>
         hasBorder: true,
         fontSize: 24,
       ),
+      fontSize: _fontSize,
       isCasting: isCasting,
       videoChild: FutureBuilder(
         future: getVideoPlayerController().initialize(),
@@ -1008,6 +1010,8 @@ class _VideoPlayerState extends State<VideoPlayer>
         text: getSubtitleController().subtitlesOffset.toString());
     TextEditingController _allowanceController =
         TextEditingController(text: _audioAllowance.value.toString());
+    TextEditingController _fontSizeController =
+        TextEditingController(text: _fontSize.value.toString());
 
     void setValues(bool remember) {
       String offsetText = _offsetController.text;
@@ -1016,15 +1020,20 @@ class _VideoPlayerState extends State<VideoPlayer>
       String allowanceText = _allowanceController.text;
       int newAllowance = int.tryParse(allowanceText);
 
-      if (newOffset != null && newAllowance != null) {
+      String fontSizeText = _fontSizeController.text;
+      double newFontSize = double.tryParse(fontSizeText);
+
+      if (newOffset != null && newAllowance != null && fontSizeText != null) {
         getSubtitleController().subtitlesOffset = newOffset;
         getSubtitleController().updateSubtitleContent(
             content: getSubtitleController().subtitlesContent);
         _audioAllowance.value = newAllowance;
+        _fontSize.value = newFontSize;
 
         if (remember) {
           setSubtitleDelay(newOffset);
           setAudioAllowance(newAllowance);
+          setFontSize(newFontSize);
         }
 
         Navigator.pop(context);
@@ -1071,6 +1080,18 @@ class _VideoPlayerState extends State<VideoPlayer>
                           labelText: "Audio allowance",
                           hintText: "Enter audio allowance",
                           suffixText: " ms"),
+                    ),
+                    TextField(
+                      controller: _fontSizeController,
+                      keyboardType: TextInputType.numberWithOptions(
+                        signed: false,
+                        decimal: true,
+                      ),
+                      maxLines: 1,
+                      decoration: InputDecoration(
+                          labelText: "Font size",
+                          hintText: "Enter font size",
+                          suffixText: " px"),
                     ),
                   ],
                 ),

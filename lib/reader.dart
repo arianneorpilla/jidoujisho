@@ -401,43 +401,46 @@ reader.addEventListener('touchstart', (e) => {
 
                 switch (messageJson["jidoujisho"]) {
                   case "jidoujisho":
-                    emptyStack();
-
-                    int index = messageJson["offset"];
-                    String text = messageJson["text"];
-
-                    try {
-                      String processedText = text.replaceAll("﻿", "␝");
-                      processedText = processedText.replaceAll("　", "␝");
-                      processedText = processedText.replaceAll('\n', '␜');
-                      processedText = processedText.replaceAll(' ', '␝');
-
-                      List<Word> tokens = parseVe(gMecabTagger, processedText);
-                      print(tokens);
-
-                      List<String> tokenTape = [];
-                      for (int i = 0; i < tokens.length; i++) {
-                        Word token = tokens[i];
-                        for (int j = 0; j < token.word.length; j++) {
-                          tokenTape.add(token.word);
-                        }
-                      }
-
-                      // print(tokenTape);
-                      String searchTerm = tokenTape[index];
-                      searchTerm = searchTerm.replaceAll('␜', '\n');
-                      searchTerm = searchTerm.replaceAll('␝', ' ');
-                      searchTerm = searchTerm.trim();
-                      print("SELECTED: " + searchTerm);
-                      // print("reached");
-
-                      clearSelection();
-                      _clipboard.value = searchTerm;
-                    } catch (e) {
-                      clearSelection();
+                    if (gIsTapToSelectSupported) {
                       emptyStack();
-                      _clipboard.value = "";
-                      print(e);
+
+                      int index = messageJson["offset"];
+                      String text = messageJson["text"];
+
+                      try {
+                        String processedText = text.replaceAll("﻿", "␝");
+                        processedText = processedText.replaceAll("　", "␝");
+                        processedText = processedText.replaceAll('\n', '␜');
+                        processedText = processedText.replaceAll(' ', '␝');
+
+                        List<Word> tokens =
+                            parseVe(gMecabTagger, processedText);
+                        print(tokens);
+
+                        List<String> tokenTape = [];
+                        for (int i = 0; i < tokens.length; i++) {
+                          Word token = tokens[i];
+                          for (int j = 0; j < token.word.length; j++) {
+                            tokenTape.add(token.word);
+                          }
+                        }
+
+                        // print(tokenTape);
+                        String searchTerm = tokenTape[index];
+                        searchTerm = searchTerm.replaceAll('␜', '\n');
+                        searchTerm = searchTerm.replaceAll('␝', ' ');
+                        searchTerm = searchTerm.trim();
+                        print("SELECTED: " + searchTerm);
+                        // print("reached");
+
+                        clearSelection();
+                        _clipboard.value = searchTerm;
+                      } catch (e) {
+                        clearSelection();
+                        emptyStack();
+                        _clipboard.value = "";
+                        print(e);
+                      }
                     }
                     break;
                   case "jidoujisho-bookmark":

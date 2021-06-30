@@ -1,7 +1,5 @@
 library subtitle_wrapper_package;
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:subtitle_wrapper_package/bloc/subtitle/subtitle_bloc.dart';
@@ -22,6 +20,7 @@ class SubTitleWrapper extends StatelessWidget {
     @required this.focusNode,
     @required this.emptyStack,
     @required this.isCasting,
+    @required this.fontSize,
     this.subtitleStyle = const SubtitleStyle(),
   }) : super(key: key);
 
@@ -34,6 +33,7 @@ class SubTitleWrapper extends StatelessWidget {
   final ValueNotifier<bool> isCasting;
   final FocusNode focusNode;
   final VoidCallback emptyStack;
+  final ValueNotifier<double> fontSize;
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +74,7 @@ class SubTitleWrapper extends StatelessWidget {
                             focusNode: focusNode,
                             emptyStack: emptyStack,
                             isCasting: isCasting,
+                            fontSize: fontSize,
                           ),
                         )
                       : Container(
