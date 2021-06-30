@@ -10,10 +10,6 @@
 <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.23.0-beta">0.23.0-beta 🇯🇵 → 🇬🇧</a><br>
 <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.16.7-beta-kren">0.16.7-beta 🇰🇷 → 🇬🇧</a></b><br>
 </p>
-  
-<p align="center" style="margin:0"><b>Preview Branch:<br>
-<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.23.5-beta-readerpreview">📖 0.23.5-beta-readerpreview 🇯🇵 → 🇬🇧</a></b><br>
-</p>
 
 <p align="center" style="margin:0"><b>Release Archive:<br>
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.3.0-beta">0.3</a> · 
