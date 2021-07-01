@@ -522,6 +522,8 @@ class _HomeState extends State<Home> {
           canResume = getBookHistory().isNotEmpty;
         }
         gIsResumable.value = canResume;
+        SystemChrome.setEnabledSystemUIOverlays(
+            [SystemUiOverlay.bottom, SystemUiOverlay.top]);
       });
     });
   }
@@ -1759,26 +1761,28 @@ class _HomeState extends State<Home> {
                   onPressed: () {
                     String webURL = _textFieldController.text;
 
-                    try {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => JidoujishoPlayer(
-                            playerMode: JidoujishoPlayerMode.networkStream,
-                            url: webURL,
+                    if (webURL.isNotEmpty) {
+                      try {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => JidoujishoPlayer(
+                              playerMode: JidoujishoPlayerMode.networkStream,
+                              url: webURL,
+                            ),
                           ),
-                        ),
-                      ).then((returnValue) {
-                        setState(() {
-                          unlockLandscape();
+                        ).then((returnValue) {
+                          setState(() {
+                            unlockLandscape();
+                          });
                         });
-                      });
-                    } on Exception {
-                      Navigator.pop(context);
-                      print("INVALID LINK");
-                    } catch (error) {
-                      Navigator.pop(context);
-                      print("INVALID LINK");
+                      } on Exception {
+                        Navigator.pop(context);
+                        print("INVALID LINK");
+                      } catch (error) {
+                        Navigator.pop(context);
+                        print("INVALID LINK");
+                      }
                     }
                   },
                 ),
