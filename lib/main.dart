@@ -1,11 +1,8 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:async/async.dart';
 import 'package:audio_service/audio_service.dart';
-import 'package:blurrycontainer/blurrycontainer.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:flutter/foundation.dart';
@@ -627,15 +624,20 @@ class _HomeState extends State<Home> {
     }
 
     ScrollController scrollController = ScrollController();
+    gCurrentScrollbar = scrollController;
 
     return Scrollbar(
       controller: scrollController,
-      child: Column(
+      child: ListView(
+        shrinkWrap: true,
+        controller: scrollController,
         key: UniqueKey(),
         children: [
           openReaderButton(),
           Expanded(
             child: GridView.builder(
+              physics: NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
               itemCount: bookHistory.length,
               gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                 maxCrossAxisExtent: 200,
@@ -1658,14 +1660,10 @@ class _HomeState extends State<Home> {
             }
 
             if (snapshot.data.isNotEmpty) {
-              ScrollController scrollController = ScrollController();
-              gCurrentScrollbar = scrollController;
-
               return Container(
                 height: 100,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  controller: scrollController,
                   addAutomaticKeepAlives: true,
                   itemCount: snapshot.data.length + 1,
                   itemBuilder: (BuildContext context, int index) {
@@ -1894,13 +1892,13 @@ class _HomeState extends State<Home> {
         );
         break;
       case "About this app":
-        const String legalese =
-            "A mobile video player, reader assistant and card creation toolkit tailored for language learners.\n\n" +
-                "Built for the Japanese language learning community by Leo Rafael Orpilla. " +
-                "Bilingual definitions queried from Jisho.org. Monolingual definitions queried from Sora. Pitch accent patterns from Kanjium. Reader WebView linked to ッツ Ebook Reader. Video streaming via YouTube. Image search via Bing. Logo by Aaron Marbella.\n\n" +
-                "jidoujisho is free and open source software. Liking the application? " +
-                "Help out by providing feedback, making a donation, reporting issues or collaborating " +
-                "for further improvements on GitHub.";
+        const String legalese = "A mobile video player, reader assistant and card creation toolkit tailored for language learners.\n\n" +
+            "Built for the Japanese language learning community by Leo Rafael Orpilla. " +
+            "Bilingual definitions queried from Jisho.org. Monolingual definitions queried from Sora. Pitch accent patterns from Kanjium. " +
+            "Reader WebView linked to ッツ Ebook Reader. Video streaming via YouTube. Image search via Bing. Logo by Aaron Marbella.\n\n" +
+            "jidoujisho is free and open source software. Liking the application? " +
+            "Help out by providing feedback, making a donation, reporting issues or collaborating " +
+            "for further improvements on GitHub.";
 
         showLicensePage(
           context: context,
@@ -1975,7 +1973,13 @@ class _HomeState extends State<Home> {
                   });
                 });
               } else {
-                startReader(null);
+                String initialURL;
+                if (getBookHistory().isEmpty) {
+                  initialURL = null;
+                } else {
+                  initialURL = getBookHistory().last.url;
+                }
+                startReader(initialURL);
               }
             },
           );
