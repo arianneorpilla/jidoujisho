@@ -703,12 +703,15 @@ class _HomeState extends State<Home> {
               alignment: Alignment.center,
               margin: EdgeInsets.all(8),
               padding: EdgeInsets.fromLTRB(2, 2, 2, 4),
-              height: constraints.maxHeight * 0.15,
+              height: constraints.maxHeight * 0.175,
               width: double.maxFinite,
               color: Colors.black.withOpacity(0.6),
               child: Text(
                 book.heading,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
                 textAlign: TextAlign.center,
+                softWrap: true,
                 style: TextStyle(
                   fontSize: 9,
                 ),
@@ -1108,9 +1111,9 @@ class _HomeState extends State<Home> {
     }
 
     Widget queryMessage = centerMessage(
-      "Listing channels",
+      "Listing channels...",
       Icons.subscriptions_sharp,
-      true,
+      false,
     );
     Widget errorMessage = centerMessage(
       "Error getting channels",
@@ -1468,14 +1471,14 @@ class _HomeState extends State<Home> {
       false,
     );
     Widget searchingMessage = centerMessage(
-      "Searching for \"$_searchQuery\"",
+      "Searching for \"$_searchQuery\"...",
       Icons.youtube_searched_for,
-      true,
+      false,
     );
     Widget queryMessage = centerMessage(
-      "Querying trending videos",
+      "Querying trending videos...",
       Icons.youtube_searched_for,
-      true,
+      false,
     );
     Widget errorMessage = centerMessage(
       "Error getting videos",
@@ -3380,9 +3383,9 @@ class _ClipboardState extends State<ClipboardMenu> {
     );
 
     Widget loadingMessage = centerMessage(
-      "Preparing dictionary",
+      "Preparing dictionary...",
       Icons.auto_stories,
-      true,
+      false,
     );
 
     Widget cardCreatorButton() {
@@ -4383,17 +4386,10 @@ class _CreatorState extends State<Creator> {
             crossAxisAlignment: WrapCrossAlignment.end,
             children: [
               Text(
-                "Preparing card creator",
+                "Preparing card creator...",
                 style: TextStyle(
                   color: Colors.grey,
                   fontSize: 20,
-                ),
-              ),
-              SizedBox(
-                width: 12,
-                height: 16,
-                child: JumpingDotsProgressIndicator(
-                  color: Colors.grey,
                 ),
               ),
             ],
