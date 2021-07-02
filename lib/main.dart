@@ -568,12 +568,12 @@ class _HomeState extends State<Home> {
       String readerMessage;
       String initialURL;
 
-      if (getBookHistory().isEmpty) {
-        readerMessage = "Start Reading";
-        initialURL = null;
-      } else {
-        readerMessage = "Continue Reading";
+      try {
         initialURL = getBookHistory().last.url;
+        readerMessage = "Continue Reading";
+      } catch (e) {
+        initialURL = null;
+        readerMessage = "Start Reading";
       }
 
       return Container(
@@ -634,22 +634,20 @@ class _HomeState extends State<Home> {
         key: UniqueKey(),
         children: [
           openReaderButton(),
-          Expanded(
-            child: GridView.builder(
-              physics: NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: bookHistory.length,
-              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 200,
-                childAspectRatio: 176 / 250,
-              ),
-              itemBuilder: (BuildContext context, int index) {
-                HistoryItem book = bookHistory[index];
-                print("BOOK LISTED: $book");
-
-                return showBook(book);
-              },
+          GridView.builder(
+            physics: NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemCount: bookHistory.length,
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 200,
+              childAspectRatio: 176 / 250,
             ),
+            itemBuilder: (BuildContext context, int index) {
+              HistoryItem book = bookHistory[index];
+              print("BOOK LISTED: $book");
+
+              return showBook(book);
+            },
           ),
         ],
       ),
@@ -657,12 +655,12 @@ class _HomeState extends State<Home> {
   }
 
   Widget showBook(HistoryItem book) {
-    UriData data = Uri.parse(book.thumbnail).data;
     ImageProvider imageProvider;
 
-    if (data != null) {
+    try {
+      UriData data = Uri.parse(book.thumbnail).data;
       imageProvider = MemoryImage(data.contentAsBytes());
-    } else {
+    } catch (e) {
       imageProvider = MemoryImage(kTransparentImage);
     }
 
@@ -707,7 +705,7 @@ class _HomeState extends State<Home> {
               width: double.maxFinite,
               color: Colors.black.withOpacity(0.6),
               child: Text(
-                book.heading,
+                book.heading ?? "",
                 overflow: TextOverflow.ellipsis,
                 maxLines: 2,
                 textAlign: TextAlign.center,
@@ -1977,10 +1975,10 @@ class _HomeState extends State<Home> {
                 });
               } else {
                 String initialURL;
-                if (getBookHistory().isEmpty) {
-                  initialURL = null;
-                } else {
+                try {
                   initialURL = getBookHistory().last.url;
+                } catch (e) {
+                  initialURL = null;
                 }
                 startReader(initialURL);
               }
@@ -4163,9 +4161,9 @@ class _LazyResultsState extends State<LazyResults> {
   Widget build(BuildContext context) {
     if (verticalData.length == 0) {
       return centerMessage(
-        "Listing channel videos",
+        "Listing channel videos...",
         Icons.subscriptions_sharp,
-        true,
+        false,
       );
     }
 
@@ -4386,7 +4384,7 @@ class _CreatorState extends State<Creator> {
             crossAxisAlignment: WrapCrossAlignment.end,
             children: [
               Text(
-                "Preparing card creator...",
+                "Preparing card creator",
                 style: TextStyle(
                   color: Colors.grey,
                   fontSize: 20,

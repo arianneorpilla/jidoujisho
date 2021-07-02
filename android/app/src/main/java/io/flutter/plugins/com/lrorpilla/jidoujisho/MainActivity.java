@@ -26,6 +26,7 @@ import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
+import android.net.Uri;
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity;
@@ -348,6 +349,10 @@ public class MainActivity extends FlutterActivity {
                             final String answer = call.argument("answer");
                             final String meaning = call.argument("meaning");
                             final String reading = call.argument("reading");
+
+                            final String fileUriPath = call.argument("fileUriPath");
+                            final String preferredName = call.argument("preferredName");
+                            final String mimeType = call.argument("mimeType");
                             final AddContentApi api = new AddContentApi(context);
 
                             switch (call.method) {
@@ -367,6 +372,11 @@ public class MainActivity extends FlutterActivity {
                                     if (mAnkiDroid.shouldRequestPermission()) {
                                         mAnkiDroid.requestPermission(MainActivity.this, AD_PERM_REQUEST);
                                     }
+                                    break;
+                                case "addMediaFromUri":
+                                    Uri fileUri = Uri.parse(fileUriPath);
+                                    String addedFileName = api.addMediaFromUri(fileUri, preferredName, mimeType);
+                                    result.success(addedFileName);
                                     break;
                                 default:
                                     result.notImplemented();
@@ -389,6 +399,4 @@ public class MainActivity extends FlutterActivity {
 
         );
     }
-    
-
 }

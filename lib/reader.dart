@@ -444,46 +444,62 @@ reader.addEventListener('touchstart', (e) => {
                     }
                     break;
                   case "jidoujisho-bookmark":
-                    currentBookmarkDiv = messageJson["bookmark"];
-                    print("BOOKMARK GET! $currentBookmarkDiv");
-
-                    String currentUrl = (await controller.getUrl()).toString();
-                    HistoryItem bookHistory = HistoryItem(
-                        currentUrl,
-                        currentTitle,
-                        currentBookmarkDiv,
-                        currentBase64Image,
-                        null,
-                        wordCount);
-
-                    setLastSetBook();
-                    await addBookHistory(bookHistory);
-                    break;
-                  case "jidoujisho-metadata":
-                    if (messageJson["base64Image"].startsWith("data:image/")) {
-                      currentBase64Image = messageJson["base64Image"];
-                    }
-
-                    currentBookmarkDiv = messageJson["bookmark"];
-
-                    if (initialX == null) {
-                      print("IMAGE GET!");
+                    try {
+                      currentBookmarkDiv = messageJson["bookmark"];
                       print("BOOKMARK GET! $currentBookmarkDiv");
 
-                      String currentUrl =
-                          (await controller.getUrl()).toString();
+                      String currentIndexText = (await controller.getUrl())
+                          .toString()
+                          .replaceAll("https://ttu-ebook.web.app/b/", "");
+                      currentIndex = int.parse(currentIndexText);
                       HistoryItem bookHistory = HistoryItem(
-                          currentUrl,
+                          "https://ttu-ebook.web.app/b/$currentIndex",
                           currentTitle,
                           currentBookmarkDiv,
                           currentBase64Image,
                           null,
-                          1);
+                          wordCount);
 
-                      setLastSetBook();
+                      await setLastSetBook();
                       await addBookHistory(bookHistory);
+                    } catch (e) {
+                      print(e);
                     }
-                    if (initialX != null) {
+
+                    break;
+                  case "jidoujisho-metadata":
+                    if (initialX == null) {
+                      try {
+                        if (messageJson["base64Image"]
+                            .startsWith("data:image/")) {
+                          currentBase64Image = messageJson["base64Image"];
+                        }
+                      } catch (e) {
+                        currentBase64Image = null;
+                      }
+
+                      try {
+                        currentBookmarkDiv = messageJson["bookmark"];
+                        print("BOOKMARK GET! $currentBookmarkDiv");
+
+                        String currentIndexText = (await controller.getUrl())
+                            .toString()
+                            .replaceAll("https://ttu-ebook.web.app/b/", "");
+                        currentIndex = int.parse(currentIndexText);
+                        HistoryItem bookHistory = HistoryItem(
+                            "https://ttu-ebook.web.app/b/$currentIndex",
+                            currentTitle,
+                            currentBookmarkDiv,
+                            currentBase64Image,
+                            null,
+                            wordCount);
+
+                        await setLastSetBook();
+                        await addBookHistory(bookHistory);
+                      } catch (e) {
+                        print(e);
+                      }
+                    } else {
                       print("SCROLL TO X");
                       Future.delayed(Duration(seconds: 1), () async {
                         await scrollToX(initialX);

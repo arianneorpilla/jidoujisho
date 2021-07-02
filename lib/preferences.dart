@@ -338,12 +338,12 @@ bool getLastSetMediaType() {
   return gSharedPrefs.getBool("lastSetMediaType") ?? false;
 }
 
-void setLastSetVideo() {
-  gSharedPrefs.setBool("lastSetMediaType", false);
+Future setLastSetVideo() async {
+  await gSharedPrefs.setBool("lastSetMediaType", false);
 }
 
-void setLastSetBook() {
-  gSharedPrefs.setBool("lastSetMediaType", true);
+Future setLastSetBook() async {
+  await gSharedPrefs.setBool("lastSetMediaType", true);
 }
 
 bool isLastSetBook() {
