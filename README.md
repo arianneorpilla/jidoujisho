@@ -51,7 +51,7 @@
 - [x] **Dictionary tab remembers words queried** for review between sessions and **allows resuming back to context**
 - [x] **Use monolingual definitions** from Sora and export cards **with pitch accent information** from Kanjium
 - [x] **Frictionless sentence mining workflow for readers** via ッツ Ebook Reader
-- [x] Playback support for **network streams** including **Plex external player support**
+- [x] Playback support for **network streams** including **Chromecast** and **Plex external player support**
 - [x] **(Experimental)** **Korean to English support** through the National Institute of Korean Language's KrDict 
 
 # ⚕️ Current state of the project
@@ -73,7 +73,6 @@ Please note that the development of the app switches between changes being imple
 
 
 ### 🛣️ Stretch Goals
-- [ ] Promote project to stable and **Google Play release**
 - [ ] **Extensive language support with text segmentation** for other CJK languages
 - [ ] Tinker around with releasing the app on **other platforms if possible**
 
@@ -128,40 +127,42 @@ A primer on the basics of the application is as follows.
 
 * 📲 <a href="https://github.com/lrorpilla/jidoujisho/releases/"/>**Download and install the latest beta**</a> onto your Android device
 * ⏯️ Play a video by selecting from your **local media library** or **picking a YouTube video**
-* 📋 Select text with any of the two modes: **tap to select** or **drag to select**
+* 📚 Start reading with the *Reader* tab to launch ッツ Ebook Reader to read an **EPUB** or **HTMLZ** file
+* 📋 Select text with **tap to select** or **drag to select**
 * 📔 When the **dictionary definition** for the text shows up, the text is the **current context**
 * 🗑️ Closing the dictionary prompt will **clear the clipboard**
-* 🌐 The current context may be used to **open browser links to third-party websites**
-* ↕️ You may **swipe vertically to open the transcript**, and you can pick a time or read subtitles from there
-* ↔️ **Swipe horizontally** to repeat the current subtitle audio
-* ➕ **Swipe left or right on the pop-up dictionary** to scroll through multiple definition results
+* 🌐 You may switch between **bilingual or monolingual definitions** at any time
+* ↕️ You may **swipe vertically to open the transcript** in the player, and pick a time or read subtitles
+* ↔️ **Swipe horizontally** in the player to repeat the current subtitle audio
+* ➕ **Swipe left or right on dictionary results** to scroll through multiple definitions
 
 ### 📲 Exporting to AnkiDroid
 
 * 📤 You may also export the current context to an **AnkiDroid card, including the current frame and audio**
 * 🔤 Having a word in the clipboard **will include the sentence, word, meaning and reading** in the export
 * 📝 **You may edit the sentence, word, meaning and reading text fields** before exporting to AnkiDroid
-* 🔗 To finalise the export, **share the exported text to AnkiDroid**
 * 🃏 The **front of the card** will include only the **sentence**
 * 🎴 The **back of the card** will include the **audio, image, reading, word and meaning**
 * 📑 You may apply **text formatting to the card with the AnkiDroid editor once exported**
 * ⚛️ **Customisation of the Anki export** is possible by changing the default template in AnkiDroid 
-* 🔄 Once in AnkiDroid, **cards may be synced to AnkiWeb**, use *Check Media* to include all exported media 
 
 ### 🙌 Advanced User Tips
 
 * 🇯🇵 Can't find Japanese subtitles for your media? Try finding what you need at <b><a href="https://kitsunekko.net">kitsunekko</a></b>
+* 🤚 **Hold onto the headword** in the pop-up dictionary to **quickly switch between bilingual and monolingual modes** 
 * 📑 **External subtitles with the same name as the selected video file** will be loaded by default
 * ⏲️ If your subtitles are off, you can **set the delay** or **pad the exported audio time with an allowance**
-* ▶️ A **resume button** is at the top of the main menu, and **returns to the last played video and duration**
-* 🤝 **Sharing is caring.** You can import and export your channel IDs for backup and sharing in the main menu
+* ▶️ A **resume button** is at the top of the main menu, and **returns to last video or book**
+* ⌛ Users may select *Context* to go back to the **exact duration in video** or **scroll position in book**
 * ⛓️ Channels may also be added by **pasting a link of any video by the channel** in *List new channel*
-* 🔎 Holding onto a YouTube video in search, history or trending will show the option to list the channel
+* 🖧 You may also watch videos from your **Plex server** and cast the current video to a **Chromecast**
+* 📡 **Users that prefer to stream** rather than download can **open the app with a direct link to video** 
 * ✊ **Export a range of multiple subtitles** by holding onto a subtitle aside from the current one in the transcript
 * ⚠️ **If AnkiDroid is not running in the background**, tap on the export message to open it
 * 🗃 **The AnkiDroid deck you last export to will be remembered** for your next export
 * 📹 The quality closest to the **last selected quality** will be selected by default for YouTube videos
 * 📢 **Automatic captions** are more excellent in **podcasts and news programs** with clear speakers
+
 
 # 👥 Contribution and attribution
 
