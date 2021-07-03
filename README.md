@@ -153,7 +153,7 @@ A primer on the basics of the application is as follows.
 * 📑 **External subtitles with the same name as the selected video file** will be loaded by default
 * ⏲️ If your subtitles are off, you can **set the delay** or **pad the exported audio time with an allowance**
 * ▶️ A **resume button** is at the top of the main menu, and **returns to last video or book**
-* ⌛ Users may select *Context* to go back to the **exact duration in video** or **scroll position in book**
+* ⌛ Users may select *Context* from a dictionary result to go back to the **exact duration in video** or **scroll position in book**
 * ⛓️ Channels may also be added by **pasting a link of any video by the channel** in *List new channel*
 * 🖧 You may also watch videos from your **Plex server** and cast the current video to a **Chromecast**
 * 📡 **Users that prefer to stream** rather than download can **open the app with a direct link to video** 
