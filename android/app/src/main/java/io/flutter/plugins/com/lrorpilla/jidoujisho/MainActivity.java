@@ -374,10 +374,21 @@ public class MainActivity extends FlutterActivity {
                                     }
                                     break;
                                 case "addMediaFromUri":
-                                    //Uri fileUri = Uri.parse(fileUriPath);
-                                    //String addedFileName = api.addMediaFromUri(fileUri, preferredName, mimeType);
-                                    //result.success(addedFileName);
-                                    //break;
+                                    System.out.println(fileUriPath);
+                                    System.out.println(preferredName);
+                                    System.out.println(mimeType);
+                                    Uri fileUri = Uri.parse(fileUriPath);
+                                    
+                                    try {
+                                        String addedFileName = api.addMediaFromUri(fileUri, preferredName, mimeType);
+                                        result.success(addedFileName);
+                                        System.out.println("Added media from URI");
+                                    } catch (Exception e) {
+                                        System.out.println(e);
+                                    }
+                                    
+                                    
+                                    break;
                                 default:
                                     result.notImplemented();
                             }

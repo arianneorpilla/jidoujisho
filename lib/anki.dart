@@ -21,16 +21,20 @@ Future<void> requestAnkiDroidPermissions() async {
   await platform.invokeMethod('requestPermissions');
 }
 
+Directory getDCIMDirectory() {
+  return Directory("storage/emulated/0/DCIM/jidoujisho/");
+}
+
 String getPreviewImagePath() {
-  return "$gAppDirPath/exportImage.jpg";
+  return getDCIMDirectory().path + "exportImage.jpg";
 }
 
 String getPreviewImageMultiPath(int index) {
-  return "$gAppDirPath/exportMulti$index.jpg";
+  return getDCIMDirectory().path + "exportMulti$index.jpg";
 }
 
 String getPreviewAudioPath() {
-  return "$gAppDirPath/exportAudio.mp3";
+  return getDCIMDirectory().path + "exportAudio.mp3";
 }
 
 Future exportCurrentFrame(
@@ -128,6 +132,7 @@ Future exportCurrentAudio(
   int subtitleDelay,
 ) async {
   File audioFile = File(getPreviewAudioPath());
+  String previewAudioPath = audioFile.path;
   if (audioFile.existsSync()) {
     audioFile.deleteSync();
   }
@@ -170,7 +175,7 @@ Future exportCurrentAudio(
       break;
   }
 
-  String outputPath = "\"$gAppDirPath/exportAudio.mp3\"";
+  String outputPath = "\"$previewAudioPath\"";
   String command =
       "-loglevel verbose -ss $timeStart -to $timeEnd -y -i \"$inputPath\" -map 0:a:$audioIndex $outputPath";
 
@@ -672,8 +677,29 @@ class _DeckDropDownState extends State<DeckDropDown> {
   }
 }
 
+Future<String> addMediaFromUri(
+  String fileUriPath,
+  String preferredName,
+  String mimeType,
+) async {
+  const platform = const MethodChannel('com.lrorpilla.api/ankidroid');
+
+  try {
+    return await platform.invokeMethod('addMediaFromUri', <String, dynamic>{
+      'fileUriPath': fileUriPath,
+      'preferredName': preferredName,
+      'mimeType': mimeType,
+    });
+  } on PlatformException catch (e) {
+    print("Failed to add media from URI");
+    print(e);
+  }
+
+  return null;
+}
+
 void exportAnkiCard(String deck, String sentence, String answer, String reading,
-    String meaning, bool isSingle, int selectedIndex) {
+    String meaning, bool isSingle, int selectedIndex) async {
   DateTime now = DateTime.now();
   String newFileName =
       "jidoujisho-" + intl.DateFormat('yyyyMMddTkkmmss').format(now);
@@ -687,25 +713,27 @@ void exportAnkiCard(String deck, String sentence, String answer, String reading,
 
   File audioFile = File(getPreviewAudioPath());
 
-  String newImagePath = path.join(
-    getAnkiDroidDirectory().path,
-    "collection.media/$newFileName.jpg",
-  );
-  String newAudioPath = path.join(
-    getAnkiDroidDirectory().path,
-    "collection.media/$newFileName.mp3",
-  );
+  // String newImagePath = path.join(
+  //   getAnkiDroidDirectory().path,
+  //   "collection.media/$newFileName.jpg",
+  // );
+  // String newAudioPath = path.join(
+  //   getAnkiDroidDirectory().path,
+  //   "collection.media/$newFileName.mp3",
+  // );
 
   String addImage = "";
   String addAudio = "";
 
-  if (imageFile.existsSync()) {
-    imageFile.copySync(newImagePath);
-    addImage = "<img src=\"$newFileName.jpg\">";
+  if (imageFile != null && imageFile.existsSync()) {
+    addImage = await addMediaFromUri(
+        "file:///" + imageFile.uri.toString(), newFileName, "image");
+    print("IMAGE FILE EXPORTED: $addImage");
   }
-  if (audioFile.existsSync()) {
-    audioFile.copySync(newAudioPath);
-    addAudio = "[sound:$newFileName.mp3]";
+  if (audioFile != null && audioFile.existsSync()) {
+    addAudio = await addMediaFromUri(
+        "file:///" + audioFile.uri.toString(), newFileName, "audio");
+    print("AUDIO FILE EXPORTED: $addAudio");
   }
 
   if (answer == "") {
@@ -726,22 +754,18 @@ void exportAnkiCard(String deck, String sentence, String answer, String reading,
 }
 
 void exportCreatorAnkiCard(String deck, String sentence, String answer,
-    String reading, String meaning, File imageFile, bool isReader) {
+    String reading, String meaning, File imageFile, bool isReader) async {
   DateTime now = DateTime.now();
   String newFileName =
       "jidoujisho-" + intl.DateFormat('yyyyMMddTkkmmss').format(now);
-
-  String newImagePath = path.join(
-    getAnkiDroidDirectory().path,
-    "collection.media/$newFileName.jpg",
-  );
 
   String addImage = "";
   String addAudio = "";
 
   if (imageFile != null && imageFile.existsSync()) {
-    imageFile.copySync(newImagePath);
-    addImage = "<img src=\"$newFileName.jpg\">";
+    addImage = await addMediaFromUri(
+        "file:///" + imageFile.uri.toString(), newFileName, "image");
+    print("IMAGE FILE EXPORTED: $addImage");
   }
 
   if (answer == "") {

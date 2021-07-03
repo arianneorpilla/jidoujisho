@@ -61,7 +61,7 @@ void main() async {
   gAppDirPath = (await getApplicationDocumentsDirectory()).path;
   gPackageInfo = await PackageInfo.fromPlatform();
   gMecabTagger = Mecab();
-  gMecabTagger.init("assets/ipadic", true);
+  await gMecabTagger.init("assets/ipadic", true);
 
   if (Platform.isAndroid) {
     AndroidDeviceInfo androidInfo = await DeviceInfoPlugin().androidInfo;
@@ -69,6 +69,10 @@ void main() async {
     if (sdkInt <= 23) {
       gIsTapToSelectSupported = false;
     }
+  }
+
+  if (!getDCIMDirectory().existsSync()) {
+    getDCIMDirectory().createSync(recursive: true);
   }
 
   gSharedPrefs = await SharedPreferences.getInstance();
@@ -1721,10 +1725,6 @@ class _HomeState extends State<Home> {
           value: 'Report a bug or problem',
         ),
         PopupMenuItem<String>(
-          child: const Text('Set AnkiDroid directory'),
-          value: 'Set AnkiDroid directory',
-        ),
-        PopupMenuItem<String>(
           child: const Text('About this app'),
           value: 'About this app',
         ),
@@ -1848,49 +1848,6 @@ class _HomeState extends State<Home> {
         break;
       case "Report a bug or problem":
         await launch("https://github.com/lrorpilla/jidoujisho/issues/new");
-        break;
-      case "Set AnkiDroid directory":
-        String currentDirectoryPath = getAnkiDroidDirectory().path;
-        TextEditingController _textFieldController = TextEditingController(
-          text: currentDirectoryPath,
-        );
-
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.zero,
-              ),
-              content: TextField(
-                controller: _textFieldController,
-                decoration: InputDecoration(
-                    hintText: "storage/emulated/0/AnkiDroid",
-                    labelText: 'AnkiDroid directory path'),
-              ),
-              actions: <Widget>[
-                TextButton(
-                  child: Text('CANCEL', style: TextStyle(color: Colors.white)),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                TextButton(
-                  child: Text('OK', style: TextStyle(color: Colors.white)),
-                  onPressed: () async {
-                    String newDirectoryPath = _textFieldController.text;
-                    Directory newDirectory = Directory(newDirectoryPath);
-
-                    if (newDirectory.existsSync()) {
-                      await setAnkiDroidDirectory(newDirectory);
-                      Navigator.pop(context);
-                    }
-                  },
-                ),
-              ],
-            );
-          },
-        );
         break;
       case "About this app":
         const String legalese = "A mobile video player, reader assistant and card creation toolkit tailored for language learners.\n\n" +
@@ -4384,7 +4341,7 @@ class _CreatorState extends State<Creator> {
             crossAxisAlignment: WrapCrossAlignment.end,
             children: [
               Text(
-                "Preparing card creator",
+                "Preparing card creator...",
                 style: TextStyle(
                   color: Colors.grey,
                   fontSize: 20,
