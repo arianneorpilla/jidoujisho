@@ -2,7 +2,7 @@ name: jidoujisho
 description: A mobile video player tailored for Japanese language learners. 
 publish_to: none
 
-version: 0.16.7+30
+version: 0.16.8+30
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -62,7 +62,7 @@ dependencies:
   youtube_explode_dart:
     git:
       url: https://github.com/Hexer10/youtube_explode_dart
-      ref: 721ad7e2d535812e0e90fbe4c4b6175717c44bc5
+      ref: 4f9b38d7d2d1a8dce209e83f9b0b96ebdd33a287
   youtube_player_flutter:
   wakelock:
 
