@@ -748,7 +748,7 @@ Future openDictionaryMenu(BuildContext context, bool importAllowed) {
         ),
         content: buildDictionaryMenuContent(),
         actions: <Widget>[
-          if (importAllowed)
+          if (gIsTapToSelectSupported && importAllowed)
             TextButton(
               child: Text('IMPORT', style: TextStyle(color: Colors.white)),
               onPressed: () async {
