@@ -4,16 +4,13 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:html/parser.dart' as parser;
-import 'package:html/dom.dart' as dom;
 import 'package:http/http.dart' as http;
 import 'package:jidoujisho/pitch.dart';
 import 'package:jidoujisho/preferences.dart';
 import 'package:path/path.dart' as path;
 import 'package:unofficial_jisho_api/api.dart';
 
-import 'package:jidoujisho/globals.dart';
 import 'package:jidoujisho/util.dart';
-import 'package:jidoujisho/pitch.dart';
 
 class DictionaryEntry {
   String word;
@@ -268,12 +265,58 @@ DictionaryEntry getEntryFromJishoResult(JishoResult result, String searchTerm) {
   );
 }
 
+bool searchTermIllegal(searchTerm) {
+  if (searchTerm.trim().isEmpty) {
+    return true;
+  }
+  switch (searchTerm) {
+    case "「":
+    case "」":
+    case "。":
+    case "、":
+    case "『":
+    case "』":
+    case "！":
+    case "…":
+    case "‥":
+    case "・":
+    case "〽":
+    case "〜":
+    case "：":
+    case "？":
+    case "♪":
+    case "，":
+    case "（":
+    case "）":
+    case "｛":
+    case "｝":
+    case "［":
+    case "］":
+    case "【":
+    case "】":
+    case "｛":
+    case "｝":
+      return true;
+  }
+  return false;
+}
+
 Future<DictionaryHistoryEntry> getWordDetails({
   String searchTerm,
   String contextDataSource,
   int contextPosition,
   String searchTermOverride = "",
 }) async {
+  if (searchTermIllegal(searchTerm)) {
+    return DictionaryHistoryEntry(
+      entries: [],
+      searchTerm: searchTermOverride.trim(),
+      swipeIndex: 0,
+      contextDataSource: contextDataSource,
+      contextPosition: contextPosition,
+    );
+  }
+
   List<DictionaryEntry> entries = [];
   if (searchTermOverride.isEmpty) {
     searchTermOverride = searchTerm;
@@ -359,6 +402,15 @@ Future<DictionaryHistoryEntry> getMonolingualWordDetails({
   String searchTermOverride = "",
 }) async {
   List<DictionaryEntry> entries = [];
+  if (searchTermIllegal(searchTerm)) {
+    return DictionaryHistoryEntry(
+      entries: [],
+      searchTerm: searchTermOverride.trim(),
+      swipeIndex: 0,
+      contextDataSource: contextDataSource,
+      contextPosition: contextPosition,
+    );
+  }
 
   if (searchTermOverride.isEmpty) {
     searchTermOverride = searchTerm;
@@ -383,16 +435,15 @@ Future<DictionaryHistoryEntry> getMonolingualWordDetails({
         contextPosition: contextPosition,
       );
     } else {
-      String newSearchTerm = (await getWordDetails(
+      DictionaryHistoryEntry bilingualResults = await getWordDetails(
         searchTerm: searchTerm.trim(),
         contextDataSource: contextDataSource,
         contextPosition: contextPosition,
-      ))
-          .entries
-          .first
-          .word
-          .split(";")
-          .first;
+      );
+      String newSearchTerm = bilingualResults.entries.first.word;
+      if (newSearchTerm.contains(";")) {
+        newSearchTerm = newSearchTerm.split(";").first;
+      }
 
       return getMonolingualWordDetails(
         searchTerm: newSearchTerm.trim(),
@@ -421,7 +472,10 @@ List<DictionaryEntry> sakuraJsonToDictionaryEntries(
   words.forEach((word) {
     Map<String, dynamic> json = word as Map<String, dynamic>;
     if (!json['text'].contains('ＪＩＳ')) {
-      entries.add(sakuraJsonToDictionaryEntry(json, searchTerm));
+      DictionaryEntry entry = sakuraJsonToDictionaryEntry(json, searchTerm);
+      if (entry.word.isNotEmpty && entry.reading.isNotEmpty) {
+        entries.add(entry);
+      }
     }
   });
 

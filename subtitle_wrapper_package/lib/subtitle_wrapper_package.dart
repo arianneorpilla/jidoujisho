@@ -98,6 +98,7 @@ class SubTitleWrapper extends StatelessWidget {
                             focusNode: focusNode,
                             emptyStack: emptyStack,
                             isCasting: isCasting,
+                            fontSize: fontSize,
                           ),
                         )
                       : Container(

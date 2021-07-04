@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_youtube_dl/youtube_dl.dart';
 import 'package:http/http.dart' as http;
-import 'package:jidoujisho/cache.dart';
 import 'package:jidoujisho/preferences.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
