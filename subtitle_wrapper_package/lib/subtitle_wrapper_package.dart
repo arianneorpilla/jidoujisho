@@ -41,75 +41,69 @@ class SubTitleWrapper extends StatelessWidget {
       children: <Widget>[
         videoChild,
         BlocProvider(
-          create: (context) => SubtitleBloc(
-            videoPlayerController: videoPlayerController,
-            subtitleRepository: SubtitleDataRepository(
-              subtitleController: subtitleController,
-            ),
-            subtitleController: subtitleController,
-            subtitleNotifier: subtitleNotifier,
-          )..add(
-              InitSubtitles(
-                subtitleController: subtitleController,
-              ),
-            ),
-          child: ValueListenableBuilder(
-            valueListenable: isCasting,
-            builder: (BuildContext context, bool casting, Widget child) {
-              if (!casting) {
-                return Container(
-                  child: subtitleController.showSubtitles
-                      ? Positioned(
-                          top: subtitleStyle.position.top,
-                          bottom: subtitleStyle.position.bottom,
-                          left: subtitleStyle.position.left,
-                          right: subtitleStyle.position.right,
-                          child: SubtitleTextView(
-                            subtitleStyle: subtitleStyle,
-                            widgetVisibility:
-                                subtitleController.widgetVisibility,
-                            comprehensionSubtitle:
-                                subtitleController.comprehensionSubtitle,
-                            contextSubtitle: subtitleController.contextSubtitle,
-                            focusNode: focusNode,
-                            emptyStack: emptyStack,
-                            isCasting: isCasting,
-                            fontSize: fontSize,
-                          ),
-                        )
-                      : Container(
-                          child: null,
-                        ),
-                );
-              } else {
-                return Container(
-                  padding: EdgeInsets.only(
-                      left: subtitleStyle.position.left,
-                      right: subtitleStyle.position.right),
-                  child: subtitleController.showSubtitles
-                      ? Center(
-                          child: SubtitleTextView(
-                            subtitleStyle: subtitleStyle,
-                            widgetVisibility:
-                                subtitleController.widgetVisibility,
-                            comprehensionSubtitle:
-                                subtitleController.comprehensionSubtitle,
-                            contextSubtitle: subtitleController.contextSubtitle,
-                            focusNode: focusNode,
-                            emptyStack: emptyStack,
-                            isCasting: isCasting,
-                            fontSize: fontSize,
-                          ),
-                        )
-                      : Container(
-                          child: null,
-                        ),
-                );
-              }
-            },
-          ),
-        ),
+            create: (context) => SubtitleBloc(
+                  videoPlayerController: videoPlayerController,
+                  subtitleRepository: SubtitleDataRepository(
+                    subtitleController: subtitleController,
+                  ),
+                  subtitleController: subtitleController,
+                  subtitleNotifier: subtitleNotifier,
+                )..add(
+                    InitSubtitles(
+                      subtitleController: subtitleController,
+                    ),
+                  ),
+            child: rebuildableTextView()),
       ],
     );
+  }
+
+  Widget rebuildableTextView() {
+    if (!subtitleController.showSubtitles) {
+      return Container();
+    }
+
+    return ValueListenableBuilder<bool>(
+        valueListenable: isCasting,
+        builder: (BuildContext context, bool casting, Widget child) {
+          if (!casting) {
+            return Container(
+              child: Positioned(
+                top: subtitleStyle.position.top,
+                bottom: subtitleStyle.position.bottom,
+                left: subtitleStyle.position.left,
+                right: subtitleStyle.position.right,
+                child: SubtitleTextView(
+                  subtitleStyle: subtitleStyle,
+                  widgetVisibility: subtitleController.widgetVisibility,
+                  comprehensionSubtitle:
+                      subtitleController.comprehensionSubtitle,
+                  contextSubtitle: subtitleController.contextSubtitle,
+                  focusNode: focusNode,
+                  emptyStack: emptyStack,
+                  fontSize: fontSize.value,
+                ),
+              ),
+            );
+          } else {
+            return Container(
+              padding: EdgeInsets.only(
+                  left: subtitleStyle.position.left,
+                  right: subtitleStyle.position.right),
+              child: Center(
+                child: SubtitleTextView(
+                  subtitleStyle: subtitleStyle,
+                  widgetVisibility: subtitleController.widgetVisibility,
+                  comprehensionSubtitle:
+                      subtitleController.comprehensionSubtitle,
+                  contextSubtitle: subtitleController.contextSubtitle,
+                  focusNode: focusNode,
+                  emptyStack: emptyStack,
+                  fontSize: fontSize.value * 1.75,
+                ),
+              ),
+            );
+          }
+        });
   }
 }

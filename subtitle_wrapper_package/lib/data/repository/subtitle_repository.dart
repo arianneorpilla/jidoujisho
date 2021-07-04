@@ -155,7 +155,7 @@ class SubtitleDataRepository extends SubtitleRepository {
       );
     } else if (subtitleType == SubtitleType.srt) {
       regExp = RegExp(
-        r'((\d{2}):(\d{2}):(\d{2})\,(\d+)) +--> +((\d{2}):(\d{2}):(\d{2})\,(\d{3})).*[\r\n]+\s*((?:(?!\r?\n\r?).)*(\r\n|\r|\n)(?:.*))',
+        r'((\d{2}):(\d{2}):(\d{2})\,(\d+)) +--> +((\d{2}):(\d{2}):(\d{2})\,(\d{3})).*[\r\n]+\s*(^[\s\S]*?(?=\n{2,}))',
         caseSensitive: false,
         multiLine: true,
       );

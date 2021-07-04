@@ -554,8 +554,6 @@ Future<void> addVideoHistory(HistoryItem videoHistory, bool addPosition) async {
     videoHistories = videoHistories.sublist(videoHistories.length - 20);
   }
 
-  print("ADDED");
-
   if (addPosition) {
     await addVideoHistoryPosition(
       HistoryItemPosition(
@@ -803,7 +801,6 @@ Future<void> addBookHistory(HistoryItem bookHistory) async {
     bookHistories = bookHistories.sublist(bookHistories.length - 20);
   }
 
-  print("ADDED");
   await setBookHistory(bookHistories);
 }
 

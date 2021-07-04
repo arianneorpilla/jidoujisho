@@ -28,7 +28,6 @@ import 'package:jidoujisho/dictionary.dart';
 import 'package:jidoujisho/globals.dart';
 import 'package:jidoujisho/pitch.dart';
 import 'package:jidoujisho/preferences.dart';
-import 'package:jidoujisho/util.dart';
 import 'package:jidoujisho/youtube.dart';
 
 class JidoujishoPlayer extends StatefulWidget {
@@ -546,7 +545,7 @@ class _VideoPlayerState extends State<VideoPlayer>
             getVideoPlayerController().value.position.inMilliseconds -
                     getSubtitleController().subtitlesOffset <
                 cutOffEnd.inMilliseconds) {
-          if (!getSubtitleController().widgetVisibility.value) {
+          if (!(getSubtitleController().widgetVisibility.value)) {
             getSubtitleController().widgetVisibility.value = true;
           }
         } else {
