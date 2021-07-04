@@ -84,6 +84,28 @@ fetchMonolingualSearchCache({
   return gMonolingualSearchCache[searchTerm].future;
 }
 
+fetchCustomDictionarySearchCache({
+  String dictionaryName,
+  String searchTerm,
+  String contextDataSource = "-1",
+  int contextPosition = -1,
+}) {
+  if (gCustomDictionarySearchCache[dictionaryName] == null) {
+    gCustomDictionarySearchCache[dictionaryName] = {};
+  }
+
+  if (gCustomDictionarySearchCache[dictionaryName][searchTerm] == null) {
+    gCustomDictionarySearchCache[dictionaryName][searchTerm] = AsyncMemoizer();
+  }
+
+  gCustomDictionarySearchCache[dictionaryName][searchTerm].runOnce(() async {
+    // TO DO METHOD HERE
+    return null;
+  });
+
+  return gCustomDictionarySearchCache[dictionaryName][searchTerm].future;
+}
+
 fetchCaptioningCache(String videoID) {
   if (gCaptioningCache[videoID] == null) {
     gCaptioningCache[videoID] = AsyncMemoizer();

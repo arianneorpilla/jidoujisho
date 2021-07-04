@@ -303,19 +303,11 @@ bool getSelectMode() {
 }
 
 Future<void> useMonolingual() async {
-  await gSharedPrefs.setBool("monolingualMode", true);
+  await setCurrentDictionary('Sora Dictionary API');
 }
 
 Future<void> useBilingual() async {
-  await gSharedPrefs.setBool("monolingualMode", false);
-}
-
-Future<void> toggleMonolingualMode() async {
-  await gSharedPrefs.setBool("monolingualMode", !getMonolingualMode());
-}
-
-bool getMonolingualMode() {
-  return gSharedPrefs.getBool("monolingualMode") ?? false;
+  await setCurrentDictionary('Jisho.org API');
 }
 
 Future<void> toggleFocusMode() async {
@@ -863,4 +855,39 @@ Future<void> removeBookHistoryPosition(HistoryItemPosition bookHistory) async {
 
   bookHistories.removeWhere((entry) => entry.url == bookHistory.url);
   await setBookHistoryPosition(bookHistories);
+}
+
+List<String> getDictionariesName() {
+  return gSharedPrefs.getStringList('customDictionaries') ?? [];
+}
+
+Future<void> setDictionariesName(List<String> customDictionaries) async {
+  await gSharedPrefs.setStringList('customDictionaries', customDictionaries);
+}
+
+Future<void> addDictionaryName(String customDictionary) async {
+  List<String> customDictionaries = getDictionariesName();
+  customDictionaries.add(customDictionary);
+  await setDictionariesName(customDictionaries);
+}
+
+Future<void> removeDictionaryName(String customDictionary) async {
+  List<String> customDictionaries = getDictionariesName();
+  customDictionaries.remove(customDictionary);
+  await setDictionariesName(customDictionaries);
+}
+
+Future<void> setCurrentDictionary(String newCurrentDictionary) async {
+  gActiveDictionary.value = newCurrentDictionary;
+  await gSharedPrefs.setString("currentCustomDictionary", newCurrentDictionary);
+}
+
+String getCurrentDictionary() {
+  String customDictionary =
+      gSharedPrefs.getString('currentCustomDictionary') ?? 'Jisho.org API';
+  return customDictionary;
+}
+
+bool isCustomDictionary() {
+  return getCurrentDictionary().isNotEmpty;
 }

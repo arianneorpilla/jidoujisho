@@ -268,10 +268,9 @@ reader.addEventListener('touchstart', (e) => {
           ContextMenuItem(
               androidId: 1,
               iosId: "1",
-              title: "A⌕",
+              title: "Search",
               action: () async {
                 emptyStack();
-                await useBilingual();
                 _clipboard.value = (await webViewController.getSelectedText())
                         .replaceAll("\\n", "\n")
                         .trim() ??
@@ -281,14 +280,17 @@ reader.addEventListener('touchstart', (e) => {
           ContextMenuItem(
               androidId: 2,
               iosId: "2",
-              title: "あ⌕",
+              title: "Dictionaries",
               action: () async {
-                emptyStack();
-                await useMonolingual();
-                _clipboard.value = (await webViewController.getSelectedText())
-                        .replaceAll("\\n", "\n")
-                        .trim() ??
-                    "";
+                String clipboardMemory =
+                    (await webViewController.getSelectedText())
+                            .replaceAll("\\n", "\n")
+                            .trim() ??
+                        "";
+                openDictionaryMenu(context, false).then((result) async {
+                  emptyStack();
+                  _clipboard.value = clipboardMemory;
+                });
                 clearSelection();
               }),
           ContextMenuItem(
@@ -785,10 +787,15 @@ reader.addEventListener('touchstart', (e) => {
   }
 
   Widget buildDictionaryNoMatch(String clipboard) {
-    if (getMonolingualMode()) {
-      gMonolingualSearchCache[clipboard] = null;
-    } else {
-      gBilingualSearchCache[clipboard] = null;
+    switch (getCurrentDictionary()) {
+      case "Jisho.org API":
+        gBilingualSearchCache[clipboard] = null;
+        break;
+      case "Sora Dictionary API":
+        gMonolingualSearchCache[clipboard] = null;
+        break;
+      default:
+        gCustomDictionarySearchCache[getCurrentDictionary()][clipboard] = null;
     }
 
     _subtitleFocusNode.unfocus();
@@ -806,45 +813,50 @@ reader.addEventListener('touchstart', (e) => {
                 meaning: "",
               );
             },
-            child: Container(
-                padding: EdgeInsets.all(16.0),
-                color: Colors.grey[600].withOpacity(0.97),
-                child: Wrap(
-                  alignment: WrapAlignment.center,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    Text(
-                      "No matches for",
-                      style: TextStyle(),
-                    ),
-                    Wrap(
-                      alignment: WrapAlignment.center,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Text(
-                          "『",
-                          style: TextStyle(
-                            color: Colors.grey[300],
+            child: GestureDetector(
+              onLongPress: () {
+                openDictionaryMenu(context, false);
+              },
+              child: Container(
+                  padding: EdgeInsets.all(16.0),
+                  color: Colors.grey[600].withOpacity(0.97),
+                  child: Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        "No matches for",
+                        style: TextStyle(),
+                      ),
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          Text(
+                            "『",
+                            style: TextStyle(
+                              color: Colors.grey[300],
+                            ),
                           ),
-                        ),
-                        SelectableText(
-                          clipboard,
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          "』",
-                          style: TextStyle(
-                            color: Colors.grey[300],
+                          SelectableText(
+                            clipboard,
+                            style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                        ),
-                      ],
-                    ),
-                    Text(
-                      "could be queried.",
-                      style: TextStyle(),
-                    ),
-                  ],
-                )),
+                          Text(
+                            "』",
+                            style: TextStyle(
+                              color: Colors.grey[300],
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        "could be queried.",
+                        style: TextStyle(),
+                      ),
+                    ],
+                  )),
+            ),
           ),
         ),
         Expanded(child: Container()),
@@ -918,11 +930,7 @@ reader.addEventListener('touchstart', (e) => {
                 children: [
                   GestureDetector(
                     onLongPress: () {
-                      toggleMonolingualMode();
-                      final String clipboardMemory = _clipboard.value;
-                      _clipboard.value = "";
-                      setNoPush();
-                      _clipboard.value = clipboardMemory;
+                      openDictionaryMenu(context, false);
                     },
                     child: Text(
                       results.entries[selectedIndex.value].word,
@@ -935,11 +943,7 @@ reader.addEventListener('touchstart', (e) => {
                   SizedBox(height: 5),
                   GestureDetector(
                     onLongPress: () {
-                      toggleMonolingualMode();
-                      final String clipboardMemory = _clipboard.value;
-                      _clipboard.value = "";
-                      setNoPush();
-                      _clipboard.value = clipboardMemory;
+                      openDictionaryMenu(context, false);
                     },
                     child: (pitchEntry != null)
                         ? getAllPitchWidgets(pitchEntry)
@@ -948,26 +952,18 @@ reader.addEventListener('touchstart', (e) => {
                   Flexible(
                     child: Scrollbar(
                       child: SingleChildScrollView(
-                        controller: scrollController,
-                        child: getMonolingualMode()
-                            ? SelectableText(
-                                "\n${results.entries[selectedIndex.value].meaning}\n",
-                                style: TextStyle(
-                                  fontSize: 15,
-                                ),
-                                toolbarOptions: ToolbarOptions(
-                                    copy: true,
-                                    cut: false,
-                                    selectAll: false,
-                                    paste: false),
-                              )
-                            : Text(
-                                "\n${results.entries[selectedIndex.value].meaning}\n",
-                                style: TextStyle(
-                                  fontSize: 15,
-                                ),
-                              ),
-                      ),
+                          controller: scrollController,
+                          child: SelectableText(
+                            "\n${results.entries[selectedIndex.value].meaning}\n",
+                            style: TextStyle(
+                              fontSize: 15,
+                            ),
+                            toolbarOptions: ToolbarOptions(
+                                copy: true,
+                                cut: false,
+                                selectAll: false,
+                                paste: false),
+                          )),
                     ),
                   ),
                   Wrap(
@@ -1112,19 +1108,27 @@ reader.addEventListener('touchstart', (e) => {
     String currentUrl = (await webViewController.getUrl()).toString();
     int currentScrollX = (await webViewController.getScrollX());
 
-    if (getMonolingualMode()) {
-      return fetchMonolingualSearchCache(
-        searchTerm: clipboard,
-        recursive: false,
-        contextDataSource: currentUrl,
-        contextPosition: currentScrollX,
-      );
-    } else {
-      return fetchBilingualSearchCache(
-        searchTerm: clipboard,
-        contextDataSource: currentUrl,
-        contextPosition: currentScrollX,
-      );
+    switch (getCurrentDictionary()) {
+      case "Jisho.org API":
+        return fetchBilingualSearchCache(
+          searchTerm: clipboard,
+          contextDataSource: currentUrl,
+          contextPosition: currentScrollX,
+        );
+      case "Sora Dictionary API":
+        return fetchMonolingualSearchCache(
+          searchTerm: clipboard,
+          recursive: false,
+          contextDataSource: currentUrl,
+          contextPosition: currentScrollX,
+        );
+      default:
+        return fetchCustomDictionarySearchCache(
+          dictionaryName: getCurrentDictionary(),
+          searchTerm: clipboard,
+          contextDataSource: currentUrl,
+          contextPosition: currentScrollX,
+        );
     }
   }
 
@@ -1132,46 +1136,52 @@ reader.addEventListener('touchstart', (e) => {
     return ValueListenableBuilder(
       valueListenable: _clipboard,
       builder: (context, clipboard, widget) {
-        return FutureBuilder(
-          future: dictionaryFutureHelper(clipboard),
-          builder: (BuildContext context, AsyncSnapshot snapshot) {
-            if (_clipboard.value == "&<&>export&<&>") {
-              return buildDictionaryExporting(clipboard);
-            }
-            if (_clipboard.value == "&<&>autogen&<&>") {
-              return buildDictionaryAutoGenQuery(clipboard);
-            }
-            if (_clipboard.value == "&<&>autogendependencies&<&>") {
-              return buildDictionaryAutoGenDependencies(clipboard);
-            }
-            if (_clipboard.value == "&<&>autogenbad&<&>") {
-              return buildDictionaryAutoGenBad(clipboard);
-            }
-            if (_clipboard.value == "&<&>netsubsrequest&<&>") {
-              return buildDictionaryNetworkSubtitlesRequest(clipboard);
-            }
-            if (_clipboard.value == "&<&>netsubsbad&<&>") {
-              return buildDictionaryNetworkSubtitlesBad(clipboard);
-            }
-            if (_clipboard.value.startsWith("&<&>exported")) {
-              return buildDictionaryExported(clipboard);
-            }
-            if (_clipboard.value == "") {
-              return Container();
-            }
-
-            switch (snapshot.connectionState) {
-              case ConnectionState.waiting:
-                return buildDictionaryLoading(clipboard);
-              default:
-                DictionaryHistoryEntry results = snapshot.data;
-
-                if (snapshot.hasData && results.entries.isNotEmpty) {
-                  return buildDictionaryMatch(results);
-                } else {
-                  return buildDictionaryNoMatch(clipboard);
+        return ValueListenableBuilder(
+          valueListenable: gActiveDictionary,
+          builder:
+              (BuildContext context, String activeDictionary, Widget child) {
+            return FutureBuilder(
+              future: dictionaryFutureHelper(clipboard),
+              builder: (BuildContext context, AsyncSnapshot snapshot) {
+                if (_clipboard.value == "&<&>export&<&>") {
+                  return buildDictionaryExporting(clipboard);
                 }
-            }
+                if (_clipboard.value == "&<&>autogen&<&>") {
+                  return buildDictionaryAutoGenQuery(clipboard);
+                }
+                if (_clipboard.value == "&<&>autogendependencies&<&>") {
+                  return buildDictionaryAutoGenDependencies(clipboard);
+                }
+                if (_clipboard.value == "&<&>autogenbad&<&>") {
+                  return buildDictionaryAutoGenBad(clipboard);
+                }
+                if (_clipboard.value == "&<&>netsubsrequest&<&>") {
+                  return buildDictionaryNetworkSubtitlesRequest(clipboard);
+                }
+                if (_clipboard.value == "&<&>netsubsbad&<&>") {
+                  return buildDictionaryNetworkSubtitlesBad(clipboard);
+                }
+                if (_clipboard.value.startsWith("&<&>exported")) {
+                  return buildDictionaryExported(clipboard);
+                }
+                if (_clipboard.value == "") {
+                  return Container();
+                }
+
+                switch (snapshot.connectionState) {
+                  case ConnectionState.waiting:
+                    return buildDictionaryLoading(clipboard);
+                  default:
+                    DictionaryHistoryEntry results = snapshot.data;
+
+                    if (snapshot.hasData && results.entries.isNotEmpty) {
+                      return buildDictionaryMatch(results);
+                    } else {
+                      return buildDictionaryNoMatch(clipboard);
+                    }
+                }
+              },
+            );
           },
         );
       },

@@ -1847,6 +1847,9 @@ class _HomeState extends State<Home> {
           },
         );
         break;
+      case "Manage dictionaries":
+        openDictionaryMenu(context, true);
+        break;
       case "View repository on GitHub":
         await launch("https://github.com/lrorpilla/jidoujisho");
         break;
@@ -3389,7 +3392,7 @@ class _ClipboardState extends State<ClipboardMenu> {
       );
     }
 
-    void wordFieldSearch(bool monolingual) async {
+    void wordFieldSearch() async {
       String searchTerm = _wordController.text;
       if (!_isSearching.value && searchTerm.isNotEmpty) {
         _wordController.clear();
@@ -3397,15 +3400,24 @@ class _ClipboardState extends State<ClipboardMenu> {
 
         try {
           var results;
-          if (monolingual) {
-            results = await fetchMonolingualSearchCache(
-              searchTerm: searchTerm,
-              recursive: false,
-            );
-          } else {
-            results = await fetchBilingualSearchCache(
-              searchTerm: searchTerm,
-            );
+          switch (getCurrentDictionary()) {
+            case "Jisho.org API":
+              results = await fetchBilingualSearchCache(
+                searchTerm: searchTerm,
+              );
+              break;
+            case "Sora Dictionary API":
+              results = await fetchMonolingualSearchCache(
+                searchTerm: searchTerm,
+                recursive: false,
+              );
+              break;
+            default:
+              results = await fetchCustomDictionarySearchCache(
+                dictionaryName: getCurrentDictionary(),
+                searchTerm: searchTerm,
+              );
+              break;
           }
 
           if (results != null && results.entries.isNotEmpty) {
@@ -3419,20 +3431,17 @@ class _ClipboardState extends State<ClipboardMenu> {
       }
     }
 
-    Widget wordSearchButton({bool monolingual}) {
+    Widget wordSearchButton() {
       return ValueListenableBuilder(
         valueListenable: _isSearching,
         builder: (BuildContext context, bool isSearching, Widget widget) {
           return IconButton(
             iconSize: 18,
             onPressed: () async {
-              wordFieldSearch(monolingual);
+              wordFieldSearch();
             },
-            icon: Text(
-              (monolingual) ? "あ⌕" : "A⌕",
-              style:
-                  TextStyle(color: (isSearching) ? Colors.grey : Colors.white),
-            ),
+            icon: Icon(Icons.search,
+                color: (isSearching) ? Colors.grey : Colors.white),
           );
         },
       );
@@ -3443,7 +3452,7 @@ class _ClipboardState extends State<ClipboardMenu> {
       maxLines: 1,
       controller: _wordController,
       onFieldSubmitted: (result) {
-        wordFieldSearch(getMonolingualMode());
+        wordFieldSearch();
       },
       decoration: InputDecoration(
         contentPadding: EdgeInsets.all(0),
@@ -3454,8 +3463,12 @@ class _ClipboardState extends State<ClipboardMenu> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
           children: [
-            wordSearchButton(monolingual: false),
-            wordSearchButton(monolingual: true),
+            wordSearchButton(),
+            IconButton(
+              iconSize: 18,
+              onPressed: () => openDictionaryMenu(context, false),
+              icon: Icon(Icons.auto_stories, color: Colors.white),
+            ),
             IconButton(
               iconSize: 18,
               onPressed: () => _wordController.clear(),
@@ -4863,44 +4876,54 @@ class _CreatorState extends State<Creator> {
           _isReader.value = value.isNotEmpty;
         });
 
-    void wordFieldSearch(bool monolingual) async {
-      if (!_isSearching.value) {
+    void wordFieldSearch() async {
+      String searchTerm = _wordController.text;
+      if (!_isSearching.value && searchTerm.isNotEmpty) {
+        _wordController.clear();
         _isSearching.value = true;
-        String searchTerm = _wordController.text;
+
         try {
           var results;
-          if (monolingual) {
-            results = await fetchMonolingualSearchCache(
-              searchTerm: searchTerm,
-              recursive: false,
-            );
-          } else {
-            results = await fetchBilingualSearchCache(
-              searchTerm: searchTerm,
-            );
+          switch (getCurrentDictionary()) {
+            case "Jisho.org API":
+              results = await fetchBilingualSearchCache(
+                searchTerm: searchTerm,
+              );
+              break;
+            case "Sora Dictionary API":
+              results = await fetchMonolingualSearchCache(
+                searchTerm: searchTerm,
+                recursive: false,
+              );
+              break;
+            default:
+              results = await fetchCustomDictionarySearchCache(
+                dictionaryName: getCurrentDictionary(),
+                searchTerm: searchTerm,
+              );
+              break;
           }
 
-          showDictionaryDialog(results);
+          if (results != null && results.entries.isNotEmpty) {
+            addDictionaryEntryToHistory(results);
+          }
         } finally {
           _isSearching.value = false;
         }
       }
     }
 
-    Widget wordSearchButton({bool monolingual}) {
+    Widget wordSearchButton() {
       return ValueListenableBuilder(
         valueListenable: _isSearching,
         builder: (BuildContext context, bool isSearching, Widget widget) {
           return IconButton(
             iconSize: 18,
             onPressed: () async {
-              wordFieldSearch(monolingual);
+              wordFieldSearch();
             },
-            icon: Text(
-              (monolingual) ? "あ⌕" : "A⌕",
-              style:
-                  TextStyle(color: (isSearching) ? Colors.grey : Colors.white),
-            ),
+            icon: Icon(Icons.search,
+                color: (isSearching) ? Colors.grey : Colors.white),
           );
         },
       );
@@ -4911,7 +4934,7 @@ class _CreatorState extends State<Creator> {
       maxLines: 1,
       controller: _wordController,
       onFieldSubmitted: (result) {
-        wordFieldSearch(getMonolingualMode());
+        wordFieldSearch();
       },
       decoration: InputDecoration(
         prefixIcon: Icon(
@@ -4921,8 +4944,12 @@ class _CreatorState extends State<Creator> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
           children: [
-            wordSearchButton(monolingual: false),
-            wordSearchButton(monolingual: true),
+            wordSearchButton(),
+            IconButton(
+              iconSize: 18,
+              onPressed: () => openDictionaryMenu(context, false),
+              icon: Icon(Icons.auto_stories, color: Colors.white),
+            ),
             IconButton(
               iconSize: 18,
               onPressed: () => _wordController.clear(),

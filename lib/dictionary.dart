@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:html/parser.dart' as parser;
 import 'package:http/http.dart' as http;
+import 'package:jidoujisho/globals.dart';
 import 'package:jidoujisho/pitch.dart';
 import 'package:jidoujisho/preferences.dart';
 import 'package:path/path.dart' as path;
@@ -541,5 +543,151 @@ DictionaryEntry sakuraJsonToDictionaryEntry(
     reading: reading,
     meaning: meaning,
     searchTerm: searchTerm,
+  );
+}
+
+Future openDictionaryMenu(BuildContext context, bool importAllowed) {
+  ScrollController scrollController = ScrollController();
+  ValueNotifier<List<String>> _useCustomDictionaries =
+      ValueNotifier<List<String>>(getDictionariesName());
+
+  Widget buildDictionaryMenuContent() {
+    return Container(
+      width: double.maxFinite,
+      child: ValueListenableBuilder(
+        valueListenable: _useCustomDictionaries,
+        builder:
+            (BuildContext context, List<String> dictionaryNames, Widget child) {
+          return ValueListenableBuilder(
+            valueListenable: gActiveDictionary,
+            builder:
+                (BuildContext context, String activeDictionary, Widget child) {
+              return Scrollbar(
+                controller: scrollController,
+                child: ListView.builder(
+                  controller: scrollController,
+                  shrinkWrap: true,
+                  physics: ClampingScrollPhysics(),
+                  itemCount: dictionaryNames.length + 2,
+                  itemBuilder: (context, index) {
+                    if (index < dictionaryNames.length) {
+                      String dictionaryName = dictionaryNames[index];
+
+                      return ListTile(
+                        dense: true,
+                        title: Row(
+                          children: [
+                            Icon(
+                              Icons.auto_stories,
+                              size: 20.0,
+                              color: Colors.white,
+                            ),
+                            const SizedBox(width: 16.0),
+                            Text(
+                              dictionaryName,
+                              style: TextStyle(fontSize: 16),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                        onTap: () {},
+                      );
+                    } else if (index == dictionaryNames.length) {
+                      String dictionaryName = "Jisho.org API";
+                      return ListTile(
+                        dense: true,
+                        selected: (activeDictionary == dictionaryName),
+                        selectedTileColor: Colors.white.withOpacity(0.2),
+                        title: Row(
+                          children: [
+                            Icon(
+                              Icons.cloud,
+                              size: 20.0,
+                              color: Colors.white,
+                            ),
+                            const SizedBox(width: 16.0),
+                            Text(
+                              dictionaryName,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                        onTap: () {
+                          useBilingual();
+                          if (!importAllowed) {
+                            Navigator.pop(context);
+                          }
+                        },
+                      );
+                    } else {
+                      String dictionaryName = "Sora Dictionary API";
+                      return ListTile(
+                        dense: true,
+                        selected: (activeDictionary == dictionaryName),
+                        selectedTileColor: Colors.white.withOpacity(0.2),
+                        title: Row(
+                          children: [
+                            Icon(
+                              Icons.cloud,
+                              size: 20.0,
+                              color: Colors.white,
+                            ),
+                            const SizedBox(width: 16.0),
+                            Text(
+                              dictionaryName,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                        onTap: () {
+                          useMonolingual();
+                          if (!importAllowed) {
+                            Navigator.pop(context);
+                          }
+                        },
+                      );
+                    }
+                  },
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  return showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.zero,
+        ),
+        content: buildDictionaryMenuContent(),
+        actions: <Widget>[
+          if (importAllowed)
+            TextButton(
+              child: Text('IMPORT', style: TextStyle(color: Colors.white)),
+              onPressed: () {},
+            ),
+          if (importAllowed)
+            TextButton(
+              child: Text('CLOSE', style: TextStyle(color: Colors.white)),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+        ],
+      );
+    },
   );
 }

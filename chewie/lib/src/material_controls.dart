@@ -10,6 +10,7 @@ import 'package:chewie/src/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
+import 'package:jidoujisho/dictionary.dart';
 import 'package:jidoujisho/util.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:share/share.dart';
@@ -344,10 +345,7 @@ class _MaterialControlsState extends State<MaterialControls>
                 "Use Tap to Select Subtitle Selection"
               else
                 "Use Drag to Select Subtitle Selection",
-              if (getMonolingualMode())
-                "Use Bilingual Definitions from Jisho.org"
-              else
-                "Use Monolingual Definitions from Sora",
+              "Select Active Dictionary Source",
               if (chewieController.isCasting.value)
                 "Stop Casting to Display Device"
               else
@@ -369,7 +367,7 @@ class _MaterialControlsState extends State<MaterialControls>
                 Icons.touch_app_sharp
               else
                 Icons.select_all_sharp,
-              Icons.translate_sharp,
+              Icons.auto_stories,
               if (chewieController.isCasting.value)
                 Icons.cast_connected_sharp
               else
@@ -399,7 +397,7 @@ class _MaterialControlsState extends State<MaterialControls>
             }
             break;
           case 4:
-            toggleMonolingualMode();
+            openDictionaryMenu(context, false);
             final String clipboardMemory = chewieController.clipboard.value;
             chewieController.clipboard.value = "";
             chewieController.setNoPush();
