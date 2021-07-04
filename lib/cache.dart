@@ -100,7 +100,11 @@ fetchCustomDictionarySearchCache({
 
   gCustomDictionarySearchCache[dictionaryName][searchTerm].runOnce(() async {
     // TO DO METHOD HERE
-    return null;
+    return getCustomWordDetails(
+      searchTerm: searchTerm,
+      contextDataSource: contextDataSource,
+      contextPosition: contextPosition,
+    );
   });
 
   return gCustomDictionarySearchCache[dictionaryName][searchTerm].future;

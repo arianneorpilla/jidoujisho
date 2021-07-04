@@ -45,3 +45,5 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Objectbox related
+/lib/objectbox.g.dart

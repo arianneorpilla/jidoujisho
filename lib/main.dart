@@ -12,10 +12,12 @@ import 'package:flutter_absolute_path/flutter_absolute_path.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:jidoujisho/objectbox.g.dart';
 import 'package:jidoujisho/reader.dart';
 import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:minimize_app/minimize_app.dart';
+import 'package:objectbox/objectbox.dart';
 import 'package:package_info/package_info.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -93,6 +95,7 @@ void main() async {
     backgroundTaskEntrypoint: _backgroundTaskEntrypoint,
   );
 
+  initializeCustomDictionaries();
   initializeKanjiumEntries().then((entries) {
     gKanjiumDictionary.value = entries;
   });

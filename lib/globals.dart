@@ -1,12 +1,13 @@
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
-import 'package:jidoujisho/preferences.dart';
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:package_info/package_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 import 'package:jidoujisho/dictionary.dart';
-import 'package:youtube_explode_dart/youtube_explode_dart.dart';
+import 'package:jidoujisho/objectbox.g.dart';
+import 'package:jidoujisho/preferences.dart';
 
 String gAppDirPath;
 String gPreviewImageDir;
@@ -36,6 +37,7 @@ Map<String, Map<String, AsyncMemoizer>> gCustomDictionarySearchCache = {};
 Map<String, AsyncMemoizer> gCaptioningCache = {};
 Map<String, List<Video>> gChannelVideoCache = {};
 Map<String, AsyncMemoizer> gMetadataCache = {};
+Map<String, Store> gCustomDictionaryStores = {};
 
 ValueNotifier<List<DictionaryEntry>> gKanjiumDictionary = ValueNotifier([]);
 ScrollController gCurrentScrollbar;

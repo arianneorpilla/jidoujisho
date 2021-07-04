@@ -4,17 +4,26 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_archive/flutter_archive.dart';
+import 'package:gx_file_picker/gx_file_picker.dart';
 import 'package:html/parser.dart' as parser;
 import 'package:http/http.dart' as http;
 import 'package:jidoujisho/globals.dart';
+import 'package:jidoujisho/objectbox.g.dart';
 import 'package:jidoujisho/pitch.dart';
 import 'package:jidoujisho/preferences.dart';
+import 'package:objectbox/objectbox.dart';
 import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 import 'package:unofficial_jisho_api/api.dart';
 
 import 'package:jidoujisho/util.dart';
+import 'package:ve_dart/ve_dart.dart';
 
+@Entity()
 class DictionaryEntry {
+  int id;
+  String dictionarySource;
   String word;
   String reading;
   String meaning;
@@ -22,6 +31,8 @@ class DictionaryEntry {
   List<PitchAccentInformation> pitchAccentEntries;
 
   DictionaryEntry({
+    this.id = 0,
+    this.dictionarySource,
     this.word,
     this.reading,
     this.meaning,
@@ -36,6 +47,7 @@ class DictionaryEntry {
     }
 
     return {
+      "dictionarySource": this.dictionarySource,
       "word": this.word,
       "reading": this.reading,
       "meaning": this.meaning,
@@ -53,6 +65,7 @@ class DictionaryEntry {
       entriesFromMap.add(entry);
     });
 
+    this.dictionarySource = map['dictionarySource'];
     this.word = map['word'];
     this.reading = map['reading'];
     this.meaning = map['meaning'];
@@ -137,31 +150,74 @@ class DictionaryHistoryEntry {
   int get hashCode => super.hashCode;
 }
 
-List<DictionaryEntry> importCustomDictionary() {
+Future<ArchiveImportResult> getCustomDictionaryFromArchive(
+    File archiveFile, ValueNotifier<String> progressNotifier) async {
   List<DictionaryEntry> entries = [];
+
+  progressNotifier.value = "Initializing import...";
+
+  await Future.delayed(Duration(milliseconds: 1), () {});
+
+  Directory importDirectory = Directory(
+    path.join(gAppDirPath, "importDirectory"),
+  );
+  if (importDirectory.existsSync()) {
+    progressNotifier.value = "Clearing working space...";
+    await Future.delayed(Duration(milliseconds: 1), () {});
+    importDirectory.deleteSync(recursive: true);
+  }
+
+  progressNotifier.value = "Extracting archive...";
+  importDirectory.createSync();
+  await ZipFile.extractToDirectory(
+      zipFile: archiveFile, destinationDir: importDirectory);
 
   if (!getTermBankDirectory().existsSync()) {
     getTermBankDirectory().createSync(recursive: true);
   }
 
+  await Future.delayed(Duration(milliseconds: 1), () {});
+
+  String indexPath = path.join(importDirectory.path, "index.json");
+  File indexFile = File(indexPath);
+  Map<String, dynamic> index = jsonDecode(indexFile.readAsStringSync());
+  String dictionaryName = index["title"];
+
+  if (getDictionariesName().contains(dictionaryName)) {
+    throw Exception("Dictionary with same title already found.");
+  }
+
   for (int i = 0; i < 999; i++) {
-    String outputPath =
-        path.join(getTermBankDirectory().path, "term_bank_$i.json");
+    String outputPath = path.join(importDirectory.path, "term_bank_$i.json");
     File dictionaryFile = File(outputPath);
 
     if (dictionaryFile.existsSync()) {
       List<dynamic> dictionary = jsonDecode(dictionaryFile.readAsStringSync());
       dictionary.forEach((entry) {
         entries.add(DictionaryEntry(
+          dictionarySource: dictionaryName,
           word: entry[0].toString(),
           reading: entry[1].toString(),
           meaning: entry[5].toString(),
         ));
+        progressNotifier.value = "Found ${entries.length} entries...";
       });
     }
   }
 
-  return entries;
+  await Future.delayed(Duration(milliseconds: 1), () {});
+
+  return ArchiveImportResult(
+    dictionaryName: dictionaryName,
+    entries: entries,
+  );
+}
+
+class ArchiveImportResult {
+  String dictionaryName;
+  List<DictionaryEntry> entries;
+
+  ArchiveImportResult({this.dictionaryName, this.entries});
 }
 
 DictionaryEntry getEntryFromJishoResult(JishoResult result, String searchTerm) {
@@ -261,6 +317,7 @@ DictionaryEntry getEntryFromJishoResult(JishoResult result, String searchTerm) {
   exportMeanings = removeLastNewline(exportMeanings);
 
   return DictionaryEntry(
+    dictionarySource: getCurrentDictionary(),
     word: exportTerm ?? searchTerm,
     reading: exportReadings,
     meaning: exportMeanings,
@@ -539,6 +596,7 @@ DictionaryEntry sakuraJsonToDictionaryEntry(
   meaning = meaning.trim();
 
   return DictionaryEntry(
+    dictionarySource: getCurrentDictionary(),
     word: word,
     reading: reading,
     meaning: meaning,
@@ -575,6 +633,8 @@ Future openDictionaryMenu(BuildContext context, bool importAllowed) {
 
                       return ListTile(
                         dense: true,
+                        selected: (activeDictionary == dictionaryName),
+                        selectedTileColor: Colors.white.withOpacity(0.2),
                         title: Row(
                           children: [
                             Icon(
@@ -585,12 +645,26 @@ Future openDictionaryMenu(BuildContext context, bool importAllowed) {
                             const SizedBox(width: 16.0),
                             Text(
                               dictionaryName,
-                              style: TextStyle(fontSize: 16),
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ),
-                        onTap: () {},
+                        onTap: () {
+                          setCurrentDictionary(dictionaryName);
+                          if (!importAllowed) {
+                            Navigator.pop(context);
+                          }
+                        },
+                        onLongPress: () async {
+                          if (importAllowed) {
+                            deleteDialog(context, dictionaryName,
+                                _useCustomDictionaries);
+                          }
+                        },
                       );
                     } else if (index == dictionaryNames.length) {
                       String dictionaryName = "Jisho.org API";
@@ -677,7 +751,10 @@ Future openDictionaryMenu(BuildContext context, bool importAllowed) {
           if (importAllowed)
             TextButton(
               child: Text('IMPORT', style: TextStyle(color: Colors.white)),
-              onPressed: () {},
+              onPressed: () async {
+                await dictionaryImport(context);
+                _useCustomDictionaries.value = getDictionariesName();
+              },
             ),
           if (importAllowed)
             TextButton(
@@ -689,5 +766,214 @@ Future openDictionaryMenu(BuildContext context, bool importAllowed) {
         ],
       );
     },
+  );
+}
+
+Widget deleteDialog(BuildContext context, String dictionaryName,
+    ValueNotifier<List<String>> customDictionaries) {
+  Widget alertDialog = AlertDialog(
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.zero,
+    ),
+    title: new Text('Delete 『$dictionaryName』?'),
+    actions: <Widget>[
+      new TextButton(
+          child: Text(
+            'NO',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          style: TextButton.styleFrom(
+            textStyle: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+          onPressed: () => Navigator.pop(context)),
+      new TextButton(
+        child: Text(
+          'YES',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        style: TextButton.styleFrom(
+          textStyle: TextStyle(
+            color: Colors.white,
+          ),
+        ),
+        onPressed: () async {
+          await deleteCustomDictionary(dictionaryName);
+          Navigator.pop(context);
+          customDictionaries.value = getDictionariesName();
+          await setCurrentDictionary("Jisho.org API");
+        },
+      ),
+    ],
+  );
+
+  showDialog(
+    context: context,
+    builder: (context) => alertDialog,
+  );
+}
+
+Future dictionaryImport(BuildContext context) async {
+  ValueNotifier<String> progressNotifier = ValueNotifier<String>("");
+
+  try {
+    File archiveFile = await FilePicker.getFile(type: FileType.any);
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
+          ),
+          contentPadding:
+              EdgeInsets.only(top: 20, bottom: 10, left: 30, right: 30),
+          content: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+              ),
+              SizedBox(width: 20),
+              ValueListenableBuilder(
+                valueListenable: progressNotifier,
+                builder: (BuildContext context, String progressNotification,
+                    Widget child) {
+                  return Text(
+                    progressNotification,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  );
+                },
+              ),
+            ],
+          ),
+          actions: [],
+        );
+      },
+    );
+
+    ArchiveImportResult archiveImportResult =
+        await getCustomDictionaryFromArchive(archiveFile, progressNotifier);
+    await populateCustomDictionaryDatabase(
+        archiveImportResult, progressNotifier);
+    await addDictionaryName(archiveImportResult.dictionaryName);
+
+    Navigator.pop(context);
+  } catch (e) {
+    print(e);
+  }
+}
+
+Future<void> populateCustomDictionaryDatabase(
+  ArchiveImportResult archiveImportResult,
+  ValueNotifier<String> progressNotifier,
+) async {
+  String dictionaryName = archiveImportResult.dictionaryName;
+  List<DictionaryEntry> entries = archiveImportResult.entries;
+
+  await Future.delayed(Duration(seconds: 1), () {});
+
+  initializeCustomDictionary(dictionaryName);
+  progressNotifier.value = "Initializing database store...";
+  Store store = gCustomDictionaryStores[dictionaryName];
+  Box box = store.box<DictionaryEntry>();
+
+  await Future.delayed(Duration(seconds: 1), () {});
+
+  box.putMany(entries);
+
+  progressNotifier.value = "Added ${entries.length} to database.";
+
+  await Future.delayed(Duration(seconds: 1), () {});
+
+  progressNotifier.value = "Dictionary import complete.";
+
+  await Future.delayed(Duration(seconds: 1), () {});
+}
+
+void initializeCustomDictionaries() async {
+  getDictionariesName().forEach((dictionaryName) {
+    initializeCustomDictionary(dictionaryName);
+  });
+}
+
+void initializeCustomDictionary(String dictionaryName) {
+  Directory objectBoxDirDirectory = Directory(
+    path.join(gAppDirPath, "objectbox", dictionaryName),
+  );
+  if (!objectBoxDirDirectory.existsSync()) {
+    objectBoxDirDirectory.createSync(recursive: true);
+  }
+
+  gCustomDictionaryStores[dictionaryName] = Store(
+    getObjectBoxModel(),
+    directory: path.join(gAppDirPath, "objectbox", objectBoxDirDirectory.path),
+  );
+}
+
+Future<void> deleteCustomDictionary(String dictionaryName) async {
+  Store store = gCustomDictionaryStores[dictionaryName];
+  Box box = store.box<DictionaryEntry>();
+  box.removeAll();
+  store.close();
+
+  Directory objectBoxDirDirectory = Directory(
+    path.join(gAppDirPath, "objectbox", dictionaryName),
+  );
+  objectBoxDirDirectory.deleteSync(recursive: true);
+
+  await removeDictionaryName(dictionaryName);
+}
+
+Future<DictionaryHistoryEntry> getCustomWordDetails({
+  String searchTerm,
+  String contextDataSource,
+  int contextPosition,
+}) async {
+  String parsedTerm;
+  List<Word> words = parseVe(gMecabTagger, searchTerm);
+  if (words == null && words.isNotEmpty) {
+    parsedTerm = searchTerm;
+  } else {
+    if (words.first.lemma != null && words.first.lemma != words.first.word) {
+      parsedTerm = words.first.lemma;
+    } else {
+      if (words.first.word == searchTerm) {
+        parsedTerm = words.first.word;
+      } else {
+        parsedTerm = searchTerm;
+      }
+    }
+  }
+
+  Store store = gCustomDictionaryStores[getCurrentDictionary()];
+  Box box = store.box<DictionaryEntry>();
+
+  final queryBuilder = box.query(DictionaryEntry_.word.equals(parsedTerm) |
+      DictionaryEntry_.reading.equals(parsedTerm) |
+      DictionaryEntry_.meaning.equals(parsedTerm) |
+      DictionaryEntry_.word.startsWith(parsedTerm) |
+      DictionaryEntry_.reading.startsWith(parsedTerm) |
+      DictionaryEntry_.meaning.startsWith(parsedTerm))
+    ..order(DictionaryEntry_.word);
+  final query = queryBuilder.build();
+
+  Query limitedQuery = query..limit = 20;
+  List<DictionaryEntry> entries = limitedQuery.find();
+
+  return DictionaryHistoryEntry(
+    entries: entries,
+    searchTerm: searchTerm,
+    swipeIndex: 0,
+    contextDataSource: contextDataSource,
+    contextPosition: contextPosition,
   );
 }
