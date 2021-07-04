@@ -1717,6 +1717,10 @@ class _HomeState extends State<Home> {
           enabled: gIsYouTubeAllowed,
         ),
         PopupMenuItem<String>(
+          child: const Text('Manage dictionaries'),
+          value: 'Manage dictionaries',
+        ),
+        PopupMenuItem<String>(
           child: const Text('View repository on GitHub'),
           value: 'View repository on GitHub',
         ),
