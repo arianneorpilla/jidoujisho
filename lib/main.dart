@@ -4908,7 +4908,7 @@ class _CreatorState extends State<Creator> {
           }
 
           if (results != null && results.entries.isNotEmpty) {
-            addDictionaryEntryToHistory(results);
+            showDictionaryDialog(results);
           }
         } finally {
           _isSearching.value = false;
