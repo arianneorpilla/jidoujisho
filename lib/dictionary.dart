@@ -822,53 +822,59 @@ Widget deleteDialog(BuildContext context, String dictionaryName,
 
 Future dictionaryImport(BuildContext context) async {
   ValueNotifier<String> progressNotifier = ValueNotifier<String>("");
+  File archiveFile = await FilePicker.getFile(type: FileType.any);
 
-  try {
-    File archiveFile = await FilePicker.getFile(type: FileType.any);
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.zero,
-          ),
-          contentPadding:
-              EdgeInsets.only(top: 20, bottom: 10, left: 30, right: 30),
-          content: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
-              ),
-              SizedBox(width: 20),
-              ValueListenableBuilder(
-                valueListenable: progressNotifier,
-                builder: (BuildContext context, String progressNotification,
-                    Widget child) {
-                  return Text(
-                    progressNotification,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                  );
-                },
-              ),
-            ],
-          ),
-          actions: [],
-        );
-      },
-    );
+  if (archiveFile != null) {
+    try {
+      showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.zero,
+            ),
+            contentPadding:
+                EdgeInsets.only(top: 20, bottom: 10, left: 30, right: 30),
+            content: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+                ),
+                SizedBox(width: 20),
+                ValueListenableBuilder(
+                  valueListenable: progressNotifier,
+                  builder: (BuildContext context, String progressNotification,
+                      Widget child) {
+                    return Text(
+                      progressNotification,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    );
+                  },
+                ),
+              ],
+            ),
+            actions: [],
+          );
+        },
+      );
 
-    ArchiveImportResult archiveImportResult =
-        await getCustomDictionaryFromArchive(archiveFile, progressNotifier);
-    await populateCustomDictionaryDatabase(
-        archiveImportResult, progressNotifier);
-    await addDictionaryName(archiveImportResult.dictionaryName);
-
-    Navigator.pop(context);
-  } catch (e) {
-    print(e);
+      ArchiveImportResult archiveImportResult =
+          await getCustomDictionaryFromArchive(archiveFile, progressNotifier);
+      await populateCustomDictionaryDatabase(
+          archiveImportResult, progressNotifier);
+      await addDictionaryName(archiveImportResult.dictionaryName);
+      await setCurrentDictionary(archiveImportResult.dictionaryName);
+      Navigator.pop(context);
+    } catch (e) {
+      progressNotifier.value = "An error has occurred.";
+      await Future.delayed(Duration(seconds: 3), () {
+        Navigator.pop(context);
+      });
+      print(e);
+    }
   }
 }
 
@@ -966,7 +972,7 @@ Future<DictionaryHistoryEntry> getCustomWordDetails({
     ..order(DictionaryEntry_.word);
   final query = queryBuilder.build();
 
-  Query limitedQuery = query..limit = 20;
+  Query limitedQuery = query..limit = 40;
   List<DictionaryEntry> entries = limitedQuery.find();
 
   return DictionaryHistoryEntry(
