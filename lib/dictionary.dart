@@ -988,6 +988,52 @@ Future<DictionaryHistoryEntry> getCustomWordDetails({
 }) async {
   String parsedTerm;
   List<Word> words = parseVe(gMecabTagger, searchTerm);
+
+  Store store = gCustomDictionaryStores[getCurrentDictionary()];
+  Box box = store.box<DictionaryEntry>();
+
+  QueryBuilder exactWordMatch =
+      box.query(DictionaryEntry_.word.equals(searchTerm));
+  Query exactWordQuery = exactWordMatch.build();
+
+  Query limitedWordQuery = exactWordQuery..limit = 20;
+  List<DictionaryEntry> entries = limitedWordQuery.find();
+
+  QueryBuilder exactReadingMatch =
+      box.query(DictionaryEntry_.reading.equals(searchTerm));
+  Query exactReadingQuery = exactReadingMatch.build();
+
+  Query limitedReadingQuery = exactReadingQuery..limit = 20;
+  List<DictionaryEntry> readingMatchQueries = limitedReadingQuery.find();
+  entries.addAll(readingMatchQueries);
+
+  if (entries.isEmpty) {
+    QueryBuilder startsWithWordMatch =
+        box.query(DictionaryEntry_.word.startsWith(searchTerm));
+    Query startsWithWordQuery = startsWithWordMatch.build();
+
+    limitedWordQuery = startsWithWordQuery..limit = 20;
+    entries = limitedWordQuery.find();
+
+    QueryBuilder startsWithReadingMatch =
+        box.query(DictionaryEntry_.reading.startsWith(searchTerm));
+    Query startsWithReadingQuery = startsWithReadingMatch.build();
+
+    limitedReadingQuery = startsWithReadingQuery..limit = 20;
+    readingMatchQueries = limitedReadingQuery.find();
+    entries.addAll(readingMatchQueries);
+  }
+
+  if (entries.isNotEmpty) {
+    return DictionaryHistoryEntry(
+      entries: entries,
+      searchTerm: searchTerm,
+      swipeIndex: 0,
+      contextDataSource: contextDataSource,
+      contextPosition: contextPosition,
+    );
+  }
+
   if (words == null && words.isNotEmpty) {
     parsedTerm = searchTerm;
   } else {
@@ -1002,43 +1048,35 @@ Future<DictionaryHistoryEntry> getCustomWordDetails({
     }
   }
 
-  Store store = gCustomDictionaryStores[getCurrentDictionary()];
-  Box box = store.box<DictionaryEntry>();
+  exactWordMatch = box.query(DictionaryEntry_.word.equals(parsedTerm));
+  exactWordQuery = exactWordMatch.build();
 
-  final exactWordMatch = box.query(DictionaryEntry_.word.equals(parsedTerm));
-  final exactWordQuery = exactWordMatch.build();
+  limitedWordQuery = exactWordQuery..limit = 20;
+  entries = limitedWordQuery.find();
 
-  Query limitedWordQuery = exactWordQuery..limit = 20;
-  List<DictionaryEntry> entries = limitedWordQuery.find();
+  exactReadingMatch = box.query(DictionaryEntry_.reading.equals(parsedTerm));
+  exactReadingQuery = exactReadingMatch.build();
 
-  final exactReadingMatch =
-      box.query(DictionaryEntry_.reading.equals(parsedTerm));
-  final exactReadingQuery = exactReadingMatch.build();
-
-  Query limitedReadingQuery = exactReadingQuery..limit = 20;
-  List<DictionaryEntry> readingMatchQueries = limitedReadingQuery.find();
+  limitedReadingQuery = exactReadingQuery..limit = 20;
+  readingMatchQueries = limitedReadingQuery.find();
   entries.addAll(readingMatchQueries);
 
   if (entries.isEmpty) {
-    final startsWithWordMatch =
+    QueryBuilder startsWithWordMatch =
         box.query(DictionaryEntry_.word.startsWith(parsedTerm));
-    final startsWithWordQuery = startsWithWordMatch.build();
+    Query startsWithWordQuery = startsWithWordMatch.build();
 
-    Query limitedWordQuery = startsWithWordQuery..limit = 20;
-    List<DictionaryEntry> entries = limitedWordQuery.find();
+    limitedWordQuery = startsWithWordQuery..limit = 20;
+    entries = limitedWordQuery.find();
 
-    final startsWithReadingMatch =
+    QueryBuilder startsWithReadingMatch =
         box.query(DictionaryEntry_.reading.startsWith(parsedTerm));
-    final startsWithReadingQuery = startsWithReadingMatch.build();
+    Query startsWithReadingQuery = startsWithReadingMatch.build();
 
-    Query limitedReadingQuery = startsWithReadingQuery..limit = 20;
-    List<DictionaryEntry> readingMatchQueries = limitedReadingQuery.find();
+    limitedReadingQuery = startsWithReadingQuery..limit = 20;
+    readingMatchQueries = limitedReadingQuery.find();
     entries.addAll(readingMatchQueries);
   }
-
-  entries.forEach((element) {
-    print(json.encode(element.meaning));
-  });
 
   return DictionaryHistoryEntry(
     entries: entries,

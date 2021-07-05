@@ -29,7 +29,7 @@ fetchChannelCache() {
       String channelsMessage = jsonEncode(channelIDs);
       channels = await compute(getSubscribedChannels, channelsMessage);
       if (channels != null && channels.isNotEmpty) {
-        setTrendingChannelCache(channels);
+        setChannelCache(channels);
       }
     } catch (e) {
       print(e);
