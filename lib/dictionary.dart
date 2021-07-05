@@ -150,77 +150,6 @@ class DictionaryHistoryEntry {
   int get hashCode => super.hashCode;
 }
 
-Future<ArchiveImportResult> getCustomDictionaryFromArchive(
-    File archiveFile, ValueNotifier<String> progressNotifier) async {
-  List<DictionaryEntry> entries = [];
-
-  progressNotifier.value = "Initializing import...";
-
-  await Future.delayed(Duration(milliseconds: 1), () {});
-
-  Directory importDirectory = Directory(
-    path.join(gAppDirPath, "importDirectory"),
-  );
-  if (importDirectory.existsSync()) {
-    progressNotifier.value = "Clearing working space...";
-    await Future.delayed(Duration(milliseconds: 1), () {});
-    importDirectory.deleteSync(recursive: true);
-  }
-
-  progressNotifier.value = "Extracting archive...";
-  importDirectory.createSync();
-  await ZipFile.extractToDirectory(
-      zipFile: archiveFile, destinationDir: importDirectory);
-
-  if (!getTermBankDirectory().existsSync()) {
-    getTermBankDirectory().createSync(recursive: true);
-  }
-
-  await Future.delayed(Duration(milliseconds: 1), () {});
-
-  String indexPath = path.join(importDirectory.path, "index.json");
-  File indexFile = File(indexPath);
-  Map<String, dynamic> index = jsonDecode(indexFile.readAsStringSync());
-  String dictionaryName = index["title"];
-
-  if (getDictionariesName().contains(dictionaryName) ||
-      gReservedDictionaryNames.contains(dictionaryName)) {
-    throw Exception("Dictionary with same title already found.");
-  }
-
-  for (int i = 0; i < 999; i++) {
-    String outputPath = path.join(importDirectory.path, "term_bank_$i.json");
-    File dictionaryFile = File(outputPath);
-
-    if (dictionaryFile.existsSync()) {
-      List<dynamic> dictionary = jsonDecode(dictionaryFile.readAsStringSync());
-      dictionary.forEach((entry) {
-        entries.add(DictionaryEntry(
-          dictionarySource: dictionaryName,
-          word: entry[0].toString(),
-          reading: entry[1].toString(),
-          meaning: entry[5].toString(),
-        ));
-        progressNotifier.value = "Found ${entries.length} entries...";
-      });
-    }
-  }
-
-  await Future.delayed(Duration(milliseconds: 1), () {});
-
-  return ArchiveImportResult(
-    dictionaryName: dictionaryName,
-    entries: entries,
-  );
-}
-
-class ArchiveImportResult {
-  String dictionaryName;
-  List<DictionaryEntry> entries;
-
-  ArchiveImportResult({this.dictionaryName, this.entries});
-}
-
 DictionaryEntry getEntryFromJishoResult(JishoResult result, String searchTerm) {
   String removeLastNewline(String n) => n = n.substring(0, n.length - 2);
   bool hasDuplicateReading(String readings, String reading) =>
@@ -821,6 +750,13 @@ Widget deleteDialog(BuildContext context, String dictionaryName,
   );
 }
 
+class ArchiveImportResult {
+  String dictionaryName;
+  List<DictionaryEntry> entries;
+
+  ArchiveImportResult({this.dictionaryName, this.entries});
+}
+
 Future dictionaryImport(BuildContext context) async {
   ValueNotifier<String> progressNotifier = ValueNotifier<String>("");
   File archiveFile = await FilePicker.getFile(type: FileType.any);
@@ -879,6 +815,111 @@ Future dictionaryImport(BuildContext context) async {
   }
 }
 
+Future<ArchiveImportResult> getCustomDictionaryFromArchive(
+    File archiveFile, ValueNotifier<String> progressNotifier) async {
+  List<DictionaryEntry> entries = [];
+
+  progressNotifier.value = "Initializing import...";
+
+  await Future.delayed(Duration(milliseconds: 500), () {});
+
+  Directory importDirectory = Directory(
+    path.join(gAppDirPath, "importDirectory"),
+  );
+  if (importDirectory.existsSync()) {
+    progressNotifier.value = "Clearing working space...";
+    await Future.delayed(Duration(milliseconds: 500), () {});
+    importDirectory.deleteSync(recursive: true);
+  }
+
+  progressNotifier.value = "Extracting archive...";
+  await Future.delayed(Duration(milliseconds: 500), () {});
+  importDirectory.createSync();
+  await ZipFile.extractToDirectory(
+      zipFile: archiveFile, destinationDir: importDirectory);
+
+  if (!getTermBankDirectory().existsSync()) {
+    getTermBankDirectory().createSync(recursive: true);
+  }
+
+  progressNotifier.value = "Scanning for entries...";
+  await Future.delayed(Duration(milliseconds: 500), () {});
+
+  EntryExtractParams params = EntryExtractParams(
+    dictionaryNames: getDictionariesName(),
+    reservedNames: gReservedDictionaryNames,
+    importDirectoryPath: importDirectory.path,
+  );
+
+  entries = await compute(extractEntries, params);
+  progressNotifier.value = "Found ${entries.length} entries...";
+
+  await Future.delayed(Duration(milliseconds: 500), () {});
+
+  return ArchiveImportResult(
+    dictionaryName: entries.first.dictionarySource,
+    entries: entries,
+  );
+}
+
+List<DictionaryEntry> extractEntries(EntryExtractParams params) {
+  List<DictionaryEntry> entries = [];
+
+  String indexPath = path.join(params.importDirectoryPath, "index.json");
+  File indexFile = File(indexPath);
+  Map<String, dynamic> index = jsonDecode(indexFile.readAsStringSync());
+  String dictionaryName = index["title"];
+
+  if (params.dictionaryNames.contains(dictionaryName) ||
+      params.reservedNames.contains(dictionaryName)) {
+    throw Exception("Dictionary with same title already found.");
+  }
+
+  for (int i = 0; i < 999; i++) {
+    String outputPath =
+        path.join(params.importDirectoryPath, "term_bank_$i.json");
+    File dictionaryFile = File(outputPath);
+
+    if (dictionaryFile.existsSync()) {
+      List<dynamic> dictionary = jsonDecode(dictionaryFile.readAsStringSync());
+      String parseMeaning(entry) {
+        try {
+          List<dynamic> list = List.from(entry);
+          if (list.length == 1) {
+            return list.first as String;
+          }
+          String reduced = list.reduce((value, element) {
+            return "$value\n• $element";
+          });
+          return "• " + reduced;
+        } catch (e) {
+          return entry.toString();
+        }
+      }
+
+      dictionary.forEach((entry) {
+        entries.add(DictionaryEntry(
+          dictionarySource: dictionaryName,
+          word: entry[0].toString(),
+          reading: entry[1].toString(),
+          meaning: parseMeaning(entry[5]),
+        ));
+      });
+    }
+  }
+
+  return entries;
+}
+
+class EntryExtractParams {
+  List<String> dictionaryNames;
+  List<String> reservedNames;
+  String importDirectoryPath;
+
+  EntryExtractParams(
+      {this.dictionaryNames, this.reservedNames, this.importDirectoryPath});
+}
+
 Future<void> populateCustomDictionaryDatabase(
   ArchiveImportResult archiveImportResult,
   ValueNotifier<String> progressNotifier,
@@ -886,20 +927,20 @@ Future<void> populateCustomDictionaryDatabase(
   String dictionaryName = archiveImportResult.dictionaryName;
   List<DictionaryEntry> entries = archiveImportResult.entries;
 
-  await Future.delayed(Duration(seconds: 1), () {});
+  await Future.delayed(Duration(milliseconds: 500), () {});
 
   initializeCustomDictionary(dictionaryName);
-  progressNotifier.value = "Initializing database store...";
+  progressNotifier.value = "Storing entries to database...";
   Store store = gCustomDictionaryStores[dictionaryName];
   Box box = store.box<DictionaryEntry>();
 
-  await Future.delayed(Duration(seconds: 1), () {});
+  await Future.delayed(Duration(milliseconds: 500), () {});
 
   box.putMany(entries);
 
-  progressNotifier.value = "Added ${entries.length} entries to database.";
+  progressNotifier.value = "Imported ${entries.length} entries.";
 
-  await Future.delayed(Duration(seconds: 1), () {});
+  await Future.delayed(Duration(milliseconds: 500), () {});
 
   progressNotifier.value = "Dictionary import complete.";
 
@@ -964,17 +1005,40 @@ Future<DictionaryHistoryEntry> getCustomWordDetails({
   Store store = gCustomDictionaryStores[getCurrentDictionary()];
   Box box = store.box<DictionaryEntry>();
 
-  final queryBuilder = box.query(DictionaryEntry_.word.equals(parsedTerm) |
-      DictionaryEntry_.reading.equals(parsedTerm) |
-      DictionaryEntry_.meaning.equals(parsedTerm) |
-      DictionaryEntry_.word.startsWith(parsedTerm) |
-      DictionaryEntry_.reading.startsWith(parsedTerm) |
-      DictionaryEntry_.meaning.startsWith(parsedTerm))
-    ..order(DictionaryEntry_.word);
-  final query = queryBuilder.build();
+  final exactWordMatch = box.query(DictionaryEntry_.word.equals(parsedTerm));
+  final exactWordQuery = exactWordMatch.build();
 
-  Query limitedQuery = query..limit = 40;
-  List<DictionaryEntry> entries = limitedQuery.find();
+  Query limitedWordQuery = exactWordQuery..limit = 20;
+  List<DictionaryEntry> entries = limitedWordQuery.find();
+
+  final exactReadingMatch =
+      box.query(DictionaryEntry_.reading.equals(parsedTerm));
+  final exactReadingQuery = exactReadingMatch.build();
+
+  Query limitedReadingQuery = exactReadingQuery..limit = 20;
+  List<DictionaryEntry> readingMatchQueries = limitedReadingQuery.find();
+  entries.addAll(readingMatchQueries);
+
+  if (entries.isEmpty) {
+    final startsWithWordMatch =
+        box.query(DictionaryEntry_.word.startsWith(parsedTerm));
+    final startsWithWordQuery = startsWithWordMatch.build();
+
+    Query limitedWordQuery = startsWithWordQuery..limit = 20;
+    List<DictionaryEntry> entries = limitedWordQuery.find();
+
+    final startsWithReadingMatch =
+        box.query(DictionaryEntry_.reading.startsWith(parsedTerm));
+    final startsWithReadingQuery = startsWithReadingMatch.build();
+
+    Query limitedReadingQuery = startsWithReadingQuery..limit = 20;
+    List<DictionaryEntry> readingMatchQueries = limitedReadingQuery.find();
+    entries.addAll(readingMatchQueries);
+  }
+
+  entries.forEach((element) {
+    print(json.encode(element.meaning));
+  });
 
   return DictionaryHistoryEntry(
     entries: entries,

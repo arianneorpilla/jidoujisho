@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:async/async.dart';
+import 'package:flutter/foundation.dart';
 import 'package:jidoujisho/dictionary.dart';
+import 'package:jidoujisho/preferences.dart';
 
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
@@ -16,13 +20,39 @@ fetchTrendingCache() {
 
 fetchChannelCache() {
   return gChannelCache.runOnce(() async {
-    return getSubscribedChannels();
+    List<Channel> channels;
+    try {
+      if (getChannelCache().isNotEmpty) {
+        return getChannelCache();
+      }
+      List<String> channelIDs = getChannelList();
+      String channelsMessage = jsonEncode(channelIDs);
+      channels = await compute(getSubscribedChannels, channelsMessage);
+      if (channels != null && channels.isNotEmpty) {
+        setTrendingChannelCache(channels);
+      }
+    } catch (e) {
+      print(e);
+    }
+    return channels;
   });
 }
 
 fetchTrendingChannelCache(List<Video> trendingVideos) {
   return gTrendingChannelCache.runOnce(() async {
-    return getTrendingChannels(trendingVideos);
+    List<Channel> trendingChannels;
+    try {
+      if (getTrendingChannelCache().isNotEmpty) {
+        return getTrendingChannelCache();
+      }
+      trendingChannels = await compute(getTrendingChannels, trendingVideos);
+      if (trendingChannels != null && trendingChannels.isNotEmpty) {
+        setTrendingChannelCache(trendingChannels);
+      }
+    } catch (e) {
+      print(e);
+    }
+    return trendingChannels;
   });
 }
 

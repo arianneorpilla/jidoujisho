@@ -12,12 +12,10 @@ import 'package:flutter_absolute_path/flutter_absolute_path.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
-import 'package:jidoujisho/objectbox.g.dart';
 import 'package:jidoujisho/reader.dart';
 import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:minimize_app/minimize_app.dart';
-import 'package:objectbox/objectbox.dart';
 import 'package:package_info/package_info.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -1116,9 +1114,9 @@ class _HomeState extends State<Home> {
     }
 
     Widget queryMessage = centerMessage(
-      "Listing channels...",
+      "Listing channels",
       Icons.subscriptions_sharp,
-      false,
+      true,
     );
     Widget errorMessage = centerMessage(
       "Error getting channels",
@@ -1476,14 +1474,14 @@ class _HomeState extends State<Home> {
       false,
     );
     Widget searchingMessage = centerMessage(
-      "Searching for \"$_searchQuery\"...",
+      "Searching for \"$_searchQuery\"",
       Icons.youtube_searched_for,
-      false,
+      true,
     );
     Widget queryMessage = centerMessage(
-      "Querying trending videos...",
+      "Querying trending videos",
       Icons.youtube_searched_for,
-      false,
+      true,
     );
     Widget errorMessage = centerMessage(
       "Error getting videos",
@@ -3348,9 +3346,9 @@ class _ClipboardState extends State<ClipboardMenu> {
     );
 
     Widget loadingMessage = centerMessage(
-      "Preparing dictionary...",
+      "Preparing dictionary",
       Icons.auto_stories,
-      false,
+      true,
     );
 
     Widget cardCreatorButton() {
@@ -3663,6 +3661,8 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                     style: TextStyle(
                       fontSize: 15,
                     ),
+                    maxLines: 10,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   Wrap(
                     alignment: WrapAlignment.center,
@@ -4138,9 +4138,9 @@ class _LazyResultsState extends State<LazyResults> {
   Widget build(BuildContext context) {
     if (verticalData.length == 0) {
       return centerMessage(
-        "Listing channel videos...",
+        "Listing channel videos",
         Icons.subscriptions_sharp,
-        false,
+        true,
       );
     }
 
@@ -4361,12 +4361,19 @@ class _CreatorState extends State<Creator> {
             crossAxisAlignment: WrapCrossAlignment.end,
             children: [
               Text(
-                "Preparing card creator...",
+                "Preparing card creator",
                 style: TextStyle(
                   color: Colors.grey,
                   fontSize: 20,
                 ),
               ),
+              SizedBox(
+                width: 12,
+                height: 16,
+                child: JumpingDotsProgressIndicator(
+                  color: Colors.grey,
+                ),
+              )
             ],
           )
         ],

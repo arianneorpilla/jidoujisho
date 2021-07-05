@@ -216,12 +216,9 @@ FutureOr<List<Video>> searchYouTubeTrendingVideos() async {
   return trendingVideos;
 }
 
-FutureOr<List<Channel>> getSubscribedChannels() async {
-  if (getChannelCache().isNotEmpty) {
-    return getChannelCache();
-  }
-
-  List<String> channelIDs = getChannelList();
+FutureOr<List<Channel>> getSubscribedChannels(String message) async {
+  List<String> channelIDs =
+      (jsonDecode(message) as List<dynamic>).cast<String>();
   YoutubeExplode yt = YoutubeExplode();
 
   List<Future<Channel>> futureChannels = [];
@@ -232,17 +229,10 @@ FutureOr<List<Channel>> getSubscribedChannels() async {
   channels
       .sort(((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase())));
 
-  setChannelCache(channels);
-
   return channels;
 }
 
 FutureOr<List<Channel>> getTrendingChannels(List<Video> trendingVideos) async {
-  if (getTrendingChannelCache().isNotEmpty) {
-    print("USING TRENDING CHANNELS CACHE");
-    return getTrendingChannelCache();
-  }
-
   YoutubeExplode yt = YoutubeExplode();
 
   List<Future<Channel>> futureChannels = [];
@@ -252,10 +242,6 @@ FutureOr<List<Channel>> getTrendingChannels(List<Video> trendingVideos) async {
 
   List<Channel> channels = await Future.wait(futureChannels);
   List<Channel> distinctChannels = channels.toSet().toList();
-
-  if (distinctChannels != null && distinctChannels.isNotEmpty) {
-    setTrendingChannelCache(distinctChannels);
-  }
 
   return distinctChannels;
 }
