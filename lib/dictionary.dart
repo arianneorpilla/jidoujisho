@@ -183,7 +183,8 @@ Future<ArchiveImportResult> getCustomDictionaryFromArchive(
   Map<String, dynamic> index = jsonDecode(indexFile.readAsStringSync());
   String dictionaryName = index["title"];
 
-  if (getDictionariesName().contains(dictionaryName)) {
+  if (getDictionariesName().contains(dictionaryName) ||
+      gReservedDictionaryNames.contains(dictionaryName)) {
     throw Exception("Dictionary with same title already found.");
   }
 
@@ -896,7 +897,7 @@ Future<void> populateCustomDictionaryDatabase(
 
   box.putMany(entries);
 
-  progressNotifier.value = "Added ${entries.length} to database.";
+  progressNotifier.value = "Added ${entries.length} entries to database.";
 
   await Future.delayed(Duration(seconds: 1), () {});
 

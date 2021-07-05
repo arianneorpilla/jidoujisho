@@ -18,7 +18,7 @@ class SubtitleTextView extends StatelessWidget {
   final ValueNotifier<Subtitle> contextSubtitle;
   final VoidCallback emptyStack;
   final FocusNode focusNode;
-  final double fontSize;
+  final ValueNotifier<double> fontSize;
 
   const SubtitleTextView({
     Key key,
@@ -35,7 +35,7 @@ class SubtitleTextView extends StatelessWidget {
     return Text(
       word.word,
       style: TextStyle(
-        fontSize: fontSize,
+        fontSize: fontSize.value,
         foreground: Paint()
           ..style = subtitleStyle.borderStyle.style
           ..strokeWidth = subtitleStyle.borderStyle.strokeWidth
@@ -57,7 +57,7 @@ class SubtitleTextView extends StatelessWidget {
       child: Text(
         word.word,
         style: TextStyle(
-          fontSize: fontSize,
+          fontSize: fontSize.value,
         ),
       ),
     );
@@ -127,7 +127,7 @@ class SubtitleTextView extends StatelessWidget {
                           subtitleText,
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: fontSize,
+                            fontSize: fontSize.value,
                             foreground: Paint()
                               ..style = subtitleStyle.borderStyle.style
                               ..strokeWidth =
@@ -151,7 +151,7 @@ class SubtitleTextView extends StatelessWidget {
                           text: selection.textInside(subtitleText)));
                     },
                     style: TextStyle(
-                      fontSize: fontSize,
+                      fontSize: fontSize.value,
                       color: subtitleStyle.textColor,
                     ),
                     focusNode: focusNode,
@@ -184,13 +184,13 @@ class SubtitleTextView extends StatelessWidget {
       context,
       subtitleStyle,
       words,
-      fontSize,
+      fontSize.value,
     );
     List<List<int>> indexes = getIndexesFromWords(
       context,
       subtitleStyle,
       words,
-      fontSize,
+      fontSize.value,
     );
 
     for (Word word in words) {

@@ -81,7 +81,7 @@ class SubTitleWrapper extends StatelessWidget {
                   contextSubtitle: subtitleController.contextSubtitle,
                   focusNode: focusNode,
                   emptyStack: emptyStack,
-                  fontSize: fontSize.value,
+                  fontSize: fontSize,
                 ),
               ),
             );
@@ -99,7 +99,7 @@ class SubTitleWrapper extends StatelessWidget {
                   contextSubtitle: subtitleController.contextSubtitle,
                   focusNode: focusNode,
                   emptyStack: emptyStack,
-                  fontSize: fontSize.value * 1.75,
+                  fontSize: fontSize,
                 ),
               ),
             );
