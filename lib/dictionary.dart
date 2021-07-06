@@ -16,7 +16,6 @@ import 'package:jidoujisho/pitch.dart';
 import 'package:jidoujisho/preferences.dart';
 import 'package:objectbox/objectbox.dart';
 import 'package:path/path.dart' as path;
-import 'package:progress_indicators/progress_indicators.dart';
 import 'package:unofficial_jisho_api/api.dart';
 
 import 'package:jidoujisho/util.dart';
@@ -28,6 +27,7 @@ class DictionaryEntry {
   String word;
   String reading;
   String meaning;
+  int popularity;
   String searchTerm;
   List<PitchAccentInformation> pitchAccentEntries;
 
@@ -37,6 +37,7 @@ class DictionaryEntry {
     this.word,
     this.reading,
     this.meaning,
+    this.popularity,
     this.searchTerm,
     this.pitchAccentEntries = const [],
   });
@@ -52,6 +53,7 @@ class DictionaryEntry {
       "word": this.word,
       "reading": this.reading,
       "meaning": this.meaning,
+      "popularity": this.popularity,
       "searchTerm": this.searchTerm,
       "pitchAccentEntries": jsonEncode(entriesMaps),
     };
@@ -70,6 +72,7 @@ class DictionaryEntry {
     this.word = map['word'];
     this.reading = map['reading'];
     this.meaning = map['meaning'];
+    this.popularity = map['popularity'];
     this.searchTerm = map['searchTerm'];
     this.pitchAccentEntries = entriesFromMap;
   }
@@ -920,6 +923,7 @@ Future<int> importEntries(EntryExtractParams params) async {
           word: entry[0].toString(),
           reading: entry[1].toString(),
           meaning: parseMeaning(entry[5]),
+          popularity: entry[4],
         ));
       });
     }
@@ -1015,15 +1019,17 @@ Future<DictionaryHistoryEntry> getCustomWordDetails(
   Store store = Store.fromReference(getObjectBoxModel(), storeReference);
   Box box = store.box<DictionaryEntry>();
 
-  QueryBuilder exactWordMatch =
-      box.query(DictionaryEntry_.word.equals(searchTerm));
+  QueryBuilder exactWordMatch = box
+      .query(DictionaryEntry_.word.equals(searchTerm))
+        ..order(DictionaryEntry_.popularity, flags: Order.descending);
   Query exactWordQuery = exactWordMatch.build();
 
   Query limitedWordQuery = exactWordQuery..limit = 20;
   List<DictionaryEntry> entries = limitedWordQuery.find();
 
-  QueryBuilder exactReadingMatch =
-      box.query(DictionaryEntry_.reading.equals(searchTerm));
+  QueryBuilder exactReadingMatch = box
+      .query(DictionaryEntry_.reading.equals(searchTerm))
+        ..order(DictionaryEntry_.popularity, flags: Order.descending);
   Query exactReadingQuery = exactReadingMatch.build();
 
   Query limitedReadingQuery = exactReadingQuery..limit = 20;
@@ -1031,20 +1037,16 @@ Future<DictionaryHistoryEntry> getCustomWordDetails(
   entries.addAll(readingMatchQueries);
 
   if (entries.isEmpty) {
-    QueryBuilder startsWithWordMatch =
-        box.query(DictionaryEntry_.word.startsWith(searchTerm));
-    Query startsWithWordQuery = startsWithWordMatch.build();
+    QueryBuilder fallbackMixMatch = box.query(
+        DictionaryEntry_.word.equals(fallbackTerm) |
+            DictionaryEntry_.reading.equals(fallbackTerm) |
+            DictionaryEntry_.word.startsWith(searchTerm) |
+            DictionaryEntry_.reading.startsWith(searchTerm))
+      ..order(DictionaryEntry_.popularity, flags: Order.descending);
+    Query fallbackMixQuery = fallbackMixMatch.build();
 
-    limitedWordQuery = startsWithWordQuery..limit = 20;
-    entries = limitedWordQuery.find();
-
-    QueryBuilder startsWithReadingMatch =
-        box.query(DictionaryEntry_.reading.startsWith(searchTerm));
-    Query startsWithReadingQuery = startsWithReadingMatch.build();
-
-    limitedReadingQuery = startsWithReadingQuery..limit = 20;
-    readingMatchQueries = limitedReadingQuery.find();
-    entries.addAll(readingMatchQueries);
+    Query fallbackLimitedQuery = fallbackMixQuery..limit = 30;
+    entries = fallbackLimitedQuery.find();
   }
 
   if (entries.isNotEmpty) {
@@ -1057,29 +1059,18 @@ Future<DictionaryHistoryEntry> getCustomWordDetails(
     );
   }
 
-  exactWordMatch = box.query(DictionaryEntry_.word.equals(fallbackTerm));
-  exactWordQuery = exactWordMatch.build();
-
-  limitedWordQuery = exactWordQuery..limit = 20;
-  entries = limitedWordQuery.find();
-
-  exactReadingMatch = box.query(DictionaryEntry_.reading.equals(fallbackTerm));
-  exactReadingQuery = exactReadingMatch.build();
-
-  limitedReadingQuery = exactReadingQuery..limit = 20;
-  readingMatchQueries = limitedReadingQuery.find();
-  entries.addAll(readingMatchQueries);
-
   if (entries.isEmpty) {
-    QueryBuilder startsWithWordMatch =
-        box.query(DictionaryEntry_.word.startsWith(fallbackTerm));
+    QueryBuilder startsWithWordMatch = box
+        .query(DictionaryEntry_.word.startsWith(fallbackTerm))
+          ..order(DictionaryEntry_.popularity, flags: Order.descending);
     Query startsWithWordQuery = startsWithWordMatch.build();
 
     limitedWordQuery = startsWithWordQuery..limit = 20;
     entries = limitedWordQuery.find();
 
-    QueryBuilder startsWithReadingMatch =
-        box.query(DictionaryEntry_.reading.startsWith(fallbackTerm));
+    QueryBuilder startsWithReadingMatch = box
+        .query(DictionaryEntry_.reading.startsWith(fallbackTerm))
+          ..order(DictionaryEntry_.popularity, flags: Order.descending);
     Query startsWithReadingQuery = startsWithReadingMatch.build();
 
     limitedReadingQuery = startsWithReadingQuery..limit = 20;

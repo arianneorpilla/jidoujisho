@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "2:4755458634901463339",
-      "lastPropertyId": "6:4729597980755086168",
+      "lastPropertyId": "7:582611194591032575",
       "name": "DictionaryEntry",
       "properties": [
         {
@@ -38,6 +38,11 @@
           "id": "6:4729597980755086168",
           "name": "searchTerm",
           "type": 9
+        },
+        {
+          "id": "7:582611194591032575",
+          "name": "popularity",
+          "type": 6
         }
       ],
       "relations": []
