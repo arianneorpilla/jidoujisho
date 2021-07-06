@@ -889,5 +889,5 @@ String getCurrentDictionary() {
 }
 
 bool isCustomDictionary() {
-  return getCurrentDictionary().isNotEmpty;
+  return !(gReservedDictionaryNames.contains(getCurrentDictionary()));
 }

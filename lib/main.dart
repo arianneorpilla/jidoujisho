@@ -3289,6 +3289,9 @@ class _ClipboardState extends State<ClipboardMenu> {
 
   ScrollController _dictionaryScroller;
   final _wordController = TextEditingController(text: "");
+
+  ValueNotifier<DictionaryHistoryEntry> _currentInstantSearch =
+      ValueNotifier<DictionaryHistoryEntry>(null);
   ValueNotifier<bool> _isSearching = ValueNotifier<bool>(false);
 
   _ClipboardState(this.creatorCallback, this.dictionaryScrollOffset);
@@ -3315,9 +3318,6 @@ class _ClipboardState extends State<ClipboardMenu> {
         }
       });
     });
-
-    List<DictionaryHistoryEntry> entries =
-        getDictionaryHistory().reversed.toList();
 
     Widget centerMessage(String text, IconData icon, bool dots) {
       return Center(
@@ -3369,7 +3369,7 @@ class _ClipboardState extends State<ClipboardMenu> {
       true,
     );
 
-    Widget cardCreatorButton() {
+    Widget buildCardCreatorButton() {
       return Container(
         width: double.infinity,
         margin: EdgeInsets.only(bottom: 12),
@@ -3466,94 +3466,105 @@ class _ClipboardState extends State<ClipboardMenu> {
       );
     }
 
-    Widget wordField = TextFormField(
-      keyboardType: TextInputType.text,
-      maxLines: 1,
-      controller: _wordController,
-      onFieldSubmitted: (result) {
-        wordFieldSearch();
-      },
-      decoration: InputDecoration(
-        contentPadding: EdgeInsets.all(0),
-        prefixIcon: Icon(
-          Icons.search,
-        ),
-        suffixIcon: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            wordSearchButton(),
-            IconButton(
-              iconSize: 18,
-              onPressed: () => openDictionaryMenu(context, false),
-              icon: Icon(Icons.auto_stories, color: Colors.white),
+    List<DictionaryHistoryEntry> entries =
+        getDictionaryHistory().reversed.toList();
+
+    Widget buildSearchField() {
+      return Padding(
+        padding: EdgeInsets.only(left: 12, right: 12, bottom: 12),
+        child: TextFormField(
+          keyboardType: TextInputType.text,
+          maxLines: 1,
+          controller: _wordController,
+          onFieldSubmitted: (result) {
+            wordFieldSearch();
+          },
+          onChanged: (query) async {
+            if (query.isEmpty) {
+              _currentInstantSearch.value = null;
+            }
+            if (isCustomDictionary()) {
+              _currentInstantSearch.value =
+                  await fetchCustomDictionarySearchCache(
+                dictionaryName: getCurrentDictionary(),
+                searchTerm: query.trim(),
+              );
+              print(_currentInstantSearch.value.entries.first.word);
+            }
+          },
+          decoration: InputDecoration(
+            contentPadding: EdgeInsets.all(0),
+            prefixIcon: Icon(
+              Icons.search,
             ),
-            IconButton(
-              iconSize: 18,
-              onPressed: () => _wordController.clear(),
-              icon: Icon(Icons.clear, color: Colors.white),
+            suffixIcon: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                wordSearchButton(),
+                IconButton(
+                  iconSize: 18,
+                  onPressed: () => openDictionaryMenu(context, false),
+                  icon: Icon(Icons.auto_stories, color: Colors.white),
+                ),
+                IconButton(
+                  iconSize: 18,
+                  onPressed: () => _wordController.clear(),
+                  icon: Icon(Icons.clear, color: Colors.white),
+                ),
+              ],
             ),
-          ],
+            labelText: "Search",
+            hintText: "Enter search term here",
+          ),
         ),
-        labelText: "Search",
-        hintText: "Enter search term here",
-      ),
-    );
+      );
+    }
 
     if (entries.isEmpty) {
       return Column(children: [
-        Padding(
-          padding: EdgeInsets.only(left: 12, right: 12, bottom: 12),
-          child: wordField,
-        ),
-        cardCreatorButton(),
-        Expanded(child: emptyMessage),
+        buildSearchField(),
+        buildCardCreatorButton(),
       ]);
     }
     return ValueListenableBuilder(
       valueListenable: gKanjiumDictionary,
-      builder:
-          (BuildContext context, List<DictionaryEntry> value, Widget child) {
-        if (value.isEmpty) {
+      builder: (BuildContext context, List<DictionaryEntry> pitchAccents,
+          Widget child) {
+        if (pitchAccents.isEmpty) {
           return Column(children: [
-            Padding(
-              padding: EdgeInsets.only(left: 12, right: 12, bottom: 12),
-              child: wordField,
-            ),
-            cardCreatorButton(),
+            buildSearchField(),
+            buildCardCreatorButton(),
             Expanded(child: loadingMessage),
           ]);
         }
 
         return Scrollbar(
           controller: _dictionaryScroller,
-          child: ListView.builder(
+          child: ListView(
+            shrinkWrap: true,
             controller: _dictionaryScroller,
             addAutomaticKeepAlives: true,
             key: UniqueKey(),
-            itemCount: entries.length + 2,
-            itemBuilder: (BuildContext context, int index) {
-              if (index == 0) {
-                return Padding(
-                  padding: EdgeInsets.only(left: 12, right: 12, bottom: 12),
-                  child: wordField,
-                );
-              }
-              if (index == 1) {
-                return cardCreatorButton();
-              }
-
-              DictionaryHistoryEntry entry = entries[index - 2];
-              print("ENTRY LISTED: $entry");
-
-              return ClipboardHistoryItem(
-                entry,
-                creatorCallback,
-                setStateFromResult,
-                _dictionaryScroller,
-                dictionaryScrollOffset,
-              );
-            },
+            children: [
+              buildSearchField(),
+              buildCardCreatorButton(),
+              if (pitchAccents.isEmpty)
+                Expanded(child: loadingMessage)
+              else if (entries.isEmpty)
+                Expanded(child: emptyMessage)
+              else
+                ValueListenableBuilder(
+                    valueListenable: _currentInstantSearch,
+                    builder: (BuildContext context,
+                        DictionaryHistoryEntry searchResults, Widget child) {
+                      if (_currentInstantSearch.value == null) {
+                        return buildClipboardHistoryItems(entries);
+                      } else {
+                        return buildSearchSuggestionItems(searchResults);
+                      }
+                    }),
+            ],
           ),
         );
       },
@@ -3564,6 +3575,52 @@ class _ClipboardState extends State<ClipboardMenu> {
     setState(() {
       unlockLandscape();
     });
+  }
+
+  Widget buildClipboardHistoryItems(List<DictionaryHistoryEntry> entries) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      controller: _dictionaryScroller,
+      addAutomaticKeepAlives: true,
+      key: UniqueKey(),
+      itemCount: entries.length,
+      itemBuilder: (BuildContext context, int index) {
+        DictionaryHistoryEntry entry = entries[index];
+        print("ENTRY LISTED: $entry");
+
+        return ClipboardHistoryItem(
+          entry,
+          creatorCallback,
+          setStateFromResult,
+          _dictionaryScroller,
+          dictionaryScrollOffset,
+        );
+      },
+    );
+  }
+
+  Widget buildSearchSuggestionItems(DictionaryHistoryEntry historyEntry) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      controller: _dictionaryScroller,
+      addAutomaticKeepAlives: true,
+      key: UniqueKey(),
+      itemCount: historyEntry.entries.length,
+      itemBuilder: (BuildContext context, int index) {
+        print("SUGGESTION LISTED: ${historyEntry.entries[index]}");
+
+        return SearchSuggestionsItem(
+          historyEntry,
+          index,
+          creatorCallback,
+          setStateFromResult,
+          _dictionaryScroller,
+          dictionaryScrollOffset,
+        );
+      },
+    );
   }
 }
 
@@ -4055,6 +4112,193 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
 
     updateDictionaryHistorySwipeIndex(results, _dialogIndex.value);
     setState(() {});
+  }
+}
+
+class SearchSuggestionsItem extends StatefulWidget {
+  final DictionaryHistoryEntry entry;
+  final int swipeIndex;
+  final CreatorCallback creatorCallback;
+  final VoidCallback stateCallback;
+
+  final ScrollController dictionaryScroller;
+  final ValueNotifier<double> dictionaryScrollOffset;
+
+  SearchSuggestionsItem(
+    this.entry,
+    this.swipeIndex,
+    this.creatorCallback,
+    this.stateCallback,
+    this.dictionaryScroller,
+    this.dictionaryScrollOffset,
+  );
+
+  @override
+  _SearchSuggestionsItemState createState() => new _SearchSuggestionsItemState(
+        this.entry,
+        this.swipeIndex,
+        this.creatorCallback,
+        this.stateCallback,
+        this.dictionaryScroller,
+        this.dictionaryScrollOffset,
+      );
+}
+
+class _SearchSuggestionsItemState extends State<SearchSuggestionsItem>
+    with AutomaticKeepAliveClientMixin {
+  _SearchSuggestionsItemState(
+    this.entry,
+    this.swipeIndex,
+    this.creatorCallback,
+    this.stateCallback,
+    this.dictionaryScroller,
+    this.dictionaryScrollOffset,
+  );
+
+  @override
+  bool get wantKeepAlive => true;
+
+  final DictionaryHistoryEntry entry;
+  final int swipeIndex;
+  final CreatorCallback creatorCallback;
+  final VoidCallback stateCallback;
+
+  final ScrollController dictionaryScroller;
+  final ValueNotifier<double> dictionaryScrollOffset;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    DictionaryEntry pitchEntry =
+        getClosestPitchEntry(entry.entries[swipeIndex]);
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 12),
+      color: Colors.grey[800].withOpacity(0.2),
+      child: InkWell(
+        onTap: () {
+          creatorCallback(
+            sentence: "",
+            dictionaryEntry: entry.entries[swipeIndex],
+            file: null,
+            isShared: false,
+          );
+        },
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: InkWell(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    entry.entries[swipeIndex].word,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                  ),
+                  SizedBox(height: 5),
+                  (pitchEntry != null)
+                      ? getAllPitchWidgets(pitchEntry)
+                      : Text(entry.entries[swipeIndex].reading),
+                  Text(
+                    "\n${entry.entries[swipeIndex].meaning}\n",
+                    style: TextStyle(
+                      fontSize: 15,
+                    ),
+                    maxLines: 10,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.end,
+                    children: [
+                      Text(
+                        "Instant search result ",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        "${swipeIndex + 1} ",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        "out of ",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        "${entry.entries.length} ",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        "found for",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.end,
+                        children: [
+                          Text(
+                            "『",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            "${entry.searchTerm}",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                              color: Colors.white,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            "』",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

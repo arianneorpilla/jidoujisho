@@ -154,8 +154,7 @@ fetchCustomDictionarySearchCache({
   }
 
   gCustomDictionarySearchCache[dictionaryName][searchTerm].runOnce(() async {
-    ByteData storeReference =
-        gCustomDictionaryStores[getCurrentDictionary()].reference;
+    ByteData storeReference = gCustomDictionaryStores[dictionaryName].reference;
 
     CustomWordDetailsParams params = CustomWordDetailsParams(
       searchTerm: searchTerm,
