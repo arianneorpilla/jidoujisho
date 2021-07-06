@@ -1,18 +1,18 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:async/async.dart';
-import 'package:audio_service/audio_service.dart';
-import 'package:device_info_plus/device_info_plus.dart';
-import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_absolute_path/flutter_absolute_path.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+
+import 'package:async/async.dart';
+import 'package:audio_service/audio_service.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
-import 'package:jidoujisho/reader.dart';
 import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:minimize_app/minimize_app.dart';
@@ -36,6 +36,7 @@ import 'package:jidoujisho/globals.dart';
 import 'package:jidoujisho/pitch.dart';
 import 'package:jidoujisho/player.dart';
 import 'package:jidoujisho/preferences.dart';
+import 'package:jidoujisho/reader.dart';
 import 'package:jidoujisho/util.dart';
 import 'package:jidoujisho/youtube.dart';
 
@@ -61,7 +62,7 @@ void main() async {
   gAppDirPath = (await getApplicationDocumentsDirectory()).path;
   gPackageInfo = await PackageInfo.fromPlatform();
   gMecabTagger = Mecab();
-  await gMecabTagger.init("assets/ipadic", true);
+  gMecabTagger.init("assets/ipadic", true);
 
   if (Platform.isAndroid) {
     AndroidDeviceInfo androidInfo = await DeviceInfoPlugin().androidInfo;
@@ -401,6 +402,11 @@ class _HomeState extends State<Home> {
     String link, {
     bool pop = false,
   }) {
+    if (!gIsYouTubeAllowed &&
+        playerMode == JidoujishoPlayerMode.youtubeStream) {
+      return;
+    }
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -1718,11 +1724,11 @@ class _HomeState extends State<Home> {
           child: const Text('Enter network stream URL'),
           value: 'Enter network stream URL',
         ),
-        PopupMenuItem<String>(
-          child: const Text('Import/export channels'),
-          value: 'Import/export channels',
-          enabled: gIsYouTubeAllowed,
-        ),
+        if (gIsYouTubeAllowed)
+          PopupMenuItem<String>(
+            child: const Text('Import/export channels'),
+            value: 'Import/export channels',
+          ),
         PopupMenuItem<String>(
           child: const Text('Manage dictionaries'),
           value: 'Manage dictionaries',
@@ -3289,6 +3295,9 @@ class _ClipboardState extends State<ClipboardMenu> {
 
   ScrollController _dictionaryScroller;
   final _wordController = TextEditingController(text: "");
+
+  ValueNotifier<DictionaryHistoryEntry> _currentInstantSearch =
+      ValueNotifier<DictionaryHistoryEntry>(null);
   ValueNotifier<bool> _isSearching = ValueNotifier<bool>(false);
 
   _ClipboardState(this.creatorCallback, this.dictionaryScrollOffset);
@@ -3315,9 +3324,6 @@ class _ClipboardState extends State<ClipboardMenu> {
         }
       });
     });
-
-    List<DictionaryHistoryEntry> entries =
-        getDictionaryHistory().reversed.toList();
 
     Widget centerMessage(String text, IconData icon, bool dots) {
       return Center(
@@ -3369,7 +3375,7 @@ class _ClipboardState extends State<ClipboardMenu> {
       true,
     );
 
-    Widget cardCreatorButton() {
+    Widget buildCardCreatorButton() {
       return Container(
         width: double.infinity,
         margin: EdgeInsets.only(bottom: 12),
@@ -3466,94 +3472,92 @@ class _ClipboardState extends State<ClipboardMenu> {
       );
     }
 
-    Widget wordField = TextFormField(
-      keyboardType: TextInputType.text,
-      maxLines: 1,
-      controller: _wordController,
-      onFieldSubmitted: (result) {
-        wordFieldSearch();
-      },
-      decoration: InputDecoration(
-        contentPadding: EdgeInsets.all(0),
-        prefixIcon: Icon(
-          Icons.search,
-        ),
-        suffixIcon: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            wordSearchButton(),
-            IconButton(
-              iconSize: 18,
-              onPressed: () => openDictionaryMenu(context, false),
-              icon: Icon(Icons.auto_stories, color: Colors.white),
+    List<DictionaryHistoryEntry> entries =
+        getDictionaryHistory().reversed.toList();
+
+    Widget buildSearchField() {
+      return Padding(
+        padding: EdgeInsets.only(left: 12, right: 12, bottom: 12),
+        child: TextFormField(
+          keyboardType: TextInputType.text,
+          maxLines: 1,
+          controller: _wordController,
+          onFieldSubmitted: (result) {
+            wordFieldSearch();
+          },
+          onChanged: (query) async {
+            if (query.isEmpty) {
+              _currentInstantSearch.value = null;
+            }
+            if (isCustomDictionary()) {
+              _currentInstantSearch.value =
+                  await fetchCustomDictionarySearchCache(
+                dictionaryName: getCurrentDictionary(),
+                searchTerm: query.trim(),
+              );
+              print(_currentInstantSearch.value.entries.first.word);
+            }
+          },
+          decoration: InputDecoration(
+            contentPadding: EdgeInsets.all(0),
+            prefixIcon: Icon(
+              Icons.search,
             ),
-            IconButton(
-              iconSize: 18,
-              onPressed: () => _wordController.clear(),
-              icon: Icon(Icons.clear, color: Colors.white),
+            suffixIcon: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                wordSearchButton(),
+                IconButton(
+                  iconSize: 18,
+                  onPressed: () => openDictionaryMenu(context, false),
+                  icon: Icon(Icons.auto_stories, color: Colors.white),
+                ),
+                IconButton(
+                  iconSize: 18,
+                  onPressed: () => _wordController.clear(),
+                  icon: Icon(Icons.clear, color: Colors.white),
+                ),
+              ],
             ),
-          ],
+            labelText: "Search",
+            hintText: "Enter search term here",
+          ),
         ),
-        labelText: "Search",
-        hintText: "Enter search term here",
-      ),
-    );
+      );
+    }
 
     if (entries.isEmpty) {
       return Column(children: [
-        Padding(
-          padding: EdgeInsets.only(left: 12, right: 12, bottom: 12),
-          child: wordField,
-        ),
-        cardCreatorButton(),
+        buildSearchField(),
+        buildCardCreatorButton(),
         Expanded(child: emptyMessage),
       ]);
     }
     return ValueListenableBuilder(
       valueListenable: gKanjiumDictionary,
-      builder:
-          (BuildContext context, List<DictionaryEntry> value, Widget child) {
-        if (value.isEmpty) {
+      builder: (BuildContext context, List<DictionaryEntry> pitchAccents,
+          Widget child) {
+        if (pitchAccents.isEmpty) {
           return Column(children: [
-            Padding(
-              padding: EdgeInsets.only(left: 12, right: 12, bottom: 12),
-              child: wordField,
-            ),
-            cardCreatorButton(),
+            buildSearchField(),
+            buildCardCreatorButton(),
             Expanded(child: loadingMessage),
           ]);
         }
 
         return Scrollbar(
           controller: _dictionaryScroller,
-          child: ListView.builder(
+          child: ListView(
+            shrinkWrap: true,
             controller: _dictionaryScroller,
             addAutomaticKeepAlives: true,
             key: UniqueKey(),
-            itemCount: entries.length + 2,
-            itemBuilder: (BuildContext context, int index) {
-              if (index == 0) {
-                return Padding(
-                  padding: EdgeInsets.only(left: 12, right: 12, bottom: 12),
-                  child: wordField,
-                );
-              }
-              if (index == 1) {
-                return cardCreatorButton();
-              }
-
-              DictionaryHistoryEntry entry = entries[index - 2];
-              print("ENTRY LISTED: $entry");
-
-              return ClipboardHistoryItem(
-                entry,
-                creatorCallback,
-                setStateFromResult,
-                _dictionaryScroller,
-                dictionaryScrollOffset,
-              );
-            },
+            children: [
+              buildSearchField(),
+              buildCardCreatorButton(),
+              buildClipboardHistoryItems(entries),
+            ],
           ),
         );
       },
@@ -3564,6 +3568,29 @@ class _ClipboardState extends State<ClipboardMenu> {
     setState(() {
       unlockLandscape();
     });
+  }
+
+  Widget buildClipboardHistoryItems(List<DictionaryHistoryEntry> entries) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      controller: _dictionaryScroller,
+      addAutomaticKeepAlives: true,
+      key: UniqueKey(),
+      itemCount: entries.length,
+      itemBuilder: (BuildContext context, int index) {
+        DictionaryHistoryEntry entry = entries[index];
+        print("ENTRY LISTED: $entry");
+
+        return ClipboardHistoryItem(
+          entry,
+          creatorCallback,
+          setStateFromResult,
+          _dictionaryScroller,
+          dictionaryScrollOffset,
+        );
+      },
+    );
   }
 }
 

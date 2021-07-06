@@ -783,17 +783,19 @@ Future dictionaryImport(BuildContext context) async {
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
                 ),
                 SizedBox(width: 20),
-                ValueListenableBuilder(
-                  valueListenable: progressNotifier,
-                  builder: (BuildContext context, String progressNotification,
-                      Widget child) {
-                    return Text(
-                      progressNotification,
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                      strutStyle: StrutStyle(forceStrutHeight: true),
-                    );
-                  },
+                Flexible(
+                  child: ValueListenableBuilder(
+                    valueListenable: progressNotifier,
+                    builder: (BuildContext context, String progressNotification,
+                        Widget child) {
+                      return Text(
+                        progressNotification,
+                        maxLines: 1,
+                        strutStyle: StrutStyle(forceStrutHeight: true),
+                        overflow: TextOverflow.ellipsis,
+                      );
+                    },
+                  ),
                 ),
               ],
             ),
@@ -810,9 +812,8 @@ Future dictionaryImport(BuildContext context) async {
         Navigator.pop(context);
       });
       progressNotifier.value = "Dictionary import failed.";
-      await Future.delayed(Duration(seconds: 1), () {
-        Navigator.pop(context);
-      });
+      await Future.delayed(Duration(seconds: 1), () {});
+      Navigator.pop(context);
       print(e);
     }
   }
