@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -14,11 +16,10 @@ import 'package:jidoujisho/pitch.dart';
 import 'package:jidoujisho/preferences.dart';
 import 'package:objectbox/objectbox.dart';
 import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
+import 'package:progress_indicators/progress_indicators.dart';
 import 'package:unofficial_jisho_api/api.dart';
 
 import 'package:jidoujisho/util.dart';
-import 'package:ve_dart/ve_dart.dart';
 
 @Entity()
 class DictionaryEntry {
@@ -673,6 +674,8 @@ Future openDictionaryMenu(BuildContext context, bool importAllowed) {
     context: context,
     builder: (context) {
       return AlertDialog(
+        contentPadding:
+            EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.zero,
         ),
@@ -699,7 +702,7 @@ Future openDictionaryMenu(BuildContext context, bool importAllowed) {
   );
 }
 
-Widget deleteDialog(BuildContext context, String dictionaryName,
+void deleteDialog(BuildContext context, String dictionaryName,
     ValueNotifier<List<String>> customDictionaries) {
   Widget alertDialog = AlertDialog(
     shape: RoundedRectangleBorder(
@@ -788,6 +791,7 @@ Future dictionaryImport(BuildContext context) async {
                       progressNotification,
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
+                      strutStyle: StrutStyle(forceStrutHeight: true),
                     );
                   },
                 ),
@@ -798,16 +802,15 @@ Future dictionaryImport(BuildContext context) async {
         },
       );
 
-      ArchiveImportResult archiveImportResult =
-          await getCustomDictionaryFromArchive(archiveFile, progressNotifier);
-      await populateCustomDictionaryDatabase(
-          archiveImportResult, progressNotifier);
-      await addDictionaryName(archiveImportResult.dictionaryName);
-      await setCurrentDictionary(archiveImportResult.dictionaryName);
+      await importCustomDictionary(archiveFile, progressNotifier);
       Navigator.pop(context);
     } catch (e) {
       progressNotifier.value = "An error has occurred.";
       await Future.delayed(Duration(seconds: 3), () {
+        Navigator.pop(context);
+      });
+      progressNotifier.value = "Dictionary import failed.";
+      await Future.delayed(Duration(seconds: 1), () {
         Navigator.pop(context);
       });
       print(e);
@@ -815,10 +818,8 @@ Future dictionaryImport(BuildContext context) async {
   }
 }
 
-Future<ArchiveImportResult> getCustomDictionaryFromArchive(
+Future<void> importCustomDictionary(
     File archiveFile, ValueNotifier<String> progressNotifier) async {
-  List<DictionaryEntry> entries = [];
-
   progressNotifier.value = "Initializing import...";
 
   await Future.delayed(Duration(milliseconds: 500), () {});
@@ -842,39 +843,54 @@ Future<ArchiveImportResult> getCustomDictionaryFromArchive(
     getTermBankDirectory().createSync(recursive: true);
   }
 
-  progressNotifier.value = "Scanning for entries...";
   await Future.delayed(Duration(milliseconds: 500), () {});
 
-  EntryExtractParams params = EntryExtractParams(
-    dictionaryNames: getDictionariesName(),
-    reservedNames: gReservedDictionaryNames,
-    importDirectoryPath: importDirectory.path,
-  );
-
-  entries = await compute(extractEntries, params);
-  progressNotifier.value = "Found ${entries.length} entries...";
-
-  await Future.delayed(Duration(milliseconds: 500), () {});
-
-  return ArchiveImportResult(
-    dictionaryName: entries.first.dictionarySource,
-    entries: entries,
-  );
-}
-
-List<DictionaryEntry> extractEntries(EntryExtractParams params) {
-  List<DictionaryEntry> entries = [];
-
-  String indexPath = path.join(params.importDirectoryPath, "index.json");
+  String indexPath = path.join(importDirectory.path, "index.json");
   File indexFile = File(indexPath);
   Map<String, dynamic> index = jsonDecode(indexFile.readAsStringSync());
-  String dictionaryName = index["title"];
+  String dictionaryName = (index["title"] as String).trim();
 
-  if (params.dictionaryNames.contains(dictionaryName) ||
-      params.reservedNames.contains(dictionaryName)) {
+  if (getDictionariesName().contains(dictionaryName) ||
+      gReservedDictionaryNames.contains(dictionaryName)) {
     throw Exception("Dictionary with same title already found.");
   }
 
+  progressNotifier.value = "Importing 『$dictionaryName』...";
+  initializeCustomDictionary(dictionaryName);
+  Store store = gCustomDictionaryStores[dictionaryName];
+
+  await Future.delayed(Duration(milliseconds: 500), () {});
+
+  ReceivePort receivePort = ReceivePort();
+  receivePort.listen((data) {
+    if (data is String) {
+      progressNotifier.value = data;
+    }
+  });
+
+  EntryExtractParams params = EntryExtractParams(
+    dictionaryName: dictionaryName,
+    importDirectoryPath: importDirectory.path,
+    storeReference: store.reference,
+    sendPort: receivePort.sendPort,
+  );
+
+  int entriesCount = await compute(importEntries, params);
+  progressNotifier.value = "Imported $entriesCount entries...";
+
+  await Future.delayed(Duration(seconds: 1), () {});
+
+  progressNotifier.value = "Dictionary import complete.";
+
+  await Future.delayed(Duration(seconds: 1), () {});
+
+  await addDictionaryName(dictionaryName);
+  await setCurrentDictionary(dictionaryName);
+}
+
+Future<int> importEntries(EntryExtractParams params) async {
+  SendPort sendPort = params.sendPort;
+  List<DictionaryEntry> entries = [];
   for (int i = 0; i < 999; i++) {
     String outputPath =
         path.join(params.importDirectoryPath, "term_bank_$i.json");
@@ -899,52 +915,38 @@ List<DictionaryEntry> extractEntries(EntryExtractParams params) {
 
       dictionary.forEach((entry) {
         entries.add(DictionaryEntry(
-          dictionarySource: dictionaryName,
+          dictionarySource: params.dictionaryName,
           word: entry[0].toString(),
           reading: entry[1].toString(),
           meaning: parseMeaning(entry[5]),
         ));
       });
     }
+
+    sendPort.send("Found ${entries.length} entries...");
   }
 
-  return entries;
+  await Future.delayed(Duration(seconds: 1), () {});
+  sendPort.send("Adding entries to database...");
+
+  Store store = Store.fromReference(getObjectBoxModel(), params.storeReference);
+  Box box = store.box<DictionaryEntry>();
+  box.putMany(entries);
+  return entries.length;
 }
 
 class EntryExtractParams {
-  List<String> dictionaryNames;
-  List<String> reservedNames;
+  String dictionaryName;
   String importDirectoryPath;
+  ByteData storeReference;
+  SendPort sendPort;
 
-  EntryExtractParams(
-      {this.dictionaryNames, this.reservedNames, this.importDirectoryPath});
-}
-
-Future<void> populateCustomDictionaryDatabase(
-  ArchiveImportResult archiveImportResult,
-  ValueNotifier<String> progressNotifier,
-) async {
-  String dictionaryName = archiveImportResult.dictionaryName;
-  List<DictionaryEntry> entries = archiveImportResult.entries;
-
-  await Future.delayed(Duration(milliseconds: 500), () {});
-
-  initializeCustomDictionary(dictionaryName);
-  progressNotifier.value = "Storing entries to database...";
-  Store store = gCustomDictionaryStores[dictionaryName];
-  Box box = store.box<DictionaryEntry>();
-
-  await Future.delayed(Duration(milliseconds: 500), () {});
-
-  box.putMany(entries);
-
-  progressNotifier.value = "Imported ${entries.length} entries.";
-
-  await Future.delayed(Duration(milliseconds: 500), () {});
-
-  progressNotifier.value = "Dictionary import complete.";
-
-  await Future.delayed(Duration(seconds: 1), () {});
+  EntryExtractParams({
+    this.dictionaryName,
+    this.importDirectoryPath,
+    this.storeReference,
+    this.sendPort,
+  });
 }
 
 void initializeCustomDictionaries() async {
@@ -963,7 +965,7 @@ void initializeCustomDictionary(String dictionaryName) {
 
   gCustomDictionaryStores[dictionaryName] = Store(
     getObjectBoxModel(),
-    directory: path.join(gAppDirPath, "objectbox", objectBoxDirDirectory.path),
+    directory: objectBoxDirDirectory.path,
   );
 }
 
@@ -981,15 +983,35 @@ Future<void> deleteCustomDictionary(String dictionaryName) async {
   await removeDictionaryName(dictionaryName);
 }
 
-Future<DictionaryHistoryEntry> getCustomWordDetails({
-  String searchTerm,
-  String contextDataSource,
-  int contextPosition,
-}) async {
-  String parsedTerm;
-  List<Word> words = parseVe(gMecabTagger, searchTerm);
+class CustomWordDetailsParams {
+  String searchTerm;
+  String contextDataSource;
+  int contextPosition;
+  String originalSearchTerm;
+  String fallbackTerm;
+  ByteData storeReference;
 
-  Store store = gCustomDictionaryStores[getCurrentDictionary()];
+  CustomWordDetailsParams({
+    this.searchTerm,
+    this.contextDataSource,
+    this.contextPosition,
+    this.originalSearchTerm,
+    this.fallbackTerm,
+    this.storeReference,
+  });
+}
+
+Future<DictionaryHistoryEntry> getCustomWordDetails(
+  CustomWordDetailsParams params,
+) async {
+  String searchTerm = params.searchTerm;
+  String contextDataSource = params.contextDataSource;
+  int contextPosition = params.contextPosition;
+  String originalSearchTerm = params.originalSearchTerm;
+  String fallbackTerm = params.fallbackTerm;
+  ByteData storeReference = params.storeReference;
+
+  Store store = Store.fromReference(getObjectBoxModel(), storeReference);
   Box box = store.box<DictionaryEntry>();
 
   QueryBuilder exactWordMatch =
@@ -1027,34 +1049,20 @@ Future<DictionaryHistoryEntry> getCustomWordDetails({
   if (entries.isNotEmpty) {
     return DictionaryHistoryEntry(
       entries: entries,
-      searchTerm: searchTerm,
+      searchTerm: originalSearchTerm,
       swipeIndex: 0,
       contextDataSource: contextDataSource,
       contextPosition: contextPosition,
     );
   }
 
-  if (words == null && words.isNotEmpty) {
-    parsedTerm = searchTerm;
-  } else {
-    if (words.first.lemma != null && words.first.lemma != words.first.word) {
-      parsedTerm = words.first.lemma;
-    } else {
-      if (words.first.word == searchTerm) {
-        parsedTerm = words.first.word;
-      } else {
-        parsedTerm = searchTerm;
-      }
-    }
-  }
-
-  exactWordMatch = box.query(DictionaryEntry_.word.equals(parsedTerm));
+  exactWordMatch = box.query(DictionaryEntry_.word.equals(fallbackTerm));
   exactWordQuery = exactWordMatch.build();
 
   limitedWordQuery = exactWordQuery..limit = 20;
   entries = limitedWordQuery.find();
 
-  exactReadingMatch = box.query(DictionaryEntry_.reading.equals(parsedTerm));
+  exactReadingMatch = box.query(DictionaryEntry_.reading.equals(fallbackTerm));
   exactReadingQuery = exactReadingMatch.build();
 
   limitedReadingQuery = exactReadingQuery..limit = 20;
@@ -1063,14 +1071,14 @@ Future<DictionaryHistoryEntry> getCustomWordDetails({
 
   if (entries.isEmpty) {
     QueryBuilder startsWithWordMatch =
-        box.query(DictionaryEntry_.word.startsWith(parsedTerm));
+        box.query(DictionaryEntry_.word.startsWith(fallbackTerm));
     Query startsWithWordQuery = startsWithWordMatch.build();
 
     limitedWordQuery = startsWithWordQuery..limit = 20;
     entries = limitedWordQuery.find();
 
     QueryBuilder startsWithReadingMatch =
-        box.query(DictionaryEntry_.reading.startsWith(parsedTerm));
+        box.query(DictionaryEntry_.reading.startsWith(fallbackTerm));
     Query startsWithReadingQuery = startsWithReadingMatch.build();
 
     limitedReadingQuery = startsWithReadingQuery..limit = 20;
@@ -1078,11 +1086,15 @@ Future<DictionaryHistoryEntry> getCustomWordDetails({
     entries.addAll(readingMatchQueries);
   }
 
-  return DictionaryHistoryEntry(
-    entries: entries,
-    searchTerm: searchTerm,
-    swipeIndex: 0,
-    contextDataSource: contextDataSource,
-    contextPosition: contextPosition,
-  );
+  if (entries.isNotEmpty) {
+    return DictionaryHistoryEntry(
+      entries: entries,
+      searchTerm: originalSearchTerm,
+      swipeIndex: 0,
+      contextDataSource: contextDataSource,
+      contextPosition: contextPosition,
+    );
+  }
+
+  return null;
 }

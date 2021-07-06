@@ -737,6 +737,8 @@ class _HomeState extends State<Home> {
           context: context,
           builder: (context) {
             return AlertDialog(
+              contentPadding:
+                  EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.zero,
               ),
@@ -1240,6 +1242,8 @@ class _HomeState extends State<Home> {
           context: context,
           builder: (context) {
             return AlertDialog(
+              contentPadding:
+                  EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.zero,
               ),
@@ -1326,6 +1330,8 @@ class _HomeState extends State<Home> {
           context: context,
           builder: (context) {
             return AlertDialog(
+              contentPadding:
+                  EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.zero,
               ),
@@ -1484,7 +1490,7 @@ class _HomeState extends State<Home> {
       true,
     );
     Widget errorMessage = centerMessage(
-      "Error getting videos",
+      "No videos could be queried",
       Icons.error,
       false,
     );
@@ -1745,6 +1751,8 @@ class _HomeState extends State<Home> {
           context: context,
           builder: (context) {
             return AlertDialog(
+              contentPadding:
+                  EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.zero,
               ),
@@ -1805,6 +1813,8 @@ class _HomeState extends State<Home> {
           context: context,
           builder: (context) {
             return AlertDialog(
+              contentPadding:
+                  EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.zero,
               ),
@@ -2205,6 +2215,8 @@ class _YouTubeResultState extends State<YouTubeResult>
           context: context,
           builder: (context) {
             return AlertDialog(
+              contentPadding:
+                  EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.zero,
               ),
@@ -2538,6 +2550,8 @@ class _ChannelResultState extends State<ChannelResult>
           context: context,
           builder: (context) {
             return AlertDialog(
+              contentPadding:
+                  EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.zero,
               ),
@@ -2802,6 +2816,8 @@ class _SearchResultState extends State<SearchResult>
             context: context,
             builder: (context) {
               return AlertDialog(
+                contentPadding:
+                    EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.zero,
                 ),
@@ -3073,6 +3089,8 @@ class _HistoryResultState extends State<HistoryResult>
           context: context,
           builder: (context) {
             return AlertDialog(
+              contentPadding:
+                  EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.zero,
               ),
@@ -3784,6 +3802,8 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
       context: context,
       builder: (context) {
         return AlertDialog(
+          contentPadding:
+              EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.zero,
           ),
@@ -4422,6 +4442,8 @@ class _CreatorState extends State<Creator> {
       context: context,
       builder: (context) {
         return AlertDialog(
+          contentPadding:
+              EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.zero,
           ),
@@ -4676,6 +4698,8 @@ class _CreatorState extends State<Creator> {
       context: context,
       builder: (context) {
         return AlertDialog(
+          contentPadding:
+              EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.zero,
           ),

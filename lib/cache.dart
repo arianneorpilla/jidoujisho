@@ -1,9 +1,13 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:async/async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:jidoujisho/dictionary.dart';
 import 'package:jidoujisho/preferences.dart';
+import 'package:kana_kit/kana_kit.dart';
+import 'package:path/path.dart' as path;
+import 'package:ve_dart/ve_dart.dart';
 
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
@@ -114,6 +118,27 @@ fetchMonolingualSearchCache({
   return gMonolingualSearchCache[searchTerm].future;
 }
 
+String generateFallbackTerm(String searchTerm) {
+  String fallbackTerm;
+  List<Word> words = parseVe(gMecabTagger, searchTerm);
+
+  if (words == null && words.isNotEmpty) {
+    fallbackTerm = searchTerm;
+  } else {
+    if (words.first.lemma != null && words.first.lemma != words.first.word) {
+      fallbackTerm = words.first.lemma;
+    } else {
+      if (words.first.word == searchTerm) {
+        fallbackTerm = words.first.word;
+      } else {
+        fallbackTerm = searchTerm;
+      }
+    }
+  }
+
+  return fallbackTerm;
+}
+
 fetchCustomDictionarySearchCache({
   String dictionaryName,
   String searchTerm,
@@ -129,12 +154,80 @@ fetchCustomDictionarySearchCache({
   }
 
   gCustomDictionarySearchCache[dictionaryName][searchTerm].runOnce(() async {
-    // TO DO METHOD HERE
-    return getCustomWordDetails(
+    ByteData storeReference =
+        gCustomDictionaryStores[getCurrentDictionary()].reference;
+
+    CustomWordDetailsParams params = CustomWordDetailsParams(
       searchTerm: searchTerm,
       contextDataSource: contextDataSource,
       contextPosition: contextPosition,
+      originalSearchTerm: searchTerm,
+      fallbackTerm: generateFallbackTerm(searchTerm),
+      storeReference: storeReference,
     );
+
+    try {
+      DictionaryHistoryEntry results =
+          await compute(getCustomWordDetails, params);
+
+      if (results != null) {
+        return results;
+      } else {
+        KanaKit kanaKit = KanaKit();
+        if (kanaKit.isRomaji(searchTerm)) {
+          String recursiveSearchTerm = kanaKit.toHiragana(searchTerm);
+          params = CustomWordDetailsParams(
+            searchTerm: recursiveSearchTerm,
+            contextDataSource: contextDataSource,
+            contextPosition: contextPosition,
+            originalSearchTerm: searchTerm,
+            fallbackTerm: generateFallbackTerm(recursiveSearchTerm),
+            storeReference: storeReference,
+          );
+          DictionaryHistoryEntry results =
+              await compute(getCustomWordDetails, params);
+
+          if (results != null) {
+            return results;
+          } else {
+            recursiveSearchTerm = kanaKit.toKatakana(searchTerm);
+            params = CustomWordDetailsParams(
+              searchTerm: recursiveSearchTerm,
+              contextDataSource: contextDataSource,
+              contextPosition: contextPosition,
+              originalSearchTerm: searchTerm,
+              fallbackTerm: generateFallbackTerm(recursiveSearchTerm),
+              storeReference: storeReference,
+            );
+            return await compute(getCustomWordDetails, params);
+          }
+        } else if (kanaKit.isHiragana(searchTerm)) {
+          String recursiveSearchTerm = kanaKit.toKatakana(searchTerm);
+          params = CustomWordDetailsParams(
+            searchTerm: recursiveSearchTerm,
+            contextDataSource: contextDataSource,
+            contextPosition: contextPosition,
+            originalSearchTerm: searchTerm,
+            fallbackTerm: generateFallbackTerm(recursiveSearchTerm),
+            storeReference: storeReference,
+          );
+          return await compute(getCustomWordDetails, params);
+        } else if (kanaKit.isKatakana(searchTerm)) {
+          String recursiveSearchTerm = kanaKit.toHiragana(searchTerm);
+          params = CustomWordDetailsParams(
+            searchTerm: recursiveSearchTerm,
+            contextDataSource: contextDataSource,
+            contextPosition: contextPosition,
+            originalSearchTerm: searchTerm,
+            fallbackTerm: generateFallbackTerm(recursiveSearchTerm),
+            storeReference: storeReference,
+          );
+          return await compute(getCustomWordDetails, params);
+        }
+      }
+    } catch (e) {
+      print(e);
+    }
   });
 
   return gCustomDictionarySearchCache[dictionaryName][searchTerm].future;

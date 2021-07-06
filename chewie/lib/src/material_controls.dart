@@ -467,6 +467,8 @@ class _MaterialControlsState extends State<MaterialControls>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          contentPadding:
+              EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.zero,
           ),
@@ -1178,6 +1180,8 @@ class _MaterialControlsState extends State<MaterialControls>
         context: context,
         builder: (context) {
           return AlertDialog(
+            contentPadding:
+                EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.zero,
             ),
@@ -1230,6 +1234,8 @@ class _MaterialControlsState extends State<MaterialControls>
         context: context,
         builder: (context) {
           return AlertDialog(
+            contentPadding:
+                EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.zero,
             ),

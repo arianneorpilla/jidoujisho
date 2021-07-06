@@ -332,6 +332,8 @@ reader.addEventListener('touchstart', (e) => {
     return new WillPopScope(
       onWillPop: () async {
         Widget alertDialog = AlertDialog(
+          contentPadding:
+            EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.zero,
           ),
