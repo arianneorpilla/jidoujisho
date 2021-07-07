@@ -75,7 +75,6 @@ Please note that the development of the app switches between changes being imple
 - [ ] HTML summary tags for **dual query mode**
 
 ### 🛣️ Stretch Goals
-- [ ] **Stable release** on the Google Play Store or F-Droid
 - [ ] **Extensive language support with text segmentation** for other languages
 - [ ] Tinker around with releasing the app on **other platforms if possible**
 
