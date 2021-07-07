@@ -72,6 +72,17 @@ void main() async {
     }
   }
 
+  print(
+    mergeSameEntries(
+      [
+        DictionaryEntry(
+            word: "banana", reading: "banana2", meaning: "a", popularity: 5),
+        DictionaryEntry(
+            word: "banana", reading: "banana", meaning: "b", popularity: 2)
+      ],
+    ),
+  );
+
   if (!getDCIMDirectory().existsSync()) {
     getDCIMDirectory().createSync(recursive: true);
   }
@@ -3484,19 +3495,6 @@ class _ClipboardState extends State<ClipboardMenu> {
           controller: _wordController,
           onFieldSubmitted: (result) {
             wordFieldSearch();
-          },
-          onChanged: (query) async {
-            if (query.isEmpty) {
-              _currentInstantSearch.value = null;
-            }
-            if (isCustomDictionary()) {
-              _currentInstantSearch.value =
-                  await fetchCustomDictionarySearchCache(
-                dictionaryName: getCurrentDictionary(),
-                searchTerm: query.trim(),
-              );
-              print(_currentInstantSearch.value.entries.first.word);
-            }
           },
           decoration: InputDecoration(
             contentPadding: EdgeInsets.all(0),

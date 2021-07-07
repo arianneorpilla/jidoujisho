@@ -7,7 +7,7 @@
 <p align="center">A mobile video player, reader assistant and card creation toolkit tailored for language learners.</p>
 
 <p align="center" style="margin:0"><b>Latest GitHub Release:<br>
-<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.24.3-beta">0.24.3-beta 🇯🇵 → 🇬🇧</a><br>
+<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.24.4-beta">0.24.4-beta 🇯🇵 → 🇬🇧</a><br>
 <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.16.8-beta-kren">0.16.8-beta 🇰🇷 → 🇬🇧</a></b><br>
 </p>
 
@@ -33,7 +33,7 @@
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.21.2-beta">0.21</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.22.1-beta">0.22</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.23.2-beta">0.23</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.24.3-beta">0.24</a>
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.24.4-beta">0.24</a>
 </b></p>
 
 # 📚 Uninterrupted language immersion at your fingertips
@@ -101,8 +101,8 @@ Please note that the development of the app switches between changes being imple
 
 <p align="center" style="margin:0">
   <img src="https://i.postimg.cc/vm2STn21/Screenshot-20210421-111725.jpg" width="223">
-  <img src="https://i.postimg.cc/zDgPDVCB/Screenshot-20210421-111922.jpg" width="223">
-  <img src="https://i.postimg.cc/KzKpMYC0/Screenshot-20210421-112011.jpg" width="223">
+  <img src="https://i.postimg.cc/3Nrgmwjv/Screenshot-20210705-033959.jpg" width="223">
+  <img src="https://i.postimg.cc/ncz4LCh8/Screenshot-20210705-034036.jpg" width="223">
 </p>
 
 # 📖 Using the application
@@ -150,6 +150,7 @@ A primer on the basics of the application is as follows.
 ### 🙌 Advanced User Tips
 
 * 🇯🇵 Can't find Japanese subtitles for your media? Try finding what you need at <b><a href="https://kitsunekko.net">kitsunekko</a></b>
+* 📚 Users may import their own <b><a href="https://foosoft.net/projects/yomichan/">Yomichan</a></b> custom dictionaries for offline use and instant lookups, <b><a href="https://foosoft.net/projects/yomichan/">some can be found here</a></b>
 * 🤚 **Hold onto the headword** in the pop-up dictionary to **quickly switch between bilingual and monolingual modes** 
 * 📑 **External subtitles with the same name as the selected video file** will be loaded by default
 * ⏲️ If your subtitles are off, you can **set the delay** or **pad the exported audio time with an allowance**

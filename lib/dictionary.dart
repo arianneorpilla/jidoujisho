@@ -31,6 +31,9 @@ class DictionaryEntry {
   String searchTerm;
   List<PitchAccentInformation> pitchAccentEntries;
 
+  int duplicateCount;
+  String duplicateWorkingMeaning;
+
   DictionaryEntry({
     this.id = 0,
     this.dictionarySource,
@@ -38,6 +41,7 @@ class DictionaryEntry {
     this.reading,
     this.meaning,
     this.popularity,
+    this.duplicateCount = 0,
     this.searchTerm,
     this.pitchAccentEntries = const [],
   });
@@ -794,7 +798,6 @@ Future dictionaryImport(BuildContext context) async {
                       return Text(
                         progressNotification,
                         maxLines: 1,
-                        strutStyle: StrutStyle(forceStrutHeight: true),
                         overflow: TextOverflow.ellipsis,
                       );
                     },
@@ -909,9 +912,9 @@ Future<int> importEntries(EntryExtractParams params) async {
             return list.first as String;
           }
           String reduced = list.reduce((value, element) {
-            return "$value\n• $element";
+            return "$value; $element";
           });
-          return "• " + reduced;
+          return reduced;
         } catch (e) {
           return entry.toString();
         }
@@ -1051,7 +1054,7 @@ Future<DictionaryHistoryEntry> getCustomWordDetails(
 
   if (entries.isNotEmpty) {
     return DictionaryHistoryEntry(
-      entries: entries,
+      entries: mergeSameEntries(entries),
       searchTerm: originalSearchTerm,
       swipeIndex: 0,
       contextDataSource: contextDataSource,
@@ -1080,7 +1083,7 @@ Future<DictionaryHistoryEntry> getCustomWordDetails(
 
   if (entries.isNotEmpty) {
     return DictionaryHistoryEntry(
-      entries: entries,
+      entries: mergeSameEntries(entries),
       searchTerm: originalSearchTerm,
       swipeIndex: 0,
       contextDataSource: contextDataSource,
@@ -1089,4 +1092,60 @@ Future<DictionaryHistoryEntry> getCustomWordDetails(
   }
 
   return null;
+}
+
+List<DictionaryEntry> mergeSameEntries(List<DictionaryEntry> entries) {
+  List<DictionaryEntry> mergedEntries = [];
+
+  Map<String, Map<String, DictionaryEntry>> readingMap = {};
+
+  entries.forEach((entry) {
+    if (readingMap[entry.reading] == null) {
+      readingMap[entry.reading] = {};
+    }
+    if (readingMap[entry.reading][entry.word] == null) {
+      readingMap[entry.reading][entry.word] = DictionaryEntry(
+        word: entry.word,
+        reading: entry.reading,
+        meaning: "",
+        popularity: 0,
+        duplicateCount: 0,
+        searchTerm: entry.searchTerm,
+      );
+    }
+
+    DictionaryEntry monoEntry = readingMap[entry.reading][entry.word];
+
+    monoEntry.duplicateCount += 1;
+    monoEntry.meaning += getBetterNumberTag("• ${entry.meaning}\n");
+    monoEntry.duplicateWorkingMeaning = entry.meaning;
+    monoEntry.popularity += entry.popularity;
+  });
+
+  readingMap.values.forEach((headwordMap) {
+    headwordMap.values.forEach((dictionaryEntry) {
+      print(dictionaryEntry);
+    });
+  });
+
+  readingMap.values.forEach((headwordMap) {
+    headwordMap.values.forEach((dictionaryEntry) {
+      mergedEntries.add(dictionaryEntry);
+    });
+  });
+
+  String removeLastNewline(String n) => n = n.substring(0, n.length - 1);
+  mergedEntries.forEach((entry) {
+    if (entry.duplicateCount == 1) {
+      entry.meaning = entry.duplicateWorkingMeaning;
+    } else {
+      entry.meaning = removeLastNewline(entry.meaning);
+    }
+
+    entry.popularity = entry.popularity ~/ entry.duplicateCount;
+  });
+
+  mergedEntries.sort((a, b) => b.popularity.compareTo(a.popularity));
+  mergedEntries.sort((a, b) => b.duplicateCount.compareTo(a.duplicateCount));
+  return mergedEntries;
 }
