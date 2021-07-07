@@ -666,9 +666,9 @@ Future<void> addDictionaryEntryToHistory(
       .removeWhere((entry) => dictionaryHistoryEntry == entry);
   dictionaryHistoryEntries.add(dictionaryHistoryEntry);
 
-  if (dictionaryHistoryEntries.length >= 100) {
+  if (dictionaryHistoryEntries.length >= 50) {
     dictionaryHistoryEntries =
-        dictionaryHistoryEntries.sublist(dictionaryHistoryEntries.length - 100);
+        dictionaryHistoryEntries.sublist(dictionaryHistoryEntries.length - 50);
   }
 
   await setDictionaryHistory(dictionaryHistoryEntries);

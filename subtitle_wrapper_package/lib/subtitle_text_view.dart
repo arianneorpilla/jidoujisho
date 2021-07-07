@@ -77,34 +77,38 @@ class SubtitleTextView extends StatelessWidget {
           return ValueListenableBuilder(
               valueListenable: gIsSelectMode,
               builder: (context, selectMode, widget) {
-                Subtitle currentSubtitle = state.subtitle;
-                String subtitleText = currentSubtitle.text;
-                if (getLatinFilterMode()) {
-                  subtitleText = stripLatinCharactersFromText(subtitleText);
-                }
+                return ValueListenableBuilder(
+                    valueListenable: widgetVisibility,
+                    builder: (context, visible, widget) {
+                      if (!visible) {
+                        return Container();
+                      }
+                      Subtitle currentSubtitle = state.subtitle;
+                      String subtitleText = currentSubtitle.text;
 
-                if (getListeningComprehensionMode()) {
-                  if (comprehensionSubtitle.value == null ||
-                      (widgetVisibility.value &&
-                          comprehensionSubtitle.value != null &&
-                          (comprehensionSubtitle.value.startTime -
-                                      Duration(seconds: 10) >
-                                  currentSubtitle.startTime ||
-                              comprehensionSubtitle.value.endTime <
-                                  currentSubtitle.endTime))) {
-                    if (widgetVisibility.value) {
-                      widgetVisibility.value = false;
-                    }
-                    return Container();
-                  }
-                }
+                      if (getListeningComprehensionMode()) {
+                        if (comprehensionSubtitle.value == null ||
+                            (widgetVisibility.value &&
+                                comprehensionSubtitle.value != null &&
+                                (comprehensionSubtitle.value.startTime -
+                                            Duration(seconds: 10) >
+                                        currentSubtitle.startTime ||
+                                    comprehensionSubtitle.value.endTime <
+                                        currentSubtitle.endTime))) {
+                          if (widgetVisibility.value) {
+                            widgetVisibility.value = false;
+                          }
+                          return Container();
+                        }
+                      }
 
-                if (selectMode) {
-                  return dragToSelectWidget(subtitleText);
-                } else {
-                  return tapToSelectWidget(
-                      context, subtitleText, currentSubtitle);
-                }
+                      if (selectMode) {
+                        return dragToSelectWidget(subtitleText);
+                      } else {
+                        return tapToSelectWidget(
+                            context, subtitleText, currentSubtitle);
+                      }
+                    });
               });
         } else {
           return Container();
@@ -114,61 +118,48 @@ class SubtitleTextView extends StatelessWidget {
   }
 
   Widget dragToSelectWidget(String subtitleText) {
-    return ValueListenableBuilder(
-      valueListenable: widgetVisibility,
-      builder: (BuildContext context, bool visible, Widget child) {
-        if (visible) {
-          return Container(
-            child: Stack(
-              children: <Widget>[
-                subtitleStyle.hasBorder
-                    ? Center(
-                        child: SelectableText(
-                          subtitleText,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: fontSize.value,
-                            foreground: Paint()
-                              ..style = subtitleStyle.borderStyle.style
-                              ..strokeWidth =
-                                  subtitleStyle.borderStyle.strokeWidth
-                              ..color = Colors.black.withOpacity(0.75),
-                          ),
-                          enableInteractiveSelection: false,
-                        ),
-                      )
-                    : Container(
-                        child: null,
-                      ),
-                Center(
+    return Container(
+      child: Stack(
+        children: <Widget>[
+          subtitleStyle.hasBorder
+              ? Center(
                   child: SelectableText(
                     subtitleText,
-                    key: ViewKeys.SUBTITLE_TEXT_CONTENT,
                     textAlign: TextAlign.center,
-                    onSelectionChanged: (selection, cause) {
-                      emptyStack();
-                      Clipboard.setData(ClipboardData(
-                          text: selection.textInside(subtitleText)));
-                    },
                     style: TextStyle(
                       fontSize: fontSize.value,
-                      color: subtitleStyle.textColor,
+                      foreground: Paint()
+                        ..style = subtitleStyle.borderStyle.style
+                        ..strokeWidth = subtitleStyle.borderStyle.strokeWidth
+                        ..color = Colors.black.withOpacity(0.75),
                     ),
-                    focusNode: focusNode,
-                    toolbarOptions: ToolbarOptions(
-                        copy: false,
-                        cut: false,
-                        selectAll: false,
-                        paste: false),
+                    enableInteractiveSelection: false,
                   ),
+                )
+              : Container(
+                  child: null,
                 ),
-              ],
+          Center(
+            child: SelectableText(
+              subtitleText,
+              key: ViewKeys.SUBTITLE_TEXT_CONTENT,
+              textAlign: TextAlign.center,
+              onSelectionChanged: (selection, cause) {
+                emptyStack();
+                Clipboard.setData(
+                    ClipboardData(text: selection.textInside(subtitleText)));
+              },
+              style: TextStyle(
+                fontSize: fontSize.value,
+                color: subtitleStyle.textColor,
+              ),
+              focusNode: focusNode,
+              toolbarOptions: ToolbarOptions(
+                  copy: false, cut: false, selectAll: false, paste: false),
             ),
-          );
-        } else {
-          return Container();
-        }
-      },
+          ),
+        ],
+      ),
     );
   }
 
@@ -197,78 +188,69 @@ class SubtitleTextView extends StatelessWidget {
       word.word = word.word.replaceAll('␝', ' ');
       word.word = word.word.replaceAll('␜', '');
     }
+    return Container(
+      child: Stack(
+        children: <Widget>[
+          subtitleStyle.hasBorder
+              ? Center(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: lines.length,
+                    physics: BouncingScrollPhysics(),
+                    itemBuilder: (BuildContext context, int lineIndex) {
+                      List<dynamic> line = lines[lineIndex];
+                      List<Widget> textWidgets = [];
 
-    return ValueListenableBuilder(
-        valueListenable: widgetVisibility,
-        builder: (BuildContext context, bool visible, Widget child) {
-          if (visible) {
-            return Container(
-              child: Stack(
-                children: <Widget>[
-                  subtitleStyle.hasBorder
-                      ? Center(
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: lines.length,
-                            physics: BouncingScrollPhysics(),
-                            itemBuilder: (BuildContext context, int lineIndex) {
-                              List<dynamic> line = lines[lineIndex];
-                              List<Widget> textWidgets = [];
+                      for (int i = 0; i < line.length; i++) {
+                        Word word = line[i];
+                        textWidgets.add(getOutlineText(word));
+                      }
 
-                              for (int i = 0; i < line.length; i++) {
-                                Word word = line[i];
-                                textWidgets.add(getOutlineText(word));
-                              }
-
-                              return Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: textWidgets,
-                              );
-                            },
-                          ),
-                        )
-                      : Container(
-                          child: null,
-                        ),
-                  Center(
-                    child: Center(
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: lines.length,
-                        physics: BouncingScrollPhysics(),
-                        itemBuilder: (BuildContext context, int lineIndex) {
-                          List<dynamic> line = lines[lineIndex];
-                          List<int> indexList = indexes[lineIndex];
-                          List<Widget> textWidgets = [];
-
-                          for (int i = 0; i < line.length; i++) {
-                            Word word = line[i];
-                            int index = indexList[i];
-                            textWidgets.add(
-                              getText(
-                                word,
-                                index,
-                                currentSubtitle,
-                              ),
-                            );
-                          }
-
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: textWidgets,
-                          );
-                        },
-                      ),
-                    ),
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: textWidgets,
+                      );
+                    },
                   ),
-                ],
+                )
+              : Container(
+                  child: null,
+                ),
+          Center(
+            child: Center(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: lines.length,
+                physics: BouncingScrollPhysics(),
+                itemBuilder: (BuildContext context, int lineIndex) {
+                  List<dynamic> line = lines[lineIndex];
+                  List<int> indexList = indexes[lineIndex];
+                  List<Widget> textWidgets = [];
+
+                  for (int i = 0; i < line.length; i++) {
+                    Word word = line[i];
+                    int index = indexList[i];
+                    textWidgets.add(
+                      getText(
+                        word,
+                        index,
+                        currentSubtitle,
+                      ),
+                    );
+                  }
+
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: textWidgets,
+                  );
+                },
               ),
-            );
-          } else {
-            return Container();
-          }
-        });
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

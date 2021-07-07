@@ -3548,16 +3548,30 @@ class _ClipboardState extends State<ClipboardMenu> {
 
         return Scrollbar(
           controller: _dictionaryScroller,
-          child: ListView(
-            shrinkWrap: true,
+          child: ListView.builder(
             controller: _dictionaryScroller,
             addAutomaticKeepAlives: true,
             key: UniqueKey(),
-            children: [
-              buildSearchField(),
-              buildCardCreatorButton(),
-              buildClipboardHistoryItems(entries),
-            ],
+            itemCount: entries.length + 2,
+            itemBuilder: (BuildContext context, int index) {
+              if (index == 0) {
+                return buildSearchField();
+              }
+              if (index == 1) {
+                return buildCardCreatorButton();
+              }
+
+              DictionaryHistoryEntry entry = entries[index - 2];
+              print("ENTRY LISTED: $entry");
+
+              return ClipboardHistoryItem(
+                entry,
+                creatorCallback,
+                setStateFromResult,
+                _dictionaryScroller,
+                dictionaryScrollOffset,
+              );
+            },
           ),
         );
       },
@@ -3568,29 +3582,6 @@ class _ClipboardState extends State<ClipboardMenu> {
     setState(() {
       unlockLandscape();
     });
-  }
-
-  Widget buildClipboardHistoryItems(List<DictionaryHistoryEntry> entries) {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      controller: _dictionaryScroller,
-      addAutomaticKeepAlives: true,
-      key: UniqueKey(),
-      itemCount: entries.length,
-      itemBuilder: (BuildContext context, int index) {
-        DictionaryHistoryEntry entry = entries[index];
-        print("ENTRY LISTED: $entry");
-
-        return ClipboardHistoryItem(
-          entry,
-          creatorCallback,
-          setStateFromResult,
-          _dictionaryScroller,
-          dictionaryScrollOffset,
-        );
-      },
-    );
   }
 }
 
