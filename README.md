@@ -69,12 +69,14 @@ Please note that the development of the app switches between changes being imple
 - [x] **Various immersion modes** for oral practice
 - [x] Include **pitch accent information** in dictionary and exported cards
 - [x] **Reader enhancements** for manga and novel sentence mining
-- [ ] HTML summary tags for **dual query mode** (bilingual and monolingual)
-- [ ] **Basic support for any languages and offline use** via support of a common dictionary format
-
+- [x] **Instant queries and offline use** via support of Yomichan archive format dictionaries
+- [ ] **Improve text segmentation** and custom dictionaries query results
+- [ ] Dedicated **Android TV experience** with a remote control
+- [ ] HTML summary tags for **dual query mode**
 
 ### 🛣️ Stretch Goals
-- [ ] **Extensive language support with text segmentation** for other CJK languages
+- [ ] **Stable release** on the Google Play Store or F-Droid
+- [ ] **Extensive language support with text segmentation** for other languages
 - [ ] Tinker around with releasing the app on **other platforms if possible**
 
 # 🎞️ A glimpse of jidoujisho in action
@@ -151,7 +153,7 @@ A primer on the basics of the application is as follows.
 
 * 🇯🇵 Can't find Japanese subtitles for your media? Try finding what you need at <b><a href="https://kitsunekko.net">kitsunekko</a></b>
 * 📚 Users may import their own <b><a href="https://foosoft.net/projects/yomichan/">Yomichan</a></b> custom dictionaries for offline use and instant lookups, <b><a href="https://foosoft.net/projects/yomichan/">some can be found here</a></b>
-* 🤚 **Hold onto the headword** in the pop-up dictionary to **quickly switch between bilingual and monolingual modes** 
+* 🤚 **Hold onto the headword** in the pop-up dictionary to **quickly switch between dictionaries** 
 * 📑 **External subtitles with the same name as the selected video file** will be loaded by default
 * ⏲️ If your subtitles are off, you can **set the delay** or **pad the exported audio time with an allowance**
 * ▶️ A **resume button** is at the top of the main menu, and **returns to last video or book**
