@@ -28,7 +28,7 @@ class DictionaryEntry {
   String word;
   String reading;
   String meaning;
-  int popularity;
+  double popularity;
   String searchTerm;
   List<String> termTags;
   List<String> definitionTags;
@@ -137,11 +137,11 @@ class DictionaryEntry {
     List<String> meanings =
         meaningsJson != null ? List.from(meaningsJson) : null;
 
-    this.dictionarySource = map['dictionarySource'];
-    this.word = map['word'];
-    this.reading = map['reading'];
-    this.meaning = map['meaning'];
-    this.popularity = map['popularity'];
+    this.dictionarySource = map['dictionarySource'] as String;
+    this.word = map['word'] as String;
+    this.reading = map['reading'] as String;
+    this.meaning = map['meaning'] as String;
+    this.popularity = jsonToDouble(map["popularity"]);
     this.searchTerm = map['searchTerm'];
     this.termTags = termTags;
     this.definitionTags = definitionTags;
@@ -1358,20 +1358,20 @@ Future<int> importEntries(EntryExtractParams params) async {
 
       termBank.forEach((term) {
         List<String> definitionTags = [];
-        String definitionTagsUnsplit = term[2];
+        String definitionTagsUnsplit = term[2].toString();
         definitionTags = definitionTagsUnsplit.split(" ");
 
         List<String> termTags = [];
         try {
-          String termTagsUnsplit = term[7];
+          String termTagsUnsplit = term[7].toString();
           termTags = termTagsUnsplit.split(" ");
         } catch (e) {}
 
         entries.add(DictionaryEntry(
-          word: term[0],
-          reading: term[1],
+          word: term[0].toString(),
+          reading: term[1].toString(),
           definitionTags: definitionTags,
-          popularity: term[4],
+          popularity: jsonToDouble(term[4]),
           meaning: parseMeaning(term[5]),
           termTags: termTags,
           dictionarySource: params.dictionaryName,
@@ -1658,7 +1658,7 @@ List<DictionaryEntry> mergeSameEntries({
       entry.meaning = removeLastNewline(entry.meaning);
     }
 
-    entry.popularity = entry.popularity ~/ entry.duplicateCount;
+    entry.popularity = entry.popularity / entry.duplicateCount;
     entry.termTags = getRawTags(entry, allBoxes);
     entry.yomichanTermTags = getYomichanTermTags(entry.termTags, tagStore);
     entry.yomichanTermTags.add(YomichanTag(

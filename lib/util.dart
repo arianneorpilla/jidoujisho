@@ -691,3 +691,7 @@ class BlurWidgetOptions {
     this.visible,
   );
 }
+
+double jsonToDouble(dynamic value) {
+  return value.toDouble();
+}
