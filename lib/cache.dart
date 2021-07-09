@@ -205,7 +205,10 @@ fetchCustomDictionarySearchCache({
               tagStoreReference: gTagStore.reference,
               allStoreReferences: getAllStoreReferences(),
             );
-            return await compute(getCustomWordDetails, params);
+            results = await compute(getCustomWordDetails, params);
+            if (results != null) {
+              return results;
+            }
           }
         } else if (kanaKit.isHiragana(searchTerm)) {
           String recursiveSearchTerm = kanaKit.toKatakana(searchTerm);
@@ -219,7 +222,10 @@ fetchCustomDictionarySearchCache({
             tagStoreReference: gTagStore.reference,
             allStoreReferences: getAllStoreReferences(),
           );
-          return await compute(getCustomWordDetails, params);
+          results = await compute(getCustomWordDetails, params);
+          if (results != null) {
+            return results;
+          }
         } else if (kanaKit.isKatakana(searchTerm)) {
           String recursiveSearchTerm = kanaKit.toHiragana(searchTerm);
           params = CustomWordDetailsParams(
@@ -232,9 +238,31 @@ fetchCustomDictionarySearchCache({
             tagStoreReference: gTagStore.reference,
             allStoreReferences: getAllStoreReferences(),
           );
-          return await compute(getCustomWordDetails, params);
+          results = await compute(getCustomWordDetails, params);
+          if (results != null) {
+            return results;
+          }
         }
       }
+
+      if (searchTerm.length > 1) {
+        params = CustomWordDetailsParams(
+          searchTerm: searchTerm.substring(0, searchTerm.length - 1),
+          contextDataSource: contextDataSource,
+          contextPosition: contextPosition,
+          originalSearchTerm: searchTerm,
+          fallbackTerm: searchTerm.substring(0, searchTerm.length - 1),
+          entryStoreReference: storeReference,
+          tagStoreReference: gTagStore.reference,
+          allStoreReferences: getAllStoreReferences(),
+        );
+        results = await compute(getCustomWordDetails, params);
+        if (results != null) {
+          return results;
+        }
+      }
+
+      return null;
     } catch (e) {
       print(e);
     }

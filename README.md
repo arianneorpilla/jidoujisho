@@ -7,7 +7,7 @@
 <p align="center">A mobile video player, reader assistant and card creation toolkit tailored for language learners.</p>
 
 <p align="center" style="margin:0"><b>Latest GitHub Release:<br>
-<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.24.5-beta">0.24.5-beta 🇯🇵 → 🇬🇧</a><br>
+<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.25.0-beta">0.25.0-beta 🇯🇵 → 🇬🇧</a><br>
 <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.16.8-beta-kren">0.16.8-beta 🇰🇷 → 🇬🇧</a></b><br>
 </p>
 
@@ -33,7 +33,8 @@
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.21.2-beta">0.21</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.22.1-beta">0.22</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.23.2-beta">0.23</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.24.5-beta">0.24</a>
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.24.5-beta">0.24</a> · 
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.25.0-beta">0.25</a>
 </b></p>
 
 # 📚 Uninterrupted language immersion at your fingertips
