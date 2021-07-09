@@ -163,7 +163,9 @@ fetchCustomDictionarySearchCache({
       contextPosition: contextPosition,
       originalSearchTerm: searchTerm,
       fallbackTerm: generateFallbackTerm(searchTerm),
-      storeReference: storeReference,
+      entryStoreReference: storeReference,
+      tagStoreReference: gTagStore.reference,
+      allStoreReferences: getAllStoreReferences(),
     );
 
     try {
@@ -182,7 +184,9 @@ fetchCustomDictionarySearchCache({
             contextPosition: contextPosition,
             originalSearchTerm: searchTerm,
             fallbackTerm: generateFallbackTerm(recursiveSearchTerm),
-            storeReference: storeReference,
+            entryStoreReference: storeReference,
+            tagStoreReference: gTagStore.reference,
+            allStoreReferences: getAllStoreReferences(),
           );
           DictionaryHistoryEntry results =
               await compute(getCustomWordDetails, params);
@@ -197,7 +201,9 @@ fetchCustomDictionarySearchCache({
               contextPosition: contextPosition,
               originalSearchTerm: searchTerm,
               fallbackTerm: generateFallbackTerm(recursiveSearchTerm),
-              storeReference: storeReference,
+              entryStoreReference: storeReference,
+              tagStoreReference: gTagStore.reference,
+              allStoreReferences: getAllStoreReferences(),
             );
             return await compute(getCustomWordDetails, params);
           }
@@ -209,7 +215,9 @@ fetchCustomDictionarySearchCache({
             contextPosition: contextPosition,
             originalSearchTerm: searchTerm,
             fallbackTerm: generateFallbackTerm(recursiveSearchTerm),
-            storeReference: storeReference,
+            entryStoreReference: storeReference,
+            tagStoreReference: gTagStore.reference,
+            allStoreReferences: getAllStoreReferences(),
           );
           return await compute(getCustomWordDetails, params);
         } else if (kanaKit.isKatakana(searchTerm)) {
@@ -220,7 +228,9 @@ fetchCustomDictionarySearchCache({
             contextPosition: contextPosition,
             originalSearchTerm: searchTerm,
             fallbackTerm: generateFallbackTerm(recursiveSearchTerm),
-            storeReference: storeReference,
+            entryStoreReference: storeReference,
+            tagStoreReference: gTagStore.reference,
+            allStoreReferences: getAllStoreReferences(),
           );
           return await compute(getCustomWordDetails, params);
         }
@@ -249,4 +259,12 @@ fetchMetadataCache(String videoID, Video video) {
   return gMetadataCache[videoID].runOnce(() async {
     return getPublishMetadata(video);
   });
+}
+
+List<ByteData> getAllStoreReferences() {
+  List<ByteData> storeReferences = [];
+  gCustomDictionaryStores.values.forEach((store) {
+    storeReferences.add(store.reference);
+  });
+  return storeReferences;
 }

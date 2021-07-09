@@ -492,7 +492,8 @@ class _MaterialControlsState extends State<MaterialControls>
                   valueListenable: castDevices,
                   builder: (BuildContext context,
                       Map<String, String> castDevices, Widget child) {
-                    return Scrollbar(
+                    return RawScrollbar(
+                      thumbColor: Colors.grey[600],
                       controller: scrollController,
                       child: ListView.builder(
                         controller: scrollController,

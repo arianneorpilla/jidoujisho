@@ -622,7 +622,7 @@ Future<void> removeVideoHistoryPosition(
 
 List<DictionaryHistoryEntry> getDictionaryHistory() {
   String prefsDictionary =
-      gSharedPrefs.getString('dictionaryEntriesPitch') ?? '[]';
+      gSharedPrefs.getString('dictionaryEntriesYomi') ?? '[]';
 
   List<dynamic> history = (jsonDecode(prefsDictionary) as List<dynamic>);
 
@@ -642,7 +642,7 @@ Future<void> setDictionaryHistory(
     maps.add(entry.toMap());
   });
 
-  await gSharedPrefs.setString('dictionaryEntriesPitch', jsonEncode(maps));
+  await gSharedPrefs.setString('dictionaryEntriesYomi', jsonEncode(maps));
 }
 
 Future<void> addDictionaryEntryToHistory(

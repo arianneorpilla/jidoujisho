@@ -133,7 +133,7 @@ A primer on the basics of the application is as follows.
 * 📋 Select text with **tap to select** or **drag to select**
 * 📔 When the **dictionary definition** for the text shows up, the text is the **current context**
 * 🗑️ Closing the dictionary prompt will **clear the clipboard**
-* 🌐 You may switch between **bilingual or monolingual definitions** at any time
+* 🌐 Switch between dictionaries by **holding on the headword** or **swiping vertically** in the pop-up dictionary
 * ↕️ You may **swipe vertically to open the transcript** in the player, and pick a time or read subtitles
 * ↔️ **Swipe horizontally** in the player to repeat the current subtitle audio
 * ➕ **Swipe left or right on dictionary results** to scroll through multiple definitions

@@ -572,31 +572,31 @@ reader.addEventListener('touchstart', (e) => {
               alignment: WrapAlignment.center,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                Text(
-                  "Looking up",
-                  style: TextStyle(),
-                ),
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    Text(
-                      "『",
-                      style: TextStyle(
-                        color: Colors.grey[300],
+                Text.rich(
+                  TextSpan(
+                    text: '',
+                    children: <InlineSpan>[
+                      TextSpan(
+                        text: "Looking up",
                       ),
-                    ),
-                    Text(
-                      clipboard,
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      "』",
-                      style: TextStyle(
-                        color: Colors.grey[300],
+                      TextSpan(
+                        text: "『",
+                        style: TextStyle(
+                          color: Colors.grey[300],
+                        ),
                       ),
-                    ),
-                  ],
+                      TextSpan(
+                        text: clipboard,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      TextSpan(
+                        text: "』",
+                        style: TextStyle(
+                          color: Colors.grey[300],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 SizedBox(
                   height: 12,
@@ -817,45 +817,48 @@ reader.addEventListener('touchstart', (e) => {
               onLongPress: () {
                 openDictionaryMenu(context, false);
               },
+              onVerticalDragEnd: (details) async {
+                if (details.primaryVelocity == 0) return;
+                if (details.primaryVelocity.compareTo(0) == -1) {
+                  await setPrevDictionary();
+                } else {
+                  await setNextDictionary();
+                }
+              },
               child: Container(
-                  padding: EdgeInsets.all(16.0),
-                  color: Colors.grey[600].withOpacity(0.97),
-                  child: Wrap(
-                    alignment: WrapAlignment.center,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      Text(
-                        "No matches for",
-                        style: TextStyle(),
+                padding: EdgeInsets.all(16.0),
+                color: Colors.grey[600].withOpacity(0.97),
+                child: Text.rich(
+                  TextSpan(
+                    text: '',
+                    children: <InlineSpan>[
+                      TextSpan(
+                        text: "No matches for",
                       ),
-                      Wrap(
-                        alignment: WrapAlignment.center,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          Text(
-                            "『",
-                            style: TextStyle(
-                              color: Colors.grey[300],
-                            ),
-                          ),
-                          SelectableText(
-                            clipboard,
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            "』",
-                            style: TextStyle(
-                              color: Colors.grey[300],
-                            ),
-                          ),
-                        ],
+                      TextSpan(
+                        text: "『",
+                        style: TextStyle(
+                          color: Colors.grey[300],
+                        ),
                       ),
-                      Text(
-                        "could be queried.",
-                        style: TextStyle(),
+                      TextSpan(
+                        text: clipboard,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      TextSpan(
+                        text: "』",
+                        style: TextStyle(
+                          color: Colors.grey[300],
+                        ),
+                      ),
+                      TextSpan(
+                        text: "could be queried.",
                       ),
                     ],
-                  )),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
             ),
           ),
         ),
@@ -958,101 +961,82 @@ reader.addEventListener('touchstart', (e) => {
                         ? getAllPitchWidgets(pitchEntry)
                         : Text(results.entries[selectedIndex.value].reading),
                   ),
-                  Flexible(
-                    child: Scrollbar(
-                      child: SingleChildScrollView(
-                          controller: scrollController,
-                          child: SelectableText(
-                            "\n${results.entries[selectedIndex.value].meaning}\n",
-                            style: TextStyle(
-                              fontSize: 15,
-                            ),
-                            toolbarOptions: ToolbarOptions(
-                                copy: true,
-                                cut: false,
-                                selectAll: false,
-                                paste: false),
-                          )),
+                  if (results
+                      .entries[selectedIndex.value].yomichanTermTags.isNotEmpty)
+                    SizedBox(height: 5),
+                  if (results
+                      .entries[selectedIndex.value].yomichanTermTags.isNotEmpty)
+                    Wrap(
+                      children: results.entries[selectedIndex.value]
+                          .generateTagWidgets(context),
                     ),
-                  ),
-                  Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    alignment: WrapAlignment.center,
-                    children: [
-                      Text(
-                        "Selecting search result ",
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[300],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      Text(
-                        "${selectedIndex.value + 1} ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      Text(
-                        "out of ",
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[300],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      Text(
-                        "${results.entries.length} ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      Text(
-                        "found for",
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[300],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      Wrap(
-                        alignment: WrapAlignment.center,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          Text(
-                            "『",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                              color: Colors.grey[300],
-                            ),
-                            textAlign: TextAlign.center,
+                  results.entries[selectedIndex.value]
+                      .generateMeaningWidgetsDialog(context, selectable: true),
+                  Text.rich(
+                    TextSpan(
+                      text: '',
+                      children: <InlineSpan>[
+                        TextSpan(
+                          text: "Selecting search result ",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[300],
                           ),
-                          Text(
-                            "${results.searchTerm}",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                            textAlign: TextAlign.center,
-                            softWrap: true,
+                        ),
+                        TextSpan(
+                          text: "${selectedIndex.value + 1} ",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
                           ),
-                          Text(
-                            "』",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                              color: Colors.grey[300],
-                            ),
-                            textAlign: TextAlign.center,
+                        ),
+                        TextSpan(
+                          text: "out of ",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[300],
                           ),
-                        ],
-                      ),
-                    ],
+                        ),
+                        TextSpan(
+                          text: "${results.entries.length} ",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                        TextSpan(
+                          text: "found for",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[300],
+                          ),
+                        ),
+                        TextSpan(
+                          text: "『",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            color: Colors.grey[300],
+                          ),
+                        ),
+                        TextSpan(
+                          text: "${results.searchTerm}",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                        TextSpan(
+                          text: "』",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            color: Colors.grey[300],
+                          ),
+                        ),
+                      ],
+                    ),
+                    textAlign: TextAlign.center,
                   ),
                   (recursiveTerms.length > 1)
                       ? GestureDetector(
@@ -1061,41 +1045,59 @@ reader.addEventListener('touchstart', (e) => {
                             recursiveTerms.removeLast();
                             _clipboard.value = recursiveTerms.last;
                           },
-                          child: Padding(
-                            padding: EdgeInsets.only(top: 8, bottom: 8),
-                            child: Wrap(
-                              alignment: WrapAlignment.start,
-                              crossAxisAlignment: WrapCrossAlignment.center,
-                              children: [
-                                Text(
-                                  "『 ",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                    color: Colors.grey[300],
-                                  ),
-                                  textAlign: TextAlign.center,
+                          child: Wrap(
+                            alignment: WrapAlignment.start,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              Text(
+                                "『 ",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  color: Colors.grey[300],
                                 ),
-                                Icon(Icons.arrow_back, size: 11),
-                                SizedBox(width: 5),
-                                Text(
-                                  "Return to previous definition",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                  ),
-                                  textAlign: TextAlign.center,
+                                textAlign: TextAlign.center,
+                              ),
+                              Icon(Icons.arrow_back, size: 11),
+                              SizedBox(width: 5),
+                              Text(
+                                "Return ",
+                                style: TextStyle(
+                                  fontSize: 12,
                                 ),
-                                Text(
-                                  " 』",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                    color: Colors.grey[300],
-                                  ),
-                                  textAlign: TextAlign.center,
+                                textAlign: TextAlign.center,
+                              ),
+                              Text(
+                                "to ",
+                                style: TextStyle(
+                                  fontSize: 12,
                                 ),
-                              ],
-                            ),
+                                textAlign: TextAlign.center,
+                              ),
+                              Text(
+                                "previous ",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              Text(
+                                "definition",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              Text(
+                                " 』",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  color: Colors.grey[300],
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
                           ),
                         )
                       : SizedBox.shrink(),

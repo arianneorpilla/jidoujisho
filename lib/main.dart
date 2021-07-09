@@ -72,17 +72,6 @@ void main() async {
     }
   }
 
-  print(
-    mergeSameEntries(
-      [
-        DictionaryEntry(
-            word: "banana", reading: "banana2", meaning: "a", popularity: 5),
-        DictionaryEntry(
-            word: "banana", reading: "banana", meaning: "b", popularity: 2)
-      ],
-    ),
-  );
-
   if (!getDCIMDirectory().existsSync()) {
     getDCIMDirectory().createSync(recursive: true);
   }
@@ -213,17 +202,22 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ThemeData theme = ThemeData(
+      brightness: Brightness.dark,
+      backgroundColor: Colors.black,
+      cardColor: Colors.black,
+      focusColor: Colors.red,
+      appBarTheme: AppBarTheme(backgroundColor: Colors.black),
+      canvasColor: Colors.grey[900],
+      typography: kTypography,
+    );
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       locale: Locale("ja", "JP"),
-      theme: ThemeData(
-        accentColor: Colors.red,
-        brightness: Brightness.dark,
-        backgroundColor: Colors.black,
-        cardColor: Colors.black,
-        appBarTheme: AppBarTheme(backgroundColor: Colors.black),
-        canvasColor: Colors.grey[900],
-        typography: kTypography,
+      theme: theme.copyWith(
+        colorScheme: theme.colorScheme
+            .copyWith(primary: Colors.red, secondary: Colors.red),
       ),
       home: AudioServiceWidget(child: Home()),
     );
@@ -648,7 +642,8 @@ class _HomeState extends State<Home> {
     ScrollController scrollController = ScrollController();
     gCurrentScrollbar = scrollController;
 
-    return Scrollbar(
+    return RawScrollbar(
+      thumbColor: Colors.grey[600],
       controller: scrollController,
       child: ListView(
         shrinkWrap: true,
@@ -743,6 +738,7 @@ class _HomeState extends State<Home> {
             child: LinearProgressIndicator(
               value: progress,
               backgroundColor: Colors.white.withOpacity(0.6),
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
               minHeight: 2,
             ),
           ),
@@ -1173,7 +1169,8 @@ class _HomeState extends State<Home> {
                 ScrollController scrollController = ScrollController();
                 gCurrentScrollbar = scrollController;
 
-                return Scrollbar(
+                return RawScrollbar(
+                  thumbColor: Colors.grey[600],
                   controller: scrollController,
                   child: ListView.builder(
                     controller: scrollController,
@@ -1405,7 +1402,8 @@ class _HomeState extends State<Home> {
       builder: (BuildContext context, List<String> suggestions, ___) {
         ScrollController scrollController = ScrollController();
 
-        return Scrollbar(
+        return RawScrollbar(
+          thumbColor: Colors.grey[600],
           controller: scrollController,
           child: ListView.builder(
             key: UniqueKey(),
@@ -1432,7 +1430,8 @@ class _HomeState extends State<Home> {
 
     ScrollController scrollController = ScrollController();
 
-    return Scrollbar(
+    return RawScrollbar(
+      thumbColor: Colors.grey[600],
       controller: scrollController,
       child: ListView.builder(
         key: UniqueKey(),
@@ -1556,7 +1555,8 @@ class _HomeState extends State<Home> {
             ScrollController scrollController = ScrollController();
             gCurrentScrollbar = scrollController;
 
-            return Scrollbar(
+            return RawScrollbar(
+              thumbColor: Colors.grey[600],
               controller: scrollController,
               child: ListView.builder(
                 controller: scrollController,
@@ -3002,6 +3002,7 @@ class _HistoryResultState extends State<HistoryResult>
                   child: LinearProgressIndicator(
                     value: historyPosition.position / history.duration,
                     backgroundColor: Colors.white.withOpacity(0.6),
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
                     minHeight: 2,
                   ),
                 ),
@@ -3262,7 +3263,8 @@ class _HistoryState extends State<History> {
     ScrollController scrollController = ScrollController();
     gCurrentScrollbar = scrollController;
 
-    return Scrollbar(
+    return RawScrollbar(
+      thumbColor: Colors.grey[600],
       controller: scrollController,
       child: ListView.builder(
         controller: scrollController,
@@ -3544,7 +3546,8 @@ class _ClipboardState extends State<ClipboardMenu> {
           ]);
         }
 
-        return Scrollbar(
+        return RawScrollbar(
+          thumbColor: Colors.grey[600],
           controller: _dictionaryScroller,
           child: ListView.builder(
             controller: _dictionaryScroller,
@@ -3690,114 +3693,103 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                   (pitchEntry != null)
                       ? getAllPitchWidgets(pitchEntry)
                       : Text(entry.entries[entry.swipeIndex].reading),
-                  Text(
-                    "\n${entry.entries[entry.swipeIndex].meaning}\n",
-                    style: TextStyle(
-                      fontSize: 15,
+                  if (entry
+                      .entries[entry.swipeIndex].yomichanTermTags.isNotEmpty)
+                    SizedBox(height: 5),
+                  if (entry
+                      .entries[entry.swipeIndex].yomichanTermTags.isNotEmpty)
+                    Wrap(
+                      children: entry.entries[entry.swipeIndex]
+                          .generateTagWidgets(context),
                     ),
-                    maxLines: 10,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    crossAxisAlignment: WrapCrossAlignment.end,
-                    children: [
-                      Text(
-                        "Search result ",
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      Text(
-                        "${entry.swipeIndex + 1} ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          color: Colors.white,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      Text(
-                        "out of ",
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      Text(
-                        "${entry.entries.length} ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          color: Colors.white,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      if (entry.contextDataSource != "-1")
-                        if (entry.contextDataSource
-                            .startsWith("https://ttu-ebook.web.app/"))
-                          Text(
-                            "from book ",
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
-                            textAlign: TextAlign.center,
-                          )
-                        else
-                          Text(
-                            "from video ",
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
-                            textAlign: TextAlign.center,
+                  entry.entries[entry.swipeIndex]
+                      .generateMeaningWidgetsMenu(context),
+                  Text.rich(
+                    TextSpan(
+                      text: '',
+                      children: <InlineSpan>[
+                        TextSpan(
+                          text: "Search result ",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
                           ),
-                      Text(
-                        "found for",
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                      Wrap(
-                        alignment: WrapAlignment.center,
-                        crossAxisAlignment: WrapCrossAlignment.end,
-                        children: [
-                          Text(
-                            "『",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
-                            textAlign: TextAlign.center,
+                        TextSpan(
+                          text: "${entry.swipeIndex + 1} ",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            color: Colors.white,
                           ),
-                          Text(
-                            "${entry.searchTerm}",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                              color: Colors.white,
-                            ),
-                            textAlign: TextAlign.center,
+                        ),
+                        TextSpan(
+                          text: "out of ",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
                           ),
-                          Text(
-                            "』",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
-                            textAlign: TextAlign.center,
+                        ),
+                        TextSpan(
+                          text: "${entry.entries.length} ",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            color: Colors.white,
                           ),
-                        ],
-                      ),
-                    ],
+                        ),
+                        if (entry.contextDataSource != "-1")
+                          if (entry.contextDataSource
+                              .startsWith("https://ttu-ebook.web.app/"))
+                            TextSpan(
+                              text: "from book ",
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            )
+                          else
+                            TextSpan(
+                              text: "from video ",
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                        TextSpan(
+                          text: "found for",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        TextSpan(
+                          text: "『",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        TextSpan(
+                          text: "${entry.searchTerm}",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            color: Colors.white,
+                          ),
+                        ),
+                        TextSpan(
+                          text: "』",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                    textAlign: TextAlign.center,
                   ),
                 ],
               ),
@@ -3816,7 +3808,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
 
     await showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           contentPadding:
               EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
@@ -3870,113 +3862,103 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                         (pitchEntry != null)
                             ? getAllPitchWidgets(pitchEntry)
                             : Text(results.entries[_dialogIndex.value].reading),
-                        Flexible(
-                          child: SingleChildScrollView(
-                            child: Text(
-                              "\n${results.entries[_dialogIndex.value].meaning}\n",
-                              style: TextStyle(
-                                fontSize: 15,
-                              ),
-                            ),
+                        if (entry.entries[entry.swipeIndex].yomichanTermTags
+                            .isNotEmpty)
+                          SizedBox(height: 5),
+                        if (entry.entries[entry.swipeIndex].yomichanTermTags
+                            .isNotEmpty)
+                          Wrap(
+                            children: entry.entries[entry.swipeIndex]
+                                .generateTagWidgets(context),
                           ),
-                        ),
-                        Wrap(
-                          alignment: WrapAlignment.center,
-                          crossAxisAlignment: WrapCrossAlignment.end,
-                          children: [
-                            Text(
-                              "Selecting search result ",
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[400],
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            Text(
-                              "${_dialogIndex.value + 1} ",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            Text(
-                              "out of ",
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[400],
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            Text(
-                              "${results.entries.length} ",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            if (entry.contextDataSource != "-1")
-                              if (entry.contextDataSource
-                                  .startsWith("https://ttu-ebook.web.app/"))
-                                Text(
-                                  "from book ",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                )
-                              else
-                                Text(
-                                  "from video ",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey,
-                                  ),
-                                  textAlign: TextAlign.center,
+                        results.entries[_dialogIndex.value]
+                            .generateMeaningWidgetsDialog(dialogContext),
+                        Text.rich(
+                          TextSpan(
+                            text: '',
+                            children: <InlineSpan>[
+                              TextSpan(
+                                text: "Search result ",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
                                 ),
-                            Text(
-                              "found for",
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[400],
                               ),
-                              textAlign: TextAlign.center,
-                            ),
-                            Wrap(
-                              alignment: WrapAlignment.center,
-                              crossAxisAlignment: WrapCrossAlignment.end,
-                              children: [
-                                Text(
-                                  "『",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                    color: Colors.grey[400],
-                                  ),
-                                  textAlign: TextAlign.center,
+                              TextSpan(
+                                text: "${entry.swipeIndex + 1} ",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  color: Colors.white,
                                 ),
-                                Text(
-                                  "${results.searchTerm}",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                  textAlign: TextAlign.center,
+                              ),
+                              TextSpan(
+                                text: "out of ",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
                                 ),
-                                Text(
-                                  "』",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                    color: Colors.grey[400],
-                                  ),
-                                  textAlign: TextAlign.center,
+                              ),
+                              TextSpan(
+                                text: "${entry.entries.length} ",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  color: Colors.white,
                                 ),
-                              ],
-                            ),
-                          ],
+                              ),
+                              if (entry.contextDataSource != "-1")
+                                if (entry.contextDataSource
+                                    .startsWith("https://ttu-ebook.web.app/"))
+                                  TextSpan(
+                                    text: "from book ",
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    ),
+                                  )
+                                else
+                                  TextSpan(
+                                    text: "from video ",
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                              TextSpan(
+                                text: "found for",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              TextSpan(
+                                text: "『",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              TextSpan(
+                                text: "${entry.searchTerm}",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              TextSpan(
+                                text: "』",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                          textAlign: TextAlign.center,
                         ),
                       ],
                     ),
@@ -4051,7 +4033,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
               ),
             TextButton(
               child: Text(
-                'CREATE CARD',
+                'CREATOR',
                 style: TextStyle(color: Colors.white),
               ),
               onPressed: () {
@@ -4465,7 +4447,7 @@ class _CreatorState extends State<Creator> {
           ),
           content: ValueListenableBuilder(
             valueListenable: _dialogIndex,
-            builder: (BuildContext context, int _, Widget widget) {
+            builder: (BuildContext dialogContext, int _, Widget widget) {
               _dialogEntry.value = results.entries[_dialogIndex.value];
               addDictionaryEntryToHistory(
                 DictionaryHistoryEntry(
@@ -4520,16 +4502,17 @@ class _CreatorState extends State<Creator> {
                         (pitchEntry != null)
                             ? getAllPitchWidgets(pitchEntry)
                             : Text(results.entries[_dialogIndex.value].reading),
-                        Flexible(
-                          child: SingleChildScrollView(
-                            child: Text(
-                              "\n${results.entries[_dialogIndex.value].meaning}\n",
-                              style: TextStyle(
-                                fontSize: 15,
-                              ),
-                            ),
+                        if (results.entries[_dialogIndex.value].yomichanTermTags
+                            .isNotEmpty)
+                          SizedBox(height: 5),
+                        if (results.entries[_dialogIndex.value].yomichanTermTags
+                            .isNotEmpty)
+                          Wrap(
+                            children: results.entries[_dialogIndex.value]
+                                .generateTagWidgets(context),
                           ),
-                        ),
+                        results.entries[_dialogIndex.value]
+                            .generateMeaningWidgetsDialog(dialogContext),
                         Wrap(
                           alignment: WrapAlignment.center,
                           crossAxisAlignment: WrapCrossAlignment.end,

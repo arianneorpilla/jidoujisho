@@ -37,8 +37,8 @@ Map<String, Map<String, AsyncMemoizer>> gCustomDictionarySearchCache = {};
 Map<String, AsyncMemoizer> gCaptioningCache = {};
 Map<String, List<Video>> gChannelVideoCache = {};
 Map<String, AsyncMemoizer> gMetadataCache = {};
+Store gTagStore;
 Map<String, Store> gCustomDictionaryStores = {};
-Store gKanjiumStore;
 
 ValueNotifier<List<DictionaryEntry>> gKanjiumDictionary = ValueNotifier([]);
 ScrollController gCurrentScrollbar;

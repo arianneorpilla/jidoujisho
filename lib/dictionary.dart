@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_archive/flutter_archive.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gx_file_picker/gx_file_picker.dart';
 import 'package:html/parser.dart' as parser;
 import 'package:http/http.dart' as http;
@@ -29,21 +30,34 @@ class DictionaryEntry {
   String meaning;
   int popularity;
   String searchTerm;
-  List<PitchAccentInformation> pitchAccentEntries;
+  List<String> termTags;
+  List<String> definitionTags;
+
+  List<String> meanings;
+
+  List<YomichanTag> yomichanTermTags;
+  List<List<YomichanTag>> yomichanDefinitionTags;
 
   int duplicateCount;
   String duplicateWorkingMeaning;
 
+  List<PitchAccentInformation> pitchAccentEntries;
+
   DictionaryEntry({
     this.id = 0,
-    this.dictionarySource,
     this.word,
     this.reading,
     this.meaning,
     this.popularity,
     this.duplicateCount = 0,
     this.searchTerm,
+    this.dictionarySource,
+    this.termTags = const [],
+    this.definitionTags = const [],
     this.pitchAccentEntries = const [],
+    this.meanings = const [],
+    this.yomichanTermTags = const [],
+    this.yomichanDefinitionTags = const [],
   });
 
   Map<String, dynamic> toMap() {
@@ -52,25 +66,76 @@ class DictionaryEntry {
       entriesMaps.add(pitchAccentEntries[i].toMap());
     }
 
+    List<Map<String, dynamic>> yomichanTagMaps = [];
+    for (int i = 0; i < yomichanTermTags.length; i++) {
+      yomichanTagMaps.add(yomichanTermTags[i].toMap());
+    }
+
+    List<List<Map<String, dynamic>>> yomichanDefinitionMaps = [];
+    for (int i = 0; i < yomichanDefinitionTags.length; i++) {
+      List<Map<String, dynamic>> yomichanTagMapList = [];
+      yomichanDefinitionTags[i].forEach((definition) {
+        yomichanTagMapList.add(definition.toMap());
+      });
+      yomichanDefinitionMaps.add(yomichanTagMapList);
+    }
+
     return {
-      "dictionarySource": this.dictionarySource,
       "word": this.word,
       "reading": this.reading,
       "meaning": this.meaning,
       "popularity": this.popularity,
       "searchTerm": this.searchTerm,
+      "dictionarySource": this.dictionarySource,
+      "termTags": jsonEncode(termTags),
+      "definitionTags": jsonEncode(definitionTags),
+      "yomichanTermTags": jsonEncode(yomichanTagMaps),
+      "yomichanDefinitionTags": jsonEncode(yomichanDefinitionMaps),
       "pitchAccentEntries": jsonEncode(entriesMaps),
+      "meanings": jsonEncode(meanings),
     };
   }
 
   DictionaryEntry.fromMap(Map<String, dynamic> map) {
     List<dynamic> entriesMaps =
-        (jsonDecode(map['pitchAccentEntries']) as List<dynamic>);
+        (jsonDecode(map['pitchAccentEntries']) as List<dynamic>) ?? [];
     List<PitchAccentInformation> entriesFromMap = [];
     entriesMaps.forEach((map) {
       PitchAccentInformation entry = PitchAccentInformation.fromMap(map);
       entriesFromMap.add(entry);
     });
+
+    List<dynamic> yomichanDefinitionTagMaps =
+        (jsonDecode(map['yomichanDefinitionTags']) as List<dynamic>) ?? [];
+    List<List<YomichanTag>> yomichanDefinitionTags = [];
+    yomichanDefinitionTagMaps.forEach((list) {
+      List<YomichanTag> yomichanTagList = [];
+      list.forEach((map) {
+        YomichanTag tag = YomichanTag.fromMap(map);
+        yomichanTagList.add(tag);
+      });
+      yomichanDefinitionTags.add(yomichanTagList);
+    });
+
+    List<dynamic> yomichanTermTagMaps =
+        (jsonDecode(map['yomichanTermTags']) as List<dynamic>) ?? [];
+    List<YomichanTag> yomichanTermTags = [];
+    yomichanTermTagMaps.forEach((map) {
+      YomichanTag tag = YomichanTag.fromMap(map);
+      yomichanTermTags.add(tag);
+    });
+
+    var termTagsJson = jsonDecode(map['termTags']);
+    List<String> termTags =
+        termTagsJson != null ? List.from(termTagsJson) : null;
+
+    var definitionTagsJson = jsonDecode(map['definitionTags']);
+    List<String> definitionTags =
+        definitionTagsJson != null ? List.from(definitionTagsJson) : null;
+
+    var meaningsJson = jsonDecode(map['meanings']);
+    List<String> meanings =
+        meaningsJson != null ? List.from(meaningsJson) : null;
 
     this.dictionarySource = map['dictionarySource'];
     this.word = map['word'];
@@ -78,7 +143,256 @@ class DictionaryEntry {
     this.meaning = map['meaning'];
     this.popularity = map['popularity'];
     this.searchTerm = map['searchTerm'];
+    this.termTags = termTags;
+    this.definitionTags = definitionTags;
+    this.yomichanTermTags = yomichanTermTags;
+    this.yomichanDefinitionTags = yomichanDefinitionTags;
     this.pitchAccentEntries = entriesFromMap;
+    this.meanings = meanings;
+  }
+
+  List<Widget> generateTagWidgets(BuildContext context) {
+    List<Widget> tagWidgets = [];
+
+    this.yomichanTermTags.forEach((tag) {
+      tagWidgets.add(
+        GestureDetector(
+          onTap: () {
+            Fluttertoast.showToast(
+              msg: "${tag.tagName} - ${tag.tagNotes}",
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.BOTTOM,
+              timeInSecForIosWeb: 1,
+              backgroundColor: tag.getTagColor(),
+              textColor: Colors.white,
+              fontSize: 16.0,
+            );
+          },
+          child: Container(
+            child: Text(
+              tag.tagName,
+              style: TextStyle(
+                fontSize: 11,
+              ),
+            ),
+            color: tag.getTagColor(),
+            padding: EdgeInsets.all(3),
+          ),
+        ),
+      );
+      tagWidgets.add(SizedBox(width: 5));
+    });
+
+    tagWidgets.removeLast();
+    return tagWidgets;
+  }
+
+  Widget generateMeaningWidgetsDialog(BuildContext context,
+      {bool selectable = false}) {
+    if (gReservedDictionaryNames.contains(this.dictionarySource)) {
+      return Text(
+        "\n${this.meaning}\n",
+        style: TextStyle(
+          fontSize: 15,
+        ),
+        maxLines: 10,
+        overflow: TextOverflow.ellipsis,
+      );
+    }
+
+    List<List<Widget>> definitionWidgets = [];
+    yomichanDefinitionTags.forEach((tagList) {
+      List<Widget> tagWidgets = [];
+      tagList.forEach((tag) {
+        tagWidgets.add(
+          GestureDetector(
+            onTap: () {
+              Fluttertoast.showToast(
+                msg: "${tag.tagName} - ${tag.tagNotes}",
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.BOTTOM,
+                timeInSecForIosWeb: 1,
+                backgroundColor: tag.getTagColor(),
+                textColor: Colors.white,
+                fontSize: 16.0,
+              );
+            },
+            child: Container(
+              child: Text(
+                tag.tagName,
+                style: TextStyle(
+                  fontSize: 11,
+                ),
+              ),
+              color: tag.getTagColor(),
+              padding: EdgeInsets.all(3),
+            ),
+          ),
+        );
+        tagWidgets.add(SizedBox(width: 5));
+      });
+      definitionWidgets.add(tagWidgets);
+    });
+
+    List<Widget> meaningWidgets = [];
+
+    for (int i = 0; i < meanings.length; i++) {
+      List<InlineSpan> inlineSpanWidgets = [];
+      for (int j = 0; j < definitionWidgets[i].length; j++) {
+        inlineSpanWidgets.add(
+          WidgetSpan(
+            child: definitionWidgets[i][j],
+          ),
+        );
+      }
+
+      inlineSpanWidgets.add(
+        TextSpan(
+          text: meanings[i],
+        ),
+      );
+
+      meaningWidgets.add(
+        SizedBox(height: (i == 0) ? 10 : 5),
+      );
+      if (selectable) {
+        meaningWidgets.add(
+          SelectableText.rich(
+            TextSpan(
+              text: '',
+              style: TextStyle(
+                fontSize: 15,
+              ),
+              children: inlineSpanWidgets,
+            ),
+          ),
+        );
+      } else {
+        meaningWidgets.add(
+          Text.rich(
+            TextSpan(
+              text: '',
+              style: TextStyle(
+                fontSize: 15,
+              ),
+              children: inlineSpanWidgets,
+            ),
+          ),
+        );
+      }
+      if (i == meanings.length - 1) {
+        meaningWidgets.add(
+          SizedBox(height: 10),
+        );
+      }
+    }
+
+    return Flexible(
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: meaningWidgets,
+        ),
+      ),
+    );
+  }
+
+  Widget generateMeaningWidgetsMenu(BuildContext context) {
+    if (gReservedDictionaryNames.contains(this.dictionarySource)) {
+      return Text(
+        "\n${this.meaning}\n",
+        style: TextStyle(
+          fontSize: 15,
+        ),
+        maxLines: 10,
+        overflow: TextOverflow.ellipsis,
+      );
+    }
+
+    List<List<Widget>> definitionWidgets = [];
+    yomichanDefinitionTags.forEach((tagList) {
+      List<Widget> tagWidgets = [];
+      tagList.forEach((tag) {
+        tagWidgets.add(
+          GestureDetector(
+            onTap: () {
+              Fluttertoast.showToast(
+                msg: "${tag.tagName} - ${tag.tagNotes}",
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.BOTTOM,
+                timeInSecForIosWeb: 1,
+                backgroundColor: tag.getTagColor(),
+                textColor: Colors.white,
+                fontSize: 16.0,
+              );
+            },
+            child: Container(
+              child: Text(
+                tag.tagName,
+                style: TextStyle(
+                  fontSize: 11,
+                ),
+              ),
+              color: tag.getTagColor(),
+              padding: EdgeInsets.all(3),
+            ),
+          ),
+        );
+        tagWidgets.add(SizedBox(width: 5));
+      });
+      definitionWidgets.add(tagWidgets);
+    });
+
+    List<Widget> meaningWidgets = [];
+
+    for (int i = 0; i < meanings.length; i++) {
+      List<InlineSpan> inlineSpanWidgets = [];
+      for (int j = 0; j < definitionWidgets[i].length; j++) {
+        inlineSpanWidgets.add(
+          WidgetSpan(
+            child: definitionWidgets[i][j],
+          ),
+        );
+      }
+
+      inlineSpanWidgets.add(
+        TextSpan(
+          text: meanings[i],
+        ),
+      );
+
+      meaningWidgets.add(
+        SizedBox(height: (i == 0) ? 10 : 5),
+      );
+      meaningWidgets.add(
+        Text.rich(
+          TextSpan(
+            text: '',
+            style: TextStyle(
+              fontSize: 15,
+            ),
+            children: inlineSpanWidgets,
+          ),
+          maxLines: 10,
+          overflow: TextOverflow.ellipsis,
+        ),
+      );
+      if (i == meanings.length - 1) {
+        meaningWidgets.add(
+          SizedBox(height: 10),
+        );
+      }
+    }
+
+    return SingleChildScrollView(
+      physics: NeverScrollableScrollPhysics(),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: meaningWidgets,
+      ),
+    );
   }
 
   @override
@@ -96,6 +410,70 @@ class DictionaryEntry {
   @override
   int get hashCode =>
       this.word.hashCode ^ this.reading.hashCode ^ this.meaning.hashCode;
+}
+
+@Entity()
+class YomichanTag {
+  int id;
+  String tagName;
+  String frequencyName;
+  int sortingOrder;
+  String tagNotes;
+  int popularity;
+  String dictionarySource;
+
+  YomichanTag({
+    this.id = 0,
+    this.tagName,
+    this.frequencyName,
+    this.sortingOrder,
+    this.tagNotes,
+    this.popularity,
+    this.dictionarySource,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      "tagName": this.tagName,
+      "frequencyName": this.frequencyName,
+      "sortingOrder": this.sortingOrder,
+      "tagNotes": this.tagNotes,
+      "popularity": this.popularity,
+      "dictionarySource": this.dictionarySource,
+    };
+  }
+
+  YomichanTag.fromMap(Map<String, dynamic> map) {
+    this.tagName = map["tagName"];
+    this.frequencyName = map["frequencyName"];
+    this.sortingOrder = map["sortingOrder"];
+    this.tagNotes = map["tagNotes"];
+    this.popularity = map["popularity"];
+    this.dictionarySource = map["dictionarySource"];
+  }
+
+  Color getTagColor() {
+    switch (this.frequencyName) {
+      case "name":
+        return Color(0xffd46a6a);
+      case "expression":
+        return Color(0xffff4d4d);
+      case "popular":
+        return Color(0xff550000);
+      case "partOfSpeech":
+        return Color(0xff565656);
+      case "archaism":
+        return Colors.grey[700];
+      case "dictionary":
+        return Color(0xffd46a6a);
+      case "frequency":
+        return Color(0xffd46a6a);
+      case "frequent":
+        return Color(0xff801515);
+    }
+
+    return Colors.grey[700];
+  }
 }
 
 class VideoContext {
@@ -567,7 +945,8 @@ Future openDictionaryMenu(BuildContext context, bool importAllowed) {
             valueListenable: gActiveDictionary,
             builder:
                 (BuildContext context, String activeDictionary, Widget child) {
-              return Scrollbar(
+              return RawScrollbar(
+                thumbColor: Colors.grey[600],
                 controller: scrollController,
                 child: ListView.builder(
                   controller: scrollController,
@@ -823,9 +1202,7 @@ Future dictionaryImport(BuildContext context) async {
       Navigator.pop(context);
     } catch (e) {
       progressNotifier.value = "An error has occurred.";
-      await Future.delayed(Duration(seconds: 3), () {
-        Navigator.pop(context);
-      });
+      await Future.delayed(Duration(seconds: 3), () {});
       progressNotifier.value = "Dictionary import failed.";
       await Future.delayed(Duration(seconds: 1), () {});
       Navigator.pop(context);
@@ -887,7 +1264,8 @@ Future<void> importCustomDictionary(
   EntryExtractParams params = EntryExtractParams(
     dictionaryName: dictionaryName,
     importDirectoryPath: importDirectory.path,
-    storeReference: store.reference,
+    entryStoreReference: store.reference,
+    tagStoreReference: gTagStore.reference,
     sendPort: receivePort.sendPort,
   );
 
@@ -907,13 +1285,40 @@ Future<void> importCustomDictionary(
 Future<int> importEntries(EntryExtractParams params) async {
   SendPort sendPort = params.sendPort;
   List<DictionaryEntry> entries = [];
+  List<YomichanTag> tags = [];
+
+  for (int i = 0; i < 999; i++) {
+    String outputPath =
+        path.join(params.importDirectoryPath, "tag_bank_$i.json");
+    File tagBankFile = File(outputPath);
+
+    if (tagBankFile.existsSync()) {
+      List<dynamic> tagBank = jsonDecode(tagBankFile.readAsStringSync());
+
+      tagBank.forEach((tag) {
+        tags.add(YomichanTag(
+          tagName: tag[0],
+          frequencyName: tag[1],
+          sortingOrder: tag[2],
+          tagNotes: tag[3],
+          popularity: tag[4],
+          dictionarySource: params.dictionaryName,
+        ));
+      });
+    }
+
+    sendPort.send("Found ${tags.length} tags...");
+  }
+
+  await Future.delayed(Duration(seconds: 1), () {});
+
   for (int i = 0; i < 999; i++) {
     String outputPath =
         path.join(params.importDirectoryPath, "term_bank_$i.json");
-    File dictionaryFile = File(outputPath);
+    File termBankFile = File(outputPath);
 
-    if (dictionaryFile.existsSync()) {
-      List<dynamic> dictionary = jsonDecode(dictionaryFile.readAsStringSync());
+    if (termBankFile.existsSync()) {
+      List<dynamic> termBank = jsonDecode(termBankFile.readAsStringSync());
       String parseMeaning(entry) {
         try {
           List<dynamic> list = List.from(entry);
@@ -929,13 +1334,25 @@ Future<int> importEntries(EntryExtractParams params) async {
         }
       }
 
-      dictionary.forEach((entry) {
+      termBank.forEach((term) {
+        List<String> definitionTags = [];
+        String definitionTagsUnsplit = term[2];
+        definitionTags = definitionTagsUnsplit.split(" ");
+
+        List<String> termTags = [];
+        try {
+          String termTagsUnsplit = term[7];
+          termTags = termTagsUnsplit.split(" ");
+        } catch (e) {}
+
         entries.add(DictionaryEntry(
+          word: term[0],
+          reading: term[1],
+          definitionTags: definitionTags,
+          popularity: term[4],
+          meaning: parseMeaning(term[5]),
+          termTags: termTags,
           dictionarySource: params.dictionaryName,
-          word: entry[0].toString(),
-          reading: entry[1].toString(),
-          meaning: parseMeaning(entry[5]),
-          popularity: entry[4],
         ));
       });
     }
@@ -944,29 +1361,49 @@ Future<int> importEntries(EntryExtractParams params) async {
   }
 
   await Future.delayed(Duration(seconds: 1), () {});
+  sendPort.send("Adding tags to database...");
+
+  Store tagStore =
+      Store.fromReference(getObjectBoxModel(), params.tagStoreReference);
+  Box tagBox = tagStore.box<YomichanTag>();
+  tagBox.putMany(tags);
+
+  await Future.delayed(Duration(milliseconds: 500), () {});
   sendPort.send("Adding entries to database...");
 
-  Store store = Store.fromReference(getObjectBoxModel(), params.storeReference);
-  Box box = store.box<DictionaryEntry>();
-  box.putMany(entries);
+  Store entryStore =
+      Store.fromReference(getObjectBoxModel(), params.entryStoreReference);
+  Box entryBox = entryStore.box<DictionaryEntry>();
+  entryBox.putMany(entries);
   return entries.length;
 }
 
 class EntryExtractParams {
   String dictionaryName;
   String importDirectoryPath;
-  ByteData storeReference;
+  ByteData entryStoreReference;
+  ByteData tagStoreReference;
   SendPort sendPort;
 
   EntryExtractParams({
     this.dictionaryName,
     this.importDirectoryPath,
-    this.storeReference,
+    this.entryStoreReference,
+    this.tagStoreReference,
     this.sendPort,
   });
 }
 
 void initializeCustomDictionaries() async {
+  Directory tagsDirectory = Directory(
+    path.join(gAppDirPath, "tags"),
+  );
+  if (!tagsDirectory.existsSync()) {
+    tagsDirectory.createSync(recursive: true);
+  }
+
+  gTagStore = Store(getObjectBoxModel(), directory: tagsDirectory.path);
+
   getDictionariesName().forEach((dictionaryName) {
     initializeCustomDictionary(dictionaryName);
   });
@@ -974,7 +1411,7 @@ void initializeCustomDictionaries() async {
 
 void initializeCustomDictionary(String dictionaryName) {
   Directory objectBoxDirDirectory = Directory(
-    path.join(gAppDirPath, "objectbox", dictionaryName),
+    path.join(gAppDirPath, "customDictionaries", dictionaryName),
   );
   if (!objectBoxDirDirectory.existsSync()) {
     objectBoxDirDirectory.createSync(recursive: true);
@@ -987,13 +1424,24 @@ void initializeCustomDictionary(String dictionaryName) {
 }
 
 Future<void> deleteCustomDictionary(String dictionaryName) async {
-  Store store = gCustomDictionaryStores[dictionaryName];
-  Box box = store.box<DictionaryEntry>();
-  box.removeAll();
-  store.close();
+  Store entryStore = gCustomDictionaryStores[dictionaryName];
+  Box entryBox = entryStore.box<DictionaryEntry>();
+  entryBox.removeAll();
+  entryStore.close();
+
+  Store tagStore = gTagStore;
+  Box tagBox = tagStore.box<YomichanTag>();
+
+  QueryBuilder tagMatchDictionary =
+      tagBox.query(YomichanTag_.dictionarySource.equals(dictionaryName));
+  Query tagMatchQuery = tagMatchDictionary.build();
+  List<YomichanTag> tags = tagMatchQuery.find();
+  tags.forEach((tag) {
+    tagBox.remove(tag.id);
+  });
 
   Directory objectBoxDirDirectory = Directory(
-    path.join(gAppDirPath, "objectbox", dictionaryName),
+    path.join(gAppDirPath, "customDictionaries", dictionaryName),
   );
   objectBoxDirDirectory.deleteSync(recursive: true);
 
@@ -1006,7 +1454,9 @@ class CustomWordDetailsParams {
   int contextPosition;
   String originalSearchTerm;
   String fallbackTerm;
-  ByteData storeReference;
+  ByteData entryStoreReference;
+  ByteData tagStoreReference;
+  List<ByteData> allStoreReferences;
 
   CustomWordDetailsParams({
     this.searchTerm,
@@ -1014,7 +1464,9 @@ class CustomWordDetailsParams {
     this.contextPosition,
     this.originalSearchTerm,
     this.fallbackTerm,
-    this.storeReference,
+    this.entryStoreReference,
+    this.tagStoreReference,
+    this.allStoreReferences,
   });
 }
 
@@ -1026,22 +1478,21 @@ Future<DictionaryHistoryEntry> getCustomWordDetails(
   int contextPosition = params.contextPosition;
   String originalSearchTerm = params.originalSearchTerm;
   String fallbackTerm = params.fallbackTerm;
-  ByteData storeReference = params.storeReference;
+  ByteData entryStoreReference = params.entryStoreReference;
 
-  Store store = Store.fromReference(getObjectBoxModel(), storeReference);
-  Box box = store.box<DictionaryEntry>();
+  Store entryStore =
+      Store.fromReference(getObjectBoxModel(), entryStoreReference);
+  Box entryBox = entryStore.box<DictionaryEntry>();
 
-  QueryBuilder exactWordMatch = box
-      .query(DictionaryEntry_.word.equals(searchTerm))
-        ..order(DictionaryEntry_.popularity, flags: Order.descending);
+  QueryBuilder exactWordMatch =
+      entryBox.query(DictionaryEntry_.word.equals(searchTerm));
   Query exactWordQuery = exactWordMatch.build();
 
   Query limitedWordQuery = exactWordQuery..limit = 20;
   List<DictionaryEntry> entries = limitedWordQuery.find();
 
-  QueryBuilder exactReadingMatch = box
-      .query(DictionaryEntry_.reading.equals(searchTerm))
-        ..order(DictionaryEntry_.popularity, flags: Order.descending);
+  QueryBuilder exactReadingMatch =
+      entryBox.query(DictionaryEntry_.reading.equals(searchTerm));
   Query exactReadingQuery = exactReadingMatch.build();
 
   Query limitedReadingQuery = exactReadingQuery..limit = 20;
@@ -1049,7 +1500,7 @@ Future<DictionaryHistoryEntry> getCustomWordDetails(
   entries.addAll(readingMatchQueries);
 
   if (entries.isEmpty) {
-    QueryBuilder fallbackMixMatch = box.query(
+    QueryBuilder fallbackMixMatch = entryBox.query(
         DictionaryEntry_.word.equals(fallbackTerm) |
             DictionaryEntry_.reading.equals(fallbackTerm) |
             DictionaryEntry_.word.startsWith(searchTerm) |
@@ -1063,7 +1514,12 @@ Future<DictionaryHistoryEntry> getCustomWordDetails(
 
   if (entries.isNotEmpty) {
     return DictionaryHistoryEntry(
-      entries: mergeSameEntries(entries),
+      entries: mergeSameEntries(
+        entries: entries,
+        params: params,
+        entryBox: entryBox,
+        dictionarySource: entries.first.dictionarySource,
+      ),
       searchTerm: originalSearchTerm,
       swipeIndex: 0,
       contextDataSource: contextDataSource,
@@ -1073,7 +1529,7 @@ Future<DictionaryHistoryEntry> getCustomWordDetails(
   }
 
   if (entries.isEmpty) {
-    QueryBuilder startsWithWordMatch = box
+    QueryBuilder startsWithWordMatch = entryBox
         .query(DictionaryEntry_.word.startsWith(fallbackTerm))
           ..order(DictionaryEntry_.popularity, flags: Order.descending);
     Query startsWithWordQuery = startsWithWordMatch.build();
@@ -1081,7 +1537,7 @@ Future<DictionaryHistoryEntry> getCustomWordDetails(
     limitedWordQuery = startsWithWordQuery..limit = 20;
     entries = limitedWordQuery.find();
 
-    QueryBuilder startsWithReadingMatch = box
+    QueryBuilder startsWithReadingMatch = entryBox
         .query(DictionaryEntry_.reading.startsWith(fallbackTerm))
           ..order(DictionaryEntry_.popularity, flags: Order.descending);
     Query startsWithReadingQuery = startsWithReadingMatch.build();
@@ -1093,7 +1549,12 @@ Future<DictionaryHistoryEntry> getCustomWordDetails(
 
   if (entries.isNotEmpty) {
     return DictionaryHistoryEntry(
-      entries: mergeSameEntries(entries),
+      entries: mergeSameEntries(
+        entries: entries,
+        params: params,
+        entryBox: entryBox,
+        dictionarySource: entries.first.dictionarySource,
+      ),
       searchTerm: originalSearchTerm,
       swipeIndex: 0,
       contextDataSource: contextDataSource,
@@ -1105,7 +1566,21 @@ Future<DictionaryHistoryEntry> getCustomWordDetails(
   return null;
 }
 
-List<DictionaryEntry> mergeSameEntries(List<DictionaryEntry> entries) {
+List<DictionaryEntry> mergeSameEntries({
+  List<DictionaryEntry> entries,
+  CustomWordDetailsParams params,
+  Box entryBox,
+  String dictionarySource,
+}) {
+  Store tagStore =
+      Store.fromReference(getObjectBoxModel(), params.tagStoreReference);
+  List<Box> allBoxes = [];
+  params.allStoreReferences.forEach((storeReference) {
+    Store store = Store.fromReference(getObjectBoxModel(), storeReference);
+    allBoxes.add(store.box<DictionaryEntry>());
+  });
+  allBoxes.add(entryBox);
+
   List<DictionaryEntry> mergedEntries = [];
 
   Map<String, Map<String, DictionaryEntry>> readingMap = {};
@@ -1122,6 +1597,11 @@ List<DictionaryEntry> mergeSameEntries(List<DictionaryEntry> entries) {
         popularity: 0,
         duplicateCount: 0,
         searchTerm: entry.searchTerm,
+        termTags: [],
+        definitionTags: [],
+        yomichanDefinitionTags: [],
+        yomichanTermTags: [],
+        meanings: [],
       );
     }
 
@@ -1131,12 +1611,15 @@ List<DictionaryEntry> mergeSameEntries(List<DictionaryEntry> entries) {
     monoEntry.meaning += getBetterNumberTag("• ${entry.meaning}\n");
     monoEntry.duplicateWorkingMeaning = entry.meaning;
     monoEntry.popularity += entry.popularity;
-  });
 
-  readingMap.values.forEach((headwordMap) {
-    headwordMap.values.forEach((dictionaryEntry) {
-      print(dictionaryEntry);
-    });
+    monoEntry.meanings.add(entry.meaning);
+    monoEntry.yomichanDefinitionTags.add(
+      getYomichanTermTags(
+        entry.definitionTags,
+        tagStore,
+        dictionaryName: dictionarySource,
+      ),
+    );
   });
 
   readingMap.values.forEach((headwordMap) {
@@ -1154,9 +1637,79 @@ List<DictionaryEntry> mergeSameEntries(List<DictionaryEntry> entries) {
     }
 
     entry.popularity = entry.popularity ~/ entry.duplicateCount;
+    entry.termTags = getRawTags(entry, allBoxes);
+    entry.yomichanTermTags = getYomichanTermTags(entry.termTags, tagStore);
   });
 
-  mergedEntries.sort((a, b) => b.popularity.compareTo(a.popularity));
-  mergedEntries.sort((a, b) => b.duplicateCount.compareTo(a.duplicateCount));
+  mergedEntries.sort((a, b) => b.yomichanDefinitionTags.length
+      .compareTo(a.yomichanDefinitionTags.length));
+  mergedEntries.sort((a, b) => getPopularitySum(b.yomichanTermTags)
+      .compareTo(getPopularitySum(a.yomichanTermTags)));
+  mergedEntries.sort((a, b) =>
+      (getTagCount(b.yomichanTermTags) + b.duplicateCount * 0.3)
+          .compareTo(getTagCount(a.yomichanTermTags) + a.duplicateCount * 0.3));
+
   return mergedEntries;
+}
+
+int getPopularitySum(List<YomichanTag> tags) {
+  int sum = 0;
+  tags.forEach((tag) {
+    sum += tag.popularity;
+  });
+
+  return sum;
+}
+
+int getTagCount(List<YomichanTag> tags) {
+  int sum = 0;
+  tags.forEach((tag) {
+    sum += 1;
+  });
+
+  return sum;
+}
+
+List<YomichanTag> getYomichanTermTags(List<String> tagNames, Store tagStore,
+    {String dictionaryName}) {
+  List<YomichanTag> tags = [];
+  Box tagBox = tagStore.box<YomichanTag>();
+
+  tagNames.forEach((tagName) {
+    QueryBuilder tagMatch;
+    if (dictionaryName != null) {
+      tagMatch = tagBox.query(YomichanTag_.tagName.equals(tagName) &
+          YomichanTag_.dictionarySource.equals(dictionaryName));
+    } else {
+      tagMatch = tagBox.query(YomichanTag_.tagName.equals(tagName));
+    }
+    List<YomichanTag> tagsToAdd = tagMatch.build().find();
+    tags.addAll(tagsToAdd);
+  });
+
+  tags.sort((a, b) => a.sortingOrder.compareTo(b.sortingOrder));
+  return tags;
+}
+
+List<String> collapseEntryTags(List<DictionaryEntry> entries) {
+  List<String> rawTags = [];
+  entries.forEach((entry) {
+    rawTags.addAll(entry.termTags);
+  });
+  return rawTags;
+}
+
+List<String> getRawTags(DictionaryEntry entry, List<Box> boxes) {
+  List<String> rawTags = [];
+
+  boxes.forEach((box) {
+    QueryBuilder exactMatchBuilder = box.query(
+        DictionaryEntry_.word.equals(entry.word) &
+            DictionaryEntry_.reading.equals(entry.reading));
+    Query exactMatchQuery = exactMatchBuilder.build();
+    List<DictionaryEntry> entries = exactMatchQuery.find();
+    rawTags.addAll(collapseEntryTags(entries));
+  });
+
+  return rawTags.toSet().toList();
 }

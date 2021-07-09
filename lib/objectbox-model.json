@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "2:4755458634901463339",
-      "lastPropertyId": "7:582611194591032575",
+      "lastPropertyId": "15:8283070831257298812",
       "name": "DictionaryEntry",
       "properties": [
         {
@@ -43,24 +43,106 @@
           "id": "7:582611194591032575",
           "name": "popularity",
           "type": 6
+        },
+        {
+          "id": "9:1147762122349205545",
+          "name": "duplicateCount",
+          "type": 6
+        },
+        {
+          "id": "10:2866772737479640802",
+          "name": "duplicateWorkingMeaning",
+          "type": 9
+        },
+        {
+          "id": "13:7181825718303943046",
+          "name": "meanings",
+          "type": 30
+        },
+        {
+          "id": "14:1676519671978125952",
+          "name": "termTags",
+          "type": 30
+        },
+        {
+          "id": "15:8283070831257298812",
+          "name": "definitionTags",
+          "type": 30
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "5:3969171428457546341",
+      "lastPropertyId": "7:142735480427566547",
+      "name": "YomichanTag",
+      "properties": [
+        {
+          "id": "1:1470516188262856580",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:25466780649841623",
+          "name": "tagName",
+          "type": 9
+        },
+        {
+          "id": "3:2362895795773882837",
+          "name": "frequencyName",
+          "type": 9
+        },
+        {
+          "id": "4:2584686782452263202",
+          "name": "sortingOrder",
+          "type": 6
+        },
+        {
+          "id": "5:2648597569493504268",
+          "name": "tagNotes",
+          "type": 9
+        },
+        {
+          "id": "6:1105527077558680599",
+          "name": "popularity",
+          "type": 6
+        },
+        {
+          "id": "7:142735480427566547",
+          "name": "dictionarySource",
+          "type": 9
         }
       ],
       "relations": []
     }
   ],
-  "lastEntityId": "2:4755458634901463339",
+  "lastEntityId": "5:3969171428457546341",
   "lastIndexId": "0:0",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,
   "retiredEntityUids": [
-    1338158310023032229
+    1338158310023032229,
+    155126688344968822,
+    694790228921274971
   ],
   "retiredIndexUids": [],
   "retiredPropertyUids": [
     439744796758856751,
-    4795071745416322479
+    4795071745416322479,
+    438239007804015513,
+    9159804443919172978,
+    4907833313838560625,
+    5616262378626123193,
+    3381291441207537044,
+    7316249910332690272,
+    6424846992050250630,
+    3403170335371678123,
+    4447879661151287467,
+    6595092431315820230,
+    3584442349989577125
   ],
   "retiredRelationUids": [],
   "version": 1

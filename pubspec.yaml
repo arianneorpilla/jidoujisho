@@ -2,7 +2,7 @@ name: jidoujisho
 description: A mobile video player tailored for Japanese language learners. 
 publish_to: none
 
-version: 0.24.5+62
+version: 0.25.0+63
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -12,7 +12,10 @@ dependencies:
     sdk: flutter
 
   audioplayers:
-  audio_service: ^0.17.0
+  audio_service: 
+    git:
+      url: https://github.com/lrorpilla/audio_service
+      ref: 1820d8cd19d8248fbfc48ff01a5bee939ea0b858
   auto_orientation:
   async:
   blurrycontainer:
@@ -24,7 +27,7 @@ dependencies:
   ext_storage:
   external_app_launcher:
   gx_file_picker:
-  flutter_archive:
+  flutter_archive: 3.0.0
   flutter_absolute_path:
   flutter_cache_manager:
   flutter_ffmpeg:
@@ -35,8 +38,9 @@ dependencies:
     git:
       url: https://github.com/project-violet/flutter-youtube-dl
       ref: 046b5e6c051b3fda333c1f366e2640cd04f763b8
+  fluttertoast:
   fuzzy:
-  image_picker:
+  image_picker: 0.6.7+11
   intl:
   kana_kit:
   http:
@@ -48,10 +52,13 @@ dependencies:
   minimize_app:
   objectbox:
   objectbox_flutter_libs: any
-  package_info: ^0.4.3+4
+  package_info: ^2.0.2
   path_provider:
   permission_handler:
   photo_view:
+      git:
+        url: https://github.com/lrorpilla/photo_view
+        ref: ae70414abe711b115657fd640527a2a148871847
   progress_indicators:
   receive_sharing_intent:
   scrollable_positioned_list: ^0.1.9
@@ -59,7 +66,7 @@ dependencies:
   shared_preferences:
   subtitle_wrapper_package:
     path: ./subtitle_wrapper_package
-  transparent_image: ^1.0.0
+  transparent_image: ^2.0.0
   unofficial_jisho_api:
     git:
       url: https://github.com/lrorpilla/unofficial_jisho_api_dart
@@ -84,6 +91,7 @@ dependency_overrides:
   process: ^3.0.0
   platform: ^3.0.0
   file: ^6.0.0
+
 
 dev_dependencies:
   flutter_launcher_icons:
