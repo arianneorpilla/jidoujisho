@@ -243,7 +243,6 @@ class JidoujishoPlayerState extends State<JidoujishoPlayer> {
 
   Widget youtubeWarning(BuildContext context, String webURL) {
     return AlertDialog(
-      contentPadding: EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.zero,
       ),
@@ -405,8 +404,6 @@ class _VideoPlayerState extends State<VideoPlayer>
         context: context,
         builder: (context) {
           return AlertDialog(
-            contentPadding:
-                EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.zero,
             ),
@@ -796,7 +793,6 @@ class _VideoPlayerState extends State<VideoPlayer>
     }
 
     Widget alertDialog = AlertDialog(
-      contentPadding: EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.zero,
       ),
@@ -1051,8 +1047,6 @@ class _VideoPlayerState extends State<VideoPlayer>
         context: context,
         builder: (context) {
           return AlertDialog(
-            contentPadding:
-                EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.zero,
             ),
@@ -1521,6 +1515,7 @@ class _VideoPlayerState extends State<VideoPlayer>
             swipeIndex: selectedIndex.value,
             contextDataSource: results.contextDataSource,
             contextPosition: results.contextPosition,
+            dictionarySource: results.dictionarySource,
           ),
         );
 
@@ -1556,6 +1551,14 @@ class _VideoPlayerState extends State<VideoPlayer>
                 } else {
                   selectedIndex.value -= 1;
                 }
+              }
+            },
+            onVerticalDragEnd: (details) async {
+              if (details.primaryVelocity == 0) return;
+              if (details.primaryVelocity.compareTo(0) == -1) {
+                await setNextDictionary();
+              } else {
+                await setPrevDictionary();
               }
             },
             child: Container(

@@ -4474,6 +4474,7 @@ class _CreatorState extends State<Creator> {
                   swipeIndex: _dialogIndex.value,
                   contextDataSource: results.contextDataSource,
                   contextPosition: results.contextPosition,
+                  dictionarySource: results.dictionarySource,
                 ),
               );
 

@@ -891,3 +891,27 @@ String getCurrentDictionary() {
 bool isCustomDictionary() {
   return !(gReservedDictionaryNames.contains(getCurrentDictionary()));
 }
+
+Future<void> setNextDictionary() async {
+  List<String> allDictionaries =
+      getDictionariesName() + gReservedDictionaryNames;
+  int currentIndex = allDictionaries.indexOf(getCurrentDictionary());
+
+  if (currentIndex + 1 > allDictionaries.length - 1) {
+    await setCurrentDictionary(allDictionaries[0]);
+  } else {
+    await setCurrentDictionary(allDictionaries[currentIndex + 1]);
+  }
+}
+
+Future<void> setPrevDictionary() async {
+  List<String> allDictionaries =
+      getDictionariesName() + gReservedDictionaryNames;
+  int currentIndex = allDictionaries.indexOf(getCurrentDictionary());
+
+  if (currentIndex - 1 < 0) {
+    await setCurrentDictionary(allDictionaries[allDictionaries.length - 1]);
+  } else {
+    await setCurrentDictionary(allDictionaries[currentIndex - 1]);
+  }
+}

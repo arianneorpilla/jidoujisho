@@ -332,8 +332,6 @@ reader.addEventListener('touchstart', (e) => {
     return new WillPopScope(
       onWillPop: () async {
         Widget alertDialog = AlertDialog(
-          contentPadding:
-            EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.zero,
           ),
@@ -892,6 +890,7 @@ reader.addEventListener('touchstart', (e) => {
             swipeIndex: selectedIndex.value,
             contextDataSource: results.contextDataSource,
             contextPosition: results.contextPosition,
+            dictionarySource: results.dictionarySource,
           ),
         );
 
@@ -922,6 +921,14 @@ reader.addEventListener('touchstart', (e) => {
                 } else {
                   selectedIndex.value -= 1;
                 }
+              }
+            },
+            onVerticalDragEnd: (details) async {
+              if (details.primaryVelocity == 0) return;
+              if (details.primaryVelocity.compareTo(0) == -1) {
+                await setNextDictionary();
+              } else {
+                await setPrevDictionary();
               }
             },
             child: Container(

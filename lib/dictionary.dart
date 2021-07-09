@@ -109,6 +109,7 @@ class DictionaryHistoryEntry {
   int swipeIndex;
   String contextDataSource;
   int contextPosition;
+  String dictionarySource;
 
   DictionaryHistoryEntry({
     this.entries,
@@ -116,6 +117,7 @@ class DictionaryHistoryEntry {
     this.swipeIndex,
     this.contextDataSource,
     this.contextPosition,
+    this.dictionarySource,
   });
 
   Map<String, dynamic> toMap() {
@@ -130,6 +132,7 @@ class DictionaryHistoryEntry {
       "swipeIndex": swipeIndex,
       "contextDataSource": contextDataSource,
       "contextPosition": contextPosition,
+      "dictionarySource": dictionarySource,
     };
   }
 
@@ -146,6 +149,7 @@ class DictionaryHistoryEntry {
     this.swipeIndex = map['swipeIndex'] as int;
     this.contextDataSource = map['contextDataSource'] as String ?? "-1";
     this.contextPosition = map['contextPosition'] as int ?? -1;
+    this.dictionarySource = map['dictionarySource'];
   }
 
   @override
@@ -311,6 +315,7 @@ Future<DictionaryHistoryEntry> getWordDetails({
       swipeIndex: 0,
       contextDataSource: contextDataSource,
       contextPosition: contextPosition,
+      dictionarySource: getCurrentDictionary(),
     );
   }
 
@@ -335,6 +340,7 @@ Future<DictionaryHistoryEntry> getWordDetails({
         swipeIndex: 0,
         contextDataSource: contextDataSource,
         contextPosition: contextPosition,
+        dictionarySource: getCurrentDictionary(),
       );
     } else {
       String inflection = breakdown.first.querySelector("a").text;
@@ -388,6 +394,7 @@ Future<DictionaryHistoryEntry> getWordDetails({
     swipeIndex: 0,
     contextDataSource: contextDataSource,
     contextPosition: contextPosition,
+    dictionarySource: getCurrentDictionary(),
   );
 }
 
@@ -430,6 +437,7 @@ Future<DictionaryHistoryEntry> getMonolingualWordDetails({
         swipeIndex: 0,
         contextDataSource: contextDataSource,
         contextPosition: contextPosition,
+        dictionarySource: getCurrentDictionary(),
       );
     } else {
       DictionaryHistoryEntry bilingualResults = await getWordDetails(
@@ -458,6 +466,7 @@ Future<DictionaryHistoryEntry> getMonolingualWordDetails({
     swipeIndex: 0,
     contextDataSource: contextDataSource,
     contextPosition: contextPosition,
+    dictionarySource: getCurrentDictionary(),
   );
 }
 
@@ -1059,6 +1068,7 @@ Future<DictionaryHistoryEntry> getCustomWordDetails(
       swipeIndex: 0,
       contextDataSource: contextDataSource,
       contextPosition: contextPosition,
+      dictionarySource: entries.first.dictionarySource,
     );
   }
 
@@ -1088,6 +1098,7 @@ Future<DictionaryHistoryEntry> getCustomWordDetails(
       swipeIndex: 0,
       contextDataSource: contextDataSource,
       contextPosition: contextPosition,
+      dictionarySource: entries.first.dictionarySource,
     );
   }
 
