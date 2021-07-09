@@ -858,11 +858,11 @@ Future<void> removeBookHistoryPosition(HistoryItemPosition bookHistory) async {
 }
 
 List<String> getDictionariesName() {
-  return gSharedPrefs.getStringList('dictionarySources') ?? [];
+  return gSharedPrefs.getStringList('importedDictionaries') ?? [];
 }
 
 Future<void> setDictionariesName(List<String> customDictionaries) async {
-  await gSharedPrefs.setStringList('dictionarySources', customDictionaries);
+  await gSharedPrefs.setStringList('importedDictionaries', customDictionaries);
 }
 
 Future<void> addDictionaryName(String customDictionary) async {

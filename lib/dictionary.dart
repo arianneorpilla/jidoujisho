@@ -465,7 +465,7 @@ class YomichanTag {
       case "archaism":
         return Colors.grey[700];
       case "dictionary":
-        return Color(0xffd46a6a);
+        return Color(0xffa15151);
       case "frequency":
         return Color(0xffd46a6a);
       case "frequent":
@@ -641,6 +641,17 @@ DictionaryEntry getEntryFromJishoResult(JishoResult result, String searchTerm) {
     word: exportTerm ?? searchTerm,
     reading: exportReadings,
     meaning: exportMeanings,
+    yomichanTermTags: [
+      YomichanTag(
+        tagName: getCurrentDictionary(),
+        frequencyName: "dictionary",
+        sortingOrder: 99999999999,
+        tagNotes:
+            "Dictionary entry imported and queried from ${getCurrentDictionary()}",
+        popularity: 0,
+        dictionarySource: getCurrentDictionary(),
+      ),
+    ],
   );
 }
 
@@ -926,6 +937,17 @@ DictionaryEntry sakuraJsonToDictionaryEntry(
     reading: reading,
     meaning: meaning,
     searchTerm: searchTerm,
+    yomichanTermTags: [
+      YomichanTag(
+        tagName: getCurrentDictionary(),
+        frequencyName: "dictionary",
+        sortingOrder: 99999999999,
+        tagNotes:
+            "Dictionary entry imported and queried from ${getCurrentDictionary()}",
+        popularity: 0,
+        dictionarySource: getCurrentDictionary(),
+      ),
+    ],
   );
 }
 
@@ -1639,6 +1661,14 @@ List<DictionaryEntry> mergeSameEntries({
     entry.popularity = entry.popularity ~/ entry.duplicateCount;
     entry.termTags = getRawTags(entry, allBoxes);
     entry.yomichanTermTags = getYomichanTermTags(entry.termTags, tagStore);
+    entry.yomichanTermTags.add(YomichanTag(
+      tagName: dictionarySource,
+      frequencyName: "dictionary",
+      sortingOrder: 99999999999,
+      tagNotes: "Dictionary entry imported and queried from $dictionarySource",
+      popularity: 0,
+      dictionarySource: dictionarySource,
+    ));
   });
 
   mergedEntries.sort((a, b) => b.yomichanDefinitionTags.length
