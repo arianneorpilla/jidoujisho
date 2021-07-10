@@ -1445,9 +1445,9 @@ class _VideoPlayerState extends State<VideoPlayer>
               onVerticalDragEnd: (details) async {
                 if (details.primaryVelocity == 0) return;
                 if (details.primaryVelocity.compareTo(0) == -1) {
-                  await setPrevDictionary();
-                } else {
                   await setNextDictionary();
+                } else {
+                  await setPrevDictionary();
                 }
               },
               child: Container(
