@@ -176,3 +176,6 @@ If you like what I've done so far, you can help me out by testing the applicatio
 
 The logo of the application is by <b><a href="https://www.buymeacoffee.com/marblesaa">Aaron Marbella</a></b>, support his awesome work if you can!
 
+# ⚖️ Licensing
+
+<a href="https://github.com/mifunetoshiro/kanjium"><b>Kanjium</b></a>: The pitch accent notation, verb particle data, phonetics, homonyms and other additions or modifications to EDICT, KANJIDIC or KRADFILE were provided by Uros O. through his free database.
