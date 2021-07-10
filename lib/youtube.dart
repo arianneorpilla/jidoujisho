@@ -123,6 +123,10 @@ Future<YouTubeMux> getPlayerYouTubeInfo(String webURL) async {
     }
 
     for (var stream in streamManifest.videoOnly.sortByBitrate()) {
+      if (!stream.videoCodec.contains("avc1")) {
+        continue;
+      }
+
       String resolutionLabel = stream.videoQualityLabel;
       if (!stream.videoQualityLabel.contains("p")) {
         resolutionLabel = stream.videoQualityLabel + "p";
