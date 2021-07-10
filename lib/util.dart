@@ -633,7 +633,7 @@ Future<List<String>> scrapeBingImages(
 
 String stripLatinCharactersFromText(String subtitleText) {
   subtitleText =
-      subtitleText.replaceAll(RegExp(r'(?![×])[A-zÀ-ú\u0160-\u0161œû]'), "○");
+      subtitleText.replaceAll(RegExp(r'(?![×])[A-zÀ-ú\u0160-\u0161œûōī]'), "○");
   subtitleText = subtitleText.replaceAll(
       RegExp(r"[-!%^&*_+|=`;'?,.\/"
           '"'
@@ -662,6 +662,9 @@ String stripLatinCharactersFromText(String subtitleText) {
     line = line.replaceAll("”", " ");
     line = line.replaceAll("—", " ");
     line = line.replaceAll("♪", " ");
+    line = line.replaceAll("「", " ");
+    line = line.replaceAll("」", " ");
+    line = line.replaceAll("‘", " ");
     line = line.replaceAll(RegExp(r"[0-9]"), " ");
     line = line.trim();
 

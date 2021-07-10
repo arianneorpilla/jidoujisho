@@ -86,6 +86,11 @@ class SubtitleTextView extends StatelessWidget {
                       Subtitle currentSubtitle = state.subtitle;
                       String subtitleText = currentSubtitle.text;
 
+                      if (getLatinFilterMode()) {
+                        subtitleText =
+                            stripLatinCharactersFromText(subtitleText);
+                      }
+
                       if (getListeningComprehensionMode()) {
                         if (comprehensionSubtitle.value == null ||
                             (widgetVisibility.value &&

@@ -72,8 +72,6 @@ void main() async {
     }
   }
 
-  print(generateFallbackTerm("原色擬似概念"));
-
   if (!getDCIMDirectory().existsSync()) {
     getDCIMDirectory().createSync(recursive: true);
   }

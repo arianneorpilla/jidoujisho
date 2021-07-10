@@ -74,6 +74,7 @@ String timedLineToSRT(Map<String, dynamic> line, int lineCount) {
   double start = double.parse(line["\@start"]);
   double duration = double.parse(line["\@dur"]);
   String text = line["\$"] ?? "";
+  text = text.replaceAll("\\\\n", "\n");
 
   String startTime = formatTimeString(start);
   String endTime = formatTimeString(start + duration);
