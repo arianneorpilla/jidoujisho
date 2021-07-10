@@ -72,6 +72,8 @@ void main() async {
     }
   }
 
+  print(generateFallbackTerm("原色擬似概念"));
+
   if (!getDCIMDirectory().existsSync()) {
     getDCIMDirectory().createSync(recursive: true);
   }
@@ -4164,7 +4166,8 @@ class _LazyResultsState extends State<LazyResults> {
 
     return LazyLoadScrollView(
       onEndOfPage: () => _loadMore(),
-      child: Scrollbar(
+      child: RawScrollbar(
+        thumbColor: Colors.grey[600],
         controller: scrollController,
         child: ListView.builder(
           controller: scrollController,
@@ -4709,7 +4712,8 @@ class _CreatorState extends State<Creator> {
               return Container(
                 child: Container(
                   color: Colors.grey[800].withOpacity(0.6),
-                  child: Scrollbar(
+                  child: RawScrollbar(
+                    thumbColor: Colors.grey[600],
                     controller: scrollController,
                     child: SingleChildScrollView(
                       controller: scrollController,
@@ -5356,7 +5360,8 @@ class _CreatorState extends State<Creator> {
           Expanded(
             child: Padding(
               padding: EdgeInsets.only(left: 8, right: 8),
-              child: Scrollbar(
+              child: RawScrollbar(
+                thumbColor: Colors.grey[600],
                 controller: scrollController,
                 child: SingleChildScrollView(
                   controller: scrollController,

@@ -128,11 +128,7 @@ String generateFallbackTerm(String searchTerm) {
     if (words.first.lemma != null && words.first.lemma != words.first.word) {
       fallbackTerm = words.first.lemma;
     } else {
-      if (words.first.word == searchTerm) {
-        fallbackTerm = words.first.word;
-      } else {
-        fallbackTerm = searchTerm;
-      }
+      fallbackTerm = words.first.word;
     }
   }
 
