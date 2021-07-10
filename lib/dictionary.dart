@@ -25,10 +25,13 @@ import 'package:jidoujisho/util.dart';
 class DictionaryEntry {
   int id;
   String dictionarySource;
+  @Index()
   String word;
+  @Index()
   String reading;
   String meaning;
   double popularity;
+  @Index()
   String searchTerm;
   List<String> termTags;
   List<String> definitionTags;
@@ -141,7 +144,7 @@ class DictionaryEntry {
     this.word = map['word'] as String;
     this.reading = map['reading'] as String;
     this.meaning = map['meaning'] as String;
-    this.popularity = jsonToDouble(map["popularity"]);
+    this.popularity = parsePopularity(map["popularity"]);
     this.searchTerm = map['searchTerm'];
     this.termTags = termTags;
     this.definitionTags = definitionTags;
@@ -415,11 +418,13 @@ class DictionaryEntry {
 @Entity()
 class YomichanTag {
   int id;
+  @Index()
   String tagName;
   String frequencyName;
   int sortingOrder;
   String tagNotes;
   int popularity;
+  @Index()
   String dictionarySource;
 
   YomichanTag({
@@ -1371,7 +1376,7 @@ Future<int> importEntries(EntryExtractParams params) async {
           word: term[0].toString(),
           reading: term[1].toString(),
           definitionTags: definitionTags,
-          popularity: jsonToDouble(term[4]),
+          popularity: parsePopularity(term[4]),
           meaning: parseMeaning(term[5]),
           termTags: termTags,
           dictionarySource: params.dictionaryName,

@@ -692,6 +692,9 @@ class BlurWidgetOptions {
   );
 }
 
-double jsonToDouble(dynamic value) {
+double parsePopularity(dynamic value) {
+  if (value == null) {
+    return 0;
+  }
   return value.toDouble();
 }

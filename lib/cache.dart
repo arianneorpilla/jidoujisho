@@ -251,7 +251,26 @@ fetchCustomDictionarySearchCache({
           contextDataSource: contextDataSource,
           contextPosition: contextPosition,
           originalSearchTerm: searchTerm,
-          fallbackTerm: searchTerm.substring(0, searchTerm.length - 1),
+          fallbackTerm: generateFallbackTerm(
+              searchTerm.substring(0, searchTerm.length - 1)),
+          entryStoreReference: storeReference,
+          tagStoreReference: gTagStore.reference,
+          allStoreReferences: getAllStoreReferences(),
+        );
+        results = await compute(getCustomWordDetails, params);
+        if (results != null) {
+          return results;
+        }
+      }
+
+      if (searchTerm.length >= 4) {
+        params = CustomWordDetailsParams(
+          searchTerm: searchTerm.substring(0, searchTerm.length - 2),
+          contextDataSource: contextDataSource,
+          contextPosition: contextPosition,
+          originalSearchTerm: searchTerm,
+          fallbackTerm: generateFallbackTerm(
+              searchTerm.substring(0, searchTerm.length - 2)),
           entryStoreReference: storeReference,
           tagStoreReference: gTagStore.reference,
           allStoreReferences: getAllStoreReferences(),

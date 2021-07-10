@@ -3862,13 +3862,13 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                         (pitchEntry != null)
                             ? getAllPitchWidgets(pitchEntry)
                             : Text(results.entries[_dialogIndex.value].reading),
-                        if (entry.entries[entry.swipeIndex].yomichanTermTags
+                        if (results.entries[_dialogIndex.value].yomichanTermTags
                             .isNotEmpty)
                           SizedBox(height: 5),
-                        if (entry.entries[entry.swipeIndex].yomichanTermTags
+                        if (results.entries[_dialogIndex.value].yomichanTermTags
                             .isNotEmpty)
                           Wrap(
-                            children: entry.entries[entry.swipeIndex]
+                            children: results.entries[_dialogIndex.value]
                                 .generateTagWidgets(context),
                           ),
                         results.entries[_dialogIndex.value]
@@ -3885,7 +3885,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                                 ),
                               ),
                               TextSpan(
-                                text: "${entry.swipeIndex + 1} ",
+                                text: "${_dialogIndex.value + 1} ",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 12,
@@ -3900,7 +3900,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                                 ),
                               ),
                               TextSpan(
-                                text: "${entry.entries.length} ",
+                                text: "${results.entries.length} ",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 12,
@@ -3941,7 +3941,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                                 ),
                               ),
                               TextSpan(
-                                text: "${entry.searchTerm}",
+                                text: "${results.searchTerm}",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 12,
