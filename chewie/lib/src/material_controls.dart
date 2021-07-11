@@ -385,7 +385,7 @@ class _MaterialControlsState extends State<MaterialControls>
               Icons.mobile_screen_share_rounded,
             ],
             highlights: highlightedIndexes,
-            invisibles: gIsTapToSelectSupported ? [1] : [3, 1],
+            invisibles: gIsTapToSelectSupported ? [1] : [1, 3],
           ),
         );
 

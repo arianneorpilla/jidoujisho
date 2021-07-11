@@ -3140,18 +3140,17 @@ class _HistoryResultState extends State<HistoryResult>
                     Navigator.pop(context);
                   },
                 ),
-                (isNetwork())
-                    ? TextButton(
-                        child: Text('CHANNEL',
-                            style: TextStyle(color: Colors.white)),
-                        onPressed: () async {
-                          channelCallback(
-                              history.channelId, history.subheading, false);
-                          Navigator.pop(context);
-                          print(history.channelId);
-                        },
-                      )
-                    : Container(),
+                if (isNetwork())
+                  TextButton(
+                    child:
+                        Text('CHANNEL', style: TextStyle(color: Colors.white)),
+                    onPressed: () async {
+                      channelCallback(
+                          history.channelId, history.subheading, false);
+                      Navigator.pop(context);
+                      print(history.channelId);
+                    },
+                  ),
                 TextButton(
                   child: Text(
                     'PLAY',
@@ -4789,7 +4788,7 @@ class _CreatorState extends State<Creator> {
         });
       },
       decoration: InputDecoration(
-        prefixIcon: Icon(Icons.image, color: Colors.white),
+        prefixIcon: Icon(Icons.image),
         suffixIcon: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
@@ -4877,8 +4876,7 @@ class _CreatorState extends State<Creator> {
           }
         },
         decoration: InputDecoration(
-          prefixIcon:
-              Icon(Icons.format_align_center_rounded, color: Colors.white),
+          prefixIcon: Icon(Icons.format_align_center_rounded),
           suffixIcon: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             mainAxisSize: MainAxisSize.min,
@@ -4891,7 +4889,7 @@ class _CreatorState extends State<Creator> {
                       showSentenceDialog(_sentenceController.text);
                     }
                   },
-                  icon: Icon(Icons.account_tree_outlined, color: Colors.white),
+                  icon: Icon(Icons.account_tree_outlined),
                 ),
               IconButton(
                 iconSize: 18,

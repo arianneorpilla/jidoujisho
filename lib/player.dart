@@ -1105,22 +1105,6 @@ class _VideoPlayerState extends State<VideoPlayer>
   }
 
   void playEmbeddedSubtitles(int index) async {
-    _currentSubtitle.value = Subtitle(
-      startTime: Duration.zero,
-      endTime: Duration.zero,
-      text: "",
-    );
-    _shadowingSubtitle.value = Subtitle(
-      startTime: Duration.zero,
-      endTime: Duration.zero,
-      text: "",
-    );
-    _comprehensionSubtitle.value = Subtitle(
-      startTime: Duration.zero,
-      endTime: Duration.zero,
-      text: "",
-    );
-
     _subTitleController.subtitleType = SubtitleType.srt;
     if (index == 99999) {
       _subTitleController.updateSubtitleContent(content: "");
@@ -1133,21 +1117,6 @@ class _VideoPlayerState extends State<VideoPlayer>
   }
 
   void playExternalSubtitles() async {
-    _currentSubtitle.value = Subtitle(
-      startTime: Duration.zero,
-      endTime: Duration.zero,
-      text: "",
-    );
-    _shadowingSubtitle.value = Subtitle(
-      startTime: Duration.zero,
-      endTime: Duration.zero,
-      text: "",
-    );
-    _comprehensionSubtitle.value = Subtitle(
-      startTime: Duration.zero,
-      endTime: Duration.zero,
-      text: "",
-    );
     _subTitleController.subtitleType = SubtitleType.srt;
 
     File result = await FilePicker.getFile(
