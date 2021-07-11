@@ -2,6 +2,7 @@ library subtitle_wrapper_package;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:subtitle_wrapper_package/bloc/subtitle/subtitle_bloc.dart';
 import 'package:subtitle_wrapper_package/data/models/subtitle.dart';
 import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
@@ -26,7 +27,7 @@ class SubTitleWrapper extends StatelessWidget {
 
   final Widget videoChild;
   final SubtitleController subtitleController;
-  final dynamic videoPlayerController;
+  final VlcPlayerController videoPlayerController;
   final SubtitleStyle subtitleStyle;
   final ValueNotifier<Subtitle> subtitleNotifier;
   final ValueNotifier<Subtitle> contextSubtitle;
@@ -74,6 +75,7 @@ class SubTitleWrapper extends StatelessWidget {
                 left: subtitleStyle.position.left,
                 right: subtitleStyle.position.right,
                 child: SubtitleTextView(
+                  videoPlayerController: videoPlayerController,
                   subtitleStyle: subtitleStyle,
                   widgetVisibility: subtitleController.widgetVisibility,
                   comprehensionSubtitle:
@@ -92,6 +94,7 @@ class SubTitleWrapper extends StatelessWidget {
                   right: subtitleStyle.position.right),
               child: Center(
                 child: SubtitleTextView(
+                  videoPlayerController: videoPlayerController,
                   subtitleStyle: subtitleStyle,
                   widgetVisibility: subtitleController.widgetVisibility,
                   comprehensionSubtitle:

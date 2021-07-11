@@ -21,6 +21,7 @@ dependencies:
   bloc: ^6.1.0
   equatable:
   flutter_bloc: ^6.1.1
+  flutter_vlc_player: ^5.0.5
   http:
   http_parser:
   ve_dart:

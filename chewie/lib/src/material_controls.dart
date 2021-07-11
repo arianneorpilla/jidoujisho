@@ -5,6 +5,7 @@ import 'package:chewie/src/chewie_player.dart';
 import 'package:chewie/src/chewie_progress_colors.dart';
 import 'package:chewie/src/material_progress_bar.dart';
 import 'package:chewie/src/player_with_controls.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:chewie/src/utils.dart';
 import 'package:flutter/material.dart';
@@ -325,11 +326,14 @@ class _MaterialControlsState extends State<MaterialControls>
         if (chewieController.shadowingSubtitle.value != null) {
           highlightedIndexes.add(0);
         }
-        if (getFocusMode()) {
+        if (chewieController.densePlaybackRepetitions.value != 0) {
           highlightedIndexes.add(1);
         }
-        if (getListeningComprehensionMode()) {
+        if (getFocusMode()) {
           highlightedIndexes.add(2);
+        }
+        if (getListeningComprehensionMode()) {
+          highlightedIndexes.add(3);
         }
 
         final chosenOption = await showModalBottomSheet<int>(
@@ -339,6 +343,7 @@ class _MaterialControlsState extends State<MaterialControls>
           builder: (context) => _MoreOptionsDialog(
             options: [
               "Shadowing Mode",
+              "Dense Playback Mode",
               "Definition Focus Mode",
               "Listening Comprehension Mode",
               if (getSelectMode())
@@ -355,6 +360,10 @@ class _MaterialControlsState extends State<MaterialControls>
             ],
             icons: [
               Icons.loop_sharp,
+              if (chewieController.densePlaybackRepetitions.value != 0)
+                Icons.flash_on
+              else
+                Icons.flash_off,
               if (getFocusMode())
                 Icons.lightbulb
               else
@@ -376,7 +385,7 @@ class _MaterialControlsState extends State<MaterialControls>
               Icons.mobile_screen_share_rounded,
             ],
             highlights: highlightedIndexes,
-            invisibles: gIsTapToSelectSupported ? [] : [3],
+            invisibles: gIsTapToSelectSupported ? [1] : [3, 1],
           ),
         );
 
@@ -385,25 +394,34 @@ class _MaterialControlsState extends State<MaterialControls>
             chewieController.toggleShadowingMode();
             break;
           case 1:
-            toggleFocusMode();
+            if (chewieController.densePlaybackRepetitions.value != 0) {
+              chewieController.densePlaybackRepetitions.value = 0;
+              setDensePlaybackRepetitions(0);
+            } else {
+              controller.pause();
+              chewieController.densePlayback();
+            }
             break;
           case 2:
-            toggleListeningComprehensionMode();
+            toggleFocusMode();
             break;
           case 3:
+            toggleListeningComprehensionMode();
+            break;
+          case 4:
             if (gIsTapToSelectSupported) {
               toggleSelectMode();
               gIsSelectMode.value = getSelectMode();
             }
             break;
-          case 4:
+          case 5:
             openDictionaryMenu(context, false);
             final String clipboardMemory = chewieController.clipboard.value;
             chewieController.clipboard.value = "";
             chewieController.setNoPush();
             chewieController.clipboard.value = clipboardMemory;
             break;
-          case 5:
+          case 6:
             bool wasPlaying =
                 chewieController.videoPlayerController.value.isPlaying;
 
@@ -420,10 +438,10 @@ class _MaterialControlsState extends State<MaterialControls>
             }
 
             break;
-          case 6:
+          case 7:
             openExtraShare();
             break;
-          case 7:
+          case 8:
             chewieController.wasPlaying.value =
                 (chewieController.videoPlayerController.value.isPlaying ||
                     chewieController.wasPlaying.value);
@@ -468,7 +486,7 @@ class _MaterialControlsState extends State<MaterialControls>
       builder: (BuildContext context) {
         return AlertDialog(
           contentPadding:
-              EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
+              EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 20),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.zero,
           ),
@@ -534,42 +552,26 @@ class _MaterialControlsState extends State<MaterialControls>
               footer: Container(
                 child: ListTile(
                   dense: true,
-                  title: Wrap(
-                    children: [
-                      Icon(Icons.info,
-                          size: 14.0, color: Colors.lightBlue[300]),
-                      const SizedBox(width: 8.0),
-                      Text(
-                        "Casting experience may ",
-                        style: TextStyle(
-                            fontSize: 14, color: Colors.lightBlue[300]),
-                      ),
-                      Text(
-                        "vary based on network ",
-                        style: TextStyle(
-                            fontSize: 14, color: Colors.lightBlue[300]),
-                      ),
-                      Text(
-                        "performance and ",
-                        style: TextStyle(
-                            fontSize: 14, color: Colors.lightBlue[300]),
-                      ),
-                      Text(
-                        "the supported formats ",
-                        style: TextStyle(
-                            fontSize: 14, color: Colors.lightBlue[300]),
-                      ),
-                      Text(
-                        "of the selected ",
-                        style: TextStyle(
-                            fontSize: 14, color: Colors.lightBlue[300]),
-                      ),
-                      Text(
-                        "display device.",
-                        style: TextStyle(
-                            fontSize: 14, color: Colors.lightBlue[300]),
-                      ),
-                    ],
+                  title: Text.rich(
+                    TextSpan(
+                      text: '',
+                      children: <InlineSpan>[
+                        WidgetSpan(
+                          child: Icon(Icons.info,
+                              size: 14.0, color: Colors.lightBlue[300]),
+                        ),
+                        WidgetSpan(
+                          child: const SizedBox(width: 4.0),
+                        ),
+                        TextSpan(
+                          text:
+                              "Casting experience may vary based on network performance and the supported formats of the selected display device.",
+                          style: TextStyle(
+                              fontSize: 14, color: Colors.lightBlue[300]),
+                        ),
+                      ],
+                    ),
+                    textAlign: TextAlign.left,
                   ),
                 ),
               ),
@@ -603,6 +605,7 @@ class _MaterialControlsState extends State<MaterialControls>
             } else {
               await controller.setAudioTrack(1);
               while (!await controller.isPlaying()) {}
+              chewieController.resetDensePlaybackRepetitions();
               await controller.seekTo(position);
             }
           });
@@ -682,6 +685,7 @@ class _MaterialControlsState extends State<MaterialControls>
               );
             }
 
+            chewieController.resetDensePlaybackRepetitions();
             await controller.seekTo(position);
           } else {
             final preferredQualityOption = await showModalBottomSheet<int>(
@@ -1033,6 +1037,9 @@ class _MaterialControlsState extends State<MaterialControls>
     final isFinished = controller.value.isEnded;
     chewieController.wasPlaying.value = false;
 
+    chewieController.comprehensionSubtitle.value =
+        chewieController.currentSubtitle.value;
+
     setState(() {
       if (controller.value.isPlaying) {
         playPauseIconAnimationController.reverse();
@@ -1078,6 +1085,7 @@ class _MaterialControlsState extends State<MaterialControls>
       child: Padding(
         padding: const EdgeInsets.only(right: 20.0),
         child: MaterialVideoProgressBar(
+          chewieController,
           controller,
           onDragStart: () {
             setState(() {
@@ -1095,10 +1103,11 @@ class _MaterialControlsState extends State<MaterialControls>
           },
           colors: chewieController.materialProgressColors ??
               ChewieProgressColors(
-                  playedColor: Theme.of(context).accentColor,
-                  handleColor: Theme.of(context).accentColor,
-                  bufferedColor: Theme.of(context).backgroundColor,
-                  backgroundColor: Theme.of(context).disabledColor),
+                playedColor: Theme.of(context).accentColor,
+                handleColor: Theme.of(context).accentColor,
+                bufferedColor: Theme.of(context).backgroundColor,
+                backgroundColor: Theme.of(context).disabledColor,
+              ),
         ),
       ),
     );
@@ -1293,7 +1302,15 @@ class _MoreOptionsDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ScrollController _scrollController = ScrollController();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _scrollController.jumpTo(
+        _scrollController.position.maxScrollExtent,
+      );
+    });
+
     return ListView.builder(
+      controller: _scrollController,
       shrinkWrap: true,
       physics: const ScrollPhysics(),
       itemCount: options.length,
@@ -1434,7 +1451,15 @@ class _SelectAudioDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ScrollController _scrollController = ScrollController();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _scrollController.jumpTo(
+        _scrollController.position.maxScrollExtent,
+      );
+    });
+
     return ListView.builder(
+      controller: _scrollController,
       shrinkWrap: true,
       physics: const ScrollPhysics(),
       itemBuilder: (context, index) {

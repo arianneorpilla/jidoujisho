@@ -307,19 +307,24 @@ reader.addEventListener('touchstart', (e) => {
                 readerExport = readerExport.replaceAll("　", " ");
                 print(readerExport);
 
+                clearSelection();
+
                 stopClipboardMonitor();
-                Navigator.push(
+                await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => Home(readerExport: readerExport),
                   ),
                 ).then((result) {
                   SystemChrome.setEnabledSystemUIOverlays([]);
-                  _clipboard.value = "";
+                  if (result != null && result) {
+                    _clipboard.value = "&<&>exported&<&>";
+                    Future.delayed(Duration(seconds: 2), () {
+                      _clipboard.value = "";
+                    });
+                  }
                   startClipboardMonitor();
                 });
-
-                clearSelection();
               }),
         ],
         onCreateContextMenu: (result) {
@@ -768,17 +773,43 @@ reader.addEventListener('touchstart', (e) => {
   }
 
   Widget buildDictionaryExported(String clipboard) {
-    String deckName = clipboard.substring(12, clipboard.length - 4);
-    String lookupText = "Card exported to \"$deckName\".";
-
     return Column(
       children: [
         Padding(
           padding: EdgeInsets.all(16.0),
           child: Container(
             padding: EdgeInsets.all(16.0),
-            color: Colors.grey[600].withOpacity(0.97),
-            child: Text(lookupText),
+            color: Colors.grey[800].withOpacity(0.6),
+            child: Text.rich(
+              TextSpan(
+                text: '',
+                children: <InlineSpan>[
+                  TextSpan(
+                    text: "Card exported to",
+                  ),
+                  TextSpan(
+                    text: "『",
+                    style: TextStyle(
+                      color: Colors.grey[300],
+                    ),
+                  ),
+                  TextSpan(
+                    text: getLastDeck(),
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  TextSpan(
+                    text: "』",
+                    style: TextStyle(
+                      color: Colors.grey[300],
+                    ),
+                  ),
+                  TextSpan(
+                    text: "deck.",
+                  ),
+                ],
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
         ),
         Expanded(child: Container()),
@@ -1172,7 +1203,7 @@ reader.addEventListener('touchstart', (e) => {
                 if (_clipboard.value == "&<&>netsubsbad&<&>") {
                   return buildDictionaryNetworkSubtitlesBad(clipboard);
                 }
-                if (_clipboard.value.startsWith("&<&>exported")) {
+                if (_clipboard.value == "&<&>exported&<&>") {
                   return buildDictionaryExported(clipboard);
                 }
                 if (_clipboard.value == "") {

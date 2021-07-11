@@ -1684,7 +1684,26 @@ List<DictionaryEntry> mergeSameEntries({
       (getTagCount(b.yomichanTermTags) + b.duplicateCount * 0.3)
           .compareTo(getTagCount(a.yomichanTermTags) + a.duplicateCount * 0.3));
 
-  return mergedEntries;
+  List<DictionaryEntry> exactFirstEntries = [];
+  mergedEntries.forEach((entry) {
+    if (entry.word == params.searchTerm) {
+      exactFirstEntries.add(entry);
+    }
+  });
+  if (params.fallbackTerm != params.searchTerm) {
+    mergedEntries.forEach((entry) {
+      if (entry.word == params.fallbackTerm) {
+        exactFirstEntries.add(entry);
+      }
+    });
+  }
+  mergedEntries.forEach((entry) {
+    if (entry.word != params.searchTerm && entry.word != params.fallbackTerm) {
+      exactFirstEntries.add(entry);
+    }
+  });
+
+  return exactFirstEntries;
 }
 
 int getPopularitySum(List<YomichanTag> tags) {

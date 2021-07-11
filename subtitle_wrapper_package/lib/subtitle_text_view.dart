@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:jidoujisho/preferences.dart';
 import 'package:jidoujisho/util.dart';
 import 'package:subtitle_wrapper_package/bloc/subtitle/subtitle_bloc.dart';
@@ -12,6 +13,7 @@ import 'package:ve_dart/ve_dart.dart';
 import 'package:jidoujisho/globals.dart';
 
 class SubtitleTextView extends StatelessWidget {
+  final VlcPlayerController videoPlayerController;
   final SubtitleStyle subtitleStyle;
   final ValueNotifier<bool> widgetVisibility;
   final ValueNotifier<Subtitle> comprehensionSubtitle;
@@ -22,6 +24,7 @@ class SubtitleTextView extends StatelessWidget {
 
   const SubtitleTextView({
     Key key,
+    @required this.videoPlayerController,
     @required this.subtitleStyle,
     @required this.widgetVisibility,
     @required this.comprehensionSubtitle,
@@ -103,7 +106,10 @@ class SubtitleTextView extends StatelessWidget {
                           if (widgetVisibility.value) {
                             widgetVisibility.value = false;
                           }
-                          return Container();
+
+                          if (videoPlayerController.value.isPlaying) {
+                            return Container();
+                          }
                         }
                       }
 

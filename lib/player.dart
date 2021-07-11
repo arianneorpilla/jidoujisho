@@ -367,6 +367,8 @@ class _VideoPlayerState extends State<VideoPlayer>
   );
   ValueNotifier<bool> isCasting = ValueNotifier<bool>(false);
   ValueNotifier<int> _audioAllowance = ValueNotifier<int>(getAudioAllowance());
+  ValueNotifier<int> _densePlaybackRepetitions =
+      ValueNotifier<int>(getDensePlaybackRepetitions());
   ValueNotifier<double> _fontSize = ValueNotifier<double>(getFontSize());
   List<String> recursiveTerms = [];
   bool noPush = false;
@@ -374,6 +376,7 @@ class _VideoPlayerState extends State<VideoPlayer>
   Timer durationTimer;
   Timer visibilityTimer;
   int initialSubTrack;
+  int densePlaybackRepetitionsLeft = getDensePlaybackRepetitions();
 
   @override
   void initState() {
@@ -444,9 +447,15 @@ class _VideoPlayerState extends State<VideoPlayer>
     }
   }
 
+  void resetDensePlaybackRepetitions() {
+    densePlaybackRepetitionsLeft = _densePlaybackRepetitions.value;
+  }
+
   Future<void> rewindFastForward() async {
-    await getVideoPlayerController().seekTo(_currentSubtitle.value.startTime +
-        Duration(milliseconds: _subTitleController.subtitlesOffset));
+    resetDensePlaybackRepetitions();
+    await getVideoPlayerController().seekTo(
+      getRewindWithDelayAndAllowance(_currentSubtitle.value),
+    );
   }
 
   @override
@@ -525,6 +534,41 @@ class _VideoPlayerState extends State<VideoPlayer>
                 _shadowingSubtitle.value.endTime.inMilliseconds) {
           getVideoPlayerController()
               .seekTo(getRewindWithDelayAndAllowance(_shadowingSubtitle.value));
+        }
+      } else if (_densePlaybackRepetitions.value != 0) {
+        if (_currentSubtitle.value ==
+            Subtitle(
+                startTime: Duration.zero, endTime: Duration.zero, text: "")) {
+          _currentSubtitle.value =
+              _subTitleController.subtitleBloc.subtitles.subtitles.first;
+        }
+
+        if (getVideoPlayerController().value.position.inMilliseconds +
+                    _audioAllowance.value -
+                    getSubtitleController().subtitlesOffset <
+                _currentSubtitle.value.startTime.inMilliseconds - 10000 ||
+            getVideoPlayerController().value.position.inMilliseconds -
+                    _audioAllowance.value -
+                    getSubtitleController().subtitlesOffset >
+                _currentSubtitle.value.endTime.inMilliseconds) {
+          densePlaybackRepetitionsLeft -= 1;
+
+          if (densePlaybackRepetitionsLeft == 0) {
+            resetDensePlaybackRepetitions();
+            Subtitle nextSubtitle = _currentSubtitle.value.nextSubtitle;
+            if (nextSubtitle != null) {
+              _currentSubtitle.value = nextSubtitle;
+              if ((nextSubtitle.startTime.inSeconds -
+                          _currentSubtitle.value.endTime.inSeconds)
+                      .abs() >
+                  1)
+                getVideoPlayerController()
+                    .seekTo(getRewindWithDelayAndAllowance(nextSubtitle));
+            }
+          } else {
+            getVideoPlayerController()
+                .seekTo(getRewindWithDelayAndAllowance(_currentSubtitle.value));
+          }
         }
       }
 
@@ -672,6 +716,7 @@ class _VideoPlayerState extends State<VideoPlayer>
     _comprehensionSubtitle.value = _currentSubtitle.value;
     getSubtitleController().widgetVisibility.value = true;
 
+    resetDensePlaybackRepetitions();
     getVideoPlayerController().seekTo(
       getRewindWithDelayAndAllowance(getExportSubtitle()),
     );
@@ -881,6 +926,92 @@ class _VideoPlayerState extends State<VideoPlayer>
     }
   }
 
+  void densePlayback() async {
+    String defaultRepetitions = getDensePlaybackRepetitions().toString();
+    if (getDensePlaybackRepetitions() == 0) {
+      defaultRepetitions = "1";
+    }
+    TextEditingController _repetitionsController =
+        TextEditingController(text: defaultRepetitions);
+
+    void setValues(bool remember) {
+      String repetitionsText = _repetitionsController.text;
+      int newRepetitions = int.tryParse(repetitionsText);
+
+      if (repetitionsText != null && newRepetitions >= 1) {
+        _densePlaybackRepetitions.value = newRepetitions;
+        resetDensePlaybackRepetitions();
+
+        if (remember) {
+          setDensePlaybackRepetitions(newRepetitions);
+        }
+
+        Navigator.pop(context);
+      }
+    }
+
+    _chewieController.wasPlaying.value =
+        _videoPlayerController.value.isPlaying ||
+            _chewieController.wasPlaying.value;
+
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.zero,
+            ),
+            content: SingleChildScrollView(
+              child: Container(
+                width: MediaQuery.of(context).size.width * (1 / 3),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: _repetitionsController,
+                      keyboardType: TextInputType.numberWithOptions(
+                        signed: false,
+                        decimal: false,
+                      ),
+                      maxLines: 1,
+                      decoration: InputDecoration(
+                          labelText: "Number of repetitions",
+                          hintText: "Enter number of repetitions",
+                          suffixText: " repetitions"),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text('CANCEL', style: TextStyle(color: Colors.white)),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              TextButton(
+                child: Text('SET AND REMEMBER',
+                    style: TextStyle(color: Colors.white)),
+                onPressed: () {
+                  setValues(true);
+                },
+              ),
+              TextButton(
+                child: Text('SET', style: TextStyle(color: Colors.white)),
+                onPressed: () {
+                  setValues(false);
+                },
+              ),
+            ],
+          );
+        }).then((result) {
+      if (_wasPlaying.value) {
+        _videoPlayerController.play();
+      }
+    });
+  }
+
   ChewieController getChewieController() {
     _chewieController ??= ChewieController(
       videoPlayerController: getVideoPlayerController(),
@@ -892,6 +1023,9 @@ class _VideoPlayerState extends State<VideoPlayer>
       currentSubTrack: _currentSubTrack,
       currentAudioTrack: _currentAudioTrack,
       wasPlaying: _wasPlaying,
+      densePlayback: densePlayback,
+      densePlaybackRepetitions: _densePlaybackRepetitions,
+      resetDensePlaybackRepetitions: resetDensePlaybackRepetitions,
       playExternalSubtitles: playExternalSubtitles,
       retimeSubtitles: retimeSubtitles,
       exportSingleCallback: exportSingleCallback,
@@ -971,6 +1105,22 @@ class _VideoPlayerState extends State<VideoPlayer>
   }
 
   void playEmbeddedSubtitles(int index) async {
+    _currentSubtitle.value = Subtitle(
+      startTime: Duration.zero,
+      endTime: Duration.zero,
+      text: "",
+    );
+    _shadowingSubtitle.value = Subtitle(
+      startTime: Duration.zero,
+      endTime: Duration.zero,
+      text: "",
+    );
+    _comprehensionSubtitle.value = Subtitle(
+      startTime: Duration.zero,
+      endTime: Duration.zero,
+      text: "",
+    );
+
     _subTitleController.subtitleType = SubtitleType.srt;
     if (index == 99999) {
       _subTitleController.updateSubtitleContent(content: "");
@@ -983,6 +1133,21 @@ class _VideoPlayerState extends State<VideoPlayer>
   }
 
   void playExternalSubtitles() async {
+    _currentSubtitle.value = Subtitle(
+      startTime: Duration.zero,
+      endTime: Duration.zero,
+      text: "",
+    );
+    _shadowingSubtitle.value = Subtitle(
+      startTime: Duration.zero,
+      endTime: Duration.zero,
+      text: "",
+    );
+    _comprehensionSubtitle.value = Subtitle(
+      startTime: Duration.zero,
+      endTime: Duration.zero,
+      text: "",
+    );
     _subTitleController.subtitleType = SubtitleType.srt;
 
     File result = await FilePicker.getFile(
@@ -1388,9 +1553,6 @@ class _VideoPlayerState extends State<VideoPlayer>
   }
 
   Widget buildDictionaryExported(String clipboard) {
-    String deckName = clipboard.substring(12, clipboard.length - 4);
-    String lookupText = "Card exported to \"$deckName\".";
-
     return Column(
       children: [
         Padding(
@@ -1398,7 +1560,36 @@ class _VideoPlayerState extends State<VideoPlayer>
           child: Container(
             padding: EdgeInsets.all(16.0),
             color: Colors.grey[800].withOpacity(0.6),
-            child: Text(lookupText),
+            child: Text.rich(
+              TextSpan(
+                text: '',
+                children: <InlineSpan>[
+                  TextSpan(
+                    text: "Card exported to",
+                  ),
+                  TextSpan(
+                    text: "『",
+                    style: TextStyle(
+                      color: Colors.grey[300],
+                    ),
+                  ),
+                  TextSpan(
+                    text: getLastDeck(),
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  TextSpan(
+                    text: "』",
+                    style: TextStyle(
+                      color: Colors.grey[300],
+                    ),
+                  ),
+                  TextSpan(
+                    text: "deck.",
+                  ),
+                ],
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
         ),
         Expanded(child: Container()),
@@ -1814,7 +2005,7 @@ class _VideoPlayerState extends State<VideoPlayer>
                 if (_clipboard.value == "&<&>netsubsbad&<&>") {
                   return buildDictionaryNetworkSubtitlesBad(clipboard);
                 }
-                if (_clipboard.value.startsWith("&<&>exported")) {
+                if (_clipboard.value == "&<&>exported&<&>") {
                   return buildDictionaryExported(clipboard);
                 }
                 if (_clipboard.value == "") {
@@ -1995,8 +2186,13 @@ class _VideoPlayerState extends State<VideoPlayer>
             ),
             onTap: () {
               Navigator.pop(context);
-              _videoPlayerController.seekTo(subtitles[index].startTime +
-                  Duration(milliseconds: _subTitleController.subtitlesOffset));
+
+              resetDensePlaybackRepetitions();
+              _currentSubtitle.value = subtitles[index];
+              getVideoPlayerController().seekTo(
+                getRewindWithDelayAndAllowance(subtitles[index]),
+              );
+
               _videoPlayerController.play();
 
               if (_shadowingSubtitle.value != null) {

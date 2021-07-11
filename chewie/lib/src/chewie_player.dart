@@ -222,10 +222,13 @@ class ChewieController extends ChangeNotifier {
     @required this.wasPlaying,
     @required this.playExternalSubtitles,
     @required this.retimeSubtitles,
+    @required this.densePlayback,
+    @required this.resetDensePlaybackRepetitions,
     @required this.exportSingleCallback,
     @required this.toggleShadowingMode,
     @required this.shadowingSubtitle,
     @required this.comprehensionSubtitle,
+    @required this.densePlaybackRepetitions,
     @required this.audioAllowance,
     @required this.setNoPush,
     @required this.isCasting,
@@ -277,12 +280,15 @@ class ChewieController extends ChangeNotifier {
   final ValueNotifier<bool> wasPlaying;
   final VoidCallback playExternalSubtitles;
   final VoidCallback retimeSubtitles;
+  final VoidCallback densePlayback;
+  final VoidCallback resetDensePlaybackRepetitions;
   final VoidCallback exportSingleCallback;
   final VoidCallback setNoPush;
   final VoidCallback toggleShadowingMode;
   final ValueNotifier<Subtitle> shadowingSubtitle;
   final ValueNotifier<Subtitle> comprehensionSubtitle;
   final ValueNotifier<int> audioAllowance;
+  final ValueNotifier<int> densePlaybackRepetitions;
   final YouTubeMux streamData;
   final String streamUrl;
   final ValueNotifier<bool> isCasting;

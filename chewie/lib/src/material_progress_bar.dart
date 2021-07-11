@@ -1,3 +1,4 @@
+import 'package:chewie/src/chewie_player.dart';
 import 'package:chewie/src/chewie_progress_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -5,6 +6,7 @@ import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 
 class MaterialVideoProgressBar extends StatefulWidget {
   MaterialVideoProgressBar(
+    this.chewieController,
     this.controller, {
     ChewieProgressColors colors,
     this.onDragEnd,
@@ -14,6 +16,7 @@ class MaterialVideoProgressBar extends StatefulWidget {
   })  : colors = colors ?? ChewieProgressColors(),
         super(key: key);
 
+  final ChewieController chewieController;
   final VlcPlayerController controller;
   final ChewieProgressColors colors;
   final Function() onDragStart;
@@ -37,6 +40,7 @@ class _VideoProgressBarState extends State<MaterialVideoProgressBar> {
   VoidCallback listener;
   bool _controllerWasPlaying = false;
 
+  ChewieController get chewieController => widget.chewieController;
   VlcPlayerController get controller => widget.controller;
 
   @override
@@ -62,6 +66,7 @@ class _VideoProgressBarState extends State<MaterialVideoProgressBar> {
       final Offset tapPos = box.globalToLocal(globalPosition);
       final double relative = tapPos.dx / box.size.width;
       final Duration position = controller.value.duration * relative;
+      chewieController.resetDensePlaybackRepetitions();
       controller.seekTo(position);
     }
 

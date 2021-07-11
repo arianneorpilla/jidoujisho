@@ -164,7 +164,7 @@ class SubtitleDataRepository extends SubtitleRepository {
     }
 
     var matches = regExp.allMatches(subtitlesContent).toList();
-    var subtitleList = [];
+    List<Subtitle> subtitleList = [];
 
     matches.forEach((RegExpMatch regExpMatch) {
       var startTimeHours = int.parse(regExpMatch.group(2));
@@ -300,6 +300,11 @@ class SubtitleDataRepository extends SubtitleRepository {
           secondLastSubtitle.startTime.inMilliseconds) {
         subtitleList.remove(lastSubtitle);
       }
+    }
+
+    for (int i = 0; i < subtitleList.length - 1; i++) {
+      Subtitle subtitle = subtitleList[i];
+      subtitle.nextSubtitle = subtitleList[i + 1];
     }
 
     var subtitles = Subtitles(subtitles: subtitleList);

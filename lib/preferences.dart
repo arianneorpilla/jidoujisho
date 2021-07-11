@@ -355,6 +355,15 @@ bool getListeningComprehensionMode() {
   return gSharedPrefs.getBool("listeningComprehensionMode") ?? false;
 }
 
+Future<void> setDensePlaybackRepetitions(int densePlaybackRepetitions) async {
+  await gSharedPrefs.setInt(
+      "densePlaybackRepetitions", densePlaybackRepetitions);
+}
+
+int getDensePlaybackRepetitions() {
+  return gSharedPrefs.getInt("densePlaybackRepetitions") ?? 0;
+}
+
 bool getResumeAvailable() {
   String lastPlayedPath = getLastPlayedPath();
   return lastPlayedPath != "-1";

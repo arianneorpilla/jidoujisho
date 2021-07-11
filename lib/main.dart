@@ -5332,7 +5332,7 @@ class _CreatorState extends State<Creator> {
                           MinimizeApp.minimizeApp();
                           resetMenu();
                         } else if (isReaderExport) {
-                          Navigator.pop(context);
+                          Navigator.pop(context, true);
                         } else {
                           Future.delayed(Duration(seconds: 2), () {
                             _justExported.value = false;

@@ -557,7 +557,7 @@ void showAnkiDialog(
 
               Navigator.pop(context);
 
-              clipboard.value = "&<&>exported${_selectedDeck.value}&<&>";
+              clipboard.value = "&<&>exported&<&>";
               Future.delayed(Duration(seconds: 2), () {
                 clipboard.value = "";
               });
