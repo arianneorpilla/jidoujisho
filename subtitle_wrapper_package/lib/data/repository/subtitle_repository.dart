@@ -155,7 +155,7 @@ class SubtitleDataRepository extends SubtitleRepository {
       );
     } else if (subtitleType == SubtitleType.srt) {
       regExp = RegExp(
-        r'((\d{2}):(\d{2}):(\d{2})\,(\d+)) +--> +((\d{2}):(\d{2}):(\d{2})\,(\d{3})).*[\r\n]+\s*(^[\s\S]*?(?=\n{2,}))',
+        r'((\d{2}):(\d{2}):(\d{2})\,(\d+)) +--> +((\d{2}):(\d{2}):(\d{2})\,(\d{3})).*[\r\n]+\s*(.*(?:\r?\n(?!\r?\n).*)*)',
         caseSensitive: false,
         multiLine: true,
       );
@@ -164,6 +164,7 @@ class SubtitleDataRepository extends SubtitleRepository {
     }
 
     var matches = regExp.allMatches(subtitlesContent).toList();
+    print(matches);
     List<Subtitle> subtitleList = [];
 
     matches.forEach((RegExpMatch regExpMatch) {
@@ -194,6 +195,7 @@ class SubtitleDataRepository extends SubtitleRepository {
     });
 
     for (var i = 1; i < subtitleList.length; i++) {
+      print(subtitleList[i].text);
       var previousSubtitle = subtitleList[i - 1];
       var currentSubtitle = subtitleList[i];
 
