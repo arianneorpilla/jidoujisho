@@ -4889,7 +4889,10 @@ class _CreatorState extends State<Creator> {
                       showSentenceDialog(_sentenceController.text);
                     }
                   },
-                  icon: Icon(Icons.account_tree_outlined),
+                  icon: Icon(
+                    Icons.account_tree_outlined,
+                    color: Colors.white,
+                  ),
                 ),
               IconButton(
                 iconSize: 18,
@@ -4899,7 +4902,10 @@ class _CreatorState extends State<Creator> {
                     _isReader.value = false;
                   });
                 },
-                icon: Icon(Icons.clear, color: Colors.white),
+                icon: Icon(
+                  Icons.clear,
+                  color: Colors.white,
+                ),
               ),
             ],
           ),

@@ -786,6 +786,7 @@ class _VideoPlayerState extends State<VideoPlayer>
       _audioAllowance.value,
       getSubtitleController().subtitlesOffset,
       _failureMetadata,
+      _regexFilter.value,
     );
   }
 
@@ -829,6 +830,7 @@ class _VideoPlayerState extends State<VideoPlayer>
       _audioAllowance.value,
       getSubtitleController().subtitlesOffset,
       _failureMetadata,
+      _regexFilter.value,
     );
   }
 
@@ -1520,6 +1522,7 @@ class _VideoPlayerState extends State<VideoPlayer>
                 metadata.audioAllowance,
                 metadata.subtitleDelay,
                 _failureMetadata,
+                _regexFilter.value,
               );
 
               _failureMetadata.value = null;

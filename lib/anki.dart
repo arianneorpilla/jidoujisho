@@ -196,6 +196,7 @@ Future exportToAnki(
   int audioAllowance,
   int subtitleDelay,
   ValueNotifier<AnkiExportMetadata> failureMetadata,
+  String regexFilter,
 ) async {
   String lastDeck = getLastDeck();
 
@@ -231,9 +232,14 @@ Future exportToAnki(
     );
     clipboard.value = "";
 
+    String sentence = subtitle.text;
+    if (regexFilter.isNotEmpty) {
+      sentence = sentence.replaceAll(RegExp(regexFilter), "");
+    }
+
     showAnkiDialog(
       context,
-      subtitle.text,
+      sentence,
       dictionaryEntry,
       decks,
       lastDeck,
