@@ -271,10 +271,12 @@ reader.addEventListener('touchstart', (e) => {
               title: "Search",
               action: () async {
                 emptyStack();
-                _clipboard.value = (await webViewController.getSelectedText())
+                String toCopy = (await webViewController.getSelectedText())
                         .replaceAll("\\n", "\n")
                         .trim() ??
                     "";
+
+                Clipboard.setData(ClipboardData(text: toCopy));
                 clearSelection();
               }),
           ContextMenuItem(
@@ -322,6 +324,8 @@ reader.addEventListener('touchstart', (e) => {
                     Future.delayed(Duration(seconds: 2), () {
                       _clipboard.value = "";
                     });
+                  } else {
+                    _clipboard.value = "";
                   }
                   startClipboardMonitor();
                 });
@@ -442,6 +446,7 @@ reader.addEventListener('touchstart', (e) => {
 
                         clearSelection();
                         _clipboard.value = searchTerm;
+                        Clipboard.setData(ClipboardData(text: searchTerm));
                       } catch (e) {
                         clearSelection();
                         emptyStack();
