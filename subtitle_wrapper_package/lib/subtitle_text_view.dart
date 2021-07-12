@@ -93,8 +93,9 @@ class SubtitleTextView extends StatelessWidget {
                       String subtitleText = currentSubtitle.text;
 
                       if (regexFilter.value.isNotEmpty) {
-                        subtitleText = subtitleText.replaceAll(
-                            RegExp(regexFilter.value), "");
+                        subtitleText = subtitleText
+                            .replaceAll(RegExp(regexFilter.value), "")
+                            .trim();
                       }
 
                       if (getLatinFilterMode()) {

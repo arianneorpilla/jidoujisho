@@ -234,7 +234,7 @@ Future exportToAnki(
 
     String sentence = subtitle.text;
     if (regexFilter.isNotEmpty) {
-      sentence = sentence.replaceAll(RegExp(regexFilter), "");
+      sentence = sentence.replaceAll(RegExp(regexFilter), "").trim();
     }
 
     showAnkiDialog(

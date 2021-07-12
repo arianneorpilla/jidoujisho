@@ -2139,6 +2139,10 @@ class _VideoPlayerState extends State<VideoPlayer>
           if (getLatinFilterMode()) {
             subtitleText = stripLatinCharactersFromText(subtitleText);
           }
+          if (_regexFilter.value.isNotEmpty) {
+            subtitleText =
+                subtitleText.replaceAll(RegExp(_regexFilter.value), "").trim();
+          }
           if (subtitleText.trim().isNotEmpty) {
             subtitleText = "『 $subtitleText 』";
           }
@@ -2220,8 +2224,18 @@ class _VideoPlayerState extends State<VideoPlayer>
               String selectedText = "";
               String removeLastNewline(String n) =>
                   n = n.substring(0, n.length - 1);
-              selectedSubtitles
-                  .forEach((subtitle) => selectedText += subtitle.text + "\n");
+
+              if (_regexFilter.value.isNotEmpty) {
+                selectedSubtitles.forEach((subtitle) => selectedText += subtitle
+                        .text
+                        .replaceAll(RegExp(_regexFilter.value), "")
+                        .trim() +
+                    "\n");
+              } else {
+                selectedSubtitles.forEach(
+                    (subtitle) => selectedText += subtitle.text + "\n");
+              }
+
               selectedText = removeLastNewline(selectedText);
 
               Duration selectedStartTime = selectedSubtitles.first.startTime;
