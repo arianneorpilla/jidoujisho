@@ -403,6 +403,14 @@ double getFontSize() {
   return gSharedPrefs.getDouble("fontSize") ?? 24;
 }
 
+Future<void> setRegExFilter(String regexFilter) async {
+  await gSharedPrefs.setString("regexFilter", regexFilter);
+}
+
+String getRegExFilter() {
+  return gSharedPrefs.getString("regexFilter") ?? "";
+}
+
 Future<void> setSubtitleDelay(int ms) async {
   await gSharedPrefs.setInt("subtitleDelay", ms);
 }

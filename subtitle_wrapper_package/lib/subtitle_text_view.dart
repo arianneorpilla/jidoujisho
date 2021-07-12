@@ -21,6 +21,7 @@ class SubtitleTextView extends StatelessWidget {
   final VoidCallback emptyStack;
   final FocusNode focusNode;
   final ValueNotifier<double> fontSize;
+  final ValueNotifier<String> regexFilter;
 
   const SubtitleTextView({
     Key key,
@@ -32,6 +33,7 @@ class SubtitleTextView extends StatelessWidget {
     @required this.focusNode,
     @required this.emptyStack,
     @required this.fontSize,
+    @required this.regexFilter,
   }) : super(key: key);
 
   Widget getOutlineText(Word word) {
@@ -86,8 +88,14 @@ class SubtitleTextView extends StatelessWidget {
                       if (!visible) {
                         return Container();
                       }
+
                       Subtitle currentSubtitle = state.subtitle;
                       String subtitleText = currentSubtitle.text;
+
+                      if (regexFilter.value.isNotEmpty) {
+                        subtitleText = subtitleText.replaceAll(
+                            RegExp(regexFilter.value), "");
+                      }
 
                       if (getLatinFilterMode()) {
                         subtitleText =
@@ -128,7 +136,7 @@ class SubtitleTextView extends StatelessWidget {
     );
   }
 
-  Widget dragToSelectWidget(String subtitleText) {
+  StatelessWidget dragToSelectWidget(String subtitleText) {
     return Container(
       child: Stack(
         children: <Widget>[
@@ -174,7 +182,7 @@ class SubtitleTextView extends StatelessWidget {
     );
   }
 
-  Widget tapToSelectWidget(
+  StatelessWidget tapToSelectWidget(
       BuildContext context, String subtitleText, Subtitle currentSubtitle) {
     String processedSubtitles;
     processedSubtitles = subtitleText.replaceAll('\n', '␜');

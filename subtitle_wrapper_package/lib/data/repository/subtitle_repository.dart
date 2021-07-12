@@ -304,11 +304,6 @@ class SubtitleDataRepository extends SubtitleRepository {
       }
     }
 
-    for (int i = 0; i < subtitleList.length - 1; i++) {
-      Subtitle subtitle = subtitleList[i];
-      subtitle.nextSubtitle = subtitleList[i + 1];
-    }
-
     var subtitles = Subtitles(subtitles: subtitleList);
     return subtitles;
   }

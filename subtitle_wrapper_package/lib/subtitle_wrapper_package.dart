@@ -22,6 +22,7 @@ class SubTitleWrapper extends StatelessWidget {
     @required this.emptyStack,
     @required this.isCasting,
     @required this.fontSize,
+    @required this.regexFilter,
     this.subtitleStyle = const SubtitleStyle(),
   }) : super(key: key);
 
@@ -35,6 +36,7 @@ class SubTitleWrapper extends StatelessWidget {
   final FocusNode focusNode;
   final VoidCallback emptyStack;
   final ValueNotifier<double> fontSize;
+  final ValueNotifier<String> regexFilter;
 
   @override
   Widget build(BuildContext context) {
@@ -84,6 +86,7 @@ class SubTitleWrapper extends StatelessWidget {
                   focusNode: focusNode,
                   emptyStack: emptyStack,
                   fontSize: fontSize,
+                  regexFilter: regexFilter,
                 ),
               ),
             );
@@ -103,6 +106,7 @@ class SubTitleWrapper extends StatelessWidget {
                   focusNode: focusNode,
                   emptyStack: emptyStack,
                   fontSize: fontSize,
+                  regexFilter: regexFilter,
                 ),
               ),
             );

@@ -21,11 +21,16 @@ class PlayerWithControls extends StatelessWidget {
       return const MaterialControls();
     }
 
+    double height = MediaQuery.of(context).size.height;
+    double width = MediaQuery.of(context).size.width;
+
     return Stack(
       children: <Widget>[
         chewieController.placeholder ?? Container(),
         Center(
-          child: SizedBox.expand(
+          child: SizedBox(
+            height: height,
+            width: width,
             child: VlcPlayer(
               controller: chewieController.videoPlayerController,
               aspectRatio: chewieController.aspectRatio,

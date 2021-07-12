@@ -370,6 +370,7 @@ class _VideoPlayerState extends State<VideoPlayer>
   ValueNotifier<int> _densePlaybackRepetitions =
       ValueNotifier<int>(getDensePlaybackRepetitions());
   ValueNotifier<double> _fontSize = ValueNotifier<double>(getFontSize());
+  ValueNotifier<String> _regexFilter = ValueNotifier<String>(getRegExFilter());
   List<String> recursiveTerms = [];
   bool noPush = false;
 
@@ -1084,6 +1085,7 @@ class _VideoPlayerState extends State<VideoPlayer>
         fontSize: 24,
       ),
       fontSize: _fontSize,
+      regexFilter: _regexFilter,
       isCasting: isCasting,
       videoChild: FutureBuilder(
         future: getVideoPlayerController().initialize(),
@@ -1145,6 +1147,8 @@ class _VideoPlayerState extends State<VideoPlayer>
         TextEditingController(text: _audioAllowance.value.toString());
     TextEditingController _fontSizeController =
         TextEditingController(text: _fontSize.value.toString());
+    TextEditingController _regexFilterController =
+        TextEditingController(text: _regexFilter.value.trim());
 
     void setValues(bool remember) {
       String offsetText = _offsetController.text;
@@ -1156,17 +1160,24 @@ class _VideoPlayerState extends State<VideoPlayer>
       String fontSizeText = _fontSizeController.text;
       double newFontSize = double.tryParse(fontSizeText);
 
-      if (newOffset != null && newAllowance != null && fontSizeText != null) {
+      String newRegexFilter = _regexFilterController.text.trim();
+
+      if (newOffset != null &&
+          newAllowance != null &&
+          newFontSize != null &&
+          RegExp(newRegexFilter) != null) {
         getSubtitleController().subtitlesOffset = newOffset;
         getSubtitleController().updateSubtitleContent(
             content: getSubtitleController().subtitlesContent);
         _audioAllowance.value = newAllowance;
         _fontSize.value = newFontSize;
+        _regexFilter.value = newRegexFilter;
 
         if (remember) {
           setSubtitleDelay(newOffset);
           setAudioAllowance(newAllowance);
           setFontSize(newFontSize);
+          setRegExFilter(newRegexFilter);
         }
 
         Navigator.pop(context);
@@ -1225,6 +1236,15 @@ class _VideoPlayerState extends State<VideoPlayer>
                           labelText: "Font size",
                           hintText: "Enter font size",
                           suffixText: " px"),
+                    ),
+                    TextField(
+                      controller: _regexFilterController,
+                      keyboardType: TextInputType.text,
+                      maxLines: 1,
+                      decoration: InputDecoration(
+                        labelText: "Regular expression filter",
+                        hintText: "Enter regular expression filter",
+                      ),
                     ),
                   ],
                 ),
