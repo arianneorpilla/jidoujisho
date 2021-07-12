@@ -100,17 +100,7 @@ class ReaderState extends State<Reader> {
   }
 
   void onClipboardText(String text) {
-    text = text.trim();
-    _volatileText = text.trim();
-
-    Future.delayed(
-        text.length == 1
-            ? Duration(milliseconds: 1000)
-            : Duration(milliseconds: 500), () {
-      if (_volatileText.trim() == text.trim()) {
-        _clipboard.value = text;
-      }
-    });
+    _clipboard.value = text;
   }
 
   String textClickJs = """
@@ -271,12 +261,13 @@ reader.addEventListener('touchstart', (e) => {
               title: "Search",
               action: () async {
                 emptyStack();
-                String toCopy = (await webViewController.getSelectedText())
+
+                String searchTerm = (await webViewController.getSelectedText())
                         .replaceAll("\\n", "\n")
                         .trim() ??
                     "";
+                Clipboard.setData(ClipboardData(text: searchTerm));
 
-                Clipboard.setData(ClipboardData(text: toCopy));
                 clearSelection();
               }),
           ContextMenuItem(
@@ -445,7 +436,6 @@ reader.addEventListener('touchstart', (e) => {
                         // print("reached");
 
                         clearSelection();
-                        _clipboard.value = searchTerm;
                         Clipboard.setData(ClipboardData(text: searchTerm));
                       } catch (e) {
                         clearSelection();

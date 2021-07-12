@@ -489,6 +489,12 @@ class _VideoPlayerState extends State<VideoPlayer>
   }
 
   void onClipboardText(String text) {
+    if (!getSelectMode() && isCustomDictionary()) {
+      _clipboard.value = text;
+      _contextSubtitle.value = _currentSubtitle.value;
+      return;
+    }
+
     text = text.trim();
     _volatileText = text.trim();
 
