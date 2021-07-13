@@ -661,18 +661,26 @@ class _VideoPlayerState extends State<VideoPlayer>
         getVideoPlayerController().value.duration.inSeconds != 0 &&
         getVideoPlayerController().value.position.inSeconds <
             getVideoPlayerController().value.duration.inSeconds - 5) {
+      int positionInSeconds =
+          getVideoPlayerController().value.position.inSeconds;
+      int durationInSeconds =
+          getVideoPlayerController().value.duration.inSeconds;
+      if (positionInSeconds > (durationInSeconds * 0.9)) {
+        positionInSeconds = 0;
+      }
+
       if (playerMode == JidoujishoPlayerMode.localFile) {
         addVideoHistoryPosition(
           HistoryItemPosition(
             videoFile.path,
-            getVideoPlayerController().value.position.inSeconds,
+            positionInSeconds,
           ),
         );
       } else if (playerMode == JidoujishoPlayerMode.youtubeStream) {
         addVideoHistoryPosition(
           HistoryItemPosition(
             streamData.videoURL,
-            getVideoPlayerController().value.position.inSeconds,
+            positionInSeconds,
           ),
         );
       }

@@ -1536,7 +1536,8 @@ Future<DictionaryHistoryEntry> getCustomWordDetails(
     Query fallbackMixQuery = fallbackMixMatch.build();
 
     Query fallbackLimitedQuery = fallbackMixQuery..limit = 30;
-    entries = fallbackLimitedQuery.find();
+    List<DictionaryEntry> likeMatches = fallbackLimitedQuery.find();
+    entries.addAll(likeMatches);
   }
 
   if (entries.isNotEmpty) {

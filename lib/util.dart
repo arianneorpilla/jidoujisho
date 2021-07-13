@@ -456,7 +456,7 @@ List<List<int>> getIndexesFromWords(
     if (word.word.contains('␜') ||
         i == words.length - 1 ||
         textPainter.width >=
-            width - style.position.left - style.position.right) {
+            width - style.position.left - style.position.right - 20) {
       List<int> line = [];
       for (int i = 0; i < working.length; i++) {
         line.add(working[i]);

@@ -187,9 +187,11 @@ class SubtitleTextView extends StatelessWidget {
       BuildContext context, String subtitleText, Subtitle currentSubtitle) {
     String processedSubtitles;
     processedSubtitles = subtitleText.replaceAll('\n', '␜');
-    processedSubtitles = processedSubtitles.replaceAll(' ', '␝');
+    processedSubtitles = processedSubtitles.replaceAll(' ', '␝').trim();
 
     List<Word> words = parseVe(gMecabTagger, processedSubtitles);
+
+    print(words);
 
     List<List<Word>> lines = getLinesFromWords(
       context,
@@ -203,6 +205,9 @@ class SubtitleTextView extends StatelessWidget {
       words,
       fontSize.value,
     );
+
+    print(lines);
+    print(indexes);
 
     for (Word word in words) {
       word.word = word.word.replaceAll('␝', ' ');

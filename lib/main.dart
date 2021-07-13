@@ -343,6 +343,8 @@ class _HomeState extends State<Home> {
           return;
         }
 
+        print(value);
+
         if (value.startsWith("https://") || value.startsWith("http://")) {
           Navigator.of(context).popUntil((route) => route.isFirst);
           if (YoutubePlayer.convertUrlToId(value) != null) {
@@ -375,6 +377,8 @@ class _HomeState extends State<Home> {
         if (value == null) {
           return;
         }
+
+        print(value);
 
         if (value.startsWith("https://") || value.startsWith("http://")) {
           Navigator.of(context).popUntil((route) => route.isFirst);

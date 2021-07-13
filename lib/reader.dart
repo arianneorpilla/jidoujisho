@@ -246,6 +246,169 @@ reader.addEventListener('touchstart', (e) => {
 	touchmoved = false;
 	touchevent = e;
 });
+
+function getSelectionText() {
+    function getRangeSelectedNodes(range) {
+      var node = range.startContainer;
+      var endNode = range.endContainer;
+      if (node == endNode) return [node];
+      var rangeNodes = [];
+      while (node && node != endNode) rangeNodes.push(node = nextNode(node));
+      node = range.startContainer;
+      while (node && node != range.commonAncestorContainer) {
+        rangeNodes.unshift(node);
+        node = node.parentNode;
+      }
+      return rangeNodes;
+      function nextNode(node) {
+        if (node.hasChildNodes()) return node.firstChild;
+        else {
+          while (node && !node.nextSibling) node = node.parentNode;
+          if (!node) return null;
+          return node.nextSibling;
+        }
+      }
+    }
+    var txt = "";
+    var nodesInRange;
+    var selection;
+    if (window.getSelection) {
+      selection = window.getSelection();
+      nodesInRange = getRangeSelectedNodes(selection.getRangeAt(0));
+      nodes = nodesInRange.filter((node) => node.nodeName == "#text" && node.parentElement.nodeName !== "RT" && node.parentElement.nodeName !== "RP" && node.parentElement.parentElement.nodeName !== "RT" && node.parentElement.parentElement.nodeName !== "RP");
+      if (selection.anchorNode === selection.focusNode) {
+          txt = txt.concat(selection.anchorNode.textContent.substring(selection.baseOffset, selection.extentOffset));
+      } else {
+          for (var i = 0; i < nodes.length; i++) {
+              var node = nodes[i];
+              if (i === 0) {
+                  txt = txt.concat(node.textContent.substring(selection.getRangeAt(0).startOffset));
+              } else if (i === nodes.length - 1) {
+                  txt = txt.concat(node.textContent.substring(0, selection.getRangeAt(0).endOffset));
+              } else {
+                  txt = txt.concat(node.textContent);
+              }
+          }
+      }
+    } else if (window.document.getSelection) {
+      selection = window.document.getSelection();
+      nodesInRange = getRangeSelectedNodes(selection.getRangeAt(0));
+      nodes = nodesInRange.filter((node) => node.nodeName == "#text" && node.parentElement.nodeName !== "RT" && node.parentElement.nodeName !== "RP" && node.parentElement.parentElement.nodeName !== "RT" && node.parentElement.parentElement.nodeName !== "RP");
+      if (selection.anchorNode === selection.focusNode) {
+          txt = txt.concat(selection.anchorNode.textContent.substring(selection.baseOffset, selection.extentOffset));
+      } else {
+          for (var i = 0; i < nodes.length; i++) {
+              var node = nodes[i];
+              if (i === 0) {
+                  txt = txt.concat(node.textContent.substring(selection.getRangeAt(0).startOffset));
+              } else if (i === nodes.length - 1) {
+                  txt = txt.concat(node.textContent.substring(0, selection.getRangeAt(0).endOffset));
+              } else {
+                  txt = txt.concat(node.textContent);
+              }
+          }
+      }
+    } else if (window.document.selection) {
+      txt = window.document.selection.createRange().text;
+    }
+    return txt;
+};
+
+reader.addEventListener('auxclick', (e) => {
+  if (getSelectionText()) {
+    console.log(JSON.stringify({
+				"offset": -1,
+				"text": getSelectionText(),
+				"jidoujisho": "jidoujisho",
+        "isCreator": "yes",
+			}));
+  }
+});
+
+reader.addEventListener('click', (e) => {
+  if (getSelectionText()) {
+    console.log(JSON.stringify({
+				"offset": -1,
+				"text": getSelectionText(),
+				"jidoujisho": "jidoujisho",
+        "isCreator": "no",
+			}));
+  } else {
+    var result = document.caretRangeFromPoint(e.clientX, e.clientY);
+    var selectedElement = result.startContainer;
+
+    var paragraph = result.startContainer;
+    while (paragraph && paragraph.nodeName !== 'P') {
+      paragraph = paragraph.parentNode;
+    }
+
+    if (paragraph == null) {
+      paragraph = result.startContainer.parentNode;
+    }
+
+    console.log(paragraph.nodeName);
+
+		var noFuriganaText = [];
+		var noFuriganaNodes = [];
+		var selectedFound = false;
+		var index = 0;
+
+		for (var value of paragraph.childNodes.values()) {
+			if (value.nodeName === "#text") {
+				noFuriganaText.push(value.textContent);
+				noFuriganaNodes.push(value);
+
+				if (selectedFound === false) {
+					if (selectedElement !== value) {
+						index = index + value.textContent.length;
+					} else {
+						index = index + result.startOffset;
+						selectedFound = true;
+					}
+				}
+
+			} else {
+				for (var node of value.childNodes.values()) {
+					if (node.nodeName === "#text") {
+						noFuriganaText.push(node.textContent);
+						noFuriganaNodes.push(node);
+
+						if (selectedFound === false) {
+							if (selectedElement !== node) {
+								index = index + node.textContent.length;
+							} else {
+								index = index + result.startOffset;
+								selectedFound = true;
+							}
+						}
+					} else if (node.firstChild.nodeName === "#text" && node.nodeName !== "RT" && node.nodeName !== "RP") {
+						noFuriganaText.push(node.firstChild.textContent);
+						noFuriganaNodes.push(node.firstChild);
+
+						if (selectedFound === false) {
+							if (selectedElement !== node.firstChild) {
+								index = index + node.firstChild.textContent.length;
+							} else {
+								index = index + result.startOffset;
+								selectedFound = true;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		var text = noFuriganaText.join("");
+		var offset = index;
+    
+
+		console.log(JSON.stringify({
+				"offset": offset,
+				"text": text,
+				"jidoujisho": "jidoujisho"
+			}));
+  }
+});
 """;
 
   @override
@@ -410,33 +573,65 @@ reader.addEventListener('touchstart', (e) => {
                       String text = messageJson["text"];
 
                       try {
-                        String processedText = text.replaceAll("﻿", "␝");
-                        processedText = processedText.replaceAll("　", "␝");
-                        processedText = processedText.replaceAll('\n', '␜');
-                        processedText = processedText.replaceAll(' ', '␝');
+                        if (index != -1) {
+                          String processedText = text.replaceAll("﻿", "␝");
+                          processedText = processedText.replaceAll("　", "␝");
+                          processedText = processedText.replaceAll('\n', '␜');
+                          processedText = processedText.replaceAll(' ', '␝');
 
-                        List<Word> tokens =
-                            parseVe(gMecabTagger, processedText);
-                        print(tokens);
+                          List<Word> tokens =
+                              parseVe(gMecabTagger, processedText);
+                          print(tokens);
 
-                        List<String> tokenTape = [];
-                        for (int i = 0; i < tokens.length; i++) {
-                          Word token = tokens[i];
-                          for (int j = 0; j < token.word.length; j++) {
-                            tokenTape.add(token.word);
+                          List<String> tokenTape = [];
+                          for (int i = 0; i < tokens.length; i++) {
+                            Word token = tokens[i];
+                            for (int j = 0; j < token.word.length; j++) {
+                              tokenTape.add(token.word);
+                            }
+                          }
+
+                          // print(tokenTape);
+                          String searchTerm = tokenTape[index];
+                          searchTerm = searchTerm.replaceAll('␜', '\n');
+                          searchTerm = searchTerm.replaceAll('␝', ' ');
+                          searchTerm = searchTerm.trim();
+                          print("SELECTED: " + searchTerm);
+                          // print("reached");
+
+                          clearSelection();
+                          Clipboard.setData(ClipboardData(text: searchTerm));
+                        } else {
+                          clearSelection();
+                          String isCreator = messageJson["isCreator"];
+                          if (isCreator != "yes") {
+                            Clipboard.setData(ClipboardData(text: text));
+                          } else {
+                            String readerExport =
+                                text.replaceAll("\\n", "\n") ?? "";
+                            readerExport = readerExport.replaceAll("　", " ");
+
+                            stopClipboardMonitor();
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    Home(readerExport: readerExport),
+                              ),
+                            ).then((result) {
+                              SystemChrome.setEnabledSystemUIOverlays([]);
+                              if (result != null && result) {
+                                _clipboard.value = "&<&>exported&<&>";
+                                Future.delayed(Duration(seconds: 2), () {
+                                  _clipboard.value = "";
+                                });
+                              } else {
+                                _clipboard.value = "";
+                              }
+                              startClipboardMonitor();
+                            });
                           }
                         }
-
-                        // print(tokenTape);
-                        String searchTerm = tokenTape[index];
-                        searchTerm = searchTerm.replaceAll('␜', '\n');
-                        searchTerm = searchTerm.replaceAll('␝', ' ');
-                        searchTerm = searchTerm.trim();
-                        print("SELECTED: " + searchTerm);
-                        // print("reached");
-
-                        clearSelection();
-                        Clipboard.setData(ClipboardData(text: searchTerm));
                       } catch (e) {
                         clearSelection();
                         emptyStack();
@@ -926,208 +1121,218 @@ reader.addEventListener('touchstart', (e) => {
         return Container(
           padding: EdgeInsets.all(16.0),
           alignment: Alignment.topCenter,
-          child: GestureDetector(
-            onTap: () {
-              _clipboard.value = "";
-              _currentDictionaryEntry.value = DictionaryEntry(
-                word: "",
-                reading: "",
-                meaning: "",
-              );
+          child: MouseRegion(
+            onHover: (e) {
+              print("ENTER");
             },
-            onHorizontalDragEnd: (details) {
-              if (details.primaryVelocity == 0) return;
+            onExit: (a) {
+              print("EXIT");
+            },
+            opaque: true,
+            child: GestureDetector(
+              onTap: () {
+                _clipboard.value = "";
+                _currentDictionaryEntry.value = DictionaryEntry(
+                  word: "",
+                  reading: "",
+                  meaning: "",
+                );
+              },
+              onHorizontalDragEnd: (details) {
+                if (details.primaryVelocity == 0) return;
 
-              if (details.primaryVelocity.compareTo(0) == -1) {
-                if (selectedIndex.value == results.entries.length - 1) {
-                  selectedIndex.value = 0;
+                if (details.primaryVelocity.compareTo(0) == -1) {
+                  if (selectedIndex.value == results.entries.length - 1) {
+                    selectedIndex.value = 0;
+                  } else {
+                    selectedIndex.value += 1;
+                  }
                 } else {
-                  selectedIndex.value += 1;
+                  if (selectedIndex.value == 0) {
+                    selectedIndex.value = results.entries.length - 1;
+                  } else {
+                    selectedIndex.value -= 1;
+                  }
                 }
-              } else {
-                if (selectedIndex.value == 0) {
-                  selectedIndex.value = results.entries.length - 1;
+              },
+              onVerticalDragEnd: (details) async {
+                if (details.primaryVelocity == 0) return;
+                if (details.primaryVelocity.compareTo(0) == -1) {
+                  await setNextDictionary();
                 } else {
-                  selectedIndex.value -= 1;
+                  await setPrevDictionary();
                 }
-              }
-            },
-            onVerticalDragEnd: (details) async {
-              if (details.primaryVelocity == 0) return;
-              if (details.primaryVelocity.compareTo(0) == -1) {
-                await setNextDictionary();
-              } else {
-                await setPrevDictionary();
-              }
-            },
-            child: Container(
-              padding: EdgeInsets.all(16),
-              color: Colors.grey[600].withOpacity(0.97),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  GestureDetector(
-                    onLongPress: () {
-                      openDictionaryMenu(context, false);
-                    },
-                    child: Text(
-                      results.entries[selectedIndex.value].word,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
+              },
+              child: Container(
+                padding: EdgeInsets.all(16),
+                color: Colors.grey[600].withOpacity(0.97),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    GestureDetector(
+                      onLongPress: () {
+                        openDictionaryMenu(context, false);
+                      },
+                      child: Text(
+                        results.entries[selectedIndex.value].word,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: 5),
-                  GestureDetector(
-                    onLongPress: () {
-                      openDictionaryMenu(context, false);
-                    },
-                    child: (pitchEntry != null)
-                        ? getAllPitchWidgets(pitchEntry)
-                        : Text(results.entries[selectedIndex.value].reading),
-                  ),
-                  if (results
-                      .entries[selectedIndex.value].yomichanTermTags.isNotEmpty)
                     SizedBox(height: 5),
-                  if (results
-                      .entries[selectedIndex.value].yomichanTermTags.isNotEmpty)
-                    Wrap(
-                      children: results.entries[selectedIndex.value]
-                          .generateTagWidgets(context),
+                    GestureDetector(
+                      onLongPress: () {
+                        openDictionaryMenu(context, false);
+                      },
+                      child: (pitchEntry != null)
+                          ? getAllPitchWidgets(pitchEntry)
+                          : Text(results.entries[selectedIndex.value].reading),
                     ),
-                  results.entries[selectedIndex.value]
-                      .generateMeaningWidgetsDialog(context, selectable: true),
-                  Text.rich(
-                    TextSpan(
-                      text: '',
-                      children: <InlineSpan>[
-                        TextSpan(
-                          text: "Selecting search result ",
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[300],
+                    if (results.entries[selectedIndex.value].yomichanTermTags
+                        .isNotEmpty)
+                      SizedBox(height: 5),
+                    if (results.entries[selectedIndex.value].yomichanTermTags
+                        .isNotEmpty)
+                      Wrap(
+                        children: results.entries[selectedIndex.value]
+                            .generateTagWidgets(context),
+                      ),
+                    results.entries[selectedIndex.value]
+                        .generateMeaningWidgetsDialog(context,
+                            selectable: true),
+                    Text.rich(
+                      TextSpan(
+                        text: '',
+                        children: <InlineSpan>[
+                          TextSpan(
+                            text: "Selecting search result ",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[300],
+                            ),
                           ),
-                        ),
-                        TextSpan(
-                          text: "${selectedIndex.value + 1} ",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                          TextSpan(
+                            text: "${selectedIndex.value + 1} ",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
                           ),
-                        ),
-                        TextSpan(
-                          text: "out of ",
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[300],
+                          TextSpan(
+                            text: "out of ",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[300],
+                            ),
                           ),
-                        ),
-                        TextSpan(
-                          text: "${results.entries.length} ",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                          TextSpan(
+                            text: "${results.entries.length} ",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
                           ),
-                        ),
-                        TextSpan(
-                          text: "found for",
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[300],
+                          TextSpan(
+                            text: "found for",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[300],
+                            ),
                           ),
-                        ),
-                        TextSpan(
-                          text: "『",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                            color: Colors.grey[300],
+                          TextSpan(
+                            text: "『",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                              color: Colors.grey[300],
+                            ),
                           ),
-                        ),
-                        TextSpan(
-                          text: "${results.searchTerm}",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                          TextSpan(
+                            text: "${results.searchTerm}",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
                           ),
-                        ),
-                        TextSpan(
-                          text: "』",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                            color: Colors.grey[300],
+                          TextSpan(
+                            text: "』",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                              color: Colors.grey[300],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  (recursiveTerms.length > 1)
-                      ? GestureDetector(
-                          onTap: () {
-                            noPush = true;
-                            recursiveTerms.removeLast();
-                            _clipboard.value = recursiveTerms.last;
-                          },
-                          child: Wrap(
-                            alignment: WrapAlignment.start,
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            children: [
-                              Text(
-                                "『 ",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                  color: Colors.grey[300],
+                    (recursiveTerms.length > 1)
+                        ? GestureDetector(
+                            onTap: () {
+                              noPush = true;
+                              recursiveTerms.removeLast();
+                              _clipboard.value = recursiveTerms.last;
+                            },
+                            child: Wrap(
+                              alignment: WrapAlignment.start,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                Text(
+                                  "『 ",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                    color: Colors.grey[300],
+                                  ),
+                                  textAlign: TextAlign.center,
                                 ),
-                                textAlign: TextAlign.center,
-                              ),
-                              Icon(Icons.arrow_back, size: 11),
-                              SizedBox(width: 5),
-                              Text(
-                                "Return ",
-                                style: TextStyle(
-                                  fontSize: 12,
+                                Icon(Icons.arrow_back, size: 11),
+                                SizedBox(width: 5),
+                                Text(
+                                  "Return ",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                  ),
+                                  textAlign: TextAlign.center,
                                 ),
-                                textAlign: TextAlign.center,
-                              ),
-                              Text(
-                                "to ",
-                                style: TextStyle(
-                                  fontSize: 12,
+                                Text(
+                                  "to ",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                  ),
+                                  textAlign: TextAlign.center,
                                 ),
-                                textAlign: TextAlign.center,
-                              ),
-                              Text(
-                                "previous ",
-                                style: TextStyle(
-                                  fontSize: 12,
+                                Text(
+                                  "previous ",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                  ),
+                                  textAlign: TextAlign.center,
                                 ),
-                                textAlign: TextAlign.center,
-                              ),
-                              Text(
-                                "definition",
-                                style: TextStyle(
-                                  fontSize: 12,
+                                Text(
+                                  "definition",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                  ),
+                                  textAlign: TextAlign.center,
                                 ),
-                                textAlign: TextAlign.center,
-                              ),
-                              Text(
-                                " 』",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                  color: Colors.grey[300],
+                                Text(
+                                  " 』",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                    color: Colors.grey[300],
+                                  ),
+                                  textAlign: TextAlign.center,
                                 ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        )
-                      : SizedBox.shrink(),
-                ],
+                              ],
+                            ),
+                          )
+                        : SizedBox.shrink(),
+                  ],
+                ),
               ),
             ),
           ),
