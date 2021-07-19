@@ -153,7 +153,7 @@ A primer on the basics of the application is as follows.
 
 * 🇯🇵 Can't find Japanese subtitles for your media? Try finding what you need at <b><a href="https://kitsunekko.net">kitsunekko</a></b>
 * 📚 Users may import their own <b><a href="https://foosoft.net/projects/yomichan/">Yomichan</a></b> custom dictionaries for offline use and instant lookups, <b><a href="https://foosoft.net/projects/yomichan/">some can be found here</a></b>
-* 🤚 **Hold onto the headword** in the pop-up dictionary to **quickly switch between dictionaries** 
+* 🤚 **Hold onto the headword or swipe vertically** in the pop-up dictionary to **quickly switch between dictionaries** 
 * 📑 **External subtitles with the same name as the selected video file** will be loaded by default
 * ⏲️ If your subtitles are off, you can **set the delay** or **pad the exported audio time with an allowance**
 * ▶️ A **resume button** is at the top of the main menu, and **returns to last video or book**
