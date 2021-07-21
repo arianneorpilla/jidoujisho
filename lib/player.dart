@@ -6,12 +6,11 @@ import 'package:audio_service/audio_service.dart';
 import 'package:chewie/chewie.dart';
 import 'package:clipboard_monitor/clipboard_monitor.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
-import 'package:gx_file_picker/gx_file_picker.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:http/http.dart' as http;
-import 'package:jidoujisho/util.dart';
 import 'package:path/path.dart' as path;
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -28,6 +27,7 @@ import 'package:jidoujisho/dictionary.dart';
 import 'package:jidoujisho/globals.dart';
 import 'package:jidoujisho/pitch.dart';
 import 'package:jidoujisho/preferences.dart';
+import 'package:jidoujisho/util.dart';
 import 'package:jidoujisho/youtube.dart';
 
 class JidoujishoPlayer extends StatefulWidget {
@@ -413,7 +413,7 @@ class _VideoPlayerState extends State<VideoPlayer>
             ),
             title: Text("Scoped Storage Warning"),
             content: Text(
-              "The selected video file has been cached in the application's scoped storage by the file picker rather than direct play. This redundant duplication of the video file may have caused slower loading. Additionally, default external subtitles were not imported.\n\nFor faster loading and direct video playback, try using a different file picker. You may ignore this warning if playing files externally.",
+              "The selected video file has been cached in the application's scoped storage by the file picker rather than direct play. This redundant duplication of the video file may have caused slower loading. Additionally, default external subtitles were not imported.\n\nFor faster loading and direct video playback, try using a different file picker.",
               textAlign: TextAlign.justify,
             ),
             actions: <Widget>[
@@ -1128,6 +1128,7 @@ class _VideoPlayerState extends State<VideoPlayer>
       _subTitleController.updateSubtitleContent(content: "");
       print("SUBTITLES SWITCHED OFF");
     } else {
+      print(internalSubs);
       getSubtitleWrapper().subtitleController.updateSubtitleContent(
           content: sanitizeSrtNewlines(internalSubs[index].readAsStringSync()));
       print("SUBTITLES SWITCHED TO TRACK $index");

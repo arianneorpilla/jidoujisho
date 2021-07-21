@@ -166,11 +166,12 @@ List<File> extractWebSubtitle(String webSubtitle) {
 Future<List<File>> extractSubtitles(String inputPath) async {
   List<File> files = [];
   final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
+  final FlutterFFmpegConfig _flutterFFmpegConfig = new FlutterFFmpegConfig();
 
-  for (int i = 0; i < 10; i++) {
+  for (int i = 0; i < 99; i++) {
     String outputPath = "\"$gAppDirPath/extractSrt$i.srt\"";
     String command =
-        "-loglevel quiet -i \"$inputPath\" -map 0:s:$i $outputPath";
+        "-loglevel verbose -i \"$inputPath\" -map 0:s:$i $outputPath";
 
     String subPath = "$gAppDirPath/extractSrt$i.srt";
     File subFile = File(subPath);
@@ -180,17 +181,12 @@ Future<List<File>> extractSubtitles(String inputPath) async {
     }
 
     await _flutterFFmpeg.execute(command);
-
-    if (await subFile.exists()) {
-      if (subFile.readAsStringSync().isEmpty) {
-        subFile.deleteSync();
-        break;
-      } else {
-        files.add(subFile);
-      }
-    } else {
+    String output = await _flutterFFmpegConfig.getLastCommandOutput();
+    if (output.contains("Stream map '0:s:$i' matches no streams.")) {
       break;
     }
+
+    files.add(subFile);
   }
 
   return files;

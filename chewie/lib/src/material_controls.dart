@@ -774,7 +774,12 @@ class _MaterialControlsState extends State<MaterialControls>
           final subtitleTracks = await controller.getSpuTracks();
 
           audioTracks.forEach((index, name) => audioTrackNames.add(name));
-          subtitleTracks.forEach((index, name) => subtitleTrackNames.add(name));
+          subtitleTracks.forEach((index, name) {
+            if (subtitleTrackNames.length <
+                chewieController.internalSubs.length) {
+              subtitleTrackNames.add(name);
+            }
+          });
         } else {
           if (chewieController.internalSubs.isNotEmpty) {
             subtitleTrackNames.add("YouTube - [CC] - [Japanese]");

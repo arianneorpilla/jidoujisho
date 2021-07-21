@@ -75,6 +75,9 @@ void main() async {
   if (!getDCIMDirectory().existsSync()) {
     getDCIMDirectory().createSync(recursive: true);
   }
+  if (!getDCIMNoMediaFile().existsSync()) {
+    getDCIMNoMediaFile().createSync();
+  }
 
   gSharedPrefs = await SharedPreferences.getInstance();
   gIsSelectMode = ValueNotifier<bool>(getSelectMode());
@@ -2044,6 +2047,7 @@ class _HomeState extends State<Home> {
       _searchSuggestions.value = [];
       _searchQuery = newQuery;
       addSearchHistory(newQuery);
+      FocusScope.of(context).unfocus();
     });
   }
 
@@ -3312,8 +3316,6 @@ class _ClipboardState extends State<ClipboardMenu> {
   ScrollController _dictionaryScroller;
   final _wordController = TextEditingController(text: "");
 
-  ValueNotifier<DictionaryHistoryEntry> _currentInstantSearch =
-      ValueNotifier<DictionaryHistoryEntry>(null);
   ValueNotifier<bool> _isSearching = ValueNotifier<bool>(false);
 
   _ClipboardState(this.creatorCallback, this.dictionaryScrollOffset);

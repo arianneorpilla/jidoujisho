@@ -25,6 +25,10 @@ Directory getDCIMDirectory() {
   return Directory("storage/emulated/0/DCIM/jidoujisho/");
 }
 
+File getDCIMNoMediaFile() {
+  return File("storage/emulated/0/DCIM/jidoujisho/.nomedia");
+}
+
 String getPreviewImagePath() {
   return getDCIMDirectory().path + "exportImage.jpg";
 }
