@@ -442,6 +442,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "8.0.7"
+  freezed_annotation:
+    dependency: transitive
+    description:
+      name: freezed_annotation
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.14.3"
   frontend_server_client:
     dependency: transitive
     description:
@@ -553,7 +560,7 @@ packages:
       name: json_annotation
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.0.1"
+    version: "4.1.0"
   kana_kit:
     dependency: "direct main"
     description:
@@ -1159,11 +1166,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "4298ea7e396ff01316f635f5fa29cff975f1480c"
-      resolved-ref: "4298ea7e396ff01316f635f5fa29cff975f1480c"
+      ref: "73504b2a4405d0aee3967368b9a94bd0eaa22619"
+      resolved-ref: "73504b2a4405d0aee3967368b9a94bd0eaa22619"
       url: "https://github.com/Hexer10/youtube_explode_dart"
     source: git
-    version: "1.9.5"
+    version: "1.10.0"
   youtube_player_flutter:
     dependency: "direct main"
     description:

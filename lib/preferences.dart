@@ -83,7 +83,7 @@ Channel mapToChannel(Map<String, dynamic> map) {
   String title = map['title'];
   String logoUrl = map['logoUrl'];
 
-  return Channel(id, title, logoUrl);
+  return Channel(id, title, logoUrl, 0);
 }
 
 Future<void> setChannelCache(List<Channel> channels) async {
