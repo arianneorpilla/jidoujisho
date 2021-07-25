@@ -53,7 +53,6 @@
 - [x] Import **Yomichan archive dictionaries** and export cards **with pitch accent information** from Kanjium
 - [x] **Frictionless sentence mining workflow for readers** via ッツ Ebook Reader
 - [x] Playback support for **network streams** including **Chromecast** and **Plex external player support**
-- [x] **(Experimental)** **Korean to English support** through the National Institute of Korean Language's KrDict 
 
 # ⚕️ Current state of the project
 
