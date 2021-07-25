@@ -761,7 +761,7 @@ class _MaterialControlsState extends State<MaterialControls>
     return GestureDetector(
       onTap: () async {
         chewieController.currentAudioTrack.value =
-            await controller.getAudioTrack() - 1;
+            await controller.getAudioTrack();
 
         _hideTimer?.cancel();
 
@@ -770,10 +770,8 @@ class _MaterialControlsState extends State<MaterialControls>
         final List<String> autoSubtitleTrackNames = [];
 
         if (chewieController.playerMode != JidoujishoPlayerMode.youtubeStream) {
-          final audioTracks = await controller.getAudioTracks();
           final subtitleTracks = await controller.getSpuTracks();
 
-          audioTracks.forEach((index, name) => audioTrackNames.add(name));
           subtitleTracks.forEach((index, name) {
             if (subtitleTrackNames.length <
                 chewieController.internalSubs.length) {
@@ -786,20 +784,30 @@ class _MaterialControlsState extends State<MaterialControls>
           } else {
             autoSubtitleTrackNames.add("YouTube - [Automatic] - [Japanese]");
           }
-          audioTrackNames
-              .add("YouTube - ${chewieController.streamData.audioMetadata}");
         }
 
         final List<SubtitleAudioMenuOption> options = [];
-        for (int i = 0; i < audioTrackNames.length; i++) {
+        final audioTracks = await controller.getAudioTracks();
+        if (chewieController.streamData == null) {
+          audioTracks.forEach((index, name) {
+            options.add(
+              SubtitleAudioMenuOption(
+                type: SubtitleAudioMenuOptionType.audioTrack,
+                callbackIndex: index,
+                metadata: name,
+              ),
+            );
+          });
+        } else {
           options.add(
             SubtitleAudioMenuOption(
-              type: SubtitleAudioMenuOptionType.audioTrack,
-              callbackIndex: i,
-              metadata: audioTrackNames[i],
-            ),
+                type: SubtitleAudioMenuOptionType.audioTrack,
+                callbackIndex: 0,
+                metadata:
+                    "YouTube - ${chewieController.streamData.audioMetadata}"),
           );
         }
+
         if (chewieController.playerMode != JidoujishoPlayerMode.networkStream) {
           for (int i = 0; i < subtitleTrackNames.length; i++) {
             options.add(
@@ -864,7 +872,9 @@ class _MaterialControlsState extends State<MaterialControls>
 
         switch (chosenOption.type) {
           case SubtitleAudioMenuOptionType.audioTrack:
-            await controller.setAudioTrack(chosenOption.callbackIndex + 1);
+            if (chewieController.streamData == null) {
+              await controller.setAudioTrack(chosenOption.callbackIndex);
+            }
             break;
           case SubtitleAudioMenuOptionType.embeddedSubtitle:
           case SubtitleAudioMenuOptionType.autoSubtitle:

@@ -39,7 +39,10 @@ void unlockLandscape() {
 
 void lockLandscape() {
   Wakelock.enable();
-  AutoOrientation.landscapeAutoMode(forceSensor: true);
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
   SystemChrome.setEnabledSystemUIOverlays([]);
 }
 

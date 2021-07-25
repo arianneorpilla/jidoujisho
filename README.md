@@ -7,7 +7,7 @@
 <p align="center">A mobile video player, reader assistant and card creation toolkit tailored for language learners.</p>
 
 <p align="center" style="margin:0"><b>Latest GitHub Release:<br>
-<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.25.9-beta">0.25.9-beta 🇯🇵 → 🇬🇧</a><br>
+<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.25.10-beta">0.25.10-beta 🇯🇵 → 🇬🇧</a><br>
 <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.16.8-beta-kren">0.16.8-beta 🇰🇷 → 🇬🇧</a></b><br>
 </p>
 
@@ -34,7 +34,7 @@
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.22.1-beta">0.22</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.23.2-beta">0.23</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.24.5-beta">0.24</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.25.9-beta">0.25</a>
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.25.10-beta">0.25</a>
 </b></p>
 
 # 📚 Uninterrupted language immersion at your fingertips
@@ -58,7 +58,7 @@
 
 # ⚕️ Current state of the project
 
-**jidoujisho is still in active development.** Built for the Japanese language learning community, the application is free and open source software, and is <b><a href="https://github.com/lrorpilla/jidoujisho/releases">available to download here on GitHub.</a></b> Current features planned on the roadmap are listed below, but as of now there is no estimate on any updates.
+**jidoujisho is still in development, and is currently in hiatus. The project will receive fixes to critical bugs and issues. Rollout of new features will resume in time.** Built for the Japanese language learning community, the application is free and open source software, and is <b><a href="https://github.com/lrorpilla/jidoujisho/releases">available to download here on GitHub.</a></b> Current features planned on the roadmap are listed below, but as of now there is no estimate on any updates.
 
 Please note that the development of the app switches between changes being implemented and being left alone for daily use. Update frequency may depend on the gravity of any issues that arise. **Hiatuses provide practical insight on usage and where development should go next.**
 

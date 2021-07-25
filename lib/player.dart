@@ -6,8 +6,8 @@ import 'package:audio_service/audio_service.dart';
 import 'package:chewie/chewie.dart';
 import 'package:clipboard_monitor/clipboard_monitor.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
-//import 'package:gx_file_picker/gx_file_picker.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:gx_file_picker/gx_file_picker.dart';
+//import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
@@ -86,7 +86,6 @@ class JidoujishoPlayerState extends State<JidoujishoPlayer> {
   @override
   void dispose() {
     super.dispose();
-    unlockLandscape();
   }
 
   Widget localPlayer(BuildContext context, String url, int initialPosition) {
@@ -153,7 +152,7 @@ class JidoujishoPlayerState extends State<JidoujishoPlayer> {
             String unsanitized = "";
             if (externalSubs != null) {
               unsanitized = externalSubs.readAsStringSync();
-            } else if (internalSubs.isNotEmpty) {
+            } else if (internalSubs != null && internalSubs.isNotEmpty) {
               unsanitized = internalSubs.first.readAsStringSync();
             }
             String defaultSubtitles = sanitizeSrtNewlines(unsanitized);
