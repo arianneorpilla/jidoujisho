@@ -58,7 +58,9 @@
 
 # ⚕️ Current state of the project
 
-**jidoujisho is still in development, and is currently in hiatus. The project will receive fixes to critical bugs and issues. Rollout of new features will resume in time.** Built for the Japanese language learning community, the application is free and open source software, and is <b><a href="https://github.com/lrorpilla/jidoujisho/releases">available to download here on GitHub.</a></b> Current features planned on the roadmap are listed below, but as of now there is no estimate on any updates.
+**jidoujisho is still in development, and is currently in hiatus. The project will receive fixes to critical bugs and issues. Rollout of new features will resume in time.** 
+
+Built for the Japanese language learning community, the application is free and open source software, and is <b><a href="https://github.com/lrorpilla/jidoujisho/releases">available to download here on GitHub.</a></b> Current features planned on the roadmap are listed below, but as of now there is no estimate on any updates.
 
 Please note that the development of the app switches between changes being implemented and being left alone for daily use. Update frequency may depend on the gravity of any issues that arise. **Hiatuses provide practical insight on usage and where development should go next.**
 
