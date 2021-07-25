@@ -7,7 +7,7 @@
 <p align="center">A mobile video player, reader assistant and card creation toolkit tailored for language learners.</p>
 
 <p align="center" style="margin:0"><b>Latest GitHub Release:<br>
-<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.25.10-beta">0.25.10-beta 🇯🇵 → 🇬🇧</a><br>
+<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.25.10-beta">0.25.10-beta 🇯🇵 → 🇬🇧</a></b><br>
 </p>
 
 <p align="center" style="margin:0"><b>Release Archive:<br>
@@ -53,6 +53,7 @@
 - [x] Import **Yomichan archive dictionaries** and export cards **with pitch accent information** from Kanjium
 - [x] **Frictionless sentence mining workflow for readers** via ッツ Ebook Reader
 - [x] Playback support for **network streams** including **Chromecast** and **Plex external player support**
+- [x] **(Experimental)** **Korean to English support** through the National Institute of Korean Language's KrDict 
 
 # ⚕️ Current state of the project
 
@@ -115,7 +116,7 @@ jidoujisho will take **video and audio formats as supported by VLC**. Subtitles 
 
 If you wish to use external subtitles, they may be in **SRT, ASS or SSA format** and you may import them during playback through the menu. You may switch between different audio and subtitle tracks. Image-based subtitles such as PGS are not currently supported.
 
-**YouTube closed captions** are taken from TimedText XML, which is only publicly exposed to videos that have user-generated Japanese subtitles. <a href="https://www.youtube.com/watch?v=mZ0sJQC8qkE">Here are a fair sample of</a> <a href="https://www.youtube.com/watch?v=X9zw0QF12Kc">YouTube videos with such subtitles</a> <a href="https://www.youtube.com/watch?v=t1yXDcuwzpY">showcasing some very practical application use cases.</a> If unavailable, **Japanese automatic captions** can be queried from videos. Please be aware that critical inaccuracies are to be expected in such cases. 
+**YouTube closed captions** are taken from TimedText XML, which is only publicly exposed to videos that have user-generated Japanese subtitles. <b><a href="https://www.youtube.com/watch?v=mZ0sJQC8qkE">Here are a fair sample of</a> <a href="https://www.youtube.com/watch?v=X9zw0QF12Kc">YouTube videos with such subtitles</a> <a href="https://www.youtube.com/watch?v=t1yXDcuwzpY">showcasing some very practical application use cases.</a></b> If unavailable, **Japanese automatic captions** can be queried from videos. Please be aware that critical inaccuracies are to be expected in such cases. 
 
 ### ☝️ Important Links
 
