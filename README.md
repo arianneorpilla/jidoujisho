@@ -8,7 +8,6 @@
 
 <p align="center" style="margin:0"><b>Latest GitHub Release:<br>
 <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.25.10-beta">0.25.10-beta 🇯🇵 → 🇬🇧</a><br>
-<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.16.8-beta-kren">0.16.8-beta 🇰🇷 → 🇬🇧</a></b><br>
 </p>
 
 <p align="center" style="margin:0"><b>Release Archive:<br>
@@ -54,7 +53,6 @@
 - [x] Import **Yomichan archive dictionaries** and export cards **with pitch accent information** from Kanjium
 - [x] **Frictionless sentence mining workflow for readers** via ッツ Ebook Reader
 - [x] Playback support for **network streams** including **Chromecast** and **Plex external player support**
-- [x] **(Experimental)** **Korean to English support** through the National Institute of Korean Language's KrDict 
 
 # ⚕️ Current state of the project
 
