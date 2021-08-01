@@ -171,10 +171,10 @@ Future<List<File>> extractSubtitles(String inputPath) async {
   final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
   final FlutterFFmpegConfig _flutterFFmpegConfig = new FlutterFFmpegConfig();
 
-  for (int i = 0; i < 99; i++) {
+  for (int i = 0; i < 10; i++) {
     String outputPath = "\"$gAppDirPath/extractSrt$i.srt\"";
     String command =
-        "-loglevel verbose -i \"$inputPath\" -map 0:s:$i $outputPath";
+        "-loglevel quiet -i \"$inputPath\" -map 0:s:$i $outputPath";
 
     String subPath = "$gAppDirPath/extractSrt$i.srt";
     File subFile = File(subPath);

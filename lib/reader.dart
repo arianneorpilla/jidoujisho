@@ -549,7 +549,8 @@ reader.addEventListener('click', (e) => {
           children: [
             InAppWebView(
               initialUrlRequest: URLRequest(
-                  url: Uri.parse(initialURL ?? "https://ttu-ebook.web.app/")),
+                url: Uri.parse(initialURL ?? "https://ttu-ebook.web.app/?min="),
+              ),
               initialOptions: options,
               androidOnPermissionRequest:
                   (controller, origin, resources) async {
@@ -647,7 +648,8 @@ reader.addEventListener('click', (e) => {
 
                       String currentIndexText = (await controller.getUrl())
                           .toString()
-                          .replaceAll("https://ttu-ebook.web.app/b/", "");
+                          .replaceAll("https://ttu-ebook.web.app/b/", "")
+                          .replaceAll("?min=", "");
                       currentIndex = int.parse(currentIndexText);
                       HistoryItem bookHistory = HistoryItem(
                           "https://ttu-ebook.web.app/b/$currentIndex",
@@ -681,10 +683,11 @@ reader.addEventListener('click', (e) => {
 
                         String currentIndexText = (await controller.getUrl())
                             .toString()
-                            .replaceAll("https://ttu-ebook.web.app/b/", "");
+                            .replaceAll("https://ttu-ebook.web.app/b/", "")
+                            .replaceAll("?min=", "");
                         currentIndex = int.parse(currentIndexText);
                         HistoryItem bookHistory = HistoryItem(
-                            "https://ttu-ebook.web.app/b/$currentIndex",
+                            "https://ttu-ebook.web.app/b/$currentIndex?min=",
                             currentTitle,
                             currentBookmarkDiv,
                             currentBase64Image,
@@ -713,7 +716,8 @@ reader.addEventListener('click', (e) => {
 
                 String currentIndexText = (await controller.getUrl())
                     .toString()
-                    .replaceAll("https://ttu-ebook.web.app/b/", "");
+                    .replaceAll("https://ttu-ebook.web.app/b/", "")
+                    .replaceAll("?min=", "");
                 currentIndex = int.tryParse(currentIndexText) ?? -1;
 
                 print("NEW CURRENT INDEX: $currentIndex");

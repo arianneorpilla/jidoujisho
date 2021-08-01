@@ -795,7 +795,11 @@ Future<void> addBookHistory(HistoryItem bookHistory) async {
     bookHistory.thumbnail = photoFileNameDir;
   }
 
-  bookHistories.removeWhere((entry) => entry.url == bookHistory.url);
+  bookHistories.removeWhere(
+    (entry) =>
+        entry.url.replaceAll("?min=", "") ==
+        bookHistory.url.replaceAll("?min=", ""),
+  );
   bookHistories.add(bookHistory);
 
   if (bookHistories.length >= 20) {
