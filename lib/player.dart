@@ -6,8 +6,8 @@ import 'package:audio_service/audio_service.dart';
 import 'package:chewie/chewie.dart';
 import 'package:clipboard_monitor/clipboard_monitor.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
-import 'package:gx_file_picker/gx_file_picker.dart';
-//import 'package:file_picker/file_picker.dart';
+//import 'package:gx_file_picker/gx_file_picker.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
@@ -149,13 +149,14 @@ class JidoujishoPlayerState extends State<JidoujishoPlayer> {
             List<dynamic> subtitleFutures = snapshot.data;
             List<File> internalSubs = subtitleFutures[0];
             File externalSubs = subtitleFutures[1];
+
             String unsanitized = "";
             if (externalSubs != null) {
               unsanitized = externalSubs.readAsStringSync();
             } else if (internalSubs != null && internalSubs.isNotEmpty) {
               unsanitized = internalSubs.first.readAsStringSync();
             }
-            String defaultSubtitles = sanitizeSrtNewlines(unsanitized);
+            String defaultSubtitles = sanitizeSrtNewlines(unsanitized) ?? "";
 
             lockLandscape();
 

@@ -1415,7 +1415,7 @@ class _SelectQualityDialog extends StatelessWidget {
               ),
               const SizedBox(width: 16.0),
               Text(
-                qualityTag,
+                qualityTag.replaceAll("(seek friendly)", ""),
                 style: TextStyle(
                   color: (currentQuality == qualityTag)
                       ? Colors.red

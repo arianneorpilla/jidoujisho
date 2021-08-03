@@ -652,7 +652,7 @@ reader.addEventListener('click', (e) => {
                           .replaceAll("?min=", "");
                       currentIndex = int.parse(currentIndexText);
                       HistoryItem bookHistory = HistoryItem(
-                          "https://ttu-ebook.web.app/b/$currentIndex",
+                          "https://ttu-ebook.web.app/b/$currentIndex?min=",
                           currentTitle,
                           currentBookmarkDiv,
                           currentBase64Image,
