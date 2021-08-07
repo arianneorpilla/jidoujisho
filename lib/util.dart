@@ -1,32 +1,33 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:auto_orientation/auto_orientation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_tesseract_ocr/flutter_tesseract_ocr.dart';
+import 'package:gx_file_picker/gx_file_picker.dart';
 import 'package:html/parser.dart' as parser;
 import 'package:html/dom.dart' as dom;
 import 'package:http/http.dart' as http;
+import 'package:image/image.dart' as im;
 import 'package:flutter/material.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:jidoujisho/preferences.dart';
+import 'package:jidoujisho/viewer.dart';
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:path/path.dart' as path;
 import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
+import 'package:transparent_image/transparent_image.dart';
 import 'package:ve_dart/ve_dart.dart';
 
 import 'package:jidoujisho/globals.dart';
 import 'package:wakelock/wakelock.dart';
 
 void unlockLandscape() {
-  bool canResume;
-  if (isLastSetVideo()) {
-    canResume = getVideoHistory().isNotEmpty;
-  } else {
-    canResume = getBookHistory().isNotEmpty;
-  }
-  gIsResumable.value = canResume;
-
+  setResumableByMediaType();
   Wakelock.disable();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -699,4 +700,872 @@ double parsePopularity(dynamic value) {
     return 0;
   }
   return value.toDouble();
+}
+
+class DropDownMenu extends StatefulWidget {
+  final List<String> options;
+  final ValueNotifier<String> selectedOption;
+
+  const DropDownMenu({this.options, this.selectedOption});
+
+  @override
+  DropDownMenuState createState() =>
+      DropDownMenuState(this.selectedOption, this.options);
+}
+
+class DropDownMenuState extends State<DropDownMenu> {
+  final ValueNotifier<String> _selectedDeck;
+  final List<String> _decks;
+
+  DropDownMenuState(this._selectedDeck, this._decks);
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButton<String>(
+      isExpanded: true,
+      value: _selectedDeck.value,
+      items: _decks.map((String value) {
+        return new DropdownMenuItem<String>(
+          value: value,
+          child: new Text("  $value"),
+        );
+      }).toList(),
+      onChanged: (selectedDeck) async {
+        setLastDeck(selectedDeck);
+
+        setState(() {
+          _selectedDeck.value = selectedDeck;
+        });
+      },
+    );
+  }
+}
+
+Future<String> processOcrTextFromFile(File inputImageFile) async {
+  im.Image image = im.decodeImage(inputImageFile.readAsBytesSync());
+  image = im.adjustColor(
+    image.clone(),
+  );
+  File cleanedImageFile = File("$gAppDirPath/extractOcr.jpg");
+  cleanedImageFile.writeAsBytesSync(im.encodeJpg(image));
+
+  String text = await FlutterTesseractOcr.extractText(
+    cleanedImageFile.path,
+    language: 'jpn_vert+jpn',
+    args: {
+      "psm": "0",
+      "preserve_interword_spaces": "1",
+    },
+  );
+
+  return text;
+}
+
+class Manga {
+  Directory directory;
+
+  Manga({this.directory});
+
+  String getMangaName() {
+    return path.basename(directory.path);
+  }
+
+  String getMangaAliasName() {
+    String nameAlias = getLibraryNameAlias(directory.path);
+    if (nameAlias != null) {
+      return nameAlias;
+    }
+
+    return getMangaName();
+  }
+
+  List<MangaChapter> getChapters() {
+    List<MangaChapter> chapters = [];
+
+    List<FileSystemEntity> entities = directory.listSync();
+    entities.sort((a, b) => a.path.compareTo(b.path));
+    entities.forEach((entity) {
+      if (entity is Directory) {
+        chapters.add(
+          MangaChapter(
+            directory: entity,
+          ),
+        );
+      }
+    });
+
+    return chapters;
+  }
+
+  int getUnfinishedChapters() {
+    int unfinishedChapters = 0;
+    getChapters().forEach((chapter) {
+      if (chapter.getMangaProgressState() !=
+          MangaProgressState.MANGA_FINISHED) {
+        unfinishedChapters += 1;
+      }
+    });
+
+    return unfinishedChapters;
+  }
+
+  Future<void> setUpToChapterFinished(
+    MangaChapter stopChapter, {
+    bool unmark = false,
+  }) async {
+    for (MangaChapter chapter in getChapters()) {
+      if (unmark) {
+        await chapter.setUnstarted();
+      } else {
+        await chapter.setFinished();
+      }
+      if (chapter.directory.path == stopChapter.directory.path) {
+        break;
+      }
+    }
+  }
+
+  Future<void> setLastChapterRead(MangaChapter chapter) async {
+    await gSharedPrefs.setString(this.directory.path, chapter.directory.path);
+  }
+
+  MangaChapter getLastChapterRead() {
+    String lastChapterPath = gSharedPrefs.getString(this.directory.path) ?? "";
+    Directory lastChapterDirectory = Directory(lastChapterPath);
+
+    if (lastChapterDirectory.existsSync()) {
+      return MangaChapter(directory: lastChapterDirectory);
+    } else {
+      return null;
+    }
+  }
+
+  ImageProvider getCover() {
+    return getChapters().first.getCover();
+  }
+
+  ImageProvider getAliasCover() {
+    File coverAliasFile = getLibraryCoverAlias(directory.path);
+    if (coverAliasFile.existsSync()) {
+      return FileImage(coverAliasFile);
+    }
+    return getCover();
+  }
+
+  File getCoverFile() {
+    return getChapters().first.getCoverFile();
+  }
+
+  Widget getWidget(BuildContext context, VoidCallback updateCallback) {
+    return InkWell(
+      child: Stack(
+        alignment: Alignment.bottomLeft,
+        children: [
+          Container(
+            padding: EdgeInsets.all(8),
+            child: Container(
+              color: Colors.grey[800].withOpacity(0.3),
+              child: AspectRatio(
+                aspectRatio: 250 / 350,
+                child: FadeInImage(
+                  image: getAliasCover(),
+                  placeholder: MemoryImage(kTransparentImage),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ),
+          if (getUnfinishedChapters() != 0)
+            Positioned(
+              right: 11.0,
+              top: 18.0,
+              child: Container(
+                height: 20,
+                color: Colors.black.withOpacity(0.8),
+                alignment: Alignment.center,
+                child: Text(
+                  "  " + getUnfinishedChapters().toString() + "  ",
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w300,
+                  ),
+                ),
+              ),
+            ),
+          LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+            return Container(
+              alignment: Alignment.center,
+              margin: EdgeInsets.all(8),
+              padding: EdgeInsets.fromLTRB(2, 2, 2, 4),
+              height: constraints.maxHeight * 0.175,
+              width: double.maxFinite,
+              color: Colors.black.withOpacity(0.6),
+              child: Text(
+                getMangaAliasName(),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+                textAlign: TextAlign.center,
+                softWrap: true,
+                style: TextStyle(
+                  fontSize: 9,
+                ),
+              ),
+            );
+          }),
+        ],
+      ),
+      onTap: () async {
+        await openMangaMenu(context, updateCallback);
+        updateCallback();
+      },
+      onLongPress: () async {
+        await openMangaMenu(context, updateCallback);
+        updateCallback();
+      },
+    );
+  }
+
+  Future openMangaMenu(BuildContext context, VoidCallback updateCallback) {
+    ScrollController scrollController = ScrollController();
+    ValueNotifier<bool> updateListener = ValueNotifier<bool>(true);
+
+    List<MangaChapter> chapters = getChapters();
+
+    Color getProgressColor(MangaProgressState mangaProgressState) {
+      switch (mangaProgressState) {
+        case MangaProgressState.MANGA_UNSTARTED:
+          return Colors.white;
+        case MangaProgressState.MANGA_VIEWED:
+        case MangaProgressState.MANGA_FINISHED:
+          return Colors.grey;
+      }
+
+      return null;
+    }
+
+    Widget buildProgressIndicator(MangaChapter chapter, Color color) {
+      int progress = chapter.getMangaPageProgress();
+      int pageCount = chapter.getImages().length;
+      double percentage = progress / pageCount;
+
+      if (progress == -1) {
+        return Icon(Icons.play_arrow, color: color);
+      } else if (percentage >= 1) {
+        return Icon(Icons.check, color: color);
+      }
+
+      return Padding(
+        child: SizedBox(
+          height: 14,
+          width: 14,
+          child: CircularProgressIndicator(
+            value: percentage,
+            backgroundColor: Colors.grey,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+            strokeWidth: 2,
+          ),
+        ),
+        padding: EdgeInsets.only(right: 5),
+      );
+    }
+
+    Widget buildMangaMenuContent() {
+      return Container(
+        width: double.maxFinite,
+        child: ValueListenableBuilder(
+          valueListenable: updateListener,
+          builder: (BuildContext context, bool value, Widget child) {
+            return RawScrollbar(
+              thumbColor: Colors.grey[600],
+              controller: scrollController,
+              child: ListView.builder(
+                  controller: scrollController,
+                  shrinkWrap: true,
+                  physics: ClampingScrollPhysics(),
+                  itemCount: chapters.length,
+                  itemBuilder: (context, index) {
+                    MangaChapter chapter = chapters[index];
+                    Color progressColor = getProgressColor(
+                      chapter.getMangaProgressState(),
+                    );
+
+                    return ListTile(
+                      dense: true,
+                      title: Row(
+                        children: [
+                          Icon(
+                            Icons.book_sharp,
+                            size: 20.0,
+                            color: progressColor,
+                          ),
+                          const SizedBox(width: 16.0),
+                          Expanded(
+                            child: Text(
+                              chapter.getChapterName(),
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: progressColor,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          buildProgressIndicator(chapter, progressColor),
+                        ],
+                      ),
+                      onTap: () async {
+                        await startViewer(
+                          context,
+                          chapter,
+                          updateCallback,
+                        );
+                        updateListener.value = !updateListener.value;
+                      },
+                      onLongPress: () async {
+                        await showChapterProgressDialog(context, chapter);
+                        updateListener.value = !updateListener.value;
+                      },
+                    );
+                  }),
+            );
+          },
+        ),
+      );
+    }
+
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          contentPadding:
+              EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
+          ),
+          title: Text(
+            getMangaAliasName(),
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+          ),
+          content: buildMangaMenuContent(),
+          actions: [
+            TextButton(
+              child: Text(
+                'EDIT',
+                style: TextStyle(color: Colors.white),
+              ),
+              onPressed: () async {
+                await showAliasDialog(
+                  context,
+                  directory.path,
+                  getMangaAliasName(),
+                  getMangaName(),
+                  getAliasCover(),
+                  getCover(),
+                );
+
+                Navigator.pop(context);
+                updateCallback();
+              },
+            ),
+            TextButton(
+              child: Text(
+                (getLastChapterRead() == null) ? 'READ' : 'RESUME',
+                style: TextStyle(color: Colors.white),
+              ),
+              onPressed: () async {
+                if (getLastChapterRead() == null) {
+                  await startViewer(
+                    context,
+                    getChapters().first,
+                    updateCallback,
+                  );
+                } else {
+                  await startViewer(
+                    context,
+                    getLastChapterRead(),
+                    updateCallback,
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+Future showChapterProgressDialog(
+    BuildContext context, MangaChapter chapter) async {
+  Widget alertDialog = AlertDialog(
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.zero,
+    ),
+    title: Text(chapter.getManga().getMangaName()),
+    content: Text(chapter.getChapterName()),
+    actions: <Widget>[
+      new TextButton(
+        child: Text(
+          'MARK ALL SO FAR UNSTARTED',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        style: TextButton.styleFrom(
+          textStyle: TextStyle(
+            color: Colors.white,
+          ),
+        ),
+        onPressed: () async {
+          await chapter
+              .getManga()
+              .setUpToChapterFinished(chapter, unmark: true);
+          Navigator.pop(context);
+        },
+      ),
+      new TextButton(
+        child: Text(
+          'MARK ALL SO FAR DONE',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        style: TextButton.styleFrom(
+          textStyle: TextStyle(
+            color: Colors.white,
+          ),
+        ),
+        onPressed: () async {
+          await chapter.getManga().setUpToChapterFinished(chapter);
+          Navigator.pop(context);
+        },
+      ),
+      TextButton(
+        child: Text(
+          'MARK UNSTARTED',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        style: TextButton.styleFrom(
+          textStyle: TextStyle(
+            color: Colors.white,
+          ),
+        ),
+        onPressed: () async {
+          await chapter.setUnstarted();
+          Navigator.pop(context);
+        },
+      ),
+      TextButton(
+        child: Text(
+          'MARK DONE',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        style: TextButton.styleFrom(
+          textStyle: TextStyle(
+            color: Colors.white,
+          ),
+        ),
+        onPressed: () async {
+          await chapter.setFinished();
+          Navigator.pop(context);
+        },
+      ),
+      TextButton(
+        child: Text(
+          'CANCEL',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        style: TextButton.styleFrom(
+          textStyle: TextStyle(
+            color: Colors.white,
+          ),
+        ),
+        onPressed: () => Navigator.pop(context),
+      ),
+    ],
+  );
+
+  await showDialog(
+    context: context,
+    builder: (context) => alertDialog,
+  );
+}
+
+enum MangaProgressState {
+  MANGA_UNSTARTED,
+  MANGA_VIEWED,
+  MANGA_FINISHED,
+}
+
+class MangaChapter {
+  Directory directory;
+
+  MangaChapter({this.directory});
+
+  Manga getManga() {
+    return Manga(directory: Directory(path.dirname(directory.path)));
+  }
+
+  String getChapterName() {
+    return directory.path.substring(directory.path.indexOf("_") + 1);
+  }
+
+  ImageProvider getCover() {
+    List<FileSystemEntity> entities = directory.listSync();
+    entities.sort((a, b) => a.path.compareTo(b.path));
+
+    for (FileSystemEntity entity in entities) {
+      if (entity is File) {
+        switch (path.extension(entity.path)) {
+          case ".jpg":
+          case ".jpeg":
+          case ".png":
+            return FileImage(entity);
+            break;
+          default:
+        }
+      }
+    }
+    return MemoryImage(kTransparentImage);
+  }
+
+  File getCoverFile() {
+    List<FileSystemEntity> entities = directory.listSync();
+    entities.sort((a, b) => a.path.compareTo(b.path));
+
+    for (FileSystemEntity entity in entities) {
+      if (entity is File) {
+        switch (path.extension(entity.path)) {
+          case ".jpg":
+          case ".jpeg":
+          case ".png":
+            return File(entity.path);
+            break;
+          default:
+        }
+      }
+    }
+    return null;
+  }
+
+  List<ImageProvider> getImages() {
+    List<ImageProvider> images = [];
+
+    List<FileSystemEntity> entities = directory.listSync();
+    entities.sort((a, b) => a.path.compareTo(b.path));
+    entities.forEach((entity) {
+      if (entity is File) {
+        switch (path.extension(entity.path)) {
+          case ".jpg":
+          case ".jpeg":
+          case ".png":
+            images.add(FileImage(entity));
+            break;
+          default:
+        }
+      }
+    });
+
+    return images;
+  }
+
+  MangaChapter getPreviousChapter() {
+    List<MangaChapter> chapters = getManga().getChapters();
+    int index = chapters
+        .indexWhere((chapter) => chapter.directory.path == directory.path);
+
+    if (index == 0) {
+      return null;
+    } else {
+      return chapters[index - 1];
+    }
+  }
+
+  MangaChapter getNextChapter() {
+    List<MangaChapter> chapters = getManga().getChapters();
+    int index = chapters
+        .indexWhere((chapter) => chapter.directory.path == directory.path);
+
+    if (index == chapters.length - 1) {
+      return null;
+    } else {
+      return chapters[index + 1];
+    }
+  }
+
+  MangaProgressState getMangaProgressState() {
+    int pageProgress = getMangaPageProgress();
+    if (pageProgress >= getImages().length) {
+      return MangaProgressState.MANGA_FINISHED;
+    } else if (pageProgress <= -1) {
+      return MangaProgressState.MANGA_UNSTARTED;
+    } else {
+      return MangaProgressState.MANGA_VIEWED;
+    }
+  }
+
+  Future<void> setMangaPageProgress(int pageProgress) async {
+    await gSharedPrefs.setInt(this.directory.path, pageProgress);
+  }
+
+  int getMangaPageProgress() {
+    return gSharedPrefs.getInt(this.directory.path) ?? -1;
+  }
+
+  Future<void> setFinished() async {
+    await setMangaPageProgress(getImages().length);
+  }
+
+  Future<void> setUnstarted() async {
+    await setMangaPageProgress(-1);
+  }
+}
+
+List<Directory> getTachiyomiDirectoryFolders() {
+  List<Directory> downloadSources = [];
+
+  Directory downloadsDirectory =
+      Directory(path.join(getTachiyomiDirectory().path, "downloads"));
+
+  if (downloadsDirectory.existsSync()) {
+    List<FileSystemEntity> entities = downloadsDirectory.listSync();
+    entities.sort((a, b) => a.path.compareTo(b.path));
+    entities.forEach((entity) {
+      if (entity is Directory) {
+        downloadSources.add(entity);
+      }
+    });
+  }
+
+  return downloadSources;
+}
+
+List<String> getTachiyomiSourceNames() {
+  List<String> sourceNames = [];
+
+  getTachiyomiDirectoryFolders().forEach((folder) {
+    sourceNames.add(path.basename(folder.path));
+  });
+
+  return sourceNames;
+}
+
+class MangaSource {
+  String sourceName;
+  Directory directory;
+
+  MangaSource.fromSourceName(String sourceName) {
+    this.sourceName = sourceName;
+    this.directory = Directory(
+        path.join(getTachiyomiDirectory().path, "downloads", sourceName));
+  }
+
+  List<Manga> getMangaFromSource() {
+    List<Manga> manga = [];
+
+    List<FileSystemEntity> entities = directory.listSync();
+    entities.sort((a, b) => a.path.compareTo(b.path));
+    entities.forEach((entity) {
+      if (entity is Directory) {
+        manga.add(Manga(directory: entity));
+      }
+    });
+
+    return manga;
+  }
+}
+
+List<Manga> getAllManga() {
+  List<Manga> allManga = [];
+  List<String> sourceNames = getTachiyomiSourceNames();
+  sourceNames
+      .removeWhere((sourceName) => getHiddenSourcesList().contains(sourceName));
+  for (String sourceName in sourceNames) {
+    MangaSource mangaSource = MangaSource.fromSourceName(sourceName);
+    allManga.addAll(mangaSource.getMangaFromSource());
+  }
+
+  allManga.sort((a, b) => a.getMangaName().compareTo(b.getMangaName()));
+  return allManga;
+}
+
+Future showAliasDialog(
+  BuildContext context,
+  String path,
+  String name,
+  String actualName,
+  ImageProvider cover,
+  ImageProvider actualCover,
+) async {
+  TextEditingController _nameAliasController = TextEditingController(
+    text: name,
+  );
+  TextEditingController _coverAliasController = TextEditingController(
+    text: "a",
+  );
+
+  File newAliasCover;
+  ValueNotifier<ImageProvider> imageProviderNotifier =
+      ValueNotifier<ImageProvider>(cover);
+
+  Widget showPreviewImage() {
+    return ValueListenableBuilder(
+      valueListenable: imageProviderNotifier,
+      builder:
+          (BuildContext context, ImageProvider imageProvider, Widget child) {
+        return Image(image: imageProvider);
+      },
+    );
+  }
+
+  await showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.zero,
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(width: double.maxFinite, height: 1),
+              TextField(
+                controller: _nameAliasController,
+                decoration: InputDecoration(
+                  labelText: 'Name alias',
+                  suffixIcon: IconButton(
+                    iconSize: 18,
+                    onPressed: () async {
+                      _nameAliasController.text = actualName;
+                    },
+                    icon: Icon(Icons.undo, color: Colors.white),
+                  ),
+                ),
+              ),
+              TextField(
+                readOnly: true,
+                controller: _coverAliasController,
+                style: TextStyle(color: Colors.transparent),
+                decoration: InputDecoration(
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                  labelText: 'Cover alias',
+                  suffixIcon: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          child: showPreviewImage(),
+                          padding: EdgeInsets.only(top: 5, bottom: 5),
+                        ),
+                      ),
+                      SizedBox(width: 5),
+                      IconButton(
+                        iconSize: 18,
+                        onPressed: () async {
+                          final _picker = ImagePicker();
+                          final pickedFile = await _picker.getImage(
+                              source: ImageSource.gallery);
+                          newAliasCover = File(pickedFile.path);
+                          imageProviderNotifier.value =
+                              FileImage(newAliasCover);
+                        },
+                        icon: Icon(Icons.file_upload, color: Colors.white),
+                      ),
+                      IconButton(
+                        iconSize: 18,
+                        onPressed: () async {
+                          newAliasCover = null;
+                          imageProviderNotifier.value = actualCover;
+                        },
+                        icon: Icon(Icons.undo, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: Text('CANCEL', style: TextStyle(color: Colors.white)),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          TextButton(
+            child: Text('APPLY', style: TextStyle(color: Colors.white)),
+            onPressed: () async {
+              String newNameAlias = _nameAliasController.text.trim();
+
+              if (newNameAlias.isNotEmpty) {
+                await setLibraryNameAlias(path, newNameAlias);
+
+                if (newAliasCover != null) {
+                  setLibraryCoverAlias(path, newAliasCover);
+                } else {
+                  if (getLibraryCoverAlias(path).existsSync()) {
+                    getLibraryCoverAlias(path).deleteSync();
+                  }
+                }
+              }
+
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+void setResumableByMediaType() {
+  bool resumable = false;
+  switch (getLastMediaType()) {
+    case MediaType.none:
+      resumable = false;
+      break;
+    case MediaType.video:
+      resumable = getVideoHistory().isNotEmpty;
+      break;
+    case MediaType.book:
+      resumable = getBookHistory().isNotEmpty;
+      break;
+    case MediaType.manga:
+      resumable = getLastReadMangaDirectory().isNotEmpty;
+      break;
+  }
+
+  gIsResumable = ValueNotifier<bool>(resumable);
+}
+
+Future startViewer(BuildContext context, MangaChapter chapter,
+    VoidCallback updateCallback) async {
+  SystemChrome.setEnabledSystemUIOverlays([]);
+  await Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => Viewer(chapter),
+    ),
+  ).then((result) {
+    setResumableByMediaType();
+    SystemChrome.setEnabledSystemUIOverlays(
+        [SystemUiOverlay.bottom, SystemUiOverlay.top]);
+
+    updateCallback();
+  });
 }

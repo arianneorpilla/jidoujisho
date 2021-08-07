@@ -38,7 +38,7 @@
 
 # 📚 Uninterrupted language immersion at your fingertips
 
-**jidoujisho** is an Android video player, reader assistant and card creation toolkit with features specifically helpful for language learners. 
+**jidoujisho** is an Android video player, reader assistant, OCR image viewer and card creation toolkit with features specifically helpful for language learners. 
 
 - [x] Text selection of subtitles allows for **quick dictionary lookups within the application**
 - [x] **Export cards to AnkiDroid**, complete with a snapshot and audio of the current context
@@ -170,7 +170,7 @@ A primer on the basics of the application is as follows.
 
 # 👥 Contribution and attribution
 
-jidoujisho is written in <b><a href="https://dart.dev/">Dart</a></b> and powered by <b><a href="https://flutter.dev/">Flutter</a></b>. Bilingual dictionary definitions are queried from <b><a href="https://jisho.org/">Jisho.org</a></b> and monolingual dictionary definitions are from <b><a href="https://sakura-paris.org/">Sora</a></b>. Pitch accent patterns are sourced from <b><a href="https://github.com/mifunetoshiro/kanjium">Kanjium</a></b>. Reader WebView linked to <b><a href="https://ttu-ebook.web.app">ッツ Ebook Reader</b></a>. Video streaming via <b><a href="https://youtube.com/">YouTube</a></b>. Image search via <b><a href="https://bing.com//">Bing</a></b>.
+jidoujisho is written in <b><a href="https://dart.dev/">Dart</a></b> and powered by <b><a href="https://flutter.dev/">Flutter</a></b>. Bilingual online dictionary definitions are queried from <b><a href="https://jisho.org/">Jisho.org</a></b> and monolingual online dictionary definitions are from <b><a href="https://sakura-paris.org/">Sora</a></b>. Pitch accent patterns are sourced from <b><a href="https://github.com/mifunetoshiro/kanjium">Kanjium</a></b>. Reader WebView linked to <b><a href="https://ttu-ebook.web.app">ッツ Ebook Reader</b></a>. Optical character recognition via <b><a href="https://github.com/tesseract-ocr/tesseract">Tesseract 4</a></b> with best trained data. Video streaming via <b><a href="https://youtube.com/">YouTube</a></b>. Image search via <b><a href="https://bing.com//">Bing</a></b>.
 
 If you like what I've done so far, you can help me out by testing the application on various devices so that I can gauge the compatibility of the application with different versions of Android, <b><a href="https://www.buymeacoffee.com/lrorpilla">making a donation</a></b> or collaborating with me on further improvements.
 

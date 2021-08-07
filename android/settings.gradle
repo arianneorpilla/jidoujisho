@@ -1,4 +1,4 @@
-include ':app'
+include ':app', ':tesseract_ocr'
 
 def localPropertiesFile = new File(rootProject.projectDir, "local.properties")
 def properties = new Properties()

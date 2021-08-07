@@ -477,9 +477,9 @@ void showAnkiDialog(
                               );
                             },
                           ),
-                    DeckDropDown(
-                      decks: decks,
-                      selectedDeck: _selectedDeck,
+                    DropDownMenu(
+                      options: decks,
+                      selectedOption: _selectedDeck,
                     ),
                   ],
                 ),
@@ -646,45 +646,6 @@ Future<List<String>> getDecks() async {
   Map<dynamic, dynamic> deckMap = await platform.invokeMethod('getDecks');
 
   return deckMap.values.toList().cast<String>();
-}
-
-class DeckDropDown extends StatefulWidget {
-  final List<String> decks;
-  final ValueNotifier<String> selectedDeck;
-
-  const DeckDropDown({this.decks, this.selectedDeck});
-
-  @override
-  _DeckDropDownState createState() =>
-      _DeckDropDownState(this.selectedDeck, this.decks);
-}
-
-class _DeckDropDownState extends State<DeckDropDown> {
-  final ValueNotifier<String> _selectedDeck;
-  final List<String> _decks;
-
-  _DeckDropDownState(this._selectedDeck, this._decks);
-
-  @override
-  Widget build(BuildContext context) {
-    return DropdownButton<String>(
-      isExpanded: true,
-      value: _selectedDeck.value,
-      items: _decks.map((String value) {
-        return new DropdownMenuItem<String>(
-          value: value,
-          child: new Text("  $value"),
-        );
-      }).toList(),
-      onChanged: (selectedDeck) async {
-        setLastDeck(selectedDeck);
-
-        setState(() {
-          _selectedDeck.value = selectedDeck;
-        });
-      },
-    );
-  }
 }
 
 Future<String> addMediaFromUri(

@@ -225,25 +225,13 @@ Future<void> removeSearchHistory(String term) async {
   await gSharedPrefs.setString('searchHistory', jsonEncode(history));
 }
 
-Future<void> setAnkiDroidDirectory(Directory directory) async {
-  await gSharedPrefs.setString('ankiDroidDirectory', directory.path);
+Future<void> setTachiyomiDirectory(Directory directory) async {
+  await gSharedPrefs.setString('tachiyomiDirectory', directory.path);
 }
 
-Directory getAnkiDroidDirectory() {
-  String directoryPath = gSharedPrefs.getString('ankiDroidDirectory') ??
-      'storage/emulated/0/AnkiDroid';
-  Directory directory = Directory(directoryPath);
-
-  return directory;
-}
-
-Future<void> setTermBankDirectory(Directory directory) async {
-  await gSharedPrefs.setString('termBankDirectory', directory.path);
-}
-
-Directory getTermBankDirectory() {
-  String directoryPath = gSharedPrefs.getString('termBankDirectory') ??
-      'storage/emulated/0/jidoujisho';
+Directory getTachiyomiDirectory() {
+  String directoryPath = gSharedPrefs.getString('tachiyomiDirectory') ??
+      'storage/emulated/0/Tachiyomi';
   Directory directory = Directory(directoryPath);
 
   return directory;
@@ -257,6 +245,17 @@ String getLastDeck() {
   String lastDeck = gSharedPrefs.getString('lastDeck') ?? 'Default';
 
   return lastDeck;
+}
+
+Future<void> setLastTachiyomiSource(String lastTachiyomiSource) async {
+  await gSharedPrefs.setString("lastTachiyomiSource", lastTachiyomiSource);
+}
+
+String getLastTachiyomiSource() {
+  String lastTachiyomiSource =
+      gSharedPrefs.getString('lastTachiyomiSource') ?? '';
+
+  return lastTachiyomiSource;
 }
 
 Future<void> setPreferredQuality(int preferredQualityIndex) async {
@@ -326,24 +325,20 @@ bool getLatinFilterMode() {
   return gSharedPrefs.getBool("latinFilterMode") ?? false;
 }
 
-bool getLastSetMediaType() {
-  return gSharedPrefs.getBool("lastSetMediaType") ?? false;
+enum MediaType {
+  none,
+  video,
+  book,
+  manga,
 }
 
-Future setLastSetVideo() async {
-  await gSharedPrefs.setBool("lastSetMediaType", false);
+MediaType getLastMediaType() {
+  int index = gSharedPrefs.getInt("lastMediaType") ?? 0;
+  return MediaType.values[index];
 }
 
-Future setLastSetBook() async {
-  await gSharedPrefs.setBool("lastSetMediaType", true);
-}
-
-bool isLastSetBook() {
-  return (getLastSetMediaType() == true);
-}
-
-bool isLastSetVideo() {
-  return (getLastSetMediaType() == false);
+Future<void> setLastMediaType(MediaType mediaType) async {
+  await gSharedPrefs.setInt("lastMediaType", mediaType.index);
 }
 
 Future<void> toggleListeningComprehensionMode() async {
@@ -377,6 +372,22 @@ String getLastPlayedPath() {
 int getLastPlayedPosition() {
   return gSharedPrefs.getInt("lastPlayedPosition") ??
       getVideoHistoryPosition().last.position;
+}
+
+String getLastReadMangaDirectory() {
+  return gSharedPrefs.getString("lastReadMangaDirectory") ?? "";
+}
+
+int getLastReadMangaPosition() {
+  return gSharedPrefs.getInt("lastReadMangaPosition") ?? -1;
+}
+
+Future<void> setLastReadMangaDirectory(String path) async {
+  await gSharedPrefs.setString("lastReadMangaDirectory", path);
+}
+
+Future<void> setLastReadMangaPosition(int position) async {
+  await gSharedPrefs.setInt("lastReadMangaPosition", position);
 }
 
 Future<void> setScopedStorageDontShow() async {
@@ -935,4 +946,49 @@ Future<void> setPrevDictionary() async {
   } else {
     await setCurrentDictionary(allDictionaries[currentIndex - 1]);
   }
+}
+
+List<String> getHiddenSourcesList() {
+  String prefsHiddenSources =
+      gSharedPrefs.getString('hiddenSourcesList') ?? '[]';
+  List<String> hiddenSourcesList =
+      (jsonDecode(prefsHiddenSources) as List<dynamic>).cast<String>();
+
+  return hiddenSourcesList;
+}
+
+Future<void> setHiddenSourcesList(List<String> hiddenSourcesList) async {
+  await gSharedPrefs.setString(
+      'hiddenSourcesList', jsonEncode(hiddenSourcesList));
+}
+
+Future<void> setLibraryNameAlias(String path, String alias) async {
+  await gSharedPrefs.setString("jidoujisho-library-name-alias@@$path", alias);
+}
+
+String getLibraryNameAlias(String path) {
+  return gSharedPrefs.getString("jidoujisho-library-name-alias@@$path");
+}
+
+File setLibraryCoverAlias(String directoryPath, File alias) {
+  File coverAliasFile =
+      File(path.join(gAppDirPath, "coverAliases", directoryPath));
+  Directory coverAliasDirectory = Directory(path.dirname(coverAliasFile.path));
+
+  if (!coverAliasDirectory.existsSync()) {
+    coverAliasDirectory.createSync(recursive: true);
+  }
+  return alias.copySync(coverAliasFile.path);
+}
+
+File getLibraryCoverAlias(String directoryPath) {
+  return File(path.join(gAppDirPath, "coverAliases", directoryPath));
+}
+
+bool hasCoverAlias(String directoryPath) {
+  File coverAliasFile =
+      File(path.join(gAppDirPath, "coverAliases", directoryPath));
+  Directory coverAliasDirectory = Directory(path.dirname(coverAliasFile.path));
+
+  return (coverAliasDirectory.existsSync());
 }

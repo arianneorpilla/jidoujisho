@@ -8,8 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_archive/flutter_archive.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-//import 'package:gx_file_picker/gx_file_picker.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:gx_file_picker/gx_file_picker.dart';
+//import 'package:file_picker/file_picker.dart';
 import 'package:html/parser.dart' as parser;
 import 'package:http/http.dart' as http;
 import 'package:jidoujisho/globals.dart';
@@ -1259,10 +1259,6 @@ Future<void> importCustomDictionary(
   importDirectory.createSync();
   await ZipFile.extractToDirectory(
       zipFile: archiveFile, destinationDir: importDirectory);
-
-  if (!getTermBankDirectory().existsSync()) {
-    getTermBankDirectory().createSync(recursive: true);
-  }
 
   await Future.delayed(Duration(milliseconds: 500), () {});
 

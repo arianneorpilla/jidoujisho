@@ -11,6 +11,7 @@ import 'package:async/async.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
+
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
@@ -81,13 +82,7 @@ void main() async {
 
   gSharedPrefs = await SharedPreferences.getInstance();
   gIsSelectMode = ValueNotifier<bool>(getSelectMode());
-  bool canResume;
-  if (isLastSetVideo()) {
-    canResume = getVideoHistory().isNotEmpty;
-  } else {
-    canResume = getBookHistory().isNotEmpty;
-  }
-  gIsResumable = ValueNotifier<bool>(canResume);
+  setResumableByMediaType();
 
   maintainTrendingCache();
   maintainClosedCaptions();
@@ -101,6 +96,8 @@ void main() async {
   initializeKanjiumEntries().then((entries) {
     gKanjiumDictionary.value = entries;
   });
+
+  //String text = await processOcrTextFromFile(inputImageFile);
 
   runApp(App());
 
@@ -456,28 +453,13 @@ class _HomeState extends State<Home> {
       }
     } else {
       setState(() {
-        if (getNavigationBarItems()[index].label == "Player") {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => JidoujishoPlayer(
-                playerMode: JidoujishoPlayerMode.localFile,
-              ),
-            ),
-          ).then((result) {
-            setState(() {
-              unlockLandscape();
-            });
-          });
-        } else {
-          _selectedIndex = index;
-          setLastMenuSeen(index);
-          if (_isSearching || _isChannelView || _isCreatorView) {
-            _isSearching = false;
-            _isChannelView = false;
-            _isCreatorView = false;
-            _searchQuery = "";
-          }
+        _selectedIndex = index;
+        setLastMenuSeen(index);
+        if (_isSearching || _isChannelView || _isCreatorView) {
+          _isSearching = false;
+          _isChannelView = false;
+          _isCreatorView = false;
+          _searchQuery = "";
         }
       });
     }
@@ -515,10 +497,12 @@ class _HomeState extends State<Home> {
     switch (getNavigationBarItems()[index].label) {
       case "Trending":
         return buildBody();
+      case "Player":
+        return History(setChannelVideoSearch);
       case "Reader":
         return buildReader();
-      case "History":
-        return History(setChannelVideoSearch);
+      case "Viewer":
+        return buildViewer();
       case "Dictionary":
         return ClipboardMenu(setCreatorView, _dictionaryScrollOffset);
       default:
@@ -535,17 +519,144 @@ class _HomeState extends State<Home> {
       ),
     ).then((result) {
       setState(() {
-        bool canResume;
-        if (isLastSetVideo()) {
-          canResume = getVideoHistory().isNotEmpty;
-        } else {
-          canResume = getBookHistory().isNotEmpty;
-        }
-        gIsResumable.value = canResume;
+        setResumableByMediaType();
         SystemChrome.setEnabledSystemUIOverlays(
             [SystemUiOverlay.bottom, SystemUiOverlay.top]);
       });
     });
+  }
+
+  Widget buildViewer() {
+    Widget centerMessage(String text, IconData icon, bool dots) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: Colors.grey,
+              size: 72,
+            ),
+            const SizedBox(height: 6),
+            Wrap(
+              alignment: WrapAlignment.end,
+              crossAxisAlignment: WrapCrossAlignment.end,
+              children: [
+                Text(
+                  text,
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 20,
+                  ),
+                ),
+                (dots)
+                    ? SizedBox(
+                        width: 12,
+                        height: 16,
+                        child: JumpingDotsProgressIndicator(
+                          color: Colors.grey,
+                        ),
+                      )
+                    : SizedBox.shrink()
+              ],
+            )
+          ],
+        ),
+      );
+    }
+
+    ValueNotifier<String> selectedSource =
+        ValueNotifier<String>(getLastTachiyomiSource());
+
+    Widget sourcesDropdown() {
+      List<String> sourceNames = ["All sources"];
+      sourceNames.addAll(getTachiyomiSourceNames());
+      String lastTachiyomiSource = getLastTachiyomiSource();
+      if (!sourceNames.contains(lastTachiyomiSource)) {
+        lastTachiyomiSource = sourceNames.first;
+      }
+
+      return Container(
+        width: double.infinity,
+        margin: EdgeInsets.only(
+          bottom: 12,
+          left: 12,
+          right: 12,
+        ),
+        child: DropDownMenu(
+          options: sourceNames,
+          selectedOption: selectedSource,
+        ),
+      );
+    }
+
+    String getErrorMessage() {
+      if (!getTachiyomiDirectory().existsSync()) {
+        return "Tachiyomi directory does not exist";
+      } else if (getTachiyomiDirectory().listSync().isEmpty) {
+        return "No downloads in Tachiyomi directory";
+      }
+
+      return null;
+    }
+
+    if (getErrorMessage() != null) {
+      return Column(children: [
+        sourcesDropdown(),
+        Expanded(
+          child: centerMessage(
+            getErrorMessage(),
+            Icons.library_books,
+            false,
+          ),
+        ),
+      ]);
+    }
+
+    ScrollController scrollController = ScrollController();
+
+    return RawScrollbar(
+      thumbColor: Colors.grey[600],
+      controller: scrollController,
+      child: ListView(
+        shrinkWrap: true,
+        controller: scrollController,
+        key: UniqueKey(),
+        children: [
+          sourcesDropdown(),
+          ValueListenableBuilder<String>(
+            valueListenable: selectedSource,
+            builder: (context, value, child) {
+              setLastTachiyomiSource(value);
+              MangaSource mangaSource;
+              List<Manga> allManga;
+
+              if (value != "All sources") {
+                mangaSource =
+                    MangaSource.fromSourceName(getLastTachiyomiSource());
+                allManga = mangaSource.getMangaFromSource();
+              } else {
+                allManga = getAllManga();
+              }
+
+              return GridView.builder(
+                  physics: NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: allManga.length,
+                  gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 200,
+                    childAspectRatio: 250 / 350,
+                  ),
+                  itemBuilder: (BuildContext context, int index) {
+                    Manga manga = allManga[index];
+
+                    return manga.getWidget(context, setStateFromResult);
+                  });
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   Widget buildReader() {
@@ -611,7 +722,7 @@ class _HomeState extends State<Home> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.chrome_reader_mode, size: 16),
+                  Icon(Icons.text_snippet, size: 16),
                   SizedBox(width: 5),
                   Text(
                     readerMessage,
@@ -633,7 +744,7 @@ class _HomeState extends State<Home> {
 
     Widget emptyMessage = centerMessage(
       "No books added to reader",
-      Icons.chrome_reader_mode,
+      Icons.library_books,
       false,
     );
 
@@ -701,6 +812,23 @@ class _HomeState extends State<Home> {
       progress = 0;
     }
 
+    String bookNameAlias() {
+      String nameAlias = getLibraryNameAlias(book.url);
+      if (nameAlias != null) {
+        return nameAlias;
+      }
+
+      return book.heading;
+    }
+
+    ImageProvider bookCoverAlias() {
+      File coverAliasFile = getLibraryCoverAlias(book.url);
+      if (coverAliasFile.existsSync()) {
+        return FileImage(coverAliasFile);
+      }
+      return imageProvider;
+    }
+
     return InkWell(
       child: Stack(
         alignment: Alignment.bottomLeft,
@@ -712,9 +840,9 @@ class _HomeState extends State<Home> {
               child: AspectRatio(
                 aspectRatio: 176 / 250,
                 child: FadeInImage(
-                  image: imageProvider,
+                  image: bookCoverAlias(),
                   placeholder: MemoryImage(kTransparentImage),
-                  fit: BoxFit.contain,
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
@@ -729,7 +857,7 @@ class _HomeState extends State<Home> {
               width: double.maxFinite,
               color: Colors.black.withOpacity(0.6),
               child: Text(
-                book.heading ?? "",
+                bookNameAlias() ?? "",
                 overflow: TextOverflow.ellipsis,
                 maxLines: 2,
                 textAlign: TextAlign.center,
@@ -763,14 +891,14 @@ class _HomeState extends State<Home> {
                 borderRadius: BorderRadius.zero,
               ),
               title: Text(
-                book.heading,
+                bookNameAlias(),
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),
               content: AspectRatio(
                 aspectRatio: 176 / 250,
                 child: FadeInImage(
-                  image: imageProvider,
+                  image: bookCoverAlias(),
                   placeholder: MemoryImage(kTransparentImage),
                 ),
               ),
@@ -784,20 +912,33 @@ class _HomeState extends State<Home> {
                     await removeBookHistory(book);
 
                     setState(() {
-                      bool canResume;
-                      if (isLastSetVideo()) {
-                        canResume = getVideoHistory().isNotEmpty;
-                      } else {
-                        canResume = getBookHistory().isNotEmpty;
-                      }
-                      gIsResumable.value = canResume;
+                      setResumableByMediaType();
                     });
                     Navigator.pop(context);
                   },
                 ),
                 TextButton(
                   child: Text(
-                    'READ',
+                    'EDIT',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  onPressed: () async {
+                    await showAliasDialog(
+                      context,
+                      book.url,
+                      bookNameAlias(),
+                      book.heading,
+                      bookCoverAlias(),
+                      imageProvider,
+                    );
+
+                    Navigator.pop(context);
+                    setState(() {});
+                  },
+                ),
+                TextButton(
+                  child: Text(
+                    'RESUME',
                     style: TextStyle(color: Colors.white),
                   ),
                   onPressed: () {
@@ -823,7 +964,7 @@ class _HomeState extends State<Home> {
       items.addAll(
         [
           BottomNavigationBarItem(
-            icon: Icon(Icons.whatshot_sharp),
+            icon: Icon(Icons.whatshot),
             label: 'Trending',
           ),
         ],
@@ -833,20 +974,20 @@ class _HomeState extends State<Home> {
     items.addAll(
       [
         BottomNavigationBarItem(
-          icon: Icon(Icons.history_sharp),
-          label: 'History',
+          icon: Icon(Icons.video_library),
+          label: 'Player',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.library_books),
+          label: 'Reader',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.photo_library),
+          label: 'Viewer',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.auto_stories),
           label: 'Dictionary',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.chrome_reader_mode),
-          label: 'Reader',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.play_circle_filled_sharp),
-          label: 'Player',
         ),
       ],
     );
@@ -1752,6 +1893,10 @@ class _HomeState extends State<Home> {
           value: 'Manage dictionaries',
         ),
         PopupMenuItem<String>(
+          child: const Text('Set Tachiyomi directory'),
+          value: 'Set Tachiyomi directory',
+        ),
+        PopupMenuItem<String>(
           child: const Text('View repository on GitHub'),
           value: 'View repository on GitHub',
         ),
@@ -1847,8 +1992,8 @@ class _HomeState extends State<Home> {
                 keyboardType: TextInputType.multiline,
                 decoration: InputDecoration(
                     hintText: "Paste channel IDs line by line to import here"),
-                expands: true,
-                maxLines: null,
+                minLines: 1,
+                maxLines: 500,
               ),
               actions: <Widget>[
                 TextButton(
@@ -1885,6 +2030,83 @@ class _HomeState extends State<Home> {
       case "Manage dictionaries":
         openDictionaryMenu(context, true);
         break;
+      case "Set Tachiyomi directory":
+        String currentDirectoryPath = getTachiyomiDirectory().path;
+        TextEditingController _directoryFieldController = TextEditingController(
+          text: currentDirectoryPath,
+        );
+
+        String initialText = getHiddenSourcesList().join("\n");
+        TextEditingController _hiddenSourcesFieldController =
+            TextEditingController(
+          text: initialText,
+        );
+
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.zero,
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: _directoryFieldController,
+                      decoration: InputDecoration(
+                          hintText: "storage/emulated/0/Tachiyomi",
+                          labelText: 'Tachiyomi directory path'),
+                    ),
+                    TextField(
+                      controller: _hiddenSourcesFieldController,
+                      keyboardType: TextInputType.multiline,
+                      decoration: InputDecoration(
+                        hintText:
+                            "Manga from hidden sources will be hidden from 'All sources', include the language code in the source name",
+                        labelText: 'Hidden sources list',
+                      ),
+                      minLines: 1,
+                      maxLines: 100,
+                    ),
+                  ],
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('CANCEL', style: TextStyle(color: Colors.white)),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                TextButton(
+                  child: Text('OK', style: TextStyle(color: Colors.white)),
+                  onPressed: () async {
+                    String newDirectoryPath = _directoryFieldController.text;
+                    String hiddenSources = _hiddenSourcesFieldController.text;
+                    Directory newDirectory = Directory(newDirectoryPath);
+
+                    if (newDirectory.existsSync()) {
+                      await setTachiyomiDirectory(newDirectory);
+                      List<String> hiddenSourcesList =
+                          hiddenSources.split("\n");
+                      hiddenSourcesList
+                          .forEach((channelID) => channelID.trim());
+                      hiddenSourcesList
+                          .removeWhere((channelID) => channelID.isEmpty);
+                      await setHiddenSourcesList(hiddenSourcesList);
+                      Navigator.pop(context);
+
+                      setState(() {});
+                    }
+                  },
+                ),
+              ],
+            );
+          },
+        );
+        break;
       case "View repository on GitHub":
         await launch("https://github.com/lrorpilla/jidoujisho");
         break;
@@ -1892,10 +2114,10 @@ class _HomeState extends State<Home> {
         await launch("https://github.com/lrorpilla/jidoujisho/issues/new");
         break;
       case "About this app":
-        const String legalese = "A mobile video player, reader assistant and card creation toolkit tailored for language learners.\n\n" +
+        const String legalese = "A mobile video player, reader assistant, OCR image viewer and card creation toolkit tailored for language learners.\n\n" +
             "Built for the Japanese language learning community by Leo Rafael Orpilla. " +
-            "Bilingual definitions queried from Jisho.org. Monolingual definitions queried from Sora. Pitch accent patterns from Kanjium. " +
-            "Reader WebView linked to ッツ Ebook Reader. Video streaming via YouTube. Image search via Bing. Logo by Aaron Marbella.\n\n" +
+            "Bilingual online definitions queried from Jisho.org. Monolingual online definitions queried from Sora. Pitch accent patterns from Kanjium. " +
+            "Reader WebView linked to ッツ Ebook Reader. Optical character recognition via Tesseract 4 with best trained data. Video streaming via YouTube. Image search via Bing. Logo by Aaron Marbella.\n\n" +
             "jidoujisho is free and open source software. Liking the application? " +
             "Help out by providing feedback, making a donation, reporting issues or collaborating " +
             "for further improvements on GitHub.";
@@ -1946,40 +2168,53 @@ class _HomeState extends State<Home> {
           return IconButton(
             icon: const Icon(Icons.update_sharp),
             onPressed: () async {
-              if (isLastSetVideo()) {
-                int lastPlayedPosition = getLastPlayedPosition();
-                String lastPlayedPath = getLastPlayedPath();
+              switch (getLastMediaType()) {
+                case MediaType.none:
+                  return;
+                case MediaType.video:
+                  int lastPlayedPosition = getLastPlayedPosition();
+                  String lastPlayedPath = getLastPlayedPath();
 
-                JidoujishoPlayerMode playerMode;
-                if (lastPlayedPath.startsWith("https://") ||
-                    lastPlayedPath.startsWith("http://")) {
-                  playerMode = JidoujishoPlayerMode.youtubeStream;
-                } else {
-                  playerMode = JidoujishoPlayerMode.localFile;
-                }
+                  JidoujishoPlayerMode playerMode;
+                  if (lastPlayedPath.startsWith("https://") ||
+                      lastPlayedPath.startsWith("http://")) {
+                    playerMode = JidoujishoPlayerMode.youtubeStream;
+                  } else {
+                    playerMode = JidoujishoPlayerMode.localFile;
+                  }
 
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => JidoujishoPlayer(
-                      playerMode: playerMode,
-                      url: lastPlayedPath,
-                      initialPosition: lastPlayedPosition,
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => JidoujishoPlayer(
+                        playerMode: playerMode,
+                        url: lastPlayedPath,
+                        initialPosition: lastPlayedPosition,
+                      ),
                     ),
-                  ),
-                ).then((returnValue) {
-                  setState(() {
-                    unlockLandscape();
+                  ).then((returnValue) {
+                    setState(() {
+                      unlockLandscape();
+                    });
                   });
-                });
-              } else {
-                String initialURL;
-                try {
-                  initialURL = getBookHistory().last.url;
-                } catch (e) {
-                  initialURL = null;
-                }
-                startReader(initialURL);
+                  break;
+                case MediaType.book:
+                  String initialURL;
+                  try {
+                    initialURL = getBookHistory().last.url;
+                  } catch (e) {
+                    initialURL = null;
+                  }
+                  startReader(initialURL);
+                  break;
+                case MediaType.manga:
+                  Directory chapterDirectory =
+                      Directory(getLastReadMangaDirectory());
+                  MangaChapter chapter =
+                      MangaChapter(directory: chapterDirectory);
+                  startViewer(context, chapter, setStateFromResult);
+
+                  break;
               }
             },
           );
@@ -3258,10 +3493,59 @@ class _HistoryState extends State<History> {
     }
 
     Widget emptyMessage = centerMessage(
-      "No videos in history",
-      Icons.history_sharp,
+      "No videos in player history",
+      Icons.video_library,
       false,
     );
+
+    Widget openVideoFileButton() {
+      return Container(
+        width: double.infinity,
+        margin: EdgeInsets.only(bottom: 12),
+        color: Colors.grey[800].withOpacity(0.2),
+        child: InkWell(
+          child: Padding(
+            padding: EdgeInsets.all(12),
+            child: InkWell(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.upload_file, size: 16),
+                  SizedBox(width: 5),
+                  Text(
+                    "Select Video File",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          onTap: () async {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => JidoujishoPlayer(
+                  playerMode: JidoujishoPlayerMode.localFile,
+                ),
+              ),
+            ).then((result) {
+              setStateFromResult();
+            });
+          },
+        ),
+      );
+    }
+
+    if (histories.isEmpty) {
+      return Column(children: [
+        openVideoFileButton(),
+        Expanded(child: emptyMessage),
+      ]);
+    }
 
     if (histories.isEmpty) {
       return emptyMessage;
@@ -3276,10 +3560,14 @@ class _HistoryState extends State<History> {
       child: ListView.builder(
         controller: scrollController,
         key: UniqueKey(),
-        itemCount: histories.length,
+        itemCount: histories.length + 1,
         itemBuilder: (BuildContext context, int index) {
-          HistoryItem history = histories[index];
-          HistoryItemPosition position = historyPositions[index];
+          if (index == 0) {
+            return openVideoFileButton();
+          }
+
+          HistoryItem history = histories[index - 1];
+          HistoryItemPosition position = historyPositions[index - 1];
 
           print("HISTORY $history");
           print("POSITION $position");
@@ -4002,13 +4290,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                       ),
                     ).then((result) {
                       setState(() {
-                        bool canResume;
-                        if (isLastSetVideo()) {
-                          canResume = getVideoHistory().isNotEmpty;
-                        } else {
-                          canResume = getBookHistory().isNotEmpty;
-                        }
-                        gIsResumable.value = canResume;
+                        setResumableByMediaType();
                       });
                     });
                   } else {
@@ -5379,9 +5661,9 @@ class _CreatorState extends State<Creator> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       showImagePreview(),
-                      DeckDropDown(
-                        decks: decks,
-                        selectedDeck: _selectedDeck,
+                      DropDownMenu(
+                        options: decks,
+                        selectedOption: _selectedDeck,
                       ),
                       imageSearchField,
                       wordField,

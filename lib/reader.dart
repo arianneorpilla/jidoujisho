@@ -653,13 +653,13 @@ reader.addEventListener('click', (e) => {
                       currentIndex = int.parse(currentIndexText);
                       HistoryItem bookHistory = HistoryItem(
                           "https://ttu-ebook.web.app/b/$currentIndex?min=",
-                          currentTitle,
+                          currentTitle.trim(),
                           currentBookmarkDiv,
                           currentBase64Image,
                           null,
                           wordCount);
 
-                      await setLastSetBook();
+                      await setLastMediaType(MediaType.book);
                       await addBookHistory(bookHistory);
                     } catch (e) {
                       print(e);
@@ -688,13 +688,13 @@ reader.addEventListener('click', (e) => {
                         currentIndex = int.parse(currentIndexText);
                         HistoryItem bookHistory = HistoryItem(
                             "https://ttu-ebook.web.app/b/$currentIndex?min=",
-                            currentTitle,
+                            currentTitle.trim(),
                             currentBookmarkDiv,
                             currentBase64Image,
                             null,
                             wordCount);
 
-                        await setLastSetBook();
+                        await setLastMediaType(MediaType.book);
                         await addBookHistory(bookHistory);
                       } catch (e) {
                         print(e);
