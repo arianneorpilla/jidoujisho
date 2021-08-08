@@ -1,6 +1,6 @@
 // Derived from the AnkiDroid API Sample
 
-package com.lrorpilla.jidoujisho_experimental;
+package com.lrorpilla.jidoujisho;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -61,85 +61,6 @@ public class MainActivity extends FlutterActivity {
         mAnkiDroid = new AnkiDroidHelper(context);
     }
 
-    private void addCreatorNote(String deck, String image, String audio, String sentence, String word, String meaning, String reading) {
-        final AddContentApi api = new AddContentApi(context);
-
-        long deckId;
-        if (deckExists(deck)) {
-            deckId = mAnkiDroid.findDeckIdByName(deck);
-        } else {
-            deckId = api.addNewDeck(deck);
-        }
-
-        long modelId;
-        if (modelExists("jidoujisho (Creator)")) {
-            modelId = mAnkiDroid.findModelIdByName("jidoujisho (Creator)", 6);
-        } else {
-            modelId = api.addNewCustomModel("jidoujisho (Creator)",
-                    new String[] {"Image", "Audio", "Sentence", "Word", "Meaning", "Reading"},
-                    new String[] {"jidoujisho (Creator) Default"},
-                    new String[] {"{{Audio}}<div class=\"image\">{{Image}}</div><br><p id=\"sentence\">{{Sentence}}</p><div id=\"word\">{{Word}}</div>"},
-                    new String[] {"{{Audio}}<div class=\"image\">{{Image}}</div><br><p id=\"sentence\">{{Sentence}}</p><div id=\"word\">{{Word}}</div>" +
-                            "<hr><p id=\"reading\">{{Reading}}</p><h2 id=\"word\">{{Word}}</h2><br><p><small id=\"meaning\">{{Meaning}}</small></p><br>"},
-                            "p {\n" +
-                            "    margin: 0px\n" +
-                            "}\n" +
-                            "\n" +
-                            "h2 {\n" +
-                            "    margin: 0px\n" +
-                            "}\n" +
-                            "\n" +
-                            "small {\n" +
-                            "    margin: 0px\n" +
-                            "}\n" +
-                            "\n" +
-                            ".card {\n" +
-                            "  font-family: arial;\n" +
-                            "  font-size: 20px;\n" +
-                            "  white-space: pre-line;\n" +
-                            "  text-align: center;\n" +
-                            "  color: black;\n" +
-                            "  background-color: white;\n" +
-                            "}\n" +
-                            "\n" +
-                            "#sentence {\n" +
-                            "    font-size: 30px\n" +
-                            "}\n" +
-                            "\n" +
-                            ".image img {\n" +
-                            "  position: static;\n" +
-                            "  height: auto;\n" +
-                            "  width: auto;\n" +
-                            "  max-height: 400px;\n" +
-                            "}\n" +
-                            ".pitch{\n" +
-                            "  border-top: solid red 2px;\n" +
-                            "  padding-top: 1px;\n" +
-                            "}\n" +
-                            "\n" +
-                            ".pitch_end{\n" +
-                            "  border-color: red;\n" +
-                            "  border-right: solid red 2px;\n" +
-                            "  border-top: solid red 2px;  \n" +
-                            "  line-height: 1px;\n" +
-                            "  margin-right: 1px;\n" +
-                            "  padding-right: 1px;\n" +
-                            "  padding-top:1px;\n" +
-                            "}",
-                    null,
-                    null
-                    );
-        }
-
-        Set<String> tags = new HashSet<>(Arrays.asList("jidoujisho"));
-
-        api.addNote(modelId, deckId, new String[] {image, audio, sentence, word, meaning, reading}, tags);
-
-        System.out.println("Added note via flutter_ankidroid_api");
-        System.out.println("Model: " + modelId);
-        System.out.println("Deck: " + deckId);
-    }
-
     private void addNote(String deck, String image, String audio, String sentence, String word, String meaning, String reading) {
         final AddContentApi api = new AddContentApi(context);
 
@@ -160,85 +81,6 @@ public class MainActivity extends FlutterActivity {
                     new String[] {"<p id=\"sentence\">{{Sentence}}</p><div id=\"word\">{{Word}}</div>"},
                     new String[] {"<p id=\"sentence\">{{Sentence}}</p><div id=\"word\">{{Word}}</div><br>{{Audio}}<div class=\"image\">{{Image}}</div>" +
                     "<hr id=reading><p id=\"reading\">{{Reading}}</p><h2 id=\"word\">{{Word}}</h2><br><p><small id=\"meaning\">{{Meaning}}</small></p>"},
-                            "p {\n" +
-                            "    margin: 0px\n" +
-                            "}\n" +
-                            "\n" +
-                            "h2 {\n" +
-                            "    margin: 0px\n" +
-                            "}\n" +
-                            "\n" +
-                            "small {\n" +
-                            "    margin: 0px\n" +
-                            "}\n" +
-                            "\n" +
-                            ".card {\n" +
-                            "  font-family: arial;\n" +
-                            "  font-size: 20px;\n" +
-                            "  white-space: pre-line;\n" +
-                            "  text-align: center;\n" +
-                            "  color: black;\n" +
-                            "  background-color: white;\n" +
-                            "}\n" +
-                            "\n" +
-                            "#sentence {\n" +
-                            "    font-size: 30px\n" +
-                            "}\n" +
-                            "\n" +
-                            ".image img {\n" +
-                            "  position: static;\n" +
-                            "  height: auto;\n" +
-                            "  width: auto;\n" +
-                            "  max-height: 250px;\n" +
-                            "}\n" +
-                            ".pitch{\n" +
-                            "  border-top: solid red 2px;\n" +
-                            "  padding-top: 1px;\n" +
-                            "}\n" +
-                            "\n" +
-                            ".pitch_end{\n" +
-                            "  border-color: red;\n" +
-                            "  border-right: solid red 2px;\n" +
-                            "  border-top: solid red 2px;  \n" +
-                            "  line-height: 1px;\n" +
-                            "  margin-right: 1px;\n" +
-                            "  padding-right: 1px;\n" +
-                            "  padding-top:1px;\n" +
-                            "}",
-                    null,
-                    null
-                    );
-        }
-
-        Set<String> tags = new HashSet<>(Arrays.asList("jidoujisho"));
-
-        api.addNote(modelId, deckId, new String[] {image, audio, sentence, word, meaning, reading}, tags);
-
-        System.out.println("Added note via flutter_ankidroid_api");
-        System.out.println("Model: " + modelId);
-        System.out.println("Deck: " + deckId);
-    }
-
-    private void addReaderNote(String deck, String image, String audio, String sentence, String word, String meaning, String reading) {
-        final AddContentApi api = new AddContentApi(context);
-
-        long deckId;
-        if (deckExists(deck)) {
-            deckId = mAnkiDroid.findDeckIdByName(deck);
-        } else {
-            deckId = api.addNewDeck(deck);
-        }
-
-        long modelId;
-        if (modelExists("jidoujisho (Reader)")) {
-            modelId = mAnkiDroid.findModelIdByName("jidoujisho (Reader)", 6);
-        } else {
-            modelId = api.addNewCustomModel("jidoujisho (Reader)",
-                    new String[] {"Image", "Audio", "Sentence", "Word", "Meaning", "Reading"},
-                    new String[] {"jidoujisho (Reader) Default"},
-                    new String[] {"<p id=\"sentence\">{{Sentence}}</p><div id=\"word\">{{Word}}</div>"},
-                    new String[] {"<p id=\"sentence\">{{Sentence}}</p><div id=\"word\">{{Word}}</div><br>{{Audio}}<div class=\"image\">{{Image}}</div>" +
-                            "<hr id=reading><p id=\"reading\">{{Reading}}</p><h2 id=\"word\">{{Word}}</h2><br><p><small id=\"meaning\">{{Meaning}}</small></p>"},
                             "p {\n" +
                             "    margin: 0px\n" +
                             "}\n" +
@@ -358,12 +200,6 @@ public class MainActivity extends FlutterActivity {
                             switch (call.method) {
                                 case "addNote":
                                     addNote(deck, image, audio, sentence, answer, meaning, reading);
-                                    break;
-                                case "addCreatorNote":
-                                    addCreatorNote(deck, image, audio, sentence, answer, meaning, reading);
-                                    break;
-                                case "addReaderNote":
-                                    addReaderNote(deck, image, audio, sentence, answer, meaning, reading);
                                     break;
                                 case "getDecks":
                                     result.success(api.getDeckList());

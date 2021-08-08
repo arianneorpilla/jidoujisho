@@ -1,4 +1,4 @@
-package com.lrorpilla.jidoujisho_experimental;
+package com.lrorpilla.jidoujisho;
 
 import java.util.ArrayList;
 import java.util.Collections;

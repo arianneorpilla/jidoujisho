@@ -14,6 +14,7 @@ import 'package:image/image.dart' as im;
 import 'package:flutter/material.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:jidoujisho/dictionary.dart';
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:path/path.dart' as path;
 import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
@@ -762,7 +763,7 @@ Future<String> processOcrTextFromBytes(Uint8List imageBytes) async {
     cleanedImageFile.path,
     language: (getOcrHorizontalMode()) ? 'jpn+jpn_vert' : 'jpn_vert+jpn',
     args: {
-      "preserve_interword_spaces": "1",
+      "psm": "6",
     },
   );
 
@@ -779,9 +780,9 @@ Future<String> processOcrTextFromFile(File inputImageFile) async {
 
   String text = await FlutterTesseractOcr.extractText(
     cleanedImageFile.path,
-    language: (getOcrHorizontalMode()) ? 'jpn+jpn_vert' : 'jpn_vert+jpn',
+    language: (getOcrHorizontalMode()) ? 'jpn' : 'jpn_vert',
     args: {
-      "preserve_interword_spaces": "1",
+      "psm": "6",
     },
   );
 
@@ -1652,4 +1653,77 @@ TextSpan getContextDataSourceSpan(String contextDataSource) {
       color: Colors.grey,
     ),
   );
+}
+
+String reorderOcrVerticalText(String raw) {
+  String ordered = "";
+  List<String> lines = raw.split("\n");
+  print(lines);
+
+  while (true) {
+    for (int i = 0; i < lines.length; i++) {
+      String line = lines[i];
+
+      if (line.isNotEmpty) {
+        String character = line[line.length - 1];
+        ordered += character;
+
+        if (line.length == 1) {
+          lines[i] = "";
+        } else {
+          lines[i] = line.substring(0, line.length - 1);
+        }
+      }
+    }
+    if (lines.every((line) => line.isEmpty)) {
+      break;
+    }
+  }
+
+  return ordered;
+}
+
+List<Widget> getTextWidgetsFromWords(
+    List<String> words, ValueNotifier<int> notifier) {
+  List<Widget> widgets = [];
+  for (int i = 0; i < words.length; i++) {
+    widgets.add(
+      GestureDetector(
+        onTap: () {
+          notifier.value = i;
+        },
+        child: ValueListenableBuilder(
+            valueListenable: notifier,
+            builder: (BuildContext context, int value, Widget child) {
+              return Container(
+                  padding: EdgeInsets.all(8),
+                  margin: EdgeInsets.only(top: 10, right: 10),
+                  color: (notifier.value == i)
+                      ? Colors.red.withOpacity(0.3)
+                      : Colors.white.withOpacity(0.1),
+                  child: Text(
+                    words[i],
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 18,
+                    ),
+                  ));
+            }),
+      ),
+    );
+  }
+
+  return widgets;
+}
+
+class CreatorExportInformation {
+  String initialSentence;
+  DictionaryEntry dictionaryEntry;
+  File initialFile;
+
+  CreatorExportInformation({
+    this.initialSentence,
+    this.dictionaryEntry,
+    this.initialFile,
+  });
 }

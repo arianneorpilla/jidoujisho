@@ -4,10 +4,10 @@
 
 
 <h3 align="center">jidoujisho</h3>
-<p align="center">A mobile video player, reader assistant and card creation toolkit tailored for language learners.</p>
+<p align="center">A mobile video player, reader assistant, image mining workflow and card creation toolkit tailored for language learners.</p>
 
 <p align="center" style="margin:0"><b>Latest GitHub Release:<br>
-<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.25.12-beta">0.25.12-beta 🇯🇵 → 🇬🇧</a></b><br>
+<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.26.0-beta">0.26.0-beta 🇯🇵 → 🇬🇧</a></b><br>
 </p>
 
 <p align="center" style="margin:0"><b>Release Archive:<br>
@@ -33,12 +33,13 @@
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.22.1-beta">0.22</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.23.2-beta">0.23</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.24.5-beta">0.24</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.25.12-beta">0.25</a>
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.25.12-beta">0.25</a> · 
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.26.0-beta">0.26</a>
 </b></p>
 
 # 📚 Uninterrupted language immersion at your fingertips
 
-**jidoujisho** is an Android video player, reader assistant, OCR image viewer and card creation toolkit with features specifically helpful for language learners. 
+**jidoujisho** is an Android video player, reader assistant, image mining workflow and card creation toolkit with features specifically helpful for language learners. 
 
 - [x] Text selection of subtitles allows for **quick dictionary lookups within the application**
 - [x] **Export cards to AnkiDroid**, complete with a snapshot and audio of the current context
@@ -51,7 +52,8 @@
 - [x] Use **card creator mode** to quickly **search images and definitions** with imported photos and text 
 - [x] **Dictionary tab remembers words queried** for review between sessions and **allows resuming back to context**
 - [x] Import **Yomichan archive dictionaries** and export cards **with pitch accent information** from Kanjium
-- [x] **Frictionless sentence mining workflow for readers** via ッツ Ebook Reader
+- [x] **Frictionless sentence mining workflow for readers** via **ッツ Ebook Reader**
+- [x] **Mine manga with an image mining workflow** designed for symbiosis with **Tachiyomi** and **Kaku**
 - [x] Playback support for **network streams** including **Chromecast** and **Plex external player support**
 
 # ⚕️ Current state of the project
@@ -159,7 +161,7 @@ A primer on the basics of the application is as follows.
 * ▶️ A **resume button** is at the top of the main menu, and **returns to last video or book**
 * ⌛ Users may select *Context* from a dictionary result to go back to the **exact duration in video** or **scroll position in book**
 * ⛓️ Channels may also be added by **pasting a link of any video by the channel** in *List new channel*
-* 🖧 You may also watch videos from your **Plex server** and cast the current video to a **Chromecast**
+* 🏢 You may also watch videos from your **Plex server** and cast the current video to a **Chromecast**
 * 📡 **Users that prefer to stream** rather than download can **open the app with a direct link to video** 
 * ✊ **Export a range of multiple subtitles** by holding onto a subtitle aside from the current one in the transcript
 * ⚠️ **If AnkiDroid is not running in the background**, tap on the export message to open it
@@ -170,7 +172,7 @@ A primer on the basics of the application is as follows.
 
 # 👥 Contribution and attribution
 
-jidoujisho is written in <b><a href="https://dart.dev/">Dart</a></b> and powered by <b><a href="https://flutter.dev/">Flutter</a></b>. Bilingual online dictionary definitions are queried from <b><a href="https://jisho.org/">Jisho.org</a></b> and monolingual online dictionary definitions are from <b><a href="https://sakura-paris.org/">Sora</a></b>. Pitch accent patterns are sourced from <b><a href="https://github.com/mifunetoshiro/kanjium">Kanjium</a></b>. Reader WebView linked to <b><a href="https://ttu-ebook.web.app">ッツ Ebook Reader</b></a>. Optical character recognition via <b><a href="https://github.com/tesseract-ocr/tesseract">Tesseract 4</a></b> with best trained data. Video streaming via <b><a href="https://youtube.com/">YouTube</a></b>. Image search via <b><a href="https://bing.com//">Bing</a></b>.
+jidoujisho is written in <b><a href="https://dart.dev/">Dart</a></b> and powered by <b><a href="https://flutter.dev/">Flutter</a></b>. Bilingual online dictionary definitions are queried from <b><a href="https://jisho.org/">Jisho.org</a></b> and monolingual online dictionary definitions are from <b><a href="https://sakura-paris.org/">Sora</a></b>. Pitch accent patterns are sourced from <b><a href="https://github.com/mifunetoshiro/kanjium">Kanjium</a></b>. Reader WebView linked to <b><a href="https://ttu-ebook.web.app">ッツ Ebook Reader</b></a>. Video streaming via <b><a href="https://youtube.com/">YouTube</a></b>. Image search via <b><a href="https://bing.com//">Bing</a></b>.
 
 If you like what I've done so far, you can help me out by testing the application on various devices so that I can gauge the compatibility of the application with different versions of Android, <b><a href="https://www.buymeacoffee.com/lrorpilla">making a donation</a></b> or collaborating with me on further improvements.
 

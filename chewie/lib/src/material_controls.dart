@@ -14,7 +14,7 @@ import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:jidoujisho/dictionary.dart';
 import 'package:jidoujisho/util.dart';
 import 'package:progress_indicators/progress_indicators.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:share/share.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:jidoujisho/globals.dart';
 import 'package:jidoujisho/preferences.dart';

@@ -10,12 +10,15 @@ import 'package:flutter/material.dart';
 
 import 'package:chewie/chewie.dart';
 import 'package:clipboard_monitor/clipboard_monitor.dart';
+import 'package:flutter/services.dart';
 import 'package:image/image.dart' as imglib;
+import 'package:jidoujisho/main.dart';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:screenshot/screenshot.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:share/share.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:jidoujisho/util.dart';
@@ -24,6 +27,7 @@ import 'package:jidoujisho/dictionary.dart';
 import 'package:jidoujisho/globals.dart';
 import 'package:jidoujisho/pitch.dart';
 import 'package:jidoujisho/preferences.dart';
+import 'package:ve_dart/ve_dart.dart';
 
 class Viewer extends StatefulWidget {
   Viewer(
@@ -79,17 +83,30 @@ class ViewerState extends State<Viewer> {
   bool ocrOverlayShown = false;
   List<TouchPoints> touchPoints = [];
 
+  TextEditingController _sentenceController = TextEditingController(text: "");
+  TextEditingController _wordController = TextEditingController(text: "");
+  FocusNode workingAreaNode = FocusNode();
   final double barHeight = 48;
+
+  int subscribingId;
+  bool ocrDialogVisible = false;
+
+  bool isExporting = false;
 
   @override
   void dispose() {
     stopAllClipboardMonitoring();
+    KeyboardVisibilityNotification().removeListener(subscribingId);
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
+    subscribingId = KeyboardVisibilityNotification().addNewListener(onHide: () {
+      workingAreaNode.unfocus();
+    });
+
     currentPage = ValueNotifier<int>(chapter.getMangaPageProgress());
 
     if (currentPage.value <= 0 ||
@@ -128,7 +145,17 @@ class ViewerState extends State<Viewer> {
   }
 
   void onClipboardText(String text) {
-    _clipboard.value = text;
+    emptyStack();
+    if (!workingAreaNode.hasFocus && !ocrDialogVisible && !isExporting) {
+      ocrDialogVisible = true;
+      showOCRHelperDialog(text).then((result) {
+        ocrDialogVisible = false;
+      });
+    } else {
+      if (!ocrDialogVisible && !isExporting) {
+        _clipboard.value = text;
+      }
+    }
   }
 
   Future<void> processOcr(Offset a, Offset b) async {
@@ -170,7 +197,11 @@ class ViewerState extends State<Viewer> {
         });
 
         print("OCR COMPLETE -- RESULT");
+
         print(result);
+
+        print("OCR REORDERED OUTPUT");
+        print(reorderOcrVerticalText(result));
         print("OCR END");
       });
     } else {
@@ -240,23 +271,26 @@ class ViewerState extends State<Viewer> {
       child: new Scaffold(
         resizeToAvoidBottomInset: false,
         backgroundColor: Colors.black,
-        body: Screenshot(
-          controller: screenshotController,
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              buildGallery(),
-              buildCurrentPage(),
-              if (ocrOverlayShown) buildOcrOverlay(),
-              buildBottomBar(context),
-              Padding(
-                padding: EdgeInsets.only(
-                  top: MediaQuery.of(context).size.height * 0.05,
-                  bottom: MediaQuery.of(context).size.height * 0.05,
+        body: SafeArea(
+          child: Screenshot(
+            controller: screenshotController,
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                buildGallery(),
+                buildCurrentPage(),
+                if (ocrOverlayShown) buildOcrOverlay(),
+                buildBottomBar(context),
+                buildTopBar(context),
+                Padding(
+                  padding: EdgeInsets.only(
+                    top: MediaQuery.of(context).size.height * 0.05,
+                    bottom: MediaQuery.of(context).size.height * 0.05,
+                  ),
+                  child: buildDictionary(),
                 ),
-                child: buildDictionary(),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -269,6 +303,225 @@ class ViewerState extends State<Viewer> {
         processOcr(a, b);
       }
     });
+  }
+
+  Widget sentenceField() {
+    return TextFormField(
+      minLines: 1,
+      maxLines: 5,
+      keyboardType: TextInputType.multiline,
+      controller: _sentenceController,
+      onFieldSubmitted: (result) {
+        if (_sentenceController.text.trim().isNotEmpty) {
+          showSentenceDialog(_sentenceController.text);
+        }
+      },
+      focusNode: workingAreaNode,
+      decoration: InputDecoration(
+        contentPadding: EdgeInsets.all(16.0),
+        prefixIcon: Icon(Icons.format_align_center_rounded),
+        suffixIcon: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (gIsTapToSelectSupported)
+              IconButton(
+                iconSize: 18,
+                onPressed: () {
+                  if (_sentenceController.text.trim().isNotEmpty) {
+                    showSentenceDialog(_sentenceController.text);
+                  }
+                },
+                icon: Icon(
+                  Icons.account_tree_outlined,
+                  color: Colors.white,
+                ),
+              ),
+            IconButton(
+              iconSize: 18,
+              onPressed: () {
+                setState(() {
+                  _sentenceController.clear();
+                });
+              },
+              icon: Icon(
+                Icons.clear,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void showSentenceDialog(String sentence) {
+    sentence = sentence.trim();
+
+    ValueNotifier<int> selectedWordIndex = ValueNotifier<int>(-1);
+    List<Word> segments = parseVe(gMecabTagger, sentence);
+    List<String> words = [];
+    segments.forEach((segment) => words.add(segment.word));
+    List<Widget> textWidgets =
+        getTextWidgetsFromWords(words, selectedWordIndex);
+
+    ScrollController scrollController = ScrollController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          contentPadding:
+              EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
+          ),
+          content: ValueListenableBuilder(
+            valueListenable: selectedWordIndex,
+            builder: (BuildContext context, int _, Widget widget) {
+              return Container(
+                child: Container(
+                  color: Colors.grey[800].withOpacity(0.6),
+                  child: RawScrollbar(
+                    thumbColor: Colors.grey[600],
+                    controller: scrollController,
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      child: Wrap(children: textWidgets),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('REPLACE', style: TextStyle(color: Colors.white)),
+              onPressed: () {
+                if (selectedWordIndex.value == -1) {
+                  _sentenceController.text = sentence;
+                } else {
+                  _sentenceController.text = words[selectedWordIndex.value];
+                }
+                setState(() {
+                  _hideStuff = false;
+                });
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              child: Text('SEARCH', style: TextStyle(color: Colors.white)),
+              onPressed: () async {
+                if (selectedWordIndex.value == -1) {
+                  _clipboard.value = sentence;
+                } else {
+                  _clipboard.value = words[selectedWordIndex.value];
+                }
+                setState(() {
+                  _hideStuff = false;
+                });
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> showOCRHelperDialog(String sentence) async {
+    ValueNotifier<int> selectedWordIndex;
+    List<Widget> textWidgets;
+    List<String> words;
+
+    if (gIsTapToSelectSupported) {
+      sentence = sentence.trim();
+
+      selectedWordIndex = ValueNotifier<int>(-1);
+      List<Word> segments = parseVe(gMecabTagger, sentence);
+      words = [];
+      segments.forEach((segment) => words.add(segment.word));
+      textWidgets = getTextWidgetsFromWords(words, selectedWordIndex);
+    }
+
+    ScrollController scrollController = ScrollController();
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          contentPadding:
+              EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
+          ),
+          title: (gIsTapToSelectSupported)
+              ? ValueListenableBuilder(
+                  valueListenable: selectedWordIndex,
+                  builder: (BuildContext context, int _, Widget widget) {
+                    return Container(
+                      child: Container(
+                        color: Colors.grey[800].withOpacity(0.6),
+                        child: RawScrollbar(
+                          thumbColor: Colors.grey[600],
+                          controller: scrollController,
+                          child: SingleChildScrollView(
+                            controller: scrollController,
+                            child: Wrap(children: textWidgets),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                )
+              : Text(sentence),
+          actions: <Widget>[
+            TextButton(
+              child: Text('SEARCH', style: TextStyle(color: Colors.white)),
+              onPressed: () {
+                if (!gIsTapToSelectSupported || selectedWordIndex.value == -1) {
+                  _clipboard.value = sentence;
+                } else {
+                  _clipboard.value = words[selectedWordIndex.value];
+                }
+                setState(() {
+                  _hideStuff = false;
+                });
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              child: Text('REPLACE', style: TextStyle(color: Colors.white)),
+              onPressed: () {
+                if (!gIsTapToSelectSupported || selectedWordIndex.value == -1) {
+                  _sentenceController.text = sentence;
+                } else {
+                  _sentenceController.text = words[selectedWordIndex.value];
+                }
+                setState(() {
+                  _hideStuff = false;
+                });
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              child: Text('APPEND', style: TextStyle(color: Colors.white)),
+              onPressed: () async {
+                if (!gIsTapToSelectSupported || selectedWordIndex.value == -1) {
+                  _sentenceController.text += sentence;
+                } else {
+                  _sentenceController.text += words[selectedWordIndex.value];
+                }
+                setState(() {
+                  _hideStuff = false;
+                });
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget buildOcrOverlay() {
@@ -453,6 +706,7 @@ class ViewerState extends State<Viewer> {
           onTapDown: (context, details, value) {
             setState(() {
               _hideStuff = !_hideStuff;
+              workingAreaNode.unfocus();
             });
           },
         );
@@ -496,6 +750,20 @@ class ViewerState extends State<Viewer> {
     );
   }
 
+  Widget buildTopBar(BuildContext context) {
+    return Align(
+      alignment: Alignment.topCenter,
+      child: AnimatedOpacity(
+        opacity: _hideStuff ? 0.0 : 1.0,
+        duration: const Duration(milliseconds: 300),
+        child: Container(
+          color: Theme.of(context).dialogBackgroundColor.withOpacity(0.8),
+          child: sentenceField(),
+        ),
+      ),
+    );
+  }
+
   AnimatedOpacity buildBottomBar(BuildContext context) {
     final iconColor = Theme.of(context).textTheme.button.color;
 
@@ -507,10 +775,10 @@ class ViewerState extends State<Viewer> {
         color: Theme.of(context).dialogBackgroundColor.withOpacity(0.8),
         child: Row(
           children: <Widget>[
-            SizedBox(width: 20),
+            SizedBox(width: 24),
             _buildPosition(iconColor),
             _buildProgressBar(),
-            _buildScanButton(),
+            //_buildScanButton(),
             _buildMoreButton(),
             // _buildToolsButton(controller),
             // _buildMoreButton(controller),
@@ -549,7 +817,7 @@ class ViewerState extends State<Viewer> {
   Widget _buildProgressBar() {
     return Expanded(
       child: Padding(
-        padding: const EdgeInsets.only(right: 20.0),
+        padding: const EdgeInsets.only(right: 4),
         child: MangaProgressBar(
           currentPage,
           images.length - 2,
@@ -613,7 +881,7 @@ class ViewerState extends State<Viewer> {
               Icons.mobile_screen_share_rounded,
             ],
             highlights: [],
-            invisibles: [],
+            invisibles: [1],
           ),
         );
 
@@ -635,6 +903,38 @@ class ViewerState extends State<Viewer> {
             openExtraShare();
             break;
           case 4:
+            FileImage fileImage = images[currentPage.value];
+
+            stopClipboardMonitor();
+            isExporting = true;
+
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => Home(
+                  readerExport: CreatorExportInformation(
+                    initialSentence: _sentenceController.text,
+                    initialFile: fileImage.file,
+                    dictionaryEntry: _currentDictionaryEntry.value,
+                  ),
+                ),
+              ),
+            ).then((result) {
+              isExporting = false;
+              _sentenceController.clear();
+
+              SystemChrome.setEnabledSystemUIOverlays([]);
+              if (result != null && result) {
+                _clipboard.value = "&<&>exported&<&>";
+                Future.delayed(Duration(seconds: 2), () {
+                  _clipboard.value = "";
+                });
+              } else {
+                _clipboard.value = "";
+              }
+              startClipboardMonitor();
+            });
+
             break;
         }
       },
@@ -645,8 +945,8 @@ class ViewerState extends State<Viewer> {
           child: Container(
             height: barHeight,
             padding: const EdgeInsets.only(
-              left: 8.0,
-              right: 8.0,
+              left: 12.0,
+              right: 16.0,
             ),
             child: const Icon(Icons.more_vert),
           ),
@@ -662,10 +962,10 @@ class ViewerState extends State<Viewer> {
       useRootNavigator: true,
       builder: (context) => _MoreOptionsDialog(
         options: const [
-          "Search Working Text with Jisho.org",
-          "Translate Working Text with DeepL",
-          "Translate Working Text with Google Translate",
-          "Share Working Text with Menu",
+          "Search Text with Jisho.org",
+          "Translate Text with DeepL",
+          "Translate Text with Google Translate",
+          "Share Text with Menu",
           "Share Current Image",
         ],
         icons: const [

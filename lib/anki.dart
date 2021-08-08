@@ -620,14 +620,11 @@ Future<void> addCreatorNote(
   String answer,
   String meaning,
   String reading,
-  bool isReader,
 ) async {
   const platform = const MethodChannel('com.lrorpilla.api/ankidroid');
 
-  String method = (isReader) ? "addReaderNote" : "addCreatorNote";
-
   try {
-    await platform.invokeMethod(method, <String, dynamic>{
+    await platform.invokeMethod("addNote", <String, dynamic>{
       'deck': deck,
       'image': image,
       'audio': audio,
@@ -726,7 +723,7 @@ void exportAnkiCard(String deck, String sentence, String answer, String reading,
 }
 
 void exportCreatorAnkiCard(String deck, String sentence, String answer,
-    String reading, String meaning, File imageFile, bool isReader) async {
+    String reading, String meaning, File imageFile) async {
   DateTime now = DateTime.now();
   String newFileName =
       "jidoujisho-" + intl.DateFormat('yyyyMMddTkkmmss').format(now);
@@ -743,7 +740,7 @@ void exportCreatorAnkiCard(String deck, String sentence, String answer,
   if (answer == "") {
     answer = "​";
   }
-  if (isReader && sentence == "") {
+  if (sentence == "") {
     sentence = "​";
   }
   if (meaning == "") {
@@ -762,6 +759,5 @@ void exportCreatorAnkiCard(String deck, String sentence, String answer,
     answer,
     meaning,
     reading,
-    isReader,
   );
 }

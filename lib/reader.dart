@@ -469,7 +469,14 @@ reader.addEventListener('click', (e) => {
                 await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => Home(readerExport: readerExport),
+                    builder: (context) => Home(
+                      readerExport: CreatorExportInformation(
+                        initialSentence: readerExport,
+                        initialFile: null,
+                        dictionaryEntry:
+                            DictionaryEntry(reading: "", meaning: "", word: ""),
+                      ),
+                    ),
                   ),
                 ).then((result) {
                   SystemChrome.setEnabledSystemUIOverlays([]);
@@ -616,8 +623,14 @@ reader.addEventListener('click', (e) => {
                             await Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    Home(readerExport: readerExport),
+                                builder: (context) => Home(
+                                  readerExport: CreatorExportInformation(
+                                    initialSentence: readerExport,
+                                    initialFile: null,
+                                    dictionaryEntry: DictionaryEntry(
+                                        reading: "", meaning: "", word: ""),
+                                  ),
+                                ),
                               ),
                             ).then((result) {
                               SystemChrome.setEnabledSystemUIOverlays([]);

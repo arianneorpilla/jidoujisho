@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
+import 'package:crop_image/crop_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,12 +14,13 @@ import 'package:async/async.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
-
+import 'package:intl/intl.dart' as intl;
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:minimize_app/minimize_app.dart';
+import 'package:image/image.dart' as imglib;
 import 'package:package_info/package_info.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -226,15 +230,15 @@ class App extends StatelessWidget {
 }
 
 class Home extends StatefulWidget {
-  Home({this.readerExport = ""});
-  final String readerExport;
+  Home({this.readerExport});
+  final CreatorExportInformation readerExport;
 
   _HomeState createState() => _HomeState(readerExport: this.readerExport);
 }
 
 class _HomeState extends State<Home> {
-  _HomeState({this.readerExport = ""});
-  final String readerExport;
+  _HomeState({this.readerExport});
+  final CreatorExportInformation readerExport;
 
   TextEditingController _searchQueryController = TextEditingController();
   ValueNotifier<double> _dictionaryScrollOffset = ValueNotifier<double>(0);
@@ -267,7 +271,7 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
 
-    if (readerExport.isEmpty) {
+    if (readerExport == null) {
       _intentDataStreamSubscription = ReceiveSharingIntent.getMediaStream()
           .listen((List<SharedMediaFile> value) {
         SharedMediaType type = value.first.type;
@@ -284,6 +288,7 @@ class _HomeState extends State<Home> {
                   DictionaryEntry(word: "", meaning: "", reading: ""),
               file: File(value.first.path),
               isShared: true,
+              isReaderExport: false,
             );
             break;
           case SharedMediaType.VIDEO:
@@ -306,11 +311,11 @@ class _HomeState extends State<Home> {
       // For sharing images coming from outside the app while the app is closed
       ReceiveSharingIntent.getInitialMedia()
           .then((List<SharedMediaFile> value) {
-        SharedMediaType type = value.first.type;
-
-        if (value == null) {
+        if (value == null || value.isEmpty) {
           return;
         }
+
+        SharedMediaType type = value.first.type;
 
         switch (type) {
           case SharedMediaType.IMAGE:
@@ -320,6 +325,7 @@ class _HomeState extends State<Home> {
                   DictionaryEntry(word: "", meaning: "", reading: ""),
               file: File(value.first.path),
               isShared: true,
+              isReaderExport: false,
             );
             break;
           case SharedMediaType.VIDEO:
@@ -365,6 +371,7 @@ class _HomeState extends State<Home> {
                 DictionaryEntry(word: "", meaning: "", reading: ""),
             file: null,
             isShared: true,
+            isReaderExport: false,
           );
         }
         ReceiveSharingIntent.reset();
@@ -400,6 +407,7 @@ class _HomeState extends State<Home> {
                 DictionaryEntry(word: "", meaning: "", reading: ""),
             file: null,
             isShared: true,
+            isReaderExport: false,
           );
         }
         ReceiveSharingIntent.reset();
@@ -467,11 +475,11 @@ class _HomeState extends State<Home> {
   }
 
   Widget getWidgetOptions(int index) {
-    if (readerExport.isNotEmpty) {
+    if (readerExport != null) {
       return Creator(
-        readerExport,
-        DictionaryEntry(word: "", reading: "", meaning: ""),
-        null,
+        readerExport.initialSentence,
+        readerExport.dictionaryEntry,
+        readerExport.initialFile,
         false,
         true,
         resetMenu,
@@ -1001,7 +1009,7 @@ class _HomeState extends State<Home> {
               actions: buildActions(),
             ),
             backgroundColor: Colors.black,
-            bottomNavigationBar: (!_isCreatorView && !readerExport.isNotEmpty)
+            bottomNavigationBar: (!_isCreatorView && readerExport == null)
                 ? buildNavigationBar()
                 : SizedBox.shrink(),
             body: getWidgetOptions(_selectedIndex),
@@ -1046,7 +1054,7 @@ class _HomeState extends State<Home> {
         _searchQueryController.clear();
       });
     } else {
-      if (readerExport.isEmpty) {
+      if (readerExport == null) {
         MinimizeApp.minimizeApp();
         resetMenu();
       } else {
@@ -1071,13 +1079,13 @@ class _HomeState extends State<Home> {
     if (_isSearching ||
         _isChannelView ||
         _isCreatorView ||
-        readerExport.isNotEmpty) {
+        readerExport != null) {
       return BackButton(
         onPressed: () {
           if (_isCreatorShared) {
             MinimizeApp.minimizeApp();
             resetMenu();
-          } else if (readerExport.isNotEmpty) {
+          } else if (readerExport != null) {
             Navigator.pop(context);
           } else {
             setState(() {
@@ -1126,7 +1134,7 @@ class _HomeState extends State<Home> {
       );
     } else if (_isChannelView) {
       return buildChannelNameRow();
-    } else if (_isCreatorView || readerExport.isNotEmpty) {
+    } else if (_isCreatorView || readerExport != null) {
       return Text(
         "Card Creator",
         style: TextStyle(
@@ -1143,7 +1151,7 @@ class _HomeState extends State<Home> {
         children: [
           Text("jidoujisho"),
           Text(
-            " ${gPackageInfo.version} beta",
+            " ${gPackageInfo.version} preview",
             style: TextStyle(
               fontWeight: FontWeight.w200,
               fontSize: 10,
@@ -2106,10 +2114,10 @@ class _HomeState extends State<Home> {
         await launch("https://github.com/lrorpilla/jidoujisho/issues/new");
         break;
       case "About this app":
-        const String legalese = "A mobile video player, reader assistant, OCR image viewer and card creation toolkit tailored for language learners.\n\n" +
+        const String legalese = "A mobile video player, reader assistant, image mining workflow and card creation toolkit tailored for language learners.\n\n" +
             "Built for the Japanese language learning community by Leo Rafael Orpilla. " +
             "Bilingual online definitions queried from Jisho.org. Monolingual online definitions queried from Sora. Pitch accent patterns from Kanjium. " +
-            "Reader WebView linked to ッツ Ebook Reader. Optical character recognition via Tesseract 4 with best trained data. Video streaming via YouTube. Image search via Bing. Logo by Aaron Marbella.\n\n" +
+            "Reader WebView linked to ッツ Ebook Reader. Video streaming via YouTube. Image search via Bing. Logo by Aaron Marbella.\n\n" +
             "jidoujisho is free and open source software. Liking the application? " +
             "Help out by providing feedback, making a donation, reporting issues or collaborating " +
             "for further improvements on GitHub.";
@@ -2133,7 +2141,7 @@ class _HomeState extends State<Home> {
   }
 
   List<Widget> buildActions() {
-    if (_isCreatorView || readerExport.isNotEmpty) {
+    if (_isCreatorView || readerExport != null) {
       return [];
     }
 
@@ -3725,6 +3733,7 @@ class _ClipboardState extends State<ClipboardMenu> {
               ),
               file: null,
               isShared: false,
+              isReaderExport: false,
             );
           },
         ),
@@ -3949,6 +3958,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
             dictionaryEntry: entry.entries[entry.swipeIndex],
             file: null,
             isShared: false,
+            isReaderExport: false,
           );
         },
         onLongPress: () {
@@ -4306,6 +4316,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                   dictionaryEntry: results.entries[_dialogIndex.value],
                   file: null,
                   isShared: false,
+                  isReaderExport: false,
                 );
                 Navigator.pop(context);
               },
@@ -4539,8 +4550,6 @@ class _CreatorState extends State<Creator> {
   File _fileImage;
   String _networkImageURL;
 
-  ValueNotifier<bool> _isReader;
-
   _CreatorState(
     this.initialSentence,
     this.initialDictionaryEntry,
@@ -4560,7 +4569,6 @@ class _CreatorState extends State<Creator> {
 
     _selectedEntry = new ValueNotifier<DictionaryEntry>(initialDictionaryEntry);
     _selectedDeck = new ValueNotifier<String>(lastDeck);
-    _isReader = ValueNotifier<bool>(false);
 
     DictionaryEntry pitchEntry = getClosestPitchEntry(initialDictionaryEntry);
     if (pitchEntry != null) {
@@ -4587,7 +4595,6 @@ class _CreatorState extends State<Creator> {
           parseVe(gMecabTagger, initialSentence).length != 1) {
         _sentenceController = TextEditingController(text: initialSentence);
         _wordController = TextEditingController(text: "");
-        _isReader = ValueNotifier<bool>(true);
       } else {
         _sentenceController = TextEditingController(text: "");
         _wordController = TextEditingController(text: initialSentence);
@@ -4914,39 +4921,6 @@ class _CreatorState extends State<Creator> {
     );
   }
 
-  List<Widget> getTextWidgetsFromWords(
-      List<String> words, ValueNotifier<int> notifier) {
-    List<Widget> widgets = [];
-    for (int i = 0; i < words.length; i++) {
-      widgets.add(
-        GestureDetector(
-          onTap: () {
-            notifier.value = i;
-          },
-          child: ValueListenableBuilder(
-              valueListenable: notifier,
-              builder: (BuildContext context, int value, Widget child) {
-                return Container(
-                    padding: EdgeInsets.all(8),
-                    margin: EdgeInsets.only(top: 10, right: 10),
-                    color: (notifier.value == i)
-                        ? Colors.red.withOpacity(0.3)
-                        : Colors.white.withOpacity(0.1),
-                    child: Text(
-                      words[i],
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 18,
-                      ),
-                    ));
-              }),
-        ),
-      );
-    }
-
-    return widgets;
-  }
-
   void showSentenceDialog(String sentence) {
     sentence = sentence.trim();
 
@@ -5008,6 +4982,54 @@ class _CreatorState extends State<Creator> {
                   // }
                 });
                 Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future showCropDialog(
+      CropController cropController, ImageProvider image) async {
+    ScrollController scrollController = ScrollController();
+
+    return await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          contentPadding:
+              EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
+          ),
+          content: Container(
+            color: Colors.grey[800].withOpacity(0.6),
+            child: RawScrollbar(
+              thumbColor: Colors.grey[600],
+              controller: scrollController,
+              child: SingleChildScrollView(
+                controller: scrollController,
+                child: Center(
+                  child: CropImage(
+                    controller: cropController,
+                    image: Image(image: image),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('CANCEL', style: TextStyle(color: Colors.white)),
+              onPressed: () async {
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              child: Text('CONFIRM', style: TextStyle(color: Colors.white)),
+              onPressed: () async {
+                Navigator.pop(context, true);
               },
             ),
           ],
@@ -5085,6 +5107,48 @@ class _CreatorState extends State<Creator> {
             IconButton(
               iconSize: 18,
               onPressed: () async {
+                ImageProvider image;
+                if (_fileImage != null) {
+                  image = FileImage(_fileImage);
+                } else if (_networkImageURL != null) {
+                  image = NetworkImage(_networkImageURL);
+                }
+
+                if (image != null) {
+                  CropController cropController = CropController();
+
+                  if (await showCropDialog(cropController, image) != null) {
+                    ui.Image croppedImage =
+                        await cropController.croppedBitmap();
+                    ByteData data = await croppedImage.toByteData(
+                        format: ui.ImageByteFormat.png);
+                    Uint8List bytes = data.buffer.asUint8List();
+
+                    String temporaryDirectoryPath =
+                        (await getTemporaryDirectory()).path;
+
+                    String temporaryFileName = "jidoujisho-" +
+                        intl.DateFormat('yyyyMMddTkkmmss')
+                            .format(DateTime.now());
+                    File croppedImageFile =
+                        new File('$temporaryDirectoryPath/$temporaryFileName');
+
+                    croppedImageFile.createSync();
+                    croppedImageFile.writeAsBytesSync(bytes);
+
+                    setState(() {
+                      _fileImage = croppedImageFile;
+                      _isFileImage = true;
+                      _networkImageURL = null;
+                    });
+                  }
+                }
+              },
+              icon: Icon(Icons.crop, color: Colors.white),
+            ),
+            IconButton(
+              iconSize: 18,
+              onPressed: () async {
                 final pickedFile =
                     await ImagePicker.pickImage(source: ImageSource.camera);
 
@@ -5125,59 +5189,56 @@ class _CreatorState extends State<Creator> {
           ],
         ),
         labelText: "Image",
-        hintText: "Searches word if blank",
+        hintText: "Searches if blank",
       ),
     );
 
     Widget sentenceField = TextFormField(
-        maxLines: null,
-        keyboardType: TextInputType.multiline,
-        controller: _sentenceController,
-        onFieldSubmitted: (result) {
-          if (_sentenceController.text.trim().isNotEmpty) {
-            showSentenceDialog(_sentenceController.text);
-          }
-        },
-        decoration: InputDecoration(
-          prefixIcon: Icon(Icons.format_align_center_rounded),
-          suffixIcon: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (gIsTapToSelectSupported)
-                IconButton(
-                  iconSize: 18,
-                  onPressed: () {
-                    if (_sentenceController.text.trim().isNotEmpty) {
-                      showSentenceDialog(_sentenceController.text);
-                    }
-                  },
-                  icon: Icon(
-                    Icons.account_tree_outlined,
-                    color: Colors.white,
-                  ),
-                ),
+      maxLines: null,
+      keyboardType: TextInputType.multiline,
+      controller: _sentenceController,
+      onFieldSubmitted: (result) {
+        if (_sentenceController.text.trim().isNotEmpty) {
+          showSentenceDialog(_sentenceController.text);
+        }
+      },
+      decoration: InputDecoration(
+        prefixIcon: Icon(Icons.format_align_center_rounded),
+        suffixIcon: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (gIsTapToSelectSupported)
               IconButton(
                 iconSize: 18,
                 onPressed: () {
-                  setState(() {
-                    _sentenceController.clear();
-                    _isReader.value = false;
-                  });
+                  if (_sentenceController.text.trim().isNotEmpty) {
+                    showSentenceDialog(_sentenceController.text);
+                  }
                 },
                 icon: Icon(
-                  Icons.clear,
+                  Icons.account_tree_outlined,
                   color: Colors.white,
                 ),
               ),
-            ],
-          ),
-          labelText: "Sentence",
-          hintText: "Enter sentence here",
+            IconButton(
+              iconSize: 18,
+              onPressed: () {
+                setState(() {
+                  _sentenceController.clear();
+                });
+              },
+              icon: Icon(
+                Icons.clear,
+                color: Colors.white,
+              ),
+            ),
+          ],
         ),
-        onChanged: (value) {
-          _isReader.value = value.isNotEmpty;
-        });
+        labelText: "Sentence",
+        hintText: "Enter sentence here",
+      ),
+    );
 
     void wordFieldSearch() async {
       String searchTerm = _wordController.text;
@@ -5499,121 +5560,113 @@ class _CreatorState extends State<Creator> {
       }
     }
 
-    String isReaderText() {
-      if (_isReader.value) {
-        return "Reader";
-      } else {
-        return "Creator";
-      }
-    }
-
     Widget showExportButton() {
       return ValueListenableBuilder(
-          valueListenable: _isReader,
-          builder: (BuildContext context, bool exported, ___) {
-            return ValueListenableBuilder(
-              valueListenable: _justExported,
-              builder: (BuildContext context, bool exported, ___) {
-                return Container(
-                  width: double.infinity,
-                  color: Colors.grey[800].withOpacity(0.2),
-                  child: InkWell(
-                    enableFeedback: !exported,
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: InkWell(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.note_add_sharp,
-                                size: 16,
-                                color: exported ? Colors.grey : Colors.white),
-                            SizedBox(width: 5),
-                            Text(
-                              exported
-                                  ? "Card Exported"
-                                  : isShared
-                                      ? "Export ${isReaderText()} Card and Return"
-                                      : "Export ${isReaderText()} Card",
-                              style: TextStyle(
-                                color: exported ? Colors.grey : Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
+        valueListenable: _justExported,
+        builder: (BuildContext context, bool exported, ___) {
+          return Container(
+            width: double.infinity,
+            color: Colors.grey[800].withOpacity(0.2),
+            child: InkWell(
+              enableFeedback: !exported,
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: InkWell(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.note_add_sharp,
+                          size: 16,
+                          color: exported ? Colors.grey : Colors.white),
+                      SizedBox(width: 5),
+                      Text(
+                        exported
+                            ? "Card Exported"
+                            : isShared
+                                ? "Export Card and Return"
+                                : "Export Card",
+                        style: TextStyle(
+                          color: exported ? Colors.grey : Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
-                    onTap: () async {
-                      bool isReader = _isReader.value;
-
-                      if (_wordController.text == "" &&
-                          _sentenceController.text == "" &&
-                          _readingController.text == "" &&
-                          _meaningController.text == "" &&
-                          _fileImage == null) {
-                        return;
-                      }
-
-                      if (_fileImage == null && _networkImageURL != null) {
-                        var response =
-                            await http.get(Uri.tryParse(_networkImageURL));
-
-                        File previewImageFile = File(getPreviewImagePath());
-                        if (previewImageFile.existsSync()) {
-                          previewImageFile.deleteSync();
-                        }
-
-                        previewImageFile.writeAsBytesSync(response.bodyBytes);
-                        _fileImage = previewImageFile;
-                      }
-
-                      try {
-                        exportCreatorAnkiCard(
-                          _selectedDeck.value,
-                          _sentenceController.text,
-                          _wordController.text,
-                          _readingController.text,
-                          _meaningController.text,
-                          _fileImage,
-                          isReader,
-                        );
-
-                        setState(() {
-                          _isFileImage = true;
-                          _fileImage = null;
-                          _networkImageURL = null;
-
-                          _imageSearchController.clear();
-                          _sentenceController.clear();
-                          _wordController.clear();
-                          _readingController.clear();
-                          _meaningController.clear();
-                        });
-
-                        _isReader.value = false;
-                        _justExported.value = true;
-                        if (isShared) {
-                          MinimizeApp.minimizeApp();
-                          resetMenu();
-                        } else if (isReaderExport) {
-                          Navigator.pop(context, true);
-                        } else {
-                          Future.delayed(Duration(seconds: 2), () {
-                            _justExported.value = false;
-                          });
-                        }
-                      } catch (e) {
-                        print(e);
-                      }
-                    },
+                    ],
                   ),
-                );
+                ),
+              ),
+              onTap: () async {
+                if (_wordController.text == "" &&
+                    _sentenceController.text == "" &&
+                    _readingController.text == "" &&
+                    _meaningController.text == "" &&
+                    _fileImage == null) {
+                  return;
+                }
+
+                if (_networkImageURL != null) {
+                  var response = await http.get(Uri.tryParse(_networkImageURL));
+
+                  File previewImageFile = File(getPreviewImagePath());
+                  if (previewImageFile.existsSync()) {
+                    previewImageFile.deleteSync();
+                  }
+
+                  previewImageFile.writeAsBytesSync(response.bodyBytes);
+                  _fileImage = previewImageFile;
+                } else if (_fileImage != null) {
+                  File previewImageFile = File(getPreviewImagePath());
+                  if (previewImageFile.existsSync()) {
+                    previewImageFile.deleteSync();
+                  }
+
+                  _fileImage.copySync(getPreviewImagePath());
+                  _fileImage = previewImageFile;
+                }
+
+                try {
+                  exportCreatorAnkiCard(
+                    _selectedDeck.value,
+                    _sentenceController.text,
+                    _wordController.text,
+                    _readingController.text,
+                    _meaningController.text,
+                    _fileImage,
+                  );
+
+                  setState(() {
+                    _isFileImage = true;
+                    _fileImage = null;
+                    _networkImageURL = null;
+
+                    _imageSearchController.clear();
+                    _sentenceController.clear();
+                    _wordController.clear();
+                    _readingController.clear();
+                    _meaningController.clear();
+                  });
+
+                  _justExported.value = true;
+
+                  if (isShared) {
+                    MinimizeApp.minimizeApp();
+                    resetMenu();
+                  } else if (isReaderExport) {
+                    Navigator.pop(context, true);
+                  } else {
+                    Future.delayed(Duration(seconds: 2), () {
+                      _justExported.value = false;
+                    });
+                  }
+                } catch (e) {
+                  print(e);
+                }
               },
-            );
-          });
+            ),
+          );
+        },
+      );
     }
 
     ScrollController scrollController = ScrollController();
