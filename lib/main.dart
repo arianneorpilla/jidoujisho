@@ -1151,7 +1151,7 @@ class _HomeState extends State<Home> {
         children: [
           Text("jidoujisho"),
           Text(
-            " ${gPackageInfo.version} preview",
+            " ${gPackageInfo.version} beta",
             style: TextStyle(
               fontWeight: FontWeight.w200,
               fontSize: 10,

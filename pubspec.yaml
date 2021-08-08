@@ -27,8 +27,8 @@ dependencies:
   device_info_plus:
   ext_storage:
   external_app_launcher:
-  file_picker: 1.13.3
-  #gx_file_picker:
+  #file_picker: 1.13.3
+  gx_file_picker:
   flutter_archive: 3.0.0
   flutter_absolute_path:
   flutter_cache_manager:

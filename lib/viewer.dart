@@ -65,7 +65,7 @@ class ViewerState extends State<Viewer> {
   final bool fromEnd;
   final bool fromStart;
 
-  bool _hideStuff = false;
+  ValueNotifier<bool> _hideStuff = ValueNotifier<bool>(false);
   String workingText = "";
 
   ScreenshotController screenshotController = ScreenshotController();
@@ -84,7 +84,6 @@ class ViewerState extends State<Viewer> {
   List<TouchPoints> touchPoints = [];
 
   TextEditingController _sentenceController = TextEditingController(text: "");
-  TextEditingController _wordController = TextEditingController(text: "");
   FocusNode workingAreaNode = FocusNode();
   final double barHeight = 48;
 
@@ -158,56 +157,56 @@ class ViewerState extends State<Viewer> {
     }
   }
 
-  Future<void> processOcr(Offset a, Offset b) async {
-    if (!ocrBusy) {
-      ocrBusy = true;
-      print("OCR START");
+  // Future<void> processOcr(Offset a, Offset b) async {
+  //   if (!ocrBusy) {
+  //     ocrBusy = true;
+  //     print("OCR START");
 
-      Uint8List imageBytes = await screenshotController.capture();
-      imglib.Image screenshot = imglib.decodeImage(imageBytes);
+  //     Uint8List imageBytes = await screenshotController.capture();
+  //     imglib.Image screenshot = imglib.decodeImage(imageBytes);
 
-      double actualWidth = MediaQuery.of(context).size.width;
-      double actualHeight = MediaQuery.of(context).size.height;
-      double widthRatioMultiplier = (screenshot.width / actualWidth);
-      double heightRatioMultiplier = (screenshot.height / actualHeight);
+  //     double actualWidth = MediaQuery.of(context).size.width;
+  //     double actualHeight = MediaQuery.of(context).size.height;
+  //     double widthRatioMultiplier = (screenshot.width / actualWidth);
+  //     double heightRatioMultiplier = (screenshot.height / actualHeight);
 
-      Offset scaledA = a.scale(widthRatioMultiplier, heightRatioMultiplier);
-      Offset scaledB = b.scale(widthRatioMultiplier, heightRatioMultiplier);
-      Rect rect = Rect.fromPoints(scaledA, scaledB);
+  //     Offset scaledA = a.scale(widthRatioMultiplier, heightRatioMultiplier);
+  //     Offset scaledB = b.scale(widthRatioMultiplier, heightRatioMultiplier);
+  //     Rect rect = Rect.fromPoints(scaledA, scaledB);
 
-      imglib.Image croppedImage = imglib.copyCrop(
-        screenshot,
-        rect.left.round(),
-        rect.top.round(),
-        rect.width.round(),
-        rect.height.round(),
-      );
-      List<int> croppedImageBytes = imglib.writeJpg(croppedImage);
+  //     imglib.Image croppedImage = imglib.copyCrop(
+  //       screenshot,
+  //       rect.left.round(),
+  //       rect.top.round(),
+  //       rect.width.round(),
+  //       rect.height.round(),
+  //     );
+  //     List<int> croppedImageBytes = imglib.writeJpg(croppedImage);
 
-      // File cropTest = File("storage/emulated/0/Download/cropTest.jpg");
-      // cropTest.createSync(recursive: true);
-      // cropTest.writeAsBytesSync(croppedImageBytes);
-      print("CROPPED IMAGE WRITTEN");
+  //     // File cropTest = File("storage/emulated/0/Download/cropTest.jpg");
+  //     // cropTest.createSync(recursive: true);
+  //     // cropTest.writeAsBytesSync(croppedImageBytes);
+  //     print("CROPPED IMAGE WRITTEN");
 
-      processOcrTextFromBytes(croppedImageBytes).then((result) {
-        setState(() {
-          ocrBusy = false;
-          ocrOverlayShown = false;
-          touchPoints.clear();
-        });
+  //     processOcrTextFromBytes(croppedImageBytes).then((result) {
+  //       setState(() {
+  //         ocrBusy = false;
+  //         ocrOverlayShown = false;
+  //         touchPoints.clear();
+  //       });
 
-        print("OCR COMPLETE -- RESULT");
+  //       print("OCR COMPLETE -- RESULT");
 
-        print(result);
+  //       print(result);
 
-        print("OCR REORDERED OUTPUT");
-        print(reorderOcrVerticalText(result));
-        print("OCR END");
-      });
-    } else {
-      print("OCR IS BUSY -- WAITING TO FINISH");
-    }
-  }
+  //       print("OCR REORDERED OUTPUT");
+  //       print(reorderOcrVerticalText(result));
+  //       print("OCR END");
+  //     });
+  //   } else {
+  //     print("OCR IS BUSY -- WAITING TO FINISH");
+  //   }
+  // }
 
   Paint ocrOverlayPaint = Paint()
     ..strokeCap = StrokeCap.round
@@ -279,7 +278,6 @@ class ViewerState extends State<Viewer> {
               children: [
                 buildGallery(),
                 buildCurrentPage(),
-                if (ocrOverlayShown) buildOcrOverlay(),
                 buildBottomBar(context),
                 buildTopBar(context),
                 Padding(
@@ -297,13 +295,13 @@ class ViewerState extends State<Viewer> {
     );
   }
 
-  void promptTimerOcr(Offset a, Offset b) {
-    Future.delayed(Duration(seconds: 1), () {
-      if (touchPoints[0].points == a && touchPoints[1].points == b) {
-        processOcr(a, b);
-      }
-    });
-  }
+  // void promptTimerOcr(Offset a, Offset b) {
+  //   Future.delayed(Duration(seconds: 1), () {
+  //     if (touchPoints[0].points == a && touchPoints[1].points == b) {
+  //       processOcr(a, b);
+  //     }
+  //   });
+  // }
 
   Widget sentenceField() {
     return TextFormField(
@@ -340,9 +338,8 @@ class ViewerState extends State<Viewer> {
             IconButton(
               iconSize: 18,
               onPressed: () {
-                setState(() {
-                  _sentenceController.clear();
-                });
+                _hideStuff.value = false;
+                _sentenceController.clear();
               },
               icon: Icon(
                 Icons.clear,
@@ -403,9 +400,7 @@ class ViewerState extends State<Viewer> {
                 } else {
                   _sentenceController.text = words[selectedWordIndex.value];
                 }
-                setState(() {
-                  _hideStuff = false;
-                });
+                _hideStuff.value = false;
                 Navigator.pop(context);
               },
             ),
@@ -417,9 +412,7 @@ class ViewerState extends State<Viewer> {
                 } else {
                   _clipboard.value = words[selectedWordIndex.value];
                 }
-                setState(() {
-                  _hideStuff = false;
-                });
+                _hideStuff.value = false;
                 Navigator.pop(context);
               },
             ),
@@ -484,9 +477,7 @@ class ViewerState extends State<Viewer> {
                 } else {
                   _clipboard.value = words[selectedWordIndex.value];
                 }
-                setState(() {
-                  _hideStuff = false;
-                });
+                _hideStuff.value = false;
                 Navigator.pop(context);
               },
             ),
@@ -498,9 +489,7 @@ class ViewerState extends State<Viewer> {
                 } else {
                   _sentenceController.text = words[selectedWordIndex.value];
                 }
-                setState(() {
-                  _hideStuff = false;
-                });
+                _hideStuff.value = false;
                 Navigator.pop(context);
               },
             ),
@@ -512,9 +501,7 @@ class ViewerState extends State<Viewer> {
                 } else {
                   _sentenceController.text += words[selectedWordIndex.value];
                 }
-                setState(() {
-                  _hideStuff = false;
-                });
+                _hideStuff.value = false;
                 Navigator.pop(context);
               },
             ),
@@ -524,47 +511,47 @@ class ViewerState extends State<Viewer> {
     );
   }
 
-  Widget buildOcrOverlay() {
-    return GestureDetector(
-      child: CustomPaint(
-        size: Size.infinite,
-        painter: OcrBoxPainter(
-          pointsList: touchPoints,
-          defaultPaint: ocrOverlayPaint,
-          coordsCallback: promptTimerOcr,
-        ),
-      ),
-      onPanStart: (details) {
-        setState(() {
-          touchPoints.clear();
-          RenderBox renderBox = context.findRenderObject();
-          touchPoints.add(
-            TouchPoints(
-              points: renderBox.globalToLocal(details.globalPosition),
-              paint: ocrOverlayPaint,
-            ),
-          );
-        });
-      },
-      onPanUpdate: (details) {
-        setState(() {
-          RenderBox renderBox = context.findRenderObject();
-          touchPoints = [touchPoints.first];
-          touchPoints.add(
-            TouchPoints(
-              points: renderBox.globalToLocal(details.globalPosition),
-              paint: ocrOverlayPaint,
-            ),
-          );
-        });
-      },
-      onPanEnd: (details) {
-        setState(() {
-          touchPoints.add(null);
-        });
-      },
-    );
-  }
+  // Widget buildOcrOverlay() {
+  //   return GestureDetector(
+  //     child: CustomPaint(
+  //       size: Size.infinite,
+  //       painter: OcrBoxPainter(
+  //         pointsList: touchPoints,
+  //         defaultPaint: ocrOverlayPaint,
+  //         coordsCallback: promptTimerOcr,
+  //       ),
+  //     ),
+  //     onPanStart: (details) {
+  //       setState(() {
+  //         touchPoints.clear();
+  //         RenderBox renderBox = context.findRenderObject();
+  //         touchPoints.add(
+  //           TouchPoints(
+  //             points: renderBox.globalToLocal(details.globalPosition),
+  //             paint: ocrOverlayPaint,
+  //           ),
+  //         );
+  //       });
+  //     },
+  //     onPanUpdate: (details) {
+  //       setState(() {
+  //         RenderBox renderBox = context.findRenderObject();
+  //         touchPoints = [touchPoints.first];
+  //         touchPoints.add(
+  //           TouchPoints(
+  //             points: renderBox.globalToLocal(details.globalPosition),
+  //             paint: ocrOverlayPaint,
+  //           ),
+  //         );
+  //       });
+  //     },
+  //     onPanEnd: (details) {
+  //       setState(() {
+  //         touchPoints.add(null);
+  //       });
+  //     },
+  //   );
+  // }
 
   Future showChapterRedirectionDialog(MangaChapter redirectChapter,
       {previous = false}) async {
@@ -650,47 +637,51 @@ class ViewerState extends State<Viewer> {
   }
 
   Widget buildCurrentPage() {
-    return AnimatedOpacity(
-      opacity: _hideStuff ? 1.0 : 0.0,
-      duration: const Duration(milliseconds: 300),
-      child: ValueListenableBuilder(
-        valueListenable: currentPage,
-        builder: (BuildContext context, int value, Widget child) {
-          return Container(
-            child: Stack(
-              alignment: Alignment.center,
-              children: <Widget>[
-                Positioned(
-                  bottom: 10,
-                  child: Text(
-                    "$value / ${images.length - 2}",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 12,
-                      foreground: Paint()
-                        ..strokeWidth = 2
-                        ..style = PaintingStyle.stroke
-                        ..color = Colors.black.withOpacity(0.75),
-                    ),
+    return ValueListenableBuilder(
+        valueListenable: _hideStuff,
+        builder: (BuildContext context, bool value, Widget child) {
+          return AnimatedOpacity(
+            opacity: value ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 300),
+            child: ValueListenableBuilder(
+              valueListenable: currentPage,
+              builder: (BuildContext context, int value, Widget child) {
+                return Container(
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: <Widget>[
+                      Positioned(
+                        bottom: 10,
+                        child: Text(
+                          "$value / ${images.length - 2}",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 12,
+                            foreground: Paint()
+                              ..strokeWidth = 2
+                              ..style = PaintingStyle.stroke
+                              ..color = Colors.black.withOpacity(0.75),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 10,
+                        child: Text(
+                          "$value / ${images.length - 2}",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                Positioned(
-                  bottom: 10,
-                  child: Text(
-                    "$value / ${images.length - 2}",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
+                );
+              },
             ),
           );
-        },
-      ),
-    );
+        });
   }
 
   Widget buildGallery() {
@@ -704,10 +695,8 @@ class ViewerState extends State<Viewer> {
           maxScale: PhotoViewComputedScale.contained * 6,
           filterQuality: FilterQuality.high,
           onTapDown: (context, details, value) {
-            setState(() {
-              _hideStuff = !_hideStuff;
-              workingAreaNode.unfocus();
-            });
+            _hideStuff.value = !_hideStuff.value;
+            workingAreaNode.unfocus();
           },
         );
       },
@@ -753,39 +742,47 @@ class ViewerState extends State<Viewer> {
   Widget buildTopBar(BuildContext context) {
     return Align(
       alignment: Alignment.topCenter,
-      child: AnimatedOpacity(
-        opacity: _hideStuff ? 0.0 : 1.0,
-        duration: const Duration(milliseconds: 300),
-        child: Container(
-          color: Theme.of(context).dialogBackgroundColor.withOpacity(0.8),
-          child: sentenceField(),
-        ),
+      child: ValueListenableBuilder(
+        valueListenable: _hideStuff,
+        builder: (BuildContext context, bool value, Widget child) {
+          return AnimatedOpacity(
+            opacity: value ? 0.0 : 1.0,
+            duration: const Duration(milliseconds: 300),
+            child: Container(
+              color: Theme.of(context).dialogBackgroundColor.withOpacity(0.8),
+              child: sentenceField(),
+            ),
+          );
+        },
       ),
     );
   }
 
-  AnimatedOpacity buildBottomBar(BuildContext context) {
+  Widget buildBottomBar(BuildContext context) {
     final iconColor = Theme.of(context).textTheme.button.color;
 
-    return AnimatedOpacity(
-      opacity: _hideStuff ? 0.0 : 1.0,
-      duration: const Duration(milliseconds: 300),
-      child: Container(
-        height: barHeight,
-        color: Theme.of(context).dialogBackgroundColor.withOpacity(0.8),
-        child: Row(
-          children: <Widget>[
-            SizedBox(width: 24),
-            _buildPosition(iconColor),
-            _buildProgressBar(),
-            //_buildScanButton(),
-            _buildMoreButton(),
-            // _buildToolsButton(controller),
-            // _buildMoreButton(controller),
-          ],
-        ),
-      ),
-    );
+    return ValueListenableBuilder(
+        valueListenable: _hideStuff,
+        builder: (BuildContext context, bool value, Widget child) {
+          return AnimatedOpacity(
+              opacity: _hideStuff.value ? 0.0 : 1.0,
+              duration: const Duration(milliseconds: 300),
+              child: Container(
+                height: barHeight,
+                color: Theme.of(context).dialogBackgroundColor.withOpacity(0.8),
+                child: Row(
+                  children: <Widget>[
+                    SizedBox(width: 24),
+                    _buildPosition(iconColor),
+                    _buildProgressBar(),
+                    //_buildScanButton(),
+                    _buildMoreButton(),
+                    // _buildToolsButton(controller),
+                    // _buildMoreButton(controller),
+                  ],
+                ),
+              ));
+        });
   }
 
   Widget _buildPosition(Color iconColor) {
@@ -833,24 +830,24 @@ class ViewerState extends State<Viewer> {
     );
   }
 
-  GestureDetector _buildScanButton() {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          touchPoints.clear();
-          ocrOverlayShown = !ocrOverlayShown;
-        });
-      },
-      child: Container(
-        height: barHeight,
-        color: Colors.transparent,
-        margin: const EdgeInsets.only(left: 4.0, right: 8.0),
-        child: (ocrOverlayShown)
-            ? Icon(Icons.highlight_remove)
-            : Icon(Icons.qr_code_sharp),
-      ),
-    );
-  }
+  // GestureDetector _buildScanButton() {
+  //   return GestureDetector(
+  //     onTap: () {
+  //       setState(() {
+  //         touchPoints.clear();
+  //         ocrOverlayShown = !ocrOverlayShown;
+  //       });
+  //     },
+  //     child: Container(
+  //       height: barHeight,
+  //       color: Colors.transparent,
+  //       margin: const EdgeInsets.only(left: 4.0, right: 8.0),
+  //       child: (ocrOverlayShown)
+  //           ? Icon(Icons.highlight_remove)
+  //           : Icon(Icons.qr_code_sharp),
+  //     ),
+  //   );
+  // }
 
   Widget _buildMoreButton() {
     return GestureDetector(
@@ -938,18 +935,14 @@ class ViewerState extends State<Viewer> {
             break;
         }
       },
-      child: AnimatedOpacity(
-        opacity: _hideStuff ? 0.0 : 1.0,
-        duration: const Duration(milliseconds: 300),
-        child: ClipRect(
-          child: Container(
-            height: barHeight,
-            padding: const EdgeInsets.only(
-              left: 12.0,
-              right: 16.0,
-            ),
-            child: const Icon(Icons.more_vert),
+      child: ClipRect(
+        child: Container(
+          height: barHeight,
+          padding: const EdgeInsets.only(
+            left: 12.0,
+            right: 16.0,
           ),
+          child: const Icon(Icons.more_vert),
         ),
       ),
     );
