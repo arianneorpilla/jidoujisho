@@ -42,7 +42,7 @@ dependencies:
   fluttertoast:
   fuzzy:
   image:
-  image_picker: 0.6.7+11
+  image_picker:
   intl:
   kana_kit:
   http:
@@ -63,7 +63,10 @@ dependencies:
         ref: ae70414abe711b115657fd640527a2a148871847
   progress_indicators:
   receive_sharing_intent:
+  share_plus: 2.1.4
   scrollable_positioned_list: ^0.1.9
+  screenshot:
+  shake_event:
   shell:
   shared_preferences:
   subtitle_wrapper_package:

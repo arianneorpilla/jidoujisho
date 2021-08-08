@@ -1,27 +1,29 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:clipboard_monitor/clipboard_monitor.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:jidoujisho/main.dart';
-import 'package:jidoujisho/util.dart';
+
+import 'package:chewie/chewie.dart';
+import 'package:clipboard_monitor/clipboard_monitor.dart';
+import 'package:image/image.dart' as imglib;
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:progress_indicators/progress_indicators.dart';
-
+import 'package:screenshot/screenshot.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:transparent_image/transparent_image.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:jidoujisho/util.dart';
 import 'package:jidoujisho/cache.dart';
 import 'package:jidoujisho/dictionary.dart';
 import 'package:jidoujisho/globals.dart';
 import 'package:jidoujisho/pitch.dart';
 import 'package:jidoujisho/preferences.dart';
-import 'package:transparent_image/transparent_image.dart';
-import 'package:ve_dart/ve_dart.dart';
 
 class Viewer extends StatefulWidget {
   Viewer(
@@ -59,13 +61,25 @@ class ViewerState extends State<Viewer> {
   final bool fromEnd;
   final bool fromStart;
 
+  bool _hideStuff = false;
+  String workingText = "";
+
+  ScreenshotController screenshotController = ScreenshotController();
   PageController pageController;
+
   List<ImageProvider> images;
   ValueNotifier<int> currentPage;
+  Uint8List croppedImage;
 
   String highlightedText = "";
   List<String> recursiveTerms = [];
   bool noPush = false;
+
+  bool ocrBusy = false;
+  bool ocrOverlayShown = false;
+  List<TouchPoints> touchPoints = [];
+
+  final double barHeight = 48;
 
   @override
   void dispose() {
@@ -91,6 +105,7 @@ class ViewerState extends State<Viewer> {
     }
 
     pageController = PageController(initialPage: currentPage.value);
+
     chapter.setMangaPageProgress(currentPage.value);
     chapter.getManga().setLastChapterRead(chapter);
 
@@ -115,6 +130,59 @@ class ViewerState extends State<Viewer> {
   void onClipboardText(String text) {
     _clipboard.value = text;
   }
+
+  Future<void> processOcr(Offset a, Offset b) async {
+    if (!ocrBusy) {
+      ocrBusy = true;
+      print("OCR START");
+
+      Uint8List imageBytes = await screenshotController.capture();
+      imglib.Image screenshot = imglib.decodeImage(imageBytes);
+
+      double actualWidth = MediaQuery.of(context).size.width;
+      double actualHeight = MediaQuery.of(context).size.height;
+      double widthRatioMultiplier = (screenshot.width / actualWidth);
+      double heightRatioMultiplier = (screenshot.height / actualHeight);
+
+      Offset scaledA = a.scale(widthRatioMultiplier, heightRatioMultiplier);
+      Offset scaledB = b.scale(widthRatioMultiplier, heightRatioMultiplier);
+      Rect rect = Rect.fromPoints(scaledA, scaledB);
+
+      imglib.Image croppedImage = imglib.copyCrop(
+        screenshot,
+        rect.left.round(),
+        rect.top.round(),
+        rect.width.round(),
+        rect.height.round(),
+      );
+      List<int> croppedImageBytes = imglib.writeJpg(croppedImage);
+
+      // File cropTest = File("storage/emulated/0/Download/cropTest.jpg");
+      // cropTest.createSync(recursive: true);
+      // cropTest.writeAsBytesSync(croppedImageBytes);
+      print("CROPPED IMAGE WRITTEN");
+
+      processOcrTextFromBytes(croppedImageBytes).then((result) {
+        setState(() {
+          ocrBusy = false;
+          ocrOverlayShown = false;
+          touchPoints.clear();
+        });
+
+        print("OCR COMPLETE -- RESULT");
+        print(result);
+        print("OCR END");
+      });
+    } else {
+      print("OCR IS BUSY -- WAITING TO FINISH");
+    }
+  }
+
+  Paint ocrOverlayPaint = Paint()
+    ..strokeCap = StrokeCap.round
+    ..isAntiAlias = true
+    ..color = Colors.black.withOpacity(0.6)
+    ..strokeWidth = 3.0;
 
   @override
   Widget build(BuildContext context) {
@@ -172,21 +240,76 @@ class ViewerState extends State<Viewer> {
       child: new Scaffold(
         resizeToAvoidBottomInset: false,
         backgroundColor: Colors.black,
-        body: Stack(
-          alignment: Alignment.bottomCenter,
-          children: [
-            buildGallery(),
-            buildCurrentPage(),
-            Padding(
-              padding: EdgeInsets.only(
-                top: MediaQuery.of(context).size.height * 0.05,
-                bottom: MediaQuery.of(context).size.height * 0.05,
+        body: Screenshot(
+          controller: screenshotController,
+          child: Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              buildGallery(),
+              buildCurrentPage(),
+              if (ocrOverlayShown) buildOcrOverlay(),
+              buildBottomBar(context),
+              Padding(
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).size.height * 0.05,
+                  bottom: MediaQuery.of(context).size.height * 0.05,
+                ),
+                child: buildDictionary(),
               ),
-              child: buildDictionary(),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  void promptTimerOcr(Offset a, Offset b) {
+    Future.delayed(Duration(seconds: 1), () {
+      if (touchPoints[0].points == a && touchPoints[1].points == b) {
+        processOcr(a, b);
+      }
+    });
+  }
+
+  Widget buildOcrOverlay() {
+    return GestureDetector(
+      child: CustomPaint(
+        size: Size.infinite,
+        painter: OcrBoxPainter(
+          pointsList: touchPoints,
+          defaultPaint: ocrOverlayPaint,
+          coordsCallback: promptTimerOcr,
+        ),
+      ),
+      onPanStart: (details) {
+        setState(() {
+          touchPoints.clear();
+          RenderBox renderBox = context.findRenderObject();
+          touchPoints.add(
+            TouchPoints(
+              points: renderBox.globalToLocal(details.globalPosition),
+              paint: ocrOverlayPaint,
+            ),
+          );
+        });
+      },
+      onPanUpdate: (details) {
+        setState(() {
+          RenderBox renderBox = context.findRenderObject();
+          touchPoints = [touchPoints.first];
+          touchPoints.add(
+            TouchPoints(
+              points: renderBox.globalToLocal(details.globalPosition),
+              paint: ocrOverlayPaint,
+            ),
+          );
+        });
+      },
+      onPanEnd: (details) {
+        setState(() {
+          touchPoints.add(null);
+        });
+      },
     );
   }
 
@@ -224,7 +347,7 @@ class ViewerState extends State<Viewer> {
       actions: <Widget>[
         new TextButton(
           child: Text(
-            'CANCEL',
+            'BACK',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w500,
@@ -239,7 +362,7 @@ class ViewerState extends State<Viewer> {
         ),
         new TextButton(
           child: Text(
-            (previous) ? 'READ PREVIOUS' : 'READ NEXT',
+            (previous) ? 'PREVIOUS' : 'NEXT',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w500,
@@ -274,42 +397,46 @@ class ViewerState extends State<Viewer> {
   }
 
   Widget buildCurrentPage() {
-    return ValueListenableBuilder(
-      valueListenable: currentPage,
-      builder: (BuildContext context, int value, Widget child) {
-        return Container(
-          child: Stack(
-            alignment: Alignment.center,
-            children: <Widget>[
-              Positioned(
-                bottom: 10,
-                child: Text(
-                  "$value / ${images.length - 2}",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 12,
-                    foreground: Paint()
-                      ..strokeWidth = 2
-                      ..style = PaintingStyle.stroke
-                      ..color = Colors.black.withOpacity(0.75),
+    return AnimatedOpacity(
+      opacity: _hideStuff ? 1.0 : 0.0,
+      duration: const Duration(milliseconds: 300),
+      child: ValueListenableBuilder(
+        valueListenable: currentPage,
+        builder: (BuildContext context, int value, Widget child) {
+          return Container(
+            child: Stack(
+              alignment: Alignment.center,
+              children: <Widget>[
+                Positioned(
+                  bottom: 10,
+                  child: Text(
+                    "$value / ${images.length - 2}",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      foreground: Paint()
+                        ..strokeWidth = 2
+                        ..style = PaintingStyle.stroke
+                        ..color = Colors.black.withOpacity(0.75),
+                    ),
                   ),
                 ),
-              ),
-              Positioned(
-                bottom: 10,
-                child: Text(
-                  "$value / ${images.length - 2}",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.white,
+                Positioned(
+                  bottom: 10,
+                  child: Text(
+                    "$value / ${images.length - 2}",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        );
-      },
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -321,10 +448,16 @@ class ViewerState extends State<Viewer> {
           imageProvider: images[index],
           initialScale: PhotoViewComputedScale.contained * 1,
           minScale: PhotoViewComputedScale.contained * 1,
-          maxScale: PhotoViewComputedScale.contained * 4,
+          maxScale: PhotoViewComputedScale.contained * 6,
           filterQuality: FilterQuality.high,
+          onTapDown: (context, details, value) {
+            setState(() {
+              _hideStuff = !_hideStuff;
+            });
+          },
         );
       },
+      scrollPhysics: BouncingScrollPhysics(),
       itemCount: images.length,
       loadingBuilder: (context, event) => Center(
         child: Container(
@@ -338,17 +471,19 @@ class ViewerState extends State<Viewer> {
         ),
       ),
       pageController: pageController,
-      onPageChanged: (pageNumber) {
+      onPageChanged: (pageNumber) async {
         if (pageNumber <= 0) {
           MangaChapter previous = chapter.getPreviousChapter();
           if (previous != null) {
-            showChapterRedirectionDialog(previous, previous: true);
-          } else {}
+            await showChapterRedirectionDialog(previous, previous: true);
+          }
+          pageController.jumpToPage(1);
         } else if (pageNumber > images.length - 2) {
           MangaChapter next = chapter.getNextChapter();
           if (next != null) {
-            showChapterRedirectionDialog(next, previous: false);
-          } else {}
+            await showChapterRedirectionDialog(next, previous: false);
+          }
+          pageController.jumpToPage(images.length - 2);
         } else {
           currentPage.value = pageNumber;
           chapter.setMangaPageProgress(pageNumber);
@@ -359,6 +494,211 @@ class ViewerState extends State<Viewer> {
         }
       },
     );
+  }
+
+  AnimatedOpacity buildBottomBar(BuildContext context) {
+    final iconColor = Theme.of(context).textTheme.button.color;
+
+    return AnimatedOpacity(
+      opacity: _hideStuff ? 0.0 : 1.0,
+      duration: const Duration(milliseconds: 300),
+      child: Container(
+        height: barHeight,
+        color: Theme.of(context).dialogBackgroundColor.withOpacity(0.8),
+        child: Row(
+          children: <Widget>[
+            SizedBox(width: 20),
+            _buildPosition(iconColor),
+            _buildProgressBar(),
+            _buildScanButton(),
+            _buildMoreButton(),
+            // _buildToolsButton(controller),
+            // _buildMoreButton(controller),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPosition(Color iconColor) {
+    return GestureDetector(
+      child: Padding(
+        padding: const EdgeInsets.only(
+          right: 24.0,
+        ),
+        child: Row(
+          children: [
+            ValueListenableBuilder(
+              valueListenable: currentPage,
+              builder: (BuildContext context, int value, Widget child) {
+                return Text(
+                  "$value / ${images.length - 2}",
+                  style: const TextStyle(
+                    fontSize: 14.0,
+                    color: Colors.white,
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProgressBar() {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.only(right: 20.0),
+        child: MangaProgressBar(
+          currentPage,
+          images.length - 2,
+          pageController,
+          colors: ChewieProgressColors(
+            playedColor: Colors.grey,
+            handleColor: Colors.red,
+            backgroundColor: Colors.red,
+            bufferedColor: Colors.red[200],
+          ),
+        ),
+      ),
+    );
+  }
+
+  GestureDetector _buildScanButton() {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          touchPoints.clear();
+          ocrOverlayShown = !ocrOverlayShown;
+        });
+      },
+      child: Container(
+        height: barHeight,
+        color: Colors.transparent,
+        margin: const EdgeInsets.only(left: 4.0, right: 8.0),
+        child: (ocrOverlayShown)
+            ? Icon(Icons.highlight_remove)
+            : Icon(Icons.qr_code_sharp),
+      ),
+    );
+  }
+
+  Widget _buildMoreButton() {
+    return GestureDetector(
+      onTap: () async {
+        final chosenOption = await showModalBottomSheet<int>(
+          context: context,
+          isScrollControlled: true,
+          useRootNavigator: true,
+          builder: (context) => _MoreOptionsDialog(
+            options: [
+              "Open Chapter Navigation Menu",
+              if (getOcrHorizontalMode())
+                "Use Vertical Text Recognition"
+              else
+                "Use Horizontal Text Recognition",
+              "Select Active Dictionary Source",
+              "Share Links to Applications",
+              "Export Current Context to Anki",
+            ],
+            icons: [
+              Icons.menu_book,
+              if (getOcrHorizontalMode())
+                Icons.text_rotate_vertical
+              else
+                Icons.text_rotation_none,
+              Icons.auto_stories,
+              Icons.share_outlined,
+              Icons.mobile_screen_share_rounded,
+            ],
+            highlights: [],
+            invisibles: [],
+          ),
+        );
+
+        switch (chosenOption) {
+          case 0:
+            chapter.getManga().openMangaMenu(context, () {}, inViewer: true);
+            break;
+          case 1:
+            toggleOcrHorizontalMode();
+            break;
+          case 2:
+            openDictionaryMenu(context, false);
+            final String clipboardMemory = _clipboard.value;
+            _clipboard.value = "";
+            setNoPush();
+            _clipboard.value = clipboardMemory;
+            break;
+          case 3:
+            openExtraShare();
+            break;
+          case 4:
+            break;
+        }
+      },
+      child: AnimatedOpacity(
+        opacity: _hideStuff ? 0.0 : 1.0,
+        duration: const Duration(milliseconds: 300),
+        child: ClipRect(
+          child: Container(
+            height: barHeight,
+            padding: const EdgeInsets.only(
+              left: 8.0,
+              right: 8.0,
+            ),
+            child: const Icon(Icons.more_vert),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> openExtraShare() async {
+    final chosenOption = await showModalBottomSheet<int>(
+      context: context,
+      isScrollControlled: true,
+      useRootNavigator: true,
+      builder: (context) => _MoreOptionsDialog(
+        options: const [
+          "Search Working Text with Jisho.org",
+          "Translate Working Text with DeepL",
+          "Translate Working Text with Google Translate",
+          "Share Working Text with Menu",
+          "Share Current Image",
+        ],
+        icons: const [
+          Icons.menu_book_rounded,
+          Icons.translate_rounded,
+          Icons.g_translate_rounded,
+          Icons.share_outlined,
+          Icons.photo,
+        ],
+        highlights: [],
+        invisibles: (images[currentPage.value] is FileImage) ? [] : [4],
+      ),
+    );
+
+    switch (chosenOption) {
+      case 0:
+        await launch("https://jisho.org/search/$workingText");
+        break;
+      case 1:
+        await launch("https://www.deepl.com/translator#ja/en/$workingText");
+        break;
+      case 2:
+        await launch(
+            "https://translate.google.com/?sl=ja&tl=en&text=$workingText&op=translate");
+        break;
+      case 3:
+        Share.share(workingText);
+        break;
+      case 4:
+        FileImage fileImage = images[currentPage.value];
+        Share.shareFiles([fileImage.file.path], text: " ");
+        break;
+    }
   }
 
   void emptyStack() {
@@ -1029,4 +1369,258 @@ class ViewerState extends State<Viewer> {
       },
     );
   }
+}
+
+class MangaProgressBar extends StatefulWidget {
+  MangaProgressBar(
+    this.currentPage,
+    this.pagesCount,
+    this.pageController, {
+    ChewieProgressColors colors,
+    this.onDragEnd,
+    this.onDragStart,
+    this.onDragUpdate,
+    Key key,
+  })  : colors = colors ?? ChewieProgressColors(),
+        super(key: key);
+
+  final ChewieProgressColors colors;
+  final ValueNotifier<int> currentPage;
+  final PageController pageController;
+  final int pagesCount;
+  final Function() onDragStart;
+  final Function() onDragEnd;
+  final Function() onDragUpdate;
+
+  @override
+  MangaProgressBarState createState() {
+    return MangaProgressBarState();
+  }
+}
+
+class MangaProgressBarState extends State<MangaProgressBar> {
+  MangaProgressBarState() {
+    listener = () {
+      if (!mounted) return;
+      setState(() {});
+    };
+  }
+
+  VoidCallback listener;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void deactivate() {
+    super.deactivate();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    void seekToRelativePosition(Offset globalPosition) {
+      final box = context.findRenderObject() as RenderBox;
+      final Offset tapPos = box.globalToLocal(globalPosition);
+      final double relative = tapPos.dx / box.size.width;
+      final int position =
+          widget.pagesCount - ((widget.pagesCount) * relative).round();
+      widget.pageController.jumpToPage(
+        position,
+      );
+    }
+
+    return GestureDetector(
+      onHorizontalDragStart: (DragStartDetails details) {
+        if (widget.onDragStart != null) {
+          widget.onDragStart();
+        }
+      },
+      onHorizontalDragUpdate: (DragUpdateDetails details) {
+        seekToRelativePosition(details.globalPosition);
+
+        if (widget.onDragUpdate != null) {
+          widget.onDragUpdate();
+        }
+      },
+      onHorizontalDragEnd: (DragEndDetails details) {
+        if (widget.onDragEnd != null) {
+          widget.onDragEnd();
+        }
+      },
+      onTapDown: (TapDownDetails details) {
+        seekToRelativePosition(details.globalPosition);
+      },
+      child: Center(
+        child: Container(
+          height: MediaQuery.of(context).size.height / 2,
+          width: MediaQuery.of(context).size.width,
+          color: Colors.transparent,
+          child: CustomPaint(
+            painter: MangaProgressBarPainter(
+              widget.currentPage,
+              widget.pagesCount,
+              widget.colors,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class MangaProgressBarPainter extends CustomPainter {
+  MangaProgressBarPainter(this.currentPage, this.pagesCount, this.colors);
+
+  final ValueNotifier<int> currentPage;
+  final int pagesCount;
+
+  ChewieProgressColors colors;
+
+  @override
+  bool shouldRepaint(CustomPainter painter) {
+    return true;
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const height = 2.0;
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromPoints(
+          Offset(0.0, size.height / 2),
+          Offset(size.width, size.height / 2 + height),
+        ),
+        const Radius.circular(4.0),
+      ),
+      colors.backgroundPaint,
+    );
+
+    final double playedPartPercent =
+        1 - ((currentPage.value - 1) / (pagesCount - 1));
+    final double playedPart =
+        playedPartPercent > 1 ? size.width : playedPartPercent * size.width;
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromPoints(
+          Offset(0.0, size.height / 2),
+          Offset(playedPart, size.height / 2 + height),
+        ),
+        const Radius.circular(4.0),
+      ),
+      colors.playedPaint,
+    );
+    canvas.drawCircle(
+      Offset(playedPart, size.height / 2 + height / 2),
+      height * 3,
+      colors.handlePaint,
+    );
+  }
+}
+
+class _MoreOptionsDialog extends StatelessWidget {
+  const _MoreOptionsDialog({
+    this.options,
+    this.icons,
+    this.highlights,
+    this.invisibles,
+  });
+
+  final List<String> options;
+  final List<IconData> icons;
+  final List<int> highlights;
+  final List<int> invisibles;
+
+  @override
+  Widget build(BuildContext context) {
+    ScrollController _scrollController = ScrollController();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _scrollController.jumpTo(
+        _scrollController.position.maxScrollExtent,
+      );
+    });
+
+    return ListView.builder(
+      controller: _scrollController,
+      shrinkWrap: true,
+      physics: const ScrollPhysics(),
+      itemCount: options.length,
+      itemBuilder: (context, index) {
+        final _option = options[index];
+        final _icon = icons[index];
+
+        if (invisibles.contains(index)) {
+          return Container();
+        }
+
+        return ListTile(
+          dense: true,
+          title: Row(
+            children: [
+              Icon(
+                _icon,
+                size: 20.0,
+                color: Colors.red,
+              ),
+              const SizedBox(width: 16.0),
+              Text(
+                _option,
+                style: TextStyle(
+                  color:
+                      (highlights.contains(index)) ? Colors.red : Colors.white,
+                ),
+              ),
+            ],
+          ),
+          onTap: () {
+            Navigator.of(context).pop(index);
+          },
+        );
+      },
+    );
+  }
+}
+
+class TouchPoints {
+  Paint paint;
+  Offset points;
+  TouchPoints({this.points, this.paint});
+}
+
+typedef void OcrCoordsCallback(Offset a, Offset b);
+
+class OcrBoxPainter extends CustomPainter {
+  OcrBoxPainter({this.pointsList, this.defaultPaint, this.coordsCallback});
+
+  OcrCoordsCallback coordsCallback;
+  Paint defaultPaint;
+  List<TouchPoints> pointsList;
+  List<Offset> offsetPoints = [];
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (pointsList.isEmpty) {
+      canvas.drawRect(Rect.largest, defaultPaint);
+    }
+
+    for (int i = 0; i < pointsList.length - 1; i++) {
+      if (pointsList[i] != null && pointsList[i + 1] != null) {
+        canvas.drawPath(
+            Path()
+              ..addRect(Rect.largest)
+              ..addRect(Rect.fromPoints(
+                  pointsList[i].points, pointsList[i + 1].points))
+              ..fillType = PathFillType.evenOdd,
+            pointsList[i].paint);
+
+        coordsCallback(pointsList[i].points, pointsList[i + 1].points);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(OcrBoxPainter oldDelegate) => true;
 }

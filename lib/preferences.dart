@@ -992,3 +992,11 @@ bool hasCoverAlias(String directoryPath) {
 
   return (coverAliasDirectory.existsSync());
 }
+
+Future<void> toggleOcrHorizontalMode() async {
+  await gSharedPrefs.setBool("ocrHorizontalMode", !getOcrHorizontalMode());
+}
+
+bool getOcrHorizontalMode() {
+  return gSharedPrefs.getBool("ocrHorizontalMode") ?? false;
+}

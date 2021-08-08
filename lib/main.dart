@@ -50,6 +50,7 @@ typedef void CreatorCallback({
   bool isReaderExport,
 });
 typedef void SearchCallback(String term);
+typedef void DropdownCallback(String option);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -586,6 +587,7 @@ class _HomeState extends State<Home> {
         child: DropDownMenu(
           options: sourceNames,
           selectedOption: selectedSource,
+          dropdownCallback: setLastTachiyomiSource,
         ),
       );
     }
@@ -593,8 +595,8 @@ class _HomeState extends State<Home> {
     String getErrorMessage() {
       if (!getTachiyomiDirectory().existsSync()) {
         return "Tachiyomi directory does not exist";
-      } else if (getTachiyomiDirectory().listSync().isEmpty) {
-        return "No downloads in Tachiyomi directory";
+      } else if (getMangaByDropdown().isEmpty) {
+        return "No downloads were found";
       }
 
       return null;
@@ -606,7 +608,7 @@ class _HomeState extends State<Home> {
         Expanded(
           child: centerMessage(
             getErrorMessage(),
-            Icons.library_books,
+            Icons.photo_library,
             false,
           ),
         ),
@@ -627,17 +629,7 @@ class _HomeState extends State<Home> {
           ValueListenableBuilder<String>(
             valueListenable: selectedSource,
             builder: (context, value, child) {
-              setLastTachiyomiSource(value);
-              MangaSource mangaSource;
-              List<Manga> allManga;
-
-              if (value != "All sources") {
-                mangaSource =
-                    MangaSource.fromSourceName(getLastTachiyomiSource());
-                allManga = mangaSource.getMangaFromSource();
-              } else {
-                allManga = getAllManga();
-              }
+              List<Manga> allManga = getMangaByDropdown();
 
               return GridView.builder(
                   physics: NeverScrollableScrollPhysics(),
@@ -1154,7 +1146,7 @@ class _HomeState extends State<Home> {
             " ${gPackageInfo.version} beta",
             style: TextStyle(
               fontWeight: FontWeight.w200,
-              fontSize: 12,
+              fontSize: 10,
             ),
             overflow: TextOverflow.fade,
           ),
@@ -2485,13 +2477,21 @@ class _YouTubeResultState extends State<YouTubeResult>
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),
-              content: AspectRatio(
-                aspectRatio: 16 / 9,
-                child: FadeInImage(
-                  image: NetworkImage(result.thumbnails.mediumResUrl),
-                  placeholder: MemoryImage(kTransparentImage),
-                  width: 1280,
-                  fit: BoxFit.fitWidth,
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(width: double.maxFinite, height: 1),
+                    AspectRatio(
+                      aspectRatio: 16 / 9,
+                      child: FadeInImage(
+                        image: NetworkImage(result.thumbnails.mediumResUrl),
+                        placeholder: MemoryImage(kTransparentImage),
+                        width: 1280,
+                        fit: BoxFit.fitWidth,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               actions: <Widget>[
@@ -3360,15 +3360,23 @@ class _HistoryResultState extends State<HistoryResult>
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),
-              content: AspectRatio(
-                aspectRatio: 16 / 9,
-                child: FadeInImage(
-                  image: isNetwork()
-                      ? NetworkImage(history.thumbnail)
-                      : FileImage(File(history.thumbnail)),
-                  placeholder: MemoryImage(kTransparentImage),
-                  height: 1280,
-                  fit: BoxFit.fitWidth,
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(width: double.maxFinite, height: 1),
+                    AspectRatio(
+                      aspectRatio: 16 / 9,
+                      child: FadeInImage(
+                        image: isNetwork()
+                            ? NetworkImage(history.thumbnail)
+                            : FileImage(File(history.thumbnail)),
+                        placeholder: MemoryImage(kTransparentImage),
+                        height: 1280,
+                        fit: BoxFit.fitWidth,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               actions: <Widget>[
@@ -4032,23 +4040,7 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                           ),
                         ),
                         if (entry.contextDataSource != "-1")
-                          if (entry.contextDataSource
-                              .startsWith("https://ttu-ebook.web.app/"))
-                            TextSpan(
-                              text: "from book ",
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                              ),
-                            )
-                          else
-                            TextSpan(
-                              text: "from video ",
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                              ),
-                            ),
+                          getContextDataSourceSpan(entry.contextDataSource),
                         TextSpan(
                           text: "found for",
                           style: TextStyle(
@@ -4201,30 +4193,8 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                                 ),
                               ),
                               if (entry.contextDataSource != "-1")
-                                if (entry.contextDataSource
-                                    .startsWith("https://ttu-ebook.web.app/"))
-                                  TextSpan(
-                                    text: "from book ",
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey,
-                                    ),
-                                  )
-                                else
-                                  TextSpan(
-                                    text: "from video ",
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                              TextSpan(
-                                text: "found for",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                ),
-                              ),
+                                getContextDataSourceSpan(
+                                    entry.contextDataSource),
                               TextSpan(
                                 text: "『",
                                 style: TextStyle(
@@ -4293,6 +4263,13 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                         setResumableByMediaType();
                       });
                     });
+                  } else if (entry.contextDataSource
+                      .startsWith(getTachiyomiDirectory().path)) {
+                    Directory chapterDirectory =
+                        Directory(entry.contextDataSource);
+                    MangaChapter chapter =
+                        MangaChapter(directory: chapterDirectory);
+                    startViewer(context, chapter, stateCallback);
                   } else {
                     JidoujishoPlayerMode playerMode;
                     if (results.contextDataSource.startsWith("https://") ||
@@ -5108,9 +5085,8 @@ class _CreatorState extends State<Creator> {
             IconButton(
               iconSize: 18,
               onPressed: () async {
-                final _picker = ImagePicker();
                 final pickedFile =
-                    await _picker.getImage(source: ImageSource.camera);
+                    await ImagePicker.pickImage(source: ImageSource.camera);
 
                 setState(() {
                   _fileImage = File(pickedFile.path);
@@ -5123,9 +5099,8 @@ class _CreatorState extends State<Creator> {
             IconButton(
               iconSize: 18,
               onPressed: () async {
-                final _picker = ImagePicker();
                 final pickedFile =
-                    await _picker.getImage(source: ImageSource.gallery);
+                    await ImagePicker.pickImage(source: ImageSource.gallery);
 
                 setState(() {
                   _fileImage = File(pickedFile.path);
@@ -5664,6 +5639,7 @@ class _CreatorState extends State<Creator> {
                       DropDownMenu(
                         options: decks,
                         selectedOption: _selectedDeck,
+                        dropdownCallback: setLastDeck,
                       ),
                       imageSearchField,
                       wordField,

@@ -480,6 +480,7 @@ void showAnkiDialog(
                     DropDownMenu(
                       options: decks,
                       selectedOption: _selectedDeck,
+                      dropdownCallback: setLastDeck,
                     ),
                   ],
                 ),

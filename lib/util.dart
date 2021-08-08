@@ -3,11 +3,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:auto_orientation/auto_orientation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+
 import 'package:flutter_tesseract_ocr/flutter_tesseract_ocr.dart';
-import 'package:gx_file_picker/gx_file_picker.dart';
 import 'package:html/parser.dart' as parser;
 import 'package:html/dom.dart' as dom;
 import 'package:http/http.dart' as http;
@@ -15,16 +14,17 @@ import 'package:image/image.dart' as im;
 import 'package:flutter/material.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:jidoujisho/preferences.dart';
-import 'package:jidoujisho/viewer.dart';
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:path/path.dart' as path;
 import 'package:subtitle_wrapper_package/data/models/style/subtitle_style.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:ve_dart/ve_dart.dart';
-
-import 'package:jidoujisho/globals.dart';
 import 'package:wakelock/wakelock.dart';
+
+import 'package:jidoujisho/main.dart';
+import 'package:jidoujisho/globals.dart';
+import 'package:jidoujisho/preferences.dart';
+import 'package:jidoujisho/viewer.dart';
 
 void unlockLandscape() {
   setResumableByMediaType();
@@ -705,40 +705,68 @@ double parsePopularity(dynamic value) {
 class DropDownMenu extends StatefulWidget {
   final List<String> options;
   final ValueNotifier<String> selectedOption;
+  final DropdownCallback dropdownCallback;
 
-  const DropDownMenu({this.options, this.selectedOption});
+  const DropDownMenu({
+    this.options,
+    this.selectedOption,
+    this.dropdownCallback,
+  });
 
   @override
-  DropDownMenuState createState() =>
-      DropDownMenuState(this.selectedOption, this.options);
+  DropDownMenuState createState() => DropDownMenuState(
+        this.selectedOption,
+        this.options,
+        this.dropdownCallback,
+      );
 }
 
 class DropDownMenuState extends State<DropDownMenu> {
-  final ValueNotifier<String> _selectedDeck;
-  final List<String> _decks;
+  final List<String> options;
+  final ValueNotifier<String> selectedOption;
+  final DropdownCallback dropdownCallback;
 
-  DropDownMenuState(this._selectedDeck, this._decks);
+  DropDownMenuState(
+    this.selectedOption,
+    this.options,
+    this.dropdownCallback,
+  );
 
   @override
   Widget build(BuildContext context) {
     return DropdownButton<String>(
       isExpanded: true,
-      value: _selectedDeck.value,
-      items: _decks.map((String value) {
+      value: selectedOption.value,
+      items: options.map((String value) {
         return new DropdownMenuItem<String>(
           value: value,
           child: new Text("  $value"),
         );
       }).toList(),
       onChanged: (selectedDeck) async {
-        setLastDeck(selectedDeck);
+        dropdownCallback(selectedDeck);
 
         setState(() {
-          _selectedDeck.value = selectedDeck;
+          selectedOption.value = selectedDeck;
         });
       },
     );
   }
+}
+
+Future<String> processOcrTextFromBytes(Uint8List imageBytes) async {
+  File cleanedImageFile = File("$gAppDirPath/extractOcr.jpg");
+  cleanedImageFile.writeAsBytesSync(imageBytes);
+
+  String text = await FlutterTesseractOcr.extractText(
+    cleanedImageFile.path,
+    language: (getOcrHorizontalMode()) ? 'jpn+jpn_vert' : 'jpn_vert+jpn',
+    args: {
+      "preserve_interword_spaces": "1",
+    },
+  );
+
+  return text;
 }
 
 Future<String> processOcrTextFromFile(File inputImageFile) async {
@@ -751,9 +779,8 @@ Future<String> processOcrTextFromFile(File inputImageFile) async {
 
   String text = await FlutterTesseractOcr.extractText(
     cleanedImageFile.path,
-    language: 'jpn_vert+jpn',
+    language: (getOcrHorizontalMode()) ? 'jpn+jpn_vert' : 'jpn_vert+jpn',
     args: {
-      "psm": "0",
       "preserve_interword_spaces": "1",
     },
   );
@@ -926,7 +953,11 @@ class Manga {
     );
   }
 
-  Future openMangaMenu(BuildContext context, VoidCallback updateCallback) {
+  Future openMangaMenu(
+    BuildContext context,
+    VoidCallback updateCallback, {
+    bool inViewer = false,
+  }) {
     ScrollController scrollController = ScrollController();
     ValueNotifier<bool> updateListener = ValueNotifier<bool>(true);
 
@@ -1014,16 +1045,29 @@ class Manga {
                         ],
                       ),
                       onTap: () async {
-                        await startViewer(
-                          context,
-                          chapter,
-                          updateCallback,
-                        );
-                        updateListener.value = !updateListener.value;
+                        if (!inViewer) {
+                          await startViewer(
+                            context,
+                            chapter,
+                            updateCallback,
+                          );
+                          updateListener.value = !updateListener.value;
+                        } else {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Viewer(
+                                chapter,
+                              ),
+                            ),
+                          );
+                        }
                       },
                       onLongPress: () async {
-                        await showChapterProgressDialog(context, chapter);
-                        updateListener.value = !updateListener.value;
+                        if (!inViewer) {
+                          await showChapterProgressDialog(context, chapter);
+                          updateListener.value = !updateListener.value;
+                        }
                       },
                     );
                   }),
@@ -1048,48 +1092,50 @@ class Manga {
             overflow: TextOverflow.ellipsis,
           ),
           content: buildMangaMenuContent(),
-          actions: [
-            TextButton(
-              child: Text(
-                'EDIT',
-                style: TextStyle(color: Colors.white),
-              ),
-              onPressed: () async {
-                await showAliasDialog(
-                  context,
-                  directory.path,
-                  getMangaAliasName(),
-                  getMangaName(),
-                  getAliasCover(),
-                  getCover(),
-                );
+          actions: (inViewer)
+              ? []
+              : [
+                  TextButton(
+                    child: Text(
+                      'EDIT',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    onPressed: () async {
+                      await showAliasDialog(
+                        context,
+                        directory.path,
+                        getMangaAliasName(),
+                        getMangaName(),
+                        getAliasCover(),
+                        getCover(),
+                      );
 
-                Navigator.pop(context);
-                updateCallback();
-              },
-            ),
-            TextButton(
-              child: Text(
-                (getLastChapterRead() == null) ? 'READ' : 'RESUME',
-                style: TextStyle(color: Colors.white),
-              ),
-              onPressed: () async {
-                if (getLastChapterRead() == null) {
-                  await startViewer(
-                    context,
-                    getChapters().first,
-                    updateCallback,
-                  );
-                } else {
-                  await startViewer(
-                    context,
-                    getLastChapterRead(),
-                    updateCallback,
-                  );
-                }
-              },
-            ),
-          ],
+                      Navigator.pop(context);
+                      updateCallback();
+                    },
+                  ),
+                  TextButton(
+                    child: Text(
+                      (getLastChapterRead() == null) ? 'READ' : 'RESUME',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    onPressed: () async {
+                      if (getLastChapterRead() == null) {
+                        await startViewer(
+                          context,
+                          getChapters().first,
+                          updateCallback,
+                        );
+                      } else {
+                        await startViewer(
+                          context,
+                          getLastChapterRead(),
+                          updateCallback,
+                        );
+                      }
+                    },
+                  ),
+                ],
         );
       },
     );
@@ -1107,7 +1153,7 @@ Future showChapterProgressDialog(
     actions: <Widget>[
       new TextButton(
         child: Text(
-          'MARK ALL SO FAR UNSTARTED',
+          'MARK UP TO THIS UNSTARTED',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w500,
@@ -1127,7 +1173,7 @@ Future showChapterProgressDialog(
       ),
       new TextButton(
         child: Text(
-          'MARK ALL SO FAR DONE',
+          'MARK UP TO THIS DONE',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w500,
@@ -1181,7 +1227,7 @@ Future showChapterProgressDialog(
       ),
       TextButton(
         child: Text(
-          'CANCEL',
+          'BACK',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w500,
@@ -1219,7 +1265,13 @@ class MangaChapter {
   }
 
   String getChapterName() {
-    return directory.path.substring(directory.path.indexOf("_") + 1);
+    String basename = path.basename(directory.path);
+
+    if (basename.indexOf("_") == -1) {
+      return basename;
+    }
+
+    return basename.substring(basename.indexOf("_") + 1);
   }
 
   ImageProvider getCover() {
@@ -1401,6 +1453,19 @@ List<Manga> getAllManga() {
   return allManga;
 }
 
+List<Manga> getMangaByDropdown() {
+  List<Manga> manga;
+  if (getLastTachiyomiSource() != "All sources") {
+    MangaSource mangaSource =
+        MangaSource.fromSourceName(getLastTachiyomiSource());
+    manga = mangaSource.getMangaFromSource();
+  } else {
+    manga = getAllManga();
+  }
+
+  return manga;
+}
+
 Future showAliasDialog(
   BuildContext context,
   String path,
@@ -1476,8 +1541,7 @@ Future showAliasDialog(
                       IconButton(
                         iconSize: 18,
                         onPressed: () async {
-                          final _picker = ImagePicker();
-                          final pickedFile = await _picker.getImage(
+                          final pickedFile = await ImagePicker.pickImage(
                               source: ImageSource.gallery);
                           newAliasCover = File(pickedFile.path);
                           imageProviderNotifier.value =
@@ -1568,4 +1632,24 @@ Future startViewer(BuildContext context, MangaChapter chapter,
 
     updateCallback();
   });
+}
+
+TextSpan getContextDataSourceSpan(String contextDataSource) {
+  String text = "";
+
+  if (contextDataSource.startsWith("https://ttu-ebook.web.app/")) {
+    text = "from reader ";
+  } else if (contextDataSource.startsWith(getTachiyomiDirectory().path)) {
+    text = "from viewer ";
+  } else {
+    text = "from player ";
+  }
+
+  return TextSpan(
+    text: text,
+    style: TextStyle(
+      fontSize: 12,
+      color: Colors.grey,
+    ),
+  );
 }
