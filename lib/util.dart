@@ -1425,8 +1425,19 @@ class MangaSource {
         path.join(getTachiyomiDirectory().path, "downloads", sourceName));
   }
 
+  MangaSource.local() {
+    this.sourceName = "Local source";
+    this.directory = Directory(
+      path.join(getTachiyomiDirectory().path, "local"),
+    );
+  }
+
   List<Manga> getMangaFromSource() {
     List<Manga> manga = [];
+
+    if (!this.directory.existsSync()) {
+      return manga;
+    }
 
     List<FileSystemEntity> entities = directory.listSync();
     entities.sort((a, b) => a.path.compareTo(b.path));
@@ -1445,10 +1456,12 @@ List<Manga> getAllManga() {
   List<String> sourceNames = getTachiyomiSourceNames();
   sourceNames
       .removeWhere((sourceName) => getHiddenSourcesList().contains(sourceName));
+
   for (String sourceName in sourceNames) {
     MangaSource mangaSource = MangaSource.fromSourceName(sourceName);
     allManga.addAll(mangaSource.getMangaFromSource());
   }
+  allManga.addAll(MangaSource.local().getMangaFromSource());
 
   allManga.sort((a, b) => a.getMangaName().compareTo(b.getMangaName()));
   return allManga;
@@ -1456,12 +1469,15 @@ List<Manga> getAllManga() {
 
 List<Manga> getMangaByDropdown() {
   List<Manga> manga;
-  if (getLastTachiyomiSource() != "All sources") {
+  if (getLastTachiyomiSource() == "All sources") {
+    manga = getAllManga();
+  } else if (getLastTachiyomiSource() == "Local source") {
+    MangaSource mangaSource = MangaSource.local();
+    manga = mangaSource.getMangaFromSource();
+  } else {
     MangaSource mangaSource =
         MangaSource.fromSourceName(getLastTachiyomiSource());
     manga = mangaSource.getMangaFromSource();
-  } else {
-    manga = getAllManga();
   }
 
   return manga;

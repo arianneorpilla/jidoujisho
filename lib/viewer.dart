@@ -327,10 +327,6 @@ class ViewerState extends State<Viewer> {
 
   Widget sentenceField() {
     return TextFormField(
-      selectionControls:
-          CustomTextSelectionControls(customButton: (selectedValue) {
-        _clipboard.value = "&&jidoujisho-kaku-bypass&&$selectedValue";
-      }),
       minLines: 1,
       maxLines: 5,
       keyboardType: TextInputType.multiline,
@@ -789,6 +785,7 @@ class ViewerState extends State<Viewer> {
           filterQuality: FilterQuality.high,
           onTapDown: (context, details, value) async {
             _hideStuff.value = !_hideStuff.value;
+
             workingAreaNode.unfocus();
           },
         );

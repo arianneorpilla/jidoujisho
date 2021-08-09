@@ -579,8 +579,14 @@ class _HomeState extends State<Home> {
 
     Widget sourcesDropdown() {
       List<String> sourceNames = ["All sources"];
+
+      if (MangaSource.local().getMangaFromSource().isNotEmpty) {
+        sourceNames.add("Local source");
+      }
+
       sourceNames.addAll(getTachiyomiSourceNames());
       String lastTachiyomiSource = getLastTachiyomiSource();
+
       if (!sourceNames.contains(lastTachiyomiSource)) {
         lastTachiyomiSource = sourceNames.first;
       }
@@ -604,7 +610,7 @@ class _HomeState extends State<Home> {
       if (!getTachiyomiDirectory().existsSync()) {
         return "Tachiyomi directory does not exist";
       } else if (getMangaByDropdown().isEmpty) {
-        return "No downloads were found";
+        return "No manga found";
       }
 
       return null;
