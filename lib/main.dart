@@ -4166,8 +4166,10 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                             children: results.entries[_dialogIndex.value]
                                 .generateTagWidgets(context),
                           ),
-                        results.entries[_dialogIndex.value]
-                            .generateMeaningWidgetsDialog(dialogContext),
+                        Flexible(
+                          child: results.entries[_dialogIndex.value]
+                              .generateMeaningWidgetsDialog(dialogContext),
+                        ),
                         Text.rich(
                           TextSpan(
                             text: '',
@@ -4205,6 +4207,13 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                               if (entry.contextDataSource != "-1")
                                 getContextDataSourceSpan(
                                     entry.contextDataSource),
+                              TextSpan(
+                                text: "found for",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
+                              ),
                               TextSpan(
                                 text: "『",
                                 style: TextStyle(
@@ -4279,7 +4288,12 @@ class _ClipboardHistoryItemState extends State<ClipboardHistoryItem>
                         Directory(entry.contextDataSource);
                     MangaChapter chapter =
                         MangaChapter(directory: chapterDirectory);
-                    startViewer(context, chapter, stateCallback);
+                    startViewer(
+                      context,
+                      chapter,
+                      stateCallback,
+                      initialPage: entry.contextPosition,
+                    );
                   } else {
                     JidoujishoPlayerMode playerMode;
                     if (results.contextDataSource.startsWith("https://") ||
@@ -4590,14 +4604,21 @@ class _CreatorState extends State<Creator> {
       _fileImage = initialFile;
     }
 
-    if (initialSentence.isNotEmpty) {
-      if (!gIsTapToSelectSupported ||
-          parseVe(gMecabTagger, initialSentence).length != 1) {
-        _sentenceController = TextEditingController(text: initialSentence);
-        _wordController = TextEditingController(text: "");
-      } else {
-        _sentenceController = TextEditingController(text: "");
-        _wordController = TextEditingController(text: initialSentence);
+    if (initialSentence.isNotEmpty && initialDictionaryEntry.word.isNotEmpty) {
+      _sentenceController = TextEditingController(text: initialSentence);
+      _wordController = TextEditingController(
+        text: initialDictionaryEntry.word,
+      );
+    } else {
+      if (initialSentence.isNotEmpty) {
+        if (!gIsTapToSelectSupported ||
+            parseVe(gMecabTagger, initialSentence).length != 1) {
+          _sentenceController = TextEditingController(text: initialSentence);
+          _wordController = TextEditingController(text: "");
+        } else {
+          _sentenceController = TextEditingController(text: "");
+          _wordController = TextEditingController(text: initialSentence);
+        }
       }
     }
 
@@ -4783,8 +4804,10 @@ class _CreatorState extends State<Creator> {
                             children: results.entries[_dialogIndex.value]
                                 .generateTagWidgets(context),
                           ),
-                        results.entries[_dialogIndex.value]
-                            .generateMeaningWidgetsDialog(dialogContext),
+                        Flexible(
+                          child: results.entries[_dialogIndex.value]
+                              .generateMeaningWidgetsDialog(dialogContext),
+                        ),
                         Wrap(
                           alignment: WrapAlignment.center,
                           crossAxisAlignment: WrapCrossAlignment.end,
@@ -4924,12 +4947,17 @@ class _CreatorState extends State<Creator> {
   void showSentenceDialog(String sentence) {
     sentence = sentence.trim();
 
-    ValueNotifier<int> selectedWordIndex = ValueNotifier<int>(-1);
     List<Word> segments = parseVe(gMecabTagger, sentence);
     List<String> words = [];
     segments.forEach((segment) => words.add(segment.word));
-    List<Widget> textWidgets =
-        getTextWidgetsFromWords(words, selectedWordIndex);
+
+    ValueNotifier<List<bool>> indexesSelected = ValueNotifier<List<bool>>(
+      List.generate(
+        words.length,
+        (index) => false,
+      ),
+    );
+    List<Widget> textWidgets = getTextWidgetsFromWords(words, indexesSelected);
 
     ScrollController scrollController = ScrollController();
 
@@ -4943,8 +4971,8 @@ class _CreatorState extends State<Creator> {
             borderRadius: BorderRadius.zero,
           ),
           content: ValueListenableBuilder(
-            valueListenable: _selectedIndex,
-            builder: (BuildContext context, int _, Widget widget) {
+            valueListenable: indexesSelected,
+            builder: (BuildContext context, List<bool> _, Widget widget) {
               return Container(
                 child: Container(
                   color: Colors.grey[800].withOpacity(0.6),
@@ -4971,15 +4999,20 @@ class _CreatorState extends State<Creator> {
               child: Text('SELECT', style: TextStyle(color: Colors.white)),
               onPressed: () async {
                 setState(() {
-                  _wordController.text = words[selectedWordIndex.value];
-                  // if (_fileImage == null) {
-                  //   setState(() {
-                  //     _isFileImage = false;
-                  //     _fileImage = null;
-                  //     searchTerm = _wordController.text;
-                  //     _selectedIndex.value = 0;
-                  //   });
-                  // }
+                  if (indexesSelected.value
+                      .every((selected) => selected == false)) {
+                    _wordController.text = sentence;
+                  } else {
+                    String wordsJoined = "";
+
+                    for (int i = 0; i < words.length; i++) {
+                      if (indexesSelected.value[i]) {
+                        wordsJoined += words[i];
+                      }
+                    }
+
+                    _wordController.text = wordsJoined;
+                  }
                 });
                 Navigator.pop(context);
               },

@@ -1618,13 +1618,18 @@ void setResumableByMediaType() {
   gIsResumable = ValueNotifier<bool>(resumable);
 }
 
-Future startViewer(BuildContext context, MangaChapter chapter,
-    VoidCallback updateCallback) async {
-  SystemChrome.setEnabledSystemUIOverlays([]);
+Future startViewer(
+    BuildContext context, MangaChapter chapter, VoidCallback updateCallback,
+    {int initialPage}) async {
+  SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
+
   await Navigator.push(
     context,
     MaterialPageRoute(
-      builder: (context) => Viewer(chapter),
+      builder: (context) => Viewer(
+        chapter,
+        initialPage: initialPage,
+      ),
     ),
   ).then((result) {
     setResumableByMediaType();
@@ -1684,21 +1689,23 @@ String reorderOcrVerticalText(String raw) {
 }
 
 List<Widget> getTextWidgetsFromWords(
-    List<String> words, ValueNotifier<int> notifier) {
+    List<String> words, ValueNotifier<List<bool>> notifier) {
   List<Widget> widgets = [];
   for (int i = 0; i < words.length; i++) {
     widgets.add(
       GestureDetector(
         onTap: () {
-          notifier.value = i;
+          List<bool> values = notifier.value;
+          values[i] = !values[i];
+          notifier.value = []..addAll(values);
         },
         child: ValueListenableBuilder(
             valueListenable: notifier,
-            builder: (BuildContext context, int value, Widget child) {
+            builder: (BuildContext context, List<bool> values, Widget child) {
               return Container(
                   padding: EdgeInsets.all(8),
                   margin: EdgeInsets.only(top: 10, right: 10),
-                  color: (notifier.value == i)
+                  color: (notifier.value[i])
                       ? Colors.red.withOpacity(0.3)
                       : Colors.white.withOpacity(0.1),
                   child: Text(

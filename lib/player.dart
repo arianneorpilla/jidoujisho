@@ -6,8 +6,8 @@ import 'package:audio_service/audio_service.dart';
 import 'package:chewie/chewie.dart';
 import 'package:clipboard_monitor/clipboard_monitor.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
-import 'package:gx_file_picker/gx_file_picker.dart';
-//import 'package:file_picker/file_picker.dart';
+//import 'package:gx_file_picker/gx_file_picker.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
@@ -1800,8 +1800,11 @@ class _VideoPlayerState extends State<VideoPlayer>
                       children: results.entries[selectedIndex.value]
                           .generateTagWidgets(context),
                     ),
-                  results.entries[selectedIndex.value]
-                      .generateMeaningWidgetsDialog(context, selectable: true),
+                  Flexible(
+                    child: results.entries[selectedIndex.value]
+                        .generateMeaningWidgetsDialog(context,
+                            selectable: true),
+                  ),
                   Text.rich(
                     TextSpan(
                       text: '',

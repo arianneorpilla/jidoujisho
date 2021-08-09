@@ -13,6 +13,7 @@ import 'package:clipboard_monitor/clipboard_monitor.dart';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as imglib;
 import 'package:jidoujisho/main.dart';
+import 'package:jidoujisho/selection.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
@@ -34,15 +35,21 @@ class Viewer extends StatefulWidget {
     this.chapter, {
     this.fromEnd = false,
     this.fromStart = false,
+    this.initialPage,
   });
 
   final MangaChapter chapter;
   final bool fromEnd;
   final bool fromStart;
+  final int initialPage;
 
   @override
-  State<Viewer> createState() =>
-      ViewerState(this.chapter, this.fromEnd, this.fromStart);
+  State<Viewer> createState() => ViewerState(
+        this.chapter,
+        this.fromEnd,
+        this.fromStart,
+        this.initialPage,
+      );
 }
 
 class ViewerState extends State<Viewer> {
@@ -50,6 +57,7 @@ class ViewerState extends State<Viewer> {
     this.chapter,
     this.fromEnd,
     this.fromStart,
+    this.initialPage,
   );
 
   final _clipboard = ValueNotifier<String>("");
@@ -64,6 +72,7 @@ class ViewerState extends State<Viewer> {
   final MangaChapter chapter;
   final bool fromEnd;
   final bool fromStart;
+  final int initialPage;
 
   ValueNotifier<bool> _hideStuff = ValueNotifier<bool>(false);
   String workingText = "";
@@ -87,7 +96,11 @@ class ViewerState extends State<Viewer> {
   FocusNode workingAreaNode = FocusNode();
   final double barHeight = 48;
 
-  int subscribingId;
+  int onHideSubscriberId;
+  int onChangeSubscriberId;
+
+  bool editingWorkArea = false;
+
   bool ocrDialogVisible = false;
 
   bool isExporting = false;
@@ -95,15 +108,21 @@ class ViewerState extends State<Viewer> {
   @override
   void dispose() {
     stopAllClipboardMonitoring();
-    KeyboardVisibilityNotification().removeListener(subscribingId);
+    KeyboardVisibilityNotification().removeListener(onHideSubscriberId);
+    KeyboardVisibilityNotification().removeListener(onChangeSubscriberId);
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
-    subscribingId = KeyboardVisibilityNotification().addNewListener(onHide: () {
+    onHideSubscriberId =
+        KeyboardVisibilityNotification().addNewListener(onHide: () {
       workingAreaNode.unfocus();
+    });
+    onChangeSubscriberId =
+        KeyboardVisibilityNotification().addNewListener(onChange: (visible) {
+      editingWorkArea = visible;
     });
 
     currentPage = ValueNotifier<int>(chapter.getMangaPageProgress());
@@ -118,6 +137,9 @@ class ViewerState extends State<Viewer> {
     }
     if (fromStart) {
       currentPage.value = chapter.getImages().length;
+    }
+    if (initialPage != null) {
+      currentPage.value = initialPage;
     }
 
     pageController = PageController(initialPage: currentPage.value);
@@ -145,7 +167,7 @@ class ViewerState extends State<Viewer> {
 
   void onClipboardText(String text) {
     emptyStack();
-    if (!workingAreaNode.hasFocus && !ocrDialogVisible && !isExporting) {
+    if (!editingWorkArea && !ocrDialogVisible && !isExporting) {
       ocrDialogVisible = true;
       showOCRHelperDialog(text).then((result) {
         ocrDialogVisible = false;
@@ -282,8 +304,8 @@ class ViewerState extends State<Viewer> {
                 buildTopBar(context),
                 Padding(
                   padding: EdgeInsets.only(
-                    top: MediaQuery.of(context).size.height * 0.05,
-                    bottom: MediaQuery.of(context).size.height * 0.05,
+                    top: 60,
+                    bottom: 60,
                   ),
                   child: buildDictionary(),
                 ),
@@ -305,15 +327,14 @@ class ViewerState extends State<Viewer> {
 
   Widget sentenceField() {
     return TextFormField(
+      selectionControls:
+          CustomTextSelectionControls(customButton: (selectedValue) {
+        _clipboard.value = "&&jidoujisho-kaku-bypass&&$selectedValue";
+      }),
       minLines: 1,
       maxLines: 5,
       keyboardType: TextInputType.multiline,
       controller: _sentenceController,
-      onFieldSubmitted: (result) {
-        if (_sentenceController.text.trim().isNotEmpty) {
-          showSentenceDialog(_sentenceController.text);
-        }
-      },
       focusNode: workingAreaNode,
       decoration: InputDecoration(
         contentPadding: EdgeInsets.all(16.0),
@@ -322,6 +343,17 @@ class ViewerState extends State<Viewer> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
           children: [
+            IconButton(
+              iconSize: 18,
+              onPressed: () {
+                _hideStuff.value = false;
+                _clipboard.value = _sentenceController.text;
+              },
+              icon: Icon(
+                Icons.search,
+                color: Colors.white,
+              ),
+            ),
             if (gIsTapToSelectSupported)
               IconButton(
                 iconSize: 18,
@@ -355,12 +387,17 @@ class ViewerState extends State<Viewer> {
   void showSentenceDialog(String sentence) {
     sentence = sentence.trim();
 
-    ValueNotifier<int> selectedWordIndex = ValueNotifier<int>(-1);
     List<Word> segments = parseVe(gMecabTagger, sentence);
     List<String> words = [];
     segments.forEach((segment) => words.add(segment.word));
-    List<Widget> textWidgets =
-        getTextWidgetsFromWords(words, selectedWordIndex);
+
+    ValueNotifier<List<bool>> indexesSelected = ValueNotifier<List<bool>>(
+      List.generate(
+        words.length,
+        (index) => false,
+      ),
+    );
+    List<Widget> textWidgets = getTextWidgetsFromWords(words, indexesSelected);
 
     ScrollController scrollController = ScrollController();
 
@@ -374,8 +411,8 @@ class ViewerState extends State<Viewer> {
             borderRadius: BorderRadius.zero,
           ),
           content: ValueListenableBuilder(
-            valueListenable: selectedWordIndex,
-            builder: (BuildContext context, int _, Widget widget) {
+            valueListenable: indexesSelected,
+            builder: (BuildContext context, List<bool> _, Widget widget) {
               return Container(
                 child: Container(
                   color: Colors.grey[800].withOpacity(0.6),
@@ -395,11 +432,20 @@ class ViewerState extends State<Viewer> {
             TextButton(
               child: Text('REPLACE', style: TextStyle(color: Colors.white)),
               onPressed: () {
-                if (selectedWordIndex.value == -1) {
+                if (indexesSelected.value.every((selected) => false)) {
                   _sentenceController.text = sentence;
                 } else {
-                  _sentenceController.text = words[selectedWordIndex.value];
+                  String wordsJoined = "";
+
+                  for (int i = 0; i < words.length; i++) {
+                    if (indexesSelected.value[i]) {
+                      wordsJoined += words[i];
+                    }
+                  }
+
+                  _sentenceController.text = wordsJoined;
                 }
+
                 _hideStuff.value = false;
                 Navigator.pop(context);
               },
@@ -407,10 +453,20 @@ class ViewerState extends State<Viewer> {
             TextButton(
               child: Text('SEARCH', style: TextStyle(color: Colors.white)),
               onPressed: () async {
-                if (selectedWordIndex.value == -1) {
+                emptyStack();
+
+                if (indexesSelected.value.every((selected) => false)) {
                   _clipboard.value = sentence;
                 } else {
-                  _clipboard.value = words[selectedWordIndex.value];
+                  String wordsJoined = "";
+
+                  for (int i = 0; i < words.length; i++) {
+                    if (indexesSelected.value[i]) {
+                      wordsJoined += words[i];
+                    }
+                  }
+
+                  _clipboard.value = wordsJoined;
                 }
                 _hideStuff.value = false;
                 Navigator.pop(context);
@@ -423,18 +479,21 @@ class ViewerState extends State<Viewer> {
   }
 
   Future<void> showOCRHelperDialog(String sentence) async {
-    ValueNotifier<int> selectedWordIndex;
+    ValueNotifier<List<bool>> indexesSelected;
     List<Widget> textWidgets;
-    List<String> words;
+    List<String> words = [];
 
     if (gIsTapToSelectSupported) {
-      sentence = sentence.trim();
-
-      selectedWordIndex = ValueNotifier<int>(-1);
       List<Word> segments = parseVe(gMecabTagger, sentence);
-      words = [];
       segments.forEach((segment) => words.add(segment.word));
-      textWidgets = getTextWidgetsFromWords(words, selectedWordIndex);
+
+      indexesSelected = ValueNotifier<List<bool>>(
+        List.generate(
+          words.length,
+          (index) => false,
+        ),
+      );
+      textWidgets = getTextWidgetsFromWords(words, indexesSelected);
     }
 
     ScrollController scrollController = ScrollController();
@@ -450,8 +509,8 @@ class ViewerState extends State<Viewer> {
           ),
           title: (gIsTapToSelectSupported)
               ? ValueListenableBuilder(
-                  valueListenable: selectedWordIndex,
-                  builder: (BuildContext context, int _, Widget widget) {
+                  valueListenable: indexesSelected,
+                  builder: (BuildContext context, List<bool> _, Widget widget) {
                     return Container(
                       child: Container(
                         color: Colors.grey[800].withOpacity(0.6),
@@ -472,10 +531,22 @@ class ViewerState extends State<Viewer> {
             TextButton(
               child: Text('SEARCH', style: TextStyle(color: Colors.white)),
               onPressed: () {
-                if (!gIsTapToSelectSupported || selectedWordIndex.value == -1) {
+                emptyStack();
+
+                if (!gIsTapToSelectSupported ||
+                    indexesSelected.value
+                        .every((selected) => selected == false)) {
                   _clipboard.value = sentence;
                 } else {
-                  _clipboard.value = words[selectedWordIndex.value];
+                  String wordsJoined = "";
+
+                  for (int i = 0; i < words.length; i++) {
+                    if (indexesSelected.value[i]) {
+                      wordsJoined += words[i];
+                    }
+                  }
+
+                  _clipboard.value = wordsJoined;
                 }
                 _hideStuff.value = false;
                 Navigator.pop(context);
@@ -484,11 +555,22 @@ class ViewerState extends State<Viewer> {
             TextButton(
               child: Text('REPLACE', style: TextStyle(color: Colors.white)),
               onPressed: () {
-                if (!gIsTapToSelectSupported || selectedWordIndex.value == -1) {
+                if (!gIsTapToSelectSupported ||
+                    indexesSelected.value
+                        .every((selected) => selected == false)) {
                   _sentenceController.text = sentence;
                 } else {
-                  _sentenceController.text = words[selectedWordIndex.value];
+                  String wordsJoined = "";
+
+                  for (int i = 0; i < words.length; i++) {
+                    if (indexesSelected.value[i]) {
+                      wordsJoined += words[i];
+                    }
+                  }
+
+                  _sentenceController.text = wordsJoined;
                 }
+
                 _hideStuff.value = false;
                 Navigator.pop(context);
               },
@@ -496,11 +578,22 @@ class ViewerState extends State<Viewer> {
             TextButton(
               child: Text('APPEND', style: TextStyle(color: Colors.white)),
               onPressed: () async {
-                if (!gIsTapToSelectSupported || selectedWordIndex.value == -1) {
+                if (!gIsTapToSelectSupported ||
+                    indexesSelected.value
+                        .every((selected) => selected == false)) {
                   _sentenceController.text += sentence;
                 } else {
-                  _sentenceController.text += words[selectedWordIndex.value];
+                  String wordsJoined = "";
+
+                  for (int i = 0; i < words.length; i++) {
+                    if (indexesSelected.value[i]) {
+                      wordsJoined += words[i];
+                    }
+                  }
+
+                  _sentenceController.text += wordsJoined;
                 }
+
                 _hideStuff.value = false;
                 Navigator.pop(context);
               },
@@ -694,7 +787,7 @@ class ViewerState extends State<Viewer> {
           minScale: PhotoViewComputedScale.contained * 1,
           maxScale: PhotoViewComputedScale.contained * 6,
           filterQuality: FilterQuality.high,
-          onTapDown: (context, details, value) {
+          onTapDown: (context, details, value) async {
             _hideStuff.value = !_hideStuff.value;
             workingAreaNode.unfocus();
           },
@@ -919,8 +1012,13 @@ class ViewerState extends State<Viewer> {
             ).then((result) {
               isExporting = false;
               _sentenceController.clear();
+              _currentDictionaryEntry.value = DictionaryEntry(
+                word: "",
+                meaning: "",
+                reading: "",
+              );
 
-              SystemChrome.setEnabledSystemUIOverlays([]);
+              SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
               if (result != null && result) {
                 _clipboard.value = "&<&>exported&<&>";
                 Future.delayed(Duration(seconds: 2), () {
@@ -1439,8 +1537,17 @@ class ViewerState extends State<Viewer> {
                       children: results.entries[selectedIndex.value]
                           .generateTagWidgets(context),
                     ),
-                  results.entries[selectedIndex.value]
-                      .generateMeaningWidgetsDialog(context, selectable: true),
+                  Flexible(
+                    child: results.entries[selectedIndex.value]
+                        .generateMeaningWidgetsDialog(
+                      context,
+                      selectable: true,
+                      customTextSelectionControls: CustomTextSelectionControls(
+                          customButton: (selectedValue) {
+                        _clipboard.value = selectedValue;
+                      }),
+                    ),
+                  ),
                   Text.rich(
                     TextSpan(
                       text: '',

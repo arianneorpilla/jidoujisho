@@ -1216,9 +1216,11 @@ reader.addEventListener('click', (e) => {
                         children: results.entries[selectedIndex.value]
                             .generateTagWidgets(context),
                       ),
-                    results.entries[selectedIndex.value]
-                        .generateMeaningWidgetsDialog(context,
-                            selectable: true),
+                    Flexible(
+                      child: results.entries[selectedIndex.value]
+                          .generateMeaningWidgetsDialog(context,
+                              selectable: true),
+                    ),
                     Text.rich(
                       TextSpan(
                         text: '',

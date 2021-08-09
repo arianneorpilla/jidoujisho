@@ -253,7 +253,7 @@ Future<void> setLastTachiyomiSource(String lastTachiyomiSource) async {
 
 String getLastTachiyomiSource() {
   String lastTachiyomiSource =
-      gSharedPrefs.getString('lastTachiyomiSource') ?? '';
+      gSharedPrefs.getString('lastTachiyomiSource') ?? 'All sources';
 
   return lastTachiyomiSource;
 }

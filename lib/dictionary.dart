@@ -8,14 +8,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_archive/flutter_archive.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:gx_file_picker/gx_file_picker.dart';
-//import 'package:file_picker/file_picker.dart';
+//import 'package:gx_file_picker/gx_file_picker.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:html/parser.dart' as parser;
 import 'package:http/http.dart' as http;
 import 'package:jidoujisho/globals.dart';
 import 'package:jidoujisho/objectbox.g.dart';
 import 'package:jidoujisho/pitch.dart';
 import 'package:jidoujisho/preferences.dart';
+import 'package:jidoujisho/selection.dart';
 import 'package:objectbox/objectbox.dart';
 import 'package:path/path.dart' as path;
 import 'package:unofficial_jisho_api/api.dart';
@@ -192,16 +193,26 @@ class DictionaryEntry {
   }
 
   Widget generateMeaningWidgetsDialog(BuildContext context,
-      {bool selectable = false}) {
+      {bool selectable = false,
+      CustomTextSelectionControls customTextSelectionControls}) {
     if (gReservedDictionaryNames.contains(this.dictionarySource)) {
-      return Text(
-        "\n${this.meaning}\n",
-        style: TextStyle(
-          fontSize: 15,
-        ),
-        maxLines: 10,
-        overflow: TextOverflow.ellipsis,
-      );
+      if (selectable) {
+        return SelectableText(
+          "\n${this.meaning}\n",
+          style: TextStyle(
+            fontSize: 15,
+          ),
+          selectionControls:
+              customTextSelectionControls ?? MaterialTextSelectionControls(),
+        );
+      } else {
+        return Text(
+          "\n${this.meaning}\n",
+          style: TextStyle(
+            fontSize: 15,
+          ),
+        );
+      }
     }
 
     List<List<Widget>> definitionWidgets = [];
@@ -269,6 +280,8 @@ class DictionaryEntry {
               ),
               children: inlineSpanWidgets,
             ),
+            selectionControls:
+                customTextSelectionControls ?? MaterialTextSelectionControls(),
           ),
         );
       } else {
