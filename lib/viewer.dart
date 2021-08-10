@@ -786,6 +786,7 @@ class ViewerState extends State<Viewer> {
           filterQuality: FilterQuality.high,
           onTapDown: (context, details, value) async {
             _hideStuff.value = !_hideStuff.value;
+            SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
 
             workingAreaNode.unfocus();
           },
