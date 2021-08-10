@@ -2,7 +2,7 @@ name: jidoujisho
 description: jidoujisho is an Android video player, reader assistant, OCR image viewer and card creation toolkit with features specifically helpful for language learners. 
 publish_to: none
 
-version: 0.26.1+77
+version: 0.26.2+78
 
 environment:
   sdk: ">=2.7.0 <3.0.0"

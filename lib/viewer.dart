@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -953,6 +954,7 @@ class ViewerState extends State<Viewer> {
                 "Use Vertical Text Recognition"
               else
                 "Use Horizontal Text Recognition",
+              "Launch OCR Overlay with Kaku",
               "Select Active Dictionary Source",
               "Share Links to Applications",
               "Export Current Context to Anki",
@@ -963,6 +965,7 @@ class ViewerState extends State<Viewer> {
                 Icons.text_rotate_vertical
               else
                 Icons.text_rotation_none,
+              Icons.launch,
               Icons.auto_stories,
               Icons.share_outlined,
               Icons.mobile_screen_share_rounded,
@@ -980,16 +983,22 @@ class ViewerState extends State<Viewer> {
             toggleOcrHorizontalMode();
             break;
           case 2:
+            await LaunchApp.openApp(
+              androidPackageName: 'ca.fuwafuwa.kaku',
+              openStore: true,
+            );
+            break;
+          case 3:
             openDictionaryMenu(context, false);
             final String clipboardMemory = _clipboard.value;
             _clipboard.value = "";
             setNoPush();
             _clipboard.value = clipboardMemory;
             break;
-          case 3:
+          case 4:
             openExtraShare();
             break;
-          case 4:
+          case 5:
             FileImage fileImage = images[currentPage.value];
 
             stopClipboardMonitor();
