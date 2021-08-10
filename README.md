@@ -84,29 +84,29 @@ Please note that the development of the app switches between changes being imple
 # 🎞️ A glimpse of jidoujisho in action
 
 <p align="center" style="margin:0">
-<img src="https://i.postimg.cc/4NCsPR0D/23.jpg" height="350">
-<img src="https://i.postimg.cc/GmKRb8pR/24.jpg" height="350">
-<img src="https://i.postimg.cc/g2md9qm4/25.jpg" height="350">
-<img src="https://i.postimg.cc/wBBpMqtm/26.jpg" height="350">
+<img src="https://i.postimg.cc/k5r73ZDG/Screenshot-20210810-124547.jpg" height="350">
+<img src="https://i.postimg.cc/cLtdzZxP/Screenshot-20210810-124847.jpg" height="350">
+<img src="https://i.postimg.cc/zXcJp3rn/Screenshot-20210810-124856.jpg" height="350">
+<img src="https://i.postimg.cc/Hx9Yt2Yx/Screenshot-20210810-125000.jpg" height="350">
 </p>
 
 <p align="center" style="margin:0">
-  <img src="https://i.postimg.cc/nV3Mzhpy/Screenshot-20210421-113339.jpg" width="223">
-  <img src="https://i.postimg.cc/ryB35SVx/Screenshot-20210421-112104.jpg" width="223">
-  <img src="https://i.postimg.cc/Dy7dVZ5R/Screenshot-20210421-112206.jpg" width="223">
+  <img src="https://i.postimg.cc/x8j0pz8P/Screenshot-20210810-125127.jpg" width="223">
+  <img src="https://i.postimg.cc/3RTrp6HV/Screenshot-20210810-125317.jpg" width="223">
+  <img src="https://i.postimg.cc/7PXPGmtt/Screenshot-20210810-125508.jpg" width="223">
 </p>
 
 <p align="center" style="margin:0">
-  <img src="https://i.postimg.cc/P547G9mQ/Screenshot-20210421-082347.jpg" height="350">
-  <img src="https://i.postimg.cc/6549Nhp9/7.jpg" height="350">
-  <img src="https://i.postimg.cc/7LwD08M6/1.jpg" height="350">
-  <img src="https://i.postimg.cc/KzY2pPWh/2.jpg" height="350">
+  <img src="https://i.postimg.cc/G3P8MF7v/Screenshot-20210810-130405.jpg" height="350">
+  <img src="https://i.postimg.cc/1z658SbD/Screenshot-20210810-125630.jpg" height="350">
+  <img src="https://i.postimg.cc/rwHKdQs2/Screenshot-20210810-130004.jpg" height="350">
+  <img src="https://i.postimg.cc/HspJFrRR/Screenshot-20210810-130107.jpg" height="350">
 </p>
 
 <p align="center" style="margin:0">
-  <img src="https://i.postimg.cc/vm2STn21/Screenshot-20210421-111725.jpg" width="223">
-  <img src="https://i.postimg.cc/3Nrgmwjv/Screenshot-20210705-033959.jpg" width="223">
-  <img src="https://i.postimg.cc/ncz4LCh8/Screenshot-20210705-034036.jpg" width="223">
+  <img src="https://i.postimg.cc/Jz0s491Q/Screenshot-20210810-130625.jpg" width="223">
+  <img src="https://i.postimg.cc/W3Lz8z09/Screenshot-20210810-130941.jpg" width="223">
+  <img src="https://i.postimg.cc/JnNn28qR/Screenshot-20210810-130745.jpg" width="223">
 </p>
 
 # 📖 Using the application
