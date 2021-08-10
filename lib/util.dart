@@ -1447,6 +1447,9 @@ class MangaSource {
       }
     });
 
+    manga
+        .sort((a, b) => a.getMangaAliasName().compareTo(b.getMangaAliasName()));
+
     return manga;
   }
 }
@@ -1463,7 +1466,8 @@ List<Manga> getAllManga() {
   }
   allManga.addAll(MangaSource.local().getMangaFromSource());
 
-  allManga.sort((a, b) => a.getMangaName().compareTo(b.getMangaName()));
+  allManga
+      .sort((a, b) => a.getMangaAliasName().compareTo(b.getMangaAliasName()));
   return allManga;
 }
 
