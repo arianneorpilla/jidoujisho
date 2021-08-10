@@ -86,7 +86,7 @@ Please note that the development of the app switches between changes being imple
 <p align="center" style="margin:0">
 <img src="https://i.postimg.cc/k5r73ZDG/Screenshot-20210810-124547.jpg" height="350">
 <img src="https://i.postimg.cc/cLtdzZxP/Screenshot-20210810-124847.jpg" height="350">
-<img src="https://i.postimg.cc/zXcJp3rn/Screenshot-20210810-124856.jpg" height="350">
+<img src="https://i.postimg.cc/R0TTfW6B/Screenshot-20210810-143528.jpg" height="350">
 <img src="https://i.postimg.cc/Hx9Yt2Yx/Screenshot-20210810-125000.jpg" height="350">
 </p>
 
