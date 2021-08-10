@@ -837,12 +837,15 @@ class ViewerState extends State<Viewer> {
       child: ValueListenableBuilder(
         valueListenable: _hideStuff,
         builder: (BuildContext context, bool value, Widget child) {
-          return AnimatedOpacity(
-            opacity: value ? 0.0 : 1.0,
-            duration: const Duration(milliseconds: 300),
-            child: Container(
-              color: Theme.of(context).dialogBackgroundColor.withOpacity(0.8),
-              child: sentenceField(),
+          return AbsorbPointer(
+            absorbing: value,
+            child: AnimatedOpacity(
+              opacity: value ? 0.0 : 1.0,
+              duration: const Duration(milliseconds: 300),
+              child: Container(
+                color: Theme.of(context).dialogBackgroundColor.withOpacity(0.8),
+                child: sentenceField(),
+              ),
             ),
           );
         },
@@ -856,7 +859,9 @@ class ViewerState extends State<Viewer> {
     return ValueListenableBuilder(
         valueListenable: _hideStuff,
         builder: (BuildContext context, bool value, Widget child) {
-          return AnimatedOpacity(
+          return AbsorbPointer(
+            absorbing: value,
+            child: AnimatedOpacity(
               opacity: _hideStuff.value ? 0.0 : 1.0,
               duration: const Duration(milliseconds: 300),
               child: Container(
@@ -873,7 +878,9 @@ class ViewerState extends State<Viewer> {
                     // _buildMoreButton(controller),
                   ],
                 ),
-              ));
+              ),
+            ),
+          );
         });
   }
 
