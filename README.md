@@ -131,8 +131,9 @@ Below are some links that some users might find useful.
 A primer on the basics of the application is as follows.
 
 * 📲 <a href="https://github.com/lrorpilla/jidoujisho/releases/"/>**Download and install the latest beta**</a> onto your Android device
-* ⏯️ Play a video by selecting from your **local media library** or **picking a YouTube video**
-* 📚 Start reading with the *Reader* tab to launch ッツ Ebook Reader to read an **EPUB** or **HTMLZ** file
+* ⏯️ Watch a video with the *Player* selecting from your **local media library** or **picking a YouTube video**
+* 📚 Start a novel with the *Reader* to launch ッツ Ebook Reader to read an **EPUB** or **HTMLZ** file
+* 🖼 Read manga from your [**Tachiyomi**](https://tachiyomi.org/) library with the *Viewer* and launch [**Kaku**](https://kaku.fuwafuwa.ca/) to pass text to the app 
 * 📋 Select text with **tap to select** or **drag to select**
 * 📔 When the **dictionary definition** for the text shows up, the text is the **current context**
 * 🗑️ Closing the dictionary prompt will **clear the clipboard**
@@ -140,6 +141,7 @@ A primer on the basics of the application is as follows.
 * ↕️ You may **swipe vertically to open the transcript** in the player, and pick a time or read subtitles
 * ↔️ **Swipe horizontally** in the player to repeat the current subtitle audio
 * ➕ **Swipe left or right on dictionary results** to scroll through multiple definitions
+* 📨 *In the *Viewer*, **users can pass text to the app** by **holding onto [Kaku](https://kaku.fuwafuwa.ca/)'s results box**
 
 ### 📲 Exporting to AnkiDroid
 
@@ -168,7 +170,7 @@ A primer on the basics of the application is as follows.
 * 🗃 **The AnkiDroid deck you last export to will be remembered** for your next export
 * 📹 The quality closest to the **last selected quality** will be selected by default for YouTube videos
 * 📢 **Automatic captions** are more excellent in **podcasts and news programs** with clear speakers
-
+* ✂️ **Crop manga panels before exporting them** within the *Creator* to have better context for your cards 
 
 # 👥 Contribution and attribution
 
