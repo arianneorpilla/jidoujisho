@@ -8,8 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_archive/flutter_archive.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-//import 'package:gx_file_picker/gx_file_picker.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:gx_file_picker/gx_file_picker.dart';
+//import 'package:file_picker/file_picker.dart';
 import 'package:html/parser.dart' as parser;
 import 'package:http/http.dart' as http;
 import 'package:jidoujisho/globals.dart';
@@ -304,13 +304,11 @@ class DictionaryEntry {
       }
     }
 
-    return Flexible(
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: meaningWidgets,
-        ),
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: meaningWidgets,
       ),
     );
   }

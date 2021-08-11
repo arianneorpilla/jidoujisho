@@ -49,3 +49,4 @@ ValueNotifier<String> gActiveDictionary =
     ValueNotifier<String>(getCurrentDictionary());
 
 ValueNotifier<bool> gPlayPause = ValueNotifier<bool>(true);
+ValueNotifier<bool> gDirtyDefinitionFix = ValueNotifier<bool>(true);

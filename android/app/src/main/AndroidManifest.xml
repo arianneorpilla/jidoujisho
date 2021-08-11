@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.lrorpilla.jidoujisho">
+    package="com.lrorpilla.jidoujisho_testing">
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/> 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/> 
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/> 

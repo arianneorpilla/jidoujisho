@@ -823,7 +823,7 @@ class _MaterialControlsState extends State<MaterialControls>
             SubtitleAudioMenuOption(
               type: SubtitleAudioMenuOptionType.autoSubtitle,
               callbackIndex: -50,
-              metadata: audioTrackNames[i],
+              metadata: autoSubtitleTrackNames[i],
             ),
           );
         }

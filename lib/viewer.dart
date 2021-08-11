@@ -124,6 +124,10 @@ class ViewerState extends State<Viewer> {
     onChangeSubscriberId =
         KeyboardVisibilityNotification().addNewListener(onChange: (visible) {
       editingWorkArea = visible;
+
+      if (isCustomDictionary()) {
+        gDirtyDefinitionFix.value = !gDirtyDefinitionFix.value;
+      }
     });
 
     currentPage = ValueNotifier<int>(chapter.getMangaPageProgress());
@@ -786,7 +790,14 @@ class ViewerState extends State<Viewer> {
           filterQuality: FilterQuality.high,
           onTapDown: (context, details, value) async {
             _hideStuff.value = !_hideStuff.value;
-            SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
+
+            await SystemChrome.setEnabledSystemUIOverlays(
+                [SystemUiOverlay.bottom]);
+            if (isCustomDictionary()) {
+              Future.delayed(Duration(seconds: 2), () {
+                gDirtyDefinitionFix.value = !gDirtyDefinitionFix.value;
+              });
+            }
 
             workingAreaNode.unfocus();
           },
@@ -1552,15 +1563,20 @@ class ViewerState extends State<Viewer> {
                           .generateTagWidgets(context),
                     ),
                   Flexible(
-                    child: results.entries[selectedIndex.value]
-                        .generateMeaningWidgetsDialog(
-                      context,
-                      selectable: true,
-                      customTextSelectionControls: CustomTextSelectionControls(
-                          customButton: (selectedValue) {
-                        _clipboard.value = selectedValue;
-                      }),
-                    ),
+                    child: ValueListenableBuilder(
+                        valueListenable: gDirtyDefinitionFix,
+                        builder: (BuildContext context, value, Widget child) {
+                          return results.entries[selectedIndex.value]
+                              .generateMeaningWidgetsDialog(
+                            context,
+                            selectable: true,
+                            customTextSelectionControls:
+                                CustomTextSelectionControls(
+                                    customButton: (selectedValue) {
+                              _clipboard.value = selectedValue;
+                            }),
+                          );
+                        }),
                   ),
                   Text.rich(
                     TextSpan(
