@@ -141,7 +141,7 @@ A primer on the basics of the application is as follows.
 * ↕️ You may **swipe vertically to open the transcript** in the player, and pick a time or read subtitles
 * ↔️ **Swipe horizontally** in the player to repeat the current subtitle audio
 * ➕ **Swipe left or right on dictionary results** to scroll through multiple definitions
-* 📨 *In the *Viewer*, **users can pass text to the app** by **holding onto [Kaku](https://kaku.fuwafuwa.ca/)'s results box**
+* 📨 In the *Viewer*, **users can pass text to the app** by **holding onto [Kaku](https://kaku.fuwafuwa.ca/)'s results box**
 
 ### 📲 Exporting to AnkiDroid
 
