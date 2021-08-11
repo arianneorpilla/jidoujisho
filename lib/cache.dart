@@ -277,6 +277,24 @@ fetchCustomDictionarySearchCache({
         }
       }
 
+      if (searchTerm.length >= 4 && searchTerm.endsWith("そうに")) {
+        params = CustomWordDetailsParams(
+          searchTerm: searchTerm.substring(0, searchTerm.length - 3),
+          contextDataSource: contextDataSource,
+          contextPosition: contextPosition,
+          originalSearchTerm: searchTerm,
+          fallbackTerm: generateFallbackTerm(
+              searchTerm.substring(0, searchTerm.length - 3)),
+          entryStoreReference: storeReference,
+          tagStoreReference: gTagStore.reference,
+          allStoreReferences: getAllStoreReferences(),
+        );
+        results = await compute(getCustomWordDetails, params);
+        if (results != null) {
+          return results;
+        }
+      }
+
       return null;
     } catch (e) {
       print(e);
