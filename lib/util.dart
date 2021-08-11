@@ -869,6 +869,10 @@ class Manga {
   }
 
   ImageProvider getCover() {
+    if (getChapters().isEmpty) {
+      return MemoryImage(kTransparentImage);
+    }
+
     return getChapters().first.getCover();
   }
 
@@ -1291,6 +1295,7 @@ class MangaChapter {
         }
       }
     }
+
     return MemoryImage(kTransparentImage);
   }
 
