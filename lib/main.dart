@@ -630,6 +630,7 @@ class _HomeState extends State<Home> {
     }
 
     ScrollController scrollController = ScrollController();
+    gCurrentScrollbar = scrollController;
 
     return RawScrollbar(
       thumbColor: Colors.grey[600],
