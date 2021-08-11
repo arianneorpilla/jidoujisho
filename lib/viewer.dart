@@ -778,6 +778,19 @@ class ViewerState extends State<Viewer> {
         });
   }
 
+  void toggleTopBottomBarVisibility() async {
+    _hideStuff.value = !_hideStuff.value;
+
+    await SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
+    if (isCustomDictionary()) {
+      Future.delayed(Duration(seconds: 2), () {
+        gDirtyDefinitionFix.value = !gDirtyDefinitionFix.value;
+      });
+    }
+
+    workingAreaNode.unfocus();
+  }
+
   Widget buildGallery() {
     return PhotoViewGallery.builder(
       reverse: true,
@@ -789,17 +802,7 @@ class ViewerState extends State<Viewer> {
           maxScale: PhotoViewComputedScale.contained * 6,
           filterQuality: FilterQuality.high,
           onTapDown: (context, details, value) async {
-            _hideStuff.value = !_hideStuff.value;
-
-            await SystemChrome.setEnabledSystemUIOverlays(
-                [SystemUiOverlay.bottom]);
-            if (isCustomDictionary()) {
-              Future.delayed(Duration(seconds: 2), () {
-                gDirtyDefinitionFix.value = !gDirtyDefinitionFix.value;
-              });
-            }
-
-            workingAreaNode.unfocus();
+            toggleTopBottomBarVisibility();
           },
         );
       },
@@ -848,14 +851,20 @@ class ViewerState extends State<Viewer> {
       child: ValueListenableBuilder(
         valueListenable: _hideStuff,
         builder: (BuildContext context, bool value, Widget child) {
-          return AbsorbPointer(
-            absorbing: value,
-            child: AnimatedOpacity(
-              opacity: value ? 0.0 : 1.0,
-              duration: const Duration(milliseconds: 300),
-              child: Container(
-                color: Theme.of(context).dialogBackgroundColor.withOpacity(0.8),
-                child: sentenceField(),
+          return GestureDetector(
+            onTap: () {
+              toggleTopBottomBarVisibility();
+            },
+            child: AbsorbPointer(
+              absorbing: value,
+              child: AnimatedOpacity(
+                opacity: value ? 0.0 : 1.0,
+                duration: const Duration(milliseconds: 300),
+                child: Container(
+                  color:
+                      Theme.of(context).dialogBackgroundColor.withOpacity(0.8),
+                  child: sentenceField(),
+                ),
               ),
             ),
           );
@@ -870,24 +879,30 @@ class ViewerState extends State<Viewer> {
     return ValueListenableBuilder(
         valueListenable: _hideStuff,
         builder: (BuildContext context, bool value, Widget child) {
-          return AbsorbPointer(
-            absorbing: value,
-            child: AnimatedOpacity(
-              opacity: _hideStuff.value ? 0.0 : 1.0,
-              duration: const Duration(milliseconds: 300),
-              child: Container(
-                height: barHeight,
-                color: Theme.of(context).dialogBackgroundColor.withOpacity(0.8),
-                child: Row(
-                  children: <Widget>[
-                    SizedBox(width: 24),
-                    _buildPosition(iconColor),
-                    _buildProgressBar(),
-                    //_buildScanButton(),
-                    _buildMoreButton(),
-                    // _buildToolsButton(controller),
-                    // _buildMoreButton(controller),
-                  ],
+          return GestureDetector(
+            onTap: () {
+              toggleTopBottomBarVisibility();
+            },
+            child: AbsorbPointer(
+              absorbing: value,
+              child: AnimatedOpacity(
+                opacity: _hideStuff.value ? 0.0 : 1.0,
+                duration: const Duration(milliseconds: 300),
+                child: Container(
+                  height: barHeight,
+                  color:
+                      Theme.of(context).dialogBackgroundColor.withOpacity(0.8),
+                  child: Row(
+                    children: <Widget>[
+                      SizedBox(width: 24),
+                      _buildPosition(iconColor),
+                      _buildProgressBar(),
+                      //_buildScanButton(),
+                      _buildMoreButton(),
+                      // _buildToolsButton(controller),
+                      // _buildMoreButton(controller),
+                    ],
+                  ),
                 ),
               ),
             ),
