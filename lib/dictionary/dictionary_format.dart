@@ -1,10 +1,13 @@
+import 'dart:io';
+
+import 'package:daijidoujisho/dictionary/dictionary.dart';
+import 'package:daijidoujisho/dictionary/dictionary_utils.dart';
 import 'package:flutter/material.dart';
 
 import 'package:daijidoujisho/dictionary/dictionary_entry.dart';
 import 'package:daijidoujisho/dictionary/dictionary_extract_params.dart';
 import 'package:daijidoujisho/dictionary/dictionary_result.dart';
 import 'package:daijidoujisho/dictionary/dictionary_search_results.dart';
-import 'package:daijidoujisho/models/dictionary_progress_model.dart';
 
 abstract class DictionaryFormat {
   DictionaryFormat({
@@ -23,23 +26,52 @@ abstract class DictionaryFormat {
   /// format.
   bool isUriSupported(Uri uri);
 
-  /// Given a [Uri], return the appropriate name of a dictionary. For example,
-  /// "JMdict" or "Merriam-Webster Dictionary".
-  String getDictionaryName(Uri uri);
-
-  /// Return a list of [DictionaryEntry] from a given [Uri]. This function
-  /// will perform file extraction and will parse the contents of the
-  /// dictionary file to get the entries.
+  /// Given a [File], prepare a working [Directory] such that it will be
+  /// possible to make relative commands (in the directory) to be able to
+  /// get a dictionary's name, its entries and other related metadata that
+  /// will be useful for preservation.
   ///
-  /// This is a resource intensive operation and operations inside this should
-  /// be handled in a separate isolate and call [compute].
-  List<DictionaryExtractParams> getDictionaryEntries(
-      Uri uri, DictionaryProgressModel dictionaryProgress);
+  /// For many formats, this will likely be a ZIP extraction operation. A
+  /// given parameter [targetDirectory] is where the final working directory
+  /// should be, and where the rest of the operations will be performed.
+  ///
+  /// See [ImportPreparationParams] for how to work with the individual input
+  /// parameters.
+  Future<Directory> prepareWorkingDirectory(ImportPreparationParams params);
+
+  /// Given a [Directory] of files pertaining to this dictionary format,
+  /// return a [String] that will refer to a dictionary's name in this format.
+  ///
+  /// If this format does not offer a way for a dictionary's name to be
+  /// represented in its schema, return a unique [String] instead such that
+  /// collisions with other dictionaries will not be likely.
+  ///
+  /// See [ImportProcessingParams] for how to work with the individual input
+  /// parameters.
+  Future<String> getDictionaryName(ImportProcessingParams params);
+
+  /// Given a [Directory] of files pertaining to this dictionary format,
+  /// return a list of [DictionaryEntry] that will be added to the database.
+  ///
+  /// See [ImportProcessingParams] for how to work with the individual input
+  /// parameters.
+  Future<List<DictionaryEntry>> extractDictionaryEntries(
+      ImportProcessingParams params);
+
+  /// Given a [Directory] of files pertaining to this dictionary format,
+  /// prepare a [Map] of metadata that will be used for cleaning up and
+  /// enhancing raw database results.
+  ///
+  /// For example, a dictionary format may make use of tags separate from the
+  /// entry. This will be preserved by the dictionary. This field may also
+  /// be used to store trivial metadata pertaining to the dictionary itself.
+  ///
+  /// See [ImportProcessingParams] for how to work with the individual input
+  /// parameters.
+  Future<Map<String, String>> getDictionaryMetadata(
+      ImportProcessingParams params);
 
   /// Process clean results from the searched entries.
   DictionarySearchResult processResultsFromEntries(
       List<DictionaryEntry> entries);
-
-  /// Recreate a dictionary result item from serialised JSON. Used for history.
-  DictionaryResultItem fromJson(String json);
 }

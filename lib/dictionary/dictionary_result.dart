@@ -1,8 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
-
-abstract class DictionaryResultItem {
+class DictionaryResultItem {
   DictionaryResultItem({
     required this.headword,
     required this.reading,
@@ -23,9 +21,8 @@ abstract class DictionaryResultItem {
   /// widgets.
   late Map<String, String> extra;
 
-  /// The widget representation of the dictionary result.
-  Widget showResult();
-
+  /// Get a serialised representation of the dictionary result for history
+  /// and persistence purposes.
   String toJson() {
     Map<String, String> map = {
       "headword": headword,
@@ -35,5 +32,17 @@ abstract class DictionaryResultItem {
     };
 
     return jsonEncode(map);
+  }
+
+  /// Deserialise JSON and get a result from history as a result item.
+  factory DictionaryResultItem.fromJson(String json) {
+    Map<String, dynamic> map = jsonDecode(json);
+
+    return DictionaryResultItem(
+      headword: map["headword"],
+      reading: map["reading"],
+      meaning: map["meaning"],
+      extra: jsonDecode(map["extra"]),
+    );
   }
 }

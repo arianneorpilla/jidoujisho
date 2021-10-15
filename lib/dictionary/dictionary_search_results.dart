@@ -27,6 +27,8 @@ class DictionarySearchResult {
   /// The list of processed search results.
   final List<DictionaryResultItem> results;
 
+  /// Get a serialised representation of the dictionary search result
+  /// for history and persistence purposes.
   String toJson() {
     List<String> serialisedItems = [];
     for (DictionaryResultItem result in results) {
@@ -39,12 +41,33 @@ class DictionarySearchResult {
 
     Map<String, String> map = {
       "dictionaryName": dictionaryName,
-      "dictionaryFormat": dictionaryFormat.formatName,
+      "formatName": dictionaryFormat.formatName,
       "originalSearchTerm": originalSearchTerm,
       "fallbackSearchTerm": fallbackSearchTerm,
       "results": jsonEncode(serialisedItems),
     };
 
     return jsonEncode(map);
+  }
+
+  factory DictionarySearchResult.fromJson(String json) {
+    Map<String, dynamic> map = jsonDecode(json);
+
+    List<String> resultsJson = jsonDecode(map["results"]);
+
+    List<DictionaryResultItem> results = [];
+    for (String resultJson in resultsJson) {
+      results.add(
+        DictionaryResultItem.fromJson(resultJson),
+      );
+    }
+
+    return DictionarySearchResult(
+      dictionaryName: map["dictionaryName"],
+      dictionaryFormat: map["formatName"],
+      originalSearchTerm: map["originalSearchTerm"],
+      fallbackSearchTerm: map["fallbackSearchTerm"],
+      results: results,
+    );
   }
 }

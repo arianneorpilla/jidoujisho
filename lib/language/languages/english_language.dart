@@ -1,4 +1,4 @@
-import 'package:daijidoujisho/enums/reading_direction.dart';
+import 'package:daijidoujisho/util/reading_direction.dart';
 import 'package:daijidoujisho/language/language.dart';
 import 'package:daijidoujisho/util/reg_exp.dart';
 

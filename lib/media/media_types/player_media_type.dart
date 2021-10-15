@@ -1,11 +1,13 @@
 import 'dart:io';
 
+import 'package:daijidoujisho/language/app_localizations.dart';
 import 'package:daijidoujisho/models/app_model.dart';
 import 'package:flutter/material.dart';
 import 'package:mime/mime.dart';
 
 import 'package:daijidoujisho/media/media_history_item.dart';
 import 'package:daijidoujisho/media/media_type.dart';
+import 'package:provider/provider.dart';
 
 class PlayerMediaType extends MediaType {
   PlayerMediaType()
@@ -24,10 +26,12 @@ class PlayerMediaType extends MediaType {
   }
 
   @override
-  BottomNavigationBarItem getHomeTab() {
-    return const BottomNavigationBarItem(
-      label: "Player",
-      icon: Icon(Icons.video_library),
+  BottomNavigationBarItem getHomeTab(BuildContext context) {
+    AppModel appModel = Provider.of<AppModel>(context);
+    return BottomNavigationBarItem(
+      label: AppLocalizations.getLocalizedValue(
+          appModel.getAppLanguage(), "player_media_type"),
+      icon: const Icon(Icons.video_library),
     );
   }
 

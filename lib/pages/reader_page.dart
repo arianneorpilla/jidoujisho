@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:daijidoujisho/media/media_page.dart';
-import 'package:daijidoujisho/media/media_page_state.dart';
 import 'package:epubx/epubx.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

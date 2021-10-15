@@ -5,13 +5,15 @@ typedef DropdownCallback = void Function(String option);
 class DropDownMenu extends StatefulWidget {
   final List<String> options;
   final String initialOption;
-  final DropdownCallback callback;
+  final DropdownCallback optionCallback;
+  final VoidCallback voidCallback;
 
   const DropDownMenu({
     Key? key,
     required this.options,
     required this.initialOption,
-    required this.callback,
+    required this.optionCallback,
+    required this.voidCallback,
   }) : super(key: key);
 
   @override
@@ -35,7 +37,8 @@ class DropDownMenuState extends State<DropDownMenu> {
         );
       }).toList(),
       onChanged: (newOption) async {
-        widget.callback(newOption ?? selectedOption);
+        widget.optionCallback(newOption ?? selectedOption);
+        widget.voidCallback();
 
         setState(() {
           selectedOption = newOption ?? selectedOption;

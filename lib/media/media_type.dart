@@ -10,9 +10,6 @@ abstract class MediaType {
   /// purposes.
   late String mediaTypeName;
 
-  /// A reference to the app-wide data model.
-  late AppModel appModel;
-
   /// Given a [Uri], pointing to a file, a directory or a link, return a value
   /// for whether or not it is appropriate to the media type.
   ///
@@ -43,7 +40,7 @@ abstract class MediaType {
   /// For example, in the case of the Reader, this is a bottom navigation bar
   /// item with a book icon and labelled as "Reader". For the player, this
   /// is a nav bar item with a video icon and labelled as "Player".
-  BottomNavigationBarItem getHomeTab();
+  BottomNavigationBarItem getHomeTab(BuildContext context);
 
   /// Given a [MediaHistoryItem], launch the appropriate page for the media
   /// type, returning to the appropriate progress marker if given.

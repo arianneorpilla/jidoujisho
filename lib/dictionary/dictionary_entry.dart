@@ -1,11 +1,18 @@
+import 'package:objectbox/objectbox.dart';
+
+@Entity()
 class DictionaryEntry {
   DictionaryEntry({
-    required this.headword,
-    required this.reading,
+    this.id = 0,
+    @Index() required this.headword,
+    @Index() required this.reading,
     required this.meaning,
     required this.extra,
     required this.popularity,
   });
+
+  /// ObjectBox identifier parameter.
+  int id;
 
   /// The headword of the dictionary entry. For example, 見る.
   late String headword;
@@ -22,5 +29,5 @@ class DictionaryEntry {
   late String extra;
 
   /// The popularity index of the dictionary entry for sorting purposes.
-  late int popularity;
+  late double popularity;
 }

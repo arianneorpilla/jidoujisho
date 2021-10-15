@@ -55,10 +55,15 @@ dependencies:
   epubx: ^3.0.0-dev.3
   file: ^6.1.2
   flutter_image_compress: ^1.1.0
+  objectbox: ^1.2.0
+  objectbox_flutter_libs: any
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  
+  build_runner: ^1.0.0
+  objectbox_generator: any
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

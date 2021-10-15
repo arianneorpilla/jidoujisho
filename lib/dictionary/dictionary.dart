@@ -1,10 +1,12 @@
-import 'package:daijidoujisho/dictionary/dictionary_entry.dart';
-import 'package:daijidoujisho/dictionary/dictionary_format.dart';
+import 'dart:convert';
 
-abstract class Dictionary {
+import 'package:daijidoujisho/dictionary/dictionary_entry.dart';
+
+class Dictionary {
   Dictionary({
     required this.dictionaryName,
     required this.formatName,
+    required this.metadata,
   });
 
   /// The name of the dictionary. For example, this could be "Merriam-Webster
@@ -19,16 +21,37 @@ abstract class Dictionary {
   /// The format that the dictionary was sourced from.
   final String formatName;
 
-  /// Get the format from the format name.
-  DictionaryFormat getDictionaryFormat(String formatName);
+  /// The metadata pertaining to this dictionary from import. Used for
+  /// format-specific enhancements.
+  final Map<String, String> metadata;
 
   /// Search the database for a given search term and return a list of
   /// appropriate [DictionaryEntry] items.
-  List<DictionaryEntry> searchForEntries(String searchTerm);
+  // List<DictionaryEntry> searchForEntries(String searchTerm) {
 
-  /// Given a list of [DictionaryEntry], add these to the database.
-  Future<void> addEntries(List<DictionaryEntry> entries);
+  // }
 
-  /// Delete this dictionary and erase its contents from the database.
-  Future<void> deleteDictionary();
+  /// Get a serialised representation of the dictionary search result
+  /// for history and persistence purposes.
+  String toJson() {
+    Map<String, String> map = {
+      "dictionaryName": dictionaryName,
+      "formatName": formatName,
+      "metadata": jsonEncode(metadata),
+    };
+
+    return jsonEncode(map);
+  }
+
+  factory Dictionary.fromJson(String json) {
+    Map<String, dynamic> map = jsonDecode(json);
+
+    return Dictionary(
+      dictionaryName: map["dictionaryName"],
+      formatName: map["formatName"],
+      metadata: jsonDecode(
+        map["metadata"],
+      ),
+    );
+  }
 }

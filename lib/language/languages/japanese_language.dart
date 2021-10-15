@@ -1,4 +1,4 @@
-import 'package:daijidoujisho/enums/reading_direction.dart';
+import 'package:daijidoujisho/util/reading_direction.dart';
 import 'package:daijidoujisho/language/language.dart';
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:ve_dart/ve_dart.dart';
@@ -6,7 +6,7 @@ import 'package:ve_dart/ve_dart.dart';
 class JapaneseLanguage extends Language {
   JapaneseLanguage()
       : super(
-          languageName: "Japanese",
+          languageName: "日本語",
           languageCode: "ja",
           countryCode: "JP",
           readingDirection: ReadingDirection.verticalRTL,

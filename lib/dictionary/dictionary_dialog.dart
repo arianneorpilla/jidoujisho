@@ -1,4 +1,5 @@
 import 'package:daijidoujisho/dictionary/dictionary_format.dart';
+import 'package:daijidoujisho/language/app_localizations.dart';
 import 'package:daijidoujisho/models/app_model.dart';
 import 'package:daijidoujisho/util/drop_down_menu.dart';
 import 'package:flutter/material.dart';
@@ -34,14 +35,20 @@ class DictionaryDialogState extends State<DictionaryDialog> {
       content: buildContent(),
       actions: <Widget>[
         TextButton(
-          child: const Text('IMPORT'),
+          child: Text(
+            AppLocalizations.getLocalizedValue(
+                appModel.getAppLanguage(), "dialog_import"),
+          ),
           onPressed: () async {
             //await dictionaryImport(context);
             setState(() {});
           },
         ),
         TextButton(
-          child: const Text('CLOSE'),
+          child: Text(
+            AppLocalizations.getLocalizedValue(
+                appModel.getAppLanguage(), "dialog_close"),
+          ),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -51,12 +58,8 @@ class DictionaryDialogState extends State<DictionaryDialog> {
   }
 
   Widget buildContent() {
-    List<String> importedDictionaries = appModel.getImportedDictionaries();
-    List<DictionaryFormat> dictionaryFormats =
-        appModel.availableDictionaryFormats;
-
-    List<String> options =
-        dictionaryFormats.map((format) => format.formatName).toList();
+    List<String> importedDictionaries = appModel.getImportedDictionaryNames();
+    List<String> options = appModel.getDictionaryFormatNames();
     String initialOption = appModel.getLastDictionaryFormat();
 
     return SizedBox(
@@ -67,13 +70,37 @@ class DictionaryDialogState extends State<DictionaryDialog> {
           importedDictionaries.isEmpty
               ? showEmptyMessage()
               : showDictionaryList(),
-          Divider(
-            color: Theme.of(context).unselectedWidgetColor,
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            height: 1.0,
+            decoration: const BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: Color(0xFFBDBDBD),
+                  width: 0.0,
+                ),
+              ),
+            ),
+          ),
+          Container(
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.only(left: 8),
+            child: Text(
+              AppLocalizations.getLocalizedValue(
+                  appModel.getAppLanguage(), "import_format"),
+              style: TextStyle(
+                fontSize: 10,
+                color: Theme.of(context).unselectedWidgetColor,
+              ),
+            ),
           ),
           DropDownMenu(
             options: options,
             initialOption: initialOption,
-            callback: appModel.setLastDictionaryFormat,
+            optionCallback: appModel.setLastDictionaryFormat,
+            voidCallback: () {
+              setState(() {});
+            },
           ),
         ],
       ),
@@ -82,7 +109,7 @@ class DictionaryDialogState extends State<DictionaryDialog> {
 
   Widget showEmptyMessage() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -93,7 +120,8 @@ class DictionaryDialogState extends State<DictionaryDialog> {
           ),
           const SizedBox(height: 12),
           Text(
-            "No imported dictionaries",
+            AppLocalizations.getLocalizedValue(
+                appModel.getAppLanguage(), "no_available_dictionaries"),
             style: TextStyle(
               color: Theme.of(context).unselectedWidgetColor,
               fontSize: 20,
@@ -105,8 +133,8 @@ class DictionaryDialogState extends State<DictionaryDialog> {
   }
 
   Widget showDictionaryList() {
-    String currentDictionary = appModel.getCurrentDictionary();
-    List<String> importedDictionaries = appModel.getImportedDictionaries();
+    String currentDictionary = appModel.getCurrentDictionaryName();
+    List<String> importedDictionaries = appModel.getImportedDictionaryNames();
 
     return Scrollbar(
       controller: scrollController,
@@ -138,7 +166,7 @@ class DictionaryDialogState extends State<DictionaryDialog> {
               ],
             ),
             onTap: () async {
-              await appModel.setCurrentDictionary(dictionaryName);
+              await appModel.setCurrentDictionaryName(dictionaryName);
               if (!widget.manageAllowed) {
                 Navigator.pop(context);
               }
@@ -150,7 +178,8 @@ class DictionaryDialogState extends State<DictionaryDialog> {
   }
 
   Widget showFormatList() {
-    List<DictionaryFormat> dictionaryFormats = [];
+    List<DictionaryFormat> dictionaryFormats =
+        appModel.availableDictionaryFormats;
 
     return Scrollbar(
       controller: scrollController,

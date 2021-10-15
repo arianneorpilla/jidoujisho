@@ -1,20 +1,33 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:daijidoujisho/dictionary/dictionary.dart';
 import 'package:daijidoujisho/dictionary/dictionary_dialog.dart';
+import 'package:daijidoujisho/dictionary/dictionary_entry.dart';
 import 'package:daijidoujisho/dictionary/dictionary_format.dart';
+import 'package:daijidoujisho/dictionary/formats/yomichan_term_bank_format.dart';
+import 'package:daijidoujisho/language/app_localizations.dart';
 import 'package:daijidoujisho/language/language.dart';
+import 'package:daijidoujisho/language/language_dialog.dart';
 import 'package:daijidoujisho/language/languages/english_language.dart';
 import 'package:daijidoujisho/language/languages/japanese_language.dart';
 import 'package:daijidoujisho/media/media_type.dart';
 import 'package:daijidoujisho/media/media_types/reader_media_type.dart';
 import 'package:daijidoujisho/media/media_types/player_media_type.dart';
+import 'package:daijidoujisho/objectbox.g.dart';
 import 'package:flutter/material.dart';
+import 'package:objectbox/objectbox.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path/path.dart' as p;
 
 /// A scoped model for parameters that affect the entire application.
 /// [Provider] is used for global state management across multiple layers,
 /// especially for preferences that persist across application restarts.
 class AppModel with ChangeNotifier {
   Language _language;
+  final Map<String, Store> _dictionaryStores = {};
   final SharedPreferences _sharedPreferences;
   final PackageInfo _packageInfo;
 
@@ -31,7 +44,9 @@ class AppModel with ChangeNotifier {
         EnglishLanguage(),
       ];
 
-  List<DictionaryFormat> get availableDictionaryFormats => [];
+  List<DictionaryFormat> get availableDictionaryFormats => [
+        YomichanTermBankFormat(),
+      ];
 
   AppModel({
     required sharedPreferences,
@@ -80,51 +95,28 @@ class AppModel with ChangeNotifier {
   }
 
   /// Get the current active dictionary, the last one used.
-  String getCurrentDictionary() {
-    return _sharedPreferences.getString("currentDictionary") ?? "";
+  String getCurrentDictionaryName() {
+    return _sharedPreferences.getString("currentDictionaryName") ?? "";
   }
 
   /// Save a new active dictionary and remember it on application restart.
-  Future<void> setCurrentDictionary(String dictionaryName) async {
-    await _sharedPreferences.setString("currentDictionary", dictionaryName);
-  }
-
-  /// Get the list of all imported dictionaries.
-  List<String> getImportedDictionaries() {
-    return _sharedPreferences.getStringList('importedDictionaries') ?? [];
-  }
-
-  /// Update the persisted list of all imported dictionaries.
-  Future<void> setImportedDictionaries(List<String> customDictionaries) async {
-    await _sharedPreferences.setStringList(
-        'importedDictionaries', customDictionaries);
-  }
-
-  /// Add a new dictionary to the list of persisted imported dictionaries.
-  Future<void> addImportedDictionary(String customDictionary) async {
-    List<String> customDictionaries = getImportedDictionaries();
-    customDictionaries.add(customDictionary);
-    await setImportedDictionaries(customDictionaries);
-  }
-
-  /// Remove a new dictionary from the list of persisted imported dictionaries.
-  Future<void> removeImportedDictionary(String customDictionary) async {
-    List<String> customDictionaries = getImportedDictionaries();
-    customDictionaries.remove(customDictionary);
-    await setImportedDictionaries(customDictionaries);
+  Future<void> setCurrentDictionaryName(String dictionaryName) async {
+    await _sharedPreferences.setString("currentDictionaryName", dictionaryName);
   }
 
   /// With the list of imported dictionaries, set the next one after the
   /// current dictionary as the new current one. If the current is last, the
   /// next will be the first dictionary.
   Future<void> setNextDictionary() async {
-    List<String> allDictionaries = getImportedDictionaries();
-    int currentIndex = allDictionaries.indexOf(getCurrentDictionary());
+    List<Dictionary> allDictionaries = getDictionaryRecord();
+    int currentIndex = allDictionaries.indexWhere((dictionary) =>
+        dictionary.dictionaryName == getCurrentDictionaryName());
 
     if (currentIndex + 1 > allDictionaries.length - 1) {
-      await setCurrentDictionary(allDictionaries[0]);
+      await setCurrentDictionaryName(allDictionaries[0].dictionaryName);
     } else {
-      await setCurrentDictionary(allDictionaries[currentIndex + 1]);
+      await setCurrentDictionaryName(
+          allDictionaries[currentIndex + 1].dictionaryName);
     }
   }
 
@@ -132,13 +124,16 @@ class AppModel with ChangeNotifier {
   /// current dictionary as the new current one. If the current is first, the
   /// next will be the last dictionary.
   Future<void> setPrevDictionary() async {
-    List<String> allDictionaries = getImportedDictionaries();
-    int currentIndex = allDictionaries.indexOf(getCurrentDictionary());
+    List<Dictionary> allDictionaries = getDictionaryRecord();
+    int currentIndex = allDictionaries.indexWhere((dictionary) =>
+        dictionary.dictionaryName == getCurrentDictionaryName());
 
     if (currentIndex - 1 < 0) {
-      await setCurrentDictionary(allDictionaries[allDictionaries.length - 1]);
+      await setCurrentDictionaryName(
+          allDictionaries[allDictionaries.length - 1].dictionaryName);
     } else {
-      await setCurrentDictionary(allDictionaries[currentIndex - 1]);
+      await setCurrentDictionaryName(
+          allDictionaries[currentIndex - 1].dictionaryName);
     }
   }
 
@@ -155,13 +150,146 @@ class AppModel with ChangeNotifier {
     );
   }
 
+  /// Show the language menu.
+  Future<void> showLanguageMenu(
+    BuildContext context,
+  ) async {
+    await showDialog(
+      barrierDismissible: true,
+      context: context,
+      builder: (context) => const LanguageDialog(),
+    );
+  }
+
   /// Get the last selected dictionary format.
   String getLastDictionaryFormat() {
-    return _sharedPreferences.getString("lastDictionaryFormat") ?? "";
+    return _sharedPreferences.getString("lastDictionaryFormat") ??
+        getDictionaryFormatNames().first;
   }
 
   /// Save a new active dictionary and remember it on application restart.
   Future<void> setLastDictionaryFormat(String formatName) async {
     await _sharedPreferences.setString("lastDictionaryFormat", formatName);
+  }
+
+  Store? getDictionaryStore(String dictionaryName) {
+    return _dictionaryStores[dictionaryName];
+  }
+
+  Future<void> initialiseImportedDictionaries() async {
+    getDictionaryRecord().forEach((dictionary) {
+      initialiseImportedDictionary(dictionary.dictionaryName);
+    });
+  }
+
+  Future<Store> initialiseImportedDictionary(String dictionaryName) async {
+    String appDirDocPath = (await getApplicationDocumentsDirectory()).path;
+
+    Directory objectBoxDirDirectory = Directory(
+      p.join(appDirDocPath, "customDictionaries", dictionaryName),
+    );
+    if (!objectBoxDirDirectory.existsSync()) {
+      objectBoxDirDirectory.createSync(recursive: true);
+    }
+
+    _dictionaryStores[dictionaryName] = Store(
+      getObjectBoxModel(),
+      directory: objectBoxDirDirectory.path,
+    );
+
+    return _dictionaryStores[dictionaryName]!;
+  }
+
+  Future<void> deleteImportedDictionary(String dictionaryName) async {
+    String appDirDocPath = (await getApplicationDocumentsDirectory()).path;
+
+    Store entryStore = _dictionaryStores[dictionaryName]!;
+    Box entryBox = entryStore.box<DictionaryEntry>();
+    entryBox.removeAll();
+    entryStore.close();
+
+    Directory objectBoxDirDirectory = Directory(
+      p.join(appDirDocPath, "customDictionaries", dictionaryName),
+    );
+    objectBoxDirDirectory.deleteSync(recursive: true);
+
+    await removeDictionaryRecord(dictionaryName);
+  }
+
+  Future<void> addDictionaryRecord(Dictionary dictionary) async {
+    List<Dictionary> dictionaries = getDictionaryRecord();
+
+    dictionaries.removeWhere((existingDictionary) =>
+        existingDictionary.dictionaryName == dictionary.dictionaryName);
+    dictionaries.add(dictionary);
+
+    await setDictionaryRecord(dictionaries);
+  }
+
+  Future<void> removeDictionaryRecord(String dictionaryName) async {
+    List<Dictionary> dictionaries = getDictionaryRecord();
+
+    dictionaries.removeWhere(
+        (dictionary) => dictionaryName == dictionary.dictionaryName);
+    await setDictionaryRecord(dictionaries);
+  }
+
+  List<Dictionary> getDictionaryRecord() {
+    String jsonList = _sharedPreferences.getString("dictionaryRecord") ?? '[]';
+
+    List<dynamic> serialisedItems = (jsonDecode(jsonList) as List<dynamic>);
+
+    List<Dictionary> dictionaries = [];
+    for (var serialisedItem in serialisedItems) {
+      Dictionary dictionary = Dictionary.fromJson(serialisedItem);
+      dictionaries.add(dictionary);
+    }
+
+    return dictionaries;
+  }
+
+  Future<void> setDictionaryRecord(List<Dictionary> items) async {
+    List<String> serialisedItems = [];
+    for (Dictionary item in items) {
+      serialisedItems.add(
+        item.toJson(),
+      );
+    }
+
+    await _sharedPreferences.setString(
+      "dictionaryRecord",
+      jsonEncode(serialisedItems),
+    );
+  }
+
+  List<String> getImportedDictionaryNames() {
+    return getDictionaryRecord()
+        .map((dictionary) => dictionary.dictionaryName)
+        .toList();
+  }
+
+  List<String> getDictionaryFormatNames() {
+    return availableDictionaryFormats
+        .map((format) => format.formatName)
+        .toList();
+  }
+
+  String getTargetLanguage() {
+    return _sharedPreferences.getString("targetLanguage") ??
+        availableLanguages.first.languageName;
+  }
+
+  Future<void> setTargetLanguage(String targetLanguage) async {
+    await _sharedPreferences.setString("targetLanguage", targetLanguage);
+  }
+
+  String getAppLanguage() {
+    return _sharedPreferences.getString("appLanguage") ??
+        AppLocalizations.localizations().first;
+  }
+
+  Future<void> setAppLanguage(String appLanguage) async {
+    await _sharedPreferences.setString("appLanguage", appLanguage);
+    notifyListeners();
   }
 }

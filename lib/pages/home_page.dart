@@ -1,11 +1,8 @@
-import 'package:daijidoujisho/dictionary/dictionary_dialog.dart';
+import 'package:daijidoujisho/language/app_localizations.dart';
 import 'package:daijidoujisho/media/media_type.dart';
-import 'package:daijidoujisho/media/media_types/reader_media_type.dart';
 import 'package:daijidoujisho/models/app_model.dart';
-import 'package:daijidoujisho/pages/reader_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -60,7 +57,8 @@ class HomePageState extends State<HomePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text("jidoujisho"),
+        Text(AppLocalizations.getLocalizedValue(
+            appModel.getAppLanguage(), "app_title")),
         getVersion(),
       ],
     );
@@ -93,7 +91,7 @@ class HomePageState extends State<HomePage> {
   Widget getBottomNavigationBar() {
     List<BottomNavigationBarItem> items = [];
     for (MediaType mediaType in appModel.availableMediaTypes) {
-      items.add(mediaType.getHomeTab());
+      items.add(mediaType.getHomeTab(context));
     }
 
     return BottomNavigationBar(
@@ -152,7 +150,7 @@ class HomePageState extends State<HomePage> {
           ],
         ),
         value: action,
-        padding: const EdgeInsets.only(left: 32, top: 16, bottom: 16),
+        padding: const EdgeInsets.only(left: 16, top: 16, bottom: 16),
       );
     }
 
@@ -161,15 +159,19 @@ class HomePageState extends State<HomePage> {
       position: RelativeRect.fromLTRB(left, top, 0, 0),
       items: [
         menuItem(
-          label:
-              appModel.getIsDarkMode() ? 'Use light theme' : 'Use dark theme',
+          label: appModel.getIsDarkMode()
+              ? AppLocalizations.getLocalizedValue(
+                  appModel.getAppLanguage(), "options_theme_light")
+              : AppLocalizations.getLocalizedValue(
+                  appModel.getAppLanguage(), "options_theme_dark"),
           icon: appModel.getIsDarkMode() ? Icons.light_mode : Icons.dark_mode,
           action: () async {
             await appModel.toggleActiveTheme();
           },
         ),
         menuItem(
-          label: 'Manage dictionaries',
+          label: AppLocalizations.getLocalizedValue(
+              appModel.getAppLanguage(), "options_dictionaries"),
           icon: Icons.auto_stories,
           action: () async {
             await appModel.showDictionaryMenu(
@@ -179,32 +181,28 @@ class HomePageState extends State<HomePage> {
           },
         ),
         menuItem(
-          label: 'Language settings',
+          label: AppLocalizations.getLocalizedValue(
+              appModel.getAppLanguage(), "options_language"),
           icon: Icons.translate,
-          action: () async {},
+          action: () async {
+            await appModel.showLanguageMenu(
+              context,
+            );
+          },
         ),
         menuItem(
-          label: 'View repository on GitHub',
+          label: AppLocalizations.getLocalizedValue(
+              appModel.getAppLanguage(), "options_github"),
           icon: Icons.code,
           action: () async {
             await launch("https://github.com/lrorpilla/jidoujisho");
           },
         ),
         menuItem(
-          label: 'Licenses and attribution',
+          label: AppLocalizations.getLocalizedValue(
+              appModel.getAppLanguage(), "options_licenses"),
           icon: Icons.info,
           action: () async {
-            const String legalese = "A mobile video player, reader assistant, "
-                "image mining workflow and card creation toolkit tailored for "
-                "language learners.\n\nBuilt for the Japanese language "
-                "learning community by Leo Rafael Orpilla. Pitch accent "
-                "patterns from Kanjium. Reader WebView linked to ッツ "
-                "Ebook Reader. Video streaming via YouTube. Image search via "
-                "Bing. Logo by Aaron Marbella.\n\njidoujisho is free and open "
-                "source software. Liking the application? Help out by "
-                "providing feedback, making a donation, reporting issues or "
-                "collaborating for further improvements on GitHub.";
-
             Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (context) => Theme(
@@ -213,18 +211,20 @@ class HomePageState extends State<HomePage> {
                         appModel.getIsDarkMode() ? Colors.black : Colors.white,
                   ),
                   child: LicensePage(
-                    applicationName: "jidoujisho",
-                    applicationVersion: appModel.packageInfo.version,
-                    applicationIcon: const Padding(
-                      padding: EdgeInsets.only(top: 8, bottom: 8),
-                      child: Image(
-                        image: AssetImage("assets/icon/icon.png"),
-                        height: 48,
-                        width: 48,
+                      applicationName: AppLocalizations.getLocalizedValue(
+                          appModel.getAppLanguage(), "app_title"),
+                      applicationVersion: appModel.packageInfo.version,
+                      applicationIcon: const Padding(
+                        padding: EdgeInsets.only(top: 8, bottom: 8),
+                        child: Image(
+                          image: AssetImage("assets/icon/icon.png"),
+                          height: 48,
+                          width: 48,
+                        ),
                       ),
-                    ),
-                    applicationLegalese: legalese,
-                  ),
+                      applicationLegalese: AppLocalizations.getLocalizedValue(
+                          appModel.getAppLanguage(),
+                          "license_screen_legalese")),
                 ),
               ),
             );
