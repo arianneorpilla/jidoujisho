@@ -1,4 +1,4 @@
-import 'package:daijidoujisho/media/media_history_item.dart';
+import 'package:chisachan/media/media_history_item.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class MediaHistory {

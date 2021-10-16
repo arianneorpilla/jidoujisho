@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:daijidoujisho/dictionary/dictionary_utils.dart';
+import 'package:chisachan/dictionary/dictionary_utils.dart';
 import 'package:flutter/material.dart';
 
-import 'package:daijidoujisho/dictionary/dictionary_entry.dart';
-import 'package:daijidoujisho/dictionary/dictionary_search_results.dart';
+import 'package:chisachan/dictionary/dictionary_entry.dart';
+import 'package:chisachan/dictionary/dictionary_search_results.dart';
 
 abstract class DictionaryFormat {
   DictionaryFormat({
@@ -14,7 +14,6 @@ abstract class DictionaryFormat {
     required this.getDictionaryName,
     required this.getDictionaryEntries,
     required this.getDictionaryMetadata,
-    this.formatIcon = Icons.archive,
   });
 
   /// The name of this dictionary format. For example, this could be a

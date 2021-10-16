@@ -2,11 +2,11 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
-import 'package:daijidoujisho/dictionary/dictionary.dart';
-import 'package:daijidoujisho/dictionary/dictionary_entry.dart';
-import 'package:daijidoujisho/dictionary/dictionary_format.dart';
-import 'package:daijidoujisho/models/app_model.dart';
-import 'package:daijidoujisho/objectbox.g.dart';
+import 'package:chisachan/dictionary/dictionary.dart';
+import 'package:chisachan/dictionary/dictionary_entry.dart';
+import 'package:chisachan/dictionary/dictionary_format.dart';
+import 'package:chisachan/models/app_model.dart';
+import 'package:chisachan/objectbox.g.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

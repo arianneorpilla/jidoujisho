@@ -4,8 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
-import 'package:daijidoujisho/models/app_model.dart';
-import 'package:daijidoujisho/pages/home_page.dart';
+import 'package:chisachan/models/app_model.dart';
+import 'package:chisachan/pages/home_page.dart';
 
 /// Application execution starts here.
 void main() async {

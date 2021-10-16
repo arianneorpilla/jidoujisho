@@ -3,7 +3,7 @@ class AppLocalizations {
 
   static const _localizedValues = <String, Map<String, String>>{
     'English': {
-      'app_title': 'jidoujisho',
+      'app_title': 'chisachan',
       'target_language': 'Target language',
       'app_language': 'App language',
       'player_media_type': 'Player',
@@ -23,13 +23,13 @@ class AppLocalizations {
       'license_screen_legalese': "A mobile video player, reader assistant, "
           "image mining workflow and card creation toolkit tailored for "
           "language learners.\n\nBuilt for the language learning community "
-          "by Leo Rafael Orpilla. Logo by Aaron Marbella.\n\njidoujisho is "
+          "by Leo Rafael Orpilla. Logo by Aaron Marbella.\n\nchisachan is "
           "free and open source software. Liking the application? Help out "
           "by providing feedback, making a donation, reporting issues or "
           "collaborating for further improvements on GitHub.",
     },
     'Tagalog': {
-      'app_title': 'jidoujisho',
+      'app_title': 'chisachan',
       'target_language': 'Wika na pakay',
       'app_language': 'Wika ng aplikasyon',
       'player_media_type': 'Manood',

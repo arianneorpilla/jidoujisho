@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:daijidoujisho/media/media_history.dart';
-import 'package:daijidoujisho/media/media_history_item.dart';
-import 'package:daijidoujisho/media/history_items/default_media_history_item.dart';
+import 'package:chisachan/media/media_history.dart';
+import 'package:chisachan/media/media_history_item.dart';
+import 'package:chisachan/media/history_items/default_media_history_item.dart';
 
 class DefaultMediaHistory extends MediaHistory {
   DefaultMediaHistory({

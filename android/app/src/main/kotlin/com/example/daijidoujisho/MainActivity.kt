@@ -1,4 +1,4 @@
-package com.example.daijidoujisho
+package com.lrorpilla.chisachan
 
 import io.flutter.embedding.android.FlutterActivity
 

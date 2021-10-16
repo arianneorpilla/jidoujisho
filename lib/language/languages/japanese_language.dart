@@ -1,5 +1,5 @@
-import 'package:daijidoujisho/util/reading_direction.dart';
-import 'package:daijidoujisho/language/language.dart';
+import 'package:chisachan/util/reading_direction.dart';
+import 'package:chisachan/language/language.dart';
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:ve_dart/ve_dart.dart';
 

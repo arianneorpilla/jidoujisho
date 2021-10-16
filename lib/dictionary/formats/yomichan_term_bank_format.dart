@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:daijidoujisho/dictionary/dictionary_entry.dart';
-import 'package:daijidoujisho/dictionary/dictionary_format.dart';
-import 'package:daijidoujisho/dictionary/dictionary_utils.dart';
-import 'package:daijidoujisho/dictionary/dictionary_search_results.dart';
+import 'package:chisachan/dictionary/dictionary_entry.dart';
+import 'package:chisachan/dictionary/dictionary_format.dart';
+import 'package:chisachan/dictionary/dictionary_utils.dart';
+import 'package:chisachan/dictionary/dictionary_search_results.dart';
 import 'package:flutter_archive/flutter_archive.dart';
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as p;

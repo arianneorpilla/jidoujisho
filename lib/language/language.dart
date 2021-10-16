@@ -1,4 +1,4 @@
-import 'package:daijidoujisho/util/reading_direction.dart';
+import 'package:chisachan/util/reading_direction.dart';
 
 abstract class Language {
   Language({

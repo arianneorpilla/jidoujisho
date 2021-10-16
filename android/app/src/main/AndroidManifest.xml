@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.daijidoujisho">
+    package="com.lrorpilla.chisachan">
   <uses-permission android:name="android.permission.INTERNET"/>
    <application
-        android:label="daijidoujisho"
+        android:label="chisachan"
         android:icon="@mipmap/launcher_icon">
         <activity
             android:name=".MainActivity"

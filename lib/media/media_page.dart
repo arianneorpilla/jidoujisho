@@ -1,4 +1,4 @@
-import 'package:daijidoujisho/media/media_type.dart';
+import 'package:chisachan/media/media_type.dart';
 import 'package:flutter/material.dart';
 
 abstract class MediaPage extends StatefulWidget {

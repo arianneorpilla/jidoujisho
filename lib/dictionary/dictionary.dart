@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:daijidoujisho/dictionary/dictionary_entry.dart';
+import 'package:chisachan/dictionary/dictionary_entry.dart';
 
 class Dictionary {
   Dictionary({

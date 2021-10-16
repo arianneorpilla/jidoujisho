@@ -1,9 +1,9 @@
-import 'package:daijidoujisho/dictionary/dictionary.dart';
-import 'package:daijidoujisho/dictionary/dictionary_format.dart';
-import 'package:daijidoujisho/dictionary/dictionary_utils.dart';
-import 'package:daijidoujisho/language/app_localizations.dart';
-import 'package:daijidoujisho/models/app_model.dart';
-import 'package:daijidoujisho/util/drop_down_menu.dart';
+import 'package:chisachan/dictionary/dictionary.dart';
+import 'package:chisachan/dictionary/dictionary_format.dart';
+import 'package:chisachan/dictionary/dictionary_utils.dart';
+import 'package:chisachan/language/app_localizations.dart';
+import 'package:chisachan/models/app_model.dart';
+import 'package:chisachan/util/drop_down_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
