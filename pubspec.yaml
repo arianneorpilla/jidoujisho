@@ -57,6 +57,7 @@ dependencies:
   flutter_image_compress: ^1.1.0
   objectbox: ^1.2.0
   objectbox_flutter_libs: any
+  progress_indicators: ^1.0.0
 
 dev_dependencies:
   flutter_test:

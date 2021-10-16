@@ -1,11 +1,13 @@
+import 'package:chisa/util/center_icon_message.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'package:chisa/dictionary/dictionary.dart';
 import 'package:chisa/dictionary/dictionary_format.dart';
 import 'package:chisa/dictionary/dictionary_utils.dart';
 import 'package:chisa/language/app_localizations.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/util/drop_down_menu.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class DictionaryDialog extends StatefulWidget {
   const DictionaryDialog({
@@ -27,7 +29,8 @@ class DictionaryDialogState extends State<DictionaryDialog> {
   @override
   Widget build(BuildContext context) {
     appModel = Provider.of<AppModel>(context);
-    DictionaryFormat lastDictionaryFormat = appModel.getLastDictionaryFormat();
+    DictionaryFormat lastDictionaryFormat = appModel
+        .getDictionaryFormatFromName(appModel.getLastDictionaryFormatName());
 
     return AlertDialog(
       contentPadding:
@@ -36,35 +39,49 @@ class DictionaryDialogState extends State<DictionaryDialog> {
         borderRadius: BorderRadius.zero,
       ),
       content: buildContent(),
-      actions: <Widget>[
-        TextButton(
-          child: Text(
-            AppLocalizations.getLocalizedValue(
-                appModel.getAppLanguage(), "dialog_import"),
-          ),
-          onPressed: () async {
-            await dictionaryFileImport(context, appModel, lastDictionaryFormat);
-            //await dictionaryImport(context);
-            setState(() {});
-          },
-        ),
-        TextButton(
-          child: Text(
-            AppLocalizations.getLocalizedValue(
-                appModel.getAppLanguage(), "dialog_close"),
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ],
+      actions: (widget.manageAllowed)
+          ? <Widget>[
+              if (appModel.getDictionaryRecord().isNotEmpty)
+                TextButton(
+                  child: Text(
+                    AppLocalizations.getLocalizedValue(
+                        appModel.getAppLanguageName(), "dialog_delete"),
+                    style: TextStyle(
+                      color: Theme.of(context).focusColor,
+                    ),
+                  ),
+                  onPressed: () async {
+                    showDictionaryDeleteDialog(context);
+                  },
+                ),
+              TextButton(
+                child: Text(
+                  AppLocalizations.getLocalizedValue(
+                      appModel.getAppLanguageName(), "dialog_import"),
+                ),
+                onPressed: () async {
+                  await dictionaryFileImport(
+                      context, appModel, lastDictionaryFormat);
+                  //await dictionaryImport(context);
+                  setState(() {});
+                },
+              ),
+              TextButton(
+                child: Text(
+                  AppLocalizations.getLocalizedValue(
+                      appModel.getAppLanguageName(), "dialog_close"),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ]
+          : [],
     );
   }
 
   Widget buildContent() {
     List<String> importedDictionaries = appModel.getImportedDictionaryNames();
-    List<String> options = appModel.getDictionaryFormatNames();
-    String initialOption = appModel.getLastDictionaryFormatName();
 
     return SizedBox(
       width: double.maxFinite,
@@ -74,64 +91,64 @@ class DictionaryDialogState extends State<DictionaryDialog> {
           importedDictionaries.isEmpty
               ? showEmptyMessage()
               : showDictionaryList(),
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 8),
-            height: 1.0,
-            decoration: const BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: Color(0xFFBDBDBD),
-                  width: 0.0,
-                ),
-              ),
-            ),
-          ),
-          Container(
-            alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.only(left: 8),
-            child: Text(
-              AppLocalizations.getLocalizedValue(
-                  appModel.getAppLanguage(), "import_format"),
-              style: TextStyle(
-                fontSize: 10,
-                color: Theme.of(context).unselectedWidgetColor,
-              ),
-            ),
-          ),
-          DropDownMenu(
-            options: options,
-            initialOption: initialOption,
-            optionCallback: appModel.setLastDictionaryFormatName,
-            voidCallback: () {
-              setState(() {});
-            },
-          ),
+          if (widget.manageAllowed) showFormatSelection(),
         ],
       ),
+    );
+  }
+
+  Widget showFormatSelection() {
+    List<String> options = appModel.getDictionaryFormatNames();
+    String initialOption = appModel.getLastDictionaryFormatName();
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          height: 1.0,
+          decoration: const BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: Color(0xFFBDBDBD),
+                width: 0.0,
+              ),
+            ),
+          ),
+        ),
+        Container(
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.only(left: 8),
+          child: Text(
+            AppLocalizations.getLocalizedValue(
+                appModel.getAppLanguageName(), "import_format"),
+            style: TextStyle(
+              fontSize: 10,
+              color: Theme.of(context).unselectedWidgetColor,
+            ),
+          ),
+        ),
+        DropDownMenu(
+          options: options,
+          initialOption: initialOption,
+          optionCallback: appModel.setLastDictionaryFormatName,
+          voidCallback: () {
+            setState(() {});
+          },
+        ),
+      ],
     );
   }
 
   Widget showEmptyMessage() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.auto_stories,
-            size: 36,
-            color: Theme.of(context).unselectedWidgetColor,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            AppLocalizations.getLocalizedValue(
-                appModel.getAppLanguage(), "no_available_dictionaries"),
-            style: TextStyle(
-              color: Theme.of(context).unselectedWidgetColor,
-              fontSize: 20,
-            ),
-          ),
-        ],
+      child: showCenterIconMessage(
+        context: context,
+        label: AppLocalizations.getLocalizedValue(
+            appModel.getAppLanguageName(), "import_dictionaries_for_use"),
+        icon: Icons.auto_stories,
+        jumpingDots: false,
       ),
     );
   }
@@ -176,10 +193,50 @@ class DictionaryDialogState extends State<DictionaryDialog> {
               if (!widget.manageAllowed) {
                 Navigator.pop(context);
               }
+              setState(() {});
             },
           );
         },
       ),
+    );
+  }
+
+  void showDictionaryDeleteDialog(BuildContext context) {
+    Widget alertDialog = AlertDialog(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+      title: Text(appModel.getCurrentDictionaryName()),
+      content: Text(
+        AppLocalizations.getLocalizedValue(
+            appModel.getAppLanguageName(), "delete_dictionary_confirmation"),
+      ),
+      actions: <Widget>[
+        TextButton(
+            child: Text(
+              AppLocalizations.getLocalizedValue(
+                  appModel.getAppLanguageName(), "dialog_yes"),
+              style: TextStyle(
+                color: Theme.of(context).focusColor,
+              ),
+            ),
+            onPressed: () async {
+              await appModel.deleteCurrentDictionary();
+              Navigator.pop(context);
+              setState(() {});
+            }),
+        TextButton(
+            child: Text(
+              AppLocalizations.getLocalizedValue(
+                  appModel.getAppLanguageName(), "dialog_no"),
+            ),
+            onPressed: () => Navigator.pop(context)),
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) => alertDialog,
     );
   }
 }

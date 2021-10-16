@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:chisa/language/app_localizations.dart';
+import 'package:chisa/media/histories/default_media_history.dart';
+import 'package:chisa/media/media_history.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:flutter/material.dart';
 import 'package:mime/mime.dart';
@@ -13,6 +15,7 @@ class PlayerMediaType extends MediaType {
   PlayerMediaType()
       : super(
           mediaTypeName: "Player",
+          mediaTypeIcon: Icons.video_library,
         );
 
   @override
@@ -22,7 +25,7 @@ class PlayerMediaType extends MediaType {
 
   @override
   Widget getHomeBody(BuildContext context) {
-    return Container(color: Colors.red);
+    return Container();
   }
 
   @override
@@ -30,8 +33,8 @@ class PlayerMediaType extends MediaType {
     AppModel appModel = Provider.of<AppModel>(context);
     return BottomNavigationBarItem(
       label: AppLocalizations.getLocalizedValue(
-          appModel.getAppLanguage(), "player_media_type"),
-      icon: const Icon(Icons.video_library),
+          appModel.getAppLanguageName(), "player_media_type"),
+      icon: Icon(mediaTypeIcon),
     );
   }
 
@@ -64,5 +67,14 @@ class PlayerMediaType extends MediaType {
   @override
   void launchMediaPageFromUri(BuildContext context, Uri uri) {
     // TODO: implement launchMediaPageFromUri
+  }
+
+  @override
+  MediaHistory getMediaHistory(BuildContext context) {
+    AppModel appModel = Provider.of<AppModel>(context);
+    return DefaultMediaHistory(
+      sharedPreferences: appModel.sharedPreferences,
+      prefsDirectory: mediaTypeName,
+    );
   }
 }

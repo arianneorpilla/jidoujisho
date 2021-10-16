@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:objectbox/objectbox.dart';
 
 @Entity()
@@ -30,4 +32,31 @@ class DictionaryEntry {
 
   /// The popularity index of the dictionary entry for sorting purposes.
   late double popularity;
+
+  /// Get a serialised representation of the dictionary result for history
+  /// and persistence purposes.
+  String toJson() {
+    Map<String, dynamic> map = {
+      "headword": headword,
+      "reading": reading,
+      "meaning": meaning,
+      "extra": extra,
+      "popularity": popularity,
+    };
+
+    return jsonEncode(map);
+  }
+
+  /// Deserialise JSON and get a result from history as a result item.
+  factory DictionaryEntry.fromJson(String json) {
+    Map<String, dynamic> map = jsonDecode(json);
+
+    return DictionaryEntry(
+      headword: map["headword"],
+      reading: map["reading"],
+      meaning: map["meaning"],
+      extra: map["extra"],
+      popularity: map["popularity"],
+    );
+  }
 }

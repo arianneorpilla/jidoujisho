@@ -6,18 +6,18 @@ import 'package:chisa/media/history_items/default_media_history_item.dart';
 
 class DefaultMediaHistory extends MediaHistory {
   DefaultMediaHistory({
-    prefsDirectory,
-    maxItemCount,
-    sharedPreferences,
+    required sharedPreferences,
+    required prefsDirectory,
+    maxItemCount = 50,
   }) : super(
+          sharedPreferences,
           prefsDirectory,
           maxItemCount,
-          sharedPreferences,
         );
 
   @override
-  Future<void> addMediaHistoryItem(MediaHistoryItem item) async {
-    List<MediaHistoryItem> history = getMediaHistory();
+  Future<void> addItem(MediaHistoryItem item) async {
+    List<MediaHistoryItem> history = getItems();
 
     history.removeWhere((historyItem) => item.uri == historyItem.uri);
     history.add(item);
@@ -26,19 +26,19 @@ class DefaultMediaHistory extends MediaHistory {
       history = history.sublist(history.length - maxItemCount);
     }
 
-    await setMediaHistory(history);
+    await setItems(history);
   }
 
   @override
-  Future<void> removeMediaHistoryItem(Uri uri) async {
-    List<MediaHistoryItem> history = getMediaHistory();
+  Future<void> removeItem(Uri uri) async {
+    List<MediaHistoryItem> history = getItems();
 
     history.removeWhere((historyItem) => uri == historyItem.uri);
-    await setMediaHistory(history);
+    await setItems(history);
   }
 
   @override
-  List<MediaHistoryItem> getMediaHistory() {
+  List<MediaHistoryItem> getItems() {
     String jsonList = sharedPreferences.getString(prefsDirectory) ?? '[]';
 
     List<dynamic> serialisedItems = (jsonDecode(jsonList) as List<dynamic>);
@@ -54,7 +54,7 @@ class DefaultMediaHistory extends MediaHistory {
   }
 
   @override
-  Future<void> setMediaHistory(List<MediaHistoryItem> items) async {
+  Future<void> setItems(List<MediaHistoryItem> items) async {
     List<String> serialisedItems = [];
     for (MediaHistoryItem item in items) {
       serialisedItems.add(

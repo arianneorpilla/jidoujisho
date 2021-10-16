@@ -3,9 +3,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class MediaHistory {
   MediaHistory(
+    this.sharedPreferences,
     this.prefsDirectory,
     this.maxItemCount,
-    this.sharedPreferences,
   );
 
   /// A directory name for where this media's history should be stored in
@@ -24,18 +24,18 @@ abstract class MediaHistory {
   ///
   /// If a [MediaHistoryItem] with a conflicting [Uri] exists, delete the
   /// existing item and push the new item to the latest end of history.
-  Future<void> addMediaHistoryItem(MediaHistoryItem item);
+  Future<void> addItem(MediaHistoryItem item);
 
   /// Remove a given media history item with a given Uri. If the Uri does
   /// not exist, do nothing.
-  Future<void> removeMediaHistoryItem(Uri uri);
+  Future<void> removeItem(Uri uri);
 
   /// Given a list of [MediaHistoryItem], serialise all with [toJson] and
   /// update the appropriate [prefsDirectory] in [SharedPreferences] with
   /// the serialised list of [MediaHistoryItem] in JSON format.
-  void setMediaHistory(List<MediaHistoryItem> items);
+  void setItems(List<MediaHistoryItem> items);
 
   /// Get the serialised history in [prefsDirectory] of [SharedPreferences]
   /// and deserialise each [MediaHistoryItem] and return the list.
-  List<MediaHistoryItem> getMediaHistory();
+  List<MediaHistoryItem> getItems();
 }

@@ -33,7 +33,7 @@ class LanguageDialogState extends State<LanguageDialog> {
         TextButton(
           child: Text(
             AppLocalizations.getLocalizedValue(
-                appModel.getAppLanguage(), "dialog_close"),
+                appModel.getAppLanguageName(), "dialog_close"),
           ),
           onPressed: () {
             Navigator.pop(context);
@@ -54,7 +54,7 @@ class LanguageDialogState extends State<LanguageDialog> {
             padding: const EdgeInsets.only(left: 8),
             child: Text(
               AppLocalizations.getLocalizedValue(
-                  appModel.getAppLanguage(), "target_language"),
+                  appModel.getAppLanguageName(), "target_language"),
               style: TextStyle(
                 fontSize: 10,
                 color: Theme.of(context).unselectedWidgetColor,
@@ -65,8 +65,8 @@ class LanguageDialogState extends State<LanguageDialog> {
             options: appModel.availableLanguages
                 .map((language) => language.languageName)
                 .toList(),
-            initialOption: appModel.getTargetLanguage(),
-            optionCallback: appModel.setTargetLanguage,
+            initialOption: appModel.getTargetLanguageName(),
+            optionCallback: appModel.setTargetLanguageName,
             voidCallback: () {
               setState(() {});
             },
@@ -76,7 +76,7 @@ class LanguageDialogState extends State<LanguageDialog> {
             padding: const EdgeInsets.only(left: 8),
             child: Text(
               AppLocalizations.getLocalizedValue(
-                  appModel.getAppLanguage(), "app_language"),
+                  appModel.getAppLanguageName(), "app_language"),
               style: TextStyle(
                 fontSize: 10,
                 color: Theme.of(context).unselectedWidgetColor,
@@ -85,8 +85,8 @@ class LanguageDialogState extends State<LanguageDialog> {
           ),
           DropDownMenu(
             options: AppLocalizations.localizations(),
-            initialOption: appModel.getAppLanguage(),
-            optionCallback: appModel.setAppLanguage,
+            initialOption: appModel.getAppLanguageName(),
+            optionCallback: appModel.setAppLanguageName,
             voidCallback: () {
               setState(() {});
             },

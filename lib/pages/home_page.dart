@@ -24,6 +24,7 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     appModel = Provider.of<AppModel>(context);
+    appModel.initialiseImportedDictionaries();
 
     selectedTabIndex = appModel.getLastActiveTabIndex();
     mediaType = appModel.availableMediaTypes[selectedTabIndex];
@@ -57,8 +58,10 @@ class HomePageState extends State<HomePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(AppLocalizations.getLocalizedValue(
-            appModel.getAppLanguage(), "app_title")),
+        Text(
+          AppLocalizations.getLocalizedValue(
+              appModel.getAppLanguageName(), "app_title"),
+        ),
         getVersion(),
       ],
     );
@@ -69,8 +72,8 @@ class HomePageState extends State<HomePage> {
     return Text(
       " $version preview",
       style: const TextStyle(
-        fontWeight: FontWeight.w200,
-        fontSize: 11,
+        fontWeight: FontWeight.w300,
+        fontSize: 12,
       ),
       overflow: TextOverflow.fade,
     );
@@ -95,6 +98,7 @@ class HomePageState extends State<HomePage> {
     }
 
     return BottomNavigationBar(
+      elevation: 0,
       items: items,
       type: BottomNavigationBarType.fixed,
       currentIndex: selectedTabIndex,
@@ -161,9 +165,9 @@ class HomePageState extends State<HomePage> {
         menuItem(
           label: appModel.getIsDarkMode()
               ? AppLocalizations.getLocalizedValue(
-                  appModel.getAppLanguage(), "options_theme_light")
+                  appModel.getAppLanguageName(), "options_theme_light")
               : AppLocalizations.getLocalizedValue(
-                  appModel.getAppLanguage(), "options_theme_dark"),
+                  appModel.getAppLanguageName(), "options_theme_dark"),
           icon: appModel.getIsDarkMode() ? Icons.light_mode : Icons.dark_mode,
           action: () async {
             await appModel.toggleActiveTheme();
@@ -171,7 +175,7 @@ class HomePageState extends State<HomePage> {
         ),
         menuItem(
           label: AppLocalizations.getLocalizedValue(
-              appModel.getAppLanguage(), "options_dictionaries"),
+              appModel.getAppLanguageName(), "options_dictionaries"),
           icon: Icons.auto_stories,
           action: () async {
             await appModel.showDictionaryMenu(
@@ -182,7 +186,7 @@ class HomePageState extends State<HomePage> {
         ),
         menuItem(
           label: AppLocalizations.getLocalizedValue(
-              appModel.getAppLanguage(), "options_language"),
+              appModel.getAppLanguageName(), "options_language"),
           icon: Icons.translate,
           action: () async {
             await appModel.showLanguageMenu(
@@ -192,7 +196,7 @@ class HomePageState extends State<HomePage> {
         ),
         menuItem(
           label: AppLocalizations.getLocalizedValue(
-              appModel.getAppLanguage(), "options_github"),
+              appModel.getAppLanguageName(), "options_github"),
           icon: Icons.code,
           action: () async {
             await launch("https://github.com/lrorpilla/jidoujisho");
@@ -200,7 +204,7 @@ class HomePageState extends State<HomePage> {
         ),
         menuItem(
           label: AppLocalizations.getLocalizedValue(
-              appModel.getAppLanguage(), "options_licenses"),
+              appModel.getAppLanguageName(), "options_licenses"),
           icon: Icons.info,
           action: () async {
             Navigator.of(context).push(
@@ -212,7 +216,7 @@ class HomePageState extends State<HomePage> {
                   ),
                   child: LicensePage(
                       applicationName: AppLocalizations.getLocalizedValue(
-                          appModel.getAppLanguage(), "app_title"),
+                          appModel.getAppLanguageName(), "app_title"),
                       applicationVersion: appModel.packageInfo.version,
                       applicationIcon: const Padding(
                         padding: EdgeInsets.only(top: 8, bottom: 8),
@@ -223,7 +227,7 @@ class HomePageState extends State<HomePage> {
                         ),
                       ),
                       applicationLegalese: AppLocalizations.getLocalizedValue(
-                          appModel.getAppLanguage(),
+                          appModel.getAppLanguageName(),
                           "license_screen_legalese")),
                 ),
               ),

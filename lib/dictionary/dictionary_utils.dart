@@ -5,6 +5,8 @@ import 'dart:typed_data';
 import 'package:chisa/dictionary/dictionary.dart';
 import 'package:chisa/dictionary/dictionary_entry.dart';
 import 'package:chisa/dictionary/dictionary_format.dart';
+import 'package:chisa/dictionary/dictionary_search_results.dart';
+import 'package:chisa/language/app_localizations.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/objectbox.g.dart';
 import 'package:file_picker/file_picker.dart';
@@ -13,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:objectbox/objectbox.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:provider/provider.dart';
 
 Future<void> dictionaryFileImport(
   BuildContext context,
@@ -52,7 +55,7 @@ Future<void> dictionaryFileImport(
     barrierDismissible: false,
     context: context,
     builder: (context) {
-      return showProgressDialog(progressNotifier);
+      return showProgressDialog(context, progressNotifier);
     },
   );
 
@@ -166,8 +169,8 @@ Future<void> dictionaryFileImport(
     workingDirectory.deleteSync(recursive: true);
   }
 
-  await Future.delayed(const Duration(seconds: 1), () {});
   importMessageComplete(progressNotifier);
+  await Future.delayed(const Duration(seconds: 1), () {});
 
   await appModel.addDictionaryRecord(
     Dictionary(
@@ -201,7 +204,10 @@ Future<void> depositEntriesToDatabase(ImportDatabaseParams params) async {
   entryBox.putMany(params.dictionaryEntries);
 }
 
-Widget showProgressDialog(ValueNotifier<String> progressNotifier) {
+Widget showProgressDialog(
+    BuildContext context, ValueNotifier<String> progressNotifier) {
+  AppModel appModel = Provider.of<AppModel>(context);
+
   return AlertDialog(
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.zero,
@@ -216,60 +222,38 @@ Widget showProgressDialog(ValueNotifier<String> progressNotifier) {
         ),
         const SizedBox(width: 20),
         Flexible(
-            child: ValueListenableBuilder(
-          valueListenable: progressNotifier,
-          builder: (context, progressNotification, _) {
-            return Text(
-              progressNotifier.value,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            );
-          },
-        )),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 0.7),
+                child: Text(
+                  AppLocalizations.getLocalizedValue(
+                      appModel.getAppLanguageName(), "import_in_progress"),
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Theme.of(context).unselectedWidgetColor,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              ValueListenableBuilder(
+                valueListenable: progressNotifier,
+                builder: (context, progressNotification, _) {
+                  return Text(
+                    progressNotifier.value,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
       ],
     ),
   );
-}
-
-/// These duplicate functions are necessary for later localisation.
-void importMessageStart(ValueNotifier<String> progressNotifier) {
-  progressNotifier.value = "Importing dictionary...";
-}
-
-void importMessageClean(ValueNotifier<String> progressNotifier) {
-  progressNotifier.value = "Clearing working space...";
-}
-
-void importMessageExtraction(ValueNotifier<String> progressNotifier) {
-  progressNotifier.value = "Extracting files...";
-}
-
-void importMessageName(ValueNotifier<String> progressNotifier, String name) {
-  progressNotifier.value = "Importing as 『$name』...";
-}
-
-void importMessageEntries(ValueNotifier<String> progressNotifier) {
-  progressNotifier.value = "Processing entries...";
-}
-
-void importMessageMetadata(ValueNotifier<String> progressNotifier) {
-  progressNotifier.value = "Processing metadata...";
-}
-
-void importMessageDatabase(ValueNotifier<String> progressNotifier) {
-  progressNotifier.value = "Adding entries to database...";
-}
-
-void importMessageComplete(ValueNotifier<String> progressNotifier) {
-  progressNotifier.value = "Dictionary import complete.";
-}
-
-void importMessageError(ValueNotifier<String> progressNotifier, String error) {
-  progressNotifier.value = "Import error: $error";
-}
-
-void importMessageFailed(ValueNotifier<String> progressNotifier) {
-  progressNotifier.value = "Dictionary import failed.";
 }
 
 /// For working area step isolate. See [prepareWorkingDirectory].
@@ -327,4 +311,113 @@ class ImportDatabaseParams {
   final List<DictionaryEntry> dictionaryEntries;
   final SendPort sendPort;
   final ByteData storeReference;
+}
+
+/// These duplicate functions are necessary for later localisation.
+void importMessageStart(ValueNotifier<String> progressNotifier) {
+  progressNotifier.value = "Importing dictionary...";
+}
+
+void importMessageClean(ValueNotifier<String> progressNotifier) {
+  progressNotifier.value = "Clearing working space...";
+}
+
+void importMessageExtraction(ValueNotifier<String> progressNotifier) {
+  progressNotifier.value = "Extracting files...";
+}
+
+void importMessageName(ValueNotifier<String> progressNotifier, String name) {
+  progressNotifier.value = "Importing as 『$name』...";
+}
+
+void importMessageEntries(ValueNotifier<String> progressNotifier) {
+  progressNotifier.value = "Processing entries...";
+}
+
+void importMessageMetadata(ValueNotifier<String> progressNotifier) {
+  progressNotifier.value = "Processing metadata...";
+}
+
+void importMessageDatabase(ValueNotifier<String> progressNotifier) {
+  progressNotifier.value = "Adding entries to database...";
+}
+
+void importMessageComplete(ValueNotifier<String> progressNotifier) {
+  progressNotifier.value = "Dictionary import complete.";
+}
+
+void importMessageError(ValueNotifier<String> progressNotifier, String error) {
+  progressNotifier.value = "Import error: $error";
+}
+
+void importMessageFailed(ValueNotifier<String> progressNotifier) {
+  progressNotifier.value = "Dictionary import failed.";
+}
+
+Future<DictionarySearchResult> searchDatabase(
+  DictionarySearchResult unprocessedResult,
+) async {
+  String originalTerm = unprocessedResult.originalSearchTerm;
+  String fallbackTerm = unprocessedResult.fallbackSearchTerm;
+  ByteData storeReference = unprocessedResult.storeReference!;
+  Store store = Store.fromReference(getObjectBoxModel(), storeReference);
+  Box box = store.box<DictionaryEntry>();
+
+  QueryBuilder exactWordMatch =
+      box.query(DictionaryEntry_.headword.equals(originalTerm));
+  Query exactWordQuery = exactWordMatch.build();
+
+  Query limitedWordQuery = exactWordQuery..limit = 20;
+  unprocessedResult.results
+      .addAll(limitedWordQuery.find() as List<DictionaryEntry>);
+
+  QueryBuilder exactReadingMatch =
+      box.query(DictionaryEntry_.reading.equals(originalTerm));
+  Query exactReadingQuery = exactReadingMatch.build();
+
+  Query limitedReadingQuery = exactReadingQuery..limit = 20;
+  List<DictionaryEntry> readingMatchQueries =
+      limitedReadingQuery.find() as List<DictionaryEntry>;
+  unprocessedResult.results.addAll(readingMatchQueries);
+
+  if (unprocessedResult.results.isEmpty) {
+    QueryBuilder fallbackMixMatch = box.query(
+        DictionaryEntry_.headword.equals(fallbackTerm) |
+            DictionaryEntry_.reading.equals(fallbackTerm) |
+            DictionaryEntry_.headword.startsWith(originalTerm) |
+            DictionaryEntry_.reading.startsWith(originalTerm))
+      ..order(DictionaryEntry_.popularity, flags: Order.descending);
+    Query fallbackMixQuery = fallbackMixMatch.build();
+
+    Query fallbackLimitedQuery = fallbackMixQuery..limit = 30;
+    List<DictionaryEntry> likeMatches =
+        fallbackLimitedQuery.find() as List<DictionaryEntry>;
+    unprocessedResult.results.addAll(likeMatches);
+  }
+
+  if (unprocessedResult.results.isNotEmpty) {
+    return unprocessedResult;
+  }
+
+  if (unprocessedResult.results.isEmpty) {
+    QueryBuilder startsWithWordMatch = box
+        .query(DictionaryEntry_.headword.startsWith(fallbackTerm))
+          ..order(DictionaryEntry_.popularity, flags: Order.descending);
+    Query startsWithWordQuery = startsWithWordMatch.build();
+
+    limitedWordQuery = startsWithWordQuery..limit = 20;
+    unprocessedResult.results
+        .addAll(limitedWordQuery.find() as List<DictionaryEntry>);
+
+    QueryBuilder startsWithReadingMatch = box
+        .query(DictionaryEntry_.reading.startsWith(fallbackTerm))
+          ..order(DictionaryEntry_.popularity, flags: Order.descending);
+    Query startsWithReadingQuery = startsWithReadingMatch.build();
+
+    limitedReadingQuery = startsWithReadingQuery..limit = 20;
+    readingMatchQueries = limitedReadingQuery.find() as List<DictionaryEntry>;
+    unprocessedResult.results.addAll(readingMatchQueries);
+  }
+
+  return unprocessedResult;
 }

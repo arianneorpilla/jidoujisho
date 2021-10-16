@@ -1,14 +1,20 @@
-import 'package:chisa/models/app_model.dart';
+import 'package:chisa/media/media_history.dart';
 import 'package:flutter/material.dart';
 
 import 'package:chisa/media/media_history_item.dart';
 
 abstract class MediaType {
-  MediaType({required this.mediaTypeName});
+  MediaType({
+    required this.mediaTypeName,
+    required this.mediaTypeIcon,
+  });
 
   /// The default localisation name of this media type for preferencing
   /// purposes.
   late String mediaTypeName;
+
+  /// The icon that shows on the bottom navigation bar.
+  late IconData mediaTypeIcon;
 
   /// Given a [Uri], pointing to a file, a directory or a link, return a value
   /// for whether or not it is appropriate to the media type.
@@ -63,4 +69,7 @@ abstract class MediaType {
   /// [getFallbackMediaType] may point it to the appropriate media type,
   /// which will then handle its own [launchMediaPage] function.
   void launchMediaPageFromUri(BuildContext context, Uri uri);
+
+  /// Get the media history for this certain media type.
+  MediaHistory getMediaHistory(BuildContext context);
 }

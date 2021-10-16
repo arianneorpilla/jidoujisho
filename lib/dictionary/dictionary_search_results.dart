@@ -1,22 +1,26 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
-import 'package:chisa/dictionary/dictionary_format.dart';
-import 'package:chisa/dictionary/dictionary_result.dart';
+import 'package:chisa/dictionary/dictionary_entry.dart';
 
 class DictionarySearchResult {
   DictionarySearchResult({
     required this.dictionaryName,
-    required this.dictionaryFormat,
+    required this.formatName,
     required this.originalSearchTerm,
     required this.fallbackSearchTerm,
     required this.results,
+    this.contextSource = "",
+    this.contextPosition = -1,
+    this.contextMediaTypeName = "",
+    this.storeReference,
   });
 
   /// The dictionary where the results were sourced from.
   final String dictionaryName;
 
   /// The format of the dictionary where the results were sourced from.
-  final DictionaryFormat dictionaryFormat;
+  final String formatName;
 
   /// An original search term used from the actual media or search made.
   final String originalSearchTerm;
@@ -24,14 +28,32 @@ class DictionarySearchResult {
   /// A lemmatised or fallback search term from the original search term.
   final String fallbackSearchTerm;
 
+  /// A [Uri] in [String] form that represents media that could be in use
+  /// when the search was made. Used to return from context from history.
+  final String contextSource;
+
+  /// A number that represents the position of progress of media upon search.
+  /// Used to return to a specific point in context from history.
+  final int contextPosition;
+
+  /// Name of the media type where a media was playing. Used to return from
+  /// context from history back to a certain media type body.
+  final String contextMediaTypeName;
+
   /// The list of processed search results.
-  final List<DictionaryResultItem> results;
+  final List<DictionaryEntry> results;
+
+  /// An ObjectBox [Store] reference that is used to make the dictionary
+  /// search from another isolate. As an empty [DictionarySearchResult] is
+  /// passed as a parameter to make the search, the object itself to be filled
+  /// is passed as the parameter to the [compute] function.
+  ByteData? storeReference;
 
   /// Get a serialised representation of the dictionary search result
   /// for history and persistence purposes.
   String toJson() {
     List<String> serialisedItems = [];
-    for (DictionaryResultItem result in results) {
+    for (DictionaryEntry result in results) {
       serialisedItems.add(
         jsonEncode(
           result.toJson(),
@@ -39,12 +61,15 @@ class DictionarySearchResult {
       );
     }
 
-    Map<String, String> map = {
+    Map<String, dynamic> map = {
       "dictionaryName": dictionaryName,
-      "formatName": dictionaryFormat.formatName,
+      "formatName": formatName,
       "originalSearchTerm": originalSearchTerm,
       "fallbackSearchTerm": fallbackSearchTerm,
       "results": jsonEncode(serialisedItems),
+      "contextSource": contextSource,
+      "contextPosition": contextPosition,
+      "contextMediaTypeName": contextMediaTypeName,
     };
 
     return jsonEncode(map);
@@ -55,19 +80,22 @@ class DictionarySearchResult {
 
     List<String> resultsJson = jsonDecode(map["results"]);
 
-    List<DictionaryResultItem> results = [];
+    List<DictionaryEntry> results = [];
     for (String resultJson in resultsJson) {
       results.add(
-        DictionaryResultItem.fromJson(resultJson),
+        DictionaryEntry.fromJson(resultJson),
       );
     }
 
     return DictionarySearchResult(
       dictionaryName: map["dictionaryName"],
-      dictionaryFormat: map["formatName"],
+      formatName: map["formatName"],
       originalSearchTerm: map["originalSearchTerm"],
       fallbackSearchTerm: map["fallbackSearchTerm"],
       results: results,
+      contextSource: map["contextSource"],
+      contextPosition: map["contextPosition"] as int,
+      contextMediaTypeName: map["contextMediaTypeName"],
     );
   }
 }

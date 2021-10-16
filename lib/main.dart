@@ -52,7 +52,16 @@ class App extends StatelessWidget {
             darkTheme: getDarkTheme(context),
             themeMode:
                 appModel.getIsDarkMode() ? ThemeMode.dark : ThemeMode.light,
-            home: const HomePage(),
+            home: FutureBuilder(
+              future: appModel.initialiseAppModel(),
+              builder: (BuildContext context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Container();
+                } else {
+                  return const HomePage();
+                }
+              },
+            ),
           );
         },
       ),
@@ -63,6 +72,7 @@ class App extends StatelessWidget {
     return ThemeData(
       backgroundColor: Colors.white,
       colorScheme: ColorScheme.fromSwatch().copyWith(
+        primary: Colors.red,
         secondary: Colors.red,
         brightness: Brightness.light,
       ),
@@ -77,9 +87,11 @@ class App extends StatelessWidget {
           primary: Colors.black,
         ),
       ),
+      iconTheme: const IconThemeData(color: Colors.black),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.white,
         iconTheme: IconThemeData(color: Colors.black),
+        elevation: 0,
       ),
     );
   }
@@ -88,13 +100,14 @@ class App extends StatelessWidget {
     return ThemeData(
       backgroundColor: Colors.black,
       colorScheme: ColorScheme.fromSwatch().copyWith(
+        primary: Colors.red,
         secondary: Colors.red,
         brightness: Brightness.dark,
       ),
       scaffoldBackgroundColor: Colors.black,
       cardColor: Colors.grey.shade900,
       focusColor: Colors.red,
-      selectedRowColor: Colors.grey,
+      selectedRowColor: Colors.grey.shade600,
       primaryTextTheme:
           Typography.material2018(platform: TargetPlatform.android).white,
       textButtonTheme: TextButtonThemeData(
@@ -102,9 +115,11 @@ class App extends StatelessWidget {
           primary: Colors.white,
         ),
       ),
+      iconTheme: const IconThemeData(color: Colors.white),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.black,
         iconTheme: IconThemeData(color: Colors.white),
+        elevation: 0,
       ),
     );
   }

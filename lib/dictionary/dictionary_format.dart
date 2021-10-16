@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:chisa/dictionary/dictionary_entry_widget.dart';
 import 'package:chisa/dictionary/dictionary_utils.dart';
 import 'package:flutter/material.dart';
 
@@ -14,6 +15,9 @@ abstract class DictionaryFormat {
     required this.getDictionaryName,
     required this.getDictionaryEntries,
     required this.getDictionaryMetadata,
+    this.databaseSearchEnhancement,
+    this.searchResultsEnhancement,
+    this.widgetDisplayEnhancement,
   });
 
   /// The name of this dictionary format. For example, this could be a
@@ -24,8 +28,20 @@ abstract class DictionaryFormat {
   late IconData formatIcon;
 
   /// Given a [Uri], return whether or not the source is of this dictionary
-  /// format.
-  bool isUriSupported(Uri uri);
+  /// format. Some formats may not depend on file extensions for compatibility.
+  ///
+  /// Hence, the default behaviour of this function is to always allow files
+  /// regardless of [Uri] to be attempted for import.
+  bool isUriSupported(Uri uri) {
+    return true;
+  }
+
+  /// [IMPORTANT]: The following parameters below point to functions defined in
+  /// the top-level, not within the inheriting class. They are meant to be
+  /// defined in the constructor -- the actual functions to be executed are
+  /// outside of the class, placed preferably at the bottom of the inheriting
+  /// format class. This is because these functions should not block the UI
+  /// isolate and must be top-level in order to do so.
 
   /// Given a [File], prepare files to be accessible in a working [Directory]
   /// such that it will be possible to make relative commands (in the
@@ -73,7 +89,18 @@ abstract class DictionaryFormat {
   late FutureOr<Map<String, String>> Function(ImportProcessingParams)
       getDictionaryMetadata;
 
-  /// Process clean results from the searched entries.
-  DictionarySearchResult processResultsFromEntries(
-      List<DictionaryEntry> entries);
+  /// Some formats may want to perform their own queries and override the
+  /// standard database query. If not, leave this null, which is the default.
+  late FutureOr<DictionarySearchResult> Function(DictionarySearchResult result)?
+      databaseSearchEnhancement;
+
+  /// Some formats may want to override existing search results over the
+  /// standard results. If not, leave this null, which is the default.
+  late FutureOr<DictionarySearchResult> Function(DictionarySearchResult result)?
+      searchResultsEnhancement;
+
+  /// Some formats may want to override the widget representation of their
+  /// results. If not, leave this null, which is the default.
+  late DictionaryEntryWidget Function(DictionaryEntry result)?
+      widgetDisplayEnhancement;
 }

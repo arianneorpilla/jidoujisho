@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:chisa/language/app_localizations.dart';
+import 'package:chisa/media/histories/default_media_history.dart';
+import 'package:chisa/media/media_history.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/reader_page.dart';
 import 'package:file_picker/file_picker.dart';
@@ -15,6 +17,7 @@ class ReaderMediaType extends MediaType {
   ReaderMediaType()
       : super(
           mediaTypeName: "Reader",
+          mediaTypeIcon: Icons.library_books,
         );
 
   @override
@@ -34,7 +37,7 @@ class ReaderMediaType extends MediaType {
           color: Colors.grey,
           child: Text(
             AppLocalizations.getLocalizedValue(
-                appModel.getAppLanguage(), "start_reading"),
+                appModel.getAppLanguageName(), "start_reading"),
           ),
         ),
       ),
@@ -62,8 +65,8 @@ class ReaderMediaType extends MediaType {
 
     return BottomNavigationBarItem(
       label: AppLocalizations.getLocalizedValue(
-          appModel.getAppLanguage(), "reader_media_type"),
-      icon: const Icon(Icons.library_books),
+          appModel.getAppLanguageName(), "reader_media_type"),
+      icon: Icon(mediaTypeIcon),
     );
   }
 
@@ -101,6 +104,15 @@ class ReaderMediaType extends MediaType {
           uri: uri,
         ),
       ),
+    );
+  }
+
+  @override
+  MediaHistory getMediaHistory(BuildContext context) {
+    AppModel appModel = Provider.of<AppModel>(context);
+    return DefaultMediaHistory(
+      sharedPreferences: appModel.sharedPreferences,
+      prefsDirectory: mediaTypeName,
     );
   }
 }

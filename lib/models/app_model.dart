@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:chisa/dictionary/dictionary.dart';
 import 'package:chisa/dictionary/dictionary_dialog.dart';
 import 'package:chisa/dictionary/dictionary_entry.dart';
 import 'package:chisa/dictionary/dictionary_format.dart';
+import 'package:chisa/dictionary/dictionary_search_results.dart';
+import 'package:chisa/dictionary/dictionary_utils.dart';
 import 'package:chisa/dictionary/formats/yomichan_term_bank_format.dart';
 import 'package:chisa/language/app_localizations.dart';
 import 'package:chisa/language/language.dart';
@@ -16,6 +19,7 @@ import 'package:chisa/media/media_types/dictionary_media_type.dart';
 import 'package:chisa/media/media_types/reader_media_type.dart';
 import 'package:chisa/media/media_types/player_media_type.dart';
 import 'package:chisa/objectbox.g.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:objectbox/objectbox.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -32,23 +36,29 @@ class AppModel with ChangeNotifier {
   final SharedPreferences _sharedPreferences;
   final PackageInfo _packageInfo;
 
+  final List<DictionaryFormat> _availableDictionaryFormats = [
+    YomichanTermBankFormat(),
+  ];
+  final List<MediaType> _availableMediaTypes = [
+    PlayerMediaType(),
+    ReaderMediaType(),
+    DictionaryMediaType(),
+  ];
+  final List<Language> _availableLanguages = [
+    JapaneseLanguage(),
+    EnglishLanguage(),
+  ];
+
+  bool _dictionariesInitialised = false;
+
   Language get language => _language;
   PackageInfo get packageInfo => _packageInfo;
+  SharedPreferences get sharedPreferences => _sharedPreferences;
 
-  List<MediaType> get availableMediaTypes => [
-        PlayerMediaType(),
-        ReaderMediaType(),
-        DictionaryMediaType(),
-      ];
-
-  List<Language> get availableLanguages => [
-        JapaneseLanguage(),
-        EnglishLanguage(),
-      ];
-
-  List<DictionaryFormat> get availableDictionaryFormats => [
-        YomichanTermBankFormat(),
-      ];
+  List<MediaType> get availableMediaTypes => _availableMediaTypes;
+  List<Language> get availableLanguages => _availableLanguages;
+  List<DictionaryFormat> get availableDictionaryFormats =>
+      _availableDictionaryFormats;
 
   AppModel({
     required sharedPreferences,
@@ -178,10 +188,21 @@ class AppModel with ChangeNotifier {
     return _dictionaryStores[dictionaryName];
   }
 
+  Future<void> initialiseAppModel() async {
+    await initialiseImportedDictionaries();
+    for (Language language in availableLanguages) {
+      await language.initialiseLanguage();
+    }
+  }
+
   Future<void> initialiseImportedDictionaries() async {
-    getDictionaryRecord().forEach((dictionary) {
-      initialiseImportedDictionary(dictionary.dictionaryName);
-    });
+    if (!_dictionariesInitialised) {
+      getDictionaryRecord().forEach((dictionary) {
+        initialiseImportedDictionary(dictionary.dictionaryName);
+      });
+
+      _dictionariesInitialised = true;
+    }
   }
 
   Future<Store> initialiseImportedDictionary(String dictionaryName) async {
@@ -202,20 +223,34 @@ class AppModel with ChangeNotifier {
     return _dictionaryStores[dictionaryName]!;
   }
 
-  Future<void> deleteImportedDictionary(String dictionaryName) async {
+  Dictionary getCurrentDictionary() {
+    return getDictionaryRecord().firstWhere((dictionary) =>
+        dictionary.dictionaryName == getCurrentDictionaryName());
+  }
+
+  Future<void> deleteCurrentDictionary() async {
     String appDirDocPath = (await getApplicationDocumentsDirectory()).path;
+    String dictionaryName = getCurrentDictionaryName();
 
-    Store entryStore = _dictionaryStores[dictionaryName]!;
-    Box entryBox = entryStore.box<DictionaryEntry>();
-    entryBox.removeAll();
-    entryStore.close();
+    if (getDictionaryRecord().length != 1) {
+      setPrevDictionary();
+    } else {
+      await setCurrentDictionaryName("");
+    }
 
-    Directory objectBoxDirDirectory = Directory(
-      p.join(appDirDocPath, "customDictionaries", dictionaryName),
-    );
-    objectBoxDirDirectory.deleteSync(recursive: true);
+    try {
+      Store entryStore = _dictionaryStores[dictionaryName]!;
+      Box entryBox = entryStore.box<DictionaryEntry>();
+      entryBox.removeAll();
+      entryStore.close();
 
-    await removeDictionaryRecord(dictionaryName);
+      Directory objectBoxDirDirectory = Directory(
+        p.join(appDirDocPath, "customDictionaries", dictionaryName),
+      );
+      objectBoxDirDirectory.deleteSync(recursive: true);
+    } finally {
+      await removeDictionaryRecord(dictionaryName);
+    }
   }
 
   Future<void> addDictionaryRecord(Dictionary dictionary) async {
@@ -276,27 +311,62 @@ class AppModel with ChangeNotifier {
         .toList();
   }
 
-  String getTargetLanguage() {
+  String getTargetLanguageName() {
     return _sharedPreferences.getString("targetLanguage") ??
         availableLanguages.first.languageName;
   }
 
-  Future<void> setTargetLanguage(String targetLanguage) async {
+  Future<void> setTargetLanguageName(String targetLanguage) async {
     await _sharedPreferences.setString("targetLanguage", targetLanguage);
   }
 
-  String getAppLanguage() {
+  String getAppLanguageName() {
     return _sharedPreferences.getString("appLanguage") ??
         AppLocalizations.localizations().first;
   }
 
-  Future<void> setAppLanguage(String appLanguage) async {
+  Future<void> setAppLanguageName(String appLanguage) async {
     await _sharedPreferences.setString("appLanguage", appLanguage);
     notifyListeners();
   }
 
-  DictionaryFormat getLastDictionaryFormat() {
-    return availableDictionaryFormats.firstWhere(
-        (format) => format.formatName == getLastDictionaryFormatName());
+  DictionaryFormat getDictionaryFormatFromName(String formatName) {
+    return availableDictionaryFormats
+        .firstWhere((format) => format.formatName == formatName);
+  }
+
+  Language getCurrentLangauge() {
+    return availableLanguages.firstWhere(
+        (language) => language.languageName == getTargetLanguageName());
+  }
+
+  MediaType getMediaTypeFromName(String mediaTypeName) {
+    return availableMediaTypes
+        .firstWhere((mediaType) => mediaType.mediaTypeName == mediaTypeName);
+  }
+
+  Future<DictionarySearchResult> searchDictionary(
+    String searchTerm, {
+    String contextSource = "",
+    int contextPosition = -1,
+    String contextMediaTypeName = "",
+  }) async {
+    Language currentLanguage = getCurrentLangauge();
+    Dictionary currentDictionary = getCurrentDictionary();
+
+    Store store = _dictionaryStores[currentDictionary.dictionaryName]!;
+    ByteData storeReference = store.reference;
+
+    DictionarySearchResult unprocessedResult = DictionarySearchResult(
+        dictionaryName: currentDictionary.dictionaryName,
+        formatName: currentDictionary.formatName,
+        originalSearchTerm: searchTerm,
+        fallbackSearchTerm: currentLanguage.getRootForm(searchTerm),
+        results: [],
+        storeReference: storeReference);
+    DictionarySearchResult processedResult =
+        await compute(searchDatabase, unprocessedResult);
+
+    return Future.value(processedResult);
   }
 }

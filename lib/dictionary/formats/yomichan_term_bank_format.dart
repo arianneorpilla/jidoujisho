@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:chisa/dictionary/dictionary_entry.dart';
 import 'package:chisa/dictionary/dictionary_format.dart';
 import 'package:chisa/dictionary/dictionary_utils.dart';
-import 'package:chisa/dictionary/dictionary_search_results.dart';
+
 import 'package:flutter_archive/flutter_archive.dart';
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as p;
@@ -24,13 +24,6 @@ class YomichanTermBankFormat extends DictionaryFormat {
   @override
   bool isUriSupported(Uri uri) {
     return (lookupMimeType(uri.path) ?? "") == 'application/zip';
-  }
-
-  @override
-  DictionarySearchResult processResultsFromEntries(
-      List<DictionaryEntry> entries) {
-    // TODO: implement processResultsFromEntries
-    throw UnimplementedError();
   }
 }
 
