@@ -1,4 +1,6 @@
+import 'package:daijidoujisho/dictionary/dictionary.dart';
 import 'package:daijidoujisho/dictionary/dictionary_format.dart';
+import 'package:daijidoujisho/dictionary/dictionary_utils.dart';
 import 'package:daijidoujisho/language/app_localizations.dart';
 import 'package:daijidoujisho/models/app_model.dart';
 import 'package:daijidoujisho/util/drop_down_menu.dart';
@@ -25,6 +27,7 @@ class DictionaryDialogState extends State<DictionaryDialog> {
   @override
   Widget build(BuildContext context) {
     appModel = Provider.of<AppModel>(context);
+    DictionaryFormat lastDictionaryFormat = appModel.getLastDictionaryFormat();
 
     return AlertDialog(
       contentPadding:
@@ -40,6 +43,7 @@ class DictionaryDialogState extends State<DictionaryDialog> {
                 appModel.getAppLanguage(), "dialog_import"),
           ),
           onPressed: () async {
+            await dictionaryFileImport(context, appModel, lastDictionaryFormat);
             //await dictionaryImport(context);
             setState(() {});
           },
@@ -60,7 +64,7 @@ class DictionaryDialogState extends State<DictionaryDialog> {
   Widget buildContent() {
     List<String> importedDictionaries = appModel.getImportedDictionaryNames();
     List<String> options = appModel.getDictionaryFormatNames();
-    String initialOption = appModel.getLastDictionaryFormat();
+    String initialOption = appModel.getLastDictionaryFormatName();
 
     return SizedBox(
       width: double.maxFinite,
@@ -97,7 +101,7 @@ class DictionaryDialogState extends State<DictionaryDialog> {
           DropDownMenu(
             options: options,
             initialOption: initialOption,
-            optionCallback: appModel.setLastDictionaryFormat,
+            optionCallback: appModel.setLastDictionaryFormatName,
             voidCallback: () {
               setState(() {});
             },
@@ -134,7 +138,7 @@ class DictionaryDialogState extends State<DictionaryDialog> {
 
   Widget showDictionaryList() {
     String currentDictionary = appModel.getCurrentDictionaryName();
-    List<String> importedDictionaries = appModel.getImportedDictionaryNames();
+    List<Dictionary> importedDictionaries = appModel.getDictionaryRecord();
 
     return Scrollbar(
       controller: scrollController,
@@ -143,7 +147,7 @@ class DictionaryDialogState extends State<DictionaryDialog> {
         shrinkWrap: true,
         itemCount: importedDictionaries.length,
         itemBuilder: (context, index) {
-          String dictionaryName = importedDictionaries[index];
+          String dictionaryName = importedDictionaries[index].dictionaryName;
 
           return ListTile(
             dense: true,
@@ -158,8 +162,10 @@ class DictionaryDialogState extends State<DictionaryDialog> {
                 const SizedBox(width: 16.0),
                 Text(
                   dictionaryName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
+                    color:
+                        appModel.getIsDarkMode() ? Colors.white : Colors.black,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -170,49 +176,6 @@ class DictionaryDialogState extends State<DictionaryDialog> {
               if (!widget.manageAllowed) {
                 Navigator.pop(context);
               }
-            },
-          );
-        },
-      ),
-    );
-  }
-
-  Widget showFormatList() {
-    List<DictionaryFormat> dictionaryFormats =
-        appModel.availableDictionaryFormats;
-
-    return Scrollbar(
-      controller: scrollController,
-      child: ListView.builder(
-        controller: scrollController,
-        shrinkWrap: true,
-        itemCount: dictionaryFormats.length,
-        itemBuilder: (context, index) {
-          DictionaryFormat dictionaryFormat = dictionaryFormats[index];
-
-          return ListTile(
-            dense: true,
-            title: Row(
-              children: [
-                Icon(
-                  dictionaryFormat.formatIcon,
-                  size: 20.0,
-                ),
-                const SizedBox(width: 16.0),
-                Text(
-                  dictionaryFormat.formatName,
-                  style: const TextStyle(
-                    fontSize: 16,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-            onTap: () async {
-              // await appModel.setCurrentDictionary(dictionaryName);
-              // if (!widget.manageAllowed) {
-              //   Navigator.pop(context);
-              // }
             },
           );
         },

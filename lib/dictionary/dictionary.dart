@@ -44,13 +44,13 @@ class Dictionary {
   }
 
   factory Dictionary.fromJson(String json) {
-    Map<String, dynamic> map = jsonDecode(json);
+    Map<String, String> map = Map.castFrom(jsonDecode(json));
 
     return Dictionary(
-      dictionaryName: map["dictionaryName"],
-      formatName: map["formatName"],
-      metadata: jsonDecode(
-        map["metadata"],
+      dictionaryName: map["dictionaryName"]!,
+      formatName: map["formatName"]!,
+      metadata: Map.castFrom(
+        jsonDecode(map["metadata"]!),
       ),
     );
   }

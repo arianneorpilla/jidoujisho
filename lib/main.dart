@@ -69,6 +69,7 @@ class App extends StatelessWidget {
       scaffoldBackgroundColor: Colors.white,
       cardColor: Colors.white,
       focusColor: Colors.red,
+      selectedRowColor: Colors.grey.shade300,
       primaryTextTheme:
           Typography.material2018(platform: TargetPlatform.android).black,
       textButtonTheme: TextButtonThemeData(
@@ -93,6 +94,7 @@ class App extends StatelessWidget {
       scaffoldBackgroundColor: Colors.black,
       cardColor: Colors.grey.shade900,
       focusColor: Colors.red,
+      selectedRowColor: Colors.grey,
       primaryTextTheme:
           Typography.material2018(platform: TargetPlatform.android).white,
       textButtonTheme: TextButtonThemeData(

@@ -1,17 +1,19 @@
+import 'dart:async';
 import 'dart:io';
 
-import 'package:daijidoujisho/dictionary/dictionary.dart';
 import 'package:daijidoujisho/dictionary/dictionary_utils.dart';
 import 'package:flutter/material.dart';
 
 import 'package:daijidoujisho/dictionary/dictionary_entry.dart';
-import 'package:daijidoujisho/dictionary/dictionary_extract_params.dart';
-import 'package:daijidoujisho/dictionary/dictionary_result.dart';
 import 'package:daijidoujisho/dictionary/dictionary_search_results.dart';
 
 abstract class DictionaryFormat {
   DictionaryFormat({
     required this.formatName,
+    required this.prepareWorkingDirectory,
+    required this.getDictionaryName,
+    required this.getDictionaryEntries,
+    required this.getDictionaryMetadata,
     this.formatIcon = Icons.archive,
   });
 
@@ -26,10 +28,10 @@ abstract class DictionaryFormat {
   /// format.
   bool isUriSupported(Uri uri);
 
-  /// Given a [File], prepare a working [Directory] such that it will be
-  /// possible to make relative commands (in the directory) to be able to
-  /// get a dictionary's name, its entries and other related metadata that
-  /// will be useful for preservation.
+  /// Given a [File], prepare files to be accessible in a working [Directory]
+  /// such that it will be possible to make relative commands (in the
+  /// directory) to be able to get a dictionary's name, its entries and
+  /// other related metadata that will be useful for preservation.
   ///
   /// For many formats, this will likely be a ZIP extraction operation. A
   /// given parameter [targetDirectory] is where the final working directory
@@ -37,7 +39,8 @@ abstract class DictionaryFormat {
   ///
   /// See [ImportPreparationParams] for how to work with the individual input
   /// parameters.
-  Future<Directory> prepareWorkingDirectory(ImportPreparationParams params);
+  late FutureOr<void> Function(ImportPreparationParams params)
+      prepareWorkingDirectory;
 
   /// Given a [Directory] of files pertaining to this dictionary format,
   /// return a [String] that will refer to a dictionary's name in this format.
@@ -48,15 +51,15 @@ abstract class DictionaryFormat {
   ///
   /// See [ImportProcessingParams] for how to work with the individual input
   /// parameters.
-  Future<String> getDictionaryName(ImportProcessingParams params);
+  late FutureOr<String> Function(ImportProcessingParams) getDictionaryName;
 
   /// Given a [Directory] of files pertaining to this dictionary format,
   /// return a list of [DictionaryEntry] that will be added to the database.
   ///
   /// See [ImportProcessingParams] for how to work with the individual input
   /// parameters.
-  Future<List<DictionaryEntry>> extractDictionaryEntries(
-      ImportProcessingParams params);
+  late FutureOr<List<DictionaryEntry>> Function(ImportProcessingParams)
+      getDictionaryEntries;
 
   /// Given a [Directory] of files pertaining to this dictionary format,
   /// prepare a [Map] of metadata that will be used for cleaning up and
@@ -68,8 +71,8 @@ abstract class DictionaryFormat {
   ///
   /// See [ImportProcessingParams] for how to work with the individual input
   /// parameters.
-  Future<Map<String, String>> getDictionaryMetadata(
-      ImportProcessingParams params);
+  late FutureOr<Map<String, String>> Function(ImportProcessingParams)
+      getDictionaryMetadata;
 
   /// Process clean results from the searched entries.
   DictionarySearchResult processResultsFromEntries(

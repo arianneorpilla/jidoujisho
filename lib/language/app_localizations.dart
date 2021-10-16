@@ -8,6 +8,7 @@ class AppLocalizations {
       'app_language': 'App language',
       'player_media_type': 'Player',
       'reader_media_type': 'Reader',
+      'dictionary_media_type': 'Dictionary',
       'options_theme_light': 'Use light theme',
       'options_theme_dark': 'Use dark theme',
       'options_dictionaries': 'Manage dictionaries',
@@ -27,12 +28,13 @@ class AppLocalizations {
           "by providing feedback, making a donation, reporting issues or "
           "collaborating for further improvements on GitHub.",
     },
-    'Filipino': {
+    'Tagalog': {
       'app_title': 'jidoujisho',
       'target_language': 'Wika na pakay',
       'app_language': 'Wika ng aplikasyon',
       'player_media_type': 'Manood',
       'reader_media_type': 'Magbasa',
+      'dictionary_media_type': 'Diksyunaryo',
       'options_theme_light': 'Magaan na tema',
       'options_theme_dark': 'Madilim na tema',
       'options_dictionaries': 'Mga diksyunaryo',

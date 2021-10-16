@@ -150,7 +150,7 @@ class HomePageState extends State<HomePage> {
           ],
         ),
         value: action,
-        padding: const EdgeInsets.only(left: 16, top: 16, bottom: 16),
+        padding: const EdgeInsets.only(left: 20, top: 16, bottom: 16),
       );
     }
 

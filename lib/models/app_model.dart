@@ -12,6 +12,7 @@ import 'package:daijidoujisho/language/language_dialog.dart';
 import 'package:daijidoujisho/language/languages/english_language.dart';
 import 'package:daijidoujisho/language/languages/japanese_language.dart';
 import 'package:daijidoujisho/media/media_type.dart';
+import 'package:daijidoujisho/media/media_types/dictionary_media_type.dart';
 import 'package:daijidoujisho/media/media_types/reader_media_type.dart';
 import 'package:daijidoujisho/media/media_types/player_media_type.dart';
 import 'package:daijidoujisho/objectbox.g.dart';
@@ -37,6 +38,7 @@ class AppModel with ChangeNotifier {
   List<MediaType> get availableMediaTypes => [
         PlayerMediaType(),
         ReaderMediaType(),
+        DictionaryMediaType(),
       ];
 
   List<Language> get availableLanguages => [
@@ -162,13 +164,13 @@ class AppModel with ChangeNotifier {
   }
 
   /// Get the last selected dictionary format.
-  String getLastDictionaryFormat() {
+  String getLastDictionaryFormatName() {
     return _sharedPreferences.getString("lastDictionaryFormat") ??
         getDictionaryFormatNames().first;
   }
 
   /// Save a new active dictionary and remember it on application restart.
-  Future<void> setLastDictionaryFormat(String formatName) async {
+  Future<void> setLastDictionaryFormatName(String formatName) async {
     await _sharedPreferences.setString("lastDictionaryFormat", formatName);
   }
 
@@ -291,5 +293,10 @@ class AppModel with ChangeNotifier {
   Future<void> setAppLanguage(String appLanguage) async {
     await _sharedPreferences.setString("appLanguage", appLanguage);
     notifyListeners();
+  }
+
+  DictionaryFormat getLastDictionaryFormat() {
+    return availableDictionaryFormats.firstWhere(
+        (format) => format.formatName == getLastDictionaryFormatName());
   }
 }
