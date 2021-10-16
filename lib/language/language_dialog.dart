@@ -1,6 +1,6 @@
-import 'package:chisachan/language/app_localizations.dart';
-import 'package:chisachan/models/app_model.dart';
-import 'package:chisachan/util/drop_down_menu.dart';
+import 'package:chisa/language/app_localizations.dart';
+import 'package:chisa/models/app_model.dart';
+import 'package:chisa/util/drop_down_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

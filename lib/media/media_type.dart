@@ -1,7 +1,7 @@
-import 'package:chisachan/models/app_model.dart';
+import 'package:chisa/models/app_model.dart';
 import 'package:flutter/material.dart';
 
-import 'package:chisachan/media/media_history_item.dart';
+import 'package:chisa/media/media_history_item.dart';
 
 abstract class MediaType {
   MediaType({required this.mediaTypeName});

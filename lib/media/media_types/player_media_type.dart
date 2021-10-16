@@ -1,12 +1,12 @@
 import 'dart:io';
 
-import 'package:chisachan/language/app_localizations.dart';
-import 'package:chisachan/models/app_model.dart';
+import 'package:chisa/language/app_localizations.dart';
+import 'package:chisa/models/app_model.dart';
 import 'package:flutter/material.dart';
 import 'package:mime/mime.dart';
 
-import 'package:chisachan/media/media_history_item.dart';
-import 'package:chisachan/media/media_type.dart';
+import 'package:chisa/media/media_history_item.dart';
+import 'package:chisa/media/media_type.dart';
 import 'package:provider/provider.dart';
 
 class PlayerMediaType extends MediaType {

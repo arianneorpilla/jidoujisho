@@ -1,9 +1,9 @@
-import 'package:chisachan/dictionary/dictionary.dart';
-import 'package:chisachan/dictionary/dictionary_format.dart';
-import 'package:chisachan/dictionary/dictionary_utils.dart';
-import 'package:chisachan/language/app_localizations.dart';
-import 'package:chisachan/models/app_model.dart';
-import 'package:chisachan/util/drop_down_menu.dart';
+import 'package:chisa/dictionary/dictionary.dart';
+import 'package:chisa/dictionary/dictionary_format.dart';
+import 'package:chisa/dictionary/dictionary_utils.dart';
+import 'package:chisa/language/app_localizations.dart';
+import 'package:chisa/models/app_model.dart';
+import 'package:chisa/util/drop_down_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:chisachan/dictionary/dictionary_format.dart';
-import 'package:chisachan/dictionary/dictionary_result.dart';
+import 'package:chisa/dictionary/dictionary_format.dart';
+import 'package:chisa/dictionary/dictionary_result.dart';
 
 class DictionarySearchResult {
   DictionarySearchResult({

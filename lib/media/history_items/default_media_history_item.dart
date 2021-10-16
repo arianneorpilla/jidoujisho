@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:chisachan/media/media_history_item.dart';
+import 'package:chisa/media/media_history_item.dart';
 
 class DefaultMediaHistoryItem extends MediaHistoryItem {
   DefaultMediaHistoryItem({

@@ -1,6 +1,6 @@
-import 'package:chisachan/util/reading_direction.dart';
-import 'package:chisachan/language/language.dart';
-import 'package:chisachan/util/reg_exp.dart';
+import 'package:chisa/util/reading_direction.dart';
+import 'package:chisa/language/language.dart';
+import 'package:chisa/util/reg_exp.dart';
 
 class EnglishLanguage extends Language {
   EnglishLanguage()

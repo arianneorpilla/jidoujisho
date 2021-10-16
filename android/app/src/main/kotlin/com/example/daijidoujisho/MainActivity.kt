@@ -1,4 +1,4 @@
-package com.lrorpilla.chisachan
+package com.lrorpilla.chisa
 
 import io.flutter.embedding.android.FlutterActivity
 

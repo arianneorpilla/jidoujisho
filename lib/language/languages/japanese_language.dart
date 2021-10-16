@@ -1,5 +1,5 @@
-import 'package:chisachan/util/reading_direction.dart';
-import 'package:chisachan/language/language.dart';
+import 'package:chisa/util/reading_direction.dart';
+import 'package:chisa/language/language.dart';
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:ve_dart/ve_dart.dart';
 

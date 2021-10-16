@@ -1,4 +1,4 @@
-import 'package:chisachan/util/reading_direction.dart';
+import 'package:chisa/util/reading_direction.dart';
 
 abstract class Language {
   Language({

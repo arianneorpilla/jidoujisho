@@ -1,4 +1,4 @@
-# chisachan
+# chisa
 
 A new Flutter project.
 

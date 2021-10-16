@@ -1,4 +1,4 @@
-import 'package:chisachan/dictionary/dictionary_entry.dart';
+import 'package:chisa/dictionary/dictionary_entry.dart';
 
 class DictionaryExtractParams {
   DictionaryExtractParams({

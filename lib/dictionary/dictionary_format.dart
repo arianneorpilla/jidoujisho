@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:chisachan/dictionary/dictionary_utils.dart';
+import 'package:chisa/dictionary/dictionary_utils.dart';
 import 'package:flutter/material.dart';
 
-import 'package:chisachan/dictionary/dictionary_entry.dart';
-import 'package:chisachan/dictionary/dictionary_search_results.dart';
+import 'package:chisa/dictionary/dictionary_entry.dart';
+import 'package:chisa/dictionary/dictionary_search_results.dart';
 
 abstract class DictionaryFormat {
   DictionaryFormat({
