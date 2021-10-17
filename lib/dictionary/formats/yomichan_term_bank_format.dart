@@ -85,27 +85,27 @@ FutureOr<List<DictionaryEntry>> getDictionaryEntriesYomichanTermBankFormat(
 
       /// See https://github.com/FooSoft/yomichan/blob/master/ext/data/schemas/dictionary-term-bank-v3-schema.json
       for (var termJson in termJsons) {
-        List<String> definitionTags = [];
-        String definitionTagsUnsplit = termJson[2].toString();
-        definitionTags = definitionTagsUnsplit.split(" ");
+        List<String> meaningTags = [];
+        String meaningTagsUnsplit = termJson[2].toString();
+        meaningTags = meaningTagsUnsplit.split(" ");
 
         List<String> termTags = [];
         String termTagsUnsplit = termJson[7].toString();
         termTags = termTagsUnsplit.split(" ");
 
-        String headword = termJson[0].toString();
+        String word = termJson[0].toString();
         String reading = termJson[1].toString();
         String meaning = parseMeaning(termJson[5]);
         double popularity = parsePopularity(termJson[4]);
 
         Map<String, String> extraMap = {
-          "definitionTags": jsonEncode(definitionTags),
+          "meaningTags": jsonEncode(meaningTags),
           "termTags": jsonEncode(termTags),
         };
         String extra = jsonEncode(extraMap);
 
         entries.add(DictionaryEntry(
-          headword: headword,
+          word: word,
           reading: reading,
           meaning: meaning,
           extra: extra,

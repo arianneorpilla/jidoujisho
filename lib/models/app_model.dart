@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:chisa/anki/anki_export_enhancement.dart';
+import 'package:chisa/anki/anki_export_params.dart';
+import 'package:chisa/anki/enhancements/clear_button.dart';
 import 'package:chisa/dictionary/dictionary.dart';
 import 'package:chisa/dictionary/dictionary_dialog.dart';
 import 'package:chisa/dictionary/dictionary_entry.dart';
@@ -19,6 +22,7 @@ import 'package:chisa/media/media_types/dictionary_media_type.dart';
 import 'package:chisa/media/media_types/reader_media_type.dart';
 import 'package:chisa/media/media_types/player_media_type.dart';
 import 'package:chisa/objectbox.g.dart';
+import 'package:chisa/util/anki_export_field.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:objectbox/objectbox.dart';
@@ -26,6 +30,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path/path.dart' as p;
+import 'package:collection/collection.dart';
 
 /// A scoped model for parameters that affect the entire application.
 /// [Provider] is used for global state management across multiple layers,
@@ -35,6 +40,7 @@ class AppModel with ChangeNotifier {
   final Map<String, Store> _dictionaryStores = {};
   final SharedPreferences _sharedPreferences;
   final PackageInfo _packageInfo;
+  AnkiExportParams _ankiExportParams = AnkiExportParams();
 
   final List<DictionaryFormat> _availableDictionaryFormats = [
     YomichanTermBankFormat(),
@@ -48,17 +54,22 @@ class AppModel with ChangeNotifier {
     JapaneseLanguage(),
     EnglishLanguage(),
   ];
+  final List<AnkiExportEnhancement> _availableExportEnhancements = [];
 
-  bool _dictionariesInitialised = false;
+  bool _firstTimeInitialisation = true;
 
   Language get language => _language;
   PackageInfo get packageInfo => _packageInfo;
   SharedPreferences get sharedPreferences => _sharedPreferences;
 
+  List<AnkiExportEnhancement> get availableExportEnhancements =>
+      _availableExportEnhancements;
+
   List<MediaType> get availableMediaTypes => _availableMediaTypes;
   List<Language> get availableLanguages => _availableLanguages;
   List<DictionaryFormat> get availableDictionaryFormats =>
       _availableDictionaryFormats;
+  AnkiExportParams get ankiExportParams => _ankiExportParams;
 
   AppModel({
     required sharedPreferences,
@@ -189,20 +200,28 @@ class AppModel with ChangeNotifier {
   }
 
   Future<void> initialiseAppModel() async {
-    await initialiseImportedDictionaries();
-    for (Language language in availableLanguages) {
-      await language.initialiseLanguage();
+    if (_firstTimeInitialisation) {
+      await initialiseImportedDictionaries();
+      initialiseExportEnhancements();
+      for (Language language in availableLanguages) {
+        await language.initialiseLanguage();
+      }
+      _firstTimeInitialisation = false;
     }
   }
 
-  Future<void> initialiseImportedDictionaries() async {
-    if (!_dictionariesInitialised) {
-      getDictionaryRecord().forEach((dictionary) {
-        initialiseImportedDictionary(dictionary.dictionaryName);
-      });
-
-      _dictionariesInitialised = true;
+  void initialiseExportEnhancements() {
+    for (AnkiExportField field in AnkiExportField.values) {
+      _availableExportEnhancements
+          .add(ClearButton(appModel: this, enhancementField: field));
     }
+    _availableExportEnhancements.addAll([]);
+  }
+
+  Future<void> initialiseImportedDictionaries() async {
+    getDictionaryRecord().forEach((dictionary) {
+      initialiseImportedDictionary(dictionary.dictionaryName);
+    });
   }
 
   Future<Store> initialiseImportedDictionary(String dictionaryName) async {
@@ -368,5 +387,90 @@ class AppModel with ChangeNotifier {
         await compute(searchDatabase, unprocessedResult);
 
     return Future.value(processedResult);
+  }
+
+  void clearExportParams(AnkiExportParams params) {
+    params.sentence = "";
+    params.word = "";
+    params.reading = "";
+    params.meaning = "";
+    params.extra = "";
+    params.imageFile = null;
+    params.audioFile = null;
+  }
+
+  void setExportParams(AnkiExportParams params) {
+    _ankiExportParams = params;
+    notifyListeners();
+  }
+
+  void setExportWord(String word) {
+    _ankiExportParams.word = word;
+    notifyListeners();
+  }
+
+  void setExportSentence(String context) {
+    _ankiExportParams.sentence = context;
+    notifyListeners();
+  }
+
+  void setExportReading(String reading) {
+    _ankiExportParams.reading = reading;
+    notifyListeners();
+  }
+
+  void setExportMeaning(String meaning) {
+    _ankiExportParams.meaning = meaning;
+    notifyListeners();
+  }
+
+  void setExportExtra(String extra) {
+    _ankiExportParams.extra = extra;
+    notifyListeners();
+  }
+
+  void setExportImageFile(File? imageFile) {
+    _ankiExportParams.imageFile = imageFile;
+    notifyListeners();
+  }
+
+  void setExportAudioFile(File? audioFile) {
+    _ankiExportParams.audioFile = audioFile;
+    notifyListeners();
+  }
+
+  List<AnkiExportEnhancement?> getExportEnabledFieldEnhancement(
+      AnkiExportField field) {
+    List<AnkiExportEnhancement?> enhancements = [];
+
+    for (int i = 0; i < 3; i++) {
+      AnkiExportEnhancement? enhancement =
+          _availableExportEnhancements.firstWhereOrNull((enhancement) =>
+              enhancement.enhancementField == field &&
+              enhancement.enhancementName ==
+                  sharedPreferences.getString(
+                      AnkiExportEnhancement.getFieldEnabledPositionKey(
+                          field, i)));
+
+      enhancements.add(enhancement);
+    }
+
+    return enhancements;
+  }
+
+  AnkiExportEnhancement? getAutoFieldEnhancement(AnkiExportField field) {
+    return _availableExportEnhancements.firstWhereOrNull((enhancement) =>
+        enhancement.enhancementField == field &&
+        enhancement.enhancementName ==
+            sharedPreferences
+                .getString(AnkiExportEnhancement.getFieldAutoKey(field)));
+  }
+
+  List<AnkiExportEnhancement> getFieldEnhancements(AnkiExportField field) {
+    List<AnkiExportEnhancement> enhancements = _availableExportEnhancements
+        .where((enhancement) => enhancement.enhancementField == field)
+        .toList();
+
+    return enhancements;
   }
 }

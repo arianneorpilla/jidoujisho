@@ -2,14 +2,14 @@ import 'dart:convert';
 
 class DictionaryResultItem {
   DictionaryResultItem({
-    required this.headword,
+    required this.word,
     required this.reading,
     required this.meaning,
     required this.extra,
   });
 
-  /// The headword of the dictionary entry. For example, 見る.
-  late String headword;
+  /// The word of the dictionary entry. For example, 見る.
+  late String word;
 
   /// The reading of the dictionary entry. For example, みる.
   late String reading;
@@ -25,7 +25,7 @@ class DictionaryResultItem {
   /// and persistence purposes.
   String toJson() {
     Map<String, String> map = {
-      "headword": headword,
+      "word": word,
       "reading": reading,
       "meaning": meaning,
       "extra": jsonEncode(extra),
@@ -39,7 +39,7 @@ class DictionaryResultItem {
     Map<String, dynamic> map = jsonDecode(json);
 
     return DictionaryResultItem(
-      headword: map["headword"],
+      word: map["word"],
       reading: map["reading"],
       meaning: map["meaning"],
       extra: jsonDecode(map["extra"]),

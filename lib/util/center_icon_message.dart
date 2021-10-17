@@ -15,7 +15,7 @@ Widget showCenterIconMessage(
         color: Theme.of(context).unselectedWidgetColor,
         size: 36,
       ),
-      const SizedBox(height: 6),
+      const SizedBox(height: 20),
       Wrap(
         alignment: WrapAlignment.end,
         crossAxisAlignment: WrapCrossAlignment.end,
@@ -26,6 +26,7 @@ Widget showCenterIconMessage(
               color: Theme.of(context).unselectedWidgetColor,
               fontSize: 20,
             ),
+            textAlign: TextAlign.center,
           ),
           (jumpingDots)
               ? SizedBox(

@@ -6,7 +6,7 @@ import 'package:objectbox/objectbox.dart';
 class DictionaryEntry {
   DictionaryEntry({
     this.id = 0,
-    @Index() required this.headword,
+    @Index() required this.word,
     @Index() required this.reading,
     required this.meaning,
     required this.extra,
@@ -16,8 +16,8 @@ class DictionaryEntry {
   /// ObjectBox identifier parameter.
   int id;
 
-  /// The headword of the dictionary entry. For example, 見る.
-  late String headword;
+  /// The word of the dictionary entry. For example, 見る.
+  late String word;
 
   /// The reading of the dictionary entry. For example, みる.
   late String reading;
@@ -37,7 +37,7 @@ class DictionaryEntry {
   /// and persistence purposes.
   String toJson() {
     Map<String, dynamic> map = {
-      "headword": headword,
+      "word": word,
       "reading": reading,
       "meaning": meaning,
       "extra": extra,
@@ -52,7 +52,7 @@ class DictionaryEntry {
     Map<String, dynamic> map = jsonDecode(json);
 
     return DictionaryEntry(
-      headword: map["headword"],
+      word: map["word"],
       reading: map["reading"],
       meaning: map["meaning"],
       extra: map["extra"],

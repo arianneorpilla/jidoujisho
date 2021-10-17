@@ -6,6 +6,7 @@ import 'package:chisa/language/app_localizations.dart';
 import 'package:chisa/media/histories/default_media_history.dart';
 import 'package:chisa/media/media_history.dart';
 import 'package:chisa/models/app_model.dart';
+import 'package:chisa/pages/creator_page.dart';
 import 'package:chisa/pages/reader_page.dart';
 import 'package:chisa/util/center_icon_message.dart';
 import 'package:file_picker/file_picker.dart';
@@ -144,7 +145,7 @@ class DictionaryMediaType extends MediaType {
                       await appModel.searchDictionary(wordController.text);
 
                   for (DictionaryEntry entry in result.results) {
-                    print(entry.headword);
+                    print(entry.word);
                   }
                 },
               ),
@@ -183,7 +184,7 @@ class DictionaryMediaType extends MediaType {
       margin: const EdgeInsets.only(bottom: 12, left: 6, right: 6),
       child: InkWell(
         child: Container(
-          color: Theme.of(context).unselectedWidgetColor.withOpacity(0.1),
+          color: Theme.of(context).unselectedWidgetColor.withOpacity(0.075),
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
@@ -204,7 +205,14 @@ class DictionaryMediaType extends MediaType {
             ),
           ),
         ),
-        onTap: () async {},
+        onTap: () async {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const CreatorPage(),
+            ),
+          );
+        },
       ),
     );
   }

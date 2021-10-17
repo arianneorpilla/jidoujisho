@@ -1,6 +1,7 @@
 import 'package:chisa/language/app_localizations.dart';
 import 'package:chisa/media/media_type.dart';
 import 'package:chisa/models/app_model.dart';
+import 'package:chisa/util/menu_item.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
@@ -125,7 +126,7 @@ class HomePageState extends State<HomePage> {
 
   Widget getSeeMoreButton(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
+      padding: const EdgeInsets.fromLTRB(12, 0, 14, 0),
       child: GestureDetector(
         child: const Icon(Icons.more_vert),
         onTapDown: (TapDownDetails details) =>
@@ -139,24 +140,6 @@ class HomePageState extends State<HomePage> {
   void showDropDownOptions(BuildContext context, Offset offset) async {
     double left = offset.dx;
     double top = offset.dy;
-
-    PopupMenuItem<VoidCallback> menuItem(
-        {required String label, required IconData icon, required action}) {
-      return PopupMenuItem<VoidCallback>(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Icon(icon, size: 18),
-            const SizedBox(width: 12),
-            Text(label),
-          ],
-        ),
-        value: action,
-        padding: const EdgeInsets.only(left: 20, top: 16, bottom: 16),
-      );
-    }
 
     VoidCallback? callbackAction = await showMenu(
       context: context,
@@ -184,6 +167,12 @@ class HomePageState extends State<HomePage> {
             );
           },
         ),
+        // menuItem(
+        //   label: AppLocalizations.getLocalizedValue(
+        //       appModel.getAppLanguageName(), "options_enhancements"),
+        //   icon: Icons.auto_fix_high,
+        //   action: () async {},
+        // ),
         menuItem(
           label: AppLocalizations.getLocalizedValue(
               appModel.getAppLanguageName(), "options_language"),

@@ -142,7 +142,7 @@ packages:
     source: hosted
     version: "3.7.0"
   collection:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: collection
       url: "https://pub.dartlang.org"

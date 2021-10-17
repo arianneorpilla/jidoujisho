@@ -355,8 +355,8 @@ void importMessageFailed(ValueNotifier<String> progressNotifier) {
 }
 
 Future<DictionarySearchResult> searchDatabase(
-  DictionarySearchResult unprocessedResult,
-) async {
+    DictionarySearchResult unprocessedResult,
+    {int searchLimit = 20}) async {
   String originalTerm = unprocessedResult.originalSearchTerm;
   String fallbackTerm = unprocessedResult.fallbackSearchTerm;
   ByteData storeReference = unprocessedResult.storeReference!;
@@ -364,10 +364,10 @@ Future<DictionarySearchResult> searchDatabase(
   Box box = store.box<DictionaryEntry>();
 
   QueryBuilder exactWordMatch =
-      box.query(DictionaryEntry_.headword.equals(originalTerm));
+      box.query(DictionaryEntry_.word.equals(originalTerm));
   Query exactWordQuery = exactWordMatch.build();
 
-  Query limitedWordQuery = exactWordQuery..limit = 20;
+  Query limitedWordQuery = exactWordQuery..limit = searchLimit;
   unprocessedResult.results
       .addAll(limitedWordQuery.find() as List<DictionaryEntry>);
 
@@ -375,21 +375,21 @@ Future<DictionarySearchResult> searchDatabase(
       box.query(DictionaryEntry_.reading.equals(originalTerm));
   Query exactReadingQuery = exactReadingMatch.build();
 
-  Query limitedReadingQuery = exactReadingQuery..limit = 20;
+  Query limitedReadingQuery = exactReadingQuery..limit = searchLimit;
   List<DictionaryEntry> readingMatchQueries =
       limitedReadingQuery.find() as List<DictionaryEntry>;
   unprocessedResult.results.addAll(readingMatchQueries);
 
   if (unprocessedResult.results.isEmpty) {
     QueryBuilder fallbackMixMatch = box.query(
-        DictionaryEntry_.headword.equals(fallbackTerm) |
+        DictionaryEntry_.word.equals(fallbackTerm) |
             DictionaryEntry_.reading.equals(fallbackTerm) |
-            DictionaryEntry_.headword.startsWith(originalTerm) |
+            DictionaryEntry_.word.startsWith(originalTerm) |
             DictionaryEntry_.reading.startsWith(originalTerm))
       ..order(DictionaryEntry_.popularity, flags: Order.descending);
     Query fallbackMixQuery = fallbackMixMatch.build();
 
-    Query fallbackLimitedQuery = fallbackMixQuery..limit = 30;
+    Query fallbackLimitedQuery = fallbackMixQuery..limit = searchLimit;
     List<DictionaryEntry> likeMatches =
         fallbackLimitedQuery.find() as List<DictionaryEntry>;
     unprocessedResult.results.addAll(likeMatches);
@@ -401,11 +401,11 @@ Future<DictionarySearchResult> searchDatabase(
 
   if (unprocessedResult.results.isEmpty) {
     QueryBuilder startsWithWordMatch = box
-        .query(DictionaryEntry_.headword.startsWith(fallbackTerm))
+        .query(DictionaryEntry_.word.startsWith(fallbackTerm))
           ..order(DictionaryEntry_.popularity, flags: Order.descending);
     Query startsWithWordQuery = startsWithWordMatch.build();
 
-    limitedWordQuery = startsWithWordQuery..limit = 20;
+    limitedWordQuery = startsWithWordQuery..limit = searchLimit;
     unprocessedResult.results
         .addAll(limitedWordQuery.find() as List<DictionaryEntry>);
 
@@ -414,7 +414,7 @@ Future<DictionarySearchResult> searchDatabase(
           ..order(DictionaryEntry_.popularity, flags: Order.descending);
     Query startsWithReadingQuery = startsWithReadingMatch.build();
 
-    limitedReadingQuery = startsWithReadingQuery..limit = 20;
+    limitedReadingQuery = startsWithReadingQuery..limit = searchLimit;
     readingMatchQueries = limitedReadingQuery.find() as List<DictionaryEntry>;
     unprocessedResult.results.addAll(readingMatchQueries);
   }

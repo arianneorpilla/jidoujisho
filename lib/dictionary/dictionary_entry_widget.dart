@@ -12,9 +12,9 @@ class DictionaryEntryWidget {
   final BuildContext context;
   final DictionaryEntry dictionaryEntry;
 
-  Widget buildHeadword() {
+  Widget buildWord() {
     return Text(
-      dictionaryEntry.headword,
+      dictionaryEntry.word,
       style: const TextStyle(
         fontWeight: FontWeight.bold,
         fontSize: 20,
@@ -43,7 +43,7 @@ class DictionaryEntryWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        buildHeadword(),
+        buildWord(),
         const SizedBox(height: 5),
         buildReading(),
         buildMeaning(),
