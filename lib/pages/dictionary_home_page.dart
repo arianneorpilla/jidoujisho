@@ -98,6 +98,9 @@ class DictionaryPageState extends State<DictionaryHomePage> {
               dictionaryFormat: appModel.getDictionaryFormatFromName(
                 result.formatName,
               ),
+              callback: () {
+                setState(() {});
+              },
             );
           },
         ),

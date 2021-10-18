@@ -20,6 +20,7 @@ class DictionaryScrollableWidget extends StatefulWidget {
     required this.dictionaryFormat,
     required this.dictionary,
     this.indexNotifier,
+    this.callback,
     this.dialog = false,
   }) : super(key: key);
 
@@ -29,6 +30,7 @@ class DictionaryScrollableWidget extends StatefulWidget {
   final DictionaryFormat dictionaryFormat;
   final Dictionary dictionary;
   final bool dialog;
+  final VoidCallback? callback;
   final ValueNotifier<int>? indexNotifier;
 
   @override
@@ -91,6 +93,7 @@ class DictionaryScrollableWidgetState
                     dictionary: widget.dictionary,
                     dictionaryFormat: widget.dictionaryFormat,
                     result: widget.result,
+                    callback: widget.callback,
                     indexNotifier: ValueNotifier(swipeIndex),
                   ),
                 );

@@ -19,14 +19,14 @@ class DictionaryDialogWidget extends StatefulWidget {
     required this.dictionaryFormat,
     required this.dictionary,
     required this.indexNotifier,
-    this.scaffoldKey,
+    this.callback,
   }) : super(key: key);
 
   final DictionarySearchResult result;
   final DictionaryMediaHistoryItem mediaHistoryItem;
   final DictionaryFormat dictionaryFormat;
   final Dictionary dictionary;
-  final GlobalKey? scaffoldKey;
+  final VoidCallback? callback;
   final ValueNotifier<int> indexNotifier;
 
   @override
@@ -55,6 +55,7 @@ class DictionaryDialogWidgetState extends State<DictionaryDialogWidget> {
         dictionaryFormat: widget.dictionaryFormat,
         dictionary: widget.dictionary,
         dialog: true,
+        callback: widget.callback,
         indexNotifier: widget.indexNotifier,
       ),
       actions: [
@@ -68,6 +69,8 @@ class DictionaryDialogWidgetState extends State<DictionaryDialogWidget> {
           ),
           onPressed: () async {
             await appModel.removeDictionaryHistoryItem(widget.result);
+
+            widget.callback!();
 
             Navigator.pop(context);
             setState(() {});
