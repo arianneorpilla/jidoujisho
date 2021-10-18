@@ -328,6 +328,19 @@ class AppModel with ChangeNotifier {
     String appDirDocPath = (await getApplicationDocumentsDirectory()).path;
     String dictionaryName = getCurrentDictionaryName();
 
+    List<DictionaryMediaHistoryItem> mediaHistoryItems =
+        getDictionaryMediaHistory().getDictionaryItems().toList();
+    List<DictionarySearchResult> results = mediaHistoryItems
+        .map((item) => DictionarySearchResult.fromJson(item.key))
+        .toList();
+
+    /// Dispose of potential format breaking dictionary entries.
+    for (DictionarySearchResult result in results) {
+      if (result.dictionaryName == dictionaryName) {
+        getDictionaryMediaHistory().removeDictionaryItem(result.toJson());
+      }
+    }
+
     if (getDictionaryRecord().length != 1) {
       setPrevDictionary();
     } else {
