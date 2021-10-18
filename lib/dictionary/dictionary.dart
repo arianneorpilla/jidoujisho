@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:chisa/dictionary/dictionary_entry.dart';
-
 class Dictionary {
   Dictionary({
     required this.dictionaryName,
@@ -24,12 +22,6 @@ class Dictionary {
   /// The metadata pertaining to this dictionary from import. Used for
   /// format-specific enhancements.
   final Map<String, String> metadata;
-
-  /// Search the database for a given search term and return a list of
-  /// appropriate [DictionaryEntry] items.
-  // List<DictionaryEntry> searchForEntries(String searchTerm) {
-
-  // }
 
   /// Get a serialised representation of the dictionary search result
   /// for history and persistence purposes.

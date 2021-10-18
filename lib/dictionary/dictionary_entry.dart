@@ -33,6 +33,12 @@ class DictionaryEntry {
   /// The popularity index of the dictionary entry for sorting purposes.
   late double popularity;
 
+  /// A dummy variable used to store work. Extra has to be serialised for
+  /// preservation in database storage to maintain compatibility with
+  /// ObjectBox, so it is useful to have this when processing dictionary
+  /// entries.
+  Map<dynamic, dynamic> workingArea = {};
+
   /// Get a serialised representation of the dictionary result for history
   /// and persistence purposes.
   String toJson() {

@@ -1,15 +1,19 @@
-import 'package:chisa/dictionary/dictionary_entry_widget.dart';
+import 'package:chisa/dictionary/dictionary.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'package:chisa/dictionary/dictionary_format.dart';
+import 'package:chisa/dictionary/dictionary_scrollable_widget.dart';
 import 'package:chisa/dictionary/dictionary_search_results.dart';
 import 'package:chisa/language/app_localizations.dart';
+import 'package:chisa/media/history_items/dictionary_media_history_item.dart';
+import 'package:chisa/media/media_history_item.dart';
 import 'package:chisa/media/media_type.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/creator_page.dart';
 import 'package:chisa/pages/media_home_page.dart';
 import 'package:chisa/util/busy_icon_button.dart';
 import 'package:chisa/util/center_icon_message.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class DictionaryHomePage extends MediaHomePage {
   const DictionaryHomePage({
@@ -38,7 +42,7 @@ class DictionaryPageState extends State<DictionaryHomePage> {
   Widget build(BuildContext context) {
     appModel = Provider.of<AppModel>(context);
 
-    if (appModel.getDictionaryHistory().isNotEmpty) {
+    if (appModel.getDictionaryMediaHistory().getDictionaryItems().isNotEmpty) {
       return buildBody();
     } else {
       return buildEmptyBody();
@@ -46,34 +50,57 @@ class DictionaryPageState extends State<DictionaryHomePage> {
   }
 
   Widget buildBody() {
-    List<DictionarySearchResult> results =
-        appModel.getDictionaryHistory().reversed.toList();
-    DictionaryFormat dictionaryFormat =
-        appModel.getDictionaryFormatFromName(results.first.formatName);
+    List<DictionaryMediaHistoryItem> mediaHistoryItems = appModel
+        .getDictionaryMediaHistory()
+        .getDictionaryItems()
+        .reversed
+        .toList();
+    List<DictionarySearchResult> results = mediaHistoryItems
+        .map((item) => DictionarySearchResult.fromJson(item.key))
+        .toList();
 
-    ScrollController scrollController = ScrollController();
+    ScrollController scrollController =
+        ScrollController(initialScrollOffset: appModel.scrollOffset);
+    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+      scrollController.addListener(() {
+        appModel.scrollOffset = scrollController.offset;
+      });
+      scrollController.position.isScrollingNotifier.addListener(() {
+        appModel.scrollOffset = scrollController.offset;
+      });
+    });
 
-    return Scrollbar(
-      controller: scrollController,
-      child: ListView.builder(
-        addAutomaticKeepAlives: true,
-        key: UniqueKey(),
-        itemCount: results.length + 2,
-        itemBuilder: (BuildContext context, int index) {
-          if (index == 0) {
-            return buildSearchField();
-          } else if (index == 1) {
-            return buildCardCreatorButton();
-          }
+    return Scaffold(
+      body: RawScrollbar(
+        controller: scrollController,
+        thumbColor:
+            (appModel.getIsDarkMode()) ? Colors.grey[700] : Colors.grey[400],
+        child: ListView.builder(
+          controller: scrollController,
+          addAutomaticKeepAlives: true,
+          key: UniqueKey(),
+          itemCount: results.length + 2,
+          itemBuilder: (BuildContext context, int index) {
+            if (index == 0) {
+              return buildSearchField();
+            } else if (index == 1) {
+              return buildCardCreatorButton();
+            }
 
-          DictionarySearchResult result = results[index - 2];
+            DictionarySearchResult result = results[index - 2];
+            MediaHistoryItem mediaHistoryItem = mediaHistoryItems[index - 2];
 
-          return appModel.buildDictionarySearchResult(
-            context,
-            dictionaryFormat,
-            result.entries.first,
-          );
-        },
+            return DictionaryScrollableWidget(
+              appModel: appModel,
+              mediaHistoryItem: mediaHistoryItem as DictionaryMediaHistoryItem,
+              result: result,
+              dictionary: appModel.getDictionaryFromName(result.dictionaryName),
+              dictionaryFormat: appModel.getDictionaryFormatFromName(
+                result.formatName,
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -104,8 +131,10 @@ class DictionaryPageState extends State<DictionaryHomePage> {
         maxLines: 1,
         controller: wordController,
         enabled: (appModel.getCurrentDictionary() != null),
-        onFieldSubmitted: (result) {
-          // wordFieldSearch();
+        onFieldSubmitted: (result) async {
+          setState(() {});
+          await appModel.searchDictionary(wordController.text);
+          setState(() {});
         },
         decoration: InputDecoration(
           enabledBorder: UnderlineInputBorder(
@@ -126,12 +155,10 @@ class DictionaryPageState extends State<DictionaryHomePage> {
               BusyIconButton(
                 iconSize: 18,
                 icon: const Icon(Icons.search),
-                enabled: (appModel.getCurrentDictionary() != null),
+                enabled: (appModel.getCurrentDictionary() != null &&
+                    !appModel.isSearching),
                 onPressed: () async {
-                  DictionarySearchResult result =
-                      await appModel.searchDictionary(wordController.text);
-                  // print(appModel.getDictionaryHistoryItems());
-
+                  await appModel.searchDictionary(wordController.text);
                   setState(() {});
                 },
               ),

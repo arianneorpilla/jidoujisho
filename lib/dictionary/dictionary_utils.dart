@@ -140,9 +140,15 @@ Future<void> dictionaryFileImport(
     importProcessingParams,
   );
 
+  Dictionary dictionary = Dictionary(
+    dictionaryName: dictionaryName,
+    formatName: dictionaryFormat.formatName,
+    metadata: dictionaryMetadata,
+  );
+
   /// Initialise an ObjectBox [Store], where the new database will be
   /// used from. Stores of existing dictionaries are initialised on startup.
-  Store store = await appModel.initialiseImportedDictionary(dictionaryName);
+  Store store = await appModel.initialiseImportedDictionary(dictionary);
 
   /// Now that a name, entries and metadata are obtained, the entries can
   /// now be placed in a database.
@@ -313,6 +319,28 @@ class ImportDatabaseParams {
   final ByteData storeReference;
 }
 
+/// For database interaction. See [depositEntriesToDatabase].
+class ResultsProcessingParams {
+  ResultsProcessingParams({
+    /// Dictionary search results.
+    required this.result,
+
+    /// Dictionary metadata obtained from import.
+    required this.metadata,
+
+    /// For communication with the [ReceivePort] for isolate updates.
+    required this.sendPort,
+
+    /// For widget creation.
+    this.context,
+  });
+
+  final DictionarySearchResult result;
+  final Map<String, String> metadata;
+  final SendPort sendPort;
+  BuildContext? context;
+}
+
 /// These duplicate functions are necessary for later localisation.
 void importMessageStart(ValueNotifier<String> progressNotifier) {
   progressNotifier.value = "Importing dictionary...";
@@ -355,8 +383,10 @@ void importMessageFailed(ValueNotifier<String> progressNotifier) {
 }
 
 Future<DictionarySearchResult> searchDatabase(
-    DictionarySearchResult unprocessedResult,
-    {int searchLimit = 20}) async {
+    ResultsProcessingParams params) async {
+  DictionarySearchResult unprocessedResult = params.result;
+  int searchLimit = 20;
+
   String originalTerm = unprocessedResult.originalSearchTerm;
   String fallbackTerm = unprocessedResult.fallbackSearchTerm;
   ByteData storeReference = unprocessedResult.storeReference!;

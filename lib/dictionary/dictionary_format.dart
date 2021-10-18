@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:chisa/dictionary/dictionary.dart';
 import 'package:chisa/dictionary/dictionary_entry_widget.dart';
 import 'package:chisa/dictionary/dictionary_utils.dart';
 import 'package:flutter/material.dart';
@@ -91,18 +92,20 @@ abstract class DictionaryFormat {
 
   /// Some formats may want to perform their own queries and override the
   /// standard database query. If not, leave this null, which is the default.
-  late FutureOr<DictionarySearchResult> Function(DictionarySearchResult result)?
-      databaseSearchEnhancement;
+  late FutureOr<DictionarySearchResult> Function(
+      ResultsProcessingParams params)? databaseSearchEnhancement;
 
   /// Some formats may want to override existing search results over the
   /// standard results. If not, leave this null, which is the default.
-  late FutureOr<DictionarySearchResult> Function(DictionarySearchResult result)?
-      searchResultsEnhancement;
+  late FutureOr<DictionarySearchResult> Function(
+      ResultsProcessingParams params)? searchResultsEnhancement;
 
   /// Some formats may want to override the widget representation of their
   /// results. If not, leave this null, which is the default.
   late DictionaryWidget Function({
-    BuildContext context,
-    DictionaryEntry dictionaryEntry,
+    required BuildContext context,
+    required DictionaryEntry dictionaryEntry,
+    required DictionaryFormat dictionaryFormat,
+    required Dictionary dictionary,
   })? widgetDisplayEnhancement;
 }

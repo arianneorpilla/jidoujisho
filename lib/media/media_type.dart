@@ -1,4 +1,5 @@
 import 'package:chisa/media/media_history.dart';
+import 'package:chisa/pages/media_home_page.dart';
 import 'package:flutter/material.dart';
 
 import 'package:chisa/media/media_history_item.dart';
@@ -38,7 +39,7 @@ abstract class MediaType {
   ///
   /// For example, in the case of the Reader, this is a history of books to
   /// pick from. For the player, this shows the playback history.
-  Widget getHomeBody(BuildContext context);
+  MediaHomePage getHomeBody(BuildContext context);
 
   /// A bottom navigation bar item that represents the media type in the home
   /// screen.

@@ -84,10 +84,6 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  void refreshBody() {
-    List<MediaType> mediaTypes = appModel.availableMediaTypes;
-  }
-
   void changeTab(int index) {
     appModel.setLastActiveTabIndex(index);
     setState(() {

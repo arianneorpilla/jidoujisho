@@ -22,6 +22,7 @@ class AppLocalizations {
       'dialog_delete': 'DELETE',
       'dialog_yes': 'YES',
       'dialog_no': 'NO',
+      'dialog_creator': 'CREATOR',
       'creator_options_menu': 'Creator menu addons',
       'creator_options_auto': 'Creator auto addons',
       'widget_options': 'Dictionary widget addons',
@@ -31,6 +32,10 @@ class AppLocalizations {
       'delete_dictionary_confirmation':
           'This dictionary will be removed. Are you sure you want to delete '
               'this?',
+      'search_label_before': 'Search result ',
+      'search_label_middle': 'out of ',
+      'search_label_from': 'from ',
+      'search_label_after': 'found for',
       'field_label_sentence': 'Sentence',
       'field_label_word': 'Word',
       'field_label_reading': 'Reading',
@@ -82,6 +87,7 @@ class AppLocalizations {
       'dialog_delete': 'ITANGGAL',
       'dialog_yes': 'OO',
       'dialog_no': 'HINDI',
+      'dialog_creator': 'CREATOR',
       'creator_options_menu': 'Mga creator menu mod',
       'creator_options_auto': 'Mga creator auto mod',
       'widget_options': 'Mga diksyunaryo widget',
@@ -90,6 +96,10 @@ class AppLocalizations {
       'preparing_card_creator': 'Hinahanda ang card',
       'delete_dictionary_confirmation':
           'Mawawala ang diksyunaryo na ito. Sigurado ka ba sa pagtanggal nito?',
+      'search_label_before': 'Resulto ',
+      'search_label_middle': 'sa ',
+      'search_label_from': 'galing sa ',
+      'search_label_after': 'mula sa',
       'field_label_sentence': 'Pangungusap',
       'field_label_word': 'Salita',
       'field_label_reading': 'Bigkas',

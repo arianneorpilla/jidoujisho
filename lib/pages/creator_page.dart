@@ -296,8 +296,11 @@ class CreatorPageState extends State<CreatorPage> {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Scrollbar(
+              child: RawScrollbar(
                 controller: scrollController,
+                thumbColor: (appModel.getIsDarkMode())
+                    ? Colors.grey[700]
+                    : Colors.grey[400],
                 child: SingleChildScrollView(
                   controller: scrollController,
                   child: Column(

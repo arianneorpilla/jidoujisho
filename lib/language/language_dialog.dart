@@ -62,9 +62,7 @@ class LanguageDialogState extends State<LanguageDialog> {
             ),
           ),
           DropDownMenu(
-            options: appModel.availableLanguages
-                .map((language) => language.languageName)
-                .toList(),
+            options: appModel.availableLanguages.keys.toList(),
             initialOption: appModel.getTargetLanguageName(),
             optionCallback: appModel.setTargetLanguageName,
             voidCallback: () {

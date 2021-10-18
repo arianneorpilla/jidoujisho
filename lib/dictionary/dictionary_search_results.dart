@@ -23,10 +23,10 @@ class DictionarySearchResult {
   final String formatName;
 
   /// An original search term used from the actual media or search made.
-  final String originalSearchTerm;
+  String originalSearchTerm;
 
   /// A lemmatised or fallback search term from the original search term.
-  final String fallbackSearchTerm;
+  String fallbackSearchTerm;
 
   /// A [Uri] in [String] form that represents media that could be in use
   /// when the search was made. Used to return from context from history.
@@ -41,7 +41,7 @@ class DictionarySearchResult {
   final String contextMediaTypeName;
 
   /// The list of processed search results.
-  final List<DictionaryEntry> entries;
+  List<DictionaryEntry> entries;
 
   /// An ObjectBox [Store] reference that is used to make the dictionary
   /// search from another isolate. As an empty [DictionarySearchResult] is

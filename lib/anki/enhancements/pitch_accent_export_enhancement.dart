@@ -30,9 +30,9 @@ class PitchAccentExportEnhancement extends AnkiExportEnhancement {
       word: params.word,
       reading: params.reading,
     ));
-    print(params.reading);
     if (closestReadingMatch != null) {
-      params.reading = getAllHtmlPitch(closestReadingMatch);
+      params.reading = getAllHtmlPitch(
+          closestReadingMatch, jsonDecode(closestReadingMatch.extra));
     }
 
     return params;
@@ -292,15 +292,14 @@ class PitchAccentExportEnhancement extends AnkiExportEnhancement {
     );
   }
 
-  String getAllHtmlPitch(DictionaryEntry entry) {
+  String getAllHtmlPitch(DictionaryEntry entry, List<dynamic> pitchJsons) {
     String allPitches = "";
     String reading = entry.reading;
     if (reading.isEmpty) {
       reading = entry.word;
     }
 
-    List<Map<String, dynamic>> entryJsons = jsonDecode(entry.extra);
-    List<PitchAccentInformation> pitchAccentEntries = entryJsons
+    List<PitchAccentInformation> pitchAccentEntries = pitchJsons
         .map((entryJson) => PitchAccentInformation.fromMap(entryJson))
         .toList();
 

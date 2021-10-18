@@ -1,14 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:chisa/anki/enhancements/pitch_accent_export_enhancement.dart';
 import 'package:chisa/dictionary/dictionary_entry_widget.dart';
 import 'package:chisa/dictionary/dictionary_widget_enhancement.dart';
 import 'package:chisa/dictionary/enhancements/pitch_accent_enhancement.dart';
-import 'package:chisa/media/histories/default_media_history.dart';
+import 'package:chisa/media/histories/dictionary_media_history.dart';
 import 'package:chisa/media/history_items/dictionary_media_history_item.dart';
-import 'package:chisa/media/media_history.dart';
 import 'package:chisa/media/media_history_item.dart';
 import 'package:chisa/util/dictionary_widget_field.dart';
 import 'package:flutter/foundation.dart';
@@ -55,21 +55,26 @@ class AppModel with ChangeNotifier {
   final Map<String, Store> _dictionaryStores = {};
   final SharedPreferences _sharedPreferences;
   final PackageInfo _packageInfo;
+  bool _isSearching = false;
 
-  final List<DictionaryFormat> _availableDictionaryFormats = [
-    YomichanTermBankFormat(),
-  ];
+  final Map<String, DictionaryFormat> _availableDictionaryFormats = {
+    "Yomichan Term Bank": YomichanTermBankFormat()
+  };
 
+  /// Cache for dictionaries to use if they need to improve performance.
+  final Map<String, Map<String, dynamic>> _dictionaryCache = {};
+
+  final Map<String, Dictionary> _availableDictionaries = {};
   final List<MediaType> _availableMediaTypes = [
     PlayerMediaType(),
     ReaderMediaType(),
     DictionaryMediaType(),
   ];
 
-  final List<Language> _availableLanguages = [
-    JapaneseLanguage(),
-    EnglishLanguage(),
-  ];
+  final Map<String, Language> _availableLanguages = {
+    '日本語': JapaneseLanguage(),
+    'English': EnglishLanguage(),
+  };
 
   /// Populated in [initialiseExportEnhancements] when the app is started.
   final List<AnkiExportEnhancement> _availableExportEnhancements = [];
@@ -78,15 +83,19 @@ class AppModel with ChangeNotifier {
   final List<DictionaryWidgetEnhancement> _availableWidgetEnhancements = [];
 
   bool _hasInitialized = false;
+  bool get isSearching => _isSearching;
   PackageInfo get packageInfo => _packageInfo;
   SharedPreferences get sharedPreferences => _sharedPreferences;
+
+  /// Save the offset scroll value of the dictionary.
+  double scrollOffset = 0;
 
   List<AnkiExportEnhancement> get availableExportEnhancements =>
       _availableExportEnhancements;
 
   List<MediaType> get availableMediaTypes => _availableMediaTypes;
-  List<Language> get availableLanguages => _availableLanguages;
-  List<DictionaryFormat> get availableDictionaryFormats =>
+  Map<String, Language> get availableLanguages => _availableLanguages;
+  Map<String, DictionaryFormat> get availableDictionaryFormats =>
       _availableDictionaryFormats;
 
   /// Get the current theme, whether or not dark mode should be on.
@@ -112,7 +121,7 @@ class AppModel with ChangeNotifier {
       return 0;
     } else {
       return availableMediaTypes.indexWhere(
-          (mediaType) => lastActiveMediaType == mediaType.mediaTypeName);
+          (mediaType) => mediaType.mediaTypeName == lastActiveMediaType);
     }
   }
 
@@ -130,6 +139,16 @@ class AppModel with ChangeNotifier {
   /// Save a new active dictionary and remember it on application restart.
   Future<void> setCurrentDictionaryName(String dictionaryName) async {
     await _sharedPreferences.setString("currentDictionaryName", dictionaryName);
+  }
+
+  /// Method for future proofing and saving performance. Dump one time data
+  /// stores for use here.
+  Map<String, dynamic> getDictionaryCache(String dictionaryName) {
+    if (_dictionaryCache[dictionaryName] == null) {
+      _dictionaryCache[dictionaryName] = {};
+    }
+
+    return _dictionaryCache[dictionaryName]!;
   }
 
   /// With the list of imported dictionaries, set the next one after the
@@ -216,7 +235,7 @@ class AppModel with ChangeNotifier {
 
   Future<void> initialiseImportedDictionaries() async {
     getDictionaryRecord().forEach((dictionary) {
-      initialiseImportedDictionary(dictionary.dictionaryName);
+      initialiseImportedDictionary(dictionary);
     });
   }
 
@@ -274,30 +293,30 @@ class AppModel with ChangeNotifier {
   }
 
   Future<void> initialiseLanguage() async {
-    for (Language language in availableLanguages) {
-      if (language.languageName == getTargetLanguageName() &&
-          !language.isInitialised) {
-        await language.initialiseLanguage();
-      }
+    Language language = getCurrentLanguage();
+    if (!language.isInitialised) {
+      language.initialiseLanguage();
     }
   }
 
-  Future<Store> initialiseImportedDictionary(String dictionaryName) async {
+  Future<Store> initialiseImportedDictionary(Dictionary dictionary) async {
     String appDirDocPath = (await getApplicationDocumentsDirectory()).path;
 
     Directory objectBoxDirDirectory = Directory(
-      p.join(appDirDocPath, "customDictionaries", dictionaryName),
+      p.join(appDirDocPath, "customDictionaries", dictionary.dictionaryName),
     );
     if (!objectBoxDirDirectory.existsSync()) {
       objectBoxDirDirectory.createSync(recursive: true);
     }
 
-    _dictionaryStores[dictionaryName] = Store(
+    _dictionaryStores[dictionary.dictionaryName] = Store(
       getObjectBoxModel(),
       directory: objectBoxDirDirectory.path,
     );
 
-    return _dictionaryStores[dictionaryName]!;
+    _availableDictionaries[dictionary.dictionaryName] = dictionary;
+
+    return _dictionaryStores[dictionary.dictionaryName]!;
   }
 
   Dictionary? getCurrentDictionary() {
@@ -383,14 +402,12 @@ class AppModel with ChangeNotifier {
   }
 
   List<String> getDictionaryFormatNames() {
-    return availableDictionaryFormats
-        .map((format) => format.formatName)
-        .toList();
+    return availableDictionaryFormats.keys.toList();
   }
 
   String getTargetLanguageName() {
     return _sharedPreferences.getString("targetLanguage") ??
-        availableLanguages.first.languageName;
+        availableLanguages.keys.first;
   }
 
   Future<void> setTargetLanguageName(String targetLanguage) async {
@@ -409,13 +426,16 @@ class AppModel with ChangeNotifier {
   }
 
   DictionaryFormat getDictionaryFormatFromName(String formatName) {
-    return availableDictionaryFormats
-        .firstWhere((format) => format.formatName == formatName);
+    return availableDictionaryFormats[formatName]!;
+  }
+
+  Dictionary getDictionaryFromName(String dictionaryName) {
+    return getDictionaryRecord().firstWhere(
+        (dictionary) => dictionary.dictionaryName == dictionaryName);
   }
 
   Language getCurrentLanguage() {
-    return availableLanguages.firstWhere(
-        (language) => language.languageName == getTargetLanguageName());
+    return availableLanguages[getTargetLanguageName()]!;
   }
 
   MediaType getMediaTypeFromName(String mediaTypeName) {
@@ -429,6 +449,14 @@ class AppModel with ChangeNotifier {
     int contextPosition = -1,
     String contextMediaTypeName = "",
   }) async {
+    _isSearching = true;
+
+    // For isolate updates.
+    ReceivePort receivePort = ReceivePort();
+    receivePort.listen((data) {
+      debugPrint(data);
+    });
+
     Language currentLanguage = getCurrentLanguage();
     Dictionary currentDictionary = getCurrentDictionary()!;
     DictionaryFormat dictionaryFormat =
@@ -450,23 +478,37 @@ class AppModel with ChangeNotifier {
     /// If the [DictionaryFormat] has a database search function override, use
     /// that instead of this.
     DictionarySearchResult unprocessedResult;
+    ResultsProcessingParams params = ResultsProcessingParams(
+      result: emptyResult,
+      metadata: currentDictionary.metadata,
+      sendPort: receivePort.sendPort,
+    );
     unprocessedResult = await compute(
-        dictionaryFormat.databaseSearchEnhancement ?? searchDatabase,
-        emptyResult);
+        dictionaryFormat.databaseSearchEnhancement ?? searchDatabase, params);
 
     /// If a [DictionaryFormat] has a specific post-processing method for a
     /// database search result, clean it up. Otherwise, do nothing.
     DictionarySearchResult processedResult;
+    params = ResultsProcessingParams(
+      result: unprocessedResult,
+      metadata: currentDictionary.metadata,
+      sendPort: receivePort.sendPort,
+    );
     if (dictionaryFormat.searchResultsEnhancement != null) {
-      processedResult = await compute(
-          dictionaryFormat.searchResultsEnhancement!, unprocessedResult);
+      processedResult =
+          await compute(dictionaryFormat.searchResultsEnhancement!, params);
     } else {
       processedResult = unprocessedResult;
     }
 
     if (processedResult.entries.isNotEmpty) {
-      await addDictionaryHistoryItem(processedResult);
+      await addDictionaryHistoryItem(
+        DictionaryMediaHistoryItem.fromDictionarySearchResult(
+          processedResult,
+        ),
+      );
     }
+    _isSearching = false;
 
     return processedResult;
   }
@@ -536,26 +578,25 @@ class AppModel with ChangeNotifier {
     return enhancements;
   }
 
-  MediaHistory getDictionaryMediaHistory() {
-    return DefaultMediaHistory(
+  DictionaryMediaHistory getDictionaryMediaHistory() {
+    return DictionaryMediaHistory(
       prefsDirectory: "dictionary_media_type",
       sharedPreferences: sharedPreferences,
     );
   }
 
-  List<DictionarySearchResult> getDictionaryHistory() {
-    List<MediaHistoryItem> items =
-        getDictionaryMediaHistory().getItems().cast<MediaHistoryItem>();
-
-    return items.map((item) {
-      return DictionarySearchResult.fromJson(item.key);
-    }).toList();
+  Future<void> addDictionaryHistoryItem(MediaHistoryItem item) {
+    return getDictionaryMediaHistory().addItem(item);
   }
 
-  Future<void> addDictionaryHistoryItem(DictionarySearchResult result) {
-    return getDictionaryMediaHistory().addItem(
-      DictionaryMediaHistoryItem.fromDictionarySearchResult(result),
-    );
+  Future<void> updateDictionaryHistoryIndex(
+      DictionaryMediaHistoryItem newItem, int index) async {
+    List<DictionaryMediaHistoryItem> history =
+        getDictionaryMediaHistory().getDictionaryItems();
+    history.firstWhere((entry) => entry.key == newItem.key).progress =
+        newItem.progress;
+
+    await getDictionaryMediaHistory().setItems(history);
   }
 
   Future<void> removeDictionaryHistoryItem(DictionarySearchResult result) {
@@ -564,8 +605,9 @@ class AppModel with ChangeNotifier {
 
   Widget buildDictionarySearchResult(
     BuildContext context,
+    DictionaryEntry dictionaryEntry,
     DictionaryFormat dictionaryFormat,
-    DictionaryEntry entry,
+    Dictionary dictionary,
   ) {
     Widget? word;
     Widget? reading;
@@ -579,18 +621,22 @@ class AppModel with ChangeNotifier {
         getFieldWidgetEnhancement(DictionaryWidgetField.meaning);
 
     if (wordEnhancement != null) {
-      word = wordEnhancement.buildWord(entry);
+      word = wordEnhancement.buildWord(dictionaryEntry);
     }
     if (readingEnhancement != null) {
-      reading = readingEnhancement.buildReading(entry);
+      reading = readingEnhancement.buildReading(dictionaryEntry);
     }
     if (meaningEnhancement != null) {
-      meaning = meaningEnhancement.buildMeaning(entry);
+      meaning = meaningEnhancement.buildMeaning(dictionaryEntry);
     }
 
     if (dictionaryFormat.widgetDisplayEnhancement != null) {
-      return dictionaryFormat.widgetDisplayEnhancement!
-              (context: context, dictionaryEntry: entry)
+      return dictionaryFormat.widgetDisplayEnhancement!(
+        context: context,
+        dictionaryEntry: dictionaryEntry,
+        dictionaryFormat: dictionaryFormat,
+        dictionary: dictionary,
+      )
           .buildMainWidget(
         word: word,
         reading: reading,
@@ -599,7 +645,9 @@ class AppModel with ChangeNotifier {
     } else {
       return DictionaryWidget(
         context: context,
-        dictionaryEntry: entry,
+        dictionaryEntry: dictionaryEntry,
+        dictionaryFormat: dictionaryFormat,
+        dictionary: dictionary,
       ).buildMainWidget(
         word: word,
         reading: reading,

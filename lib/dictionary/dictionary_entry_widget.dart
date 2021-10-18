@@ -1,4 +1,6 @@
+import 'package:chisa/dictionary/dictionary.dart';
 import 'package:chisa/dictionary/dictionary_entry.dart';
+import 'package:chisa/dictionary/dictionary_format.dart';
 import 'package:flutter/material.dart';
 
 /// A standard dictionary entry widget for use of any simple formats, to be
@@ -7,10 +9,14 @@ class DictionaryWidget {
   DictionaryWidget({
     required this.context,
     required this.dictionaryEntry,
+    required this.dictionaryFormat,
+    required this.dictionary,
   });
 
   final BuildContext context;
   final DictionaryEntry dictionaryEntry;
+  final DictionaryFormat dictionaryFormat;
+  final Dictionary dictionary;
 
   Widget buildWord() {
     return Text(

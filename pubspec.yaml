@@ -60,6 +60,8 @@ dependencies:
   progress_indicators: ^1.0.0
   collection: ^1.15.0
   app_popup_menu: ^1.0.0
+  kana_kit: ^2.0.0
+  fluttertoast: ^8.0.8
 
 dev_dependencies:
   flutter_test:

@@ -1,5 +1,6 @@
 import 'package:chisa/util/reading_direction.dart';
 import 'package:chisa/language/language.dart';
+import 'package:kana_kit/kana_kit.dart';
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:ve_dart/ve_dart.dart';
 
@@ -13,6 +14,7 @@ class JapaneseLanguage extends Language {
         );
 
   Mecab mecab = Mecab();
+  KanaKit kanaKit = const KanaKit();
 
   @override
   Future<void> initialiseLanguage() async {
@@ -21,6 +23,10 @@ class JapaneseLanguage extends Language {
 
   @override
   String getRootForm(String word) {
+    if (kanaKit.isRomaji(word)) {
+      return kanaKit.toHiragana(word);
+    }
+
     List<Word> wordTokens = parseVe(mecab, word);
     return wordTokens.first.lemma ?? "";
   }

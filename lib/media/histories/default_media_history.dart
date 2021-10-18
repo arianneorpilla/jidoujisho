@@ -8,7 +8,7 @@ class DefaultMediaHistory extends MediaHistory {
   DefaultMediaHistory({
     required sharedPreferences,
     required prefsDirectory,
-    maxItemCount = 50,
+    maxItemCount = 30,
   }) : super(
           sharedPreferences,
           prefsDirectory,

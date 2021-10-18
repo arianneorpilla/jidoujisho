@@ -157,8 +157,10 @@ class DictionaryDialogState extends State<DictionaryDialog> {
     String currentDictionary = appModel.getCurrentDictionaryName();
     List<Dictionary> importedDictionaries = appModel.getDictionaryRecord();
 
-    return Scrollbar(
+    return RawScrollbar(
       controller: scrollController,
+      thumbColor:
+          (appModel.getIsDarkMode()) ? Colors.grey[700] : Colors.grey[400],
       child: ListView.builder(
         controller: scrollController,
         shrinkWrap: true,
