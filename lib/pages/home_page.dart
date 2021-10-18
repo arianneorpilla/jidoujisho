@@ -1,6 +1,10 @@
+import 'package:chisa/dictionary/dictionary_widget_enhancement.dart';
+import 'package:chisa/dictionary/dictionary_widget_enhancement_dialog.dart';
 import 'package:chisa/language/app_localizations.dart';
 import 'package:chisa/media/media_type.dart';
 import 'package:chisa/models/app_model.dart';
+import 'package:chisa/pages/creator_page.dart';
+import 'package:chisa/util/dictionary_widget_field.dart';
 import 'package:chisa/util/menu_item.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -25,10 +29,10 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     appModel = Provider.of<AppModel>(context);
-    appModel.initialiseImportedDictionaries();
 
     selectedTabIndex = appModel.getLastActiveTabIndex();
     mediaType = appModel.availableMediaTypes[selectedTabIndex];
+    List<MediaType> mediaTypes = appModel.availableMediaTypes;
 
     return Scaffold(
       appBar: AppBar(
@@ -39,7 +43,7 @@ class HomePageState extends State<HomePage> {
           getSeeMoreButton(context),
         ],
       ),
-      body: getBody(context),
+      body: mediaTypes[selectedTabIndex].getHomeBody(context),
       bottomNavigationBar: getBottomNavigationBar(),
     );
   }
@@ -80,9 +84,8 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  Widget getBody(BuildContext context) {
+  void refreshBody() {
     List<MediaType> mediaTypes = appModel.availableMediaTypes;
-    return mediaTypes[selectedTabIndex].getHomeBody(context);
   }
 
   void changeTab(int index) {
@@ -165,14 +168,17 @@ class HomePageState extends State<HomePage> {
               context,
               manageAllowed: true,
             );
+            setState(() {});
           },
         ),
-        // menuItem(
-        //   label: AppLocalizations.getLocalizedValue(
-        //       appModel.getAppLanguageName(), "options_enhancements"),
-        //   icon: Icons.auto_fix_high,
-        //   action: () async {},
-        // ),
+        menuItem(
+          label: AppLocalizations.getLocalizedValue(
+              appModel.getAppLanguageName(), "options_enhancements"),
+          icon: Icons.auto_fix_high,
+          action: () async {
+            showEnhancementOptions(context, offset);
+          },
+        ),
         menuItem(
           label: AppLocalizations.getLocalizedValue(
               appModel.getAppLanguageName(), "options_language"),
@@ -221,6 +227,116 @@ class HomePageState extends State<HomePage> {
                 ),
               ),
             );
+          },
+        ),
+      ],
+      elevation: 8.0,
+    );
+
+    if (callbackAction != null) {
+      callbackAction();
+    }
+  }
+
+  void showEnhancementOptions(BuildContext context, Offset offset) async {
+    double left = offset.dx;
+    double top = offset.dy;
+
+    VoidCallback? callbackAction = await showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(left, top, 0, 0),
+      items: [
+        menuItem(
+          label: AppLocalizations.getLocalizedValue(
+              appModel.getAppLanguageName(), "creator_options_menu"),
+          icon: Icons.widgets,
+          action: () async {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (context) => const CreatorPage(editMode: true),
+              ),
+            );
+            setState(() {});
+          },
+        ),
+        menuItem(
+          label: AppLocalizations.getLocalizedValue(
+              appModel.getAppLanguageName(), "creator_options_auto"),
+          icon: Icons.hdr_auto,
+          action: () async {
+            await Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (context) => const CreatorPage(autoMode: true),
+              ),
+            );
+            setState(() {});
+          },
+        ),
+        menuItem(
+          label: AppLocalizations.getLocalizedValue(
+              appModel.getAppLanguageName(), "widget_options"),
+          icon: Icons.auto_stories,
+          action: () async {
+            showWidgetFieldOptions(context, offset);
+          },
+        ),
+      ],
+      elevation: 8.0,
+    );
+
+    if (callbackAction != null) {
+      callbackAction();
+    }
+  }
+
+  void showWidgetFieldOptions(BuildContext context, Offset offset) async {
+    double left = offset.dx;
+    double top = offset.dy;
+
+    Future<void> changeFieldWidget(DictionaryWidgetField field) async {
+      DictionaryWidgetEnhancement? enhancement = await showDialog(
+        context: context,
+        builder: (context) => DictionaryWidgetEnhancementDialog(
+          field: field,
+        ),
+      );
+
+      if (enhancement != null) {
+        if (enhancement == appModel.getFieldWidgetEnhancement(field)) {
+          await enhancement.setDisabled(field);
+        } else {
+          await enhancement.setEnabled(field);
+        }
+      }
+      setState(() {});
+    }
+
+    VoidCallback? callbackAction = await showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(left, top, 0, 0),
+      items: [
+        menuItem(
+          label: AppLocalizations.getLocalizedValue(
+              appModel.getAppLanguageName(), "field_label_word"),
+          icon: Icons.speaker_notes_outlined,
+          action: () async {
+            await changeFieldWidget(DictionaryWidgetField.word);
+          },
+        ),
+        menuItem(
+          label: AppLocalizations.getLocalizedValue(
+              appModel.getAppLanguageName(), "field_label_reading"),
+          icon: Icons.surround_sound_outlined,
+          action: () async {
+            await changeFieldWidget(DictionaryWidgetField.reading);
+          },
+        ),
+        menuItem(
+          label: AppLocalizations.getLocalizedValue(
+              appModel.getAppLanguageName(), "field_label_meaning"),
+          icon: Icons.translate_rounded,
+          action: () async {
+            await changeFieldWidget(DictionaryWidgetField.meaning);
           },
         ),
       ],

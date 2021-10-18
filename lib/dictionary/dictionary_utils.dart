@@ -22,7 +22,7 @@ Future<void> dictionaryFileImport(
   AppModel appModel,
   DictionaryFormat dictionaryFormat,
 ) async {
-  // A [ValueNotifier] that will update a message based on the progress of the
+  /// A [ValueNotifier] that will update a message based on the progress of the
   /// on-going dictionary file import.
   ValueNotifier<String> progressNotifier = ValueNotifier<String>("");
 
@@ -368,7 +368,7 @@ Future<DictionarySearchResult> searchDatabase(
   Query exactWordQuery = exactWordMatch.build();
 
   Query limitedWordQuery = exactWordQuery..limit = searchLimit;
-  unprocessedResult.results
+  unprocessedResult.entries
       .addAll(limitedWordQuery.find() as List<DictionaryEntry>);
 
   QueryBuilder exactReadingMatch =
@@ -378,9 +378,9 @@ Future<DictionarySearchResult> searchDatabase(
   Query limitedReadingQuery = exactReadingQuery..limit = searchLimit;
   List<DictionaryEntry> readingMatchQueries =
       limitedReadingQuery.find() as List<DictionaryEntry>;
-  unprocessedResult.results.addAll(readingMatchQueries);
+  unprocessedResult.entries.addAll(readingMatchQueries);
 
-  if (unprocessedResult.results.isEmpty) {
+  if (unprocessedResult.entries.isEmpty) {
     QueryBuilder fallbackMixMatch = box.query(
         DictionaryEntry_.word.equals(fallbackTerm) |
             DictionaryEntry_.reading.equals(fallbackTerm) |
@@ -392,21 +392,21 @@ Future<DictionarySearchResult> searchDatabase(
     Query fallbackLimitedQuery = fallbackMixQuery..limit = searchLimit;
     List<DictionaryEntry> likeMatches =
         fallbackLimitedQuery.find() as List<DictionaryEntry>;
-    unprocessedResult.results.addAll(likeMatches);
+    unprocessedResult.entries.addAll(likeMatches);
   }
 
-  if (unprocessedResult.results.isNotEmpty) {
+  if (unprocessedResult.entries.isNotEmpty) {
     return unprocessedResult;
   }
 
-  if (unprocessedResult.results.isEmpty) {
+  if (unprocessedResult.entries.isEmpty) {
     QueryBuilder startsWithWordMatch = box
         .query(DictionaryEntry_.word.startsWith(fallbackTerm))
           ..order(DictionaryEntry_.popularity, flags: Order.descending);
     Query startsWithWordQuery = startsWithWordMatch.build();
 
     limitedWordQuery = startsWithWordQuery..limit = searchLimit;
-    unprocessedResult.results
+    unprocessedResult.entries
         .addAll(limitedWordQuery.find() as List<DictionaryEntry>);
 
     QueryBuilder startsWithReadingMatch = box
@@ -416,7 +416,7 @@ Future<DictionarySearchResult> searchDatabase(
 
     limitedReadingQuery = startsWithReadingQuery..limit = searchLimit;
     readingMatchQueries = limitedReadingQuery.find() as List<DictionaryEntry>;
-    unprocessedResult.results.addAll(readingMatchQueries);
+    unprocessedResult.entries.addAll(readingMatchQueries);
   }
 
   return unprocessedResult;

@@ -59,6 +59,7 @@ dependencies:
   objectbox_flutter_libs: any
   progress_indicators: ^1.0.0
   collection: ^1.15.0
+  app_popup_menu: ^1.0.0
 
 dev_dependencies:
   flutter_test:
@@ -99,6 +100,7 @@ flutter:
   assets:
     - assets/icon/icon.png
     - assets/ipadic/
+    - assets/kanjium/accents.txt
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

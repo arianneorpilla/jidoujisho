@@ -2,12 +2,15 @@ import 'dart:async';
 
 import 'package:chisa/anki/anki_export_enhancement.dart';
 import 'package:chisa/anki/anki_export_params.dart';
+import 'package:chisa/models/app_model.dart';
 import 'package:chisa/util/anki_export_field.dart';
 import 'package:flutter/material.dart';
 
-class ClearButton extends AnkiExportEnhancement {
-  ClearButton({appModel, enhancementField})
-      : super(
+class ClearButtonEnhancement extends AnkiExportEnhancement {
+  ClearButtonEnhancement({
+    required AppModel appModel,
+    required AnkiExportField enhancementField,
+  }) : super(
             appModel: appModel,
             enhancementName: "Clear Button",
             enhancementDescription: "Quickly empty a field's parameters.",

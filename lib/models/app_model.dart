@@ -2,9 +2,27 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:chisa/anki/enhancements/pitch_accent_export_enhancement.dart';
+import 'package:chisa/dictionary/dictionary_entry_widget.dart';
+import 'package:chisa/dictionary/dictionary_widget_enhancement.dart';
+import 'package:chisa/dictionary/enhancements/pitch_accent_enhancement.dart';
+import 'package:chisa/media/histories/default_media_history.dart';
+import 'package:chisa/media/history_items/dictionary_media_history_item.dart';
+import 'package:chisa/media/media_history.dart';
+import 'package:chisa/media/media_history_item.dart';
+import 'package:chisa/util/dictionary_widget_field.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:objectbox/objectbox.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path/path.dart' as p;
+import 'package:collection/collection.dart';
+
 import 'package:chisa/anki/anki_export_enhancement.dart';
 import 'package:chisa/anki/anki_export_params.dart';
-import 'package:chisa/anki/enhancements/clear_button.dart';
+import 'package:chisa/anki/enhancements/clear_button_enhancement.dart';
 import 'package:chisa/dictionary/dictionary.dart';
 import 'package:chisa/dictionary/dictionary_dialog.dart';
 import 'package:chisa/dictionary/dictionary_entry.dart';
@@ -23,42 +41,43 @@ import 'package:chisa/media/media_types/reader_media_type.dart';
 import 'package:chisa/media/media_types/player_media_type.dart';
 import 'package:chisa/objectbox.g.dart';
 import 'package:chisa/util/anki_export_field.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:objectbox/objectbox.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:path/path.dart' as p;
-import 'package:collection/collection.dart';
 
 /// A scoped model for parameters that affect the entire application.
 /// [Provider] is used for global state management across multiple layers,
 /// especially for preferences that persist across application restarts.
 class AppModel with ChangeNotifier {
-  Language _language;
+  AppModel({
+    required sharedPreferences,
+    required packageInfo,
+  })  : _sharedPreferences = sharedPreferences,
+        _packageInfo = packageInfo;
+
   final Map<String, Store> _dictionaryStores = {};
   final SharedPreferences _sharedPreferences;
   final PackageInfo _packageInfo;
-  AnkiExportParams _ankiExportParams = AnkiExportParams();
 
   final List<DictionaryFormat> _availableDictionaryFormats = [
     YomichanTermBankFormat(),
   ];
+
   final List<MediaType> _availableMediaTypes = [
     PlayerMediaType(),
     ReaderMediaType(),
     DictionaryMediaType(),
   ];
+
   final List<Language> _availableLanguages = [
     JapaneseLanguage(),
     EnglishLanguage(),
   ];
+
+  /// Populated in [initialiseExportEnhancements] when the app is started.
   final List<AnkiExportEnhancement> _availableExportEnhancements = [];
 
-  bool _firstTimeInitialisation = true;
+  /// Populated in [initialiseExportEnhancements] when the app is started.
+  final List<DictionaryWidgetEnhancement> _availableWidgetEnhancements = [];
 
-  Language get language => _language;
+  bool _hasInitialized = false;
   PackageInfo get packageInfo => _packageInfo;
   SharedPreferences get sharedPreferences => _sharedPreferences;
 
@@ -69,14 +88,6 @@ class AppModel with ChangeNotifier {
   List<Language> get availableLanguages => _availableLanguages;
   List<DictionaryFormat> get availableDictionaryFormats =>
       _availableDictionaryFormats;
-  AnkiExportParams get ankiExportParams => _ankiExportParams;
-
-  AppModel({
-    required sharedPreferences,
-    required packageInfo,
-  })  : _language = JapaneseLanguage(),
-        _sharedPreferences = sharedPreferences,
-        _packageInfo = packageInfo;
 
   /// Get the current theme, whether or not dark mode should be on.
   bool getIsDarkMode() {
@@ -89,12 +100,6 @@ class AppModel with ChangeNotifier {
     bool isDarkMode = getIsDarkMode();
     _sharedPreferences.setBool("isDarkMode", !isDarkMode);
 
-    notifyListeners();
-  }
-
-  /// Change the language to the new provided option.
-  void changeLanguage(Language language) {
-    _language = language;
     notifyListeners();
   }
 
@@ -200,28 +205,81 @@ class AppModel with ChangeNotifier {
   }
 
   Future<void> initialiseAppModel() async {
-    if (_firstTimeInitialisation) {
+    if (!_hasInitialized) {
       await initialiseImportedDictionaries();
-      initialiseExportEnhancements();
-      for (Language language in availableLanguages) {
-        await language.initialiseLanguage();
-      }
-      _firstTimeInitialisation = false;
+      await initialiseExportEnhancements();
+      await initialiseWidgetEnhancements();
+      await initialiseLanguage();
+      _hasInitialized = true;
     }
-  }
-
-  void initialiseExportEnhancements() {
-    for (AnkiExportField field in AnkiExportField.values) {
-      _availableExportEnhancements
-          .add(ClearButton(appModel: this, enhancementField: field));
-    }
-    _availableExportEnhancements.addAll([]);
   }
 
   Future<void> initialiseImportedDictionaries() async {
     getDictionaryRecord().forEach((dictionary) {
       initialiseImportedDictionary(dictionary.dictionaryName);
     });
+  }
+
+  Future<void> initialiseExportEnhancements() async {
+    for (AnkiExportField field in AnkiExportField.values) {
+      _availableExportEnhancements.add(
+        ClearButtonEnhancement(
+          appModel: this,
+          enhancementField: field,
+        ),
+      );
+    }
+    _availableExportEnhancements.addAll([
+      PitchAccentExportEnhancement(appModel: this),
+    ]);
+
+    for (AnkiExportField field in AnkiExportField.values) {
+      for (AnkiExportEnhancement? enhancement
+          in getExportEnabledFieldEnhancement(field)) {
+        if (enhancement != null && !enhancement.isInitialised) {
+          await enhancement.initialiseEnhancement();
+          enhancement.isInitialised = true;
+        }
+      }
+
+      AnkiExportEnhancement? enhancement = getAutoFieldEnhancement(field);
+      if (enhancement != null && !enhancement.isInitialised) {
+        await enhancement.initialiseEnhancement();
+        enhancement.isInitialised = true;
+      }
+    }
+  }
+
+  Future<void> initialiseWidgetEnhancements() async {
+    // for (DictionaryWidgetField field in DictionaryWidgetField.values) {
+    //   _availableExportEnhancements.add(
+    //     ClearButtonEnhancement(
+    //       appModel: this,
+    //       enhancementField: field,
+    //     ),
+    //   );
+    // }
+    _availableWidgetEnhancements.addAll([
+      PitchAccentEnhancement(appModel: this),
+    ]);
+
+    for (DictionaryWidgetField field in DictionaryWidgetField.values) {
+      DictionaryWidgetEnhancement? enhancement =
+          getFieldWidgetEnhancement(field);
+      if (enhancement != null && !enhancement.isInitialised) {
+        await enhancement.initialiseEnhancement();
+        enhancement.isInitialised = true;
+      }
+    }
+  }
+
+  Future<void> initialiseLanguage() async {
+    for (Language language in availableLanguages) {
+      if (language.languageName == getTargetLanguageName() &&
+          !language.isInitialised) {
+        await language.initialiseLanguage();
+      }
+    }
   }
 
   Future<Store> initialiseImportedDictionary(String dictionaryName) async {
@@ -242,8 +300,8 @@ class AppModel with ChangeNotifier {
     return _dictionaryStores[dictionaryName]!;
   }
 
-  Dictionary getCurrentDictionary() {
-    return getDictionaryRecord().firstWhere((dictionary) =>
+  Dictionary? getCurrentDictionary() {
+    return getDictionaryRecord().firstWhereOrNull((dictionary) =>
         dictionary.dictionaryName == getCurrentDictionaryName());
   }
 
@@ -337,6 +395,7 @@ class AppModel with ChangeNotifier {
 
   Future<void> setTargetLanguageName(String targetLanguage) async {
     await _sharedPreferences.setString("targetLanguage", targetLanguage);
+    await initialiseLanguage();
   }
 
   String getAppLanguageName() {
@@ -354,7 +413,7 @@ class AppModel with ChangeNotifier {
         .firstWhere((format) => format.formatName == formatName);
   }
 
-  Language getCurrentLangauge() {
+  Language getCurrentLanguage() {
     return availableLanguages.firstWhere(
         (language) => language.languageName == getTargetLanguageName());
   }
@@ -370,23 +429,46 @@ class AppModel with ChangeNotifier {
     int contextPosition = -1,
     String contextMediaTypeName = "",
   }) async {
-    Language currentLanguage = getCurrentLangauge();
-    Dictionary currentDictionary = getCurrentDictionary();
+    Language currentLanguage = getCurrentLanguage();
+    Dictionary currentDictionary = getCurrentDictionary()!;
+    DictionaryFormat dictionaryFormat =
+        getDictionaryFormatFromName(currentDictionary.formatName);
 
     Store store = _dictionaryStores[currentDictionary.dictionaryName]!;
     ByteData storeReference = store.reference;
 
-    DictionarySearchResult unprocessedResult = DictionarySearchResult(
+    /// Populate an empty [DictionarySearchResult] with metadata, it will be
+    /// filled with database search results in the next step.
+    DictionarySearchResult emptyResult = DictionarySearchResult(
         dictionaryName: currentDictionary.dictionaryName,
         formatName: currentDictionary.formatName,
         originalSearchTerm: searchTerm,
         fallbackSearchTerm: currentLanguage.getRootForm(searchTerm),
-        results: [],
+        entries: [],
         storeReference: storeReference);
-    DictionarySearchResult processedResult =
-        await compute(searchDatabase, unprocessedResult);
 
-    return Future.value(processedResult);
+    /// If the [DictionaryFormat] has a database search function override, use
+    /// that instead of this.
+    DictionarySearchResult unprocessedResult;
+    unprocessedResult = await compute(
+        dictionaryFormat.databaseSearchEnhancement ?? searchDatabase,
+        emptyResult);
+
+    /// If a [DictionaryFormat] has a specific post-processing method for a
+    /// database search result, clean it up. Otherwise, do nothing.
+    DictionarySearchResult processedResult;
+    if (dictionaryFormat.searchResultsEnhancement != null) {
+      processedResult = await compute(
+          dictionaryFormat.searchResultsEnhancement!, unprocessedResult);
+    } else {
+      processedResult = unprocessedResult;
+    }
+
+    if (processedResult.entries.isNotEmpty) {
+      await addDictionaryHistoryItem(processedResult);
+    }
+
+    return processedResult;
   }
 
   void clearExportParams(AnkiExportParams params) {
@@ -399,51 +481,11 @@ class AppModel with ChangeNotifier {
     params.audioFile = null;
   }
 
-  void setExportParams(AnkiExportParams params) {
-    _ankiExportParams = params;
-    notifyListeners();
-  }
-
-  void setExportWord(String word) {
-    _ankiExportParams.word = word;
-    notifyListeners();
-  }
-
-  void setExportSentence(String context) {
-    _ankiExportParams.sentence = context;
-    notifyListeners();
-  }
-
-  void setExportReading(String reading) {
-    _ankiExportParams.reading = reading;
-    notifyListeners();
-  }
-
-  void setExportMeaning(String meaning) {
-    _ankiExportParams.meaning = meaning;
-    notifyListeners();
-  }
-
-  void setExportExtra(String extra) {
-    _ankiExportParams.extra = extra;
-    notifyListeners();
-  }
-
-  void setExportImageFile(File? imageFile) {
-    _ankiExportParams.imageFile = imageFile;
-    notifyListeners();
-  }
-
-  void setExportAudioFile(File? audioFile) {
-    _ankiExportParams.audioFile = audioFile;
-    notifyListeners();
-  }
-
   List<AnkiExportEnhancement?> getExportEnabledFieldEnhancement(
       AnkiExportField field) {
     List<AnkiExportEnhancement?> enhancements = [];
 
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 5; i++) {
       AnkiExportEnhancement? enhancement =
           _availableExportEnhancements.firstWhereOrNull((enhancement) =>
               enhancement.enhancementField == field &&
@@ -466,11 +508,103 @@ class AppModel with ChangeNotifier {
                 .getString(AnkiExportEnhancement.getFieldAutoKey(field)));
   }
 
-  List<AnkiExportEnhancement> getFieldEnhancements(AnkiExportField field) {
+  List<AnkiExportEnhancement> getFieldExportEnhancements(
+      AnkiExportField field) {
     List<AnkiExportEnhancement> enhancements = _availableExportEnhancements
         .where((enhancement) => enhancement.enhancementField == field)
         .toList();
 
     return enhancements;
+  }
+
+  DictionaryWidgetEnhancement? getFieldWidgetEnhancement(
+      DictionaryWidgetField field) {
+    return _availableWidgetEnhancements.firstWhereOrNull((enhancement) =>
+        enhancement.enhancementField == field &&
+        enhancement.enhancementName ==
+            sharedPreferences
+                .getString(DictionaryWidgetEnhancement.getFieldKey(field)));
+  }
+
+  List<DictionaryWidgetEnhancement> getFieldWidgetEnhancements(
+      DictionaryWidgetField field) {
+    List<DictionaryWidgetEnhancement> enhancements =
+        _availableWidgetEnhancements
+            .where((enhancement) => enhancement.enhancementField == field)
+            .toList();
+
+    return enhancements;
+  }
+
+  MediaHistory getDictionaryMediaHistory() {
+    return DefaultMediaHistory(
+      prefsDirectory: "dictionary_media_type",
+      sharedPreferences: sharedPreferences,
+    );
+  }
+
+  List<DictionarySearchResult> getDictionaryHistory() {
+    List<MediaHistoryItem> items =
+        getDictionaryMediaHistory().getItems().cast<MediaHistoryItem>();
+
+    return items.map((item) {
+      return DictionarySearchResult.fromJson(item.key);
+    }).toList();
+  }
+
+  Future<void> addDictionaryHistoryItem(DictionarySearchResult result) {
+    return getDictionaryMediaHistory().addItem(
+      DictionaryMediaHistoryItem.fromDictionarySearchResult(result),
+    );
+  }
+
+  Future<void> removeDictionaryHistoryItem(DictionarySearchResult result) {
+    return getDictionaryMediaHistory().removeItem(result.toJson());
+  }
+
+  Widget buildDictionarySearchResult(
+    BuildContext context,
+    DictionaryFormat dictionaryFormat,
+    DictionaryEntry entry,
+  ) {
+    Widget? word;
+    Widget? reading;
+    Widget? meaning;
+
+    DictionaryWidgetEnhancement? wordEnhancement =
+        getFieldWidgetEnhancement(DictionaryWidgetField.word);
+    DictionaryWidgetEnhancement? readingEnhancement =
+        getFieldWidgetEnhancement(DictionaryWidgetField.reading);
+    DictionaryWidgetEnhancement? meaningEnhancement =
+        getFieldWidgetEnhancement(DictionaryWidgetField.meaning);
+
+    if (wordEnhancement != null) {
+      word = wordEnhancement.buildWord(entry);
+    }
+    if (readingEnhancement != null) {
+      reading = readingEnhancement.buildReading(entry);
+    }
+    if (meaningEnhancement != null) {
+      meaning = meaningEnhancement.buildMeaning(entry);
+    }
+
+    if (dictionaryFormat.widgetDisplayEnhancement != null) {
+      return dictionaryFormat.widgetDisplayEnhancement!
+              (context: context, dictionaryEntry: entry)
+          .buildMainWidget(
+        word: word,
+        reading: reading,
+        meaning: meaning,
+      );
+    } else {
+      return DictionaryWidget(
+        context: context,
+        dictionaryEntry: entry,
+      ).buildMainWidget(
+        word: word,
+        reading: reading,
+        meaning: meaning,
+      );
+    }
   }
 }

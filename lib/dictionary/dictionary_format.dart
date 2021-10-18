@@ -101,6 +101,8 @@ abstract class DictionaryFormat {
 
   /// Some formats may want to override the widget representation of their
   /// results. If not, leave this null, which is the default.
-  late DictionaryEntryWidget Function(DictionaryEntry result)?
-      widgetDisplayEnhancement;
+  late DictionaryWidget Function({
+    BuildContext context,
+    DictionaryEntry dictionaryEntry,
+  })? widgetDisplayEnhancement;
 }

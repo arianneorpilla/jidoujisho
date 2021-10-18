@@ -6,11 +6,11 @@ import 'package:objectbox/objectbox.dart';
 class DictionaryEntry {
   DictionaryEntry({
     this.id = 0,
-    @Index() required this.word,
-    @Index() required this.reading,
-    required this.meaning,
-    required this.extra,
-    required this.popularity,
+    this.word = "",
+    this.reading = "",
+    this.meaning = "",
+    this.extra = "",
+    this.popularity = 0,
   });
 
   /// ObjectBox identifier parameter.
@@ -55,7 +55,7 @@ class DictionaryEntry {
       word: map["word"],
       reading: map["reading"],
       meaning: map["meaning"],
-      extra: map["extra"],
+      extra: map["extra"].toString(),
       popularity: map["popularity"],
     );
   }

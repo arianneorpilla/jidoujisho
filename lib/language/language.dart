@@ -33,6 +33,9 @@ abstract class Language {
   /// For English, this is [ReadingDirection.horizontalLTR].
   final ReadingDirection readingDirection;
 
+  /// Whether or not the language is initialised. Do not override.
+  bool isInitialised = false;
+
   /// Initialise text segmentation and other tools necessary for this language
   /// to function.
   Future<void> initialiseLanguage();

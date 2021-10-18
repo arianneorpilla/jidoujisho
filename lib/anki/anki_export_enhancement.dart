@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+
+import 'package:flutter/material.dart';
 
 import 'package:chisa/anki/anki_export_params.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/util/anki_export_field.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:chisa/util/busy_icon_button.dart';
 
 abstract class AnkiExportEnhancement {
   AnkiExportEnhancement(
@@ -32,57 +32,37 @@ abstract class AnkiExportEnhancement {
   /// Which field this enhancement is for.
   late AnkiExportField enhancementField;
 
+  /// Whether or not the enhancement is initialised. Do not override.
+  bool isInitialised = false;
+
+  /// Performed at startup if activated on startup or later when activated
+  /// and not initialised.
+  Future<void> initialiseEnhancement() async {}
+
   /// A widget that is shown in the suffix icon area of the [TextFormField]
   /// making up the field in the [CreatorPage].
   Widget getButton({
     required BuildContext context,
-    required TextEditingController controller,
-    required ValueNotifier<File?> imageNotifier,
-    required ValueNotifier<File?> audioNotifier,
+    required AnkiExportParams Function() paramsCallback,
+    required Function(AnkiExportParams, {AnkiExportField field}) updateCallback,
     required bool editMode,
     required bool autoMode,
     required int position,
-    required VoidCallback refreshCallback,
   }) {
-    AppModel appModel = Provider.of<AppModel>(context);
-
-    return IconButton(
+    return BusyIconButton(
       iconSize: 18,
       onPressed: () async {
+        AnkiExportParams initialParams = paramsCallback();
+
         if (editMode) {
           await setDisabled(enhancementField, position);
-          refreshCallback();
+          updateCallback(initialParams, field: enhancementField);
         } else if (autoMode) {
           await setNotAuto();
-          refreshCallback();
+          updateCallback(initialParams, field: enhancementField);
         } else {
-          AnkiExportParams params =
-              await enhanceParams(appModel.ankiExportParams);
-          switch (enhancementField) {
-            case AnkiExportField.sentence:
-              controller.text = params.sentence;
-              break;
-            case AnkiExportField.word:
-              controller.text = params.word;
-              break;
-            case AnkiExportField.reading:
-              controller.text = params.reading;
-              break;
-            case AnkiExportField.meaning:
-              controller.text = params.meaning;
-              break;
-            case AnkiExportField.extra:
-              controller.text = params.extra;
-              break;
-            case AnkiExportField.image:
-              imageNotifier.value = params.imageFile;
-              controller.clear();
-              break;
-            case AnkiExportField.audio:
-              audioNotifier.value = params.audioFile;
-              controller.clear();
-              break;
-          }
+          AnkiExportParams newParams = await enhanceParams(initialParams);
+          updateCallback(newParams, field: enhancementField);
         }
       },
       icon: Icon(
@@ -115,9 +95,10 @@ abstract class AnkiExportEnhancement {
     return "enhancementPrefs/${enhancementField.toString()}/$enhancementName";
   }
 
-  Future<void> setAuto() {
-    return appModel.sharedPreferences
+  Future<void> setAuto() async {
+    await appModel.sharedPreferences
         .setString(getEnhancementFieldAutoKey(), enhancementName);
+    await initialiseEnhancement();
   }
 
   Future<void> setNotAuto() {
@@ -125,9 +106,10 @@ abstract class AnkiExportEnhancement {
         .setString(getEnhancementFieldAutoKey(), "");
   }
 
-  Future<void> setEnabled(AnkiExportField field, int position) {
-    return appModel.sharedPreferences.setString(
+  Future<void> setEnabled(AnkiExportField field, int position) async {
+    await appModel.sharedPreferences.setString(
         getFieldEnabledPositionKey(field, position), enhancementName);
+    await initialiseEnhancement();
   }
 
   Future<void> setDisabled(AnkiExportField field, int position) {

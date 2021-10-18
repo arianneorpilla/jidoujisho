@@ -4,6 +4,8 @@ import 'package:chisa/language/app_localizations.dart';
 import 'package:chisa/media/histories/default_media_history.dart';
 import 'package:chisa/media/media_history.dart';
 import 'package:chisa/models/app_model.dart';
+import 'package:chisa/pages/media_home_page.dart';
+import 'package:chisa/pages/player_home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:mime/mime.dart';
 
@@ -24,8 +26,8 @@ class PlayerMediaType extends MediaType {
   }
 
   @override
-  Widget getHomeBody(BuildContext context) {
-    return Container();
+  MediaHomePage getHomeBody(BuildContext context) {
+    return PlayerHomePage(mediaType: this);
   }
 
   @override

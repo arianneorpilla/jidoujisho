@@ -2,17 +2,18 @@ import 'dart:convert';
 
 abstract class MediaHistoryItem {
   MediaHistoryItem({
-    required this.uri,
+    required this.key,
     required this.name,
     required this.resourceUri,
     required this.progress,
     required this.extra,
   });
 
-  /// The [Uri] pertaining to the item. For example, for Player video playback
-  /// history, this is a uri to the video file. This could be a website link
-  /// for a custom streaming service media type.
-  late Uri uri;
+  /// A key unique identifier for the item. For example, for Player video
+  /// playback history, this is a uri to the video file, which should be
+  /// unique in a filesystem. This could be a website link for a custom
+  /// streaming service media type, or even the data itself in [String] form.
+  late String key;
 
   /// The name to be given for display for the history item. This could be the
   /// name of a video file or the name of a book.
@@ -30,13 +31,13 @@ abstract class MediaHistoryItem {
   /// Extra details that may be necessary should a media type need to be
   /// extended to find its use. For example, the Viewer may find storing the
   /// individual chapters progress necessary.
-  late Map<String, String> extra;
+  late Map<String, dynamic> extra;
 
   /// Return the serialised JSON form of this [MediaHistoryItem]. See
   /// [MediaHistory] for how this is used.
   String toJson() {
     Map<String, String> map = {
-      "uri": uri.toString(),
+      "key": key,
       "name": name,
       "resourceUri": resourceUri.toString(),
       "progress": progress.toString(),

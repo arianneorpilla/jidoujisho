@@ -19,7 +19,7 @@ class DefaultMediaHistory extends MediaHistory {
   Future<void> addItem(MediaHistoryItem item) async {
     List<MediaHistoryItem> history = getItems();
 
-    history.removeWhere((historyItem) => item.uri == historyItem.uri);
+    history.removeWhere((historyItem) => item.key == historyItem.key);
     history.add(item);
 
     if (history.length >= maxItemCount) {
@@ -30,10 +30,10 @@ class DefaultMediaHistory extends MediaHistory {
   }
 
   @override
-  Future<void> removeItem(Uri uri) async {
+  Future<void> removeItem(String key) async {
     List<MediaHistoryItem> history = getItems();
 
-    history.removeWhere((historyItem) => uri == historyItem.uri);
+    history.removeWhere((historyItem) => key == historyItem.key);
     await setItems(history);
   }
 

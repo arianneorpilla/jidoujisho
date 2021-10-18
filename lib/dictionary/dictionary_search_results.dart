@@ -9,7 +9,7 @@ class DictionarySearchResult {
     required this.formatName,
     required this.originalSearchTerm,
     required this.fallbackSearchTerm,
-    required this.results,
+    required this.entries,
     this.contextSource = "",
     this.contextPosition = -1,
     this.contextMediaTypeName = "",
@@ -41,7 +41,7 @@ class DictionarySearchResult {
   final String contextMediaTypeName;
 
   /// The list of processed search results.
-  final List<DictionaryEntry> results;
+  final List<DictionaryEntry> entries;
 
   /// An ObjectBox [Store] reference that is used to make the dictionary
   /// search from another isolate. As an empty [DictionarySearchResult] is
@@ -53,11 +53,9 @@ class DictionarySearchResult {
   /// for history and persistence purposes.
   String toJson() {
     List<String> serialisedItems = [];
-    for (DictionaryEntry result in results) {
+    for (DictionaryEntry entry in entries) {
       serialisedItems.add(
-        jsonEncode(
-          result.toJson(),
-        ),
+        entry.toJson(),
       );
     }
 
@@ -66,7 +64,7 @@ class DictionarySearchResult {
       "formatName": formatName,
       "originalSearchTerm": originalSearchTerm,
       "fallbackSearchTerm": fallbackSearchTerm,
-      "results": jsonEncode(serialisedItems),
+      "entries": jsonEncode(serialisedItems),
       "contextSource": contextSource,
       "contextPosition": contextPosition,
       "contextMediaTypeName": contextMediaTypeName,
@@ -76,14 +74,14 @@ class DictionarySearchResult {
   }
 
   factory DictionarySearchResult.fromJson(String json) {
-    Map<String, dynamic> map = jsonDecode(json);
+    Map<String, dynamic> map = Map.castFrom(jsonDecode(json));
 
-    List<String> resultsJson = jsonDecode(map["results"]);
+    List<String> entriesJson = List.castFrom(jsonDecode(map["entries"]));
 
-    List<DictionaryEntry> results = [];
-    for (String resultJson in resultsJson) {
-      results.add(
-        DictionaryEntry.fromJson(resultJson),
+    List<DictionaryEntry> entries = [];
+    for (String entryJson in entriesJson) {
+      entries.add(
+        DictionaryEntry.fromJson(entryJson),
       );
     }
 
@@ -92,7 +90,7 @@ class DictionarySearchResult {
       formatName: map["formatName"],
       originalSearchTerm: map["originalSearchTerm"],
       fallbackSearchTerm: map["fallbackSearchTerm"],
-      results: results,
+      entries: entries,
       contextSource: map["contextSource"],
       contextPosition: map["contextPosition"] as int,
       contextMediaTypeName: map["contextMediaTypeName"],

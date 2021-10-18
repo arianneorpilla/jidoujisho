@@ -1,28 +1,25 @@
-import 'package:chisa/anki/anki_export_enhancement.dart';
-import 'package:chisa/util/anki_export_field.dart';
-import 'package:chisa/util/center_icon_message.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:chisa/dictionary/dictionary_widget_enhancement.dart';
 import 'package:chisa/language/app_localizations.dart';
 import 'package:chisa/models/app_model.dart';
+import 'package:chisa/util/center_icon_message.dart';
+import 'package:chisa/util/dictionary_widget_field.dart';
 
-class AnkiExportEnhancementDialog extends StatefulWidget {
-  const AnkiExportEnhancementDialog({
+class DictionaryWidgetEnhancementDialog extends StatefulWidget {
+  const DictionaryWidgetEnhancementDialog({
     Key? key,
     required this.field,
-    required this.autoMode,
   }) : super(key: key);
 
-  final AnkiExportField field;
-  final bool autoMode;
-
+  final DictionaryWidgetField field;
   @override
   State<StatefulWidget> createState() => AnkiExportEnhancementDialogState();
 }
 
 class AnkiExportEnhancementDialogState
-    extends State<AnkiExportEnhancementDialog> {
+    extends State<DictionaryWidgetEnhancementDialog> {
   ScrollController scrollController = ScrollController();
 
   late AppModel appModel;
@@ -42,16 +39,8 @@ class AnkiExportEnhancementDialogState
   }
 
   Widget buildContent() {
-    List<AnkiExportEnhancement> enhancements =
-        appModel.getFieldExportEnhancements(widget.field);
-
-    List<AnkiExportEnhancement?> existings =
-        appModel.getExportEnabledFieldEnhancement(widget.field);
-    for (AnkiExportEnhancement? existing in existings) {
-      if (existing != null && !widget.autoMode) {
-        enhancements.remove(existing);
-      }
-    }
+    List<DictionaryWidgetEnhancement> enhancements =
+        appModel.getFieldWidgetEnhancements(widget.field);
 
     return SizedBox(
       width: double.maxFinite,
@@ -79,7 +68,7 @@ class AnkiExportEnhancementDialogState
     );
   }
 
-  Widget showEnhancementList(List<AnkiExportEnhancement> enhancements) {
+  Widget showEnhancementList(List<DictionaryWidgetEnhancement> enhancements) {
     return Scrollbar(
       controller: scrollController,
       child: ListView.builder(
@@ -87,14 +76,13 @@ class AnkiExportEnhancementDialogState
         shrinkWrap: true,
         itemCount: enhancements.length,
         itemBuilder: (context, index) {
-          AnkiExportEnhancement enhancement = enhancements[index];
+          DictionaryWidgetEnhancement enhancement = enhancements[index];
 
           return ListTile(
-            selected: (widget.autoMode &&
-                enhancement ==
-                    (appModel.getAutoFieldEnhancement(widget.field))),
-            selectedTileColor: Theme.of(context).selectedRowColor,
             dense: true,
+            selected: (enhancement ==
+                (appModel.getFieldWidgetEnhancement(widget.field))),
+            selectedTileColor: Theme.of(context).selectedRowColor,
             title: Row(
               children: [
                 Icon(

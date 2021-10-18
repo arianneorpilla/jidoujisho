@@ -93,6 +93,9 @@ class App extends StatelessWidget {
         iconTheme: IconThemeData(color: Colors.black),
         elevation: 0,
       ),
+      scrollbarTheme: const ScrollbarThemeData().copyWith(
+        thumbColor: MaterialStateProperty.all(Colors.grey[500]),
+      ),
     );
   }
 
@@ -120,6 +123,9 @@ class App extends StatelessWidget {
         backgroundColor: Colors.black,
         iconTheme: IconThemeData(color: Colors.white),
         elevation: 0,
+      ),
+      scrollbarTheme: const ScrollbarThemeData().copyWith(
+        thumbColor: MaterialStateProperty.all(Colors.grey.shade700),
       ),
     );
   }

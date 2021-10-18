@@ -4,13 +4,13 @@ import 'package:chisa/media/media_history_item.dart';
 
 class DefaultMediaHistoryItem extends MediaHistoryItem {
   DefaultMediaHistoryItem({
-    uri,
-    name,
-    resourceUri,
-    progress,
-    extra,
+    required String key,
+    required String name,
+    required Uri resourceUri,
+    required int progress,
+    required Map<String, dynamic> extra,
   }) : super(
-          uri: uri,
+          key: key,
           name: name,
           resourceUri: resourceUri,
           progress: progress,
@@ -18,20 +18,33 @@ class DefaultMediaHistoryItem extends MediaHistoryItem {
         );
 
   factory DefaultMediaHistoryItem.fromJson(String json) {
-    Map<String, String> map = jsonDecode(json);
+    Map<String, dynamic> map = jsonDecode(json);
 
-    Uri uri = Uri.dataFromString(map["uri"] ?? "");
+    String key = map["key"] ?? "";
     String name = map["name"] ?? "";
     Uri resourceUri = Uri.dataFromString(map["uri"] ?? "");
     int progress = int.tryParse(map["progress"] ?? "") ?? 0;
-    Map<String, String> extra = jsonDecode(map["extra"] ?? "{}");
+    Map<String, dynamic> extra = jsonDecode(map["extra"] ?? "{}");
 
     return DefaultMediaHistoryItem(
-      uri: uri,
+      key: key,
       name: name,
       resourceUri: resourceUri,
       progress: progress,
       extra: extra,
     );
   }
+
+  // @override
+  // String toJson() {
+  //   Map<String, String> map = {
+  //     "uri": uri.toString(),
+  //     "name": name,
+  //     "resourceUri": resourceUri.toString(),
+  //     "progress": progress.toString(),
+  //     "extra": jsonEncode(extra)
+  //   };
+
+  //   return jsonEncode(map);
+  // }
 }

@@ -28,21 +28,19 @@ class CreatorPage extends StatefulWidget {
 
 class CreatorPageState extends State<CreatorPage> {
   late AnkiExportParams exportParams;
-
   late AppModel appModel;
 
   ScrollController scrollController = ScrollController();
 
-  TextEditingController audioController = TextEditingController();
-  TextEditingController imageController = TextEditingController();
-  TextEditingController sentenceController = TextEditingController();
-  TextEditingController wordController = TextEditingController();
-  TextEditingController readingController = TextEditingController();
-  TextEditingController meaningController = TextEditingController();
-  TextEditingController extraController = TextEditingController();
-
-  ValueNotifier<File?> imageNotifier = ValueNotifier<File?>(null);
-  ValueNotifier<File?> audioNotifier = ValueNotifier<File?>(null);
+  final TextEditingController audioController = TextEditingController();
+  final TextEditingController imageController = TextEditingController();
+  final TextEditingController sentenceController = TextEditingController();
+  final TextEditingController wordController = TextEditingController();
+  final TextEditingController readingController = TextEditingController();
+  final TextEditingController meaningController = TextEditingController();
+  final TextEditingController extraController = TextEditingController();
+  final ValueNotifier<File?> imageNotifier = ValueNotifier<File?>(null);
+  final ValueNotifier<File?> audioNotifier = ValueNotifier<File?>(null);
 
   TextEditingController getFieldController(AnkiExportField field) {
     switch (field) {
@@ -50,15 +48,12 @@ class CreatorPageState extends State<CreatorPage> {
         return sentenceController;
       case AnkiExportField.word:
         return wordController;
-
       case AnkiExportField.reading:
         return readingController;
-
       case AnkiExportField.meaning:
         return meaningController;
       case AnkiExportField.extra:
         return extraController;
-
       case AnkiExportField.image:
         return imageController;
       case AnkiExportField.audio:
@@ -70,11 +65,11 @@ class CreatorPageState extends State<CreatorPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance!.addPostFrameCallback((_) {
-      precomputeAutoChanges();
+      setAndComputeInitialFields();
     });
   }
 
-  Future<void> precomputeAutoChanges() async {
+  Future<void> setAndComputeInitialFields() async {
     if (widget.initialParams == null) {
       exportParams = AnkiExportParams();
     } else {
@@ -89,18 +84,41 @@ class CreatorPageState extends State<CreatorPage> {
       }
     }
 
-    sentenceController = TextEditingController(text: exportParams.sentence);
-    wordController = TextEditingController(text: exportParams.word);
-    readingController = TextEditingController(text: exportParams.reading);
-    meaningController = TextEditingController(text: exportParams.meaning);
-    extraController = TextEditingController(text: exportParams.extra);
+    setState(() {
+      setCurrentParams(exportParams);
+    });
+  }
 
-    imageNotifier.value = exportParams.imageFile;
-    audioNotifier.value = exportParams.audioFile;
+  AnkiExportParams getCurrentParams() {
+    return AnkiExportParams(
+      sentence: sentenceController.text,
+      word: wordController.text,
+      reading: readingController.text,
+      meaning: meaningController.text,
+      extra: extraController.text,
+      imageFile: imageNotifier.value,
+      audioFile: audioNotifier.value,
+    );
+  }
 
-    setState(() {});
+  void setCurrentParams(AnkiExportParams newParams, {AnkiExportField? field}) {
+    exportParams = newParams;
 
-    print("test");
+    setState(() {
+      if (field == AnkiExportField.image) {
+        imageController.text = "";
+      }
+      if (field == AnkiExportField.audio) {
+        audioController.text = "";
+      }
+      sentenceController.text = exportParams.sentence;
+      wordController.text = exportParams.word;
+      readingController.text = exportParams.reading;
+      meaningController.text = exportParams.meaning;
+      extraController.text = exportParams.extra;
+      imageNotifier.value = exportParams.imageFile;
+      audioNotifier.value = exportParams.audioFile;
+    });
   }
 
   Widget getEmptyBox(
@@ -139,7 +157,31 @@ class CreatorPageState extends State<CreatorPage> {
   List<Widget> getFieldEnhancementWidgets(
       {required BuildContext context, required AnkiExportField field}) {
     List<Widget> widgets = [];
-    if (!widget.autoMode) {
+    if (widget.autoMode) {
+      AnkiExportEnhancement? enhancement =
+          appModel.getAutoFieldEnhancement(field);
+
+      if (enhancement == null) {
+        widgets.add(
+          getEmptyBox(
+            field: field,
+            position: 0,
+            autoMode: true,
+          ),
+        );
+      } else {
+        widgets.add(
+          enhancement.getButton(
+            context: context,
+            paramsCallback: getCurrentParams,
+            updateCallback: setCurrentParams,
+            editMode: widget.editMode,
+            autoMode: widget.autoMode,
+            position: 0,
+          ),
+        );
+      }
+    } else {
       List<AnkiExportEnhancement?> enhancements =
           appModel.getExportEnabledFieldEnhancement(field);
 
@@ -147,61 +189,39 @@ class CreatorPageState extends State<CreatorPage> {
         AnkiExportEnhancement? enhancement = enhancements[position];
         if (enhancement == null) {
           if (widget.editMode) {
-            widgets.add(getEmptyBox(
-              field: field,
-              position: position,
-              autoMode: false,
-            ));
+            widgets.add(
+              getEmptyBox(
+                field: field,
+                position: position,
+                autoMode: false,
+              ),
+            );
           }
         } else {
           widgets.add(
             enhancement.getButton(
               context: context,
-              controller: getFieldController(field),
-              imageNotifier: imageNotifier,
-              audioNotifier: audioNotifier,
+              paramsCallback: getCurrentParams,
+              updateCallback: setCurrentParams,
               editMode: widget.editMode,
               autoMode: widget.autoMode,
               position: position,
-              refreshCallback: refresh,
             ),
           );
         }
       }
-    } else {
-      AnkiExportEnhancement? enhancement =
-          appModel.getAutoFieldEnhancement(field);
-
-      if (enhancement == null) {
-        widgets.add(getEmptyBox(
-          field: field,
-          position: 0,
-          autoMode: true,
-        ));
-      } else {
-        widgets.add(
-          enhancement.getButton(
-            context: context,
-            controller: getFieldController(field),
-            imageNotifier: imageNotifier,
-            audioNotifier: audioNotifier,
-            editMode: widget.editMode,
-            autoMode: widget.autoMode,
-            position: 0,
-            refreshCallback: refresh,
-          ),
-        );
-      }
     }
+
     return widgets;
   }
 
-  Widget displayField(
-      {required BuildContext context,
-      required AnkiExportField field,
-      required Function(String) onFieldSubmitted,
-      TextInputType keyboardType = TextInputType.text,
-      int? maxLines = 1}) {
+  Widget displayField({
+    required BuildContext context,
+    required AnkiExportField field,
+    required Function(String) onFieldSubmitted,
+    TextInputType keyboardType = TextInputType.text,
+    int? maxLines = 1,
+  }) {
     return TextFormField(
       readOnly: (widget.editMode || widget.autoMode),
       maxLines: null,

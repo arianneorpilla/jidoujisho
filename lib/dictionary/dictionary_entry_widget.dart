@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 
 /// A standard dictionary entry widget for use of any simple formats, to be
 /// overriden by any more complex formats if so desired.
-class DictionaryEntryWidget {
-  DictionaryEntryWidget({
+class DictionaryWidget {
+  DictionaryWidget({
     required this.context,
     required this.dictionaryEntry,
   });
@@ -35,18 +35,14 @@ class DictionaryEntryWidget {
     );
   }
 
-  Widget buildExtra() {
-    return const SizedBox.shrink();
-  }
-
-  Widget buildMainWidget() {
+  Widget buildMainWidget({Widget? word, Widget? reading, Widget? meaning}) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        buildWord(),
+        word ?? buildWord(),
         const SizedBox(height: 5),
-        buildReading(),
-        buildMeaning(),
+        reading ?? buildReading(),
+        meaning ?? buildMeaning(),
       ],
     );
   }

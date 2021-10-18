@@ -1,17 +1,18 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
+import 'package:mime/mime.dart';
+import 'package:provider/provider.dart';
+
 import 'package:chisa/language/app_localizations.dart';
 import 'package:chisa/media/histories/default_media_history.dart';
 import 'package:chisa/media/media_history.dart';
-import 'package:chisa/models/app_model.dart';
-import 'package:chisa/pages/reader_page.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
-import 'package:mime/mime.dart';
-
 import 'package:chisa/media/media_history_item.dart';
 import 'package:chisa/media/media_type.dart';
-import 'package:provider/provider.dart';
+import 'package:chisa/models/app_model.dart';
+import 'package:chisa/pages/media_home_page.dart';
+import 'package:chisa/pages/reader_home_page.dart';
+import 'package:chisa/pages/reader_page.dart';
 
 class ReaderMediaType extends MediaType {
   ReaderMediaType()
@@ -26,37 +27,8 @@ class ReaderMediaType extends MediaType {
   }
 
   @override
-  Widget getHomeBody(BuildContext context) {
-    AppModel appModel = Provider.of<AppModel>(context);
-
-    return Center(
-      child: InkWell(
-        onTap: () async => launchMediaPageFromUri(context, await selectFile()),
-        child: Container(
-          padding: const EdgeInsets.all(36),
-          color: Colors.grey,
-          child: Text(
-            AppLocalizations.getLocalizedValue(
-                appModel.getAppLanguageName(), "start_reading"),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<Uri> selectFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
-
-    if (result != null) {
-      File epubFile = File(result.files.single.path!);
-      if (isUriSupported(epubFile.uri)) {
-        return epubFile.uri;
-      } else {
-        throw Exception("Uri is not supported.");
-      }
-    } else {
-      throw Exception("No file picked.");
-    }
+  MediaHomePage getHomeBody(BuildContext context) {
+    return ReaderHomePage(mediaType: this);
   }
 
   @override

@@ -22,13 +22,13 @@ abstract class MediaHistory {
   /// is too huge and exceeds [maxItemCount], get rid of the oldest items
   /// first and end up with a list with [maxItemCount] number of elements.
   ///
-  /// If a [MediaHistoryItem] with a conflicting [Uri] exists, delete the
+  /// If a [MediaHistoryItem] with a conflicting key exists, delete the
   /// existing item and push the new item to the latest end of history.
   Future<void> addItem(MediaHistoryItem item);
 
-  /// Remove a given media history item with a given Uri. If the Uri does
-  /// not exist, do nothing.
-  Future<void> removeItem(Uri uri);
+  /// Remove a given media history item with a given unique identifier.
+  /// If the key identifier does not exist, do nothing.
+  Future<void> removeItem(String key);
 
   /// Given a list of [MediaHistoryItem], serialise all with [toJson] and
   /// update the appropriate [prefsDirectory] in [SharedPreferences] with
