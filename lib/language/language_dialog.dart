@@ -1,4 +1,3 @@
-import 'package:chisa/language/app_localizations.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/util/drop_down_menu.dart';
 import 'package:flutter/material.dart';
@@ -32,8 +31,7 @@ class LanguageDialogState extends State<LanguageDialog> {
       actions: <Widget>[
         TextButton(
           child: Text(
-            AppLocalizations.getLocalizedValue(
-                appModel.getAppLanguageName(), "dialog_close"),
+            appModel.translate("dialog_close"),
           ),
           onPressed: () {
             Navigator.pop(context);
@@ -53,8 +51,7 @@ class LanguageDialogState extends State<LanguageDialog> {
             alignment: Alignment.centerLeft,
             padding: const EdgeInsets.only(left: 8),
             child: Text(
-              AppLocalizations.getLocalizedValue(
-                  appModel.getAppLanguageName(), "target_language"),
+              appModel.translate("target_language"),
               style: TextStyle(
                 fontSize: 10,
                 color: Theme.of(context).unselectedWidgetColor,
@@ -73,8 +70,7 @@ class LanguageDialogState extends State<LanguageDialog> {
             alignment: Alignment.centerLeft,
             padding: const EdgeInsets.only(left: 8),
             child: Text(
-              AppLocalizations.getLocalizedValue(
-                  appModel.getAppLanguageName(), "app_language"),
+              appModel.translate("app_language"),
               style: TextStyle(
                 fontSize: 10,
                 color: Theme.of(context).unselectedWidgetColor,
@@ -82,12 +78,38 @@ class LanguageDialogState extends State<LanguageDialog> {
             ),
           ),
           DropDownMenu(
-            options: AppLocalizations.localizations(),
+            options: appModel.getAppLanguageNames(),
             initialOption: appModel.getAppLanguageName(),
             optionCallback: appModel.setAppLanguageName,
             voidCallback: () {
               setState(() {});
             },
+          ),
+          Container(
+            child: ListTile(
+              dense: true,
+              title: Text.rich(
+                TextSpan(
+                  text: '',
+                  children: <InlineSpan>[
+                    WidgetSpan(
+                      child: Icon(Icons.info,
+                          size: 14.0, color: Colors.lightBlue.shade300),
+                    ),
+                    const WidgetSpan(
+                      child: SizedBox(width: 4.0),
+                    ),
+                    TextSpan(
+                      text:
+                          "Casting experience may vary based on network performance and the supported formats of the selected display device.",
+                      style: TextStyle(
+                          fontSize: 14, color: Colors.lightBlue.shade300),
+                    ),
+                  ],
+                ),
+                textAlign: TextAlign.left,
+              ),
+            ),
           ),
         ],
       ),

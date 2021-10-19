@@ -2,8 +2,11 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-PopupMenuItem<VoidCallback> menuItem(
-    {required String label, required IconData icon, required action}) {
+PopupMenuItem<VoidCallback> popupItem({
+  required String label,
+  required IconData icon,
+  required action,
+}) {
   return PopupMenuItem<VoidCallback>(
     child: Row(
       mainAxisSize: MainAxisSize.max,

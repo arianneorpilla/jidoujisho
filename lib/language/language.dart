@@ -64,7 +64,23 @@ abstract class Language {
 
   /// Given a word, lemmatise and get the root form of the word.
   ///
-  /// For example, for Japanese, "見せる" should be "みる".
+  /// For example, for Japanese, "しました" should be "する".
   /// For English, "running" should be "run".
   String getRootForm(String word);
+
+  /// Generate extra fallback terms for a word for use in [searchDictionary].
+  /// Some custom formats may decide to perform operations after an original
+  /// search term and a fallback search term have both failed in finding
+  /// results. By default, the [searchDatabase] function will exhaust all
+  /// fallback terms until a match is found.
+  List<String> generateFallbackTerms(String searchTerm) {
+    List<String> fallbackTerms = [];
+
+    String rootForm = getRootForm(searchTerm);
+    if (rootForm != searchTerm) {
+      fallbackTerms.add(rootForm);
+    }
+
+    return fallbackTerms;
+  }
 }

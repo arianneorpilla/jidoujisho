@@ -1,13 +1,15 @@
+import 'package:chisa/anki/anki_export_params.dart';
 import 'package:chisa/dictionary/dictionary.dart';
+import 'package:chisa/util/dictionary_dialog_widget.dart';
+import 'package:chisa/dictionary/dictionary_entry.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'package:chisa/dictionary/dictionary_format.dart';
-import 'package:chisa/dictionary/dictionary_scrollable_widget.dart';
-import 'package:chisa/dictionary/dictionary_search_results.dart';
-import 'package:chisa/language/app_localizations.dart';
+import 'package:chisa/util/dictionary_scrollable_widget.dart';
+import 'package:chisa/dictionary/dictionary_search_result.dart';
 import 'package:chisa/media/history_items/dictionary_media_history_item.dart';
-import 'package:chisa/media/media_history_item.dart';
 import 'package:chisa/media/media_type.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/creator_page.dart';
@@ -88,19 +90,122 @@ class DictionaryPageState extends State<DictionaryHomePage> {
             }
 
             DictionarySearchResult result = results[index - 2];
-            MediaHistoryItem mediaHistoryItem = mediaHistoryItems[index - 2];
+            DictionaryMediaHistoryItem mediaHistoryItem =
+                mediaHistoryItems[index - 2];
+            DictionaryFormat dictionaryFormat =
+                appModel.getDictionaryFormatFromName(result.formatName);
+            Dictionary dictionary =
+                appModel.getDictionaryFromName(result.dictionaryName);
+            ValueNotifier<int> indexNotifier =
+                ValueNotifier<int>(mediaHistoryItem.progress);
 
-            return DictionaryScrollableWidget(
-              appModel: appModel,
-              mediaHistoryItem: mediaHistoryItem as DictionaryMediaHistoryItem,
-              result: result,
-              dictionary: appModel.getDictionaryFromName(result.dictionaryName),
-              dictionaryFormat: appModel.getDictionaryFormatFromName(
-                result.formatName,
+            return Container(
+              margin: const EdgeInsets.only(bottom: 12, left: 12, right: 12),
+              color: appModel.getIsDarkMode()
+                  ? Theme.of(context).unselectedWidgetColor.withOpacity(0.055)
+                  : Theme.of(context).unselectedWidgetColor.withOpacity(0.030),
+              child: InkWell(
+                onTap: () async {
+                  DictionaryEntry entry = result.entries[indexNotifier.value];
+
+                  await Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (context) => CreatorPage(
+                        initialParams: AnkiExportParams(
+                          word: entry.word,
+                          meaning: entry.meaning,
+                          reading: entry.reading,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                onLongPress: () async {
+                  ValueNotifier<int> dialogIndexNotifier =
+                      ValueNotifier<int>(indexNotifier.value);
+
+                  HapticFeedback.vibrate();
+                  await showDialog(
+                    barrierDismissible: true,
+                    context: context,
+                    builder: (context) => DictionaryDialogWidget(
+                      mediaHistoryItem: mediaHistoryItem,
+                      dictionary: dictionary,
+                      dictionaryFormat: dictionaryFormat,
+                      result: result,
+                      callback: () {
+                        setState(() {});
+                      },
+                      indexNotifier: dialogIndexNotifier,
+                      actions: [
+                        TextButton(
+                          child: Text(
+                            appModel.translate("dialog_delete"),
+                            style: TextStyle(
+                              color: Theme.of(context).focusColor,
+                            ),
+                          ),
+                          onPressed: () async {
+                            await appModel.removeDictionaryHistoryItem(result);
+
+                            Navigator.pop(context);
+                            setState(() {});
+                          },
+                        ),
+                        TextButton(
+                            child: Text(
+                              appModel.translate("dialog_creator"),
+                              style: const TextStyle(),
+                            ),
+                            onPressed: () async {
+                              DictionaryEntry dialogEntry =
+                                  result.entries[dialogIndexNotifier.value];
+                              await Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (context) => CreatorPage(
+                                    initialParams: AnkiExportParams(
+                                      word: dialogEntry.word,
+                                      meaning: dialogEntry.meaning,
+                                      reading: dialogEntry.reading,
+                                    ),
+                                  ),
+                                ),
+                              );
+                              setState(() {});
+                            }),
+                        TextButton(
+                          child: Text(
+                            appModel.translate("dialog_close"),
+                            style: const TextStyle(),
+                          ),
+                          onPressed: () async {
+                            Navigator.pop(context);
+                            setState(() {});
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                  // showDictionaryDialog(entry, entry.swipeIndex);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: DictionaryScrollableWidget(
+                    appModel: appModel,
+                    mediaHistoryItem: mediaHistoryItem,
+                    result: result,
+                    dictionary:
+                        appModel.getDictionaryFromName(result.dictionaryName),
+                    dictionaryFormat: appModel.getDictionaryFormatFromName(
+                      result.formatName,
+                    ),
+                    indexNotifier: indexNotifier,
+                    callback: () {
+                      setState(() {});
+                    },
+                  ),
+                ),
               ),
-              callback: () {
-                setState(() {});
-              },
             );
           },
         ),
@@ -116,8 +221,7 @@ class DictionaryPageState extends State<DictionaryHomePage> {
         Expanded(
           child: showCenterIconMessage(
             context: context,
-            label: AppLocalizations.getLocalizedValue(
-                appModel.getAppLanguageName(), "dictionary_history_empty"),
+            label: appModel.translate("dictionary_history_empty"),
             icon: Icons.auto_stories,
             jumpingDots: false,
           ),
@@ -181,14 +285,12 @@ class DictionaryPageState extends State<DictionaryHomePage> {
               ),
             ],
           ),
-          labelText: AppLocalizations.getLocalizedValue(
-            appModel.getAppLanguageName(),
+          labelText: appModel.translate(
             (appModel.getCurrentDictionary() != null)
                 ? "search"
                 : "import_dictionaries_for_use",
           ),
-          hintText: AppLocalizations.getLocalizedValue(
-              appModel.getAppLanguageName(), "enter_search_term_here"),
+          hintText: appModel.translate("enter_search_term_here"),
         ),
       ),
     );
@@ -210,8 +312,7 @@ class DictionaryPageState extends State<DictionaryHomePage> {
                 const Icon(Icons.note_add_sharp, size: 16),
                 const SizedBox(width: 5),
                 Text(
-                  AppLocalizations.getLocalizedValue(
-                      appModel.getAppLanguageName(), "card_creator"),
+                  appModel.translate("card_creator"),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,

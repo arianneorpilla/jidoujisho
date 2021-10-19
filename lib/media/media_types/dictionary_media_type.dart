@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:mime/mime.dart';
 import 'package:provider/provider.dart';
 
-import 'package:chisa/language/app_localizations.dart';
 import 'package:chisa/media/histories/default_media_history.dart';
 import 'package:chisa/media/media_history.dart';
 import 'package:chisa/media/media_history_item.dart';
@@ -61,8 +60,7 @@ class DictionaryMediaType extends MediaType {
     AppModel appModel = Provider.of<AppModel>(context);
 
     return BottomNavigationBarItem(
-      label: AppLocalizations.getLocalizedValue(
-          appModel.getAppLanguageName(), "dictionary_media_type"),
+      label: appModel.translate("dictionary_media_type"),
       icon: Icon(mediaTypeIcon),
     );
   }

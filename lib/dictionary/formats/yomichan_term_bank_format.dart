@@ -3,20 +3,19 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:chisa/dictionary/dictionary.dart';
-import 'package:chisa/dictionary/dictionary_entry.dart';
-import 'package:chisa/dictionary/dictionary_entry_widget.dart';
-import 'package:chisa/dictionary/dictionary_format.dart';
-import 'package:chisa/dictionary/dictionary_search_results.dart';
-import 'package:chisa/dictionary/dictionary_utils.dart';
-import 'package:chisa/dictionary/formats/yomichan_term_bank_format_widget.dart';
-import 'package:chisa/util/number_tag.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_archive/flutter_archive.dart';
-import 'package:kana_kit/kana_kit.dart';
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as p;
+
+import 'package:chisa/dictionary/dictionary.dart';
+import 'package:chisa/dictionary/dictionary_entry.dart';
+import 'package:chisa/dictionary/dictionary_format.dart';
+import 'package:chisa/dictionary/dictionary_search_result.dart';
+import 'package:chisa/dictionary/dictionary_import.dart';
+import 'package:chisa/dictionary/formats/yomichan_term_bank_format_widget.dart';
+import 'package:chisa/util/dictionary_entry_widget.dart';
+import 'package:chisa/util/number_tag.dart';
 
 class YomichanTermBankFormat extends DictionaryFormat {
   YomichanTermBankFormat()
@@ -29,7 +28,6 @@ class YomichanTermBankFormat extends DictionaryFormat {
           getDictionaryMetadata: getDictionaryMetadataYomichanTermBankFormat,
           searchResultsEnhancement:
               searchResultsEnhancementYomichanTermBankFormat,
-          databaseSearchEnhancement: databaseSearchEnhancementYomichanTermBank,
           widgetDisplayEnhancement: widgetDisplayEnhancementYomichanTermBank,
         );
 
@@ -281,27 +279,36 @@ FutureOr<DictionarySearchResult> searchResultsEnhancementYomichanTermBankFormat(
                   a.workingArea["duplicateCount"] * 0.3));
 
   List<DictionaryEntry> exactFirstEntries = [];
-
   for (DictionaryEntry entry in mergedEntries) {
     if (entry.word == result.originalSearchTerm) {
-      exactFirstEntries.add(entry);
-    }
-  }
-  if (result.originalSearchTerm != result.fallbackSearchTerm) {
-    for (DictionaryEntry entry in mergedEntries) {
-      if (entry.word == result.fallbackSearchTerm) {
+      if (!exactFirstEntries.contains(entry)) {
         exactFirstEntries.add(entry);
       }
     }
   }
   for (DictionaryEntry entry in mergedEntries) {
-    if (entry.word != result.originalSearchTerm &&
-        entry.word != result.fallbackSearchTerm) {
+    if (entry.reading == result.originalSearchTerm) {
+      if (!exactFirstEntries.contains(entry)) {
+        exactFirstEntries.add(entry);
+      }
+    }
+  }
+  for (DictionaryEntry entry in mergedEntries) {
+    if (result.fallbackSearchTerms.contains(entry.word) ||
+        result.fallbackSearchTerms.contains(entry.reading)) {
+      if (!exactFirstEntries.contains(entry)) {
+        exactFirstEntries.add(entry);
+      }
+    }
+  }
+  for (DictionaryEntry entry in mergedEntries) {
+    if (!exactFirstEntries.contains(entry)) {
       exactFirstEntries.add(entry);
     }
   }
 
   result.entries = exactFirstEntries;
+
   return result;
 }
 
@@ -447,73 +454,6 @@ class YomichanTag {
 
     return sum;
   }
-}
-
-Future<DictionarySearchResult> databaseSearchEnhancementYomichanTermBank(
-    ResultsProcessingParams params) async {
-  KanaKit kanaKit = const KanaKit();
-  String originalSearchTerm = params.result.originalSearchTerm;
-  String fallbackSearchTerm = params.result.originalSearchTerm;
-
-  DictionarySearchResult results = await searchDatabase(params);
-  if (results.entries.isEmpty) {
-    if (kanaKit.isRomaji(results.originalSearchTerm)) {
-      params.result.originalSearchTerm = kanaKit.toHiragana(originalSearchTerm);
-      params.result.fallbackSearchTerm = kanaKit.toHiragana(fallbackSearchTerm);
-
-      results = await searchDatabase(params);
-    }
-  }
-
-  if (results.entries.isEmpty) {
-    if (kanaKit.isKatakana(results.originalSearchTerm)) {
-      params.result.originalSearchTerm = kanaKit.toHiragana(originalSearchTerm);
-      params.result.fallbackSearchTerm = kanaKit.toHiragana(fallbackSearchTerm);
-
-      results = await searchDatabase(params);
-    }
-  }
-
-  if (results.entries.isEmpty) {
-    if (kanaKit.isHiragana(results.originalSearchTerm)) {
-      params.result.originalSearchTerm = kanaKit.toKatakana(originalSearchTerm);
-      params.result.fallbackSearchTerm = kanaKit.toRomaji(originalSearchTerm);
-
-      results = await searchDatabase(params);
-    }
-  }
-
-  if (results.entries.isEmpty) {
-    if (originalSearchTerm.length > 1) {
-      params.result.originalSearchTerm =
-          originalSearchTerm.substring(0, originalSearchTerm.length - 1);
-      params.result.fallbackSearchTerm =
-          originalSearchTerm.substring(0, originalSearchTerm.length - 1);
-
-      results = await searchDatabase(params);
-    }
-  }
-
-  if (results.entries.isEmpty) {
-    if (originalSearchTerm.length >= 4 && originalSearchTerm.endsWith("そうに")) {
-      params.result.originalSearchTerm =
-          originalSearchTerm.substring(0, originalSearchTerm.length - 3);
-      params.result.fallbackSearchTerm =
-          originalSearchTerm.substring(0, originalSearchTerm.length - 2);
-
-      results = await searchDatabase(params);
-    } else if (originalSearchTerm.length >= 4) {
-      if (originalSearchTerm.length >= 4) {
-        params.result.originalSearchTerm =
-            originalSearchTerm.substring(0, originalSearchTerm.length - 2);
-        params.result.fallbackSearchTerm =
-            originalSearchTerm.substring(0, originalSearchTerm.length - 2);
-
-        results = await searchDatabase(params);
-      }
-    }
-  }
-  return results;
 }
 
 DictionaryWidget widgetDisplayEnhancementYomichanTermBank({

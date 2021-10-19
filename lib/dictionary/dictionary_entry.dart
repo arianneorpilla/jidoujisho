@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:chisa/dictionary/dictionary_search_result.dart';
 import 'package:objectbox/objectbox.dart';
 
 @Entity()
@@ -65,4 +66,16 @@ class DictionaryEntry {
       popularity: map["popularity"],
     );
   }
+
+  @override
+  operator ==(Object other) =>
+      other is DictionaryEntry &&
+      other.word == word &&
+      other.reading == reading &&
+      other.meaning == meaning &&
+      other.extra == extra &&
+      other.popularity == popularity;
+
+  @override
+  int get hashCode => toJson().hashCode;
 }

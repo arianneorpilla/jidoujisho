@@ -5,8 +5,8 @@ import 'dart:typed_data';
 import 'package:chisa/dictionary/dictionary.dart';
 import 'package:chisa/dictionary/dictionary_entry.dart';
 import 'package:chisa/dictionary/dictionary_format.dart';
-import 'package:chisa/dictionary/dictionary_search_results.dart';
-import 'package:chisa/language/app_localizations.dart';
+import 'package:chisa/dictionary/dictionary_search_result.dart';
+
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/objectbox.g.dart';
 import 'package:file_picker/file_picker.dart';
@@ -235,8 +235,7 @@ Widget showProgressDialog(
               Padding(
                 padding: const EdgeInsets.only(left: 0.7),
                 child: Text(
-                  AppLocalizations.getLocalizedValue(
-                      appModel.getAppLanguageName(), "import_in_progress"),
+                  appModel.translate("import_in_progress"),
                   style: TextStyle(
                     fontSize: 10,
                     color: Theme.of(context).unselectedWidgetColor,
@@ -387,67 +386,85 @@ Future<DictionarySearchResult> searchDatabase(
   DictionarySearchResult unprocessedResult = params.result;
   int searchLimit = 20;
 
-  String originalTerm = unprocessedResult.originalSearchTerm;
-  String fallbackTerm = unprocessedResult.fallbackSearchTerm;
   ByteData storeReference = unprocessedResult.storeReference!;
   Store store = Store.fromReference(getObjectBoxModel(), storeReference);
   Box box = store.box<DictionaryEntry>();
 
-  QueryBuilder exactWordMatch =
-      box.query(DictionaryEntry_.word.equals(originalTerm));
-  Query exactWordQuery = exactWordMatch.build();
+  List<String> terms = [];
+  terms.add(params.result.originalSearchTerm);
+  terms.addAll(params.result.fallbackSearchTerms);
 
-  Query limitedWordQuery = exactWordQuery..limit = searchLimit;
-  unprocessedResult.entries
-      .addAll(limitedWordQuery.find() as List<DictionaryEntry>);
+  for (String term in terms) {
+    QueryBuilder exactWordMatch = box.query(DictionaryEntry_.word.equals(term));
+    Query exactWordQuery = exactWordMatch.build();
 
-  QueryBuilder exactReadingMatch =
-      box.query(DictionaryEntry_.reading.equals(originalTerm));
-  Query exactReadingQuery = exactReadingMatch.build();
-
-  Query limitedReadingQuery = exactReadingQuery..limit = searchLimit;
-  List<DictionaryEntry> readingMatchQueries =
-      limitedReadingQuery.find() as List<DictionaryEntry>;
-  unprocessedResult.entries.addAll(readingMatchQueries);
-
-  if (unprocessedResult.entries.isEmpty) {
-    QueryBuilder fallbackMixMatch = box.query(
-        DictionaryEntry_.word.equals(fallbackTerm) |
-            DictionaryEntry_.reading.equals(fallbackTerm) |
-            DictionaryEntry_.word.startsWith(originalTerm) |
-            DictionaryEntry_.reading.startsWith(originalTerm))
-      ..order(DictionaryEntry_.popularity, flags: Order.descending);
-    Query fallbackMixQuery = fallbackMixMatch.build();
-
-    Query fallbackLimitedQuery = fallbackMixQuery..limit = searchLimit;
-    List<DictionaryEntry> likeMatches =
-        fallbackLimitedQuery.find() as List<DictionaryEntry>;
-    unprocessedResult.entries.addAll(likeMatches);
-  }
-
-  if (unprocessedResult.entries.isNotEmpty) {
-    return unprocessedResult;
-  }
-
-  if (unprocessedResult.entries.isEmpty) {
-    QueryBuilder startsWithWordMatch = box
-        .query(DictionaryEntry_.word.startsWith(fallbackTerm))
-          ..order(DictionaryEntry_.popularity, flags: Order.descending);
-    Query startsWithWordQuery = startsWithWordMatch.build();
-
-    limitedWordQuery = startsWithWordQuery..limit = searchLimit;
+    Query limitedWordQuery = exactWordQuery..limit = searchLimit;
     unprocessedResult.entries
         .addAll(limitedWordQuery.find() as List<DictionaryEntry>);
 
-    QueryBuilder startsWithReadingMatch = box
-        .query(DictionaryEntry_.reading.startsWith(fallbackTerm))
-          ..order(DictionaryEntry_.popularity, flags: Order.descending);
-    Query startsWithReadingQuery = startsWithReadingMatch.build();
+    QueryBuilder exactReadingMatch =
+        box.query(DictionaryEntry_.reading.equals(term));
+    Query exactReadingQuery = exactReadingMatch.build();
 
-    limitedReadingQuery = startsWithReadingQuery..limit = searchLimit;
-    readingMatchQueries = limitedReadingQuery.find() as List<DictionaryEntry>;
+    Query limitedReadingQuery = exactReadingQuery..limit = searchLimit;
+    List<DictionaryEntry> readingMatchQueries =
+        limitedReadingQuery.find() as List<DictionaryEntry>;
     unprocessedResult.entries.addAll(readingMatchQueries);
+
+    if (unprocessedResult.entries.length >= searchLimit) {
+      break;
+    }
   }
+
+  if (unprocessedResult.entries.length < searchLimit) {
+    for (String term in terms) {
+      QueryBuilder fallbackMixMatch = box.query(
+          DictionaryEntry_.word.startsWith(term) |
+              DictionaryEntry_.reading.startsWith(term))
+        ..order(DictionaryEntry_.popularity, flags: Order.descending);
+      Query fallbackMixQuery = fallbackMixMatch.build();
+
+      Query fallbackLimitedQuery = fallbackMixQuery..limit = searchLimit;
+      List<DictionaryEntry> likeMatches =
+          fallbackLimitedQuery.find() as List<DictionaryEntry>;
+      unprocessedResult.entries.addAll(likeMatches);
+
+      if (unprocessedResult.entries.length >= searchLimit) {
+        break;
+      }
+    }
+  }
+
+  List<DictionaryEntry> exactFirstEntries = [];
+  for (DictionaryEntry entry in unprocessedResult.entries) {
+    if (entry.word == unprocessedResult.originalSearchTerm) {
+      if (!exactFirstEntries.contains(entry)) {
+        exactFirstEntries.add(entry);
+      }
+    }
+  }
+  for (DictionaryEntry entry in unprocessedResult.entries) {
+    if (entry.reading == unprocessedResult.originalSearchTerm) {
+      if (!exactFirstEntries.contains(entry)) {
+        exactFirstEntries.add(entry);
+      }
+    }
+  }
+  for (DictionaryEntry entry in unprocessedResult.entries) {
+    if (unprocessedResult.fallbackSearchTerms.contains(entry.word) ||
+        unprocessedResult.fallbackSearchTerms.contains(entry.reading)) {
+      if (!exactFirstEntries.contains(entry)) {
+        exactFirstEntries.add(entry);
+      }
+    }
+  }
+  for (DictionaryEntry entry in unprocessedResult.entries) {
+    if (!exactFirstEntries.contains(entry)) {
+      exactFirstEntries.add(entry);
+    }
+  }
+
+  unprocessedResult.entries = exactFirstEntries;
 
   return unprocessedResult;
 }

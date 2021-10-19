@@ -1,25 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:chisa/dictionary/dictionary_widget_enhancement.dart';
-
 import 'package:chisa/models/app_model.dart';
-import 'package:chisa/util/center_icon_message.dart';
-import 'package:chisa/util/dictionary_widget_field.dart';
 
-class DictionaryWidgetEnhancementDialog extends StatefulWidget {
-  const DictionaryWidgetEnhancementDialog({
-    Key? key,
-    required this.field,
-  }) : super(key: key);
+class ListMenuItem {
+  ListMenuItem({
+    required this.label,
+    required this.icon,
+    required this.action,
+  });
 
-  final DictionaryWidgetField field;
-  @override
-  State<StatefulWidget> createState() => AnkiExportEnhancementDialogState();
+  final String label;
+  final IconData icon;
+  final VoidCallback? action;
 }
 
-class AnkiExportEnhancementDialogState
-    extends State<DictionaryWidgetEnhancementDialog> {
+class ListMenu extends StatefulWidget {
+  const ListMenu({
+    Key? key,
+    required this.items,
+    required this.indexNotifier,
+    required this.emptyWidget,
+    required this.stateCallback,
+    required this.popOnSelect,
+  }) : super(key: key);
+
+  final List<ListMenuItem> items;
+  final ValueNotifier<int> indexNotifier;
+  final Widget emptyWidget;
+  final VoidCallback stateCallback;
+  final bool popOnSelect;
+
+  @override
+  State<StatefulWidget> createState() => ListMenuState();
+}
+
+class ListMenuState extends State<ListMenu> {
   ScrollController scrollController = ScrollController();
 
   late AppModel appModel;
@@ -39,60 +55,42 @@ class AnkiExportEnhancementDialogState
   }
 
   Widget buildContent() {
-    List<DictionaryWidgetEnhancement> enhancements =
-        appModel.getFieldWidgetEnhancements(widget.field);
-
     return SizedBox(
       width: double.maxFinite,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          enhancements.isEmpty
-              ? showEmptyMessage()
-              : showEnhancementList(enhancements),
+          widget.items.isEmpty ? widget.emptyWidget : buildList(),
         ],
       ),
     );
   }
 
-  Widget showEmptyMessage() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 24),
-      child: showCenterIconMessage(
-        context: context,
-        label: appModel.translate("no_more_available_enhancements"),
-        icon: Icons.auto_fix_high,
-        jumpingDots: false,
-      ),
-    );
-  }
-
-  Widget showEnhancementList(List<DictionaryWidgetEnhancement> enhancements) {
+  Widget buildList() {
     return RawScrollbar(
       controller: scrollController,
       thumbColor:
-          (appModel.getIsDarkMode()) ? Colors.grey[700] : Colors.grey[400],
+          appModel.getIsDarkMode() ? Colors.grey[700] : Colors.grey[400],
       child: ListView.builder(
         controller: scrollController,
         shrinkWrap: true,
-        itemCount: enhancements.length,
+        itemCount: widget.items.length,
         itemBuilder: (context, index) {
-          DictionaryWidgetEnhancement enhancement = enhancements[index];
+          ListMenuItem item = widget.items[index];
 
           return ListTile(
-            dense: true,
-            selected: (enhancement ==
-                (appModel.getFieldWidgetEnhancement(widget.field))),
+            selected: widget.indexNotifier.value == index,
             selectedTileColor: Theme.of(context).selectedRowColor,
+            dense: true,
             title: Row(
               children: [
                 Icon(
-                  enhancement.enhancementIcon,
+                  item.icon,
                   size: 20.0,
                 ),
                 const SizedBox(width: 16.0),
                 Text(
-                  enhancement.enhancementName,
+                  item.label,
                   style: TextStyle(
                     fontSize: 16,
                     color:
@@ -103,7 +101,13 @@ class AnkiExportEnhancementDialogState
               ],
             ),
             onTap: () async {
-              Navigator.pop(context, enhancement);
+              if (item.action != null) {
+                item.action!;
+              }
+              setState(() {});
+              if (widget.popOnSelect) {
+                Navigator.pop(context, item);
+              }
             },
           );
         },

@@ -3,14 +3,7 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
-import 'package:chisa/anki/enhancements/pitch_accent_export_enhancement.dart';
-import 'package:chisa/dictionary/dictionary_entry_widget.dart';
-import 'package:chisa/dictionary/dictionary_widget_enhancement.dart';
-import 'package:chisa/dictionary/enhancements/pitch_accent_enhancement.dart';
-import 'package:chisa/media/histories/dictionary_media_history.dart';
-import 'package:chisa/media/history_items/dictionary_media_history_item.dart';
-import 'package:chisa/media/media_history_item.dart';
-import 'package:chisa/util/dictionary_widget_field.dart';
+import 'package:chisa/language/app_localizations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:objectbox/objectbox.dart';
@@ -20,17 +13,25 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path/path.dart' as p;
 import 'package:collection/collection.dart';
 
+import 'package:chisa/media/histories/dictionary_media_history.dart';
+import 'package:chisa/media/history_items/dictionary_media_history_item.dart';
+import 'package:chisa/media/media_history_item.dart';
+import 'package:chisa/util/dictionary_widget_field.dart';
 import 'package:chisa/anki/anki_export_enhancement.dart';
 import 'package:chisa/anki/anki_export_params.dart';
 import 'package:chisa/anki/enhancements/clear_button_enhancement.dart';
+import 'package:chisa/anki/enhancements/pitch_accent_export_enhancement.dart';
 import 'package:chisa/dictionary/dictionary.dart';
 import 'package:chisa/dictionary/dictionary_dialog.dart';
 import 'package:chisa/dictionary/dictionary_entry.dart';
 import 'package:chisa/dictionary/dictionary_format.dart';
-import 'package:chisa/dictionary/dictionary_search_results.dart';
-import 'package:chisa/dictionary/dictionary_utils.dart';
+import 'package:chisa/dictionary/dictionary_search_result.dart';
+import 'package:chisa/dictionary/dictionary_import.dart';
+import 'package:chisa/util/dictionary_entry_widget.dart';
+import 'package:chisa/dictionary/dictionary_widget_enhancement.dart';
+import 'package:chisa/dictionary/enhancements/pitch_accent_enhancement.dart';
 import 'package:chisa/dictionary/formats/yomichan_term_bank_format.dart';
-import 'package:chisa/language/app_localizations.dart';
+
 import 'package:chisa/language/language.dart';
 import 'package:chisa/language/language_dialog.dart';
 import 'package:chisa/language/languages/english_language.dart';
@@ -95,6 +96,7 @@ class AppModel with ChangeNotifier {
 
   List<MediaType> get availableMediaTypes => _availableMediaTypes;
   Map<String, Language> get availableLanguages => _availableLanguages;
+  Map<String, Dictionary> get availableDictionaries => _availableDictionaries;
   Map<String, DictionaryFormat> get availableDictionaryFormats =>
       _availableDictionaryFormats;
 
@@ -229,7 +231,9 @@ class AppModel with ChangeNotifier {
       await initialiseExportEnhancements();
       await initialiseWidgetEnhancements();
       await initialiseLanguage();
+
       _hasInitialized = true;
+      notifyListeners();
     }
   }
 
@@ -428,6 +432,10 @@ class AppModel with ChangeNotifier {
     await initialiseLanguage();
   }
 
+  List<String> getAppLanguageNames() {
+    return AppLocalizations.localizations();
+  }
+
   String getAppLanguageName() {
     return _sharedPreferences.getString("appLanguage") ??
         AppLocalizations.localizations().first;
@@ -443,8 +451,7 @@ class AppModel with ChangeNotifier {
   }
 
   Dictionary getDictionaryFromName(String dictionaryName) {
-    return getDictionaryRecord().firstWhere(
-        (dictionary) => dictionary.dictionaryName == dictionaryName);
+    return availableDictionaries[dictionaryName]!;
   }
 
   Language getCurrentLanguage() {
@@ -463,6 +470,7 @@ class AppModel with ChangeNotifier {
     String contextMediaTypeName = "",
   }) async {
     _isSearching = true;
+    searchTerm = searchTerm.trim();
 
     // For isolate updates.
     ReceivePort receivePort = ReceivePort();
@@ -481,12 +489,18 @@ class AppModel with ChangeNotifier {
     /// Populate an empty [DictionarySearchResult] with metadata, it will be
     /// filled with database search results in the next step.
     DictionarySearchResult emptyResult = DictionarySearchResult(
-        dictionaryName: currentDictionary.dictionaryName,
-        formatName: currentDictionary.formatName,
-        originalSearchTerm: searchTerm,
-        fallbackSearchTerm: currentLanguage.getRootForm(searchTerm),
-        entries: [],
-        storeReference: storeReference);
+      dictionaryName: currentDictionary.dictionaryName,
+      formatName: currentDictionary.formatName,
+      originalSearchTerm: searchTerm,
+      fallbackSearchTerms: currentLanguage.generateFallbackTerms(searchTerm),
+      entries: [],
+      storeReference: storeReference,
+    );
+
+    if (searchTerm.trim().isEmpty) {
+      _isSearching = false;
+      return emptyResult;
+    }
 
     /// If the [DictionaryFormat] has a database search function override, use
     /// that instead of this.
@@ -540,7 +554,7 @@ class AppModel with ChangeNotifier {
       AnkiExportField field) {
     List<AnkiExportEnhancement?> enhancements = [];
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 4; i++) {
       AnkiExportEnhancement? enhancement =
           _availableExportEnhancements.firstWhereOrNull((enhancement) =>
               enhancement.enhancementField == field &&
@@ -667,5 +681,12 @@ class AppModel with ChangeNotifier {
         meaning: meaning,
       );
     }
+  }
+
+  String translate(String localisedValue) {
+    return AppLocalizations.getLocalizedValue(
+      getAppLanguageName(),
+      localisedValue,
+    );
   }
 }

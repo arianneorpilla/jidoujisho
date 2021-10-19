@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:chisa/anki/anki_export_enhancement.dart';
 import 'package:chisa/anki/anki_export_enhancement_dialog.dart';
 import 'package:chisa/anki/anki_export_params.dart';
-import 'package:chisa/language/app_localizations.dart';
+
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/util/anki_export_field.dart';
-import 'package:chisa/util/menu_item.dart';
+import 'package:chisa/util/popup_item.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -261,14 +261,11 @@ class CreatorPageState extends State<CreatorPage> {
 
   String getTitle() {
     if (widget.editMode) {
-      return AppLocalizations.getLocalizedValue(
-          appModel.getAppLanguageName(), "creator_options_menu");
+      return appModel.translate("creator_options_menu");
     } else if (widget.autoMode) {
-      return AppLocalizations.getLocalizedValue(
-          appModel.getAppLanguageName(), "creator_options_auto");
+      return appModel.translate("creator_options_auto");
     } else {
-      return AppLocalizations.getLocalizedValue(
-          appModel.getAppLanguageName(), "card_creator");
+      return appModel.translate("card_creator");
     }
   }
 
@@ -374,9 +371,8 @@ class CreatorPageState extends State<CreatorPage> {
       context: context,
       position: RelativeRect.fromLTRB(left, top, 0, 0),
       items: [
-        menuItem(
-          label: AppLocalizations.getLocalizedValue(
-              appModel.getAppLanguageName(), "creator_options_menu"),
+        popupItem(
+          label: appModel.translate("creator_options_menu"),
           icon: Icons.widgets,
           action: () async {
             await Navigator.push(
@@ -390,9 +386,8 @@ class CreatorPageState extends State<CreatorPage> {
             setState(() {});
           },
         ),
-        menuItem(
-          label: AppLocalizations.getLocalizedValue(
-              appModel.getAppLanguageName(), "creator_options_auto"),
+        popupItem(
+          label: appModel.translate("creator_options_auto"),
           icon: Icons.hdr_auto,
           action: () async {
             await Navigator.push(

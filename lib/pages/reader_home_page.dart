@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:chisa/language/app_localizations.dart';
 import 'package:chisa/media/media_type.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/media_home_page.dart';
@@ -47,8 +46,7 @@ class ReaderHomePageState extends State<ReaderHomePage> {
           padding: const EdgeInsets.all(36),
           color: Colors.grey,
           child: Text(
-            AppLocalizations.getLocalizedValue(
-                appModel.getAppLanguageName(), "start_reading"),
+            appModel.translate("start_reading"),
           ),
         ),
       ),

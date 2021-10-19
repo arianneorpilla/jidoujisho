@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:chisa/dictionary/dictionary_search_results.dart';
+import 'package:chisa/dictionary/dictionary_search_result.dart';
 import 'package:chisa/media/history_items/default_media_history_item.dart';
 
 class DictionaryMediaHistoryItem extends DefaultMediaHistoryItem {

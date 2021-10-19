@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:chisa/language/app_localizations.dart';
 import 'package:chisa/media/histories/default_media_history.dart';
 import 'package:chisa/media/media_history.dart';
 import 'package:chisa/models/app_model.dart';
@@ -34,8 +33,7 @@ class PlayerMediaType extends MediaType {
   BottomNavigationBarItem getHomeTab(BuildContext context) {
     AppModel appModel = Provider.of<AppModel>(context);
     return BottomNavigationBarItem(
-      label: AppLocalizations.getLocalizedValue(
-          appModel.getAppLanguageName(), "player_media_type"),
+      label: appModel.translate("player_media_type"),
       icon: Icon(mediaTypeIcon),
     );
   }

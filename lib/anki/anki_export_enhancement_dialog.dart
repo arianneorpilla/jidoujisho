@@ -1,11 +1,11 @@
-import 'package:chisa/anki/anki_export_enhancement.dart';
-import 'package:chisa/util/anki_export_field.dart';
-import 'package:chisa/util/center_icon_message.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:chisa/language/app_localizations.dart';
+import 'package:chisa/anki/anki_export_enhancement.dart';
+
 import 'package:chisa/models/app_model.dart';
+import 'package:chisa/util/anki_export_field.dart';
+import 'package:chisa/util/center_icon_message.dart';
 
 class AnkiExportEnhancementDialog extends StatefulWidget {
   const AnkiExportEnhancementDialog({
@@ -44,7 +44,6 @@ class AnkiExportEnhancementDialogState
   Widget buildContent() {
     List<AnkiExportEnhancement> enhancements =
         appModel.getFieldExportEnhancements(widget.field);
-
     List<AnkiExportEnhancement?> existings =
         appModel.getExportEnabledFieldEnhancement(widget.field);
     for (AnkiExportEnhancement? existing in existings) {
@@ -71,8 +70,7 @@ class AnkiExportEnhancementDialogState
       padding: const EdgeInsets.symmetric(vertical: 24),
       child: showCenterIconMessage(
         context: context,
-        label: AppLocalizations.getLocalizedValue(
-            appModel.getAppLanguageName(), "no_more_available_enhancements"),
+        label: appModel.translate("no_more_available_enhancements"),
         icon: Icons.auto_fix_high,
         jumpingDots: false,
       ),

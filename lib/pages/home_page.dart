@@ -1,11 +1,11 @@
 import 'package:chisa/dictionary/dictionary_widget_enhancement.dart';
 import 'package:chisa/dictionary/dictionary_widget_enhancement_dialog.dart';
-import 'package:chisa/language/app_localizations.dart';
+
 import 'package:chisa/media/media_type.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/creator_page.dart';
 import 'package:chisa/util/dictionary_widget_field.dart';
-import 'package:chisa/util/menu_item.dart';
+import 'package:chisa/util/popup_item.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
@@ -64,8 +64,7 @@ class HomePageState extends State<HomePage> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          AppLocalizations.getLocalizedValue(
-              appModel.getAppLanguageName(), "app_title"),
+          appModel.translate("app_title"),
         ),
         getVersion(),
       ],
@@ -144,20 +143,17 @@ class HomePageState extends State<HomePage> {
       context: context,
       position: RelativeRect.fromLTRB(left, top, 0, 0),
       items: [
-        menuItem(
+        popupItem(
           label: appModel.getIsDarkMode()
-              ? AppLocalizations.getLocalizedValue(
-                  appModel.getAppLanguageName(), "options_theme_light")
-              : AppLocalizations.getLocalizedValue(
-                  appModel.getAppLanguageName(), "options_theme_dark"),
+              ? appModel.translate("options_theme_light")
+              : appModel.translate("options_theme_dark"),
           icon: appModel.getIsDarkMode() ? Icons.light_mode : Icons.dark_mode,
           action: () async {
             await appModel.toggleActiveTheme();
           },
         ),
-        menuItem(
-          label: AppLocalizations.getLocalizedValue(
-              appModel.getAppLanguageName(), "options_dictionaries"),
+        popupItem(
+          label: appModel.translate("options_dictionaries"),
           icon: Icons.auto_stories,
           action: () async {
             await appModel.showDictionaryMenu(
@@ -167,17 +163,15 @@ class HomePageState extends State<HomePage> {
             setState(() {});
           },
         ),
-        menuItem(
-          label: AppLocalizations.getLocalizedValue(
-              appModel.getAppLanguageName(), "options_enhancements"),
+        popupItem(
+          label: appModel.translate("options_enhancements"),
           icon: Icons.auto_fix_high,
           action: () async {
             showEnhancementOptions(context, offset);
           },
         ),
-        menuItem(
-          label: AppLocalizations.getLocalizedValue(
-              appModel.getAppLanguageName(), "options_language"),
+        popupItem(
+          label: appModel.translate("options_language"),
           icon: Icons.translate,
           action: () async {
             await appModel.showLanguageMenu(
@@ -185,17 +179,15 @@ class HomePageState extends State<HomePage> {
             );
           },
         ),
-        menuItem(
-          label: AppLocalizations.getLocalizedValue(
-              appModel.getAppLanguageName(), "options_github"),
+        popupItem(
+          label: appModel.translate("options_github"),
           icon: Icons.code,
           action: () async {
             await launch("https://github.com/lrorpilla/jidoujisho");
           },
         ),
-        menuItem(
-          label: AppLocalizations.getLocalizedValue(
-              appModel.getAppLanguageName(), "options_licenses"),
+        popupItem(
+          label: appModel.translate("options_licenses"),
           icon: Icons.info,
           action: () async {
             Navigator.of(context).push(
@@ -206,8 +198,7 @@ class HomePageState extends State<HomePage> {
                         appModel.getIsDarkMode() ? Colors.black : Colors.white,
                   ),
                   child: LicensePage(
-                      applicationName: AppLocalizations.getLocalizedValue(
-                          appModel.getAppLanguageName(), "app_title"),
+                      applicationName: appModel.translate("app_title"),
                       applicationVersion: appModel.packageInfo.version,
                       applicationIcon: const Padding(
                         padding: EdgeInsets.only(top: 8, bottom: 8),
@@ -217,9 +208,8 @@ class HomePageState extends State<HomePage> {
                           width: 48,
                         ),
                       ),
-                      applicationLegalese: AppLocalizations.getLocalizedValue(
-                          appModel.getAppLanguageName(),
-                          "license_screen_legalese")),
+                      applicationLegalese:
+                          appModel.translate("license_screen_legalese")),
                 ),
               ),
             );
@@ -242,9 +232,8 @@ class HomePageState extends State<HomePage> {
       context: context,
       position: RelativeRect.fromLTRB(left, top, 0, 0),
       items: [
-        menuItem(
-          label: AppLocalizations.getLocalizedValue(
-              appModel.getAppLanguageName(), "creator_options_menu"),
+        popupItem(
+          label: appModel.translate("creator_options_menu"),
           icon: Icons.widgets,
           action: () async {
             Navigator.of(context).push(
@@ -255,9 +244,8 @@ class HomePageState extends State<HomePage> {
             setState(() {});
           },
         ),
-        menuItem(
-          label: AppLocalizations.getLocalizedValue(
-              appModel.getAppLanguageName(), "creator_options_auto"),
+        popupItem(
+          label: appModel.translate("creator_options_auto"),
           icon: Icons.hdr_auto,
           action: () async {
             await Navigator.of(context).push(
@@ -268,9 +256,8 @@ class HomePageState extends State<HomePage> {
             setState(() {});
           },
         ),
-        menuItem(
-          label: AppLocalizations.getLocalizedValue(
-              appModel.getAppLanguageName(), "widget_options"),
+        popupItem(
+          label: appModel.translate("widget_options"),
           icon: Icons.auto_stories,
           action: () async {
             showWidgetFieldOptions(context, offset);
@@ -311,25 +298,22 @@ class HomePageState extends State<HomePage> {
       context: context,
       position: RelativeRect.fromLTRB(left, top, 0, 0),
       items: [
-        menuItem(
-          label: AppLocalizations.getLocalizedValue(
-              appModel.getAppLanguageName(), "field_label_word"),
+        popupItem(
+          label: appModel.translate("field_label_word"),
           icon: Icons.speaker_notes_outlined,
           action: () async {
             await changeFieldWidget(DictionaryWidgetField.word);
           },
         ),
-        menuItem(
-          label: AppLocalizations.getLocalizedValue(
-              appModel.getAppLanguageName(), "field_label_reading"),
+        popupItem(
+          label: appModel.translate("field_label_reading"),
           icon: Icons.surround_sound_outlined,
           action: () async {
             await changeFieldWidget(DictionaryWidgetField.reading);
           },
         ),
-        menuItem(
-          label: AppLocalizations.getLocalizedValue(
-              appModel.getAppLanguageName(), "field_label_meaning"),
+        popupItem(
+          label: appModel.translate("field_label_meaning"),
           icon: Icons.translate_rounded,
           action: () async {
             await changeFieldWidget(DictionaryWidgetField.meaning);

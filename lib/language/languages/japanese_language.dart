@@ -1,8 +1,9 @@
-import 'package:chisa/util/reading_direction.dart';
-import 'package:chisa/language/language.dart';
 import 'package:kana_kit/kana_kit.dart';
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:ve_dart/ve_dart.dart';
+
+import 'package:chisa/util/reading_direction.dart';
+import 'package:chisa/language/language.dart';
 
 class JapaneseLanguage extends Language {
   JapaneseLanguage()
@@ -66,5 +67,47 @@ class JapaneseLanguage extends Language {
     word = word.replaceAll('␜', '\n').replaceAll('␝', ' ').trim();
 
     return word;
+  }
+
+  @override
+  List<String> generateFallbackTerms(String searchTerm) {
+    List<String> fallbackTerms = [];
+
+    String rootForm = getRootForm(searchTerm);
+    if (rootForm != searchTerm) {
+      fallbackTerms.add(rootForm);
+    }
+
+    if (kanaKit.isRomaji(searchTerm)) {
+      String hiragana = kanaKit.toHiragana(searchTerm);
+      String katakana = kanaKit.toKatakana(searchTerm);
+      String hiraganaFallback = getRootForm(hiragana);
+      String katakanaFallback = getRootForm(katakana);
+
+      fallbackTerms.add(kanaKit.toHiragana(searchTerm));
+      if (hiraganaFallback != hiragana) {
+        fallbackTerms.add(hiraganaFallback);
+      }
+      fallbackTerms.add(kanaKit.toKatakana(searchTerm));
+      if (katakanaFallback != katakana) {
+        fallbackTerms.add(katakanaFallback);
+      }
+    }
+
+    if (kanaKit.isHiragana(searchTerm)) {
+      fallbackTerms.add(kanaKit.toKatakana(searchTerm));
+    }
+    if (kanaKit.isKatakana(searchTerm)) {
+      fallbackTerms.add(kanaKit.toHiragana(searchTerm));
+    }
+
+    if (searchTerm.length > 4) {
+      if (searchTerm.endsWith("そうに")) {
+        fallbackTerms.add(searchTerm.substring(0, searchTerm.length - 3));
+      }
+      fallbackTerms.add(searchTerm.substring(0, searchTerm.length - 2));
+    }
+
+    return fallbackTerms;
   }
 }

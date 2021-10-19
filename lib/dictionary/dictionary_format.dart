@@ -2,12 +2,12 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:chisa/dictionary/dictionary.dart';
-import 'package:chisa/dictionary/dictionary_entry_widget.dart';
-import 'package:chisa/dictionary/dictionary_utils.dart';
+import 'package:chisa/util/dictionary_entry_widget.dart';
+import 'package:chisa/dictionary/dictionary_import.dart';
 import 'package:flutter/material.dart';
 
 import 'package:chisa/dictionary/dictionary_entry.dart';
-import 'package:chisa/dictionary/dictionary_search_results.dart';
+import 'package:chisa/dictionary/dictionary_search_result.dart';
 
 abstract class DictionaryFormat {
   DictionaryFormat({

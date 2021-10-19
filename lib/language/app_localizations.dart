@@ -59,6 +59,9 @@ class AppLocalizations {
       'no_more_available_enhancements':
           'No more available enhancements for this field',
       'dictionary_history_empty': 'Dictionary history is empty',
+      'localisation_warning': 'Community addons and enhancements are developed '
+          'by their respective developers, and the language for these may '
+          'appear in their original language.',
       'license_screen_legalese': "A mobile video player, reader assistant, "
           "image mining workflow and card creation toolkit tailored for "
           "language learners.\n\nBuilt for the language learning community "
@@ -123,6 +126,9 @@ class AppLocalizations {
           'Wala nang karagdagang kagamitan para dito',
       'import_dictionaries_for_use': 'Magdagdag ng diksyunaryo na gagamitin',
       'dictionary_history_empty': 'Wala pang kasaysayan',
+      'localisation_warning': 'Ang wikang gamit ng mga mod o mga enhancement na '
+          'gawa ng komunidad ay hindi lokalisado at magpapakita sa orihinal na '
+          'lenguahe na pinanggalingan.',
       'license_screen_legalese': "Kagamitang nakakatulong sa pagnood ng bidyo, "
           "pagbasa ng libro at komiks at pagkabisado ng mga salita ng mga "
           "wikang banyaga.\n\nGawa ni Leo Rafael Orpilla para sa magaaral ng "

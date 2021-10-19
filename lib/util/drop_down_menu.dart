@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 
-typedef DropdownCallback = void Function(String option);
-
 class DropDownMenu extends StatefulWidget {
   final List<String> options;
   final String initialOption;
-  final DropdownCallback optionCallback;
+  final Function(String) optionCallback;
   final VoidCallback voidCallback;
 
   const DropDownMenu({

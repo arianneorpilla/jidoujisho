@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:chisa/dictionary/dictionary_entry_widget.dart';
+import 'package:chisa/util/dictionary_entry_widget.dart';
 import 'package:chisa/dictionary/formats/yomichan_term_bank_format.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:flutter/material.dart';
