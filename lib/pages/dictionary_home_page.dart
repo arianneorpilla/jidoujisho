@@ -44,10 +44,14 @@ class DictionaryPageState extends State<DictionaryHomePage> {
   Widget build(BuildContext context) {
     appModel = Provider.of<AppModel>(context);
 
-    if (appModel.getDictionaryMediaHistory().getDictionaryItems().isNotEmpty) {
-      return buildBody();
-    } else {
+    if (!appModel.hasInitialized) {
+      return Container();
+    }
+
+    if (appModel.getDictionaryMediaHistory().getDictionaryItems().isEmpty) {
       return buildEmptyBody();
+    } else {
+      return buildBody();
     }
   }
 

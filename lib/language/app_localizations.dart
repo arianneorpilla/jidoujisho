@@ -30,8 +30,8 @@ class AppLocalizations {
           'unsaved?',
       'preparing_card_creator': 'Preparing card creator',
       'delete_dictionary_confirmation':
-          'This dictionary will be removed. Are you sure you want to delete '
-              'this?',
+          'This dictionary and its searched entries will be removed. Are you '
+              'sure you want to delete this?',
       'search_label_before': 'Search result ',
       'search_label_middle': 'out of ',
       'search_label_from': 'from ',
@@ -43,13 +43,13 @@ class AppLocalizations {
       'field_label_extra': 'Extra',
       'field_label_image': 'Image',
       'field_label_audio': 'Audio',
-      'field_hint_context': 'Enter the sentence here',
-      'field_hint_word': 'Enter the word here',
-      'field_hint_reading': 'Enter the reading of the word here',
-      'field_hint_meaning': 'Enter the meaning of the word here',
-      'field_hint_extra': 'Enter extra information here',
-      'field_hint_image': 'Enter image search term here',
-      'field_hint_audio': 'Enter audio search term here',
+      'field_hint_context': 'Sentence or written context',
+      'field_hint_word': 'The headword of the card',
+      'field_hint_reading': 'Reading or pronunciation',
+      'field_hint_meaning': 'Meaning or dictionary definition',
+      'field_hint_extra': 'Any extra information here',
+      'field_hint_image': 'Enter image search term',
+      'field_hint_audio': 'Enter audio search term',
       'import_format': 'Import format',
       'import_in_progress': 'Import in progress...',
       'start_reading': 'Start Reading',
@@ -59,9 +59,9 @@ class AppLocalizations {
       'no_more_available_enhancements':
           'No more available enhancements for this field',
       'dictionary_history_empty': 'Dictionary history is empty',
-      'localisation_warning': 'Community addons and enhancements are developed '
-          'by their respective developers, and the language for these may '
-          'appear in their original language.',
+      'localisation_warning': 'Community addons and enhancements are managed '
+          'by their respective developers, and these may appear in their '
+          'original language.',
       'license_screen_legalese': "A mobile video player, reader assistant, "
           "image mining workflow and card creation toolkit tailored for "
           "language learners.\n\nBuilt for the language learning community "
@@ -81,7 +81,7 @@ class AppLocalizations {
       'options_theme_light': 'Magaan na tema',
       'options_theme_dark': 'Madilim na tema',
       'options_dictionaries': 'Mga diksyunaryo',
-      'options_enhancements': 'Dagdagang kagamitan',
+      'options_enhancements': 'Karagdagang kagamitan',
       'options_language': 'Pagpipiliang wika',
       'options_github': 'Makibahagi sa GitHub',
       'options_licenses': 'Mga pagpapatungkol',
@@ -98,7 +98,8 @@ class AppLocalizations {
           'Walang magbabagong kagamitan. Sigurado ka ba sa pagbalik?',
       'preparing_card_creator': 'Hinahanda ang card',
       'delete_dictionary_confirmation':
-          'Mawawala ang diksyunaryo na ito. Sigurado ka ba sa pagtanggal nito?',
+          'Ang diksyunaryo na ito ay mawawala, kasama ang mga resulta na galing '
+              'dito. Sigurado ka ba sa pagtanggal nito?',
       'search_label_before': 'Resulto ',
       'search_label_middle': 'sa ',
       'search_label_from': 'galing sa ',
@@ -126,9 +127,9 @@ class AppLocalizations {
           'Wala nang karagdagang kagamitan para dito',
       'import_dictionaries_for_use': 'Magdagdag ng diksyunaryo na gagamitin',
       'dictionary_history_empty': 'Wala pang kasaysayan',
-      'localisation_warning': 'Ang wikang gamit ng mga mod o mga enhancement na '
-          'gawa ng komunidad ay hindi lokalisado at magpapakita sa orihinal na '
-          'lenguahe na pinanggalingan.',
+      'localisation_warning': 'Ang mga mod na gawa ng komunidad ay maaring '
+          'hindi naisalin at maaring magpakita sa orihinal na wikang '
+          'pinanggalingan.',
       'license_screen_legalese': "Kagamitang nakakatulong sa pagnood ng bidyo, "
           "pagbasa ng libro at komiks at pagkabisado ng mga salita ng mga "
           "wikang banyaga.\n\nGawa ni Leo Rafael Orpilla para sa magaaral ng "

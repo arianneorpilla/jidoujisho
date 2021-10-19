@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:chisa/dictionary/dictionary.dart';
 import 'package:chisa/dictionary/dictionary_format.dart';
 import 'package:chisa/dictionary/dictionary_import.dart';
-import 'package:chisa/language/app_localizations.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/util/drop_down_menu.dart';
 
@@ -206,6 +205,7 @@ class DictionaryDialogState extends State<DictionaryDialog> {
       title: Text(appModel.getCurrentDictionaryName()),
       content: Text(
         appModel.translate("delete_dictionary_confirmation"),
+        textAlign: TextAlign.justify,
       ),
       actions: <Widget>[
         TextButton(

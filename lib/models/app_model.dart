@@ -83,7 +83,8 @@ class AppModel with ChangeNotifier {
   /// Populated in [initialiseExportEnhancements] when the app is started.
   final List<DictionaryWidgetEnhancement> _availableWidgetEnhancements = [];
 
-  bool _hasInitialized = false;
+  bool _hasInitialised = false;
+  bool get hasInitialized => _hasInitialised;
   bool get isSearching => _isSearching;
   PackageInfo get packageInfo => _packageInfo;
   SharedPreferences get sharedPreferences => _sharedPreferences;
@@ -226,13 +227,13 @@ class AppModel with ChangeNotifier {
   }
 
   Future<void> initialiseAppModel() async {
-    if (!_hasInitialized) {
+    if (!_hasInitialised) {
       await initialiseImportedDictionaries();
       await initialiseExportEnhancements();
       await initialiseWidgetEnhancements();
       await initialiseLanguage();
 
-      _hasInitialized = true;
+      _hasInitialised = true;
       notifyListeners();
     }
   }

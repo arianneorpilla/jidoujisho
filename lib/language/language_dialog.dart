@@ -85,30 +85,32 @@ class LanguageDialogState extends State<LanguageDialog> {
               setState(() {});
             },
           ),
-          Container(
-            child: ListTile(
-              dense: true,
-              title: Text.rich(
-                TextSpan(
-                  text: '',
-                  children: <InlineSpan>[
-                    WidgetSpan(
-                      child: Icon(Icons.info,
-                          size: 14.0, color: Colors.lightBlue.shade300),
+          ListTile(
+            dense: true,
+            title: Text.rich(
+              TextSpan(
+                text: '',
+                children: <InlineSpan>[
+                  WidgetSpan(
+                    child: Icon(
+                      Icons.info,
+                      size: 14.0,
+                      color: Colors.lightBlue.shade400,
                     ),
-                    const WidgetSpan(
-                      child: SizedBox(width: 4.0),
+                  ),
+                  const WidgetSpan(
+                    child: SizedBox(width: 8.0),
+                  ),
+                  TextSpan(
+                    text: appModel.translate("localisation_warning"),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.lightBlue.shade400,
                     ),
-                    TextSpan(
-                      text:
-                          "Casting experience may vary based on network performance and the supported formats of the selected display device.",
-                      style: TextStyle(
-                          fontSize: 14, color: Colors.lightBlue.shade300),
-                    ),
-                  ],
-                ),
-                textAlign: TextAlign.left,
+                  ),
+                ],
               ),
+              textAlign: TextAlign.justify,
             ),
           ),
         ],
