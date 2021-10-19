@@ -2,13 +2,6 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
-import 'package:chisa/dictionary/dictionary.dart';
-import 'package:chisa/dictionary/dictionary_entry.dart';
-import 'package:chisa/dictionary/dictionary_format.dart';
-import 'package:chisa/dictionary/dictionary_search_result.dart';
-
-import 'package:chisa/models/app_model.dart';
-import 'package:chisa/objectbox.g.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +9,13 @@ import 'package:objectbox/objectbox.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
+
+import 'package:chisa/dictionary/dictionary.dart';
+import 'package:chisa/dictionary/dictionary_entry.dart';
+import 'package:chisa/dictionary/dictionary_format.dart';
+import 'package:chisa/dictionary/dictionary_search_result.dart';
+import 'package:chisa/models/app_model.dart';
+import 'package:chisa/objectbox.g.dart';
 
 Future<void> dictionaryFileImport(
   BuildContext context,

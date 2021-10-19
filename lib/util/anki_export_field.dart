@@ -56,10 +56,8 @@ extension AnkiExportFieldLocalisation on AnkiExportField {
         return Icons.format_align_center;
       case AnkiExportField.word:
         return Icons.speaker_notes_outlined;
-
       case AnkiExportField.reading:
         return Icons.surround_sound_outlined;
-
       case AnkiExportField.meaning:
         return Icons.translate_rounded;
       case AnkiExportField.extra:

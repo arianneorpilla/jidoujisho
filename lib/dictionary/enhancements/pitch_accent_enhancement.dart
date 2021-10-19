@@ -55,15 +55,13 @@ class PitchAccentEnhancement extends DictionaryWidgetEnhancement {
     }
 
     for (List<String> field in kanjiumFields) {
-      String pitchAccentListMap = jsonEncode(parseKanjiumNumbers(field[2])
-          .map((pitchInfo) => pitchInfo.toMap())
-          .toList());
+      List<PitchAccentInformation> pitch = parseKanjiumNumbers(field[2]);
 
       DictionaryEntry entry = DictionaryEntry(
         word: field[0],
         reading: field[1],
-        extra: pitchAccentListMap,
       );
+      entry.workingArea["pitch_accent"] = pitch;
       kanjiumDictionary.add(entry);
     }
   }
@@ -75,7 +73,7 @@ class PitchAccentEnhancement extends DictionaryWidgetEnhancement {
       return null;
     }
 
-    return getAllPitchWidgets(entry, jsonDecode(closestReadingMatch.extra));
+    return getAllPitchWidgets(closestReadingMatch);
   }
 
   List<PitchAccentInformation> parseKanjiumNumbers(String numbers) {
@@ -93,8 +91,8 @@ class PitchAccentEnhancement extends DictionaryWidgetEnhancement {
       } else {
         String partOfSpeechRaw =
             number.substring(number.indexOf("(") + 1, number.indexOf(")"));
-        int indexRaw = int.parse(number.substring(number.indexOf(")") + 1));
 
+        int indexRaw = int.parse(number.substring(number.indexOf(")") + 1));
         pitch = PitchAccentInformation(
           partOfSpeech: partOfSpeechRaw,
           number: indexRaw,
@@ -283,19 +281,17 @@ class PitchAccentEnhancement extends DictionaryWidgetEnhancement {
     );
   }
 
-  Widget getAllPitchWidgets(DictionaryEntry entry, List<dynamic> pitchJsons) {
+  Widget getAllPitchWidgets(DictionaryEntry entry) {
     List<Widget> listWidgets = [];
     String reading = entry.reading;
     if (reading.isEmpty) {
       reading = entry.word;
     }
 
-    List<PitchAccentInformation> pitchAccentEntries = pitchJsons
-        .map((entryJson) => PitchAccentInformation.fromMap(entryJson))
-        .toList();
+    List<PitchAccentInformation> pitch = entry.workingArea["pitch_accent"];
 
-    for (int i = 0; i < pitchAccentEntries.length; i++) {
-      listWidgets.add(getPitchWidget(reading, pitchAccentEntries[i]));
+    for (int i = 0; i < pitch.length; i++) {
+      listWidgets.add(getPitchWidget(reading, pitch[i]));
       listWidgets.add(const SizedBox(height: 5));
     }
 
@@ -313,14 +309,11 @@ class PitchAccentEnhancement extends DictionaryWidgetEnhancement {
       reading = entry.word;
     }
 
-    List<Map<String, dynamic>> entryJsons = jsonDecode(entry.extra);
-    List<PitchAccentInformation> pitchAccentEntries = entryJsons
-        .map((entryJson) => PitchAccentInformation.fromMap(entryJson))
-        .toList();
+    List<PitchAccentInformation> pitch = entry.workingArea["pitch_accent"];
 
-    for (int i = 0; i < pitchAccentEntries.length; i++) {
-      allPitches += getHtmlPitch(reading, pitchAccentEntries[i]);
-      if (i != pitchAccentEntries.length - 1) {
+    for (int i = 0; i < pitch.length; i++) {
+      allPitches += getHtmlPitch(reading, pitch[i]);
+      if (i != pitch.length - 1) {
         allPitches += "\n";
       }
     }

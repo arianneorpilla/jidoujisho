@@ -84,28 +84,28 @@ class JapaneseLanguage extends Language {
       String hiraganaFallback = getRootForm(hiragana);
       String katakanaFallback = getRootForm(katakana);
 
-      fallbackTerms.add(kanaKit.toHiragana(searchTerm));
+      fallbackTerms.add(hiragana);
       if (hiraganaFallback != hiragana) {
         fallbackTerms.add(hiraganaFallback);
       }
-      fallbackTerms.add(kanaKit.toKatakana(searchTerm));
+      fallbackTerms.add(katakana);
       if (katakanaFallback != katakana) {
         fallbackTerms.add(katakanaFallback);
       }
-    }
-
-    if (kanaKit.isHiragana(searchTerm)) {
-      fallbackTerms.add(kanaKit.toKatakana(searchTerm));
-    }
-    if (kanaKit.isKatakana(searchTerm)) {
-      fallbackTerms.add(kanaKit.toHiragana(searchTerm));
-    }
-
-    if (searchTerm.length > 4) {
-      if (searchTerm.endsWith("そうに")) {
-        fallbackTerms.add(searchTerm.substring(0, searchTerm.length - 3));
+    } else {
+      if (kanaKit.isHiragana(searchTerm)) {
+        fallbackTerms.add(kanaKit.toKatakana(searchTerm));
       }
-      fallbackTerms.add(searchTerm.substring(0, searchTerm.length - 2));
+      if (kanaKit.isKatakana(searchTerm)) {
+        fallbackTerms.add(kanaKit.toHiragana(searchTerm));
+      }
+
+      if (searchTerm.length > 4) {
+        if (searchTerm.endsWith("そうに")) {
+          fallbackTerms.add(searchTerm.substring(0, searchTerm.length - 3));
+        }
+        fallbackTerms.add(searchTerm.substring(0, searchTerm.length - 2));
+      }
     }
 
     return fallbackTerms;

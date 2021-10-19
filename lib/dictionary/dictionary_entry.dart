@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:chisa/dictionary/dictionary_search_result.dart';
 import 'package:objectbox/objectbox.dart';
 
 @Entity()

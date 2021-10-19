@@ -5,6 +5,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_archive/flutter_archive.dart';
+import 'package:kana_kit/kana_kit.dart';
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as p;
 
@@ -278,6 +279,7 @@ FutureOr<DictionarySearchResult> searchResultsEnhancementYomichanTermBankFormat(
               YomichanTag.getTagCount(a.workingArea["yomichanTermTags"]) +
                   a.workingArea["duplicateCount"] * 0.3));
 
+  KanaKit kanaKit = const KanaKit();
   List<DictionaryEntry> exactFirstEntries = [];
   for (DictionaryEntry entry in mergedEntries) {
     if (entry.word == result.originalSearchTerm) {
@@ -290,6 +292,13 @@ FutureOr<DictionarySearchResult> searchResultsEnhancementYomichanTermBankFormat(
     if (entry.reading == result.originalSearchTerm) {
       if (!exactFirstEntries.contains(entry)) {
         exactFirstEntries.add(entry);
+      }
+    }
+    if (kanaKit.isRomaji(result.originalSearchTerm)) {
+      if (entry.reading == kanaKit.toHiragana(result.originalSearchTerm)) {
+        if (!exactFirstEntries.contains(entry)) {
+          exactFirstEntries.add(entry);
+        }
       }
     }
   }
