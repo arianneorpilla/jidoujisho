@@ -155,105 +155,6 @@ class PitchAccentExportEnhancement extends AnkiExportEnhancement {
     return htmlPitch;
   }
 
-  Widget getPitchWidget(String reading, PitchAccentInformation pitch) {
-    List<Widget> listWidgets = [];
-
-    Widget getAccentTop(String text) {
-      return Container(
-        padding: const EdgeInsets.only(top: 1),
-        decoration: const BoxDecoration(
-          border: Border(
-            top: BorderSide(width: 2.0, color: Colors.red),
-          ),
-        ),
-        child: Text(text),
-      );
-    }
-
-    Widget getAccentEnd(String text) {
-      return Container(
-        padding: const EdgeInsets.only(top: 1),
-        decoration: const BoxDecoration(
-          border: Border(
-            top: BorderSide(width: 2.0, color: Colors.red),
-            right: BorderSide(width: 2.0, color: Colors.red),
-          ),
-        ),
-        child: Text(text),
-      );
-    }
-
-    Widget getAccentNone(String text) {
-      return Container(
-        padding: const EdgeInsets.only(top: 1),
-        decoration: const BoxDecoration(
-          border: Border(
-            top: BorderSide(width: 2.0, color: Colors.transparent),
-          ),
-        ),
-        child: Text(text),
-      );
-    }
-
-    if (pitch.partOfSpeech != "") {
-      listWidgets.add(const Text("["));
-      listWidgets.add(
-        Text(
-          pitch.partOfSpeech,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      );
-      listWidgets.add(const Text("] "));
-    }
-
-    List<String> moras = [];
-    for (int i = 0; i < reading.length; i++) {
-      String current = reading[i];
-      String? next;
-      if (i + 1 < reading.length) {
-        next = reading[i + 1];
-      }
-
-      if (next != null && "ゃゅょぁぃぅぇぉャュョァィゥェォ".contains(next)) {
-        moras.add(current + next);
-        i += 1;
-        continue;
-      } else {
-        moras.add(current);
-      }
-    }
-
-    if (pitch.number == 0) {
-      for (int i = 0; i < moras.length; i++) {
-        if (i == 0) {
-          listWidgets.add(getAccentNone(moras[i]));
-        } else {
-          listWidgets.add(getAccentTop(moras[i]));
-        }
-      }
-    } else {
-      for (int i = 0; i < moras.length; i++) {
-        if (i == 0 && i != pitch.number! - 1) {
-          listWidgets.add(getAccentNone(moras[i]));
-        } else if (i < pitch.number! - 1) {
-          listWidgets.add(getAccentTop(moras[i]));
-        } else if (i == pitch.number! - 1) {
-          listWidgets.add(getAccentEnd(moras[i]));
-        } else {
-          listWidgets.add(getAccentNone(moras[i]));
-        }
-      }
-    }
-
-    return Wrap(
-      alignment: WrapAlignment.center,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: listWidgets,
-    );
-  }
-
   DictionaryEntry? getClosestPitchEntry(DictionaryEntry entry) {
     String firstReading = entry.reading;
     if (firstReading.contains(";")) {
@@ -266,29 +167,6 @@ class PitchAccentExportEnhancement extends AnkiExportEnhancement {
 
     return readingMatches.firstWhereOrNull(
       (pitchEntry) => entry.word.contains(pitchEntry.word),
-    );
-  }
-
-  Widget getAllPitchWidgets(DictionaryEntry entry, List<dynamic> pitchJsons) {
-    List<Widget> listWidgets = [];
-    String reading = entry.reading;
-    if (reading.isEmpty) {
-      reading = entry.word;
-    }
-
-    List<PitchAccentInformation> pitchAccentEntries = pitchJsons
-        .map((entryJson) => PitchAccentInformation.fromMap(entryJson))
-        .toList();
-
-    for (int i = 0; i < pitchAccentEntries.length; i++) {
-      listWidgets.add(getPitchWidget(reading, pitchAccentEntries[i]));
-      listWidgets.add(const SizedBox(height: 5));
-    }
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: listWidgets,
     );
   }
 

@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:convert';
+
 import 'package:chisa/dictionary/dictionary_entry.dart';
 import 'package:chisa/dictionary/dictionary_widget_enhancement.dart';
 import 'package:chisa/models/app_model.dart';
@@ -41,6 +41,7 @@ class PitchAccentEnhancement extends DictionaryWidgetEnhancement {
         );
 
   final List<DictionaryEntry> kanjiumDictionary = [];
+  final Map<DictionaryEntry, DictionaryEntry> pitchCache = {};
 
   @override
   Future<void> initialiseEnhancement() async {
@@ -68,7 +69,26 @@ class PitchAccentEnhancement extends DictionaryWidgetEnhancement {
 
   @override
   Widget? buildReading(DictionaryEntry entry) {
-    DictionaryEntry? closestReadingMatch = getClosestPitchEntry(entry);
+    DictionaryEntry? closestReadingMatch;
+
+    /// Optimises so that matches don't have to be re-run with every single
+    /// widget build.
+    if (pitchCache[entry] == null) {
+      DictionaryEntry? closestReadingMatch = getClosestPitchEntry(entry);
+      if (closestReadingMatch == null) {
+        /// Just set a dummy variable. This way, we know the cache is set and
+        /// it has a value to use.
+        pitchCache[entry] = DictionaryEntry();
+        return null;
+      } else {
+        pitchCache[entry] = closestReadingMatch;
+      }
+    } else if (pitchCache[entry]!.isEmpty()) {
+      return null;
+    } else {
+      closestReadingMatch = pitchCache[entry];
+    }
+
     if (closestReadingMatch == null) {
       return null;
     }
@@ -103,68 +123,6 @@ class PitchAccentEnhancement extends DictionaryWidgetEnhancement {
     }
 
     return pitches;
-  }
-
-  String getHtmlPitch(String reading, PitchAccentInformation pitch) {
-    String htmlPitch = "";
-
-    if (pitch.partOfSpeech != "") {
-      htmlPitch += "<span>[<b>${pitch.partOfSpeech}</b>]</span> ";
-    }
-
-    List<String> moras = [];
-    for (int i = 0; i < reading.length; i++) {
-      String current = reading[i];
-      String? next;
-      if (i + 1 < reading.length) {
-        next = reading[i + 1];
-      }
-
-      if (next != null && "ゃゅょぁぃぅぇぉャュョァィゥェォ".contains(next)) {
-        moras.add(current + next);
-        i += 1;
-        continue;
-      } else {
-        moras.add(current);
-      }
-    }
-
-    if (pitch.number == 0) {
-      htmlPitch += moras[0];
-      htmlPitch += "<span class=\"pitch\">";
-      for (int i = 1; i < moras.length; i++) {
-        htmlPitch += moras[i];
-      }
-      htmlPitch += "</span>";
-    } else {
-      List<int> beforePitchNumbers = [];
-      for (int i = 1; i < moras.length; i++) {
-        if (i < pitch.number! - 1) {
-          beforePitchNumbers.add(i);
-        }
-      }
-
-      int firstBeforePitchNumber = -1;
-      int lastBeforePitchNumber = -1;
-      if (beforePitchNumbers.isNotEmpty) {
-        firstBeforePitchNumber = beforePitchNumbers.first;
-        lastBeforePitchNumber = beforePitchNumbers.last;
-      }
-
-      for (int i = 0; i < moras.length; i++) {
-        if (i == firstBeforePitchNumber) {
-          htmlPitch += "<span class=\"pitch\">";
-        } else if (i == pitch.number! - 1) {
-          htmlPitch += "<span class=\"pitch_end\">";
-        }
-        htmlPitch += moras[i];
-        if (i == lastBeforePitchNumber || i == pitch.number! - 1) {
-          htmlPitch += "</span>";
-        }
-      }
-    }
-
-    return htmlPitch;
   }
 
   Widget getPitchWidget(String reading, PitchAccentInformation pitch) {
@@ -300,24 +258,5 @@ class PitchAccentEnhancement extends DictionaryWidgetEnhancement {
       mainAxisAlignment: MainAxisAlignment.center,
       children: listWidgets,
     );
-  }
-
-  String getAllHtmlPitch(DictionaryEntry entry) {
-    String allPitches = "";
-    String reading = entry.reading;
-    if (reading.isEmpty) {
-      reading = entry.word;
-    }
-
-    List<PitchAccentInformation> pitch = entry.workingArea["pitch_accent"];
-
-    for (int i = 0; i < pitch.length; i++) {
-      allPitches += getHtmlPitch(reading, pitch[i]);
-      if (i != pitch.length - 1) {
-        allPitches += "\n";
-      }
-    }
-
-    return allPitches;
   }
 }

@@ -27,11 +27,9 @@ import 'package:chisa/dictionary/dictionary_entry.dart';
 import 'package:chisa/dictionary/dictionary_format.dart';
 import 'package:chisa/dictionary/dictionary_search_result.dart';
 import 'package:chisa/dictionary/dictionary_import.dart';
-import 'package:chisa/util/dictionary_entry_widget.dart';
 import 'package:chisa/dictionary/dictionary_widget_enhancement.dart';
 import 'package:chisa/dictionary/enhancements/pitch_accent_enhancement.dart';
 import 'package:chisa/dictionary/formats/yomichan_term_bank_format.dart';
-
 import 'package:chisa/language/language.dart';
 import 'package:chisa/language/language_dialog.dart';
 import 'package:chisa/language/languages/english_language.dart';
@@ -42,6 +40,7 @@ import 'package:chisa/media/media_types/reader_media_type.dart';
 import 'package:chisa/media/media_types/player_media_type.dart';
 import 'package:chisa/objectbox.g.dart';
 import 'package:chisa/util/anki_export_field.dart';
+import 'package:chisa/util/dictionary_entry_widget.dart';
 
 /// A scoped model for parameters that affect the entire application.
 /// [Provider] is used for global state management across multiple layers,

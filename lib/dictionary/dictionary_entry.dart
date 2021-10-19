@@ -77,4 +77,8 @@ class DictionaryEntry {
 
   @override
   int get hashCode => toJson().hashCode;
+
+  bool isEmpty() {
+    return this == DictionaryEntry();
+  }
 }
