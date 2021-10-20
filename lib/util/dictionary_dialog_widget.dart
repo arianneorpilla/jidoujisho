@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:chisa/dictionary/dictionary.dart';
 import 'package:chisa/dictionary/dictionary_format.dart';
 import 'package:chisa/dictionary/dictionary_search_result.dart';
-import 'package:chisa/media/history_items/dictionary_media_history_item.dart';
+import 'package:chisa/media/media_history_items/dictionary_media_history_item.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/util/dictionary_scrollable_widget.dart';
 

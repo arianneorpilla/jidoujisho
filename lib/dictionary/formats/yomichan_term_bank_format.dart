@@ -246,16 +246,6 @@ FutureOr<DictionarySearchResult> searchResultsEnhancementYomichanTermBankFormat(
 
     List<YomichanTag> termTags =
         YomichanTag.getTermTagsFromEntry(entry, tagStore);
-    termTags.add(
-      YomichanTag(
-        tagName: result.dictionaryName,
-        frequencyName: "dictionary",
-        sortingOrder: 99999999999,
-        tagNotes:
-            "Dictionary entry imported and queried from ${result.dictionaryName}",
-        popularity: 0,
-      ),
-    );
     entry.workingArea["yomichanTermTags"] = termTags;
 
     List<String> termTagNames = termTags.map((tag) => tag.tagName).toList();

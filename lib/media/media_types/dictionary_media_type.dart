@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/pages/dictionary_home_page.dart';
 import 'package:chisa/pages/media_home_page.dart';
 import 'package:file_picker/file_picker.dart';
@@ -7,12 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:mime/mime.dart';
 import 'package:provider/provider.dart';
 
-import 'package:chisa/media/histories/default_media_history.dart';
+import 'package:chisa/media/media_histories/default_media_history.dart';
 import 'package:chisa/media/media_history.dart';
 import 'package:chisa/media/media_history_item.dart';
 import 'package:chisa/media/media_type.dart';
 import 'package:chisa/models/app_model.dart';
-import 'package:chisa/pages/reader_page.dart';
 
 class DictionaryMediaType extends MediaType {
   DictionaryMediaType()
@@ -84,21 +84,10 @@ class DictionaryMediaType extends MediaType {
   }
 
   @override
-  void launchMediaPageFromHistory(
-      BuildContext context, MediaHistoryItem mediaHistoryItem) {
-    // TODO: implement launchMediaPage
-  }
+  void launchMediaPage(BuildContext context, MediaLaunchParams params) {}
 
   @override
-  void launchMediaPageFromUri(BuildContext context, Uri uri) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ReaderPage(
-          mediaType: this,
-          uri: uri,
-        ),
-      ),
-    );
+  List<String> getAllowedExtensions() {
+    throw UnsupportedError("Operation invalid for dictionary media type.");
   }
 }

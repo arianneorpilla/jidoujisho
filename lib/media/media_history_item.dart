@@ -4,7 +4,7 @@ abstract class MediaHistoryItem {
   MediaHistoryItem({
     required this.key,
     required this.name,
-    required this.resourceUri,
+    required this.resource,
     required this.progress,
     required this.extra,
   });
@@ -26,7 +26,7 @@ abstract class MediaHistoryItem {
 
   /// The [Uri] pertaining to a preview resource, e.g. a thumbnail or cover
   /// art for a book.
-  late Uri resourceUri;
+  late String resource;
 
   /// Extra details that may be necessary should a media type need to be
   /// extended to find its use. For example, the Viewer may find storing the
@@ -39,7 +39,7 @@ abstract class MediaHistoryItem {
     Map<String, String> map = {
       "key": key,
       "name": name,
-      "resourceUri": resourceUri.toString(),
+      "resource": resource,
       "progress": progress.toString(),
       "extra": jsonEncode(extra),
     };

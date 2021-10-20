@@ -9,11 +9,11 @@ import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/media_home_page.dart';
 import 'package:chisa/pages/reader_home_page.dart';
 
-class ReaderMediaType extends MediaType {
-  ReaderMediaType()
+class ViewerMediaType extends MediaType {
+  ViewerMediaType()
       : super(
-          mediaTypeName: "Reader",
-          mediaTypeIcon: Icons.library_books,
+          mediaTypeName: "Viewer",
+          mediaTypeIcon: Icons.photo_library,
         );
 
   @override
@@ -42,6 +42,10 @@ class ReaderMediaType extends MediaType {
 
   @override
   List<String> getAllowedExtensions() {
-    return const [".epub"];
+    return const [
+      ".jpg",
+      ".jpeg",
+      ".png",
+    ];
   }
 }

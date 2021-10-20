@@ -27,12 +27,17 @@ class HomePageState extends State<HomePage> {
   late AppModel appModel;
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     appModel = Provider.of<AppModel>(context);
 
     selectedTabIndex = appModel.getLastActiveTabIndex();
-    mediaType = appModel.availableMediaTypes[selectedTabIndex];
-    List<MediaType> mediaTypes = appModel.availableMediaTypes;
+    mediaType = appModel.mediaTypes[selectedTabIndex];
+    List<MediaType> mediaTypes = appModel.mediaTypes;
 
     return Scaffold(
       appBar: AppBar(
@@ -92,7 +97,7 @@ class HomePageState extends State<HomePage> {
 
   Widget getBottomNavigationBar() {
     List<BottomNavigationBarItem> items = [];
-    for (MediaType mediaType in appModel.availableMediaTypes) {
+    for (MediaType mediaType in appModel.mediaTypes) {
       items.add(mediaType.getHomeTab(context));
     }
 

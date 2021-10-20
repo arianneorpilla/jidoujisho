@@ -40,8 +40,9 @@ class ReaderHomePageState extends State<ReaderHomePage> {
 
     return Center(
       child: InkWell(
-        onTap: () async =>
-            mediaType.launchMediaPageFromUri(context, await selectFile()),
+        onTap: () async {
+          // mediaType.launchMediaPage(context, await selectFile());
+        },
         child: Container(
           padding: const EdgeInsets.all(36),
           color: Colors.grey,
@@ -51,20 +52,5 @@ class ReaderHomePageState extends State<ReaderHomePage> {
         ),
       ),
     );
-  }
-
-  Future<Uri> selectFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
-
-    if (result != null) {
-      File epubFile = File(result.files.single.path!);
-      if (mediaType.isUriSupported(epubFile.uri)) {
-        return epubFile.uri;
-      } else {
-        throw Exception("Uri is not supported.");
-      }
-    } else {
-      throw Exception("No file picked.");
-    }
   }
 }

@@ -91,6 +91,35 @@ class YomichanTermBankFormatWidget extends DictionaryWidget {
       tagWidgets.add(const SizedBox(width: 5));
     }
 
+    tagWidgets.add(
+      GestureDetector(
+        onTap: () {
+          Fluttertoast.showToast(
+            msg: "${dictionary.dictionaryName} - Dictionary entry sourced from"
+                " ${dictionary.dictionaryName} with ${dictionaryFormat.formatName} format",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: const Color(0xffa15151),
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+        },
+        child: Container(
+          child: Text(
+            dictionary.dictionaryName,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 11,
+            ),
+          ),
+          color: const Color(0xffa15151),
+          padding: const EdgeInsets.all(3),
+        ),
+      ),
+    );
+    tagWidgets.add(const SizedBox(width: 5));
+
     // tagWidgets.removeLast();
     return Column(
       mainAxisSize: MainAxisSize.min,

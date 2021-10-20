@@ -6,13 +6,13 @@ class DefaultMediaHistoryItem extends MediaHistoryItem {
   DefaultMediaHistoryItem({
     required String key,
     required String name,
-    required Uri resourceUri,
+    required String resource,
     required int progress,
     required Map<String, dynamic> extra,
   }) : super(
           key: key,
           name: name,
-          resourceUri: resourceUri,
+          resource: resource,
           progress: progress,
           extra: extra,
         );
@@ -22,14 +22,14 @@ class DefaultMediaHistoryItem extends MediaHistoryItem {
 
     String key = map["key"] ?? "";
     String name = map["name"] ?? "";
-    Uri resourceUri = Uri.dataFromString(map["uri"] ?? "");
+    String resource = map["resource"] ?? "";
     int progress = int.tryParse(map["progress"] ?? "") ?? 0;
     Map<String, dynamic> extra = jsonDecode(map["extra"] ?? "{}");
 
     return DefaultMediaHistoryItem(
       key: key,
       name: name,
-      resourceUri: resourceUri,
+      resource: resource,
       progress: progress,
       extra: extra,
     );

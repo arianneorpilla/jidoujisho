@@ -3,7 +3,7 @@ class AppLocalizations {
 
   static const _localizedValues = <String, Map<String, String>>{
     'English': {
-      'app_title': 'Chisa',
+      'app_title': 'ImmerseKit',
       'target_language': 'Target language',
       'app_language': 'App language',
       'player_media_type': 'Player',
@@ -32,6 +32,7 @@ class AppLocalizations {
       'delete_dictionary_confirmation':
           'This dictionary and its searched entries will be removed. Are you '
               'sure you want to delete this?',
+      'player_pick_video': 'Pick Video File',
       'search_label_before': 'Search result ',
       'search_label_middle': 'out of ',
       'search_label_from': 'from ',
@@ -71,7 +72,7 @@ class AppLocalizations {
           "collaborating for further improvements on GitHub.",
     },
     'Tagalog': {
-      'app_title': 'Chisa',
+      'app_title': 'ImmerseKit',
       'target_language': 'Wikang pakay',
       'app_language': 'Wika ng aplikasyon',
       'player_media_type': 'Manood',
@@ -100,6 +101,7 @@ class AppLocalizations {
       'delete_dictionary_confirmation':
           'Ang diksyunaryo na ito ay mawawala, kasama ang mga resulta na galing '
               'dito. Sigurado ka ba sa pagtanggal nito?',
+      'player_pick_video': 'Pumili ng Video File',
       'search_label_before': 'Resulto ',
       'search_label_middle': 'sa ',
       'search_label_from': 'galing sa ',
@@ -130,7 +132,7 @@ class AppLocalizations {
       'localisation_warning': 'Ang mga mod na gawa ng komunidad ay maaring '
           'hindi naisalin at maaring magpakita sa orihinal na wikang '
           'pinanggalingan.',
-      'license_screen_legalese': "Kagamitang nakakatulong sa pagnood ng bidyo, "
+      'license_screen_legalese': "Kagamitang nakakatulong sa pagnood ng video, "
           "pagbasa ng libro at komiks at pagkabisado ng mga salita ng mga "
           "wikang banyaga.\n\nGawa ni Leo Rafael Orpilla para sa magaaral ng "
           "iba't ibang wika. Tatak ng aplikasyon, gawa ni Aaron Marbella.\n\n"

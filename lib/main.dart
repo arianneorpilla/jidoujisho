@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_fadein/flutter_fadein.dart';
 
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:filesystem_picker/filesystem_picker.dart';
 
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/home_page.dart';
@@ -13,11 +17,6 @@ void main() async {
 
   SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
   PackageInfo packageInfo = await PackageInfo.fromPlatform();
-
-  // Language language = JapaneseLanguage();
-  // await language.initialiseLanguage();
-  // String lemma = language.getRootForm("まかされる");
-  // print(lemma);
 
   runApp(
     App(
@@ -52,16 +51,18 @@ class App extends StatelessWidget {
             darkTheme: getDarkTheme(context),
             themeMode:
                 appModel.getIsDarkMode() ? ThemeMode.dark : ThemeMode.light,
-            home: FutureBuilder(
-              future: appModel.initialiseAppModel(),
-              builder: (BuildContext context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Container();
-                } else {
-                  return const HomePage();
-                }
-              },
-            ),
+            home: (appModel.hasInitialized)
+                ? const HomePage()
+                : FutureBuilder(
+                    future: appModel.initialiseAppModel(),
+                    builder: (BuildContext context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Container();
+                      } else {
+                        return const HomePage();
+                      }
+                    },
+                  ),
           );
         },
       ),

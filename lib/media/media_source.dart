@@ -1,0 +1,42 @@
+import 'package:chisa/media/media_history_item.dart';
+import 'package:chisa/media/media_type.dart';
+import 'package:chisa/media/media_types/media_launch_params.dart';
+import 'package:chisa/models/app_model.dart';
+import 'package:flutter/material.dart';
+
+/// A source for a [MediaType] that will appear on the list of sources when
+/// set as active. Handles sourcing and delivery of arguments such that the
+/// [MediaType] is able to execute and launch with the proper arguments.
+abstract class MediaSource {
+  MediaSource({
+    required this.sourceName,
+    required this.mediaType,
+    required this.icon,
+    required this.searchSupport,
+    this.searchAction,
+  }) : assert(
+            (searchSupport && searchAction != null ||
+                !searchSupport && searchAction == null),
+            'Media sources that do not support search should not have non-null '
+            'search actions.');
+
+  /// The name for this that will appear under the media type's source picker.
+  final String sourceName;
+
+  /// Which media type this source pertains to.
+  final MediaType mediaType;
+
+  final IconData icon;
+
+  /// Whether or not this source supports searching for items.
+  final bool searchSupport;
+
+  /// What happens when the search action is clicked when this particular
+  /// media source is active? If [searchSupport] is true, then this should not
+  /// be null.
+  final VoidCallback? searchAction;
+
+  /// If this source is active and, this widget will appear under the search bar
+  /// of the media type tab if non-null. This should typically be a button.
+  Widget? getButton(BuildContext context);
+}
