@@ -47,7 +47,7 @@ FutureOr<void> prepareWorkingDirectoryYomichanTermBankFormat(
 
 @override
 FutureOr<String> getDictionaryNameYomichanTermBankFormat(
-    ImportProcessingParams params) {
+    ImportDirectoryParams params) {
   String indexJsonPath = p.join(params.workingDirectory.path, "index.json");
   File indexJson = File(indexJsonPath);
   Map<String, dynamic> index = jsonDecode(indexJson.readAsStringSync());
@@ -58,7 +58,7 @@ FutureOr<String> getDictionaryNameYomichanTermBankFormat(
 
 @override
 FutureOr<List<DictionaryEntry>> getDictionaryEntriesYomichanTermBankFormat(
-    ImportProcessingParams params) {
+    ImportDirectoryParams params) {
   /// Used to parse more structured meanings, i.e. where a [Map] is used
   /// for the meaning. These need to be reduced to a simple [String]
   String parseMeaning(entry) {
@@ -135,7 +135,7 @@ FutureOr<List<DictionaryEntry>> getDictionaryEntriesYomichanTermBankFormat(
 
 @override
 FutureOr<Map<String, String>> getDictionaryMetadataYomichanTermBankFormat(
-    ImportProcessingParams params) {
+    ImportDirectoryParams params) {
   Map<String, String> metadata = {};
 
   /// Used to ensure whatever is in this field value is a valid double.

@@ -287,7 +287,8 @@ class AppModel with ChangeNotifier {
     }
   }
 
-  Future<Store> initialiseImportingDictionary(String dictionaryName) async {
+  /// This is a variant of the below function for
+  Future<Store> initialiseDictionaryStore(String dictionaryName) async {
     String appDirDocPath = (await getApplicationDocumentsDirectory()).path;
 
     Directory objectBoxDirDirectory = Directory(
@@ -297,37 +298,14 @@ class AppModel with ChangeNotifier {
       objectBoxDirDirectory.createSync(recursive: true);
     }
 
-    _dictionaryStores[dictionaryName] = Store(
-      getObjectBoxModel(),
-      directory: objectBoxDirDirectory.path,
-    );
-
     return _dictionaryStores[dictionaryName]!;
   }
 
-  Future<Store> initialiseImportedDictionary(Dictionary dictionary) async {
-    String appDirDocPath = (await getApplicationDocumentsDirectory()).path;
-
-    Directory objectBoxDirDirectory = Directory(
-      p.join(appDirDocPath, "customDictionaries", dictionary.dictionaryName),
-    );
-    if (!objectBoxDirDirectory.existsSync()) {
-      objectBoxDirDirectory.createSync(recursive: true);
-    }
-
-    _dictionaryStores[dictionary.dictionaryName] = Store(
-      getObjectBoxModel(),
-      directory: objectBoxDirDirectory.path,
-    );
-
-    _availableDictionaries[dictionary.dictionaryName] = dictionary;
-
-    return _dictionaryStores[dictionary.dictionaryName]!;
-  }
-
   Future<void> initialiseImportedDictionaries() async {
-    getDictionaryRecord().forEach((dictionary) {
-      initialiseImportedDictionary(dictionary);
+    getDictionaryRecord().forEach((dictionary) async {
+      _dictionaryStores[dictionary.dictionaryName] =
+          await initialiseDictionaryStore(dictionary.dictionaryName);
+      _availableDictionaries[dictionary.dictionaryName] = dictionary;
     });
   }
 

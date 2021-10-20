@@ -67,14 +67,14 @@ abstract class DictionaryFormat {
   ///
   /// See [ImportProcessingParams] for how to work with the individual input
   /// parameters.
-  late FutureOr<String> Function(ImportProcessingParams) getDictionaryName;
+  late FutureOr<String> Function(ImportDirectoryParams) getDictionaryName;
 
   /// Given a [Directory] of files pertaining to this dictionary format,
   /// return a list of [DictionaryEntry] that will be added to the database.
   ///
   /// See [ImportProcessingParams] for how to work with the individual input
   /// parameters.
-  late FutureOr<List<DictionaryEntry>> Function(ImportProcessingParams)
+  late FutureOr<List<DictionaryEntry>> Function(ImportDirectoryParams)
       getDictionaryEntries;
 
   /// Given a [Directory] of files pertaining to this dictionary format,
@@ -87,7 +87,7 @@ abstract class DictionaryFormat {
   ///
   /// See [ImportProcessingParams] for how to work with the individual input
   /// parameters.
-  late FutureOr<Map<String, String>> Function(ImportProcessingParams)
+  late FutureOr<Map<String, String>> Function(ImportDirectoryParams)
       getDictionaryMetadata;
 
   /// Some formats may want to perform their own queries and override the
