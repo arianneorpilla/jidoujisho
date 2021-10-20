@@ -287,6 +287,24 @@ class AppModel with ChangeNotifier {
     }
   }
 
+  Future<Store> initialiseImportingDictionary(String dictionaryName) async {
+    String appDirDocPath = (await getApplicationDocumentsDirectory()).path;
+
+    Directory objectBoxDirDirectory = Directory(
+      p.join(appDirDocPath, "customDictionaries", dictionaryName),
+    );
+    if (!objectBoxDirDirectory.existsSync()) {
+      objectBoxDirDirectory.createSync(recursive: true);
+    }
+
+    _dictionaryStores[dictionaryName] = Store(
+      getObjectBoxModel(),
+      directory: objectBoxDirDirectory.path,
+    );
+
+    return _dictionaryStores[dictionaryName]!;
+  }
+
   Future<Store> initialiseImportedDictionary(Dictionary dictionary) async {
     String appDirDocPath = (await getApplicationDocumentsDirectory()).path;
 

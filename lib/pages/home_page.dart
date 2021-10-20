@@ -27,11 +27,6 @@ class HomePageState extends State<HomePage> {
   late AppModel appModel;
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     appModel = Provider.of<AppModel>(context);
 

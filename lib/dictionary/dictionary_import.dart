@@ -123,13 +123,21 @@ Future<void> dictionaryFileImport(
     throw Exception("Name collision with existing dictionary");
   }
 
+  /// Initialise an ObjectBox [Store], where the new database will be
+  /// used from. Stores of existing dictionaries are initialised on startup.
+  Store store = await appModel.initialiseImportingDictionary(dictionaryName);
+
   /// From the working directory, the format is mainly responsible for
   /// parsing its entries.
   importMessageEntries(progressNotifier);
-  List<DictionaryEntry> dictionaryEntries = await compute(
-    dictionaryFormat.getDictionaryEntries,
-    importProcessingParams,
+  ImportEntriesParams importEntriesParams = ImportEntriesParams(
+    dictionaryFormat: dictionaryFormat,
+    importParams: importProcessingParams,
+    sendPort: receivePort.sendPort,
+    dictionaryName: dictionaryName,
+    storeReference: store.reference,
   );
+  await compute(extractAndDepositEntries, importEntriesParams);
 
   /// Finally, any necessary metadata that is pertaining to the dictionary
   /// format that will come in handy when in actual use (i.e. interacting
@@ -145,28 +153,7 @@ Future<void> dictionaryFileImport(
     formatName: dictionaryFormat.formatName,
     metadata: dictionaryMetadata,
   );
-
-  /// Initialise an ObjectBox [Store], where the new database will be
-  /// used from. Stores of existing dictionaries are initialised on startup.
-  Store store = await appModel.initialiseImportedDictionary(dictionary);
-
-  /// Now that a name, entries and metadata are obtained, the entries can
-  /// now be placed in a database.
-  ///
-  /// Entries are handled by [ObjectBox] with querying for search and
-  /// indexing. See the schema in [DictionaryEntry]. Metadata is handled
-  /// separately by [SharedPreferences] as JSON.
-  importMessageDatabase(progressNotifier);
-  ImportDatabaseParams importDatabaseParams = ImportDatabaseParams(
-    dictionaryName: dictionaryName,
-    dictionaryEntries: dictionaryEntries,
-    sendPort: receivePort.sendPort,
-    storeReference: store.reference,
-  );
-  await compute(
-    depositEntriesToDatabase,
-    importDatabaseParams,
-  );
+  appModel.availableDictionaries[dictionaryName] = dictionary;
 
   /// If the working area exists, clean it up.
   if (workingDirectory.existsSync()) {
@@ -201,13 +188,18 @@ Future<void> dictionaryFileImport(
 /// items to an [ObjectBox] database pertaining to a given dictionary name.
 /// See [ImportDatabaseParams] for information on how to work with the given
 /// parameters.
-Future<void> depositEntriesToDatabase(ImportDatabaseParams params) async {
+Future<void> extractAndDepositEntries(ImportEntriesParams params) async {
+  List<DictionaryEntry> dictionaryEntries =
+      await params.dictionaryFormat.getDictionaryEntries(params.importParams);
+
+  params.sendPort.send("Adding entries to database...");
   Store entryStore = Store.fromReference(
     getObjectBoxModel(),
     params.storeReference,
   );
+
   Box entryBox = entryStore.box<DictionaryEntry>();
-  entryBox.putMany(params.dictionaryEntries);
+  entryBox.putMany(dictionaryEntries);
 }
 
 Widget showProgressDialog(
@@ -294,6 +286,30 @@ class ImportProcessingParams {
 
   final Directory workingDirectory;
   final SendPort sendPort;
+}
+
+/// For working area step isolate. See [getDictionaryName] and
+/// [extractDictionaryEntries].
+class ImportEntriesParams {
+  ImportEntriesParams({
+    required this.importParams,
+    required this.dictionaryFormat,
+
+    /// Dictionary name is necessary for identifying which database to use.
+    required this.dictionaryName,
+
+    /// For communication with the [ReceivePort] for isolate updates.
+    required this.sendPort,
+
+    /// Used to transfer an ObjectBox [StoreReference] across isolates.
+    required this.storeReference,
+  });
+
+  final ImportProcessingParams importParams;
+  final DictionaryFormat dictionaryFormat;
+  final String dictionaryName;
+  final SendPort sendPort;
+  final ByteData storeReference;
 }
 
 /// For database interaction. See [depositEntriesToDatabase].
