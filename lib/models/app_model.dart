@@ -298,6 +298,11 @@ class AppModel with ChangeNotifier {
       objectBoxDirDirectory.createSync(recursive: true);
     }
 
+    _dictionaryStores[dictionaryName] = Store(
+      getObjectBoxModel(),
+      directory: objectBoxDirDirectory.path,
+    );
+
     return _dictionaryStores[dictionaryName]!;
   }
 
