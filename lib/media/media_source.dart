@@ -2,6 +2,7 @@ import 'package:chisa/media/media_history_item.dart';
 import 'package:chisa/media/media_type.dart';
 import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/models/app_model.dart';
+import 'package:chisa/util/media_type_field.dart';
 import 'package:flutter/material.dart';
 
 /// A source for a [MediaType] that will appear on the list of sources when
@@ -13,6 +14,7 @@ abstract class MediaSource {
     required this.mediaType,
     required this.icon,
     required this.searchSupport,
+    required this.searchLabel,
     this.searchAction,
   }) : assert(
             (searchSupport && searchAction != null ||
@@ -31,12 +33,19 @@ abstract class MediaSource {
   /// Whether or not this source supports searching for items.
   final bool searchSupport;
 
+  /// What shows up as a hint on the media source's search label.
+  final String? searchLabel;
+
   /// What happens when the search action is clicked when this particular
   /// media source is active? If [searchSupport] is true, then this should not
   /// be null.
-  final VoidCallback? searchAction;
+  final Future<void> Function()? searchAction;
 
   /// If this source is active and, this widget will appear under the search bar
   /// of the media type tab if non-null. This should typically be a button.
   Widget? getButton(BuildContext context);
+
+  bool isShown(AppModel appModel) {
+    return appModel.getMediaSourceShown(this);
+  }
 }

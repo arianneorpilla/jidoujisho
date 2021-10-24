@@ -33,13 +33,17 @@ class YomichanTermBankFormatWidget extends DictionaryWidget {
         word ?? buildWord(),
         const SizedBox(height: 5),
         reading ?? buildReading(),
-        meaning ?? buildMeaning(),
+        buildTermTags(),
+        Flexible(
+          child: SingleChildScrollView(
+            child: meaning ?? buildMeaning(),
+          ),
+        ),
       ],
     );
   }
 
-  @override
-  Widget buildMeaning() {
+  Widget buildTermTags() {
     List<Widget> tagWidgets = [];
 
     if (getDictionaryCache()["yomichanTags"] == null) {
@@ -120,20 +124,14 @@ class YomichanTermBankFormatWidget extends DictionaryWidget {
     );
     tagWidgets.add(const SizedBox(width: 5));
 
-    // tagWidgets.removeLast();
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 5),
-          child: Wrap(children: tagWidgets),
-        ),
-        buildTaggedMeaning(),
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Wrap(children: tagWidgets),
     );
   }
 
-  Widget buildTaggedMeaning() {
+  @override
+  Widget buildMeaning() {
     if (getDictionaryCache()["yomichanTags"] == null) {
       List<YomichanTag> yomichanTags =
           YomichanTag.getTagsFromMetadata(dictionary.metadata);
@@ -234,13 +232,10 @@ class YomichanTermBankFormatWidget extends DictionaryWidget {
       }
     }
 
-    return SingleChildScrollView(
-      physics: const NeverScrollableScrollPhysics(),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: meaningWidgets,
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: meaningWidgets,
     );
   }
 }

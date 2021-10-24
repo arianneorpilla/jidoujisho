@@ -1,7 +1,11 @@
 import 'package:chisa/dictionary/dictionary_widget_enhancement.dart';
 import 'package:chisa/dictionary/dictionary_widget_enhancement_dialog.dart';
+import 'package:chisa/media/media_sources/viewer_media_source.dart';
 
 import 'package:chisa/media/media_type.dart';
+import 'package:chisa/media/media_types/player_media_type.dart';
+import 'package:chisa/media/media_types/reader_media_type.dart';
+import 'package:chisa/media/media_types/viewer_media_type.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/creator_page.dart';
 import 'package:chisa/util/dictionary_widget_field.dart';
@@ -164,6 +168,14 @@ class HomePageState extends State<HomePage> {
           },
         ),
         popupItem(
+          label: appModel.translate("options_sources"),
+          icon: Icons.perm_media,
+          action: () async {
+            showMediaSourceOptions(context, offset);
+            setState(() {});
+          },
+        ),
+        popupItem(
           label: appModel.translate("options_enhancements"),
           icon: Icons.auto_fix_high,
           action: () async {
@@ -317,6 +329,47 @@ class HomePageState extends State<HomePage> {
           icon: Icons.translate_rounded,
           action: () async {
             await changeFieldWidget(DictionaryWidgetField.meaning);
+          },
+        ),
+      ],
+      elevation: 8.0,
+    );
+
+    if (callbackAction != null) {
+      callbackAction();
+    }
+  }
+
+  void showMediaSourceOptions(BuildContext context, Offset offset) async {
+    double left = offset.dx;
+    double top = offset.dy;
+
+    VoidCallback? callbackAction = await showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(left, top, 0, 0),
+      items: [
+        popupItem(
+          label: appModel.translate("player_media_type"),
+          icon: Icons.video_library,
+          action: () async {
+            await appModel.showSourcesMenu(context, PlayerMediaType(),
+                manageAllowed: true);
+          },
+        ),
+        popupItem(
+          label: appModel.translate("reader_media_type"),
+          icon: Icons.library_books,
+          action: () async {
+            await appModel.showSourcesMenu(context, ReaderMediaType(),
+                manageAllowed: true);
+          },
+        ),
+        popupItem(
+          label: appModel.translate("viewer_media_type"),
+          icon: Icons.photo_library,
+          action: () async {
+            await appModel.showSourcesMenu(context, ViewerMediaType(),
+                manageAllowed: true);
           },
         ),
       ],

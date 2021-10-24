@@ -2,7 +2,9 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
-import 'package:file_picker/file_picker.dart';
+import 'package:chisa/media/media_type.dart';
+import 'package:chisa/media/media_types/dictionary_media_type.dart';
+import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:objectbox/objectbox.dart';
@@ -36,16 +38,31 @@ Future<void> dictionaryFileImport(
     }
   });
 
-  /// This function is specifically for handling single [File] imports, which
-  /// should suffice for most generic cases.
-  FilePickerResult? result =
-      await FilePicker.platform.pickFiles(type: FileType.any);
+  MediaType mediaType = DictionaryMediaType();
+
+  Iterable<String>? filePaths = await FilesystemPicker.open(
+    title: appModel.translate("player_pick_video"),
+    pickText: appModel.translate("dialog_select"),
+    cancelText: appModel.translate("dialog_return"),
+    context: context,
+    rootDirectories: await appModel.getMediaTypeDirectories(mediaType),
+    fsType: FilesystemType.file,
+    folderIconColor: Colors.red,
+  );
+
+  if (filePaths == null || filePaths.isEmpty) {
+    return;
+  }
+
+  String filePath = filePaths.first;
+
+  appModel.setLastPickedDirectory(mediaType, Directory(p.dirname(filePath)));
 
   /// This file will be passed to a [DictionaryFormat]'s
   /// [prepareWorkingDirectory] method. Direct interaction with the file is
   /// discouraged and functions pertaining to getting the actual dictionary
   /// data is distanced from this file.
-  File file = File(result!.files.single.path!);
+  File file = File(filePath);
 
   /// If any [Exception] occurs, the process is aborted with a message as
   /// shown below. A dialog is shown to show the progress of the dictionary

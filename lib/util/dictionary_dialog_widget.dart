@@ -43,7 +43,7 @@ class DictionaryDialogWidgetState extends State<DictionaryDialogWidget> {
 
     return AlertDialog(
       contentPadding:
-          const EdgeInsets.only(top: 30, left: 20, right: 20, bottom: 20),
+          const EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 20),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.zero,
       ),
@@ -53,7 +53,6 @@ class DictionaryDialogWidgetState extends State<DictionaryDialogWidget> {
         result: widget.result,
         dictionaryFormat: widget.dictionaryFormat,
         dictionary: widget.dictionary,
-        dialog: true,
         callback: widget.callback,
         indexNotifier: widget.indexNotifier,
       ),

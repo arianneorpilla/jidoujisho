@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/pages/dictionary_home_page.dart';
 import 'package:chisa/pages/media_home_page.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:mime/mime.dart';
 import 'package:provider/provider.dart';
@@ -22,11 +21,6 @@ class DictionaryMediaType extends MediaType {
         );
 
   @override
-  MediaType? getFallbackMediaType(MediaHistoryItem mediaHistoryItem) {
-    return null;
-  }
-
-  @override
   MediaHomePage getHomeBody(BuildContext context) {
     return DictionaryHomePage(mediaType: this);
   }
@@ -40,21 +34,6 @@ class DictionaryMediaType extends MediaType {
     );
   }
 
-  Future<Uri> selectFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
-
-    if (result != null) {
-      File epubFile = File(result.files.single.path!);
-      if (isUriSupported(epubFile.uri)) {
-        return epubFile.uri;
-      } else {
-        throw Exception("Uri is not supported.");
-      }
-    } else {
-      throw Exception("No file picked.");
-    }
-  }
-
   @override
   BottomNavigationBarItem getHomeTab(BuildContext context) {
     AppModel appModel = Provider.of<AppModel>(context);
@@ -64,27 +43,6 @@ class DictionaryMediaType extends MediaType {
       icon: Icon(mediaTypeIcon),
     );
   }
-
-  @override
-  MediaHistoryItem getNewHistoryItem(Uri uri) {
-    throw UnimplementedError();
-  }
-
-  @override
-  bool isUriSupported(Uri uri) {
-    File file;
-
-    try {
-      file = File.fromUri(uri);
-    } on UnsupportedError {
-      return false;
-    }
-
-    return lookupMimeType(file.path) == "application/epub+zip";
-  }
-
-  @override
-  void launchMediaPage(BuildContext context, MediaLaunchParams params) {}
 
   @override
   List<String> getAllowedExtensions() {

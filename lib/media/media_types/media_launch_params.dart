@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:chisa/media/media_history_item.dart';
 import 'package:chisa/media/media_source.dart';
+import 'package:chisa/media/media_sources/player_media_source.dart';
 
 class MediaLaunchParams {}
 
@@ -13,21 +14,24 @@ enum MediaLaunchMode {
 class PlayerLaunchParams {
   PlayerLaunchParams.file({
     required this.videoFile,
-    this.networkUri,
+    this.networkPath,
+    this.audioPath,
     required this.mediaSource,
     required this.mediaHistoryItem,
   });
 
   PlayerLaunchParams.network({
     this.videoFile,
-    required this.networkUri,
+    required this.networkPath,
+    this.audioPath,
     required this.mediaSource,
     required this.mediaHistoryItem,
   });
 
   final File? videoFile;
-  final Uri? networkUri;
-  final MediaSource mediaSource;
+  final String? networkPath;
+  final String? audioPath;
+  final PlayerMediaSource mediaSource;
   final MediaHistoryItem mediaHistoryItem;
 
   MediaLaunchMode getMode() {

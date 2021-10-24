@@ -48,7 +48,6 @@ dependencies:
     git:
       url: https://github.com/Ser1ous/flutter_inappwebview
       ref: 397998788b258ca1a9d0407d2dd1bde683b4e50a
-  file_picker: ^4.1.4
   flutter_archive: ^4.0.1
   path_provider: ^2.0.4
   xml: ^5.1.2
@@ -61,9 +60,15 @@ dependencies:
   collection: ^1.15.0
   kana_kit: ^2.0.0
   fluttertoast: ^8.0.8
-  filesystem_picker: ^2.0.0
+  filesystem_picker:
+    git:
+      url: https://github.com/lrorpilla/filesystem_picker
+      ref: aa13540bf1b5b4100d43c57d99211186949373ab
+      path: package/
   flutter_vlc_player: ^6.0.5
   flutter_fadein: ^2.0.0
+  external_path: ^1.0.1
+  subtitle: ^0.1.0-beta.2
 
 dev_dependencies:
   flutter_test:

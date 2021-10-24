@@ -18,7 +18,7 @@ class DictionaryScrollableWidget extends StatefulWidget {
     required this.dictionary,
     required this.indexNotifier,
     this.callback,
-    this.dialog = false,
+    this.limitHeight = false,
   }) : super(key: key);
 
   final AppModel appModel;
@@ -26,7 +26,7 @@ class DictionaryScrollableWidget extends StatefulWidget {
   final DictionarySearchResult result;
   final DictionaryFormat dictionaryFormat;
   final Dictionary dictionary;
-  final bool dialog;
+  final bool limitHeight;
   final VoidCallback? callback;
   final ValueNotifier<int> indexNotifier;
 
@@ -49,7 +49,8 @@ class DictionaryScrollableWidgetState
 
   @override
   Widget build(BuildContext context) {
-    DictionaryEntry entry = widget.result.entries[indexNotifier.value];
+    DictionaryEntry dictionaryEntry =
+        widget.result.entries[indexNotifier.value];
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -80,12 +81,15 @@ class DictionaryScrollableWidgetState
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          widget.appModel.buildDictionarySearchResult(
-            context,
-            entry,
-            widget.dictionaryFormat,
-            widget.dictionary,
+          Flexible(
+            child: widget.appModel.buildDictionarySearchResult(
+              context: context,
+              dictionaryEntry: dictionaryEntry,
+              dictionaryFormat: widget.dictionaryFormat,
+              dictionary: widget.dictionary,
+            ),
           ),
+          const SizedBox(height: 10),
           getFooterTextSpans()
         ],
       ),

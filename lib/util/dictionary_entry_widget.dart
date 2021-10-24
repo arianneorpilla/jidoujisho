@@ -48,7 +48,11 @@ class DictionaryWidget {
         word ?? buildWord(),
         const SizedBox(height: 5),
         reading ?? buildReading(),
-        meaning ?? buildMeaning(),
+        Flexible(
+          child: SingleChildScrollView(
+            child: meaning ?? buildMeaning(),
+          ),
+        ),
       ],
     );
   }

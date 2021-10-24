@@ -97,6 +97,11 @@ class App extends StatelessWidget {
       scrollbarTheme: const ScrollbarThemeData().copyWith(
         thumbColor: MaterialStateProperty.all(Colors.grey[500]),
       ),
+      sliderTheme: const SliderThemeData(
+        trackShape: RectangularSliderTrackShape(),
+        trackHeight: 2.0,
+        thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6.0),
+      ),
     );
   }
 
@@ -127,6 +132,11 @@ class App extends StatelessWidget {
       ),
       scrollbarTheme: const ScrollbarThemeData().copyWith(
         thumbColor: MaterialStateProperty.all(Colors.grey.shade700),
+      ),
+      sliderTheme: const SliderThemeData(
+        trackShape: RectangularSliderTrackShape(),
+        trackHeight: 2.0,
+        thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6.0),
       ),
     );
   }

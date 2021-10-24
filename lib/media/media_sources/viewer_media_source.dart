@@ -10,12 +10,14 @@ abstract class ViewerMediaSource extends MediaSource {
     required String sourceName,
     required IconData icon,
     required bool searchSupport,
-    VoidCallback? searchAction,
+    String? searchLabel,
+    Future<void> Function()? searchAction,
   }) : super(
           sourceName: sourceName,
           icon: icon,
           mediaType: ViewerMediaType(),
           searchSupport: searchSupport,
+          searchLabel: searchLabel,
           searchAction: searchAction,
         );
 

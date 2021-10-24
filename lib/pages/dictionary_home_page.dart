@@ -118,7 +118,7 @@ class DictionaryPageState extends State<DictionaryHomePage> {
     return Expanded(
       child: showCenterIconMessage(
         context: context,
-        label: appModel.translate("dictionary_history_empty"),
+        label: appModel.translate("history_empty"),
         icon: Icons.auto_stories,
         jumpingDots: false,
       ),
@@ -147,9 +147,7 @@ class DictionaryPageState extends State<DictionaryHomePage> {
             borderSide: BorderSide(color: Theme.of(context).focusColor),
           ),
           contentPadding: const EdgeInsets.all(0),
-          prefixIcon: const Icon(
-            Icons.search,
-          ),
+          prefixIcon: Icon(widget.mediaType.mediaTypeIcon),
           suffixIcon: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             mainAxisSize: MainAxisSize.min,
