@@ -47,4 +47,8 @@ abstract class PlayerMediaSource extends MediaSource {
 
   FutureOr<List<SubtitleController>> provideSubtitles(
       PlayerLaunchParams params);
+
+  String getIdentifier() {
+    return "${mediaType.mediaTypeName}/$sourceName";
+  }
 }

@@ -18,15 +18,29 @@ class DictionaryScrollableWidget extends StatefulWidget {
     required this.dictionary,
     required this.indexNotifier,
     this.callback,
-    this.limitHeight = false,
   }) : super(key: key);
+
+  factory DictionaryScrollableWidget.fromLatestResult({
+    required AppModel appModel,
+    required DictionarySearchResult result,
+    required ValueNotifier<int> indexNotifier,
+  }) {
+    return DictionaryScrollableWidget(
+      appModel: appModel,
+      mediaHistoryItem:
+          appModel.getDictionaryMediaHistory().getDictionaryItems().last,
+      result: result,
+      dictionaryFormat: appModel.getDictionaryFormatFromName(result.formatName),
+      dictionary: appModel.getDictionaryFromName(result.dictionaryName),
+      indexNotifier: indexNotifier,
+    );
+  }
 
   final AppModel appModel;
   final DictionaryMediaHistoryItem mediaHistoryItem;
   final DictionarySearchResult result;
   final DictionaryFormat dictionaryFormat;
   final Dictionary dictionary;
-  final bool limitHeight;
   final VoidCallback? callback;
   final ValueNotifier<int> indexNotifier;
 
