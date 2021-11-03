@@ -66,11 +66,14 @@ dependencies:
       ref: aa13540bf1b5b4100d43c57d99211186949373ab
       path: package/
   flutter_vlc_player: ^6.0.5
-  flutter_fadein: ^2.0.0
   external_path: ^1.0.1
   subtitle: ^0.1.0-beta.2
   multi_value_listenable_builder: ^0.0.1
-
+  video_compress_ds: ^3.1.6
+  ffmpeg_kit_flutter_full_gpl: ^4.5.0-LTS
+  permission_handler:
+  google_ml_kit:
+  chaquopy:
 dev_dependencies:
   flutter_test:
     sdk: flutter

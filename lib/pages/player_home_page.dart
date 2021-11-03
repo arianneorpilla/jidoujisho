@@ -1,23 +1,20 @@
 import 'package:chisa/anki/anki_export_params.dart';
-import 'package:chisa/dictionary/dictionary.dart';
+import 'package:chisa/media/media_histories/default_media_history.dart';
+import 'package:chisa/media/media_history_item.dart';
 import 'package:chisa/media/media_source.dart';
-import 'package:chisa/util/dictionary_dialog_widget.dart';
-import 'package:chisa/dictionary/dictionary_entry.dart';
-import 'package:chisa/util/media_type_button.dart';
+import 'package:chisa/media/media_sources/player_media_source.dart';
+import 'package:chisa/util/time_format.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-import 'package:chisa/dictionary/dictionary_format.dart';
-import 'package:chisa/util/dictionary_scrollable_widget.dart';
-import 'package:chisa/dictionary/dictionary_search_result.dart';
-import 'package:chisa/media/media_history_items/dictionary_media_history_item.dart';
 import 'package:chisa/media/media_type.dart';
 import 'package:chisa/models/app_model.dart';
-import 'package:chisa/pages/creator_page.dart';
 import 'package:chisa/pages/media_home_page.dart';
 import 'package:chisa/util/busy_icon_button.dart';
 import 'package:chisa/util/center_icon_message.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class PlayerHomePage extends MediaHomePage {
   const PlayerHomePage({
@@ -54,7 +51,7 @@ class PlayerHomePageState extends State<PlayerHomePage> {
       return Container();
     }
 
-    if (appModel.getDictionaryMediaHistory().getDictionaryItems().isEmpty) {
+    if (appModel.getMediaHistory(widget.mediaType).getItems().isEmpty) {
       return buildEmptyBody();
     } else {
       return buildBody();
@@ -62,14 +59,8 @@ class PlayerHomePageState extends State<PlayerHomePage> {
   }
 
   Widget buildBody() {
-    List<DictionaryMediaHistoryItem> mediaHistoryItems = appModel
-        .getDictionaryMediaHistory()
-        .getDictionaryItems()
-        .reversed
-        .toList();
-    List<DictionarySearchResult> results = mediaHistoryItems
-        .map((item) => DictionarySearchResult.fromJson(item.key))
-        .toList();
+    List<MediaHistoryItem> mediaHistoryItems =
+        appModel.getMediaHistory(widget.mediaType).getItems().reversed.toList();
 
     ScrollController scrollController =
         ScrollController(initialScrollOffset: appModel.scrollOffset);
@@ -82,6 +73,8 @@ class PlayerHomePageState extends State<PlayerHomePage> {
       });
     });
 
+    // appModel.getMediaHistory(widget.mediaType).setItems([]);
+
     return Scaffold(
       body: RawScrollbar(
         controller: scrollController,
@@ -91,7 +84,7 @@ class PlayerHomePageState extends State<PlayerHomePage> {
           controller: scrollController,
           addAutomaticKeepAlives: true,
           key: UniqueKey(),
-          itemCount: results.length + 2,
+          itemCount: mediaHistoryItems.length + 2,
           itemBuilder: (BuildContext context, int index) {
             if (index == 0) {
               return buildSearchField();
@@ -99,10 +92,9 @@ class PlayerHomePageState extends State<PlayerHomePage> {
               return getSource().getButton(context) ?? const SizedBox.shrink();
             }
 
-            DictionarySearchResult result = results[index - 2];
-            DictionaryMediaHistoryItem mediaHistoryItem =
-                mediaHistoryItems[index - 2];
-            return buildDictionaryResult(result, mediaHistoryItem);
+            MediaHistoryItem item = mediaHistoryItems[index - 2];
+
+            return buildMediaHistoryItem(item);
           },
         ),
       ),
@@ -138,8 +130,7 @@ class PlayerHomePageState extends State<PlayerHomePage> {
         maxLines: 1,
         controller: wordController,
         onFieldSubmitted: (result) async {
-          setState(() {});
-          await appModel.searchDictionary(wordController.text);
+          await getSource().searchAction!();
           setState(() {});
         },
         enableInteractiveSelection: (!getSource().searchSupport),
@@ -166,7 +157,7 @@ class PlayerHomePageState extends State<PlayerHomePage> {
               if (getSource().searchSupport)
                 BusyIconButton(
                   iconSize: 18,
-                  icon: const Icon(Icons.auto_stories),
+                  icon: const Icon(Icons.search),
                   onPressed: () async {
                     await getSource().searchAction!();
                     setState(() {});
@@ -175,7 +166,6 @@ class PlayerHomePageState extends State<PlayerHomePage> {
               BusyIconButton(
                   iconSize: 18,
                   icon: const Icon(Icons.perm_media),
-                  enabled: (appModel.getCurrentDictionary() != null),
                   onPressed: () async {
                     await appModel.showSourcesMenu(context, widget.mediaType);
                   }),
@@ -196,120 +186,133 @@ class PlayerHomePageState extends State<PlayerHomePage> {
     );
   }
 
-  Widget buildDictionaryResult(DictionarySearchResult result,
-      DictionaryMediaHistoryItem mediaHistoryItem) {
-    DictionaryFormat dictionaryFormat =
-        appModel.getDictionaryFormatFromName(result.formatName);
-    Dictionary dictionary =
-        appModel.getDictionaryFromName(result.dictionaryName);
-    ValueNotifier<int> indexNotifier =
-        ValueNotifier<int>(mediaHistoryItem.progress);
+  Widget buildMediaHistoryItem(MediaHistoryItem item) {
+    MediaSource source =
+        widget.mediaType.getMediaSourceFromItem(appModel, item);
+
+    return InkWell(
+      onTap: () {
+        PlayerMediaSource playerMediaSource = source as PlayerMediaSource;
+        playerMediaSource.launchMediaPage(
+            context, playerMediaSource.getLaunchParams(item));
+      },
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            buildMediaHistoryThumbnail(source, item),
+            const SizedBox(width: 12),
+            Expanded(
+              child: buildMediaHistoryMetadata(source, item),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildMediaHistoryMetadata(MediaSource source, MediaHistoryItem item) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          source.getCaption(item),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          softWrap: true,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          source.getSubcaption(item),
+          style: TextStyle(
+            color: Theme.of(context).unselectedWidgetColor,
+            fontSize: 12,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          softWrap: true,
+        ),
+        Row(
+          children: [
+            Icon(
+              source.icon,
+              color: Theme.of(context).unselectedWidgetColor,
+              size: 12,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              source.sourceName,
+              style: TextStyle(
+                color: Theme.of(context).unselectedWidgetColor,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              softWrap: true,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget buildMediaHistoryThumbnail(MediaSource source, MediaHistoryItem item) {
+    double scaleWidth = MediaQuery.of(context).size.width * 0.4;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12, left: 12, right: 12),
-      color: appModel.getIsDarkMode()
-          ? Theme.of(context).unselectedWidgetColor.withOpacity(0.055)
-          : Theme.of(context).unselectedWidgetColor.withOpacity(0.030),
-      child: InkWell(
-        onTap: () async {
-          DictionaryEntry entry = result.entries[indexNotifier.value];
+      width: scaleWidth,
+      height: (scaleWidth) / 16 * 9,
+      color: Colors.black,
+      child: Stack(
+        alignment: Alignment.bottomRight,
+        children: [
+          FutureBuilder<ImageProvider<Object>>(
+              future: source.getThumbnail(item),
+              builder: (BuildContext context,
+                  AsyncSnapshot<ImageProvider> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting ||
+                    !snapshot.hasData) {
+                  return Image(image: MemoryImage(kTransparentImage));
+                }
 
-          await Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (context) => CreatorPage(
-                initialParams: AnkiExportParams(
-                  word: entry.word,
-                  meaning: entry.meaning,
-                  reading: entry.reading,
+                ImageProvider<Object> thumbnail = snapshot.data!;
+
+                return FadeInImage(
+                  placeholder: MemoryImage(kTransparentImage),
+                  image: thumbnail,
+                  fit: BoxFit.contain,
+                );
+              }),
+          Positioned(
+            right: 4.0,
+            bottom: 6.0,
+            child: Container(
+              height: 20,
+              color: Colors.black.withOpacity(0.8),
+              alignment: Alignment.center,
+              child: Text(
+                getYouTubeDuration(Duration(seconds: item.completeProgress)),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w300,
                 ),
               ),
             ),
-          );
-        },
-        onLongPress: () async {
-          ValueNotifier<int> dialogIndexNotifier =
-              ValueNotifier<int>(indexNotifier.value);
-
-          HapticFeedback.vibrate();
-          await showDialog(
-            barrierDismissible: true,
-            context: context,
-            builder: (context) => DictionaryDialogWidget(
-              mediaHistoryItem: mediaHistoryItem,
-              dictionary: dictionary,
-              dictionaryFormat: dictionaryFormat,
-              result: result,
-              callback: () {
-                setState(() {});
-              },
-              indexNotifier: dialogIndexNotifier,
-              actions: [
-                TextButton(
-                  child: Text(
-                    appModel.translate("dialog_delete"),
-                    style: TextStyle(
-                      color: Theme.of(context).focusColor,
-                    ),
-                  ),
-                  onPressed: () async {
-                    await appModel.removeDictionaryHistoryItem(result);
-
-                    Navigator.pop(context);
-                    setState(() {});
-                  },
-                ),
-                TextButton(
-                    child: Text(
-                      appModel.translate("dialog_creator"),
-                      style: const TextStyle(),
-                    ),
-                    onPressed: () async {
-                      DictionaryEntry dialogEntry =
-                          result.entries[dialogIndexNotifier.value];
-                      await Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (context) => CreatorPage(
-                            initialParams: AnkiExportParams(
-                              word: dialogEntry.word,
-                              meaning: dialogEntry.meaning,
-                              reading: dialogEntry.reading,
-                            ),
-                          ),
-                        ),
-                      );
-                      setState(() {});
-                    }),
-                TextButton(
-                  child: Text(
-                    appModel.translate("dialog_close"),
-                    style: const TextStyle(),
-                  ),
-                  onPressed: () async {
-                    Navigator.pop(context);
-                    setState(() {});
-                  },
-                ),
-              ],
-            ),
-          );
-          // showDictionaryDialog(entry, entry.swipeIndex);
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: DictionaryScrollableWidget(
-            appModel: appModel,
-            mediaHistoryItem: mediaHistoryItem,
-            result: result,
-            dictionary: appModel.getDictionaryFromName(result.dictionaryName),
-            dictionaryFormat: appModel.getDictionaryFormatFromName(
-              result.formatName,
-            ),
-            indexNotifier: indexNotifier,
-            callback: () {
-              setState(() {});
-            },
           ),
-        ),
+          Positioned(
+            child: Container(
+              alignment: Alignment.bottomCenter,
+              child: LinearProgressIndicator(
+                value: item.currentProgress / item.completeProgress,
+                backgroundColor: Colors.white.withOpacity(0.6),
+                valueColor: const AlwaysStoppedAnimation<Color>(Colors.red),
+                minHeight: 2,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

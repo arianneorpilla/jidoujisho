@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:chisa/dictionary/dictionary_search_result.dart';
 import 'package:chisa/language/tap_to_select.dart';
+import 'package:chisa/media/media_history.dart';
+import 'package:chisa/media/media_history_item.dart';
 import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/util/dictionary_scrollable_widget.dart';
@@ -126,10 +128,10 @@ class PlayerPageState extends State<PlayerPage>
           alignment: Alignment.topCenter,
           child: Padding(
             padding: const EdgeInsets.only(
-              left: 32,
-              right: 32,
-              top: 32,
-              bottom: 64,
+              left: 16,
+              right: 16,
+              top: 16,
+              bottom: 48,
             ),
             child: GestureDetector(
               onTap: () {
@@ -172,6 +174,8 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   Widget buildDictionaryMatch() {
+    latestResultEntryIndex.value = 0;
+
     return DictionaryScrollableWidget.fromLatestResult(
       appModel: appModel,
       result: latestResult!,
@@ -270,13 +274,21 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   VlcPlayerController preparePlayerController(PlayerLaunchParams params) {
+    int startTime = widget.params.mediaHistoryItem.currentProgress;
+
+    List<String> advancedParams = ["--start-time=$startTime"];
     List<String> audioParams = ["--audio-track=0", "--sub-track=99999"];
     if (params.audioPath != null) {
       audioParams.add("--input-slave=${params.audioPath}");
     }
 
+    VlcAdvancedOptions advanced = VlcAdvancedOptions(advancedParams);
     VlcAudioOptions audio = VlcAudioOptions(audioParams);
-    VlcPlayerOptions options = VlcPlayerOptions(audio: audio);
+
+    VlcPlayerOptions options = VlcPlayerOptions(
+      advanced: advanced,
+      audio: audio,
+    );
 
     switch (params.getMode()) {
       case MediaLaunchMode.file:
@@ -310,14 +322,29 @@ class PlayerPageState extends State<PlayerPage>
       position.value = playerController.value.position;
       duration.value = playerController.value.duration;
 
+      print(subtitleController!.subtitles);
+
       if (subtitleController != null) {
         Subtitle? newSubtitle =
             subtitleController!.durationSearch(position.value);
+
         if (currentSubtitle.value != newSubtitle) {
           currentSubtitle.value = newSubtitle;
         }
       }
+
+      updateHistory();
     }
+  }
+
+  Future<void> updateHistory() async {
+    MediaHistory history =
+        widget.params.mediaSource.mediaType.getMediaHistory(appModel);
+    MediaHistoryItem item = widget.params.mediaHistoryItem;
+    item.currentProgress = position.value.inSeconds;
+    item.completeProgress = duration.value.inSeconds;
+
+    await history.addItem(item);
   }
 
   Widget buildPlaceholder() {
@@ -364,7 +391,7 @@ class PlayerPageState extends State<PlayerPage>
     return Align(
       alignment: Alignment.bottomCenter,
       child: Padding(
-        padding: EdgeInsets.only(bottom: menuHeight + 24),
+        padding: EdgeInsets.only(bottom: menuHeight + 8),
         child: buildSubtitle(),
       ),
     );
@@ -378,9 +405,9 @@ class PlayerPageState extends State<PlayerPage>
     }
   }
 
-  Widget getOutlineText(String word) {
+  Widget getOutlineText(String character) {
     return Text(
-      word,
+      character,
       style: TextStyle(
         fontSize: subtitleFontSize,
         foreground: Paint()
@@ -391,13 +418,17 @@ class PlayerPageState extends State<PlayerPage>
     );
   }
 
-  Widget getText(String word) {
+  Widget getText(String character, int index) {
     return InkWell(
-      onTap: () {
+      onTap: () async {
+        String word = await appModel
+            .getCurrentLanguage()
+            .wordFromIndex(currentSubtitle.value!.data, index);
+
         setSearchTerm(word);
       },
       child: Text(
-        word,
+        character,
         style: TextStyle(
           fontSize: subtitleFontSize,
         ),
@@ -415,12 +446,9 @@ class PlayerPageState extends State<PlayerPage>
 
         String subtitleText = currentSubtitle.data;
 
-        List<String> words =
-            appModel.getCurrentLanguage().textToWords(subtitleText);
-
-        List<List<String>> lines = getLinesFromWords(
+        List<List<String>> lines = getLinesFromCharacters(
           context,
-          words,
+          subtitleText.split(''),
           subtitleFontSize,
         );
 
@@ -453,11 +481,9 @@ class PlayerPageState extends State<PlayerPage>
                 List<Widget> textWidgets = [];
 
                 for (int i = 0; i < line.length; i++) {
-                  String word = line[i];
+                  String character = line[i];
                   textWidgets.add(
-                    getText(
-                      word,
-                    ),
+                    getText(character, i),
                   );
                 }
 
@@ -588,19 +614,22 @@ class PlayerPageState extends State<PlayerPage>
       return buildPlaceholder();
     }
 
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        alignment: Alignment.center,
-        children: <Widget>[
-          buildPlayerArea(),
-          buildMenuArea(),
-          Positioned.fill(
-            child: buildSubtitleArea(),
-          ),
-          buildDictionary(),
-        ],
+    return Theme(
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            buildPlayerArea(),
+            buildMenuArea(),
+            Positioned.fill(
+              child: buildSubtitleArea(),
+            ),
+            buildDictionary(),
+          ],
+        ),
       ),
+      data: appModel.getDarkTheme(context),
     );
   }
 
@@ -614,6 +643,10 @@ class PlayerPageState extends State<PlayerPage>
       builder: (context, values, _) {
         Duration duration = values.elementAt(0);
         Duration position = values.elementAt(1);
+
+        if (duration == Duration.zero) {
+          return const SizedBox.shrink();
+        }
 
         String getPositionText() {
           if (position.inHours == 0) {

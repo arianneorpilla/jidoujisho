@@ -41,7 +41,6 @@ Future<void> dictionaryFileImport(
   MediaType mediaType = DictionaryMediaType();
 
   Iterable<String>? filePaths = await FilesystemPicker.open(
-    title: appModel.translate("player_pick_video"),
     pickText: appModel.translate("dialog_select"),
     cancelText: appModel.translate("dialog_return"),
     context: context,
@@ -142,7 +141,24 @@ Future<void> dictionaryFileImport(
 
     /// Initialise an ObjectBox [Store], where the new database will be
     /// used from. Stores of existing dictionaries are initialised on startup.
-    Store store = await appModel.initialiseDictionaryStore(dictionaryName);
+    Store? store = appModel.getDictionaryStore(dictionaryName);
+    if (store != null) {
+      try {
+        Box entryBox = store.box<DictionaryEntry>();
+        entryBox.removeAll();
+        store.close();
+        appModel.removeDictionaryStore(dictionaryName);
+
+        Directory objectBoxDirDirectory = Directory(
+          p.join(appDirDocPath, "customDictionaries", dictionaryName),
+        );
+        if (objectBoxDirDirectory.existsSync()) {
+          objectBoxDirDirectory.deleteSync(recursive: true);
+        }
+      } finally {}
+    }
+
+    store = await appModel.initialiseDictionaryStore(dictionaryName);
 
     /// From the working directory, the format is mainly responsible for
     /// parsing its entries. [extractAndDepositEntries] handles two main

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:chisa/media/media_history.dart';
 import 'package:chisa/media/media_history_item.dart';
@@ -33,7 +34,17 @@ class DefaultMediaHistory extends MediaHistory {
   Future<void> removeItem(String key) async {
     List<MediaHistoryItem> history = getItems();
 
-    history.removeWhere((historyItem) => key == historyItem.key);
+    List<MediaHistoryItem> itemsToRemove =
+        history.where((historyItem) => key == historyItem.key).toList();
+    for (MediaHistoryItem historyItem in itemsToRemove) {
+      File thumbnailFile = File(historyItem.thumbnailPath);
+      if (thumbnailFile.existsSync()) {
+        thumbnailFile.deleteSync();
+      }
+
+      history.remove(historyItem);
+    }
+
     await setItems(history);
   }
 

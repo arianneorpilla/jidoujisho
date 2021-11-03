@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chisa/media/media_history_item.dart';
 import 'package:chisa/media/media_type.dart';
 import 'package:chisa/media/media_types/media_launch_params.dart';
@@ -48,4 +50,19 @@ abstract class MediaSource {
   bool isShown(AppModel appModel) {
     return appModel.getMediaSourceShown(this);
   }
+
+  /// The unique identifier that is passed to the source parameter
+  String getIdentifier() {
+    return "${mediaType.mediaTypeName}/$sourceName";
+  }
+
+  /// From a [MediaHistoryItem], generate the thumbnail of this item that will
+  /// show up in the home screen.
+  Future<ImageProvider> getThumbnail(MediaHistoryItem item);
+
+  /// From a [MediaHistoryItem], get a caption of the metadata to display.
+  String getCaption(MediaHistoryItem item);
+
+  /// From a [MediaHistoryItem], get a subcaption of the metadata to display.
+  String getSubcaption(MediaHistoryItem item);
 }

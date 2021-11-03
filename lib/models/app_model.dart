@@ -3,8 +3,12 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
+import 'package:chisa/dictionary/formats/cccedict_simplified_format.dart';
+import 'package:chisa/dictionary/formats/cccedict_traditional_format.dart';
 import 'package:chisa/dictionary/formats/yomichan_term_bank_format.dart';
 import 'package:chisa/language/app_localizations.dart';
+import 'package:chisa/language/languages/chinese_simplified_language.dart';
+import 'package:chisa/language/languages/chinese_traditional_language.dart';
 import 'package:chisa/language/languages/english_language.dart';
 import 'package:chisa/language/languages/japanese_language.dart';
 import 'package:chisa/media/media_histories/default_media_history.dart';
@@ -120,6 +124,8 @@ class AppModel with ChangeNotifier {
 
   List<DictionaryFormat> dictionaryFormats = [
     YomichanTermBankFormat(),
+    CCCEdictTraditionalFormat(),
+    CCCEdictSimplifiedFormat(),
   ];
   List<PlayerMediaSource> playerMediaSources = [
     PlayerLocalMediaSource(),
@@ -155,6 +161,8 @@ class AppModel with ChangeNotifier {
   void populateLanguages() {
     List<Language> languages = [
       JapaneseLanguage(),
+      ChineseTraditionalLanguage(),
+      ChineseSimplifiedLanguage(),
       EnglishLanguage(),
     ];
 
@@ -527,6 +535,10 @@ class AppModel with ChangeNotifier {
     return _dictionaryStores[dictionaryName];
   }
 
+  void removeDictionaryStore(String dictionaryName) {
+    _dictionaryStores.remove(dictionaryName);
+  }
+
   Future<void> deleteCurrentDictionary() async {
     String appDirDocPath = (await getApplicationDocumentsDirectory()).path;
     String dictionaryName = getCurrentDictionaryName();
@@ -555,6 +567,7 @@ class AppModel with ChangeNotifier {
       Box entryBox = entryStore.box<DictionaryEntry>();
       entryBox.removeAll();
       entryStore.close();
+      removeDictionaryStore(dictionaryName);
 
       Directory objectBoxDirDirectory = Directory(
         p.join(appDirDocPath, "customDictionaries", dictionaryName),
@@ -633,6 +646,7 @@ class AppModel with ChangeNotifier {
   Future<void> setTargetLanguageName(String targetLanguage) async {
     await _sharedPreferences.setString("targetLanguage", targetLanguage);
     await initialiseCurrentLanguage();
+    notifyListeners();
   }
 
   List<String> getAppLanguageNames() {
@@ -698,7 +712,8 @@ class AppModel with ChangeNotifier {
       dictionaryName: currentDictionary.dictionaryName,
       formatName: currentDictionary.formatName,
       originalSearchTerm: searchTerm,
-      fallbackSearchTerms: currentLanguage.generateFallbackTerms(searchTerm),
+      fallbackSearchTerms:
+          await currentLanguage.generateFallbackTerms(searchTerm),
       entries: [],
       storeReference: storeReference,
     );
@@ -823,8 +838,8 @@ class AppModel with ChangeNotifier {
       DictionaryMediaHistoryItem newItem, int index) async {
     List<DictionaryMediaHistoryItem> history =
         getDictionaryMediaHistory().getDictionaryItems();
-    history.firstWhere((entry) => entry.key == newItem.key).progress =
-        newItem.progress;
+    history.firstWhere((entry) => entry.key == newItem.key).currentProgress =
+        newItem.currentProgress;
 
     await getDictionaryMediaHistory().setItems(history);
   }
@@ -931,4 +946,89 @@ class AppModel with ChangeNotifier {
   //   await sharedPreferences.setString(
   //       '${type.mediaTypeName}/lastPickedFile', directory.path);
   // }
+
+  ThemeData getLightTheme(BuildContext context) {
+    return ThemeData(
+      backgroundColor: Colors.white,
+      colorScheme: ColorScheme.fromSwatch().copyWith(
+        primary: Colors.red,
+        secondary: Colors.red,
+        brightness: Brightness.light,
+      ),
+      scaffoldBackgroundColor: Colors.white,
+      cardColor: Colors.white,
+      focusColor: Colors.red,
+      selectedRowColor: Colors.grey.shade300,
+      primaryTextTheme:
+          Typography.material2018(platform: TargetPlatform.android).black,
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          primary: Colors.black,
+        ),
+      ),
+      iconTheme: const IconThemeData(color: Colors.black),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.white,
+        iconTheme: IconThemeData(color: Colors.black),
+        elevation: 0,
+      ),
+      scrollbarTheme: const ScrollbarThemeData().copyWith(
+        thumbColor: MaterialStateProperty.all(Colors.grey[500]),
+      ),
+      sliderTheme: const SliderThemeData(
+        trackShape: RectangularSliderTrackShape(),
+        trackHeight: 2.0,
+        thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6.0),
+      ),
+    );
+  }
+
+  ThemeData getDarkTheme(BuildContext context) {
+    return ThemeData(
+      backgroundColor: Colors.black,
+      colorScheme: ColorScheme.fromSwatch().copyWith(
+        primary: Colors.red,
+        secondary: Colors.red,
+        brightness: Brightness.dark,
+      ),
+      scaffoldBackgroundColor: Colors.black,
+      cardColor: Colors.grey.shade900,
+      focusColor: Colors.red,
+      selectedRowColor: Colors.grey.shade600,
+      primaryTextTheme:
+          Typography.material2018(platform: TargetPlatform.android).white,
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          primary: Colors.white,
+        ),
+      ),
+      iconTheme: const IconThemeData(color: Colors.white),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.black,
+        iconTheme: IconThemeData(color: Colors.white),
+        elevation: 0,
+      ),
+      scrollbarTheme: const ScrollbarThemeData().copyWith(
+        thumbColor: MaterialStateProperty.all(Colors.grey.shade700),
+      ),
+      sliderTheme: const SliderThemeData(
+        trackShape: RectangularSliderTrackShape(),
+        trackHeight: 2.0,
+        thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6.0),
+      ),
+    );
+  }
+
+  Locale? getLocale() {
+    try {
+      getCurrentLanguage();
+    } catch (e) {
+      return null;
+    }
+
+    return Locale(
+      getCurrentLanguage().languageCode,
+      getCurrentLanguage().countryCode,
+    );
+  }
 }

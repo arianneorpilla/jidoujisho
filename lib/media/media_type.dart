@@ -1,4 +1,7 @@
 import 'package:chisa/media/media_history.dart';
+import 'package:chisa/media/media_history_item.dart';
+import 'package:chisa/media/media_source.dart';
+import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/media_home_page.dart';
 import 'package:flutter/material.dart';
 
@@ -31,8 +34,13 @@ abstract class MediaType {
   BottomNavigationBarItem getHomeTab(BuildContext context);
 
   /// Get the media history for this certain media type.
-  MediaHistory getMediaHistory(BuildContext context);
+  MediaHistory getMediaHistory(AppModel appModel);
 
   /// The explicit file types this media source allows for file picking.
   List<String> getAllowedExtensions();
+
+  /// Obtain the media source that a media history item pertains to.
+  MediaSource getMediaSourceFromItem(AppModel appModel, MediaHistoryItem item) {
+    return appModel.getMediaSourceFromName(mediaTypeName, item.source);
+  }
 }

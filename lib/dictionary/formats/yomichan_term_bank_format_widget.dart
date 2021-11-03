@@ -221,7 +221,6 @@ class YomichanTermBankFormatWidget extends DictionaryWidget {
             ),
             children: inlineSpanWidgets,
           ),
-          maxLines: 10,
           overflow: TextOverflow.ellipsis,
         ),
       );

@@ -211,7 +211,7 @@ class DictionaryPageState extends State<DictionaryHomePage> {
     Dictionary dictionary =
         appModel.getDictionaryFromName(result.dictionaryName);
     ValueNotifier<int> indexNotifier =
-        ValueNotifier<int>(mediaHistoryItem.progress);
+        ValueNotifier<int>(mediaHistoryItem.currentProgress);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12, left: 12, right: 12),

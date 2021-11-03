@@ -4,34 +4,45 @@ abstract class MediaHistoryItem {
   MediaHistoryItem({
     required this.key,
     required this.name,
-    required this.resource,
-    required this.progress,
+    required this.source,
+    required this.currentProgress,
+    required this.completeProgress,
+    this.thumbnailPath = "",
     required this.extra,
   });
 
-  /// A key unique identifier for the item. For example, for Player video
-  /// playback history, this is a uri to the video file, which should be
-  /// unique in a filesystem. This could be a website link for a custom
-  /// streaming service media type, or even the data itself in [String] form.
-  late String key;
+  /// The unique identifier of this item. If the same item exists in history,
+  /// then the item is replaced with a newer item in the addition operation.
+  String key;
 
-  /// The name to be given for display for the history item. This could be the
-  /// name of a video file or the name of a book.
-  late String name;
+  /// The name of this item. Typically, this could be the name of a video
+  /// or a book.
+  String name;
 
-  /// A progress parameter. For the Reader, this could be the scroll position
-  /// to scroll to. For the Player, this could be the number of seconds to seek
-  /// to when resuming playback.
-  late int progress;
+  /// The [sourceName] of the media source this item is from.
+  ///
+  /// This is used to generate resources that the media item may require for
+  /// preview purposes. For example, for a local media item to display its
+  /// screenshot, the player page will need to invoke a function pertaining
+  /// to the media source in order to generate its thumbnail.
+  String source;
 
-  /// The [Uri] pertaining to a preview resource, e.g. a thumbnail or cover
-  /// art for a book.
-  late String resource;
+  /// Progress of this item persisted for resuming purposes.
+  ///
+  /// For dictionary media history items, this is the scroll position.
+  /// For video media history items, this is the seconds elapsed.
+  int currentProgress;
 
-  /// Extra details that may be necessary should a media type need to be
-  /// extended to find its use. For example, the Viewer may find storing the
-  /// individual chapters progress necessary.
-  late Map<String, dynamic> extra;
+  /// The progress of this item when the history item is completed. Stored for
+  /// division and progress tracking purposes.
+  int completeProgress;
+
+  /// A path pointing to a file, storing a temporary thumbnail. This is deleted
+  /// when an item is disposed.
+  String thumbnailPath;
+
+  /// Extra parameters are provided should a media history item require it.
+  Map<String, dynamic> extra;
 
   /// Return the serialised JSON form of this [MediaHistoryItem]. See
   /// [MediaHistory] for how this is used.
@@ -39,8 +50,10 @@ abstract class MediaHistoryItem {
     Map<String, String> map = {
       "key": key,
       "name": name,
-      "resource": resource,
-      "progress": progress.toString(),
+      "source": source,
+      "currentProgress": currentProgress.toString(),
+      "completeProgress": completeProgress.toString(),
+      "thumbnailPath": thumbnailPath,
       "extra": jsonEncode(extra),
     };
 

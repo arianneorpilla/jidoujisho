@@ -31,7 +31,7 @@ abstract class MediaHomePageState extends State<MediaHomePage> {
       return Container();
     }
 
-    if (widget.mediaType.getMediaHistory(context).getItems().isEmpty) {
+    if (widget.mediaType.getMediaHistory(appModel).getItems().isEmpty) {
       return buildEmptyBody();
     } else {
       return buildBody();

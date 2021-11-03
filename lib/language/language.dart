@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chisa/util/reading_direction.dart';
 
 abstract class Language {
@@ -49,7 +51,7 @@ abstract class Language {
   /// In the case of English, "This is a pen." should ideally return a list
   /// containing "This", " ", "is", " ", "a", " ", "pen", ".". Delimiters
   /// should stay intact for languages that feature such, such as spaces.
-  List<String> textToWords(String text);
+  FutureOr<List<String>> textToWords(String text);
 
   /// Given an [index] or a character position in given [text], return a word
   /// such that it corresponds to a whole word from the parsed list of words
@@ -60,23 +62,36 @@ abstract class Language {
   ///
   /// In the case of English, "This is a pen." at index 10 (p), should return
   /// the word "pen".
-  String wordFromIndex(String text, int index);
+  FutureOr<String> wordFromIndex(String text, int index) async {
+    List<String> words = await textToWords(text);
+
+    List<String> wordTape = [];
+    for (int i = 0; i < words.length; i++) {
+      String word = words[i];
+      for (int j = 0; j < word.length; j++) {
+        wordTape.add(word);
+      }
+    }
+
+    String word = wordTape[index];
+    return word;
+  }
 
   /// Given a word, lemmatise and get the root form of the word.
   ///
   /// For example, for Japanese, "しました" should be "する".
   /// For English, "running" should be "run".
-  String getRootForm(String word);
+  FutureOr<String> getRootForm(String word);
 
   /// Generate extra fallback terms for a word for use in [searchDictionary].
   /// Some custom formats may decide to perform operations after an original
   /// search term and a fallback search term have both failed in finding
   /// results. By default, the [searchDatabase] function will exhaust all
   /// fallback terms until a match is found.
-  List<String> generateFallbackTerms(String searchTerm) {
+  FutureOr<List<String>> generateFallbackTerms(String searchTerm) async {
     List<String> fallbackTerms = [];
 
-    String rootForm = getRootForm(searchTerm);
+    String rootForm = await getRootForm(searchTerm);
     if (rootForm != searchTerm) {
       fallbackTerms.add(rootForm);
     }

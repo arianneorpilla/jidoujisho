@@ -1,19 +1,16 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_fadein/flutter_fadein.dart';
 
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:filesystem_picker/filesystem_picker.dart';
-
+import 'package:permission_handler/permission_handler.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/home_page.dart';
 
 /// Application execution starts here.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Permission.storage.request();
 
   SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
   PackageInfo packageInfo = await PackageInfo.fromPlatform();
@@ -46,9 +43,10 @@ class App extends StatelessWidget {
       child: Consumer<AppModel>(
         builder: (_, appModel, __) {
           return MaterialApp(
+            locale: appModel.getLocale(),
             debugShowCheckedModeBanner: false,
-            theme: getLightTheme(context),
-            darkTheme: getDarkTheme(context),
+            theme: appModel.getLightTheme(context),
+            darkTheme: appModel.getDarkTheme(context),
             themeMode:
                 appModel.getIsDarkMode() ? ThemeMode.dark : ThemeMode.light,
             home: (appModel.hasInitialized)
@@ -65,78 +63,6 @@ class App extends StatelessWidget {
                   ),
           );
         },
-      ),
-    );
-  }
-
-  ThemeData getLightTheme(BuildContext context) {
-    return ThemeData(
-      backgroundColor: Colors.white,
-      colorScheme: ColorScheme.fromSwatch().copyWith(
-        primary: Colors.red,
-        secondary: Colors.red,
-        brightness: Brightness.light,
-      ),
-      scaffoldBackgroundColor: Colors.white,
-      cardColor: Colors.white,
-      focusColor: Colors.red,
-      selectedRowColor: Colors.grey.shade300,
-      primaryTextTheme:
-          Typography.material2018(platform: TargetPlatform.android).black,
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          primary: Colors.black,
-        ),
-      ),
-      iconTheme: const IconThemeData(color: Colors.black),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.white,
-        iconTheme: IconThemeData(color: Colors.black),
-        elevation: 0,
-      ),
-      scrollbarTheme: const ScrollbarThemeData().copyWith(
-        thumbColor: MaterialStateProperty.all(Colors.grey[500]),
-      ),
-      sliderTheme: const SliderThemeData(
-        trackShape: RectangularSliderTrackShape(),
-        trackHeight: 2.0,
-        thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6.0),
-      ),
-    );
-  }
-
-  ThemeData getDarkTheme(BuildContext context) {
-    return ThemeData(
-      backgroundColor: Colors.black,
-      colorScheme: ColorScheme.fromSwatch().copyWith(
-        primary: Colors.red,
-        secondary: Colors.red,
-        brightness: Brightness.dark,
-      ),
-      scaffoldBackgroundColor: Colors.black,
-      cardColor: Colors.grey.shade900,
-      focusColor: Colors.red,
-      selectedRowColor: Colors.grey.shade600,
-      primaryTextTheme:
-          Typography.material2018(platform: TargetPlatform.android).white,
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          primary: Colors.white,
-        ),
-      ),
-      iconTheme: const IconThemeData(color: Colors.white),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.black,
-        iconTheme: IconThemeData(color: Colors.white),
-        elevation: 0,
-      ),
-      scrollbarTheme: const ScrollbarThemeData().copyWith(
-        thumbColor: MaterialStateProperty.all(Colors.grey.shade700),
-      ),
-      sliderTheme: const SliderThemeData(
-        trackShape: RectangularSliderTrackShape(),
-        trackHeight: 2.0,
-        thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6.0),
       ),
     );
   }

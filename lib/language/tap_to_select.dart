@@ -1,26 +1,26 @@
 import 'package:flutter/material.dart';
 
-List<List<String>> getLinesFromWords(
-    BuildContext context, List<String> words, double fontSize) {
+List<List<String>> getLinesFromCharacters(
+    BuildContext context, List<String> characters, double fontSize) {
   List<List<String>> lines = [];
   List<String> working = [];
   String concatenate = "";
   TextPainter textPainter;
   double width = MediaQuery.of(context).size.width;
-  words.add("");
+  characters.add("");
 
-  for (int i = 0; i < words.length; i++) {
-    String word = words[i];
+  for (int i = 0; i < characters.length; i++) {
+    String character = characters[i];
     textPainter = TextPainter()
       ..text = TextSpan(
-        text: concatenate + word,
+        text: concatenate + character,
         style: TextStyle(fontSize: fontSize),
       )
       ..textDirection = TextDirection.ltr
       ..layout(minWidth: 0, maxWidth: double.infinity);
 
-    if (word.contains('␜') ||
-        i == words.length - 1 ||
+    if (character.contains('\n') ||
+        i == characters.length - 1 ||
         textPainter.width >= width - 60) {
       List<String> line = [];
       for (int i = 0; i < working.length; i++) {
@@ -31,11 +31,11 @@ List<List<String>> getLinesFromWords(
       working = [];
       concatenate = "";
 
-      working.add(word);
-      concatenate += word;
+      working.add(character);
+      concatenate += character;
     } else {
-      working.add(word);
-      concatenate += word;
+      working.add(character);
+      concatenate += character;
     }
   }
 
@@ -44,10 +44,10 @@ List<List<String>> getLinesFromWords(
 
 List<List<int>> getIndexesFromWords(
   BuildContext context,
-  List<String> words,
+  List<String> characters,
   double fontSize,
 ) {
-  words.add("");
+  characters.add("");
 
   List<List<int>> lines = [];
   List<int> working = [];
@@ -56,19 +56,19 @@ List<List<int>> getIndexesFromWords(
 
   double width = MediaQuery.of(context).size.width;
 
-  for (int i = 0; i < words.length; i++) {
-    String word = words[i];
+  for (int i = 0; i < characters.length; i++) {
+    String character = characters[i];
     textPainter = TextPainter()
       ..text = TextSpan(
-          text: concatenate + word,
+          text: concatenate + character,
           style: TextStyle(
             fontSize: fontSize,
           ))
       ..textDirection = TextDirection.ltr
       ..layout(minWidth: 0, maxWidth: double.infinity);
 
-    if (word.contains('␜') ||
-        i == words.length - 1 ||
+    if (character.contains('\n') ||
+        i == characters.length - 1 ||
         textPainter.width >= width - 60) {
       List<int> line = [];
       for (int i = 0; i < working.length; i++) {
@@ -80,10 +80,10 @@ List<List<int>> getIndexesFromWords(
       concatenate = "";
 
       working.add(i);
-      concatenate += word;
+      concatenate += character;
     } else {
       working.add(i);
-      concatenate += word;
+      concatenate += character;
     }
   }
 

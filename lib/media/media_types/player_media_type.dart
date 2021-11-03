@@ -34,8 +34,7 @@ class PlayerMediaType extends MediaType {
   }
 
   @override
-  MediaHistory getMediaHistory(BuildContext context) {
-    AppModel appModel = Provider.of<AppModel>(context);
+  MediaHistory getMediaHistory(AppModel appModel) {
     return DefaultMediaHistory(
       sharedPreferences: appModel.sharedPreferences,
       prefsDirectory: mediaTypeName,

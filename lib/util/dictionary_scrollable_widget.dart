@@ -57,12 +57,12 @@ class DictionaryScrollableWidgetState
   void initState() {
     super.initState();
     indexNotifier = widget.indexNotifier;
-    labelColor =
-        widget.appModel.getIsDarkMode() ? Colors.grey : Colors.grey[600]!;
   }
 
   @override
   Widget build(BuildContext context) {
+    labelColor = Theme.of(context).unselectedWidgetColor;
+
     DictionaryEntry dictionaryEntry =
         widget.result.entries[indexNotifier.value];
 
@@ -85,7 +85,7 @@ class DictionaryScrollableWidgetState
           }
         }
 
-        widget.mediaHistoryItem.progress = indexNotifier.value;
+        widget.mediaHistoryItem.currentProgress = indexNotifier.value;
         widget.appModel.updateDictionaryHistoryIndex(
           widget.mediaHistoryItem,
           indexNotifier.value,

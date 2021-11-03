@@ -7,25 +7,28 @@ class DictionaryMediaHistoryItem extends DefaultMediaHistoryItem {
   DictionaryMediaHistoryItem({
     required String key,
     required String name,
-    required String resource,
-    required int progress,
+    required String source,
+    required int currentProgress,
+    required int completeProgress,
     required Map<String, dynamic> extra,
   }) : super(
           key: key,
           name: name,
-          resource: resource,
-          progress: progress,
+          source: source,
+          currentProgress: currentProgress,
+          completeProgress: completeProgress,
           extra: extra,
         );
 
   factory DictionaryMediaHistoryItem.fromDictionarySearchResult(
       DictionarySearchResult result,
-      {int progress = 0}) {
+      {int currentProgress = 0}) {
     return DictionaryMediaHistoryItem(
       key: result.toJson(),
       name: "",
-      resource: "",
-      progress: progress,
+      source: "",
+      currentProgress: currentProgress,
+      completeProgress: result.entries.length - 1,
       extra: {},
     );
   }
@@ -35,15 +38,17 @@ class DictionaryMediaHistoryItem extends DefaultMediaHistoryItem {
 
     String key = map["key"] ?? "";
     String name = map["name"] ?? "";
-    String resource = map["resource"] ?? "";
-    int progress = int.tryParse(map["progress"] ?? "") ?? 0;
+    String source = map["source"] ?? "";
+    int currentProgress = int.tryParse(map["currentProgress"] ?? "") ?? 0;
+    int completeProgress = int.tryParse(map["completeProgress"] ?? "") ?? 0;
     Map<String, dynamic> extra = jsonDecode(map["extra"] ?? "{}");
 
     return DictionaryMediaHistoryItem(
       key: key,
       name: name,
-      resource: resource,
-      progress: progress,
+      source: source,
+      currentProgress: currentProgress,
+      completeProgress: completeProgress,
       extra: extra,
     );
   }

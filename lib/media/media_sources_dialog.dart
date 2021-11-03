@@ -106,6 +106,10 @@ class MediaSourcesDialogState extends State<MediaSourcesDialog> {
     List<MediaSource> mediaSources =
         appModel.getMediaSourcesByType(widget.mediaType);
 
+    if (!widget.manageAllowed) {
+      mediaSources.removeWhere((source) => !source.isShown(appModel));
+    }
+
     return RawScrollbar(
       controller: scrollController,
       thumbColor:
@@ -115,7 +119,7 @@ class MediaSourcesDialogState extends State<MediaSourcesDialog> {
         shrinkWrap: true,
         itemCount: mediaSources.length,
         itemBuilder: (context, index) {
-          String sourceName = mediaSources[index].sourceName;
+          MediaSource source = mediaSources[index];
 
           double opacity = 1;
           if (!mediaSources[index].isShown(appModel)) {
@@ -124,7 +128,7 @@ class MediaSourcesDialogState extends State<MediaSourcesDialog> {
 
           return ListTile(
             dense: true,
-            selected: (currentMediaSource == sourceName),
+            selected: (currentMediaSource == source.sourceName),
             selectedTileColor: Theme.of(context).selectedRowColor,
             title: Row(
               children: [
@@ -137,7 +141,7 @@ class MediaSourcesDialogState extends State<MediaSourcesDialog> {
                 ),
                 const SizedBox(width: 16.0),
                 Text(
-                  sourceName,
+                  source.sourceName,
                   style: TextStyle(
                     fontSize: 16,
                     color: appModel.getIsDarkMode()
@@ -150,7 +154,9 @@ class MediaSourcesDialogState extends State<MediaSourcesDialog> {
             ),
             onTap: () async {
               await appModel.setCurrentMediaTypeSourceName(
-                  widget.mediaType, sourceName);
+                widget.mediaType,
+                source.sourceName,
+              );
               if (!widget.manageAllowed) {
                 Navigator.pop(context);
               }

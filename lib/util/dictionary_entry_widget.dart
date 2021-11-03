@@ -34,7 +34,7 @@ class DictionaryWidget {
 
   Widget buildMeaning() {
     return Text(
-      "\n${dictionaryEntry.meaning}\n",
+      dictionaryEntry.meaning,
       style: const TextStyle(
         fontSize: 15,
       ),
@@ -48,6 +48,7 @@ class DictionaryWidget {
         word ?? buildWord(),
         const SizedBox(height: 5),
         reading ?? buildReading(),
+        const SizedBox(height: 10),
         Flexible(
           child: SingleChildScrollView(
             child: meaning ?? buildMeaning(),
