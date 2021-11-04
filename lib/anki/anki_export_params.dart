@@ -7,6 +7,7 @@ class AnkiExportParams {
     this.reading = "",
     this.meaning = "",
     this.extra = "",
+    this.imageFiles = const [],
     this.imageFile,
     this.audioFile,
   });
@@ -31,6 +32,10 @@ class AnkiExportParams {
   /// from the Anki end. A JSON map serialised as a single String to be
   /// exported. Intended for future proofing and developer customisation.
   String extra;
+
+  /// List of images to choose from. The first image is what is shown in the
+  /// Creator. If there is no [imageFile], this field should be empty.
+  List<File> imageFiles;
 
   /// A [Uri] to an image file to be copied to the Anki media collection.
   File? imageFile;

@@ -22,6 +22,8 @@ import 'package:chisa/media/media_types/dictionary_media_type.dart';
 import 'package:chisa/media/media_types/player_media_type.dart';
 import 'package:chisa/media/media_types/reader_media_type.dart';
 import 'package:chisa/media/media_types/viewer_media_type.dart';
+import 'package:chisa/util/blur_widget.dart';
+import 'package:chisa/util/subtitle_options.dart';
 import 'package:external_path/external_path.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -1057,5 +1059,85 @@ class AppModel with ChangeNotifier {
   Future<void> togglePlayerDragToSelectMode() async {
     await sharedPreferences.setBool(
         "playerDragToSelectMode", !getPlayerDragToSelectMode());
+  }
+
+  BlurWidgetOptions getBlurWidgetOptions() {
+    double width = sharedPreferences.getDouble("blurWidgetWidth") ?? 200;
+    double height = sharedPreferences.getDouble("blurWidgetHeight") ?? 200;
+    double left = sharedPreferences.getDouble("blurWidgetLeft") ?? -1;
+    double top = sharedPreferences.getDouble("blurWidthTop") ?? -1;
+
+    int colorRed = sharedPreferences.getInt("blurWidgetRed") ??
+        Colors.black.withOpacity(0.5).red;
+    int colorGreen = sharedPreferences.getInt("blurWidgetGreen") ??
+        Colors.black.withOpacity(0.5).green;
+    int colorBlue = sharedPreferences.getInt("blurWidgetBlue") ??
+        Colors.black.withOpacity(0.5).blue;
+    double colorOpacity = sharedPreferences.getDouble("blurWidgetOpacity") ??
+        Colors.black.withOpacity(0.5).opacity;
+
+    Color color = Color.fromRGBO(colorRed, colorGreen, colorBlue, colorOpacity);
+
+    double blurRadius =
+        sharedPreferences.getDouble("blurWidgetBlurRadius") ?? 5;
+    bool visible = sharedPreferences.getBool("blurWidgetVisible") ?? false;
+
+    return BlurWidgetOptions(
+        width, height, left, top, color, blurRadius, visible);
+  }
+
+  Future<void> setBlurWidgetOptions(BlurWidgetOptions blurWidgetOptions) async {
+    await sharedPreferences.setDouble(
+        "blurWidgetWidth", blurWidgetOptions.width);
+    await sharedPreferences.setDouble(
+        "blurWidgetHeight", blurWidgetOptions.height);
+    await sharedPreferences.setDouble("blurWidgetLeft", blurWidgetOptions.left);
+    await sharedPreferences.setDouble("blurWidthTop", blurWidgetOptions.top);
+
+    await sharedPreferences.setInt(
+        "blurWidgetRed", blurWidgetOptions.color.red);
+    await sharedPreferences.setInt(
+        "blurWidgetGreen", blurWidgetOptions.color.green);
+    await sharedPreferences.setInt(
+        "blurWidgetBlue", blurWidgetOptions.color.blue);
+    await sharedPreferences.setDouble(
+        "blurWidgetOpacity", blurWidgetOptions.color.opacity);
+
+    await sharedPreferences.setDouble(
+        "blurWidgetBlurRadius", blurWidgetOptions.blurRadius);
+    await sharedPreferences.setBool(
+        "blurWidgetVisible", blurWidgetOptions.visible);
+  }
+
+  SubtitleOptions getSubtitleOptions() {
+    int audioAllowance = sharedPreferences.getInt("audioAllowance") ?? 0;
+    int subtitleDelay = sharedPreferences.getInt("subtitleDelay") ?? 0;
+    double fontSize = sharedPreferences.getDouble("fontSize") ?? 24;
+    String regexFilter = sharedPreferences.getString("regexFilter") ?? "";
+
+    return SubtitleOptions(
+      audioAllowance,
+      subtitleDelay,
+      fontSize,
+      regexFilter,
+    );
+  }
+
+  Future setSubtitleOptions(SubtitleOptions subtitleOptions) async {
+    await sharedPreferences.setInt(
+        "audioAllowance", subtitleOptions.audioAllowance);
+    await sharedPreferences.setInt(
+        "subtitleDelay", subtitleOptions.subtitleDelay);
+    await sharedPreferences.setDouble("fontSize", subtitleOptions.fontSize);
+    await sharedPreferences.setString(
+        "regexFilter", subtitleOptions.regexFilter);
+  }
+
+  bool getUseRegexFilter() {
+    return sharedPreferences.getBool("useRegexFilter") ?? false;
+  }
+
+  Future<void> toggleUseRegexFilter() async {
+    await sharedPreferences.setBool("useRegexFilter", !getUseRegexFilter());
   }
 }

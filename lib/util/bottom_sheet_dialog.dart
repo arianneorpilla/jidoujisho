@@ -59,8 +59,8 @@ class BottomSheetDialog extends StatelessWidget {
             ),
           ),
           onTap: () async {
-            await option.action();
             Navigator.of(context).pop();
+            await option.action();
           },
         );
       },

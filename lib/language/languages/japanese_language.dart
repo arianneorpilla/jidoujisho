@@ -36,7 +36,6 @@ class JapaneseLanguage extends Language {
 
   @override
   FutureOr<List<String>> textToWords(String text) {
-    print(text);
     String delimiterSanitisedText = text
         .replaceAll("﻿", "␝")
         .replaceAll("　", "␝")

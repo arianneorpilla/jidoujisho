@@ -76,6 +76,12 @@ dependencies:
   chaquopy:
   share_plus:
   scrollable_positioned_list:
+  blurrycontainer:
+    git:
+      url: https://github.com/Krish-Ideausher/blurry_container/
+      ref: fb26dd1fa81edeb048b14703f1c1f28e93ee43d0
+  flutter_colorpicker:
+  wakelock:
 dev_dependencies:
   flutter_test:
     sdk: flutter

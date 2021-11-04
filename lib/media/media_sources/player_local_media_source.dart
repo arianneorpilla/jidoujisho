@@ -149,7 +149,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     String command = "-i \"$inputPath\" \"$targetPath\"";
 
     await FFmpegKit.executeAsync(command, (session) async {
-      debugPrint(await session.getOutput());
+      await session.getReturnCode();
     });
 
     return sanitizeSubtitleArtifacts(targetFile.readAsStringSync());

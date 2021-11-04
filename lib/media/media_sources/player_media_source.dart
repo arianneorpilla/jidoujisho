@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:chisa/media/media_history_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:subtitle/subtitle.dart';
 
 import 'package:chisa/media/media_history_items/default_media_history_item.dart';
@@ -10,6 +11,7 @@ import 'package:chisa/media/media_source.dart';
 import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/media/media_types/player_media_type.dart';
 import 'package:chisa/pages/player_page.dart';
+import 'package:wakelock/wakelock.dart';
 
 abstract class PlayerMediaSource extends MediaSource {
   PlayerMediaSource({
@@ -34,6 +36,7 @@ abstract class PlayerMediaSource extends MediaSource {
   /// Push the navigator page to the media page pertaining to this media type.
   Future<void> launchMediaPage(
       BuildContext context, PlayerLaunchParams params) async {
+    await Wakelock.enable();
     await SystemChrome.setEnabledSystemUIOverlays([]);
     await SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
@@ -44,6 +47,7 @@ abstract class PlayerMediaSource extends MediaSource {
         builder: (context) => PlayerPage(params: params),
       ),
     );
+    await Wakelock.disable();
     await SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
     await SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -54,6 +58,4 @@ abstract class PlayerMediaSource extends MediaSource {
 
   FutureOr<List<SubtitleController>> provideSubtitles(
       PlayerLaunchParams params);
-
-  /// Given a
 }

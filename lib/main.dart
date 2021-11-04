@@ -1,3 +1,4 @@
+import 'package:chisa/util/export_paths.dart';
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
@@ -10,7 +11,9 @@ import 'package:chisa/pages/home_page.dart';
 /// Application execution starts here.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Permission.storage.request();
+  await Permission.manageExternalStorage.request();
+
+  initialiseExportPaths();
 
   SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
   PackageInfo packageInfo = await PackageInfo.fromPlatform();

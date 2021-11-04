@@ -15,12 +15,16 @@ class CreatorPage extends StatefulWidget {
       {Key? key,
       this.initialParams,
       this.editMode = false,
-      this.autoMode = false})
+      this.autoMode = false,
+      this.backgroundColor,
+      this.appBarColor})
       : super(key: key);
 
   final AnkiExportParams? initialParams;
   final bool editMode;
   final bool autoMode;
+  final Color? backgroundColor;
+  final Color? appBarColor;
 
   @override
   State<StatefulWidget> createState() => CreatorPageState();
@@ -274,7 +278,10 @@ class CreatorPageState extends State<CreatorPage> {
     appModel = Provider.of<AppModel>(context);
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
+      backgroundColor: widget.backgroundColor,
       appBar: AppBar(
+        backgroundColor: widget.appBarColor,
         title: Text(
           getTitle(),
           style: const TextStyle(
@@ -285,7 +292,10 @@ class CreatorPageState extends State<CreatorPage> {
           overflow: TextOverflow.ellipsis,
         ),
         actions: [
-          if (!widget.editMode && !widget.autoMode) getSeeMoreButton(context),
+          if (!widget.editMode &&
+              !widget.autoMode &&
+              widget.backgroundColor == null)
+            getSeeMoreButton(context),
         ],
       ),
       body: Column(
@@ -305,7 +315,10 @@ class CreatorPageState extends State<CreatorPage> {
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // showImagePreview(),
+                      if (imageNotifier.value != null)
+                        Image(
+                            image: MemoryImage(
+                                imageNotifier.value!.readAsBytesSync())),
                       // DropDownMenu(
                       //   options: decks,
                       //   selectedOption: _selectedDeck,

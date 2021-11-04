@@ -1,5 +1,3 @@
-import 'package:chisa/anki/anki_export_params.dart';
-import 'package:chisa/media/media_histories/default_media_history.dart';
 import 'package:chisa/media/media_history_item.dart';
 import 'package:chisa/media/media_source.dart';
 import 'package:chisa/media/media_sources/player_media_source.dart';
@@ -265,7 +263,7 @@ class PlayerHomePageState extends State<PlayerHomePage> {
       height: (scaleWidth) / 16 * 9,
       color: Colors.black,
       child: Stack(
-        alignment: Alignment.bottomRight,
+        alignment: Alignment.bottomCenter,
         children: [
           FutureBuilder<ImageProvider<Object>>(
               future: source.getThumbnail(item),

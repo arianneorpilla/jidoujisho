@@ -42,7 +42,7 @@ for seg in seg_list:
             .replaceAll('␝', ' ') ??
         text;
 
-    print((output.split("\n")));
+    // print((output.split("\n")));
 
     return output.split("\n");
   }

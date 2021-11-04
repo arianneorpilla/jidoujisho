@@ -1,22 +1,33 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:chisa/anki/anki_export_params.dart';
+import 'package:chisa/dictionary/dictionary_entry.dart';
 import 'package:chisa/dictionary/dictionary_search_result.dart';
 import 'package:chisa/language/tap_to_select.dart';
 import 'package:chisa/media/media_history.dart';
 import 'package:chisa/media/media_history_item.dart';
 import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/models/app_model.dart';
+import 'package:chisa/pages/creator_page.dart';
+import 'package:chisa/util/blur_widget.dart';
 import 'package:chisa/util/bottom_sheet_dialog.dart';
 import 'package:chisa/util/dictionary_scrollable_widget.dart';
+import 'package:chisa/util/export_paths.dart';
+import 'package:chisa/util/subtitle_options.dart';
+import 'package:chisa/util/time_format.dart';
 import 'package:chisa/util/transcript_dialog.dart';
+import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:multi_value_listenable_builder/multi_value_listenable_builder.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:subtitle/subtitle.dart';
+import 'package:wakelock/wakelock.dart';
 
 class PlayerPage extends StatefulWidget {
   final PlayerLaunchParams params;
@@ -31,11 +42,12 @@ class PlayerPage extends StatefulWidget {
 }
 
 class PlayerPageState extends State<PlayerPage>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
   late AppModel appModel;
 
   late VlcPlayerController playerController;
   SubtitleController? subtitleController;
+  late AnimationController playPauseIconAnimationController;
 
   List<SubtitleController> allSubtitleControllers = [];
 
@@ -49,6 +61,10 @@ class PlayerPageState extends State<PlayerPage>
   ValueNotifier<Duration> position = ValueNotifier<Duration>(Duration.zero);
   ValueNotifier<Duration> duration = ValueNotifier<Duration>(Duration.zero);
   ValueNotifier<bool> isPlaying = ValueNotifier<bool>(true);
+  ValueNotifier<bool> isEnded = ValueNotifier<bool>(false);
+
+  late ValueNotifier<BlurWidgetOptions> blurWidgetOptionsNotifier;
+  late ValueNotifier<SubtitleOptions> subtitleOptionsNotifier;
 
   Color menuColor = const Color(0xcc424242);
   Color dictionaryColor = Colors.grey.shade800.withOpacity(0.6);
@@ -59,15 +75,64 @@ class PlayerPageState extends State<PlayerPage>
   Timer? dragSearchTimer;
 
   bool isPlayerReady = false;
+  bool unhideDuringInitFlag = false;
 
   bool tapToSelectMode = true;
   double subtitleFontSize = 24;
-  FocusNode dragToSelectFocusNode = FocusNode();
+  int audioAllowance = 10;
+  int subtitlesDelay = 0;
+  final FocusNode dragToSelectFocusNode = FocusNode();
 
   DictionarySearchResult? searchResult;
   ValueNotifier<String> searchTerm = ValueNotifier<String>("");
   ValueNotifier<Subtitle?> shadowingSubtitle = ValueNotifier<Subtitle?>(null);
+  ValueNotifier<Subtitle?> listeningSubtitle = ValueNotifier<Subtitle?>(null);
   String searchMessage = "";
+
+  Future<bool> onWillPop() async {
+    if (playerController.value.isEnded) {
+      Navigator.pop(context, true);
+    }
+
+    Widget alertDialog = AlertDialog(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+      title: Text(
+        appModel.translate("dialog_exit_player"),
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text(
+            appModel.translate("dialog_yes"),
+            style: TextStyle(
+              color: Theme.of(context).focusColor,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          onPressed: () => Navigator.pop(context, true),
+        ),
+        TextButton(
+          child: Text(
+            appModel.translate("dialog_no"),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          onPressed: () async {
+            Navigator.pop(context, false);
+          },
+        ),
+      ],
+    );
+
+    return (await showDialog(
+          context: context,
+          builder: (context) => alertDialog,
+        )) ??
+        false;
+  }
 
   @override
   bool get wantKeepAlive => true;
@@ -77,6 +142,11 @@ class PlayerPageState extends State<PlayerPage>
     super.initState();
 
     playerController = preparePlayerController(widget.params);
+    playPauseIconAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+      reverseDuration: const Duration(milliseconds: 400),
+    );
 
     WidgetsBinding.instance!.addPostFrameCallback((_) async {
       allSubtitleControllers = await prepareSubtitleControllers(widget.params);
@@ -91,8 +161,17 @@ class PlayerPageState extends State<PlayerPage>
       playerController.addListener(listener);
       isPlayerReady = true;
 
+      blurWidgetOptionsNotifier =
+          ValueNotifier<BlurWidgetOptions>(appModel.getBlurWidgetOptions());
+      subtitleOptionsNotifier =
+          ValueNotifier<SubtitleOptions>(appModel.getSubtitleOptions());
+
       setState(() {});
       startHideTimer();
+
+      Future.delayed(const Duration(seconds: 3), () {
+        unhideDuringInitFlag = true;
+      });
     });
   }
 
@@ -161,6 +240,8 @@ class PlayerPageState extends State<PlayerPage>
                         return buildDictionarySearching();
                       default:
                         latestResult = snapshot.data;
+
+                        dragToSelectFocusNode.unfocus();
 
                         if (!snapshot.hasData ||
                             latestResult!.entries.isEmpty) {
@@ -328,6 +409,9 @@ class PlayerPageState extends State<PlayerPage>
       position.value = playerController.value.position;
       duration.value = playerController.value.duration;
 
+      isPlaying.value = playerController.value.isPlaying;
+      isEnded.value = playerController.value.isEnded;
+
       if (subtitleController != null) {
         Subtitle? newSubtitle =
             subtitleController!.durationSearch(position.value);
@@ -342,8 +426,19 @@ class PlayerPageState extends State<PlayerPage>
       }
 
       if (shadowingSubtitle.value != null) {
-        if (position.value > shadowingSubtitle.value!.end) {
+        if (position.value <
+                shadowingSubtitle.value!.start - const Duration(seconds: 15) ||
+            position.value > shadowingSubtitle.value!.end) {
           playerController.seekTo(shadowingSubtitle.value!.start);
+        }
+      }
+
+      if (listeningSubtitle.value != null) {
+        if (position.value <
+                listeningSubtitle.value!.start - const Duration(seconds: 15) ||
+            position.value >
+                listeningSubtitle.value!.end + const Duration(seconds: 5)) {
+          listeningSubtitle.value = null;
         }
       }
 
@@ -409,10 +504,24 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   Widget buildSubtitle() {
-    return ValueListenableBuilder<Subtitle?>(
-      valueListenable: currentSubtitle,
-      builder: (BuildContext context, Subtitle? currentSubtitle, _) {
+    return MultiValueListenableBuider(
+      // Add all ValueListenables here.
+      valueListenables: [
+        currentSubtitle,
+        listeningSubtitle,
+        isPlaying,
+      ],
+      builder: (context, values, _) {
+        Subtitle? currentSubtitle = values.elementAt(0);
+        Subtitle? listeningSubtitle = values.elementAt(1);
+        bool isPlaying = values.elementAt(2);
+
         if (currentSubtitle == null) {
+          return const SizedBox.shrink();
+        }
+
+        if (appModel.getListeningComprehensionMode() &&
+            !(listeningSubtitle != null || !isPlaying)) {
           return const SizedBox.shrink();
         }
 
@@ -465,47 +574,45 @@ class PlayerPageState extends State<PlayerPage>
       subtitleFontSize,
     );
 
+    List<Widget> rows = [];
+    List<Widget> outlinedRows = [];
+    for (List<String> line in lines) {
+      List<Widget> textWidgets = [];
+      List<Widget> outlinedTextWidgets = [];
+
+      for (int i = 0; i < line.length; i++) {
+        String character = line[i];
+        outlinedTextWidgets.add(getOutlineText(character));
+        textWidgets.add(getText(character, i));
+      }
+
+      outlinedRows.add(
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: outlinedTextWidgets,
+        ),
+      );
+      rows.add(
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: textWidgets,
+        ),
+      );
+    }
+
     return Stack(
       children: <Widget>[
-        ListView.builder(
-          shrinkWrap: true,
-          itemCount: lines.length,
-          itemBuilder: (BuildContext context, int lineIndex) {
-            List<dynamic> line = lines[lineIndex];
-            List<Widget> textWidgets = [];
-
-            for (int i = 0; i < line.length; i++) {
-              String word = line[i];
-              textWidgets.add(getOutlineText(word));
-            }
-
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: textWidgets,
-            );
-          },
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: outlinedRows,
         ),
-        ListView.builder(
-          shrinkWrap: true,
-          itemCount: lines.length,
-          itemBuilder: (BuildContext context, int lineIndex) {
-            List<dynamic> line = lines[lineIndex];
-            List<Widget> textWidgets = [];
-
-            for (int i = 0; i < line.length; i++) {
-              String character = line[i];
-              textWidgets.add(
-                getText(character, i),
-              );
-            }
-
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: textWidgets,
-            );
-          },
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: rows,
         ),
       ],
     );
@@ -557,6 +664,8 @@ class PlayerPageState extends State<PlayerPage>
   // }
 
   void toggleMenuVisibility() async {
+    SystemChrome.setEnabledSystemUIOverlays([]);
+
     menuHideTimer!.cancel();
     isMenuHidden.value = !isMenuHidden.value;
     if (!isMenuHidden.value) {
@@ -586,12 +695,12 @@ class PlayerPageState extends State<PlayerPage>
       child: Container(
         height: menuHeight,
         color: menuColor,
-        child: AbsorbPointer(
-          absorbing: isMenuHidden.value,
-          child: GestureDetector(
-            onTap: () {
-              toggleMenuVisibility();
-            },
+        child: GestureDetector(
+          onTap: () {
+            toggleMenuVisibility();
+          },
+          child: AbsorbPointer(
+            absorbing: isMenuHidden.value,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -599,6 +708,7 @@ class PlayerPageState extends State<PlayerPage>
                 buildPlayButton(),
                 buildDurationAndPosition(),
                 buildSlider(),
+                buildAudioSubtitlesButton(),
                 buildOptionsButton(),
               ],
             ),
@@ -629,18 +739,147 @@ class PlayerPageState extends State<PlayerPage>
     }
   }
 
+  Future<void> playPause() async {
+    final isFinished = playerController.value.isEnded;
+
+    if (playerController.value.isPlaying) {
+      playPauseIconAnimationController.reverse();
+      startHideTimer();
+      await playerController.pause();
+    } else {
+      cancelHideTimer();
+
+      if (!playerController.value.isInitialized) {
+        playerController.initialize().then((_) async {
+          await playerController.play();
+          playPauseIconAnimationController.forward();
+        });
+      } else {
+        if (isFinished) {
+          await playerController.stop();
+        }
+        playPauseIconAnimationController.forward();
+        await playerController.play();
+
+        if (isFinished) {
+          Future.delayed(const Duration(seconds: 3), () async {
+            await playerController.seekTo(Duration.zero);
+          });
+        }
+      }
+    }
+  }
+
+  Widget buildCentralPlayPause() {
+    if (playerController.value.isEnded) {
+      Wakelock.disable();
+    } else {
+      Wakelock.enable();
+    }
+
+    Widget getIcon() {
+      if (playerController.value.isEnded) {
+        return const Icon(Icons.replay, size: 32.0);
+      } else {
+        if (!playerController.value.isInitialized) {
+          return const Icon(Icons.play_arrow, color: Colors.transparent);
+        }
+
+        return AnimatedIcon(
+          icon: AnimatedIcons.play_pause,
+          progress: playPauseIconAnimationController,
+          size: 32.0,
+        );
+      }
+    }
+
+    return MultiValueListenableBuider(
+      // Add all ValueListenables here.
+      valueListenables: [
+        isPlaying,
+        isEnded,
+      ],
+      builder: (context, values, _) {
+        bool playing = values.elementAt(0);
+        bool ended = values.elementAt(1);
+
+        return Center(
+          child: AnimatedOpacity(
+            opacity: unhideDuringInitFlag && (!playing || ended) ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 300),
+            child: GestureDetector(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).dialogBackgroundColor,
+                  borderRadius: BorderRadius.circular(48.0),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: IconButton(
+                    icon: getIcon(),
+                    onPressed: () async {
+                      await playPause();
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget buildScrubDetectors() {
+    return Row(
+      children: [
+        Expanded(
+          child: GestureDetector(
+            onDoubleTap: () async {
+              cancelHideTimer();
+              await playerController
+                  .seekTo(position.value - const Duration(seconds: 10));
+
+              startHideTimer();
+            },
+            child: Container(
+              color: Colors.red.withOpacity(0.0),
+            ),
+          ),
+        ),
+        Expanded(
+          child: GestureDetector(
+            onDoubleTap: () async {
+              cancelHideTimer();
+              await playerController
+                  .seekTo(position.value + const Duration(seconds: 10));
+
+              startHideTimer();
+            },
+            child: Container(
+              color: Colors.blue.withOpacity(0.0),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget buildGestureArea() {
     return GestureDetector(
       onHorizontalDragUpdate: (details) async {
         if (details.delta.dx.abs() > 10) {
-          await playerController.seekTo(getNearestSubtitle()!.start);
+          Subtitle? nearestSubtitle = getNearestSubtitle();
+
+          listeningSubtitle.value = nearestSubtitle;
+          await playerController.seekTo(nearestSubtitle!.start);
         }
       },
       onVerticalDragUpdate: (details) async {
         if (details.delta.dy.abs() > 10) {
           await openTranscript(
             context: context,
-            subtitles: subtitleController!.subtitles,
+            subtitles: subtitleController?.subtitles ?? [],
             currentSubtitle: getNearestSubtitle(),
             regexFilter: null,
             onTapCallback: (int selectedIndex) async {
@@ -653,38 +892,18 @@ class PlayerPageState extends State<PlayerPage>
       onTap: () {
         toggleMenuVisibility();
       },
-      child: Row(
+      child: Stack(
         children: [
-          Expanded(
-            child: GestureDetector(
-              onDoubleTap: () async {
-                cancelHideTimer();
-                await playerController
-                    .seekTo(position.value - const Duration(seconds: 10));
-
-                startHideTimer();
-              },
-              child: Container(
-                color: Colors.red.withOpacity(0.2),
-              ),
-            ),
-          ),
-          Expanded(
-            child: GestureDetector(
-              onDoubleTap: () async {
-                cancelHideTimer();
-                await playerController
-                    .seekTo(position.value + const Duration(seconds: 10));
-
-                startHideTimer();
-              },
-              child: Container(
-                color: Colors.blue.withOpacity(0.2),
-              ),
-            ),
-          ),
+          buildScrubDetectors(),
         ],
       ),
+    );
+  }
+
+  Widget buildBlurWidget() {
+    return ResizeableWidget(
+      context: context,
+      blurWidgetNotifier: blurWidgetOptionsNotifier,
     );
   }
 
@@ -697,44 +916,53 @@ class PlayerPageState extends State<PlayerPage>
       return buildPlaceholder();
     }
 
-    return Theme(
-      child: Scaffold(
-        backgroundColor: Colors.black,
-        body: Stack(
-          alignment: Alignment.center,
-          children: <Widget>[
-            buildPlayerArea(),
-            buildGestureArea(),
-            buildMenuArea(),
-            Positioned.fill(
-              child: buildSubtitleArea(),
-            ),
-            buildDictionary(),
-          ],
+    return WillPopScope(
+      onWillPop: onWillPop,
+      child: Theme(
+        child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          backgroundColor: Colors.black,
+          body: Stack(
+            alignment: Alignment.center,
+            children: <Widget>[
+              buildPlayerArea(),
+              buildGestureArea(),
+              buildBlurWidget(),
+              buildMenuArea(),
+              buildCentralPlayPause(),
+              buildSubtitleArea(),
+              buildDictionary(),
+            ],
+          ),
         ),
+        data: appModel.getDarkTheme(context),
       ),
-      data: appModel.getDarkTheme(context),
     );
   }
 
   Widget buildDurationAndPosition() {
     return MultiValueListenableBuider(
-      // Add all ValueListenables here.
       valueListenables: [
         duration,
         position,
+        isEnded,
         shadowingSubtitle,
       ],
       builder: (context, values, _) {
         Duration duration = values.elementAt(0);
         Duration position = values.elementAt(1);
-        Subtitle? shadowingSubtitle = values.elementAt(2);
+        bool isEnded = values.elementAt(2);
+        Subtitle? shadowingSubtitle = values.elementAt(3);
 
         if (duration == Duration.zero) {
           return const SizedBox.shrink();
         }
 
         String getPositionText() {
+          if (isEnded && shadowingSubtitle == null) {
+            position = duration;
+          }
+
           if (position.inHours == 0) {
             var strPosition = position.toString().split('.')[0];
             return "${strPosition.split(':')[1]}:${strPosition.split(':')[2]}";
@@ -774,29 +1002,133 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   Widget buildPlayButton() {
-    return ValueListenableBuilder<bool>(
-      valueListenable: isPlaying,
-      builder: (context, bool playing, _) {
+    return MultiValueListenableBuider(
+      // Add all ValueListenables here.
+      valueListenables: [
+        isPlaying,
+        isEnded,
+      ],
+      builder: (context, values, _) {
+        bool playing = values.elementAt(0);
+        bool ended = values.elementAt(1);
+
         return IconButton(
           color: Colors.white,
-          icon:
-              playing ? const Icon(Icons.pause) : const Icon(Icons.play_arrow),
+          icon: ended
+              ? const Icon(Icons.replay)
+              : playing
+                  ? const Icon(Icons.pause)
+                  : const Icon(Icons.play_arrow),
           onPressed: () async {
             cancelHideTimer();
 
-            isPlaying.value = !playing;
-
-            if (playing) {
-              cancelHideTimer();
-              await playerController.pause();
-            } else {
-              startHideTimer();
-              await playerController.play();
-            }
+            await playPause();
           },
         );
       },
     );
+  }
+
+  Widget buildAudioSubtitlesButton() {
+    return IconButton(
+      color: Colors.white,
+      icon: const Icon(Icons.queue_music_outlined),
+      onPressed: () async {
+        await showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          useRootNavigator: true,
+          builder: (context) => BottomSheetDialog(
+            options: getAudioSubtitles(),
+          ),
+        );
+      },
+    );
+  }
+
+  List<BottomSheetDialogOption> getBlurOptions() {
+    List<BottomSheetDialogOption> options = [
+      BottomSheetDialogOption(
+        label: appModel.translate("player_option_blur_use"),
+        active: appModel.getBlurWidgetOptions().visible,
+        icon: appModel.getBlurWidgetOptions().visible
+            ? Icons.blur_on_outlined
+            : Icons.blur_off_outlined,
+        action: () async {
+          BlurWidgetOptions blurWidgetOptions = appModel.getBlurWidgetOptions();
+          blurWidgetOptions.visible = !blurWidgetOptions.visible;
+          await appModel.setBlurWidgetOptions(blurWidgetOptions);
+          blurWidgetOptionsNotifier.value = blurWidgetOptions;
+        },
+      ),
+      BottomSheetDialogOption(
+        label: appModel.translate("player_option_blur_options"),
+        icon: Icons.blur_circular_sharp,
+        action: () async {
+          await showBlurWidgetOptionsDialog(context, blurWidgetOptionsNotifier);
+        },
+      ),
+      BottomSheetDialogOption(
+        label: appModel.translate("player_option_blur_reset"),
+        icon: Icons.timer_sharp,
+        action: () async {
+          BlurWidgetOptions blurWidgetOptions = appModel.getBlurWidgetOptions();
+          blurWidgetOptions.left = -1;
+          blurWidgetOptions.top = -1;
+          blurWidgetOptions.width = 200;
+          blurWidgetOptions.height = 200;
+
+          await appModel.setBlurWidgetOptions(blurWidgetOptions);
+          blurWidgetOptionsNotifier.value = blurWidgetOptions;
+        },
+      ),
+    ];
+
+    return options;
+  }
+
+  List<BottomSheetDialogOption> getAudioSubtitles() {
+    List<BottomSheetDialogOption> options = [
+      BottomSheetDialogOption(
+        label: appModel.translate("player_option_text_filter"),
+        active: appModel.getUseRegexFilter(),
+        icon: appModel.getUseRegexFilter()
+            ? Icons.do_disturb_on_outlined
+            : Icons.do_disturb_off_outlined,
+        action: () async {
+          await appModel.toggleUseRegexFilter();
+          refreshSubtitleWidget();
+        },
+      ),
+      BottomSheetDialogOption(
+        label: appModel.translate("player_option_blur_preferences"),
+        icon: Icons.blur_circular_sharp,
+        action: () async {
+          await showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            useRootNavigator: true,
+            builder: (context) => BottomSheetDialog(
+              options: getBlurOptions(),
+            ),
+          );
+        },
+      ),
+      BottomSheetDialogOption(
+        label: appModel.translate("player_option_subtitle_appearance"),
+        icon: Icons.timer_sharp,
+        action: () async {
+          await showSubtitleOptionsDialog(context, subtitleOptionsNotifier);
+        },
+      ),
+      BottomSheetDialogOption(
+        label: appModel.translate("player_option_load_subtitles"),
+        icon: Icons.upload_file,
+        action: () async {},
+      ),
+    ];
+
+    return options;
   }
 
   Widget buildOptionsButton() {
@@ -832,7 +1164,16 @@ class PlayerPageState extends State<PlayerPage>
     if (shadowingSubtitle.value != null) {
       shadowingSubtitle.value = null;
     } else {
-      shadowingSubtitle.value = currentSubtitle.value;
+      if (subtitleController == null || subtitleController!.subtitles.isEmpty) {
+        shadowingSubtitle.value = Subtitle(
+          data: "",
+          start: position.value - Duration(seconds: audioAllowance),
+          end: position.value + Duration(seconds: audioAllowance),
+          index: 0,
+        );
+      } else {
+        shadowingSubtitle.value = getNearestSubtitle();
+      }
     }
   }
 
@@ -897,17 +1238,194 @@ class PlayerPageState extends State<PlayerPage>
         label: appModel.translate("player_option_share_subtitle"),
         icon: Icons.share,
         action: () {
-          Share.share(currentSubtitle.value?.data ?? "");
+          Share.share(getNearestSubtitle()?.data ?? "");
         },
       ),
       BottomSheetDialogOption(
         label: appModel.translate("player_option_export"),
         icon: Icons.mobile_screen_share,
-        action: () {},
+        action: () async {
+          List<Subtitle> subtitles = [];
+          Subtitle? singleSubtitle = getNearestSubtitle();
+          if (singleSubtitle != null) {
+            subtitles.add(singleSubtitle);
+          }
+          await openCardCreator(subtitles);
+        },
       ),
     ];
 
     return options;
+  }
+
+  Future<AnkiExportParams> prepareExportParams(List<Subtitle> subtitles) async {
+    String sentence = "";
+    String word = "";
+    String meaning = "";
+    String reading = "";
+
+    for (Subtitle subtitle in subtitles) {
+      sentence += "${subtitle.data}\n";
+    }
+    if (subtitles.isNotEmpty) {
+      String removeLastNewline(String n) => n = n.substring(0, n.length - 1);
+      sentence = removeLastNewline(sentence);
+    }
+
+    if (latestResult != null) {
+      DictionaryEntry entry =
+          latestResult!.entries[latestResultEntryIndex.value];
+      word = entry.word;
+      meaning = entry.meaning;
+      reading = entry.reading;
+    }
+
+    List<File> imageFiles = [];
+
+    File? imageFile;
+    File? audioFile;
+
+    try {
+      imageFiles = await exportImages(subtitles);
+      if (imageFiles.isNotEmpty) {
+        imageFile = imageFiles.first;
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+
+    try {
+      audioFile = await exportCurrentAudio(
+        subtitles,
+        subtitleOptionsNotifier.value.audioAllowance,
+        subtitleOptionsNotifier.value.subtitleDelay,
+      );
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+
+    await Future.delayed(const Duration(seconds: 1), () {});
+
+    return AnkiExportParams(
+      sentence: sentence,
+      word: word,
+      meaning: meaning,
+      reading: reading,
+      imageFiles: imageFiles,
+      imageFile: imageFile,
+      audioFile: audioFile,
+    );
+  }
+
+  Future<List<File>> exportImages(
+    List<Subtitle> subtitles,
+  ) async {
+    List<File> imageFiles = [];
+
+    for (int i = 0; i < subtitles.length; i++) {
+      Subtitle subtitle = subtitles[i];
+
+      String outputPath = getPreviewImageMultiPath(i);
+      File imageFile = File(outputPath);
+      if (imageFile.existsSync()) {
+        imageFile.deleteSync();
+      }
+
+      int msStart = subtitle.start.inMilliseconds;
+      int msEnd = subtitle.end.inMilliseconds;
+      int msMean = ((msStart + msEnd) / 2).floor();
+      Duration currentTime = Duration(milliseconds: msMean);
+      String formatted = getTimestampFromDuration(currentTime);
+
+      String inputPath = "";
+
+      switch (widget.params.getMode()) {
+        case MediaLaunchMode.file:
+          inputPath = widget.params.videoFile!.path;
+          break;
+        case MediaLaunchMode.network:
+          inputPath = widget.params.networkPath!;
+          break;
+      }
+
+      String command =
+          "-loglevel verbose -ss $formatted -y -i \"$inputPath\" -frames:v 1 -q:v 2 \"$outputPath\"";
+
+      await FFmpegKit.executeAsync(command, (session) async {
+        debugPrint(await session.getOutput());
+      });
+
+      await precacheImage(FileImage(imageFile), context);
+
+      imageFiles.add(imageFile);
+    }
+
+    return imageFiles;
+  }
+
+  Future<File> exportCurrentAudio(
+    List<Subtitle> subtitles,
+    int audioAllowance,
+    int subtitleDelay,
+  ) async {
+    File audioFile = File(getPreviewAudioPath());
+    String outputPath = audioFile.path;
+    if (audioFile.existsSync()) {
+      audioFile.deleteSync();
+    }
+
+    String timeStart = "";
+    String timeEnd = "";
+    String audioIndex = "${playerController.value.activeAudioTrack - 1}";
+
+    Duration allowance = Duration(milliseconds: audioAllowance);
+    Duration delay = Duration(milliseconds: subtitleDelay);
+    Duration adjustedStart = subtitles.first.start + delay - allowance;
+    Duration adjustedEnd = subtitles.last.end + delay + allowance;
+
+    timeStart = getTimestampFromDuration(adjustedStart);
+    timeEnd = getTimestampFromDuration(adjustedEnd);
+
+    String inputPath = "";
+
+    switch (widget.params.getMode()) {
+      case MediaLaunchMode.file:
+        inputPath = widget.params.videoFile!.path;
+        break;
+      case MediaLaunchMode.network:
+        inputPath = widget.params.networkPath!;
+        break;
+    }
+
+    String command =
+        "-loglevel quiet -ss $timeStart -to $timeEnd -y -i \"$inputPath\" -map 0:a:$audioIndex \"$outputPath\"";
+
+    await FFmpegKit.executeAsync(command, (session) async {
+      debugPrint(await session.getOutput());
+    });
+
+    return audioFile;
+  }
+
+  Future<void> openCardCreator(List<Subtitle> subtitles) async {
+    AnkiExportParams initialParams = await prepareExportParams(subtitles);
+
+    Subtitle? subtitleHolder = currentSubtitle.value;
+    currentSubtitle.value = null;
+    searchTerm.value = "";
+
+    await Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: false,
+        pageBuilder: (_, __, ___) => CreatorPage(
+          initialParams: initialParams,
+          backgroundColor: Theme.of(context).primaryColor.withOpacity(0.9),
+          appBarColor: Colors.transparent,
+        ),
+      ),
+    );
+
+    currentSubtitle.value = subtitleHolder;
   }
 
   Widget buildSlider() {
@@ -916,13 +1434,19 @@ class PlayerPageState extends State<PlayerPage>
       valueListenables: [
         duration,
         position,
+        isEnded,
       ],
       builder: (context, values, _) {
         Duration duration = values.elementAt(0);
         Duration position = values.elementAt(1);
+        bool isEnded = values.elementAt(2);
 
         bool validPosition = duration.compareTo(position) >= 0;
         double sliderValue = validPosition ? position.inSeconds.toDouble() : 0;
+
+        if (isEnded) {
+          sliderValue = 1;
+        }
 
         return Expanded(
           child: Slider(
@@ -930,7 +1454,7 @@ class PlayerPageState extends State<PlayerPage>
             inactiveColor: Theme.of(context).unselectedWidgetColor,
             value: sliderValue,
             min: 0.0,
-            max: (!validPosition)
+            max: (!validPosition || isEnded)
                 ? 1.0
                 : playerController.value.duration.inSeconds.toDouble(),
             onChangeStart: (value) {
@@ -942,8 +1466,10 @@ class PlayerPageState extends State<PlayerPage>
             onChanged: validPosition
                 ? (progress) {
                     cancelHideTimer();
-                    sliderValue = progress.floor().toDouble();
-                    playerController.setTime(sliderValue.toInt() * 1000);
+                    if (!isEnded) {
+                      sliderValue = progress.floor().toDouble();
+                      playerController.setTime(sliderValue.toInt() * 1000);
+                    }
                   }
                 : null,
           ),
