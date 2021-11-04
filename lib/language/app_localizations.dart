@@ -43,6 +43,16 @@ class AppLocalizations {
           'This dictionary and its searched entries will be removed. Are you '
               'sure you want to delete this?',
       'player_pick_video': 'Pick Video File',
+      'player_option_shadowing': 'Shadowing Mode',
+      'player_option_definition_focus': 'Definition Focus Mode',
+      'player_option_listening_comprehension': 'Listening Comprehension Mode',
+      'player_option_drag_to_select': 'Use Drag to Select Subtitle Selection',
+      'player_option_tap_to_select': 'Use Tap to Select Subtitle Selection',
+      'player_option_dictionary_menu': 'Select Active Dictionary Source',
+      'player_option_cast_video': 'Cast to Display Device',
+      'player_option_share_subtitle': 'Share Current Subtitle',
+      'player_option_export': 'Create Card from Context',
+      'player_subtitles_transcript_empty': 'Transcript is empty.',
       'search_label_before': 'Search result ',
       'search_label_middle': 'out of ',
       'search_label_from': 'from ',
@@ -90,7 +100,7 @@ class AppLocalizations {
       'reader_media_type': 'Libro',
       'viewer_media_type': 'Komiks',
       'dictionary_media_type': 'Diksyunaryo',
-      'card_creator': 'Creator ng Card',
+      'card_creator': 'Panggawa ng Card',
       'options_theme_light': 'Magaan na tema',
       'options_theme_dark': 'Madilim na tema',
       'options_dictionaries': 'Mga diksyunaryo',
@@ -108,7 +118,7 @@ class AppLocalizations {
       'dialog_no': 'HINDI',
       'dialog_hide': 'ITAGO',
       'dialog_show': 'IPAKITA',
-      'dialog_creator': 'CREATOR',
+      'dialog_creator': 'PANGGAWA',
       'dictionary_searching_before': 'Naghahanap para sa',
       'dictionary_searching_after': '',
       'dictionary_nomatch_before': 'Walang resultang nahanap para sa',
@@ -123,6 +133,16 @@ class AppLocalizations {
           'Ang diksyunaryo na ito ay mawawala, kasama ang mga resulta na galing '
               'dito. Sigurado ka ba sa pagtanggal nito?',
       'player_pick_video': 'Pumili ng Bidyo',
+      'player_option_shadowing': 'Ulitin ang Subtitle',
+      'player_option_definition_focus': 'Hintuin kapag Naghanap ng Salita',
+      'player_option_listening_comprehension': 'Itago ang Subtitle at Makinig',
+      'player_option_drag_to_select': 'Maghanap Gamit ang Paghila sa Subtitle',
+      'player_option_tap_to_select': 'Maghanap Gamit ang Pagpindot sa Subtitle',
+      'player_option_dictionary_menu': 'Pumili ng Ibang Diksunaryo',
+      'player_option_cast_video': 'Ipalabas sa Ibang Device',
+      'player_option_share_subtitle': 'Ibahagi ang Pangkasalukuyang Subtitle',
+      'player_option_export': 'Gumawa ng Card Mula sa Konteksto',
+      'player_subtitles_transcript_empty': 'Walang laman ang iskrip.',
       'search_label_before': 'Resulto ',
       'search_label_middle': 'sa ',
       'search_label_from': 'galing sa ',
@@ -152,7 +172,7 @@ class AppLocalizations {
       'history_empty': 'Wala pang kasaysayan',
       'source_list_emmpty': 'Walang mga pagkukunan',
       'localisation_warning': 'Ang mga mod na gawa ng komunidad ay maaring '
-          'hindi naisalin at maaring magpakita sa orihinal na wikang '
+          'hindi naisalin at magpakita sa orihinal na wikang '
           'pinanggalingan.',
       'license_screen_legalese': "Kagamitang nakakatulong sa pagnood ng video, "
           "pagbasa ng libro at komiks at pagkabisado ng mga salita ng mga "

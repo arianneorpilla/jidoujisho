@@ -74,6 +74,8 @@ dependencies:
   permission_handler:
   google_ml_kit:
   chaquopy:
+  share_plus:
+  scrollable_positioned_list:
 dev_dependencies:
   flutter_test:
     sdk: flutter

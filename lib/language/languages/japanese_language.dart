@@ -36,6 +36,7 @@ class JapaneseLanguage extends Language {
 
   @override
   FutureOr<List<String>> textToWords(String text) {
+    print(text);
     String delimiterSanitisedText = text
         .replaceAll("﻿", "␝")
         .replaceAll("　", "␝")
@@ -45,8 +46,13 @@ class JapaneseLanguage extends Language {
     List<Word> tokens = parseVe(mecab, delimiterSanitisedText);
 
     List<String> words = [];
+
     for (Word token in tokens) {
-      String word = token.word!.replaceAll('␜', '\n').replaceAll('␝', ' ');
+      String word = "";
+      for (TokenNode token in token.tokens) {
+        word += token.surface;
+      }
+      word = word.replaceAll('␜', '\n').replaceAll('␝', ' ');
       words.add(word);
     }
 

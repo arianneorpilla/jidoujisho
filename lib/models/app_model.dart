@@ -646,7 +646,6 @@ class AppModel with ChangeNotifier {
   Future<void> setTargetLanguageName(String targetLanguage) async {
     await _sharedPreferences.setString("targetLanguage", targetLanguage);
     await initialiseCurrentLanguage();
-    notifyListeners();
   }
 
   List<String> getAppLanguageNames() {
@@ -1030,5 +1029,33 @@ class AppModel with ChangeNotifier {
       getCurrentLanguage().languageCode,
       getCurrentLanguage().countryCode,
     );
+  }
+
+  bool getPlayerDefinitionFocusMode() {
+    return sharedPreferences.getBool("playerDefinitionFocusMode") ?? false;
+  }
+
+  Future<void> togglePlayerDefinitionFocusMode() async {
+    await sharedPreferences.setBool(
+        "playerDefinitionFocusMode", !getPlayerDefinitionFocusMode());
+  }
+
+  bool getListeningComprehensionMode() {
+    return sharedPreferences.getBool("playerListeningComprehensionMode") ??
+        false;
+  }
+
+  Future<void> toggleListeningComprehensionMode() async {
+    await sharedPreferences.setBool(
+        "playerListeningComprehensionMode", !getListeningComprehensionMode());
+  }
+
+  bool getPlayerDragToSelectMode() {
+    return sharedPreferences.getBool("playerDragToSelectMode") ?? false;
+  }
+
+  Future<void> togglePlayerDragToSelectMode() async {
+    await sharedPreferences.setBool(
+        "playerDragToSelectMode", !getPlayerDragToSelectMode());
   }
 }

@@ -6,13 +6,16 @@ import 'package:chisa/media/media_history.dart';
 import 'package:chisa/media/media_history_item.dart';
 import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/models/app_model.dart';
+import 'package:chisa/util/bottom_sheet_dialog.dart';
 import 'package:chisa/util/dictionary_scrollable_widget.dart';
+import 'package:chisa/util/transcript_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:multi_value_listenable_builder/multi_value_listenable_builder.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:subtitle/subtitle.dart';
 
 class PlayerPage extends StatefulWidget {
@@ -41,6 +44,8 @@ class PlayerPageState extends State<PlayerPage>
 
   final ValueNotifier<Subtitle?> currentSubtitle =
       ValueNotifier<Subtitle?>(null);
+  final ValueNotifier<Subtitle?> currentSubtitleMemory =
+      ValueNotifier<Subtitle?>(null);
   ValueNotifier<Duration> position = ValueNotifier<Duration>(Duration.zero);
   ValueNotifier<Duration> duration = ValueNotifier<Duration>(Duration.zero);
   ValueNotifier<bool> isPlaying = ValueNotifier<bool>(true);
@@ -61,6 +66,7 @@ class PlayerPageState extends State<PlayerPage>
 
   DictionarySearchResult? searchResult;
   ValueNotifier<String> searchTerm = ValueNotifier<String>("");
+  ValueNotifier<Subtitle?> shadowingSubtitle = ValueNotifier<Subtitle?>(null);
   String searchMessage = "";
 
   @override
@@ -131,7 +137,7 @@ class PlayerPageState extends State<PlayerPage>
               left: 16,
               right: 16,
               top: 16,
-              bottom: 48,
+              bottom: 96,
             ),
             child: GestureDetector(
               onTap: () {
@@ -322,14 +328,22 @@ class PlayerPageState extends State<PlayerPage>
       position.value = playerController.value.position;
       duration.value = playerController.value.duration;
 
-      print(subtitleController!.subtitles);
-
       if (subtitleController != null) {
         Subtitle? newSubtitle =
             subtitleController!.durationSearch(position.value);
 
         if (currentSubtitle.value != newSubtitle) {
           currentSubtitle.value = newSubtitle;
+          // For remembering the last subtitle even if it has disappeared.
+          if (newSubtitle != null) {
+            currentSubtitleMemory.value = newSubtitle;
+          }
+        }
+      }
+
+      if (shadowingSubtitle.value != null) {
+        if (position.value > shadowingSubtitle.value!.end) {
+          playerController.seekTo(shadowingSubtitle.value!.start);
         }
       }
 
@@ -344,7 +358,9 @@ class PlayerPageState extends State<PlayerPage>
     item.currentProgress = position.value.inSeconds;
     item.completeProgress = duration.value.inSeconds;
 
-    await history.addItem(item);
+    if (item.completeProgress != 0) {
+      await history.addItem(item);
+    }
   }
 
   Widget buildPlaceholder() {
@@ -373,17 +389,12 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   Widget buildPlayerArea() {
-    return GestureDetector(
-      onTap: () {
-        toggleMenuVisibility();
-      },
-      child: Container(
-        alignment: Alignment.center,
-        height: double.maxFinite,
-        width: double.maxFinite,
-        color: Colors.black,
-        child: buildPlayer(),
-      ),
+    return Container(
+      alignment: Alignment.center,
+      height: double.maxFinite,
+      width: double.maxFinite,
+      color: Colors.black,
+      child: buildPlayer(),
     );
   }
 
@@ -398,11 +409,20 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   Widget buildSubtitle() {
-    if (tapToSelectMode) {
-      return tapToSelectWidget();
-    } else {
-      return dragToSelectSubtitle();
-    }
+    return ValueListenableBuilder<Subtitle?>(
+      valueListenable: currentSubtitle,
+      builder: (BuildContext context, Subtitle? currentSubtitle, _) {
+        if (currentSubtitle == null) {
+          return const SizedBox.shrink();
+        }
+
+        if (appModel.getPlayerDragToSelectMode()) {
+          return tapToSelectWidget(currentSubtitle);
+        } else {
+          return dragToSelectSubtitle(currentSubtitle);
+        }
+      },
+    );
   }
 
   Widget getOutlineText(String character) {
@@ -436,117 +456,99 @@ class PlayerPageState extends State<PlayerPage>
     );
   }
 
-  Widget tapToSelectWidget() {
-    return ValueListenableBuilder<Subtitle?>(
-      valueListenable: currentSubtitle,
-      builder: (BuildContext context, Subtitle? currentSubtitle, _) {
-        if (currentSubtitle == null) {
-          return const SizedBox.shrink();
-        }
+  Widget tapToSelectWidget(Subtitle subtitle) {
+    String subtitleText = subtitle.data;
 
-        String subtitleText = currentSubtitle.data;
+    List<List<String>> lines = getLinesFromCharacters(
+      context,
+      subtitleText.split(''),
+      subtitleFontSize,
+    );
 
-        List<List<String>> lines = getLinesFromCharacters(
-          context,
-          subtitleText.split(''),
-          subtitleFontSize,
-        );
+    return Stack(
+      children: <Widget>[
+        ListView.builder(
+          shrinkWrap: true,
+          itemCount: lines.length,
+          itemBuilder: (BuildContext context, int lineIndex) {
+            List<dynamic> line = lines[lineIndex];
+            List<Widget> textWidgets = [];
 
-        return Stack(
-          children: <Widget>[
-            ListView.builder(
-              shrinkWrap: true,
-              itemCount: lines.length,
-              itemBuilder: (BuildContext context, int lineIndex) {
-                List<dynamic> line = lines[lineIndex];
-                List<Widget> textWidgets = [];
+            for (int i = 0; i < line.length; i++) {
+              String word = line[i];
+              textWidgets.add(getOutlineText(word));
+            }
 
-                for (int i = 0; i < line.length; i++) {
-                  String word = line[i];
-                  textWidgets.add(getOutlineText(word));
-                }
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: textWidgets,
+            );
+          },
+        ),
+        ListView.builder(
+          shrinkWrap: true,
+          itemCount: lines.length,
+          itemBuilder: (BuildContext context, int lineIndex) {
+            List<dynamic> line = lines[lineIndex];
+            List<Widget> textWidgets = [];
 
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: textWidgets,
-                );
-              },
-            ),
-            ListView.builder(
-              shrinkWrap: true,
-              itemCount: lines.length,
-              itemBuilder: (BuildContext context, int lineIndex) {
-                List<dynamic> line = lines[lineIndex];
-                List<Widget> textWidgets = [];
+            for (int i = 0; i < line.length; i++) {
+              String character = line[i];
+              textWidgets.add(
+                getText(character, i),
+              );
+            }
 
-                for (int i = 0; i < line.length; i++) {
-                  String character = line[i];
-                  textWidgets.add(
-                    getText(character, i),
-                  );
-                }
-
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: textWidgets,
-                );
-              },
-            ),
-          ],
-        );
-      },
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: textWidgets,
+            );
+          },
+        ),
+      ],
     );
   }
 
-  Widget dragToSelectSubtitle() {
-    return ValueListenableBuilder<Subtitle?>(
-      valueListenable: currentSubtitle,
-      builder: (BuildContext context, Subtitle? currentSubtitle, _) {
-        if (currentSubtitle == null) {
-          return const SizedBox.shrink();
-        }
+  Widget dragToSelectSubtitle(Subtitle subtitle) {
+    String subtitleText = subtitle.data;
 
-        String subtitleText = currentSubtitle.data;
-
-        return Stack(
-          alignment: Alignment.bottomCenter,
-          children: <Widget>[
-            SelectableText(
-              subtitleText,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: subtitleFontSize,
-                foreground: Paint()
-                  ..style = PaintingStyle.stroke
-                  ..strokeWidth = 3
-                  ..color = Colors.black.withOpacity(0.75),
-              ),
-              enableInteractiveSelection: false,
-            ),
-            SelectableText(
-              subtitleText,
-              textAlign: TextAlign.center,
-              onSelectionChanged: (selection, cause) {
-                String newTerm = selection.textInside(subtitleText);
-                startDragSubtitlesTimer(newTerm);
-              },
-              style: TextStyle(
-                fontSize: subtitleFontSize,
-                color: Colors.white,
-              ),
-              focusNode: dragToSelectFocusNode,
-              toolbarOptions: const ToolbarOptions(
-                copy: false,
-                cut: false,
-                selectAll: false,
-                paste: false,
-              ),
-            ),
-          ],
-        );
-      },
+    return Stack(
+      alignment: Alignment.bottomCenter,
+      children: <Widget>[
+        SelectableText(
+          subtitleText,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: subtitleFontSize,
+            foreground: Paint()
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 3
+              ..color = Colors.black.withOpacity(0.75),
+          ),
+          enableInteractiveSelection: false,
+        ),
+        SelectableText(
+          subtitleText,
+          textAlign: TextAlign.center,
+          onSelectionChanged: (selection, cause) {
+            String newTerm = selection.textInside(subtitleText);
+            startDragSubtitlesTimer(newTerm);
+          },
+          style: TextStyle(
+            fontSize: subtitleFontSize,
+            color: Colors.white,
+          ),
+          focusNode: dragToSelectFocusNode,
+          toolbarOptions: const ToolbarOptions(
+            copy: false,
+            cut: false,
+            selectAll: false,
+            paste: false,
+          ),
+        ),
+      ],
     );
   }
 
@@ -568,18 +570,10 @@ class PlayerPageState extends State<PlayerPage>
       child: ValueListenableBuilder(
         valueListenable: isMenuHidden,
         builder: (BuildContext context, bool value, _) {
-          return GestureDetector(
-            onTap: () {
-              toggleMenuVisibility();
-            },
-            child: AbsorbPointer(
-              absorbing: value,
-              child: AnimatedOpacity(
-                opacity: value ? 0.0 : 1.0,
-                duration: const Duration(milliseconds: 300),
-                child: buildMenuContent(),
-              ),
-            ),
+          return AnimatedOpacity(
+            opacity: value ? 0.0 : 1.0,
+            duration: const Duration(milliseconds: 300),
+            child: buildMenuContent(),
           );
         },
       ),
@@ -592,15 +586,104 @@ class PlayerPageState extends State<PlayerPage>
       child: Container(
         height: menuHeight,
         color: menuColor,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            buildPlayButton(),
-            buildDurationAndPosition(),
-            buildSlider(),
-          ],
+        child: AbsorbPointer(
+          absorbing: isMenuHidden.value,
+          child: GestureDetector(
+            onTap: () {
+              toggleMenuVisibility();
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                buildPlayButton(),
+                buildDurationAndPosition(),
+                buildSlider(),
+                buildOptionsButton(),
+              ],
+            ),
+          ),
         ),
+      ),
+    );
+  }
+
+  Subtitle? getNearestSubtitle() {
+    if (currentSubtitle.value != null) {
+      return currentSubtitle.value!;
+    } else {
+      if (subtitleController == null || subtitleController!.subtitles.isEmpty) {
+        return null;
+      }
+
+      Subtitle? lastSubtitle;
+      for (Subtitle subtitle in subtitleController!.subtitles) {
+        if (position.value < subtitle.start) {
+          return lastSubtitle;
+        }
+
+        lastSubtitle = subtitle;
+      }
+
+      return null;
+    }
+  }
+
+  Widget buildGestureArea() {
+    return GestureDetector(
+      onHorizontalDragUpdate: (details) async {
+        if (details.delta.dx.abs() > 10) {
+          await playerController.seekTo(getNearestSubtitle()!.start);
+        }
+      },
+      onVerticalDragUpdate: (details) async {
+        if (details.delta.dy.abs() > 10) {
+          await openTranscript(
+            context: context,
+            subtitles: subtitleController!.subtitles,
+            currentSubtitle: getNearestSubtitle(),
+            regexFilter: null,
+            onTapCallback: (int selectedIndex) async {
+              await playerController
+                  .seekTo(subtitleController!.subtitles[selectedIndex].start);
+            },
+          );
+        }
+      },
+      onTap: () {
+        toggleMenuVisibility();
+      },
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onDoubleTap: () async {
+                cancelHideTimer();
+                await playerController
+                    .seekTo(position.value - const Duration(seconds: 10));
+
+                startHideTimer();
+              },
+              child: Container(
+                color: Colors.red.withOpacity(0.2),
+              ),
+            ),
+          ),
+          Expanded(
+            child: GestureDetector(
+              onDoubleTap: () async {
+                cancelHideTimer();
+                await playerController
+                    .seekTo(position.value + const Duration(seconds: 10));
+
+                startHideTimer();
+              },
+              child: Container(
+                color: Colors.blue.withOpacity(0.2),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -621,6 +704,7 @@ class PlayerPageState extends State<PlayerPage>
           alignment: Alignment.center,
           children: <Widget>[
             buildPlayerArea(),
+            buildGestureArea(),
             buildMenuArea(),
             Positioned.fill(
               child: buildSubtitleArea(),
@@ -639,10 +723,12 @@ class PlayerPageState extends State<PlayerPage>
       valueListenables: [
         duration,
         position,
+        shadowingSubtitle,
       ],
       builder: (context, values, _) {
         Duration duration = values.elementAt(0);
         Duration position = values.elementAt(1);
+        Subtitle? shadowingSubtitle = values.elementAt(2);
 
         if (duration == Duration.zero) {
           return const SizedBox.shrink();
@@ -658,6 +744,10 @@ class PlayerPageState extends State<PlayerPage>
         }
 
         String getDurationText() {
+          if (shadowingSubtitle != null) {
+            duration = shadowingSubtitle.end;
+          }
+
           if (duration.inHours == 0) {
             var strDuration = duration.toString().split('.')[0];
             return "${strDuration.split(':')[1]}:${strDuration.split(':')[2]}";
@@ -666,9 +756,18 @@ class PlayerPageState extends State<PlayerPage>
           }
         }
 
-        return Text(
-          "${getPositionText()} / ${getDurationText()}",
-          style: const TextStyle(color: Colors.white),
+        return InkWell(
+          child: Text(
+            "${getPositionText()} / ${getDurationText()}",
+            style: TextStyle(
+              color: (shadowingSubtitle != null)
+                  ? Theme.of(context).focusColor
+                  : Colors.white,
+            ),
+          ),
+          onTap: () {
+            setShadowingSubtitle();
+          },
         );
       },
     );
@@ -698,6 +797,117 @@ class PlayerPageState extends State<PlayerPage>
         );
       },
     );
+  }
+
+  Widget buildOptionsButton() {
+    return IconButton(
+      color: Colors.white,
+      icon: const Icon(Icons.more_vert),
+      onPressed: () async {
+        await showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          useRootNavigator: true,
+          builder: (context) => BottomSheetDialog(
+            options: getOptions(),
+          ),
+        );
+      },
+    );
+  }
+
+  void refreshSubtitleWidget() {
+    Subtitle? holder = currentSubtitle.value;
+    currentSubtitle.value = null;
+    currentSubtitle.value = holder;
+  }
+
+  void refreshDictionaryWidget() {
+    String holder = searchTerm.value;
+    searchTerm.value = "";
+    searchTerm.value = holder;
+  }
+
+  void setShadowingSubtitle() {
+    if (shadowingSubtitle.value != null) {
+      shadowingSubtitle.value = null;
+    } else {
+      shadowingSubtitle.value = currentSubtitle.value;
+    }
+  }
+
+  List<BottomSheetDialogOption> getOptions() {
+    List<BottomSheetDialogOption> options = [
+      BottomSheetDialogOption(
+        label: appModel.translate("player_option_shadowing"),
+        icon: Icons.loop,
+        active: shadowingSubtitle.value != null,
+        action: () {
+          setShadowingSubtitle();
+        },
+      ),
+      BottomSheetDialogOption(
+        label: appModel.translate("player_option_definition_focus"),
+        icon: (appModel.getPlayerDefinitionFocusMode())
+            ? Icons.flash_on
+            : Icons.flash_off,
+        active: appModel.getPlayerDefinitionFocusMode(),
+        action: () async {
+          await appModel.togglePlayerDefinitionFocusMode();
+        },
+      ),
+      BottomSheetDialogOption(
+        label: appModel.translate("player_option_listening_comprehension"),
+        icon: (appModel.getListeningComprehensionMode())
+            ? Icons.hearing
+            : Icons.hearing_disabled,
+        active: appModel.getListeningComprehensionMode(),
+        action: () async {
+          await appModel.toggleListeningComprehensionMode();
+          refreshSubtitleWidget();
+        },
+      ),
+      BottomSheetDialogOption(
+        label: (appModel.getPlayerDragToSelectMode())
+            ? appModel.translate("player_option_drag_to_select")
+            : appModel.translate("player_option_tap_to_select"),
+        icon: (appModel.getPlayerDragToSelectMode())
+            ? Icons.select_all
+            : Icons.touch_app,
+        action: () async {
+          await appModel.togglePlayerDragToSelectMode();
+          refreshSubtitleWidget();
+        },
+      ),
+      BottomSheetDialogOption(
+        label: appModel.translate("player_option_dictionary_menu"),
+        icon: Icons.auto_stories,
+        action: () async {
+          await appModel.showDictionaryMenu(context);
+          refreshDictionaryWidget();
+        },
+      ),
+      // BottomSheetDialogOption(
+      //   label: appModel.translate("player_option_cast_video"),
+      //   icon: Icons.cast_connected,
+      //   action: () {
+      //   },
+      // ),
+      BottomSheetDialogOption(
+        label: appModel.translate("player_option_share_subtitle"),
+        icon: Icons.share,
+        action: () {
+          Share.share(currentSubtitle.value?.data ?? "");
+        },
+      ),
+      BottomSheetDialogOption(
+        label: appModel.translate("player_option_export"),
+        icon: Icons.mobile_screen_share,
+        action: () {},
+      ),
+    ];
+
+    return options;
   }
 
   Widget buildSlider() {
