@@ -1,5 +1,6 @@
 import 'package:chisa/anki/anki_export_params.dart';
 import 'package:chisa/dictionary/dictionary.dart';
+import 'package:chisa/util/anki_creator.dart';
 import 'package:chisa/util/dictionary_dialog_widget.dart';
 import 'package:chisa/dictionary/dictionary_entry.dart';
 import 'package:chisa/util/media_type_button.dart';
@@ -194,10 +195,9 @@ class DictionaryPageState extends State<DictionaryHomePage> {
       label: appModel.translate("card_creator"),
       icon: Icons.note_add,
       onTap: () async {
-        await Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (context) => const CreatorPage(),
-          ),
+        await navigateToCreator(
+          context: context,
+          appModel: appModel,
         );
         setState(() {});
       },
@@ -222,15 +222,13 @@ class DictionaryPageState extends State<DictionaryHomePage> {
         onTap: () async {
           DictionaryEntry entry = result.entries[indexNotifier.value];
 
-          await Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (context) => CreatorPage(
-                initialParams: AnkiExportParams(
-                  word: entry.word,
-                  meaning: entry.meaning,
-                  reading: entry.reading,
-                ),
-              ),
+          await navigateToCreator(
+            context: context,
+            appModel: appModel,
+            initialParams: AnkiExportParams(
+              word: entry.word,
+              meaning: entry.meaning,
+              reading: entry.reading,
             ),
           );
         },
@@ -274,15 +272,13 @@ class DictionaryPageState extends State<DictionaryHomePage> {
                     onPressed: () async {
                       DictionaryEntry dialogEntry =
                           result.entries[dialogIndexNotifier.value];
-                      await Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (context) => CreatorPage(
-                            initialParams: AnkiExportParams(
-                              word: dialogEntry.word,
-                              meaning: dialogEntry.meaning,
-                              reading: dialogEntry.reading,
-                            ),
-                          ),
+                      await navigateToCreator(
+                        context: context,
+                        appModel: appModel,
+                        initialParams: AnkiExportParams(
+                          word: dialogEntry.word,
+                          meaning: dialogEntry.meaning,
+                          reading: dialogEntry.reading,
                         ),
                       );
                       setState(() {});

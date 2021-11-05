@@ -1,6 +1,6 @@
 import 'dart:io';
 
-void initialiseExportPaths() {
+Future<void> initialiseExportPaths() async {
   if (!getDCIMDirectory().existsSync()) {
     getDCIMDirectory().createSync(recursive: true);
   }

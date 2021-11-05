@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:chisa/media/media_history_item.dart';
+import 'package:chisa/util/subtitle_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
@@ -48,14 +49,14 @@ abstract class PlayerMediaSource extends MediaSource {
       ),
     );
     await Wakelock.disable();
-    await SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+
     await SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
+    await SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
   }
 
-  FutureOr<List<SubtitleController>> provideSubtitles(
-      PlayerLaunchParams params);
+  FutureOr<List<SubtitleItem>> provideSubtitles(PlayerLaunchParams params);
 }

@@ -392,7 +392,7 @@ Future<void> showBlurWidgetOptionsDialog(
     }
   }
 
-  showDialog(
+  await showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -433,15 +433,17 @@ Future<void> showBlurWidgetOptionsDialog(
           ),
           actions: <Widget>[
             TextButton(
-              child: Text(appModel.translate("dialog_close"),
-                  style: const TextStyle(color: Colors.white)),
+              child: Text(
+                appModel.translate("dialog_close"),
+              ),
               onPressed: () {
                 Navigator.pop(context);
               },
             ),
             TextButton(
-              child: Text(appModel.translate("dialog_set"),
-                  style: const TextStyle(color: Colors.white)),
+              child: Text(
+                appModel.translate("dialog_set"),
+              ),
               onPressed: () async {
                 await setValues();
               },

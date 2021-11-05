@@ -7,15 +7,14 @@ import 'package:chisa/media/media_sources/player_media_source.dart';
 import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/util/media_type_button.dart';
+import 'package:chisa/util/subtitle_utils.dart';
 import 'package:chisa/util/time_format.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
 import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:subtitle/subtitle.dart';
 
 class PlayerLocalMediaSource extends PlayerMediaSource {
   PlayerLocalMediaSource()
@@ -92,39 +91,37 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
   }
 
   @override
-  FutureOr<List<SubtitleController>> provideSubtitles(
+  FutureOr<List<SubtitleItem>> provideSubtitles(
       PlayerLaunchParams params) async {
-    List<SubtitleController> controllers = [];
+    List<SubtitleItem> items = [];
 
     File videoFile = params.videoFile!;
+    Directory directory = Directory(p.dirname(videoFile.path));
 
-    String srtPath = p.withoutExtension(videoFile.path) + ".srt";
-    String assPath = p.withoutExtension(videoFile.path) + ".ass";
+    List<FileSystemEntity> entityList = directory.listSync();
 
-    File srtFile = File(srtPath);
-    File assFile = File(assPath);
+    String videoFileBasename = p.basenameWithoutExtension(videoFile.path);
 
-    // First priority is an existing SRT file.
-    if (srtFile.existsSync()) {
-      SubtitleController controller = SubtitleController(
-        provider: SubtitleProvider.fromString(
-          data: srtFile.readAsStringSync(),
-          type: SubtitleType.srt,
-        ),
-      );
-      controllers.add(controller);
-    }
-    if (assFile.existsSync()) {
-      SubtitleController controller = SubtitleController(
-        provider: SubtitleProvider.fromString(
-          data: await convertAssSubtitles(assFile.path),
-          type: SubtitleType.srt,
-        ),
-      );
-      controllers.add(controller);
+    List<FileSystemEntity> matchingEntities = entityList.where((entity) {
+      return entity is File &&
+          p.basename(entity.path).startsWith(videoFileBasename) &&
+          videoFile.path != entity.path;
+    }).toList();
+
+    for (FileSystemEntity file in matchingEntities) {
+      if (file is File) {
+        String metadata =
+            p.basename(file.path).replaceAll(videoFileBasename, "");
+        SubtitleItem? item = await prepareSubtitleControllerFromFile(
+          file: file,
+          metadata: metadata,
+          type: SubtitleItemType.externalSubtitle,
+        );
+        items.add(item);
+      }
     }
 
-    return controllers;
+    return items;
   }
 
   Future<void> generateThumbnail(String inputPath, String targetPath) async {
@@ -134,45 +131,6 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
         "-ss $timestamp -y -i \"$inputPath\" -frames:v 1 -q:v 2 \"$targetPath\"";
 
     await FFmpegKit.executeAsync(command, (session) async {});
-  }
-
-  Future<String> convertAssSubtitles(String inputPath) async {
-    Directory appDocDir = await getApplicationDocumentsDirectory();
-    Directory subsDir = Directory(appDocDir.path + "/subtitles");
-    if (!subsDir.existsSync()) {
-      subsDir.createSync(recursive: true);
-    }
-
-    String targetPath = "${subsDir.path}/assSubtitles.srt";
-    File targetFile = File(targetPath);
-
-    String command = "-i \"$inputPath\" \"$targetPath\"";
-
-    await FFmpegKit.executeAsync(command, (session) async {
-      await session.getReturnCode();
-    });
-
-    return sanitizeSubtitleArtifacts(targetFile.readAsStringSync());
-  }
-
-  String sanitizeSubtitleArtifacts(String unsanitizedContent) {
-    RegExp exp = RegExp(r"<[^>]*>", multiLine: true, caseSensitive: true);
-
-    String sanitizedContent = unsanitizedContent.replaceAll(exp, '');
-    sanitizedContent = sanitizedContent.replaceAll(
-        RegExp(r'{(.*?)}', caseSensitive: false), '');
-
-    sanitizedContent = sanitizedContent.replaceAll("<br>", "\n");
-    sanitizedContent = sanitizedContent.replaceAll('&amp;', '&');
-    sanitizedContent = sanitizedContent.replaceAll('&apos;', '\'');
-    sanitizedContent = sanitizedContent.replaceAll('&#39;', '\'');
-    sanitizedContent = sanitizedContent.replaceAll('&quot;', '\"');
-    sanitizedContent = sanitizedContent.replaceAll('&amp;', '');
-    sanitizedContent = sanitizedContent.replaceAll('\r', '\n');
-    sanitizedContent = sanitizedContent.replaceAll('\\n', '\n');
-    sanitizedContent = sanitizedContent.replaceAll('​', '');
-
-    return sanitizedContent;
   }
 
   @override

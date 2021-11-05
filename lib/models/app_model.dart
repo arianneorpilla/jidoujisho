@@ -1140,4 +1140,12 @@ class AppModel with ChangeNotifier {
   Future<void> toggleUseRegexFilter() async {
     await sharedPreferences.setBool("useRegexFilter", !getUseRegexFilter());
   }
+
+  String getLastAnkiDroidDeck() {
+    return _sharedPreferences.getString("lastAnkiDroidDeck") ?? "Default";
+  }
+
+  Future<void> setLastAnkiDroidDeck(String deckName) async {
+    await _sharedPreferences.setString("lastAnkiDroidDeck", deckName);
+  }
 }

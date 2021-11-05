@@ -11,7 +11,8 @@ Widget transcriptDialog({
   required BuildContext context,
   required List<Subtitle> subtitles,
   required Subtitle? currentSubtitle,
-  required Pattern? regexFilter,
+  required String regexFilter,
+  required Duration subtitleDelay,
   required FutureOr<void> Function(int)? onTapCallback,
   required FutureOr<void> Function(int)? onLongPressCallback,
 }) {
@@ -54,16 +55,34 @@ Widget transcriptDialog({
       Subtitle subtitle = subtitles[index];
       String subtitleText = subtitle.data;
 
-      if (regexFilter != null) {
-        subtitleText = subtitleText.replaceAll(regexFilter, subtitleText);
+      if (regexFilter.isNotEmpty && appModel.getUseRegexFilter()) {
+        subtitleText = subtitleText.replaceAll(RegExp(regexFilter), "");
       }
       if (subtitleText.trim().isNotEmpty) {
         subtitleText = "『$subtitleText』";
       }
 
-      String subtitleStart = getTimestampFromDuration(subtitle.start);
-      String subtitleEnd = getTimestampFromDuration(subtitle.end);
-      String subtitleDuration = "$subtitleStart - $subtitleEnd";
+      String subtitleDelayText =
+          "(+${getTimestampFromDuration(subtitleDelay)})";
+
+      Color durationColor = Theme.of(context).unselectedWidgetColor;
+      if (subtitleDelay != Duration.zero) {
+        if (subtitleDelay.isNegative) {
+          durationColor = Colors.red.shade400;
+        } else {
+          durationColor = Colors.green.shade400;
+        }
+      }
+
+      if (subtitleDelay.isNegative) {
+        subtitleDelayText = "(+${getTimestampFromDuration(subtitleDelay)})";
+      }
+
+      Duration offsetStart = subtitle.start + subtitleDelay;
+      Duration offsetEnd = subtitle.end + subtitleDelay;
+      String offsetStartText = getTimestampFromDuration(offsetStart);
+      String offsetEndText = getTimestampFromDuration(offsetEnd);
+      String subtitleDuration = "$offsetStartText - $offsetEndText";
 
       return ListTile(
         selected: selectedIndex == index,
@@ -82,31 +101,37 @@ Widget transcriptDialog({
                 const SizedBox(width: 16.0),
                 Text(
                   subtitleDuration,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Colors.grey,
+                    color: durationColor,
                   ),
                 ),
+                const SizedBox(width: 4.0),
               ],
             ),
             const SizedBox(height: 6),
             Text(
               subtitleText,
-              style: const TextStyle(fontSize: 20, color: Colors.white),
+              textAlign: TextAlign.center,
+              softWrap: true,
+              style: TextStyle(
+                fontSize: 20,
+                color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
+              ),
             ),
             const SizedBox(height: 6),
           ],
         ),
         onTap: () async {
           if (onTapCallback != null) {
-            await onTapCallback(index);
+            onTapCallback(index);
             Navigator.pop(context);
           }
         },
         onLongPress: () async {
           if (onLongPressCallback != null) {
-            await onLongPressCallback(index);
+            onLongPressCallback(index);
             Navigator.pop(context);
           }
         },
@@ -118,13 +143,19 @@ Widget transcriptDialog({
 Future<void> openTranscript({
   required BuildContext context,
   required List<Subtitle> subtitles,
+  required Duration subtitleDelay,
   Subtitle? currentSubtitle,
-  Pattern? regexFilter,
+  required String regexFilter,
   FutureOr<void> Function(int)? onTapCallback,
   FutureOr<void> Function(int)? onLongPressCallback,
 }) async {
+  AppModel appModel = Provider.of<AppModel>(context, listen: false);
+  Color backgroundColor = appModel.getIsDarkMode()
+      ? const Color(0xcc212121)
+      : const Color(0xdfb8b8b8);
+
   await showModalBottomSheet(
-    backgroundColor: Theme.of(context).primaryColor.withOpacity(0.8),
+    backgroundColor: backgroundColor,
     context: context,
     isScrollControlled: true,
     useRootNavigator: true,
@@ -132,6 +163,7 @@ Future<void> openTranscript({
       context: context,
       subtitles: subtitles,
       currentSubtitle: currentSubtitle,
+      subtitleDelay: subtitleDelay,
       regexFilter: regexFilter,
       onTapCallback: onTapCallback,
       onLongPressCallback: onLongPressCallback,

@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:chisa/models/app_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
 
 class BottomSheetDialogOption {
   BottomSheetDialogOption({
@@ -28,6 +30,8 @@ class BottomSheetDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppModel appModel = Provider.of<AppModel>(context);
+
     ScrollController scrollController = ScrollController();
     SchedulerBinding.instance!.addPostFrameCallback((_) {
       scrollController.jumpTo(
@@ -54,8 +58,11 @@ class BottomSheetDialog extends StatelessWidget {
             option.label,
             maxLines: 1,
             style: TextStyle(
-              color:
-                  (option.active) ? Theme.of(context).focusColor : Colors.white,
+              color: (option.active)
+                  ? Theme.of(context).focusColor
+                  : appModel.getIsDarkMode()
+                      ? Colors.white
+                      : Colors.black,
             ),
           ),
           onTap: () async {

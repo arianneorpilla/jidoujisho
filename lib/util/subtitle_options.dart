@@ -65,7 +65,7 @@ Future<void> showSubtitleOptionsDialog(
     } finally {}
   }
 
-  showDialog(
+  await showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -129,22 +129,25 @@ Future<void> showSubtitleOptionsDialog(
           ),
           actions: <Widget>[
             TextButton(
-              child: Text(appModel.translate("dialog_close"),
-                  style: const TextStyle(color: Colors.white)),
+              child: Text(
+                appModel.translate("dialog_close"),
+              ),
               onPressed: () {
                 Navigator.pop(context);
               },
             ),
             TextButton(
-              child: Text(appModel.translate("dialog_set_remember"),
-                  style: const TextStyle(color: Colors.white)),
+              child: Text(
+                appModel.translate("dialog_set_remember"),
+              ),
               onPressed: () {
                 setValues(true);
               },
             ),
             TextButton(
-              child: Text(appModel.translate("dialog_set"),
-                  style: const TextStyle(color: Colors.white)),
+              child: Text(
+                appModel.translate("dialog_set"),
+              ),
               onPressed: () {
                 setValues(false);
               },

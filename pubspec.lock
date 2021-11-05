@@ -36,6 +36,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.7.0"
+  audioplayers:
+    dependency: "direct main"
+    description:
+      name: audioplayers
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.20.1"
   blurrycontainer:
     dependency: "direct main"
     description:
@@ -206,6 +213,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.3"
+  external_app_launcher:
+    dependency: "direct main"
+    description:
+      name: external_app_launcher
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.1"
   external_path:
     dependency: "direct main"
     description:
@@ -283,13 +297,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.6.0"
-  flutter_image_compress:
-    dependency: "direct main"
-    description:
-      name: flutter_image_compress
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.1.0"
   flutter_inappwebview:
     dependency: "direct main"
     description:
@@ -400,6 +407,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.8"
+  intl:
+    dependency: "direct main"
+    description:
+      name: intl
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.17.0"
   io:
     dependency: transitive
     description:
@@ -484,6 +498,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.0"
+  network_to_file_image:
+    dependency: "direct main"
+    description:
+      name: network_to_file_image
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.3"
   objectbox:
     dependency: "direct main"
     description:
@@ -624,6 +645,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.2.0"
+  photo_view:
+    dependency: "direct main"
+    description:
+      name: photo_view
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.13.0"
   platform:
     dependency: transitive
     description:
@@ -930,6 +958,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.2"
+  uuid:
+    dependency: transitive
+    description:
+      name: uuid
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.5"
   ve_dart:
     dependency: "direct main"
     description:
@@ -944,13 +979,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.0"
-  video_compress_ds:
-    dependency: "direct main"
-    description:
-      name: video_compress_ds
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "3.1.6"
   wakelock:
     dependency: "direct main"
     description:

@@ -90,4 +90,5 @@ flutter {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'com.github.ankidroid:Anki-Android:api-v1.1.0'
 }

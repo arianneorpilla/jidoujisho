@@ -1,30 +1,46 @@
 import 'dart:io';
+import 'dart:ui';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:chisa/anki/anki_export_enhancement.dart';
 import 'package:chisa/anki/anki_export_enhancement_dialog.dart';
 import 'package:chisa/anki/anki_export_params.dart';
 
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/util/anki_export_field.dart';
+import 'package:chisa/util/anki_creator.dart';
+import 'package:chisa/util/drop_down_menu.dart';
+import 'package:chisa/util/image_select_widget.dart';
+import 'package:chisa/util/media_type_button.dart';
 import 'package:chisa/util/popup_item.dart';
 import 'package:flutter/material.dart';
+import 'package:multi_value_listenable_builder/multi_value_listenable_builder.dart';
+import 'package:network_to_file_image/network_to_file_image.dart';
 import 'package:provider/provider.dart';
 
 class CreatorPage extends StatefulWidget {
-  const CreatorPage(
-      {Key? key,
-      this.initialParams,
-      this.editMode = false,
-      this.autoMode = false,
-      this.backgroundColor,
-      this.appBarColor})
-      : super(key: key);
+  const CreatorPage({
+    Key? key,
+    this.initialParams,
+    this.editMode = false,
+    this.autoMode = false,
+    this.landscapeLocked = false,
+    this.backgroundColor,
+    this.appBarColor,
+    this.popOnExport = false,
+    this.exportCallback,
+    required this.decks,
+  }) : super(key: key);
 
   final AnkiExportParams? initialParams;
   final bool editMode;
   final bool autoMode;
   final Color? backgroundColor;
   final Color? appBarColor;
+  final bool landscapeLocked;
+  final bool popOnExport;
+  final List<String> decks;
+  final Function()? exportCallback;
 
   @override
   State<StatefulWidget> createState() => CreatorPageState();
@@ -43,8 +59,18 @@ class CreatorPageState extends State<CreatorPage> {
   final TextEditingController readingController = TextEditingController();
   final TextEditingController meaningController = TextEditingController();
   final TextEditingController extraController = TextEditingController();
+  final ValueNotifier<List<NetworkToFileImage>> imagesNotifier =
+      ValueNotifier<List<NetworkToFileImage>>(const []);
   final ValueNotifier<File?> imageNotifier = ValueNotifier<File?>(null);
   final ValueNotifier<File?> audioNotifier = ValueNotifier<File?>(null);
+  final AudioPlayer audioPlayer = AudioPlayer();
+
+  final ValueNotifier<Duration> positionNotifier =
+      ValueNotifier<Duration>(Duration.zero);
+  final ValueNotifier<Duration> durationNotifier =
+      ValueNotifier<Duration>(Duration.zero);
+  final ValueNotifier<PlayerState> playerStateNotifier =
+      ValueNotifier<PlayerState>(PlayerState.PAUSED);
 
   TextEditingController getFieldController(AnkiExportField field) {
     switch (field) {
@@ -68,8 +94,22 @@ class CreatorPageState extends State<CreatorPage> {
   @override
   void initState() {
     super.initState();
+
+    if (widget.initialParams != null) {
+      setCurrentParams(widget.initialParams!);
+    }
     WidgetsBinding.instance!.addPostFrameCallback((_) {
       setAndComputeInitialFields();
+    });
+
+    audioPlayer.onDurationChanged.listen((duration) {
+      durationNotifier.value = duration;
+    });
+    audioPlayer.onAudioPositionChanged.listen((duration) {
+      positionNotifier.value = duration;
+    });
+    audioPlayer.onPlayerStateChanged.listen((playerState) {
+      playerStateNotifier.value = playerState;
     });
   }
 
@@ -90,6 +130,11 @@ class CreatorPageState extends State<CreatorPage> {
 
     setState(() {
       setCurrentParams(exportParams);
+      if (audioNotifier.value != null) {
+        audioPlayer.setUrl(audioNotifier.value!.path).then((seconds) {
+          durationNotifier.value = Duration(seconds: seconds);
+        });
+      }
     });
   }
 
@@ -100,6 +145,7 @@ class CreatorPageState extends State<CreatorPage> {
       reading: readingController.text,
       meaning: meaningController.text,
       extra: extraController.text,
+      imageFiles: imagesNotifier.value,
       imageFile: imageNotifier.value,
       audioFile: audioNotifier.value,
     );
@@ -120,6 +166,7 @@ class CreatorPageState extends State<CreatorPage> {
       readingController.text = exportParams.reading;
       meaningController.text = exportParams.meaning;
       extraController.text = exportParams.extra;
+      imagesNotifier.value = exportParams.imageFiles;
       imageNotifier.value = exportParams.imageFile;
       audioNotifier.value = exportParams.audioFile;
     });
@@ -276,103 +323,453 @@ class CreatorPageState extends State<CreatorPage> {
   @override
   Widget build(BuildContext context) {
     appModel = Provider.of<AppModel>(context);
+    Orientation orientation = MediaQuery.of(context).orientation;
 
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: (orientation == Orientation.portrait),
       backgroundColor: widget.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: widget.appBarColor,
-        title: Text(
-          getTitle(),
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
+      appBar: (imagesNotifier.value.isNotEmpty &&
+              orientation == Orientation.landscape)
+          ? null
+          : AppBar(
+              backgroundColor: widget.appBarColor,
+              title: Text(
+                getTitle(),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              actions: [
+                if (!widget.editMode &&
+                    !widget.autoMode &&
+                    widget.backgroundColor == null)
+                  getSeeMoreButton(context),
+              ],
+            ),
+      body: Stack(
+        children: [
+          ClipRect(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
+              child: Container(),
+            ),
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        actions: [
-          if (!widget.editMode &&
-              !widget.autoMode &&
-              widget.backgroundColor == null)
-            getSeeMoreButton(context),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: buildFields(),
+          ),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: RawScrollbar(
-                controller: scrollController,
-                thumbColor: (appModel.getIsDarkMode())
-                    ? Colors.grey[700]
-                    : Colors.grey[400],
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (imageNotifier.value != null)
-                        Image(
-                            image: MemoryImage(
-                                imageNotifier.value!.readAsBytesSync())),
-                      // DropDownMenu(
-                      //   options: decks,
-                      //   selectedOption: _selectedDeck,
-                      //   optionCallback: ,
-                      // ),
-                      displayField(
-                        context: context,
-                        field: AnkiExportField.image,
-                        onFieldSubmitted: (value) {},
-                      ),
-                      displayField(
-                        context: context,
-                        field: AnkiExportField.audio,
-                        onFieldSubmitted: (value) {},
-                      ),
+    );
+  }
 
-                      displayField(
-                        context: context,
-                        field: AnkiExportField.sentence,
-                        onFieldSubmitted: (value) {},
-                        maxLines: null,
-                        keyboardType: TextInputType.multiline,
-                      ),
-                      displayField(
-                        context: context,
-                        field: AnkiExportField.word,
-                        onFieldSubmitted: (value) {},
-                      ),
-                      displayField(
-                        context: context,
-                        field: AnkiExportField.reading,
-                        onFieldSubmitted: (value) {},
-                      ),
-                      displayField(
-                        context: context,
-                        field: AnkiExportField.meaning,
-                        keyboardType: TextInputType.multiline,
-                        onFieldSubmitted: (value) {},
-                      ),
-                      displayField(
-                        context: context,
-                        field: AnkiExportField.extra,
-                        onFieldSubmitted: (value) {},
-                      ),
-                      const SizedBox(height: 10),
-                    ],
+  Widget buildFields() {
+    Orientation orientation = MediaQuery.of(context).orientation;
+    if (imagesNotifier.value.isNotEmpty &&
+        orientation == Orientation.landscape) {
+      return buildLandscapeFields();
+    } else {
+      return buildPortraitFields();
+    }
+  }
+
+  Widget buildAudioPlayer() {
+    return Row(
+      children: [
+        buildPlayButton(),
+        buildDurationAndPosition(),
+        buildSlider(),
+      ],
+    );
+  }
+
+  Widget buildExportButton() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: MediaTypeButton(
+        label: appModel.translate("export_card"),
+        icon: Icons.note_add,
+        onTap: () async {
+          addNote(
+            deck: "Default",
+            params: exportParams,
+          );
+
+          setCurrentParams(AnkiExportParams());
+          setState(() {});
+
+          if (widget.exportCallback != null) {
+            widget.exportCallback!();
+          }
+        },
+      ),
+    );
+  }
+
+  Widget buildLandscapeFields() {
+    ScrollController scrollerImage = ScrollController();
+    ScrollController scrollerText = ScrollController();
+    return Row(
+      children: [
+        Flexible(
+          flex: 3,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AppBar(
+                backgroundColor: widget.appBarColor,
+                title: Text(
+                  getTitle(),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                actions: [
+                  if (!widget.editMode &&
+                      !widget.autoMode &&
+                      widget.backgroundColor == null)
+                    getSeeMoreButton(context),
+                ],
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: RawScrollbar(
+                    controller: scrollerImage,
+                    thumbColor: (appModel.getIsDarkMode())
+                        ? Colors.grey[700]
+                        : Colors.grey[400],
+                    child: SingleChildScrollView(
+                      controller: scrollerImage,
+                      child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.max,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (imagesNotifier.value.isNotEmpty)
+                              ImageSelectWidget(
+                                appModel: appModel,
+                                fileNotifier: imageNotifier,
+                                filesNotifier: imagesNotifier,
+                              ),
+                            if (audioNotifier.value != null) buildAudioPlayer(),
+                            buildDeckDropDown(),
+                          ]),
+                    ),
                   ),
                 ),
               ),
+            ],
+          ),
+        ),
+        Flexible(
+          flex: 4,
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: RawScrollbar(
+              controller: scrollerText,
+              thumbColor: (appModel.getIsDarkMode())
+                  ? Colors.grey[700]
+                  : Colors.grey[400],
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Expanded(
+                    child: Scrollbar(
+                      controller: scrollController,
+                      child: SingleChildScrollView(
+                        controller: scrollController,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.max,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            displayField(
+                              context: context,
+                              field: AnkiExportField.sentence,
+                              onFieldSubmitted: (value) {},
+                              maxLines: null,
+                              keyboardType: TextInputType.multiline,
+                            ),
+                            displayField(
+                              context: context,
+                              field: AnkiExportField.word,
+                              onFieldSubmitted: (value) {},
+                            ),
+                            displayField(
+                              context: context,
+                              field: AnkiExportField.reading,
+                              onFieldSubmitted: (value) {},
+                            ),
+                            displayField(
+                              context: context,
+                              field: AnkiExportField.meaning,
+                              keyboardType: TextInputType.multiline,
+                              onFieldSubmitted: (value) {},
+                            ),
+                            displayField(
+                              context: context,
+                              field: AnkiExportField.image,
+                              onFieldSubmitted: (value) {},
+                            ),
+                            displayField(
+                              context: context,
+                              field: AnkiExportField.audio,
+                              onFieldSubmitted: (value) {},
+                            ),
+                            displayField(
+                              context: context,
+                              field: AnkiExportField.extra,
+                              onFieldSubmitted: (value) {},
+                            ),
+                            SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height / 3 * 2),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  buildExportButton(),
+                ],
+              ),
             ),
           ),
-          //showExportButton(),
-        ],
-      ),
+        ),
+      ],
+    );
+  }
+
+  Widget buildDeckDropDown() {
+    return DropDownMenu(
+      options: widget.decks,
+      initialOption: appModel.getLastAnkiDroidDeck(),
+      optionCallback: appModel.setLastAnkiDroidDeck,
+      voidCallback: () {
+        setState(() {});
+      },
+    );
+  }
+
+  Widget buildPortraitFields() {
+    return Column(
+      children: [
+        Expanded(
+          child: Scrollbar(
+            controller: scrollController,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (imagesNotifier.value.isNotEmpty)
+                    ImageSelectWidget(
+                      appModel: appModel,
+                      fileNotifier: imageNotifier,
+                      filesNotifier: imagesNotifier,
+                    ),
+                  if (audioNotifier.value != null) buildAudioPlayer(),
+                  buildDeckDropDown(),
+                  displayField(
+                    context: context,
+                    field: AnkiExportField.sentence,
+                    onFieldSubmitted: (value) {},
+                    maxLines: null,
+                    keyboardType: TextInputType.multiline,
+                  ),
+                  displayField(
+                    context: context,
+                    field: AnkiExportField.word,
+                    onFieldSubmitted: (value) {},
+                  ),
+                  displayField(
+                    context: context,
+                    field: AnkiExportField.reading,
+                    onFieldSubmitted: (value) {},
+                  ),
+                  displayField(
+                    context: context,
+                    field: AnkiExportField.meaning,
+                    keyboardType: TextInputType.multiline,
+                    onFieldSubmitted: (value) {},
+                  ),
+                  displayField(
+                    context: context,
+                    field: AnkiExportField.image,
+                    onFieldSubmitted: (value) {},
+                  ),
+                  displayField(
+                    context: context,
+                    field: AnkiExportField.audio,
+                    onFieldSubmitted: (value) {},
+                  ),
+                  displayField(
+                    context: context,
+                    field: AnkiExportField.extra,
+                    onFieldSubmitted: (value) {},
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        buildExportButton(),
+      ],
+    );
+  }
+
+  Widget buildPlayButton() {
+    return MultiValueListenableBuider(
+      valueListenables: [
+        playerStateNotifier,
+      ],
+      builder: (context, values, _) {
+        PlayerState playerState = values.elementAt(0);
+
+        IconData iconData = Icons.play_arrow;
+
+        switch (playerState) {
+          case PlayerState.STOPPED:
+            iconData = Icons.replay;
+            break;
+          case PlayerState.PLAYING:
+            iconData = Icons.pause;
+            break;
+          case PlayerState.PAUSED:
+            iconData = Icons.play_arrow;
+            break;
+          case PlayerState.COMPLETED:
+            iconData = Icons.replay;
+            break;
+        }
+
+        return IconButton(
+          icon: Icon(iconData, size: 24),
+          onPressed: () {
+            switch (playerState) {
+              case PlayerState.STOPPED:
+                audioPlayer.play(audioNotifier.value!.path);
+                break;
+              case PlayerState.PLAYING:
+                audioPlayer.pause();
+                break;
+              case PlayerState.PAUSED:
+                audioPlayer.play(audioNotifier.value!.path);
+                break;
+              case PlayerState.COMPLETED:
+                audioPlayer.play(audioNotifier.value!.path);
+                break;
+            }
+          },
+        );
+      },
+    );
+  }
+
+  Widget buildDurationAndPosition() {
+    return MultiValueListenableBuider(
+      valueListenables: [
+        durationNotifier,
+        positionNotifier,
+        playerStateNotifier,
+      ],
+      builder: (context, values, _) {
+        Duration duration = values.elementAt(0);
+        Duration position = values.elementAt(1);
+        PlayerState playerState = values.elementAt(2);
+
+        if (duration == Duration.zero) {
+          return const SizedBox.shrink();
+        }
+
+        String getPositionText() {
+          if (playerState == PlayerState.COMPLETED) {
+            position = duration;
+          }
+
+          if (position.inHours == 0) {
+            var strPosition = position.toString().split('.')[0];
+            return "${strPosition.split(':')[1]}:${strPosition.split(':')[2]}";
+          } else {
+            return position.toString().split('.')[0];
+          }
+        }
+
+        String getDurationText() {
+          if (duration.inHours == 0) {
+            var strDuration = duration.toString().split('.')[0];
+            return "${strDuration.split(':')[1]}:${strDuration.split(':')[2]}";
+          } else {
+            return duration.toString().split('.')[0];
+          }
+        }
+
+        return Text(
+          "${getPositionText()} / ${getDurationText()}",
+        );
+      },
+    );
+  }
+
+  Widget buildSlider() {
+    return MultiValueListenableBuider(
+      valueListenables: [
+        durationNotifier,
+        positionNotifier,
+        playerStateNotifier,
+      ],
+      builder: (context, values, _) {
+        Duration duration = values.elementAt(0);
+        Duration position = values.elementAt(1);
+        PlayerState playerState = values.elementAt(2);
+
+        bool validPosition = duration.compareTo(position) >= 0;
+        double sliderValue =
+            validPosition ? position.inMilliseconds.toDouble() : 0;
+
+        if (playerState == PlayerState.COMPLETED) {
+          sliderValue = 1;
+        }
+
+        return Expanded(
+          child: Slider(
+            activeColor: Theme.of(context).focusColor,
+            inactiveColor: Theme.of(context).unselectedWidgetColor,
+            value: sliderValue,
+            min: 0.0,
+            max: (!validPosition || playerState == PlayerState.COMPLETED)
+                ? 1.0
+                : duration.inMilliseconds.toDouble(),
+            onChanged: validPosition
+                ? (progress) {
+                    if (playerState == PlayerState.COMPLETED) {
+                      sliderValue = progress.floor().toDouble();
+                      audioPlayer.play(
+                        audioNotifier.value!.path,
+                        position: Duration(
+                          milliseconds: sliderValue.toInt(),
+                        ),
+                      );
+                    } else {
+                      sliderValue = progress.floor().toDouble();
+                      audioPlayer
+                          .seek(Duration(milliseconds: sliderValue.toInt()));
+                    }
+                  }
+                : null,
+          ),
+        );
+      },
     );
   }
 
@@ -388,13 +785,10 @@ class CreatorPageState extends State<CreatorPage> {
           label: appModel.translate("creator_options_menu"),
           icon: Icons.widgets,
           action: () async {
-            await Navigator.push(
-              context,
-              PageRouteBuilder(
-                pageBuilder: (context, animation1, animation2) =>
-                    const CreatorPage(editMode: true),
-                transitionDuration: Duration.zero,
-              ),
+            await navigateToCreator(
+              context: context,
+              appModel: appModel,
+              editMode: true,
             );
             setState(() {});
           },
@@ -403,13 +797,10 @@ class CreatorPageState extends State<CreatorPage> {
           label: appModel.translate("creator_options_auto"),
           icon: Icons.hdr_auto,
           action: () async {
-            await Navigator.push(
-              context,
-              PageRouteBuilder(
-                pageBuilder: (context, animation1, animation2) =>
-                    const CreatorPage(autoMode: true),
-                transitionDuration: Duration.zero,
-              ),
+            await navigateToCreator(
+              context: context,
+              appModel: appModel,
+              autoMode: true,
             );
             setState(() {});
           },

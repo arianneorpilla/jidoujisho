@@ -7,27 +7,32 @@ import 'package:chisa/dictionary/dictionary_search_result.dart';
 import 'package:chisa/language/tap_to_select.dart';
 import 'package:chisa/media/media_history.dart';
 import 'package:chisa/media/media_history_item.dart';
+import 'package:chisa/media/media_type.dart';
 import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/models/app_model.dart';
-import 'package:chisa/pages/creator_page.dart';
+import 'package:chisa/util/anki_creator.dart';
 import 'package:chisa/util/blur_widget.dart';
 import 'package:chisa/util/bottom_sheet_dialog.dart';
 import 'package:chisa/util/dictionary_scrollable_widget.dart';
 import 'package:chisa/util/export_paths.dart';
 import 'package:chisa/util/subtitle_options.dart';
+import 'package:chisa/util/subtitle_utils.dart';
 import 'package:chisa/util/time_format.dart';
 import 'package:chisa/util/transcript_dialog.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
+import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:multi_value_listenable_builder/multi_value_listenable_builder.dart';
+import 'package:network_to_file_image/network_to_file_image.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:subtitle/subtitle.dart';
 import 'package:wakelock/wakelock.dart';
+import 'package:path/path.dart' as p;
 
 class PlayerPage extends StatefulWidget {
   final PlayerLaunchParams params;
@@ -46,13 +51,16 @@ class PlayerPageState extends State<PlayerPage>
   late AppModel appModel;
 
   late VlcPlayerController playerController;
-  SubtitleController? subtitleController;
+  late SubtitleItem subtitleItem;
+  late SubtitleItem emptySubtitleItem;
   late AnimationController playPauseIconAnimationController;
 
-  List<SubtitleController> allSubtitleControllers = [];
+  List<SubtitleItem> subtitleItems = [];
 
   final ValueNotifier<int> latestResultEntryIndex = ValueNotifier<int>(0);
   DictionarySearchResult? latestResult;
+
+  int currentAudioTrack = 0;
 
   final ValueNotifier<Subtitle?> currentSubtitle =
       ValueNotifier<Subtitle?>(null);
@@ -66,8 +74,8 @@ class PlayerPageState extends State<PlayerPage>
   late ValueNotifier<BlurWidgetOptions> blurWidgetOptionsNotifier;
   late ValueNotifier<SubtitleOptions> subtitleOptionsNotifier;
 
-  Color menuColor = const Color(0xcc424242);
-  Color dictionaryColor = Colors.grey.shade800.withOpacity(0.6);
+  late Color menuColor;
+  late Color dictionaryColor;
   double menuHeight = 48;
 
   final ValueNotifier<bool> isMenuHidden = ValueNotifier<bool>(false);
@@ -79,63 +87,95 @@ class PlayerPageState extends State<PlayerPage>
 
   bool tapToSelectMode = true;
   double subtitleFontSize = 24;
-  int audioAllowance = 10;
   int subtitlesDelay = 0;
   final FocusNode dragToSelectFocusNode = FocusNode();
 
+  bool dialogSmartPaused = false;
+  bool dialogSmartFocusFlag = false;
+
   DictionarySearchResult? searchResult;
   ValueNotifier<String> searchTerm = ValueNotifier<String>("");
+  ValueNotifier<String> searchMessage = ValueNotifier<String>("");
   ValueNotifier<Subtitle?> shadowingSubtitle = ValueNotifier<Subtitle?>(null);
   ValueNotifier<Subtitle?> listeningSubtitle = ValueNotifier<Subtitle?>(null);
-  String searchMessage = "";
 
   Future<bool> onWillPop() async {
     if (playerController.value.isEnded) {
       Navigator.pop(context, true);
+    } else {
+      Widget alertDialog = AlertDialog(
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.zero,
+        ),
+        title: Text(
+          appModel.translate("dialog_exit_player"),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: Text(
+              appModel.translate("dialog_yes"),
+              style: TextStyle(
+                color: Theme.of(context).focusColor,
+              ),
+            ),
+            onPressed: () => Navigator.pop(context, true),
+          ),
+          TextButton(
+            child: Text(
+              appModel.translate("dialog_no"),
+            ),
+            onPressed: () async {
+              Navigator.pop(context, false);
+            },
+          ),
+        ],
+      );
+
+      return (await showDialog(
+            context: context,
+            builder: (context) => alertDialog,
+          )) ??
+          false;
     }
 
-    Widget alertDialog = AlertDialog(
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
-      title: Text(
-        appModel.translate("dialog_exit_player"),
-      ),
-      actions: <Widget>[
-        TextButton(
-          child: Text(
-            appModel.translate("dialog_yes"),
-            style: TextStyle(
-              color: Theme.of(context).focusColor,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          onPressed: () => Navigator.pop(context, true),
-        ),
-        TextButton(
-          child: Text(
-            appModel.translate("dialog_no"),
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          onPressed: () async {
-            Navigator.pop(context, false);
-          },
-        ),
-      ],
-    );
-
-    return (await showDialog(
-          context: context,
-          builder: (context) => alertDialog,
-        )) ??
-        false;
+    return false;
   }
 
   @override
   bool get wantKeepAlive => true;
+
+  void initialiseEmbeddedSubtitles() async {
+    if (widget.params.getMode() == MediaLaunchMode.network) {
+      return;
+    }
+
+    await Future.delayed(const Duration(seconds: 2), () {});
+
+    int embeddedTrackCount = await playerController.getSpuTracksCount() ?? 0;
+    int currentAudioIndex = await playerController.getAudioTrack() ?? 0;
+
+    List<SubtitleItem> embeddedItems =
+        await prepareSubtitleControllersFromVideo(
+            widget.params.videoFile!, embeddedTrackCount);
+
+    for (int i = 0; i < embeddedItems.length; i++) {
+      SubtitleItem item = embeddedItems[i];
+      await item.controller.initial();
+      print("${item.controller.subtitles.length}");
+    }
+
+    subtitleItems.addAll(embeddedItems);
+
+    if (subtitleItem.type == SubtitleItemType.noneSubtitle) {
+      for (int i = 0; i < subtitleItems.length; i++) {
+        SubtitleItem item = subtitleItems[i];
+        if (item.controller.subtitles.isNotEmpty) {
+          subtitleItem = item;
+          break;
+        }
+      }
+    }
+  }
 
   @override
   void initState() {
@@ -148,17 +188,46 @@ class PlayerPageState extends State<PlayerPage>
       reverseDuration: const Duration(milliseconds: 400),
     );
 
+    emptySubtitleItem = SubtitleItem(
+      controller: SubtitleController(
+        provider: SubtitleProvider.fromString(
+          data: "",
+          type: SubtitleType.srt,
+        ),
+      ),
+      type: SubtitleItemType.noneSubtitle,
+    );
+    subtitleItem = emptySubtitleItem;
+
     WidgetsBinding.instance!.addPostFrameCallback((_) async {
-      allSubtitleControllers = await prepareSubtitleControllers(widget.params);
-      for (SubtitleController controller in allSubtitleControllers) {
-        await controller.initial();
+      menuColor = appModel.getIsDarkMode()
+          ? const Color(0xcc424242)
+          : const Color(0xccdfdfdf);
+      dictionaryColor = appModel.getIsDarkMode()
+          ? Colors.grey.shade800.withOpacity(0.6)
+          : Colors.white.withOpacity(0.8);
+
+      subtitleItems = await prepareSubtitleControllers(widget.params);
+
+      for (int i = 0; i < subtitleItems.length; i++) {
+        SubtitleItem? item = subtitleItems[i];
+        if (item.controller.subtitles.isNotEmpty) {
+          subtitleItem = item;
+          break;
+        }
       }
 
-      if (allSubtitleControllers.isNotEmpty) {
-        subtitleController = allSubtitleControllers.first;
+      await emptySubtitleItem.controller.initial();
+
+      for (int i = 0; i < subtitleItems.length; i++) {
+        SubtitleItem? item = subtitleItems[i];
+        await item.controller.initial();
       }
 
       playerController.addListener(listener);
+      playerController.addOnInitListener(() {
+        initialiseEmbeddedSubtitles();
+      });
       isPlayerReady = true;
 
       blurWidgetOptionsNotifier =
@@ -202,9 +271,39 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   Widget buildDictionary() {
-    return ValueListenableBuilder<String>(
-      valueListenable: searchTerm,
-      builder: (BuildContext context, String searchTerm, _) {
+    return MultiValueListenableBuider(
+      valueListenables: [
+        searchTerm,
+        searchMessage,
+      ],
+      builder: (context, values, _) {
+        String searchTerm = values.elementAt(0);
+        String searchMessage = values.elementAt(1);
+
+        if (searchMessage.isNotEmpty) {
+          return Align(
+            alignment: Alignment.topCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: 16,
+                bottom: 96,
+              ),
+              child: GestureDetector(
+                onTap: () {
+                  setSearchTerm("");
+                },
+                child: Container(
+                  color: dictionaryColor,
+                  padding: const EdgeInsets.all(16),
+                  child: buildDictionaryMessage(searchMessage),
+                ),
+              ),
+            ),
+          );
+        }
+
         if (searchTerm.isEmpty) {
           return const SizedBox.shrink();
         }
@@ -220,6 +319,10 @@ class PlayerPageState extends State<PlayerPage>
             ),
             child: GestureDetector(
               onTap: () {
+                if (appModel.getPlayerDefinitionFocusMode()) {
+                  dialogSmartResume(isSmartFocus: true);
+                }
+
                 setSearchTerm("");
               },
               child: Container(
@@ -235,6 +338,11 @@ class PlayerPageState extends State<PlayerPage>
                   ), // a previously-obtained Future<String> or null
                   builder: (BuildContext context,
                       AsyncSnapshot<DictionarySearchResult> snapshot) {
+                    if (appModel.getPlayerDefinitionFocusMode()) {
+                      dialogSmartFocusFlag = true;
+                      dialogSmartPause();
+                    }
+
                     switch (snapshot.connectionState) {
                       case ConnectionState.waiting:
                         return buildDictionarySearching();
@@ -277,40 +385,36 @@ class PlayerPageState extends State<PlayerPage>
         children: <InlineSpan>[
           TextSpan(
             text: appModel.translate("dictionary_searching_before"),
-            style: const TextStyle(
-              color: Colors.white,
-            ),
+            style: const TextStyle(),
           ),
           TextSpan(
             text: "『",
             style: TextStyle(
-              color: Colors.grey[300],
+              color: Theme.of(context).unselectedWidgetColor,
             ),
           ),
           TextSpan(
             text: searchTerm.value,
             style: const TextStyle(
               fontWeight: FontWeight.bold,
-              color: Colors.white,
             ),
           ),
           TextSpan(
             text: "』",
             style: TextStyle(
-              color: Colors.grey[300],
+              color: Theme.of(context).unselectedWidgetColor,
             ),
           ),
           TextSpan(
             text: appModel.translate("dictionary_searching_after"),
-            style: const TextStyle(
-              color: Colors.white,
-            ),
           ),
           WidgetSpan(
             child: SizedBox(
               height: 12,
               width: 12,
-              child: JumpingDotsProgressIndicator(color: Colors.white),
+              child: JumpingDotsProgressIndicator(
+                color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
+              ),
             ),
           ),
         ],
@@ -318,41 +422,169 @@ class PlayerPageState extends State<PlayerPage>
     );
   }
 
+  Widget buildDictionaryMessage1Argument(
+    String beforeText,
+    String boldedText,
+    String afterText,
+    bool jumpingDots,
+  ) {
+    return Text.rich(
+      TextSpan(
+        text: '',
+        children: <InlineSpan>[
+          TextSpan(
+            text: beforeText,
+            style: const TextStyle(),
+          ),
+          TextSpan(
+            text: "『",
+            style: TextStyle(
+              color: Theme.of(context).unselectedWidgetColor,
+            ),
+          ),
+          TextSpan(
+            text: boldedText,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          TextSpan(
+            text: "』",
+            style: TextStyle(
+              color: Theme.of(context).unselectedWidgetColor,
+            ),
+          ),
+          TextSpan(text: afterText),
+          if (jumpingDots)
+            WidgetSpan(
+              child: SizedBox(
+                height: 12,
+                width: 12,
+                child: JumpingDotsProgressIndicator(
+                  color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildDictionaryMessageArgument(
+    String beforeText,
+    String boldedText,
+    String afterText,
+    bool jumpingDots,
+  ) {
+    return Text.rich(
+      TextSpan(
+        text: '',
+        children: <InlineSpan>[
+          TextSpan(
+            text: beforeText,
+            style: const TextStyle(),
+          ),
+          TextSpan(
+            text: "『",
+            style: TextStyle(
+              color: Theme.of(context).unselectedWidgetColor,
+            ),
+          ),
+          TextSpan(
+            text: boldedText,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          TextSpan(
+            text: "』",
+            style: TextStyle(
+              color: Theme.of(context).unselectedWidgetColor,
+            ),
+          ),
+          TextSpan(text: afterText),
+          if (jumpingDots)
+            WidgetSpan(
+              child: SizedBox(
+                height: 12,
+                width: 12,
+                child: JumpingDotsProgressIndicator(
+                  color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildDictionaryMessage(String messageText) {
+    // Handle special cases with certain reserved patterns.
+    if (messageText.startsWith("deckExport://")) {
+      String deckName = messageText.replaceAll("deckExport://", "");
+      return buildDictionaryMessageArgument(
+        appModel.translate("deck_label_before"),
+        deckName,
+        appModel.translate("deck_label_after"),
+        false,
+      );
+    }
+
+    return Text.rich(
+      TextSpan(
+        text: '',
+        children: <InlineSpan>[
+          TextSpan(
+            text: messageText.replaceAll("...", ""),
+          ),
+          if (messageText.endsWith("..."))
+            WidgetSpan(
+              child: SizedBox(
+                height: 12,
+                width: 12,
+                child: JumpingDotsProgressIndicator(
+                  color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   Widget buildDictionaryNoMatch() {
+    Future.delayed(const Duration(seconds: 3), () {
+      searchTerm.value = "";
+    });
+
     return Text.rich(
       TextSpan(
         text: '',
         children: <InlineSpan>[
           TextSpan(
             text: appModel.translate("dictionary_nomatch_before"),
-            style: const TextStyle(
-              color: Colors.white,
-            ),
           ),
           TextSpan(
             text: "『",
             style: TextStyle(
-              color: Colors.grey[300],
+              color: Theme.of(context).unselectedWidgetColor,
             ),
           ),
           TextSpan(
             text: searchTerm.value,
             style: const TextStyle(
               fontWeight: FontWeight.bold,
-              color: Colors.white,
             ),
           ),
           TextSpan(
             text: "』",
             style: TextStyle(
-              color: Colors.grey[300],
+              color: Theme.of(context).unselectedWidgetColor,
             ),
           ),
           TextSpan(
             text: appModel.translate("dictionary_nomatch_after"),
-            style: const TextStyle(
-              color: Colors.white,
-            ),
+            style: const TextStyle(),
           ),
         ],
       ),
@@ -391,7 +623,7 @@ class PlayerPageState extends State<PlayerPage>
     }
   }
 
-  Future<List<SubtitleController>> prepareSubtitleControllers(
+  Future<List<SubtitleItem>> prepareSubtitleControllers(
       PlayerLaunchParams params) async {
     return await params.mediaSource.provideSubtitles(params);
   }
@@ -412,32 +644,49 @@ class PlayerPageState extends State<PlayerPage>
       isPlaying.value = playerController.value.isPlaying;
       isEnded.value = playerController.value.isEnded;
 
-      if (subtitleController != null) {
-        Subtitle? newSubtitle =
-            subtitleController!.durationSearch(position.value);
+      Subtitle? newSubtitle = subtitleItem.controller
+          .durationSearch(position.value + getSubtitleDelay());
 
-        if (currentSubtitle.value != newSubtitle) {
-          currentSubtitle.value = newSubtitle;
-          // For remembering the last subtitle even if it has disappeared.
-          if (newSubtitle != null) {
-            currentSubtitleMemory.value = newSubtitle;
-          }
+      if (currentSubtitle.value != newSubtitle) {
+        currentSubtitle.value = newSubtitle;
+        // For remembering the last subtitle even if it has disappeared.
+        if (newSubtitle != null) {
+          currentSubtitleMemory.value = newSubtitle;
         }
       }
 
       if (shadowingSubtitle.value != null) {
+        Duration allowance = getAudioAllowance();
+        if (subtitleItem.controller.subtitles.isEmpty) {
+          if (allowance == Duration.zero) {
+            allowance = const Duration(seconds: 5);
+          }
+        }
+
         if (position.value <
-                shadowingSubtitle.value!.start - const Duration(seconds: 15) ||
-            position.value > shadowingSubtitle.value!.end) {
-          playerController.seekTo(shadowingSubtitle.value!.start);
+                shadowingSubtitle.value!.start +
+                    getSubtitleDelay() -
+                    const Duration(seconds: 15) -
+                    getAudioAllowance() ||
+            position.value >
+                shadowingSubtitle.value!.end +
+                    getSubtitleDelay() +
+                    getAudioAllowance()) {
+          playerController.seekTo(shadowingSubtitle.value!.start +
+              getSubtitleDelay() -
+              getAudioAllowance());
         }
       }
 
       if (listeningSubtitle.value != null) {
         if (position.value <
-                listeningSubtitle.value!.start - const Duration(seconds: 15) ||
+                listeningSubtitle.value!.start +
+                    getSubtitleDelay() -
+                    const Duration(seconds: 15) ||
             position.value >
-                listeningSubtitle.value!.end + const Duration(seconds: 5)) {
+                listeningSubtitle.value!.end +
+                    getSubtitleDelay() +
+                    const Duration(seconds: 5)) {
           listeningSubtitle.value = null;
         }
       }
@@ -525,10 +774,16 @@ class PlayerPageState extends State<PlayerPage>
           return const SizedBox.shrink();
         }
 
+        String subtitleText = currentSubtitle.data;
+        String regex = subtitleOptionsNotifier.value.regexFilter;
+        if (regex.isNotEmpty && appModel.getUseRegexFilter()) {
+          subtitleText = subtitleText.replaceAll(RegExp(regex), "");
+        }
+
         if (appModel.getPlayerDragToSelectMode()) {
-          return tapToSelectWidget(currentSubtitle);
+          return tapToSelectWidget(subtitleText);
         } else {
-          return dragToSelectSubtitle(currentSubtitle);
+          return dragToSelectSubtitle(subtitleText);
         }
       },
     );
@@ -560,14 +815,13 @@ class PlayerPageState extends State<PlayerPage>
         character,
         style: TextStyle(
           fontSize: subtitleFontSize,
+          color: Colors.white,
         ),
       ),
     );
   }
 
-  Widget tapToSelectWidget(Subtitle subtitle) {
-    String subtitleText = subtitle.data;
-
+  Widget tapToSelectWidget(String subtitleText) {
     List<List<String>> lines = getLinesFromCharacters(
       context,
       subtitleText.split(''),
@@ -618,9 +872,10 @@ class PlayerPageState extends State<PlayerPage>
     );
   }
 
-  Widget dragToSelectSubtitle(Subtitle subtitle) {
-    String subtitleText = subtitle.data;
-
+  Widget dragToSelectSubtitle(String subtitleText) {
+    subtitleText.codeUnits.forEach((unit) {
+      print(unit);
+    });
     return Stack(
       alignment: Alignment.bottomCenter,
       children: <Widget>[
@@ -664,7 +919,9 @@ class PlayerPageState extends State<PlayerPage>
   // }
 
   void toggleMenuVisibility() async {
-    SystemChrome.setEnabledSystemUIOverlays([]);
+    if (mounted) {
+      SystemChrome.setEnabledSystemUIOverlays([]);
+    }
 
     menuHideTimer!.cancel();
     isMenuHidden.value = !isMenuHidden.value;
@@ -722,13 +979,13 @@ class PlayerPageState extends State<PlayerPage>
     if (currentSubtitle.value != null) {
       return currentSubtitle.value!;
     } else {
-      if (subtitleController == null || subtitleController!.subtitles.isEmpty) {
+      if (subtitleItem.controller.subtitles.isEmpty) {
         return null;
       }
 
       Subtitle? lastSubtitle;
-      for (Subtitle subtitle in subtitleController!.subtitles) {
-        if (position.value < subtitle.start) {
+      for (Subtitle subtitle in subtitleItem.controller.subtitles) {
+        if (position.value < subtitle.start + getSubtitleDelay()) {
           return lastSubtitle;
         }
 
@@ -740,6 +997,8 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   Future<void> playPause() async {
+    dialogSmartPaused = false;
+
     final isFinished = playerController.value.isEnded;
 
     if (playerController.value.isPlaying) {
@@ -865,6 +1124,27 @@ class PlayerPageState extends State<PlayerPage>
     );
   }
 
+  void setDictionaryMessage(String messageText, {Duration? duration}) {
+    searchMessage.value = messageText;
+    if (duration != null) {
+      Future.delayed(duration, () {
+        clearDictionaryMessage();
+      });
+    }
+  }
+
+  void clearDictionaryMessage() {
+    searchMessage.value = "";
+  }
+
+  Duration getSubtitleDelay() {
+    return Duration(milliseconds: subtitleOptionsNotifier.value.subtitleDelay);
+  }
+
+  Duration getAudioAllowance() {
+    return Duration(milliseconds: subtitleOptionsNotifier.value.audioAllowance);
+  }
+
   Widget buildGestureArea() {
     return GestureDetector(
       onHorizontalDragUpdate: (details) async {
@@ -872,21 +1152,34 @@ class PlayerPageState extends State<PlayerPage>
           Subtitle? nearestSubtitle = getNearestSubtitle();
 
           listeningSubtitle.value = nearestSubtitle;
-          await playerController.seekTo(nearestSubtitle!.start);
+          await playerController
+              .seekTo(nearestSubtitle!.start + getSubtitleDelay());
         }
       },
       onVerticalDragUpdate: (details) async {
         if (details.delta.dy.abs() > 10) {
+          await dialogSmartPause();
+
+          bool exporting = false;
           await openTranscript(
-            context: context,
-            subtitles: subtitleController?.subtitles ?? [],
-            currentSubtitle: getNearestSubtitle(),
-            regexFilter: null,
-            onTapCallback: (int selectedIndex) async {
-              await playerController
-                  .seekTo(subtitleController!.subtitles[selectedIndex].start);
-            },
-          );
+              context: context,
+              subtitles: subtitleItem.controller.subtitles,
+              subtitleDelay: getSubtitleDelay(),
+              currentSubtitle: getNearestSubtitle(),
+              regexFilter: subtitleOptionsNotifier.value.regexFilter,
+              onTapCallback: (int selectedIndex) async {
+                await playerController.seekTo(
+                    subtitleItem.controller.subtitles[selectedIndex].start +
+                        getSubtitleDelay());
+              },
+              onLongPressCallback: (int selectedIndex) async {
+                exporting = true;
+                await exportMultipleSubtitles(selectedIndex);
+              });
+
+          if (!exporting) {
+            await dialogSmartResume();
+          }
         }
       },
       onTap: () {
@@ -898,6 +1191,37 @@ class PlayerPageState extends State<PlayerPage>
         ],
       ),
     );
+  }
+
+  Future<void> exportMultipleSubtitles(int selectedIndex) async {
+    int maxSubtitles = 10;
+
+    Subtitle? nearestSubtitle = getNearestSubtitle();
+    if (nearestSubtitle == null) {
+      return;
+    }
+
+    List<Subtitle> subtitles = subtitleItem.controller.subtitles;
+    List<Subtitle> selectedSubtitles = [];
+
+    if (selectedIndex < nearestSubtitle.index - 1) {
+      for (int i = selectedIndex; i <= nearestSubtitle.index - 1; i++) {
+        selectedSubtitles.add(subtitles[i]);
+        if (selectedSubtitles.length == maxSubtitles) {
+          break;
+        }
+      }
+    } else if (selectedIndex > nearestSubtitle.index - 1) {
+      for (int i = nearestSubtitle.index - 1; i <= selectedIndex; i++) {
+        selectedSubtitles.add(subtitles[i]);
+        if (selectedSubtitles.length == maxSubtitles) {
+          break;
+        }
+      }
+    } else {
+      selectedSubtitles.add(nearestSubtitle);
+    }
+    await openCardCreator(selectedSubtitles);
   }
 
   Widget buildBlurWidget() {
@@ -918,24 +1242,21 @@ class PlayerPageState extends State<PlayerPage>
 
     return WillPopScope(
       onWillPop: onWillPop,
-      child: Theme(
-        child: Scaffold(
-          resizeToAvoidBottomInset: false,
-          backgroundColor: Colors.black,
-          body: Stack(
-            alignment: Alignment.center,
-            children: <Widget>[
-              buildPlayerArea(),
-              buildGestureArea(),
-              buildBlurWidget(),
-              buildMenuArea(),
-              buildCentralPlayPause(),
-              buildSubtitleArea(),
-              buildDictionary(),
-            ],
-          ),
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        backgroundColor: Colors.black,
+        body: Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            buildPlayerArea(),
+            buildGestureArea(),
+            buildBlurWidget(),
+            buildMenuArea(),
+            buildCentralPlayPause(),
+            buildSubtitleArea(),
+            buildDictionary(),
+          ],
         ),
-        data: appModel.getDarkTheme(context),
       ),
     );
   }
@@ -973,7 +1294,9 @@ class PlayerPageState extends State<PlayerPage>
 
         String getDurationText() {
           if (shadowingSubtitle != null) {
-            duration = shadowingSubtitle.end;
+            duration = shadowingSubtitle.end +
+                getSubtitleDelay() +
+                getAudioAllowance();
           }
 
           if (duration.inHours == 0) {
@@ -990,7 +1313,9 @@ class PlayerPageState extends State<PlayerPage>
             style: TextStyle(
               color: (shadowingSubtitle != null)
                   ? Theme.of(context).focusColor
-                  : Colors.white,
+                  : appModel.getIsDarkMode()
+                      ? Colors.white
+                      : Colors.black,
             ),
           ),
           onTap: () {
@@ -1013,7 +1338,7 @@ class PlayerPageState extends State<PlayerPage>
         bool ended = values.elementAt(1);
 
         return IconButton(
-          color: Colors.white,
+          color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
           icon: ended
               ? const Icon(Icons.replay)
               : playing
@@ -1031,15 +1356,21 @@ class PlayerPageState extends State<PlayerPage>
 
   Widget buildAudioSubtitlesButton() {
     return IconButton(
-      color: Colors.white,
+      color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
       icon: const Icon(Icons.queue_music_outlined),
       onPressed: () async {
+        Map<int, String> audioEmbeddedTracks =
+            await playerController.getAudioTracks();
+        Map<int, String> subtitleEmbeddedTracks =
+            await playerController.getSpuTracks();
+
         await showModalBottomSheet(
           context: context,
           isScrollControlled: true,
           useRootNavigator: true,
           builder: (context) => BottomSheetDialog(
-            options: getAudioSubtitles(),
+            options:
+                getAudioSubtitles(audioEmbeddedTracks, subtitleEmbeddedTracks),
           ),
         );
       },
@@ -1065,7 +1396,9 @@ class PlayerPageState extends State<PlayerPage>
         label: appModel.translate("player_option_blur_options"),
         icon: Icons.blur_circular_sharp,
         action: () async {
+          await dialogSmartPause();
           await showBlurWidgetOptionsDialog(context, blurWidgetOptionsNotifier);
+          await dialogSmartResume();
         },
       ),
       BottomSheetDialogOption(
@@ -1087,8 +1420,8 @@ class PlayerPageState extends State<PlayerPage>
     return options;
   }
 
-  List<BottomSheetDialogOption> getAudioSubtitles() {
-    List<BottomSheetDialogOption> options = [
+  List<BottomSheetDialogOption> getAudioSubtitlesBottom() {
+    List<BottomSheetDialogOption> bottomOptions = [
       BottomSheetDialogOption(
         label: appModel.translate("player_option_text_filter"),
         active: appModel.getUseRegexFilter(),
@@ -1115,25 +1448,146 @@ class PlayerPageState extends State<PlayerPage>
         },
       ),
       BottomSheetDialogOption(
-        label: appModel.translate("player_option_subtitle_appearance"),
-        icon: Icons.timer_sharp,
+        label: appModel.translate("player_align_subtitle_transcript"),
+        icon: Icons.timer,
         action: () async {
+          await dialogSmartPause();
+          await openTranscript(
+              context: context,
+              subtitles: subtitleItem.controller.subtitles,
+              subtitleDelay: getSubtitleDelay(),
+              currentSubtitle: getNearestSubtitle(),
+              regexFilter: subtitleOptionsNotifier.value.regexFilter,
+              onTapCallback: (int selectedIndex) async {
+                Subtitle subtitle =
+                    subtitleItem.controller.subtitles[selectedIndex];
+
+                subtitleOptionsNotifier.value.subtitleDelay =
+                    subtitle.end.inMilliseconds - position.value.inMilliseconds;
+
+                refreshSubtitleWidget();
+              },
+              onLongPressCallback: (int selectedIndex) async {
+                Subtitle subtitle =
+                    subtitleItem.controller.subtitles[selectedIndex];
+
+                subtitleOptionsNotifier.value.subtitleDelay =
+                    subtitle.end.inMilliseconds - position.value.inMilliseconds;
+
+                SubtitleOptions subtitleOptions = appModel.getSubtitleOptions();
+                subtitleOptions.subtitleDelay =
+                    subtitle.end.inMilliseconds - position.value.inMilliseconds;
+                await appModel.setSubtitleOptions(subtitleOptions);
+
+                refreshSubtitleWidget();
+              });
+          await dialogSmartResume();
+        },
+      ),
+      BottomSheetDialogOption(
+        label: appModel.translate("player_option_subtitle_appearance"),
+        icon: Icons.text_fields,
+        action: () async {
+          await dialogSmartPause();
           await showSubtitleOptionsDialog(context, subtitleOptionsNotifier);
+          await dialogSmartResume();
         },
       ),
       BottomSheetDialogOption(
         label: appModel.translate("player_option_load_subtitles"),
         icon: Icons.upload_file,
-        action: () async {},
+        action: () async {
+          await dialogSmartPause();
+          await importExternalSubtitle();
+          await dialogSmartResume();
+        },
       ),
     ];
+
+    return bottomOptions;
+  }
+
+  List<BottomSheetDialogOption> getAudioDialogOptions(
+      Map<int, String> embeddedTracks) {
+    List<BottomSheetDialogOption> options = [];
+    String audio = appModel.translate("player_option_audio");
+
+    embeddedTracks.forEach((index, label) {
+      BottomSheetDialogOption option = BottomSheetDialogOption(
+          label: "$audio - $label",
+          icon: Icons.music_note_outlined,
+          active: currentAudioTrack == index,
+          action: () {
+            playerController.setAudioTrack(index);
+            currentAudioTrack = index;
+          });
+
+      options.add(option);
+    });
+
+    return options;
+  }
+
+  String getSubtitleLabel(SubtitleItem item, Map<int, String> embeddedTracks) {
+    String subtitle = appModel.translate("player_option_subtitle");
+    String subtitleExternal =
+        appModel.translate("player_option_subtitle_external");
+    String subtitleNone = appModel.translate("player_option_subtitle_none");
+
+    switch (item.type) {
+      case SubtitleItemType.externalSubtitle:
+        return "$subtitle - $subtitleExternal [${item.metadata}]";
+      case SubtitleItemType.embeddedSubtitle:
+        return "$subtitle - ${embeddedTracks.values.toList()[item.index!]}";
+      case SubtitleItemType.webSubtitle:
+        return "$subtitle - ${item.metadata}";
+      case SubtitleItemType.noneSubtitle:
+        return "$subtitle - $subtitleNone";
+    }
+  }
+
+  List<BottomSheetDialogOption> getSubtitleDialogOptions(
+      Map<int, String> embeddedTracks) {
+    List<BottomSheetDialogOption> options = [];
+    for (SubtitleItem item in subtitleItems) {
+      BottomSheetDialogOption option = BottomSheetDialogOption(
+          label: getSubtitleLabel(item, embeddedTracks),
+          icon: Icons.subtitles_outlined,
+          active: subtitleItem == item,
+          action: () {
+            subtitleItem = item;
+          });
+
+      options.add(option);
+    }
+
+    options.add(BottomSheetDialogOption(
+        label: getSubtitleLabel(emptySubtitleItem, embeddedTracks),
+        icon: Icons.subtitles_off_outlined,
+        active: subtitleItem == emptySubtitleItem,
+        action: () {
+          subtitleItem = emptySubtitleItem;
+        }));
+
+    return options;
+  }
+
+  List<BottomSheetDialogOption> getAudioSubtitles(
+    Map<int, String> audioEmbeddedTracks,
+    Map<int, String> subtitleEmbeddedTracks,
+  ) {
+    List<BottomSheetDialogOption> options = [];
+
+    options.addAll(getAudioDialogOptions(audioEmbeddedTracks));
+    options.addAll(getSubtitleDialogOptions(subtitleEmbeddedTracks));
+    options.addAll(getAudioSubtitlesBottom());
 
     return options;
   }
 
   Widget buildOptionsButton() {
     return IconButton(
-      color: Colors.white,
+      color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
       icon: const Icon(Icons.more_vert),
       onPressed: () async {
         await showModalBottomSheet(
@@ -1164,11 +1618,11 @@ class PlayerPageState extends State<PlayerPage>
     if (shadowingSubtitle.value != null) {
       shadowingSubtitle.value = null;
     } else {
-      if (subtitleController == null || subtitleController!.subtitles.isEmpty) {
+      if (subtitleItem.controller.subtitles.isEmpty) {
         shadowingSubtitle.value = Subtitle(
           data: "",
-          start: position.value - Duration(seconds: audioAllowance),
-          end: position.value + Duration(seconds: audioAllowance),
+          start: position.value,
+          end: position.value,
           index: 0,
         );
       } else {
@@ -1224,8 +1678,10 @@ class PlayerPageState extends State<PlayerPage>
         label: appModel.translate("player_option_dictionary_menu"),
         icon: Icons.auto_stories,
         action: () async {
+          await dialogSmartPause();
           await appModel.showDictionaryMenu(context);
           refreshDictionaryWidget();
+          await dialogSmartResume();
         },
       ),
       // BottomSheetDialogOption(
@@ -1237,8 +1693,8 @@ class PlayerPageState extends State<PlayerPage>
       BottomSheetDialogOption(
         label: appModel.translate("player_option_share_subtitle"),
         icon: Icons.share,
-        action: () {
-          Share.share(getNearestSubtitle()?.data ?? "");
+        action: () async {
+          await Share.share(getNearestSubtitle()?.data ?? "");
         },
       ),
       BottomSheetDialogOption(
@@ -1250,6 +1706,8 @@ class PlayerPageState extends State<PlayerPage>
           if (singleSubtitle != null) {
             subtitles.add(singleSubtitle);
           }
+
+          dialogSmartPause();
           await openCardCreator(subtitles);
         },
       ),
@@ -1265,7 +1723,12 @@ class PlayerPageState extends State<PlayerPage>
     String reading = "";
 
     for (Subtitle subtitle in subtitles) {
-      sentence += "${subtitle.data}\n";
+      String subtitleText = subtitle.data;
+      String regex = subtitleOptionsNotifier.value.regexFilter;
+      if (regex.isNotEmpty && appModel.getUseRegexFilter()) {
+        subtitleText = subtitleText.replaceAll(RegExp(regex), "");
+      }
+      sentence += "$subtitleText\n";
     }
     if (subtitles.isNotEmpty) {
       String removeLastNewline(String n) => n = n.substring(0, n.length - 1);
@@ -1280,7 +1743,7 @@ class PlayerPageState extends State<PlayerPage>
       reading = entry.reading;
     }
 
-    List<File> imageFiles = [];
+    List<NetworkToFileImage> imageFiles = [];
 
     File? imageFile;
     File? audioFile;
@@ -1288,7 +1751,7 @@ class PlayerPageState extends State<PlayerPage>
     try {
       imageFiles = await exportImages(subtitles);
       if (imageFiles.isNotEmpty) {
-        imageFile = imageFiles.first;
+        imageFile = imageFiles.first.file;
       }
     } catch (e) {
       debugPrint(e.toString());
@@ -1304,8 +1767,6 @@ class PlayerPageState extends State<PlayerPage>
       debugPrint(e.toString());
     }
 
-    await Future.delayed(const Duration(seconds: 1), () {});
-
     return AnkiExportParams(
       sentence: sentence,
       word: word,
@@ -1317,10 +1778,10 @@ class PlayerPageState extends State<PlayerPage>
     );
   }
 
-  Future<List<File>> exportImages(
+  Future<List<NetworkToFileImage>> exportImages(
     List<Subtitle> subtitles,
   ) async {
-    List<File> imageFiles = [];
+    List<NetworkToFileImage> imageFiles = [];
 
     for (int i = 0; i < subtitles.length; i++) {
       Subtitle subtitle = subtitles[i];
@@ -1335,6 +1796,9 @@ class PlayerPageState extends State<PlayerPage>
       int msEnd = subtitle.end.inMilliseconds;
       int msMean = ((msStart + msEnd) / 2).floor();
       Duration currentTime = Duration(milliseconds: msMean);
+      if (subtitles.length == 1) {
+        currentTime = position.value;
+      }
       String formatted = getTimestampFromDuration(currentTime);
 
       String inputPath = "";
@@ -1351,13 +1815,16 @@ class PlayerPageState extends State<PlayerPage>
       String command =
           "-loglevel verbose -ss $formatted -y -i \"$inputPath\" -frames:v 1 -q:v 2 \"$outputPath\"";
 
-      await FFmpegKit.executeAsync(command, (session) async {
-        debugPrint(await session.getOutput());
-      });
+      await FFmpegKit.executeAsync(command, (session) async {});
 
-      await precacheImage(FileImage(imageFile), context);
+      while (!imageFile.existsSync()) {
+        await Future.delayed(const Duration(milliseconds: 100));
+      }
 
-      imageFiles.add(imageFile);
+      NetworkToFileImage networkToFileImage =
+          NetworkToFileImage(file: imageFile);
+
+      imageFiles.add(networkToFileImage);
     }
 
     return imageFiles;
@@ -1400,32 +1867,42 @@ class PlayerPageState extends State<PlayerPage>
     String command =
         "-loglevel quiet -ss $timeStart -to $timeEnd -y -i \"$inputPath\" -map 0:a:$audioIndex \"$outputPath\"";
 
-    await FFmpegKit.executeAsync(command, (session) async {
-      debugPrint(await session.getOutput());
-    });
+    await FFmpegKit.executeAsync(command, (session) async {});
+
+    while (!audioFile.existsSync()) {
+      await Future.delayed(const Duration(seconds: 1));
+    }
 
     return audioFile;
   }
 
   Future<void> openCardCreator(List<Subtitle> subtitles) async {
+    setDictionaryMessage(appModel.translate("player_prepare_export"));
+
+    imageCache!.clear();
     AnkiExportParams initialParams = await prepareExportParams(subtitles);
 
-    Subtitle? subtitleHolder = currentSubtitle.value;
-    currentSubtitle.value = null;
     searchTerm.value = "";
 
-    await Navigator.of(context).push(
-      PageRouteBuilder(
-        opaque: false,
-        pageBuilder: (_, __, ___) => CreatorPage(
-          initialParams: initialParams,
-          backgroundColor: Theme.of(context).primaryColor.withOpacity(0.9),
-          appBarColor: Colors.transparent,
-        ),
-      ),
-    );
+    clearDictionaryMessage();
+    await navigateToCreator(
+        context: context,
+        appModel: appModel,
+        initialParams: initialParams,
+        backgroundColor: dictionaryColor,
+        appBarColor: Colors.transparent,
+        landscapeLocked: true,
+        popOnExport: true,
+        exportCallback: () {
+          Navigator.of(context).pop();
+          String lastDeck = appModel.getLastAnkiDroidDeck();
+          setDictionaryMessage(
+            "deckExport://$lastDeck",
+            duration: const Duration(seconds: 3),
+          );
+        });
 
-    currentSubtitle.value = subtitleHolder;
+    dialogSmartResume(isSmartFocus: true);
   }
 
   Widget buildSlider() {
@@ -1466,15 +1943,72 @@ class PlayerPageState extends State<PlayerPage>
             onChanged: validPosition
                 ? (progress) {
                     cancelHideTimer();
-                    if (!isEnded) {
-                      sliderValue = progress.floor().toDouble();
-                      playerController.setTime(sliderValue.toInt() * 1000);
-                    }
+
+                    sliderValue = progress.floor().toDouble();
+                    playerController.setTime(sliderValue.toInt() * 1000);
                   }
                 : null,
           ),
         );
       },
     );
+  }
+
+  Future<void> dialogSmartPause() async {
+    if (playerController.value.isPlaying) {
+      dialogSmartPaused = true;
+      playerController.pause();
+    }
+  }
+
+  Future<void> dialogSmartResume({bool isSmartFocus = false}) async {
+    if (dialogSmartFocusFlag && !isSmartFocus) {
+      return;
+    }
+
+    if (isSmartFocus) {
+      dialogSmartFocusFlag = false;
+    }
+
+    if (dialogSmartPaused) {
+      await playerController.play();
+    }
+    dialogSmartPaused = false;
+  }
+
+  Future<void> importExternalSubtitle() async {
+    MediaType mediaType = widget.params.mediaSource.mediaType;
+    Iterable<String>? filePaths = await FilesystemPicker.open(
+      title: "",
+      pickText: appModel.translate("dialog_select"),
+      cancelText: appModel.translate("dialog_return"),
+      context: context,
+      rootDirectories: await appModel.getMediaTypeDirectories(mediaType),
+      fsType: FilesystemType.file,
+      multiSelect: false,
+      folderIconColor: Colors.red,
+    );
+
+    if (filePaths == null || filePaths.isEmpty) {
+      return;
+    }
+
+    String filePath = filePaths.first;
+
+    appModel.setLastPickedDirectory(mediaType, Directory(p.dirname(filePath)));
+    File file = File(filePath);
+
+    String fileExtension = p.extension(filePath);
+
+    SubtitleItem? item = await prepareSubtitleControllerFromFile(
+      file: file,
+      type: SubtitleItemType.externalSubtitle,
+      metadata: fileExtension,
+    );
+
+    await item.controller.initial();
+
+    subtitleItems.add(item);
+    subtitleItem = item;
   }
 }

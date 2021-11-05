@@ -31,8 +31,10 @@ List<List<String>> getLinesFromCharacters(
       working = [];
       concatenate = "";
 
-      working.add(character);
-      concatenate += character;
+      if (character != '\n') {
+        working.add(character);
+        concatenate += character;
+      }
     } else {
       working.add(character);
       concatenate += character;
@@ -79,8 +81,10 @@ List<List<int>> getIndexesFromWords(
       working = [];
       concatenate = "";
 
-      working.add(i);
-      concatenate += character;
+      if (character != '\n') {
+        working.add(i);
+        concatenate += character;
+      }
     } else {
       working.add(i);
       concatenate += character;

@@ -1,3 +1,4 @@
+import 'package:chisa/util/anki_creator.dart';
 import 'package:chisa/util/export_paths.dart';
 import 'package:flutter/material.dart';
 
@@ -11,7 +12,9 @@ import 'package:chisa/pages/home_page.dart';
 /// Application execution starts here.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Permission.manageExternalStorage.request();
+  requestAnkiDroidPermissions();
 
   initialiseExportPaths();
 

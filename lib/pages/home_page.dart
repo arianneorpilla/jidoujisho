@@ -8,6 +8,7 @@ import 'package:chisa/media/media_types/reader_media_type.dart';
 import 'package:chisa/media/media_types/viewer_media_type.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/creator_page.dart';
+import 'package:chisa/util/anki_creator.dart';
 import 'package:chisa/util/dictionary_widget_field.dart';
 import 'package:chisa/util/popup_item.dart';
 import 'package:flutter/material.dart';
@@ -248,10 +249,11 @@ class HomePageState extends State<HomePage> {
           label: appModel.translate("creator_options_menu"),
           icon: Icons.widgets,
           action: () async {
-            Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (context) => const CreatorPage(editMode: true),
-              ),
+            List<String> decks = await getDecks();
+            await navigateToCreator(
+              context: context,
+              appModel: appModel,
+              editMode: true,
             );
             setState(() {});
           },
@@ -260,10 +262,12 @@ class HomePageState extends State<HomePage> {
           label: appModel.translate("creator_options_auto"),
           icon: Icons.hdr_auto,
           action: () async {
-            await Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (context) => const CreatorPage(autoMode: true),
-              ),
+            List<String> decks = await getDecks();
+
+            await navigateToCreator(
+              context: context,
+              appModel: appModel,
+              autoMode: true,
             );
             setState(() {});
           },

@@ -6,6 +6,7 @@ String getTimestampFromDuration(Duration duration) {
   String mins = twoDigits(duration.inMinutes.remainder(60));
   String secs = twoDigits(duration.inSeconds.remainder(60));
   String mills = threeDigits(duration.inMilliseconds.remainder(1000));
+
   return "$hours:$mins:$secs.$mills";
 }
 

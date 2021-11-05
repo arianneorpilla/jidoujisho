@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:network_to_file_image/network_to_file_image.dart';
+
 class AnkiExportParams {
   AnkiExportParams({
     this.sentence = "",
@@ -35,11 +37,39 @@ class AnkiExportParams {
 
   /// List of images to choose from. The first image is what is shown in the
   /// Creator. If there is no [imageFile], this field should be empty.
-  List<File> imageFiles;
+  List<NetworkToFileImage> imageFiles;
 
   /// A [Uri] to an image file to be copied to the Anki media collection.
   File? imageFile;
 
   /// A [Uri] to an audio file to be copied to the Anki media collection.
   File? audioFile;
+
+  @override
+  operator ==(Object other) =>
+      other is AnkiExportParams &&
+      other.sentence == sentence &&
+      other.word == word &&
+      other.reading == reading &&
+      other.meaning == meaning &&
+      other.extra == extra &&
+      other.imageFiles == imageFiles &&
+      other.imageFile == imageFile &&
+      other.audioFile == audioFile;
+
+  @override
+  int get hashCode => {
+        "sentence": sentence,
+        "word": word,
+        "reading": reading,
+        "meaning": meaning,
+        "extra": extra,
+        "imageFiles": imageFiles.hashCode,
+        "imageFile": imageFile.hashCode,
+        "audioFile": audioFile.hashCode,
+      }.hashCode;
+
+  bool isEmpty() {
+    return this == AnkiExportParams();
+  }
 }
