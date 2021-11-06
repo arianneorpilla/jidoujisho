@@ -13,11 +13,13 @@ class YomichanTermBankFormatWidget extends DictionaryWidget {
     required dictionaryFormat,
     required dictionary,
     required context,
+    required selectable,
   }) : super(
           context: context,
           dictionaryEntry: dictionaryEntry,
           dictionary: dictionary,
           dictionaryFormat: dictionaryFormat,
+          selectable: selectable,
         );
 
   Map<String, dynamic> getDictionaryCache() {
@@ -36,7 +38,7 @@ class YomichanTermBankFormatWidget extends DictionaryWidget {
         buildTermTags(),
         Flexible(
           child: SingleChildScrollView(
-            child: meaning ?? buildMeaning(),
+            child: meaning ?? buildMeaning(selectable),
           ),
         ),
       ],
@@ -55,7 +57,7 @@ class YomichanTermBankFormatWidget extends DictionaryWidget {
     List<YomichanTag> tagsStore = getDictionaryCache()["yomichanTags"];
 
     if (map["meanings"] == null) {
-      return super.buildMeaning();
+      return super.buildMeaning(selectable);
     }
 
     List<dynamic> uncastNames = map["termTags"];
@@ -131,7 +133,7 @@ class YomichanTermBankFormatWidget extends DictionaryWidget {
   }
 
   @override
-  Widget buildMeaning() {
+  Widget buildMeaning(bool selectable) {
     if (getDictionaryCache()["yomichanTags"] == null) {
       List<YomichanTag> yomichanTags =
           YomichanTag.getTagsFromMetadata(dictionary.metadata);
@@ -141,7 +143,7 @@ class YomichanTermBankFormatWidget extends DictionaryWidget {
     List<YomichanTag> tagsStore = getDictionaryCache()["yomichanTags"];
 
     if (map["meanings"] == null) {
-      return super.buildMeaning();
+      return super.buildMeaning(selectable);
     }
 
     List<List<String>> definitionTagNames = [];
@@ -212,16 +214,28 @@ class YomichanTermBankFormatWidget extends DictionaryWidget {
       meaningWidgets.add(
         SizedBox(height: (i == 0) ? 10 : 5),
       );
+
       meaningWidgets.add(
-        Text.rich(
-          TextSpan(
-            text: '',
-            style: const TextStyle(
-              fontSize: 15,
-            ),
-            children: inlineSpanWidgets,
-          ),
-        ),
+        (selectable)
+            ? SelectableText.rich(
+                TextSpan(
+                  text: '',
+                  style: const TextStyle(
+                    fontSize: 15,
+                  ),
+                  children: inlineSpanWidgets,
+                ),
+                enableInteractiveSelection: true,
+              )
+            : Text.rich(
+                TextSpan(
+                  text: '',
+                  style: const TextStyle(
+                    fontSize: 15,
+                  ),
+                  children: inlineSpanWidgets,
+                ),
+              ),
       );
       if (i == meanings.length - 1) {
         meaningWidgets.add(

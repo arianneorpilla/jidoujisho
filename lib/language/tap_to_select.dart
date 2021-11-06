@@ -8,10 +8,7 @@ class TapToSelectInfo {
 }
 
 TapToSelectInfo getLinesFromCharacters(
-  BuildContext context,
-  List<String> characters,
-  double fontSize,
-) {
+    BuildContext context, List<String> characters, double fontSize) {
   List<List<String>> lines = [];
   List<List<int>> lineIndexes = [];
 
@@ -44,6 +41,9 @@ TapToSelectInfo getLinesFromCharacters(
 
       lines.add(line);
       lineIndexes.add(lineIndex);
+
+      working = [];
+      workingIndexes = [];
 
       concatenate = "";
 

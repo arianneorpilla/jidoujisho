@@ -460,11 +460,13 @@ DictionaryWidget widgetDisplayEnhancementYomichanTermBank({
   required DictionaryEntry dictionaryEntry,
   required DictionaryFormat dictionaryFormat,
   required Dictionary dictionary,
+  required bool selectable,
 }) {
   return YomichanTermBankFormatWidget(
     dictionaryEntry: dictionaryEntry,
     dictionary: dictionary,
     dictionaryFormat: dictionaryFormat,
     context: context,
+    selectable: selectable,
   );
 }

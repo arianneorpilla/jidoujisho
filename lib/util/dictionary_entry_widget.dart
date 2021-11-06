@@ -11,12 +11,14 @@ class DictionaryWidget {
     required this.dictionaryEntry,
     required this.dictionaryFormat,
     required this.dictionary,
+    required this.selectable,
   });
 
   final BuildContext context;
   final DictionaryEntry dictionaryEntry;
   final DictionaryFormat dictionaryFormat;
   final Dictionary dictionary;
+  final bool selectable;
 
   Widget buildWord() {
     return Text(
@@ -32,9 +34,10 @@ class DictionaryWidget {
     return Text(dictionaryEntry.reading);
   }
 
-  Widget buildMeaning() {
-    return Text(
+  Widget buildMeaning(bool selectable) {
+    return SelectableText(
       dictionaryEntry.meaning,
+      enableInteractiveSelection: selectable,
       style: const TextStyle(
         fontSize: 15,
       ),
@@ -51,7 +54,7 @@ class DictionaryWidget {
         const SizedBox(height: 10),
         Flexible(
           child: SingleChildScrollView(
-            child: meaning ?? buildMeaning(),
+            child: meaning ?? buildMeaning(selectable),
           ),
         ),
       ],

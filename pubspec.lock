@@ -150,6 +150,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.3.5"
+  clipboard_listener:
+    dependency: "direct main"
+    description:
+      name: clipboard_listener
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.0"
   clock:
     dependency: transitive
     description:

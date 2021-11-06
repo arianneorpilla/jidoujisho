@@ -85,6 +85,7 @@ dependencies:
   photo_view:
   intl:
   external_app_launcher:
+  clipboard_listener:
 dev_dependencies:
   flutter_test:
     sdk: flutter

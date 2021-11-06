@@ -62,21 +62,7 @@ Widget transcriptDialog({
         subtitleText = "『$subtitleText』";
       }
 
-      String subtitleDelayText =
-          "(+${getTimestampFromDuration(subtitleDelay)})";
-
       Color durationColor = Theme.of(context).unselectedWidgetColor;
-      if (subtitleDelay != Duration.zero) {
-        if (subtitleDelay.isNegative) {
-          durationColor = Colors.red.shade400;
-        } else {
-          durationColor = Colors.green.shade400;
-        }
-      }
-
-      if (subtitleDelay.isNegative) {
-        subtitleDelayText = "(+${getTimestampFromDuration(subtitleDelay)})";
-      }
 
       Duration offsetStart = subtitle.start + subtitleDelay;
       Duration offsetEnd = subtitle.end + subtitleDelay;
@@ -152,7 +138,7 @@ Future<void> openTranscript({
   AppModel appModel = Provider.of<AppModel>(context, listen: false);
   Color backgroundColor = appModel.getIsDarkMode()
       ? const Color(0xcc212121)
-      : const Color(0xdfb8b8b8);
+      : const Color(0xefc8c8c8);
 
   await showModalBottomSheet(
     backgroundColor: backgroundColor,

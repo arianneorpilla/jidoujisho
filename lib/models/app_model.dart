@@ -854,6 +854,7 @@ class AppModel with ChangeNotifier {
     required DictionaryEntry dictionaryEntry,
     required DictionaryFormat dictionaryFormat,
     required Dictionary dictionary,
+    required bool selectable,
   }) {
     Widget? word;
     Widget? reading;
@@ -882,6 +883,7 @@ class AppModel with ChangeNotifier {
         dictionaryEntry: dictionaryEntry,
         dictionaryFormat: dictionaryFormat,
         dictionary: dictionary,
+        selectable: selectable,
       )
           .buildMainWidget(
         word: word,
@@ -894,6 +896,7 @@ class AppModel with ChangeNotifier {
         dictionaryEntry: dictionaryEntry,
         dictionaryFormat: dictionaryFormat,
         dictionary: dictionary,
+        selectable: selectable,
       ).buildMainWidget(
         word: word,
         reading: reading,

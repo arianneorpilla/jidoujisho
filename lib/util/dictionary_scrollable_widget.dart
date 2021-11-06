@@ -17,6 +17,7 @@ class DictionaryScrollableWidget extends StatefulWidget {
     required this.dictionaryFormat,
     required this.dictionary,
     required this.indexNotifier,
+    this.selectable = false,
     this.callback,
   }) : super(key: key);
 
@@ -24,6 +25,7 @@ class DictionaryScrollableWidget extends StatefulWidget {
     required AppModel appModel,
     required DictionarySearchResult result,
     required ValueNotifier<int> indexNotifier,
+    bool selectable = false,
   }) {
     return DictionaryScrollableWidget(
       appModel: appModel,
@@ -33,6 +35,7 @@ class DictionaryScrollableWidget extends StatefulWidget {
       dictionaryFormat: appModel.getDictionaryFormatFromName(result.formatName),
       dictionary: appModel.getDictionaryFromName(result.dictionaryName),
       indexNotifier: indexNotifier,
+      selectable: selectable,
     );
   }
 
@@ -43,6 +46,7 @@ class DictionaryScrollableWidget extends StatefulWidget {
   final Dictionary dictionary;
   final VoidCallback? callback;
   final ValueNotifier<int> indexNotifier;
+  final bool selectable;
 
   @override
   State<StatefulWidget> createState() => DictionaryScrollableWidgetState();
@@ -101,6 +105,7 @@ class DictionaryScrollableWidgetState
               dictionaryEntry: dictionaryEntry,
               dictionaryFormat: widget.dictionaryFormat,
               dictionary: widget.dictionary,
+              selectable: widget.selectable,
             ),
           ),
           const SizedBox(height: 10),

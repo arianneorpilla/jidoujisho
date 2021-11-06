@@ -107,5 +107,6 @@ abstract class DictionaryFormat {
     required DictionaryEntry dictionaryEntry,
     required DictionaryFormat dictionaryFormat,
     required Dictionary dictionary,
+    required bool selectable,
   })? widgetDisplayEnhancement;
 }

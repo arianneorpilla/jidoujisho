@@ -19,6 +19,7 @@ import 'package:chisa/util/subtitle_options.dart';
 import 'package:chisa/util/subtitle_utils.dart';
 import 'package:chisa/util/time_format.dart';
 import 'package:chisa/util/transcript_dialog.dart';
+import 'package:clipboard_listener/clipboard_listener.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
 import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/material.dart';
@@ -172,8 +173,25 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   @override
+  void dispose() async {
+    playerController.removeListener(listener);
+    await playerController.dispose();
+    await SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+    ClipboardListener.removeListener(copyClipboardAction);
+
+    super.dispose();
+  }
+
+  Future<void> copyClipboardAction() async {
+    setSearchTerm((await Clipboard.getData(Clipboard.kTextPlain))!
+        .text!
+        .replaceAll("￼", ""));
+  }
+
+  @override
   void initState() {
     super.initState();
+    ClipboardListener.addListener(copyClipboardAction);
 
     playerController = preparePlayerController(widget.params);
     playPauseIconAnimationController = AnimationController(
@@ -361,6 +379,7 @@ class PlayerPageState extends State<PlayerPage>
       appModel: appModel,
       result: latestResult!,
       indexNotifier: latestResultEntryIndex,
+      selectable: true,
     );
   }
 
@@ -405,6 +424,7 @@ class PlayerPageState extends State<PlayerPage>
           ),
         ],
       ),
+      textAlign: TextAlign.center,
     );
   }
 
@@ -614,12 +634,6 @@ class PlayerPageState extends State<PlayerPage>
     return await params.mediaSource.provideSubtitles(params);
   }
 
-  @override
-  void dispose() {
-    playerController.removeListener(listener);
-    super.dispose();
-  }
-
   void listener() async {
     if (!mounted) return;
 
@@ -779,7 +793,7 @@ class PlayerPageState extends State<PlayerPage>
     return Text(
       character,
       style: TextStyle(
-        fontSize: subtitleFontSize,
+        fontSize: subtitleOptionsNotifier.value.fontSize,
         foreground: Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 3
@@ -800,7 +814,7 @@ class PlayerPageState extends State<PlayerPage>
       child: Text(
         character,
         style: TextStyle(
-          fontSize: subtitleFontSize,
+          fontSize: subtitleOptionsNotifier.value.fontSize,
           color: Colors.white,
         ),
       ),
@@ -870,7 +884,7 @@ class PlayerPageState extends State<PlayerPage>
           subtitleText,
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: subtitleFontSize,
+            fontSize: subtitleOptionsNotifier.value.fontSize,
             foreground: Paint()
               ..style = PaintingStyle.stroke
               ..strokeWidth = 3
@@ -886,7 +900,7 @@ class PlayerPageState extends State<PlayerPage>
             startDragSubtitlesTimer(newTerm);
           },
           style: TextStyle(
-            fontSize: subtitleFontSize,
+            fontSize: subtitleOptionsNotifier.value.fontSize,
             color: Colors.white,
           ),
           focusNode: dragToSelectFocusNode,
@@ -1455,7 +1469,9 @@ class PlayerPageState extends State<PlayerPage>
         icon: Icons.text_fields,
         action: () async {
           await dialogSmartPause();
+          ClipboardListener.removeListener(copyClipboardAction);
           await showSubtitleOptionsDialog(context, subtitleOptionsNotifier);
+          ClipboardListener.addListener(copyClipboardAction);
           await dialogSmartResume();
         },
       ),
@@ -1506,7 +1522,9 @@ class PlayerPageState extends State<PlayerPage>
         icon: Icons.blur_circular_sharp,
         action: () async {
           await dialogSmartPause();
+          ClipboardListener.removeListener(copyClipboardAction);
           await showBlurWidgetOptionsDialog(context, blurWidgetOptionsNotifier);
+          ClipboardListener.addListener(copyClipboardAction);
           await dialogSmartResume();
         },
       ),
@@ -1896,6 +1914,8 @@ class PlayerPageState extends State<PlayerPage>
 
     searchTerm.value = "";
 
+    ClipboardListener.removeListener(copyClipboardAction);
+
     clearDictionaryMessage();
     await navigateToCreator(
         context: context,
@@ -1915,6 +1935,9 @@ class PlayerPageState extends State<PlayerPage>
         });
 
     dialogSmartResume(isSmartFocus: true);
+
+    await Clipboard.setData(const ClipboardData(text: ""));
+    ClipboardListener.addListener(copyClipboardAction);
   }
 
   Widget buildSlider() {
