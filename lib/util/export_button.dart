@@ -1,22 +1,25 @@
+import 'package:chisa/anki/anki_export_params.dart';
 import 'package:flutter/material.dart';
 
-class BusyMediaTypeButton extends StatefulWidget {
-  const BusyMediaTypeButton({
+class ExportButton extends StatefulWidget {
+  const ExportButton({
     Key? key,
     required this.label,
     required this.icon,
+    required this.exportParams,
     required this.onTap,
   }) : super(key: key);
 
   final String label;
   final IconData icon;
+  final AnkiExportParams exportParams;
   final Function() onTap;
 
   @override
-  State<StatefulWidget> createState() => BusyMediaTypeButtonState();
+  State<StatefulWidget> createState() => ExportButtonState();
 }
 
-class BusyMediaTypeButtonState extends State<BusyMediaTypeButton> {
+class ExportButtonState extends State<ExportButton> {
   bool justClicked = false;
 
   @override

@@ -1,14 +1,17 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:network_to_file_image/network_to_file_image.dart';
 
-class AnkiExportParams {
+class AnkiExportParams with ChangeNotifier {
   AnkiExportParams({
     this.sentence = "",
     this.word = "",
     this.reading = "",
     this.meaning = "",
     this.extra = "",
+    this.imageSearch = "",
+    this.audioSearch = "",
     this.imageFiles = const [],
     this.imageFile,
     this.audioFile,
@@ -45,6 +48,12 @@ class AnkiExportParams {
   /// A [Uri] to an audio file to be copied to the Anki media collection.
   File? audioFile;
 
+  /// The content of the image search controller for the Creator.
+  String imageSearch;
+
+  /// The content of the audio search controller for the Creator.
+  String audioSearch;
+
   @override
   operator ==(Object other) =>
       other is AnkiExportParams &&
@@ -71,5 +80,69 @@ class AnkiExportParams {
 
   bool isEmpty() {
     return this == AnkiExportParams();
+  }
+
+  void setSentence(String newSentence) {
+    sentence = newSentence;
+    notifyListeners();
+  }
+
+  void setWord(String newWord) {
+    word = newWord;
+    notifyListeners();
+  }
+
+  void setReading(String newReading) {
+    reading = newReading;
+    notifyListeners();
+  }
+
+  void setMeaning(String newMeaning) {
+    meaning = newMeaning;
+    notifyListeners();
+  }
+
+  void setExtra(String newExtra) {
+    extra = newExtra;
+    notifyListeners();
+  }
+
+  void setImageSearch(String newImageSearch) {
+    imageSearch = newImageSearch;
+    notifyListeners();
+  }
+
+  void setAudioSearch(String newAudioSearch) {
+    audioSearch = newAudioSearch;
+    notifyListeners();
+  }
+
+  void setImageFiles(List<NetworkToFileImage> newImageFiles) {
+    imageFiles = newImageFiles;
+    notifyListeners();
+  }
+
+  void setAudioFile(File? newAudioFile) {
+    audioFile = newAudioFile;
+    notifyListeners();
+  }
+
+  void setImageFile(File? newImageFile) {
+    imageFile = newImageFile;
+    notifyListeners();
+  }
+
+  void setAllValues(AnkiExportParams params) {
+    sentence = params.sentence;
+    word = params.word;
+    reading = params.reading;
+    meaning = params.meaning;
+    extra = params.extra;
+    imageSearch = params.imageSearch;
+    audioSearch = params.audioSearch;
+    imageFiles = params.imageFiles;
+    imageFile = params.imageFile;
+    audioFile = params.audioFile;
+    notifyListeners();
   }
 }
