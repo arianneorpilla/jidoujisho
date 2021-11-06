@@ -808,7 +808,7 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   Widget tapToSelectWidget(String subtitleText) {
-    List<List<String>> lines = getLinesFromCharacters(
+    TapToSelectInfo tapToSelectInfo = getLinesFromCharacters(
       context,
       subtitleText.split(''),
       subtitleFontSize,
@@ -816,14 +816,18 @@ class PlayerPageState extends State<PlayerPage>
 
     List<Widget> rows = [];
     List<Widget> outlinedRows = [];
-    for (List<String> line in lines) {
+    for (int i = 0; i < tapToSelectInfo.lines.length; i++) {
+      List<String> line = tapToSelectInfo.lines[i];
+      List<int> lineIndex = tapToSelectInfo.lineIndexes[i];
+
       List<Widget> textWidgets = [];
       List<Widget> outlinedTextWidgets = [];
 
       for (int i = 0; i < line.length; i++) {
         String character = line[i];
+        int index = lineIndex[i];
         outlinedTextWidgets.add(getOutlineText(character));
-        textWidgets.add(getText(character, i));
+        textWidgets.add(getText(character, index));
       }
 
       outlinedRows.add(
