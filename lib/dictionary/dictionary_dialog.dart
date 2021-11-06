@@ -12,9 +12,11 @@ class DictionaryDialog extends StatefulWidget {
   const DictionaryDialog({
     Key? key,
     this.manageAllowed = false,
+    this.onDictionaryChange,
   }) : super(key: key);
 
   final bool manageAllowed;
+  final Function()? onDictionaryChange;
 
   @override
   State<StatefulWidget> createState() => DictionaryDialogState();
@@ -186,6 +188,10 @@ class DictionaryDialogState extends State<DictionaryDialog> {
             ),
             onTap: () async {
               await appModel.setCurrentDictionaryName(dictionaryName);
+              if (widget.onDictionaryChange != null) {
+                widget.onDictionaryChange!();
+              }
+
               if (!widget.manageAllowed) {
                 Navigator.pop(context);
               }

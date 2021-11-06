@@ -17,6 +17,8 @@ class DictionaryScrollableWidget extends StatefulWidget {
     required this.dictionaryFormat,
     required this.dictionary,
     required this.indexNotifier,
+    this.verticalScrollCallback,
+    this.longPressCallback,
     this.selectable = false,
     this.callback,
   }) : super(key: key);
@@ -25,6 +27,8 @@ class DictionaryScrollableWidget extends StatefulWidget {
     required AppModel appModel,
     required DictionarySearchResult result,
     required ValueNotifier<int> indexNotifier,
+    Function(DragEndDetails)? verticalScrollCallback,
+    Function()? longPressCallback,
     bool selectable = false,
   }) {
     return DictionaryScrollableWidget(
@@ -36,6 +40,8 @@ class DictionaryScrollableWidget extends StatefulWidget {
       dictionary: appModel.getDictionaryFromName(result.dictionaryName),
       indexNotifier: indexNotifier,
       selectable: selectable,
+      verticalScrollCallback: verticalScrollCallback,
+      longPressCallback: longPressCallback,
     );
   }
 
@@ -46,6 +52,8 @@ class DictionaryScrollableWidget extends StatefulWidget {
   final Dictionary dictionary;
   final VoidCallback? callback;
   final ValueNotifier<int> indexNotifier;
+  final Function(DragEndDetails)? verticalScrollCallback;
+  final Function()? longPressCallback;
   final bool selectable;
 
   @override
@@ -96,6 +104,8 @@ class DictionaryScrollableWidgetState
         );
         setState(() {});
       },
+      onVerticalDragEnd: widget.verticalScrollCallback,
+      onLongPress: widget.longPressCallback,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

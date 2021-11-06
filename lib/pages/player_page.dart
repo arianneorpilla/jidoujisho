@@ -165,7 +165,9 @@ class PlayerPageState extends State<PlayerPage>
       for (int i = 0; i < subtitleItems.length; i++) {
         SubtitleItem item = subtitleItems[i];
         if (item.controller.subtitles.isNotEmpty) {
+          await item.controller.initial();
           subtitleItem = item;
+
           break;
         }
       }
@@ -376,11 +378,25 @@ class PlayerPageState extends State<PlayerPage>
     latestResultEntryIndex.value = 0;
 
     return DictionaryScrollableWidget.fromLatestResult(
-      appModel: appModel,
-      result: latestResult!,
-      indexNotifier: latestResultEntryIndex,
-      selectable: true,
-    );
+        appModel: appModel,
+        result: latestResult!,
+        indexNotifier: latestResultEntryIndex,
+        selectable: true,
+        longPressCallback: () async {
+          await appModel.showDictionaryMenu(context, onDictionaryChange: () {
+            refreshDictionaryWidget();
+          });
+        },
+        verticalScrollCallback: (details) {
+          if (details.primaryVelocity == 0) return;
+
+          if (details.primaryVelocity!.compareTo(0) == -1) {
+            appModel.setPrevDictionary();
+          } else {
+            appModel.setNextDictionary();
+          }
+          refreshDictionaryWidget();
+        });
   }
 
   Widget buildDictionarySearching() {
@@ -1709,8 +1725,9 @@ class PlayerPageState extends State<PlayerPage>
         icon: Icons.auto_stories,
         action: () async {
           await dialogSmartPause();
-          await appModel.showDictionaryMenu(context);
-          refreshDictionaryWidget();
+          await appModel.showDictionaryMenu(context, onDictionaryChange: () {
+            refreshDictionaryWidget();
+          });
           await dialogSmartResume();
         },
       ),

@@ -484,12 +484,14 @@ class AppModel with ChangeNotifier {
   Future<void> showDictionaryMenu(
     BuildContext context, {
     bool manageAllowed = false,
+    Function()? onDictionaryChange,
   }) async {
     await showDialog(
       barrierDismissible: true,
       context: context,
       builder: (context) => DictionaryDialog(
         manageAllowed: manageAllowed,
+        onDictionaryChange: onDictionaryChange,
       ),
     );
   }
