@@ -1,46 +1,125 @@
-import 'package:chisa/media/media_history.dart';
-import 'package:chisa/media/media_history_item.dart';
-import 'package:chisa/media/media_source.dart';
+import 'package:chisa/media/media_histories/media_history.dart';
 import 'package:chisa/models/app_model.dart';
+import 'package:chisa/pages/dictionary_home_page.dart';
 import 'package:chisa/pages/media_home_page.dart';
+import 'package:chisa/pages/player_home_page.dart';
+import 'package:chisa/pages/reader_home_page.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-abstract class MediaType {
-  MediaType({
-    required this.mediaTypeName,
-    required this.mediaTypeIcon,
-  });
+enum MediaType {
+  player,
+  reader,
+  viewer,
+  dictionary,
+}
 
-  /// The default localisation name of this media type for preferencing
-  /// purposes.
-  late String mediaTypeName;
+extension MediaTypeParameters on MediaType {
+  IconData icon() {
+    switch (this) {
+      case MediaType.player:
+        return Icons.video_library;
+      case MediaType.reader:
+        return Icons.library_books;
+      case MediaType.viewer:
+        return Icons.photo_library;
+      case MediaType.dictionary:
+        return Icons.auto_stories;
+    }
+  }
 
-  /// The icon that shows on the bottom navigation bar.
-  late IconData mediaTypeIcon;
+  String prefsDirectory() {
+    switch (this) {
+      case MediaType.player:
+        return "player_media_type";
+      case MediaType.reader:
+        return "reader_media_type";
+      case MediaType.viewer:
+        return "viewer_media_type";
+      case MediaType.dictionary:
+        return "dictionary_media_type";
+    }
+  }
 
-  /// The widget that is shown when the bottom navigation bar item from
-  /// [getHomeNavigationBarItem] is active in the home page.
-  ///
-  /// For example, in the case of the Reader, this is a history of books to
-  /// pick from. For the player, this shows the playback history.
-  MediaHomePage getHomeBody(BuildContext context);
+  MediaHomePage getHomeBody() {
+    switch (this) {
+      case MediaType.player:
+        return PlayerHomePage(mediaType: this);
+      case MediaType.reader:
+        return ReaderHomePage(mediaType: this);
+      case MediaType.viewer:
+        throw UnimplementedError();
+      case MediaType.dictionary:
+        return DictionaryHomePage(mediaType: this);
+    }
+  }
 
-  /// A bottom navigation bar item that represents the media type in the home
-  /// screen.
-  ///
-  /// For example, in the case of the Reader, this is a bottom navigation bar
-  /// item with a book icon and labelled as "Reader". For the player, this
-  /// is a nav bar item with a video icon and labelled as "Player".
-  BottomNavigationBarItem getHomeTab(BuildContext context);
+  BottomNavigationBarItem getHomeTab(BuildContext context) {
+    AppModel appModel = Provider.of<AppModel>(context);
+    return BottomNavigationBarItem(
+      label: appModel.translate(prefsDirectory()),
+      icon: Icon(icon()),
+    );
+  }
 
-  /// Get the media history for this certain media type.
-  MediaHistory getMediaHistory(AppModel appModel);
+  MediaHistory getMediaHistory(AppModel appModel) {
+    return MediaHistory(
+      sharedPreferences: appModel.sharedPreferences,
+      prefsDirectory: prefsDirectory(),
+    );
+  }
 
-  /// The explicit file types this media source allows for file picking.
-  List<String> getAllowedExtensions();
-
-  /// Obtain the media source that a media history item pertains to.
-  MediaSource getMediaSourceFromItem(AppModel appModel, MediaHistoryItem item) {
-    return appModel.getMediaSourceFromName(mediaTypeName, item.source);
+  List<String> getAllowedExtensions() {
+    switch (this) {
+      case MediaType.player:
+        return const [
+          ".3gp",
+          ".aaf",
+          ".asf",
+          ".avchd",
+          ".avi",
+          ".drc",
+          ".flv",
+          ".m2v",
+          ".m4p",
+          ".m4v",
+          ".mkv",
+          ".mng",
+          ".mov",
+          ".mp2",
+          ".mp4",
+          ".mpe",
+          ".mpeg",
+          ".mpg",
+          ".mpv",
+          ".mxf",
+          ".nsv",
+          ".ogg",
+          ".ogv",
+          ".ogm",
+          ".qt",
+          ".rm",
+          ".rmvb",
+          ".roq",
+          ".srt",
+          ".svi",
+          ".vob",
+          ".webm",
+          ".wmv",
+          ".yuv"
+        ];
+      case MediaType.reader:
+        return const [
+          ".epub",
+        ];
+      case MediaType.viewer:
+        return const [
+          ".jpg",
+          ".jpeg",
+          ".png",
+        ];
+      case MediaType.dictionary:
+        throw UnsupportedError("Operation invalid for dictionary media type.");
+    }
   }
 }

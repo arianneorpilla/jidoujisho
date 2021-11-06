@@ -1,13 +1,8 @@
 import 'package:chisa/dictionary/dictionary_widget_enhancement.dart';
 import 'package:chisa/dictionary/dictionary_widget_enhancement_dialog.dart';
-import 'package:chisa/media/media_sources/viewer_media_source.dart';
 
 import 'package:chisa/media/media_type.dart';
-import 'package:chisa/media/media_types/player_media_type.dart';
-import 'package:chisa/media/media_types/reader_media_type.dart';
-import 'package:chisa/media/media_types/viewer_media_type.dart';
 import 'package:chisa/models/app_model.dart';
-import 'package:chisa/pages/creator_page.dart';
 import 'package:chisa/util/anki_creator.dart';
 import 'package:chisa/util/dictionary_widget_field.dart';
 import 'package:chisa/util/popup_item.dart';
@@ -48,7 +43,7 @@ class HomePageState extends State<HomePage> {
           getSeeMoreButton(context),
         ],
       ),
-      body: mediaTypes[selectedTabIndex].getHomeBody(context),
+      body: mediaTypes[selectedTabIndex].getHomeBody(),
       bottomNavigationBar: getBottomNavigationBar(),
     );
   }
@@ -356,24 +351,33 @@ class HomePageState extends State<HomePage> {
           label: appModel.translate("player_media_type"),
           icon: Icons.video_library,
           action: () async {
-            await appModel.showSourcesMenu(context, PlayerMediaType(),
-                manageAllowed: true);
+            await appModel.showSourcesMenu(
+              context: context,
+              mediaType: MediaType.player,
+              manageAllowed: true,
+            );
           },
         ),
         popupItem(
           label: appModel.translate("reader_media_type"),
           icon: Icons.library_books,
           action: () async {
-            await appModel.showSourcesMenu(context, ReaderMediaType(),
-                manageAllowed: true);
+            await appModel.showSourcesMenu(
+              context: context,
+              mediaType: MediaType.reader,
+              manageAllowed: true,
+            );
           },
         ),
         popupItem(
           label: appModel.translate("viewer_media_type"),
           icon: Icons.photo_library,
           action: () async {
-            await appModel.showSourcesMenu(context, ViewerMediaType(),
-                manageAllowed: true);
+            await appModel.showSourcesMenu(
+              context: context,
+              mediaType: MediaType.viewer,
+              manageAllowed: true,
+            );
           },
         ),
       ],

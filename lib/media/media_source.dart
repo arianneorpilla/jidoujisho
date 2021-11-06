@@ -1,10 +1,8 @@
 import 'dart:async';
 
-import 'package:chisa/media/media_history_item.dart';
+import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_type.dart';
-import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/models/app_model.dart';
-import 'package:chisa/util/media_type_field.dart';
 import 'package:flutter/material.dart';
 
 /// A source for a [MediaType] that will appear on the list of sources when
@@ -53,7 +51,7 @@ abstract class MediaSource {
 
   /// The unique identifier that is passed to the source parameter
   String getIdentifier() {
-    return "${mediaType.mediaTypeName}/$sourceName";
+    return "${mediaType.prefsDirectory()}/$sourceName";
   }
 
   /// From a [MediaHistoryItem], generate the thumbnail of this item that will

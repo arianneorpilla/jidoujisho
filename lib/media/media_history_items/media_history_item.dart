@@ -1,14 +1,15 @@
 import 'dart:convert';
 
-abstract class MediaHistoryItem {
+class MediaHistoryItem {
   MediaHistoryItem({
     required this.key,
     required this.name,
     required this.source,
+    required this.mediaType,
     required this.currentProgress,
     required this.completeProgress,
-    this.thumbnailPath = "",
     required this.extra,
+    this.thumbnailPath = "",
   });
 
   /// The unique identifier of this item. If the same item exists in history,
@@ -19,13 +20,19 @@ abstract class MediaHistoryItem {
   /// or a book.
   String name;
 
-  /// The [sourceName] of the media source this item is from.
+  /// The media source where this item is from. All media sources have a
+  /// unique identifier that takes the format of [mediaTypeName/sourceName].
   ///
   /// This is used to generate resources that the media item may require for
   /// preview purposes. For example, for a local media item to display its
   /// screenshot, the player page will need to invoke a function pertaining
   /// to the media source in order to generate its thumbnail.
   String source;
+  String mediaType;
+
+  /// A path pointing to a file, storing a temporary thumbnail. This is deleted
+  /// when an item is disposed.
+  String thumbnailPath;
 
   /// Progress of this item persisted for resuming purposes.
   ///
@@ -37,15 +44,33 @@ abstract class MediaHistoryItem {
   /// division and progress tracking purposes.
   int completeProgress;
 
-  /// A path pointing to a file, storing a temporary thumbnail. This is deleted
-  /// when an item is disposed.
-  String thumbnailPath;
-
   /// Extra parameters are provided should a media history item require it.
   Map<String, dynamic> extra;
 
-  /// Return the serialised JSON form of this [MediaHistoryItem]. See
-  /// [MediaHistory] for how this is used.
+  factory MediaHistoryItem.fromJson(String json) {
+    Map<String, dynamic> map = jsonDecode(json);
+
+    String key = map["key"] ?? "";
+    String name = map["name"] ?? "";
+    String source = map["source"] ?? "";
+    String mediaType = map["mediaType"] ?? "";
+    int currentProgress = int.tryParse(map["currentProgress"] ?? "") ?? 0;
+    int completeProgress = int.tryParse(map["completeProgress"] ?? "") ?? 0;
+    String thumbnailPath = map["thumbnailPath"] ?? "";
+    Map<String, dynamic> extra = jsonDecode(map["extra"] ?? "{}");
+
+    return MediaHistoryItem(
+      key: key,
+      name: name,
+      mediaType: mediaType,
+      source: source,
+      currentProgress: currentProgress,
+      completeProgress: completeProgress,
+      thumbnailPath: thumbnailPath,
+      extra: extra,
+    );
+  }
+
   String toJson() {
     Map<String, String> map = {
       "key": key,

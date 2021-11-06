@@ -5,8 +5,8 @@ import 'package:chisa/anki/anki_export_params.dart';
 import 'package:chisa/dictionary/dictionary_entry.dart';
 import 'package:chisa/dictionary/dictionary_search_result.dart';
 import 'package:chisa/language/tap_to_select.dart';
-import 'package:chisa/media/media_history.dart';
-import 'package:chisa/media/media_history_item.dart';
+import 'package:chisa/media/media_histories/media_history.dart';
+import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_type.dart';
 import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/models/app_model.dart';
@@ -274,6 +274,17 @@ class PlayerPageState extends State<PlayerPage>
     searchTerm.value = newTerm;
   }
 
+  MediaHistoryItem? generateContextHistoryItem() {
+    if (!widget.params.saveHistoryItem) {
+      return null;
+    }
+
+    MediaHistoryItem item = widget.params.mediaHistoryItem;
+    item.currentProgress = position.value.inSeconds;
+    item.completeProgress = duration.value.inSeconds;
+    return item;
+  }
+
   Widget buildDictionary() {
     return MultiValueListenableBuider(
       valueListenables: [
@@ -351,10 +362,7 @@ class PlayerPageState extends State<PlayerPage>
                 child: FutureBuilder<DictionarySearchResult>(
                   future: appModel.searchDictionary(
                     searchTerm,
-                    contextSource: playerController.dataSource,
-                    contextPosition: playerController.value.duration.inSeconds,
-                    contextMediaTypeName:
-                        widget.params.mediaSource.getIdentifier(),
+                    mediaHistoryItem: generateContextHistoryItem(),
                   ), // a previously-obtained Future<String> or null
                   builder: (BuildContext context,
                       AsyncSnapshot<DictionarySearchResult> snapshot) {
@@ -798,9 +806,9 @@ class PlayerPageState extends State<PlayerPage>
         }
 
         if (appModel.getPlayerDragToSelectMode()) {
-          return tapToSelectWidget(subtitleText);
-        } else {
           return dragToSelectSubtitle(subtitleText);
+        } else {
+          return tapToSelectWidget(subtitleText);
         }
       },
     );
@@ -1707,11 +1715,11 @@ class PlayerPageState extends State<PlayerPage>
       ),
       BottomSheetDialogOption(
         label: (appModel.getPlayerDragToSelectMode())
-            ? appModel.translate("player_option_drag_to_select")
-            : appModel.translate("player_option_tap_to_select"),
+            ? appModel.translate("player_option_tap_to_select")
+            : appModel.translate("player_option_drag_to_select"),
         icon: (appModel.getPlayerDragToSelectMode())
-            ? Icons.select_all
-            : Icons.touch_app,
+            ? Icons.touch_app
+            : Icons.select_all,
         action: () async {
           await appModel.togglePlayerDragToSelectMode();
           refreshSubtitleWidget();

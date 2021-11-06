@@ -1,5 +1,6 @@
 import 'package:chisa/anki/anki_export_params.dart';
 import 'package:chisa/dictionary/dictionary.dart';
+import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/util/anki_creator.dart';
 import 'package:chisa/util/dictionary_dialog_widget.dart';
 import 'package:chisa/dictionary/dictionary_entry.dart';
@@ -14,7 +15,6 @@ import 'package:chisa/dictionary/dictionary_search_result.dart';
 import 'package:chisa/media/media_history_items/dictionary_media_history_item.dart';
 import 'package:chisa/media/media_type.dart';
 import 'package:chisa/models/app_model.dart';
-import 'package:chisa/pages/creator_page.dart';
 import 'package:chisa/pages/media_home_page.dart';
 import 'package:chisa/util/busy_icon_button.dart';
 import 'package:chisa/util/center_icon_message.dart';
@@ -63,6 +63,7 @@ class DictionaryPageState extends State<DictionaryHomePage> {
         .getDictionaryItems()
         .reversed
         .toList();
+
     List<DictionarySearchResult> results = mediaHistoryItems
         .map((item) => DictionarySearchResult.fromJson(item.key))
         .toList();
@@ -148,7 +149,7 @@ class DictionaryPageState extends State<DictionaryHomePage> {
             borderSide: BorderSide(color: Theme.of(context).focusColor),
           ),
           contentPadding: const EdgeInsets.all(0),
-          prefixIcon: Icon(widget.mediaType.mediaTypeIcon),
+          prefixIcon: Icon(widget.mediaType.icon()),
           suffixIcon: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             mainAxisSize: MainAxisSize.min,
@@ -202,6 +203,12 @@ class DictionaryPageState extends State<DictionaryHomePage> {
         setState(() {});
       },
     );
+  }
+
+  Future<void> returnFromContext(MediaHistoryItem item) async {
+    // MediaType mediaType = appModel.getMediaTypeFromName(item.mediaType);
+
+    // switch (mediaType.)
   }
 
   Widget buildDictionaryResult(DictionarySearchResult result,
@@ -264,10 +271,21 @@ class DictionaryPageState extends State<DictionaryHomePage> {
                     setState(() {});
                   },
                 ),
+                if (mediaHistoryItem.contextItem != null)
+                  TextButton(
+                    child: Text(
+                      appModel.translate("dialog_context"),
+                    ),
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      await returnFromContext(mediaHistoryItem.contextItem!);
+
+                      setState(() {});
+                    },
+                  ),
                 TextButton(
                     child: Text(
                       appModel.translate("dialog_creator"),
-                      style: const TextStyle(),
                     ),
                     onPressed: () async {
                       DictionaryEntry dialogEntry =
@@ -283,16 +301,6 @@ class DictionaryPageState extends State<DictionaryHomePage> {
                       );
                       setState(() {});
                     }),
-                TextButton(
-                  child: Text(
-                    appModel.translate("dialog_close"),
-                    style: const TextStyle(),
-                  ),
-                  onPressed: () async {
-                    Navigator.pop(context);
-                    setState(() {});
-                  },
-                ),
               ],
             ),
           );

@@ -11,17 +11,14 @@ import 'package:chisa/language/languages/chinese_simplified_language.dart';
 import 'package:chisa/language/languages/chinese_traditional_language.dart';
 import 'package:chisa/language/languages/english_language.dart';
 import 'package:chisa/language/languages/japanese_language.dart';
-import 'package:chisa/media/media_histories/default_media_history.dart';
+import 'package:chisa/media/media_histories/media_history.dart';
+import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_source.dart';
 import 'package:chisa/media/media_sources/player_local_media_source.dart';
 import 'package:chisa/media/media_sources/player_media_source.dart';
 import 'package:chisa/media/media_sources/reader_media_source.dart';
 import 'package:chisa/media/media_sources/viewer_media_source.dart';
 import 'package:chisa/media/media_sources_dialog.dart';
-import 'package:chisa/media/media_types/dictionary_media_type.dart';
-import 'package:chisa/media/media_types/player_media_type.dart';
-import 'package:chisa/media/media_types/reader_media_type.dart';
-import 'package:chisa/media/media_types/viewer_media_type.dart';
 import 'package:chisa/util/blur_widget.dart';
 import 'package:chisa/util/subtitle_options.dart';
 import 'package:external_path/external_path.dart';
@@ -35,7 +32,7 @@ import 'package:path/path.dart' as p;
 
 import 'package:chisa/media/media_histories/dictionary_media_history.dart';
 import 'package:chisa/media/media_history_items/dictionary_media_history_item.dart';
-import 'package:chisa/media/media_history_item.dart';
+
 import 'package:chisa/util/dictionary_widget_field.dart';
 import 'package:chisa/anki/anki_export_enhancement.dart';
 import 'package:chisa/anki/anki_export_params.dart';
@@ -93,8 +90,7 @@ class AppModel with ChangeNotifier {
   final Map<String, Dictionary> _availableDictionaries = {};
   final Map<String, DictionaryFormat> _availableDictionaryFormats = {};
   final Map<String, Language> _availableLanguages = {};
-  final Map<String, MediaType> _availableMediaTypes = {};
-  final Map<String, Map<String, MediaSource>> _availableMediaSources = {};
+  final Map<MediaType, Map<String, MediaSource>> _availableMediaSources = {};
   final Map<AnkiExportField, Map<String, AnkiExportEnhancement>>
       _availableExportEnhancements = {};
   final Map<DictionaryWidgetField, Map<String, DictionaryWidgetEnhancement>>
@@ -103,9 +99,9 @@ class AppModel with ChangeNotifier {
   final Map<String, Store> _dictionaryStores = {};
 
   final List<MediaType> _mediaTypes = [
-    PlayerMediaType(),
-    ReaderMediaType(),
-    DictionaryMediaType(),
+    MediaType.player,
+    MediaType.reader,
+    MediaType.dictionary,
   ];
   List<MediaType> get mediaTypes => _mediaTypes;
 
@@ -116,8 +112,7 @@ class AppModel with ChangeNotifier {
   Map<String, DictionaryFormat> get availableDictionaryFormats =>
       _availableDictionaryFormats;
   Map<String, Language> get availableLanguages => _availableLanguages;
-  Map<String, MediaType> get availableMediaTypes => _availableMediaTypes;
-  Map<String, Map<String, MediaSource>> get availableMediaSources =>
+  Map<MediaType, Map<String, MediaSource>> get availableMediaSources =>
       _availableMediaSources;
   Map<AnkiExportField, Map<String, AnkiExportEnhancement>>
       get availableExportEnhancements => _availableExportEnhancements;
@@ -139,7 +134,6 @@ class AppModel with ChangeNotifier {
     if (!_hasInitialised) {
       populateDictionaryFormats();
       populateLanguages();
-      populateMediaTypes();
       populateMediaSources();
       populateExportEnhancements();
       populateWidgetEnhancements();
@@ -173,25 +167,20 @@ class AppModel with ChangeNotifier {
     }
   }
 
-  void populateMediaTypes() {
-    for (MediaType mediaType in mediaTypes) {
-      _availableMediaTypes[mediaType.mediaTypeName] = mediaType;
-    }
-  }
-
   void populateMediaSources() {
     for (MediaType mediaType in mediaTypes) {
-      _availableMediaSources[mediaType.mediaTypeName] = {};
+      _availableMediaSources[mediaType] = {};
     }
 
     for (PlayerMediaSource source in playerMediaSources) {
-      _availableMediaSources["Player"]![source.sourceName] = source;
+      _availableMediaSources[MediaType.player]![source.sourceName] = source;
     }
+
     for (ReaderMediaSource source in readerMediaSources) {
-      _availableMediaSources["Reader"]![source.sourceName] = source;
+      _availableMediaSources[MediaType.reader]![source.sourceName] = source;
     }
     // for (ViewerMediaSource source in viewerMediaSources) {
-    //   _availableMediaSources["Viewer"]![source.sourceName] = source;
+    //   _availableMediaSources[MediaType.viewer]![source.sourceName] = source;
     // }
   }
 
@@ -382,21 +371,20 @@ class AppModel with ChangeNotifier {
 
   /// Get the saved last main menu item so it can be shown on application start.
   int getLastActiveTabIndex() {
-    String? lastActiveMediaType =
-        _sharedPreferences.getString("lastActiveMediaType");
+    int tabIndex = mediaTypes.indexWhere((mediaType) =>
+        "$mediaType" == _sharedPreferences.getString("lastActiveMediaType"));
 
-    if (lastActiveMediaType == null) {
+    if (tabIndex == -1) {
       return 0;
-    } else {
-      return mediaTypes.indexWhere(
-          (mediaType) => mediaType.mediaTypeName == lastActiveMediaType);
     }
+
+    return tabIndex;
   }
 
   /// Save the last index and remember it on application restart.
   Future<void> setLastActiveTabIndex(int tabIndex) async {
     await _sharedPreferences.setString(
-        "lastActiveMediaType", mediaTypes[tabIndex].mediaTypeName);
+        "lastActiveMediaType", mediaTypes[tabIndex].toString());
   }
 
   /// Get the current active dictionary, the last one used.
@@ -410,31 +398,32 @@ class AppModel with ChangeNotifier {
   }
 
   MediaSource getCurrentMediaTypeSource(MediaType mediaType) {
-    return availableMediaSources[mediaType.mediaTypeName]![
+    return availableMediaSources[mediaType]![
         getCurrentMediaTypeSourceName(mediaType)]!;
   }
 
   String getCurrentMediaTypeSourceName(MediaType mediaType) {
     return _sharedPreferences
-            .getString("${mediaType.mediaTypeName}/currentSource") ??
-        availableMediaSources[mediaType.mediaTypeName]!.values.first.sourceName;
+            .getString("${mediaType.prefsDirectory()}/currentSource") ??
+        availableMediaSources[mediaType]!.values.first.sourceName;
   }
 
   Future<void> setCurrentMediaTypeSourceName(
-      MediaType type, String sourceName) async {
+      MediaType mediaType, String sourceName) async {
     await _sharedPreferences.setString(
-        "${type.mediaTypeName}/currentSource", sourceName);
+        "${mediaType.prefsDirectory()}/currentSource", sourceName);
   }
 
   bool getMediaSourceShown(MediaSource source) {
     return _sharedPreferences.getBool(
-            "${source.mediaType.mediaTypeName}/${source.sourceName}/shown") ??
+            "${source.mediaType.prefsDirectory()}/${source.sourceName}/shown") ??
         true;
   }
 
   Future<void> setMediaSourceShown(MediaSource source, bool shown) async {
     await _sharedPreferences.setBool(
-        "${source.mediaType.mediaTypeName}/${source.sourceName}/shown", shown);
+        "${source.mediaType.prefsDirectory()}/${source.sourceName}/shown",
+        shown);
   }
 
   /// Method for future proofing and saving performance. Dump one time data
@@ -499,9 +488,9 @@ class AppModel with ChangeNotifier {
 
   /// Show the dictionary menu. This should be callable from many parts of the
   /// app, so it is appropriately handled by the model.
-  Future<void> showSourcesMenu(
-    BuildContext context,
-    MediaType mediaType, {
+  Future<void> showSourcesMenu({
+    required BuildContext context,
+    required MediaType mediaType,
     bool manageAllowed = false,
   }) async {
     await showDialog(
@@ -672,7 +661,7 @@ class AppModel with ChangeNotifier {
   }
 
   List<MediaSource> getMediaSourcesByType(MediaType mediaType) {
-    return availableMediaSources[mediaType.mediaTypeName]!.values.toList();
+    return availableMediaSources[mediaType]!.values.toList();
   }
 
   List<String> getImportedDictionaryNames() {
@@ -713,8 +702,8 @@ class AppModel with ChangeNotifier {
     return availableDictionaryFormats[formatName]!;
   }
 
-  MediaSource getMediaSourceFromName(String mediaTypeName, String sourceName) {
-    return availableMediaSources[mediaTypeName]![sourceName]!;
+  MediaSource getMediaSourceFromName(MediaType type, String sourceName) {
+    return availableMediaSources[type]![sourceName]!;
   }
 
   Dictionary getDictionaryFromName(String dictionaryName) {
@@ -725,15 +714,9 @@ class AppModel with ChangeNotifier {
     return availableLanguages[getTargetLanguageName()]!;
   }
 
-  MediaType getMediaTypeFromName(String mediaTypeName) {
-    return availableMediaTypes[mediaTypeName]!;
-  }
-
   Future<DictionarySearchResult> searchDictionary(
     String searchTerm, {
-    String contextSource = "",
-    int contextPosition = -1,
-    String contextMediaTypeName = "",
+    MediaHistoryItem? mediaHistoryItem,
   }) async {
     _isSearching = true;
     searchTerm = searchTerm.trim();
@@ -762,6 +745,7 @@ class AppModel with ChangeNotifier {
           await currentLanguage.generateFallbackTerms(searchTerm),
       entries: [],
       storeReference: storeReference,
+      mediaHistoryItem: mediaHistoryItem,
     );
 
     if (searchTerm.trim().isEmpty) {
@@ -869,9 +853,9 @@ class AppModel with ChangeNotifier {
     );
   }
 
-  DefaultMediaHistory getMediaHistory(MediaType mediaType) {
-    return DefaultMediaHistory(
-      prefsDirectory: mediaType.mediaTypeName,
+  MediaHistory getMediaHistory(MediaType mediaType) {
+    return MediaHistory(
+      prefsDirectory: mediaType.prefsDirectory(),
       sharedPreferences: sharedPreferences,
     );
   }
@@ -958,9 +942,8 @@ class AppModel with ChangeNotifier {
   }
 
   Directory getLastPickedDirectory(MediaType type) {
-    return Directory(
-        sharedPreferences.getString('${type.mediaTypeName}/lastPickedFile') ??
-            'storage/emulated/0');
+    return Directory(sharedPreferences.getString('$type/lastPickedFile') ??
+        'storage/emulated/0');
   }
 
   Future<List<Directory>> getMediaTypeDirectories(MediaType type) async {
@@ -980,8 +963,7 @@ class AppModel with ChangeNotifier {
 
   Future<void> setLastPickedDirectory(
       MediaType type, Directory directory) async {
-    await sharedPreferences.setString(
-        '${type.mediaTypeName}/lastPickedFile', directory.path);
+    await sharedPreferences.setString('$type/lastPickedFile', directory.path);
   }
 
   // MediaSource getActiveMediaTypeSource(MediaType type) {

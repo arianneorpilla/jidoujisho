@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:chisa/media/media_history_item.dart';
+import 'package:chisa/media/media_history_items/media_history_item.dart';
+import 'package:chisa/media/media_type.dart';
 
 import 'package:chisa/util/subtitle_utils.dart';
 import 'package:chisa/util/time_format.dart';
@@ -9,7 +10,6 @@ import 'package:flutter/services.dart';
 
 import 'package:chisa/media/media_source.dart';
 import 'package:chisa/media/media_types/media_launch_params.dart';
-import 'package:chisa/media/media_types/player_media_type.dart';
 import 'package:chisa/pages/player_page.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:wakelock/wakelock.dart';
@@ -24,7 +24,7 @@ abstract class PlayerMediaSource extends MediaSource {
   }) : super(
           sourceName: sourceName,
           icon: icon,
-          mediaType: PlayerMediaType(),
+          mediaType: MediaType.player,
           searchSupport: searchSupport,
           searchLabel: searchLabel,
           searchAction: searchAction,

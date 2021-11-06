@@ -1,13 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:chisa/media/media_history_item.dart';
-import 'package:chisa/media/media_history_items/default_media_history_item.dart';
+import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_sources/player_media_source.dart';
+import 'package:chisa/media/media_type.dart';
 import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/player_page.dart';
-import 'package:chisa/util/bottom_sheet_dialog.dart';
 import 'package:chisa/util/media_type_button.dart';
 import 'package:chisa/util/subtitle_utils.dart';
 import 'package:chisa/util/time_format.dart';
@@ -91,13 +90,14 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
         .getItems()
         .firstWhereOrNull((item) => item.key == filePath);
 
-    DefaultMediaHistoryItem item;
+    MediaHistoryItem item;
     if (historyItem != null) {
-      item = DefaultMediaHistoryItem.fromJson(historyItem.toJson());
+      item = MediaHistoryItem.fromJson(historyItem.toJson());
     } else {
-      item = DefaultMediaHistoryItem(
+      item = MediaHistoryItem(
         key: filePath,
         name: p.basenameWithoutExtension(filePath),
+        mediaType: mediaType.prefsDirectory(),
         source: sourceName,
         currentProgress: 0,
         completeProgress: 0,

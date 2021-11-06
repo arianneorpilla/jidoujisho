@@ -1,8 +1,6 @@
-import 'package:chisa/media/media_history.dart';
-import 'package:chisa/media/media_history_item.dart';
-import 'package:chisa/media/media_source.dart';
+import 'package:chisa/media/media_histories/media_history.dart';
+import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_sources/player_media_source.dart';
-import 'package:chisa/util/time_format.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -104,16 +102,17 @@ class PlayerHomePageState extends State<PlayerHomePage> {
 
   Widget buildMediaHistoryItem(MediaHistory history, MediaHistoryItem item) {
     PlayerMediaSource playerMediaSource = appModel.getMediaSourceFromName(
-      widget.mediaType.mediaTypeName,
+      widget.mediaType,
       item.source,
     ) as PlayerMediaSource;
 
     return playerMediaSource.buildMediaHistoryItem(
       context: context,
       item: item,
-      onTap: () {
-        playerMediaSource.launchMediaPage(
+      onTap: () async {
+        await playerMediaSource.launchMediaPage(
             context, playerMediaSource.getLaunchParams(item));
+        setState(() {});
       },
       onLongPress: () async {
         List<Widget> actions = [];
@@ -142,11 +141,13 @@ class PlayerHomePageState extends State<PlayerHomePage> {
         actions.add(
           TextButton(
             child: Text(
-              appModel.translate("dialog_close"),
+              appModel.translate("dialog_play"),
               style: const TextStyle(),
             ),
             onPressed: () async {
               Navigator.pop(context);
+              playerMediaSource.launchMediaPage(
+                  context, playerMediaSource.getLaunchParams(item));
               setState(() {});
             },
           ),
@@ -193,7 +194,7 @@ class PlayerHomePageState extends State<PlayerHomePage> {
       child: showCenterIconMessage(
         context: context,
         label: appModel.translate("history_empty"),
-        icon: widget.mediaType.mediaTypeIcon,
+        icon: widget.mediaType.icon(),
         jumpingDots: false,
       ),
     );
@@ -226,7 +227,7 @@ class PlayerHomePageState extends State<PlayerHomePage> {
             borderSide: BorderSide(color: Theme.of(context).focusColor),
           ),
           contentPadding: const EdgeInsets.all(0),
-          prefixIcon: Icon(widget.mediaType.mediaTypeIcon),
+          prefixIcon: Icon(widget.mediaType.icon()),
           suffixIcon: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             mainAxisSize: MainAxisSize.min,
@@ -244,7 +245,10 @@ class PlayerHomePageState extends State<PlayerHomePage> {
                   iconSize: 18,
                   icon: const Icon(Icons.perm_media),
                   onPressed: () async {
-                    await appModel.showSourcesMenu(context, widget.mediaType);
+                    await appModel.showSourcesMenu(
+                      context: context,
+                      mediaType: widget.mediaType,
+                    );
                   }),
               if (getCurrentMediaSource().searchSupport)
                 BusyIconButton(

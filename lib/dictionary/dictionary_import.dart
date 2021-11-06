@@ -3,7 +3,6 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:chisa/media/media_type.dart';
-import 'package:chisa/media/media_types/dictionary_media_type.dart';
 import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +37,7 @@ Future<void> dictionaryFileImport(
     }
   });
 
-  MediaType mediaType = DictionaryMediaType();
+  MediaType mediaType = MediaType.dictionary;
 
   Iterable<String>? filePaths = await FilesystemPicker.open(
     pickText: appModel.translate("dialog_select"),

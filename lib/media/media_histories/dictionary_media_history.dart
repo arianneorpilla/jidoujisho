@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:chisa/media/media_histories/default_media_history.dart';
+import 'package:chisa/media/media_histories/media_history.dart';
 import 'package:chisa/media/media_history_items/dictionary_media_history_item.dart';
 
-class DictionaryMediaHistory extends DefaultMediaHistory {
+class DictionaryMediaHistory extends MediaHistory {
   DictionaryMediaHistory({
     required sharedPreferences,
     required prefsDirectory,

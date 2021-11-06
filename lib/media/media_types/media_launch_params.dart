@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:chisa/media/media_history_item.dart';
+import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_source.dart';
 import 'package:chisa/media/media_sources/player_media_source.dart';
 
