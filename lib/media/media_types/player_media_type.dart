@@ -2,13 +2,11 @@ import 'dart:io';
 
 import 'package:chisa/media/media_histories/default_media_history.dart';
 import 'package:chisa/media/media_history.dart';
-import 'package:chisa/media/media_sources/player_local_media_source.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/media_home_page.dart';
 import 'package:chisa/pages/player_home_page.dart';
 import 'package:flutter/material.dart';
 
-import 'package:chisa/media/media_history_item.dart';
 import 'package:chisa/media/media_type.dart';
 import 'package:provider/provider.dart';
 

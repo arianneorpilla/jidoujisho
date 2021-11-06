@@ -10,7 +10,7 @@ String getTimestampFromDuration(Duration duration) {
   return "$hours:$mins:$secs.$mills";
 }
 
-String getYouTubeDuration(Duration duration) {
+String getDurationText(Duration duration) {
   String twoDigits(int n) => n.toString().padLeft(2, "0");
 
   String hours = twoDigits(duration.inHours);

@@ -1,6 +1,7 @@
 import 'package:chisa/util/anki_creator.dart';
 import 'package:chisa/util/export_paths.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,10 +9,19 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/home_page.dart';
+import 'package:wakelock/wakelock.dart';
 
 /// Application execution starts here.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Wakelock.disable();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
+  await SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
 
   await Permission.manageExternalStorage.request();
   requestAnkiDroidPermissions();

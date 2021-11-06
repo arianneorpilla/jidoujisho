@@ -252,7 +252,7 @@ class DictionaryPageState extends State<DictionaryHomePage> {
               actions: [
                 TextButton(
                   child: Text(
-                    appModel.translate("dialog_delete"),
+                    appModel.translate("dialog_remove"),
                     style: TextStyle(
                       color: Theme.of(context).focusColor,
                     ),

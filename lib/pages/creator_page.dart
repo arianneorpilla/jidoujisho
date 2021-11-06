@@ -328,6 +328,7 @@ class CreatorPageState extends State<CreatorPage> {
     return Scaffold(
       resizeToAvoidBottomInset: (orientation == Orientation.portrait),
       backgroundColor: widget.backgroundColor,
+      extendBodyBehindAppBar: true,
       appBar: (imagesNotifier.value.isNotEmpty &&
               orientation == Orientation.landscape)
           ? null
@@ -560,71 +561,74 @@ class CreatorPageState extends State<CreatorPage> {
   }
 
   Widget buildPortraitFields() {
-    return Column(
-      children: [
-        Expanded(
-          child: Scrollbar(
-            controller: scrollController,
-            child: SingleChildScrollView(
+    return Padding(
+      padding: EdgeInsets.only(top: 48.0),
+      child: Column(
+        children: [
+          Expanded(
+            child: Scrollbar(
               controller: scrollController,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (imagesNotifier.value.isNotEmpty)
-                    ImageSelectWidget(
-                      appModel: appModel,
-                      fileNotifier: imageNotifier,
-                      filesNotifier: imagesNotifier,
+              child: SingleChildScrollView(
+                controller: scrollController,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (imagesNotifier.value.isNotEmpty)
+                      ImageSelectWidget(
+                        appModel: appModel,
+                        fileNotifier: imageNotifier,
+                        filesNotifier: imagesNotifier,
+                      ),
+                    if (audioNotifier.value != null) buildAudioPlayer(),
+                    buildDeckDropDown(),
+                    displayField(
+                      context: context,
+                      field: AnkiExportField.sentence,
+                      onFieldSubmitted: (value) {},
+                      maxLines: null,
+                      keyboardType: TextInputType.multiline,
                     ),
-                  if (audioNotifier.value != null) buildAudioPlayer(),
-                  buildDeckDropDown(),
-                  displayField(
-                    context: context,
-                    field: AnkiExportField.sentence,
-                    onFieldSubmitted: (value) {},
-                    maxLines: null,
-                    keyboardType: TextInputType.multiline,
-                  ),
-                  displayField(
-                    context: context,
-                    field: AnkiExportField.word,
-                    onFieldSubmitted: (value) {},
-                  ),
-                  displayField(
-                    context: context,
-                    field: AnkiExportField.reading,
-                    onFieldSubmitted: (value) {},
-                  ),
-                  displayField(
-                    context: context,
-                    field: AnkiExportField.meaning,
-                    keyboardType: TextInputType.multiline,
-                    onFieldSubmitted: (value) {},
-                  ),
-                  displayField(
-                    context: context,
-                    field: AnkiExportField.image,
-                    onFieldSubmitted: (value) {},
-                  ),
-                  displayField(
-                    context: context,
-                    field: AnkiExportField.audio,
-                    onFieldSubmitted: (value) {},
-                  ),
-                  displayField(
-                    context: context,
-                    field: AnkiExportField.extra,
-                    onFieldSubmitted: (value) {},
-                  ),
-                ],
+                    displayField(
+                      context: context,
+                      field: AnkiExportField.word,
+                      onFieldSubmitted: (value) {},
+                    ),
+                    displayField(
+                      context: context,
+                      field: AnkiExportField.reading,
+                      onFieldSubmitted: (value) {},
+                    ),
+                    displayField(
+                      context: context,
+                      field: AnkiExportField.meaning,
+                      keyboardType: TextInputType.multiline,
+                      onFieldSubmitted: (value) {},
+                    ),
+                    displayField(
+                      context: context,
+                      field: AnkiExportField.image,
+                      onFieldSubmitted: (value) {},
+                    ),
+                    displayField(
+                      context: context,
+                      field: AnkiExportField.audio,
+                      onFieldSubmitted: (value) {},
+                    ),
+                    displayField(
+                      context: context,
+                      field: AnkiExportField.extra,
+                      onFieldSubmitted: (value) {},
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-        buildExportButton(),
-      ],
+          buildExportButton(),
+        ],
+      ),
     );
   }
 

@@ -42,18 +42,17 @@ class DictionaryDialogState extends State<DictionaryDialog> {
       content: buildContent(),
       actions: (widget.manageAllowed)
           ? <Widget>[
-              if (appModel.getDictionaryRecord().isNotEmpty)
-                TextButton(
-                  child: Text(
-                    appModel.translate("dialog_delete"),
-                    style: TextStyle(
-                      color: Theme.of(context).focusColor,
-                    ),
+              TextButton(
+                child: Text(
+                  appModel.translate("dialog_remove"),
+                  style: TextStyle(
+                    color: Theme.of(context).focusColor,
                   ),
-                  onPressed: () async {
-                    showDictionaryDeleteDialog(context);
-                  },
                 ),
+                onPressed: () async {
+                  showDictionaryDeleteDialog(context);
+                },
+              ),
               TextButton(
                 child: Text(
                   appModel.translate("dialog_import"),
@@ -150,7 +149,7 @@ class DictionaryDialogState extends State<DictionaryDialog> {
   }
 
   Widget showDictionaryList() {
-    String currentDictionary = appModel.getCurrentDictionaryName();
+    String currentDictionaryName = appModel.getCurrentDictionaryName();
     List<Dictionary> importedDictionaries = appModel.getDictionaryRecord();
 
     return RawScrollbar(
@@ -162,11 +161,11 @@ class DictionaryDialogState extends State<DictionaryDialog> {
         shrinkWrap: true,
         itemCount: importedDictionaries.length,
         itemBuilder: (context, index) {
-          String dictionaryName = importedDictionaries[index].dictionaryName;
+          Dictionary dictionary = importedDictionaries[index];
 
           return ListTile(
             dense: true,
-            selected: (currentDictionary == dictionaryName),
+            selected: (currentDictionaryName == dictionary.dictionaryName),
             selectedTileColor: Theme.of(context).selectedRowColor,
             title: Row(
               children: [
@@ -175,19 +174,47 @@ class DictionaryDialogState extends State<DictionaryDialog> {
                   size: 20.0,
                 ),
                 const SizedBox(width: 16.0),
-                Text(
-                  dictionaryName,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color:
-                        appModel.getIsDarkMode() ? Colors.white : Colors.black,
+                Expanded(
+                  child: Text(
+                    dictionary.dictionaryName,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: appModel.getIsDarkMode()
+                          ? Colors.white
+                          : Colors.black,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
+                if (widget.manageAllowed &&
+                    importedDictionaries.length >= 2 &&
+                    currentDictionaryName == dictionary.dictionaryName)
+                  IconButton(
+                      padding: const EdgeInsets.only(left: 16, right: 8),
+                      constraints: const BoxConstraints(),
+                      iconSize: 18,
+                      icon: const Icon(Icons.arrow_upward),
+                      onPressed: () {
+                        appModel.moveDictionaryUp(dictionary);
+                        setState(() {});
+                      }),
+                if (widget.manageAllowed &&
+                    importedDictionaries.length >= 2 &&
+                    currentDictionaryName == dictionary.dictionaryName)
+                  IconButton(
+                      padding: const EdgeInsets.only(left: 16),
+                      constraints: const BoxConstraints(),
+                      iconSize: 18,
+                      icon: const Icon(Icons.arrow_downward),
+                      onPressed: () {
+                        appModel.moveDictionaryDown(dictionary);
+                        setState(() {});
+                      }),
               ],
             ),
             onTap: () async {
-              await appModel.setCurrentDictionaryName(dictionaryName);
+              await appModel
+                  .setCurrentDictionaryName(dictionary.dictionaryName);
               if (widget.onDictionaryChange != null) {
                 widget.onDictionaryChange!();
               }
@@ -210,7 +237,7 @@ class DictionaryDialogState extends State<DictionaryDialog> {
       ),
       title: Text(appModel.getCurrentDictionaryName()),
       content: Text(
-        appModel.translate("delete_dictionary_confirmation"),
+        appModel.translate("remove_dictionary_confirmation"),
         textAlign: TextAlign.justify,
       ),
       actions: <Widget>[

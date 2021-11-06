@@ -177,8 +177,6 @@ class PlayerPageState extends State<PlayerPage>
   @override
   void dispose() async {
     playerController.removeListener(listener);
-    await playerController.dispose();
-    await SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
     ClipboardListener.removeListener(copyClipboardAction);
 
     super.dispose();
@@ -331,6 +329,22 @@ class PlayerPageState extends State<PlayerPage>
 
                 setSearchTerm("");
               },
+              onLongPress: () async {
+                await appModel.showDictionaryMenu(context,
+                    onDictionaryChange: () {
+                  refreshDictionaryWidget();
+                });
+              },
+              onVerticalDragEnd: (details) {
+                if (details.primaryVelocity == 0) return;
+
+                if (details.primaryVelocity!.compareTo(0) == -1) {
+                  appModel.setPrevDictionary();
+                } else {
+                  appModel.setNextDictionary();
+                }
+                refreshDictionaryWidget();
+              },
               child: Container(
                 color: dictionaryColor,
                 padding: const EdgeInsets.all(16),
@@ -378,25 +392,11 @@ class PlayerPageState extends State<PlayerPage>
     latestResultEntryIndex.value = 0;
 
     return DictionaryScrollableWidget.fromLatestResult(
-        appModel: appModel,
-        result: latestResult!,
-        indexNotifier: latestResultEntryIndex,
-        selectable: true,
-        longPressCallback: () async {
-          await appModel.showDictionaryMenu(context, onDictionaryChange: () {
-            refreshDictionaryWidget();
-          });
-        },
-        verticalScrollCallback: (details) {
-          if (details.primaryVelocity == 0) return;
-
-          if (details.primaryVelocity!.compareTo(0) == -1) {
-            appModel.setPrevDictionary();
-          } else {
-            appModel.setNextDictionary();
-          }
-          refreshDictionaryWidget();
-        });
+      appModel: appModel,
+      result: latestResult!,
+      indexNotifier: latestResultEntryIndex,
+      selectable: true,
+    );
   }
 
   Widget buildDictionarySearching() {
@@ -575,10 +575,6 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   Widget buildDictionaryNoMatch() {
-    Future.delayed(const Duration(seconds: 3), () {
-      searchTerm.value = "";
-    });
-
     return Text.rich(
       TextSpan(
         text: '',
@@ -612,6 +608,9 @@ class PlayerPageState extends State<PlayerPage>
       ),
       textAlign: TextAlign.center,
     );
+    Future.delayed(const Duration(seconds: 3), () {
+      searchTerm.value = "";
+    });
   }
 
   VlcPlayerController preparePlayerController(PlayerLaunchParams params) {
@@ -707,7 +706,9 @@ class PlayerPageState extends State<PlayerPage>
         }
       }
 
-      updateHistory();
+      if (widget.params.saveHistoryItem) {
+        updateHistory();
+      }
     }
   }
 
@@ -936,10 +937,6 @@ class PlayerPageState extends State<PlayerPage>
   // }
 
   void toggleMenuVisibility() async {
-    if (mounted) {
-      SystemChrome.setEnabledSystemUIOverlays([]);
-    }
-
     menuHideTimer!.cancel();
     isMenuHidden.value = !isMenuHidden.value;
     if (!isMenuHidden.value) {
@@ -1768,6 +1765,24 @@ class PlayerPageState extends State<PlayerPage>
     String word = "";
     String meaning = "";
     String reading = "";
+
+    if (subtitles.isEmpty) {
+      int allowanceMs = subtitleOptionsNotifier.value.audioAllowance;
+      if (allowanceMs == 0) {
+        allowanceMs = 5000;
+      }
+
+      Duration allowance = Duration(milliseconds: allowanceMs);
+
+      subtitles = [
+        Subtitle(
+          start: position.value - allowance,
+          end: position.value + allowance,
+          data: "",
+          index: 0,
+        )
+      ];
+    }
 
     for (Subtitle subtitle in subtitles) {
       String subtitleText = subtitle.data;

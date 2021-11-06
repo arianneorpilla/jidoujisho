@@ -1,18 +1,17 @@
 import 'dart:async';
 
 import 'package:chisa/media/media_history_item.dart';
-import 'package:chisa/models/app_model.dart';
+
 import 'package:chisa/util/subtitle_utils.dart';
+import 'package:chisa/util/time_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_vlc_player/flutter_vlc_player.dart';
-import 'package:subtitle/subtitle.dart';
 
-import 'package:chisa/media/media_history_items/default_media_history_item.dart';
 import 'package:chisa/media/media_source.dart';
 import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/media/media_types/player_media_type.dart';
 import 'package:chisa/pages/player_page.dart';
+import 'package:transparent_image/transparent_image.dart';
 import 'package:wakelock/wakelock.dart';
 
 abstract class PlayerMediaSource extends MediaSource {
@@ -63,7 +62,6 @@ abstract class PlayerMediaSource extends MediaSource {
     }
 
     await Wakelock.disable();
-
     await SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.landscapeLeft,
@@ -76,4 +74,149 @@ abstract class PlayerMediaSource extends MediaSource {
 
   /// A button that shows on the player menu particular to the media source.
   Widget? buildSourceButton(BuildContext context, PlayerPageState page);
+
+  Widget buildMediaHistoryItem({
+    required BuildContext context,
+    required MediaHistoryItem item,
+    Function()? onTap,
+    Function()? onLongPress,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      onLongPress: onLongPress,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            buildMediaHistoryThumbnail(context, item),
+            const SizedBox(width: 12),
+            Expanded(
+              child: buildMediaHistoryMetadata(context, item),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildMediaHistoryMetadata(
+    BuildContext context,
+    MediaHistoryItem item,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          getCaption(item),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          softWrap: true,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          getSubcaption(item),
+          style: TextStyle(
+            color: Theme.of(context).unselectedWidgetColor,
+            fontSize: 12,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          softWrap: true,
+        ),
+        Row(
+          children: [
+            Icon(
+              icon,
+              color: Theme.of(context).unselectedWidgetColor,
+              size: 12,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              sourceName,
+              style: TextStyle(
+                color: Theme.of(context).unselectedWidgetColor,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              softWrap: true,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget buildMediaHistoryThumbnail(
+    BuildContext context,
+    MediaHistoryItem item,
+  ) {
+    double scaleWidth = MediaQuery.of(context).size.width * 0.4;
+
+    return Container(
+      width: scaleWidth,
+      height: (scaleWidth) / 16 * 9,
+      color: Colors.black,
+      child: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          FutureBuilder<ImageProvider<Object>>(
+              future: getThumbnail(item),
+              builder: (BuildContext context,
+                  AsyncSnapshot<ImageProvider> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting ||
+                    !snapshot.hasData) {
+                  return Image(image: MemoryImage(kTransparentImage));
+                }
+
+                ImageProvider<Object> thumbnail = snapshot.data!;
+
+                return FadeInImage(
+                  placeholder: MemoryImage(kTransparentImage),
+                  image: thumbnail,
+                  fit: BoxFit.contain,
+                );
+              }),
+          Positioned(
+            right: 4.0,
+            bottom: 6.0,
+            child: Container(
+              height: 20,
+              color: Colors.black.withOpacity(0.8),
+              alignment: Alignment.center,
+              child: Text(
+                getDurationText(Duration(seconds: item.completeProgress)),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w300,
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            child: Container(
+              alignment: Alignment.bottomCenter,
+              child: LinearProgressIndicator(
+                value: item.currentProgress / item.completeProgress,
+                backgroundColor: Colors.white.withOpacity(0.6),
+                valueColor: const AlwaysStoppedAnimation<Color>(Colors.red),
+                minHeight: 2,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// A source can define extra actions that appears when you long press
+  /// on a history item in the Player screen.
+  List<Widget> getExtraHistoryActions(
+    MediaHistoryItem item, {
+    Function()? callback,
+  }) {
+    return [];
+  }
 }

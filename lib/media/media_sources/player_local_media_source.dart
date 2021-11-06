@@ -33,6 +33,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
       videoFile: File(item.key),
       mediaSource: this,
       mediaHistoryItem: item,
+      saveHistoryItem: true,
     );
   }
 

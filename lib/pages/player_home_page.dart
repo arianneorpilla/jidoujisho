@@ -1,3 +1,4 @@
+import 'package:chisa/media/media_history.dart';
 import 'package:chisa/media/media_history_item.dart';
 import 'package:chisa/media/media_source.dart';
 import 'package:chisa/media/media_sources/player_media_source.dart';
@@ -37,8 +38,9 @@ class PlayerHomePageState extends State<PlayerHomePage> {
     super.didUpdateWidget(oldWidget);
   }
 
-  MediaSource getSource() {
-    return appModel.getCurrentMediaTypeSource(widget.mediaType);
+  PlayerMediaSource getCurrentMediaSource() {
+    return appModel.getCurrentMediaTypeSource(widget.mediaType)
+        as PlayerMediaSource;
   }
 
   @override
@@ -57,8 +59,9 @@ class PlayerHomePageState extends State<PlayerHomePage> {
   }
 
   Widget buildBody() {
+    MediaHistory history = appModel.getMediaHistory(widget.mediaType);
     List<MediaHistoryItem> mediaHistoryItems =
-        appModel.getMediaHistory(widget.mediaType).getItems().reversed.toList();
+        history.getItems().reversed.toList();
 
     ScrollController scrollController =
         ScrollController(initialScrollOffset: appModel.scrollOffset);
@@ -87,15 +90,91 @@ class PlayerHomePageState extends State<PlayerHomePage> {
             if (index == 0) {
               return buildSearchField();
             } else if (index == 1) {
-              return getSource().getButton(context) ?? const SizedBox.shrink();
+              return getCurrentMediaSource().getButton(context) ??
+                  const SizedBox.shrink();
             }
 
             MediaHistoryItem item = mediaHistoryItems[index - 2];
-
-            return buildMediaHistoryItem(item);
+            return buildMediaHistoryItem(history, item);
           },
         ),
       ),
+    );
+  }
+
+  Widget buildMediaHistoryItem(MediaHistory history, MediaHistoryItem item) {
+    PlayerMediaSource playerMediaSource = appModel.getMediaSourceFromName(
+      widget.mediaType.mediaTypeName,
+      item.source,
+    ) as PlayerMediaSource;
+
+    return playerMediaSource.buildMediaHistoryItem(
+      context: context,
+      item: item,
+      onTap: () {
+        playerMediaSource.launchMediaPage(
+            context, playerMediaSource.getLaunchParams(item));
+      },
+      onLongPress: () async {
+        List<Widget> actions = [];
+        actions.add(
+          TextButton(
+            child: Text(
+              appModel.translate("dialog_remove"),
+              style: TextStyle(
+                color: Theme.of(context).focusColor,
+              ),
+            ),
+            onPressed: () async {
+              await history.removeItem(item.key);
+
+              Navigator.pop(context);
+              setState(() {});
+            },
+          ),
+        );
+
+        actions.addAll(
+            playerMediaSource.getExtraHistoryActions(item, callback: () {
+          setState(() {});
+        }));
+
+        actions.add(
+          TextButton(
+            child: Text(
+              appModel.translate("dialog_close"),
+              style: const TextStyle(),
+            ),
+            onPressed: () async {
+              Navigator.pop(context);
+              setState(() {});
+            },
+          ),
+        );
+
+        HapticFeedback.vibrate();
+        ImageProvider<Object> image =
+            await playerMediaSource.getThumbnail(item);
+        await showDialog(
+          barrierDismissible: true,
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(
+              playerMediaSource.getCaption(item),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+            content: AspectRatio(
+              aspectRatio: 16 / 9,
+              child: FadeInImage(
+                image: image,
+                placeholder: MemoryImage(kTransparentImage),
+              ),
+            ),
+            actions: actions,
+          ),
+        );
+      },
     );
   }
 
@@ -103,7 +182,7 @@ class PlayerHomePageState extends State<PlayerHomePage> {
     return Column(
       children: [
         buildSearchField(),
-        getSource().getButton(context) ?? const SizedBox.shrink(),
+        getCurrentMediaSource().getButton(context) ?? const SizedBox.shrink(),
         buildEmptyMessage(),
       ],
     );
@@ -128,16 +207,16 @@ class PlayerHomePageState extends State<PlayerHomePage> {
         maxLines: 1,
         controller: wordController,
         onFieldSubmitted: (result) async {
-          await getSource().searchAction!();
+          await getCurrentMediaSource().searchAction!();
           setState(() {});
         },
-        enableInteractiveSelection: (!getSource().searchSupport),
+        enableInteractiveSelection: (!getCurrentMediaSource().searchSupport),
         onTap: () {
-          if (!getSource().searchSupport) {
+          if (!getCurrentMediaSource().searchSupport) {
             FocusScope.of(context).requestFocus(FocusNode());
           }
         },
-        readOnly: (!getSource().searchSupport),
+        readOnly: (!getCurrentMediaSource().searchSupport),
         decoration: InputDecoration(
           enabledBorder: UnderlineInputBorder(
             borderSide:
@@ -152,12 +231,12 @@ class PlayerHomePageState extends State<PlayerHomePage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (getSource().searchSupport)
+              if (getCurrentMediaSource().searchSupport)
                 BusyIconButton(
                   iconSize: 18,
                   icon: const Icon(Icons.search),
                   onPressed: () async {
-                    await getSource().searchAction!();
+                    await getCurrentMediaSource().searchAction!();
                     setState(() {});
                   },
                 ),
@@ -167,7 +246,7 @@ class PlayerHomePageState extends State<PlayerHomePage> {
                   onPressed: () async {
                     await appModel.showSourcesMenu(context, widget.mediaType);
                   }),
-              if (getSource().searchSupport)
+              if (getCurrentMediaSource().searchSupport)
                 BusyIconButton(
                   iconSize: 18,
                   icon: const Icon(Icons.clear),
@@ -177,140 +256,9 @@ class PlayerHomePageState extends State<PlayerHomePage> {
                 ),
             ],
           ),
-          labelText: getSource().sourceName,
-          hintText: getSource().searchLabel,
+          labelText: getCurrentMediaSource().sourceName,
+          hintText: getCurrentMediaSource().searchLabel,
         ),
-      ),
-    );
-  }
-
-  Widget buildMediaHistoryItem(MediaHistoryItem item) {
-    MediaSource source =
-        widget.mediaType.getMediaSourceFromItem(appModel, item);
-
-    return InkWell(
-      onTap: () {
-        PlayerMediaSource playerMediaSource = source as PlayerMediaSource;
-        playerMediaSource.launchMediaPage(
-            context, playerMediaSource.getLaunchParams(item));
-      },
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            buildMediaHistoryThumbnail(source, item),
-            const SizedBox(width: 12),
-            Expanded(
-              child: buildMediaHistoryMetadata(source, item),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget buildMediaHistoryMetadata(MediaSource source, MediaHistoryItem item) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          source.getCaption(item),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          softWrap: true,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          source.getSubcaption(item),
-          style: TextStyle(
-            color: Theme.of(context).unselectedWidgetColor,
-            fontSize: 12,
-          ),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          softWrap: true,
-        ),
-        Row(
-          children: [
-            Icon(
-              source.icon,
-              color: Theme.of(context).unselectedWidgetColor,
-              size: 12,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              source.sourceName,
-              style: TextStyle(
-                color: Theme.of(context).unselectedWidgetColor,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              softWrap: true,
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget buildMediaHistoryThumbnail(MediaSource source, MediaHistoryItem item) {
-    double scaleWidth = MediaQuery.of(context).size.width * 0.4;
-
-    return Container(
-      width: scaleWidth,
-      height: (scaleWidth) / 16 * 9,
-      color: Colors.black,
-      child: Stack(
-        alignment: Alignment.bottomCenter,
-        children: [
-          FutureBuilder<ImageProvider<Object>>(
-              future: source.getThumbnail(item),
-              builder: (BuildContext context,
-                  AsyncSnapshot<ImageProvider> snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting ||
-                    !snapshot.hasData) {
-                  return Image(image: MemoryImage(kTransparentImage));
-                }
-
-                ImageProvider<Object> thumbnail = snapshot.data!;
-
-                return FadeInImage(
-                  placeholder: MemoryImage(kTransparentImage),
-                  image: thumbnail,
-                  fit: BoxFit.contain,
-                );
-              }),
-          Positioned(
-            right: 4.0,
-            bottom: 6.0,
-            child: Container(
-              height: 20,
-              color: Colors.black.withOpacity(0.8),
-              alignment: Alignment.center,
-              child: Text(
-                getYouTubeDuration(Duration(seconds: item.completeProgress)),
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w300,
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            child: Container(
-              alignment: Alignment.bottomCenter,
-              child: LinearProgressIndicator(
-                value: item.currentProgress / item.completeProgress,
-                backgroundColor: Colors.white.withOpacity(0.6),
-                valueColor: const AlwaysStoppedAnimation<Color>(Colors.red),
-                minHeight: 2,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

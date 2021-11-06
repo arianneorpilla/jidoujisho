@@ -18,6 +18,7 @@ class PlayerLaunchParams {
     this.audioPath,
     required this.mediaSource,
     required this.mediaHistoryItem,
+    required this.saveHistoryItem,
   });
 
   PlayerLaunchParams.network({
@@ -26,6 +27,7 @@ class PlayerLaunchParams {
     this.audioPath,
     required this.mediaSource,
     required this.mediaHistoryItem,
+    required this.saveHistoryItem,
   });
 
   final File? videoFile;
@@ -33,6 +35,7 @@ class PlayerLaunchParams {
   final String? audioPath;
   final PlayerMediaSource mediaSource;
   final MediaHistoryItem mediaHistoryItem;
+  final bool saveHistoryItem;
 
   MediaLaunchMode getMode() {
     if (videoFile != null) {

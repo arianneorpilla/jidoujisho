@@ -318,11 +318,12 @@ class AppModel with ChangeNotifier {
   }
 
   Future<void> initialiseImportedDictionaries() async {
-    getDictionaryRecord().forEach((dictionary) async {
+    List<Dictionary> dictionaries = getDictionaryRecord();
+    for (Dictionary dictionary in dictionaries) {
       _dictionaryStores[dictionary.dictionaryName] =
           await initialiseDictionaryStore(dictionary.dictionaryName);
       _availableDictionaries[dictionary.dictionaryName] = dictionary;
-    });
+    }
   }
 
   Future<void> initialiseExportEnhancements() async {
@@ -511,6 +512,48 @@ class AppModel with ChangeNotifier {
         manageAllowed: manageAllowed,
       ),
     );
+  }
+
+  Future<void> moveDictionaryUp(Dictionary target) async {
+    List<Dictionary> dictionaries = getDictionaryRecord();
+    if (dictionaries.length < 2) {
+      return;
+    }
+
+    int targetIndex = dictionaries.indexWhere(
+        (dictionary) => dictionary.dictionaryName == target.dictionaryName);
+    if (targetIndex == 0) {
+      dictionaries.removeAt(targetIndex);
+      dictionaries.add(target);
+    } else {
+      Dictionary swapName = dictionaries[targetIndex - 1];
+      dictionaries[targetIndex] = swapName;
+      dictionaries[targetIndex - 1] = target;
+    }
+
+    await setDictionaryRecord(dictionaries);
+  }
+
+  Future<void> moveDictionaryDown(Dictionary target) async {
+    List<Dictionary> dictionaries = getDictionaryRecord();
+    if (dictionaries.length < 2) {
+      return;
+    }
+
+    int targetIndex = dictionaries.indexWhere(
+        (dictionary) => dictionary.dictionaryName == target.dictionaryName);
+    if (targetIndex == dictionaries.length - 1) {
+      dictionaries.removeAt(targetIndex);
+      List<Dictionary> newDictionaries = [target];
+      newDictionaries.addAll(dictionaries);
+      dictionaries = newDictionaries;
+    } else {
+      Dictionary swapName = dictionaries[targetIndex + 1];
+      dictionaries[targetIndex] = swapName;
+      dictionaries[targetIndex + 1] = target;
+    }
+
+    await setDictionaryRecord(dictionaries);
   }
 
   /// Show the language menu.
