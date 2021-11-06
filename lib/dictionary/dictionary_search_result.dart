@@ -61,8 +61,6 @@ class DictionarySearchResult {
       map["mediaHistoryItem"] = mediaHistoryItem!.toJson();
     }
 
-    if (mediaHistoryItem != null) {}
-
     return jsonEncode(map);
   }
 
@@ -85,6 +83,7 @@ class DictionarySearchResult {
     if (itemJson != null && itemJson.isNotEmpty) {
       mediaHistoryItem = MediaHistoryItem.fromJson(itemJson);
     }
+
     return DictionarySearchResult(
       dictionaryName: map["dictionaryName"],
       formatName: map["formatName"],

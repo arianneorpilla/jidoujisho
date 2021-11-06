@@ -1,3 +1,4 @@
+import 'package:chisa/media/media_type.dart';
 import 'package:flutter/material.dart';
 
 import 'package:chisa/dictionary/dictionary.dart';
@@ -115,11 +116,35 @@ class DictionaryScrollableWidgetState
     );
   }
 
+  WidgetSpan getContextSourceIcon() {
+    if (widget.result.mediaHistoryItem == null) {
+      return WidgetSpan(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(0, 0, 4, 1),
+          child: Icon(MediaType.dictionary.icon(), color: labelColor, size: 12),
+        ),
+      );
+    }
+
+    MediaType mediaType = MediaType.values.firstWhere((type) =>
+        type.prefsDirectory() ==
+        widget.result.mediaHistoryItem!.mediaTypePrefs);
+    IconData icon = mediaType.icon();
+
+    return WidgetSpan(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 4, 1),
+        child: Icon(icon, color: labelColor, size: 12),
+      ),
+    );
+  }
+
   Widget getFooterTextSpans() {
     return Text.rich(
       TextSpan(
         text: '',
         children: <InlineSpan>[
+          getContextSourceIcon(),
           TextSpan(
             text: widget.appModel.translate("search_label_before"),
             style: TextStyle(

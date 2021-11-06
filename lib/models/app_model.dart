@@ -863,8 +863,8 @@ class AppModel with ChangeNotifier {
     );
   }
 
-  Future<void> addDictionaryHistoryItem(MediaHistoryItem item) {
-    return getDictionaryMediaHistory().addItem(item);
+  Future<void> addDictionaryHistoryItem(DictionaryMediaHistoryItem item) {
+    return getDictionaryMediaHistory().addDictionaryItem(item);
   }
 
   Future<void> updateDictionaryHistoryIndex(
@@ -878,7 +878,10 @@ class AppModel with ChangeNotifier {
   }
 
   Future<void> removeDictionaryHistoryItem(DictionarySearchResult result) {
-    return getDictionaryMediaHistory().removeItem(result.toJson());
+    return getDictionaryMediaHistory().removeDictionaryItem(
+      result.originalSearchTerm,
+      result.dictionaryName,
+    );
   }
 
   Widget buildDictionarySearchResult({
