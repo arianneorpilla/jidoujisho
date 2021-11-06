@@ -428,7 +428,7 @@ class AppModel with ChangeNotifier {
   bool getMediaSourceShown(MediaSource source) {
     return _sharedPreferences.getBool(
             "${source.mediaType.mediaTypeName}/${source.sourceName}/shown") ??
-        false;
+        true;
   }
 
   Future<void> setMediaSourceShown(MediaSource source, bool shown) async {
