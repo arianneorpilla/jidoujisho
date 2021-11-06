@@ -58,6 +58,7 @@ class PlayerHomePageState extends State<PlayerHomePage> {
 
   Widget buildBody() {
     MediaHistory history = appModel.getMediaHistory(widget.mediaType);
+
     List<MediaHistoryItem> mediaHistoryItems =
         history.getItems().reversed.toList();
 
@@ -103,7 +104,7 @@ class PlayerHomePageState extends State<PlayerHomePage> {
   Widget buildMediaHistoryItem(MediaHistory history, MediaHistoryItem item) {
     PlayerMediaSource playerMediaSource = appModel.getMediaSourceFromName(
       widget.mediaType,
-      item.source,
+      item.sourceName,
     ) as PlayerMediaSource;
 
     return playerMediaSource.buildMediaHistoryItem(

@@ -8,7 +8,8 @@ class DictionaryMediaHistoryItem extends MediaHistoryItem {
   DictionaryMediaHistoryItem({
     required String key,
     required String name,
-    required String source,
+    required String sourceName,
+    required String mediaTypePrefs,
     required int currentProgress,
     required int completeProgress,
     required this.contextItem,
@@ -16,8 +17,8 @@ class DictionaryMediaHistoryItem extends MediaHistoryItem {
   }) : super(
           key: key,
           name: name,
-          source: source,
-          mediaType: MediaType.dictionary.prefsDirectory(),
+          sourceName: sourceName,
+          mediaTypePrefs: MediaType.dictionary.prefsDirectory(),
           currentProgress: currentProgress,
           completeProgress: completeProgress,
           extra: extra,
@@ -30,8 +31,9 @@ class DictionaryMediaHistoryItem extends MediaHistoryItem {
       {int currentProgress = 0}) {
     return DictionaryMediaHistoryItem(
       key: result.toJson(),
-      name: "",
-      source: "",
+      name: result.originalSearchTerm,
+      sourceName: result.dictionaryName,
+      mediaTypePrefs: MediaType.dictionary.prefsDirectory(),
       currentProgress: currentProgress,
       completeProgress: result.entries.length - 1,
       contextItem: result.mediaHistoryItem,
@@ -44,21 +46,23 @@ class DictionaryMediaHistoryItem extends MediaHistoryItem {
 
     String key = map["key"] ?? "";
     String name = map["name"] ?? "";
-    String source = map["source"] ?? "";
+    String sourceName = map["sourceName"] ?? "";
+    String mediaTypePrefs = map["mediaTypePrefs"] ?? "";
     int currentProgress = int.tryParse(map["currentProgress"] ?? "") ?? 0;
     int completeProgress = int.tryParse(map["completeProgress"] ?? "") ?? 0;
     Map<String, dynamic> extra = jsonDecode(map["extra"] ?? "{}");
 
     MediaHistoryItem? contextItem;
     String? itemJson = map["contextItem"];
-    if (itemJson != null) {
-      contextItem = MediaHistoryItem.fromJson(json);
+    if (itemJson != null && itemJson.isNotEmpty) {
+      contextItem = MediaHistoryItem.fromJson(itemJson);
     }
 
     return DictionaryMediaHistoryItem(
       key: key,
       name: name,
-      source: source,
+      sourceName: sourceName,
+      mediaTypePrefs: mediaTypePrefs,
       currentProgress: currentProgress,
       completeProgress: completeProgress,
       contextItem: contextItem,
@@ -71,13 +75,17 @@ class DictionaryMediaHistoryItem extends MediaHistoryItem {
     Map<String, String> map = {
       "key": key,
       "name": name,
-      "source": source,
+      "sourceName": sourceName,
+      "mediaTypePrefs": mediaTypePrefs,
       "currentProgress": currentProgress.toString(),
       "completeProgress": completeProgress.toString(),
       "thumbnailPath": thumbnailPath,
       "extra": jsonEncode(extra),
-      "contextItem": contextItem?.toJson() ?? "",
     };
+
+    if (contextItem != null) {
+      map["contextItem"] = contextItem!.toJson();
+    }
 
     return jsonEncode(map);
   }

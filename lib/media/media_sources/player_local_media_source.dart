@@ -97,8 +97,8 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
       item = MediaHistoryItem(
         key: filePath,
         name: p.basenameWithoutExtension(filePath),
-        mediaType: mediaType.prefsDirectory(),
-        source: sourceName,
+        mediaTypePrefs: mediaType.prefsDirectory(),
+        sourceName: sourceName,
         currentProgress: 0,
         completeProgress: 0,
         thumbnailPath: thumbnailPath,

@@ -1,6 +1,7 @@
 import 'package:chisa/anki/anki_export_params.dart';
 import 'package:chisa/dictionary/dictionary.dart';
 import 'package:chisa/media/media_history_items/media_history_item.dart';
+import 'package:chisa/media/media_sources/player_media_source.dart';
 import 'package:chisa/util/anki_creator.dart';
 import 'package:chisa/util/dictionary_dialog_widget.dart';
 import 'package:chisa/dictionary/dictionary_entry.dart';
@@ -206,9 +207,17 @@ class DictionaryPageState extends State<DictionaryHomePage> {
   }
 
   Future<void> returnFromContext(MediaHistoryItem item) async {
-    // MediaType mediaType = appModel.getMediaTypeFromName(item.mediaType);
-
-    // switch (mediaType.)
+    MediaType mediaType = MediaType.values
+        .firstWhere((type) => type.prefsDirectory() == item.mediaTypePrefs);
+    switch (mediaType) {
+      case MediaType.player:
+        PlayerMediaSource source = appModel.getMediaSourceFromName(
+            mediaType, item.sourceName) as PlayerMediaSource;
+        await source.launchMediaPage(context, source.getLaunchParams(item));
+        break;
+      default:
+        throw UnimplementedError();
+    }
   }
 
   Widget buildDictionaryResult(DictionarySearchResult result,

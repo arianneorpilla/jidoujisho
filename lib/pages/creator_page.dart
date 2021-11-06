@@ -9,6 +9,7 @@ import 'package:chisa/anki/anki_export_params.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/util/anki_export_field.dart';
 import 'package:chisa/util/anki_creator.dart';
+import 'package:chisa/util/busy_media_type_button.dart';
 import 'package:chisa/util/drop_down_menu.dart';
 import 'package:chisa/util/image_select_widget.dart';
 import 'package:chisa/util/media_type_button.dart';
@@ -390,20 +391,22 @@ class CreatorPageState extends State<CreatorPage> {
   Widget buildExportButton() {
     return Padding(
       padding: const EdgeInsets.only(top: 10),
-      child: MediaTypeButton(
+      child: BusyMediaTypeButton(
         label: appModel.translate("export_card"),
         icon: Icons.note_add,
         onTap: () async {
-          addNote(
-            deck: "Default",
-            params: exportParams,
-          );
+          if (exportParams != AnkiExportParams()) {
+            addNote(
+              deck: "Default",
+              params: exportParams,
+            );
 
-          setCurrentParams(AnkiExportParams());
-          setState(() {});
-
-          if (widget.exportCallback != null) {
-            widget.exportCallback!();
+            if (widget.exportCallback != null) {
+              widget.exportCallback!();
+            } else {
+              setCurrentParams(AnkiExportParams());
+              setState(() {});
+            }
           }
         },
       ),
@@ -562,7 +565,7 @@ class CreatorPageState extends State<CreatorPage> {
 
   Widget buildPortraitFields() {
     return Padding(
-      padding: EdgeInsets.only(top: 48.0),
+      padding: const EdgeInsets.only(top: 48.0),
       child: Column(
         children: [
           Expanded(

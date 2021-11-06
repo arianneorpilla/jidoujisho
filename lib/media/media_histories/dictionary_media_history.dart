@@ -16,7 +16,9 @@ class DictionaryMediaHistory extends MediaHistory {
   Future<void> addDictionaryItem(DictionaryMediaHistoryItem item) async {
     List<DictionaryMediaHistoryItem> history = getDictionaryItems();
 
-    history.removeWhere((historyItem) => item.key == historyItem.key);
+    history.removeWhere((historyItem) =>
+        historyItem.sourceName == item.sourceName &&
+        historyItem.name == item.name);
     history.add(item);
 
     if (history.length >= maxItemCount) {
@@ -26,10 +28,13 @@ class DictionaryMediaHistory extends MediaHistory {
     await setItems(history);
   }
 
-  Future<void> removeDictionaryItem(String key) async {
+  Future<void> removeDictionaryItem(
+      String originalSearchTerm, String dictionaryName) async {
     List<DictionaryMediaHistoryItem> history = getDictionaryItems();
 
-    history.removeWhere((historyItem) => key == historyItem.key);
+    history.removeWhere((historyItem) =>
+        historyItem.sourceName == dictionaryName &&
+        historyItem.name == originalSearchTerm);
     await setItems(history);
   }
 

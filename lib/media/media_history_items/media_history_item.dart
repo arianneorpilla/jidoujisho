@@ -4,8 +4,8 @@ class MediaHistoryItem {
   MediaHistoryItem({
     required this.key,
     required this.name,
-    required this.source,
-    required this.mediaType,
+    required this.sourceName,
+    required this.mediaTypePrefs,
     required this.currentProgress,
     required this.completeProgress,
     required this.extra,
@@ -27,8 +27,8 @@ class MediaHistoryItem {
   /// preview purposes. For example, for a local media item to display its
   /// screenshot, the player page will need to invoke a function pertaining
   /// to the media source in order to generate its thumbnail.
-  String source;
-  String mediaType;
+  String sourceName;
+  String mediaTypePrefs;
 
   /// A path pointing to a file, storing a temporary thumbnail. This is deleted
   /// when an item is disposed.
@@ -52,8 +52,8 @@ class MediaHistoryItem {
 
     String key = map["key"] ?? "";
     String name = map["name"] ?? "";
-    String source = map["source"] ?? "";
-    String mediaType = map["mediaType"] ?? "";
+    String sourceName = map["sourceName"] ?? "";
+    String mediaTypePrefs = map["mediaTypePrefs"] ?? "";
     int currentProgress = int.tryParse(map["currentProgress"] ?? "") ?? 0;
     int completeProgress = int.tryParse(map["completeProgress"] ?? "") ?? 0;
     String thumbnailPath = map["thumbnailPath"] ?? "";
@@ -62,8 +62,8 @@ class MediaHistoryItem {
     return MediaHistoryItem(
       key: key,
       name: name,
-      mediaType: mediaType,
-      source: source,
+      mediaTypePrefs: mediaTypePrefs,
+      sourceName: sourceName,
       currentProgress: currentProgress,
       completeProgress: completeProgress,
       thumbnailPath: thumbnailPath,
@@ -75,7 +75,8 @@ class MediaHistoryItem {
     Map<String, String> map = {
       "key": key,
       "name": name,
-      "source": source,
+      "sourceName": sourceName,
+      "mediaTypePrefs": mediaTypePrefs,
       "currentProgress": currentProgress.toString(),
       "completeProgress": completeProgress.toString(),
       "thumbnailPath": thumbnailPath,

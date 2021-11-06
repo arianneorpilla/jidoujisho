@@ -19,7 +19,7 @@ class MediaTypeButton extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12, left: 6, right: 6),
       child: InkWell(
         child: Container(
-          color: Theme.of(context).unselectedWidgetColor.withOpacity(0.075),
+          color: Theme.of(context).unselectedWidgetColor.withOpacity(0.1),
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Row(

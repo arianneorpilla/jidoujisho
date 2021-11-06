@@ -55,8 +55,13 @@ class DictionarySearchResult {
       "originalSearchTerm": originalSearchTerm,
       "fallbackSearchTerms": jsonEncode(fallbackSearchTerms),
       "entries": jsonEncode(serialisedItems),
-      "mediaHistoryItem": mediaHistoryItem?.toJson() ?? "",
     };
+
+    if (mediaHistoryItem != null) {
+      map["mediaHistoryItem"] = mediaHistoryItem!.toJson();
+    }
+
+    if (mediaHistoryItem != null) {}
 
     return jsonEncode(map);
   }
@@ -76,9 +81,9 @@ class DictionarySearchResult {
     }
 
     MediaHistoryItem? mediaHistoryItem;
-    String itemJson = map["mediaHistoryItem"];
-    if (itemJson.isNotEmpty) {
-      mediaHistoryItem = MediaHistoryItem.fromJson(json);
+    String? itemJson = map["mediaHistoryItem"];
+    if (itemJson != null && itemJson.isNotEmpty) {
+      mediaHistoryItem = MediaHistoryItem.fromJson(itemJson);
     }
     return DictionarySearchResult(
       dictionaryName: map["dictionaryName"],

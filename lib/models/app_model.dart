@@ -588,7 +588,10 @@ class AppModel with ChangeNotifier {
     /// Dispose of potential format breaking dictionary entries.
     for (DictionarySearchResult result in results) {
       if (result.dictionaryName == dictionaryName) {
-        getDictionaryMediaHistory().removeDictionaryItem(result.toJson());
+        getDictionaryMediaHistory().removeDictionaryItem(
+          result.originalSearchTerm,
+          result.dictionaryName,
+        );
       }
     }
 
