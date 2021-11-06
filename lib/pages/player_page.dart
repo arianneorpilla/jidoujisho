@@ -152,17 +152,11 @@ class PlayerPageState extends State<PlayerPage>
     await Future.delayed(const Duration(seconds: 2), () {});
 
     int embeddedTrackCount = await playerController.getSpuTracksCount() ?? 0;
-    int currentAudioIndex = await playerController.getAudioTrack() ?? 0;
+    currentAudioTrack = await playerController.getAudioTrack() ?? 0;
 
     List<SubtitleItem> embeddedItems =
         await prepareSubtitleControllersFromVideo(
             widget.params.videoFile!, embeddedTrackCount);
-
-    for (int i = 0; i < embeddedItems.length; i++) {
-      SubtitleItem item = embeddedItems[i];
-      await item.controller.initial();
-      print("${item.controller.subtitles.length}");
-    }
 
     subtitleItems.addAll(embeddedItems);
 
@@ -197,6 +191,7 @@ class PlayerPageState extends State<PlayerPage>
       ),
       type: SubtitleItemType.noneSubtitle,
     );
+
     subtitleItem = emptySubtitleItem;
 
     WidgetsBinding.instance!.addPostFrameCallback((_) async {
@@ -209,20 +204,11 @@ class PlayerPageState extends State<PlayerPage>
 
       subtitleItems = await prepareSubtitleControllers(widget.params);
 
-      for (int i = 0; i < subtitleItems.length; i++) {
-        SubtitleItem? item = subtitleItems[i];
-        if (item.controller.subtitles.isNotEmpty) {
-          subtitleItem = item;
-          break;
-        }
+      if (subtitleItems.isNotEmpty) {
+        subtitleItem = subtitleItems.first;
       }
 
-      await emptySubtitleItem.controller.initial();
-
-      for (int i = 0; i < subtitleItems.length; i++) {
-        SubtitleItem? item = subtitleItems[i];
-        await item.controller.initial();
-      }
+      await subtitleItem.controller.initial();
 
       playerController.addListener(listener);
       playerController.addOnInitListener(() {
@@ -946,6 +932,17 @@ class PlayerPageState extends State<PlayerPage>
     );
   }
 
+  Widget buildSourceButton() {
+    Widget? sourceButton =
+        widget.params.mediaSource.buildSourceButton(context, this);
+
+    if (sourceButton == null) {
+      return const SizedBox.shrink();
+    } else {
+      return sourceButton;
+    }
+  }
+
   Widget buildMenuContent() {
     return Align(
       alignment: Alignment.bottomCenter,
@@ -965,6 +962,7 @@ class PlayerPageState extends State<PlayerPage>
                 buildPlayButton(),
                 buildDurationAndPosition(),
                 buildSlider(),
+                buildSourceButton(),
                 buildAudioSubtitlesButton(),
                 buildOptionsButton(),
               ],
@@ -1355,73 +1353,40 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   Widget buildAudioSubtitlesButton() {
-    return IconButton(
-      color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
-      icon: const Icon(Icons.queue_music_outlined),
-      onPressed: () async {
-        Map<int, String> audioEmbeddedTracks =
-            await playerController.getAudioTracks();
-        Map<int, String> subtitleEmbeddedTracks =
-            await playerController.getSpuTracks();
-
-        await showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          useRootNavigator: true,
-          builder: (context) => BottomSheetDialog(
-            options:
-                getAudioSubtitles(audioEmbeddedTracks, subtitleEmbeddedTracks),
-          ),
-        );
-      },
-    );
-  }
-
-  List<BottomSheetDialogOption> getBlurOptions() {
     List<BottomSheetDialogOption> options = [
       BottomSheetDialogOption(
-        label: appModel.translate("player_option_blur_use"),
-        active: appModel.getBlurWidgetOptions().visible,
-        icon: appModel.getBlurWidgetOptions().visible
-            ? Icons.blur_on_outlined
-            : Icons.blur_off_outlined,
+        label: appModel.translate("player_option_select_audio"),
+        icon: Icons.music_note_outlined,
         action: () async {
-          BlurWidgetOptions blurWidgetOptions = appModel.getBlurWidgetOptions();
-          blurWidgetOptions.visible = !blurWidgetOptions.visible;
-          await appModel.setBlurWidgetOptions(blurWidgetOptions);
-          blurWidgetOptionsNotifier.value = blurWidgetOptions;
+          Map<int, String> audioEmbeddedTracks =
+              await playerController.getAudioTracks();
+          await showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            useRootNavigator: true,
+            builder: (context) => BottomSheetDialog(
+              options: getAudioDialogOptions(audioEmbeddedTracks),
+            ),
+          );
         },
       ),
       BottomSheetDialogOption(
-        label: appModel.translate("player_option_blur_options"),
-        icon: Icons.blur_circular_sharp,
+        label: appModel.translate("player_option_select_subtitle"),
+        icon: Icons.subtitles_outlined,
         action: () async {
-          await dialogSmartPause();
-          await showBlurWidgetOptionsDialog(context, blurWidgetOptionsNotifier);
-          await dialogSmartResume();
+          Map<int, String> subtitleEmbeddedTracks =
+              await playerController.getSpuTracks();
+
+          await showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            useRootNavigator: true,
+            builder: (context) => BottomSheetDialog(
+              options: getSubtitleDialogOptions(subtitleEmbeddedTracks),
+            ),
+          );
         },
       ),
-      BottomSheetDialogOption(
-        label: appModel.translate("player_option_blur_reset"),
-        icon: Icons.timer_sharp,
-        action: () async {
-          BlurWidgetOptions blurWidgetOptions = appModel.getBlurWidgetOptions();
-          blurWidgetOptions.left = -1;
-          blurWidgetOptions.top = -1;
-          blurWidgetOptions.width = 200;
-          blurWidgetOptions.height = 200;
-
-          await appModel.setBlurWidgetOptions(blurWidgetOptions);
-          blurWidgetOptionsNotifier.value = blurWidgetOptions;
-        },
-      ),
-    ];
-
-    return options;
-  }
-
-  List<BottomSheetDialogOption> getAudioSubtitlesBottom() {
-    List<BottomSheetDialogOption> bottomOptions = [
       BottomSheetDialogOption(
         label: appModel.translate("player_option_text_filter"),
         active: appModel.getUseRegexFilter(),
@@ -1504,7 +1469,63 @@ class PlayerPageState extends State<PlayerPage>
       ),
     ];
 
-    return bottomOptions;
+    return IconButton(
+      color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
+      icon: const Icon(Icons.queue_music_outlined),
+      onPressed: () async {
+        await showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          useRootNavigator: true,
+          builder: (context) => BottomSheetDialog(
+            options: options,
+          ),
+        );
+      },
+    );
+  }
+
+  List<BottomSheetDialogOption> getBlurOptions() {
+    List<BottomSheetDialogOption> options = [
+      BottomSheetDialogOption(
+        label: appModel.translate("player_option_blur_use"),
+        active: appModel.getBlurWidgetOptions().visible,
+        icon: appModel.getBlurWidgetOptions().visible
+            ? Icons.blur_on_outlined
+            : Icons.blur_off_outlined,
+        action: () async {
+          BlurWidgetOptions blurWidgetOptions = appModel.getBlurWidgetOptions();
+          blurWidgetOptions.visible = !blurWidgetOptions.visible;
+          await appModel.setBlurWidgetOptions(blurWidgetOptions);
+          blurWidgetOptionsNotifier.value = blurWidgetOptions;
+        },
+      ),
+      BottomSheetDialogOption(
+        label: appModel.translate("player_option_blur_options"),
+        icon: Icons.blur_circular_sharp,
+        action: () async {
+          await dialogSmartPause();
+          await showBlurWidgetOptionsDialog(context, blurWidgetOptionsNotifier);
+          await dialogSmartResume();
+        },
+      ),
+      BottomSheetDialogOption(
+        label: appModel.translate("player_option_blur_reset"),
+        icon: Icons.timer_sharp,
+        action: () async {
+          BlurWidgetOptions blurWidgetOptions = appModel.getBlurWidgetOptions();
+          blurWidgetOptions.left = -1;
+          blurWidgetOptions.top = -1;
+          blurWidgetOptions.width = 200;
+          blurWidgetOptions.height = 200;
+
+          await appModel.setBlurWidgetOptions(blurWidgetOptions);
+          blurWidgetOptionsNotifier.value = blurWidgetOptions;
+        },
+      ),
+    ];
+
+    return options;
   }
 
   List<BottomSheetDialogOption> getAudioDialogOptions(
@@ -1556,6 +1577,9 @@ class PlayerPageState extends State<PlayerPage>
           active: subtitleItem == item,
           action: () {
             subtitleItem = item;
+            if (!subtitleItem.controller.initialized) {
+              subtitleItem.controller.initial();
+            }
           });
 
       options.add(option);
@@ -1568,19 +1592,6 @@ class PlayerPageState extends State<PlayerPage>
         action: () {
           subtitleItem = emptySubtitleItem;
         }));
-
-    return options;
-  }
-
-  List<BottomSheetDialogOption> getAudioSubtitles(
-    Map<int, String> audioEmbeddedTracks,
-    Map<int, String> subtitleEmbeddedTracks,
-  ) {
-    List<BottomSheetDialogOption> options = [];
-
-    options.addAll(getAudioDialogOptions(audioEmbeddedTracks));
-    options.addAll(getSubtitleDialogOptions(subtitleEmbeddedTracks));
-    options.addAll(getAudioSubtitlesBottom());
 
     return options;
   }

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:chisa/media/media_history_item.dart';
+import 'package:chisa/models/app_model.dart';
 import 'package:chisa/util/subtitle_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -36,18 +37,31 @@ abstract class PlayerMediaSource extends MediaSource {
 
   /// Push the navigator page to the media page pertaining to this media type.
   Future<void> launchMediaPage(
-      BuildContext context, PlayerLaunchParams params) async {
+    BuildContext context,
+    PlayerLaunchParams params, {
+    bool pushReplacement = false,
+  }) async {
     await Wakelock.enable();
     await SystemChrome.setEnabledSystemUIOverlays([]);
     await SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (context) => PlayerPage(params: params),
-      ),
-    );
+
+    if (pushReplacement) {
+      await Navigator.of(context).pushReplacement(
+        MaterialPageRoute<void>(
+          builder: (context) => PlayerPage(params: params),
+        ),
+      );
+    } else {
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (context) => PlayerPage(params: params),
+        ),
+      );
+    }
+
     await Wakelock.disable();
 
     await SystemChrome.setPreferredOrientations([
@@ -59,4 +73,7 @@ abstract class PlayerMediaSource extends MediaSource {
   }
 
   FutureOr<List<SubtitleItem>> provideSubtitles(PlayerLaunchParams params);
+
+  /// A button that shows on the player menu particular to the media source.
+  Widget? buildSourceButton(BuildContext context, PlayerPageState page);
 }
