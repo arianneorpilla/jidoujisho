@@ -863,9 +863,6 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   Widget dragToSelectSubtitle(String subtitleText) {
-    subtitleText.codeUnits.forEach((unit) {
-      print(unit);
-    });
     return Stack(
       alignment: Alignment.bottomCenter,
       children: <Widget>[
