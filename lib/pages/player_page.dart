@@ -23,7 +23,6 @@ import 'package:clipboard_listener/clipboard_listener.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
 import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:multi_value_listenable_builder/multi_value_listenable_builder.dart';
@@ -97,6 +96,8 @@ class PlayerPageState extends State<PlayerPage>
 
   bool dialogSmartPaused = false;
   bool dialogSmartFocusFlag = false;
+
+  Orientation? currentOrientation;
 
   DictionarySearchResult? searchResult;
   ValueNotifier<String> searchTerm = ValueNotifier<String>("");
@@ -1298,8 +1299,18 @@ class PlayerPageState extends State<PlayerPage>
     appModel = Provider.of<AppModel>(context);
     super.build(context);
 
+    currentOrientation ??= MediaQuery.of(context).orientation;
+
     if (!isPlayerReady) {
       return buildPlaceholder();
+    }
+
+    if (currentOrientation != MediaQuery.of(context).orientation) {
+      currentOrientation = MediaQuery.of(context).orientation;
+      Future.delayed(Duration(milliseconds: 50), () {
+        playerController.seekTo(
+            playerController.value.position - Duration(milliseconds: 50));
+      });
     }
 
     return WillPopScope(
