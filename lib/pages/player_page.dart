@@ -1023,7 +1023,7 @@ class PlayerPageState extends State<PlayerPage>
 
       Subtitle? lastSubtitle;
       for (Subtitle subtitle in subtitleItem.controller.subtitles) {
-        if (position.value < subtitle.start + getSubtitleDelay()) {
+        if (position.value < subtitle.start - getSubtitleDelay()) {
           return lastSubtitle;
         }
 
@@ -2097,5 +2097,6 @@ class PlayerPageState extends State<PlayerPage>
 
     subtitleItems.add(item);
     subtitleItem = item;
+    refreshSubtitleWidget();
   }
 }
