@@ -80,6 +80,9 @@ class AppModel with ChangeNotifier {
   bool _isSearching = false;
   bool get isSearching => _isSearching;
 
+  /// Used to indicate if the app is currently in a source page.
+  bool isInSource = false;
+
   /// Saves the offset scroll value of the dictionary.
   double _scrollOffset = 0;
   get scrollOffset => _scrollOffset;

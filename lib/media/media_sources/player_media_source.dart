@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_type.dart';
+import 'package:chisa/models/app_model.dart';
 
 import 'package:chisa/util/subtitle_utils.dart';
 import 'package:chisa/util/time_format.dart';
@@ -11,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:chisa/media/media_source.dart';
 import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/pages/player_page.dart';
+import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:wakelock/wakelock.dart';
 
@@ -40,6 +42,9 @@ abstract class PlayerMediaSource extends MediaSource {
     PlayerLaunchParams params, {
     bool pushReplacement = false,
   }) async {
+    AppModel appModel = Provider.of<AppModel>(context, listen: false);
+    appModel.isInSource = true;
+
     await Wakelock.enable();
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     await SystemChrome.setPreferredOrientations([
@@ -68,6 +73,8 @@ abstract class PlayerMediaSource extends MediaSource {
       DeviceOrientation.landscapeRight,
     ]);
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
+    appModel.isInSource = false;
   }
 
   FutureOr<List<SubtitleItem>> provideSubtitles(PlayerLaunchParams params);

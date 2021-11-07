@@ -59,7 +59,7 @@ public class MainActivity extends FlutterActivity {
         mAnkiDroid = new AnkiDroidHelper(context);
     }
 
-    private void addNote(String deck, String sentence, String word, String reading, String meaning,  String image, String audio, String extra) {
+    private void addNote(String deck, String sentence, String word, String reading, String meaning,  String image, String audio, String extra, String contextParam) {
         final AddContentApi api = new AddContentApi(context);
 
         long deckId;
@@ -71,7 +71,7 @@ public class MainActivity extends FlutterActivity {
 
         long modelId;
         if (modelExists("jidoujisho Chisa")) {
-            modelId = mAnkiDroid.findModelIdByName("jidoujisho Chisa", 7);
+            modelId = mAnkiDroid.findModelIdByName("jidoujisho Chisa", 8);
         } else {
             modelId = api.addNewCustomModel("jidoujisho Chisa",
                 new String[] {
@@ -82,13 +82,13 @@ public class MainActivity extends FlutterActivity {
                     "Image",
                     "Audio",
                     "Extra",
+                    "Context",
                 },
                 new String[] {
                     "jidoujisho Chisa Default"
                 },
                 new String[] {"<p id=\"sentence\">{{Sentence}}</p><div id=\"word\">{{Word}}</div>"},
-                    new String[] {"<p id=\"sentence\">{{Sentence}}</p><div id=\"word\">{{Word}}</div><br>{{Audio}}<div class=\"image\">{{Image}}</div>" +
-                    "<hr id=reading><p id=\"reading\">{{Reading}}</p><h2 id=\"word\">{{Word}}</h2><br><p><small id=\"meaning\">{{Meaning}}</small></p>"},
+                    new String[] {"<p id=\"sentence\">{{Sentence}}</p><div id=\"word\">{{Word}}</div><br>{{Audio}}<div class=\"image\">{{Image}}</div><hr id=reading><p id=\"reading\">{{Reading}}</p><h2 id=\"word\">{{Word}}</h2><br><p><small id=\"meaning\">{{Meaning}}</small></p><br>{{#Context}}<a style=\"text-decoration:none;color:red;\" href=\"{{Context}}\">↩</a>{{/Context}}"},
                             "p {\n" +
                             "    margin: 0px\n" +
                             "}\n" +
@@ -104,7 +104,6 @@ public class MainActivity extends FlutterActivity {
                             ".card {\n" +
                             "  font-family: arial;\n" +
                             "  font-size: 20px;\n" +
-                            "  white-space: pre-line;\n" +
                             "  text-align: center;\n" +
                             "  color: black;\n" +
                             "  background-color: white;\n" +
@@ -112,6 +111,15 @@ public class MainActivity extends FlutterActivity {
                             "\n" +
                             "#sentence {\n" +
                             "    font-size: 30px\n" +
+                            "}\n" +
+                            "\n" +
+                            ".context.night_mode {\n" + 
+                            "    text-decoration: none;\n" +
+                            "    color: red;\n" +
+                            "}\n" +
+                            ".context {\n" +
+                            "    text-decoration: none;\n" +
+                            "    color: red;\n" +
                             "}\n" +
                             "\n" +
                             ".image img {\n" +
@@ -149,6 +157,7 @@ public class MainActivity extends FlutterActivity {
             image,
             audio,
             extra,
+            contextParam,
         }, tags);
 
         System.out.println("Added note via flutter_ankidroid_api");
@@ -162,7 +171,7 @@ public class MainActivity extends FlutterActivity {
     }
 
     private boolean modelExists(String model) {
-        Long deckId = mAnkiDroid.findModelIdByName(model, 7);
+        Long deckId = mAnkiDroid.findModelIdByName(model, 8);
         return (deckId != null);
     }
 
@@ -200,6 +209,7 @@ public class MainActivity extends FlutterActivity {
                     final String image = call.argument("image");
                     final String audio = call.argument("audio");
                     final String extra = call.argument("extra");
+                    final String contextParam = call.argument("contextParam");
 
                     final String fileUriPath = call.argument("fileUriPath");
                     final String preferredName = call.argument("preferredName");
@@ -208,7 +218,7 @@ public class MainActivity extends FlutterActivity {
 
                     switch (call.method) {
                         case "addNote":
-                            addNote(deck, sentence, word, reading, meaning, image, audio, extra);
+                            addNote(deck, sentence, word, reading, meaning, image, audio, extra, contextParam);
                             break;
                         case "getDecks":
                             result.success(api.getDeckList());

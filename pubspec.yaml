@@ -89,6 +89,7 @@ dependencies:
   youtube_explode_dart:
   lazy_load_scrollview:
   material_floating_search_bar:
+  uni_links:
 dev_dependencies:
   flutter_test:
     sdk: flutter

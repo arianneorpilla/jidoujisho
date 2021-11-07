@@ -15,6 +15,7 @@ class AnkiExportParams with ChangeNotifier {
     this.imageFiles = const [],
     this.imageFile,
     this.audioFile,
+    this.context = "",
   });
 
   /// The written context of the sourced word, i.e. an example sentence or
@@ -53,6 +54,9 @@ class AnkiExportParams with ChangeNotifier {
 
   /// The content of the audio search controller for the Creator.
   String audioSearch;
+
+  /// A serialised [MediaHistoryItem] for app link return to context.
+  String context;
 
   @override
   operator ==(Object other) =>

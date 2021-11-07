@@ -75,6 +75,7 @@ Future<void> addNote({
     String reading = params.reading;
     String meaning = params.meaning;
     String extra = params.extra;
+    String context = params.context;
 
     String zeroWidthSpace = "​";
 
@@ -103,6 +104,7 @@ Future<void> addNote({
       'image': image,
       'audio': audio,
       'extra': extra,
+      'contextParam': context,
     });
   } on PlatformException catch (e) {
     debugPrint("Failed to add note via AnkiDroid API");

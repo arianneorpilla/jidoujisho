@@ -1841,7 +1841,7 @@ class PlayerPageState extends State<PlayerPage>
       debugPrint(e.toString());
     }
 
-    return AnkiExportParams(
+    AnkiExportParams exportParams = AnkiExportParams(
       sentence: sentence,
       word: word,
       meaning: meaning,
@@ -1850,6 +1850,14 @@ class PlayerPageState extends State<PlayerPage>
       imageFile: imageFile,
       audioFile: audioFile,
     );
+
+    MediaHistoryItem? contextItem = generateContextHistoryItem();
+    if (contextItem != null) {
+      exportParams.context = Uri.encodeFull(
+          "https://jidoujisho.context/${generateContextHistoryItem()!.toJson()}");
+    }
+
+    return exportParams;
   }
 
   Future<List<NetworkToFileImage>> exportImages(

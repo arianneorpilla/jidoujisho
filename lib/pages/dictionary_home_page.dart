@@ -8,6 +8,7 @@ import 'package:chisa/util/anki_creator.dart';
 import 'package:chisa/util/dictionary_dialog_widget.dart';
 import 'package:chisa/dictionary/dictionary_entry.dart';
 import 'package:chisa/util/media_type_button.dart';
+import 'package:chisa/util/return_from_context.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
@@ -542,20 +543,6 @@ class DictionaryPageState extends State<DictionaryHomePage> {
     );
   }
 
-  Future<void> returnFromContext(MediaHistoryItem item) async {
-    MediaType mediaType = MediaType.values
-        .firstWhere((type) => type.prefsDirectory() == item.mediaTypePrefs);
-    switch (mediaType) {
-      case MediaType.player:
-        PlayerMediaSource source = appModel.getMediaSourceFromName(
-            mediaType, item.sourceName) as PlayerMediaSource;
-        await source.launchMediaPage(context, source.getLaunchParams(item));
-        break;
-      default:
-        throw UnimplementedError();
-    }
-  }
-
   Widget buildDictionaryResult(DictionarySearchResult result,
       DictionaryMediaHistoryItem mediaHistoryItem) {
     DictionaryFormat dictionaryFormat =
@@ -623,7 +610,8 @@ class DictionaryPageState extends State<DictionaryHomePage> {
                     ),
                     onPressed: () async {
                       Navigator.pop(context);
-                      await returnFromContext(mediaHistoryItem.contextItem!);
+                      await returnFromContext(
+                          context, mediaHistoryItem.contextItem!);
 
                       setState(() {});
                     },
