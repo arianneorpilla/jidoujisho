@@ -64,8 +64,8 @@ Widget transcriptDialog({
 
       Color durationColor = Theme.of(context).unselectedWidgetColor;
 
-      Duration offsetStart = subtitle.start + subtitleDelay;
-      Duration offsetEnd = subtitle.end + subtitleDelay;
+      Duration offsetStart = subtitle.start - subtitleDelay;
+      Duration offsetEnd = subtitle.end - subtitleDelay;
       String offsetStartText = getTimestampFromDuration(offsetStart);
       String offsetEndText = getTimestampFromDuration(offsetEnd);
       String subtitleDuration = "$offsetStartText - $offsetEndText";

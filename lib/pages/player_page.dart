@@ -1929,8 +1929,8 @@ class PlayerPageState extends State<PlayerPage>
 
     Duration allowance = Duration(milliseconds: audioAllowance);
     Duration delay = Duration(milliseconds: subtitleDelay);
-    Duration adjustedStart = subtitles.first.start + delay - allowance;
-    Duration adjustedEnd = subtitles.last.end + delay + allowance;
+    Duration adjustedStart = subtitles.first.start - delay - allowance;
+    Duration adjustedEnd = subtitles.last.end - delay + allowance;
 
     timeStart = getTimestampFromDuration(adjustedStart);
     timeEnd = getTimestampFromDuration(adjustedEnd);
