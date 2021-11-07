@@ -22,7 +22,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
   PlayerLocalMediaSource()
       : super(
           sourceName: "Local Media",
-          icon: Icons.video_library,
+          icon: Icons.storage,
           searchSupport: false,
         );
 
@@ -37,14 +37,18 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
   }
 
   @override
-  Widget? getButton(BuildContext context) {
+  Widget? getButton(
+    BuildContext context,
+    Function() refreshCallback,
+  ) {
     AppModel appModel = Provider.of<AppModel>(context);
 
     return MediaTypeButton(
       label: appModel.translate("player_pick_video"),
       icon: Icons.upload_file,
       onTap: () async {
-        showFilePicker(context);
+        await showFilePicker(context);
+        refreshCallback();
       },
     );
   }
@@ -188,5 +192,11 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
         page.dialogSmartResume();
       },
     );
+  }
+
+  @override
+  FutureOr<String> getNetworkStreamUrl(PlayerLaunchParams params) {
+    throw UnsupportedError(
+        "Local media source does not support network stream");
   }
 }

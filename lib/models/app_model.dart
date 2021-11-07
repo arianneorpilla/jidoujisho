@@ -16,6 +16,7 @@ import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_source.dart';
 import 'package:chisa/media/media_sources/player_local_media_source.dart';
 import 'package:chisa/media/media_sources/player_media_source.dart';
+import 'package:chisa/media/media_sources/player_youtube_source.dart';
 import 'package:chisa/media/media_sources/reader_media_source.dart';
 import 'package:chisa/media/media_sources/viewer_media_source.dart';
 import 'package:chisa/media/media_sources_dialog.dart';
@@ -126,6 +127,7 @@ class AppModel with ChangeNotifier {
   ];
   List<PlayerMediaSource> playerMediaSources = [
     PlayerLocalMediaSource(),
+    PlayerYouTubeSource(),
   ];
   List<ReaderMediaSource> readerMediaSources = [];
   List<ViewerMediaSource> viewerMediaSources = [];
@@ -1007,6 +1009,7 @@ class AppModel with ChangeNotifier {
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.white,
         iconTheme: IconThemeData(color: Colors.black),
+        titleTextStyle: TextStyle(color: Colors.black),
         elevation: 0,
       ),
       scrollbarTheme: const ScrollbarThemeData().copyWith(
@@ -1043,6 +1046,7 @@ class AppModel with ChangeNotifier {
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.black,
         iconTheme: IconThemeData(color: Colors.white),
+        titleTextStyle: TextStyle(color: Colors.white),
         elevation: 0,
       ),
       scrollbarTheme: const ScrollbarThemeData().copyWith(

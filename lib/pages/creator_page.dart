@@ -9,10 +9,8 @@ import 'package:chisa/anki/anki_export_params.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/util/anki_export_field.dart';
 import 'package:chisa/util/anki_creator.dart';
-import 'package:chisa/util/export_button.dart';
 import 'package:chisa/util/drop_down_menu.dart';
 import 'package:chisa/util/image_select_widget.dart';
-import 'package:chisa/util/media_type_button.dart';
 import 'package:chisa/util/popup_item.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -122,6 +120,8 @@ class CreatorPageState extends State<CreatorPage> {
 
   Future<void> setAndComputeInitialFields() async {
     if (widget.initialParams == null) {
+      exportParams = AnkiExportParams();
+    } else {
       exportParams = widget.initialParams!;
     }
 

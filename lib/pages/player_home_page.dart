@@ -29,7 +29,7 @@ class PlayerHomePage extends MediaHomePage {
 class PlayerHomePageState extends State<PlayerHomePage> {
   late AppModel appModel;
 
-  TextEditingController wordController = TextEditingController(text: "");
+  TextEditingController searchController = TextEditingController(text: "");
 
   @override
   void didUpdateWidget(oldWidget) {
@@ -89,7 +89,9 @@ class PlayerHomePageState extends State<PlayerHomePage> {
             if (index == 0) {
               return buildSearchField();
             } else if (index == 1) {
-              return getCurrentMediaSource().getButton(context) ??
+              return getCurrentMediaSource().getButton(context, () {
+                    setState(() {});
+                  }) ??
                   const SizedBox.shrink();
             }
 
@@ -184,7 +186,10 @@ class PlayerHomePageState extends State<PlayerHomePage> {
     return Column(
       children: [
         buildSearchField(),
-        getCurrentMediaSource().getButton(context) ?? const SizedBox.shrink(),
+        getCurrentMediaSource().getButton(context, () {
+              setState(() {});
+            }) ??
+            const SizedBox.shrink(),
         buildEmptyMessage(),
       ],
     );
@@ -207,9 +212,9 @@ class PlayerHomePageState extends State<PlayerHomePage> {
       child: TextFormField(
         keyboardType: TextInputType.text,
         maxLines: 1,
-        controller: wordController,
-        onFieldSubmitted: (result) async {
-          await getCurrentMediaSource().searchAction!();
+        controller: searchController,
+        onFieldSubmitted: (searchTerm) async {
+          await getCurrentMediaSource().searchAction!(searchTerm, context);
           setState(() {});
         },
         enableInteractiveSelection: (!getCurrentMediaSource().searchSupport),
@@ -228,7 +233,7 @@ class PlayerHomePageState extends State<PlayerHomePage> {
             borderSide: BorderSide(color: Theme.of(context).focusColor),
           ),
           contentPadding: const EdgeInsets.all(0),
-          prefixIcon: Icon(widget.mediaType.icon()),
+          prefixIcon: Icon(getCurrentMediaSource().icon),
           suffixIcon: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             mainAxisSize: MainAxisSize.min,
@@ -238,7 +243,10 @@ class PlayerHomePageState extends State<PlayerHomePage> {
                   iconSize: 18,
                   icon: const Icon(Icons.search),
                   onPressed: () async {
-                    await getCurrentMediaSource().searchAction!();
+                    await getCurrentMediaSource().searchAction!(
+                      searchController.text,
+                      context,
+                    );
                     setState(() {});
                   },
                 ),
@@ -250,13 +258,14 @@ class PlayerHomePageState extends State<PlayerHomePage> {
                       context: context,
                       mediaType: widget.mediaType,
                     );
+                    setState(() {});
                   }),
               if (getCurrentMediaSource().searchSupport)
                 BusyIconButton(
                   iconSize: 18,
                   icon: const Icon(Icons.clear),
                   onPressed: () async {
-                    wordController.clear();
+                    searchController.clear();
                   },
                 ),
             ],

@@ -138,7 +138,7 @@ Future<void> openTranscript({
   AppModel appModel = Provider.of<AppModel>(context, listen: false);
   Color backgroundColor = appModel.getIsDarkMode()
       ? const Color(0xcc212121)
-      : const Color(0xefc8c8c8);
+      : const Color(0xefeeeeee);
 
   await showModalBottomSheet(
     backgroundColor: backgroundColor,

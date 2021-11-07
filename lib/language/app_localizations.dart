@@ -82,6 +82,8 @@ class AppLocalizations {
       'player_option_regex_filter': 'Regular Expression Filter',
       'player_subtitles_transcript_empty': 'Transcript is empty.',
       'player_prepare_export': 'Preparing card...',
+      'instant_search_label_before': 'Showing ',
+      'instant_search_label_after': ' search results found for',
       'search_label_before': 'Search result ',
       'search_label_middle': 'out of ',
       'search_label_from': 'from ',
@@ -109,7 +111,9 @@ class AppLocalizations {
       'import_in_progress': 'Import in progress...',
       'start_reading': 'Start Reading',
       'search': 'Search',
-      'enter_search_term_here': 'Enter search term here',
+      'search_dictionary_before': 'Search ',
+      'search_dictionary_after': '...',
+      'enter_a_search_term': 'Enter a search term',
       'import_dictionaries_for_use': 'Import dictionaries to be used',
       'no_more_available_enhancements':
           'No more available enhancements for this field',
@@ -119,6 +123,7 @@ class AppLocalizations {
       'ankidroid_api_message':
           'The Card Creator requires the AnkiDroid API to be active in the background. Launch AnkiDroid in order to continue.',
       'dialog_launch_ankidroid': 'LAUNCH ANKIDROID',
+      'youtube_trending': 'YouTube Trending',
       'localisation_warning': 'Community addons and enhancements are managed '
           'by their respective developers, and these may appear in their '
           'original language.',
@@ -216,6 +221,8 @@ class AppLocalizations {
       'player_option_regex_filter': 'Regular Expression Filter',
       'player_subtitles_transcript_empty': 'Walang laman ang iskrip.',
       'player_prepare_export': 'Hindahanda ang card...',
+      'instant_search_label_before': 'Pinapakita ang ',
+      'instant_search_label_after': ' na resultang nahanap para sa',
       'search_label_before': 'Resulto ',
       'search_label_middle': 'sa ',
       'search_label_from': 'galing sa ',
@@ -240,7 +247,9 @@ class AppLocalizations {
       'field_hint_image': 'Imaheng hahanapin',
       'field_hint_audio': 'Tunog na hahanapin',
       'search': 'Maghanap',
-      'enter_search_term_here': 'Salitang hahanapin',
+      'search_dictionary_before': 'Hanapin sa ',
+      'search_dictionary_after': '...',
+      'enter_a_search_term': 'Maglagay ng salitang hahanapin',
       'import_format': 'Klase ng idadagdag na diksyunaryo',
       'import_in_progress': 'Nagdadagdag ng diksyunaryo...',
       'start_reading': 'Magsimulang Magbasa',
@@ -251,8 +260,9 @@ class AppLocalizations {
       'source_list_emmpty': 'Walang mga pagkukunan',
       'ankidroid_api': 'AnkiDroid API',
       'ankidroid_api_message':
-          'Kailangan na buhay ang AnkiDroid API upang gamitin ang Pagawaan ng Card. Buksan ang AnkiDroid upang magpatuloy.',
+          'Kailangan na buhay ang AnkiDroid API upang gamitin anYouTubeg Pagawaan ng Card. Buksan ang AnkiDroid upang magpatuloy.',
       'dialog_launch_ankidroid': 'BUKSAN ANG ANKIDROID',
+      'youtube_trending': 'Trending sa YouTube',
       'localisation_warning': 'Ang mga mod na gawa ng komunidad ay maaring '
           'hindi naisalin at magpakita sa orihinal na wikang '
           'pinanggalingan.',

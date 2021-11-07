@@ -10,7 +10,7 @@ abstract class ViewerMediaSource extends MediaSource {
     required IconData icon,
     required bool searchSupport,
     String? searchLabel,
-    Future<void> Function()? searchAction,
+    Future<void> Function(String, BuildContext)? searchAction,
   }) : super(
           sourceName: sourceName,
           icon: icon,
@@ -29,7 +29,7 @@ abstract class ViewerMediaSource extends MediaSource {
       BuildContext context, ViewerLaunchParams params) async {}
 
   @override
-  Widget? getButton(BuildContext context) {
+  Widget? getButton(BuildContext context, Function() refreshCallback) {
     return null;
   }
 }

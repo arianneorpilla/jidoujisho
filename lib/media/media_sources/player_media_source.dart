@@ -20,7 +20,7 @@ abstract class PlayerMediaSource extends MediaSource {
     required IconData icon,
     required bool searchSupport,
     String? searchLabel,
-    Future<void> Function()? searchAction,
+    Future<void> Function(String, BuildContext)? searchAction,
   }) : super(
           sourceName: sourceName,
           icon: icon,
@@ -41,7 +41,7 @@ abstract class PlayerMediaSource extends MediaSource {
     bool pushReplacement = false,
   }) async {
     await Wakelock.enable();
-    await SystemChrome.setEnabledSystemUIOverlays([]);
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     await SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
@@ -67,7 +67,7 @@ abstract class PlayerMediaSource extends MediaSource {
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
-    await SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   }
 
   FutureOr<List<SubtitleItem>> provideSubtitles(PlayerLaunchParams params);
@@ -78,6 +78,7 @@ abstract class PlayerMediaSource extends MediaSource {
   Widget buildMediaHistoryItem({
     required BuildContext context,
     required MediaHistoryItem item,
+    Widget? metadataWidget,
     Function()? onTap,
     Function()? onLongPress,
   }) {
@@ -91,7 +92,7 @@ abstract class PlayerMediaSource extends MediaSource {
             buildMediaHistoryThumbnail(context, item),
             const SizedBox(width: 12),
             Expanded(
-              child: buildMediaHistoryMetadata(context, item),
+              child: metadataWidget ?? buildMediaHistoryMetadata(context, item),
             ),
           ],
         ),
@@ -219,4 +220,6 @@ abstract class PlayerMediaSource extends MediaSource {
   }) {
     return [];
   }
+
+  FutureOr<String> getNetworkStreamUrl(PlayerLaunchParams params);
 }

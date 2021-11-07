@@ -65,6 +65,7 @@ class HomePageState extends State<HomePage> {
       children: [
         Text(
           appModel.translate("app_title"),
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
         ),
         getVersion(),
       ],

@@ -50,7 +50,7 @@ dependencies:
       ref: 397998788b258ca1a9d0407d2dd1bde683b4e50a
   flutter_archive: ^4.0.1
   path_provider: ^2.0.4
-  xml: ^5.1.2
+  xml: ^5.3.1
   epubx: ^3.0.0-dev.3
   file: ^6.1.2
   objectbox: ^1.2.0
@@ -84,8 +84,11 @@ dependencies:
   audioplayers:
   photo_view:
   intl:
-  external_app_launcher:
+  device_apps:
   clipboard_listener:
+  youtube_explode_dart:
+  lazy_load_scrollview:
+  material_floating_search_bar:
 dev_dependencies:
   flutter_test:
     sdk: flutter

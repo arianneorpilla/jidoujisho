@@ -15,12 +15,8 @@ abstract class MediaSource {
     required this.icon,
     required this.searchSupport,
     required this.searchLabel,
-    this.searchAction,
-  }) : assert(
-            (searchSupport && searchAction != null ||
-                !searchSupport && searchAction == null),
-            'Media sources that do not support search should not have non-null '
-            'search actions.');
+    required this.searchAction,
+  });
 
   /// The name for this that will appear under the media type's source picker.
   final String sourceName;
@@ -39,11 +35,14 @@ abstract class MediaSource {
   /// What happens when the search action is clicked when this particular
   /// media source is active? If [searchSupport] is true, then this should not
   /// be null.
-  final Future<void> Function()? searchAction;
+  Future<void> Function(String, BuildContext)? searchAction;
 
   /// If this source is active and, this widget will appear under the search bar
   /// of the media type tab if non-null. This should typically be a button.
-  Widget? getButton(BuildContext context);
+  Widget? getButton(
+    BuildContext context,
+    Function() refreshCallback,
+  );
 
   bool isShown(AppModel appModel) {
     return appModel.getMediaSourceShown(this);

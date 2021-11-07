@@ -56,6 +56,10 @@ class PlayerPageState extends State<PlayerPage>
   late SubtitleItem emptySubtitleItem;
   late AnimationController playPauseIconAnimationController;
 
+  /// Public for a [MediaSource] to edit and store session-specific details
+  /// for its source button.
+  Map<dynamic, dynamic> sourceOptions = {};
+
   List<SubtitleItem> subtitleItems = [];
 
   final ValueNotifier<int> latestResultEntryIndex = ValueNotifier<int>(0);
@@ -215,7 +219,7 @@ class PlayerPageState extends State<PlayerPage>
     WidgetsBinding.instance!.addPostFrameCallback((_) async {
       menuColor = appModel.getIsDarkMode()
           ? const Color(0xcc424242)
-          : const Color(0xccdfdfdf);
+          : const Color(0xdeeeeeee);
       dictionaryColor = appModel.getIsDarkMode()
           ? Colors.grey.shade800.withOpacity(0.6)
           : Colors.white.withOpacity(0.8);

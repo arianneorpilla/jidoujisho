@@ -133,7 +133,7 @@ class MediaSourcesDialogState extends State<MediaSourcesDialog> {
             title: Row(
               children: [
                 Icon(
-                  Icons.perm_media,
+                  source.icon,
                   size: 20.0,
                   color: appModel.getIsDarkMode()
                       ? Colors.white.withOpacity(opacity)

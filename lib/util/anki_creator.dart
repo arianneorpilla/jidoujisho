@@ -1,7 +1,7 @@
 import 'package:chisa/anki/anki_export_params.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/creator_page.dart';
-import 'package:external_app_launcher/external_app_launcher.dart';
+import 'package:device_apps/device_apps.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -164,10 +164,7 @@ Future<void> navigateToCreator({
                   appModel.translate("dialog_launch_ankidroid"),
                 ),
                 onPressed: () async {
-                  await LaunchApp.openApp(
-                    androidPackageName: 'com.ichi2.anki',
-                    openStore: true,
-                  );
+                  DeviceApps.openApp('com.ichi2.anki');
                   Navigator.pop(context);
 
                   try {
