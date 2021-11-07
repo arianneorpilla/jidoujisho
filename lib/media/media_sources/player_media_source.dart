@@ -47,10 +47,6 @@ abstract class PlayerMediaSource extends MediaSource {
 
     await Wakelock.enable();
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    await SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
 
     if (pushReplacement) {
       await Navigator.of(context).pushReplacement(
@@ -58,6 +54,9 @@ abstract class PlayerMediaSource extends MediaSource {
           builder: (context) => PlayerPage(params: params),
         ),
       );
+
+      await Wakelock.enable();
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     } else {
       await Navigator.of(context).push(
         MaterialPageRoute<void>(
@@ -67,11 +66,7 @@ abstract class PlayerMediaSource extends MediaSource {
     }
 
     await Wakelock.disable();
-    await SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
+
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
     appModel.isInSource = false;

@@ -1042,6 +1042,18 @@ class PlayerPageState extends State<PlayerPage>
     if (playerController.value.isPlaying) {
       playPauseIconAnimationController.reverse();
       startHideTimer();
+
+      if (MediaQuery.of(context).orientation == Orientation.landscape) {
+        await SystemChrome.setPreferredOrientations([
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight
+        ]);
+      } else {
+        await SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+        ]);
+      }
+
       await playerController.pause();
     } else {
       cancelHideTimer();
@@ -1049,6 +1061,12 @@ class PlayerPageState extends State<PlayerPage>
       if (!playerController.value.isInitialized) {
         playerController.initialize().then((_) async {
           await playerController.play();
+
+          await SystemChrome.setPreferredOrientations([
+            DeviceOrientation.landscapeLeft,
+            DeviceOrientation.landscapeRight,
+            DeviceOrientation.portraitUp,
+          ]);
           playPauseIconAnimationController.forward();
         });
       } else {
@@ -1057,6 +1075,12 @@ class PlayerPageState extends State<PlayerPage>
         }
         playPauseIconAnimationController.forward();
         await playerController.play();
+
+        await SystemChrome.setPreferredOrientations([
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight,
+          DeviceOrientation.portraitUp,
+        ]);
 
         if (isFinished) {
           Future.delayed(const Duration(seconds: 3), () async {
@@ -2044,7 +2068,19 @@ class PlayerPageState extends State<PlayerPage>
   Future<void> dialogSmartPause() async {
     if (playerController.value.isPlaying) {
       dialogSmartPaused = true;
-      playerController.pause();
+
+      if (MediaQuery.of(context).orientation == Orientation.landscape) {
+        await SystemChrome.setPreferredOrientations([
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight
+        ]);
+      } else {
+        await SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+        ]);
+      }
+
+      await playerController.pause();
     }
   }
 
@@ -2059,6 +2095,11 @@ class PlayerPageState extends State<PlayerPage>
 
     if (dialogSmartPaused) {
       await playerController.play();
+      await SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+        DeviceOrientation.portraitUp,
+      ]);
     }
     dialogSmartPaused = false;
   }
