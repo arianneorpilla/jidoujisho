@@ -35,6 +35,7 @@ class HomePageState extends State<HomePage> {
     List<MediaType> mediaTypes = appModel.mediaTypes;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         leading: getLeading(),
         title: getTitle(),

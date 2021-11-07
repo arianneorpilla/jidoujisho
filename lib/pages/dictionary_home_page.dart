@@ -7,6 +7,7 @@ import 'package:chisa/media/media_sources/player_media_source.dart';
 import 'package:chisa/util/anki_creator.dart';
 import 'package:chisa/util/dictionary_dialog_widget.dart';
 import 'package:chisa/dictionary/dictionary_entry.dart';
+import 'package:chisa/util/dictionary_vertical_widget.dart';
 import 'package:chisa/util/media_type_button.dart';
 import 'package:chisa/util/return_from_context.dart';
 import 'package:flutter/material.dart';
@@ -53,316 +54,20 @@ class DictionaryPageState extends State<DictionaryHomePage> {
   FloatingSearchBarController searchBarController =
       FloatingSearchBarController();
 
-  WidgetSpan getContextSourceIcon() {
-    Color labelColor = Theme.of(context).unselectedWidgetColor;
+  DictionaryVerticalWidget? dictionaryVerticalWidget;
 
-    if (searchResult!.mediaHistoryItem == null) {
-      return WidgetSpan(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(0, 0, 4, 1),
-          child: Icon(MediaType.dictionary.icon(), color: labelColor, size: 12),
-        ),
-      );
-    }
-
-    MediaType mediaType = MediaType.values.firstWhere((type) =>
-        type.prefsDirectory() ==
-        searchResult!.mediaHistoryItem!.mediaTypePrefs);
-    IconData icon = mediaType.icon();
-
-    return WidgetSpan(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 4, 1),
-        child: Icon(icon, color: labelColor, size: 12),
-      ),
-    );
-  }
-
-  Widget getFooterTextSpans() {
-    Color labelColor = Theme.of(context).unselectedWidgetColor;
-
-    return Text.rich(
-      TextSpan(
-        text: '',
-        children: <InlineSpan>[
-          getContextSourceIcon(),
-          TextSpan(
-            text: appModel.translate("instant_search_label_before"),
-            style: TextStyle(
-              fontSize: 12,
-              color: labelColor,
-            ),
-          ),
-          TextSpan(
-            text: "${searchResult!.entries.length}",
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
-            ),
-          ),
-          TextSpan(
-            text: appModel.translate("instant_search_label_after"),
-            style: TextStyle(
-              fontSize: 12,
-              color: labelColor,
-            ),
-          ),
-          TextSpan(
-            text: "『",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
-              color: labelColor,
-            ),
-          ),
-          TextSpan(
-            text: searchResult!.originalSearchTerm,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
-            ),
-          ),
-          TextSpan(
-            text: "』",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
-              color: labelColor,
-            ),
-          ),
-        ],
-      ),
-      textAlign: TextAlign.center,
-    );
-  }
-
-  Widget buildFloatingSearchBar() {
-    final isPortrait =
-        MediaQuery.of(context).orientation == Orientation.portrait;
-
-    return FloatingSearchBar(
-      controller: searchBarController,
-
-      hint: (appModel.getCurrentDictionary() != null)
-          ? appModel.translate("search_dictionary_before") +
-              appModel.getCurrentDictionaryName() +
-              appModel.translate("search_dictionary_after")
-          : appModel.translate("search") + "...",
-
-      borderRadius: BorderRadius.zero,
-      scrollPadding: const EdgeInsets.only(top: 16, bottom: 56),
-      transitionDuration: Duration.zero,
-      transitionCurve: Curves.easeInOut,
-      margins: EdgeInsets.symmetric(horizontal: 6),
-      physics: const BouncingScrollPhysics(),
-      axisAlignment: isPortrait ? 0.0 : -1.0,
-      openAxisAlignment: 0.0,
-      width: isPortrait ? 600 : 500,
-      debounceDelay: const Duration(milliseconds: 500),
-      progress: isSearching,
-
-      onFocusChanged: (focus) {
-        isFocus = focus;
-        setState(() {});
-
-        searchResult = null;
-      },
-
-      accentColor: Theme.of(context).focusColor,
-      onQueryChanged: (query) async {
-        if (appModel.getCurrentDictionary() == null) {
-          return;
-        }
-        if (query.isEmpty) {
-          searchResult = null;
-          setState(() {});
-          return;
-        }
-        if (!isSearching) {
-          setState(() {
-            isSearching = true;
-          });
-
-          searchResult = await appModel.searchDictionary(query);
-          setState(() {
-            isSearching = false;
-          });
-        }
-      },
-      // Specify a custom transition to be used for
-      // animating between opened and closed stated.
-
-      leadingActions: [
-        FloatingSearchBarAction(
-          showIfOpened: true,
-          child: CircularButton(
-            icon: Icon(
-              Icons.auto_stories,
-              size: 20,
-              color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
-            ),
-            onPressed: () async {
-              String? currentDictionary = appModel.getCurrentDictionaryName();
-
-              await appModel.showDictionaryMenu(context);
-
-              if (currentDictionary != appModel.getCurrentDictionaryName()) {
-                if (searchBarController.query.isEmpty) {
-                  searchResult = null;
-                  setState(() {});
-                  return;
-                }
-                if (!isSearching) {
-                  setState(() {
-                    isSearching = true;
-                  });
-
-                  searchResult = await appModel
-                      .searchDictionary(searchBarController.query);
-                  setState(() {
-                    isSearching = false;
-                  });
-                }
-              } else {
-                setState(() {});
-              }
-            },
-          ),
-        ),
-      ],
-      automaticallyImplyBackButton: false,
-
-      backdropColor: appModel.getIsDarkMode()
-          ? Colors.black26
-          : Colors.grey.shade300.withOpacity(0.3),
-      actions: [
-        FloatingSearchBarAction.searchToClear(
-          size: 20,
-          duration: Duration.zero,
-          showIfClosed: true,
-          color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
-        ),
-      ],
-      isScrollControlled: searchResult == null || searchResult!.entries.isEmpty,
-      builder: (context, transition) {
-        if (appModel.getCurrentDictionary() == null) {
-          return Padding(
-            padding: EdgeInsets.all(16),
-            child: Center(
-              child: showCenterIconMessage(
-                context: context,
-                label: appModel.translate("import_dictionaries_for_use"),
-                icon: Icons.auto_stories,
-                jumpingDots: false,
-              ),
-            ),
-          );
-        }
-
-        if (searchResult == null) {
-          return Padding(
-            padding: EdgeInsets.all(16),
-            child: Center(
-              child: showCenterIconMessage(
-                context: context,
-                label: appModel.translate("enter_a_search_term"),
-                icon: Icons.search,
-                jumpingDots: false,
-              ),
-            ),
-          );
-        }
-
-        if (searchResult!.entries.isEmpty) {
-          return Padding(
-            padding: EdgeInsets.all(16),
-            child: Center(
-              child: showCenterIconMessage(
-                context: context,
-                label:
-                    "${appModel.translate("dictionary_nomatch_before")}『${searchResult!.originalSearchTerm}』${appModel.translate("dictionary_nomatch_after")}",
-                icon: Icons.search,
-                jumpingDots: false,
-              ),
-            ),
-          );
-        }
-
-        List<Widget> widgets = [];
-        DictionaryFormat format =
-            appModel.getDictionaryFormatFromName(searchResult!.formatName);
-        Dictionary dictionary =
-            appModel.getDictionaryFromName(searchResult!.dictionaryName);
-
-        widgets.add(
-          Padding(
-            padding: EdgeInsets.only(bottom: 4),
-            child: getFooterTextSpans(),
-          ),
-        );
-        for (int i = 0; i < searchResult!.entries.length; i++) {
-          DictionaryEntry entry = searchResult!.entries[i];
-          widgets.add(
-            ClipRect(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 8),
-                child: InkWell(
-                  onTap: () async {
-                    await navigateToCreator(
-                      context: context,
-                      appModel: appModel,
-                      initialParams: AnkiExportParams(
-                        word: entry.word,
-                        meaning: entry.meaning,
-                        reading: entry.reading,
-                      ),
-                    );
-                  },
-                  child: Container(
-                    padding: EdgeInsets.all(16),
-                    width: double.maxFinite,
-                    color: Theme.of(context).cardColor.withOpacity(0.75),
-                    child: appModel.buildDictionarySearchResult(
-                        context: context,
-                        dictionaryEntry: entry,
-                        dictionaryFormat: format,
-                        dictionary: dictionary,
-                        selectable: false),
-                  ),
-                ),
-              ),
-            ),
-          );
-        }
-
-        return ClipRRect(
-          borderRadius: BorderRadius.zero,
-          child: Material(
-            color: Colors.transparent,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: widgets,
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget buildMask() {
-    return BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.5),
-        ),
-      ),
-    );
+  void refreshCallback() {
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     appModel = Provider.of<AppModel>(context);
+
+    dictionaryVerticalWidget ??= DictionaryVerticalWidget(
+      appModel: appModel,
+      refreshCallback: refreshCallback,
+    );
 
     if (!appModel.hasInitialized) {
       return Container();
@@ -372,8 +77,7 @@ class DictionaryPageState extends State<DictionaryHomePage> {
       return Stack(
         children: [
           buildEmptyBody(),
-          if (isFocus) buildMask(),
-          buildFloatingSearchBar(),
+          dictionaryVerticalWidget!,
         ],
       );
     }
@@ -381,8 +85,7 @@ class DictionaryPageState extends State<DictionaryHomePage> {
     return Stack(
       children: [
         buildBody(),
-        if (isFocus) buildMask(),
-        buildFloatingSearchBar(),
+        dictionaryVerticalWidget!,
       ],
     );
 
@@ -415,30 +118,28 @@ class DictionaryPageState extends State<DictionaryHomePage> {
       });
     });
 
-    return Scaffold(
-      body: RawScrollbar(
+    return RawScrollbar(
+      controller: scrollController,
+      thumbColor:
+          (appModel.getIsDarkMode()) ? Colors.grey[700] : Colors.grey[400],
+      child: ListView.builder(
         controller: scrollController,
-        thumbColor:
-            (appModel.getIsDarkMode()) ? Colors.grey[700] : Colors.grey[400],
-        child: ListView.builder(
-          controller: scrollController,
-          addAutomaticKeepAlives: true,
-          key: UniqueKey(),
-          itemCount: results.length + 2,
-          itemBuilder: (BuildContext context, int index) {
-            if (index == 0) {
-              return SizedBox(height: 72);
-              //return buildSearchField();
-            } else if (index == 1) {
-              return buildCardCreatorButton();
-            }
+        addAutomaticKeepAlives: true,
+        key: UniqueKey(),
+        itemCount: results.length + 2,
+        itemBuilder: (BuildContext context, int index) {
+          if (index == 0) {
+            return SizedBox(height: 60);
+            //return buildSearchField();
+          } else if (index == 1) {
+            return buildCardCreatorButton();
+          }
 
-            DictionarySearchResult result = results[index - 2];
-            DictionaryMediaHistoryItem mediaHistoryItem =
-                mediaHistoryItems[index - 2];
-            return buildDictionaryResult(result, mediaHistoryItem);
-          },
-        ),
+          DictionarySearchResult result = results[index - 2];
+          DictionaryMediaHistoryItem mediaHistoryItem =
+              mediaHistoryItems[index - 2];
+          return buildDictionaryResult(result, mediaHistoryItem);
+        },
       ),
     );
   }
@@ -446,7 +147,7 @@ class DictionaryPageState extends State<DictionaryHomePage> {
   Widget buildEmptyBody() {
     return Column(
       children: [
-        SizedBox(height: 72),
+        SizedBox(height: 60),
         //buildSearchField(),
         buildCardCreatorButton(),
         buildEmptyMessage(),

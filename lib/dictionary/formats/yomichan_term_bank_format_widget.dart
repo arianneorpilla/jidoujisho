@@ -226,6 +226,7 @@ class YomichanTermBankFormatWidget extends DictionaryWidget {
                   children: inlineSpanWidgets,
                 ),
                 enableInteractiveSelection: true,
+                toolbarOptions: const ToolbarOptions(copy: true),
               )
             : Text.rich(
                 TextSpan(

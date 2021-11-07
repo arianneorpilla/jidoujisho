@@ -106,32 +106,30 @@ class App extends StatelessWidget {
   Widget homeOrDeepLink() {
     bool initialLinkProcessed = false;
 
-    return Scaffold(
-      body: StreamBuilder<String?>(
-          stream: linkStream,
-          builder: (context, streamSnapshot) {
-            final link = streamSnapshot.data ?? '';
-            if (link.isNotEmpty) {
-              returnFromAppLink(context, link);
-              return const HomePage();
-            }
+    return StreamBuilder<String?>(
+        stream: linkStream,
+        builder: (context, streamSnapshot) {
+          final link = streamSnapshot.data ?? '';
+          if (link.isNotEmpty) {
+            returnFromAppLink(context, link);
+            return const HomePage();
+          }
 
-            return FutureBuilder<String?>(
-                future: getInitialLink(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  final link = snapshot.data ?? '';
+          return FutureBuilder<String?>(
+              future: getInitialLink(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Container();
+                }
+                final link = snapshot.data ?? '';
 
-                  if (link.isNotEmpty && !initialLinkProcessed) {
-                    initialLinkProcessed = true;
-                    returnFromAppLink(context, link);
-                  }
+                if (link.isNotEmpty && !initialLinkProcessed) {
+                  initialLinkProcessed = true;
+                  returnFromAppLink(context, link);
+                }
 
-                  return const HomePage();
-                });
-          }),
-    );
+                return const HomePage();
+              });
+        });
   }
 }

@@ -38,6 +38,7 @@ class DictionaryWidget {
     return SelectableText(
       dictionaryEntry.meaning,
       enableInteractiveSelection: selectable,
+      toolbarOptions: const ToolbarOptions(copy: true),
       style: const TextStyle(
         fontSize: 15,
       ),

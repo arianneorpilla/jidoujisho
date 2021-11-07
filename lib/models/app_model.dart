@@ -1191,4 +1191,39 @@ class AppModel with ChangeNotifier {
   Future<void> setLastAnkiDroidDeck(String deckName) async {
     await _sharedPreferences.setString("lastAnkiDroidDeck", deckName);
   }
+
+  Future<void> addToSearchHistory(String key,
+      {String historyType = "dictionary"}) async {
+    int maxSearchHistoryCount = 100;
+    List<String> searchHistory = getSearchHistory();
+
+    searchHistory.removeWhere((historyKey) => key == historyKey);
+    searchHistory.add(key);
+
+    if (searchHistory.length >= maxSearchHistoryCount) {
+      searchHistory =
+          searchHistory.sublist(searchHistory.length - maxSearchHistoryCount);
+    }
+
+    await setSearchHistory(searchHistory, historyType: historyType);
+  }
+
+  Future<void> removeFromSearchHistory(String key,
+      {String historyType = "dictionary"}) async {
+    List<String> searchHistory = getSearchHistory();
+    searchHistory.remove(key);
+    await setSearchHistory(searchHistory, historyType: historyType);
+  }
+
+  Future<void> setSearchHistory(List<String> searchHistory,
+      {String historyType = "dictionary"}) async {
+    await sharedPreferences.setStringList(
+        "searchHistory/$historyType", searchHistory);
+  }
+
+  List<String> getSearchHistory({String historyType = "dictionary"}) {
+    List<String> searchHistory =
+        sharedPreferences.getStringList("searchHistory/$historyType") ?? [];
+    return searchHistory;
+  }
 }
