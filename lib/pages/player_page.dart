@@ -276,7 +276,7 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   void setSearchTerm(String newTerm) {
-    searchTerm.value = newTerm;
+    searchTerm.value = newTerm.trim();
   }
 
   MediaHistoryItem? generateContextHistoryItem() {
@@ -692,12 +692,12 @@ class PlayerPageState extends State<PlayerPage>
         }
 
         if (position.value <
-                shadowingSubtitle.value!.start +
+                shadowingSubtitle.value!.start -
                     getSubtitleDelay() -
                     const Duration(seconds: 15) -
                     getAudioAllowance() ||
             position.value >
-                shadowingSubtitle.value!.end +
+                shadowingSubtitle.value!.end -
                     getSubtitleDelay() +
                     getAudioAllowance()) {
           playerController.seekTo(shadowingSubtitle.value!.start +
@@ -1211,19 +1211,27 @@ class PlayerPageState extends State<PlayerPage>
   Widget buildGestureArea() {
     return GestureDetector(
       onHorizontalDragUpdate: (details) async {
-        if (details.delta.dx.abs() > 10) {
+        if (details.delta.dx.abs() > 20) {
           Subtitle? nearestSubtitle = getNearestSubtitle();
 
           listeningSubtitle.value = nearestSubtitle;
           await playerController
-              .seekTo(nearestSubtitle!.start + getSubtitleDelay());
+              .seekTo(nearestSubtitle!.start - getSubtitleDelay());
         }
       },
-      onVerticalDragUpdate: (details) async {
-        if (details.delta.dy.abs() > 10) {
-          await dialogSmartPause();
+      onHorizontalDragEnd: (dragEndDetails) async {
+        if (dragEndDetails.primaryVelocity!.abs() > 0) {
+          Subtitle? nearestSubtitle = getNearestSubtitle();
 
+          listeningSubtitle.value = nearestSubtitle;
+          await playerController
+              .seekTo(nearestSubtitle!.start - getSubtitleDelay());
+        }
+      },
+      onVerticalDragEnd: (details) async {
+        if (details.primaryVelocity!.abs() > 0) {
           bool exporting = false;
+          await dialogSmartPause();
           await openTranscript(
               context: context,
               subtitles: subtitleItem.controller.subtitles,
@@ -1232,7 +1240,7 @@ class PlayerPageState extends State<PlayerPage>
               regexFilter: subtitleOptionsNotifier.value.regexFilter,
               onTapCallback: (int selectedIndex) async {
                 await playerController.seekTo(
-                    subtitleItem.controller.subtitles[selectedIndex].start +
+                    subtitleItem.controller.subtitles[selectedIndex].start -
                         getSubtitleDelay());
               },
               onLongPressCallback: (int selectedIndex) async {

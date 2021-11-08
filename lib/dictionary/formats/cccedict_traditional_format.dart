@@ -73,6 +73,7 @@ FutureOr<List<DictionaryEntry>> getDictionaryEntriesCCCEdictSimplifiedFormat(
       word: word,
       reading: reading,
       meaning: meaning,
+      popularity: meaning.split("\n").length.toDouble(),
     );
 
     entries.add(entry);

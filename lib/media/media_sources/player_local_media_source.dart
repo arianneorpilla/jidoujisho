@@ -111,7 +111,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     }
 
     PlayerLaunchParams params = getLaunchParams(item);
-    launchMediaPage(
+    await launchMediaPage(
       context,
       params,
       pushReplacement: pushReplacement,

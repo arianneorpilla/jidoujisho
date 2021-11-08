@@ -1,4 +1,4 @@
-package com.lrorpilla.chisa;
+package app.lrorpilla.jidoujisho;
 
 import java.util.ArrayList;
 import java.util.Collections;
