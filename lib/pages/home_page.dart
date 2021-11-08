@@ -6,6 +6,7 @@ import 'package:chisa/models/app_model.dart';
 import 'package:chisa/util/anki_creator.dart';
 import 'package:chisa/util/dictionary_widget_field.dart';
 import 'package:chisa/util/popup_item.dart';
+import 'package:chisa/util/return_from_context.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
@@ -41,6 +42,7 @@ class HomePageState extends State<HomePage> {
         title: getTitle(),
         actions: [
           getResumeButton(),
+          getCardCreatorButton(),
           getSeeMoreButton(context),
         ],
       ),
@@ -118,10 +120,31 @@ class HomePageState extends State<HomePage> {
   }
 
   Widget getResumeButton() {
+    return ValueListenableBuilder<bool>(
+        valueListenable: appModel.resumableNotifier,
+        builder: (context, bool resumable, _) {
+          return IconButton(
+              icon: const Icon(Icons.update),
+              onPressed: (resumable)
+                  ? () async {
+                      returnFromContext(
+                          context, appModel.getResumeMediaHistoryItem()!);
+                      setState(() {});
+                    }
+                  : null);
+        });
+  }
+
+  Widget getCardCreatorButton() {
     return IconButton(
-      icon: const Icon(Icons.update),
-      onPressed: () => resumeMedia(),
-    );
+        icon: const Icon(Icons.note_add_outlined),
+        onPressed: () async {
+          await navigateToCreator(
+            context: context,
+            appModel: appModel,
+          );
+          setState(() {});
+        });
   }
 
   Widget getSeeMoreButton(BuildContext context) {
@@ -134,8 +157,6 @@ class HomePageState extends State<HomePage> {
       ),
     );
   }
-
-  void resumeMedia() {}
 
   void showDropDownOptions(BuildContext context, Offset offset) async {
     double left = offset.dx;

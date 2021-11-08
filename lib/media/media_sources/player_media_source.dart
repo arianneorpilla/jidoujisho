@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:chisa/media/media_histories/media_history.dart';
 import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_type.dart';
 import 'package:chisa/models/app_model.dart';
+import 'package:chisa/util/media_source_action_button.dart';
 
 import 'package:chisa/util/subtitle_utils.dart';
 import 'package:chisa/util/time_format.dart';
@@ -20,21 +22,15 @@ abstract class PlayerMediaSource extends MediaSource {
   PlayerMediaSource({
     required String sourceName,
     required IconData icon,
-    required bool searchSupport,
-    String? searchLabel,
-    Future<void> Function(String, BuildContext)? searchAction,
   }) : super(
           sourceName: sourceName,
           icon: icon,
           mediaType: MediaType.player,
-          searchSupport: searchSupport,
-          searchLabel: searchLabel,
-          searchAction: searchAction,
         );
 
   /// A [PlayerMediaSource] must be able to construct launch parameters from
   /// its media history items.
-  PlayerLaunchParams getLaunchParams(MediaHistoryItem item);
+  PlayerLaunchParams getLaunchParams(AppModel appModel, MediaHistoryItem item);
 
   /// Push the navigator page to the media page pertaining to this media type.
   Future<void> launchMediaPage(
@@ -67,6 +63,12 @@ abstract class PlayerMediaSource extends MediaSource {
 
     await Wakelock.disable();
 
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
     appModel.isInSource = false;
@@ -77,24 +79,85 @@ abstract class PlayerMediaSource extends MediaSource {
   /// A button that shows on the player menu particular to the media source.
   Widget? buildSourceButton(BuildContext context, PlayerPageState page);
 
+  @override
   Widget buildMediaHistoryItem({
     required BuildContext context,
+    required MediaHistory history,
     required MediaHistoryItem item,
-    Widget? metadataWidget,
-    Function()? onTap,
-    Function()? onLongPress,
+    required Function() refreshCallback,
   }) {
+    AppModel appModel = Provider.of<AppModel>(context);
+
     return InkWell(
-      onTap: onTap,
-      onLongPress: onLongPress,
+      onTap: () async {
+        await launchMediaPage(context, getLaunchParams(appModel, item));
+        refreshCallback();
+      },
+      onLongPress: () async {
+        List<Widget> actions = [];
+        actions.add(
+          TextButton(
+            child: Text(
+              appModel.translate("dialog_remove"),
+              style: TextStyle(
+                color: Theme.of(context).focusColor,
+              ),
+            ),
+            onPressed: () async {
+              await history.removeItem(item.key);
+
+              Navigator.pop(context);
+              refreshCallback();
+            },
+          ),
+        );
+
+        actions.addAll(getExtraHistoryActions(item, refreshCallback));
+
+        actions.add(
+          TextButton(
+            child: Text(
+              appModel.translate("dialog_play"),
+              style: const TextStyle(),
+            ),
+            onPressed: () async {
+              Navigator.pop(context);
+              launchMediaPage(context, getLaunchParams(appModel, item));
+              refreshCallback();
+            },
+          ),
+        );
+
+        HapticFeedback.vibrate();
+        ImageProvider<Object> image = await getHistoryThumbnail(item);
+        await showDialog(
+          barrierDismissible: true,
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(
+              getHistoryCaption(item),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+            content: AspectRatio(
+              aspectRatio: 16 / 9,
+              child: FadeInImage(
+                image: image,
+                placeholder: MemoryImage(kTransparentImage),
+              ),
+            ),
+            actions: actions,
+          ),
+        );
+      },
       child: Container(
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
             buildMediaHistoryThumbnail(context, item),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
             Expanded(
-              child: metadataWidget ?? buildMediaHistoryMetadata(context, item),
+              child: buildMediaHistoryMetadata(context, item),
             ),
           ],
         ),
@@ -102,6 +165,7 @@ abstract class PlayerMediaSource extends MediaSource {
     );
   }
 
+  @override
   Widget buildMediaHistoryMetadata(
     BuildContext context,
     MediaHistoryItem item,
@@ -110,14 +174,14 @@ abstract class PlayerMediaSource extends MediaSource {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          getCaption(item),
+          getHistoryCaption(item),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           softWrap: true,
         ),
         const SizedBox(height: 8),
         Text(
-          getSubcaption(item),
+          getHistorySubcaption(item),
           style: TextStyle(
             color: Theme.of(context).unselectedWidgetColor,
             fontSize: 12,
@@ -126,36 +190,22 @@ abstract class PlayerMediaSource extends MediaSource {
           overflow: TextOverflow.ellipsis,
           softWrap: true,
         ),
-        Row(
-          children: [
-            Icon(
-              icon,
-              color: Theme.of(context).unselectedWidgetColor,
-              size: 12,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              sourceName,
-              style: TextStyle(
-                color: Theme.of(context).unselectedWidgetColor,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              softWrap: true,
-            ),
-          ],
-        ),
+        getHistoryExtraMetadata(item),
       ],
     );
   }
 
+  @override
+  Widget getHistoryExtraMetadata(MediaHistoryItem item) {
+    return const SizedBox.shrink();
+  }
+
+  @override
   Widget buildMediaHistoryThumbnail(
     BuildContext context,
     MediaHistoryItem item,
   ) {
-    double scaleWidth = MediaQuery.of(context).size.width * 0.4;
+    double scaleWidth = MediaQuery.of(context).size.shortestSide * 0.4;
 
     return Container(
       width: scaleWidth,
@@ -165,7 +215,7 @@ abstract class PlayerMediaSource extends MediaSource {
         alignment: Alignment.bottomCenter,
         children: [
           FutureBuilder<ImageProvider<Object>>(
-              future: getThumbnail(item),
+              future: getHistoryThumbnail(item),
               builder: (BuildContext context,
                   AsyncSnapshot<ImageProvider> snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting ||
@@ -216,11 +266,42 @@ abstract class PlayerMediaSource extends MediaSource {
 
   /// A source can define extra actions that appears when you long press
   /// on a history item in the Player screen.
-  List<Widget> getExtraHistoryActions(
-    MediaHistoryItem item, {
-    Function()? callback,
-  }) {
+  @override
+  List<MediaSourceActionButton> getExtraHistoryActions(
+    MediaHistoryItem item,
+    Function()? refreshCallback,
+  ) {
     return [];
+  }
+
+  @override
+  Widget getDisplayLayout({
+    required AppModel appModel,
+    required BuildContext context,
+    required Function() refreshCallback,
+    required ScrollController scrollController,
+    required List<MediaHistoryItem> items,
+  }) {
+    AppModel appModel = Provider.of<AppModel>(context);
+    MediaHistory mediaHistory = MediaHistory(
+      appModel: appModel,
+      prefsDirectory: mediaType.prefsDirectory(),
+    );
+
+    return ListView.builder(
+      controller: scrollController,
+      addAutomaticKeepAlives: true,
+      key: UniqueKey(),
+      itemCount: items.length,
+      itemBuilder: (BuildContext context, int index) {
+        return buildMediaHistoryItem(
+          context: context,
+          history: mediaHistory,
+          item: items[index],
+          refreshCallback: refreshCallback,
+        );
+      },
+    );
   }
 
   FutureOr<String> getNetworkStreamUrl(PlayerLaunchParams params);

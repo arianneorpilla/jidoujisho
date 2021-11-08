@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:chisa/anki/anki_export_params.dart';
 import 'package:chisa/dictionary/dictionary_entry.dart';
 import 'package:chisa/dictionary/dictionary_search_result.dart';
@@ -198,13 +199,6 @@ class PlayerPageState extends State<PlayerPage>
     super.initState();
     ClipboardListener.addListener(copyClipboardAction);
 
-    playerController = preparePlayerController(widget.params);
-    playPauseIconAnimationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-      reverseDuration: const Duration(milliseconds: 400),
-    );
-
     emptySubtitleItem = SubtitleItem(
       controller: SubtitleController(
         provider: SubtitleProvider.fromString(
@@ -225,6 +219,19 @@ class PlayerPageState extends State<PlayerPage>
           ? Colors.grey.shade800.withOpacity(0.6)
           : Colors.white.withOpacity(0.8);
 
+      playerController = await preparePlayerController(widget.params);
+      playPauseIconAnimationController = AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 400),
+        reverseDuration: const Duration(milliseconds: 400),
+      );
+
+      playerController.addListener(listener);
+      playerController.addOnInitListener(() {
+        initialiseEmbeddedSubtitles();
+      });
+      isPlayerReady = true;
+
       subtitleItems = await prepareSubtitleControllers(widget.params);
 
       if (subtitleItems.isNotEmpty) {
@@ -232,12 +239,6 @@ class PlayerPageState extends State<PlayerPage>
       }
 
       await subtitleItem.controller.initial();
-
-      playerController.addListener(listener);
-      playerController.addOnInitListener(() {
-        initialiseEmbeddedSubtitles();
-      });
-      isPlayerReady = true;
 
       blurWidgetOptionsNotifier =
           ValueNotifier<BlurWidgetOptions>(appModel.getBlurWidgetOptions());
@@ -621,12 +622,10 @@ class PlayerPageState extends State<PlayerPage>
       ),
       textAlign: TextAlign.center,
     );
-    Future.delayed(const Duration(seconds: 3), () {
-      searchTerm.value = "";
-    });
   }
 
-  VlcPlayerController preparePlayerController(PlayerLaunchParams params) {
+  Future<VlcPlayerController> preparePlayerController(
+      PlayerLaunchParams params) async {
     int startTime = widget.params.mediaHistoryItem.currentProgress;
 
     List<String> advancedParams = ["--start-time=$startTime"];
@@ -650,8 +649,10 @@ class PlayerPageState extends State<PlayerPage>
           options: options,
         );
       case MediaLaunchMode.network:
+        String streamUrl = await params.mediaSource.getNetworkStreamUrl(params);
+
         return VlcPlayerController.network(
-          params.networkPath!,
+          streamUrl,
           options: options,
         );
     }
@@ -1443,12 +1444,13 @@ class PlayerPageState extends State<PlayerPage>
         action: () async {
           Map<int, String> audioEmbeddedTracks =
               await playerController.getAudioTracks();
+          int audioTrack = await playerController.getAudioTrack() ?? 0;
           await showModalBottomSheet(
             context: context,
             isScrollControlled: true,
             useRootNavigator: true,
             builder: (context) => BottomSheetDialog(
-              options: getAudioDialogOptions(audioEmbeddedTracks),
+              options: getAudioDialogOptions(audioEmbeddedTracks, audioTrack),
             ),
           );
         },
@@ -1616,7 +1618,7 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   List<BottomSheetDialogOption> getAudioDialogOptions(
-      Map<int, String> embeddedTracks) {
+      Map<int, String> embeddedTracks, int audioTrack) {
     List<BottomSheetDialogOption> options = [];
     String audio = appModel.translate("player_option_audio");
 
@@ -1624,10 +1626,9 @@ class PlayerPageState extends State<PlayerPage>
       BottomSheetDialogOption option = BottomSheetDialogOption(
           label: "$audio - $label",
           icon: Icons.music_note_outlined,
-          active: currentAudioTrack == index,
+          active: audioTrack == index,
           action: () {
             playerController.setAudioTrack(index);
-            currentAudioTrack = index;
           });
 
       options.add(option);
@@ -1866,20 +1867,20 @@ class PlayerPageState extends State<PlayerPage>
     File? audioFile;
 
     try {
-      imageFiles = await exportImages(subtitles);
+      List<dynamic> futures = await Future.wait([
+        exportImages(subtitles),
+        exportCurrentAudio(
+          subtitles,
+          subtitleOptionsNotifier.value.audioAllowance,
+          subtitleOptionsNotifier.value.subtitleDelay,
+        )
+      ]);
+      imageFiles = futures.elementAt(0);
+      audioFile = futures.elementAt(1);
+
       if (imageFiles.isNotEmpty) {
         imageFile = imageFiles.first.file;
       }
-    } catch (e) {
-      debugPrint(e.toString());
-    }
-
-    try {
-      audioFile = await exportCurrentAudio(
-        subtitles,
-        subtitleOptionsNotifier.value.audioAllowance,
-        subtitleOptionsNotifier.value.subtitleDelay,
-      );
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -1924,23 +1925,15 @@ class PlayerPageState extends State<PlayerPage>
       if (subtitles.length == 1) {
         currentTime = position.value;
       }
-      String formatted = getTimestampFromDuration(currentTime);
-
-      String inputPath = "";
-
-      switch (widget.params.getMode()) {
-        case MediaLaunchMode.file:
-          inputPath = widget.params.videoFile!.path;
-          break;
-        case MediaLaunchMode.network:
-          inputPath = widget.params.networkPath!;
-          break;
-      }
+      String timestamp = getTimestampFromDuration(currentTime);
+      String inputPath = playerController.dataSource;
 
       String command =
-          "-loglevel verbose -ss $formatted -y -i \"$inputPath\" -frames:v 1 -q:v 2 \"$outputPath\"";
+          "-loglevel verbose -ss $timestamp -y -i \"$inputPath\" -frames:v 1 -q:v 2 \"$outputPath\"";
 
-      await FFmpegKit.executeAsync(command, (session) async {});
+      await FFmpegKit.executeAsync(command, (session) async {
+        debugPrint(await session.getOutput());
+      });
 
       while (!imageFile.existsSync()) {
         await Future.delayed(const Duration(milliseconds: 100));
@@ -1978,24 +1971,28 @@ class PlayerPageState extends State<PlayerPage>
     timeStart = getTimestampFromDuration(adjustedStart);
     timeEnd = getTimestampFromDuration(adjustedEnd);
 
-    String inputPath = "";
-
-    switch (widget.params.getMode()) {
-      case MediaLaunchMode.file:
-        inputPath = widget.params.videoFile!.path;
-        break;
-      case MediaLaunchMode.network:
-        inputPath = widget.params.networkPath!;
-        break;
-    }
-
+    String inputPath = playerController.dataSource;
     String command =
-        "-loglevel quiet -ss $timeStart -to $timeEnd -y -i \"$inputPath\" -map 0:a:$audioIndex \"$outputPath\"";
+        "-loglevel verbose -ss $timeStart -to $timeEnd -y -i \"$inputPath\" -map 0:a:$audioIndex \"$outputPath\"";
 
-    await FFmpegKit.executeAsync(command, (session) async {});
+    await FFmpegKit.executeAsync(command, (session) async {
+      await session.getReturnCode();
+    });
 
-    while (!audioFile.existsSync()) {
-      await Future.delayed(const Duration(seconds: 1));
+    bool filePlaySuccess = false;
+    Future.delayed(const Duration(seconds: 60), () {
+      filePlaySuccess = true;
+    });
+    while (!filePlaySuccess) {
+      try {
+        AudioPlayer audioPlayer = AudioPlayer();
+        await audioPlayer.play(audioFile.path, volume: 0);
+        filePlaySuccess = true;
+      } on PlatformException catch (_) {
+        await Future.delayed(const Duration(milliseconds: 100));
+      } catch (_) {
+        await Future.delayed(const Duration(milliseconds: 100));
+      }
     }
 
     return audioFile;

@@ -15,7 +15,8 @@ Future<void> returnFromContext(
     case MediaType.player:
       PlayerMediaSource source = appModel.getMediaSourceFromName(
           mediaType, item.sourceName) as PlayerMediaSource;
-      await source.launchMediaPage(context, source.getLaunchParams(item));
+      await source.launchMediaPage(
+          context, source.getLaunchParams(appModel, item));
       break;
     default:
       throw UnimplementedError();

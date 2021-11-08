@@ -8,16 +8,10 @@ abstract class ViewerMediaSource extends MediaSource {
   ViewerMediaSource({
     required String sourceName,
     required IconData icon,
-    required bool searchSupport,
-    String? searchLabel,
-    Future<void> Function(String, BuildContext)? searchAction,
   }) : super(
           sourceName: sourceName,
           icon: icon,
           mediaType: MediaType.viewer,
-          searchSupport: searchSupport,
-          searchLabel: searchLabel,
-          searchAction: searchAction,
         );
 
   /// A [PlayerMediaSource] must be able to construct launch parameters from

@@ -2,11 +2,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:chisa/media/media_history_items/media_history_item.dart';
+import 'package:chisa/models/app_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MediaHistory {
   MediaHistory({
-    required this.sharedPreferences,
+    required this.appModel,
     required this.prefsDirectory,
     this.maxItemCount = 30,
   });
@@ -19,7 +20,7 @@ class MediaHistory {
   final int maxItemCount;
 
   /// An instance of SharedPreferences.
-  final SharedPreferences sharedPreferences;
+  final AppModel appModel;
 
   /// Add the media history item to the latest end of history. If history
   /// is too huge and exceeds [maxItemCount], get rid of the oldest items
@@ -37,6 +38,8 @@ class MediaHistory {
       history = history.sublist(history.length - maxItemCount);
     }
 
+    appModel.sharedPreferences
+        .setString("resumeMediaHistoryItem", item.toJson());
     await setItems(history);
   }
 
@@ -70,7 +73,7 @@ class MediaHistory {
       );
     }
 
-    await sharedPreferences.setString(
+    await appModel.sharedPreferences.setString(
       prefsDirectory,
       jsonEncode(serialisedItems),
     );
@@ -79,7 +82,8 @@ class MediaHistory {
   /// Get the serialised history in [prefsDirectory] of [SharedPreferences]
   /// and deserialise each [MediaHistoryItem] and return the list.
   List<MediaHistoryItem> getItems() {
-    String jsonList = sharedPreferences.getString(prefsDirectory) ?? '[]';
+    String jsonList =
+        appModel.sharedPreferences.getString(prefsDirectory) ?? '[]';
 
     List<dynamic> serialisedItems = (jsonDecode(jsonList) as List<dynamic>);
 

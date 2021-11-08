@@ -90,6 +90,8 @@ dependencies:
   lazy_load_scrollview:
   material_floating_search_bar:
   uni_links:
+  xml2json:
+  http:
 dev_dependencies:
   flutter_test:
     sdk: flutter

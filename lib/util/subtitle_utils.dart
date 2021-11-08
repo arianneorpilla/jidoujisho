@@ -1,9 +1,6 @@
 import 'dart:io';
 
-import 'package:chisa/models/app_model.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:subtitle/subtitle.dart';
 import 'package:path/path.dart' as p;

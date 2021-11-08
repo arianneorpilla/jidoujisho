@@ -7,7 +7,8 @@ import 'package:chisa/media/media_type.dart';
 class DictionaryMediaHistoryItem extends MediaHistoryItem {
   DictionaryMediaHistoryItem({
     required String key,
-    required String name,
+    required String title,
+    required String author,
     required String sourceName,
     required String mediaTypePrefs,
     required int currentProgress,
@@ -16,7 +17,8 @@ class DictionaryMediaHistoryItem extends MediaHistoryItem {
     required Map<String, dynamic> extra,
   }) : super(
           key: key,
-          name: name,
+          author: author,
+          title: title,
           sourceName: sourceName,
           mediaTypePrefs: MediaType.dictionary.prefsDirectory(),
           currentProgress: currentProgress,
@@ -31,7 +33,8 @@ class DictionaryMediaHistoryItem extends MediaHistoryItem {
       {int currentProgress = 0}) {
     return DictionaryMediaHistoryItem(
       key: result.toJson(),
-      name: result.originalSearchTerm,
+      title: result.originalSearchTerm,
+      author: result.dictionaryName,
       sourceName: result.dictionaryName,
       mediaTypePrefs: MediaType.dictionary.prefsDirectory(),
       currentProgress: currentProgress,
@@ -45,7 +48,8 @@ class DictionaryMediaHistoryItem extends MediaHistoryItem {
     Map<String, dynamic> map = jsonDecode(json);
 
     String key = map["key"] ?? "";
-    String name = map["name"] ?? "";
+    String title = map["title"] ?? "";
+    String author = map["author"] ?? "";
     String sourceName = map["sourceName"] ?? "";
     String mediaTypePrefs = map["mediaTypePrefs"] ?? "";
     int currentProgress = int.tryParse(map["currentProgress"] ?? "") ?? 0;
@@ -60,7 +64,8 @@ class DictionaryMediaHistoryItem extends MediaHistoryItem {
 
     return DictionaryMediaHistoryItem(
       key: key,
-      name: name,
+      title: title,
+      author: author,
       sourceName: sourceName,
       mediaTypePrefs: mediaTypePrefs,
       currentProgress: currentProgress,
@@ -74,7 +79,8 @@ class DictionaryMediaHistoryItem extends MediaHistoryItem {
   String toJson() {
     Map<String, String> map = {
       "key": key,
-      "name": name,
+      "title": title,
+      "author": author,
       "sourceName": sourceName,
       "mediaTypePrefs": mediaTypePrefs,
       "currentProgress": currentProgress.toString(),

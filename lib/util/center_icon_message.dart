@@ -6,39 +6,41 @@ Widget showCenterIconMessage(
     required String label,
     required IconData icon,
     required bool jumpingDots}) {
-  return Column(
-    mainAxisSize: MainAxisSize.min,
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      Icon(
-        icon,
-        color: Theme.of(context).unselectedWidgetColor,
-        size: 36,
-      ),
-      const SizedBox(height: 20),
-      Wrap(
-        alignment: WrapAlignment.end,
-        crossAxisAlignment: WrapCrossAlignment.end,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: Theme.of(context).unselectedWidgetColor,
-              fontSize: 20,
+  return Center(
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          icon,
+          color: Theme.of(context).unselectedWidgetColor,
+          size: 36,
+        ),
+        const SizedBox(height: 20),
+        Wrap(
+          alignment: WrapAlignment.end,
+          crossAxisAlignment: WrapCrossAlignment.end,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                color: Theme.of(context).unselectedWidgetColor,
+                fontSize: 20,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
-          (jumpingDots)
-              ? SizedBox(
-                  width: 12,
-                  height: 16,
-                  child: JumpingDotsProgressIndicator(
-                    color: Colors.grey,
-                  ),
-                )
-              : const SizedBox.shrink()
-        ],
-      ),
-    ],
+            (jumpingDots)
+                ? SizedBox(
+                    width: 12,
+                    height: 16,
+                    child: JumpingDotsProgressIndicator(
+                      color: Colors.grey,
+                    ),
+                  )
+                : const SizedBox.shrink()
+          ],
+        ),
+      ],
+    ),
   );
 }

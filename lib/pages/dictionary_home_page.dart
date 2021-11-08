@@ -7,7 +7,7 @@ import 'package:chisa/media/media_sources/player_media_source.dart';
 import 'package:chisa/util/anki_creator.dart';
 import 'package:chisa/util/dictionary_dialog_widget.dart';
 import 'package:chisa/dictionary/dictionary_entry.dart';
-import 'package:chisa/util/dictionary_vertical_widget.dart';
+import 'package:chisa/util/dictionary_search_widget.dart';
 import 'package:chisa/util/media_type_button.dart';
 import 'package:chisa/util/return_from_context.dart';
 import 'package:flutter/material.dart';
@@ -43,20 +43,20 @@ class DictionaryPageState extends State<DictionaryHomePage> {
 
   TextEditingController wordController = TextEditingController(text: "");
 
+  DictionarySearchResult? searchResult;
+  DictionarySearchWidget? dictionaryVerticalWidget;
+  FloatingSearchBarController searchBarController =
+      FloatingSearchBarController();
+
+  bool isSearching = false;
+  bool isFocus = false;
+
   @override
   void didUpdateWidget(oldWidget) {
     super.didUpdateWidget(oldWidget);
   }
 
-  bool isSearching = false;
-  bool isFocus = false;
-  DictionarySearchResult? searchResult;
-  FloatingSearchBarController searchBarController =
-      FloatingSearchBarController();
-
-  DictionaryVerticalWidget? dictionaryVerticalWidget;
-
-  void refreshCallback() {
+  void focusCallback() {
     setState(() {});
   }
 
@@ -64,9 +64,10 @@ class DictionaryPageState extends State<DictionaryHomePage> {
   Widget build(BuildContext context) {
     appModel = Provider.of<AppModel>(context);
 
-    dictionaryVerticalWidget ??= DictionaryVerticalWidget(
+    dictionaryVerticalWidget ??= DictionarySearchWidget(
       appModel: appModel,
-      refreshCallback: refreshCallback,
+      searchBarController: searchBarController,
+      focusCallback: focusCallback,
     );
 
     if (!appModel.hasInitialized) {
@@ -89,11 +90,11 @@ class DictionaryPageState extends State<DictionaryHomePage> {
       ],
     );
 
-    if (appModel.getDictionaryMediaHistory().getDictionaryItems().isEmpty) {
-      return buildEmptyBody();
-    } else {
-      return buildBody();
-    }
+    // if (appModel.getDictionaryMediaHistory().getDictionaryItems().isEmpty) {
+    //   return buildEmptyBody();
+    // } else {
+    //   return buildBody();
+    // }
   }
 
   Widget buildBody() {
@@ -126,18 +127,16 @@ class DictionaryPageState extends State<DictionaryHomePage> {
         controller: scrollController,
         addAutomaticKeepAlives: true,
         key: UniqueKey(),
-        itemCount: results.length + 2,
+        itemCount: results.length + 1,
         itemBuilder: (BuildContext context, int index) {
           if (index == 0) {
-            return SizedBox(height: 60);
+            return const SizedBox(height: 48);
             //return buildSearchField();
-          } else if (index == 1) {
-            return buildCardCreatorButton();
           }
 
-          DictionarySearchResult result = results[index - 2];
+          DictionarySearchResult result = results[index - 1];
           DictionaryMediaHistoryItem mediaHistoryItem =
-              mediaHistoryItems[index - 2];
+              mediaHistoryItems[index - 1];
           return buildDictionaryResult(result, mediaHistoryItem);
         },
       ),
@@ -147,9 +146,9 @@ class DictionaryPageState extends State<DictionaryHomePage> {
   Widget buildEmptyBody() {
     return Column(
       children: [
-        SizedBox(height: 60),
+        const SizedBox(height: 48),
         //buildSearchField(),
-        buildCardCreatorButton(),
+
         buildEmptyMessage(),
       ],
     );
@@ -227,20 +226,6 @@ class DictionaryPageState extends State<DictionaryHomePage> {
           hintText: appModel.translate("enter_search_term_here"),
         ),
       ),
-    );
-  }
-
-  Widget buildCardCreatorButton() {
-    return MediaTypeButton(
-      label: appModel.translate("card_creator"),
-      icon: Icons.note_add,
-      onTap: () async {
-        await navigateToCreator(
-          context: context,
-          appModel: appModel,
-        );
-        setState(() {});
-      },
     );
   }
 

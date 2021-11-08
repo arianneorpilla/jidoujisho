@@ -5,12 +5,12 @@ import 'package:chisa/media/media_history_items/dictionary_media_history_item.da
 
 class DictionaryMediaHistory extends MediaHistory {
   DictionaryMediaHistory({
-    required sharedPreferences,
+    required appModel,
     required prefsDirectory,
     maxItemCount = 50,
   }) : super(
+          appModel: appModel,
           prefsDirectory: prefsDirectory,
-          sharedPreferences: sharedPreferences,
         );
 
   Future<void> addDictionaryItem(DictionaryMediaHistoryItem item) async {
@@ -18,7 +18,7 @@ class DictionaryMediaHistory extends MediaHistory {
 
     history.removeWhere((historyItem) =>
         historyItem.sourceName == item.sourceName &&
-        historyItem.name == item.name);
+        historyItem.title == item.title);
     history.add(item);
 
     if (history.length >= maxItemCount) {
@@ -34,12 +34,13 @@ class DictionaryMediaHistory extends MediaHistory {
 
     history.removeWhere((historyItem) =>
         historyItem.sourceName == dictionaryName &&
-        historyItem.name == originalSearchTerm);
+        historyItem.title == originalSearchTerm);
     await setItems(history);
   }
 
   List<DictionaryMediaHistoryItem> getDictionaryItems() {
-    String jsonList = sharedPreferences.getString(prefsDirectory) ?? '[]';
+    String jsonList =
+        appModel.sharedPreferences.getString(prefsDirectory) ?? '[]';
 
     List<dynamic> serialisedItems = (jsonDecode(jsonList) as List<dynamic>);
 
@@ -62,7 +63,7 @@ class DictionaryMediaHistory extends MediaHistory {
       );
     }
 
-    await sharedPreferences.setString(
+    await appModel.sharedPreferences.setString(
       prefsDirectory,
       jsonEncode(serialisedItems),
     );

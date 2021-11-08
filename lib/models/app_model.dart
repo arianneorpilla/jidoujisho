@@ -64,6 +64,8 @@ class AppModel with ChangeNotifier {
   })  : _sharedPreferences = sharedPreferences,
         _packageInfo = packageInfo;
 
+  late ValueNotifier<bool> resumableNotifier;
+
   /// For saving options and settings and persisting across app restarts.
   final SharedPreferences _sharedPreferences;
   SharedPreferences get sharedPreferences => _sharedPreferences;
@@ -82,6 +84,9 @@ class AppModel with ChangeNotifier {
 
   /// Used to indicate if the app is currently in a source page.
   bool isInSource = false;
+
+  /// Max number of history items in non-dictionary media types.
+  int maxHistoryItemCount = 30;
 
   /// Saves the offset scroll value of the dictionary.
   double _scrollOffset = 0;
@@ -147,6 +152,8 @@ class AppModel with ChangeNotifier {
       await initialiseExportEnhancements();
       await initialiseWidgetEnhancements();
       await initialiseCurrentLanguage();
+
+      resumableNotifier = ValueNotifier<bool>(isResumable());
 
       _hasInitialised = true;
       notifyListeners();
@@ -857,14 +864,7 @@ class AppModel with ChangeNotifier {
   DictionaryMediaHistory getDictionaryMediaHistory() {
     return DictionaryMediaHistory(
       prefsDirectory: "dictionary_media_type",
-      sharedPreferences: sharedPreferences,
-    );
-  }
-
-  MediaHistory getMediaHistory(MediaType mediaType) {
-    return MediaHistory(
-      prefsDirectory: mediaType.prefsDirectory(),
-      sharedPreferences: sharedPreferences,
+      appModel: this,
     );
   }
 
@@ -1225,5 +1225,19 @@ class AppModel with ChangeNotifier {
     List<String> searchHistory =
         sharedPreferences.getStringList("searchHistory/$historyType") ?? [];
     return searchHistory;
+  }
+
+  MediaHistoryItem? getResumeMediaHistoryItem() {
+    String? itemJson = sharedPreferences.getString("resumeMediaHistoryItem");
+
+    if (itemJson == null) {
+      return null;
+    }
+
+    return MediaHistoryItem.fromJson(itemJson);
+  }
+
+  bool isResumable() {
+    return getResumeMediaHistoryItem() != null;
   }
 }

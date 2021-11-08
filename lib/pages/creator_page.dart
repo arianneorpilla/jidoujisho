@@ -118,6 +118,12 @@ class CreatorPageState extends State<CreatorPage> {
     });
   }
 
+  @override
+  void dispose() {
+    audioPlayer.stop();
+    super.dispose();
+  }
+
   Future<void> setAndComputeInitialFields() async {
     if (widget.initialParams == null) {
       exportParams = AnkiExportParams();

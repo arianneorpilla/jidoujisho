@@ -3,7 +3,8 @@ import 'dart:convert';
 class MediaHistoryItem {
   MediaHistoryItem({
     required this.key,
-    required this.name,
+    this.title = "",
+    this.author = "",
     required this.sourceName,
     required this.mediaTypePrefs,
     required this.currentProgress,
@@ -18,7 +19,12 @@ class MediaHistoryItem {
 
   /// The name of this item. Typically, this could be the name of a video
   /// or a book.
-  String name;
+  String title;
+
+  /// This field is a convenience field as it may be common to store this
+  /// detail. For a web video, this could be the channel where the video is
+  /// from. For a book, it is the author.
+  String author;
 
   /// The media source where this item is from. All media sources have a
   /// unique identifier that takes the format of [mediaTypeName/sourceName].
@@ -51,7 +57,8 @@ class MediaHistoryItem {
     Map<String, dynamic> map = jsonDecode(json);
 
     String key = map["key"] ?? "";
-    String name = map["name"] ?? "";
+    String title = map["title"] ?? "";
+    String author = map["author"] ?? "";
     String sourceName = map["sourceName"] ?? "";
     String mediaTypePrefs = map["mediaTypePrefs"] ?? "";
     int currentProgress = int.tryParse(map["currentProgress"] ?? "") ?? 0;
@@ -61,7 +68,8 @@ class MediaHistoryItem {
 
     return MediaHistoryItem(
       key: key,
-      name: name,
+      title: title,
+      author: author,
       mediaTypePrefs: mediaTypePrefs,
       sourceName: sourceName,
       currentProgress: currentProgress,
@@ -74,7 +82,8 @@ class MediaHistoryItem {
   String toJson() {
     Map<String, String> map = {
       "key": key,
-      "name": name,
+      "title": title,
+      "author": author,
       "sourceName": sourceName,
       "mediaTypePrefs": mediaTypePrefs,
       "currentProgress": currentProgress.toString(),

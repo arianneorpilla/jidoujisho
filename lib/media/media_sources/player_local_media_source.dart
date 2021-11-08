@@ -7,6 +7,7 @@ import 'package:chisa/media/media_type.dart';
 import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/player_page.dart';
+import 'package:chisa/util/media_source_action_button.dart';
 import 'package:chisa/util/media_type_button.dart';
 import 'package:chisa/util/subtitle_utils.dart';
 import 'package:chisa/util/time_format.dart';
@@ -14,6 +15,7 @@ import 'package:collection/src/iterable_extensions.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
 import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -23,12 +25,12 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
       : super(
           sourceName: "Local Media",
           icon: Icons.storage,
-          searchSupport: false,
         );
 
   @override
-  PlayerLaunchParams getLaunchParams(MediaHistoryItem item) {
+  PlayerLaunchParams getLaunchParams(AppModel appModel, MediaHistoryItem item) {
     return PlayerLaunchParams.file(
+      appModel: appModel,
       videoFile: File(item.key),
       mediaSource: this,
       mediaHistoryItem: item,
@@ -89,8 +91,8 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
 
     await generateThumbnail(filePath, thumbnailPath);
 
-    MediaHistoryItem? historyItem = appModel
-        .getMediaHistory(mediaType)
+    MediaHistoryItem? historyItem = mediaType
+        .getMediaHistory(appModel)
         .getItems()
         .firstWhereOrNull((item) => item.key == filePath);
 
@@ -100,7 +102,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     } else {
       item = MediaHistoryItem(
         key: filePath,
-        name: p.basenameWithoutExtension(filePath),
+        title: p.basenameWithoutExtension(filePath),
         mediaTypePrefs: mediaType.prefsDirectory(),
         sourceName: sourceName,
         currentProgress: 0,
@@ -110,7 +112,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
       );
     }
 
-    PlayerLaunchParams params = getLaunchParams(item);
+    PlayerLaunchParams params = getLaunchParams(appModel, item);
     await launchMediaPage(
       context,
       params,
@@ -162,18 +164,20 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
   }
 
   @override
-  Future<ImageProvider> getThumbnail(MediaHistoryItem item) async {
+  Future<ImageProvider> getHistoryThumbnail(MediaHistoryItem item) async {
     return FileImage(File(item.thumbnailPath));
   }
 
   @override
-  String getCaption(MediaHistoryItem item) {
-    return item.name;
+  String getHistoryCaption(MediaHistoryItem item) {
+    String videoName = item.title;
+    return videoName;
   }
 
   @override
-  String getSubcaption(MediaHistoryItem item) {
-    return item.key;
+  String getHistorySubcaption(MediaHistoryItem item) {
+    String videoPath = item.key;
+    return videoPath;
   }
 
   @override
@@ -182,7 +186,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
 
     return IconButton(
       color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
-      icon: const Icon(Icons.perm_media),
+      icon: Icon(icon),
       onPressed: () async {
         page.dialogSmartPause();
         await showFilePicker(
@@ -198,5 +202,39 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
   FutureOr<String> getNetworkStreamUrl(PlayerLaunchParams params) {
     throw UnsupportedError(
         "Local media source does not support network stream");
+  }
+
+  @override
+  List<MediaSourceActionButton> getSearchBarActions(
+    BuildContext context,
+    Function() refreshCallback,
+  ) {
+    return [
+      MediaSourceActionButton(
+        context: context,
+        refreshCallback: refreshCallback,
+        showIfClosed: true,
+        showIfOpened: false,
+        icon: Icons.upload_file,
+        onPressed: () async {
+          await showFilePicker(context);
+          refreshCallback();
+        },
+      )
+    ];
+  }
+
+  @override
+  bool get noSearchAction => true;
+
+  @override
+  Future<void> onSearchBarTap(BuildContext context) async {
+    await showFilePicker(context);
+  }
+
+  @override
+  FutureOr<List<MediaHistoryItem>>? getSearchMediaHistoryItems(
+      String searchTerm) {
+    throw UnsupportedError("Local media does not support search");
   }
 }
