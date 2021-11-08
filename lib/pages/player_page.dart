@@ -1307,9 +1307,9 @@ class PlayerPageState extends State<PlayerPage>
 
     if (currentOrientation != MediaQuery.of(context).orientation) {
       currentOrientation = MediaQuery.of(context).orientation;
-      Future.delayed(Duration(milliseconds: 50), () {
+      Future.delayed(const Duration(milliseconds: 50), () {
         playerController.seekTo(
-            playerController.value.position - Duration(milliseconds: 50));
+            playerController.value.position - const Duration(milliseconds: 50));
       });
     }
 

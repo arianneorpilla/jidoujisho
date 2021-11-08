@@ -4,7 +4,6 @@ import 'package:chisa/dictionary/dictionary_entry.dart';
 import 'package:chisa/dictionary/dictionary_widget_enhancement.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/util/dictionary_widget_field.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -40,8 +39,7 @@ class PitchAccentEnhancement extends DictionaryWidgetEnhancement {
           enhancementField: DictionaryWidgetField.reading,
         );
 
-  final List<DictionaryEntry> kanjiumDictionary = [];
-  final Map<DictionaryEntry, DictionaryEntry> pitchCache = {};
+  final Map<String, Map<String, DictionaryEntry>> kanjiumDictionary = {};
 
   @override
   Future<void> initialiseEnhancement() async {
@@ -63,37 +61,23 @@ class PitchAccentEnhancement extends DictionaryWidgetEnhancement {
         reading: field[1],
       );
       entry.workingArea["pitch_accent"] = pitch;
-      kanjiumDictionary.add(entry);
+
+      if (kanjiumDictionary[entry.word] == null) {
+        kanjiumDictionary[entry.word] = {};
+      }
+
+      kanjiumDictionary[entry.word]![entry.reading] = entry;
     }
   }
 
   @override
   Widget? buildReading(DictionaryEntry entry) {
-    DictionaryEntry? closestReadingMatch;
-
-    /// Optimises so that matches don't have to be re-run with every single
-    /// widget build.
-    if (pitchCache[entry] == null) {
-      DictionaryEntry? closestReadingMatch = getClosestPitchEntry(entry);
-      if (closestReadingMatch == null) {
-        /// Just set a dummy variable. This way, we know the cache is set and
-        /// it has a value to use.
-        pitchCache[entry] = DictionaryEntry();
-        return null;
-      } else {
-        pitchCache[entry] = closestReadingMatch;
-      }
-    } else if (pitchCache[entry]!.isEmpty()) {
+    if (kanjiumDictionary[entry.word] == null ||
+        kanjiumDictionary[entry.word]![entry.reading] == null) {
       return null;
     } else {
-      closestReadingMatch = pitchCache[entry];
+      return getAllPitchWidgets(kanjiumDictionary[entry.word]![entry.reading]!);
     }
-
-    if (closestReadingMatch == null) {
-      return null;
-    }
-
-    return getAllPitchWidgets(closestReadingMatch);
   }
 
   List<PitchAccentInformation> parseKanjiumNumbers(String numbers) {
@@ -230,13 +214,12 @@ class PitchAccentEnhancement extends DictionaryWidgetEnhancement {
       firstReading = entry.reading.split(";").first;
     }
 
-    List<DictionaryEntry> readingMatches = kanjiumDictionary
-        .where((pitchEntry) => pitchEntry.reading == firstReading)
-        .toList();
-
-    return readingMatches.firstWhereOrNull(
-      (pitchEntry) => entry.word.contains(pitchEntry.word),
-    );
+    if (kanjiumDictionary[entry.word] == null ||
+        kanjiumDictionary[entry.word]![entry.reading] == null) {
+      return null;
+    } else {
+      return kanjiumDictionary[entry.word]![entry.reading];
+    }
   }
 
   Widget getAllPitchWidgets(DictionaryEntry entry) {

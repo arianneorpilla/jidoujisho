@@ -22,7 +22,7 @@ class PitchAccentExportEnhancement extends AnkiExportEnhancement {
           enhancementField: AnkiExportField.reading,
         );
 
-  final List<DictionaryEntry> kanjiumDictionary = [];
+  final Map<String, Map<String, DictionaryEntry>> kanjiumDictionary = {};
 
   @override
   FutureOr<AnkiExportParams> enhanceParams(AnkiExportParams params) {
@@ -31,8 +31,7 @@ class PitchAccentExportEnhancement extends AnkiExportEnhancement {
       reading: params.reading,
     ));
     if (closestReadingMatch != null) {
-      params.reading = getAllHtmlPitch(
-          closestReadingMatch, jsonDecode(closestReadingMatch.extra));
+      params.reading = getAllHtmlPitch(closestReadingMatch);
     }
 
     return params;
@@ -51,16 +50,19 @@ class PitchAccentExportEnhancement extends AnkiExportEnhancement {
     }
 
     for (List<String> field in kanjiumFields) {
-      String pitchAccentListMap = jsonEncode(parseKanjiumNumbers(field[2])
-          .map((pitchInfo) => pitchInfo.toMap())
-          .toList());
+      List<PitchAccentInformation> pitch = parseKanjiumNumbers(field[2]);
 
       DictionaryEntry entry = DictionaryEntry(
         word: field[0],
         reading: field[1],
-        extra: pitchAccentListMap,
       );
-      kanjiumDictionary.add(entry);
+      entry.workingArea["pitch_accent"] = pitch;
+
+      if (kanjiumDictionary[entry.word] == null) {
+        kanjiumDictionary[entry.word] = {};
+      }
+
+      kanjiumDictionary[entry.word]![entry.reading] = entry;
     }
   }
 
@@ -161,25 +163,23 @@ class PitchAccentExportEnhancement extends AnkiExportEnhancement {
       firstReading = entry.reading.split(";").first;
     }
 
-    List<DictionaryEntry> readingMatches = kanjiumDictionary
-        .where((pitchEntry) => pitchEntry.reading == firstReading)
-        .toList();
-
-    return readingMatches.firstWhereOrNull(
-      (pitchEntry) => entry.word.contains(pitchEntry.word),
-    );
+    if (kanjiumDictionary[entry.word] == null ||
+        kanjiumDictionary[entry.word]![entry.reading] == null) {
+      return null;
+    } else {
+      return kanjiumDictionary[entry.word]![entry.reading];
+    }
   }
 
-  String getAllHtmlPitch(DictionaryEntry entry, List<dynamic> pitchJsons) {
+  String getAllHtmlPitch(DictionaryEntry entry) {
     String allPitches = "";
     String reading = entry.reading;
     if (reading.isEmpty) {
       reading = entry.word;
     }
 
-    List<PitchAccentInformation> pitchAccentEntries = pitchJsons
-        .map((entryJson) => PitchAccentInformation.fromMap(entryJson))
-        .toList();
+    List<PitchAccentInformation> pitchAccentEntries =
+        entry.workingArea["pitch_accent"] ?? [];
 
     for (int i = 0; i < pitchAccentEntries.length; i++) {
       allPitches += getHtmlPitch(reading, pitchAccentEntries[i]);

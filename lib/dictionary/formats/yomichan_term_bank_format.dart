@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_archive/flutter_archive.dart';
@@ -285,7 +284,8 @@ FutureOr<DictionarySearchResult> searchResultsEnhancementYomichanTermBankFormat(
       }
     }
     if (kanaKit.isRomaji(result.originalSearchTerm)) {
-      if (entry.reading == kanaKit.toHiragana(result.originalSearchTerm)) {
+      if (entry.reading == kanaKit.toHiragana(result.originalSearchTerm) ||
+          entry.word == kanaKit.toHiragana(result.originalSearchTerm)) {
         if (!exactFirstEntries.contains(entry)) {
           exactFirstEntries.add(entry);
         }

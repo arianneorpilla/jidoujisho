@@ -81,4 +81,9 @@ class DictionaryEntry {
   bool isEmpty() {
     return this == DictionaryEntry();
   }
+
+  @override
+  String toString() {
+    return "DictionaryEntry(word: $word, reading: $reading, meaning: $meaning, extra: $extra, popularity: $popularity)";
+  }
 }
