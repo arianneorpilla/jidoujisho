@@ -83,7 +83,7 @@ class PlayerYouTubeSource extends PlayerMediaSource {
         sharedPreferences!.getInt("lastPreferredQuality") ??
             YouTubeVideoQuality.sd_480.index;
 
-    return manifest.muxed.withHighestBitrate().url.toString();
+    return manifest.muxed.sortByVideoQuality().last.url.toString();
   }
 
   @override
@@ -144,8 +144,8 @@ class PlayerYouTubeSource extends PlayerMediaSource {
   FutureOr<List<SubtitleItem>> provideSubtitles(
       PlayerLaunchParams params) async {
     String videoId = VideoId.fromString(params.mediaHistoryItem.key).toString();
-    ClosedCaptionManifest manifest =
-        await yt.videos.closedCaptions.getManifest(videoId);
+    ClosedCaptionManifest manifest = await yt.videos.closedCaptions
+        .getManifest(videoId, formats: [ClosedCaptionFormat.ttml]);
 
     List<String> languageCodes = [];
     List<Future<String>> futures = [];
