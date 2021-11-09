@@ -225,27 +225,10 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
   }
 
   @override
-  List<Widget> getExtraHistoryActions(BuildContext context,
-      MediaHistoryItem item, Function()? refreshCallback) {
-    AppModel appModel = Provider.of<AppModel>(context, listen: false);
-    MediaHistory history = mediaType.getMediaHistory(appModel);
-
-    return [
-      TextButton(
-        child: Text(
-          appModel.translate("dialog_remove"),
-          style: TextStyle(
-            color: Theme.of(context).focusColor,
-          ),
-        ),
-        onPressed: () async {
-          await history.removeItem(item.key);
-
-          Navigator.pop(context);
-          refreshCallback!();
-        },
-      )
-    ];
+  List<Widget> getExtraHistoryActions(
+      BuildContext context, MediaHistoryItem item, Function()? refreshCallback,
+      {bool isHistory = false}) {
+    return [];
   }
 
   @override

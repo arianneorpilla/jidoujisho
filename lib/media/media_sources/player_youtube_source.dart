@@ -124,7 +124,7 @@ class PlayerYouTubeSource extends PlayerMediaSource {
               params,
               pushReplacement: true,
             );
-            Future.delayed(const Duration(seconds: 3), () async {
+            Future.delayed(const Duration(seconds: 5), () async {
               await SystemChrome.setEnabledSystemUIMode(
                   SystemUiMode.immersiveSticky);
             });
@@ -171,13 +171,13 @@ class PlayerYouTubeSource extends PlayerMediaSource {
     String url = params.mediaHistoryItem.key;
     StreamManifest manifest = await getManifestFromUrl(url);
 
-    AudioStreamInfo streamAudioInfo = manifest.audioOnly.withHighestBitrate();
+    AudioStreamInfo streamAudioInfo = manifest.audio.withHighestBitrate();
     return streamAudioInfo.url.toString();
   }
 
   String getVideoFromManifest(
       StreamManifest manifest, YouTubeVideoQuality preferredQuality) {
-    for (VideoStreamInfo streamInfo in manifest.video) {
+    for (VideoStreamInfo streamInfo in manifest.muxed) {
       if (!streamInfo.videoCodec.contains("avc1")) {
         continue;
       }
@@ -324,8 +324,8 @@ class PlayerYouTubeSource extends PlayerMediaSource {
     AppModel appModel = Provider.of<AppModel>(context, listen: false);
 
     String url = item.key;
-    return FutureBuilder<bool>(
-      future: hasSubtitles(url),
+    return FutureBuilder<List<String>>(
+      future: getCaptionsLanguageCodes(url),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Row(
@@ -358,45 +358,133 @@ class PlayerYouTubeSource extends PlayerMediaSource {
           );
         }
 
-        bool hasSubtitles = snapshot.data!;
+        List<String> languageCodes = snapshot.data!;
+        List<String> shortenedLanguageCodes = languageCodes;
+        for (int i = 0; i < shortenedLanguageCodes.length; i++) {
+          shortenedLanguageCodes[i] = shortenedLanguageCodes[i].substring(0, 2);
+        }
+        String targetLanguage = appModel.getCurrentLanguage().languageCode;
+        String appLanguage = appModel.getAppLanguageCode();
 
-        return Row(
-          children: [
-            Icon(
-              hasSubtitles
-                  ? Icons.closed_caption
-                  : Icons.closed_caption_disabled,
-              color: hasSubtitles
-                  ? appModel.getIsDarkMode()
-                      ? Colors.green[200]
-                      : Colors.green[600]
-                  : appModel.getIsDarkMode()
+        bool hasTargetLanguage = languageCodes.contains(targetLanguage) ||
+            shortenedLanguageCodes.contains(targetLanguage);
+        bool hasAppLanguage = languageCodes.contains(appLanguage) ||
+            shortenedLanguageCodes.contains(appLanguage);
+
+        bool hasNoLanguage = languageCodes.isEmpty;
+
+        if (hasNoLanguage) {
+          return Row(
+            children: [
+              Icon(
+                Icons.closed_caption_disabled,
+                color: appModel.getIsDarkMode()
+                    ? Colors.red[200]
+                    : Colors.red[600],
+                size: 12,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                appModel.translate("closed_captions_unavailable"),
+                style: TextStyle(
+                  color: appModel.getIsDarkMode()
                       ? Colors.red[200]
                       : Colors.red[600],
-              size: 12,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              hasSubtitles
-                  ? appModel.translate("closed_captions_available")
-                  : appModel.translate("closed_captions_unavailable"),
-              style: TextStyle(
-                color: hasSubtitles
-                    ? appModel.getIsDarkMode()
-                        ? Colors.green[200]
-                        : Colors.green[600]
-                    : appModel.getIsDarkMode()
-                        ? Colors.red[200]
-                        : Colors.red[600],
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                softWrap: true,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              softWrap: true,
-            ),
-          ],
-        );
+            ],
+          );
+        }
+        if (hasTargetLanguage || hasAppLanguage) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (hasTargetLanguage)
+                Row(
+                  children: [
+                    Icon(
+                      Icons.closed_caption,
+                      color: appModel.getIsDarkMode()
+                          ? Colors.green[200]
+                          : Colors.green[600],
+                      size: 12,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      appModel.translate("closed_captions_target"),
+                      style: TextStyle(
+                        color: appModel.getIsDarkMode()
+                            ? Colors.green[200]
+                            : Colors.green[600],
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: true,
+                    ),
+                  ],
+                ),
+              if (hasAppLanguage)
+                Row(
+                  children: [
+                    Icon(
+                      Icons.closed_caption,
+                      color: appModel.getIsDarkMode()
+                          ? Colors.blue[200]
+                          : Colors.blue[600],
+                      size: 12,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      appModel.translate("closed_captions_app"),
+                      style: TextStyle(
+                        color: appModel.getIsDarkMode()
+                            ? Colors.blue[200]
+                            : Colors.blue[600],
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: true,
+                    ),
+                  ],
+                ),
+            ],
+          );
+        } else {
+          return Row(
+            children: [
+              Icon(
+                Icons.closed_caption,
+                color: appModel.getIsDarkMode()
+                    ? Colors.orange[200]
+                    : Colors.orange[600],
+                size: 12,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                appModel.translate("closed_captions_other"),
+                style: TextStyle(
+                  color: appModel.getIsDarkMode()
+                      ? Colors.orange[200]
+                      : Colors.orange[600],
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                softWrap: true,
+              ),
+            ],
+          );
+        }
       },
     );
   }
@@ -404,7 +492,7 @@ class PlayerYouTubeSource extends PlayerMediaSource {
   List<YouTubeVideoQuality> getQualitiesFromManifest(StreamManifest manifest) {
     List<YouTubeVideoQuality> qualities = [];
 
-    for (VideoStreamInfo streamInfo in manifest.video) {
+    for (VideoStreamInfo streamInfo in manifest.muxed) {
       if (!streamInfo.videoCodec.contains("avc1")) {
         continue;
       }
@@ -489,12 +577,12 @@ class PlayerYouTubeSource extends PlayerMediaSource {
     }
   }
 
-  Future<bool> hasSubtitles(String url) async {
+  Future<List<String>> getCaptionsLanguageCodes(String url) async {
     String videoId = VideoId.fromString(url).toString();
 
     sharedPreferences ??= await SharedPreferences.getInstance();
-    bool? hasSubtitlesPrefs =
-        sharedPreferences!.getBool(getSubtitlesPrefsKey(videoId));
+    List<String>? hasSubtitlesPrefs =
+        sharedPreferences!.getStringList(getCaptionsPrefsKey(videoId));
     if (hasSubtitlesPrefs != null) {
       return hasSubtitlesPrefs;
     }
@@ -511,10 +599,10 @@ class PlayerYouTubeSource extends PlayerMediaSource {
 
     languageCodes = languageCodes.toSet().toList();
 
-    bool hasSubtitles = languageCodes.isNotEmpty;
-    sharedPreferences!.setBool(getSubtitlesPrefsKey(videoId), hasSubtitles);
+    sharedPreferences!
+        .setStringList(getCaptionsPrefsKey(videoId), languageCodes);
 
-    return hasSubtitles;
+    return languageCodes;
   }
 
   Future<YouTubeVideoQuality> getPreferredQuality() async {
@@ -529,8 +617,8 @@ class PlayerYouTubeSource extends PlayerMediaSource {
     await sharedPreferences!.setInt(getQualityPrefsKey(), quality.index);
   }
 
-  String getSubtitlesPrefsKey(String videoId) {
-    return "${getIdentifier()}://subtitles/$videoId";
+  String getCaptionsPrefsKey(String videoId) {
+    return "${getIdentifier()}://captions/$videoId";
   }
 
   String getQualityPrefsKey() {

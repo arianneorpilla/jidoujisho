@@ -697,6 +697,7 @@ class AppModel with ChangeNotifier {
   Future<void> setTargetLanguageName(String targetLanguage) async {
     await _sharedPreferences.setString("targetLanguage", targetLanguage);
     await initialiseCurrentLanguage();
+    notifyListeners();
   }
 
   List<String> getAppLanguageNames() {
@@ -949,6 +950,12 @@ class AppModel with ChangeNotifier {
     return AppLocalizations.getLocalizedValue(
       getAppLanguageName(),
       localisedValue,
+    );
+  }
+
+  String getAppLanguageCode() {
+    return AppLocalizations.getLanguageCode(
+      getAppLanguageName(),
     );
   }
 

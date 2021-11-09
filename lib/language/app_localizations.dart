@@ -1,6 +1,11 @@
 class AppLocalizations {
   AppLocalizations();
 
+  static const _languageCodes = <String, String>{
+    'English': 'en',
+    'Tagalog': 'tl'
+  };
+
   static const _localizedValues = <String, Map<String, String>>{
     'English': {
       'app_title': 'jidoujisho',
@@ -44,9 +49,11 @@ class AppLocalizations {
       'dictionary_nomatch_after': 'could be found.',
       'creator_options_menu': 'Creator menu addons',
       'creator_options_auto': 'Creator auto addons',
-      'closed_captions_query': 'Querying for closed captions',
-      'closed_captions_available': 'Closed captioning available',
-      'closed_captions_unavailable': 'No closed captioning',
+      'closed_captions_query': 'Querying for captions',
+      'closed_captions_target': 'Target language captions',
+      'closed_captions_app': 'App language captions',
+      'closed_captions_other': 'Other language captions',
+      'closed_captions_unavailable': 'No captions',
       'widget_options': 'Dictionary widget addons',
       'creator_options_confirm': 'Are you sure you want to leave changes '
           'unsaved?',
@@ -180,9 +187,11 @@ class AppLocalizations {
       'dictionary_nomatch_after': '',
       'creator_options_menu': 'Mga menu mopagawaand ng Pagawaan',
       'creator_options_auto': 'Mga auto mod ng Pagawaan',
-      'closed_captions_query': 'Naghahanap ng closed captions',
-      'closed_captions_available': 'May closed captions',
-      'closed_captions_unavailable': 'Walang closed captions',
+      'closed_captions_query': 'Naghahanap ng mga caption',
+      'closed_captions_target': 'May caption and wikang pakay',
+      'closed_captions_app': 'May caption ang wika ng app',
+      'closed_captions_other': 'May caption ang ibang wika',
+      'closed_captions_unavailable': 'Walang mga caption',
       'widget_options': 'Mga diksyunaryo widget',
       'creator_options_confirm':
           'Walang magbabagong kagamitan. Sigurado ka ba sa pagbalik?',
@@ -287,5 +296,9 @@ class AppLocalizations {
 
   static String getLocalizedValue(String localization, String key) {
     return _localizedValues[localization]![key]!;
+  }
+
+  static String getLanguageCode(String languageName) {
+    return _languageCodes[languageName]!;
   }
 }

@@ -111,7 +111,8 @@ abstract class MediaSource {
   /// A source can define extra actions that appears when you long press
   /// on a history item in the Player screen.
   List<Widget> getExtraHistoryActions(
-      BuildContext context, MediaHistoryItem item, Function()? refreshCallback);
+      BuildContext context, MediaHistoryItem item, Function()? refreshCallback,
+      {bool isHistory = false});
 
   /// Number in milliseconds of how long it should take for the search bar to
   /// respond to query changes. For expensive operations, the debounce should

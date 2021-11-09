@@ -91,7 +91,8 @@ abstract class PlayerMediaSource extends MediaSource {
       },
       onLongPress: () async {
         List<Widget> actions = [];
-        actions.addAll(getExtraHistoryActions(context, item, refreshCallback));
+        actions.addAll(getExtraHistoryActions(context, item, refreshCallback,
+            isHistory: isHistory));
 
         actions.add(
           TextButton(
@@ -282,11 +283,27 @@ abstract class PlayerMediaSource extends MediaSource {
   /// on a history item in the Player screen.
   @override
   List<Widget> getExtraHistoryActions(
-    BuildContext context,
-    MediaHistoryItem item,
-    Function()? refreshCallback,
-  ) {
-    return [];
+      BuildContext context, MediaHistoryItem item, Function()? refreshCallback,
+      {bool isHistory = false}) {
+    AppModel appModel = Provider.of<AppModel>(context, listen: false);
+    MediaHistory history = mediaType.getMediaHistory(appModel);
+
+    return [
+      TextButton(
+        child: Text(
+          appModel.translate("dialog_remove"),
+          style: TextStyle(
+            color: Theme.of(context).focusColor,
+          ),
+        ),
+        onPressed: () async {
+          await history.removeItem(item.key);
+
+          Navigator.pop(context);
+          refreshCallback!();
+        },
+      )
+    ];
   }
 
   @override

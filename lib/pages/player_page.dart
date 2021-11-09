@@ -246,6 +246,9 @@ class PlayerPageState extends State<PlayerPage>
       });
       isPlayerReady = true;
 
+      await Wakelock.enable();
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
       setState(() {});
       startHideTimer();
 
@@ -674,7 +677,6 @@ class PlayerPageState extends State<PlayerPage>
     if (playerController.value.isInitialized) {
       position.value = playerController.value.position;
       duration.value = playerController.value.duration;
-
       isPlaying.value = playerController.value.isPlaying;
       isEnded.value = playerController.value.isEnded;
 
@@ -1319,12 +1321,14 @@ class PlayerPageState extends State<PlayerPage>
       return buildPlaceholder();
     }
 
+    Duration position = playerController.value.position;
     if (currentOrientation != MediaQuery.of(context).orientation) {
       currentOrientation = MediaQuery.of(context).orientation;
-      Future.delayed(const Duration(milliseconds: 50), () {
-        playerController.seekTo(
-            playerController.value.position - const Duration(milliseconds: 50));
-      });
+      if (audioPath == null) {
+        Future.delayed(const Duration(milliseconds: 50), () {
+          playerController.seekTo(position - const Duration(milliseconds: 50));
+        });
+      }
     }
 
     return WillPopScope(
