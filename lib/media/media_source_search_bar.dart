@@ -85,7 +85,8 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
         searchBarController.query = historyItem;
       },
       onLongPress: () {
-        appModel.removeFromSearchHistory(historyItem);
+        appModel.removeFromSearchHistory(historyItem,
+            historyType: mediaSource.getIdentifier());
         setState(() {});
       },
       child: Padding(
@@ -101,10 +102,14 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
               ),
             ),
             const SizedBox(width: 20),
-            Text(
-              historyItem,
-              style: const TextStyle(
-                fontSize: 16,
+            Expanded(
+              child: Text(
+                historyItem,
+                style: const TextStyle(
+                  fontSize: 16,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -115,61 +120,104 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
 
   ScrollController scrollController = ScrollController();
 
-  @override
-  Widget build(BuildContext context) {
-    final isPortrait =
-        MediaQuery.of(context).orientation == Orientation.portrait;
+  Future<void> onFocusChanged(bool focus) async {
+    isFocus = focus;
 
-    return FloatingSearchBar(
-      controller: searchBarController,
-      hint: widget.mediaSource.sourceName,
-      borderRadius: BorderRadius.zero,
-      scrollPadding: const EdgeInsets.only(top: 16, bottom: 56),
-      transitionDuration: Duration.zero,
-      margins: const EdgeInsets.symmetric(horizontal: 6),
-      physics: const BouncingScrollPhysics(),
-      axisAlignment: isPortrait ? 0.0 : -1.0,
-      openAxisAlignment: 0.0,
-      height: 48,
-      closeOnBackdropTap: true,
-      debounceDelay: Duration.zero,
-      elevation: 0,
-      progress: isSearching,
-      transition: SlideFadeFloatingSearchBarTransition(),
-      onSubmitted: (query) async {
-        if (!isSearching) {
+    if (!isFocus) {
+      searchBarController.close();
+      setState(() {});
+
+      widget.refreshCallback();
+    } else {
+      if (mediaSource.noSearchAction) {
+        await mediaSource.onSearchBarTap(context);
+        searchBarController.close();
+        setState(() {});
+      }
+    }
+
+    searchResultItems = null;
+  }
+
+  Future<void> onQueryChanged(String query) async {
+    searchResultItems = null;
+
+    if (query.isEmpty) {
+      searchSuggestions = [];
+      setState(() {});
+      return;
+    }
+
+    mediaSource.generateSearchSuggestions(query).then((newSuggestions) {
+      searchSuggestions = newSuggestions;
+      setState(() {});
+    });
+
+    if (!isSearching) {
+      String before = query;
+
+      await Future.delayed(
+          Duration(milliseconds: mediaSource.getSearchDebounceDelay), () async {
+        String after = searchBarController.query;
+        if (before == after) {
           setState(() {
             isSearching = true;
           });
+          try {
+            searchResultItems =
+                await mediaSource.getSearchMediaHistoryItems(query);
+          } catch (e) {
+            debugPrint("Search went wrong");
+            searchResultItems = [];
+          }
 
-          searchResultItems =
-              await mediaSource.getSearchMediaHistoryItems(query);
           appModel.addToSearchHistory(query,
-              historyType: widget.mediaSource.getIdentifier());
+              historyType: mediaSource.getIdentifier());
 
           setState(() {
             isSearching = false;
           });
         }
-      },
-      onFocusChanged: (focus) async {
-        isFocus = focus;
+      });
+    }
+  }
 
-        if (!isFocus) {
-          searchBarController.close();
-          setState(() {});
+  Future<void> onSubmitted(String query) async {
+    if (!isSearching) {
+      setState(() {
+        isSearching = true;
+      });
 
-          widget.refreshCallback();
-        } else {
-          if (widget.mediaSource.noSearchAction) {
-            await widget.mediaSource.onSearchBarTap(context);
-            searchBarController.close();
-            setState(() {});
-          }
-        }
+      searchResultItems = await mediaSource.getSearchMediaHistoryItems(query);
+      appModel.addToSearchHistory(query,
+          historyType: mediaSource.getIdentifier());
 
-        searchResultItems = null;
-      },
+      setState(() {
+        isSearching = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FloatingSearchBar(
+      controller: searchBarController,
+      hint: mediaSource.sourceName,
+      borderRadius: BorderRadius.zero,
+      scrollPadding: const EdgeInsets.only(top: 16, bottom: 56),
+      transitionDuration: Duration.zero,
+      margins: const EdgeInsets.symmetric(horizontal: 6),
+      physics: const BouncingScrollPhysics(),
+      openAxisAlignment: 0.0,
+      height: 48,
+      closeOnBackdropTap: true,
+      debounceDelay: Duration.zero,
+      showCursor: !mediaSource.noSearchAction,
+      elevation: 0,
+      progress: isSearching,
+      transition: SlideFadeFloatingSearchBarTransition(),
+      onSubmitted: onSubmitted,
+      onFocusChanged: onFocusChanged,
       backgroundColor: (appModel.getIsDarkMode())
           ? Theme.of(context).cardColor
           : const Color(0xFFE5E5E5),
@@ -178,18 +226,7 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
           : Colors.white.withOpacity(0.95),
       clearQueryOnClose: true,
       accentColor: Theme.of(context).focusColor,
-      onQueryChanged: (query) async {
-        if (query.isEmpty) {
-          searchResultItems = null;
-          searchSuggestions = [];
-          setState(() {});
-          return;
-        }
-
-        mediaSource.generateSearchSuggestions(query).then((newSuggestions) {
-          searchSuggestions = newSuggestions;
-        });
-      },
+      onQueryChanged: onQueryChanged,
       leadingActions: [
         buildSourceButton(),
       ],
@@ -202,7 +239,10 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
         }
 
         if (searchSuggestions.isEmpty) {
-          searchSuggestions = appModel.getSearchHistory().reversed.toList();
+          searchSuggestions = appModel
+              .getSearchHistory(historyType: mediaSource.getIdentifier())
+              .reversed
+              .toList();
         }
 
         if (searchBarController.query.isEmpty && searchSuggestions.isEmpty) {
@@ -212,6 +252,14 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
           );
         } else if (searchResultItems == null) {
           return buildSearchSuggestions();
+        }
+
+        if (searchResultItems!.isEmpty) {
+          return buildPlaceholderMessage(
+            label:
+                "${appModel.translate("dictionary_nomatch_before")}『${searchBarController.query}』${appModel.translate("dictionary_nomatch_after")}",
+            icon: Icons.search_off,
+          );
         }
 
         return RawScrollbar(
@@ -242,9 +290,15 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
         onPressed: () async {
           await appModel.showSourcesMenu(
             context: context,
-            mediaType: widget.mediaSource.mediaType,
+            mediaType: mediaSource.mediaType,
           );
           widget.refreshCallback();
+          mediaSource =
+              appModel.getCurrentMediaTypeSource(mediaSource.mediaType);
+          if (mediaSource.noSearchAction && searchBarController.isOpen) {
+            searchBarController.close();
+          }
+          setState(() {});
         },
       ),
     );
@@ -252,16 +306,18 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
 
   List<Widget> getAllActions() {
     List<Widget> actions = [];
-    actions.addAll(widget.mediaSource
-        .getSearchBarActions(context, widget.refreshCallback));
-    actions.add(
-      FloatingSearchBarAction.searchToClear(
-        size: 20,
-        duration: Duration.zero,
-        showIfClosed: true,
-        color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
-      ),
-    );
+    actions.addAll(
+        mediaSource.getSearchBarActions(context, widget.refreshCallback));
+    if (!mediaSource.noSearchAction) {
+      actions.add(
+        FloatingSearchBarAction.searchToClear(
+          size: 20,
+          duration: Duration.zero,
+          showIfClosed: true,
+          color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
+        ),
+      );
+    }
     return actions;
   }
 }

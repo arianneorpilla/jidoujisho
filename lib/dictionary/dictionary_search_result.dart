@@ -10,8 +10,8 @@ class DictionarySearchResult {
     required this.formatName,
     required this.originalSearchTerm,
     required this.fallbackSearchTerms,
-    required this.mediaHistoryItem,
     required this.entries,
+    this.mediaHistoryItem,
     this.storeReference,
   });
 

@@ -6,9 +6,9 @@ Widget showCenterIconMessage(
     required String label,
     required IconData icon,
     required bool jumpingDots}) {
-  return Center(
+  return SizedBox(
+    width: double.maxFinite,
     child: Column(
-      mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Icon(

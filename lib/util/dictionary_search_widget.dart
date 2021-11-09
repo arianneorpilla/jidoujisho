@@ -215,11 +215,47 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
     );
   }
 
+  Future<void> onQueryChanged(String query) async {
+    if (appModel.getCurrentDictionary() == null) {
+      return;
+    }
+    if (query.isEmpty) {
+      searchResult = null;
+      setState(() {});
+      return;
+    }
+    if (!isSearching) {
+      setState(() {
+        isSearching = true;
+      });
+
+      selectedIndex = 0;
+
+      searchResult = await appModel.searchDictionary(query);
+      appModel.addToSearchHistory(query);
+
+      setState(() {
+        isSearching = false;
+      });
+    }
+  }
+
+  Future<void> onFocusChanged(bool focus) async {
+    isFocus = focus;
+    if (!isFocus) {
+      searchBarController.close();
+      setState(() {});
+
+      if (widget.focusCallback != null) {
+        widget.focusCallback!();
+      }
+    }
+
+    searchResult = null;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isPortrait =
-        MediaQuery.of(context).orientation == Orientation.portrait;
-
     return FloatingSearchBar(
       controller: searchBarController,
       hint: (appModel.getCurrentDictionary() != null)
@@ -230,26 +266,13 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
       transitionDuration: Duration.zero,
       margins: const EdgeInsets.symmetric(horizontal: 6),
       physics: const BouncingScrollPhysics(),
-      axisAlignment: isPortrait ? 0.0 : -1.0,
       openAxisAlignment: 0.0,
       elevation: 0,
       closeOnBackdropTap: true,
       debounceDelay: const Duration(milliseconds: 500),
       progress: isSearching,
       transition: SlideFadeFloatingSearchBarTransition(),
-      onFocusChanged: (focus) {
-        isFocus = focus;
-        if (!isFocus) {
-          searchBarController.close();
-          setState(() {});
-
-          if (widget.focusCallback != null) {
-            widget.focusCallback!();
-          }
-        }
-
-        searchResult = null;
-      },
+      onFocusChanged: onFocusChanged,
       backgroundColor: (appModel.getIsDarkMode())
           ? Theme.of(context).cardColor
           : const Color(0xFFE5E5E5),
@@ -258,30 +281,7 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
           : Colors.white.withOpacity(0.95),
       clearQueryOnClose: true,
       accentColor: Theme.of(context).focusColor,
-      onQueryChanged: (query) async {
-        if (appModel.getCurrentDictionary() == null) {
-          return;
-        }
-        if (query.isEmpty) {
-          searchResult = null;
-          setState(() {});
-          return;
-        }
-        if (!isSearching) {
-          setState(() {
-            isSearching = true;
-          });
-
-          selectedIndex = 0;
-
-          searchResult = await appModel.searchDictionary(query);
-          appModel.addToSearchHistory(query);
-
-          setState(() {
-            isSearching = false;
-          });
-        }
-      },
+      onQueryChanged: onQueryChanged,
       leadingActions: [
         buildDictionaryButton(),
       ],
@@ -315,7 +315,7 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
           color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
         ),
       ],
-      isScrollControlled: false,
+      isScrollControlled: searchResult == null || searchResult!.entries.isEmpty,
       builder: (context, transition) {
         return buildBody();
       },

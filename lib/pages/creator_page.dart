@@ -330,7 +330,8 @@ class CreatorPageState extends State<CreatorPage> {
     return Scaffold(
       resizeToAvoidBottomInset: (orientation == Orientation.portrait),
       backgroundColor: widget.backgroundColor,
-      extendBodyBehindAppBar: true,
+      extendBodyBehindAppBar: (imagesNotifier.value.isNotEmpty &&
+          orientation == Orientation.landscape),
       appBar: (imagesNotifier.value.isNotEmpty &&
               orientation == Orientation.landscape)
           ? null
@@ -637,95 +638,92 @@ class CreatorPageState extends State<CreatorPage> {
   }
 
   Widget buildPortraitFields() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 48.0),
-      child: Column(
-        children: [
-          Expanded(
-            child: Scrollbar(
+    return Column(
+      children: [
+        Expanded(
+          child: Scrollbar(
+            controller: scrollController,
+            child: SingleChildScrollView(
               controller: scrollController,
-              child: SingleChildScrollView(
-                controller: scrollController,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.max,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    if (imagesNotifier.value.isNotEmpty)
-                      ImageSelectWidget(
-                        appModel: appModel,
-                        fileNotifier: imageNotifier,
-                        filesNotifier: imagesNotifier,
-                      ),
-                    if (audioNotifier.value != null) buildAudioPlayer(),
-                    buildDeckDropDown(),
-                    displayField(
-                      context: context,
-                      field: AnkiExportField.sentence,
-                      onFieldSubmitted: (value) {},
-                      onChanged: (value) {
-                        exportParams.setSentence(value);
-                      },
-                      maxLines: null,
-                      keyboardType: TextInputType.multiline,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (imagesNotifier.value.isNotEmpty)
+                    ImageSelectWidget(
+                      appModel: appModel,
+                      fileNotifier: imageNotifier,
+                      filesNotifier: imagesNotifier,
                     ),
-                    displayField(
-                      context: context,
-                      field: AnkiExportField.word,
-                      onFieldSubmitted: (value) {},
-                      onChanged: (value) {
-                        exportParams.setWord(value);
-                      },
-                    ),
-                    displayField(
-                      context: context,
-                      field: AnkiExportField.reading,
-                      onFieldSubmitted: (value) {},
-                      onChanged: (value) {
-                        exportParams.setReading(value);
-                      },
-                    ),
-                    displayField(
-                      context: context,
-                      field: AnkiExportField.meaning,
-                      keyboardType: TextInputType.multiline,
-                      onFieldSubmitted: (value) {},
-                      onChanged: (value) {
-                        exportParams.setMeaning(value);
-                      },
-                    ),
-                    displayField(
-                      context: context,
-                      field: AnkiExportField.image,
-                      onFieldSubmitted: (value) {},
-                      onChanged: (value) {
-                        exportParams.setImageSearch(value);
-                      },
-                    ),
-                    displayField(
-                      context: context,
-                      field: AnkiExportField.audio,
-                      onFieldSubmitted: (value) {},
-                      onChanged: (value) {
-                        exportParams.setAudioSearch(value);
-                      },
-                    ),
-                    displayField(
-                      context: context,
-                      field: AnkiExportField.extra,
-                      onFieldSubmitted: (value) {},
-                      onChanged: (value) {
-                        exportParams.setExtra(value);
-                      },
-                    ),
-                  ],
-                ),
+                  if (audioNotifier.value != null) buildAudioPlayer(),
+                  buildDeckDropDown(),
+                  displayField(
+                    context: context,
+                    field: AnkiExportField.sentence,
+                    onFieldSubmitted: (value) {},
+                    onChanged: (value) {
+                      exportParams.setSentence(value);
+                    },
+                    maxLines: null,
+                    keyboardType: TextInputType.multiline,
+                  ),
+                  displayField(
+                    context: context,
+                    field: AnkiExportField.word,
+                    onFieldSubmitted: (value) {},
+                    onChanged: (value) {
+                      exportParams.setWord(value);
+                    },
+                  ),
+                  displayField(
+                    context: context,
+                    field: AnkiExportField.reading,
+                    onFieldSubmitted: (value) {},
+                    onChanged: (value) {
+                      exportParams.setReading(value);
+                    },
+                  ),
+                  displayField(
+                    context: context,
+                    field: AnkiExportField.meaning,
+                    keyboardType: TextInputType.multiline,
+                    onFieldSubmitted: (value) {},
+                    onChanged: (value) {
+                      exportParams.setMeaning(value);
+                    },
+                  ),
+                  displayField(
+                    context: context,
+                    field: AnkiExportField.image,
+                    onFieldSubmitted: (value) {},
+                    onChanged: (value) {
+                      exportParams.setImageSearch(value);
+                    },
+                  ),
+                  displayField(
+                    context: context,
+                    field: AnkiExportField.audio,
+                    onFieldSubmitted: (value) {},
+                    onChanged: (value) {
+                      exportParams.setAudioSearch(value);
+                    },
+                  ),
+                  displayField(
+                    context: context,
+                    field: AnkiExportField.extra,
+                    onFieldSubmitted: (value) {},
+                    onChanged: (value) {
+                      exportParams.setExtra(value);
+                    },
+                  ),
+                ],
               ),
             ),
           ),
-          buildExportButton(),
-        ],
-      ),
+        ),
+        buildExportButton(),
+      ],
     );
   }
 

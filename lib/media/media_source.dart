@@ -91,22 +91,27 @@ abstract class MediaSource {
     required MediaHistory history,
     required MediaHistoryItem item,
     required Function() refreshCallback,
+    bool isHistory = false,
   });
 
   Widget buildMediaHistoryMetadata(
     BuildContext context,
-    MediaHistoryItem item,
-  );
+    MediaHistoryItem item, {
+    bool isHistory = false,
+  });
 
-  Widget getHistoryExtraMetadata(MediaHistoryItem item);
+  Widget getHistoryExtraMetadata(BuildContext context, MediaHistoryItem item);
 
   Widget buildMediaHistoryThumbnail(
-      BuildContext context, MediaHistoryItem item);
+    BuildContext context,
+    MediaHistoryItem item, {
+    bool isHistory = false,
+  });
 
   /// A source can define extra actions that appears when you long press
   /// on a history item in the Player screen.
   List<Widget> getExtraHistoryActions(
-      MediaHistoryItem item, Function()? refreshCallback);
+      BuildContext context, MediaHistoryItem item, Function()? refreshCallback);
 
   /// Number in milliseconds of how long it should take for the search bar to
   /// respond to query changes. For expensive operations, the debounce should

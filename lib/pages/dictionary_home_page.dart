@@ -1,14 +1,9 @@
-import 'dart:ui';
-
 import 'package:chisa/anki/anki_export_params.dart';
 import 'package:chisa/dictionary/dictionary.dart';
-import 'package:chisa/media/media_history_items/media_history_item.dart';
-import 'package:chisa/media/media_sources/player_media_source.dart';
 import 'package:chisa/util/anki_creator.dart';
 import 'package:chisa/util/dictionary_dialog_widget.dart';
 import 'package:chisa/dictionary/dictionary_entry.dart';
 import 'package:chisa/util/dictionary_search_widget.dart';
-import 'package:chisa/util/media_type_button.dart';
 import 'package:chisa/util/return_from_context.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -130,7 +125,7 @@ class DictionaryPageState extends State<DictionaryHomePage> {
         itemCount: results.length + 1,
         itemBuilder: (BuildContext context, int index) {
           if (index == 0) {
-            return const SizedBox(height: 48);
+            return const SizedBox(height: 60);
             //return buildSearchField();
           }
 
@@ -146,9 +141,7 @@ class DictionaryPageState extends State<DictionaryHomePage> {
   Widget buildEmptyBody() {
     return Column(
       children: [
-        const SizedBox(height: 48),
-        //buildSearchField(),
-
+        const SizedBox(height: 60),
         buildEmptyMessage(),
       ],
     );

@@ -1195,7 +1195,7 @@ class AppModel with ChangeNotifier {
   Future<void> addToSearchHistory(String key,
       {String historyType = "dictionary"}) async {
     int maxSearchHistoryCount = 100;
-    List<String> searchHistory = getSearchHistory();
+    List<String> searchHistory = getSearchHistory(historyType: historyType);
 
     searchHistory.removeWhere((historyKey) => key == historyKey);
     searchHistory.add(key);
@@ -1210,7 +1210,7 @@ class AppModel with ChangeNotifier {
 
   Future<void> removeFromSearchHistory(String key,
       {String historyType = "dictionary"}) async {
-    List<String> searchHistory = getSearchHistory();
+    List<String> searchHistory = getSearchHistory(historyType: historyType);
     searchHistory.remove(key);
     await setSearchHistory(searchHistory, historyType: historyType);
   }

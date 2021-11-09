@@ -50,9 +50,6 @@ abstract class PlayerMediaSource extends MediaSource {
           builder: (context) => PlayerPage(params: params),
         ),
       );
-
-      await Wakelock.enable();
-      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     } else {
       await Navigator.of(context).push(
         MaterialPageRoute<void>(
@@ -61,15 +58,13 @@ abstract class PlayerMediaSource extends MediaSource {
       );
     }
 
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     await Wakelock.disable();
-
     await SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
-
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
     appModel.isInSource = false;
   }
@@ -85,6 +80,7 @@ abstract class PlayerMediaSource extends MediaSource {
     required MediaHistory history,
     required MediaHistoryItem item,
     required Function() refreshCallback,
+    bool isHistory = false,
   }) {
     AppModel appModel = Provider.of<AppModel>(context);
 
@@ -95,24 +91,7 @@ abstract class PlayerMediaSource extends MediaSource {
       },
       onLongPress: () async {
         List<Widget> actions = [];
-        actions.add(
-          TextButton(
-            child: Text(
-              appModel.translate("dialog_remove"),
-              style: TextStyle(
-                color: Theme.of(context).focusColor,
-              ),
-            ),
-            onPressed: () async {
-              await history.removeItem(item.key);
-
-              Navigator.pop(context);
-              refreshCallback();
-            },
-          ),
-        );
-
-        actions.addAll(getExtraHistoryActions(item, refreshCallback));
+        actions.addAll(getExtraHistoryActions(context, item, refreshCallback));
 
         actions.add(
           TextButton(
@@ -154,10 +133,22 @@ abstract class PlayerMediaSource extends MediaSource {
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            buildMediaHistoryThumbnail(context, item),
+            Flexible(
+              flex: 3,
+              child: buildMediaHistoryThumbnail(
+                context,
+                item,
+                isHistory: isHistory,
+              ),
+            ),
             const SizedBox(width: 8),
-            Expanded(
-              child: buildMediaHistoryMetadata(context, item),
+            Flexible(
+              flex: 4,
+              child: buildMediaHistoryMetadata(
+                context,
+                item,
+                isHistory: isHistory,
+              ),
             ),
           ],
         ),
@@ -168,8 +159,9 @@ abstract class PlayerMediaSource extends MediaSource {
   @override
   Widget buildMediaHistoryMetadata(
     BuildContext context,
-    MediaHistoryItem item,
-  ) {
+    MediaHistoryItem item, {
+    bool isHistory = false,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -190,76 +182,98 @@ abstract class PlayerMediaSource extends MediaSource {
           overflow: TextOverflow.ellipsis,
           softWrap: true,
         ),
-        getHistoryExtraMetadata(item),
+        const SizedBox(height: 2),
+        (isHistory)
+            ? Row(children: [
+                Icon(
+                  icon,
+                  color: Theme.of(context).unselectedWidgetColor,
+                  size: 12,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  item.sourceName,
+                  style: TextStyle(
+                    color: Theme.of(context).unselectedWidgetColor,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 12,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  softWrap: true,
+                ),
+              ])
+            : getHistoryExtraMetadata(context, item),
       ],
     );
   }
 
   @override
-  Widget getHistoryExtraMetadata(MediaHistoryItem item) {
+  Widget getHistoryExtraMetadata(BuildContext context, MediaHistoryItem item) {
     return const SizedBox.shrink();
   }
 
   @override
   Widget buildMediaHistoryThumbnail(
     BuildContext context,
-    MediaHistoryItem item,
-  ) {
-    double scaleWidth = MediaQuery.of(context).size.shortestSide * 0.4;
+    MediaHistoryItem item, {
+    bool isHistory = false,
+  }) {
+    return AspectRatio(
+      aspectRatio: 16 / 9,
+      child: Container(
+        color: Colors.black,
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            FutureBuilder<ImageProvider<Object>>(
+                future: getHistoryThumbnail(item),
+                builder: (BuildContext context,
+                    AsyncSnapshot<ImageProvider> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting ||
+                      !snapshot.hasData) {
+                    return Image(image: MemoryImage(kTransparentImage));
+                  }
 
-    return Container(
-      width: scaleWidth,
-      height: (scaleWidth) / 16 * 9,
-      color: Colors.black,
-      child: Stack(
-        alignment: Alignment.bottomCenter,
-        children: [
-          FutureBuilder<ImageProvider<Object>>(
-              future: getHistoryThumbnail(item),
-              builder: (BuildContext context,
-                  AsyncSnapshot<ImageProvider> snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting ||
-                    !snapshot.hasData) {
-                  return Image(image: MemoryImage(kTransparentImage));
-                }
+                  ImageProvider<Object> thumbnail = snapshot.data!;
 
-                ImageProvider<Object> thumbnail = snapshot.data!;
-
-                return FadeInImage(
-                  placeholder: MemoryImage(kTransparentImage),
-                  image: thumbnail,
-                  fit: BoxFit.contain,
-                );
-              }),
-          Positioned(
-            right: 4.0,
-            bottom: 6.0,
-            child: Container(
-              height: 20,
-              color: Colors.black.withOpacity(0.8),
-              alignment: Alignment.center,
-              child: Text(
-                getDurationText(Duration(seconds: item.completeProgress)),
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w300,
+                  return FadeInImage(
+                    placeholder: MemoryImage(kTransparentImage),
+                    image: thumbnail,
+                    fit: BoxFit.contain,
+                  );
+                }),
+            Positioned(
+              right: 4.0,
+              bottom: 6.0,
+              child: Container(
+                height: 20,
+                color: Colors.black.withOpacity(0.8),
+                alignment: Alignment.center,
+                child: Text(
+                  getDurationText(Duration(seconds: item.completeProgress)),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w300,
+                  ),
                 ),
               ),
             ),
-          ),
-          Positioned(
-            child: Container(
-              alignment: Alignment.bottomCenter,
-              child: LinearProgressIndicator(
-                value: item.currentProgress / item.completeProgress,
-                backgroundColor: Colors.white.withOpacity(0.6),
-                valueColor: const AlwaysStoppedAnimation<Color>(Colors.red),
-                minHeight: 2,
+            if (isHistory)
+              Positioned(
+                child: Container(
+                  alignment: Alignment.bottomCenter,
+                  child: LinearProgressIndicator(
+                    value: item.currentProgress / item.completeProgress,
+                    backgroundColor: Colors.white.withOpacity(0.6),
+                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.red),
+                    minHeight: 2,
+                  ),
+                ),
               ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -267,7 +281,8 @@ abstract class PlayerMediaSource extends MediaSource {
   /// A source can define extra actions that appears when you long press
   /// on a history item in the Player screen.
   @override
-  List<MediaSourceActionButton> getExtraHistoryActions(
+  List<Widget> getExtraHistoryActions(
+    BuildContext context,
     MediaHistoryItem item,
     Function()? refreshCallback,
   ) {
@@ -305,4 +320,8 @@ abstract class PlayerMediaSource extends MediaSource {
   }
 
   FutureOr<String> getNetworkStreamUrl(PlayerLaunchParams params);
+
+  FutureOr<String?> getAudioStreamUrl(PlayerLaunchParams params) {
+    return null;
+  }
 }

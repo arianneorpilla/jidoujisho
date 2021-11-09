@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:chisa/media/media_histories/media_history.dart';
 import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_sources/player_media_source.dart';
 import 'package:chisa/media/media_type.dart';
@@ -15,7 +16,6 @@ import 'package:collection/src/iterable_extensions.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
 import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -47,7 +47,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
 
     return MediaTypeButton(
       label: appModel.translate("player_pick_video"),
-      icon: Icons.upload_file,
+      icon: Icons.perm_media,
       onTap: () async {
         await showFilePicker(context);
         refreshCallback();
@@ -215,10 +215,34 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
         refreshCallback: refreshCallback,
         showIfClosed: true,
         showIfOpened: false,
-        icon: Icons.upload_file,
+        icon: Icons.perm_media,
         onPressed: () async {
           await showFilePicker(context);
           refreshCallback();
+        },
+      )
+    ];
+  }
+
+  @override
+  List<Widget> getExtraHistoryActions(BuildContext context,
+      MediaHistoryItem item, Function()? refreshCallback) {
+    AppModel appModel = Provider.of<AppModel>(context, listen: false);
+    MediaHistory history = mediaType.getMediaHistory(appModel);
+
+    return [
+      TextButton(
+        child: Text(
+          appModel.translate("dialog_remove"),
+          style: TextStyle(
+            color: Theme.of(context).focusColor,
+          ),
+        ),
+        onPressed: () async {
+          await history.removeItem(item.key);
+
+          Navigator.pop(context);
+          refreshCallback!();
         },
       )
     ];

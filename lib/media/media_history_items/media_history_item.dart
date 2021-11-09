@@ -37,7 +37,8 @@ class MediaHistoryItem {
   String mediaTypePrefs;
 
   /// A path pointing to a file, storing a temporary thumbnail. This is deleted
-  /// when an item is disposed.
+  /// when an item is disposed! Paths that cannot be deleted should be placed
+  /// in the [extra] parameter instead as source-specific metadata!
   String thumbnailPath;
 
   /// Progress of this item persisted for resuming purposes.

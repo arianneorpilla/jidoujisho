@@ -114,6 +114,7 @@ class PlayerHomePageState extends State<PlayerHomePage> {
             history: history,
             item: item,
             refreshCallback: refreshCallback,
+            isHistory: true,
           );
         },
       ),

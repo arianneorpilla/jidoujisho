@@ -98,6 +98,8 @@ class PlayerPageState extends State<PlayerPage>
   bool dialogSmartPaused = false;
   bool dialogSmartFocusFlag = false;
 
+  String? audioPath;
+
   Orientation? currentOrientation;
 
   DictionarySearchResult? searchResult;
@@ -184,7 +186,6 @@ class PlayerPageState extends State<PlayerPage>
   void dispose() async {
     playerController.removeListener(listener);
     ClipboardListener.removeListener(copyClipboardAction);
-
     super.dispose();
   }
 
@@ -226,12 +227,6 @@ class PlayerPageState extends State<PlayerPage>
         reverseDuration: const Duration(milliseconds: 400),
       );
 
-      playerController.addListener(listener);
-      playerController.addOnInitListener(() {
-        initialiseEmbeddedSubtitles();
-      });
-      isPlayerReady = true;
-
       subtitleItems = await prepareSubtitleControllers(widget.params);
 
       if (subtitleItems.isNotEmpty) {
@@ -244,6 +239,12 @@ class PlayerPageState extends State<PlayerPage>
           ValueNotifier<BlurWidgetOptions>(appModel.getBlurWidgetOptions());
       subtitleOptionsNotifier =
           ValueNotifier<SubtitleOptions>(appModel.getSubtitleOptions());
+
+      playerController.addListener(listener);
+      playerController.addOnInitListener(() {
+        initialiseEmbeddedSubtitles();
+      });
+      isPlayerReady = true;
 
       setState(() {});
       startHideTimer();
@@ -627,33 +628,37 @@ class PlayerPageState extends State<PlayerPage>
   Future<VlcPlayerController> preparePlayerController(
       PlayerLaunchParams params) async {
     int startTime = widget.params.mediaHistoryItem.currentProgress;
-
     List<String> advancedParams = ["--start-time=$startTime"];
     List<String> audioParams = ["--audio-track=0", "--sub-track=99999"];
     if (params.audioPath != null) {
       audioParams.add("--input-slave=${params.audioPath}");
+      audioPath = params.audioPath!;
     }
-
-    VlcAdvancedOptions advanced = VlcAdvancedOptions(advancedParams);
-    VlcAudioOptions audio = VlcAudioOptions(audioParams);
-
-    VlcPlayerOptions options = VlcPlayerOptions(
-      advanced: advanced,
-      audio: audio,
-    );
 
     switch (params.getMode()) {
       case MediaLaunchMode.file:
         return VlcPlayerController.file(
           params.videoFile!,
-          options: options,
+          options: VlcPlayerOptions(
+            advanced: VlcAdvancedOptions(advancedParams),
+            audio: VlcAudioOptions(audioParams),
+          ),
         );
       case MediaLaunchMode.network:
         String streamUrl = await params.mediaSource.getNetworkStreamUrl(params);
+        String? audioUrl = await params.mediaSource.getAudioStreamUrl(params);
+
+        if (audioUrl != null) {
+          audioParams.add("--input-slave=$audioUrl");
+          audioPath = audioUrl;
+        }
 
         return VlcPlayerController.network(
           streamUrl,
-          options: options,
+          options: VlcPlayerOptions(
+            advanced: VlcAdvancedOptions(advancedParams),
+            audio: VlcAudioOptions(audioParams),
+          ),
         );
     }
   }
@@ -1437,24 +1442,27 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   Widget buildAudioSubtitlesButton() {
-    List<BottomSheetDialogOption> options = [
-      BottomSheetDialogOption(
-        label: appModel.translate("player_option_select_audio"),
-        icon: Icons.music_note_outlined,
-        action: () async {
-          Map<int, String> audioEmbeddedTracks =
-              await playerController.getAudioTracks();
-          int audioTrack = await playerController.getAudioTrack() ?? 0;
-          await showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            useRootNavigator: true,
-            builder: (context) => BottomSheetDialog(
-              options: getAudioDialogOptions(audioEmbeddedTracks, audioTrack),
-            ),
-          );
-        },
-      ),
+    BottomSheetDialogOption audioOption = BottomSheetDialogOption(
+      label: appModel.translate("player_option_select_audio"),
+      icon: Icons.music_note_outlined,
+      action: () async {
+        Map<int, String> audioEmbeddedTracks =
+            await playerController.getAudioTracks();
+        int audioTrack = await playerController.getAudioTrack() ?? 0;
+        await showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          useRootNavigator: true,
+          builder: (context) => BottomSheetDialog(
+            options: getAudioDialogOptions(audioEmbeddedTracks, audioTrack),
+          ),
+        );
+      },
+    );
+    List<BottomSheetDialogOption> options = [];
+    options.add(audioOption);
+
+    options.addAll([
       BottomSheetDialogOption(
         label: appModel.translate("player_option_select_subtitle"),
         icon: Icons.subtitles_outlined,
@@ -1554,12 +1562,17 @@ class PlayerPageState extends State<PlayerPage>
           await dialogSmartResume();
         },
       ),
-    ];
+    ]);
 
     return IconButton(
       color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
       icon: const Icon(Icons.queue_music_outlined),
       onPressed: () async {
+        if (await playerController.getAudioTracksCount() == 0 ||
+            audioPath != null) {
+          options.remove(audioOption);
+        }
+
         await showModalBottomSheet(
           context: context,
           isScrollControlled: true,
@@ -1971,7 +1984,7 @@ class PlayerPageState extends State<PlayerPage>
     timeStart = getTimestampFromDuration(adjustedStart);
     timeEnd = getTimestampFromDuration(adjustedEnd);
 
-    String inputPath = playerController.dataSource;
+    String inputPath = audioPath ?? playerController.dataSource;
     String command =
         "-loglevel verbose -ss $timeStart -to $timeEnd -y -i \"$inputPath\" -map 0:a:$audioIndex \"$outputPath\"";
 

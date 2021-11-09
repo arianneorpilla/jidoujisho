@@ -44,6 +44,9 @@ class AppLocalizations {
       'dictionary_nomatch_after': 'could be found.',
       'creator_options_menu': 'Creator menu addons',
       'creator_options_auto': 'Creator auto addons',
+      'closed_captions_query': 'Querying for closed captions',
+      'closed_captions_available': 'Closed captioning available',
+      'closed_captions_unavailable': 'No closed captioning',
       'widget_options': 'Dictionary widget addons',
       'creator_options_confirm': 'Are you sure you want to leave changes '
           'unsaved?',
@@ -177,6 +180,9 @@ class AppLocalizations {
       'dictionary_nomatch_after': '',
       'creator_options_menu': 'Mga menu mopagawaand ng Pagawaan',
       'creator_options_auto': 'Mga auto mod ng Pagawaan',
+      'closed_captions_query': 'Naghahanap ng closed captions',
+      'closed_captions_available': 'May closed captions',
+      'closed_captions_unavailable': 'Walang closed captions',
       'widget_options': 'Mga diksyunaryo widget',
       'creator_options_confirm':
           'Walang magbabagong kagamitan. Sigurado ka ba sa pagbalik?',
