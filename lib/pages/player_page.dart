@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:audioplayers/audioplayers.dart';
 import 'package:chisa/anki/anki_export_params.dart';
 import 'package:chisa/dictionary/dictionary_entry.dart';
 import 'package:chisa/dictionary/dictionary_search_result.dart';
@@ -21,10 +20,10 @@ import 'package:chisa/util/subtitle_utils.dart';
 import 'package:chisa/util/time_format.dart';
 import 'package:chisa/util/transcript_dialog.dart';
 import 'package:clipboard_listener/clipboard_listener.dart';
-import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
 import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:multi_value_listenable_builder/multi_value_listenable_builder.dart';
 import 'package:network_to_file_image/network_to_file_image.dart';
@@ -1324,11 +1323,9 @@ class PlayerPageState extends State<PlayerPage>
     Duration position = playerController.value.position;
     if (currentOrientation != MediaQuery.of(context).orientation) {
       currentOrientation = MediaQuery.of(context).orientation;
-      if (audioPath == null) {
-        Future.delayed(const Duration(milliseconds: 50), () {
-          playerController.seekTo(position - const Duration(milliseconds: 50));
-        });
-      }
+      Future.delayed(const Duration(milliseconds: 50), () {
+        playerController.seekTo(position - const Duration(milliseconds: 50));
+      });
     }
 
     return WillPopScope(
@@ -1839,8 +1836,9 @@ class PlayerPageState extends State<PlayerPage>
     String meaning = "";
     String reading = "";
 
+    int allowanceMs = subtitleOptionsNotifier.value.audioAllowance;
+
     if (subtitles.isEmpty) {
-      int allowanceMs = subtitleOptionsNotifier.value.audioAllowance;
       if (allowanceMs == 0) {
         allowanceMs = 5000;
       }
@@ -1884,16 +1882,12 @@ class PlayerPageState extends State<PlayerPage>
     File? audioFile;
 
     try {
-      List<dynamic> futures = await Future.wait([
-        exportImages(subtitles),
-        exportCurrentAudio(
-          subtitles,
-          subtitleOptionsNotifier.value.audioAllowance,
-          subtitleOptionsNotifier.value.subtitleDelay,
-        )
-      ]);
-      imageFiles = futures.elementAt(0);
-      audioFile = futures.elementAt(1);
+      imageFiles = await exportImages(subtitles);
+      audioFile = await exportCurrentAudio(
+        subtitles,
+        allowanceMs,
+        subtitleOptionsNotifier.value.subtitleDelay,
+      );
 
       if (imageFiles.isNotEmpty) {
         imageFile = imageFiles.first.file;
@@ -1945,12 +1939,17 @@ class PlayerPageState extends State<PlayerPage>
       String timestamp = getTimestampFromDuration(currentTime);
       String inputPath = playerController.dataSource;
 
-      String command =
-          "-loglevel verbose -ss $timestamp -y -i \"$inputPath\" -frames:v 1 -q:v 2 \"$outputPath\"";
+      String? altInputPath = await widget.params.mediaSource
+          .getExportVideoDataSource(widget.params);
+      if (altInputPath != null) {
+        inputPath = altInputPath;
+      }
 
-      await FFmpegKit.executeAsync(command, (session) async {
-        debugPrint(await session.getOutput());
-      });
+      String command =
+          "-loglevel quiet -ss $timestamp -y -i \"$inputPath\" -frames:v 1 -q:v 2 \"$outputPath\"";
+
+      final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
+      await _flutterFFmpeg.execute(command);
 
       while (!imageFile.existsSync()) {
         await Future.delayed(const Duration(milliseconds: 100));
@@ -1978,39 +1977,34 @@ class PlayerPageState extends State<PlayerPage>
 
     String timeStart = "";
     String timeEnd = "";
+
     String audioIndex = "${playerController.value.activeAudioTrack - 1}";
+    if (audioPath != null) {
+      audioIndex = "0";
+    }
 
     Duration allowance = Duration(milliseconds: audioAllowance);
     Duration delay = Duration(milliseconds: subtitleDelay);
     Duration adjustedStart = subtitles.first.start - delay - allowance;
+
     Duration adjustedEnd = subtitles.last.end - delay + allowance;
 
     timeStart = getTimestampFromDuration(adjustedStart);
     timeEnd = getTimestampFromDuration(adjustedEnd);
 
-    String inputPath = audioPath ?? playerController.dataSource;
-    String command =
-        "-loglevel verbose -ss $timeStart -to $timeEnd -y -i \"$inputPath\" -map 0:a:$audioIndex \"$outputPath\"";
+    String inputPath = playerController.dataSource;
 
-    await FFmpegKit.executeAsync(command, (session) async {
-      await session.getReturnCode();
-    });
-
-    bool filePlaySuccess = false;
-    Future.delayed(const Duration(seconds: 60), () {
-      filePlaySuccess = true;
-    });
-    while (!filePlaySuccess) {
-      try {
-        AudioPlayer audioPlayer = AudioPlayer();
-        await audioPlayer.play(audioFile.path, volume: 0);
-        filePlaySuccess = true;
-      } on PlatformException catch (_) {
-        await Future.delayed(const Duration(milliseconds: 100));
-      } catch (_) {
-        await Future.delayed(const Duration(milliseconds: 100));
-      }
+    String? altInputPath =
+        await widget.params.mediaSource.getExportAudioDataSource(widget.params);
+    if (altInputPath != null) {
+      inputPath = altInputPath;
     }
+
+    String command =
+        "-loglevel quiet -ss $timeStart -to $timeEnd -y -i \"$inputPath\" -map 0:a:$audioIndex \"$outputPath\"";
+
+    final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
+    await _flutterFFmpeg.execute(command);
 
     return audioFile;
   }
@@ -2026,6 +2020,7 @@ class PlayerPageState extends State<PlayerPage>
     ClipboardListener.removeListener(copyClipboardAction);
 
     clearDictionaryMessage();
+    dialogSmartPause();
     await navigateToCreator(
         context: context,
         appModel: appModel,

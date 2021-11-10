@@ -67,6 +67,7 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
       child: Material(
         color: Colors.transparent,
         child: ListView.builder(
+          physics: const BouncingScrollPhysics(),
           itemCount: searchSuggestions.length,
           shrinkWrap: true,
           itemExtent: 48,
@@ -84,10 +85,16 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
       onTap: () {
         searchBarController.query = historyItem;
       },
-      onLongPress: () {
-        appModel.removeFromSearchHistory(historyItem,
-            historyType: mediaSource.getIdentifier());
-        setState(() {});
+      onLongPress: () async {
+        if (searchBarController.query.isEmpty) {
+          await appModel.removeFromSearchHistory(historyItem,
+              historyType: mediaSource.getIdentifier());
+          searchSuggestions = appModel
+              .getSearchHistory(historyType: mediaSource.getIdentifier())
+              .reversed
+              .toList();
+          setState(() {});
+        }
       },
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 8, 24, 8),
@@ -156,16 +163,19 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
     if (!isSearching) {
       String before = query;
 
-      await Future.delayed(
-          Duration(milliseconds: mediaSource.getSearchDebounceDelay), () async {
+      await Future.delayed(const Duration(milliseconds: 500), () async {
         String after = searchBarController.query;
         if (before == after) {
           setState(() {
             isSearching = true;
           });
           try {
-            searchResultItems =
-                await mediaSource.getSearchMediaHistoryItems(query);
+            await Future.delayed(
+                Duration(milliseconds: mediaSource.getSearchDebounceDelay),
+                () async {
+              searchResultItems =
+                  await mediaSource.getSearchMediaHistoryItems(query);
+            });
           } catch (e) {
             debugPrint("Search went wrong");
             searchResultItems = [];

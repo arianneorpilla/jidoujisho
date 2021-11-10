@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
+import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:subtitle/subtitle.dart';
 import 'package:path/path.dart' as p;
@@ -52,7 +52,7 @@ Future<SubtitleItem> prepareSubtitleControllerFromFile({
       return SubtitleItem(
         controller: SubtitleController(
           provider: SubtitleProvider.fromString(
-            data: sanitizeSubtitleArtifacts(file.readAsStringSync()),
+            data: file.readAsStringSync(),
             type: SubtitleType.srt,
           ),
         ),
@@ -112,23 +112,13 @@ Future<List<SubtitleItem>> prepareSubtitleControllersFromVideo(
       outputFile.deleteSync();
     }
 
-    bool skipFlag = false;
-    String output = "";
+    final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
+    final FlutterFFmpegConfig _flutterFFmpegConfig = new FlutterFFmpegConfig();
 
-    await FFmpegKit.executeAsync(command, (session) async {
-      output = await session.getOutput() ?? "";
-
-      if (output.contains("Stream map '0:s:$i' matches no streams.")) {
-        skipFlag = true;
-      }
-      await session.getReturnCode();
-    });
-
-    while (!outputFile.existsSync()) {
-      await Future.delayed(const Duration(milliseconds: 500));
-      if (skipFlag) {
-        break;
-      }
+    await _flutterFFmpeg.execute(command);
+    String output = await _flutterFFmpegConfig.getLastCommandOutput();
+    if (output.contains("Stream map '0:s:$i' matches no streams.")) {
+      break;
     }
 
     await Future.delayed(const Duration(seconds: 1));
@@ -164,28 +154,10 @@ Future<String> convertAssSubtitles(String inputPath) async {
 
   String command = "-i \"$inputPath\" \"$outputPath\"";
 
-  await FFmpegKit.executeAsync(command, (session) async {
-    await session.getReturnCode();
-  });
+  final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
+  final FlutterFFmpegConfig _flutterFFmpegConfig = new FlutterFFmpegConfig();
 
-  return sanitizeSubtitleArtifacts(targetFile.readAsStringSync());
-}
+  await _flutterFFmpeg.execute(command);
 
-String sanitizeSubtitleArtifacts(String unsanitizedContent) {
-  RegExp exp = RegExp(r"<[^>]*>", multiLine: true, caseSensitive: true);
-
-  String sanitizedContent = unsanitizedContent.replaceAll(exp, '');
-  sanitizedContent =
-      sanitizedContent.replaceAll(RegExp(r'{(.*?)}', caseSensitive: false), '');
-
-  sanitizedContent = sanitizedContent.replaceAll("<br>", "\n");
-  sanitizedContent = sanitizedContent.replaceAll('&amp;', '&');
-  sanitizedContent = sanitizedContent.replaceAll('&apos;', '\'');
-  sanitizedContent = sanitizedContent.replaceAll('&#39;', '\'');
-  sanitizedContent = sanitizedContent.replaceAll('&quot;', '\"');
-  sanitizedContent = sanitizedContent.replaceAll('&amp;', '');
-  sanitizedContent = sanitizedContent.replaceAll('\\n', '\n');
-  sanitizedContent = sanitizedContent.replaceAll('​', '');
-
-  return sanitizedContent;
+  return targetFile.readAsStringSync();
 }

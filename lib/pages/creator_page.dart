@@ -63,7 +63,7 @@ class CreatorPageState extends State<CreatorPage> {
       ValueNotifier<List<NetworkToFileImage>>(const []);
   final ValueNotifier<File?> imageNotifier = ValueNotifier<File?>(null);
   final ValueNotifier<File?> audioNotifier = ValueNotifier<File?>(null);
-  final AudioPlayer audioPlayer = AudioPlayer();
+  AudioPlayer audioPlayer = AudioPlayer();
 
   final ValueNotifier<Duration> positionNotifier =
       ValueNotifier<Duration>(Duration.zero);
@@ -121,6 +121,7 @@ class CreatorPageState extends State<CreatorPage> {
   @override
   void dispose() {
     audioPlayer.stop();
+    audioPlayer.release();
     super.dispose();
   }
 
@@ -141,14 +142,7 @@ class CreatorPageState extends State<CreatorPage> {
       }
     }
 
-    setState(() {
-      setCurrentParams(exportParams);
-      if (audioNotifier.value != null) {
-        audioPlayer.setUrl(audioNotifier.value!.path).then((seconds) {
-          durationNotifier.value = Duration(seconds: seconds);
-        });
-      }
-    });
+    setCurrentParams(exportParams);
   }
 
   AnkiExportParams getCurrentParams() {
@@ -170,6 +164,14 @@ class CreatorPageState extends State<CreatorPage> {
       imageNotifier.value = exportParams.imageFile;
       audioNotifier.value = exportParams.audioFile;
     });
+
+    if (audioNotifier.value != null) {
+      audioPlayer.setUrl(audioNotifier.value!.path, isLocal: true).then((_) {
+        audioPlayer.getDuration().then((milliseconds) {
+          durationNotifier.value = Duration(milliseconds: milliseconds);
+        });
+      });
+    }
   }
 
   Widget getEmptyBox(

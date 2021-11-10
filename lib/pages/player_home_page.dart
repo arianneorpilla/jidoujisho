@@ -99,6 +99,7 @@ class PlayerHomePageState extends State<PlayerHomePage> {
           (appModel.getIsDarkMode()) ? Colors.grey[700] : Colors.grey[400],
       child: ListView.builder(
         controller: scrollController,
+        physics: BouncingScrollPhysics(),
         addAutomaticKeepAlives: true,
         key: UniqueKey(),
         itemCount: mediaHistoryItems.length + 1,

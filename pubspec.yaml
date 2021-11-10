@@ -68,7 +68,7 @@ dependencies:
   external_path: ^1.0.1
   subtitle: ^0.1.0-beta.2
   multi_value_listenable_builder: ^0.0.1
-  ffmpeg_kit_flutter_full_gpl: ^4.5.0-LTS
+  flutter_ffmpeg: ^0.4.2
   permission_handler:
   google_ml_kit:
   chaquopy:

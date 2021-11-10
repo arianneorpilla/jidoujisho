@@ -120,6 +120,7 @@ class DictionaryPageState extends State<DictionaryHomePage> {
           (appModel.getIsDarkMode()) ? Colors.grey[700] : Colors.grey[400],
       child: ListView.builder(
         controller: scrollController,
+        physics: const BouncingScrollPhysics(),
         addAutomaticKeepAlives: true,
         key: UniqueKey(),
         itemCount: results.length + 1,

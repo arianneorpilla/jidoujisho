@@ -115,6 +115,7 @@ class MediaSourcesDialogState extends State<MediaSourcesDialog> {
       thumbColor:
           (appModel.getIsDarkMode()) ? Colors.grey[700] : Colors.grey[400],
       child: ListView.builder(
+        physics: const BouncingScrollPhysics(),
         controller: scrollController,
         shrinkWrap: true,
         itemCount: mediaSources.length,

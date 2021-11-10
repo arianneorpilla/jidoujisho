@@ -13,9 +13,9 @@ import 'package:chisa/util/media_type_button.dart';
 import 'package:chisa/util/subtitle_utils.dart';
 import 'package:chisa/util/time_format.dart';
 import 'package:collection/src/iterable_extensions.dart';
-import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
 import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -156,11 +156,12 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
 
   Future<void> generateThumbnail(String inputPath, String targetPath) async {
     String timestamp = getTimestampFromDuration(const Duration(seconds: 5));
+    final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
 
     String command =
         "-ss $timestamp -y -i \"$inputPath\" -frames:v 1 -q:v 2 \"$targetPath\"";
 
-    await FFmpegKit.executeAsync(command, (session) async {});
+    await _flutterFFmpeg.execute(command);
   }
 
   @override

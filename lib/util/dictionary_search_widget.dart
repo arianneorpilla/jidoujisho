@@ -73,6 +73,7 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
       child: Material(
         color: Colors.transparent,
         child: ListView.builder(
+          physics: const BouncingScrollPhysics(),
           itemCount: searchHistory.length,
           shrinkWrap: true,
           itemExtent: 48,

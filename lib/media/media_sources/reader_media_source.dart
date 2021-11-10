@@ -21,9 +21,4 @@ abstract class ReaderMediaSource extends MediaSource {
   /// Push the navigator page to the media page pertaining to this media type.
   Future<void> launchMediaPage(
       BuildContext context, ReaderLaunchParams params) async {}
-
-  @override
-  Widget? getButton(BuildContext context, Function() refreshCallback) {
-    return null;
-  }
 }

@@ -42,7 +42,7 @@ class BottomSheetDialog extends StatelessWidget {
     return ListView.builder(
       controller: scrollController,
       shrinkWrap: true,
-      physics: const ScrollPhysics(),
+      physics: const BouncingScrollPhysics(),
       itemCount: options.length,
       itemBuilder: (context, i) {
         BottomSheetDialogOption option = options[i];

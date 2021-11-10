@@ -84,74 +84,98 @@ abstract class PlayerMediaSource extends MediaSource {
   }) {
     AppModel appModel = Provider.of<AppModel>(context);
 
-    return InkWell(
-      onTap: () async {
-        await launchMediaPage(context, getLaunchParams(appModel, item));
-        refreshCallback();
-      },
-      onLongPress: () async {
-        List<Widget> actions = [];
-        actions.addAll(getExtraHistoryActions(context, item, refreshCallback,
-            isHistory: isHistory));
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () async {
+          await launchMediaPage(context, getLaunchParams(appModel, item));
+          refreshCallback();
+        },
+        onLongPress: () async {
+          AppModel appModel = Provider.of<AppModel>(context, listen: false);
+          MediaHistory history = mediaType.getMediaHistory(appModel);
 
-        actions.add(
-          TextButton(
-            child: Text(
-              appModel.translate("dialog_play"),
-              style: const TextStyle(),
-            ),
-            onPressed: () async {
-              Navigator.pop(context);
-              launchMediaPage(context, getLaunchParams(appModel, item));
-              refreshCallback();
-            },
-          ),
-        );
+          List<Widget> actions = [];
 
-        HapticFeedback.vibrate();
-        ImageProvider<Object> image = await getHistoryThumbnail(item);
-        await showDialog(
-          barrierDismissible: true,
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text(
-              getHistoryCaption(item),
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
-            content: AspectRatio(
-              aspectRatio: 16 / 9,
-              child: FadeInImage(
-                image: image,
-                placeholder: MemoryImage(kTransparentImage),
+          if (isHistory) {
+            actions.add(TextButton(
+              child: Text(
+                appModel.translate("dialog_remove"),
+                style: TextStyle(
+                  color: Theme.of(context).focusColor,
+                ),
               ),
+              onPressed: () async {
+                await history.removeItem(item.key);
+
+                Navigator.pop(context);
+                refreshCallback();
+              },
+            ));
+          }
+
+          actions.addAll(getExtraHistoryActions(context, item, refreshCallback,
+              isHistory: isHistory));
+
+          actions.add(
+            TextButton(
+              child: Text(
+                appModel.translate("dialog_play"),
+                style: const TextStyle(),
+              ),
+              onPressed: () async {
+                Navigator.pop(context);
+                launchMediaPage(context, getLaunchParams(appModel, item));
+                refreshCallback();
+              },
             ),
-            actions: actions,
+          );
+
+          HapticFeedback.vibrate();
+          ImageProvider<Object> image = await getHistoryThumbnail(item);
+          await showDialog(
+            barrierDismissible: true,
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text(
+                getHistoryCaption(item),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+              content: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: FadeInImage(
+                  image: image,
+                  placeholder: MemoryImage(kTransparentImage),
+                ),
+              ),
+              actions: actions,
+            ),
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              Flexible(
+                flex: 3,
+                child: buildMediaHistoryThumbnail(
+                  context,
+                  item,
+                  isHistory: isHistory,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Flexible(
+                flex: 4,
+                child: buildMediaHistoryMetadata(
+                  context,
+                  item,
+                  isHistory: isHistory,
+                ),
+              ),
+            ],
           ),
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            Flexible(
-              flex: 3,
-              child: buildMediaHistoryThumbnail(
-                context,
-                item,
-                isHistory: isHistory,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Flexible(
-              flex: 4,
-              child: buildMediaHistoryMetadata(
-                context,
-                item,
-                isHistory: isHistory,
-              ),
-            ),
-          ],
         ),
       ),
     );
@@ -185,7 +209,7 @@ abstract class PlayerMediaSource extends MediaSource {
         ),
         const SizedBox(height: 2),
         (isHistory)
-            ? Row(children: [
+            ? Row(mainAxisAlignment: MainAxisAlignment.start, children: [
                 Icon(
                   icon,
                   color: Theme.of(context).unselectedWidgetColor,
@@ -285,25 +309,7 @@ abstract class PlayerMediaSource extends MediaSource {
   List<Widget> getExtraHistoryActions(
       BuildContext context, MediaHistoryItem item, Function()? refreshCallback,
       {bool isHistory = false}) {
-    AppModel appModel = Provider.of<AppModel>(context, listen: false);
-    MediaHistory history = mediaType.getMediaHistory(appModel);
-
-    return [
-      TextButton(
-        child: Text(
-          appModel.translate("dialog_remove"),
-          style: TextStyle(
-            color: Theme.of(context).focusColor,
-          ),
-        ),
-        onPressed: () async {
-          await history.removeItem(item.key);
-
-          Navigator.pop(context);
-          refreshCallback!();
-        },
-      )
-    ];
+    return [];
   }
 
   @override
@@ -321,6 +327,7 @@ abstract class PlayerMediaSource extends MediaSource {
     );
 
     return ListView.builder(
+      physics: const BouncingScrollPhysics(),
       controller: scrollController,
       addAutomaticKeepAlives: true,
       key: UniqueKey(),
@@ -339,6 +346,18 @@ abstract class PlayerMediaSource extends MediaSource {
   FutureOr<String> getNetworkStreamUrl(PlayerLaunchParams params);
 
   FutureOr<String?> getAudioStreamUrl(PlayerLaunchParams params) {
+    return null;
+  }
+
+  /// Particular to YouTube export... For some reason it needs a specific
+  /// quality to export to FFMPEG...
+  FutureOr<String>? getExportVideoDataSource(PlayerLaunchParams params) {
+    return null;
+  }
+
+  /// Particular to YouTube export... For some reason it needs a specific
+  /// quality to export to FFMPEG...
+  FutureOr<String>? getExportAudioDataSource(PlayerLaunchParams params) {
     return null;
   }
 }
