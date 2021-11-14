@@ -23,15 +23,18 @@ Widget transcriptDialog({
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
+          Icon(
             Icons.subtitles_off_outlined,
-            color: Colors.white,
+            color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
             size: 72,
           ),
           const SizedBox(height: 6),
           Text(
             appModel.translate("player_subtitles_transcript_empty"),
-            style: const TextStyle(fontSize: 20, color: Colors.white),
+            style: TextStyle(
+              fontSize: 20,
+              color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
+            ),
           ),
         ],
       ),
@@ -55,7 +58,7 @@ Widget transcriptDialog({
       Subtitle subtitle = subtitles[index];
       String subtitleText = subtitle.data;
 
-      if (regexFilter.isNotEmpty && appModel.getUseRegexFilter()) {
+      if (regexFilter.isNotEmpty) {
         subtitleText = subtitleText.replaceAll(RegExp(regexFilter), "");
       }
       if (subtitleText.trim().isNotEmpty) {

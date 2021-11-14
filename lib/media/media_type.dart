@@ -49,13 +49,19 @@ extension MediaTypeParameters on MediaType {
   MediaHomePage getHomeBody() {
     switch (this) {
       case MediaType.player:
-        return PlayerHomePage(mediaType: this);
+        return PlayerHomePage(
+          mediaType: this,
+        );
       case MediaType.reader:
-        return ReaderHomePage(mediaType: this);
+        return ReaderHomePage(
+          mediaType: this,
+        );
       case MediaType.viewer:
         throw UnimplementedError();
       case MediaType.dictionary:
-        return DictionaryHomePage(mediaType: this);
+        return DictionaryHomePage(
+          mediaType: this,
+        );
     }
   }
 

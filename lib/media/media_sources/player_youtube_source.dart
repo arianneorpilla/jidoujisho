@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:chaquopy/chaquopy.dart';
 import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_sources/player_media_source.dart';
 import 'package:chisa/media/media_type.dart';
@@ -11,8 +10,6 @@ import 'package:chisa/pages/player_page.dart';
 import 'package:chisa/util/bottom_sheet_dialog.dart';
 import 'package:chisa/util/media_source_action_button.dart';
 import 'package:chisa/util/subtitle_utils.dart';
-import 'package:chisa/util/youtube_subtitles.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:progress_indicators/progress_indicators.dart';
@@ -20,7 +17,6 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:subtitle/subtitle.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
-import 'package:http/http.dart' as http;
 
 enum YouTubeVideoQuality {
   sd_144,
@@ -44,8 +40,10 @@ class PlayerYouTubeSource extends PlayerMediaSource {
 
   Map<String, Video> videoStore = {};
   Map<String, StreamManifest> manifestStore = {};
-  Map<String, SearchList> searchListStore = {};
+  Map<String, Map<int, SearchList>> searchListStore = {};
   SharedPreferences? sharedPreferences;
+
+  List<String> captionsWorking = [];
 
   @override
   PlayerLaunchParams getLaunchParams(AppModel appModel, MediaHistoryItem item) {
@@ -116,7 +114,8 @@ class PlayerYouTubeSource extends PlayerMediaSource {
       BottomSheetDialogOption option = BottomSheetDialogOption(
           label: labelFromQuality(quality)!,
           icon: iconFromQuality(quality)!,
-          active: quality == preferredQuality,
+          active: getVideoFromManifest(manifest, quality) ==
+              page.playerController.dataSource,
           action: () async {
             await setPreferredQuality(quality);
 
@@ -176,7 +175,7 @@ class PlayerYouTubeSource extends PlayerMediaSource {
     String url = params.mediaHistoryItem.key;
     StreamManifest manifest = await getManifestFromUrl(url);
 
-    AudioStreamInfo streamAudioInfo = manifest.audio
+    AudioStreamInfo streamAudioInfo = manifest.audioOnly
         .sortByBitrate()
         .lastWhere((info) => info.audioCodec.contains("mp4a"));
     return streamAudioInfo.url.toString();
@@ -218,23 +217,33 @@ class PlayerYouTubeSource extends PlayerMediaSource {
   }
 
   @override
-  FutureOr<List<MediaHistoryItem>>? getSearchMediaHistoryItems(
-      String searchTerm) async {
-    SearchList? searchResults;
-    SearchList? searchListCached = searchListStore[searchTerm];
+  FutureOr<List<MediaHistoryItem>?> getSearchMediaHistoryItems(
+      String searchTerm, int pageKey) async {
+    SearchList? searchList;
 
-    if (searchListCached != null) {
-      searchResults = searchListCached;
+    searchListStore[searchTerm] ??= {};
+
+    if (pageKey == 1) {
+      if (searchListStore[searchTerm]![1] == null) {
+        searchList = await yt.search.getVideos(searchTerm);
+      } else {
+        searchList = searchListStore[searchTerm]![1];
+      }
     } else {
-      searchResults = await yt.search.getVideos(searchTerm);
+      SearchList lastList = searchListStore[searchTerm]![pageKey - 1]!;
+      searchList = await lastList.nextPage();
     }
 
-    searchListStore[searchTerm] = searchResults;
+    if (searchList == null) {
+      return null;
+    } else {
+      searchListStore[searchTerm]![pageKey] = searchList;
+    }
 
     List<MediaHistoryItem> items = [];
     List<Video> videos = [];
 
-    for (Video video in searchResults) {
+    for (Video video in searchList) {
       if (video.duration == null || video.duration == Duration.zero) {
         continue;
       }
@@ -311,7 +320,17 @@ class PlayerYouTubeSource extends PlayerMediaSource {
   }
 
   @override
-  Widget getHistoryExtraMetadata(BuildContext context, MediaHistoryItem item) {
+  Widget? getHistoryExtraMetadata({
+    required BuildContext context,
+    required MediaHistoryItem item,
+    required Function() homeRefreshCallback,
+    required Function() searchRefreshCallback,
+    bool isHistory = false,
+  }) {
+    if (isHistory) {
+      return null;
+    }
+
     AppModel appModel = Provider.of<AppModel>(context, listen: false);
     String videoId = VideoId.fromString(item.key).toString();
     List<String>? captions =
@@ -700,6 +719,16 @@ class PlayerYouTubeSource extends PlayerMediaSource {
 
   Future<List<String>> getCaptionsLanguageCodes(
       String url, SharedPreferences sharedPreferences) async {
+    // Random random = Random();
+    // await Future.delayed(
+    //     Duration(
+    //         milliseconds:
+    //             (200 * random.nextInt(10) + (500 * random.nextInt(4)))),
+    //     () {});
+    while (captionsWorking.isNotEmpty) {
+      await Future.delayed(const Duration(milliseconds: 100), () {});
+    }
+
     String videoId = VideoId.fromString(url).toString();
 
     List<String>? captions =
@@ -708,23 +737,31 @@ class PlayerYouTubeSource extends PlayerMediaSource {
       return captions;
     }
 
-    ClosedCaptionManifest manifest = await yt.videos.closedCaptions.getManifest(
-      videoId,
-      formats: [ClosedCaptionFormat.ttml],
-    );
+    try {
+      captionsWorking.add(url);
+      ClosedCaptionManifest manifest =
+          await yt.videos.closedCaptions.getManifest(
+        videoId,
+        formats: [ClosedCaptionFormat.vtt],
+      );
+      List<String> languageCodes = [];
 
-    List<String> languageCodes = [];
+      for (ClosedCaptionTrackInfo trackInfo in manifest.tracks) {
+        if (trackInfo.isAutoGenerated) {
+          continue;
+        }
+        String languageCode = trackInfo.language.code;
+        languageCodes.add(languageCode);
+      }
 
-    for (ClosedCaptionTrackInfo trackInfo in manifest.tracks) {
-      String languageCode = trackInfo.language.code;
-      languageCodes.add(languageCode);
+      languageCodes = languageCodes.toSet().toList();
+
+      sharedPreferences.setStringList(
+          getCaptionsPrefsKey(videoId), languageCodes);
+      return languageCodes;
+    } finally {
+      captionsWorking.remove(url);
     }
-
-    languageCodes = languageCodes.toSet().toList();
-
-    sharedPreferences.setStringList(
-        getCaptionsPrefsKey(videoId), languageCodes);
-    return languageCodes;
   }
 
   Future<YouTubeVideoQuality> getPreferredQuality() async {
@@ -770,9 +807,11 @@ class PlayerYouTubeSource extends PlayerMediaSource {
 
   @override
   FutureOr<String>? getExportAudioDataSource(PlayerLaunchParams params) async {
-    String url = params.mediaHistoryItem.key;
-    StreamManifest manifest = await getManifestFromUrl(url);
-    AudioStreamInfo streamAudioInfo = manifest.audioOnly.last;
-    return streamAudioInfo.url.toString();
+    return getExportVideoDataSource(params);
+
+    // String url = params.mediaHistoryItem.key;
+    // StreamManifest manifest = await getManifestFromUrl(url);
+    // AudioStreamInfo streamAudioInfo = manifest.audioOnly.last;
+    // return streamAudioInfo.url.toString();
   }
 }

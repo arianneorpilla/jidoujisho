@@ -187,7 +187,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
 
     return IconButton(
       color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
-      icon: Icon(icon),
+      icon: const Icon(Icons.perm_media),
       onPressed: () async {
         page.dialogSmartPause();
         await showFilePicker(
@@ -226,9 +226,13 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
   }
 
   @override
-  List<Widget> getExtraHistoryActions(
-      BuildContext context, MediaHistoryItem item, Function()? refreshCallback,
-      {bool isHistory = false}) {
+  List<Widget> getExtraHistoryActions({
+    required BuildContext context,
+    required MediaHistoryItem item,
+    required Function() homeRefreshCallback,
+    required Function() searchRefreshCallback,
+    bool isHistory = false,
+  }) {
     return [];
   }
 
@@ -242,7 +246,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
 
   @override
   FutureOr<List<MediaHistoryItem>>? getSearchMediaHistoryItems(
-      String searchTerm) {
+      String searchTerm, int pageKey) {
     throw UnsupportedError("Local media does not support search");
   }
 }

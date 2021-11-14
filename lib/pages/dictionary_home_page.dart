@@ -33,8 +33,12 @@ class DictionaryHomePage extends MediaHomePage {
   State<StatefulWidget> createState() => DictionaryPageState();
 }
 
-class DictionaryPageState extends State<DictionaryHomePage> {
+class DictionaryPageState extends State<DictionaryHomePage>
+    with AutomaticKeepAliveClientMixin {
   late AppModel appModel;
+
+  @override
+  bool get wantKeepAlive => true;
 
   TextEditingController wordController = TextEditingController(text: "");
 
@@ -42,6 +46,7 @@ class DictionaryPageState extends State<DictionaryHomePage> {
   DictionarySearchWidget? dictionaryVerticalWidget;
   FloatingSearchBarController searchBarController =
       FloatingSearchBarController();
+  ScrollController? scrollController;
 
   bool isSearching = false;
   bool isFocus = false;
@@ -55,15 +60,18 @@ class DictionaryPageState extends State<DictionaryHomePage> {
     setState(() {});
   }
 
-  @override
-  Widget build(BuildContext context) {
-    appModel = Provider.of<AppModel>(context);
-
-    dictionaryVerticalWidget ??= DictionarySearchWidget(
+  Widget buildDictionarySearchWidget() {
+    return DictionarySearchWidget(
       appModel: appModel,
       searchBarController: searchBarController,
       focusCallback: focusCallback,
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    appModel = Provider.of<AppModel>(context);
 
     if (!appModel.hasInitialized) {
       return Container();
@@ -73,7 +81,7 @@ class DictionaryPageState extends State<DictionaryHomePage> {
       return Stack(
         children: [
           buildEmptyBody(),
-          dictionaryVerticalWidget!,
+          buildDictionarySearchWidget(),
         ],
       );
     }
@@ -81,7 +89,7 @@ class DictionaryPageState extends State<DictionaryHomePage> {
     return Stack(
       children: [
         buildBody(),
-        dictionaryVerticalWidget!,
+        buildDictionarySearchWidget(),
       ],
     );
 
@@ -103,16 +111,9 @@ class DictionaryPageState extends State<DictionaryHomePage> {
         .map((item) => DictionarySearchResult.fromJson(item.key))
         .toList();
 
-    ScrollController scrollController =
-        ScrollController(initialScrollOffset: appModel.scrollOffset);
-    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-      scrollController.addListener(() {
-        appModel.setScrollOffset = scrollController.offset;
-      });
-      scrollController.position.isScrollingNotifier.addListener(() {
-        appModel.setScrollOffset = scrollController.offset;
-      });
-    });
+    scrollController ??= appModel.getScrollController(
+      widget.mediaType,
+    );
 
     return RawScrollbar(
       controller: scrollController,
@@ -122,7 +123,6 @@ class DictionaryPageState extends State<DictionaryHomePage> {
         controller: scrollController,
         physics: const BouncingScrollPhysics(),
         addAutomaticKeepAlives: true,
-        key: UniqueKey(),
         itemCount: results.length + 1,
         itemBuilder: (BuildContext context, int index) {
           if (index == 0) {

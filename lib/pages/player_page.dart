@@ -183,8 +183,18 @@ class PlayerPageState extends State<PlayerPage>
 
   @override
   void dispose() async {
+    Wakelock.disable();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+
     playerController.removeListener(listener);
+    playerController.dispose();
     ClipboardListener.removeListener(copyClipboardAction);
+
     super.dispose();
   }
 
@@ -197,6 +207,10 @@ class PlayerPageState extends State<PlayerPage>
   @override
   void initState() {
     super.initState();
+
+    Wakelock.enable();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
     ClipboardListener.addListener(copyClipboardAction);
 
     emptySubtitleItem = SubtitleItem(
@@ -243,10 +257,8 @@ class PlayerPageState extends State<PlayerPage>
       playerController.addOnInitListener(() {
         initialiseEmbeddedSubtitles();
       });
-      isPlayerReady = true;
 
-      await Wakelock.enable();
-      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+      isPlayerReady = true;
 
       setState(() {});
       startHideTimer();
@@ -813,7 +825,7 @@ class PlayerPageState extends State<PlayerPage>
 
         String subtitleText = currentSubtitle.data;
         String regex = subtitleOptionsNotifier.value.regexFilter;
-        if (regex.isNotEmpty && appModel.getUseRegexFilter()) {
+        if (regex.isNotEmpty) {
           subtitleText = subtitleText.replaceAll(RegExp(regex), "");
         }
 
@@ -1051,17 +1063,6 @@ class PlayerPageState extends State<PlayerPage>
       playPauseIconAnimationController.reverse();
       startHideTimer();
 
-      if (MediaQuery.of(context).orientation == Orientation.landscape) {
-        await SystemChrome.setPreferredOrientations([
-          DeviceOrientation.landscapeLeft,
-          DeviceOrientation.landscapeRight
-        ]);
-      } else {
-        await SystemChrome.setPreferredOrientations([
-          DeviceOrientation.portraitUp,
-        ]);
-      }
-
       await playerController.pause();
     } else {
       cancelHideTimer();
@@ -1069,12 +1070,6 @@ class PlayerPageState extends State<PlayerPage>
       if (!playerController.value.isInitialized) {
         playerController.initialize().then((_) async {
           await playerController.play();
-
-          await SystemChrome.setPreferredOrientations([
-            DeviceOrientation.landscapeLeft,
-            DeviceOrientation.landscapeRight,
-            DeviceOrientation.portraitUp,
-          ]);
           playPauseIconAnimationController.forward();
         });
       } else {
@@ -1083,12 +1078,6 @@ class PlayerPageState extends State<PlayerPage>
         }
         playPauseIconAnimationController.forward();
         await playerController.play();
-
-        await SystemChrome.setPreferredOrientations([
-          DeviceOrientation.landscapeLeft,
-          DeviceOrientation.landscapeRight,
-          DeviceOrientation.portraitUp,
-        ]);
 
         if (isFinished) {
           Future.delayed(const Duration(seconds: 3), () async {
@@ -1311,13 +1300,26 @@ class PlayerPageState extends State<PlayerPage>
 
   @override
   Widget build(BuildContext context) {
-    appModel = Provider.of<AppModel>(context);
     super.build(context);
 
+    appModel = Provider.of<AppModel>(context);
     currentOrientation ??= MediaQuery.of(context).orientation;
 
     if (!isPlayerReady) {
       return buildPlaceholder();
+    }
+
+    Wakelock.enable();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    if (appModel.isPlayerOrientationPortrait()) {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+      ]);
+    } else {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
     }
 
     Duration position = playerController.value.position;
@@ -1482,31 +1484,6 @@ class PlayerPageState extends State<PlayerPage>
         },
       ),
       BottomSheetDialogOption(
-        label: appModel.translate("player_option_text_filter"),
-        active: appModel.getUseRegexFilter(),
-        icon: appModel.getUseRegexFilter()
-            ? Icons.do_disturb_on_outlined
-            : Icons.do_disturb_off_outlined,
-        action: () async {
-          await appModel.toggleUseRegexFilter();
-          refreshSubtitleWidget();
-        },
-      ),
-      BottomSheetDialogOption(
-        label: appModel.translate("player_option_blur_preferences"),
-        icon: Icons.blur_circular_sharp,
-        action: () async {
-          await showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            useRootNavigator: true,
-            builder: (context) => BottomSheetDialog(
-              options: getBlurOptions(),
-            ),
-          );
-        },
-      ),
-      BottomSheetDialogOption(
         label: appModel.translate("player_align_subtitle_transcript"),
         icon: Icons.timer,
         action: () async {
@@ -1552,6 +1529,39 @@ class PlayerPageState extends State<PlayerPage>
           await showSubtitleOptionsDialog(context, subtitleOptionsNotifier);
           ClipboardListener.addListener(copyClipboardAction);
           await dialogSmartResume();
+        },
+      ),
+      BottomSheetDialogOption(
+        label: appModel.translate("player_option_blur_preferences"),
+        icon: Icons.blur_circular_sharp,
+        action: () async {
+          await showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            useRootNavigator: true,
+            builder: (context) => BottomSheetDialog(
+              options: getBlurOptions(),
+            ),
+          );
+        },
+      ),
+      BottomSheetDialogOption(
+        label: appModel.translate("player_change_player_orientation"),
+        icon: appModel.isPlayerOrientationPortrait()
+            ? Icons.stay_current_landscape
+            : Icons.stay_current_portrait,
+        action: () async {
+          await appModel.togglePlayerOrientationPortrait();
+          if (appModel.isPlayerOrientationPortrait()) {
+            await SystemChrome.setPreferredOrientations([
+              DeviceOrientation.portraitUp,
+            ]);
+          } else {
+            await SystemChrome.setPreferredOrientations([
+              DeviceOrientation.landscapeLeft,
+              DeviceOrientation.landscapeRight,
+            ]);
+          }
         },
       ),
       BottomSheetDialogOption(
@@ -1858,7 +1868,7 @@ class PlayerPageState extends State<PlayerPage>
     for (Subtitle subtitle in subtitles) {
       String subtitleText = subtitle.data;
       String regex = subtitleOptionsNotifier.value.regexFilter;
-      if (regex.isNotEmpty && appModel.getUseRegexFilter()) {
+      if (regex.isNotEmpty) {
         subtitleText = subtitleText.replaceAll(RegExp(regex), "");
       }
       sentence += "$subtitleText\n";
@@ -2096,18 +2106,6 @@ class PlayerPageState extends State<PlayerPage>
   Future<void> dialogSmartPause() async {
     if (playerController.value.isPlaying) {
       dialogSmartPaused = true;
-
-      if (MediaQuery.of(context).orientation == Orientation.landscape) {
-        await SystemChrome.setPreferredOrientations([
-          DeviceOrientation.landscapeLeft,
-          DeviceOrientation.landscapeRight
-        ]);
-      } else {
-        await SystemChrome.setPreferredOrientations([
-          DeviceOrientation.portraitUp,
-        ]);
-      }
-
       await playerController.pause();
     }
   }
@@ -2123,11 +2121,6 @@ class PlayerPageState extends State<PlayerPage>
 
     if (dialogSmartPaused) {
       await playerController.play();
-      await SystemChrome.setPreferredOrientations([
-        DeviceOrientation.landscapeLeft,
-        DeviceOrientation.landscapeRight,
-        DeviceOrientation.portraitUp,
-      ]);
     }
     dialogSmartPaused = false;
   }

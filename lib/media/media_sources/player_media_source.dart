@@ -4,7 +4,6 @@ import 'package:chisa/media/media_histories/media_history.dart';
 import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_type.dart';
 import 'package:chisa/models/app_model.dart';
-import 'package:chisa/util/media_source_action_button.dart';
 
 import 'package:chisa/util/subtitle_utils.dart';
 import 'package:chisa/util/time_format.dart';
@@ -14,6 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:chisa/media/media_source.dart';
 import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/pages/player_page.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:wakelock/wakelock.dart';
@@ -41,9 +41,6 @@ abstract class PlayerMediaSource extends MediaSource {
     AppModel appModel = Provider.of<AppModel>(context, listen: false);
     appModel.isInSource = true;
 
-    await Wakelock.enable();
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-
     if (pushReplacement) {
       await Navigator.of(context).pushReplacement(
         MaterialPageRoute<void>(
@@ -58,28 +55,16 @@ abstract class PlayerMediaSource extends MediaSource {
       );
     }
 
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    await Wakelock.disable();
-    await SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
-
     appModel.isInSource = false;
   }
-
-  FutureOr<List<SubtitleItem>> provideSubtitles(PlayerLaunchParams params);
-
-  /// A button that shows on the player menu particular to the media source.
-  Widget? buildSourceButton(BuildContext context, PlayerPageState page);
 
   @override
   Widget buildMediaHistoryItem({
     required BuildContext context,
     required MediaHistory history,
     required MediaHistoryItem item,
-    required Function() refreshCallback,
+    required Function() homeRefreshCallback,
+    required Function() searchRefreshCallback,
     bool isHistory = false,
   }) {
     AppModel appModel = Provider.of<AppModel>(context);
@@ -89,7 +74,8 @@ abstract class PlayerMediaSource extends MediaSource {
       child: InkWell(
         onTap: () async {
           await launchMediaPage(context, getLaunchParams(appModel, item));
-          refreshCallback();
+          homeRefreshCallback();
+          searchRefreshCallback();
         },
         onLongPress: () async {
           AppModel appModel = Provider.of<AppModel>(context, listen: false);
@@ -109,13 +95,19 @@ abstract class PlayerMediaSource extends MediaSource {
                 await history.removeItem(item.key);
 
                 Navigator.pop(context);
-                refreshCallback();
+                homeRefreshCallback();
+                searchRefreshCallback();
               },
             ));
           }
 
-          actions.addAll(getExtraHistoryActions(context, item, refreshCallback,
-              isHistory: isHistory));
+          actions.addAll(getExtraHistoryActions(
+            context: context,
+            item: item,
+            homeRefreshCallback: homeRefreshCallback,
+            searchRefreshCallback: searchRefreshCallback,
+            isHistory: isHistory,
+          ));
 
           actions.add(
             TextButton(
@@ -126,7 +118,8 @@ abstract class PlayerMediaSource extends MediaSource {
               onPressed: () async {
                 Navigator.pop(context);
                 launchMediaPage(context, getLaunchParams(appModel, item));
-                refreshCallback();
+                homeRefreshCallback();
+                searchRefreshCallback();
               },
             ),
           );
@@ -157,20 +150,23 @@ abstract class PlayerMediaSource extends MediaSource {
           padding: const EdgeInsets.all(12),
           child: Row(
             children: [
-              Flexible(
-                flex: 3,
+              SizedBox(
+                width: 180,
                 child: buildMediaHistoryThumbnail(
-                  context,
-                  item,
+                  context: context,
+                  item: item,
+                  homeRefreshCallback: homeRefreshCallback,
+                  searchRefreshCallback: searchRefreshCallback,
                   isHistory: isHistory,
                 ),
               ),
               const SizedBox(width: 8),
-              Flexible(
-                flex: 4,
+              Expanded(
                 child: buildMediaHistoryMetadata(
-                  context,
-                  item,
+                  context: context,
+                  item: item,
+                  homeRefreshCallback: homeRefreshCallback,
+                  searchRefreshCallback: searchRefreshCallback,
                   isHistory: isHistory,
                 ),
               ),
@@ -182,11 +178,21 @@ abstract class PlayerMediaSource extends MediaSource {
   }
 
   @override
-  Widget buildMediaHistoryMetadata(
-    BuildContext context,
-    MediaHistoryItem item, {
+  Widget buildMediaHistoryMetadata({
+    required BuildContext context,
+    required MediaHistoryItem item,
+    required Function() homeRefreshCallback,
+    required Function() searchRefreshCallback,
     bool isHistory = false,
   }) {
+    Widget? extraMetadata = getHistoryExtraMetadata(
+      context: context,
+      item: item,
+      homeRefreshCallback: homeRefreshCallback,
+      searchRefreshCallback: searchRefreshCallback,
+      isHistory: isHistory,
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -208,107 +214,114 @@ abstract class PlayerMediaSource extends MediaSource {
           softWrap: true,
         ),
         const SizedBox(height: 2),
-        (isHistory)
-            ? Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-                Icon(
-                  icon,
-                  color: Theme.of(context).unselectedWidgetColor,
-                  size: 12,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  item.sourceName,
-                  style: TextStyle(
-                    color: Theme.of(context).unselectedWidgetColor,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 12,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  softWrap: true,
-                ),
-              ])
-            : getHistoryExtraMetadata(context, item),
+        if (isHistory)
+          Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+            Icon(
+              icon,
+              color: Theme.of(context).unselectedWidgetColor,
+              size: 12,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              item.sourceName,
+              style: TextStyle(
+                color: Theme.of(context).unselectedWidgetColor,
+                fontWeight: FontWeight.w500,
+                fontSize: 12,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              softWrap: true,
+            ),
+          ]),
+        if (extraMetadata != null) extraMetadata
       ],
     );
   }
 
-  @override
-  Widget getHistoryExtraMetadata(BuildContext context, MediaHistoryItem item) {
-    return const SizedBox.shrink();
-  }
+  /// A button that shows on the player menu particular to the media source.
+  Widget? buildSourceButton(BuildContext context, PlayerPageState page);
+
+  FutureOr<List<SubtitleItem>> provideSubtitles(PlayerLaunchParams params);
 
   @override
-  Widget buildMediaHistoryThumbnail(
-    BuildContext context,
-    MediaHistoryItem item, {
+  Widget buildMediaHistoryThumbnail({
+    required BuildContext context,
+    required MediaHistoryItem item,
+    required Function() homeRefreshCallback,
+    required Function()? searchRefreshCallback,
     bool isHistory = false,
   }) {
-    return AspectRatio(
-      aspectRatio: 16 / 9,
-      child: Container(
-        color: Colors.black,
-        child: Stack(
-          alignment: Alignment.bottomCenter,
-          children: [
-            FutureBuilder<ImageProvider<Object>>(
-                future: getHistoryThumbnail(item),
-                builder: (BuildContext context,
-                    AsyncSnapshot<ImageProvider> snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting ||
-                      !snapshot.hasData) {
-                    return Image(image: MemoryImage(kTransparentImage));
-                  }
+    return Stack(
+      alignment: Alignment.bottomCenter,
+      children: [
+        Container(
+          color: Colors.black,
+          child: AspectRatio(
+            aspectRatio: 16 / 9,
+            child: FutureBuilder<ImageProvider<Object>>(
+              future: getHistoryThumbnail(item),
+              builder: (BuildContext context,
+                  AsyncSnapshot<ImageProvider> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting ||
+                    !snapshot.hasData) {
+                  return Image(image: MemoryImage(kTransparentImage));
+                }
 
-                  ImageProvider<Object> thumbnail = snapshot.data!;
+                ImageProvider<Object> thumbnail = snapshot.data!;
 
-                  return FadeInImage(
-                    placeholder: MemoryImage(kTransparentImage),
-                    image: thumbnail,
-                    fit: BoxFit.contain,
-                  );
-                }),
-            Positioned(
-              right: 4.0,
-              bottom: 6.0,
-              child: Container(
-                height: 20,
-                color: Colors.black.withOpacity(0.8),
-                alignment: Alignment.center,
-                child: Text(
-                  getDurationText(Duration(seconds: item.completeProgress)),
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w300,
-                  ),
-                ),
+                return FadeInImage(
+                  placeholder: MemoryImage(kTransparentImage),
+                  image: thumbnail,
+                  fit: BoxFit.fitWidth,
+                );
+              },
+            ),
+          ),
+        ),
+        Positioned(
+          right: 4.0,
+          bottom: 6.0,
+          child: Container(
+            height: 20,
+            color: Colors.black.withOpacity(0.8),
+            alignment: Alignment.center,
+            child: Text(
+              getDurationText(Duration(seconds: item.completeProgress)),
+              style: const TextStyle(
+                fontSize: 12,
+                color: Colors.white,
+                fontWeight: FontWeight.w300,
               ),
             ),
-            if (isHistory)
-              Positioned(
-                child: Container(
-                  alignment: Alignment.bottomCenter,
-                  child: LinearProgressIndicator(
-                    value: item.currentProgress / item.completeProgress,
-                    backgroundColor: Colors.white.withOpacity(0.6),
-                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.red),
-                    minHeight: 2,
-                  ),
-                ),
-              ),
-          ],
+          ),
         ),
-      ),
+        if (isHistory)
+          Positioned(
+            child: Container(
+              alignment: Alignment.bottomCenter,
+              child: LinearProgressIndicator(
+                value: item.currentProgress / item.completeProgress,
+                backgroundColor: Colors.white.withOpacity(0.6),
+                valueColor: const AlwaysStoppedAnimation<Color>(Colors.red),
+                minHeight: 2,
+              ),
+            ),
+          ),
+      ],
     );
   }
 
   /// A source can define extra actions that appears when you long press
   /// on a history item in the Player screen.
   @override
-  List<Widget> getExtraHistoryActions(
-      BuildContext context, MediaHistoryItem item, Function()? refreshCallback,
-      {bool isHistory = false}) {
+  List<Widget> getExtraHistoryActions({
+    required BuildContext context,
+    required MediaHistoryItem item,
+    required Function() homeRefreshCallback,
+    required Function() searchRefreshCallback,
+    bool isHistory = false,
+  }) {
     return [];
   }
 
@@ -316,9 +329,10 @@ abstract class PlayerMediaSource extends MediaSource {
   Widget getDisplayLayout({
     required AppModel appModel,
     required BuildContext context,
-    required Function() refreshCallback,
+    required Function() homeRefreshCallback,
+    required Function() searchRefreshCallback,
     required ScrollController scrollController,
-    required List<MediaHistoryItem> items,
+    required PagingController<int, MediaHistoryItem> pagingController,
   }) {
     AppModel appModel = Provider.of<AppModel>(context);
     MediaHistory mediaHistory = MediaHistory(
@@ -326,20 +340,22 @@ abstract class PlayerMediaSource extends MediaSource {
       prefsDirectory: mediaType.prefsDirectory(),
     );
 
-    return ListView.builder(
+    return PagedListView<int, MediaHistoryItem>(
       physics: const BouncingScrollPhysics(),
-      controller: scrollController,
+      scrollController: scrollController,
+      pagingController: pagingController,
       addAutomaticKeepAlives: true,
       key: UniqueKey(),
-      itemCount: items.length,
-      itemBuilder: (BuildContext context, int index) {
+      builderDelegate: PagedChildBuilderDelegate<MediaHistoryItem>(
+          itemBuilder: (context, item, index) {
         return buildMediaHistoryItem(
           context: context,
           history: mediaHistory,
-          item: items[index],
-          refreshCallback: refreshCallback,
+          item: item,
+          homeRefreshCallback: homeRefreshCallback,
+          searchRefreshCallback: searchRefreshCallback,
         );
-      },
+      }),
     );
   }
 

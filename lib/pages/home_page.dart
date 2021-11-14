@@ -1,3 +1,4 @@
+import 'package:chisa/dictionary/dictionary.dart';
 import 'package:chisa/dictionary/dictionary_widget_enhancement.dart';
 import 'package:chisa/dictionary/dictionary_widget_enhancement_dialog.dart';
 
@@ -21,19 +22,43 @@ class HomePage extends StatefulWidget {
   State<StatefulWidget> createState() => HomePageState();
 }
 
-class HomePageState extends State<HomePage> {
-  late MediaType mediaType;
-  int selectedTabIndex = 0;
-
+class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late AppModel appModel;
+  PageController? pageController;
+  late MediaType mediaType;
+  late ScrollController scrollController;
+
+  ValueNotifier<int> selectedTabIndex = ValueNotifier<int>(0);
+
+  MediaType getCurrentMediaTabType() {
+    return appModel.mediaTypes[selectedTabIndex.value];
+  }
+
+  Widget getTabs() {
+    List<Widget> widgets = [];
+    for (MediaType mediaType in appModel.mediaTypes) {
+      Widget widget = mediaType.getHomeBody();
+      widgets.add(widget);
+    }
+
+    return PageView(
+      controller: pageController,
+      physics: const NeverScrollableScrollPhysics(),
+      children: widgets,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     appModel = Provider.of<AppModel>(context);
+    selectedTabIndex.value = appModel.getLastActiveTabIndex();
 
-    selectedTabIndex = appModel.getLastActiveTabIndex();
-    mediaType = appModel.mediaTypes[selectedTabIndex];
-    List<MediaType> mediaTypes = appModel.mediaTypes;
+    pageController ??= PageController(
+      initialPage: selectedTabIndex.value,
+    );
+    scrollController = appModel.getScrollController(
+      getCurrentMediaTabType(),
+    );
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -46,7 +71,7 @@ class HomePageState extends State<HomePage> {
           getSeeMoreButton(context),
         ],
       ),
-      body: mediaTypes[selectedTabIndex].getHomeBody(),
+      body: getTabs(),
       bottomNavigationBar: getBottomNavigationBar(),
     );
   }
@@ -88,10 +113,14 @@ class HomePageState extends State<HomePage> {
   }
 
   void changeTab(int index) {
-    appModel.setLastActiveTabIndex(index);
-    setState(() {
-      selectedTabIndex = index;
-    });
+    if (selectedTabIndex.value == index) {
+      appModel.getScrollController(getCurrentMediaTabType()).animateTo(0,
+          duration: const Duration(milliseconds: 200), curve: Curves.easeInOut);
+    } else {
+      selectedTabIndex.value = index;
+      pageController!.jumpToPage(index);
+      appModel.setLastActiveTabIndex(index);
+    }
   }
 
   Widget getBottomNavigationBar() {
@@ -100,22 +129,28 @@ class HomePageState extends State<HomePage> {
       items.add(mediaType.getHomeTab(context));
     }
 
-    return BottomNavigationBar(
-      elevation: 0,
-      items: items,
-      type: BottomNavigationBarType.fixed,
-      currentIndex: selectedTabIndex,
-      onTap: (index) => changeTab(index),
-      selectedFontSize: 10,
-      unselectedFontSize: 10,
-      selectedIconTheme: IconThemeData(
-          color: appModel.getIsDarkMode() ? Colors.white : Colors.red),
-      selectedItemColor: appModel.getIsDarkMode() ? Colors.red : Colors.black,
-      unselectedIconTheme:
-          IconThemeData(color: Theme.of(context).unselectedWidgetColor),
-      unselectedLabelStyle:
-          TextStyle(color: Theme.of(context).unselectedWidgetColor),
-      backgroundColor: Theme.of(context).backgroundColor,
+    return ValueListenableBuilder<int>(
+      valueListenable: selectedTabIndex,
+      builder: (context, int currentIndex, _) {
+        return BottomNavigationBar(
+          elevation: 0,
+          items: items,
+          type: BottomNavigationBarType.fixed,
+          currentIndex: currentIndex,
+          onTap: (index) => changeTab(index),
+          selectedFontSize: 10,
+          unselectedFontSize: 10,
+          selectedIconTheme: IconThemeData(
+              color: appModel.getIsDarkMode() ? Colors.white : Colors.red),
+          selectedItemColor:
+              appModel.getIsDarkMode() ? Colors.red : Colors.black,
+          unselectedIconTheme:
+              IconThemeData(color: Theme.of(context).unselectedWidgetColor),
+          unselectedLabelStyle:
+              TextStyle(color: Theme.of(context).unselectedWidgetColor),
+          backgroundColor: Theme.of(context).backgroundColor,
+        );
+      },
     );
   }
 
@@ -179,11 +214,15 @@ class HomePageState extends State<HomePage> {
           label: appModel.translate("options_dictionaries"),
           icon: Icons.auto_stories,
           action: () async {
+            List<Dictionary> dictionaryRecord = appModel.getDictionaryRecord();
             await appModel.showDictionaryMenu(
               context,
               manageAllowed: true,
             );
-            setState(() {});
+            if (dictionaryRecord != appModel.getDictionaryRecord() &&
+                getCurrentMediaTabType() == MediaType.dictionary) {
+              setState(() {});
+            }
           },
         ),
         popupItem(
@@ -191,7 +230,6 @@ class HomePageState extends State<HomePage> {
           icon: Icons.perm_media,
           action: () async {
             showMediaSourceOptions(context, offset);
-            setState(() {});
           },
         ),
         popupItem(
@@ -267,7 +305,6 @@ class HomePageState extends State<HomePage> {
           label: appModel.translate("creator_options_menu"),
           icon: Icons.widgets,
           action: () async {
-            List<String> decks = await getDecks();
             await navigateToCreator(
               context: context,
               appModel: appModel,
@@ -280,8 +317,6 @@ class HomePageState extends State<HomePage> {
           label: appModel.translate("creator_options_auto"),
           icon: Icons.hdr_auto,
           action: () async {
-            List<String> decks = await getDecks();
-
             await navigateToCreator(
               context: context,
               appModel: appModel,
@@ -374,33 +409,54 @@ class HomePageState extends State<HomePage> {
           label: appModel.translate("player_media_type"),
           icon: Icons.video_library,
           action: () async {
+            String sourceName =
+                appModel.getCurrentMediaTypeSourceName(MediaType.player);
             await appModel.showSourcesMenu(
               context: context,
               mediaType: MediaType.player,
               manageAllowed: true,
             );
+            if (sourceName !=
+                    appModel.getCurrentMediaTypeSourceName(MediaType.player) &&
+                getCurrentMediaTabType() == MediaType.player) {
+              setState(() {});
+            }
           },
         ),
         popupItem(
           label: appModel.translate("reader_media_type"),
           icon: Icons.library_books,
           action: () async {
+            String sourceName =
+                appModel.getCurrentMediaTypeSourceName(MediaType.reader);
             await appModel.showSourcesMenu(
               context: context,
               mediaType: MediaType.reader,
               manageAllowed: true,
             );
+            if (sourceName !=
+                    appModel.getCurrentMediaTypeSourceName(MediaType.reader) &&
+                getCurrentMediaTabType() == MediaType.reader) {
+              setState(() {});
+            }
           },
         ),
         popupItem(
           label: appModel.translate("viewer_media_type"),
           icon: Icons.photo_library,
           action: () async {
+            String sourceName =
+                appModel.getCurrentMediaTypeSourceName(MediaType.viewer);
             await appModel.showSourcesMenu(
               context: context,
               mediaType: MediaType.viewer,
               manageAllowed: true,
             );
+            if (sourceName !=
+                    appModel.getCurrentMediaTypeSourceName(MediaType.viewer) &&
+                getCurrentMediaTabType() == MediaType.viewer) {
+              setState(() {});
+            }
           },
         ),
       ],

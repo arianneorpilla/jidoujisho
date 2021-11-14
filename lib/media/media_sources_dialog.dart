@@ -29,7 +29,7 @@ class MediaSourcesDialogState extends State<MediaSourcesDialog> {
   Widget build(BuildContext context) {
     appModel = Provider.of<AppModel>(context);
     MediaSource source = appModel.getCurrentMediaTypeSource(widget.mediaType);
-    bool isShown = source.isShown(appModel);
+    bool isShown = appModel.getMediaSourceShown(source);
 
     return AlertDialog(
       contentPadding:
@@ -107,7 +107,8 @@ class MediaSourcesDialogState extends State<MediaSourcesDialog> {
         appModel.getMediaSourcesByType(widget.mediaType);
 
     if (!widget.manageAllowed) {
-      mediaSources.removeWhere((source) => !source.isShown(appModel));
+      mediaSources
+          .removeWhere((source) => !appModel.getMediaSourceShown(source));
     }
 
     return RawScrollbar(
@@ -123,7 +124,7 @@ class MediaSourcesDialogState extends State<MediaSourcesDialog> {
           MediaSource source = mediaSources[index];
 
           double opacity = 1;
-          if (!mediaSources[index].isShown(appModel)) {
+          if (!appModel.getMediaSourceShown(source)) {
             opacity = 0.5;
           }
 

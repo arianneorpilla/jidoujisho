@@ -66,7 +66,10 @@ dependencies:
       path: package/
   flutter_vlc_player: ^6.0.5
   external_path: ^1.0.1
-  subtitle: ^0.1.0-beta.2
+  subtitle:
+    git:
+      url: https://github.com/lrorpilla/subtitle
+      ref: 89da88c1eba2eefc0f0ad4bc71d4ef1a4eb0e581
   multi_value_listenable_builder: ^0.0.1
   flutter_ffmpeg: ^0.4.2
   permission_handler:
@@ -90,11 +93,12 @@ dependencies:
     git:
       url: https://github.com/Hexer10/youtube_explode_dart
       ref: a51e38dcf8299f11271511922dc90ac48e7f5a47
-  lazy_load_scrollview:
+  infinite_scroll_pagination:
   material_floating_search_bar:
   uni_links:
   xml2json:
   http:
+  receive_sharing_intent:
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -520,7 +520,8 @@ class CreatorPageState extends State<CreatorPage> {
                                 filesNotifier: imagesNotifier,
                               ),
                             if (audioNotifier.value != null) buildAudioPlayer(),
-                            buildDeckDropDown(),
+                            if (!widget.autoMode && !widget.editMode)
+                              buildDeckDropDown(),
                           ]),
                     ),
                   ),
@@ -659,7 +660,7 @@ class CreatorPageState extends State<CreatorPage> {
                       filesNotifier: imagesNotifier,
                     ),
                   if (audioNotifier.value != null) buildAudioPlayer(),
-                  buildDeckDropDown(),
+                  if (!widget.autoMode && !widget.editMode) buildDeckDropDown(),
                   displayField(
                     context: context,
                     field: AnkiExportField.sentence,

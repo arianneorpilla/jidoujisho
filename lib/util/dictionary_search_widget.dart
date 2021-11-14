@@ -267,6 +267,7 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
       transitionDuration: Duration.zero,
       margins: const EdgeInsets.symmetric(horizontal: 6),
       physics: const BouncingScrollPhysics(),
+      width: double.maxFinite,
       openAxisAlignment: 0.0,
       elevation: 0,
       closeOnBackdropTap: true,

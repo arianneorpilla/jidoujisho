@@ -24,10 +24,15 @@ class PlayerHomePage extends MediaHomePage {
   State<StatefulWidget> createState() => PlayerHomePageState();
 }
 
-class PlayerHomePageState extends State<PlayerHomePage> {
+class PlayerHomePageState extends State<PlayerHomePage>
+    with AutomaticKeepAliveClientMixin {
   late AppModel appModel;
 
+  @override
+  bool get wantKeepAlive => true;
+
   TextEditingController searchController = TextEditingController(text: "");
+  ScrollController? scrollController;
 
   @override
   void didUpdateWidget(oldWidget) {
@@ -43,23 +48,24 @@ class PlayerHomePageState extends State<PlayerHomePage> {
     setState(() {});
   }
 
+  MediaSourceSearchBar buildSearchBar() {
+    return MediaSourceSearchBar(
+      appModel: appModel,
+      mediaSource: getCurrentMediaSource(),
+      refreshCallback: refreshCallback,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     appModel = Provider.of<AppModel>(context);
-
-    if (!appModel.hasInitialized) {
-      return Container();
-    }
 
     if (widget.mediaType.getMediaHistory(appModel).getItems().isEmpty) {
       return Stack(
         children: [
           buildEmptyBody(),
-          MediaSourceSearchBar(
-            appModel: appModel,
-            mediaSource: getCurrentMediaSource(),
-            refreshCallback: refreshCallback,
-          ),
+          buildSearchBar(),
         ],
       );
     }
@@ -67,11 +73,7 @@ class PlayerHomePageState extends State<PlayerHomePage> {
     return Stack(
       children: [
         buildBody(),
-        MediaSourceSearchBar(
-          appModel: appModel,
-          mediaSource: getCurrentMediaSource(),
-          refreshCallback: refreshCallback,
-        ),
+        buildSearchBar(),
       ],
     );
   }
@@ -82,16 +84,9 @@ class PlayerHomePageState extends State<PlayerHomePage> {
     List<MediaHistoryItem> mediaHistoryItems =
         history.getItems().reversed.toList();
 
-    ScrollController scrollController =
-        ScrollController(initialScrollOffset: appModel.scrollOffset);
-    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-      scrollController.addListener(() {
-        appModel.setScrollOffset = scrollController.offset;
-      });
-      scrollController.position.isScrollingNotifier.addListener(() {
-        appModel.setScrollOffset = scrollController.offset;
-      });
-    });
+    scrollController ??= appModel.getScrollController(
+      widget.mediaType,
+    );
 
     return RawScrollbar(
       controller: scrollController,
@@ -99,9 +94,8 @@ class PlayerHomePageState extends State<PlayerHomePage> {
           (appModel.getIsDarkMode()) ? Colors.grey[700] : Colors.grey[400],
       child: ListView.builder(
         controller: scrollController,
-        physics: BouncingScrollPhysics(),
+        physics: const BouncingScrollPhysics(),
         addAutomaticKeepAlives: true,
-        key: UniqueKey(),
         itemCount: mediaHistoryItems.length + 1,
         itemBuilder: (BuildContext context, int index) {
           if (index == 0) {
@@ -114,7 +108,8 @@ class PlayerHomePageState extends State<PlayerHomePage> {
             context: context,
             history: history,
             item: item,
-            refreshCallback: refreshCallback,
+            homeRefreshCallback: refreshCallback,
+            searchRefreshCallback: () {},
             isHistory: true,
           );
         },

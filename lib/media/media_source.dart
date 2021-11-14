@@ -5,6 +5,7 @@ import 'package:chisa/media/media_type.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/util/media_source_action_button.dart';
 import 'package:flutter/material.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 import 'media_histories/media_history.dart';
 
@@ -24,13 +25,12 @@ abstract class MediaSource {
   /// Which media type this source pertains to.
   final MediaType mediaType;
 
+  /// An icon that shows in the media source selection screen and when active
+  /// on the search bar of its source media tab.
   final IconData icon;
 
-  bool isShown(AppModel appModel) {
-    return appModel.getMediaSourceShown(this);
-  }
-
-  /// The unique identifier that is passed to the source parameter
+  /// A unique identifier that represents the media source's name along with
+  /// its media type. Useful for storing entries in shared preferences.
   String getIdentifier() {
     return "${mediaType.prefsDirectory()}/$sourceName";
   }
@@ -67,8 +67,8 @@ abstract class MediaSource {
   /// This returns a list of [MediaHistoryItem], and is performed to search
   /// the media source for items. If [onTap] is true, this can remain null as
   /// no search function actually occurs
-  FutureOr<List<MediaHistoryItem>>? getSearchMediaHistoryItems(
-      String searchTerm);
+  FutureOr<List<MediaHistoryItem>?> getSearchMediaHistoryItems(
+      String searchTerm, int pageKey);
 
   /// Given a search term, this source may give search suggestions. If the
   /// empty list is returned, then search history will be shown instead.
@@ -76,47 +76,75 @@ abstract class MediaSource {
     return Future.value([]);
   }
 
-  /// Get how this media source displays its items - this will probably be
-  /// a [ListView] or a [GridView].
+  /// Get how this media source displays its items when active under the search
+  /// bar - this will probably be a [ListView] or a [GridView].
   Widget getDisplayLayout({
     required AppModel appModel,
     required BuildContext context,
-    required Function() refreshCallback,
+    required Function() homeRefreshCallback,
+    required Function() searchRefreshCallback,
     required ScrollController scrollController,
-    required List<MediaHistoryItem> items,
+    required PagingController<int, MediaHistoryItem> pagingController,
   });
 
+  /// Builds a widget to represent the [MediaHistoryItem]. Clicking on this
+  /// item should start the media, and it should generally have a thumbnail and
+  /// metadata describing the item.
   Widget buildMediaHistoryItem({
     required BuildContext context,
     required MediaHistory history,
     required MediaHistoryItem item,
-    required Function() refreshCallback,
+    required Function() homeRefreshCallback,
+    required Function() searchRefreshCallback,
     bool isHistory = false,
   });
 
-  Widget buildMediaHistoryMetadata(
-    BuildContext context,
-    MediaHistoryItem item, {
+  /// A helper function called within [buildMediaHistoryItem] to show the
+  /// metadata of a [MediaHistoryItem].
+  Widget buildMediaHistoryMetadata({
+    required BuildContext context,
+    required MediaHistoryItem item,
+    required Function() homeRefreshCallback,
+    required Function() searchRefreshCallback,
     bool isHistory = false,
   });
 
-  Widget getHistoryExtraMetadata(BuildContext context, MediaHistoryItem item);
+  /// Extra metadata that can optionally be defined. This is typically added
+  /// to a list within [buildMediaHistoryMetadata] if non-null. If null, no
+  /// widget should be appended to the list.
+  Widget? getHistoryExtraMetadata({
+    required BuildContext context,
+    required MediaHistoryItem item,
+    required Function() homeRefreshCallback,
+    required Function() searchRefreshCallback,
+    bool isHistory = false,
+  }) {
+    return null;
+  }
 
-  Widget buildMediaHistoryThumbnail(
-    BuildContext context,
-    MediaHistoryItem item, {
+  Widget buildMediaHistoryThumbnail({
+    required BuildContext context,
+    required MediaHistoryItem item,
+    required Function() homeRefreshCallback,
+    required Function() searchRefreshCallback,
     bool isHistory = false,
   });
 
   /// A source can define extra actions that appears when you long press
   /// on a history item in the Player screen.
-  List<Widget> getExtraHistoryActions(
-      BuildContext context, MediaHistoryItem item, Function()? refreshCallback,
-      {bool isHistory = false});
+  List<Widget> getExtraHistoryActions({
+    required BuildContext context,
+    required MediaHistoryItem item,
+    required Function() homeRefreshCallback,
+    required Function() searchRefreshCallback,
+    bool isHistory = false,
+  });
 
   /// Number in milliseconds of how long it should take for the search bar to
   /// respond to query changes. For expensive operations, the debounce should
   /// probably remain the default value. Otherwise, if search suggestions can
   /// be generated efficiently, this can be 0.
   int getSearchDebounceDelay = 500;
+
+  int getSearchPageSize = 20;
 }

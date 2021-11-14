@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 
 Future<void> returnFromContext(
     BuildContext context, MediaHistoryItem item) async {
-  AppModel appModel = Provider.of<AppModel>(context);
+  AppModel appModel = Provider.of<AppModel>(context, listen: false);
 
   MediaType mediaType = MediaType.values
       .firstWhere((type) => type.prefsDirectory() == item.mediaTypePrefs);

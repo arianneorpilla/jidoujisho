@@ -1,10 +1,10 @@
 import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_source.dart';
 import 'package:flutter/material.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 
-import 'package:chisa/dictionary/dictionary_search_result.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/util/center_icon_message.dart';
 
@@ -30,6 +30,8 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
   int selectedIndex = 0;
   bool isSearching = false;
   bool isFocus = false;
+
+  PagingController<int, MediaHistoryItem>? pagingController;
 
   List<MediaHistoryItem>? searchResultItems;
   List<String> searchSuggestions = [];
@@ -143,11 +145,11 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
       }
     }
 
-    searchResultItems = null;
+    pagingController = null;
   }
 
   Future<void> onQueryChanged(String query) async {
-    searchResultItems = null;
+    pagingController = null;
 
     if (query.isEmpty) {
       searchSuggestions = [];
@@ -169,18 +171,30 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
           setState(() {
             isSearching = true;
           });
-          try {
-            await Future.delayed(
-                Duration(milliseconds: mediaSource.getSearchDebounceDelay),
-                () async {
-              searchResultItems =
-                  await mediaSource.getSearchMediaHistoryItems(query);
-            });
-          } catch (e) {
-            debugPrint("Search went wrong");
-            searchResultItems = [];
-          }
 
+          await Future.delayed(
+              Duration(milliseconds: mediaSource.getSearchDebounceDelay));
+          pagingController = PagingController(firstPageKey: 1);
+          try {
+            List<MediaHistoryItem>? newItems =
+                await mediaSource.getSearchMediaHistoryItems(query, 1);
+            if (newItems != null && newItems.isNotEmpty) {
+              pagingController!.appendPage(newItems, 2);
+            }
+          } catch (e) {
+            pagingController!.appendLastPage([]);
+          }
+          pagingController!.addPageRequestListener((pageKey) async {
+            try {
+              List<MediaHistoryItem>? newItems =
+                  await mediaSource.getSearchMediaHistoryItems(query, pageKey);
+              if (newItems != null && newItems.isNotEmpty) {
+                pagingController!.appendPage(newItems, pageKey + 1);
+              }
+            } catch (e) {
+              pagingController!.appendLastPage([]);
+            }
+          });
           appModel.addToSearchHistory(query,
               historyType: mediaSource.getIdentifier());
 
@@ -194,11 +208,35 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
 
   Future<void> onSubmitted(String query) async {
     if (!isSearching) {
+      pagingController = null;
+
       setState(() {
         isSearching = true;
       });
 
-      searchResultItems = await mediaSource.getSearchMediaHistoryItems(query);
+      await Future.delayed(
+          Duration(milliseconds: mediaSource.getSearchDebounceDelay));
+      pagingController = PagingController(firstPageKey: 1);
+      try {
+        List<MediaHistoryItem>? newItems =
+            await mediaSource.getSearchMediaHistoryItems(query, 1);
+        if (newItems != null && newItems.isNotEmpty) {
+          pagingController!.appendPage(newItems, 2);
+        }
+      } catch (e) {
+        pagingController!.appendLastPage([]);
+      }
+      pagingController!.addPageRequestListener((pageKey) async {
+        try {
+          List<MediaHistoryItem>? newItems =
+              await mediaSource.getSearchMediaHistoryItems(query, pageKey);
+          if (newItems != null && newItems.isNotEmpty) {
+            pagingController!.appendPage(newItems, pageKey + 1);
+          }
+        } catch (e) {
+          pagingController!.appendLastPage([]);
+        }
+      });
       appModel.addToSearchHistory(query,
           historyType: mediaSource.getIdentifier());
 
@@ -210,6 +248,8 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
 
   @override
   Widget build(BuildContext context) {
+    mediaSource = appModel.getCurrentMediaTypeSource(mediaSource.mediaType);
+
     return FloatingSearchBar(
       controller: searchBarController,
       hint: mediaSource.sourceName,
@@ -220,6 +260,7 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
       physics: const BouncingScrollPhysics(),
       openAxisAlignment: 0.0,
       height: 48,
+      width: double.maxFinite,
       closeOnBackdropTap: true,
       debounceDelay: Duration.zero,
       showCursor: !mediaSource.noSearchAction,
@@ -260,11 +301,12 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
             label: appModel.translate("enter_a_search_term"),
             icon: Icons.search,
           );
-        } else if (searchResultItems == null) {
+        } else if (pagingController == null) {
           return buildSearchSuggestions();
         }
 
-        if (searchResultItems!.isEmpty) {
+        if (pagingController!.itemList != null &&
+            pagingController!.itemList!.isEmpty) {
           return buildPlaceholderMessage(
             label:
                 "${appModel.translate("dictionary_nomatch_before")}『${searchBarController.query}』${appModel.translate("dictionary_nomatch_after")}",
@@ -272,17 +314,29 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
           );
         }
 
-        return RawScrollbar(
-          controller: scrollController,
-          thumbColor:
-              (appModel.getIsDarkMode()) ? Colors.grey[700] : Colors.grey[400],
-          child: mediaSource.getDisplayLayout(
-            appModel: appModel,
-            context: context,
-            refreshCallback: widget.refreshCallback,
-            scrollController: scrollController,
-            items: searchResultItems!,
-          ),
+        if (pagingController!.itemList != null || isSearching) {
+          return RawScrollbar(
+            controller: scrollController,
+            thumbColor: (appModel.getIsDarkMode())
+                ? Colors.grey[700]
+                : Colors.grey[400],
+            child: mediaSource.getDisplayLayout(
+              appModel: appModel,
+              context: context,
+              homeRefreshCallback: widget.refreshCallback,
+              searchRefreshCallback: () {
+                setState(() {});
+              },
+              scrollController: scrollController,
+              pagingController: pagingController!,
+            ),
+          );
+        }
+
+        return buildPlaceholderMessage(
+          label:
+              "${appModel.translate("dictionary_nomatch_before")}『${searchBarController.query}』${appModel.translate("dictionary_nomatch_after")}",
+          icon: Icons.search_off,
         );
       },
     );
@@ -302,11 +356,9 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
             context: context,
             mediaType: mediaSource.mediaType,
           );
-          widget.refreshCallback();
-          mediaSource =
-              appModel.getCurrentMediaTypeSource(mediaSource.mediaType);
           if (mediaSource.noSearchAction && searchBarController.isOpen) {
             searchBarController.close();
+            widget.refreshCallback();
           }
           setState(() {});
         },

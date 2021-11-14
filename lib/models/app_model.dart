@@ -11,7 +11,6 @@ import 'package:chisa/language/languages/chinese_simplified_language.dart';
 import 'package:chisa/language/languages/chinese_traditional_language.dart';
 import 'package:chisa/language/languages/english_language.dart';
 import 'package:chisa/language/languages/japanese_language.dart';
-import 'package:chisa/media/media_histories/media_history.dart';
 import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_source.dart';
 import 'package:chisa/media/media_sources/player_local_media_source.dart';
@@ -25,7 +24,6 @@ import 'package:chisa/util/subtitle_options.dart';
 import 'package:external_path/external_path.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:objectbox/objectbox.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -88,11 +86,11 @@ class AppModel with ChangeNotifier {
   /// Max number of history items in non-dictionary media types.
   int maxHistoryItemCount = 30;
 
-  /// Saves the offset scroll value of the dictionary.
-  double _scrollOffset = 0;
-  get scrollOffset => _scrollOffset;
-  set setScrollOffset(double offset) {
-    _scrollOffset = offset;
+  final Map<MediaType, ScrollController> _scrollOffsets = {};
+
+  ScrollController getScrollController(MediaType type) {
+    _scrollOffsets[type] ??= ScrollController(initialScrollOffset: 0);
+    return _scrollOffsets[type]!;
   }
 
   /// All populated in initialisation when the app is started.
@@ -109,7 +107,6 @@ class AppModel with ChangeNotifier {
 
   final List<MediaType> _mediaTypes = [
     MediaType.player,
-    MediaType.reader,
     MediaType.dictionary,
   ];
   List<MediaType> get mediaTypes => _mediaTypes;
@@ -1183,14 +1180,6 @@ class AppModel with ChangeNotifier {
         "regexFilter", subtitleOptions.regexFilter);
   }
 
-  bool getUseRegexFilter() {
-    return sharedPreferences.getBool("useRegexFilter") ?? false;
-  }
-
-  Future<void> toggleUseRegexFilter() async {
-    await sharedPreferences.setBool("useRegexFilter", !getUseRegexFilter());
-  }
-
   String getLastAnkiDroidDeck() {
     return _sharedPreferences.getString("lastAnkiDroidDeck") ?? "Default";
   }
@@ -1246,5 +1235,18 @@ class AppModel with ChangeNotifier {
 
   bool isResumable() {
     return getResumeMediaHistoryItem() != null;
+  }
+
+  bool isPlayerOrientationPortrait() {
+    return sharedPreferences.getBool("isPlayerOrientationPortrait") ?? false;
+  }
+
+  Future<void> togglePlayerOrientationPortrait() async {
+    await sharedPreferences.setBool(
+        "isPlayerOrientationPortrait", !isPlayerOrientationPortrait());
+  }
+
+  void refresh() {
+    notifyListeners();
   }
 }

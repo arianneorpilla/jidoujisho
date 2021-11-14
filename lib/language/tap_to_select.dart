@@ -19,6 +19,9 @@ TapToSelectInfo getLinesFromCharacters(
   double width = MediaQuery.of(context).size.width;
   characters.add("");
 
+  int widthPadding =
+      (MediaQuery.of(context).orientation == Orientation.landscape) ? 60 : 10;
+
   for (int i = 0; i < characters.length; i++) {
     String character = characters[i];
     textPainter = TextPainter()
@@ -31,7 +34,7 @@ TapToSelectInfo getLinesFromCharacters(
 
     if (character.contains('\n') ||
         i == characters.length - 1 ||
-        textPainter.width >= width - 60) {
+        textPainter.width >= width - widthPadding) {
       List<String> line = [];
       List<int> lineIndex = [];
       for (int i = 0; i < working.length; i++) {
