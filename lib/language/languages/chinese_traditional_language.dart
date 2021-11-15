@@ -16,7 +16,10 @@ class ChineseTraditionalLanguage extends Language {
 
   @override
   Future<void> initialiseLanguage() async {
-    await Chaquopy.executeCode('import jieba');
+    await Chaquopy.executeCode('''import jieba
+seg_list = jieba.cut_for_search("""哈囉世界""")
+for seg in seg_list:
+   print(seg)''');
   }
 
   @override

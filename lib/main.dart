@@ -2,8 +2,6 @@ import 'dart:async';
 
 import 'package:chisa/util/anki_creator.dart';
 import 'package:chisa/util/export_paths.dart';
-import 'package:chisa/util/return_from_context.dart';
-import 'package:chisa/util/share_intent.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -15,7 +13,6 @@ import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/home_page.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:wakelock/wakelock.dart';
-import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 /// Application execution starts here.
 void main() async {
@@ -94,7 +91,7 @@ class App extends StatelessWidget {
     AppModel appModel = Provider.of<AppModel>(context);
 
     if (appModel.hasInitialized) {
-      return homeOrDeepLink(context);
+      return const HomePage();
     } else {
       return FutureBuilder(
         future: appModel.initialiseAppModel(),
@@ -102,65 +99,10 @@ class App extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Container();
           } else {
-            return homeOrDeepLink(context);
+            return const HomePage();
           }
         },
       );
     }
-  }
-
-  Widget homeOrDeepLink(BuildContext context) {
-    bool initialTextProcessed = false;
-    bool initialLinkProcessed = false;
-
-    return StreamBuilder<String?>(
-        stream: ReceiveSharingIntent.getTextStream(),
-        builder: (context, streamSnapshot) {
-          final text = streamSnapshot.data ?? '';
-          if (text.isNotEmpty) {
-            textShareIntentAction(context, text);
-          }
-
-          return FutureBuilder<String?>(
-              future: ReceiveSharingIntent.getInitialText(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Container();
-                }
-                final text = snapshot.data ?? '';
-
-                if (text.isNotEmpty && !initialTextProcessed) {
-                  initialTextProcessed = true;
-                  textShareIntentAction(context, text);
-                }
-
-                return StreamBuilder<String?>(
-                    stream: linkStream,
-                    builder: (context, streamSnapshot) {
-                      final link = streamSnapshot.data ?? '';
-                      if (link.isNotEmpty) {
-                        returnFromAppLink(context, link);
-                        return const HomePage();
-                      }
-
-                      return FutureBuilder<String?>(
-                          future: getInitialLink(),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return Container();
-                            }
-                            final link = snapshot.data ?? '';
-
-                            if (link.isNotEmpty && !initialLinkProcessed) {
-                              initialLinkProcessed = true;
-                              returnFromAppLink(context, link);
-                            }
-
-                            return const HomePage();
-                          });
-                    });
-              });
-        });
   }
 }

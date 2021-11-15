@@ -245,8 +245,11 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
   }
 
   @override
-  FutureOr<List<MediaHistoryItem>>? getSearchMediaHistoryItems(
-      String searchTerm, int pageKey) {
+  FutureOr<List<MediaHistoryItem>?> getSearchMediaHistoryItems({
+    required BuildContext context,
+    required String searchTerm,
+    required int pageKey,
+  }) {
     throw UnsupportedError("Local media does not support search");
   }
 }

@@ -1,6 +1,8 @@
 import 'dart:async';
-import 'dart:math';
 
+import 'package:chisa/language/language.dart';
+import 'package:chisa/language/languages/english_language.dart';
+import 'package:chisa/language/languages/japanese_language.dart';
 import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_sources/player_media_source.dart';
 import 'package:chisa/media/media_type.dart';
@@ -9,9 +11,12 @@ import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/player_page.dart';
 import 'package:chisa/util/bottom_sheet_dialog.dart';
 import 'package:chisa/util/media_source_action_button.dart';
+import 'package:chisa/util/paginated_player_page.dart';
 import 'package:chisa/util/subtitle_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -65,11 +70,13 @@ class PlayerYouTubeSource extends PlayerMediaSource {
       mediaTypePrefs: mediaType.prefsDirectory(),
       currentProgress: 0,
       completeProgress: video.duration?.inSeconds ?? 0,
-      extra: {"thumbnail": video.thumbnails.mediumResUrl},
+      extra: {
+        "thumbnail": video.thumbnails.mediumResUrl,
+        "channelId": video.channelId.toString(),
+      },
     );
   }
 
-  @override
   @override
   Widget? buildSourceButton(BuildContext context, PlayerPageState page) {
     AppModel appModel = Provider.of<AppModel>(context, listen: false);
@@ -217,27 +224,40 @@ class PlayerYouTubeSource extends PlayerMediaSource {
   }
 
   @override
-  FutureOr<List<MediaHistoryItem>?> getSearchMediaHistoryItems(
-      String searchTerm, int pageKey) async {
+  FutureOr<List<MediaHistoryItem>?> getSearchMediaHistoryItems({
+    required BuildContext context,
+    required String searchTerm,
+    required int pageKey,
+  }) async {
     SearchList? searchList;
 
-    searchListStore[searchTerm] ??= {};
+    String storeKey = searchTerm;
+    if (getCaptionFilter(context)) {
+      storeKey = "$searchTerm [filter:cc]";
+    }
+
+    searchListStore[storeKey] ??= {};
 
     if (pageKey == 1) {
-      if (searchListStore[searchTerm]![1] == null) {
-        searchList = await yt.search.getVideos(searchTerm);
+      if (searchListStore[storeKey]![1] == null) {
+        if (getCaptionFilter(context)) {
+          searchList = await yt.search
+              .getVideos(searchTerm, filter: filters.features.subTitles);
+        } else {
+          searchList = await yt.search.getVideos(searchTerm);
+        }
       } else {
-        searchList = searchListStore[searchTerm]![1];
+        searchList = searchListStore[storeKey]![1];
       }
     } else {
-      SearchList lastList = searchListStore[searchTerm]![pageKey - 1]!;
+      SearchList lastList = searchListStore[storeKey]![pageKey - 1]!;
       searchList = await lastList.nextPage();
     }
 
     if (searchList == null) {
       return null;
     } else {
-      searchListStore[searchTerm]![pageKey] = searchList;
+      searchListStore[storeKey]![pageKey] = searchList;
     }
 
     List<MediaHistoryItem> items = [];
@@ -254,12 +274,6 @@ class PlayerYouTubeSource extends PlayerMediaSource {
     }
 
     return items;
-  }
-
-  @override
-  List<MediaSourceActionButton> getSearchBarActions(
-      BuildContext context, Function() refreshCallback) {
-    return [];
   }
 
   @override
@@ -813,5 +827,186 @@ class PlayerYouTubeSource extends PlayerMediaSource {
     // StreamManifest manifest = await getManifestFromUrl(url);
     // AudioStreamInfo streamAudioInfo = manifest.audioOnly.last;
     // return streamAudioInfo.url.toString();
+  }
+
+  @override
+  List<Widget> getExtraHistoryActions({
+    required BuildContext context,
+    required MediaHistoryItem item,
+    required Function() homeRefreshCallback,
+    required Function() searchRefreshCallback,
+    bool isHistory = false,
+  }) {
+    AppModel appModel = Provider.of<AppModel>(context, listen: false);
+
+    return [
+      TextButton(
+        child: Text(
+          appModel.translate("dialog_channel"),
+          style: const TextStyle(),
+        ),
+        onPressed: () async {
+          Navigator.pop(context);
+          await showChannelPage(context, item);
+          homeRefreshCallback();
+          searchRefreshCallback();
+        },
+      ),
+    ];
+  }
+
+  Future<void> showChannelPage(
+      BuildContext context, MediaHistoryItem item) async {
+    String author = item.author;
+    String channelId = item.extra["channelId"];
+
+    PagingController<int, MediaHistoryItem> pagingController =
+        PagingController(firstPageKey: 1);
+
+    pagingController.addPageRequestListener((pageKey) async {
+      List<MediaHistoryItem> items = [];
+      List<Video> videos = [];
+      try {
+        videos = await yt.channels
+            .getUploads(channelId)
+            .skip(pagingController.itemList?.length ?? 0)
+            .take(20)
+            .toList();
+        for (Video video in videos) {
+          items.add(getItemFromUrl(video));
+        }
+      } finally {
+        if (items.isEmpty) {
+          pagingController.appendLastPage(items);
+        } else {
+          pagingController.appendPage(items, pageKey + 1);
+        }
+      }
+    });
+
+    // Prevent recursion
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => PaginatedPlayerPage(
+          title: author,
+          source: this,
+          pagingController: pagingController,
+        ),
+      ),
+    );
+  }
+
+  String? getTrendingPlaylistId(Language language) {
+    // Add your target language country's Trending 20 playlist ID if you want it supported here
+    switch ("${language.languageCode}-${language.countryCode}") {
+      case "ja-JP": // Japanese (Japan)
+        return "PLuXL6NS58Dyx-wTr5o7NiC7CZRbMA91DC";
+      case "en-US": // English (United States)
+        return "PLrEnWoR732-DtKgaDdnPkezM_nDidBU9H";
+      case "zh-CN": // Simplified Chinese (Singapore)
+        return "PLFgquLnL59alUOZtPriN3d3nnnDVhPX3J";
+      case "zh-TW": // Traditional Chinese (Taiwan)
+        return "PLPv96SVEnDc1xDQPAHzjKnkOKHopdG6hL";
+      default:
+        return null;
+    }
+  }
+
+  Future<void> showTrendingVideos(BuildContext context) async {
+    AppModel appModel = Provider.of<AppModel>(context, listen: false);
+    String playlistId = getTrendingPlaylistId(appModel.getCurrentLanguage())!;
+    Playlist trendingPlaylist = await yt.playlists.get(playlistId);
+
+    PagingController<int, MediaHistoryItem> pagingController =
+        PagingController(firstPageKey: 1);
+
+    pagingController.addPageRequestListener((pageKey) async {
+      List<MediaHistoryItem> items = [];
+      List<Video> videos = [];
+
+      try {
+        videos = await yt.playlists.getVideos(playlistId).toList();
+        for (Video video in videos) {
+          items.add(getItemFromUrl(video));
+        }
+      } finally {
+        pagingController.appendLastPage(items);
+      }
+    });
+
+    // Prevent recursion
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => PaginatedPlayerPage(
+          title: trendingPlaylist.title,
+          source: this,
+          pagingController: pagingController,
+        ),
+      ),
+    );
+  }
+
+  @override
+  List<Widget> getSearchBarActions(
+    BuildContext context,
+    Function() refreshCallback,
+  ) {
+    AppModel appModel = Provider.of<AppModel>(context, listen: false);
+    ValueNotifier<bool> captionFilterNotifier =
+        ValueNotifier<bool>(getCaptionFilter(context));
+    String? playlistId = getTrendingPlaylistId(appModel.getCurrentLanguage());
+    return [
+      if (playlistId != null)
+        MediaSourceActionButton(
+          context: context,
+          showIfClosed: true,
+          showIfOpened: false,
+          refreshCallback: refreshCallback,
+          icon: Icons.whatshot,
+          onPressed: () async {
+            await showTrendingVideos(context);
+          },
+        ),
+      FloatingSearchBarAction(
+        showIfClosed: false,
+        showIfOpened: true,
+        child: ValueListenableBuilder<bool>(
+          valueListenable: captionFilterNotifier,
+          builder: (context, bool active, child) {
+            return CircularButton(
+              icon: Icon(
+                Icons.closed_caption,
+                size: 20,
+                color: (active)
+                    ? Colors.red
+                    : (Provider.of<AppModel>(context, listen: false)
+                            .getIsDarkMode()
+                        ? Colors.white
+                        : Colors.black),
+              ),
+              onPressed: () async {
+                await toggleCaptionFilter(context);
+                captionFilterNotifier.value = getCaptionFilter(context);
+              },
+            );
+          },
+        ),
+      ),
+    ];
+  }
+
+  bool getCaptionFilter(BuildContext context) {
+    AppModel appModel = Provider.of<AppModel>(context, listen: false);
+    return appModel.sharedPreferences
+            .getBool("$getIdentifier()://captionfilter") ??
+        false;
+  }
+
+  Future<void> toggleCaptionFilter(BuildContext context) async {
+    AppModel appModel = Provider.of<AppModel>(context, listen: false);
+    await appModel.sharedPreferences.setBool(
+        "$getIdentifier()://captionfilter", !getCaptionFilter(context));
   }
 }

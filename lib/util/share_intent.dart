@@ -13,6 +13,12 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 Future<void> textShareIntentAction(BuildContext context, String text) async {
   AppModel appModel = Provider.of<AppModel>(context, listen: false);
 
+  // If a context link, let the other case handle this.
+  if (text.startsWith("https://jidoujisho.context/")) {
+    await returnFromAppLink(context, text);
+    await SystemNavigator.pop();
+    return;
+  }
   // If a valid video ID or YouTube URL, play the video.
   String? videoId = VideoId.parseVideoId(text);
   if (videoId != null) {

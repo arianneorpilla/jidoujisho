@@ -293,6 +293,7 @@ class PlayerPageState extends State<PlayerPage>
 
   void setSearchTerm(String newTerm) {
     searchTerm.value = newTerm.trim();
+    latestResult = null;
   }
 
   MediaHistoryItem? generateContextHistoryItem() {

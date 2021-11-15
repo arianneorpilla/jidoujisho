@@ -8,8 +8,10 @@ import 'package:chisa/util/anki_creator.dart';
 import 'package:chisa/util/dictionary_widget_field.dart';
 import 'package:chisa/util/popup_item.dart';
 import 'package:chisa/util/return_from_context.dart';
+import 'package:chisa/util/share_intent.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -34,10 +36,29 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return appModel.mediaTypes[selectedTabIndex.value];
   }
 
+  bool initialTextProcessed = false;
+  bool initialLinkProcessed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    ReceiveSharingIntent.getInitialText().then((String? text) {
+      if (text != null) {
+        textShareIntentAction(context, text);
+      }
+    });
+    ReceiveSharingIntent.getTextStream().listen((String? text) {
+      if (text != null) {
+        textShareIntentAction(context, text);
+      }
+    });
+  }
+
   Widget getTabs() {
     List<Widget> widgets = [];
     for (MediaType mediaType in appModel.mediaTypes) {
-      Widget widget = mediaType.getHomeBody();
+      Widget widget =
+          mediaType.getHomeBody(appModel.getSearchController(mediaType));
       widgets.add(widget);
     }
 
@@ -51,6 +72,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     appModel = Provider.of<AppModel>(context);
+
     selectedTabIndex.value = appModel.getLastActiveTabIndex();
 
     pageController ??= PageController(
@@ -61,7 +83,6 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
 
     return Scaffold(
-      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         leading: getLeading(),
         title: getTitle(),
@@ -116,6 +137,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     if (selectedTabIndex.value == index) {
       appModel.getScrollController(getCurrentMediaTabType()).animateTo(0,
           duration: const Duration(milliseconds: 200), curve: Curves.easeInOut);
+      appModel.getSearchController(getCurrentMediaTabType()).close();
     } else {
       selectedTabIndex.value = index;
       pageController!.jumpToPage(index);

@@ -24,10 +24,13 @@ class DictionaryHomePage extends MediaHomePage {
   const DictionaryHomePage({
     Key? key,
     required MediaType mediaType,
+    required this.searchBarController,
   }) : super(
           key: key,
           mediaType: mediaType,
         );
+
+  final FloatingSearchBarController searchBarController;
 
   @override
   State<StatefulWidget> createState() => DictionaryPageState();

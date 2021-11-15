@@ -13,11 +13,13 @@ class MediaSourceSearchBar extends StatefulWidget {
     required this.appModel,
     required this.mediaSource,
     required this.refreshCallback,
+    required this.searchBarController,
     Key? key,
   }) : super(key: key);
   final AppModel appModel;
   final MediaSource mediaSource;
   final Function() refreshCallback;
+  final FloatingSearchBarController searchBarController;
 
   @override
   State<StatefulWidget> createState() => MediaSourceSearchBarState();
@@ -26,6 +28,7 @@ class MediaSourceSearchBar extends StatefulWidget {
 class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
   late AppModel appModel;
   late MediaSource mediaSource;
+  late FloatingSearchBarController searchBarController;
 
   int selectedIndex = 0;
   bool isSearching = false;
@@ -36,14 +39,12 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
   List<MediaHistoryItem>? searchResultItems;
   List<String> searchSuggestions = [];
 
-  FloatingSearchBarController searchBarController =
-      FloatingSearchBarController();
-
   @override
   void initState() {
     super.initState();
     appModel = widget.appModel;
     mediaSource = widget.mediaSource;
+    searchBarController = widget.searchBarController;
   }
 
   Widget buildPlaceholderMessage({
@@ -149,10 +150,12 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
   }
 
   Future<void> onQueryChanged(String query) async {
+    query = query.trim();
     pagingController = null;
 
     if (query.isEmpty) {
       searchSuggestions = [];
+      isSearching = false;
       setState(() {});
       return;
     }
@@ -177,22 +180,30 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
           pagingController = PagingController(firstPageKey: 1);
           try {
             List<MediaHistoryItem>? newItems =
-                await mediaSource.getSearchMediaHistoryItems(query, 1);
+                await mediaSource.getSearchMediaHistoryItems(
+              context: context,
+              searchTerm: query,
+              pageKey: 1,
+            );
             if (newItems != null && newItems.isNotEmpty) {
-              pagingController!.appendPage(newItems, 2);
+              pagingController?.appendPage(newItems, 2);
             }
           } catch (e) {
-            pagingController!.appendLastPage([]);
+            pagingController?.appendLastPage([]);
           }
-          pagingController!.addPageRequestListener((pageKey) async {
+          pagingController?.addPageRequestListener((pageKey) async {
             try {
               List<MediaHistoryItem>? newItems =
-                  await mediaSource.getSearchMediaHistoryItems(query, pageKey);
+                  await mediaSource.getSearchMediaHistoryItems(
+                context: context,
+                searchTerm: query,
+                pageKey: pageKey,
+              );
               if (newItems != null && newItems.isNotEmpty) {
-                pagingController!.appendPage(newItems, pageKey + 1);
+                pagingController?.appendPage(newItems, pageKey + 1);
               }
             } catch (e) {
-              pagingController!.appendLastPage([]);
+              pagingController?.appendLastPage([]);
             }
           });
           appModel.addToSearchHistory(query,
@@ -207,6 +218,8 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
   }
 
   Future<void> onSubmitted(String query) async {
+    query = query.trim();
+
     if (!isSearching) {
       pagingController = null;
 
@@ -219,22 +232,30 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
       pagingController = PagingController(firstPageKey: 1);
       try {
         List<MediaHistoryItem>? newItems =
-            await mediaSource.getSearchMediaHistoryItems(query, 1);
+            await mediaSource.getSearchMediaHistoryItems(
+          context: context,
+          searchTerm: query,
+          pageKey: 1,
+        );
         if (newItems != null && newItems.isNotEmpty) {
-          pagingController!.appendPage(newItems, 2);
+          pagingController?.appendPage(newItems, 2);
         }
       } catch (e) {
-        pagingController!.appendLastPage([]);
+        pagingController?.appendLastPage([]);
       }
-      pagingController!.addPageRequestListener((pageKey) async {
+      pagingController?.addPageRequestListener((pageKey) async {
         try {
           List<MediaHistoryItem>? newItems =
-              await mediaSource.getSearchMediaHistoryItems(query, pageKey);
+              await mediaSource.getSearchMediaHistoryItems(
+            context: context,
+            searchTerm: query,
+            pageKey: pageKey,
+          );
           if (newItems != null && newItems.isNotEmpty) {
-            pagingController!.appendPage(newItems, pageKey + 1);
+            pagingController?.appendPage(newItems, pageKey + 1);
           }
         } catch (e) {
-          pagingController!.appendLastPage([]);
+          pagingController?.appendLastPage([]);
         }
       });
       appModel.addToSearchHistory(query,
@@ -368,8 +389,10 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
 
   List<Widget> getAllActions() {
     List<Widget> actions = [];
+
     actions.addAll(
         mediaSource.getSearchBarActions(context, widget.refreshCallback));
+
     if (!mediaSource.noSearchAction) {
       actions.add(
         FloatingSearchBarAction.searchToClear(

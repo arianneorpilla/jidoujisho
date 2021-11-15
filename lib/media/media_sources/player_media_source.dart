@@ -16,7 +16,6 @@ import 'package:chisa/pages/player_page.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
-import 'package:wakelock/wakelock.dart';
 
 abstract class PlayerMediaSource extends MediaSource {
   PlayerMediaSource({
@@ -101,13 +100,15 @@ abstract class PlayerMediaSource extends MediaSource {
             ));
           }
 
-          actions.addAll(getExtraHistoryActions(
-            context: context,
-            item: item,
-            homeRefreshCallback: homeRefreshCallback,
-            searchRefreshCallback: searchRefreshCallback,
-            isHistory: isHistory,
-          ));
+          actions.addAll(
+            getExtraHistoryActions(
+              context: context,
+              item: item,
+              homeRefreshCallback: homeRefreshCallback,
+              searchRefreshCallback: searchRefreshCallback,
+              isHistory: isHistory,
+            ),
+          );
 
           actions.add(
             TextButton(

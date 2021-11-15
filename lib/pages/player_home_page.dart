@@ -4,6 +4,7 @@ import 'package:chisa/media/media_source.dart';
 import 'package:chisa/media/media_source_search_bar.dart';
 import 'package:chisa/media/media_sources/player_media_source.dart';
 import 'package:flutter/material.dart';
+import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:provider/provider.dart';
 
 import 'package:chisa/media/media_type.dart';
@@ -15,10 +16,13 @@ class PlayerHomePage extends MediaHomePage {
   const PlayerHomePage({
     Key? key,
     required MediaType mediaType,
+    required this.searchBarController,
   }) : super(
           key: key,
           mediaType: mediaType,
         );
+
+  final FloatingSearchBarController searchBarController;
 
   @override
   State<StatefulWidget> createState() => PlayerHomePageState();
@@ -53,12 +57,14 @@ class PlayerHomePageState extends State<PlayerHomePage>
       appModel: appModel,
       mediaSource: getCurrentMediaSource(),
       refreshCallback: refreshCallback,
+      searchBarController: widget.searchBarController,
     );
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
+
     appModel = Provider.of<AppModel>(context);
 
     if (widget.mediaType.getMediaHistory(appModel).getItems().isEmpty) {

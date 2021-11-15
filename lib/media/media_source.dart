@@ -48,7 +48,7 @@ abstract class MediaSource {
   /// A list of [Widget] to show in the [MediaSourceSearchBar] when this source
   /// is active in its media type tab. This will be the leading actions in the
   /// search bar.
-  List<MediaSourceActionButton> getSearchBarActions(
+  List<Widget> getSearchBarActions(
     BuildContext context,
     Function() refreshCallback,
   );
@@ -67,8 +67,11 @@ abstract class MediaSource {
   /// This returns a list of [MediaHistoryItem], and is performed to search
   /// the media source for items. If [onTap] is true, this can remain null as
   /// no search function actually occurs
-  FutureOr<List<MediaHistoryItem>?> getSearchMediaHistoryItems(
-      String searchTerm, int pageKey);
+  FutureOr<List<MediaHistoryItem>?> getSearchMediaHistoryItems({
+    required BuildContext context,
+    required String searchTerm,
+    required int pageKey,
+  });
 
   /// Given a search term, this source may give search suggestions. If the
   /// empty list is returned, then search history will be shown instead.

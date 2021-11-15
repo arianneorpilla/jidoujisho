@@ -6,6 +6,7 @@ import 'package:chisa/pages/player_home_page.dart';
 import 'package:chisa/pages/reader_home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
 
@@ -46,21 +47,24 @@ extension MediaTypeParameters on MediaType {
     }
   }
 
-  MediaHomePage getHomeBody() {
+  MediaHomePage getHomeBody(FloatingSearchBarController? searchBarController) {
     switch (this) {
       case MediaType.player:
         return PlayerHomePage(
           mediaType: this,
+          searchBarController: searchBarController!,
         );
       case MediaType.reader:
         return ReaderHomePage(
           mediaType: this,
+          searchBarController: searchBarController!,
         );
       case MediaType.viewer:
         throw UnimplementedError();
       case MediaType.dictionary:
         return DictionaryHomePage(
           mediaType: this,
+          searchBarController: searchBarController!,
         );
     }
   }

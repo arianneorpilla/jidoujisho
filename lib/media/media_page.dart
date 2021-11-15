@@ -46,9 +46,4 @@ abstract class MediaPageState extends State<MediaPage> {
       ),
     );
   }
-
-  /// Show the content that appears after loading.
-  Widget showContentWidget() {
-    return const Scaffold();
-  }
 }

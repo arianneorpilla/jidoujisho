@@ -217,6 +217,7 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
   }
 
   Future<void> onQueryChanged(String query) async {
+    query = query.trim();
     if (appModel.getCurrentDictionary() == null) {
       return;
     }
@@ -284,6 +285,7 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
       clearQueryOnClose: true,
       accentColor: Theme.of(context).focusColor,
       onQueryChanged: onQueryChanged,
+      onSubmitted: onQueryChanged,
       leadingActions: [
         buildDictionaryButton(),
       ],

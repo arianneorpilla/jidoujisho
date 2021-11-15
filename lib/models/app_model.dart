@@ -24,6 +24,7 @@ import 'package:chisa/util/subtitle_options.dart';
 import 'package:external_path/external_path.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -87,10 +88,16 @@ class AppModel with ChangeNotifier {
   int maxHistoryItemCount = 30;
 
   final Map<MediaType, ScrollController> _scrollOffsets = {};
+  final Map<MediaType, FloatingSearchBarController> _homeSearchControllers = {};
 
   ScrollController getScrollController(MediaType type) {
     _scrollOffsets[type] ??= ScrollController(initialScrollOffset: 0);
     return _scrollOffsets[type]!;
+  }
+
+  FloatingSearchBarController getSearchController(MediaType type) {
+    _homeSearchControllers[type] ??= FloatingSearchBarController();
+    return _homeSearchControllers[type]!;
   }
 
   /// All populated in initialisation when the app is started.
