@@ -50,7 +50,9 @@ abstract class MediaSource {
   List<Widget> getSearchBarActions(
     BuildContext context,
     Function() refreshCallback,
-  );
+  ) {
+    return [];
+  }
 
   /// If true, [onSearchBarTap] should be executed when tapping on the search
   /// bar.

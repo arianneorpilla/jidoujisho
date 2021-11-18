@@ -17,6 +17,8 @@ import 'package:chisa/media/media_sources/player_local_media_source.dart';
 import 'package:chisa/media/media_sources/player_media_source.dart';
 import 'package:chisa/media/media_sources/player_youtube_source.dart';
 import 'package:chisa/media/media_sources/reader_media_source.dart';
+import 'package:chisa/media/media_sources/reader_ttu_media_source.dart';
+import 'package:chisa/media/media_sources/viewer_local_media_source.dart';
 import 'package:chisa/media/media_sources/viewer_media_source.dart';
 import 'package:chisa/media/media_sources_dialog.dart';
 import 'package:chisa/util/blur_widget.dart';
@@ -143,8 +145,12 @@ class AppModel with ChangeNotifier {
     PlayerLocalMediaSource(),
     PlayerYouTubeSource(),
   ];
-  List<ReaderMediaSource> readerMediaSources = [];
-  List<ViewerMediaSource> viewerMediaSources = [];
+  List<ReaderMediaSource> readerMediaSources = [
+    ReaderTtuMediaSource(),
+  ];
+  List<ViewerMediaSource> viewerMediaSources = [
+    ViewerLocalMediaSource(),
+  ];
 
   Future<void> initialiseAppModel() async {
     if (!_hasInitialised) {

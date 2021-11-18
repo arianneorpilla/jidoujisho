@@ -15,10 +15,12 @@ class DictionaryMediaHistoryItem extends MediaHistoryItem {
     required int completeProgress,
     required this.contextItem,
     required Map<String, dynamic> extra,
+    String alias = "",
   }) : super(
           key: key,
           author: author,
           title: title,
+          alias: alias,
           sourceName: sourceName,
           mediaTypePrefs: MediaType.dictionary.prefsDirectory(),
           currentProgress: currentProgress,
@@ -49,6 +51,7 @@ class DictionaryMediaHistoryItem extends MediaHistoryItem {
 
     String key = map["key"] ?? "";
     String title = map["title"] ?? "";
+    String alias = map["alias"] ?? "";
     String author = map["author"] ?? "";
     String sourceName = map["sourceName"] ?? "";
     String mediaTypePrefs = map["mediaTypePrefs"] ?? "";
@@ -66,6 +69,7 @@ class DictionaryMediaHistoryItem extends MediaHistoryItem {
       key: key,
       title: title,
       author: author,
+      alias: alias,
       sourceName: sourceName,
       mediaTypePrefs: mediaTypePrefs,
       currentProgress: currentProgress,
@@ -81,6 +85,7 @@ class DictionaryMediaHistoryItem extends MediaHistoryItem {
       "key": key,
       "title": title,
       "author": author,
+      "alias": alias,
       "sourceName": sourceName,
       "mediaTypePrefs": mediaTypePrefs,
       "currentProgress": currentProgress.toString(),

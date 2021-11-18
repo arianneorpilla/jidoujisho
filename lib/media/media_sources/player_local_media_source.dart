@@ -1,6 +1,15 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
+
+import 'package:collection/collection.dart';
+import 'package:filesystem_picker/filesystem_picker.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
+
 import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_sources/player_media_source.dart';
 import 'package:chisa/media/media_type.dart';
@@ -10,13 +19,6 @@ import 'package:chisa/pages/player_page.dart';
 import 'package:chisa/util/media_source_action_button.dart';
 import 'package:chisa/util/subtitle_utils.dart';
 import 'package:chisa/util/time_format.dart';
-import 'package:collection/collection.dart';
-import 'package:filesystem_picker/filesystem_picker.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
-import 'package:provider/provider.dart';
 
 class PlayerLocalMediaSource extends PlayerMediaSource {
   PlayerLocalMediaSource()
@@ -204,17 +206,6 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
         },
       )
     ];
-  }
-
-  @override
-  List<Widget> getExtraHistoryActions({
-    required BuildContext context,
-    required MediaHistoryItem item,
-    required Function() homeRefreshCallback,
-    required Function() searchRefreshCallback,
-    bool isHistory = false,
-  }) {
-    return [];
   }
 
   @override

@@ -53,7 +53,7 @@ class PlayerLaunchParams {
 class ReaderLaunchParams {
   ReaderLaunchParams.file({
     required this.appModel,
-    this.bookFile,
+    required this.bookFile,
     required this.mediaSource,
     required this.mediaHistoryItem,
   });
@@ -72,15 +72,13 @@ class ReaderLaunchParams {
 }
 
 class ViewerLaunchParams {
-  ViewerLaunchParams.file({
+  ViewerLaunchParams({
     required this.appModel,
-    required this.imageFiles,
     required this.mediaSource,
     required this.mediaHistoryItem,
   });
 
   final AppModel appModel;
-  final List<Uri> imageFiles;
   final MediaSource mediaSource;
   final MediaHistoryItem mediaHistoryItem;
 }

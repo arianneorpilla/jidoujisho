@@ -5,6 +5,7 @@ class MediaHistoryItem {
     required this.key,
     this.title = "",
     this.author = "",
+    this.alias = "",
     required this.sourceName,
     required this.mediaTypePrefs,
     required this.currentProgress,
@@ -25,6 +26,9 @@ class MediaHistoryItem {
   /// detail. For a web video, this could be the channel where the video is
   /// from. For a book, it is the author.
   String author;
+
+  /// An alternative title for the name, for a reader or viewer item.
+  String alias;
 
   /// The media source where this item is from. All media sources have a
   /// unique identifier that takes the format of [mediaTypeName/sourceName].
@@ -60,6 +64,7 @@ class MediaHistoryItem {
     String key = map["key"] ?? "";
     String title = map["title"] ?? "";
     String author = map["author"] ?? "";
+    String alias = map["alias"] ?? "";
     String sourceName = map["sourceName"] ?? "";
     String mediaTypePrefs = map["mediaTypePrefs"] ?? "";
     int currentProgress = int.tryParse(map["currentProgress"] ?? "") ?? 0;
@@ -71,6 +76,7 @@ class MediaHistoryItem {
       key: key,
       title: title,
       author: author,
+      alias: alias,
       mediaTypePrefs: mediaTypePrefs,
       sourceName: sourceName,
       currentProgress: currentProgress,
@@ -85,6 +91,7 @@ class MediaHistoryItem {
       "key": key,
       "title": title,
       "author": author,
+      "alias": alias,
       "sourceName": sourceName,
       "mediaTypePrefs": mediaTypePrefs,
       "currentProgress": currentProgress.toString(),

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -354,11 +355,14 @@ abstract class ReaderMediaSource extends MediaSource {
 
   /// From a [MediaHistoryItem], get an alias for an alternative caption to
   /// show for the item.
-  String getHistoryCaptionAlias(MediaHistoryItem item);
+  String getHistoryCaptionAlias(MediaHistoryItem item) {
+    return item.alias;
+  }
 
-  /// From a [MediaHistoryItem], get an alias for an alternative thumbnail to
-  /// show for the item.
-  Future<ImageProvider<Object>> getHistoryThumbnailAlias(MediaHistoryItem item);
+  Future<ImageProvider<Object>> getHistoryThumbnailAlias(
+      MediaHistoryItem item) async {
+    return FileImage(File(item.thumbnailPath));
+  }
 
   /// Define a custom options for the [InAppWebView] at startup of a
   /// [ReaderPage].
@@ -393,7 +397,7 @@ abstract class ReaderMediaSource extends MediaSource {
     InAppWebViewController webViewController,
     String consoleMessage,
     ReaderPageState readerPageState,
-  ) async {}
+  );
 
   /// Define a custom load complete action for the [InAppWebView] in the
   /// [ReaderPage] when shown.
@@ -401,12 +405,12 @@ abstract class ReaderMediaSource extends MediaSource {
     InAppWebViewController webViewController,
     Uri url,
     ReaderMediaSource readerMediaSource,
-  ) async {}
+  );
 
   /// Define a custom action for when the page title changes for the
   /// [InAppWebView] in the [ReaderPage] when shown.
   Future<void> onTitleChanged(
     InAppWebViewController webViewController,
     String title,
-  ) async {}
+  );
 }
