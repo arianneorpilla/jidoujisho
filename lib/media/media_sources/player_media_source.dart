@@ -342,7 +342,6 @@ abstract class PlayerMediaSource extends MediaSource {
     );
 
     return PagedListView<int, MediaHistoryItem>(
-      physics: const BouncingScrollPhysics(),
       scrollController: scrollController,
       pagingController: pagingController,
       addAutomaticKeepAlives: true,

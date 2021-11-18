@@ -114,6 +114,7 @@ class AppModel with ChangeNotifier {
 
   final List<MediaType> _mediaTypes = [
     MediaType.player,
+    MediaType.reader,
     MediaType.dictionary,
   ];
   List<MediaType> get mediaTypes => _mediaTypes;

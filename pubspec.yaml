@@ -99,6 +99,7 @@ dependencies:
   xml2json:
   http:
   receive_sharing_intent:
+  flutter_widget_from_html_core: ^0.8.2
 dev_dependencies:
   flutter_test:
     sdk: flutter

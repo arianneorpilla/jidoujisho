@@ -7,6 +7,7 @@ import 'package:epubx/epubx.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
@@ -56,11 +57,11 @@ class ReaderPageState extends MediaPageState {
 
   @override
   Widget build(BuildContext context) {
-    if (mediaParameters.isEmpty) {
-      return showOverlayLoadingWidget();
-    } else {
-      return showContentWidget();
-    }
+    return Scaffold(
+        backgroundColor: Colors.white,
+        body: (mediaParameters.isEmpty)
+            ? showOverlayLoadingWidget()
+            : showContentWidget());
   }
 
   // Future<void> recompressImage(File file) async {
@@ -168,7 +169,6 @@ class ReaderPageState extends MediaPageState {
     );
   }
 
-  @override
   Widget showContentWidget() {
     EpubContent bookContent = getEpubBook().Content!;
 
@@ -193,61 +193,49 @@ class ReaderPageState extends MediaPageState {
           fileName ?? "", "data:$mimeType;base64,$base64Image");
     });
 
-    return Stack(
-      children: [
-        InAppWebView(
-          onWebViewCreated: (controller) {
-            webViewController = controller;
-          },
-          onLoadStop: (controller, uri) {
-            setState(() {
-              isReaderLoaded = true;
-            });
-          },
-          initialOptions: options,
-          initialUserScripts: UnmodifiableListView<UserScript>([
-            UserScript(
-              source: '''
-              function addStyle(styleString) {
-                const style = document.createElement('style');
-                style.textContent = styleString;
-                document.head.append(style);
-              }
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: HtmlWidget(
+        // the first parameter (`html`) is required
+        htmlContent,
 
-              addStyle(`
-                @font-face { font-family: NotoSerifJP; src: url(${getFont()});}
+        // all other parameters are optional, a few notable params:
 
-                html {
-                  font-size: 28px;
-                  writing-mode: vertical-rl;
-                  line-break: normal;
-                  text-align: right;
-                }
+        // specify custom styling for an element
+        // see supported inline styling below
+        customStylesBuilder: (element) {
+          if (element.classes.contains('foo')) {
+            return {'color': 'red'};
+          }
 
-                body {
-                  margin-top: 5%;
-                  margin-bottom: 3%;
-                }
+          return null;
+        },
 
-                p {
-                  font-family: "NotoSerifJP";
-                  text-align: left;
-                }
-              `);
-            ''',
-              injectionTime: UserScriptInjectionTime.AT_DOCUMENT_END,
-            ),
-          ]),
-          initialData: InAppWebViewInitialData(
-            data: htmlContent,
-            mimeType: 'text/html',
-          ),
-          shouldOverrideUrlLoading: (controller, navigationAction) async {
-            return NavigationActionPolicy.CANCEL;
-          },
-        ),
-        if (!isReaderLoaded) showOverlayLoadingWidget(),
-      ],
+        // render a custom widget
+        customWidgetBuilder: (element) {
+          if (element.localName == ('p')) {
+            return SelectableText.rich(TextSpan(text: element.text),
+                style:
+                    const TextStyle(fontSize: 20, fontFamily: "Noto Serif JP"));
+          }
+        },
+
+        // these callbacks are called when a complicated element is loading
+        // or failed to render allowing the app to render progress indicator
+        // and fallback widget
+        onErrorBuilder: (context, element, error) =>
+            Text('$element error: $error'),
+        onLoadingBuilder: (context, element, loadingProgress) =>
+            const CircularProgressIndicator(),
+
+        // select the render mode for HTML body
+        // by default, a simple `Column` is rendered
+        // consider using `ListView` or `SliverList` for better performance
+        renderMode: RenderMode.listView,
+
+        // set the default styling for text
+        textStyle: const TextStyle(fontSize: 20, fontFamily: "Noto Serif JP"),
+      ),
     );
   }
 }

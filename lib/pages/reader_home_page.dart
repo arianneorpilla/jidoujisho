@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:chisa/media/media_type.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/media_home_page.dart';
+import 'package:chisa/pages/reader_page.dart';
+import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:provider/provider.dart';
@@ -44,7 +46,31 @@ class ReaderHomePageState extends State<ReaderHomePage> {
     return Center(
       child: InkWell(
         onTap: () async {
-          // mediaType.launchMediaPage(context, await selectFile());
+          Iterable<String>? filePaths = await FilesystemPicker.open(
+            title: "",
+            pickText: appModel.translate("dialog_select"),
+            cancelText: appModel.translate("dialog_return"),
+            context: context,
+            rootDirectories: await appModel.getMediaTypeDirectories(mediaType),
+            fsType: FilesystemType.file,
+            multiSelect: false,
+            folderIconColor: Colors.red,
+          );
+
+          if (filePaths == null || filePaths.isEmpty) {
+            return;
+          }
+
+          String filePath = filePaths.first;
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ReaderPage(
+                mediaType: mediaType,
+                uri: Uri.parse(filePath),
+              ),
+            ),
+          );
         },
         child: Container(
           padding: const EdgeInsets.all(36),

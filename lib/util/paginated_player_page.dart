@@ -52,7 +52,6 @@ class PaginatedPlayerPageState extends State<PaginatedPlayerPage> {
         thumbColor:
             (appModel.getIsDarkMode()) ? Colors.grey[700] : Colors.grey[400],
         child: PagedListView<int, MediaHistoryItem>(
-          physics: const BouncingScrollPhysics(),
           scrollController: scrollController,
           pagingController: widget.pagingController,
           addAutomaticKeepAlives: true,

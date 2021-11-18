@@ -70,7 +70,6 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
       child: Material(
         color: Colors.transparent,
         child: ListView.builder(
-          physics: const BouncingScrollPhysics(),
           itemCount: searchSuggestions.length,
           shrinkWrap: true,
           itemExtent: 48,
@@ -278,7 +277,6 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
       scrollPadding: const EdgeInsets.only(top: 16, bottom: 56),
       transitionDuration: Duration.zero,
       margins: const EdgeInsets.symmetric(horizontal: 6),
-      physics: const BouncingScrollPhysics(),
       openAxisAlignment: 0.0,
       height: 48,
       width: double.maxFinite,
