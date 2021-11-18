@@ -113,7 +113,7 @@ Future<List<SubtitleItem>> prepareSubtitleControllersFromVideo(
     }
 
     final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
-    final FlutterFFmpegConfig _flutterFFmpegConfig = new FlutterFFmpegConfig();
+    final FlutterFFmpegConfig _flutterFFmpegConfig = FlutterFFmpegConfig();
 
     await _flutterFFmpeg.execute(command);
     String output = await _flutterFFmpegConfig.getLastCommandOutput();
@@ -155,7 +155,6 @@ Future<String> convertAssSubtitles(String inputPath) async {
   String command = "-i \"$inputPath\" \"$outputPath\"";
 
   final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
-  final FlutterFFmpegConfig _flutterFFmpegConfig = new FlutterFFmpegConfig();
 
   await _flutterFFmpeg.execute(command);
 

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:chisa/media/media_histories/media_history.dart';
 import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_sources/player_media_source.dart';
 import 'package:chisa/media/media_type.dart';
@@ -9,10 +8,9 @@ import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/player_page.dart';
 import 'package:chisa/util/media_source_action_button.dart';
-import 'package:chisa/util/media_type_button.dart';
 import 'package:chisa/util/subtitle_utils.dart';
 import 'package:chisa/util/time_format.dart';
-import 'package:collection/src/iterable_extensions.dart';
+import 'package:collection/collection.dart';
 import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
@@ -35,23 +33,6 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
       mediaSource: this,
       mediaHistoryItem: item,
       saveHistoryItem: true,
-    );
-  }
-
-  @override
-  Widget? getButton(
-    BuildContext context,
-    Function() refreshCallback,
-  ) {
-    AppModel appModel = Provider.of<AppModel>(context);
-
-    return MediaTypeButton(
-      label: appModel.translate("player_pick_video"),
-      icon: Icons.perm_media,
-      onTap: () async {
-        await showFilePicker(context);
-        refreshCallback();
-      },
     );
   }
 

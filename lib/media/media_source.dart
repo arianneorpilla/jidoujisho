@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_type.dart';
 import 'package:chisa/models/app_model.dart';
-import 'package:chisa/util/media_source_action_button.dart';
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
@@ -125,6 +124,8 @@ abstract class MediaSource {
     return null;
   }
 
+  /// Thumbnail which represents a [MediaHistoryItem] when shown in history or
+  /// in search.
   Widget buildMediaHistoryThumbnail({
     required BuildContext context,
     required MediaHistoryItem item,
@@ -133,7 +134,7 @@ abstract class MediaSource {
     bool isHistory = false,
   });
 
-  /// A source can define extra actions that appears when you long press
+  /// A [MediaSource] can define extra actions that appears when you long press
   /// on a history item in the Player screen.
   List<Widget> getExtraHistoryActions({
     required BuildContext context,
@@ -141,7 +142,9 @@ abstract class MediaSource {
     required Function() homeRefreshCallback,
     required Function() searchRefreshCallback,
     bool isHistory = false,
-  });
+  }) {
+    return [];
+  }
 
   /// Number in milliseconds of how long it should take for the search bar to
   /// respond to query changes. For expensive operations, the debounce should

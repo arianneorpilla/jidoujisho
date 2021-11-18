@@ -2,7 +2,7 @@ import 'package:chisa/media/media_histories/media_history.dart';
 import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_source.dart';
 import 'package:chisa/media/media_source_search_bar.dart';
-import 'package:chisa/media/media_sources/reader_media_source.dart';
+import 'package:chisa/media/media_sources/viewer_media_source.dart';
 import 'package:flutter/material.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:provider/provider.dart';
@@ -12,8 +12,8 @@ import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/media_home_page.dart';
 import 'package:chisa/util/center_icon_message.dart';
 
-class ReaderHomePage extends MediaHomePage {
-  const ReaderHomePage({
+class ViewerHomePage extends MediaHomePage {
+  const ViewerHomePage({
     Key? key,
     required MediaType mediaType,
     required this.searchBarController,
@@ -25,10 +25,10 @@ class ReaderHomePage extends MediaHomePage {
   final FloatingSearchBarController searchBarController;
 
   @override
-  State<StatefulWidget> createState() => ReaderHomePageState();
+  State<StatefulWidget> createState() => ViewerHomePageState();
 }
 
-class ReaderHomePageState extends State<ReaderHomePage>
+class ViewerHomePageState extends State<ViewerHomePage>
     with AutomaticKeepAliveClientMixin {
   late AppModel appModel;
 
@@ -43,9 +43,9 @@ class ReaderHomePageState extends State<ReaderHomePage>
     super.didUpdateWidget(oldWidget);
   }
 
-  ReaderMediaSource getCurrentMediaSource() {
+  ViewerMediaSource getCurrentMediaSource() {
     return appModel.getCurrentMediaTypeSource(widget.mediaType)
-        as ReaderMediaSource;
+        as ViewerMediaSource;
   }
 
   void refreshCallback() {

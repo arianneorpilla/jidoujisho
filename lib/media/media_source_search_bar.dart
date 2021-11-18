@@ -140,6 +140,7 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
     } else {
       if (mediaSource.noSearchAction) {
         await mediaSource.onSearchBarTap(context);
+        searchBarController.clear();
         searchBarController.close();
         setState(() {});
       }
@@ -375,7 +376,10 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
             context: context,
             mediaType: mediaSource.mediaType,
           );
+          mediaSource =
+              appModel.getCurrentMediaTypeSource(mediaSource.mediaType);
           if (mediaSource.noSearchAction && searchBarController.isOpen) {
+            searchBarController.clear();
             searchBarController.close();
             widget.refreshCallback();
           }

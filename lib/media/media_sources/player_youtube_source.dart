@@ -1,8 +1,6 @@
 import 'dart:async';
 
 import 'package:chisa/language/language.dart';
-import 'package:chisa/language/languages/english_language.dart';
-import 'package:chisa/language/languages/japanese_language.dart';
 import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_sources/player_media_source.dart';
 import 'package:chisa/media/media_type.dart';

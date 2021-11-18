@@ -42,6 +42,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+
     ReceiveSharingIntent.getInitialText().then((String? text) {
       if (text != null) {
         textShareIntentAction(context, text);

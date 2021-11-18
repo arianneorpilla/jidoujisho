@@ -2,7 +2,6 @@ import 'package:chisa/anki/anki_export_params.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/creator_page.dart';
 import 'package:device_apps/device_apps.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart' as intl;

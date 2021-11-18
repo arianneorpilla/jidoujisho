@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:chisa/util/anki_creator.dart';
 import 'package:chisa/util/export_paths.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +9,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/home_page.dart';
-import 'package:uni_links/uni_links.dart';
 import 'package:wakelock/wakelock.dart';
 
 /// Application execution starts here.
@@ -40,18 +37,6 @@ void main() async {
       packageInfo: packageInfo,
     ),
   );
-}
-
-Future<void> initUniLinks() async {
-  // Platform messages may fail, so we use a try/catch PlatformException.
-  try {
-    final String? initialLink = await getInitialLink();
-    // Parse the link and warn the user, if it is not correct,
-    // but keep in mind it could be `null`.
-  } on PlatformException {
-    // Handle exception by warning the user their action did not succeed
-    // return?
-  }
 }
 
 class App extends StatelessWidget {

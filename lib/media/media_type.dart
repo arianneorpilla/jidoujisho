@@ -4,14 +4,10 @@ import 'package:chisa/pages/dictionary_home_page.dart';
 import 'package:chisa/pages/media_home_page.dart';
 import 'package:chisa/pages/player_home_page.dart';
 import 'package:chisa/pages/reader_home_page.dart';
+import 'package:chisa/pages/viewer_home_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:provider/provider.dart';
-import 'package:transparent_image/transparent_image.dart';
-
-import 'media_history_items/media_history_item.dart';
-import 'media_sources/player_media_source.dart';
 
 enum MediaType {
   player,
@@ -60,7 +56,10 @@ extension MediaTypeParameters on MediaType {
           searchBarController: searchBarController!,
         );
       case MediaType.viewer:
-        throw UnimplementedError();
+        return ViewerHomePage(
+          mediaType: this,
+          searchBarController: searchBarController!,
+        );
       case MediaType.dictionary:
         return DictionaryHomePage(
           mediaType: this,
