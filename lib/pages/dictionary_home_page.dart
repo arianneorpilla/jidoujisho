@@ -1,10 +1,3 @@
-import 'package:chisa/anki/anki_export_params.dart';
-import 'package:chisa/dictionary/dictionary.dart';
-import 'package:chisa/util/anki_creator.dart';
-import 'package:chisa/util/dictionary_dialog_widget.dart';
-import 'package:chisa/dictionary/dictionary_entry.dart';
-import 'package:chisa/util/dictionary_search_widget.dart';
-import 'package:chisa/util/return_from_context.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
@@ -19,6 +12,13 @@ import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/media_home_page.dart';
 import 'package:chisa/util/busy_icon_button.dart';
 import 'package:chisa/util/center_icon_message.dart';
+import 'package:chisa/anki/anki_export_params.dart';
+import 'package:chisa/dictionary/dictionary.dart';
+import 'package:chisa/util/anki_creator.dart';
+import 'package:chisa/util/dictionary_dialog_widget.dart';
+import 'package:chisa/dictionary/dictionary_entry.dart';
+import 'package:chisa/util/dictionary_search_widget.dart';
+import 'package:chisa/util/return_from_context.dart';
 
 class DictionaryHomePage extends MediaHomePage {
   const DictionaryHomePage({
@@ -47,12 +47,17 @@ class DictionaryPageState extends State<DictionaryHomePage>
 
   DictionarySearchResult? searchResult;
   DictionarySearchWidget? dictionaryVerticalWidget;
-  FloatingSearchBarController searchBarController =
-      FloatingSearchBarController();
+  late FloatingSearchBarController searchBarController;
   ScrollController? scrollController;
 
   bool isSearching = false;
   bool isFocus = false;
+
+  @override
+  void initState() {
+    super.initState();
+    searchBarController = widget.searchBarController;
+  }
 
   @override
   void didUpdateWidget(oldWidget) {
@@ -95,12 +100,6 @@ class DictionaryPageState extends State<DictionaryHomePage>
         buildDictionarySearchWidget(),
       ],
     );
-
-    // if (appModel.getDictionaryMediaHistory().getDictionaryItems().isEmpty) {
-    //   return buildEmptyBody();
-    // } else {
-    //   return buildBody();
-    // }
   }
 
   Widget buildBody() {
@@ -123,13 +122,14 @@ class DictionaryPageState extends State<DictionaryHomePage>
       thumbColor:
           (appModel.getIsDarkMode()) ? Colors.grey[700] : Colors.grey[400],
       child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics()),
         controller: scrollController,
         addAutomaticKeepAlives: true,
         itemCount: results.length + 1,
         itemBuilder: (BuildContext context, int index) {
           if (index == 0) {
             return const SizedBox(height: 60);
-            //return buildSearchField();
           }
 
           DictionarySearchResult result = results[index - 1];
@@ -183,6 +183,12 @@ class DictionaryPageState extends State<DictionaryHomePage>
             borderSide: BorderSide(color: Theme.of(context).focusColor),
           ),
           contentPadding: const EdgeInsets.all(0),
+          labelText: appModel.translate(
+            (appModel.getCurrentDictionary() != null)
+                ? "search"
+                : "import_dictionaries_for_use",
+          ),
+          hintText: appModel.translate("enter_search_term_here"),
           prefixIcon: Icon(widget.mediaType.icon()),
           suffixIcon: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -214,12 +220,6 @@ class DictionaryPageState extends State<DictionaryHomePage>
               ),
             ],
           ),
-          labelText: appModel.translate(
-            (appModel.getCurrentDictionary() != null)
-                ? "search"
-                : "import_dictionaries_for_use",
-          ),
-          hintText: appModel.translate("enter_search_term_here"),
         ),
       ),
     );
@@ -299,27 +299,27 @@ class DictionaryPageState extends State<DictionaryHomePage>
                     },
                   ),
                 TextButton(
-                    child: Text(
-                      appModel.translate("dialog_creator"),
-                    ),
-                    onPressed: () async {
-                      DictionaryEntry dialogEntry =
-                          result.entries[dialogIndexNotifier.value];
-                      await navigateToCreator(
-                        context: context,
-                        appModel: appModel,
-                        initialParams: AnkiExportParams(
-                          word: dialogEntry.word,
-                          meaning: dialogEntry.meaning,
-                          reading: dialogEntry.reading,
-                        ),
-                      );
-                      setState(() {});
-                    }),
+                  child: Text(
+                    appModel.translate("dialog_creator"),
+                  ),
+                  onPressed: () async {
+                    DictionaryEntry dialogEntry =
+                        result.entries[dialogIndexNotifier.value];
+                    await navigateToCreator(
+                      context: context,
+                      appModel: appModel,
+                      initialParams: AnkiExportParams(
+                        word: dialogEntry.word,
+                        meaning: dialogEntry.meaning,
+                        reading: dialogEntry.reading,
+                      ),
+                    );
+                    setState(() {});
+                  },
+                ),
               ],
             ),
           );
-          // showDictionaryDialog(entry, entry.swipeIndex);
         },
         child: Padding(
           padding: const EdgeInsets.all(16),

@@ -99,6 +99,8 @@ class ReaderHomePageState extends State<ReaderHomePage>
       thumbColor:
           (appModel.getIsDarkMode()) ? Colors.grey[700] : Colors.grey[400],
       child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics()),
         controller: scrollController,
         addAutomaticKeepAlives: true,
         itemCount: mediaHistoryItems.length + 1,

@@ -6,13 +6,13 @@ import 'package:chisa/media/media_type.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/util/anki_creator.dart';
 import 'package:chisa/util/dictionary_widget_field.dart';
+import 'package:chisa/util/greyscale_wrapper.dart';
 import 'package:chisa/util/popup_item.dart';
 import 'package:chisa/util/return_from_context.dart';
 import 'package:chisa/util/share_intent.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-import 'package:transparent_image/transparent_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatefulWidget {
@@ -39,6 +39,9 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   bool initialTextProcessed = false;
   bool initialLinkProcessed = false;
 
+  ImageProvider<Object> imageIcon = const AssetImage("assets/icon/icon.png");
+  ValueNotifier<bool>? incognitoNotifier;
+
   @override
   void initState() {
     super.initState();
@@ -53,6 +56,13 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
         textShareIntentAction(context, text);
       }
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    precacheImage(imageIcon, context);
   }
 
   Widget getTabs() {
@@ -99,11 +109,24 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Widget getLeading() {
+    incognitoNotifier ??= ValueNotifier<bool>(appModel.getIncognitoMode());
+    return ValueListenableBuilder<bool>(
+      valueListenable: incognitoNotifier!,
+      builder: (BuildContext context, bool incognito, Widget? child) {
+        if (incognito) {
+          return GreyscaleWrapper(child: getIcon());
+        } else {
+          return getIcon();
+        }
+      },
+    );
+  }
+
+  Widget getIcon() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 9, 0, 9),
-      child: FadeInImage(
-        image: const AssetImage('assets/icon/icon.png'),
-        placeholder: MemoryImage(kTransparentImage),
+      child: Image(
+        image: imageIcon,
       ),
     );
   }
@@ -138,6 +161,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     if (selectedTabIndex.value == index) {
       appModel.getScrollController(getCurrentMediaTabType()).animateTo(0,
           duration: const Duration(milliseconds: 200), curve: Curves.easeInOut);
+      appModel.getSearchController(getCurrentMediaTabType()).clear();
       appModel.getSearchController(getCurrentMediaTabType()).close();
     } else {
       selectedTabIndex.value = index;
@@ -234,6 +258,18 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           },
         ),
         popupItem(
+          label: appModel.getIncognitoMode()
+              ? appModel.translate("options_incognito_off")
+              : appModel.translate("options_incognito_on"),
+          icon: appModel.getIncognitoMode()
+              ? Icons.person_off_outlined
+              : Icons.person_off,
+          action: () async {
+            await appModel.toggleIncognitoMode();
+            incognitoNotifier!.value = appModel.getIncognitoMode();
+          },
+        ),
+        popupItem(
           label: appModel.translate("options_dictionaries"),
           icon: Icons.auto_stories,
           action: () async {
@@ -290,18 +326,19 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         appModel.getIsDarkMode() ? Colors.black : Colors.white,
                   ),
                   child: LicensePage(
-                      applicationName: appModel.translate("app_title"),
-                      applicationVersion: appModel.packageInfo.version,
-                      applicationIcon: const Padding(
-                        padding: EdgeInsets.only(top: 8, bottom: 8),
-                        child: Image(
-                          image: AssetImage("assets/icon/icon.png"),
-                          height: 48,
-                          width: 48,
-                        ),
+                    applicationName: appModel.translate("app_title"),
+                    applicationVersion: appModel.packageInfo.version,
+                    applicationIcon: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Image(
+                        image: imageIcon,
+                        height: 48,
+                        width: 48,
                       ),
-                      applicationLegalese:
-                          appModel.translate("license_screen_legalese")),
+                    ),
+                    applicationLegalese:
+                        appModel.translate("license_screen_legalese"),
+                  ),
                 ),
               ),
             );

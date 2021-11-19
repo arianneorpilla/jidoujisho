@@ -51,9 +51,11 @@ class MediaHistory {
     List<MediaHistoryItem> itemsToRemove =
         history.where((historyItem) => key == historyItem.key).toList();
     for (MediaHistoryItem historyItem in itemsToRemove) {
-      File thumbnailFile = File(historyItem.thumbnailPath);
-      if (thumbnailFile.existsSync()) {
-        thumbnailFile.deleteSync();
+      if (historyItem.thumbnailPath.isNotEmpty) {
+        File thumbnailFile = File(historyItem.thumbnailPath);
+        if (thumbnailFile.existsSync()) {
+          thumbnailFile.deleteSync();
+        }
       }
 
       history.remove(historyItem);

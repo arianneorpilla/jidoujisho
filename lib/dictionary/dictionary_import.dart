@@ -6,7 +6,6 @@ import 'package:chisa/media/media_type.dart';
 import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:objectbox/objectbox.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
@@ -46,6 +45,7 @@ Future<void> dictionaryFileImport(
     rootDirectories: await appModel.getMediaTypeDirectories(mediaType),
     fsType: FilesystemType.file,
     folderIconColor: Colors.red,
+    themeData: Theme.of(context),
   );
 
   if (filePaths == null || filePaths.isEmpty) {

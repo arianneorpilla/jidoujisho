@@ -51,6 +51,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
       fsType: FilesystemType.file,
       multiSelect: false,
       folderIconColor: Colors.red,
+      themeData: Theme.of(context),
     );
 
     if (filePaths == null || filePaths.isEmpty) {
@@ -196,6 +197,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     return [
       MediaSourceActionButton(
         context: context,
+        source: this,
         refreshCallback: refreshCallback,
         showIfClosed: true,
         showIfOpened: false,

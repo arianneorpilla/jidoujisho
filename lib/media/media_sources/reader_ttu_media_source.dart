@@ -6,6 +6,7 @@ import 'package:chisa/media/media_type.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/pages/reader_page.dart';
+import 'package:chisa/util/media_source_action_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:provider/provider.dart';
@@ -76,6 +77,27 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
       mediaSource: this,
       appModel: appModel,
     );
+  }
+
+  @override
+  List<MediaSourceActionButton> getSearchBarActions(
+    BuildContext context,
+    Function() refreshCallback,
+  ) {
+    return [
+      MediaSourceActionButton(
+        context: context,
+        source: this,
+        refreshCallback: refreshCallback,
+        showIfClosed: true,
+        showIfOpened: false,
+        icon: Icons.public,
+        onPressed: () async {
+          await onSearchBarTap(context);
+          refreshCallback();
+        },
+      )
+    ];
   }
 
   @override

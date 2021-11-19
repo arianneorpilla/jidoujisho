@@ -3,6 +3,15 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
+import 'package:external_path/external_path.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:material_floating_search_bar/material_floating_search_bar.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path/path.dart' as p;
+
 import 'package:chisa/dictionary/formats/cccedict_simplified_format.dart';
 import 'package:chisa/dictionary/formats/cccedict_traditional_format.dart';
 import 'package:chisa/dictionary/formats/yomichan_term_bank_format.dart';
@@ -13,6 +22,9 @@ import 'package:chisa/language/languages/english_language.dart';
 import 'package:chisa/language/languages/japanese_language.dart';
 import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_source.dart';
+import 'package:chisa/media/media_type.dart';
+import 'package:chisa/media/media_histories/dictionary_media_history.dart';
+import 'package:chisa/media/media_history_items/dictionary_media_history_item.dart';
 import 'package:chisa/media/media_sources/player_local_media_source.dart';
 import 'package:chisa/media/media_sources/player_media_source.dart';
 import 'package:chisa/media/media_sources/player_youtube_source.dart';
@@ -23,18 +35,6 @@ import 'package:chisa/media/media_sources/viewer_media_source.dart';
 import 'package:chisa/media/media_sources_dialog.dart';
 import 'package:chisa/util/blur_widget.dart';
 import 'package:chisa/util/subtitle_options.dart';
-import 'package:external_path/external_path.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:material_floating_search_bar/material_floating_search_bar.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:path/path.dart' as p;
-
-import 'package:chisa/media/media_histories/dictionary_media_history.dart';
-import 'package:chisa/media/media_history_items/dictionary_media_history_item.dart';
-
 import 'package:chisa/util/dictionary_widget_field.dart';
 import 'package:chisa/anki/anki_export_enhancement.dart';
 import 'package:chisa/anki/anki_export_params.dart';
@@ -50,7 +50,6 @@ import 'package:chisa/dictionary/dictionary_widget_enhancement.dart';
 import 'package:chisa/dictionary/enhancements/pitch_accent_enhancement.dart';
 import 'package:chisa/language/language.dart';
 import 'package:chisa/language/language_dialog.dart';
-import 'package:chisa/media/media_type.dart';
 import 'package:chisa/objectbox.g.dart';
 import 'package:chisa/util/anki_export_field.dart';
 import 'package:chisa/util/dictionary_entry_widget.dart';
@@ -203,9 +202,9 @@ class AppModel with ChangeNotifier {
     for (ReaderMediaSource source in readerMediaSources) {
       _availableMediaSources[MediaType.reader]![source.sourceName] = source;
     }
-    // for (ViewerMediaSource source in viewerMediaSources) {
-    //   _availableMediaSources[MediaType.viewer]![source.sourceName] = source;
-    // }
+    for (ViewerMediaSource source in viewerMediaSources) {
+      _availableMediaSources[MediaType.viewer]![source.sourceName] = source;
+    }
   }
 
   void populateExportEnhancements() {
@@ -996,18 +995,6 @@ class AppModel with ChangeNotifier {
     await sharedPreferences.setString('$type/lastPickedFile', directory.path);
   }
 
-  // MediaSource getActiveMediaTypeSource(MediaType type) {
-  //   return Directory(
-  //       sharedPreferences.getString('${type.mediaTypeName}/lastPickedFile') ??
-  //           'storage/emulated/0');
-  // }
-
-  // Future<void> setActiveMediaTypeSource(
-  //     MediaType type, Directory directory) async {
-  //   await sharedPreferences.setString(
-  //       '${type.mediaTypeName}/lastPickedFile', directory.path);
-  // }
-
   ThemeData getLightTheme(BuildContext context) {
     return ThemeData(
       backgroundColor: Colors.white,
@@ -1093,6 +1080,14 @@ class AppModel with ChangeNotifier {
       getCurrentLanguage().languageCode,
       getCurrentLanguage().countryCode,
     );
+  }
+
+  bool getIncognitoMode() {
+    return sharedPreferences.getBool("incognitoMode") ?? false;
+  }
+
+  Future<void> toggleIncognitoMode() async {
+    await sharedPreferences.setBool("incognitoMode", !getIncognitoMode());
   }
 
   bool getPlayerDefinitionFocusMode() {

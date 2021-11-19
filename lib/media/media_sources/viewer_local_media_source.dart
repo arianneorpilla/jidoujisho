@@ -7,9 +7,13 @@ import 'package:chisa/media/media_sources/viewer_media_source.dart';
 import 'package:chisa/media/media_type.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/media/media_types/media_launch_params.dart';
+import 'package:chisa/util/media_source_action_button.dart';
+import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
+import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
+import 'package:collection/collection.dart';
 
 class ViewerLocalMediaSource extends ViewerMediaSource {
   ViewerLocalMediaSource()
@@ -101,7 +105,7 @@ class ViewerLocalMediaSource extends ViewerMediaSource {
   @override
   Future<ImageProvider<Object>> getHistoryThumbnail(
       MediaHistoryItem item) async {
-    File? coverFile = getCoverFile(item);
+    File? coverFile = getCoverFile(item.key);
 
     if (coverFile == null) {
       return MemoryImage(kTransparentImage);
@@ -110,8 +114,8 @@ class ViewerLocalMediaSource extends ViewerMediaSource {
     return FileImage(coverFile);
   }
 
-  File? getCoverFile(MediaHistoryItem item) {
-    Directory directory = getItemDirectory(item);
+  File? getCoverFile(String directoryPath) {
+    Directory directory = Directory(directoryPath);
     List<FileSystemEntity> entities = directory.listSync(recursive: true);
 
     List<String> extensions = mediaType.getAllowedExtensions();
@@ -138,7 +142,85 @@ class ViewerLocalMediaSource extends ViewerMediaSource {
     return null;
   }
 
-  // TODO: tap action
+  Future<void> showFilePicker(BuildContext context,
+      {bool pushReplacement = false}) async {
+    AppModel appModel = Provider.of<AppModel>(context, listen: false);
+
+    Iterable<String>? filePaths = await FilesystemPicker.open(
+      title: "",
+      pickText: appModel.translate("dialog_select"),
+      cancelText: appModel.translate("dialog_return"),
+      context: context,
+      rootDirectories: await appModel.getMediaTypeDirectories(mediaType),
+      fsType: FilesystemType.folder,
+      multiSelect: false,
+      folderIconColor: Colors.red,
+      themeData: Theme.of(context),
+    );
+
+    if (filePaths == null || filePaths.isEmpty) {
+      return;
+    }
+
+    String filePath = filePaths.first;
+
+    appModel.setLastPickedDirectory(mediaType, Directory(p.dirname(filePath)));
+
+    MediaHistoryItem? historyItem = mediaType
+        .getMediaHistory(appModel)
+        .getItems()
+        .firstWhereOrNull((item) => item.key == filePath);
+
+    MediaHistoryItem item;
+    if (historyItem != null) {
+      item = MediaHistoryItem.fromJson(historyItem.toJson());
+    } else {
+      item = MediaHistoryItem(
+        key: filePath,
+        title: p.basenameWithoutExtension(filePath),
+        mediaTypePrefs: mediaType.prefsDirectory(),
+        sourceName: sourceName,
+        currentProgress: 0,
+        completeProgress: 0,
+        thumbnailPath: getCoverFile(filePath)?.path ?? "",
+        extra: {},
+      );
+    }
+
+    ViewerLaunchParams params = getLaunchParams(appModel, item);
+    await launchMediaPage(
+      context,
+      params,
+      pushReplacement: pushReplacement,
+    );
+  }
+
+  @override
+  List<MediaSourceActionButton> getSearchBarActions(
+    BuildContext context,
+    Function() refreshCallback,
+  ) {
+    return [
+      MediaSourceActionButton(
+        context: context,
+        source: this,
+        refreshCallback: refreshCallback,
+        showIfClosed: true,
+        showIfOpened: false,
+        icon: Icons.perm_media,
+        onPressed: () async {
+          await showFilePicker(context);
+          refreshCallback();
+        },
+      )
+    ];
+  }
+
+  @override
+  Future<void> onSearchBarTap(BuildContext context) async {
+    await showFilePicker(context);
+  }
+
   @override
   bool get noSearchAction => true;
 }

@@ -39,8 +39,9 @@ dependencies:
   url_launcher: ^6.0.10
   shared_preferences: ^2.0.7
   ve_dart:
-    path:
-      ../ve_dart
+    git:
+      url: https://github.com/lrorpilla/ve_dart
+      ref: c366bb1ae24f6fad4f5c7e3a1efad5f2b8122e58
   mecab_dart: ^0.1.3
   path: ^1.8.0
   mime: ^1.0.0
@@ -62,7 +63,7 @@ dependencies:
   filesystem_picker:
     git:
       url: https://github.com/lrorpilla/filesystem_picker
-      ref: aa13540bf1b5b4100d43c57d99211186949373ab
+      ref: fc65b3a0b2f27db6b090ad9fbedd50d1eea7f132
       path: package/
   flutter_vlc_player: ^6.0.5
   external_path: ^1.0.1

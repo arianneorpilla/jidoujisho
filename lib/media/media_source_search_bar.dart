@@ -143,6 +143,7 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
         searchBarController.clear();
         searchBarController.close();
         setState(() {});
+        FocusScope.of(context).unfocus();
       }
     }
 
@@ -295,11 +296,14 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
       backdropColor: (appModel.getIsDarkMode())
           ? Colors.black.withOpacity(0.95)
           : Colors.white.withOpacity(0.95),
+      physics:
+          const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
       clearQueryOnClose: true,
       accentColor: Theme.of(context).focusColor,
       onQueryChanged: onQueryChanged,
       leadingActions: [
         buildSourceButton(),
+        if (!mediaSource.noSearchAction) buildBackButton(),
       ],
       automaticallyImplyBackButton: false,
       actions: getAllActions(),
@@ -364,7 +368,8 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
 
   Widget buildSourceButton() {
     return FloatingSearchBarAction(
-      showIfOpened: true,
+      showIfOpened: mediaSource.noSearchAction,
+      showIfClosed: true,
       child: CircularButton(
         icon: Icon(
           mediaSource.icon,
@@ -382,10 +387,19 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
             searchBarController.clear();
             searchBarController.close();
             widget.refreshCallback();
+            FocusScope.of(context).unfocus();
           }
           setState(() {});
         },
       ),
+    );
+  }
+
+  Widget buildBackButton() {
+    return FloatingSearchBarAction.back(
+      showIfClosed: false,
+      color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
+      size: 20,
     );
   }
 

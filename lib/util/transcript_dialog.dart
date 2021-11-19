@@ -50,6 +50,7 @@ Widget transcriptDialog({
   }
 
   return ScrollablePositionedList.builder(
+    physics: const BouncingScrollPhysics(),
     itemScrollController: itemScrollController,
     itemPositionsListener: itemPositionsListener,
     initialScrollIndex: (selectedIndex - 2 > 0) ? selectedIndex - 2 : 0,

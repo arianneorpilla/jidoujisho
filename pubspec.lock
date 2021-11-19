@@ -266,8 +266,8 @@ packages:
     dependency: "direct main"
     description:
       path: package
-      ref: aa13540bf1b5b4100d43c57d99211186949373ab
-      resolved-ref: aa13540bf1b5b4100d43c57d99211186949373ab
+      ref: fc65b3a0b2f27db6b090ad9fbedd50d1eea7f132
+      resolved-ref: fc65b3a0b2f27db6b090ad9fbedd50d1eea7f132
       url: "https://github.com/lrorpilla/filesystem_picker"
     source: git
     version: "2.0.0-nullsafety.0"
@@ -1047,9 +1047,11 @@ packages:
   ve_dart:
     dependency: "direct main"
     description:
-      path: "../ve_dart"
-      relative: true
-    source: path
+      path: "."
+      ref: c366bb1ae24f6fad4f5c7e3a1efad5f2b8122e58
+      resolved-ref: c366bb1ae24f6fad4f5c7e3a1efad5f2b8122e58
+      url: "https://github.com/lrorpilla/ve_dart"
+    source: git
     version: "0.2.1"
   vector_math:
     dependency: transitive

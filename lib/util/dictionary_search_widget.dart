@@ -280,6 +280,8 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
       backdropColor: (appModel.getIsDarkMode())
           ? Colors.black.withOpacity(0.95)
           : Colors.white.withOpacity(0.95),
+      physics:
+          const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
       clearQueryOnClose: true,
       accentColor: Theme.of(context).focusColor,
       onQueryChanged: onQueryChanged,

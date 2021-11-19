@@ -959,6 +959,7 @@ class PlayerYouTubeSource extends PlayerMediaSource {
       if (playlistId != null)
         MediaSourceActionButton(
           context: context,
+          source: this,
           showIfClosed: true,
           showIfOpened: false,
           refreshCallback: refreshCallback,

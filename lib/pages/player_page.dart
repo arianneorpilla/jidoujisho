@@ -2137,6 +2137,7 @@ class PlayerPageState extends State<PlayerPage>
       fsType: FilesystemType.file,
       multiSelect: false,
       folderIconColor: Colors.red,
+      themeData: Theme.of(context),
     );
 
     if (filePaths == null || filePaths.isEmpty) {
