@@ -42,7 +42,7 @@ class DictionaryMediaHistory extends MediaHistory {
     String jsonList =
         appModel.sharedPreferences.getString(prefsDirectory) ?? '[]';
 
-    List<dynamic> serialisedItems = (jsonDecode(jsonList) as List<dynamic>);
+    List<dynamic> serialisedItems = jsonDecode(jsonList) as List<dynamic>;
 
     List<DictionaryMediaHistoryItem> history = [];
     for (var serialisedItem in serialisedItems) {

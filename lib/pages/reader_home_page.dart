@@ -110,7 +110,7 @@ class ReaderHomePageState extends State<ReaderHomePage>
           }
           MediaHistoryItem item = mediaHistoryItems[index - 1];
           MediaSource source = appModel.getMediaSourceFromName(
-              MediaType.player, item.sourceName);
+              MediaType.reader, item.sourceName);
           return source.buildMediaHistoryItem(
             context: context,
             history: history,

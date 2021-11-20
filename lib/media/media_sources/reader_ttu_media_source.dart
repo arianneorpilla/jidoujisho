@@ -1,23 +1,32 @@
-import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'dart:async';
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:provider/provider.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 import 'package:chisa/media/media_sources/reader_media_source.dart';
 import 'package:chisa/media/media_type.dart';
+import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/pages/reader_page.dart';
 import 'package:chisa/util/media_source_action_button.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:provider/provider.dart';
-import 'package:transparent_image/transparent_image.dart';
+import 'package:chisa/util/reading_direction.dart';
 
 class ReaderTtuMediaSource extends ReaderMediaSource {
   ReaderTtuMediaSource()
       : super(
           sourceName: "ッツ Ebook Reader",
           icon: Icons.chrome_reader_mode_outlined,
+          readingDirection: ReadingDirection.verticalRTL,
         );
+
+  late InAppWebViewController controller;
+  late InAppLocalhostServer server;
 
   @override
   String getHistoryCaption(MediaHistoryItem item) {
@@ -41,19 +50,14 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
   }
 
   @override
-  URLRequest getInitialURLRequest(ReaderLaunchParams params) {
-    return URLRequest(url: Uri.parse(params.mediaHistoryItem.key));
-  }
-
-  @override
   bool get noSearchAction => true;
 
   @override
   Future<void> onSearchBarTap(BuildContext context) async {
-    AppModel appModel = Provider.of<AppModel>(context);
+    AppModel appModel = Provider.of<AppModel>(context, listen: false);
 
     MediaHistoryItem item = MediaHistoryItem(
-      key: "https://ttu-ebook.web.app/",
+      key: "https://ttu-ebook.web.app/?min=",
       mediaTypePrefs: MediaType.reader.prefsDirectory(),
       sourceName: sourceName,
       currentProgress: 0,
@@ -65,6 +69,7 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
       appModel: appModel,
       mediaSource: this,
       mediaHistoryItem: item,
+      saveHistoryItem: true,
     );
 
     await launchMediaPage(context, params);
@@ -76,6 +81,7 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
       mediaHistoryItem: item,
       mediaSource: this,
       appModel: appModel,
+      saveHistoryItem: true,
     );
   }
 
@@ -110,23 +116,499 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
   }
 
   @override
-  Future<void> onConsoleMessage(InAppWebViewController webViewController,
-      String consoleMessage, ReaderPageState readerPageState) {
-    // TODO: implement onConsoleMessage
-    throw UnimplementedError();
+  Widget buildReaderArea(BuildContext context, ReaderPageState state) {
+    return InAppWebView(
+      contextMenu: getContextMenu(state),
+      initialUrlRequest:
+          URLRequest(url: Uri.parse(state.widget.params.mediaHistoryItem.key)),
+      initialOptions: getInitialOptions(),
+      onWebViewCreated: (newController) {
+        controller = newController;
+      },
+      onConsoleMessage: (controller, consoleMessage) async {
+        onConsoleMessage(controller, consoleMessage, state);
+      },
+      onLoadStop: (controller, uri) {
+        onLoadStop(controller, uri, state);
+      },
+    );
   }
 
-  @override
-  Future<void> onLoadStop(InAppWebViewController webViewController, Uri url,
-      ReaderMediaSource readerMediaSource) {
-    // TODO: implement onLoadStop
-    throw UnimplementedError();
+  Future<void> onConsoleMessage(InAppWebViewController controller,
+      ConsoleMessage consoleMessage, ReaderPageState state) async {
+    try {
+      Map<String, dynamic> messageJson = jsonDecode(consoleMessage.message);
+
+      print(messageJson.keys);
+      switch (messageJson["jidoujisho"]) {
+        case "jidoujisho":
+          int index = messageJson["offset"];
+          String text = messageJson["text"];
+          String? isCreator = messageJson["isCreator"];
+
+          try {
+            if (index != -1) {
+              String term = await state.appModel
+                  .getCurrentLanguage()
+                  .wordFromIndex(text, index);
+
+              unselectWebViewTextSelection(controller);
+
+              if (isCreator == "yes") {
+                state.openCardCreator(term);
+              } else {
+                Clipboard.setData(ClipboardData(text: term));
+              }
+            }
+          } finally {
+            unselectWebViewTextSelection(controller);
+          }
+
+          break;
+        case "jidoujisho-bookmark":
+          try {
+            String currentIndexText = (await controller.getUrl())
+                .toString()
+                .replaceAll("https://ttu-ebook.web.app/b/", "")
+                .replaceAll("?min=", "");
+            int currentIndex = int.parse(currentIndexText);
+
+            String currentTitle = (await controller.getTitle()).toString();
+            currentTitle = currentTitle.replaceAll("| ッツ Ebook Reader", "");
+            if (currentTitle == "ッツ Ebook Reader") {
+              currentTitle = "";
+            }
+
+            state.setUrl("https://ttu-ebook.web.app/b/$currentIndex?min=");
+            state.setScrollX(await controller.getScrollX() ?? 0);
+            state.setScrollY(await controller.getScrollY() ?? 0);
+            state.setTitle(currentTitle);
+            state.setAuthor("");
+
+            if (messageJson["bookmark"] != null) {
+              String wordCountText = messageJson["bookmark"];
+              int currentProgress =
+                  int.tryParse(wordCountText.split("/")[0]) ?? 0;
+              int completeProgress =
+                  int.tryParse(wordCountText.split("/")[1].split(" ")[0]) ?? 0;
+
+              state.setCurrentProgress(currentProgress);
+              state.setCompleteProgress(completeProgress);
+            }
+
+            await state.updateHistory();
+          } catch (e) {
+            debugPrint(e.toString());
+          }
+          break;
+        case "jidoujisho-metadata":
+          if (state.thumbnail.isEmpty) {
+            try {
+              if (messageJson["base64Image"].startsWith("data:image/")) {
+                state.setThumbnail(messageJson["base64Image"]);
+              }
+            } catch (e) {
+              debugPrint(e.toString());
+            }
+          }
+      }
+    } finally {}
   }
 
-  @override
-  Future<void> onTitleChanged(
-      InAppWebViewController webViewController, String title) {
-    // TODO: implement onTitleChanged
-    throw UnimplementedError();
+  Future<void> onLoadStop(InAppWebViewController controller, Uri? uri,
+      ReaderPageState state) async {
+    await controller.evaluateJavascript(source: textClickJs);
+    String theme = await controller.evaluateJavascript(
+        source: "document.documentElement.className");
+    switch (theme) {
+      case "light-theme":
+      case "ecru-theme":
+      case "blue-theme":
+      case "grey-theme":
+        state.setIsDarkMode(false);
+        break;
+      case "black-theme":
+      case "dark-theme":
+        state.setIsDarkMode(true);
+        break;
+    }
+
+    String currentTitle = await controller.getTitle() ?? "";
+
+    currentTitle = currentTitle.replaceAll("| ッツ Ebook Reader", "");
+    if (currentTitle == "ッツ Ebook Reader") {
+      currentTitle = "";
+    }
+
+    state.setTitle(currentTitle);
   }
+
+  Future<void> onTitleChanged(InAppWebViewController controller, String? title,
+      ReaderPageState state) async {
+    await controller.evaluateJavascript(source: textClickJs);
+
+    String currentTitle = title!;
+
+    currentTitle = currentTitle.replaceAll("| ッツ Ebook Reader", "");
+    if (currentTitle == "ッツ Ebook Reader") {
+      currentTitle = "";
+    }
+
+    print(currentTitle);
+    state.setTitle(currentTitle);
+  }
+
+  Future<void> unselectWebViewTextSelection(
+      InAppWebViewController webViewController) async {
+    String unselectJs = "window.getSelection().removeAllRanges();";
+    await webViewController.evaluateJavascript(source: unselectJs);
+  }
+
+  String sanitizeWebViewTextSelection(String? text) {
+    if (text == null) {
+      return "";
+    }
+
+    text = text.replaceAll("\\n", "\n");
+    text = text.trim();
+    return text;
+  }
+
+  Future<String> getWebViewTextSelection(
+      InAppWebViewController webViewController) async {
+    String? selectedText = await webViewController.getSelectedText();
+    selectedText = sanitizeWebViewTextSelection(selectedText);
+    return selectedText;
+  }
+
+  InAppWebViewGroupOptions getInitialOptions() {
+    return InAppWebViewGroupOptions(
+      crossPlatform: InAppWebViewOptions(
+        useShouldOverrideUrlLoading: true,
+        mediaPlaybackRequiresUserGesture: false,
+        verticalScrollBarEnabled: false,
+        horizontalScrollBarEnabled: false,
+      ),
+      android: AndroidInAppWebViewOptions(
+        useHybridComposition: true,
+        verticalScrollbarThumbColor: Colors.transparent,
+        verticalScrollbarTrackColor: Colors.transparent,
+        horizontalScrollbarThumbColor: Colors.transparent,
+        horizontalScrollbarTrackColor: Colors.transparent,
+        scrollbarFadingEnabled: false,
+      ),
+    );
+  }
+
+  ContextMenu getContextMenu(ReaderPageState state) {
+    return ContextMenu();
+  }
+
+  String textClickJs = """
+/*jshint esversion: 6 */
+var getImageBlob = function(url) {
+	return new Promise(async resolve => {
+		let response = await fetch(url);
+		let blob = response.blob();
+		resolve(blob);
+	});
+};
+var blobToBase64 = function(blob) {
+	return new Promise(resolve => {
+		let reader = new FileReader();
+		reader.onload = function() {
+			let dataUrl = reader.result;
+			resolve(dataUrl);
+		};
+		reader.readAsDataURL(blob);
+	});
+}
+var getBase64Image = async function(url) {
+	let blob = await getImageBlob(url);
+	let base64 = await blobToBase64(blob);
+	return base64;
+}
+var touchmoved;
+var touchevent;
+var reader = document.getElementsByTagName('app-reader')[0];
+var bookmark = document.getElementsByClassName('fa-bookmark')[0].parentElement.parentElement;
+var info = document.getElementsByClassName('information-overlay bottom-overlay scroll-information')[0];
+
+var firstImage = document.getElementsByTagName("image")[0];
+var firstImg = document.getElementsByTagName("img")[0];
+var blob;
+
+if (firstImage != null) {
+  blob = firstImage.attributes.href.textContent;
+} else if (firstImg != null) {
+  blob = firstImg.src;
+} else {
+  blob = "";
+}
+
+if (blob != null) {
+  getBase64Image(blob).then(base64Image => console.log(JSON.stringify({
+				"base64Image": base64Image,
+        "bookmark": info.textContent,
+				"jidoujisho": "jidoujisho-metadata"
+			})));
+}
+
+bookmark.addEventListener('touchstart', function() {
+  console.log(JSON.stringify({
+				"bookmark": info.textContent,
+				"jidoujisho": "jidoujisho-bookmark"
+			}));
+});
+
+reader.addEventListener('touchend', function() {
+	if (touchmoved !== true) {
+		var touch = touchevent.touches[0];
+		var result = document.caretRangeFromPoint(touch.clientX, touch.clientY);
+		var selectedElement = result.startContainer;
+
+    var paragraph = result.startContainer;
+    while (paragraph && paragraph.nodeName !== 'P') {
+      paragraph = paragraph.parentNode;
+    }
+
+    if (paragraph == null) {
+      paragraph = result.startContainer.parentNode;
+    }
+
+    console.log(paragraph.nodeName);
+
+		var noFuriganaText = [];
+		var noFuriganaNodes = [];
+		var selectedFound = false;
+		var index = 0;
+
+		for (var value of paragraph.childNodes.values()) {
+			if (value.nodeName === "#text") {
+				noFuriganaText.push(value.textContent);
+				noFuriganaNodes.push(value);
+
+				if (selectedFound === false) {
+					if (selectedElement !== value) {
+						index = index + value.textContent.length;
+					} else {
+						index = index + result.startOffset;
+						selectedFound = true;
+					}
+				}
+
+			} else {
+				for (var node of value.childNodes.values()) {
+					if (node.nodeName === "#text") {
+						noFuriganaText.push(node.textContent);
+						noFuriganaNodes.push(node);
+
+						if (selectedFound === false) {
+							if (selectedElement !== node) {
+								index = index + node.textContent.length;
+							} else {
+								index = index + result.startOffset;
+								selectedFound = true;
+							}
+						}
+					} else if (node.firstChild.nodeName === "#text" && node.nodeName !== "RT" && node.nodeName !== "RP") {
+						noFuriganaText.push(node.firstChild.textContent);
+						noFuriganaNodes.push(node.firstChild);
+
+						if (selectedFound === false) {
+							if (selectedElement !== node.firstChild) {
+								index = index + node.firstChild.textContent.length;
+							} else {
+								index = index + result.startOffset;
+								selectedFound = true;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		var text = noFuriganaText.join("");
+		var offset = index;
+    
+
+		console.log(JSON.stringify({
+				"offset": offset,
+				"text": text,
+				"jidoujisho": "jidoujisho"
+			}));
+	}
+});
+reader.addEventListener('touchmove', () => {
+	touchmoved = true;
+	touchevent = null;
+});
+reader.addEventListener('touchstart', (e) => {
+	touchmoved = false;
+	touchevent = e;
+});
+
+function getSelectionText() {
+    function getRangeSelectedNodes(range) {
+      var node = range.startContainer;
+      var endNode = range.endContainer;
+      if (node == endNode) return [node];
+      var rangeNodes = [];
+      while (node && node != endNode) rangeNodes.push(node = nextNode(node));
+      node = range.startContainer;
+      while (node && node != range.commonAncestorContainer) {
+        rangeNodes.unshift(node);
+        node = node.parentNode;
+      }
+      return rangeNodes;
+      function nextNode(node) {
+        if (node.hasChildNodes()) return node.firstChild;
+        else {
+          while (node && !node.nextSibling) node = node.parentNode;
+          if (!node) return null;
+          return node.nextSibling;
+        }
+      }
+    }
+    var txt = "";
+    var nodesInRange;
+    var selection;
+    if (window.getSelection) {
+      selection = window.getSelection();
+      nodesInRange = getRangeSelectedNodes(selection.getRangeAt(0));
+      nodes = nodesInRange.filter((node) => node.nodeName == "#text" && node.parentElement.nodeName !== "RT" && node.parentElement.nodeName !== "RP" && node.parentElement.parentElement.nodeName !== "RT" && node.parentElement.parentElement.nodeName !== "RP");
+      if (selection.anchorNode === selection.focusNode) {
+          txt = txt.concat(selection.anchorNode.textContent.substring(selection.baseOffset, selection.extentOffset));
+      } else {
+          for (var i = 0; i < nodes.length; i++) {
+              var node = nodes[i];
+              if (i === 0) {
+                  txt = txt.concat(node.textContent.substring(selection.getRangeAt(0).startOffset));
+              } else if (i === nodes.length - 1) {
+                  txt = txt.concat(node.textContent.substring(0, selection.getRangeAt(0).endOffset));
+              } else {
+                  txt = txt.concat(node.textContent);
+              }
+          }
+      }
+    } else if (window.document.getSelection) {
+      selection = window.document.getSelection();
+      nodesInRange = getRangeSelectedNodes(selection.getRangeAt(0));
+      nodes = nodesInRange.filter((node) => node.nodeName == "#text" && node.parentElement.nodeName !== "RT" && node.parentElement.nodeName !== "RP" && node.parentElement.parentElement.nodeName !== "RT" && node.parentElement.parentElement.nodeName !== "RP");
+      if (selection.anchorNode === selection.focusNode) {
+          txt = txt.concat(selection.anchorNode.textContent.substring(selection.baseOffset, selection.extentOffset));
+      } else {
+          for (var i = 0; i < nodes.length; i++) {
+              var node = nodes[i];
+              if (i === 0) {
+                  txt = txt.concat(node.textContent.substring(selection.getRangeAt(0).startOffset));
+              } else if (i === nodes.length - 1) {
+                  txt = txt.concat(node.textContent.substring(0, selection.getRangeAt(0).endOffset));
+              } else {
+                  txt = txt.concat(node.textContent);
+              }
+          }
+      }
+    } else if (window.document.selection) {
+      txt = window.document.selection.createRange().text;
+    }
+    return txt;
+};
+
+reader.addEventListener('auxclick', (e) => {
+  if (getSelectionText()) {
+    console.log(JSON.stringify({
+				"offset": -1,
+				"text": getSelectionText(),
+				"jidoujisho": "jidoujisho",
+        "isCreator": "yes",
+			}));
+  }
+});
+
+reader.addEventListener('click', (e) => {
+  if (getSelectionText()) {
+    console.log(JSON.stringify({
+				"offset": -1,
+				"text": getSelectionText(),
+				"jidoujisho": "jidoujisho",
+        "isCreator": "no",
+			}));
+  } else {
+    var result = document.caretRangeFromPoint(e.clientX, e.clientY);
+    var selectedElement = result.startContainer;
+
+    var paragraph = result.startContainer;
+    while (paragraph && paragraph.nodeName !== 'P') {
+      paragraph = paragraph.parentNode;
+    }
+
+    if (paragraph == null) {
+      paragraph = result.startContainer.parentNode;
+    }
+
+    console.log(paragraph.nodeName);
+
+		var noFuriganaText = [];
+		var noFuriganaNodes = [];
+		var selectedFound = false;
+		var index = 0;
+
+		for (var value of paragraph.childNodes.values()) {
+			if (value.nodeName === "#text") {
+				noFuriganaText.push(value.textContent);
+				noFuriganaNodes.push(value);
+
+				if (selectedFound === false) {
+					if (selectedElement !== value) {
+						index = index + value.textContent.length;
+					} else {
+						index = index + result.startOffset;
+						selectedFound = true;
+					}
+				}
+
+			} else {
+				for (var node of value.childNodes.values()) {
+					if (node.nodeName === "#text") {
+						noFuriganaText.push(node.textContent);
+						noFuriganaNodes.push(node);
+
+						if (selectedFound === false) {
+							if (selectedElement !== node) {
+								index = index + node.textContent.length;
+							} else {
+								index = index + result.startOffset;
+								selectedFound = true;
+							}
+						}
+					} else if (node.firstChild.nodeName === "#text" && node.nodeName !== "RT" && node.nodeName !== "RP") {
+						noFuriganaText.push(node.firstChild.textContent);
+						noFuriganaNodes.push(node.firstChild);
+
+						if (selectedFound === false) {
+							if (selectedElement !== node.firstChild) {
+								index = index + node.firstChild.textContent.length;
+							} else {
+								index = index + result.startOffset;
+								selectedFound = true;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		var text = noFuriganaText.join("");
+		var offset = index;
+    
+
+		console.log(JSON.stringify({
+				"offset": offset,
+				"text": text,
+				"jidoujisho": "jidoujisho"
+			}));
+  }
+});
+""";
 }

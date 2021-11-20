@@ -308,9 +308,9 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "397998788b258ca1a9d0407d2dd1bde683b4e50a"
-      resolved-ref: "397998788b258ca1a9d0407d2dd1bde683b4e50a"
-      url: "https://github.com/Ser1ous/flutter_inappwebview"
+      ref: "1e4da7a5e5fa00903d981510a0b7c154ad3febe1"
+      resolved-ref: "1e4da7a5e5fa00903d981510a0b7c154ad3febe1"
+      url: "https://github.com/lrorpilla/flutter_inappwebview"
     source: git
     version: "5.3.2"
   flutter_launcher_icons:

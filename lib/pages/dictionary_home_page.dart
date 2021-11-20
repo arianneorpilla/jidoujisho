@@ -109,10 +109,6 @@ class DictionaryPageState extends State<DictionaryHomePage>
         .reversed
         .toList();
 
-    List<DictionarySearchResult> results = mediaHistoryItems
-        .map((item) => DictionarySearchResult.fromJson(item.key))
-        .toList();
-
     scrollController ??= appModel.getScrollController(
       widget.mediaType,
     );
@@ -125,17 +121,15 @@ class DictionaryPageState extends State<DictionaryHomePage>
         physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics()),
         controller: scrollController,
-        addAutomaticKeepAlives: true,
-        itemCount: results.length + 1,
+        itemCount: mediaHistoryItems.length + 1,
         itemBuilder: (BuildContext context, int index) {
           if (index == 0) {
             return const SizedBox(height: 60);
           }
 
-          DictionarySearchResult result = results[index - 1];
           DictionaryMediaHistoryItem mediaHistoryItem =
               mediaHistoryItems[index - 1];
-          return buildDictionaryResult(result, mediaHistoryItem);
+          return buildDictionaryResult(mediaHistoryItem);
         },
       ),
     );
@@ -225,14 +219,14 @@ class DictionaryPageState extends State<DictionaryHomePage>
     );
   }
 
-  Widget buildDictionaryResult(DictionarySearchResult result,
-      DictionaryMediaHistoryItem mediaHistoryItem) {
+  Widget buildDictionaryResult(DictionaryMediaHistoryItem mediaHistoryItem) {
+    DictionarySearchResult result =
+        DictionarySearchResult.fromJson(mediaHistoryItem.key);
+
     DictionaryFormat dictionaryFormat =
         appModel.getDictionaryFormatFromName(result.formatName);
     Dictionary dictionary =
         appModel.getDictionaryFromName(result.dictionaryName);
-    ValueNotifier<int> indexNotifier =
-        ValueNotifier<int>(mediaHistoryItem.currentProgress);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12, left: 12, right: 12),
@@ -241,7 +235,8 @@ class DictionaryPageState extends State<DictionaryHomePage>
           : Theme.of(context).unselectedWidgetColor.withOpacity(0.030),
       child: InkWell(
         onTap: () async {
-          DictionaryEntry entry = result.entries[indexNotifier.value];
+          DictionaryEntry entry =
+              result.entries[mediaHistoryItem.currentProgress];
 
           await navigateToCreator(
             context: context,
@@ -255,7 +250,7 @@ class DictionaryPageState extends State<DictionaryHomePage>
         },
         onLongPress: () async {
           ValueNotifier<int> dialogIndexNotifier =
-              ValueNotifier<int>(indexNotifier.value);
+              ValueNotifier<int>(mediaHistoryItem.currentProgress);
 
           HapticFeedback.vibrate();
           await showDialog(
@@ -304,7 +299,7 @@ class DictionaryPageState extends State<DictionaryHomePage>
                   ),
                   onPressed: () async {
                     DictionaryEntry dialogEntry =
-                        result.entries[dialogIndexNotifier.value];
+                        result.entries[mediaHistoryItem.currentProgress];
                     await navigateToCreator(
                       context: context,
                       appModel: appModel,
@@ -331,7 +326,6 @@ class DictionaryPageState extends State<DictionaryHomePage>
             dictionaryFormat: appModel.getDictionaryFormatFromName(
               result.formatName,
             ),
-            indexNotifier: indexNotifier,
             callback: () {
               setState(() {});
             },

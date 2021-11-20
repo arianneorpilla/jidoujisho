@@ -28,6 +28,7 @@ class ViewerLocalMediaSource extends ViewerMediaSource {
       appModel: appModel,
       mediaSource: this,
       mediaHistoryItem: item,
+      saveHistoryItem: true,
     );
   }
 

@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:chisa/util/reading_direction.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
@@ -22,11 +22,14 @@ abstract class ReaderMediaSource extends MediaSource {
   ReaderMediaSource({
     required String sourceName,
     required IconData icon,
+    required this.readingDirection,
   }) : super(
           sourceName: sourceName,
           icon: icon,
           mediaType: MediaType.reader,
         );
+
+  final ReadingDirection readingDirection;
 
   /// A [ReaderMediaSource] must be able to construct launch parameters from
   /// its media history items.
@@ -364,53 +367,19 @@ abstract class ReaderMediaSource extends MediaSource {
     return FileImage(File(item.thumbnailPath));
   }
 
-  /// Define a custom options for the [InAppWebView] at startup of a
-  /// [ReaderPage].
-  URLRequest getInitialURLRequest(ReaderLaunchParams params);
+  /// Define a custom [Widget] for the [ReaderPage] to represent the reading
+  /// area of the session.
+  Widget buildReaderArea(BuildContext context, ReaderPageState state);
 
-  /// Define a custom options for the [InAppWebView] in the [ReaderPage] w
-  /// when shown.
-  InAppWebViewGroupOptions getInAppWebViewOptions(ReaderLaunchParams params) {
-    return InAppWebViewGroupOptions(
-      crossPlatform: InAppWebViewOptions(
-        useShouldOverrideUrlLoading: true,
-        mediaPlaybackRequiresUserGesture: false,
-      ),
-      android: AndroidInAppWebViewOptions(
-        useHybridComposition: true,
-      ),
-      ios: IOSInAppWebViewOptions(
-        allowsInlineMediaPlayback: true,
-      ),
-    );
+  /// Return if [ReadingDirection] is vertical.
+  bool isVertical() {
+    switch (readingDirection) {
+      case ReadingDirection.horizontalLTR:
+      case ReadingDirection.horizontalRTL:
+        return false;
+      case ReadingDirection.verticalLTR:
+      case ReadingDirection.verticalRTL:
+        return true;
+    }
   }
-
-  /// Define a custom menu for a source for the [InAppWebView] in the
-  /// [ReaderPage] when shown.
-  ContextMenu? getCustomContextMenu(ReaderPageState readerPageState) {
-    return null;
-  }
-
-  /// Define a custom console message action to the [InAppWebView] in the
-  /// [ReaderPage] when shown.
-  Future<void> onConsoleMessage(
-    InAppWebViewController webViewController,
-    String consoleMessage,
-    ReaderPageState readerPageState,
-  );
-
-  /// Define a custom load complete action for the [InAppWebView] in the
-  /// [ReaderPage] when shown.
-  Future<void> onLoadStop(
-    InAppWebViewController webViewController,
-    Uri url,
-    ReaderMediaSource readerMediaSource,
-  );
-
-  /// Define a custom action for when the page title changes for the
-  /// [InAppWebView] in the [ReaderPage] when shown.
-  Future<void> onTitleChanged(
-    InAppWebViewController webViewController,
-    String title,
-  );
 }

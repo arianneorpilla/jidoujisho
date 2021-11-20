@@ -160,7 +160,7 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
                   dictionaryEntry: entry,
                   dictionaryFormat: format,
                   dictionary: dictionary,
-                  selectable: true,
+                  selectable: false,
                 ),
               ),
             ),

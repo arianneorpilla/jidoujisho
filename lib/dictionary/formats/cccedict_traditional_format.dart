@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:chisa/dictionary/dictionary_entry.dart';
 import 'package:chisa/dictionary/dictionary_format.dart';
 import 'package:chisa/dictionary/dictionary_import.dart';
-import 'package:flutter/semantics.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter_archive/flutter_archive.dart';
 

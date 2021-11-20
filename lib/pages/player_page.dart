@@ -1,6 +1,22 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
+
+import 'package:clipboard_listener/clipboard_listener.dart';
+import 'package:filesystem_picker/filesystem_picker.dart';
+import 'package:flutter_vlc_player/flutter_vlc_player.dart';
+import 'package:multi_value_listenable_builder/multi_value_listenable_builder.dart';
+import 'package:network_to_file_image/network_to_file_image.dart';
+import 'package:progress_indicators/progress_indicators.dart';
+import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:subtitle/subtitle.dart';
+import 'package:wakelock/wakelock.dart';
+import 'package:path/path.dart' as p;
+
 import 'package:chisa/anki/anki_export_params.dart';
 import 'package:chisa/dictionary/dictionary_entry.dart';
 import 'package:chisa/dictionary/dictionary_search_result.dart';
@@ -19,20 +35,6 @@ import 'package:chisa/util/subtitle_options.dart';
 import 'package:chisa/util/subtitle_utils.dart';
 import 'package:chisa/util/time_format.dart';
 import 'package:chisa/util/transcript_dialog.dart';
-import 'package:clipboard_listener/clipboard_listener.dart';
-import 'package:filesystem_picker/filesystem_picker.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
-import 'package:flutter_vlc_player/flutter_vlc_player.dart';
-import 'package:multi_value_listenable_builder/multi_value_listenable_builder.dart';
-import 'package:network_to_file_image/network_to_file_image.dart';
-import 'package:progress_indicators/progress_indicators.dart';
-import 'package:provider/provider.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:subtitle/subtitle.dart';
-import 'package:wakelock/wakelock.dart';
-import 'package:path/path.dart' as p;
 
 class PlayerPage extends StatefulWidget {
   final PlayerLaunchParams params;
@@ -47,7 +49,7 @@ class PlayerPage extends StatefulWidget {
 }
 
 class PlayerPageState extends State<PlayerPage>
-    with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   late AppModel appModel;
 
   late VlcPlayerController playerController;
@@ -139,18 +141,15 @@ class PlayerPageState extends State<PlayerPage>
         ],
       );
 
-      return (await showDialog(
+      return await showDialog(
             context: context,
             builder: (context) => alertDialog,
-          )) ??
+          ) ??
           false;
     }
 
     return false;
   }
-
-  @override
-  bool get wantKeepAlive => true;
 
   void initialiseEmbeddedSubtitles() async {
     if (widget.params.getMode() == MediaLaunchMode.network) {
@@ -441,6 +440,7 @@ class PlayerPageState extends State<PlayerPage>
           TextSpan(
             text: "『",
             style: TextStyle(
+              fontWeight: FontWeight.bold,
               color: Theme.of(context).unselectedWidgetColor,
             ),
           ),
@@ -453,6 +453,7 @@ class PlayerPageState extends State<PlayerPage>
           TextSpan(
             text: "』",
             style: TextStyle(
+              fontWeight: FontWeight.bold,
               color: Theme.of(context).unselectedWidgetColor,
             ),
           ),
@@ -491,6 +492,7 @@ class PlayerPageState extends State<PlayerPage>
           TextSpan(
             text: "『",
             style: TextStyle(
+              fontWeight: FontWeight.bold,
               color: Theme.of(context).unselectedWidgetColor,
             ),
           ),
@@ -503,6 +505,7 @@ class PlayerPageState extends State<PlayerPage>
           TextSpan(
             text: "』",
             style: TextStyle(
+              fontWeight: FontWeight.bold,
               color: Theme.of(context).unselectedWidgetColor,
             ),
           ),
@@ -539,6 +542,7 @@ class PlayerPageState extends State<PlayerPage>
           TextSpan(
             text: "『",
             style: TextStyle(
+              fontWeight: FontWeight.bold,
               color: Theme.of(context).unselectedWidgetColor,
             ),
           ),
@@ -627,6 +631,7 @@ class PlayerPageState extends State<PlayerPage>
           TextSpan(
             text: "』",
             style: TextStyle(
+              fontWeight: FontWeight.bold,
               color: Theme.of(context).unselectedWidgetColor,
             ),
           ),
@@ -740,7 +745,9 @@ class PlayerPageState extends State<PlayerPage>
       }
 
       if (widget.params.saveHistoryItem) {
-        updateHistory();
+        if (!appModel.getIncognitoMode()) {
+          updateHistory();
+        }
       }
     }
   }
@@ -804,7 +811,6 @@ class PlayerPageState extends State<PlayerPage>
 
   Widget buildSubtitle() {
     return MultiValueListenableBuider(
-      // Add all ValueListenables here.
       valueListenables: [
         currentSubtitle,
         listeningSubtitle,
@@ -965,10 +971,6 @@ class PlayerPageState extends State<PlayerPage>
     );
   }
 
-  // Widget buildDictionaryMatch() {
-  //   return Container(padding: EdgeInsets.fromLTRB(16, 16, 16, menuHeight + 16, child: DictionaryScrollableWidget(appModel: appModel, dictionary: appModel.getCurrentDictionary(), dictionaryFormat: appModel.getDictionaryFormatFromName(appModel.getCurrentDictionary().formatName),
-  // }
-
   void toggleMenuVisibility() async {
     menuHideTimer!.cancel();
     isMenuHidden.value = !isMenuHidden.value;
@@ -1113,7 +1115,6 @@ class PlayerPageState extends State<PlayerPage>
     }
 
     return MultiValueListenableBuider(
-      // Add all ValueListenables here.
       valueListenables: [
         isPlaying,
         isEnded,
@@ -1301,8 +1302,6 @@ class PlayerPageState extends State<PlayerPage>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
-
     appModel = Provider.of<AppModel>(context);
     currentOrientation ??= MediaQuery.of(context).orientation;
 
@@ -1419,7 +1418,6 @@ class PlayerPageState extends State<PlayerPage>
 
   Widget buildPlayButton() {
     return MultiValueListenableBuider(
-      // Add all ValueListenables here.
       valueListenables: [
         isPlaying,
         isEnded,
@@ -2057,7 +2055,6 @@ class PlayerPageState extends State<PlayerPage>
 
   Widget buildSlider() {
     return MultiValueListenableBuider(
-      // Add all ValueListenables here.
       valueListenables: [
         duration,
         position,

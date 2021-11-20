@@ -1,8 +1,24 @@
+import 'package:chisa/anki/anki_export_params.dart';
+import 'package:chisa/dictionary/dictionary_search_result.dart';
+import 'package:chisa/media/media_histories/media_history.dart';
+import 'package:chisa/media/media_history_items/media_history_item.dart';
+import 'package:chisa/media/media_sources/reader_media_source.dart';
+import 'package:chisa/media/media_type.dart';
+import 'package:chisa/models/app_model.dart';
+import 'package:chisa/util/anki_creator.dart';
+import 'package:chisa/util/dictionary_scrollable_widget.dart';
+import 'package:clipboard_listener/clipboard_listener.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:chisa/media/media_types/media_launch_params.dart';
+import 'package:multi_value_listenable_builder/multi_value_listenable_builder.dart';
+import 'package:progress_indicators/progress_indicators.dart';
+import 'package:provider/provider.dart';
+import 'package:wakelock/wakelock.dart';
 
 class ReaderPage extends StatefulWidget {
   const ReaderPage({
@@ -17,31 +33,600 @@ class ReaderPage extends StatefulWidget {
 }
 
 class ReaderPageState extends State<ReaderPage> {
+  late AppModel appModel;
+  Color dictionaryColor = Colors.grey.shade600.withOpacity(0.97);
+
+  late InAppWebViewController webViewController;
+
+  DictionarySearchResult? latestResult;
+  ValueNotifier<String> searchTerm = ValueNotifier<String>("");
+  ValueNotifier<String> searchMessage = ValueNotifier<String>("");
+
+  final ValueNotifier<int> latestResultEntryIndex = ValueNotifier<int>(0);
+
+  late ReaderMediaSource source;
+
+  late int currentProgress;
+  late int completeProgress;
+  late int scrollX;
+  late int scrollY;
+  late String url;
+  late String thumbnail;
+  late String title;
+  late String author;
+  late ThemeData themeData;
+
+  bool isDarkMode = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    Wakelock.enable();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    ClipboardListener.addListener(copyClipboardAction);
+
+    source = widget.params.mediaSource;
+
+    currentProgress = widget.params.mediaHistoryItem.currentProgress;
+    completeProgress = widget.params.mediaHistoryItem.completeProgress;
+    scrollX = widget.params.mediaHistoryItem.extra["scrollX"] ?? 0;
+    scrollY = widget.params.mediaHistoryItem.extra["scrollY"] ?? 0;
+    url = widget.params.mediaHistoryItem.key;
+    thumbnail = widget.params.mediaHistoryItem.thumbnailPath;
+    author = widget.params.mediaHistoryItem.author;
+
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      themeData = appModel.getIsDarkMode()
+          ? appModel.getDarkTheme(context)
+          : appModel.getLightTheme(context);
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() async {
+    Wakelock.disable();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    ClipboardListener.removeListener(copyClipboardAction);
+
+    super.dispose();
+  }
+
+  Future<void> updateHistory() async {
+    MediaHistory history =
+        widget.params.mediaSource.mediaType.getMediaHistory(appModel);
+    MediaHistoryItem item = widget.params.mediaHistoryItem;
+    item.currentProgress = currentProgress;
+    item.completeProgress = completeProgress;
+    item.extra["scrollX"] = scrollX;
+    item.extra["scrollY"] = scrollY;
+    item.key = url;
+    item.extra["thumbnail"] = thumbnail;
+    item.title = title;
+    item.author = author;
+
+    if (item.completeProgress != 0 &&
+        thumbnail.isNotEmpty &&
+        title.isNotEmpty) {
+      if (widget.params.saveHistoryItem) {
+        if (!appModel.getIncognitoMode()) {
+          history.addItem(item);
+        }
+      }
+    }
+  }
+
+  Future<void> copyClipboardAction() async {
+    setSearchTerm((await Clipboard.getData(Clipboard.kTextPlain))!
+        .text!
+        .replaceAll("￼", ""));
+  }
+
+  void setCurrentProgress(int value) {
+    currentProgress = value;
+  }
+
+  void setCompleteProgress(int value) {
+    completeProgress = value;
+  }
+
+  void setScrollX(int value) {
+    scrollX = value;
+  }
+
+  void setScrollY(int value) {
+    scrollY = value;
+  }
+
+  void setUrl(String value) {
+    url = value;
+  }
+
+  void setThumbnail(String value) {
+    thumbnail = value;
+  }
+
+  void setTitle(String value) {
+    title = value;
+  }
+
+  void setAuthor(String value) {
+    author = value;
+  }
+
+  void setIsDarkMode(bool value) {
+    isDarkMode = value;
+    dictionaryColor = isDarkMode
+        ? Colors.grey.shade800.withOpacity(0.97)
+        : Colors.grey.shade600.withOpacity(0.97);
+    themeData = isDarkMode
+        ? appModel.getDarkTheme(context)
+        : appModel.getLightTheme(context);
+    setState(() {});
+  }
+
+  Future<bool> onWillPop() async {
+    Widget alertDialog = AlertDialog(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+      title: Text(
+        appModel.translate("dialog_exit_reader"),
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text(
+            appModel.translate("dialog_yes"),
+            style: TextStyle(
+              color: Theme.of(context).focusColor,
+            ),
+          ),
+          onPressed: () => Navigator.pop(context, true),
+        ),
+        TextButton(
+          child: Text(
+            appModel.translate("dialog_no"),
+          ),
+          onPressed: () async {
+            Navigator.pop(context, false);
+          },
+        ),
+      ],
+    );
+
+    return await showDialog(
+          context: context,
+          builder: (context) => alertDialog,
+        ) ??
+        false;
+  }
+
   @override
   Widget build(BuildContext context) {
-    throw UnimplementedError();
+    appModel = Provider.of<AppModel>(context);
+
+    return Theme(
+      data: themeData,
+      child: WillPopScope(
+        onWillPop: onWillPop,
+        child: Scaffold(
+          backgroundColor: Colors.black,
+          resizeToAvoidBottomInset: false,
+          body: Stack(
+            alignment: Alignment.center,
+            children: <Widget>[
+              buildReaderArea(),
+              buildDictionary(),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
-  Future<void> unselectWebViewTextSelection(
-      InAppWebViewController webViewController) async {
-    String unselectJs = "window.getSelection().removeAllRanges();";
-    await webViewController.evaluateJavascript(source: unselectJs);
+  Widget buildReaderArea() {
+    return source.buildReaderArea(context, this);
   }
 
-  String sanitizeWebViewTextSelection(String? text) {
-    if (text == null) {
-      return "";
+  void refreshDictionaryWidget() {
+    String holder = searchTerm.value;
+    searchTerm.value = "";
+    searchTerm.value = holder;
+  }
+
+  void setSearchTerm(String newTerm) {
+    searchTerm.value = newTerm.trim();
+    latestResult = null;
+  }
+
+  MediaHistoryItem? generateContextHistoryItem() {
+    if (!widget.params.saveHistoryItem) {
+      return null;
     }
 
-    text = text.replaceAll("\\n", "\n");
-    text = text.trim();
-    return text;
+    MediaHistoryItem item = widget.params.mediaHistoryItem;
+    item.currentProgress = currentProgress;
+    item.completeProgress = completeProgress;
+    item.extra["scrollX"] = scrollX;
+    item.extra["scrollY"] = scrollY;
+    item.key = url;
+    item.extra["thumbnail"] = thumbnail;
+    item.title = title;
+    item.author = author;
+
+    return item;
   }
 
-  Future<String> getWebViewTextSelection(
-      InAppWebViewController webViewController) async {
-    String? selectedText = await webViewController.getSelectedText();
-    selectedText = sanitizeWebViewTextSelection(selectedText);
-    return selectedText;
+  Widget buildDictionary() {
+    return MultiValueListenableBuider(
+      valueListenables: [
+        searchTerm,
+        searchMessage,
+      ],
+      builder: (context, values, _) {
+        String searchTerm = values.elementAt(0);
+        String searchMessage = values.elementAt(1);
+
+        if (searchMessage.isNotEmpty) {
+          return Align(
+            alignment: Alignment.topCenter,
+            child: Padding(
+              padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: MediaQuery.of(context).size.height * 0.075,
+                bottom: MediaQuery.of(context).size.height * 0.075,
+              ),
+              child: GestureDetector(
+                onTap: () {
+                  setSearchTerm("");
+                },
+                child: Container(
+                  color: dictionaryColor,
+                  padding: const EdgeInsets.all(16),
+                  child: buildDictionaryMessage(searchMessage),
+                ),
+              ),
+            ),
+          );
+        }
+
+        if (searchTerm.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        return Align(
+          alignment: Alignment.topCenter,
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: 16,
+              right: 16,
+              top: MediaQuery.of(context).size.height * 0.075,
+              bottom: MediaQuery.of(context).size.height * 0.075,
+            ),
+            child: GestureDetector(
+              onTap: () {
+                setSearchTerm("");
+              },
+              onLongPress: () async {
+                await appModel.showDictionaryMenu(context,
+                    onDictionaryChange: () {
+                  refreshDictionaryWidget();
+                });
+              },
+              onVerticalDragEnd: (details) {
+                if (details.primaryVelocity == 0) return;
+
+                if (details.primaryVelocity!.compareTo(0) == -1) {
+                  appModel.setPrevDictionary();
+                } else {
+                  appModel.setNextDictionary();
+                }
+                refreshDictionaryWidget();
+              },
+              child: Container(
+                color: dictionaryColor,
+                padding: const EdgeInsets.all(16),
+                child: FutureBuilder<DictionarySearchResult>(
+                  future: appModel.searchDictionary(
+                    searchTerm,
+                    mediaHistoryItem: generateContextHistoryItem(),
+                  ), // a previously-obtained Future<String> or null
+                  builder: (BuildContext context,
+                      AsyncSnapshot<DictionarySearchResult> snapshot) {
+                    switch (snapshot.connectionState) {
+                      case ConnectionState.waiting:
+                        return buildDictionarySearching();
+                      default:
+                        latestResult = snapshot.data;
+
+                        if (!snapshot.hasData ||
+                            latestResult!.entries.isEmpty) {
+                          return buildDictionaryNoMatch();
+                        } else {
+                          return buildDictionaryMatch();
+                        }
+                    }
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget buildDictionaryMatch() {
+    latestResultEntryIndex.value = 0;
+
+    return DictionaryScrollableWidget.fromLatestResult(
+      appModel: appModel,
+      result: latestResult!,
+      indexNotifier: latestResultEntryIndex,
+      selectable: true,
+    );
+  }
+
+  Widget buildDictionarySearching() {
+    return Text.rich(
+      TextSpan(
+        text: '',
+        children: <InlineSpan>[
+          TextSpan(
+            text: appModel.translate("dictionary_searching_before"),
+            style: const TextStyle(),
+          ),
+          TextSpan(
+            text: "『",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: themeData.unselectedWidgetColor,
+            ),
+          ),
+          TextSpan(
+            text: searchTerm.value,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          TextSpan(
+            text: "』",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: themeData.unselectedWidgetColor,
+            ),
+          ),
+          TextSpan(
+            text: appModel.translate("dictionary_searching_after"),
+          ),
+          WidgetSpan(
+            child: SizedBox(
+              height: 12,
+              width: 12,
+              child: JumpingDotsProgressIndicator(
+                color: isDarkMode ? Colors.white : Colors.black,
+              ),
+            ),
+          ),
+        ],
+      ),
+      textAlign: TextAlign.center,
+    );
+  }
+
+  Widget buildDictionaryMessage1Argument(
+    String beforeText,
+    String boldedText,
+    String afterText,
+    bool jumpingDots,
+  ) {
+    return Text.rich(
+      TextSpan(
+        text: '',
+        children: <InlineSpan>[
+          TextSpan(
+            text: beforeText,
+            style: const TextStyle(),
+          ),
+          TextSpan(
+            text: "『",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: themeData.unselectedWidgetColor,
+            ),
+          ),
+          TextSpan(
+            text: boldedText,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          TextSpan(
+            text: "』",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: themeData.unselectedWidgetColor,
+            ),
+          ),
+          TextSpan(text: afterText),
+          if (jumpingDots)
+            WidgetSpan(
+              child: SizedBox(
+                height: 12,
+                width: 12,
+                child: JumpingDotsProgressIndicator(
+                  color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildDictionaryMessageArgument(
+    String beforeText,
+    String boldedText,
+    String afterText,
+    bool jumpingDots,
+  ) {
+    return Text.rich(
+      TextSpan(
+        text: '',
+        children: <InlineSpan>[
+          TextSpan(
+            text: beforeText,
+            style: const TextStyle(),
+          ),
+          TextSpan(
+            text: "『",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: themeData.unselectedWidgetColor,
+            ),
+          ),
+          TextSpan(
+            text: boldedText,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          TextSpan(
+            text: "』",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: themeData.unselectedWidgetColor,
+            ),
+          ),
+          TextSpan(text: afterText),
+          if (jumpingDots)
+            WidgetSpan(
+              child: SizedBox(
+                height: 12,
+                width: 12,
+                child: JumpingDotsProgressIndicator(
+                  color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildDictionaryMessage(String messageText) {
+    // Handle special cases with certain reserved patterns.
+    if (messageText.startsWith("deckExport://")) {
+      String deckName = messageText.replaceAll("deckExport://", "");
+      return buildDictionaryMessageArgument(
+        appModel.translate("deck_label_before"),
+        deckName,
+        appModel.translate("deck_label_after"),
+        false,
+      );
+    }
+
+    return Text.rich(
+      TextSpan(
+        text: '',
+        children: <InlineSpan>[
+          TextSpan(
+            text: messageText.replaceAll("...", ""),
+          ),
+          if (messageText.endsWith("..."))
+            WidgetSpan(
+              child: SizedBox(
+                height: 12,
+                width: 12,
+                child: JumpingDotsProgressIndicator(
+                  color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildDictionaryNoMatch() {
+    return Text.rich(
+      TextSpan(
+        text: '',
+        children: <InlineSpan>[
+          TextSpan(
+            text: appModel.translate("dictionary_nomatch_before"),
+          ),
+          TextSpan(
+            text: "『",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: themeData.unselectedWidgetColor,
+            ),
+          ),
+          TextSpan(
+            text: searchTerm.value,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          TextSpan(
+            text: "』",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: themeData.unselectedWidgetColor,
+            ),
+          ),
+          TextSpan(
+            text: appModel.translate("dictionary_nomatch_after"),
+            style: const TextStyle(),
+          ),
+        ],
+      ),
+      textAlign: TextAlign.center,
+    );
+  }
+
+  void setDictionaryMessage(String messageText, {Duration? duration}) {
+    searchMessage.value = messageText;
+    if (duration != null) {
+      Future.delayed(duration, () {
+        clearDictionaryMessage();
+      });
+    }
+  }
+
+  void clearDictionaryMessage() {
+    searchMessage.value = "";
+  }
+
+  Future<void> openCardCreator(String selection) async {
+    AnkiExportParams initialParams = AnkiExportParams(sentence: selection);
+
+    searchTerm.value = "";
+
+    ClipboardListener.removeListener(copyClipboardAction);
+
+    clearDictionaryMessage();
+    await navigateToCreator(
+        context: context,
+        appModel: appModel,
+        initialParams: initialParams,
+        backgroundColor: dictionaryColor,
+        appBarColor: Colors.transparent,
+        landscapeLocked: true,
+        popOnExport: true,
+        exportCallback: () {
+          Navigator.of(context).pop();
+          String lastDeck = appModel.getLastAnkiDroidDeck();
+          setDictionaryMessage(
+            "deckExport://$lastDeck",
+            duration: const Duration(seconds: 3),
+          );
+        });
+
+    await Clipboard.setData(const ClipboardData(text: ""));
+    ClipboardListener.addListener(copyClipboardAction);
   }
 }

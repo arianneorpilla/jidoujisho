@@ -885,13 +885,13 @@ class AppModel with ChangeNotifier {
   }
 
   Future<void> updateDictionaryHistoryIndex(
-      DictionaryMediaHistoryItem newItem, int index) async {
-    List<DictionaryMediaHistoryItem> history =
-        getDictionaryMediaHistory().getDictionaryItems();
-    history.firstWhere((entry) => entry.key == newItem.key).currentProgress =
+      DictionaryMediaHistoryItem newItem) async {
+    DictionaryMediaHistory history = getDictionaryMediaHistory();
+    List<DictionaryMediaHistoryItem> items = history.getDictionaryItems();
+    items.firstWhere((entry) => entry.key == newItem.key).currentProgress =
         newItem.currentProgress;
 
-    await getDictionaryMediaHistory().setItems(history);
+    await history.setItems(items);
   }
 
   Future<void> removeDictionaryHistoryItem(DictionarySearchResult result) {

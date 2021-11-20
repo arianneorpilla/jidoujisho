@@ -1,8 +1,9 @@
 import 'dart:io';
 
 import 'package:chisa/media/media_history_items/media_history_item.dart';
-import 'package:chisa/media/media_source.dart';
 import 'package:chisa/media/media_sources/player_media_source.dart';
+import 'package:chisa/media/media_sources/reader_media_source.dart';
+import 'package:chisa/media/media_sources/viewer_media_source.dart';
 import 'package:chisa/models/app_model.dart';
 
 class MediaLaunchParams {}
@@ -56,6 +57,7 @@ class ReaderLaunchParams {
     required this.bookFile,
     required this.mediaSource,
     required this.mediaHistoryItem,
+    required this.saveHistoryItem,
   });
 
   ReaderLaunchParams.network({
@@ -63,12 +65,14 @@ class ReaderLaunchParams {
     this.bookFile,
     required this.mediaSource,
     required this.mediaHistoryItem,
+    required this.saveHistoryItem,
   });
 
   final AppModel appModel;
   final File? bookFile;
-  final MediaSource mediaSource;
+  final ReaderMediaSource mediaSource;
   final MediaHistoryItem mediaHistoryItem;
+  final bool saveHistoryItem;
 }
 
 class ViewerLaunchParams {
@@ -76,9 +80,11 @@ class ViewerLaunchParams {
     required this.appModel,
     required this.mediaSource,
     required this.mediaHistoryItem,
+    required this.saveHistoryItem,
   });
 
   final AppModel appModel;
-  final MediaSource mediaSource;
+  final ViewerMediaSource mediaSource;
   final MediaHistoryItem mediaHistoryItem;
+  final bool saveHistoryItem;
 }
