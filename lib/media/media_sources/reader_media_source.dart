@@ -4,8 +4,10 @@ import 'dart:io';
 import 'package:chisa/util/reading_direction.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
 
@@ -102,21 +104,38 @@ abstract class ReaderMediaSource extends MediaSource {
           List<Widget> actions = [];
 
           if (isHistory) {
-            actions.add(TextButton(
-              child: Text(
-                appModel.translate("dialog_remove"),
-                style: TextStyle(
-                  color: Theme.of(context).focusColor,
+            actions.add(
+              TextButton(
+                child: Text(
+                  appModel.translate("dialog_remove"),
+                  style: TextStyle(
+                    color: Theme.of(context).focusColor,
+                  ),
                 ),
-              ),
-              onPressed: () async {
-                await history.removeItem(item.key);
+                onPressed: () async {
+                  await history.removeItem(item.key);
 
-                Navigator.pop(context);
-                homeRefreshCallback();
-                searchRefreshCallback();
-              },
-            ));
+                  Navigator.pop(context);
+                  homeRefreshCallback();
+                  searchRefreshCallback();
+                },
+              ),
+            );
+
+            actions.add(
+              TextButton(
+                child: Text(
+                  appModel.translate("dialog_edit"),
+                ),
+                onPressed: () async {
+                  await showAliasDialog(context, item);
+
+                  Navigator.pop(context);
+                  homeRefreshCallback();
+                  searchRefreshCallback();
+                },
+              ),
+            );
           }
 
           actions.addAll(
@@ -204,28 +223,16 @@ abstract class ReaderMediaSource extends MediaSource {
                 color: Colors.grey.shade800.withOpacity(0.3),
                 child: AspectRatio(
                   aspectRatio: 176 / 250,
-                  child: (getHistoryThumbnailAlias(item) == null)
-                      ? FutureBuilder<ImageProvider<Object>>(
-                          future: getHistoryThumbnailAlias(item),
-                          builder: (BuildContext context,
-                              AsyncSnapshot<ImageProvider> snapshot) {
-                            if (snapshot.connectionState ==
-                                    ConnectionState.waiting ||
-                                !snapshot.hasData) {
-                              return Image(
-                                  image: MemoryImage(kTransparentImage));
-                            }
+                  child: FutureBuilder<ImageProvider<Object>?>(
+                    future: getHistoryThumbnailAlias(item),
+                    builder: (BuildContext context,
+                        AsyncSnapshot<ImageProvider?> snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Image(image: MemoryImage(kTransparentImage));
+                      }
 
-                            ImageProvider<Object> thumbnail = snapshot.data!;
-
-                            return FadeInImage(
-                              placeholder: MemoryImage(kTransparentImage),
-                              image: thumbnail,
-                              fit: BoxFit.fitWidth,
-                            );
-                          },
-                        )
-                      : FutureBuilder<ImageProvider<Object>>(
+                      if (snapshot.data == null) {
+                        return FutureBuilder<ImageProvider<Object>>(
                           future: getHistoryThumbnail(item),
                           builder: (BuildContext context,
                               AsyncSnapshot<ImageProvider> snapshot) {
@@ -244,7 +251,18 @@ abstract class ReaderMediaSource extends MediaSource {
                               fit: BoxFit.fitWidth,
                             );
                           },
-                        ),
+                        );
+                      }
+
+                      ImageProvider<Object> thumbnail = snapshot.data!;
+
+                      return FadeInImage(
+                        placeholder: MemoryImage(kTransparentImage),
+                        image: thumbnail,
+                        fit: BoxFit.fitWidth,
+                      );
+                    },
+                  ),
                 ),
               ),
               LayoutBuilder(
@@ -461,9 +479,15 @@ abstract class ReaderMediaSource extends MediaSource {
     return item.alias;
   }
 
-  Future<ImageProvider<Object>>? getHistoryThumbnailAlias(
+  Future<ImageProvider<Object>?> getHistoryThumbnailAlias(
       MediaHistoryItem item) async {
-    return FileImage(File(item.thumbnailPath));
+    if (item.thumbnailPath.isEmpty) {
+      return null;
+    }
+
+    return FileImage(
+      File(item.thumbnailPath),
+    );
   }
 
   /// Define a custom [Widget] for the [ReaderPage] to represent the reading
@@ -484,4 +508,173 @@ abstract class ReaderMediaSource extends MediaSource {
 
   /// See [ReaderTtuMediaSource] lmao
   bool getHorizontalHack(BuildContext context) => false;
+
+  Future showAliasDialog(
+    BuildContext context,
+    MediaHistoryItem item,
+  ) async {
+    AppModel appModel = Provider.of<AppModel>(context, listen: false);
+
+    String defaultTitle = item.title;
+    ImageProvider<Object> defaultThumbnail = await getHistoryThumbnail(item);
+
+    String title = defaultTitle;
+    ImageProvider<Object> thumbnail = defaultThumbnail;
+
+    String titleAlias = item.alias;
+    ImageProvider<Object>? thumbnailAlias =
+        await getHistoryThumbnailAlias(item);
+
+    if (titleAlias.isNotEmpty) {
+      title = item.alias;
+    }
+    if (thumbnailAlias != null) {
+      thumbnail = thumbnailAlias;
+    }
+
+    TextEditingController nameAliasController = TextEditingController(
+      text: title,
+    );
+    TextEditingController coverAliasController = TextEditingController(
+      text: "a",
+    );
+
+    File? newCover;
+    ValueNotifier<ImageProvider> imageProviderNotifier =
+        ValueNotifier<ImageProvider>(thumbnail);
+
+    Widget showPreviewImage() {
+      return ValueListenableBuilder(
+        valueListenable: imageProviderNotifier,
+        builder:
+            (BuildContext context, ImageProvider imageProvider, Widget? child) {
+          return Image(image: imageProvider);
+        },
+      );
+    }
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(width: double.maxFinite, height: 1),
+                TextField(
+                  controller: nameAliasController,
+                  maxLines: null,
+                  decoration: InputDecoration(
+                    suffixIcon: IconButton(
+                      iconSize: 18,
+                      onPressed: () async {
+                        nameAliasController.text = defaultTitle;
+                      },
+                      icon: const Icon(Icons.undo),
+                    ),
+                  ),
+                ),
+                TextField(
+                  readOnly: true,
+                  controller: coverAliasController,
+                  style: const TextStyle(color: Colors.transparent),
+                  decoration: InputDecoration(
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                    suffixIcon: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            child: showPreviewImage(),
+                            padding: const EdgeInsets.only(top: 5, bottom: 5),
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        IconButton(
+                          iconSize: 18,
+                          onPressed: () async {
+                            ImagePicker imagePicker = ImagePicker();
+                            final pickedFile = await imagePicker.pickImage(
+                                source: ImageSource.gallery);
+                            newCover = File(pickedFile!.path);
+                            imageProviderNotifier.value = FileImage(newCover!);
+                          },
+                          icon: const Icon(Icons.file_upload),
+                        ),
+                        IconButton(
+                          iconSize: 18,
+                          onPressed: () async {
+                            newCover = null;
+                            imageProviderNotifier.value = defaultThumbnail;
+                          },
+                          icon: const Icon(Icons.undo),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(
+                appModel.translate('dialog_return'),
+                style: TextStyle(color: Theme.of(context).focusColor),
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              child: Text(
+                appModel.translate('dialog_set'),
+              ),
+              onPressed: () async {
+                String newTitleAlias = nameAliasController.text.trim();
+
+                if (newTitleAlias.isNotEmpty) {
+                  item.alias = newTitleAlias;
+
+                  if (newCover != null) {
+                    Directory appDocDir =
+                        await getApplicationDocumentsDirectory();
+                    Directory thumbsDir = Directory(
+                        appDocDir.path + "/thumbs/${getIdentifier()}");
+                    if (!thumbsDir.existsSync()) {
+                      thumbsDir.createSync(recursive: true);
+                    }
+
+                    DateTime dateTime = DateTime.now();
+
+                    String thumbnailPath =
+                        "${thumbsDir.path}/${dateTime.millisecondsSinceEpoch}.jpg";
+
+                    File thumbnailFile = File(thumbnailPath);
+                    if (thumbnailFile.existsSync()) {
+                      thumbnailFile.deleteSync();
+                    }
+                    newCover?.copySync(thumbnailPath);
+
+                    item.thumbnailPath = thumbnailPath;
+                  } else {
+                    item.thumbnailPath = "";
+                  }
+                }
+
+                mediaType.getMediaHistory(appModel).addItem(item);
+
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 }

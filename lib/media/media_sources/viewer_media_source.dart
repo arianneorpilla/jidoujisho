@@ -186,7 +186,7 @@ abstract class ViewerMediaSource extends MediaSource {
     return item.alias;
   }
 
-  Future<ImageProvider<Object>> getHistoryThumbnailAlias(
+  Future<ImageProvider<Object>?> getHistoryThumbnailAlias(
       MediaHistoryItem item) async {
     return FileImage(File(item.thumbnailPath));
   }

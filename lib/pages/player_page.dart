@@ -98,6 +98,7 @@ class PlayerPageState extends State<PlayerPage>
 
   bool dialogSmartPaused = false;
   bool dialogSmartFocusFlag = false;
+  bool pushingReplacement = false;
 
   String? audioPath;
 
@@ -206,9 +207,6 @@ class PlayerPageState extends State<PlayerPage>
   @override
   void initState() {
     super.initState();
-
-    Wakelock.enable();
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
     ClipboardListener.addListener(copyClipboardAction);
 

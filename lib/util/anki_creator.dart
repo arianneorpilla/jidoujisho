@@ -122,24 +122,29 @@ Future<void> navigateToCreator({
   bool landscapeLocked = false,
   bool popOnExport = false,
   Function()? exportCallback,
+  ThemeData? themeData,
 }) async {
   try {
     List<String> decks = await getDecks();
 
+    Widget creatorPage = CreatorPage(
+      initialParams: initialParams,
+      backgroundColor: backgroundColor,
+      appBarColor: appBarColor,
+      landscapeLocked: landscapeLocked,
+      decks: decks,
+      autoMode: autoMode,
+      editMode: editMode,
+      popOnExport: popOnExport,
+      exportCallback: exportCallback,
+    );
+
     await Navigator.of(context).push(
       PageRouteBuilder(
         opaque: false,
-        pageBuilder: (_, __, ___) => CreatorPage(
-          initialParams: initialParams,
-          backgroundColor: backgroundColor,
-          appBarColor: appBarColor,
-          landscapeLocked: landscapeLocked,
-          decks: decks,
-          autoMode: autoMode,
-          editMode: editMode,
-          popOnExport: popOnExport,
-          exportCallback: exportCallback,
-        ),
+        pageBuilder: (_, __, ___) => (themeData != null)
+            ? Theme(data: themeData, child: creatorPage)
+            : creatorPage,
       ),
     );
   } catch (e) {
@@ -170,20 +175,24 @@ Future<void> navigateToCreator({
 
                 try {
                   List<String> decks = await getDecks();
+                  Widget creatorPage = CreatorPage(
+                    initialParams: initialParams,
+                    backgroundColor: backgroundColor,
+                    appBarColor: appBarColor,
+                    landscapeLocked: landscapeLocked,
+                    decks: decks,
+                    autoMode: autoMode,
+                    editMode: editMode,
+                    popOnExport: popOnExport,
+                    exportCallback: exportCallback,
+                  );
+
                   await Navigator.of(context).push(
                     PageRouteBuilder(
                       opaque: false,
-                      pageBuilder: (_, __, ___) => CreatorPage(
-                        initialParams: initialParams,
-                        backgroundColor: backgroundColor,
-                        appBarColor: appBarColor,
-                        landscapeLocked: landscapeLocked,
-                        decks: decks,
-                        autoMode: autoMode,
-                        editMode: editMode,
-                        popOnExport: popOnExport,
-                        exportCallback: exportCallback,
-                      ),
+                      pageBuilder: (_, __, ___) => (themeData != null)
+                          ? Theme(data: themeData, child: creatorPage)
+                          : creatorPage,
                     ),
                   );
                 } catch (e) {

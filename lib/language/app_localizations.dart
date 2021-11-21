@@ -44,6 +44,7 @@ class AppLocalizations {
       'dialog_play': 'PLAY',
       'dialog_read': 'READ',
       'dialog_set_remember': 'SET AND REMEMBER',
+      'dialog_edit': 'EDIT',
       'dialog_set': 'SET',
       'dialog_exit_player': 'Exit Player?',
       'dialog_exit_reader': 'Exit Reader?',
@@ -144,13 +145,6 @@ class AppLocalizations {
       'localisation_warning': 'Community addons and enhancements are managed '
           'by their respective developers, and these may appear in their '
           'original language.',
-      'license_screen_legalese': "A mobile video player, reader assistant, "
-          "image mining workflow and card creation toolkit tailored for "
-          "language learners.\n\nBuilt for the language learning community "
-          "by Leo Rafael Orpilla. Logo by Aaron Marbella.\n\nChisa is "
-          "free and open source software. Liking the application? Help out "
-          "by providing feedback, making a donation, reporting issues or "
-          "collaborating for further improvements on GitHub.",
     },
     'Tagalog': {
       'app_title': 'jidoujisho',
@@ -190,6 +184,7 @@ class AppLocalizations {
       'dialog_read': 'BASAHIN',
       'dialog_set_remember': 'ISAAYOS AT IALALA',
       'dialog_set': 'ISAAYOS',
+      'dialog_edit': 'BAGUHIN',
       'dialog_exit_player': 'Isarado ang Video?',
       'dialog_exit_reader': 'Isarado ang Libro?',
       'dialog_exit_viewer': 'Isarado ang Komiks?',
@@ -295,14 +290,6 @@ class AppLocalizations {
       'localisation_warning': 'Ang mga mod na gawa ng komunidad ay maaring '
           'hindi naisalin at magpakita sa orihinal na wikang '
           'pinanggalingan.',
-      'license_screen_legalese': "Kagamitang nakakatulong sa pagnood ng video, "
-          "pagbasa ng libro at komiks at pagkabisado ng mga salita ng mga "
-          "wikang banyaga.\n\nGawa ni Leo Rafael Orpilla para sa magaaral ng "
-          "iba't ibang wika. Tatak ng aplikasyon, gawa ni Aaron Marbella.\n\n"
-          "Ang aplikasyon na ito ay libre na gamitin at ipagbuti para sa "
-          "lahat. Nagustuhan mo ba? Maari kang makatulong sa pamamagitan ng "
-          "donasyon o kontribusyon o ng puna, at sa pagbahagi at pagbatid ng "
-          "apliksayon na ito sa kapwa.",
     },
   };
 

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:chisa/util/reading_direction.dart';
-import 'package:flutter/material.dart';
 
 abstract class Language {
   Language({

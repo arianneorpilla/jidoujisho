@@ -94,6 +94,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         leading: getLeading(),
         title: getTitle(),
@@ -167,6 +168,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       selectedTabIndex.value = index;
       pageController!.jumpToPage(index);
       appModel.setLastActiveTabIndex(index);
+      FocusScope.of(context).unfocus();
     }
   }
 
@@ -203,18 +205,19 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   Widget getResumeButton() {
     return ValueListenableBuilder<bool>(
-        valueListenable: appModel.resumableNotifier,
-        builder: (context, bool resumable, _) {
-          return IconButton(
-              icon: const Icon(Icons.update),
-              onPressed: (resumable)
-                  ? () async {
-                      returnFromContext(
-                          context, appModel.getResumeMediaHistoryItem()!);
-                      setState(() {});
-                    }
-                  : null);
-        });
+      valueListenable: appModel.resumableNotifier,
+      builder: (context, bool resumable, _) {
+        return IconButton(
+            icon: const Icon(Icons.update),
+            onPressed: (resumable)
+                ? () async {
+                    returnFromContext(
+                        context, appModel.getResumeMediaHistoryItem()!);
+                    setState(() {});
+                  }
+                : null);
+      },
+    );
   }
 
   Widget getCardCreatorButton() {
@@ -318,6 +321,16 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           label: appModel.translate("options_licenses"),
           icon: Icons.info,
           action: () async {
+            const String legalese = "A mobile video player, reader assistant, "
+            "image mining workflow and card creation toolkit tailored for "
+            "language learners.\n\nBuilt for the Japanese language learning "
+            "community by Leo Rafael Orpilla. Logo by Aaron Marbella.\n\n"
+                "jidoujisho is free and open source software. Visit the "
+                "repository for a more comprehensive list of other licenses "
+                "and attribution notices. Liking the application? Help out by "
+                "providing feedback, making a donation, reporting issues or "
+                "collaborating for further improvements on GitHub.";
+
             Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (context) => Theme(
@@ -326,22 +339,21 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         appModel.getIsDarkMode() ? Colors.black : Colors.white,
                   ),
                   child: LicensePage(
-                    applicationName: appModel.translate("app_title"),
-                    applicationVersion: appModel.packageInfo.version,
-                    applicationIcon: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Image(
-                        image: imageIcon,
-                        height: 48,
-                        width: 48,
+                      applicationName: appModel.translate("app_title"),
+                      applicationVersion: appModel.packageInfo.version,
+                      applicationIcon: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Image(
+                          image: imageIcon,
+                          height: 128,
+                          width: 128,
+                        ),
                       ),
-                    ),
-                    applicationLegalese:
-                        appModel.translate("license_screen_legalese"),
+                      applicationLegalese: legalese,
                   ),
                 ),
               ),
-            );
+            )
           },
         ),
       ],

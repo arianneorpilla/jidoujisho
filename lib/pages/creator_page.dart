@@ -163,15 +163,15 @@ class CreatorPageState extends State<CreatorPage> {
       imagesNotifier.value = exportParams.imageFiles;
       imageNotifier.value = exportParams.imageFile;
       audioNotifier.value = exportParams.audioFile;
-    });
 
-    if (audioNotifier.value != null) {
-      audioPlayer.setUrl(audioNotifier.value!.path, isLocal: true).then((_) {
-        audioPlayer.getDuration().then((milliseconds) {
-          durationNotifier.value = Duration(milliseconds: milliseconds);
+      if (audioNotifier.value != null) {
+        audioPlayer.setUrl(audioNotifier.value!.path, isLocal: true).then((_) {
+          audioPlayer.getDuration().then((milliseconds) {
+            durationNotifier.value = Duration(milliseconds: milliseconds);
+          });
         });
-      });
-    }
+      }
+    });
   }
 
   Widget getEmptyBox(
@@ -507,8 +507,6 @@ class CreatorPageState extends State<CreatorPage> {
                         ? Colors.grey[700]
                         : Colors.grey[400],
                     child: SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(
-                          parent: BouncingScrollPhysics()),
                       controller: scrollerImage,
                       child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -548,8 +546,6 @@ class CreatorPageState extends State<CreatorPage> {
                     child: Scrollbar(
                       controller: scrollController,
                       child: SingleChildScrollView(
-                        physics: const AlwaysScrollableScrollPhysics(
-                            parent: BouncingScrollPhysics()),
                         controller: scrollController,
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
@@ -652,8 +648,6 @@ class CreatorPageState extends State<CreatorPage> {
             controller: scrollController,
             child: SingleChildScrollView(
               controller: scrollController,
-              physics: const AlwaysScrollableScrollPhysics(
-                  parent: BouncingScrollPhysics()),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.max,

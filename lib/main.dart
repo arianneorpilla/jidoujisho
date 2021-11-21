@@ -65,7 +65,10 @@ class App extends StatelessWidget {
             darkTheme: appModel.getDarkTheme(context),
             themeMode:
                 appModel.getIsDarkMode() ? ThemeMode.dark : ThemeMode.light,
-            home: blankWhileUninitialised(context),
+            home: Scaffold(
+              resizeToAvoidBottomInset: true,
+              body: blankWhileUninitialised(context),
+            ),
           );
         },
       ),

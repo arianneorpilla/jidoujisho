@@ -108,6 +108,7 @@ class PlayerHomePageState extends State<PlayerHomePage>
           if (index == 0) {
             return const SizedBox(height: 48);
           }
+
           MediaHistoryItem item = mediaHistoryItems[index - 1];
           MediaSource source = appModel.getMediaSourceFromName(
               MediaType.player, item.sourceName);

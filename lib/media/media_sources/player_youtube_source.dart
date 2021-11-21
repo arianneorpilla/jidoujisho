@@ -12,7 +12,6 @@ import 'package:chisa/util/media_source_action_button.dart';
 import 'package:chisa/util/paginated_player_page.dart';
 import 'package:chisa/util/subtitle_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:progress_indicators/progress_indicators.dart';
@@ -124,17 +123,16 @@ class PlayerYouTubeSource extends PlayerMediaSource {
           action: () async {
             await setPreferredQuality(quality);
 
-            PlayerLaunchParams params =
-                getLaunchParams(appModel, page.widget.params.mediaHistoryItem);
-            await launchMediaPage(
-              context,
-              params,
-              pushReplacement: true,
-            );
-            Future.delayed(const Duration(seconds: 5), () async {
-              await SystemChrome.setEnabledSystemUIMode(
-                  SystemUiMode.immersiveSticky);
-            });
+            if (getVideoFromManifest(manifest, quality) !=
+                page.playerController.dataSource) {
+              PlayerLaunchParams params = getLaunchParams(
+                  appModel, page.widget.params.mediaHistoryItem);
+              await launchMediaPage(
+                context,
+                params,
+                pushReplacement: true,
+              );
+            }
           });
 
       options.add(option);

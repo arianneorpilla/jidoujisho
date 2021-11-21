@@ -638,6 +638,7 @@ class ReaderPageState extends State<ReaderPage> {
         appModel: appModel,
         initialParams: initialParams,
         popOnExport: true,
+        themeData: themeData,
         exportCallback: () {
           Navigator.of(context).pop();
           String lastDeck = appModel.getLastAnkiDroidDeck();
