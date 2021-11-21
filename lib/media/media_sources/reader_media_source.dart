@@ -128,11 +128,12 @@ abstract class ReaderMediaSource extends MediaSource {
                   appModel.translate("dialog_edit"),
                 ),
                 onPressed: () async {
-                  await showAliasDialog(context, item);
-
-                  Navigator.pop(context);
-                  homeRefreshCallback();
-                  searchRefreshCallback();
+                  await showAliasDialog(
+                    context: context,
+                    item: item,
+                    homeRefreshCallback: homeRefreshCallback,
+                    searchRefreshCallback: searchRefreshCallback,
+                  );
                 },
               ),
             );
@@ -164,13 +165,14 @@ abstract class ReaderMediaSource extends MediaSource {
           );
 
           HapticFeedback.vibrate();
-          ImageProvider<Object> image = await getHistoryThumbnail(item);
           await showDialog(
             barrierDismissible: true,
             context: context,
             builder: (context) => AlertDialog(
               title: Text(
-                getHistoryCaption(item),
+                (item.alias.isNotEmpty)
+                    ? getHistoryCaptionAlias(item)
+                    : getHistoryCaption(item),
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -201,11 +203,44 @@ abstract class ReaderMediaSource extends MediaSource {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    AspectRatio(
-                      aspectRatio: 176 / 250,
-                      child: Image(
-                        image: image,
-                      ),
+                    FutureBuilder<ImageProvider<Object>?>(
+                      future: getHistoryThumbnailAlias(item),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<ImageProvider?> snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Image(image: MemoryImage(kTransparentImage));
+                        }
+
+                        if (snapshot.data == null) {
+                          return FutureBuilder<ImageProvider<Object>>(
+                            future: getHistoryThumbnail(item),
+                            builder: (BuildContext context,
+                                AsyncSnapshot<ImageProvider> snapshot) {
+                              if (snapshot.connectionState ==
+                                      ConnectionState.waiting ||
+                                  !snapshot.hasData) {
+                                return Image(
+                                    image: MemoryImage(kTransparentImage));
+                              }
+
+                              ImageProvider<Object> thumbnail = snapshot.data!;
+
+                              return FadeInImage(
+                                placeholder: MemoryImage(kTransparentImage),
+                                image: thumbnail,
+                                fit: BoxFit.fitWidth,
+                              );
+                            },
+                          );
+                        }
+
+                        ImageProvider<Object> thumbnail = snapshot.data!;
+
+                        return Image(
+                          image: thumbnail,
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -509,10 +544,12 @@ abstract class ReaderMediaSource extends MediaSource {
   /// See [ReaderTtuMediaSource] lmao
   bool getHorizontalHack(BuildContext context) => false;
 
-  Future showAliasDialog(
-    BuildContext context,
-    MediaHistoryItem item,
-  ) async {
+  Future<void> showAliasDialog({
+    required BuildContext context,
+    required MediaHistoryItem item,
+    required Function() homeRefreshCallback,
+    required Function() searchRefreshCallback,
+  }) async {
     AppModel appModel = Provider.of<AppModel>(context, listen: false);
 
     String defaultTitle = item.title;
@@ -625,7 +662,6 @@ abstract class ReaderMediaSource extends MediaSource {
             TextButton(
               child: Text(
                 appModel.translate('dialog_return'),
-                style: TextStyle(color: Theme.of(context).focusColor),
               ),
               onPressed: () {
                 Navigator.pop(context);
@@ -670,6 +706,10 @@ abstract class ReaderMediaSource extends MediaSource {
                 mediaType.getMediaHistory(appModel).addItem(item);
 
                 Navigator.pop(context);
+                Navigator.pop(context);
+
+                homeRefreshCallback();
+                searchRefreshCallback();
               },
             ),
           ],
