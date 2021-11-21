@@ -160,7 +160,7 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
                   dictionaryEntry: entry,
                   dictionaryFormat: format,
                   dictionary: dictionary,
-                  selectable: false,
+                  selectable: true,
                 ),
               ),
             ),
@@ -288,6 +288,7 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
       onSubmitted: onQueryChanged,
       leadingActions: [
         buildDictionaryButton(),
+        buildBackButton(),
       ],
       automaticallyImplyBackButton: false,
       actions: [
@@ -328,7 +329,8 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
 
   Widget buildDictionaryButton() {
     return FloatingSearchBarAction(
-      showIfOpened: true,
+      showIfOpened: false,
+      showIfClosed: true,
       child: CircularButton(
         icon: Icon(
           Icons.auto_stories,
@@ -339,6 +341,14 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
           await dictionaryButtonAction();
         },
       ),
+    );
+  }
+
+  Widget buildBackButton() {
+    return FloatingSearchBarAction.back(
+      showIfClosed: false,
+      color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
+      size: 20,
     );
   }
 

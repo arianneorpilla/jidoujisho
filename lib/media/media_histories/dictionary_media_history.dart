@@ -28,13 +28,12 @@ class DictionaryMediaHistory extends MediaHistory {
     await setItems(history);
   }
 
-  Future<void> removeDictionaryItem(
-      String originalSearchTerm, String dictionaryName) async {
+  Future<void> removeDictionaryItem(DictionaryMediaHistoryItem item) async {
     List<DictionaryMediaHistoryItem> history = getDictionaryItems();
 
     history.removeWhere((historyItem) =>
-        historyItem.sourceName == dictionaryName &&
-        historyItem.title == originalSearchTerm);
+        historyItem.author == item.author && historyItem.title == item.title);
+    await appModel.setDictionaryHistoryIndex(item, null);
     await setItems(history);
   }
 

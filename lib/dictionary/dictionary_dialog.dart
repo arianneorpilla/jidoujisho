@@ -179,9 +179,7 @@ class DictionaryDialogState extends State<DictionaryDialog> {
                     dictionary.dictionaryName,
                     style: TextStyle(
                       fontSize: 16,
-                      color: appModel.getIsDarkMode()
-                          ? Colors.white
-                          : Colors.black,
+                      color: Theme.of(context).iconTheme.color,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),

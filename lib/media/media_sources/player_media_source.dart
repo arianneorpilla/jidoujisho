@@ -136,11 +136,40 @@ abstract class PlayerMediaSource extends MediaSource {
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),
-              content: AspectRatio(
-                aspectRatio: 16 / 9,
-                child: FadeInImage(
-                  image: image,
-                  placeholder: MemoryImage(kTransparentImage),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Icon(
+                          icon,
+                          color: Theme.of(context).unselectedWidgetColor,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          item.sourceName,
+                          style: TextStyle(
+                            color: Theme.of(context).unselectedWidgetColor,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 16,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: true,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    AspectRatio(
+                      aspectRatio: 16 / 9,
+                      child: Image(
+                        image: image,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               actions: actions,

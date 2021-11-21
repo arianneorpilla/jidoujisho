@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
 
@@ -22,7 +23,7 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
       : super(
           sourceName: "ッツ Ebook Reader",
           icon: Icons.chrome_reader_mode_outlined,
-          readingDirection: ReadingDirection.verticalRTL,
+          readingDirection: ReadingDirection.horizontalLTR,
         );
 
   late InAppWebViewController controller;
@@ -41,11 +42,11 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
   @override
   Future<ImageProvider<Object>> getHistoryThumbnail(
       MediaHistoryItem item) async {
-    if (item.extra["ttu-thumbnail"] == null) {
+    if (item.extra["thumbnail"] == null) {
       return MemoryImage(kTransparentImage);
     }
 
-    UriData data = Uri.parse(item.thumbnailPath).data!;
+    UriData data = Uri.parse(item.extra["thumbnail"]).data!;
     return MemoryImage(data.contentAsBytes());
   }
 
@@ -86,11 +87,38 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
   }
 
   @override
-  List<MediaSourceActionButton> getSearchBarActions(
+  List<Widget> getSearchBarActions(
     BuildContext context,
     Function() refreshCallback,
   ) {
+    ValueNotifier<bool> horizontalHackNotifier =
+        ValueNotifier<bool>(getHorizontalHack(context));
     return [
+      FloatingSearchBarAction(
+        showIfClosed: true,
+        showIfOpened: true,
+        child: ValueListenableBuilder<bool>(
+          valueListenable: horizontalHackNotifier,
+          builder: (context, bool isHorizontal, child) {
+            return CircularButton(
+              icon: Icon(
+                (isHorizontal)
+                    ? Icons.text_rotation_none
+                    : Icons.text_rotate_vertical,
+                size: 20,
+                color: (Provider.of<AppModel>(context, listen: false)
+                        .getIsDarkMode()
+                    ? Colors.white
+                    : Colors.black),
+              ),
+              onPressed: () async {
+                await toggleHorizontalHack(context);
+                horizontalHackNotifier.value = getHorizontalHack(context);
+              },
+            );
+          },
+        ),
+      ),
       MediaSourceActionButton(
         context: context,
         source: this,
@@ -126,112 +154,122 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
         controller = newController;
       },
       onConsoleMessage: (controller, consoleMessage) async {
-        onConsoleMessage(controller, consoleMessage, state);
+        await onConsoleMessage(controller, consoleMessage, state);
       },
-      onLoadStop: (controller, uri) {
-        onLoadStop(controller, uri, state);
+      onLoadStop: (controller, uri) async {
+        await controller.evaluateJavascript(source: textClickJs);
+        if (getHorizontalHack(context)) {
+          await controller.evaluateJavascript(source: horizontalHackJs);
+        }
+        await onLoadStop(controller, uri, state);
+      },
+      onTitleChanged: (controller, title) async {
+        await controller.evaluateJavascript(source: textClickJs);
+        if (getHorizontalHack(context)) {
+          await controller.evaluateJavascript(source: horizontalHackJs);
+        }
+        await onTitleChanged(controller, title, state);
       },
     );
   }
 
   Future<void> onConsoleMessage(InAppWebViewController controller,
       ConsoleMessage consoleMessage, ReaderPageState state) async {
+    Map<String, dynamic> messageJson;
     try {
-      Map<String, dynamic> messageJson = jsonDecode(consoleMessage.message);
+      messageJson = jsonDecode(consoleMessage.message);
+    } catch (e) {
+      return;
+    }
 
-      print(messageJson.keys);
-      switch (messageJson["jidoujisho"]) {
-        case "jidoujisho":
-          int index = messageJson["offset"];
-          String text = messageJson["text"];
-          String? isCreator = messageJson["isCreator"];
+    switch (messageJson["jidoujisho"]) {
+      case "jidoujisho":
+        int index = messageJson["offset"];
+        String text = messageJson["text"];
+        String? isCreator = messageJson["isCreator"];
 
-          try {
-            if (index != -1) {
-              String term = await state.appModel
-                  .getCurrentLanguage()
-                  .wordFromIndex(text, index);
+        state.setScrollX(await controller.getScrollX() ?? -1);
 
-              unselectWebViewTextSelection(controller);
+        try {
+          if (index != -1 && index >= 0) {
+            String term = await state.appModel
+                .getCurrentLanguage()
+                .wordFromIndex(text, index);
 
-              if (isCreator == "yes") {
-                state.openCardCreator(term);
-              } else {
-                Clipboard.setData(ClipboardData(text: term));
-              }
-            }
-          } finally {
             unselectWebViewTextSelection(controller);
-          }
 
-          break;
-        case "jidoujisho-bookmark":
-          try {
-            String currentIndexText = (await controller.getUrl())
-                .toString()
-                .replaceAll("https://ttu-ebook.web.app/b/", "")
-                .replaceAll("?min=", "");
-            int currentIndex = int.parse(currentIndexText);
-
-            String currentTitle = (await controller.getTitle()).toString();
-            currentTitle = currentTitle.replaceAll("| ッツ Ebook Reader", "");
-            if (currentTitle == "ッツ Ebook Reader") {
-              currentTitle = "";
-            }
-
-            state.setUrl("https://ttu-ebook.web.app/b/$currentIndex?min=");
-            state.setScrollX(await controller.getScrollX() ?? 0);
-            state.setScrollY(await controller.getScrollY() ?? 0);
-            state.setTitle(currentTitle);
-            state.setAuthor("");
-
-            if (messageJson["bookmark"] != null) {
-              String wordCountText = messageJson["bookmark"];
-              int currentProgress =
-                  int.tryParse(wordCountText.split("/")[0]) ?? 0;
-              int completeProgress =
-                  int.tryParse(wordCountText.split("/")[1].split(" ")[0]) ?? 0;
-
-              state.setCurrentProgress(currentProgress);
-              state.setCompleteProgress(completeProgress);
-            }
-
-            await state.updateHistory();
-          } catch (e) {
-            debugPrint(e.toString());
-          }
-          break;
-        case "jidoujisho-metadata":
-          if (state.thumbnail.isEmpty) {
-            try {
-              if (messageJson["base64Image"].startsWith("data:image/")) {
-                state.setThumbnail(messageJson["base64Image"]);
-              }
-            } catch (e) {
-              debugPrint(e.toString());
+            if (isCreator == "yes") {
+              state.openCardCreator(term);
+            } else {
+              Clipboard.setData(ClipboardData(text: term));
             }
           }
-      }
-    } finally {}
+        } catch (e) {
+          Clipboard.setData(const ClipboardData(text: ""));
+          debugPrint("Out of range deselect");
+        } finally {
+          unselectWebViewTextSelection(controller);
+        }
+
+        break;
+      case "jidoujisho-bookmark":
+        String currentIndexText = (await controller.getUrl())
+            .toString()
+            .replaceAll("https://ttu-ebook.web.app/b/", "")
+            .replaceAll("?min=", "");
+        int currentIndex = int.parse(currentIndexText);
+
+        String currentTitle = (await controller.getTitle()).toString();
+        currentTitle = currentTitle.replaceAll("| ッツ Ebook Reader", "");
+        if (currentTitle == "ッツ Ebook Reader") {
+          currentTitle = "";
+        }
+
+        state.setUrl("https://ttu-ebook.web.app/b/$currentIndex?min=");
+
+        state.setTitle(currentTitle);
+
+        state.setAuthor("");
+
+        if (messageJson["bookmark"] != null) {
+          String wordCountText = messageJson["bookmark"];
+          int currentProgress = int.tryParse(wordCountText.split("/")[0]) ?? 0;
+          int completeProgress =
+              int.tryParse(wordCountText.split("/")[1].split(" ")[0]) ?? 0;
+
+          state.setCurrentProgress(currentProgress);
+          state.setCompleteProgress(completeProgress);
+        }
+
+        await state.updateHistory();
+
+        break;
+      case "jidoujisho-metadata":
+        if (messageJson["base64Image"].startsWith("data:image/")) {
+          state.setThumbnail(messageJson["base64Image"]);
+        }
+
+        Future.delayed(const Duration(seconds: 1), () async {
+          if (state.scrollX != -1) {
+            await controller.scrollTo(x: state.scrollX, y: 0, animated: false);
+            state.setScrollX(-1);
+            state.setScrollY(-1);
+          }
+        });
+
+        break;
+      case "jidoujisho-theme":
+        String themeName = messageJson["themeName"];
+        changeTheme(themeName, state);
+        break;
+    }
   }
 
   Future<void> onLoadStop(InAppWebViewController controller, Uri? uri,
       ReaderPageState state) async {
-    await controller.evaluateJavascript(source: textClickJs);
-    String theme = await controller.evaluateJavascript(
+    String themeName = await controller.evaluateJavascript(
         source: "document.documentElement.className");
-    switch (theme) {
-      case "light-theme":
-      case "ecru-theme":
-      case "blue-theme":
-      case "grey-theme":
-        state.setIsDarkMode(false);
-        break;
-      case "black-theme":
-      case "dark-theme":
-        state.setIsDarkMode(true);
-        break;
-    }
+    changeTheme(themeName, state);
 
     String currentTitle = await controller.getTitle() ?? "";
 
@@ -245,17 +283,33 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
 
   Future<void> onTitleChanged(InAppWebViewController controller, String? title,
       ReaderPageState state) async {
-    await controller.evaluateJavascript(source: textClickJs);
+    String themeName = await controller.evaluateJavascript(
+        source: "document.documentElement.className");
+    changeTheme(themeName, state);
 
-    String currentTitle = title!;
+    String currentTitle = await controller.getTitle() ?? "";
 
     currentTitle = currentTitle.replaceAll("| ッツ Ebook Reader", "");
     if (currentTitle == "ッツ Ebook Reader") {
       currentTitle = "";
     }
 
-    print(currentTitle);
     state.setTitle(currentTitle);
+  }
+
+  void changeTheme(String themeName, ReaderPageState state) {
+    switch (themeName) {
+      case "light-theme":
+      case "ecru-theme":
+      case "blue-theme":
+        state.setIsDarkMode(false);
+        break;
+      case "grey-theme":
+      case "black-theme":
+      case "dark-theme":
+        state.setIsDarkMode(true);
+        break;
+    }
   }
 
   Future<void> unselectWebViewTextSelection(
@@ -301,7 +355,120 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
   }
 
   ContextMenu getContextMenu(ReaderPageState state) {
-    return ContextMenu();
+    AppModel appModel = Provider.of<AppModel>(state.context, listen: false);
+
+    if (getHorizontalHack(state.context)) {
+      return ContextMenu(
+        options: ContextMenuOptions(hideDefaultSystemContextMenuItems: true),
+        menuItems: [
+          ContextMenuItem(
+            androidId: 3,
+            iosId: "3",
+            title: "➡️",
+            action: () async {
+              SystemChrome.setPreferredOrientations([
+                DeviceOrientation.portraitUp,
+              ]);
+
+              String searchTerm = await getWebViewTextSelection(controller);
+              Clipboard.setData(ClipboardData(text: searchTerm));
+              unselectWebViewTextSelection(controller);
+              await state.openCardCreator(searchTerm);
+
+              SystemChrome.setPreferredOrientations([
+                DeviceOrientation.landscapeRight,
+              ]);
+            },
+          ),
+          ContextMenuItem(
+            androidId: 2,
+            iosId: "2",
+            title: "📚",
+            action: () async {
+              String searchTerm = await getWebViewTextSelection(controller);
+
+              state.setScrollX(await controller.getScrollX() ?? -1);
+              unselectWebViewTextSelection(controller);
+              await appModel.showDictionaryMenu(
+                state.context,
+                horizontalHack: true,
+                themeData: state.themeData,
+                onDictionaryChange: () {
+                  Clipboard.setData(
+                    ClipboardData(text: searchTerm),
+                  );
+                },
+              );
+            },
+          ),
+          ContextMenuItem(
+            androidId: 1,
+            iosId: "1",
+            title: "🔎",
+            action: () async {
+              String searchTerm = await getWebViewTextSelection(controller);
+
+              state.setScrollX(await controller.getScrollX() ?? -1);
+              Clipboard.setData(ClipboardData(text: searchTerm));
+              unselectWebViewTextSelection(controller);
+            },
+          ),
+        ],
+        onCreateContextMenu: (result) {
+          state.setSearchTerm("");
+        },
+      );
+    } else {
+      return ContextMenu(
+        options: ContextMenuOptions(hideDefaultSystemContextMenuItems: true),
+        menuItems: [
+          ContextMenuItem(
+            androidId: 1,
+            iosId: "1",
+            title: appModel.translate("search"),
+            action: () async {
+              String searchTerm = await getWebViewTextSelection(controller);
+
+              state.setScrollX(await controller.getScrollX() ?? -1);
+              Clipboard.setData(ClipboardData(text: searchTerm));
+              unselectWebViewTextSelection(controller);
+            },
+          ),
+          ContextMenuItem(
+            androidId: 2,
+            iosId: "2",
+            title: appModel.translate("dictionaries"),
+            action: () async {
+              String searchTerm = await getWebViewTextSelection(controller);
+
+              state.setScrollX(await controller.getScrollX() ?? -1);
+              unselectWebViewTextSelection(controller);
+              await appModel.showDictionaryMenu(
+                state.context,
+                themeData: state.themeData,
+                onDictionaryChange: () {
+                  Clipboard.setData(ClipboardData(text: searchTerm));
+                },
+              );
+            },
+          ),
+          ContextMenuItem(
+            androidId: 3,
+            iosId: "3",
+            title: appModel.translate("creator"),
+            action: () async {
+              String searchTerm = await getWebViewTextSelection(controller);
+              Clipboard.setData(ClipboardData(text: searchTerm));
+              unselectWebViewTextSelection(controller);
+              state.openCardCreator(searchTerm);
+            },
+          ),
+        ],
+        onCreateContextMenu: (result) {
+          state.setSearchTerm("");
+        },
+      );
+    }
   }
 
   String textClickJs = """
@@ -332,12 +499,11 @@ var touchmoved;
 var touchevent;
 var reader = document.getElementsByTagName('app-reader')[0];
 var bookmark = document.getElementsByClassName('fa-bookmark')[0].parentElement.parentElement;
+var settings = document.getElementsByClassName('fa-cog')[0].parentElement.parentElement;
 var info = document.getElementsByClassName('information-overlay bottom-overlay scroll-information')[0];
-
 var firstImage = document.getElementsByTagName("image")[0];
 var firstImg = document.getElementsByTagName("img")[0];
 var blob;
-
 if (firstImage != null) {
   blob = firstImage.attributes.href.textContent;
 } else if (firstImg != null) {
@@ -345,7 +511,6 @@ if (firstImage != null) {
 } else {
   blob = "";
 }
-
 if (blob != null) {
   getBase64Image(blob).then(base64Image => console.log(JSON.stringify({
 				"base64Image": base64Image,
@@ -353,41 +518,33 @@ if (blob != null) {
 				"jidoujisho": "jidoujisho-metadata"
 			})));
 }
-
 bookmark.addEventListener('touchstart', function() {
   console.log(JSON.stringify({
 				"bookmark": info.textContent,
 				"jidoujisho": "jidoujisho-bookmark"
 			}));
 });
-
 reader.addEventListener('touchend', function() {
 	if (touchmoved !== true) {
 		var touch = touchevent.touches[0];
 		var result = document.caretRangeFromPoint(touch.clientX, touch.clientY);
 		var selectedElement = result.startContainer;
-
     var paragraph = result.startContainer;
     while (paragraph && paragraph.nodeName !== 'P') {
       paragraph = paragraph.parentNode;
     }
-
     if (paragraph == null) {
       paragraph = result.startContainer.parentNode;
     }
-
     console.log(paragraph.nodeName);
-
 		var noFuriganaText = [];
 		var noFuriganaNodes = [];
 		var selectedFound = false;
 		var index = 0;
-
 		for (var value of paragraph.childNodes.values()) {
 			if (value.nodeName === "#text") {
 				noFuriganaText.push(value.textContent);
 				noFuriganaNodes.push(value);
-
 				if (selectedFound === false) {
 					if (selectedElement !== value) {
 						index = index + value.textContent.length;
@@ -396,13 +553,11 @@ reader.addEventListener('touchend', function() {
 						selectedFound = true;
 					}
 				}
-
 			} else {
 				for (var node of value.childNodes.values()) {
 					if (node.nodeName === "#text") {
 						noFuriganaText.push(node.textContent);
 						noFuriganaNodes.push(node);
-
 						if (selectedFound === false) {
 							if (selectedElement !== node) {
 								index = index + node.textContent.length;
@@ -414,7 +569,6 @@ reader.addEventListener('touchend', function() {
 					} else if (node.firstChild.nodeName === "#text" && node.nodeName !== "RT" && node.nodeName !== "RP") {
 						noFuriganaText.push(node.firstChild.textContent);
 						noFuriganaNodes.push(node.firstChild);
-
 						if (selectedFound === false) {
 							if (selectedElement !== node.firstChild) {
 								index = index + node.firstChild.textContent.length;
@@ -427,11 +581,9 @@ reader.addEventListener('touchend', function() {
 				}
 			}
 		}
-
 		var text = noFuriganaText.join("");
 		var offset = index;
     
-
 		console.log(JSON.stringify({
 				"offset": offset,
 				"text": text,
@@ -447,7 +599,6 @@ reader.addEventListener('touchstart', (e) => {
 	touchmoved = false;
 	touchevent = e;
 });
-
 function getSelectionText() {
     function getRangeSelectedNodes(range) {
       var node = range.startContainer;
@@ -514,7 +665,6 @@ function getSelectionText() {
     }
     return txt;
 };
-
 reader.addEventListener('auxclick', (e) => {
   if (getSelectionText()) {
     console.log(JSON.stringify({
@@ -525,7 +675,6 @@ reader.addEventListener('auxclick', (e) => {
 			}));
   }
 });
-
 reader.addEventListener('click', (e) => {
   if (getSelectionText()) {
     console.log(JSON.stringify({
@@ -537,28 +686,22 @@ reader.addEventListener('click', (e) => {
   } else {
     var result = document.caretRangeFromPoint(e.clientX, e.clientY);
     var selectedElement = result.startContainer;
-
     var paragraph = result.startContainer;
     while (paragraph && paragraph.nodeName !== 'P') {
       paragraph = paragraph.parentNode;
     }
-
     if (paragraph == null) {
       paragraph = result.startContainer.parentNode;
     }
-
     console.log(paragraph.nodeName);
-
 		var noFuriganaText = [];
 		var noFuriganaNodes = [];
 		var selectedFound = false;
 		var index = 0;
-
 		for (var value of paragraph.childNodes.values()) {
 			if (value.nodeName === "#text") {
 				noFuriganaText.push(value.textContent);
 				noFuriganaNodes.push(value);
-
 				if (selectedFound === false) {
 					if (selectedElement !== value) {
 						index = index + value.textContent.length;
@@ -567,13 +710,11 @@ reader.addEventListener('click', (e) => {
 						selectedFound = true;
 					}
 				}
-
 			} else {
 				for (var node of value.childNodes.values()) {
 					if (node.nodeName === "#text") {
 						noFuriganaText.push(node.textContent);
 						noFuriganaNodes.push(node);
-
 						if (selectedFound === false) {
 							if (selectedElement !== node) {
 								index = index + node.textContent.length;
@@ -585,7 +726,6 @@ reader.addEventListener('click', (e) => {
 					} else if (node.firstChild.nodeName === "#text" && node.nodeName !== "RT" && node.nodeName !== "RP") {
 						noFuriganaText.push(node.firstChild.textContent);
 						noFuriganaNodes.push(node.firstChild);
-
 						if (selectedFound === false) {
 							if (selectedElement !== node.firstChild) {
 								index = index + node.firstChild.textContent.length;
@@ -598,11 +738,9 @@ reader.addEventListener('click', (e) => {
 				}
 			}
 		}
-
 		var text = noFuriganaText.join("");
 		var offset = index;
     
-
 		console.log(JSON.stringify({
 				"offset": offset,
 				"text": text,
@@ -610,5 +748,51 @@ reader.addEventListener('click', (e) => {
 			}));
   }
 });
+
+document.getElementsByClassName('custom-svg-icon')[0].remove();
+
+var MutationObserver = window.MutationObserver;
+var observer = new MutationObserver(function(mutations) {
+  mutations.forEach(function(mutation) {
+   	console.log(JSON.stringify({
+				"themeName": mutation.target.className,
+				"jidoujisho": "jidoujisho-theme"
+			}));
+  });
+});
+
+var config = {attributes: true,  childList: false,  characterData: false};
+observer.observe(document.documentElement, config);
 """;
+
+  String horizontalHackJs = """
+var icons = document.getElementsByTagName('fa-icon');
+for (var i = 0; i < icons.length; i++) {
+    var icon = icons[i];
+    icon.style.setProperty("-webkit-transform", "rotate(90deg)", null);
+}
+
+settings.addEventListener('touchstart', function() {
+  console.log(JSON.stringify({
+				"bookmark": info.textContent,
+				"jidoujisho": "jidoujisho-bookmark"
+			}));
+});
+
+document.body.style.setProperty('text-orientation', 'sideways', 'important');
+""";
+
+  @override
+  bool getHorizontalHack(BuildContext context) {
+    AppModel appModel = Provider.of<AppModel>(context, listen: false);
+    return appModel.sharedPreferences
+            .getBool("$getIdentifier()://horizontalHack") ??
+        false;
+  }
+
+  Future<void> toggleHorizontalHack(BuildContext context) async {
+    AppModel appModel = Provider.of<AppModel>(context, listen: false);
+    await appModel.sharedPreferences.setBool(
+        "$getIdentifier()://horizontalHack", !getHorizontalHack(context));
+  }
 }

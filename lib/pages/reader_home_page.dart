@@ -103,21 +103,34 @@ class ReaderHomePageState extends State<ReaderHomePage>
             parent: BouncingScrollPhysics()),
         controller: scrollController,
         addAutomaticKeepAlives: true,
-        itemCount: mediaHistoryItems.length + 1,
+        itemCount: 2,
         itemBuilder: (BuildContext context, int index) {
           if (index == 0) {
             return const SizedBox(height: 48);
           }
-          MediaHistoryItem item = mediaHistoryItems[index - 1];
-          MediaSource source = appModel.getMediaSourceFromName(
-              MediaType.reader, item.sourceName);
-          return source.buildMediaHistoryItem(
-            context: context,
-            history: history,
-            item: item,
-            homeRefreshCallback: refreshCallback,
-            searchRefreshCallback: () {},
-            isHistory: true,
+
+          return GridView.builder(
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 200,
+              childAspectRatio: 176 / 250,
+            ),
+            shrinkWrap: true,
+            controller: scrollController,
+            addAutomaticKeepAlives: true,
+            itemCount: mediaHistoryItems.length,
+            itemBuilder: (BuildContext context, int index) {
+              MediaHistoryItem item = mediaHistoryItems[index];
+              MediaSource source = appModel.getMediaSourceFromName(
+                  MediaType.reader, item.sourceName);
+              return source.buildMediaHistoryItem(
+                context: context,
+                history: history,
+                item: item,
+                homeRefreshCallback: refreshCallback,
+                searchRefreshCallback: () {},
+                isHistory: true,
+              );
+            },
           );
         },
       ),

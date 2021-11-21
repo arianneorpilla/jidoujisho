@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
+import 'package:chisa/media/media_sources/reader_ttu_media_source.dart';
 import 'package:external_path/external_path.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -498,15 +499,34 @@ class AppModel with ChangeNotifier {
     BuildContext context, {
     bool manageAllowed = false,
     Function()? onDictionaryChange,
+    bool horizontalHack = false,
+    ThemeData? themeData,
   }) async {
-    await showDialog(
-      barrierDismissible: true,
-      context: context,
-      builder: (context) => DictionaryDialog(
-        manageAllowed: manageAllowed,
-        onDictionaryChange: onDictionaryChange,
-      ),
+    Widget dictionaryDialog = DictionaryDialog(
+      manageAllowed: manageAllowed,
+      onDictionaryChange: onDictionaryChange,
     );
+
+    if (themeData != null) {
+      await showDialog(
+        barrierDismissible: true,
+        context: context,
+        builder: (context) => Theme(
+          data: themeData,
+          child: (horizontalHack)
+              ? RotatedBox(quarterTurns: 1, child: dictionaryDialog)
+              : dictionaryDialog,
+        ),
+      );
+    } else {
+      await showDialog(
+        barrierDismissible: true,
+        context: context,
+        builder: (context) => (horizontalHack)
+            ? RotatedBox(quarterTurns: 1, child: dictionaryDialog)
+            : dictionaryDialog,
+      );
+    }
   }
 
   /// Show the dictionary menu. This should be callable from many parts of the
@@ -604,17 +624,11 @@ class AppModel with ChangeNotifier {
 
     List<DictionaryMediaHistoryItem> mediaHistoryItems =
         getDictionaryMediaHistory().getDictionaryItems().toList();
-    List<DictionarySearchResult> results = mediaHistoryItems
-        .map((item) => DictionarySearchResult.fromJson(item.key))
-        .toList();
 
     /// Dispose of potential format breaking dictionary entries.
-    for (DictionarySearchResult result in results) {
-      if (result.dictionaryName == dictionaryName) {
-        getDictionaryMediaHistory().removeDictionaryItem(
-          result.originalSearchTerm,
-          result.dictionaryName,
-        );
+    for (DictionaryMediaHistoryItem item in mediaHistoryItems) {
+      if (item.author == dictionaryName) {
+        getDictionaryMediaHistory().removeDictionaryItem(item);
       }
     }
 
@@ -880,25 +894,37 @@ class AppModel with ChangeNotifier {
     );
   }
 
+  Map<String, int> getDictionaryHistoryIndexMap() {
+    String indexMapJson =
+        sharedPreferences.getString("dictionaryHistoryIndexMap") ?? "{}";
+    Map<String, int> indexMap = Map<String, int>.from(jsonDecode(indexMapJson));
+
+    return indexMap;
+  }
+
+  Future<void> setDictionaryHistoryIndexMap(Map<String, int> indexMap) async {
+    await sharedPreferences.setString(
+        "dictionaryHistoryIndexMap", jsonEncode(indexMap));
+  }
+
   Future<void> addDictionaryHistoryItem(DictionaryMediaHistoryItem item) {
     return getDictionaryMediaHistory().addDictionaryItem(item);
   }
 
-  Future<void> updateDictionaryHistoryIndex(
-      DictionaryMediaHistoryItem newItem) async {
-    DictionaryMediaHistory history = getDictionaryMediaHistory();
-    List<DictionaryMediaHistoryItem> items = history.getDictionaryItems();
-    items.firstWhere((entry) => entry.key == newItem.key).currentProgress =
-        newItem.currentProgress;
-
-    await history.setItems(items);
+  int getDictionaryHistoryIndex(DictionaryMediaHistoryItem item) {
+    Map<String, int> indexMap = getDictionaryHistoryIndexMap();
+    return indexMap["${item.title}/${item.author}"] ?? 0;
   }
 
-  Future<void> removeDictionaryHistoryItem(DictionarySearchResult result) {
-    return getDictionaryMediaHistory().removeDictionaryItem(
-      result.originalSearchTerm,
-      result.dictionaryName,
-    );
+  Future<void> setDictionaryHistoryIndex(
+      DictionaryMediaHistoryItem item, int? index) async {
+    Map<String, int> indexMap = getDictionaryHistoryIndexMap();
+    if (index == null) {
+      indexMap.remove("${item.title}/${item.author}");
+    } else {
+      indexMap["${item.title}/${item.author}"] = index;
+    }
+    await setDictionaryHistoryIndexMap(indexMap);
   }
 
   Widget buildDictionarySearchResult({

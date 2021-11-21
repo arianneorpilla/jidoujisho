@@ -143,57 +143,58 @@ Future<void> navigateToCreator({
       ),
     );
   } catch (e) {
-    showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            contentPadding:
-                const EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.zero,
-            ),
-            title: Text(
-              appModel.translate("ankidroid_api"),
-            ),
-            content: Text(
-              appModel.translate("ankidroid_api_message"),
-              textAlign: TextAlign.justify,
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: Text(
-                  appModel.translate("dialog_launch_ankidroid"),
-                ),
-                onPressed: () async {
-                  DeviceApps.openApp('com.ichi2.anki');
-                  Navigator.pop(context);
-
-                  try {
-                    List<String> decks = await getDecks();
-                    await Navigator.of(context).push(
-                      PageRouteBuilder(
-                        opaque: false,
-                        pageBuilder: (_, __, ___) => CreatorPage(
-                          initialParams: initialParams,
-                          backgroundColor: backgroundColor,
-                          appBarColor: appBarColor,
-                          landscapeLocked: landscapeLocked,
-                          decks: decks,
-                          autoMode: autoMode,
-                          editMode: editMode,
-                          popOnExport: popOnExport,
-                          exportCallback: exportCallback,
-                        ),
-                      ),
-                    );
-                  } catch (e) {
-                    debugPrint(e.toString());
-                  }
-                },
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          contentPadding:
+              const EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
+          ),
+          title: Text(
+            appModel.translate("ankidroid_api"),
+          ),
+          content: Text(
+            appModel.translate("ankidroid_api_message"),
+            textAlign: TextAlign.justify,
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(
+                appModel.translate("dialog_launch_ankidroid"),
               ),
-            ],
-          );
-        });
+              onPressed: () async {
+                DeviceApps.openApp('com.ichi2.anki');
+                Navigator.pop(context);
+
+                try {
+                  List<String> decks = await getDecks();
+                  await Navigator.of(context).push(
+                    PageRouteBuilder(
+                      opaque: false,
+                      pageBuilder: (_, __, ___) => CreatorPage(
+                        initialParams: initialParams,
+                        backgroundColor: backgroundColor,
+                        appBarColor: appBarColor,
+                        landscapeLocked: landscapeLocked,
+                        decks: decks,
+                        autoMode: autoMode,
+                        editMode: editMode,
+                        popOnExport: popOnExport,
+                        exportCallback: exportCallback,
+                      ),
+                    ),
+                  );
+                } catch (e) {
+                  debugPrint(e.toString());
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
     debugPrint(e.toString());
   }
 }

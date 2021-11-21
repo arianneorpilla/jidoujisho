@@ -1,5 +1,6 @@
 import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_sources/player_media_source.dart';
+import 'package:chisa/media/media_sources/reader_media_source.dart';
 import 'package:chisa/media/media_type.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,12 @@ Future<void> returnFromContext(
     case MediaType.player:
       PlayerMediaSource source = appModel.getMediaSourceFromName(
           mediaType, item.sourceName) as PlayerMediaSource;
+      await source.launchMediaPage(
+          context, source.getLaunchParams(appModel, item));
+      break;
+    case MediaType.reader:
+      ReaderMediaSource source = appModel.getMediaSourceFromName(
+          mediaType, item.sourceName) as ReaderMediaSource;
       await source.launchMediaPage(
           context, source.getLaunchParams(appModel, item));
       break;

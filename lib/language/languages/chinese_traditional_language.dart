@@ -62,13 +62,18 @@ for seg in seg_list:
       fallbackTerms.add(remainderTerm);
     }
 
-    if (searchTerm.length > 4) {
+    if (searchTerm.length >= 3) {
       fallbackTerms.add(searchTerm.substring(0, searchTerm.length - 2));
     }
-    if (searchTerm.length > 2) {
+    if (searchTerm.length >= 2) {
       fallbackTerms.add(searchTerm.substring(0, searchTerm.length - 1));
     }
 
+    // debugPrint(fallbackTerms);
+
     return fallbackTerms;
   }
+
+  @override
+  int get indexMaxDistance => 5;
 }

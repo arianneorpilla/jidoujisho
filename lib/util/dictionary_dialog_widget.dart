@@ -54,6 +54,7 @@ class DictionaryDialogWidgetState extends State<DictionaryDialogWidget> {
         dictionaryFormat: widget.dictionaryFormat,
         dictionary: widget.dictionary,
         callback: widget.callback,
+        indexNotifier: widget.indexNotifier,
       ),
       actions: widget.actions,
     );

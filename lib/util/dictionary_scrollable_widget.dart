@@ -1,4 +1,3 @@
-import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_type.dart';
 import 'package:flutter/material.dart';
 
@@ -11,13 +10,14 @@ import 'package:chisa/media/media_history_items/dictionary_media_history_item.da
 import 'package:chisa/models/app_model.dart';
 
 class DictionaryScrollableWidget extends StatelessWidget {
-  DictionaryScrollableWidget({
+  const DictionaryScrollableWidget({
     Key? key,
     required this.appModel,
     required this.mediaHistoryItem,
     required this.result,
     required this.dictionaryFormat,
     required this.dictionary,
+    required this.indexNotifier,
     this.selectable = false,
     this.callback,
   }) : super(key: key);
@@ -36,6 +36,7 @@ class DictionaryScrollableWidget extends StatelessWidget {
       dictionaryFormat: appModel.getDictionaryFormatFromName(result.formatName),
       dictionary: appModel.getDictionaryFromName(result.dictionaryName),
       selectable: selectable,
+      indexNotifier: indexNotifier,
     );
   }
 
@@ -45,61 +46,59 @@ class DictionaryScrollableWidget extends StatelessWidget {
   final DictionaryFormat dictionaryFormat;
   final Dictionary dictionary;
   final VoidCallback? callback;
+  final ValueNotifier<int> indexNotifier;
   final bool selectable;
-
-  final ValueNotifier<int> indexNotifier = ValueNotifier<int>(0);
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<int>(
-        valueListenable: indexNotifier,
-        builder: (context, index, child) {
-          DictionaryEntry dictionaryEntry = result.entries[indexNotifier.value];
+      valueListenable: indexNotifier,
+      builder: (context, index, child) {
+        DictionaryEntry dictionaryEntry = result.entries[indexNotifier.value];
 
-          return GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onHorizontalDragEnd: (details) async {
-              if (details.primaryVelocity == 0) return;
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onHorizontalDragEnd: (details) async {
+            if (details.primaryVelocity == 0) return;
 
-              if (details.primaryVelocity!.compareTo(0) == -1) {
-                if (indexNotifier.value == result.entries.length - 1) {
-                  indexNotifier.value = 0;
-                } else {
-                  indexNotifier.value += 1;
-                }
+            if (details.primaryVelocity!.compareTo(0) == -1) {
+              if (indexNotifier.value == result.entries.length - 1) {
+                indexNotifier.value = 0;
               } else {
-                if (indexNotifier.value == 0) {
-                  indexNotifier.value = result.entries.length - 1;
-                } else {
-                  indexNotifier.value -= 1;
-                }
+                indexNotifier.value += 1;
               }
+            } else {
+              if (indexNotifier.value == 0) {
+                indexNotifier.value = result.entries.length - 1;
+              } else {
+                indexNotifier.value -= 1;
+              }
+            }
 
-              DictionaryMediaHistoryItem newItem = mediaHistoryItem;
-              newItem.currentProgress = indexNotifier.value;
-
-              appModel.updateDictionaryHistoryIndex(
-                newItem,
-              );
-            },
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Flexible(
-                  child: appModel.buildDictionarySearchResult(
-                    context: context,
-                    dictionaryEntry: dictionaryEntry,
-                    dictionaryFormat: dictionaryFormat,
-                    dictionary: dictionary,
-                    selectable: selectable,
-                  ),
+            await appModel.setDictionaryHistoryIndex(
+              mediaHistoryItem,
+              indexNotifier.value,
+            );
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: appModel.buildDictionarySearchResult(
+                  context: context,
+                  dictionaryEntry: dictionaryEntry,
+                  dictionaryFormat: dictionaryFormat,
+                  dictionary: dictionary,
+                  selectable: selectable,
                 ),
-                const SizedBox(height: 10),
-                getFooterTextSpans(context),
-              ],
-            ),
-          );
-        });
+              ),
+              const SizedBox(height: 10),
+              getFooterTextSpans(context),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   WidgetSpan getContextSourceIcon(BuildContext context) {

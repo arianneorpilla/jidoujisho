@@ -10,7 +10,6 @@ import 'package:chisa/util/dictionary_scrollable_widget.dart';
 import 'package:clipboard_listener/clipboard_listener.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
@@ -34,7 +33,7 @@ class ReaderPage extends StatefulWidget {
 
 class ReaderPageState extends State<ReaderPage> {
   late AppModel appModel;
-  Color dictionaryColor = Colors.grey.shade600.withOpacity(0.97);
+  Color dictionaryColor = Colors.grey.shade800.withOpacity(0.97);
 
   late InAppWebViewController webViewController;
 
@@ -54,8 +53,8 @@ class ReaderPageState extends State<ReaderPage> {
   late String thumbnail;
   late String title;
   late String author;
-  late ThemeData themeData;
 
+  ThemeData? themeData;
   bool isDarkMode = false;
 
   @override
@@ -63,20 +62,27 @@ class ReaderPageState extends State<ReaderPage> {
     super.initState();
 
     Wakelock.enable();
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
     ClipboardListener.addListener(copyClipboardAction);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
     source = widget.params.mediaSource;
 
     currentProgress = widget.params.mediaHistoryItem.currentProgress;
     completeProgress = widget.params.mediaHistoryItem.completeProgress;
-    scrollX = widget.params.mediaHistoryItem.extra["scrollX"] ?? 0;
-    scrollY = widget.params.mediaHistoryItem.extra["scrollY"] ?? 0;
     url = widget.params.mediaHistoryItem.key;
-    thumbnail = widget.params.mediaHistoryItem.thumbnailPath;
+    scrollX = widget.params.mediaHistoryItem.extra["scrollX"] ?? -1;
+    scrollY = widget.params.mediaHistoryItem.extra["scrollY"] ?? -1;
+    thumbnail = widget.params.mediaHistoryItem.extra["thumbnail"] ?? "";
     author = widget.params.mediaHistoryItem.author;
 
     WidgetsBinding.instance!.addPostFrameCallback((_) {
+      if (widget.params.mediaSource.getHorizontalHack(context)) {
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.landscapeRight,
+        ]);
+      }
+
       themeData = appModel.getIsDarkMode()
           ? appModel.getDarkTheme(context)
           : appModel.getLightTheme(context);
@@ -86,29 +92,29 @@ class ReaderPageState extends State<ReaderPage> {
 
   @override
   void dispose() async {
-    Wakelock.disable();
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     ClipboardListener.removeListener(copyClipboardAction);
-
     super.dispose();
   }
 
   Future<void> updateHistory() async {
     MediaHistory history =
         widget.params.mediaSource.mediaType.getMediaHistory(appModel);
-    MediaHistoryItem item = widget.params.mediaHistoryItem;
-    item.currentProgress = currentProgress;
-    item.completeProgress = completeProgress;
-    item.extra["scrollX"] = scrollX;
-    item.extra["scrollY"] = scrollY;
-    item.key = url;
-    item.extra["thumbnail"] = thumbnail;
-    item.title = title;
-    item.author = author;
+    MediaHistoryItem item = MediaHistoryItem(
+      currentProgress: currentProgress,
+      completeProgress: completeProgress,
+      key: url,
+      extra: {
+        "thumbnail": thumbnail,
+        "scrollX": -1,
+        "scrollY": -1,
+      },
+      title: title,
+      author: author,
+      sourceName: source.sourceName,
+      mediaTypePrefs: MediaType.reader.prefsDirectory(),
+    );
 
-    if (item.completeProgress != 0 &&
-        thumbnail.isNotEmpty &&
-        title.isNotEmpty) {
+    if (completeProgress != 0 && thumbnail.isNotEmpty && title.isNotEmpty) {
       if (widget.params.saveHistoryItem) {
         if (!appModel.getIncognitoMode()) {
           history.addItem(item);
@@ -159,7 +165,7 @@ class ReaderPageState extends State<ReaderPage> {
     isDarkMode = value;
     dictionaryColor = isDarkMode
         ? Colors.grey.shade800.withOpacity(0.97)
-        : Colors.grey.shade600.withOpacity(0.97);
+        : Colors.grey.shade200.withOpacity(0.97);
     themeData = isDarkMode
         ? appModel.getDarkTheme(context)
         : appModel.getLightTheme(context);
@@ -197,17 +203,20 @@ class ReaderPageState extends State<ReaderPage> {
 
     return await showDialog(
           context: context,
-          builder: (context) => alertDialog,
+          builder: (context) => (source.getHorizontalHack(context))
+              ? RotatedBox(quarterTurns: 1, child: alertDialog)
+              : alertDialog,
         ) ??
         false;
   }
 
   @override
   Widget build(BuildContext context) {
+    themeData ??= Theme.of(context);
     appModel = Provider.of<AppModel>(context);
 
     return Theme(
-      data: themeData,
+      data: themeData!,
       child: WillPopScope(
         onWillPop: onWillPop,
         child: Scaffold(
@@ -217,7 +226,12 @@ class ReaderPageState extends State<ReaderPage> {
             alignment: Alignment.center,
             children: <Widget>[
               buildReaderArea(),
-              buildDictionary(),
+              (source.getHorizontalHack(context))
+                  ? RotatedBox(
+                      quarterTurns: 1,
+                      child: buildDictionary(),
+                    )
+                  : buildDictionary(),
             ],
           ),
         ),
@@ -245,15 +259,20 @@ class ReaderPageState extends State<ReaderPage> {
       return null;
     }
 
-    MediaHistoryItem item = widget.params.mediaHistoryItem;
-    item.currentProgress = currentProgress;
-    item.completeProgress = completeProgress;
-    item.extra["scrollX"] = scrollX;
-    item.extra["scrollY"] = scrollY;
-    item.key = url;
-    item.extra["thumbnail"] = thumbnail;
-    item.title = title;
-    item.author = author;
+    MediaHistoryItem item = MediaHistoryItem(
+      currentProgress: currentProgress,
+      completeProgress: completeProgress,
+      key: url,
+      extra: {
+        "thumbnail": thumbnail,
+        "scrollX": scrollX,
+        "scrollY": scrollY,
+      },
+      title: title,
+      author: author,
+      sourceName: source.sourceName,
+      mediaTypePrefs: MediaType.reader.prefsDirectory(),
+    );
 
     return item;
   }
@@ -310,10 +329,14 @@ class ReaderPageState extends State<ReaderPage> {
                 setSearchTerm("");
               },
               onLongPress: () async {
-                await appModel.showDictionaryMenu(context,
-                    onDictionaryChange: () {
-                  refreshDictionaryWidget();
-                });
+                await appModel.showDictionaryMenu(
+                  context,
+                  onDictionaryChange: () {
+                    refreshDictionaryWidget();
+                  },
+                  horizontalHack: source.getHorizontalHack(context),
+                  themeData: themeData,
+                );
               },
               onVerticalDragEnd: (details) {
                 if (details.primaryVelocity == 0) return;
@@ -382,7 +405,7 @@ class ReaderPageState extends State<ReaderPage> {
             text: "『",
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: themeData.unselectedWidgetColor,
+              color: themeData!.unselectedWidgetColor,
             ),
           ),
           TextSpan(
@@ -395,7 +418,7 @@ class ReaderPageState extends State<ReaderPage> {
             text: "』",
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: themeData.unselectedWidgetColor,
+              color: themeData!.unselectedWidgetColor,
             ),
           ),
           TextSpan(
@@ -434,7 +457,7 @@ class ReaderPageState extends State<ReaderPage> {
             text: "『",
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: themeData.unselectedWidgetColor,
+              color: themeData!.unselectedWidgetColor,
             ),
           ),
           TextSpan(
@@ -447,7 +470,7 @@ class ReaderPageState extends State<ReaderPage> {
             text: "』",
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: themeData.unselectedWidgetColor,
+              color: themeData!.unselectedWidgetColor,
             ),
           ),
           TextSpan(text: afterText),
@@ -484,7 +507,7 @@ class ReaderPageState extends State<ReaderPage> {
             text: "『",
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: themeData.unselectedWidgetColor,
+              color: themeData!.unselectedWidgetColor,
             ),
           ),
           TextSpan(
@@ -497,7 +520,7 @@ class ReaderPageState extends State<ReaderPage> {
             text: "』",
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: themeData.unselectedWidgetColor,
+              color: themeData!.unselectedWidgetColor,
             ),
           ),
           TextSpan(text: afterText),
@@ -562,7 +585,7 @@ class ReaderPageState extends State<ReaderPage> {
             text: "『",
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: themeData.unselectedWidgetColor,
+              color: themeData!.unselectedWidgetColor,
             ),
           ),
           TextSpan(
@@ -575,7 +598,7 @@ class ReaderPageState extends State<ReaderPage> {
             text: "』",
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: themeData.unselectedWidgetColor,
+              color: themeData!.unselectedWidgetColor,
             ),
           ),
           TextSpan(
@@ -609,13 +632,11 @@ class ReaderPageState extends State<ReaderPage> {
     ClipboardListener.removeListener(copyClipboardAction);
 
     clearDictionaryMessage();
+
     await navigateToCreator(
         context: context,
         appModel: appModel,
         initialParams: initialParams,
-        backgroundColor: dictionaryColor,
-        appBarColor: Colors.transparent,
-        landscapeLocked: true,
         popOnExport: true,
         exportCallback: () {
           Navigator.of(context).pop();

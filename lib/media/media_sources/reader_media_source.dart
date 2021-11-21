@@ -17,6 +17,7 @@ import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/reader_page.dart';
 import 'package:chisa/util/time_format.dart';
+import 'package:wakelock/wakelock.dart';
 
 abstract class ReaderMediaSource extends MediaSource {
   ReaderMediaSource({
@@ -59,6 +60,20 @@ abstract class ReaderMediaSource extends MediaSource {
     }
 
     appModel.isInSource = false;
+    Wakelock.disable();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
+
+    Future.delayed(const Duration(seconds: 1), () {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+    });
   }
 
   @override
@@ -117,7 +132,7 @@ abstract class ReaderMediaSource extends MediaSource {
           actions.add(
             TextButton(
               child: Text(
-                appModel.translate("dialog_play"),
+                appModel.translate("dialog_read"),
                 style: const TextStyle(),
               ),
               onPressed: () async {
@@ -140,11 +155,40 @@ abstract class ReaderMediaSource extends MediaSource {
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),
-              content: AspectRatio(
-                aspectRatio: 16 / 9,
-                child: FadeInImage(
-                  image: image,
-                  placeholder: MemoryImage(kTransparentImage),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Icon(
+                          icon,
+                          color: Theme.of(context).unselectedWidgetColor,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          item.sourceName,
+                          style: TextStyle(
+                            color: Theme.of(context).unselectedWidgetColor,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 16,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: true,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    AspectRatio(
+                      aspectRatio: 176 / 250,
+                      child: Image(
+                        image: image,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               actions: actions,
@@ -153,27 +197,82 @@ abstract class ReaderMediaSource extends MediaSource {
         },
         child: Container(
           padding: const EdgeInsets.all(12),
-          child: Row(
+          child: Stack(
+            alignment: Alignment.bottomLeft,
             children: [
-              SizedBox(
-                width: 180,
-                child: buildMediaHistoryThumbnail(
-                  context: context,
-                  item: item,
-                  homeRefreshCallback: homeRefreshCallback,
-                  searchRefreshCallback: searchRefreshCallback,
-                  isHistory: isHistory,
+              Container(
+                color: Colors.grey.shade800.withOpacity(0.3),
+                child: AspectRatio(
+                  aspectRatio: 176 / 250,
+                  child: (getHistoryThumbnailAlias(item) == null)
+                      ? FutureBuilder<ImageProvider<Object>>(
+                          future: getHistoryThumbnailAlias(item),
+                          builder: (BuildContext context,
+                              AsyncSnapshot<ImageProvider> snapshot) {
+                            if (snapshot.connectionState ==
+                                    ConnectionState.waiting ||
+                                !snapshot.hasData) {
+                              return Image(
+                                  image: MemoryImage(kTransparentImage));
+                            }
+
+                            ImageProvider<Object> thumbnail = snapshot.data!;
+
+                            return FadeInImage(
+                              placeholder: MemoryImage(kTransparentImage),
+                              image: thumbnail,
+                              fit: BoxFit.fitWidth,
+                            );
+                          },
+                        )
+                      : FutureBuilder<ImageProvider<Object>>(
+                          future: getHistoryThumbnail(item),
+                          builder: (BuildContext context,
+                              AsyncSnapshot<ImageProvider> snapshot) {
+                            if (snapshot.connectionState ==
+                                    ConnectionState.waiting ||
+                                !snapshot.hasData) {
+                              return Image(
+                                  image: MemoryImage(kTransparentImage));
+                            }
+
+                            ImageProvider<Object> thumbnail = snapshot.data!;
+
+                            return FadeInImage(
+                              placeholder: MemoryImage(kTransparentImage),
+                              image: thumbnail,
+                              fit: BoxFit.fitWidth,
+                            );
+                          },
+                        ),
                 ),
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: buildMediaHistoryMetadata(
-                  context: context,
-                  item: item,
-                  homeRefreshCallback: homeRefreshCallback,
-                  searchRefreshCallback: searchRefreshCallback,
-                  isHistory: isHistory,
-                ),
+              LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints constraints) {
+                return Container(
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.fromLTRB(2, 2, 2, 4),
+                  height: constraints.maxHeight * 0.175,
+                  width: double.maxFinite,
+                  color: Colors.black.withOpacity(0.6),
+                  child: Text(
+                    (item.alias.isEmpty) ? item.title : item.alias,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                    textAlign: TextAlign.center,
+                    softWrap: true,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 9,
+                    ),
+                  ),
+                );
+              }),
+              LinearProgressIndicator(
+                value: item.currentProgress / item.completeProgress,
+                backgroundColor: Colors.white.withOpacity(0.6),
+                valueColor: const AlwaysStoppedAnimation<Color>(Colors.red),
+                minHeight: 2,
               ),
             ],
           ),
@@ -258,7 +357,7 @@ abstract class ReaderMediaSource extends MediaSource {
         Container(
           color: Colors.black,
           child: AspectRatio(
-            aspectRatio: 16 / 9,
+            aspectRatio: 176 / 250,
             child: FutureBuilder<ImageProvider<Object>>(
               future: getHistoryThumbnail(item),
               builder: (BuildContext context,
@@ -362,7 +461,7 @@ abstract class ReaderMediaSource extends MediaSource {
     return item.alias;
   }
 
-  Future<ImageProvider<Object>> getHistoryThumbnailAlias(
+  Future<ImageProvider<Object>>? getHistoryThumbnailAlias(
       MediaHistoryItem item) async {
     return FileImage(File(item.thumbnailPath));
   }
@@ -382,4 +481,7 @@ abstract class ReaderMediaSource extends MediaSource {
         return true;
     }
   }
+
+  /// See [ReaderTtuMediaSource] lmao
+  bool getHorizontalHack(BuildContext context) => false;
 }

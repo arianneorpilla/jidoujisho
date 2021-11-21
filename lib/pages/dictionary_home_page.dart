@@ -227,6 +227,8 @@ class DictionaryPageState extends State<DictionaryHomePage>
         appModel.getDictionaryFormatFromName(result.formatName);
     Dictionary dictionary =
         appModel.getDictionaryFromName(result.dictionaryName);
+    ValueNotifier<int> indexNotifier = ValueNotifier<int>(
+        appModel.getDictionaryHistoryIndex(mediaHistoryItem));
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12, left: 12, right: 12),
@@ -274,7 +276,9 @@ class DictionaryPageState extends State<DictionaryHomePage>
                     ),
                   ),
                   onPressed: () async {
-                    await appModel.removeDictionaryHistoryItem(result);
+                    await appModel
+                        .getDictionaryMediaHistory()
+                        .removeDictionaryItem(mediaHistoryItem);
 
                     Navigator.pop(context);
                     setState(() {});
@@ -329,6 +333,7 @@ class DictionaryPageState extends State<DictionaryHomePage>
             callback: () {
               setState(() {});
             },
+            indexNotifier: indexNotifier,
           ),
         ),
       ),

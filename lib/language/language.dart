@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:chisa/util/reading_direction.dart';
+import 'package:flutter/material.dart';
 
 abstract class Language {
   Language({
@@ -38,6 +40,13 @@ abstract class Language {
   /// Whether or not the language is initialised. Do not override.
   bool isInitialised = false;
 
+  /// Some implementations of tap-to-select are very unoptimised for a high
+  /// length of text. It is impractical to run text segmentation in some cases.
+  /// This value sets a length from the center from which input text for
+  /// [wordFromIndex] should be cut if longer. If -1, the limit will not be
+  /// used.
+  int indexMaxDistance = -1;
+
   /// Initialise text segmentation and other tools necessary for this language
   /// to function.
   Future<void> initialiseLanguage();
@@ -63,6 +72,48 @@ abstract class Language {
   /// In the case of English, "This is a pen." at index 10 (p), should return
   /// the word "pen".
   FutureOr<String> wordFromIndex(String text, int index) async {
+    /// See [indexMaxDistance] above.
+    /// If the [indexMaxDistance] is not defined (-1)...
+    if (indexMaxDistance != -1) {
+      /// If the length of text cut into two, incrmeented by one exceeds the
+      /// [indexMaxDistance] multiplied into two and incremented by one...
+      if (((text.length / 2) + 1) > ((indexMaxDistance * 2) + 1)) {
+        /// Then get a substring of text, with the original index character
+        /// being the center and to its left and right, a maximum number of
+        /// [indexMaxDistance] characters...
+        ///
+        /// Of course, the indexes of those values will have to be in the range
+        /// of (0, length - 1)...
+        List<int> originalIndexTape = [];
+        List<int> indexTape = [];
+
+        int rangeStart = max(0, index - indexMaxDistance);
+        int rangeEnd = min(text.length - 1, index + indexMaxDistance + 1);
+
+        for (int i = 0; i < text.length; i++) {
+          originalIndexTape.add(i);
+        }
+
+        String newText = "";
+        int newIndex = -1;
+
+        for (int i = 0; i < text.runes.length; i++) {
+          if (i >= rangeStart && i < rangeEnd) {
+            String character = String.fromCharCode(text.runes.elementAt(i));
+            newText += character;
+
+            indexTape.add(i);
+            if (index == i) {
+              newIndex = indexTape.indexOf(i);
+            }
+          }
+        }
+
+        text = newText;
+        index = newIndex;
+      }
+    }
+
     List<String> words = await textToWords(text);
 
     List<String> wordTape = [];
@@ -74,6 +125,14 @@ abstract class Language {
     }
 
     String word = wordTape[index];
+
+    // debugPrint("---");
+    // debugPrint(text);
+    // debugPrint(index.toString());
+    // debugPrint(text[index]);
+    // debugPrint(word);
+    // debugPrint("---");
+
     return word;
   }
 
