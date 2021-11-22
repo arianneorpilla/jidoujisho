@@ -98,7 +98,6 @@ class PlayerPageState extends State<PlayerPage>
 
   bool dialogSmartPaused = false;
   bool dialogSmartFocusFlag = false;
-  bool pushingReplacement = false;
 
   String? audioPath;
 
@@ -268,7 +267,7 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   void cancelHideTimer() {
-    menuHideTimer!.cancel();
+    menuHideTimer?.cancel();
     isMenuHidden.value = false;
   }
 
@@ -278,7 +277,7 @@ class PlayerPageState extends State<PlayerPage>
 
   void cancelDragSubtitlesTimer() {
     if (dragSearchTimer != null) {
-      dragSearchTimer!.cancel();
+      dragSearchTimer?.cancel();
     }
   }
 
@@ -765,7 +764,7 @@ class PlayerPageState extends State<PlayerPage>
 
   Widget buildPlaceholder() {
     return Container(
-      color: Colors.black,
+      color: Colors.transparent,
       child: Center(
         child: SizedBox(
           height: 32,
@@ -971,7 +970,7 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   void toggleMenuVisibility() async {
-    menuHideTimer!.cancel();
+    menuHideTimer?.cancel();
     isMenuHidden.value = !isMenuHidden.value;
     if (!isMenuHidden.value) {
       startHideTimer();

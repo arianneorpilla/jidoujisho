@@ -126,7 +126,7 @@ abstract class PlayerMediaSource extends MediaSource {
           );
 
           HapticFeedback.vibrate();
-          ImageProvider<Object> image = await getHistoryThumbnail(item);
+          ImageProvider<Object> image = getHistoryThumbnail(item);
           await showDialog(
             barrierDismissible: true,
             context: context,

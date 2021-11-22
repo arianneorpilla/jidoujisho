@@ -41,6 +41,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   bool initialLinkProcessed = false;
 
   ImageProvider<Object> imageIcon = const AssetImage("assets/icon/icon.png");
+  ImageProvider<Object> imageSmallIcon = const AssetImage("assets/icon/icon_small.png");
   ValueNotifier<bool>? incognitoNotifier;
 
   @override
@@ -57,6 +58,14 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
         textShareIntentAction(context, text);
       }
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    precacheImage(imageIcon, context);
+     precacheImage(imageSmallIcon, context);
   }
 
   Widget getTabs() {
@@ -90,7 +99,12 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        leading: getLeading(),
+        leading: Transform.scale(
+          scale: 1.25,
+          child: getLeading(),
+          
+          ),
+        
         title: getTitle(),
         actions: [
           getResumeButton(),
@@ -121,7 +135,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 9, 0, 9),
       child: FadeInImage(
-        image: imageIcon,  placeholder: MemoryImage(kTransparentImage),
+        image: imageSmallIcon, placeholder: MemoryImage(kTransparentImage),
       ),
     );
   }

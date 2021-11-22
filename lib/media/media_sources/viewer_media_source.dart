@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:chisa/media/media_histories/media_history.dart';
@@ -13,7 +14,7 @@ import 'package:flutter/services.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
-import 'package:collection/collection.dart';
+import 'package:wakelock/wakelock.dart';
 
 enum ChapterProgressState {
   unstarted,
@@ -33,7 +34,11 @@ abstract class ViewerMediaSource extends MediaSource {
 
   /// A [PlayerMediaSource] must be able to construct launch parameters from
   /// its media history items.
-  ViewerLaunchParams getLaunchParams(AppModel appModel, MediaHistoryItem item);
+  ViewerLaunchParams getLaunchParams(
+    AppModel appModel,
+    MediaHistoryItem item,
+    List<String> chapters,
+  );
 
   /// Push the navigator page to the media page pertaining to this media type.
   Future<void> launchMediaPage(
@@ -76,7 +81,8 @@ abstract class ViewerMediaSource extends MediaSource {
       color: Colors.transparent,
       child: InkWell(
         onTap: () async {
-          await launchMediaPage(context, getLaunchParams(appModel, item));
+          await launchMediaPage(context,
+              getLaunchParams(appModel, item, await getChapters(item)));
           homeRefreshCallback();
           searchRefreshCallback();
         },
@@ -117,12 +123,13 @@ abstract class ViewerMediaSource extends MediaSource {
           actions.add(
             TextButton(
               child: Text(
-                appModel.translate("dialog_play"),
+                appModel.translate("dialog_read"),
                 style: const TextStyle(),
               ),
               onPressed: () async {
                 Navigator.pop(context);
-                launchMediaPage(context, getLaunchParams(appModel, item));
+                launchMediaPage(context,
+                    getLaunchParams(appModel, item, await getChapters(item)));
                 homeRefreshCallback();
                 searchRefreshCallback();
               },
@@ -130,7 +137,7 @@ abstract class ViewerMediaSource extends MediaSource {
           );
 
           HapticFeedback.vibrate();
-          ImageProvider<Object> image = await getHistoryThumbnail(item);
+          ImageProvider<Object> image = getHistoryThumbnail(item);
           await showDialog(
             barrierDismissible: true,
             context: context,
@@ -359,41 +366,30 @@ abstract class ViewerMediaSource extends MediaSource {
   }
 
   /// Get the name of the last chapter read pertaining to a [MediaHistoryItem].
-  String? getLastReadChapterName(MediaHistoryItem item) {
-    return item.extra["lastChapterRead"];
-  }
-
-  /// Get the name of the last chapter read pertaining to a [MediaHistoryItem].
-  MediaHistoryItem setLastReadChapterName(
+  MediaHistoryItem setCurrentChapterName(
       MediaHistoryItem item, String chapter) {
-    item.extra["lastChapterRead"] = chapter;
+    item.extra["currentChapterName"] = chapter;
     return item;
   }
 
   /// Get the last chapter read pertaining to a [MediaHistoryItem] and a given
   /// list of [Chapter].
-  String? getLastReadChapter(MediaHistoryItem item, List<String> chapters) {
-    String? lastChapterName = item.extra["lastChapterRead"];
+  String? getCurrentChapter(MediaHistoryItem item, List<String> chapters) {
+    String? lastChapterName = item.extra["currentChapterName"];
     if (lastChapterName == null) {
       return null;
     }
-
-    return chapters.firstWhereOrNull((chapter) => chapter == lastChapterName);
   }
 
   /// Get the chapter before the last read chapter pertaining to a
   /// [MediaHistoryItem]  and a given list of [Chapter].
-  String? getPreviousChapter(MediaHistoryItem item, List<String> chapters) {
-    String? lastChapterRead = getLastReadChapterName(item);
-    if (lastChapterRead == null) {
-      return null;
-    }
+  String? getPreviousChapter(String currentChapter, List<String> chapters) {
     if (chapters.isEmpty || chapters.length == 1) {
       return null;
     }
 
     for (int i = 0; i < chapters.length; i++) {
-      if (chapters[i] == lastChapterRead) {
+      if (chapters[i] == currentChapter) {
         if (i == 0) {
           return null;
         } else {
@@ -405,17 +401,13 @@ abstract class ViewerMediaSource extends MediaSource {
 
   /// Get the chapter after the last read chapter pertaining to a
   /// [MediaHistoryItem]  and a given list of [Chapter].
-  String? getNextChapter(MediaHistoryItem item, List<String> chapters) {
-    String? lastChapterRead = getLastReadChapterName(item);
-    if (lastChapterRead == null) {
-      return null;
-    }
+  String? getNextChapter(String currentChapter, List<String> chapters) {
     if (chapters.isEmpty || chapters.length == 1) {
       return null;
     }
 
     for (int i = 0; i < chapters.length; i++) {
-      if (chapters[i] == lastChapterRead) {
+      if (chapters[i] == currentChapter) {
         if (i == chapters.length - 1) {
           return null;
         } else {
@@ -476,7 +468,7 @@ abstract class ViewerMediaSource extends MediaSource {
   }
 
   /// Get all chapters given a [MediaHistoryItem].
-  List<String> getChapters(MediaHistoryItem item);
+  FutureOr<List<String>> getChapters(MediaHistoryItem item);
 
   /// Given a [Chapter] from a [MediaHistoryItem], return a list of
   /// [ImageProvider<Object>] representing the chapter contents.

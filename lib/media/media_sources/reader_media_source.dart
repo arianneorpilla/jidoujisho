@@ -471,14 +471,13 @@ abstract class ReaderMediaSource extends MediaSource {
     AppModel appModel = Provider.of<AppModel>(context, listen: false);
 
     String defaultTitle = item.title;
-    ImageProvider<Object> defaultThumbnail = await getHistoryThumbnail(item);
+    ImageProvider<Object> defaultThumbnail = getHistoryThumbnail(item);
 
     String title = defaultTitle;
     ImageProvider<Object> thumbnail = defaultThumbnail;
 
     String titleAlias = item.alias;
-    ImageProvider<Object>? thumbnailAlias =
-        await getHistoryThumbnailAlias(item);
+    ImageProvider<Object>? thumbnailAlias = getHistoryThumbnailAlias(item);
 
     if (titleAlias.isNotEmpty) {
       title = item.alias;

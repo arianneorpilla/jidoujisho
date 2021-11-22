@@ -23,12 +23,17 @@ class ViewerLocalMediaSource extends ViewerMediaSource {
         );
 
   @override
-  ViewerLaunchParams getLaunchParams(AppModel appModel, MediaHistoryItem item) {
+  ViewerLaunchParams getLaunchParams(
+    AppModel appModel,
+    MediaHistoryItem item,
+    List<String> chapters,
+  ) {
     return ViewerLaunchParams(
       appModel: appModel,
       mediaSource: this,
       mediaHistoryItem: item,
       saveHistoryItem: true,
+      chapters: chapters,
     );
   }
 
@@ -70,7 +75,7 @@ class ViewerLocalMediaSource extends ViewerMediaSource {
   }
 
   @override
-  List<String> getChapters(MediaHistoryItem item) {
+  FutureOr<List<String>> getChapters(MediaHistoryItem item) {
     Directory directory = getItemDirectory(item);
     List<FileSystemEntity> entities = directory.listSync();
 
@@ -81,13 +86,12 @@ class ViewerLocalMediaSource extends ViewerMediaSource {
       }
     }
 
-    directories.sort((a, b) => p
-        .basenameWithoutExtension(a.path)
-        .compareTo(p.basenameWithoutExtension(b.path)));
+    directories
+        .sort((a, b) => p.basename(a.path).compareTo(p.basename(b.path)));
     List<String> chapters = [];
 
     for (Directory directory in directories) {
-      chapters.add(p.basenameWithoutExtension(directory.path));
+      chapters.add(p.basename(directory.path));
     }
 
     return chapters;
@@ -187,7 +191,8 @@ class ViewerLocalMediaSource extends ViewerMediaSource {
       );
     }
 
-    ViewerLaunchParams params = getLaunchParams(appModel, item);
+    ViewerLaunchParams params =
+        getLaunchParams(appModel, item, await getChapters(item));
     await launchMediaPage(
       context,
       params,

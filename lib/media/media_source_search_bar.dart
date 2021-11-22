@@ -290,6 +290,13 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
   Widget build(BuildContext context) {
     mediaSource = appModel.getCurrentMediaTypeSource(mediaSource.mediaType);
 
+    if (searchBarController.query.isEmpty) {
+      searchSuggestions = appModel
+          .getSearchHistory(historyType: mediaSource.getIdentifier())
+          .reversed
+          .toList();
+    }
+
     return FloatingSearchBar(
       controller: searchBarController,
       hint: mediaSource.sourceName,
@@ -408,12 +415,13 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
           );
           mediaSource =
               appModel.getCurrentMediaTypeSource(mediaSource.mediaType);
+          searchBarController.clear();
           if (mediaSource.noSearchAction && searchBarController.isOpen) {
-            searchBarController.clear();
             searchBarController.close();
             widget.refreshCallback();
             FocusScope.of(context).unfocus();
           }
+
           setState(() {});
         },
       ),

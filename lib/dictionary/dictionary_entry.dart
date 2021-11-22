@@ -84,6 +84,7 @@ class DictionaryEntry {
 
   @override
   String toString() {
-    return "DictionaryEntry(word: $word, reading: $reading, meaning: $meaning, extra: $extra, popularity: $popularity)";
+    return "DictionaryEntry(word: $word, reading: $reading, "
+        "meaning: $meaning, extra: $extra, popularity: $popularity)";
   }
 }

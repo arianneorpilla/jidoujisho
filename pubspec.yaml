@@ -101,6 +101,7 @@ dependencies:
   http:
   receive_sharing_intent:
   image_picker:
+  flutter_cache_manager:
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -139,6 +140,7 @@ flutter:
   #   - images/a_dot_ham.jpeg
   assets:
     - assets/icon/icon.png
+    - assets/icon/icon_small.png
     - assets/ipadic/
     - assets/kanjium/accents.txt
 

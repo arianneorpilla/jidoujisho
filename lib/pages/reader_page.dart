@@ -43,6 +43,10 @@ class ReaderPageState extends State<ReaderPage> {
 
   final ValueNotifier<int> latestResultEntryIndex = ValueNotifier<int>(0);
 
+  /// Public for a [MediaSource] to edit and store session-specific details
+  /// for its source button.
+  Map<dynamic, dynamic> sourceOptions = {};
+
   late ReaderMediaSource source;
 
   late int currentProgress;

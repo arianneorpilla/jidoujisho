@@ -8,6 +8,7 @@ import 'package:chisa/media/media_sources/reader_ttu_media_source.dart';
 import 'package:external_path/external_path.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -382,7 +383,9 @@ class AppModel with ChangeNotifier {
 
   /// Get the current theme, whether or not dark mode should be on.
   bool getIsDarkMode() {
-    return _sharedPreferences.getBool("isDarkMode") ?? false;
+    return _sharedPreferences.getBool("isDarkMode") ??
+        Brightness.dark ==
+            (SchedulerBinding.instance?.window.platformBrightness ?? false);
   }
 
   /// Called when the toggle button is called in the drop down options menu,
@@ -1045,7 +1048,11 @@ class AppModel with ChangeNotifier {
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.white,
         iconTheme: IconThemeData(color: Colors.black),
-        titleTextStyle: TextStyle(color: Colors.black),
+        titleTextStyle: TextStyle(
+          color: Colors.black,
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
         elevation: 0,
       ),
       scrollbarTheme: const ScrollbarThemeData().copyWith(
@@ -1082,7 +1089,11 @@ class AppModel with ChangeNotifier {
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.black,
         iconTheme: IconThemeData(color: Colors.white),
-        titleTextStyle: TextStyle(color: Colors.white),
+        titleTextStyle: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
         elevation: 0,
       ),
       scrollbarTheme: const ScrollbarThemeData().copyWith(
@@ -1285,6 +1296,34 @@ class AppModel with ChangeNotifier {
   Future<void> togglePlayerOrientationPortrait() async {
     await sharedPreferences.setBool(
         "isPlayerOrientationPortrait", !isPlayerOrientationPortrait());
+  }
+
+  bool isViewerRightToLeft() {
+    return sharedPreferences.getBool("isViewerRightToLeft") ?? false;
+  }
+
+  Future<void> toggleViewerRightToLeft() async {
+    await sharedPreferences.setBool(
+        "isViewerRightToLeft", !isViewerRightToLeft());
+  }
+
+  Color getViewerColorBackground() {
+    int colorRed = sharedPreferences.getInt("viewerBackgroundRed") ??
+        Colors.black.withOpacity(0).red;
+    int colorGreen = sharedPreferences.getInt("viewerBackgroundGreen") ??
+        Colors.black.withOpacity(0).green;
+    int colorBlue = sharedPreferences.getInt("viewerBackgroundBlue") ??
+        Colors.black.withOpacity(0).blue;
+
+    Color color = Color.fromRGBO(colorRed, colorGreen, colorBlue, 1.0);
+
+    return color;
+  }
+
+  Future<void> setViewerColorBackground(Color color) async {
+    await sharedPreferences.setInt("viewerBackgroundRed", color.red);
+    await sharedPreferences.setInt("viewerBackgroundGreen", color.green);
+    await sharedPreferences.setInt("viewerBackgroundBlue", color.blue);
   }
 
   void refresh() {
