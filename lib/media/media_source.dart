@@ -28,6 +28,16 @@ abstract class MediaSource {
   /// on the search bar of its source media tab.
   final IconData icon;
 
+  /// If this entry is for direct text entry from the search bar and does not
+  /// need to show search results
+  bool isDirectTextEntry = false;
+
+  /// If this entry is for direct text entry, this action defines what happens
+  /// on the search bar's submit.
+  FutureOr<void>? onDirectTextEntrySubmit(BuildContext context, String query) {
+    return null;
+  }
+
   /// A unique identifier that represents the media source's name along with
   /// its media type. Useful for storing entries in shared preferences.
   String getIdentifier() {
@@ -36,7 +46,7 @@ abstract class MediaSource {
 
   /// From a [MediaHistoryItem], generate the thumbnail of this item that will
   /// show up in the home screen.
-  Future<ImageProvider> getHistoryThumbnail(MediaHistoryItem item);
+  ImageProvider getHistoryThumbnail(MediaHistoryItem item);
 
   /// From a [MediaHistoryItem], get a caption of the metadata to display.
   String getHistoryCaption(MediaHistoryItem item);

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
+import 'package:chisa/media/media_sources/player_network_stream_source.dart';
 import 'package:chisa/media/media_sources/reader_ttu_media_source.dart';
 import 'package:external_path/external_path.dart';
 import 'package:flutter/foundation.dart';
@@ -143,6 +144,7 @@ class AppModel with ChangeNotifier {
   List<PlayerMediaSource> playerMediaSources = [
     PlayerLocalMediaSource(),
     PlayerYouTubeSource(),
+    PlayerNetworkStreamSource(),
   ];
   List<ReaderMediaSource> readerMediaSources = [
     ReaderTtuMediaSource(),
@@ -1225,6 +1227,10 @@ class AppModel with ChangeNotifier {
 
   Future<void> addToSearchHistory(String key,
       {String historyType = "dictionary"}) async {
+    if (getIncognitoMode()) {
+      return;
+    }
+
     int maxSearchHistoryCount = 100;
     List<String> searchHistory = getSearchHistory(historyType: historyType);
 

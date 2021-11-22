@@ -65,10 +65,7 @@ class App extends StatelessWidget {
             darkTheme: appModel.getDarkTheme(context),
             themeMode:
                 appModel.getIsDarkMode() ? ThemeMode.dark : ThemeMode.light,
-            home: Scaffold(
-              resizeToAvoidBottomInset: true,
-              body: blankWhileUninitialised(context),
-            ),
+            home: blankWhileUninitialised(context),
           );
         },
       ),
@@ -77,12 +74,13 @@ class App extends StatelessWidget {
 
   Widget blankWhileUninitialised(BuildContext context) {
     AppModel appModel = Provider.of<AppModel>(context);
+    Future<void> initialiseAppModel = appModel.initialiseAppModel();
 
     if (appModel.hasInitialized) {
       return const HomePage();
     } else {
       return FutureBuilder(
-        future: appModel.initialiseAppModel(),
+        future: initialiseAppModel,
         builder: (BuildContext context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Container();

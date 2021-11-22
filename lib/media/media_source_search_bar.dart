@@ -1,6 +1,8 @@
 import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_source.dart';
+import 'package:chisa/util/media_source_action_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
@@ -70,6 +72,8 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
       child: Material(
         color: Colors.transparent,
         child: ListView.builder(
+          physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics()),
           itemCount: searchSuggestions.length,
           shrinkWrap: true,
           itemExtent: 48,
@@ -151,6 +155,10 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
   }
 
   Future<void> onQueryChanged(String query) async {
+    if (mediaSource.isDirectTextEntry) {
+      return;
+    }
+
     query = query.trim();
     pagingController = null;
 
@@ -219,6 +227,16 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
   }
 
   Future<void> onSubmitted(String query) async {
+    if (mediaSource.isDirectTextEntry) {
+      appModel.addToSearchHistory(query,
+          historyType: mediaSource.getIdentifier());
+      await mediaSource.onDirectTextEntrySubmit(
+          context, searchBarController.query);
+
+      searchBarController.clear();
+      return;
+    }
+
     query = query.trim();
 
     if (!isSearching) {
@@ -321,10 +339,17 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
         }
 
         if (searchBarController.query.isEmpty && searchSuggestions.isEmpty) {
-          return buildPlaceholderMessage(
-            label: appModel.translate("enter_a_search_term"),
-            icon: Icons.search,
-          );
+          if (mediaSource.isDirectTextEntry) {
+            return buildPlaceholderMessage(
+              label: appModel.translate("enter_a_link"),
+              icon: Icons.subdirectory_arrow_left,
+            );
+          } else {
+            return buildPlaceholderMessage(
+              label: appModel.translate("enter_a_search_term"),
+              icon: Icons.search,
+            );
+          }
         } else if (pagingController == null) {
           return buildSearchSuggestions();
         }
@@ -409,7 +434,46 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
     actions.addAll(
         mediaSource.getSearchBarActions(context, widget.refreshCallback));
 
-    if (!mediaSource.noSearchAction) {
+    if (mediaSource.isDirectTextEntry) {
+      actions.add(
+        MediaSourceActionButton(
+          context: context,
+          source: mediaSource,
+          refreshCallback: widget.refreshCallback,
+          icon: Icons.paste,
+          showIfClosed: false,
+          showIfOpened: true,
+          onPressed: () async {
+            ClipboardData? clipboardData =
+                await Clipboard.getData('text/plain');
+            setState(() {
+              if (clipboardData != null && clipboardData.text != null) {
+                searchBarController.query = clipboardData.text!;
+              }
+            });
+          },
+        ),
+      );
+
+      actions.add(
+        MediaSourceActionButton(
+          context: context,
+          source: mediaSource,
+          refreshCallback: widget.refreshCallback,
+          icon: Icons.subdirectory_arrow_left,
+          showIfClosed: true,
+          showIfOpened: true,
+          onPressed: () async {
+            appModel.addToSearchHistory(searchBarController.query,
+                historyType: mediaSource.getIdentifier());
+            await mediaSource.onDirectTextEntrySubmit(
+                context, searchBarController.query);
+
+            searchBarController.clear();
+          },
+        ),
+      );
+    } else if (!mediaSource.noSearchAction) {
       actions.add(
         FloatingSearchBarAction.searchToClear(
           size: 20,
@@ -419,6 +483,7 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
         ),
       );
     }
+
     return actions;
   }
 }

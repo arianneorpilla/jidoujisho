@@ -40,8 +40,7 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
   }
 
   @override
-  Future<ImageProvider<Object>> getHistoryThumbnail(
-      MediaHistoryItem item) async {
+  ImageProvider<Object> getHistoryThumbnail(MediaHistoryItem item) {
     if (item.extra["thumbnail"] == null) {
       return MemoryImage(kTransparentImage);
     }

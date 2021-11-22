@@ -13,6 +13,7 @@ import 'package:chisa/util/share_intent.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'package:transparent_image/transparent_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatefulWidget {
@@ -56,13 +57,6 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
         textShareIntentAction(context, text);
       }
     });
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    precacheImage(imageIcon, context);
   }
 
   Widget getTabs() {
@@ -126,8 +120,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Widget getIcon() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 9, 0, 9),
-      child: Image(
-        image: imageIcon,
+      child: FadeInImage(
+        image: imageIcon,  placeholder: MemoryImage(kTransparentImage),
       ),
     );
   }

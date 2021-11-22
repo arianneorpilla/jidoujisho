@@ -634,19 +634,20 @@ class ReaderPageState extends State<ReaderPage> {
     clearDictionaryMessage();
 
     await navigateToCreator(
-        context: context,
-        appModel: appModel,
-        initialParams: initialParams,
-        popOnExport: true,
-        themeData: themeData,
-        exportCallback: () {
-          Navigator.of(context).pop();
-          String lastDeck = appModel.getLastAnkiDroidDeck();
-          setDictionaryMessage(
-            "deckExport://$lastDeck",
-            duration: const Duration(seconds: 3),
-          );
-        });
+      context: context,
+      appModel: appModel,
+      initialParams: initialParams,
+      popOnExport: true,
+      themeData: themeData,
+      exportCallback: () {
+        Navigator.of(context).pop();
+        String lastDeck = appModel.getLastAnkiDroidDeck();
+        setDictionaryMessage(
+          "deckExport://$lastDeck",
+          duration: const Duration(seconds: 3),
+        );
+      },
+    );
 
     await Clipboard.setData(const ClipboardData(text: ""));
     ClipboardListener.addListener(copyClipboardAction);

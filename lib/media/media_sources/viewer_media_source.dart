@@ -268,23 +268,10 @@ abstract class ViewerMediaSource extends MediaSource {
           color: Colors.black,
           child: AspectRatio(
             aspectRatio: 16 / 9,
-            child: FutureBuilder<ImageProvider<Object>>(
-              future: getHistoryThumbnail(item),
-              builder: (BuildContext context,
-                  AsyncSnapshot<ImageProvider> snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting ||
-                    !snapshot.hasData) {
-                  return Image(image: MemoryImage(kTransparentImage));
-                }
-
-                ImageProvider<Object> thumbnail = snapshot.data!;
-
-                return FadeInImage(
-                  placeholder: MemoryImage(kTransparentImage),
-                  image: thumbnail,
-                  fit: BoxFit.fitWidth,
-                );
-              },
+            child: FadeInImage(
+              placeholder: MemoryImage(kTransparentImage),
+              image: getHistoryThumbnail(item),
+              fit: BoxFit.fitWidth,
             ),
           ),
         ),

@@ -203,44 +203,10 @@ abstract class ReaderMediaSource extends MediaSource {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    FutureBuilder<ImageProvider<Object>?>(
-                      future: getHistoryThumbnailAlias(item),
-                      builder: (BuildContext context,
-                          AsyncSnapshot<ImageProvider?> snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return Image(image: MemoryImage(kTransparentImage));
-                        }
-
-                        if (snapshot.data == null) {
-                          return FutureBuilder<ImageProvider<Object>>(
-                            future: getHistoryThumbnail(item),
-                            builder: (BuildContext context,
-                                AsyncSnapshot<ImageProvider> snapshot) {
-                              if (snapshot.connectionState ==
-                                      ConnectionState.waiting ||
-                                  !snapshot.hasData) {
-                                return Image(
-                                    image: MemoryImage(kTransparentImage));
-                              }
-
-                              ImageProvider<Object> thumbnail = snapshot.data!;
-
-                              return FadeInImage(
-                                placeholder: MemoryImage(kTransparentImage),
-                                image: thumbnail,
-                                fit: BoxFit.fitWidth,
-                              );
-                            },
-                          );
-                        }
-
-                        ImageProvider<Object> thumbnail = snapshot.data!;
-
-                        return Image(
-                          image: thumbnail,
-                        );
-                      },
+                    Image(
+                      image: getHistoryThumbnailAlias(item) ??
+                          getHistoryThumbnail(item),
+                      fit: BoxFit.fitWidth,
                     ),
                   ],
                 ),
@@ -258,45 +224,11 @@ abstract class ReaderMediaSource extends MediaSource {
                 color: Colors.grey.shade800.withOpacity(0.3),
                 child: AspectRatio(
                   aspectRatio: 176 / 250,
-                  child: FutureBuilder<ImageProvider<Object>?>(
-                    future: getHistoryThumbnailAlias(item),
-                    builder: (BuildContext context,
-                        AsyncSnapshot<ImageProvider?> snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Image(image: MemoryImage(kTransparentImage));
-                      }
-
-                      if (snapshot.data == null) {
-                        return FutureBuilder<ImageProvider<Object>>(
-                          future: getHistoryThumbnail(item),
-                          builder: (BuildContext context,
-                              AsyncSnapshot<ImageProvider> snapshot) {
-                            if (snapshot.connectionState ==
-                                    ConnectionState.waiting ||
-                                !snapshot.hasData) {
-                              return Image(
-                                  image: MemoryImage(kTransparentImage));
-                            }
-
-                            ImageProvider<Object> thumbnail = snapshot.data!;
-
-                            return FadeInImage(
-                              placeholder: MemoryImage(kTransparentImage),
-                              image: thumbnail,
-                              fit: BoxFit.fitWidth,
-                            );
-                          },
-                        );
-                      }
-
-                      ImageProvider<Object> thumbnail = snapshot.data!;
-
-                      return FadeInImage(
-                        placeholder: MemoryImage(kTransparentImage),
-                        image: thumbnail,
-                        fit: BoxFit.fitWidth,
-                      );
-                    },
+                  child: FadeInImage(
+                    placeholder: MemoryImage(kTransparentImage),
+                    image: getHistoryThumbnailAlias(item) ??
+                        getHistoryThumbnail(item),
+                    fit: BoxFit.fitWidth,
                   ),
                 ),
               ),
@@ -411,23 +343,10 @@ abstract class ReaderMediaSource extends MediaSource {
           color: Colors.black,
           child: AspectRatio(
             aspectRatio: 176 / 250,
-            child: FutureBuilder<ImageProvider<Object>>(
-              future: getHistoryThumbnail(item),
-              builder: (BuildContext context,
-                  AsyncSnapshot<ImageProvider> snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting ||
-                    !snapshot.hasData) {
-                  return Image(image: MemoryImage(kTransparentImage));
-                }
-
-                ImageProvider<Object> thumbnail = snapshot.data!;
-
-                return FadeInImage(
-                  placeholder: MemoryImage(kTransparentImage),
-                  image: thumbnail,
-                  fit: BoxFit.fitWidth,
-                );
-              },
+            child: FadeInImage(
+              placeholder: MemoryImage(kTransparentImage),
+              image: getHistoryThumbnail(item),
+              fit: BoxFit.fitWidth,
             ),
           ),
         ),
@@ -514,8 +433,7 @@ abstract class ReaderMediaSource extends MediaSource {
     return item.alias;
   }
 
-  Future<ImageProvider<Object>?> getHistoryThumbnailAlias(
-      MediaHistoryItem item) async {
+  ImageProvider<Object>? getHistoryThumbnailAlias(MediaHistoryItem item) {
     if (item.thumbnailPath.isEmpty) {
       return null;
     }

@@ -104,8 +104,7 @@ class ViewerLocalMediaSource extends ViewerMediaSource {
   }
 
   @override
-  Future<ImageProvider<Object>> getHistoryThumbnail(
-      MediaHistoryItem item) async {
+  ImageProvider<Object> getHistoryThumbnail(MediaHistoryItem item) {
     File? coverFile = getCoverFile(item.key);
 
     if (coverFile == null) {

@@ -38,6 +38,21 @@ Future<void> textShareIntentAction(BuildContext context, String text) async {
     );
     await returnFromContext(context, item);
     await SystemNavigator.pop();
+  } else if (text.startsWith("http://") || text.startsWith("https://")) {
+    PlayerMediaSource source = appModel.getMediaSourceFromName(
+        MediaType.player, "Network Stream") as PlayerMediaSource;
+    MediaHistoryItem item = MediaHistoryItem(
+      key: text,
+      title: "",
+      author: "",
+      sourceName: source.sourceName,
+      mediaTypePrefs: source.mediaType.prefsDirectory(),
+      currentProgress: 0,
+      completeProgress: 0,
+      extra: {},
+    );
+    await returnFromContext(context, item);
+    await SystemNavigator.pop();
   } else {
     await navigateToCreator(
       context: context,

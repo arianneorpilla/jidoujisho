@@ -38,8 +38,10 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     );
   }
 
-  Future<void> showFilePicker(BuildContext context,
-      {bool pushReplacement = false}) async {
+  Future<void> showFilePicker(
+    BuildContext context, {
+    bool pushReplacement = false,
+  }) async {
     AppModel appModel = Provider.of<AppModel>(context, listen: false);
 
     Iterable<String>? filePaths = await FilesystemPicker.open(
@@ -149,7 +151,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
   }
 
   @override
-  Future<ImageProvider> getHistoryThumbnail(MediaHistoryItem item) async {
+  ImageProvider<Object> getHistoryThumbnail(MediaHistoryItem item) {
     return FileImage(File(item.thumbnailPath));
   }
 

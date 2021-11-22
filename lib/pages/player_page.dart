@@ -123,14 +123,15 @@ class PlayerPageState extends State<PlayerPage>
         ),
         actions: <Widget>[
           TextButton(
-            child: Text(
-              appModel.translate("dialog_yes"),
-              style: TextStyle(
-                color: Theme.of(context).focusColor,
+              child: Text(
+                appModel.translate("dialog_yes"),
+                style: TextStyle(
+                  color: Theme.of(context).focusColor,
+                ),
               ),
-            ),
-            onPressed: () => Navigator.pop(context, true),
-          ),
+              onPressed: () async {
+                Navigator.pop(context, true);
+              }),
           TextButton(
             child: Text(
               appModel.translate("dialog_no"),
@@ -183,17 +184,17 @@ class PlayerPageState extends State<PlayerPage>
 
   @override
   void dispose() async {
-    Wakelock.disable();
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    SystemChrome.setPreferredOrientations([
+    playerController.removeListener(listener);
+    playerController.dispose();
+    ClipboardListener.removeListener(copyClipboardAction);
+
+    await Wakelock.disable();
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    await SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
-
-    playerController.removeListener(listener);
-    playerController.dispose();
-    ClipboardListener.removeListener(copyClipboardAction);
 
     super.dispose();
   }

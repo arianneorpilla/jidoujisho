@@ -213,8 +213,7 @@ class PlayerYouTubeSource extends PlayerMediaSource {
   }
 
   @override
-  Future<ImageProvider<Object>> getHistoryThumbnail(
-      MediaHistoryItem item) async {
+  ImageProvider<Object> getHistoryThumbnail(MediaHistoryItem item) {
     String thumbnailUrl = item.extra["thumbnail"]!;
     return NetworkImage(thumbnailUrl);
   }
