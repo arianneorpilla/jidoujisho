@@ -38,10 +38,10 @@ class ViewerHomePageState extends State<ViewerHomePage>
   TextEditingController searchController = TextEditingController(text: "");
   ScrollController? scrollController;
 
-  @override
-  void didUpdateWidget(oldWidget) {
-    super.didUpdateWidget(oldWidget);
-  }
+  // @override
+  // void didUpdateWidget(oldWidget) {
+  //   super.didUpdateWidget(oldWidget);
+  // }
 
   ViewerMediaSource getCurrentMediaSource() {
     return appModel.getCurrentMediaTypeSource(widget.mediaType)
@@ -100,24 +100,38 @@ class ViewerHomePageState extends State<ViewerHomePage>
           (appModel.getIsDarkMode()) ? Colors.grey[700] : Colors.grey[400],
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(
-            parent: BouncingScrollPhysics()),
+          parent: BouncingScrollPhysics(),
+        ),
         controller: scrollController,
         addAutomaticKeepAlives: true,
-        itemCount: mediaHistoryItems.length + 1,
+        itemCount: 2,
         itemBuilder: (BuildContext context, int index) {
           if (index == 0) {
             return const SizedBox(height: 48);
           }
-          MediaHistoryItem item = mediaHistoryItems[index - 1];
-          MediaSource source = appModel.getMediaSourceFromName(
-              MediaType.player, item.sourceName);
-          return source.buildMediaHistoryItem(
-            context: context,
-            history: history,
-            item: item,
-            homeRefreshCallback: refreshCallback,
-            searchRefreshCallback: () {},
-            isHistory: true,
+
+          return GridView.builder(
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 200,
+              childAspectRatio: 176 / 250,
+            ),
+            shrinkWrap: true,
+            controller: scrollController,
+            addAutomaticKeepAlives: true,
+            itemCount: mediaHistoryItems.length,
+            itemBuilder: (BuildContext context, int index) {
+              MediaHistoryItem item = mediaHistoryItems[index];
+              MediaSource source = appModel.getMediaSourceFromName(
+                  MediaType.viewer, item.sourceName);
+              return source.buildMediaHistoryItem(
+                context: context,
+                history: history,
+                item: item,
+                homeRefreshCallback: refreshCallback,
+                searchRefreshCallback: () {},
+                isHistory: true,
+              );
+            },
           );
         },
       ),

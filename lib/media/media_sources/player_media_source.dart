@@ -131,6 +131,9 @@ abstract class PlayerMediaSource extends MediaSource {
             barrierDismissible: true,
             context: context,
             builder: (context) => AlertDialog(
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.zero,
+              ),
               title: Text(
                 getHistoryCaption(item),
                 maxLines: 3,

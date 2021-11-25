@@ -1,7 +1,9 @@
 import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_sources/player_media_source.dart';
 import 'package:chisa/media/media_sources/reader_media_source.dart';
+import 'package:chisa/media/media_sources/viewer_media_source.dart';
 import 'package:chisa/media/media_type.dart';
+import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -24,6 +26,20 @@ Future<void> returnFromContext(
           mediaType, item.sourceName) as ReaderMediaSource;
       await source.launchMediaPage(
           context, source.getLaunchParams(appModel, item));
+      break;
+    case MediaType.viewer:
+      ViewerMediaSource source = appModel.getMediaSourceFromName(
+          mediaType, item.sourceName) as ViewerMediaSource;
+      await source.launchMediaPage(
+        context,
+        ViewerLaunchParams(
+          mediaHistoryItem: item,
+          saveHistoryItem: source.saveHistoryItem,
+          appModel: appModel,
+          chapters: await source.getCachedChapters(item),
+          mediaSource: source,
+        ),
+      );
       break;
     default:
       throw UnimplementedError();

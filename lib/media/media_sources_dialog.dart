@@ -1,6 +1,7 @@
 import 'package:chisa/media/media_source.dart';
 import 'package:chisa/media/media_type.dart';
 import 'package:chisa/util/center_icon_message.dart';
+import 'package:chisa/util/marquee.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -141,15 +142,19 @@ class MediaSourcesDialogState extends State<MediaSourcesDialog> {
                       : Colors.black.withOpacity(opacity),
                 ),
                 const SizedBox(width: 16.0),
-                Text(
-                  source.sourceName,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: appModel.getIsDarkMode()
-                        ? Colors.white.withOpacity(opacity)
-                        : Colors.black.withOpacity(opacity),
+                Expanded(
+                  child: SizedBox(
+                    height: 48,
+                    child: Marquee(
+                      text: source.sourceName,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: appModel.getIsDarkMode()
+                            ? Colors.white.withOpacity(opacity)
+                            : Colors.black.withOpacity(opacity),
+                      ),
+                    ),
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

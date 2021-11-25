@@ -1,23 +1,30 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
+import 'package:chisa/anki/anki_export_enhancement.dart';
 import 'package:chisa/anki/anki_export_params.dart';
 import 'package:chisa/media/media_sources/viewer_media_source.dart';
 import 'package:chisa/util/anki_creator.dart';
-import 'package:chisa/util/list_menu.dart';
+import 'package:chisa/util/anki_export_field.dart';
+import 'package:chisa/util/ocr.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:clipboard_listener/clipboard_listener.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:multi_value_listenable_builder/multi_value_listenable_builder.dart';
 import 'package:network_to_file_image/network_to_file_image.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:provider/provider.dart';
+import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'package:chisa/dictionary/dictionary_search_result.dart';
@@ -30,6 +37,8 @@ import 'package:chisa/util/bottom_sheet_dialog.dart';
 import 'package:chisa/util/dictionary_scrollable_widget.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:wakelock/wakelock.dart';
+
+import 'package:image/image.dart' as imglib;
 
 class ViewerPage extends StatefulWidget {
   final ViewerLaunchParams params;
@@ -44,6 +53,7 @@ class ViewerPage extends StatefulWidget {
 }
 
 class ViewerPageState extends State<ViewerPage> {
+  AnkiExportParams exportParams = AnkiExportParams();
   late AppModel appModel;
 
   /// Public for a [MediaSource] to edit and store session-specific details
@@ -55,7 +65,9 @@ class ViewerPageState extends State<ViewerPage> {
 
   Timer? menuHideTimer;
 
-  PageController pageController = PageController();
+  PageController pageController = PageController(
+    viewportFraction: 1,
+  );
 
   late Color menuColor;
   late Color dictionaryColor;
@@ -69,6 +81,7 @@ class ViewerPageState extends State<ViewerPage> {
 
   ValueNotifier<int> currentProgress = ValueNotifier<int>(0);
   int completeProgress = 0;
+  bool isDragging = false;
 
   List<String> chapters = [];
   String chapterName = "";
@@ -76,6 +89,212 @@ class ViewerPageState extends State<ViewerPage> {
   DictionarySearchResult? searchResult;
   ValueNotifier<String> searchTerm = ValueNotifier<String>("");
   ValueNotifier<String> searchMessage = ValueNotifier<String>("");
+
+  TextEditingController sentenceController = TextEditingController();
+  FocusNode sentenceFocusNode = FocusNode();
+  KeyboardVisibilityController keyboardVisibilityController =
+      KeyboardVisibilityController();
+  ScreenshotController screenshotController = ScreenshotController();
+  late StreamSubscription<bool> visibilitySubscription;
+  List<TouchPoints?> touchPoints = [];
+  ValueNotifier<bool> ocrBusy = ValueNotifier<bool>(false);
+  bool ocrOverlayShown = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    ClipboardListener.addListener(copyClipboardAction);
+
+    visibilitySubscription =
+        keyboardVisibilityController.onChange.listen((bool visible) {
+      if (!visible) {
+        sentenceFocusNode.unfocus();
+      }
+    });
+
+    WidgetsBinding.instance!.addPostFrameCallback((_) async {
+      menuColor = appModel.getIsDarkMode()
+          ? const Color(0xcc424242)
+          : const Color(0xdeeeeeee);
+      dictionaryColor = appModel.getIsDarkMode()
+          ? Colors.grey.shade800.withOpacity(0.6)
+          : Colors.white.withOpacity(0.8);
+
+      await initialiseViewer();
+      setState(() {
+        isViewerReady = true;
+      });
+    });
+  }
+
+  @override
+  void dispose() async {
+    ClipboardListener.removeListener(copyClipboardAction);
+    pageController.dispose();
+    visibilitySubscription.cancel();
+
+    super.dispose();
+  }
+
+  Future<void> copyClipboardAction() async {
+    setSearchTerm((await Clipboard.getData(Clipboard.kTextPlain))!
+        .text!
+        .replaceAll("￼", ""));
+  }
+
+  Future<void> processOcr(Offset a, Offset b) async {
+    if (!ocrBusy.value) {
+      ocrBusy.value = true;
+      print("OCR START");
+
+      Uint8List? imageBytes = await screenshotController.capture();
+      imglib.Image? screenshot = imglib.decodeImage(imageBytes!)!;
+
+      double actualWidth = MediaQuery.of(context).size.width;
+      double actualHeight = MediaQuery.of(context).size.height;
+      double widthRatioMultiplier = (screenshot.width / actualWidth);
+      double heightRatioMultiplier = (screenshot.height / actualHeight);
+
+      Offset scaledA = a.scale(widthRatioMultiplier, heightRatioMultiplier);
+      Offset scaledB = b.scale(widthRatioMultiplier, heightRatioMultiplier);
+      Rect rect = Rect.fromPoints(scaledA, scaledB);
+
+      imglib.Image croppedImage = imglib.copyCrop(
+        screenshot,
+        rect.left.round(),
+        rect.top.round(),
+        rect.width.round(),
+        rect.height.round(),
+      );
+      List<int> croppedImageBytes = imglib.writeJpg(croppedImage);
+
+      final tempDir = await getTemporaryDirectory();
+      DateTime now = DateTime.now();
+      File file = File('${tempDir.path}/${now.millisecondsSinceEpoch}.jpg');
+      await file.writeAsBytes(croppedImageBytes);
+
+      print("CROPPED IMAGE WRITTEN");
+
+      final textDetector = GoogleMlKit.vision.textDetectorV2();
+      RecognisedText recognisedText = await textDetector.processImage(
+          InputImage.fromFile(file),
+          script: TextRecognitionOptions.JAPANESE);
+
+      setState(() {
+        ocrBusy.value = false;
+        ocrOverlayShown = false;
+        touchPoints.clear();
+      });
+
+      print(recognisedText);
+      recognisedText.blocks.forEach((block) {
+        print(block.cornerPoints);
+        print(block.lines);
+        print(block.rect);
+        print(block.text);
+      });
+    } else {
+      print("OCR IS BUSY -- WAITING TO FINISH");
+    }
+  }
+
+  Widget buildScanButton() {
+    return SizedBox(
+      width: 48,
+      height: 48,
+      child: Center(
+        child: ValueListenableBuilder<bool>(
+          valueListenable: ocrBusy,
+          builder: (context, busy, child) {
+            if (busy) {
+              return SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 3,
+                  valueColor: AlwaysStoppedAnimation(
+                    appModel.getIsDarkMode() ? Colors.white : Colors.black,
+                  ),
+                ),
+              );
+            } else {
+              return IconButton(
+                color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
+                icon: (ocrOverlayShown)
+                    ? const Icon(Icons.highlight_remove)
+                    : const Icon(Icons.qr_code_sharp),
+                onPressed: () async {
+                  setState(() {
+                    touchPoints.clear();
+                    ocrOverlayShown = !ocrOverlayShown;
+                  });
+                },
+              );
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  void promptTimerOcr(Offset a, Offset b) {
+    Future.delayed(const Duration(seconds: 1), () {
+      if (touchPoints.isNotEmpty) {
+        if (touchPoints[0]!.points == a && touchPoints[1]!.points == b) {
+          processOcr(a, b);
+        }
+      }
+    });
+  }
+
+  Widget buildOcrOverlay() {
+    return GestureDetector(
+      child: CustomPaint(
+        size: Size.infinite,
+        painter: OcrBoxPainter(
+          pointsList: touchPoints,
+          defaultPaint: ocrOverlayPaint,
+          coordsCallback: promptTimerOcr,
+        ),
+      ),
+      onPanStart: (details) {
+        setState(() {
+          touchPoints.clear();
+          final container = context.findRenderObject() as RenderBox;
+          touchPoints.add(
+            TouchPoints(
+              points: container.globalToLocal(details.globalPosition),
+              paint: ocrOverlayPaint,
+            ),
+          );
+        });
+      },
+      onPanUpdate: (details) {
+        setState(() {
+          final container = context.findRenderObject() as RenderBox;
+          touchPoints = [touchPoints.first];
+          touchPoints.add(
+            TouchPoints(
+              points: container.globalToLocal(details.globalPosition),
+              paint: ocrOverlayPaint,
+            ),
+          );
+        });
+      },
+      onPanEnd: (details) {
+        setState(() {
+          touchPoints.add(null);
+        });
+      },
+    );
+  }
+
+  Paint ocrOverlayPaint = Paint()
+    ..strokeCap = StrokeCap.round
+    ..isAntiAlias = true
+    ..color = Colors.black.withOpacity(0.6)
+    ..strokeWidth = 3.0;
 
   Future<bool> onWillPop() async {
     Widget alertDialog = AlertDialog(
@@ -87,14 +306,23 @@ class ViewerPageState extends State<ViewerPage> {
       ),
       actions: <Widget>[
         TextButton(
-          child: Text(
-            appModel.translate("dialog_yes"),
-            style: TextStyle(
-              color: Theme.of(context).focusColor,
+            child: Text(
+              appModel.translate("dialog_yes"),
+              style: TextStyle(
+                color: Theme.of(context).focusColor,
+              ),
             ),
-          ),
-          onPressed: () => Navigator.pop(context, true),
-        ),
+            onPressed: () async {
+              Wakelock.disable();
+              SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+              SystemChrome.setPreferredOrientations([
+                DeviceOrientation.portraitUp,
+                DeviceOrientation.landscapeLeft,
+                DeviceOrientation.landscapeRight,
+              ]);
+
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            }),
         TextButton(
           child: Text(
             appModel.translate("dialog_no"),
@@ -113,53 +341,6 @@ class ViewerPageState extends State<ViewerPage> {
         false;
   }
 
-  @override
-  void dispose() async {
-    ClipboardListener.removeListener(copyClipboardAction);
-
-    pageController.dispose();
-
-    await Wakelock.disable();
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    await SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
-
-    super.dispose();
-  }
-
-  Future<void> copyClipboardAction() async {
-    setSearchTerm((await Clipboard.getData(Clipboard.kTextPlain))!
-        .text!
-        .replaceAll("￼", ""));
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    Wakelock.enable();
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-
-    ClipboardListener.addListener(copyClipboardAction);
-
-    WidgetsBinding.instance!.addPostFrameCallback((_) async {
-      menuColor = appModel.getIsDarkMode()
-          ? const Color(0xcc424242)
-          : const Color(0xdeeeeeee);
-      dictionaryColor = appModel.getIsDarkMode()
-          ? Colors.grey.shade800.withOpacity(0.6)
-          : Colors.white.withOpacity(0.8);
-
-      await initialiseViewer();
-      setState(() {
-        isViewerReady = true;
-      });
-    });
-  }
-
   Future<void> initialiseViewer() async {
     MediaHistoryItem item = widget.params.mediaHistoryItem;
     ViewerMediaSource source = widget.params.mediaSource;
@@ -174,7 +355,7 @@ class ViewerPageState extends State<ViewerPage> {
       chapterName = widget.params.chapterName!;
     }
 
-    sourceImages = await source.getChapterImages(item, chapterName);
+    sourceImages = await source.getCachedImages(item, chapterName);
     int historyProgress = source.getChapterPageProgress(item, chapterName) ?? 1;
     completeProgress = sourceImages.length;
 
@@ -195,14 +376,16 @@ class ViewerPageState extends State<ViewerPage> {
       currentProgress.value = historyProgress;
     }
 
+    updateHistory();
+
     WidgetsBinding.instance!.addPostFrameCallback((_) async {
       pageController.jumpToPage(currentProgress.value);
     });
   }
 
   void setSearchTerm(String newTerm) {
-    searchTerm.value = newTerm.trim();
     latestResult = null;
+    searchTerm.value = newTerm.trim();
   }
 
   MediaHistoryItem? generateContextHistoryItem() {
@@ -213,6 +396,11 @@ class ViewerPageState extends State<ViewerPage> {
     MediaHistoryItem item = widget.params.mediaHistoryItem;
     item.currentProgress = currentProgress.value;
     item.completeProgress = completeProgress;
+    item = widget.params.mediaSource
+        .setChapterPageProgress(item, chapterName, currentProgress.value);
+    item = widget.params.mediaSource
+        .setChapterPageTotal(item, chapterName, completeProgress);
+    item = widget.params.mediaSource.setCurrentChapterName(item, chapterName);
     return item;
   }
 
@@ -308,18 +496,17 @@ class ViewerPageState extends State<ViewerPage> {
                   ), // a previously-obtained Future<String> or null
                   builder: (BuildContext context,
                       AsyncSnapshot<DictionarySearchResult> snapshot) {
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.waiting:
-                        return buildDictionarySearching();
-                      default:
-                        latestResult = snapshot.data;
+                    if (!snapshot.hasData &&
+                        snapshot.connectionState == ConnectionState.waiting) {
+                      return buildDictionarySearching();
+                    }
 
-                        if (!snapshot.hasData ||
-                            latestResult!.entries.isEmpty) {
-                          return buildDictionaryNoMatch();
-                        } else {
-                          return buildDictionaryMatch();
-                        }
+                    latestResult = snapshot.data;
+
+                    if (!snapshot.hasData || latestResult!.entries.isEmpty) {
+                      return buildDictionaryNoMatch();
+                    } else {
+                      return buildDictionaryMatch();
                     }
                   },
                 ),
@@ -564,16 +751,22 @@ class ViewerPageState extends State<ViewerPage> {
         widget.params.mediaSource.mediaType.getMediaHistory(appModel);
     MediaHistoryItem item = widget.params.mediaHistoryItem;
     item.currentProgress = currentProgress.value;
-    widget.params.mediaSource
+    item.completeProgress = completeProgress;
+    item = widget.params.mediaSource
         .setChapterPageProgress(item, chapterName, currentProgress.value);
-    widget.params.mediaSource
+    item = widget.params.mediaSource
         .setChapterPageTotal(item, chapterName, completeProgress);
-    widget.params.mediaSource.setCurrentChapterName(item, chapterName);
+    item = widget.params.mediaSource.setCurrentChapterName(item, chapterName);
+    item.extra["chapters"] = chapters;
 
     if (item.completeProgress != 0) {
-      await history.addItem(item);
+      if (!appModel.getIncognitoMode()) {
+        await history.addItem(item);
+      }
     }
   }
+
+  bool isDialogBusy = false;
 
   Widget buildViewer() {
     return PhotoViewGallery.builder(
@@ -590,9 +783,10 @@ class ViewerPageState extends State<ViewerPage> {
           },
         );
       },
+      gaplessPlayback: true,
       backgroundDecoration:
           BoxDecoration(color: appModel.getViewerColorBackground()),
-      scrollPhysics: const BouncingScrollPhysics(),
+      scrollPhysics: const PageScrollPhysics(),
       itemCount: galleryImages.length,
       loadingBuilder: (context, event) => Center(
         child: SizedBox(
@@ -631,7 +825,9 @@ class ViewerPageState extends State<ViewerPage> {
           pageController.jumpToPage(completeProgress);
         } else {
           currentProgress.value = pageNumber;
-          updateHistory();
+          if (!isDragging) {
+            await updateHistory();
+          }
         }
       },
     );
@@ -700,6 +896,7 @@ class ViewerPageState extends State<ViewerPage> {
               mediaSource: widget.params.mediaSource,
               fromStart: previous,
               fromEnd: !previous,
+              pushReplacement: true,
             );
 
             Navigator.pop(context);
@@ -713,15 +910,99 @@ class ViewerPageState extends State<ViewerPage> {
       ],
     );
 
-    await showDialog(
-      context: context,
-      builder: (context) => alertDialog,
+    if (!isDialogBusy) {
+      isDialogBusy = true;
+      await showDialog(
+        context: context,
+        builder: (context) => alertDialog,
+      );
+      isDialogBusy = false;
+    }
+  }
+
+  Widget buildSearchArea() {
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ValueListenableBuilder(
+        valueListenable: isMenuHidden,
+        builder: (BuildContext context, bool value, _) {
+          return AnimatedOpacity(
+            opacity: value ? 0.0 : 1.0,
+            duration: const Duration(milliseconds: 300),
+            child: buildSearchContent(),
+          );
+        },
+      ),
+    );
+  }
+
+  AnkiExportParams getExportParams() {
+    return exportParams;
+  }
+
+  void setExportParams(AnkiExportParams newParams, {AnkiExportField? field}) {
+    sentenceController.text = exportParams.sentence;
+  }
+
+  List<Widget> getFieldEnhancementWidgets(
+      {required BuildContext context, required AnkiExportField field}) {
+    List<Widget> widgets = [];
+    List<AnkiExportEnhancement?> enhancements =
+        appModel.getExportEnabledFieldEnhancement(field);
+
+    for (int position = 0; position < enhancements.length; position++) {
+      AnkiExportEnhancement? enhancement = enhancements[position];
+      if (enhancement == null) {
+        continue;
+      }
+
+      widgets.add(
+        enhancement.getButton(
+          context: context,
+          paramsCallback: getExportParams,
+          updateCallback: setExportParams,
+          autoMode: false,
+          editMode: false,
+          position: position,
+        ),
+      );
+    }
+
+    return widgets;
+  }
+
+  Widget buildSentenceField({
+    TextInputType keyboardType = TextInputType.multiline,
+  }) {
+    AnkiExportField field = AnkiExportField.sentence;
+
+    return TextFormField(
+      minLines: 1,
+      maxLines: 5,
+      controller: sentenceController,
+      decoration: InputDecoration(
+        enabledBorder: UnderlineInputBorder(
+          borderSide: BorderSide(
+              color: Theme.of(context).unselectedWidgetColor.withOpacity(0.5)),
+        ),
+        focusedBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: Theme.of(context).focusColor),
+        ),
+        prefixIcon: Icon(field.icon(appModel)),
+        suffixIcon: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.min,
+          children: getFieldEnhancementWidgets(context: context, field: field),
+        ),
+      ),
+      keyboardType: keyboardType,
+      focusNode: sentenceFocusNode,
     );
   }
 
   Widget buildMenuArea() {
     return Align(
-      alignment: Alignment.topCenter,
+      alignment: Alignment.bottomCenter,
       child: ValueListenableBuilder(
         valueListenable: isMenuHidden,
         builder: (BuildContext context, bool value, _) {
@@ -746,21 +1027,10 @@ class ViewerPageState extends State<ViewerPage> {
     }
   }
 
-  void cancelHideTimer() {
-    menuHideTimer?.cancel();
-    isMenuHidden.value = false;
-  }
-
-  void startHideTimer() {
-    menuHideTimer = Timer(const Duration(seconds: 3), toggleMenuVisibility);
-  }
-
   void toggleMenuVisibility() async {
-    menuHideTimer?.cancel();
     isMenuHidden.value = !isMenuHidden.value;
-    if (!isMenuHidden.value) {
-      startHideTimer();
-    }
+    sentenceFocusNode.unfocus();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
 
   Widget buildCurrentPage() {
@@ -809,6 +1079,24 @@ class ViewerPageState extends State<ViewerPage> {
         });
   }
 
+  Widget buildSearchContent() {
+    return Align(
+      alignment: Alignment.topCenter,
+      child: Container(
+        color: menuColor,
+        child: GestureDetector(
+          onTap: () {
+            toggleMenuVisibility();
+          },
+          child: AbsorbPointer(
+            absorbing: isMenuHidden.value,
+            child: buildSentenceField(),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget buildMenuContent() {
     return Align(
       alignment: Alignment.bottomCenter,
@@ -828,6 +1116,7 @@ class ViewerPageState extends State<ViewerPage> {
                 buildPosition(),
                 buildSlider(),
                 buildSourceButton(),
+                buildScanButton(),
                 buildOptionsButton(),
               ],
             ),
@@ -862,15 +1151,25 @@ class ViewerPageState extends State<ViewerPage> {
       onWillPop: onWillPop,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        backgroundColor: Colors.black,
-        body: Stack(
-          alignment: Alignment.center,
-          children: <Widget>[
-            buildViewer(),
-            buildCurrentPage(),
-            buildMenuArea(),
-            buildDictionary(),
-          ],
+        backgroundColor: appModel.getViewerColorBackground(),
+        body: Screenshot(
+          controller: screenshotController,
+          child: Stack(
+            children: <Widget>[
+              buildViewer(),
+              if (ocrOverlayShown) buildOcrOverlay(),
+              buildCurrentPage(),
+              buildMenuArea(),
+              buildSearchArea(),
+              Padding(
+                padding: const EdgeInsets.only(
+                  top: 60,
+                  bottom: 60,
+                ),
+                child: buildDictionary(),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -926,59 +1225,18 @@ class ViewerPageState extends State<ViewerPage> {
     searchTerm.value = holder;
   }
 
-  Future<void> showChapterMenu() async {
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        ValueNotifier<int> indexNotifier =
-            ValueNotifier<int>(chapters.indexOf(chapterName));
-        List<ListMenuItem> items = [];
-        for (String chapter in chapters) {
-          items.add(
-            ListMenuItem(
-              icon: Icons.book,
-              label: chapter,
-              action: () async {
-                ViewerLaunchParams newParams = ViewerLaunchParams(
-                  appModel: appModel,
-                  saveHistoryItem: widget.params.saveHistoryItem,
-                  mediaHistoryItem: widget.params.mediaHistoryItem,
-                  chapters: chapters,
-                  chapterName: chapter,
-                  mediaSource: widget.params.mediaSource,
-                );
-
-                Navigator.pop(context);
-                await widget.params.mediaSource.launchMediaPage(
-                  context,
-                  newParams,
-                  pushReplacement: true,
-                );
-              },
-            ),
-          );
-        }
-
-        return ListMenu(
-          items: items,
-          indexNotifier: indexNotifier,
-          stateCallback: () {
-            setState(() {});
-          },
-          popOnSelect: false,
-          emptyWidget: Container(),
-        );
-      },
-    );
-  }
-
   List<BottomSheetDialogOption> getOptions() {
     List<BottomSheetDialogOption> options = [
       BottomSheetDialogOption(
         label: appModel.translate("viewer_option_chapter_menu"),
         icon: Icons.book,
         action: () async {
-          await showChapterMenu();
+          await widget.params.mediaSource.showChapterMenu(
+            context: context,
+            item: widget.params.mediaHistoryItem,
+            actions: [],
+            pushReplacement: true,
+          );
         },
       ),
       BottomSheetDialogOption(
@@ -999,8 +1257,6 @@ class ViewerPageState extends State<ViewerPage> {
             : Icons.format_textdirection_r_to_l,
         action: () async {
           await appModel.toggleViewerRightToLeft();
-          cancelHideTimer();
-          startHideTimer();
           setState(() {});
         },
       ),
@@ -1168,14 +1424,13 @@ class ViewerPageState extends State<ViewerPage> {
             min: 0.99,
             max: completeProgress.toDouble() + 0.01,
             onChangeStart: (value) {
-              cancelHideTimer();
+              isDragging = true;
             },
-            onChangeEnd: (value) {
-              startHideTimer();
+            onChangeEnd: (value) async {
+              isDragging = false;
+              await updateHistory();
             },
             onChanged: (progress) async {
-              cancelHideTimer();
-
               int page = progress.floor();
               sliderValue = page.toDouble();
               pageController.jumpToPage(page);

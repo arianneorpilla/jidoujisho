@@ -390,20 +390,17 @@ class PlayerPageState extends State<PlayerPage>
                       dialogSmartPause();
                     }
 
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.waiting:
-                        return buildDictionarySearching();
-                      default:
-                        latestResult = snapshot.data;
+                    if (!snapshot.hasData &&
+                        snapshot.connectionState == ConnectionState.waiting) {
+                      return buildDictionarySearching();
+                    }
 
-                        dragToSelectFocusNode.unfocus();
+                    latestResult = snapshot.data;
 
-                        if (!snapshot.hasData ||
-                            latestResult!.entries.isEmpty) {
-                          return buildDictionaryNoMatch();
-                        } else {
-                          return buildDictionaryMatch();
-                        }
+                    if (!snapshot.hasData || latestResult!.entries.isEmpty) {
+                      return buildDictionaryNoMatch();
+                    } else {
+                      return buildDictionaryMatch();
                     }
                   },
                 ),

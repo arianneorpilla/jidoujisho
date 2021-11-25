@@ -14,6 +14,7 @@ class JapaneseLanguage extends Language {
           languageCode: "ja",
           countryCode: "JP",
           readingDirection: ReadingDirection.verticalRTL,
+          isSpaceDelimited: false,
         );
 
   Mecab mecab = Mecab();

@@ -1,12 +1,12 @@
 import 'dart:io';
 
+import 'package:chisa/media/media_histories/media_history.dart';
 import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'dart:async';
 
 import 'package:chisa/media/media_sources/viewer_media_source.dart';
 import 'package:chisa/media/media_type.dart';
 import 'package:chisa/models/app_model.dart';
-import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/util/media_source_action_button.dart';
 import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/material.dart';
@@ -21,21 +21,6 @@ class ViewerLocalMediaSource extends ViewerMediaSource {
           sourceName: "Local Source",
           icon: Icons.photo_album,
         );
-
-  @override
-  ViewerLaunchParams getLaunchParams(
-    AppModel appModel,
-    MediaHistoryItem item,
-    List<String> chapters,
-  ) {
-    return ViewerLaunchParams(
-      appModel: appModel,
-      mediaSource: this,
-      mediaHistoryItem: item,
-      saveHistoryItem: true,
-      chapters: chapters,
-    );
-  }
 
   @override
   Future<List<ImageProvider<Object>>> getChapterImages(
@@ -75,8 +60,12 @@ class ViewerLocalMediaSource extends ViewerMediaSource {
   }
 
   @override
-  FutureOr<List<String>> getChapters(MediaHistoryItem item) {
+  Future<List<String>> getChapters(MediaHistoryItem item) async {
     Directory directory = getItemDirectory(item);
+    if (!directory.existsSync()) {
+      return [];
+    }
+
     List<FileSystemEntity> entities = directory.listSync();
 
     List<Directory> directories = [];
@@ -111,7 +100,7 @@ class ViewerLocalMediaSource extends ViewerMediaSource {
   ImageProvider<Object> getHistoryThumbnail(MediaHistoryItem item) {
     File? coverFile = getCoverFile(item.key);
 
-    if (coverFile == null) {
+    if (coverFile == null || !coverFile.existsSync()) {
       return MemoryImage(kTransparentImage);
     }
 
@@ -120,7 +109,12 @@ class ViewerLocalMediaSource extends ViewerMediaSource {
 
   File? getCoverFile(String directoryPath) {
     Directory directory = Directory(directoryPath);
+    if (!directory.existsSync()) {
+      return null;
+    }
+
     List<FileSystemEntity> entities = directory.listSync(recursive: true);
+    entities.sort((a, b) => a.path.compareTo(b.path));
 
     List<String> extensions = mediaType.getAllowedExtensions();
 
@@ -130,6 +124,14 @@ class ViewerLocalMediaSource extends ViewerMediaSource {
           if (extensions.contains(p.extension(entity.path))) {
             return entity;
           }
+        }
+      }
+    }
+
+    for (FileSystemEntity entity in entities) {
+      if (entity is File) {
+        if (extensions.contains(p.extension(entity.path))) {
+          return entity;
         }
       }
     }
@@ -146,8 +148,10 @@ class ViewerLocalMediaSource extends ViewerMediaSource {
     return null;
   }
 
-  Future<void> showFilePicker(BuildContext context,
-      {bool pushReplacement = false}) async {
+  Future<void> showFilePicker(
+    BuildContext context, {
+    bool pushReplacement = false,
+  }) async {
     AppModel appModel = Provider.of<AppModel>(context, listen: false);
 
     Iterable<String>? filePaths = await FilesystemPicker.open(
@@ -157,7 +161,7 @@ class ViewerLocalMediaSource extends ViewerMediaSource {
       context: context,
       rootDirectories: await appModel.getMediaTypeDirectories(mediaType),
       fsType: FilesystemType.folder,
-      multiSelect: false,
+      multiSelect: true,
       folderIconColor: Colors.red,
       themeData: Theme.of(context),
     );
@@ -166,38 +170,44 @@ class ViewerLocalMediaSource extends ViewerMediaSource {
       return;
     }
 
-    String filePath = filePaths.first;
+    List<String> paths = filePaths.toList();
+    for (String path in paths) {
+      appModel.setLastPickedDirectory(mediaType, Directory(p.dirname(path)));
 
-    appModel.setLastPickedDirectory(mediaType, Directory(p.dirname(filePath)));
+      MediaHistory history = mediaType.getMediaHistory(appModel);
 
-    MediaHistoryItem? historyItem = mediaType
-        .getMediaHistory(appModel)
-        .getItems()
-        .firstWhereOrNull((item) => item.key == filePath);
+      MediaHistoryItem? historyItem =
+          history.getItems().firstWhereOrNull((item) => item.key == path);
 
-    MediaHistoryItem item;
-    if (historyItem != null) {
-      item = MediaHistoryItem.fromJson(historyItem.toJson());
-    } else {
-      item = MediaHistoryItem(
-        key: filePath,
-        title: p.basenameWithoutExtension(filePath),
-        mediaTypePrefs: mediaType.prefsDirectory(),
-        sourceName: sourceName,
-        currentProgress: 0,
-        completeProgress: 0,
-        thumbnailPath: getCoverFile(filePath)?.path ?? "",
-        extra: {},
-      );
+      MediaHistoryItem item;
+      if (historyItem != null) {
+        item = MediaHistoryItem.fromJson(historyItem.toJson());
+      } else {
+        item = MediaHistoryItem(
+          key: path,
+          title: p.basenameWithoutExtension(path),
+          mediaTypePrefs: mediaType.prefsDirectory(),
+          sourceName: sourceName,
+          currentProgress: 0,
+          completeProgress: 0,
+          extra: {},
+        );
+      }
+
+      try {
+        List<String> chapters = await getCachedChapters(item);
+        getCoverFile(item.key);
+        if (chapters.isEmpty) {
+          continue;
+        }
+
+        item.extra["chapters"] = chapters;
+
+        history.addItem(item);
+      } catch (e) {
+        continue;
+      }
     }
-
-    ViewerLaunchParams params =
-        getLaunchParams(appModel, item, await getChapters(item));
-    await launchMediaPage(
-      context,
-      params,
-      pushReplacement: pushReplacement,
-    );
   }
 
   @override
@@ -212,12 +222,12 @@ class ViewerLocalMediaSource extends ViewerMediaSource {
         refreshCallback: refreshCallback,
         showIfClosed: true,
         showIfOpened: false,
-        icon: Icons.perm_media,
+        icon: Icons.my_library_add,
         onPressed: () async {
           await showFilePicker(context);
           refreshCallback();
         },
-      )
+      ),
     ];
   }
 

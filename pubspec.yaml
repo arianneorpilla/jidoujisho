@@ -74,7 +74,7 @@ dependencies:
   multi_value_listenable_builder: ^0.0.1
   flutter_ffmpeg: ^0.4.2
   permission_handler:
-  google_ml_kit:
+  google_ml_kit: 0.7.3
   chaquopy:
   share_plus:
   scrollable_positioned_list:
@@ -102,6 +102,10 @@ dependencies:
   receive_sharing_intent:
   image_picker:
   flutter_cache_manager:
+  marquee:
+  flutter_keyboard_visibility:
+  image:
+  screenshot:
 dev_dependencies:
   flutter_test:
     sdk: flutter

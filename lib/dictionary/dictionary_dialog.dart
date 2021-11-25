@@ -1,4 +1,5 @@
 import 'package:chisa/util/center_icon_message.dart';
+import 'package:chisa/util/marquee.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -175,13 +176,15 @@ class DictionaryDialogState extends State<DictionaryDialog> {
                 ),
                 const SizedBox(width: 16.0),
                 Expanded(
-                  child: Text(
-                    dictionary.dictionaryName,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Theme.of(context).iconTheme.color,
+                  child: SizedBox(
+                    height: 48,
+                    child: Marquee(
+                      text: dictionary.dictionaryName,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Theme.of(context).iconTheme.color,
+                      ),
                     ),
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 if (widget.manageAllowed &&

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:chisa/util/cached_memory_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -46,7 +47,10 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
     }
 
     UriData data = Uri.parse(item.extra["thumbnail"]).data!;
-    return MemoryImage(data.contentAsBytes());
+
+    /// A cached version of [MemoryImage] so that the image does not reload
+    /// on every revisit
+    return CacheImageProvider(item.key, data.contentAsBytes());
   }
 
   @override

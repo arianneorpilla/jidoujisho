@@ -21,10 +21,10 @@ abstract class MediaHomePageState extends State<MediaHomePage>
   @override
   bool get wantKeepAlive => true;
 
-  @override
-  void didUpdateWidget(oldWidget) {
-    super.didUpdateWidget(oldWidget);
-  }
+  // @override
+  // void didUpdateWidget(oldWidget) {
+  //   super.didUpdateWidget(oldWidget);
+  // }
 
   @override
   Widget build(BuildContext context) {

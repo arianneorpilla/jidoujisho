@@ -85,6 +85,7 @@ class ViewerLaunchParams {
     this.chapterName,
     this.fromStart = false,
     this.fromEnd = false,
+    this.pushReplacement = false,
   });
 
   final AppModel appModel;
@@ -95,4 +96,5 @@ class ViewerLaunchParams {
   final String? chapterName;
   final bool fromStart;
   final bool fromEnd;
+  final bool pushReplacement;
 }

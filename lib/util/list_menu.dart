@@ -1,3 +1,4 @@
+import 'package:chisa/util/marquee.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -89,14 +90,19 @@ class ListMenuState extends State<ListMenu> {
                   size: 20.0,
                 ),
                 const SizedBox(width: 16.0),
-                Text(
-                  item.label,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color:
-                        appModel.getIsDarkMode() ? Colors.white : Colors.black,
+                Expanded(
+                  child: SizedBox(
+                    height: 48,
+                    child: Marquee(
+                      text: item.label,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: appModel.getIsDarkMode()
+                            ? Colors.white
+                            : Colors.black,
+                      ),
+                    ),
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

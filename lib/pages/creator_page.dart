@@ -167,6 +167,7 @@ class CreatorPageState extends State<CreatorPage> {
       if (audioNotifier.value != null) {
         audioPlayer.setUrl(audioNotifier.value!.path, isLocal: true).then((_) {
           audioPlayer.getDuration().then((milliseconds) {
+            positionNotifier.value = Duration.zero;
             durationNotifier.value = Duration(milliseconds: milliseconds);
           });
         });
@@ -330,7 +331,6 @@ class CreatorPageState extends State<CreatorPage> {
     Orientation orientation = MediaQuery.of(context).orientation;
 
     return Scaffold(
-      resizeToAvoidBottomInset: (orientation == Orientation.portrait),
       backgroundColor: widget.backgroundColor,
       extendBodyBehindAppBar: (imagesNotifier.value.isNotEmpty &&
           orientation == Orientation.landscape),
@@ -357,12 +357,13 @@ class CreatorPageState extends State<CreatorPage> {
             ),
       body: Stack(
         children: [
-          ClipRect(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
-              child: Container(),
+          if (widget.backgroundColor != null)
+            ClipRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
+                child: Container(),
+              ),
             ),
-          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: buildFields(),
@@ -507,6 +508,8 @@ class CreatorPageState extends State<CreatorPage> {
                         ? Colors.grey[700]
                         : Colors.grey[400],
                     child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(
+                          parent: BouncingScrollPhysics()),
                       controller: scrollerImage,
                       child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -546,6 +549,8 @@ class CreatorPageState extends State<CreatorPage> {
                     child: Scrollbar(
                       controller: scrollController,
                       child: SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(
+                            parent: BouncingScrollPhysics()),
                         controller: scrollController,
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
@@ -611,9 +616,6 @@ class CreatorPageState extends State<CreatorPage> {
                                 exportParams.setExtra(value);
                               },
                             ),
-                            SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height / 3 * 2),
                           ],
                         ),
                       ),
@@ -647,6 +649,8 @@ class CreatorPageState extends State<CreatorPage> {
           child: Scrollbar(
             controller: scrollController,
             child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics()),
               controller: scrollController,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -748,10 +752,8 @@ class CreatorPageState extends State<CreatorPage> {
             iconData = Icons.pause;
             break;
           case PlayerState.PAUSED:
-            iconData = Icons.play_arrow;
-            break;
           case PlayerState.COMPLETED:
-            iconData = Icons.replay;
+            iconData = Icons.play_arrow;
             break;
         }
 
@@ -796,7 +798,7 @@ class CreatorPageState extends State<CreatorPage> {
 
         String getPositionText() {
           if (playerState == PlayerState.COMPLETED) {
-            position = duration;
+            position = Duration.zero;
           }
 
           if (position.inHours == 0) {
@@ -840,7 +842,7 @@ class CreatorPageState extends State<CreatorPage> {
             validPosition ? position.inMilliseconds.toDouble() : 0;
 
         if (playerState == PlayerState.COMPLETED) {
-          sliderValue = 1;
+          sliderValue = 0;
         }
 
         return Expanded(

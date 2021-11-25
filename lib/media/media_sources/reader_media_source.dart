@@ -169,6 +169,9 @@ abstract class ReaderMediaSource extends MediaSource {
             barrierDismissible: true,
             context: context,
             builder: (context) => AlertDialog(
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.zero,
+              ),
               title: Text(
                 (item.alias.isNotEmpty)
                     ? getHistoryCaptionAlias(item)
@@ -523,8 +526,21 @@ abstract class ReaderMediaSource extends MediaSource {
                   controller: nameAliasController,
                   maxLines: null,
                   decoration: InputDecoration(
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                          color: Theme.of(context)
+                              .unselectedWidgetColor
+                              .withOpacity(0.5)),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide:
+                          BorderSide(color: Theme.of(context).focusColor),
+                    ),
                     suffixIcon: IconButton(
                       iconSize: 18,
+                      color: appModel.getIsDarkMode()
+                          ? Colors.white
+                          : Colors.black,
                       onPressed: () async {
                         nameAliasController.text = defaultTitle;
                       },
@@ -537,6 +553,16 @@ abstract class ReaderMediaSource extends MediaSource {
                   controller: coverAliasController,
                   style: const TextStyle(color: Colors.transparent),
                   decoration: InputDecoration(
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                          color: Theme.of(context)
+                              .unselectedWidgetColor
+                              .withOpacity(0.5)),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide:
+                          BorderSide(color: Theme.of(context).focusColor),
+                    ),
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                     suffixIcon: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -551,6 +577,9 @@ abstract class ReaderMediaSource extends MediaSource {
                         const SizedBox(width: 5),
                         IconButton(
                           iconSize: 18,
+                          color: appModel.getIsDarkMode()
+                              ? Colors.white
+                              : Colors.black,
                           onPressed: () async {
                             ImagePicker imagePicker = ImagePicker();
                             final pickedFile = await imagePicker.pickImage(
@@ -562,6 +591,9 @@ abstract class ReaderMediaSource extends MediaSource {
                         ),
                         IconButton(
                           iconSize: 18,
+                          color: appModel.getIsDarkMode()
+                              ? Colors.white
+                              : Colors.black,
                           onPressed: () async {
                             newCover = null;
                             imageProviderNotifier.value = defaultThumbnail;

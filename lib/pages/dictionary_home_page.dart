@@ -59,10 +59,10 @@ class DictionaryPageState extends State<DictionaryHomePage>
     searchBarController = widget.searchBarController;
   }
 
-  @override
-  void didUpdateWidget(oldWidget) {
-    super.didUpdateWidget(oldWidget);
-  }
+  // @override
+  // void didUpdateWidget(oldWidget) {
+  //   super.didUpdateWidget(oldWidget);
+  // }
 
   void focusCallback() {
     setState(() {});
@@ -237,8 +237,7 @@ class DictionaryPageState extends State<DictionaryHomePage>
           : Theme.of(context).unselectedWidgetColor.withOpacity(0.030),
       child: InkWell(
         onTap: () async {
-          DictionaryEntry entry =
-              result.entries[mediaHistoryItem.currentProgress];
+          DictionaryEntry entry = result.entries[indexNotifier.value];
 
           await navigateToCreator(
             context: context,
@@ -252,7 +251,7 @@ class DictionaryPageState extends State<DictionaryHomePage>
         },
         onLongPress: () async {
           ValueNotifier<int> dialogIndexNotifier =
-              ValueNotifier<int>(mediaHistoryItem.currentProgress);
+              ValueNotifier<int>(indexNotifier.value);
 
           HapticFeedback.vibrate();
           await showDialog(
@@ -303,7 +302,7 @@ class DictionaryPageState extends State<DictionaryHomePage>
                   ),
                   onPressed: () async {
                     DictionaryEntry dialogEntry =
-                        result.entries[mediaHistoryItem.currentProgress];
+                        result.entries[dialogIndexNotifier.value];
                     await navigateToCreator(
                       context: context,
                       appModel: appModel,

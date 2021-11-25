@@ -11,6 +11,7 @@ class EnglishLanguage extends Language {
           languageCode: "en",
           countryCode: "US",
           readingDirection: ReadingDirection.horizontalLTR,
+          isSpaceDelimited: true,
         );
 
   @override
@@ -18,6 +19,8 @@ class EnglishLanguage extends Language {
 
   @override
   FutureOr<String> getRootForm(String word) {
+    // Implement an actual lemmatiser here... Could use NLTK, but it should
+    // really be light to use...
     return word;
   }
 

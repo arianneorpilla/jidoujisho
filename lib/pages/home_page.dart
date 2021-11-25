@@ -60,13 +60,13 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     });
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  // @override
+  // void didChangeDependencies() {
+  //   super.didChangeDependencies();
 
-    precacheImage(imageIcon, context);
-     precacheImage(imageSmallIcon, context);
-  }
+  //   precacheImage(imageIcon, context);
+  //    precacheImage(imageSmallIcon, context);
+  // }
 
   Widget getTabs() {
     List<Widget> widgets = [];
@@ -75,6 +75,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           mediaType.getHomeBody(appModel.getSearchController(mediaType));
       widgets.add(widget);
     }
+
+    widgets.add(Container());
 
     return PageView(
       controller: pageController,

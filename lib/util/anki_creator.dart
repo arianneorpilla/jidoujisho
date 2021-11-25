@@ -127,17 +127,23 @@ Future<void> navigateToCreator({
   try {
     List<String> decks = await getDecks();
 
-    Widget creatorPage = CreatorPage(
-      initialParams: initialParams,
-      backgroundColor: backgroundColor,
-      appBarColor: appBarColor,
-      landscapeLocked: landscapeLocked,
-      decks: decks,
-      autoMode: autoMode,
-      editMode: editMode,
-      popOnExport: popOnExport,
-      exportCallback: exportCallback,
-    );
+    Future<Widget> buildCreatorPage() async {
+      return Future.microtask(() {
+        return CreatorPage(
+          initialParams: initialParams,
+          backgroundColor: backgroundColor,
+          appBarColor: appBarColor,
+          landscapeLocked: landscapeLocked,
+          decks: decks,
+          autoMode: autoMode,
+          editMode: editMode,
+          popOnExport: popOnExport,
+          exportCallback: exportCallback,
+        );
+      });
+    }
+
+    Widget creatorPage = await buildCreatorPage();
 
     await Navigator.of(context).push(
       PageRouteBuilder(
@@ -175,18 +181,23 @@ Future<void> navigateToCreator({
 
                 try {
                   List<String> decks = await getDecks();
-                  Widget creatorPage = CreatorPage(
-                    initialParams: initialParams,
-                    backgroundColor: backgroundColor,
-                    appBarColor: appBarColor,
-                    landscapeLocked: landscapeLocked,
-                    decks: decks,
-                    autoMode: autoMode,
-                    editMode: editMode,
-                    popOnExport: popOnExport,
-                    exportCallback: exportCallback,
-                  );
+                  Future<Widget> buildCreatorPage() async {
+                    return Future.microtask(() {
+                      return CreatorPage(
+                        initialParams: initialParams,
+                        backgroundColor: backgroundColor,
+                        appBarColor: appBarColor,
+                        landscapeLocked: landscapeLocked,
+                        decks: decks,
+                        autoMode: autoMode,
+                        editMode: editMode,
+                        popOnExport: popOnExport,
+                        exportCallback: exportCallback,
+                      );
+                    });
+                  }
 
+                  Widget creatorPage = await buildCreatorPage();
                   await Navigator.of(context).push(
                     PageRouteBuilder(
                       opaque: false,

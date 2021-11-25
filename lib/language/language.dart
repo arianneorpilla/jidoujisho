@@ -9,6 +9,7 @@ abstract class Language {
     required this.languageCode,
     required this.countryCode,
     required this.readingDirection,
+    required this.isSpaceDelimited,
   });
 
   /// The name of the language, as known to native speakers.
@@ -35,6 +36,9 @@ abstract class Language {
   /// This is [ReadingDirection.verticalRTL] for Japanese.
   /// For English, this is [ReadingDirection.horizontalLTR].
   final ReadingDirection readingDirection;
+
+  /// Whether or not this language is typically space-delimited.
+  final bool isSpaceDelimited;
 
   /// Whether or not the language is initialised. Do not override.
   bool isInitialised = false;

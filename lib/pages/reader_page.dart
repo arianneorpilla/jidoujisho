@@ -362,18 +362,17 @@ class ReaderPageState extends State<ReaderPage> {
                   ), // a previously-obtained Future<String> or null
                   builder: (BuildContext context,
                       AsyncSnapshot<DictionarySearchResult> snapshot) {
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.waiting:
-                        return buildDictionarySearching();
-                      default:
-                        latestResult = snapshot.data;
+                    if (!snapshot.hasData &&
+                        snapshot.connectionState == ConnectionState.waiting) {
+                      return buildDictionarySearching();
+                    }
 
-                        if (!snapshot.hasData ||
-                            latestResult!.entries.isEmpty) {
-                          return buildDictionaryNoMatch();
-                        } else {
-                          return buildDictionaryMatch();
-                        }
+                    latestResult = snapshot.data;
+
+                    if (!snapshot.hasData || latestResult!.entries.isEmpty) {
+                      return buildDictionaryNoMatch();
+                    } else {
+                      return buildDictionaryMatch();
                     }
                   },
                 ),

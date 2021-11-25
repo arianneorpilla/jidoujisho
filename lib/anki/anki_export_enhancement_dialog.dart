@@ -1,3 +1,4 @@
+import 'package:chisa/util/marquee.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -102,14 +103,19 @@ class AnkiExportEnhancementDialogState
                   size: 20.0,
                 ),
                 const SizedBox(width: 16.0),
-                Text(
-                  enhancement.enhancementName,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color:
-                        appModel.getIsDarkMode() ? Colors.white : Colors.black,
+                Expanded(
+                  child: SizedBox(
+                    height: 48,
+                    child: Marquee(
+                      text: enhancement.enhancementName,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: appModel.getIsDarkMode()
+                            ? Colors.white
+                            : Colors.black,
+                      ),
+                    ),
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
