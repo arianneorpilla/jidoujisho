@@ -51,10 +51,10 @@ class ReaderPageState extends State<ReaderPage> {
 
   late int currentProgress;
   late int completeProgress;
-  late int scrollX;
-  late int scrollY;
+  late dynamic scrollX;
+  late dynamic scrollY;
   late String url;
-  late String thumbnail;
+  late dynamic thumbnail;
   late String title;
   late String author;
 
@@ -90,6 +90,7 @@ class ReaderPageState extends State<ReaderPage> {
       themeData = appModel.getIsDarkMode()
           ? appModel.getDarkTheme(context)
           : appModel.getLightTheme(context);
+      isDarkMode = appModel.getIsDarkMode();
       setState(() {});
     });
   }
@@ -121,7 +122,7 @@ class ReaderPageState extends State<ReaderPage> {
     if (completeProgress != 0 && thumbnail.isNotEmpty && title.isNotEmpty) {
       if (widget.params.saveHistoryItem) {
         if (!appModel.getIncognitoMode()) {
-          history.addItem(item);
+          await history.addItem(item);
         }
       }
     }
@@ -362,8 +363,7 @@ class ReaderPageState extends State<ReaderPage> {
                   ), // a previously-obtained Future<String> or null
                   builder: (BuildContext context,
                       AsyncSnapshot<DictionarySearchResult> snapshot) {
-                    if (!snapshot.hasData &&
-                        snapshot.connectionState == ConnectionState.waiting) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
                       return buildDictionarySearching();
                     }
 
@@ -483,7 +483,7 @@ class ReaderPageState extends State<ReaderPage> {
                 height: 12,
                 width: 12,
                 child: JumpingDotsProgressIndicator(
-                  color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
+                  color: isDarkMode ? Colors.white : Colors.black,
                 ),
               ),
             ),
@@ -533,7 +533,7 @@ class ReaderPageState extends State<ReaderPage> {
                 height: 12,
                 width: 12,
                 child: JumpingDotsProgressIndicator(
-                  color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
+                  color: isDarkMode ? Colors.white : Colors.black,
                 ),
               ),
             ),
@@ -567,7 +567,7 @@ class ReaderPageState extends State<ReaderPage> {
                 height: 12,
                 width: 12,
                 child: JumpingDotsProgressIndicator(
-                  color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
+                  color: isDarkMode ? Colors.white : Colors.black,
                 ),
               ),
             ),
@@ -641,6 +641,7 @@ class ReaderPageState extends State<ReaderPage> {
       appModel: appModel,
       initialParams: initialParams,
       popOnExport: true,
+      hideActions: true,
       themeData: themeData,
       exportCallback: () {
         Navigator.of(context).pop();

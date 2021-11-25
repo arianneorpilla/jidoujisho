@@ -139,8 +139,6 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
     if (!isFocus) {
       searchBarController.close();
       setState(() {});
-
-      widget.refreshCallback();
     } else {
       if (mediaSource.noSearchAction) {
         await mediaSource.onSearchBarTap(context);
@@ -151,6 +149,7 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
       }
     }
 
+    widget.refreshCallback();
     pagingController = null;
   }
 
@@ -476,6 +475,9 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
                 historyType: mediaSource.getIdentifier());
             await mediaSource.onDirectTextEntrySubmit(
                 context, searchBarController.query);
+
+            setState(() {});
+            widget.refreshCallback();
 
             searchBarController.clear();
           },

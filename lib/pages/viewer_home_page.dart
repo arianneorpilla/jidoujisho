@@ -38,10 +38,10 @@ class ViewerHomePageState extends State<ViewerHomePage>
   TextEditingController searchController = TextEditingController(text: "");
   ScrollController? scrollController;
 
-  // @override
-  // void didUpdateWidget(oldWidget) {
-  //   super.didUpdateWidget(oldWidget);
-  // }
+  @override
+  void didUpdateWidget(oldWidget) {
+    super.didUpdateWidget(oldWidget);
+  }
 
   ViewerMediaSource getCurrentMediaSource() {
     return appModel.getCurrentMediaTypeSource(widget.mediaType)

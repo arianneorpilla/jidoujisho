@@ -34,7 +34,6 @@ Future<void> returnFromContext(
         context,
         ViewerLaunchParams(
           mediaHistoryItem: item,
-          saveHistoryItem: source.saveHistoryItem,
           appModel: appModel,
           chapters: await source.getCachedChapters(item),
           mediaSource: source,

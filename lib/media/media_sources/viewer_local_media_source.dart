@@ -6,14 +6,17 @@ import 'dart:async';
 
 import 'package:chisa/media/media_sources/viewer_media_source.dart';
 import 'package:chisa/media/media_type.dart';
+import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/util/media_source_action_button.dart';
 import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:collection/collection.dart';
+import 'package:wakelock/wakelock.dart';
 
 class ViewerLocalMediaSource extends ViewerMediaSource {
   ViewerLocalMediaSource()
@@ -161,7 +164,7 @@ class ViewerLocalMediaSource extends ViewerMediaSource {
       context: context,
       rootDirectories: await appModel.getMediaTypeDirectories(mediaType),
       fsType: FilesystemType.folder,
-      multiSelect: true,
+      multiSelect: !appModel.getIncognitoMode(),
       folderIconColor: Colors.red,
       themeData: Theme.of(context),
     );
@@ -171,7 +174,47 @@ class ViewerLocalMediaSource extends ViewerMediaSource {
     }
 
     List<String> paths = filePaths.toList();
-    for (String path in paths) {
+
+    if (paths.length > 1) {
+      for (String path in paths) {
+        appModel.setLastPickedDirectory(mediaType, Directory(p.dirname(path)));
+
+        MediaHistory history = mediaType.getMediaHistory(appModel);
+
+        MediaHistoryItem? historyItem =
+            history.getItems().firstWhereOrNull((item) => item.key == path);
+
+        MediaHistoryItem item;
+        if (historyItem != null) {
+          item = MediaHistoryItem.fromJson(historyItem.toJson());
+        } else {
+          item = MediaHistoryItem(
+            key: path,
+            title: p.basenameWithoutExtension(path),
+            mediaTypePrefs: mediaType.prefsDirectory(),
+            sourceName: sourceName,
+            currentProgress: 0,
+            completeProgress: 0,
+            extra: {},
+          );
+        }
+
+        try {
+          List<String> chapters = await getCachedChapters(item);
+          getCoverFile(item.key);
+          if (chapters.isEmpty) {
+            continue;
+          }
+
+          item.extra["chapters"] = chapters;
+
+          await history.addItem(item);
+        } catch (e) {
+          continue;
+        }
+      }
+    } else {
+      String path = filePaths.first;
       appModel.setLastPickedDirectory(mediaType, Directory(p.dirname(path)));
 
       MediaHistory history = mediaType.getMediaHistory(appModel);
@@ -198,15 +241,27 @@ class ViewerLocalMediaSource extends ViewerMediaSource {
         List<String> chapters = await getCachedChapters(item);
         getCoverFile(item.key);
         if (chapters.isEmpty) {
-          continue;
+          return;
         }
 
-        item.extra["chapters"] = chapters;
+        Wakelock.enable();
+        SystemChrome.setEnabledSystemUIMode(
+          SystemUiMode.manual,
+          overlays: [SystemUiOverlay.bottom],
+        );
 
-        history.addItem(item);
-      } catch (e) {
-        continue;
-      }
+        launchMediaPage(
+          context,
+          ViewerLaunchParams(
+            appModel: appModel,
+            chapters: chapters,
+            mediaHistoryItem: item,
+            mediaSource: this,
+          ),
+        );
+
+        item.extra["chapters"] = chapters;
+      } finally {}
     }
   }
 

@@ -389,7 +389,7 @@ class ViewerPageState extends State<ViewerPage> {
   }
 
   MediaHistoryItem? generateContextHistoryItem() {
-    if (!widget.params.saveHistoryItem) {
+    if (!widget.params.mediaSource.saveHistoryItem) {
       return null;
     }
 
@@ -496,11 +496,9 @@ class ViewerPageState extends State<ViewerPage> {
                   ), // a previously-obtained Future<String> or null
                   builder: (BuildContext context,
                       AsyncSnapshot<DictionarySearchResult> snapshot) {
-                    if (!snapshot.hasData &&
-                        snapshot.connectionState == ConnectionState.waiting) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
                       return buildDictionarySearching();
                     }
-
                     latestResult = snapshot.data;
 
                     if (!snapshot.hasData || latestResult!.entries.isEmpty) {
@@ -760,7 +758,8 @@ class ViewerPageState extends State<ViewerPage> {
     item.extra["chapters"] = chapters;
 
     if (item.completeProgress != 0) {
-      if (!appModel.getIncognitoMode()) {
+      if (!appModel.getIncognitoMode() &&
+          widget.params.mediaSource.saveHistoryItem) {
         await history.addItem(item);
       }
     }
@@ -889,7 +888,6 @@ class ViewerPageState extends State<ViewerPage> {
           onPressed: () async {
             ViewerLaunchParams newParams = ViewerLaunchParams(
               appModel: appModel,
-              saveHistoryItem: widget.params.saveHistoryItem,
               mediaHistoryItem: widget.params.mediaHistoryItem,
               chapters: chapters,
               chapterName: newChapterName,
@@ -1030,7 +1028,10 @@ class ViewerPageState extends State<ViewerPage> {
   void toggleMenuVisibility() async {
     isMenuHidden.value = !isMenuHidden.value;
     sentenceFocusNode.unfocus();
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: [SystemUiOverlay.bottom],
+    );
   }
 
   Widget buildCurrentPage() {
@@ -1113,8 +1114,9 @@ class ViewerPageState extends State<ViewerPage> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                buildPosition(),
-                buildSlider(),
+                if (widget.params.hideSlider) const Spacer(),
+                if (!widget.params.hideSlider) buildPosition(),
+                if (!widget.params.hideSlider) buildSlider(),
                 buildSourceButton(),
                 buildScanButton(),
                 buildOptionsButton(),
@@ -1227,18 +1229,19 @@ class ViewerPageState extends State<ViewerPage> {
 
   List<BottomSheetDialogOption> getOptions() {
     List<BottomSheetDialogOption> options = [
-      BottomSheetDialogOption(
-        label: appModel.translate("viewer_option_chapter_menu"),
-        icon: Icons.book,
-        action: () async {
-          await widget.params.mediaSource.showChapterMenu(
-            context: context,
-            item: widget.params.mediaHistoryItem,
-            actions: [],
-            pushReplacement: true,
-          );
-        },
-      ),
+      if (widget.params.canOpenHistory)
+        BottomSheetDialogOption(
+          label: appModel.translate("viewer_option_chapter_menu"),
+          icon: Icons.book,
+          action: () async {
+            await widget.params.mediaSource.showChapterMenu(
+              context: context,
+              item: widget.params.mediaHistoryItem,
+              actions: [],
+              pushReplacement: true,
+            );
+          },
+        ),
       BottomSheetDialogOption(
         label: appModel.translate("viewer_option_dictionary_menu"),
         icon: Icons.auto_stories,
@@ -1248,18 +1251,19 @@ class ViewerPageState extends State<ViewerPage> {
           });
         },
       ),
-      BottomSheetDialogOption(
-        label: (appModel.isViewerRightToLeft())
-            ? appModel.translate("viewer_option_direction_ltr")
-            : appModel.translate("viewer_option_direction_rtl"),
-        icon: (appModel.isViewerRightToLeft())
-            ? Icons.format_textdirection_l_to_r
-            : Icons.format_textdirection_r_to_l,
-        action: () async {
-          await appModel.toggleViewerRightToLeft();
-          setState(() {});
-        },
-      ),
+      if (!widget.params.hideSlider)
+        BottomSheetDialogOption(
+          label: (appModel.isViewerRightToLeft())
+              ? appModel.translate("viewer_option_direction_ltr")
+              : appModel.translate("viewer_option_direction_rtl"),
+          icon: (appModel.isViewerRightToLeft())
+              ? Icons.format_textdirection_l_to_r
+              : Icons.format_textdirection_r_to_l,
+          action: () async {
+            await appModel.toggleViewerRightToLeft();
+            setState(() {});
+          },
+        ),
       BottomSheetDialogOption(
         label: appModel.translate("viewer_option_background_color"),
         icon: Icons.color_lens,
@@ -1306,6 +1310,7 @@ class ViewerPageState extends State<ViewerPage> {
       appModel: appModel,
       initialParams: initialParams,
       popOnExport: true,
+      hideActions: true,
       exportCallback: () {
         Navigator.of(context).pop();
         String lastDeck = appModel.getLastAnkiDroidDeck();
@@ -1415,6 +1420,10 @@ class ViewerPageState extends State<ViewerPage> {
 
           bool validPosition = completeProgress.compareTo(currentProgress) >= 0;
           double sliderValue = validPosition ? currentProgress.toDouble() : 0;
+
+          if (currentProgress == completeProgress) {
+            sliderValue = 1;
+          }
 
           Slider slider = Slider(
             thumbColor: Theme.of(context).focusColor,

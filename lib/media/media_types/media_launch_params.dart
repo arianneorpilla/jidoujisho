@@ -80,8 +80,9 @@ class ViewerLaunchParams {
     required this.appModel,
     required this.mediaSource,
     required this.mediaHistoryItem,
-    required this.saveHistoryItem,
     required this.chapters,
+    this.canOpenHistory = true,
+    this.hideSlider = false,
     this.chapterName,
     this.fromStart = false,
     this.fromEnd = false,
@@ -91,10 +92,11 @@ class ViewerLaunchParams {
   final AppModel appModel;
   final ViewerMediaSource mediaSource;
   final MediaHistoryItem mediaHistoryItem;
-  final bool saveHistoryItem;
   final List<String> chapters;
   final String? chapterName;
   final bool fromStart;
   final bool fromEnd;
+  final bool canOpenHistory;
+  final bool hideSlider;
   final bool pushReplacement;
 }

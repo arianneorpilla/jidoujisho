@@ -17,18 +17,15 @@ import 'package:chisa/models/app_model.dart';
 import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/pages/reader_page.dart';
 import 'package:chisa/util/media_source_action_button.dart';
-import 'package:chisa/util/reading_direction.dart';
 
 class ReaderTtuMediaSource extends ReaderMediaSource {
   ReaderTtuMediaSource()
       : super(
           sourceName: "ッツ Ebook Reader",
           icon: Icons.chrome_reader_mode_outlined,
-          readingDirection: ReadingDirection.horizontalLTR,
         );
 
   late InAppWebViewController controller;
-  late InAppLocalhostServer server;
 
   @override
   String getHistoryCaption(MediaHistoryItem item) {
@@ -128,7 +125,7 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
         refreshCallback: refreshCallback,
         showIfClosed: true,
         showIfOpened: false,
-        icon: Icons.public,
+        icon: Icons.launch,
         onPressed: () async {
           await onSearchBarTap(context);
           refreshCallback();

@@ -1,25 +1,20 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/models/app_model.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class MediaHistory {
   MediaHistory({
     required this.appModel,
     required this.prefsDirectory,
-    this.maxItemCount = 30,
+    this.maxItemCount = 100,
   });
 
   /// A directory name for where this media's history should be stored in
-  /// [SharedPreferences].
+  /// a Hive [Box].
   final String prefsDirectory;
 
   /// A maximum number of items to keep in history.
   final int maxItemCount;
 
-  /// An instance of SharedPreferences.
   final AppModel appModel;
 
   /// Add the media history item to the latest end of history. If history
@@ -29,70 +24,61 @@ class MediaHistory {
   /// If a [MediaHistoryItem] with a conflicting key exists, delete the
   /// existing item and push the new item to the latest end of history.
   Future<void> addItem(MediaHistoryItem item) async {
-    List<MediaHistoryItem> history = getItems();
+    List<String> keys = getKeys();
 
-    history.removeWhere((historyItem) => item.key == historyItem.key);
-    history.add(item);
+    keys.removeWhere((historyKey) => item.key == historyKey);
+    keys.add(item.key);
 
-    if (history.length >= maxItemCount) {
-      history = history.sublist(history.length - maxItemCount);
+    if (keys.length >= maxItemCount) {
+      keys = keys.sublist(keys.length - maxItemCount);
+
+      for (int i = 0; i < keys.length - maxItemCount; i++) {
+        await appModel.sharedPreferences
+            .remove("$prefsDirectory/values/${keys[i]}");
+        keys.remove(keys[i]);
+      }
     }
 
-    appModel.sharedPreferences
+    await appModel.sharedPreferences
+        .setString("$prefsDirectory/values/${item.key}", item.toJson());
+    await appModel.sharedPreferences
         .setString("resumeMediaHistoryItem", item.toJson());
-    await setItems(history);
+    await setKeys(keys);
   }
 
   /// Remove a given media history item with a given unique identifier.
   /// If the key identifier does not exist, do nothing.
   Future<void> removeItem(String key) async {
-    List<MediaHistoryItem> history = getItems();
-
-    List<MediaHistoryItem> itemsToRemove =
-        history.where((historyItem) => key == historyItem.key).toList();
-    for (MediaHistoryItem historyItem in itemsToRemove) {
-      if (historyItem.thumbnailPath.isNotEmpty) {
-        File thumbnailFile = File(historyItem.thumbnailPath);
-        if (thumbnailFile.existsSync()) {
-          thumbnailFile.deleteSync();
-        }
-      }
-
-      history.remove(historyItem);
-    }
-
-    await setItems(history);
+    await appModel.sharedPreferences.remove("$prefsDirectory/values/$key");
+    List<String> keys = getKeys();
+    keys.removeWhere((historyKey) => key == historyKey);
+    await setKeys(keys);
   }
 
-  /// Given a list of [MediaHistoryItem], serialise all with [toJson] and
-  /// update the appropriate [prefsDirectory] in [SharedPreferences] with
-  /// the serialised list of [MediaHistoryItem] in JSON format.
-  Future<void> setItems(List<MediaHistoryItem> items) async {
-    List<String> serialisedItems = [];
-    for (MediaHistoryItem item in items) {
-      serialisedItems.add(
-        item.toJson(),
-      );
-    }
-
-    await appModel.sharedPreferences.setString(
-      prefsDirectory,
-      jsonEncode(serialisedItems),
-    );
+  /// Get the serialised history in [prefsDirectory] of a Hive [Box]
+  /// and deserialise each [MediaHistoryItem] and return the list.
+  Future<bool> setKeys(List<String> keys) async {
+    return await appModel.sharedPreferences
+        .setStringList("$prefsDirectory/keys", keys);
   }
 
-  /// Get the serialised history in [prefsDirectory] of [SharedPreferences]
+  /// Get the serialised history in [prefsDirectory] of a Hive [Box]
+  /// and deserialise each [MediaHistoryItem] and return the list.
+  List<String> getKeys() {
+    return appModel.sharedPreferences.getStringList("$prefsDirectory/keys") ??
+        [];
+  }
+
+  /// Get the serialised history in [prefsDirectory] of a Hive [Box]
   /// and deserialise each [MediaHistoryItem] and return the list.
   List<MediaHistoryItem> getItems() {
-    String jsonList =
-        appModel.sharedPreferences.getString(prefsDirectory) ?? '[]';
-
-    List<dynamic> serialisedItems = (jsonDecode(jsonList) as List<dynamic>);
-
+    List<String> keys = getKeys();
     List<MediaHistoryItem> history = [];
-    for (var serialisedItem in serialisedItems) {
-      MediaHistoryItem entry = MediaHistoryItem.fromJson(serialisedItem);
-      history.add(entry);
+    for (String key in keys) {
+      String itemJson =
+          appModel.sharedPreferences.getString('$prefsDirectory/values/$key')!;
+      MediaHistoryItem item = MediaHistoryItem.fromJson(itemJson);
+      history.add(item);
     }
 
     return history;

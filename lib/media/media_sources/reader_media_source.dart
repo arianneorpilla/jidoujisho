@@ -25,14 +25,11 @@ abstract class ReaderMediaSource extends MediaSource {
   ReaderMediaSource({
     required String sourceName,
     required IconData icon,
-    required this.readingDirection,
   }) : super(
           sourceName: sourceName,
           icon: icon,
           mediaType: MediaType.reader,
         );
-
-  final ReadingDirection readingDirection;
 
   /// A [ReaderMediaSource] must be able to construct launch parameters from
   /// its media history items.
@@ -244,7 +241,9 @@ abstract class ReaderMediaSource extends MediaSource {
                   width: double.maxFinite,
                   color: Colors.black.withOpacity(0.6),
                   child: Text(
-                    (item.alias.isEmpty) ? item.title : item.alias,
+                    (getHistoryCaptionAlias(item).isEmpty)
+                        ? getHistoryCaption(item)
+                        : getHistoryCaptionAlias(item),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 2,
                     textAlign: TextAlign.center,
@@ -256,12 +255,13 @@ abstract class ReaderMediaSource extends MediaSource {
                   ),
                 );
               }),
-              LinearProgressIndicator(
-                value: item.currentProgress / item.completeProgress,
-                backgroundColor: Colors.white.withOpacity(0.6),
-                valueColor: const AlwaysStoppedAnimation<Color>(Colors.red),
-                minHeight: 2,
-              ),
+              if (item.completeProgress != 0)
+                LinearProgressIndicator(
+                  value: item.currentProgress / item.completeProgress,
+                  backgroundColor: Colors.white.withOpacity(0.6),
+                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.red),
+                  minHeight: 2,
+                ),
             ],
           ),
         ),
@@ -449,18 +449,6 @@ abstract class ReaderMediaSource extends MediaSource {
   /// Define a custom [Widget] for the [ReaderPage] to represent the reading
   /// area of the session.
   Widget buildReaderArea(BuildContext context, ReaderPageState state);
-
-  /// Return if [ReadingDirection] is vertical.
-  bool isVertical() {
-    switch (readingDirection) {
-      case ReadingDirection.horizontalLTR:
-      case ReadingDirection.horizontalRTL:
-        return false;
-      case ReadingDirection.verticalLTR:
-      case ReadingDirection.verticalRTL:
-        return true;
-    }
-  }
 
   /// See [ReaderTtuMediaSource] lmao
   bool getHorizontalHack(BuildContext context) => false;
@@ -652,7 +640,7 @@ abstract class ReaderMediaSource extends MediaSource {
                   }
                 }
 
-                mediaType.getMediaHistory(appModel).addItem(item);
+                await mediaType.getMediaHistory(appModel).addItem(item);
 
                 Navigator.pop(context);
                 Navigator.pop(context);

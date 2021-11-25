@@ -4,7 +4,9 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:chisa/media/media_sources/player_network_stream_source.dart';
+import 'package:chisa/media/media_sources/reader_browser_media_source.dart';
 import 'package:chisa/media/media_sources/reader_ttu_media_source.dart';
+import 'package:chisa/media/media_sources/viewer_camera_media_source.dart';
 import 'package:external_path/external_path.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -87,11 +89,9 @@ class AppModel with ChangeNotifier {
   /// Used to indicate if the app is currently in a source page.
   bool isInSource = false;
 
-  /// Max number of history items in non-dictionary media types.
-  int maxHistoryItemCount = 30;
-
   final Map<MediaType, ScrollController> _scrollOffsets = {};
   final Map<MediaType, FloatingSearchBarController> _homeSearchControllers = {};
+  final Map<String, Map<String, DictionarySearchResult>> _resultsCache = {};
 
   ScrollController getScrollController(MediaType type) {
     _scrollOffsets[type] ??= ScrollController(initialScrollOffset: 0);
@@ -149,9 +149,11 @@ class AppModel with ChangeNotifier {
   ];
   List<ReaderMediaSource> readerMediaSources = [
     ReaderTtuMediaSource(),
+    ReaderBrowserSource(),
   ];
   List<ViewerMediaSource> viewerMediaSources = [
     ViewerLocalMediaSource(),
+    ViewerCameraMediaSource(),
   ];
 
   Future<void> initialiseAppModel() async {
@@ -625,6 +627,7 @@ class AppModel with ChangeNotifier {
   Future<void> deleteCurrentDictionary() async {
     String appDirDocPath = (await getApplicationDocumentsDirectory()).path;
     String dictionaryName = getCurrentDictionaryName();
+    _resultsCache[dictionaryName] = {};
 
     List<DictionaryMediaHistoryItem> mediaHistoryItems =
         getDictionaryMediaHistory().getDictionaryItems().toList();
@@ -777,6 +780,13 @@ class AppModel with ChangeNotifier {
     DictionaryFormat dictionaryFormat =
         getDictionaryFormatFromName(currentDictionary.formatName);
 
+    _resultsCache[currentDictionary.dictionaryName] ??= {};
+
+    if (_resultsCache[currentDictionary.dictionaryName]![searchTerm] != null) {
+      return Future.value(
+          _resultsCache[currentDictionary.dictionaryName]![searchTerm]!);
+    }
+
     Store store = _dictionaryStores[currentDictionary.dictionaryName]!;
     ByteData storeReference = store.reference;
 
@@ -831,6 +841,10 @@ class AppModel with ChangeNotifier {
         ),
       );
     }
+
+    _resultsCache[currentDictionary.dictionaryName]![searchTerm] =
+        processedResult;
+
     _isSearching = false;
 
     return processedResult;

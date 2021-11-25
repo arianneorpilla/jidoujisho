@@ -24,10 +24,10 @@ class CreatorPage extends StatefulWidget {
     this.initialParams,
     this.editMode = false,
     this.autoMode = false,
-    this.landscapeLocked = false,
     this.backgroundColor,
     this.appBarColor,
     this.popOnExport = false,
+    this.hideActions = false,
     this.exportCallback,
     required this.decks,
   }) : super(key: key);
@@ -37,8 +37,8 @@ class CreatorPage extends StatefulWidget {
   final bool autoMode;
   final Color? backgroundColor;
   final Color? appBarColor;
-  final bool landscapeLocked;
   final bool popOnExport;
+  final bool hideActions;
   final List<String> decks;
   final Function()? exportCallback;
 
@@ -349,9 +349,7 @@ class CreatorPageState extends State<CreatorPage> {
                 overflow: TextOverflow.ellipsis,
               ),
               actions: [
-                if (!widget.editMode &&
-                    !widget.autoMode &&
-                    widget.backgroundColor == null)
+                if (!widget.editMode && !widget.autoMode && widget.hideActions)
                   getSeeMoreButton(context),
               ],
             ),

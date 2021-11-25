@@ -120,24 +120,6 @@ abstract class ViewerMediaSource extends MediaSource {
     AppModel appModel = Provider.of<AppModel>(context);
     ValueNotifier<bool> chapterValueNotifier = ValueNotifier<bool>(false);
 
-    double progress = 0;
-    List<dynamic>? chapterCache = item.extra["chapters"];
-    List<String>? chapters;
-    if (chapterCache != null) {
-      chapters = List<String>.from(chapterCache);
-    }
-
-    if (chapters != null) {
-      String? currentChapter = getCurrentChapter(item, chapters);
-      if (currentChapter != null) {
-        int? currentProgress = getChapterPageProgress(item, currentChapter);
-        int? completeProgress = getChapterPageTotal(item, currentChapter);
-        if (currentProgress != null && completeProgress != null) {
-          progress = currentProgress / completeProgress;
-        }
-      }
-    }
-
     List<Widget> actions = [];
     if (isHistory) {
       actions.add(
@@ -194,7 +176,6 @@ abstract class ViewerMediaSource extends MediaSource {
         onPressed: () async {
           ViewerLaunchParams params = ViewerLaunchParams(
             mediaHistoryItem: item,
-            saveHistoryItem: saveHistoryItem,
             appModel: appModel,
             chapters: await getCachedChapters(item),
             mediaSource: this,
@@ -671,7 +652,7 @@ abstract class ViewerMediaSource extends MediaSource {
                   }
                 }
 
-                mediaType.getMediaHistory(appModel).addItem(item);
+                await mediaType.getMediaHistory(appModel).addItem(item);
 
                 Navigator.pop(context);
                 Navigator.pop(context);
@@ -973,7 +954,7 @@ class ChapterMenuState extends State<ChapterMenu> {
                 !widget.chapterValueNotifier!.value;
           }
           widget.shouldRefreshNotifier?.value = true;
-          widget.source.mediaType.getMediaHistory(appModel).addItem(item);
+          await widget.source.mediaType.getMediaHistory(appModel).addItem(item);
 
           toggleEditMode();
         },
@@ -1084,7 +1065,6 @@ class ChapterMenuState extends State<ChapterMenu> {
 
                 ViewerLaunchParams newParams = ViewerLaunchParams(
                   mediaHistoryItem: item,
-                  saveHistoryItem: widget.source.saveHistoryItem,
                   appModel: appModel,
                   chapters: widget.source.chaptersCache[item.key]!,
                   chapterName: chapterName,

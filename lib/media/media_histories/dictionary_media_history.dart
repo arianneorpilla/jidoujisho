@@ -7,47 +7,53 @@ class DictionaryMediaHistory extends MediaHistory {
   DictionaryMediaHistory({
     required appModel,
     required prefsDirectory,
-    maxItemCount = 50,
+    maxItemCount = 100,
   }) : super(
           appModel: appModel,
           prefsDirectory: prefsDirectory,
+          maxItemCount: maxItemCount,
         );
 
   Future<void> addDictionaryItem(DictionaryMediaHistoryItem item) async {
-    List<DictionaryMediaHistoryItem> history = getDictionaryItems();
+    List<String> keys = getKeys();
 
-    history.removeWhere((historyItem) =>
-        historyItem.sourceName == item.sourceName &&
-        historyItem.title == item.title);
-    history.add(item);
+    keys.removeWhere((historyKey) => item.key == historyKey);
+    keys.add(item.key);
 
-    if (history.length >= maxItemCount) {
-      history = history.sublist(history.length - maxItemCount);
+    if (keys.length >= maxItemCount) {
+      keys = keys.sublist(keys.length - maxItemCount);
+
+      for (int i = 0; i < keys.length - maxItemCount; i++) {
+        keys.remove(keys[i]);
+        await appModel.sharedPreferences
+            .remove("$prefsDirectory/values/${keys[i]}");
+      }
     }
 
-    await setItems(history);
+    await appModel.sharedPreferences
+        .setString("$prefsDirectory/values/${item.key}", item.toJson());
+    await appModel.sharedPreferences
+        .setString("resumeMediaHistoryItem", item.toJson());
+    await setKeys(keys);
   }
 
   Future<void> removeDictionaryItem(DictionaryMediaHistoryItem item) async {
-    List<DictionaryMediaHistoryItem> history = getDictionaryItems();
-
-    history.removeWhere((historyItem) =>
-        historyItem.author == item.author && historyItem.title == item.title);
-    await appModel.setDictionaryHistoryIndex(item, null);
-    await setItems(history);
+    await appModel.sharedPreferences
+        .remove("$prefsDirectory/values/${item.key}");
+    List<String> keys = getKeys();
+    keys.removeWhere((historyKey) => item.key == historyKey);
+    await setKeys(keys);
   }
 
   List<DictionaryMediaHistoryItem> getDictionaryItems() {
-    String jsonList =
-        appModel.sharedPreferences.getString(prefsDirectory) ?? '[]';
-
-    List<dynamic> serialisedItems = jsonDecode(jsonList) as List<dynamic>;
-
+    List<String> keys = getKeys();
     List<DictionaryMediaHistoryItem> history = [];
-    for (var serialisedItem in serialisedItems) {
-      DictionaryMediaHistoryItem entry =
-          DictionaryMediaHistoryItem.fromJson(serialisedItem);
-      history.add(entry);
+    for (String key in keys) {
+      String itemJson =
+          appModel.sharedPreferences.getString('$prefsDirectory/values/$key')!;
+      DictionaryMediaHistoryItem item =
+          DictionaryMediaHistoryItem.fromJson(itemJson);
+      history.add(item);
     }
 
     return history;

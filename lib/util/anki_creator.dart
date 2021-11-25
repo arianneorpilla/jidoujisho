@@ -119,8 +119,8 @@ Future<void> navigateToCreator({
   bool autoMode = false,
   Color? backgroundColor,
   Color? appBarColor,
-  bool landscapeLocked = false,
   bool popOnExport = false,
+  bool hideActions = false,
   Function()? exportCallback,
   ThemeData? themeData,
 }) async {
@@ -133,11 +133,11 @@ Future<void> navigateToCreator({
           initialParams: initialParams,
           backgroundColor: backgroundColor,
           appBarColor: appBarColor,
-          landscapeLocked: landscapeLocked,
           decks: decks,
           autoMode: autoMode,
           editMode: editMode,
           popOnExport: popOnExport,
+          hideActions: hideActions,
           exportCallback: exportCallback,
         );
       });
@@ -187,7 +187,6 @@ Future<void> navigateToCreator({
                         initialParams: initialParams,
                         backgroundColor: backgroundColor,
                         appBarColor: appBarColor,
-                        landscapeLocked: landscapeLocked,
                         decks: decks,
                         autoMode: autoMode,
                         editMode: editMode,

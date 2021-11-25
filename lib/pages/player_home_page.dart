@@ -38,10 +38,10 @@ class PlayerHomePageState extends State<PlayerHomePage>
   TextEditingController searchController = TextEditingController(text: "");
   ScrollController? scrollController;
 
-  // @override
-  // void didUpdateWidget(oldWidget) {
-  //   super.didUpdateWidget(oldWidget);
-  // }
+  @override
+  void didUpdateWidget(oldWidget) {
+    super.didUpdateWidget(oldWidget);
+  }
 
   PlayerMediaSource getCurrentMediaSource() {
     return appModel.getCurrentMediaTypeSource(widget.mediaType)

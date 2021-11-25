@@ -390,8 +390,7 @@ class PlayerPageState extends State<PlayerPage>
                       dialogSmartPause();
                     }
 
-                    if (!snapshot.hasData &&
-                        snapshot.connectionState == ConnectionState.waiting) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
                       return buildDictionarySearching();
                     }
 
@@ -2031,7 +2030,7 @@ class PlayerPageState extends State<PlayerPage>
         initialParams: initialParams,
         backgroundColor: dictionaryColor,
         appBarColor: Colors.transparent,
-        landscapeLocked: true,
+        hideActions: true,
         popOnExport: true,
         exportCallback: () {
           Navigator.of(context).pop();
