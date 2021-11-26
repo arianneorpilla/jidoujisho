@@ -106,6 +106,7 @@ dependencies:
   flutter_keyboard_visibility:
   image:
   screenshot:
+  crop_image:
 dev_dependencies:
   flutter_test:
     sdk: flutter

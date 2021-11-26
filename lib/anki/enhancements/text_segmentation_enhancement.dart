@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chisa/anki/anki_export_enhancement.dart';
 import 'package:chisa/anki/anki_export_params.dart';
+import 'package:chisa/anki/enhancements/search_dictionary_enhancement.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/creator_page.dart';
 import 'package:chisa/util/anki_export_field.dart';
@@ -21,24 +22,17 @@ class TextSegmentationEnhancement extends AnkiExportEnhancement {
         );
 
   @override
-  FutureOr<AnkiExportParams> enhanceParams({
+  Future<AnkiExportParams> enhanceParams({
     required BuildContext context,
     required AppModel appModel,
     required AnkiExportParams params,
     required bool autoMode,
     required CreatorPageState state,
   }) async {
-    if (params.sentence.isNotEmpty) {
-      await showOCRHelperDialog(context, params);
+    if (params.sentence.isEmpty) {
+      return params;
     }
 
-    return params;
-  }
-
-  Future<void> showOCRHelperDialog(
-    BuildContext context,
-    AnkiExportParams params,
-  ) async {
     ValueNotifier<List<bool>> indexesSelected;
     List<Widget> textWidgets;
     List<String> words =
@@ -57,6 +51,8 @@ class TextSegmentationEnhancement extends AnkiExportEnhancement {
     ScrollController scrollController = ScrollController();
 
     bool isSpaceDelimited = appModel.getCurrentLanguage().isSpaceDelimited;
+    bool isSearch = false;
+    String searchTerm = "";
 
     await showDialog(
       barrierColor: Colors.transparent,
@@ -88,8 +84,35 @@ class TextSegmentationEnhancement extends AnkiExportEnhancement {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text(appModel.translate('dialog_set'),
-                  style: const TextStyle(color: Colors.red)),
+              child: Text(appModel.translate('dialog_search')),
+              onPressed: () async {
+                isSearch = true;
+
+                if (indexesSelected.value
+                    .every((selected) => selected == false)) {
+                  searchTerm = params.sentence;
+                } else {
+                  String wordsJoined = "";
+
+                  for (int i = 0; i < words.length; i++) {
+                    if (indexesSelected.value[i]) {
+                      wordsJoined += words[i];
+                    }
+                    if (isSpaceDelimited) {
+                      wordsJoined += " ";
+                    }
+                  }
+
+                  searchTerm = wordsJoined.trim();
+                }
+
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              child: Text(
+                appModel.translate('dialog_set'),
+              ),
               onPressed: () {
                 if (indexesSelected.value
                     .every((selected) => selected == false)) {
@@ -106,40 +129,31 @@ class TextSegmentationEnhancement extends AnkiExportEnhancement {
                     }
                   }
 
-                  params.sentence = wordsJoined.trim();
+                  params.word = wordsJoined.trim();
                 }
 
                 Navigator.pop(context);
               },
             ),
-            // TextButton(
-            //   child: Text(appModel.translate('dialog_search')),
-            //   onPressed: () {
-            //     if (indexesSelected.value
-            //         .every((selected) => selected == false)) {
-            //       setSearchTerm(sentence);
-            //     } else {
-            //       String wordsJoined = "";
-
-            //       for (int i = 0; i < words.length; i++) {
-            //         if (indexesSelected.value[i]) {
-            //           wordsJoined += words[i];
-            //         }
-            //         if (isSpaceDelimited) {
-            //           wordsJoined += " ";
-            //         }
-            //       }
-
-            //       setSearchTerm(wordsJoined.trim());
-            //     }
-
-            //     Navigator.pop(context);
-            //   },
-            // ),
           ],
         );
       },
     );
+
+    if (isSearch) {
+      AnkiExportEnhancement enhancement =
+          SearchDictionaryEnhancement(appModel: appModel);
+      params.word = searchTerm;
+      return enhancement.enhanceParams(
+        context: context,
+        appModel: appModel,
+        params: params,
+        autoMode: autoMode,
+        state: state,
+      );
+    } else {
+      return params;
+    }
   }
 
   List<Widget> getTextWidgetsFromWords(
@@ -166,7 +180,7 @@ class TextSegmentationEnhancement extends AnkiExportEnhancement {
                   margin: const EdgeInsets.only(top: 10, right: 10),
                   color: (notifier.value[i])
                       ? Colors.red.withOpacity(0.3)
-                      : appModel.getIsDarkMode()
+                      : (Theme.of(context).backgroundColor == Colors.black)
                           ? Colors.white.withOpacity(0.1)
                           : Colors.black.withOpacity(0.1),
                   child: Text(

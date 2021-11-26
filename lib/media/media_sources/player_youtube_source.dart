@@ -8,6 +8,7 @@ import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/player_page.dart';
 import 'package:chisa/util/bottom_sheet_dialog.dart';
+import 'package:chisa/util/busy_icon_button.dart';
 import 'package:chisa/util/media_source_action_button.dart';
 import 'package:chisa/util/paginated_player_page.dart';
 import 'package:chisa/util/subtitle_utils.dart';
@@ -78,29 +79,32 @@ class PlayerYouTubeSource extends PlayerMediaSource {
   Widget? buildSourceButton(BuildContext context, PlayerPageState page) {
     AppModel appModel = Provider.of<AppModel>(context, listen: false);
 
-    return IconButton(
-      color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
-      icon: const Icon(Icons.video_settings),
-      onPressed: () async {
-        String url = page.widget.params.mediaHistoryItem.key;
-        StreamManifest manifest = await getManifestFromUrl(url);
-        YouTubeVideoQuality preferredQuality = await getPreferredQuality();
+    return Material(
+      color: Colors.transparent,
+      child: BusyIconButton(
+        icon: const Icon(Icons.video_settings),
+        iconSize: 24,
+        onPressed: () async {
+          String url = page.widget.params.mediaHistoryItem.key;
+          StreamManifest manifest = await getManifestFromUrl(url);
+          YouTubeVideoQuality preferredQuality = await getPreferredQuality();
 
-        await showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          useRootNavigator: true,
-          builder: (context) => BottomSheetDialog(
-            options: getQualityOptions(
-              page,
-              manifest,
-              preferredQuality,
-              context,
-              appModel,
+          await showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            useRootNavigator: true,
+            builder: (context) => BottomSheetDialog(
+              options: getQualityOptions(
+                page,
+                manifest,
+                preferredQuality,
+                context,
+                appModel,
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 

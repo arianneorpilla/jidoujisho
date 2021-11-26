@@ -66,7 +66,7 @@ class AnkiExportParams with ChangeNotifier {
       other.reading == reading &&
       other.meaning == meaning &&
       other.extra == extra &&
-      other.imageFiles == imageFiles &&
+      other.imageFiles.isEmpty &&
       other.imageFile == imageFile &&
       other.audioFile == audioFile;
 

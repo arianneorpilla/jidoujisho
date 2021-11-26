@@ -70,6 +70,7 @@ abstract class AnkiExportEnhancement {
             autoMode: false,
             state: state,
           );
+
           updateCallback(newParams, field: enhancementField);
         }
       },
@@ -82,7 +83,7 @@ abstract class AnkiExportEnhancement {
 
   /// Given an already defined set of parameters, enhance them and apply
   /// changes. These will be used to override a user's export parameters.
-  FutureOr<AnkiExportParams> enhanceParams({
+  Future<AnkiExportParams> enhanceParams({
     required BuildContext context,
     required AppModel appModel,
     required AnkiExportParams params,
@@ -90,6 +91,7 @@ abstract class AnkiExportEnhancement {
     required CreatorPageState state,
   });
 
+  /// Below fields are for saving and persisting data.
   static String getFieldAutoKey(AnkiExportField field) {
     return "enhancementPrefs/${field.toString()}/auto/";
   }

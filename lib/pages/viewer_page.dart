@@ -11,6 +11,7 @@ import 'package:chisa/language/languages/japanese_language.dart';
 import 'package:chisa/media/media_sources/viewer_media_source.dart';
 import 'package:chisa/util/anki_creator.dart';
 import 'package:chisa/util/anki_export_field.dart';
+import 'package:chisa/util/busy_icon_button.dart';
 import 'package:chisa/util/cached_memory_image.dart';
 import 'package:chisa/util/ocr.dart';
 import 'package:flutter/material.dart';
@@ -260,18 +261,21 @@ class ViewerPageState extends State<ViewerPage> {
                 ),
               );
             } else {
-              return IconButton(
-                color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
-                icon: (ocrOverlayShown)
-                    ? const Icon(Icons.highlight_remove)
-                    : const Icon(Icons.qr_code_sharp),
-                onPressed: () async {
-                  setState(() {
-                    touchPoints.clear();
-                    setSearchTerm("");
-                    ocrOverlayShown = !ocrOverlayShown;
-                  });
-                },
+              return Material(
+                color: Colors.transparent,
+                child: BusyIconButton(
+                  icon: (ocrOverlayShown)
+                      ? const Icon(Icons.highlight_remove)
+                      : const Icon(Icons.qr_code_sharp),
+                  iconSize: 24,
+                  onPressed: () async {
+                    setState(() {
+                      touchPoints.clear();
+                      setSearchTerm("");
+                      ocrOverlayShown = !ocrOverlayShown;
+                    });
+                  },
+                ),
               );
             }
           },
@@ -517,7 +521,8 @@ class ViewerPageState extends State<ViewerPage> {
     return widgets;
   }
 
-  Future<void> showOCRHelperDialog(String sentence) async {
+  Future<void> showOCRHelperDialog(String sentence,
+      {bool forFormField = true}) async {
     ValueNotifier<List<bool>> indexesSelected;
     List<Widget> textWidgets;
     List<String> words =
@@ -549,7 +554,7 @@ class ViewerPageState extends State<ViewerPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          alignment: (shouldDialogBeTop)
+          alignment: (forFormField || shouldDialogBeTop)
               ? Alignment.topCenter
               : Alignment.bottomCenter,
           insetPadding: EdgeInsets.only(
@@ -583,8 +588,7 @@ class ViewerPageState extends State<ViewerPage> {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text(appModel.translate('dialog_set'),
-                  style: const TextStyle(color: Colors.red)),
+              child: Text(appModel.translate('dialog_set')),
               onPressed: () {
                 if (indexesSelected.value
                     .every((selected) => selected == false)) {
@@ -631,49 +635,50 @@ class ViewerPageState extends State<ViewerPage> {
                 Navigator.pop(context);
               },
             ),
-            TextButton(
-              child: Text(appModel.translate("dialog_add")),
-              onLongPress: () {
-                if (indexesSelected.value
-                    .every((selected) => selected == false)) {
-                  sentenceController.text += sentence;
-                } else {
-                  String wordsJoined = "";
+            if (!forFormField)
+              TextButton(
+                child: Text(appModel.translate("dialog_add")),
+                onLongPress: () {
+                  if (indexesSelected.value
+                      .every((selected) => selected == false)) {
+                    sentenceController.text += sentence;
+                  } else {
+                    String wordsJoined = "";
 
-                  for (int i = 0; i < words.length; i++) {
-                    if (indexesSelected.value[i]) {
-                      wordsJoined += words[i];
+                    for (int i = 0; i < words.length; i++) {
+                      if (indexesSelected.value[i]) {
+                        wordsJoined += words[i];
+                      }
                     }
+
+                    sentenceController.text += wordsJoined;
                   }
 
-                  sentenceController.text += wordsJoined;
-                }
+                  Navigator.pop(context);
+                },
+                onPressed: () async {
+                  if (indexesSelected.value
+                      .every((selected) => selected == false)) {
+                    sentenceController.text += sentence;
+                  } else {
+                    String wordsJoined = "";
 
-                Navigator.pop(context);
-              },
-              onPressed: () async {
-                if (indexesSelected.value
-                    .every((selected) => selected == false)) {
-                  sentenceController.text += sentence;
-                } else {
-                  String wordsJoined = "";
+                    for (int i = 0; i < words.length; i++) {
+                      if (indexesSelected.value[i]) {
+                        wordsJoined += words[i];
+                      }
+                      if (isSpaceDelimited) {
+                        wordsJoined += " ";
+                      }
+                    }
 
-                  for (int i = 0; i < words.length; i++) {
-                    if (indexesSelected.value[i]) {
-                      wordsJoined += words[i];
-                    }
-                    if (isSpaceDelimited) {
-                      wordsJoined += " ";
-                    }
+                    setSearchTerm(wordsJoined.trim());
                   }
 
-                  setSearchTerm(wordsJoined.trim());
-                }
-
-                Navigator.pop(context);
-                ocrOverlayShown = true;
-              },
-            ),
+                  Navigator.pop(context);
+                  ocrOverlayShown = true;
+                },
+              ),
           ],
         );
       },
@@ -1134,9 +1139,6 @@ class ViewerPageState extends State<ViewerPage> {
         TextButton(
           child: Text(
             appModel.translate('dialog_return'),
-            style: const TextStyle(
-              color: Colors.red,
-            ),
           ),
           onPressed: () => Navigator.pop(context),
         ),
@@ -1221,11 +1223,46 @@ class ViewerPageState extends State<ViewerPage> {
           borderSide: BorderSide(color: Theme.of(context).focusColor),
         ),
         contentPadding: const EdgeInsets.all(16.0),
-        prefixIcon: Icon(field.icon(appModel)),
+        prefixIcon: const Icon(Icons.assignment_sharp),
         suffixIcon: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
-          children: [],
+          children: [
+            Material(
+              color: Colors.transparent,
+              child: BusyIconButton(
+                icon: const Icon(Icons.search),
+                iconSize: 20,
+                onPressed: () async {
+                  setSearchTerm(sentenceController.text);
+                },
+              ),
+            ),
+            Material(
+              color: Colors.transparent,
+              child: BusyIconButton(
+                icon: const Icon(Icons.account_tree),
+                iconSize: 20,
+                onPressed: () async {
+                  if (sentenceController.text.trim().isNotEmpty) {
+                    await showOCRHelperDialog(sentenceController.text,
+                        forFormField: true);
+                    FocusScope.of(context).unfocus();
+                  }
+                },
+              ),
+            ),
+            Material(
+              color: Colors.transparent,
+              child: BusyIconButton(
+                icon: const Icon(Icons.clear),
+                iconSize: 20,
+                onPressed: () async {
+                  sentenceController.clear();
+                },
+              ),
+            ),
+          ],
         ),
       ),
       keyboardType: keyboardType,
@@ -1450,19 +1487,22 @@ class ViewerPageState extends State<ViewerPage> {
   }
 
   Widget buildOptionsButton() {
-    return IconButton(
-      color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
-      icon: const Icon(Icons.more_vert),
-      onPressed: () async {
-        await showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          useRootNavigator: true,
-          builder: (context) => BottomSheetDialog(
-            options: getOptions(),
-          ),
-        );
-      },
+    return Material(
+      color: Colors.transparent,
+      child: BusyIconButton(
+        icon: const Icon(Icons.more_vert),
+        iconSize: 24,
+        onPressed: () async {
+          await showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            useRootNavigator: true,
+            builder: (context) => BottomSheetDialog(
+              options: getOptions(),
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -1616,14 +1656,6 @@ class ViewerPageState extends State<ViewerPage> {
 
     throw UnsupportedError("ImageProvider type not implemented for share");
   }
-
-  // 'viewer_option_chapter_menu': 'Pumili ng Kabanata',
-  //     'viewer_option_direction_ltr': 'Magbasa mula sa Kanan',
-  //     'viewer_option_direction_rtl': 'Magbasa mula sa Kaliwa',
-  //     'viewer_option_dictionary_menu': 'Pumili ng Ibang Diksunaryo',
-  //     'viewer_option_background_color': 'Ibahin ang Kulay ng Likod',
-  //     'viewer_option_share_image': 'Ibahagi ang Imahe na Ito',
-  //     'viewer_option_export': 'Gumawa ng Card Mula sa Konteksto',
 
   Future<void> showColorOptionsDialog() async {
     AppModel appModel = Provider.of<AppModel>(context, listen: false);

@@ -24,13 +24,13 @@ class PitchAccentExportEnhancement extends AnkiExportEnhancement {
   final Map<String, Map<String, DictionaryEntry>> kanjiumDictionary = {};
 
   @override
-  FutureOr<AnkiExportParams> enhanceParams({
+  Future<AnkiExportParams> enhanceParams({
     required BuildContext context,
     required AppModel appModel,
     required AnkiExportParams params,
     required bool autoMode,
     required CreatorPageState state,
-  }) {
+  }) async {
     DictionaryEntry? closestReadingMatch = getClosestPitchEntry(
       DictionaryEntry(
         word: params.word,

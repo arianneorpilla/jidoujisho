@@ -8,6 +8,7 @@ import 'package:chisa/media/media_type.dart';
 import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/viewer_page.dart';
+import 'package:chisa/util/busy_icon_button.dart';
 import 'package:chisa/util/media_source_action_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -159,7 +160,7 @@ class ViewerCameraMediaSource extends ViewerMediaSource {
         refreshCallback: refreshCallback,
         showIfClosed: true,
         showIfOpened: false,
-        icon: Icons.camera_alt,
+        icon: Icons.add_a_photo,
         onPressed: () async {
           await showCameraScreen(
             context,
@@ -178,19 +179,25 @@ class ViewerCameraMediaSource extends ViewerMediaSource {
 
     return Row(
       children: [
-        IconButton(
-          color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
-          icon: const Icon(Icons.photo_rounded),
-          onPressed: () async {
-            await showCameraScreen(context, ImageSource.gallery);
-          },
+        Material(
+          color: Colors.transparent,
+          child: BusyIconButton(
+            iconSize: 20,
+            icon: const Icon(Icons.photo_rounded),
+            onPressed: () async {
+              await showCameraScreen(context, ImageSource.gallery);
+            },
+          ),
         ),
-        IconButton(
-          color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
-          icon: const Icon(Icons.camera_alt),
-          onPressed: () async {
-            await showCameraScreen(context, ImageSource.camera);
-          },
+        Material(
+          color: Colors.transparent,
+          child: BusyIconButton(
+            icon: const Icon(Icons.add_a_photo),
+            iconSize: 20,
+            onPressed: () async {
+              await showCameraScreen(context, ImageSource.camera);
+            },
+          ),
         ),
       ],
     );

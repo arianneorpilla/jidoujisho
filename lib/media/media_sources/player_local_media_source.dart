@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:chisa/util/busy_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 
@@ -169,19 +170,20 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
 
   @override
   Widget? buildSourceButton(BuildContext context, PlayerPageState page) {
-    AppModel appModel = Provider.of<AppModel>(context, listen: false);
-
-    return IconButton(
-      color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
-      icon: const Icon(Icons.perm_media),
-      onPressed: () async {
-        page.dialogSmartPause();
-        await showFilePicker(
-          context,
-          pushReplacement: true,
-        );
-        page.dialogSmartResume();
-      },
+    return Material(
+      color: Colors.transparent,
+      child: BusyIconButton(
+        icon: const Icon(Icons.perm_media),
+        iconSize: 20,
+        onPressed: () async {
+          page.dialogSmartPause();
+          await showFilePicker(
+            context,
+            pushReplacement: true,
+          );
+          page.dialogSmartResume();
+        },
+      ),
     );
   }
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:chisa/util/busy_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
@@ -1395,20 +1396,28 @@ class PlayerPageState extends State<PlayerPage>
           }
         }
 
-        return InkWell(
-          child: Text(
-            "${getPositionText()} / ${getDurationText()}",
-            style: TextStyle(
-              color: (shadowingSubtitle != null)
-                  ? Theme.of(context).focusColor
-                  : appModel.getIsDarkMode()
-                      ? Colors.white
-                      : Colors.black,
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
+            child: Container(
+              alignment: Alignment.center,
+              height: menuHeight,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                "${getPositionText()} / ${getDurationText()}",
+                style: TextStyle(
+                  color: (shadowingSubtitle != null)
+                      ? Theme.of(context).focusColor
+                      : appModel.getIsDarkMode()
+                          ? Colors.white
+                          : Colors.black,
+                ),
+              ),
             ),
+            onTap: () {
+              setShadowingSubtitle();
+            },
           ),
-          onTap: () {
-            setShadowingSubtitle();
-          },
         );
       },
     );
@@ -1424,18 +1433,21 @@ class PlayerPageState extends State<PlayerPage>
         bool playing = values.elementAt(0);
         bool ended = values.elementAt(1);
 
-        return IconButton(
-          color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
-          icon: ended
-              ? const Icon(Icons.replay)
-              : playing
-                  ? const Icon(Icons.pause)
-                  : const Icon(Icons.play_arrow),
-          onPressed: () async {
-            cancelHideTimer();
+        return Material(
+          color: Colors.transparent,
+          child: BusyIconButton(
+            iconSize: 24,
+            icon: ended
+                ? const Icon(Icons.replay)
+                : playing
+                    ? const Icon(Icons.pause)
+                    : const Icon(Icons.play_arrow),
+            onPressed: () async {
+              cancelHideTimer();
 
-            await playPause();
-          },
+              await playPause();
+            },
+          ),
         );
       },
     );
@@ -1572,24 +1584,27 @@ class PlayerPageState extends State<PlayerPage>
       ),
     ]);
 
-    return IconButton(
-      color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
-      icon: const Icon(Icons.queue_music_outlined),
-      onPressed: () async {
-        if (await playerController.getAudioTracksCount() == 0 ||
-            audioPath != null) {
-          options.remove(audioOption);
-        }
+    return Material(
+      color: Colors.transparent,
+      child: BusyIconButton(
+        iconSize: 24,
+        icon: const Icon(Icons.queue_music_outlined),
+        onPressed: () async {
+          if (await playerController.getAudioTracksCount() == 0 ||
+              audioPath != null) {
+            options.remove(audioOption);
+          }
 
-        await showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          useRootNavigator: true,
-          builder: (context) => BottomSheetDialog(
-            options: options,
-          ),
-        );
-      },
+          await showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            useRootNavigator: true,
+            builder: (context) => BottomSheetDialog(
+              options: options,
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -1706,19 +1721,22 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   Widget buildOptionsButton() {
-    return IconButton(
-      color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
-      icon: const Icon(Icons.more_vert),
-      onPressed: () async {
-        await showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          useRootNavigator: true,
-          builder: (context) => BottomSheetDialog(
-            options: getOptions(),
-          ),
-        );
-      },
+    return Material(
+      color: Colors.transparent,
+      child: BusyIconButton(
+        iconSize: 24,
+        icon: const Icon(Icons.more_vert),
+        onPressed: () async {
+          await showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            useRootNavigator: true,
+            builder: (context) => BottomSheetDialog(
+              options: getOptions(),
+            ),
+          );
+        },
+      ),
     );
   }
 

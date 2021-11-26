@@ -20,7 +20,7 @@ class DictionaryMenuEnhancement extends AnkiExportEnhancement {
         );
 
   @override
-  FutureOr<AnkiExportParams> enhanceParams({
+  Future<AnkiExportParams> enhanceParams({
     required BuildContext context,
     required AppModel appModel,
     required AnkiExportParams params,

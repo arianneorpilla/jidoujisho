@@ -4,7 +4,11 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:chisa/anki/enhancements/bing_search_enhancement.dart';
+import 'package:chisa/anki/enhancements/camera_image_enhancement.dart';
+import 'package:chisa/anki/enhancements/crop_image_enhancement.dart';
 import 'package:chisa/anki/enhancements/dictionary_menu_enhancement.dart';
+import 'package:chisa/anki/enhancements/image_picker_enhancement.dart';
+import 'package:chisa/anki/enhancements/search_dictionary_enhancement.dart';
 import 'package:chisa/anki/enhancements/text_segmentation_enhancement.dart';
 import 'package:chisa/media/media_sources/player_network_stream_source.dart';
 import 'package:chisa/media/media_sources/reader_browser_media_source.dart';
@@ -180,8 +184,17 @@ class AppModel with ChangeNotifier {
       if (!isFirstTimeInitialised()) {
         for (AnkiExportField field in AnkiExportField.values) {
           await ClearButtonEnhancement(appModel: this, enhancementField: field)
-              .setEnabled(field, 4);
+              .setEnabled(field, 3);
         }
+
+        await TextSegmentationEnhancement(appModel: this)
+            .setEnabled(AnkiExportField.sentence, 2);
+        await DictionaryMenuEnhancement(appModel: this)
+            .setEnabled(AnkiExportField.word, 2);
+        await SearchDictionaryEnhancement(appModel: this)
+            .setEnabled(AnkiExportField.word, 1);
+        await BingSearchEnhancement(appModel: this)
+            .setEnabled(AnkiExportField.image, 2);
 
         setFirstTimeInitialised();
       }
@@ -232,6 +245,9 @@ class AppModel with ChangeNotifier {
         enhancementField: AnkiExportField.image,
       ),
       BingSearchEnhancement(appModel: this),
+      CropImageEnhancement(appModel: this),
+      ImagePickerEnhancement(appModel: this),
+      CameraImageEnhancement(appModel: this),
     ];
     List<AnkiExportEnhancement> audioEnhancements = [
       ClearButtonEnhancement(
@@ -252,6 +268,7 @@ class AppModel with ChangeNotifier {
         enhancementField: AnkiExportField.word,
       ),
       DictionaryMenuEnhancement(appModel: this),
+      SearchDictionaryEnhancement(appModel: this),
     ];
     List<AnkiExportEnhancement> readingEnhancements = [
       ClearButtonEnhancement(

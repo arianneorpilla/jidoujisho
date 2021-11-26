@@ -27,20 +27,18 @@ class BingSearchEnhancement extends AnkiExportEnhancement {
         );
 
   @override
-  FutureOr<AnkiExportParams> enhanceParams({
+  Future<AnkiExportParams> enhanceParams({
     required BuildContext context,
     required AppModel appModel,
     required AnkiExportParams params,
     required bool autoMode,
     required CreatorPageState state,
   }) async {
-    // Don't search over existing initial photos. Only perform the search and
-    // replace the list if there are no images. This way, Player export
-    // will still work.
-    if (autoMode) {
-      if (params.imageFiles.isNotEmpty || params.imageFile != null) {
-        return params;
-      }
+    /// If an image exists, and it is not an image from search, do nothing and
+    /// keep the current image.
+    if (state.imageSearchTermNotifier.value.isEmpty &&
+        params.imageFiles.isNotEmpty) {
+      return params;
     }
 
     String searchTerm = "";
@@ -53,6 +51,7 @@ class BingSearchEnhancement extends AnkiExportEnhancement {
       return params;
     }
 
+    /// Notify the [CreatorPageState] that we are searching.
     state.notifyImageSearching(searchTerm: searchTerm);
 
     try {
@@ -70,6 +69,8 @@ class BingSearchEnhancement extends AnkiExportEnhancement {
         );
       }
     } catch (e) {
+      /// Notify the [CreatorPageState] that we are not searching / later
+      /// image results are not from a search.
       state.notifyImageNotSearching();
     }
 

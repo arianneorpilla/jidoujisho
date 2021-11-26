@@ -99,7 +99,7 @@ class CreatorPageState extends State<CreatorPage> {
   }
 
   void checkForButtonRefresh() {
-    canExportNotifier.value = !exportParams.isEmpty();
+    canExportNotifier.value = exportParams != AnkiExportParams();
   }
 
   @override
@@ -109,8 +109,11 @@ class CreatorPageState extends State<CreatorPage> {
     if (widget.initialParams != null) {
       setCurrentParams(widget.initialParams!);
     }
+
     WidgetsBinding.instance!.addPostFrameCallback((_) async {
       await setAndComputeInitialFields();
+      checkForButtonRefresh();
+      exportParams.addListener(checkForButtonRefresh);
     });
 
     audioPlayer.onDurationChanged.listen((duration) {
@@ -151,8 +154,6 @@ class CreatorPageState extends State<CreatorPage> {
         );
       }
     }
-
-    exportParams.addListener(checkForButtonRefresh);
 
     setCurrentParams(exportParams);
   }
@@ -779,8 +780,8 @@ class CreatorPageState extends State<CreatorPage> {
   }
 
   /// The [ImageSelectWidget] needs to know if the search term for the image
-  /// has changed. If your [AnkiExportEnhancement] uses search, notify it with
-  /// the search term using this.
+  /// has changed. If your [AnkiExportEnhancement] changes the image and is
+  /// not the result of an image search, use this.
   void notifyImageNotSearching() {
     setState(() {
       imageSearchTermNotifier.value = "";
