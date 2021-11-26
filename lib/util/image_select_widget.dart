@@ -6,6 +6,7 @@ import 'package:chisa/models/app_model.dart';
 import 'package:network_to_file_image/network_to_file_image.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
+import 'package:progress_indicators/progress_indicators.dart';
 import 'package:transparent_image/transparent_image.dart';
 
 class ImageSelectWidget extends StatefulWidget {
@@ -14,11 +15,17 @@ class ImageSelectWidget extends StatefulWidget {
     required this.appModel,
     required this.filesNotifier,
     required this.fileNotifier,
+    required this.imageListNotifier,
+    required this.imageSearchTermNotifier,
+    required this.imageSearchingNotifier,
   }) : super(key: key);
 
   final AppModel appModel;
   final ValueNotifier<List<NetworkToFileImage>> filesNotifier;
   final ValueNotifier<File?> fileNotifier;
+  final ValueNotifier<int> imageListNotifier;
+  final ValueNotifier<String> imageSearchTermNotifier;
+  final ValueNotifier<bool> imageSearchingNotifier;
 
   @override
   State<StatefulWidget> createState() => ImageSelectWidgetState();
@@ -26,14 +33,14 @@ class ImageSelectWidget extends StatefulWidget {
 
 class ImageSelectWidgetState extends State<ImageSelectWidget> {
   late ValueNotifier<File?> fileNotifier;
-  late ValueNotifier<int> indexNotifier;
+  late ValueNotifier<int> imageListNotifier;
   late Color labelColor;
 
   @override
   void initState() {
     super.initState();
     fileNotifier = widget.fileNotifier;
-    indexNotifier = ValueNotifier<int>(0);
+    imageListNotifier = widget.imageListNotifier;
   }
 
   Widget fullViewGallery() {
@@ -65,9 +72,9 @@ class ImageSelectWidgetState extends State<ImageSelectWidget> {
           ),
         );
       },
-      pageController: PageController(initialPage: indexNotifier.value),
+      pageController: PageController(initialPage: imageListNotifier.value),
       onPageChanged: (index) {
-        indexNotifier.value = index;
+        imageListNotifier.value = index;
         setState(() {});
       },
     );
@@ -76,8 +83,31 @@ class ImageSelectWidgetState extends State<ImageSelectWidget> {
   @override
   Widget build(BuildContext context) {
     labelColor = Theme.of(context).unselectedWidgetColor;
+
+    if (widget.imageSearchingNotifier.value) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AspectRatio(
+            aspectRatio: 16 / 9,
+            child: Image(
+              image: MemoryImage(kTransparentImage),
+              fit: BoxFit.fitWidth,
+            ),
+          ),
+          const SizedBox(height: 10),
+          getPlaceholderTextSpans(),
+          const SizedBox(height: 10),
+        ],
+      );
+    }
+
+    if (imageListNotifier.value < 0 ||
+        imageListNotifier.value >= widget.filesNotifier.value.length) {
+      imageListNotifier.value = 0;
+    }
     NetworkToFileImage imageToShow =
-        widget.filesNotifier.value[indexNotifier.value];
+        widget.filesNotifier.value[imageListNotifier.value];
     fileNotifier.value = imageToShow.file!;
 
     return GestureDetector(
@@ -94,16 +124,17 @@ class ImageSelectWidgetState extends State<ImageSelectWidget> {
         if (details.primaryVelocity == 0) return;
 
         if (details.primaryVelocity!.compareTo(0) == -1) {
-          if (indexNotifier.value == widget.filesNotifier.value.length - 1) {
-            indexNotifier.value = 0;
+          if (imageListNotifier.value ==
+              widget.filesNotifier.value.length - 1) {
+            imageListNotifier.value = 0;
           } else {
-            indexNotifier.value += 1;
+            imageListNotifier.value += 1;
           }
         } else {
-          if (indexNotifier.value == 0) {
-            indexNotifier.value = widget.filesNotifier.value.length - 1;
+          if (imageListNotifier.value == 0) {
+            imageListNotifier.value = widget.filesNotifier.value.length - 1;
           } else {
-            indexNotifier.value -= 1;
+            imageListNotifier.value -= 1;
           }
         }
 
@@ -141,7 +172,7 @@ class ImageSelectWidgetState extends State<ImageSelectWidget> {
             ),
           ),
           TextSpan(
-            text: "${indexNotifier.value + 1} ",
+            text: "${imageListNotifier.value + 1} ",
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 12,
@@ -161,11 +192,97 @@ class ImageSelectWidgetState extends State<ImageSelectWidget> {
               fontSize: 12,
             ),
           ),
+          if (widget.imageSearchTermNotifier.value.isNotEmpty)
+            TextSpan(
+              text: widget.appModel.translate("image_label_after"),
+              style: TextStyle(
+                fontSize: 12,
+                color: labelColor,
+              ),
+            ),
+          if (widget.imageSearchTermNotifier.value.isNotEmpty)
+            TextSpan(
+              text: "『",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                color: Theme.of(context).unselectedWidgetColor,
+              ),
+            ),
+          if (widget.imageSearchTermNotifier.value.isNotEmpty)
+            TextSpan(
+              text: widget.imageSearchTermNotifier.value,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+          if (widget.imageSearchTermNotifier.value.isNotEmpty)
+            TextSpan(
+              text: "』",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                color: Theme.of(context).unselectedWidgetColor,
+              ),
+            ),
+        ],
+      ),
+      textAlign: TextAlign.center,
+    );
+  }
+
+  Widget getPlaceholderTextSpans() {
+    return Text.rich(
+      TextSpan(
+        text: '',
+        children: <InlineSpan>[
           TextSpan(
-            text: widget.appModel.translate("image_label_after"),
+            text: widget.appModel.translate("searching_before"),
             style: TextStyle(
               fontSize: 12,
               color: labelColor,
+            ),
+          ),
+          TextSpan(
+            text: "『",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              color: Theme.of(context).unselectedWidgetColor,
+            ),
+          ),
+          TextSpan(
+            text: widget.imageSearchTermNotifier.value,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+          ),
+          TextSpan(
+            text: "』",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              color: Theme.of(context).unselectedWidgetColor,
+            ),
+          ),
+          TextSpan(
+            text: widget.appModel.translate("searching_after"),
+            style: TextStyle(
+              fontSize: 12,
+              color: labelColor,
+            ),
+          ),
+          WidgetSpan(
+            child: SizedBox(
+              height: 12,
+              width: 12,
+              child: JumpingDotsProgressIndicator(
+                color: widget.appModel.getIsDarkMode()
+                    ? Colors.white
+                    : Colors.black,
+              ),
             ),
           ),
         ],

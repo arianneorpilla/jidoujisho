@@ -403,7 +403,7 @@ class ReaderPageState extends State<ReaderPage> {
         text: '',
         children: <InlineSpan>[
           TextSpan(
-            text: appModel.translate("dictionary_searching_before"),
+            text: appModel.translate("searching_before"),
             style: const TextStyle(),
           ),
           TextSpan(
@@ -427,7 +427,7 @@ class ReaderPageState extends State<ReaderPage> {
             ),
           ),
           TextSpan(
-            text: appModel.translate("dictionary_searching_after"),
+            text: appModel.translate("searching_after"),
           ),
           WidgetSpan(
             child: SizedBox(

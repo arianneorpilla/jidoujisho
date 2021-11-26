@@ -158,14 +158,24 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   Widget getVersion() {
     String version = appModel.packageInfo.version;
-    return Text(
-      " $version preview",
-      style: const TextStyle(
-        fontWeight: FontWeight.w300,
+    incognitoNotifier ??= ValueNotifier<bool>(appModel.getIncognitoMode());
+    return ValueListenableBuilder<bool>(
+      valueListenable: incognitoNotifier!,
+      builder: (BuildContext context, bool incognito, Widget? child) {
+         return Text(
+      " $version",
+      style: TextStyle(
+        fontWeight: FontWeight.w500,
         fontSize: 12,
+        color: (incognito) ? Theme.of(context).unselectedWidgetColor : Colors.red.shade900,
       ),
       overflow: TextOverflow.fade,
     );
+  
+      },
+    );
+
+   
   }
 
   void changeTab(int index) {

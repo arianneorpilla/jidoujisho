@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:chisa/pages/creator_page.dart';
 import 'package:flutter/material.dart';
 
 import 'package:chisa/anki/anki_export_params.dart';
@@ -48,6 +49,7 @@ abstract class AnkiExportEnhancement {
     required bool editMode,
     required bool autoMode,
     required int position,
+    required CreatorPageState state,
   }) {
     return BusyIconButton(
       iconSize: 18,
@@ -61,22 +63,32 @@ abstract class AnkiExportEnhancement {
           await setNotAuto();
           updateCallback(initialParams, field: enhancementField);
         } else {
-          AnkiExportParams newParams = await enhanceParams(initialParams);
+          AnkiExportParams newParams = await enhanceParams(
+            context: context,
+            appModel: appModel,
+            params: initialParams,
+            autoMode: false,
+            state: state,
+          );
           updateCallback(newParams, field: enhancementField);
         }
       },
       icon: Icon(
         enhancementIcon,
-        color: editMode || autoMode
-            ? Colors.red
-            : Theme.of(context).iconTheme.color,
+        color: editMode || autoMode ? Colors.red : null,
       ),
     );
   }
 
   /// Given an already defined set of parameters, enhance them and apply
   /// changes. These will be used to override a user's export parameters.
-  FutureOr<AnkiExportParams> enhanceParams(AnkiExportParams params);
+  FutureOr<AnkiExportParams> enhanceParams({
+    required BuildContext context,
+    required AppModel appModel,
+    required AnkiExportParams params,
+    required bool autoMode,
+    required CreatorPageState state,
+  });
 
   static String getFieldAutoKey(AnkiExportField field) {
     return "enhancementPrefs/${field.toString()}/auto/";
@@ -127,16 +139,4 @@ abstract class AnkiExportEnhancement {
     await appModel.sharedPreferences
         .setString(getEnhancementSettingKey(), jsonEncode(settings));
   }
-
-  // bool isEnabled() {
-  //   Map<String, dynamic> settings = getSettings();
-
-  //   return settings["enabled"] != null && settings["enabled"];
-  // }
-
-  // Future<void> toggleEnabled() async {
-  //   Map<String, dynamic> settings = getSettings();
-  //   settings["enabled"] = true;
-  //   await setSettings(settings);
-  // }
 }

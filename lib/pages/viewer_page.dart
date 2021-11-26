@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-import 'package:chisa/anki/anki_export_enhancement.dart';
 import 'package:chisa/anki/anki_export_params.dart';
 import 'package:chisa/dictionary/dictionary_entry.dart';
 import 'package:chisa/language/languages/chinese_simplified_language.dart';
@@ -795,7 +794,7 @@ class ViewerPageState extends State<ViewerPage> {
         text: '',
         children: <InlineSpan>[
           TextSpan(
-            text: appModel.translate("dictionary_searching_before"),
+            text: appModel.translate("searching_before"),
             style: const TextStyle(),
           ),
           TextSpan(
@@ -819,7 +818,7 @@ class ViewerPageState extends State<ViewerPage> {
             ),
           ),
           TextSpan(
-            text: appModel.translate("dictionary_searching_after"),
+            text: appModel.translate("searching_after"),
           ),
           WidgetSpan(
             child: SizedBox(
@@ -1204,33 +1203,6 @@ class ViewerPageState extends State<ViewerPage> {
     sentenceController.text = exportParams.sentence;
   }
 
-  List<Widget> getFieldEnhancementWidgets(
-      {required BuildContext context, required AnkiExportField field}) {
-    List<Widget> widgets = [];
-    List<AnkiExportEnhancement?> enhancements =
-        appModel.getExportEnabledFieldEnhancement(field);
-
-    for (int position = 0; position < enhancements.length; position++) {
-      AnkiExportEnhancement? enhancement = enhancements[position];
-      if (enhancement == null) {
-        continue;
-      }
-
-      widgets.add(
-        enhancement.getButton(
-          context: context,
-          paramsCallback: getExportParams,
-          updateCallback: setExportParams,
-          autoMode: false,
-          editMode: false,
-          position: position,
-        ),
-      );
-    }
-
-    return widgets;
-  }
-
   Widget buildSentenceField({
     TextInputType keyboardType = TextInputType.multiline,
   }) {
@@ -1253,7 +1225,7 @@ class ViewerPageState extends State<ViewerPage> {
         suffixIcon: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
-          children: getFieldEnhancementWidgets(context: context, field: field),
+          children: [],
         ),
       ),
       keyboardType: keyboardType,

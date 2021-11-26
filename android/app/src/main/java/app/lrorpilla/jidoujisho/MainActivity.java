@@ -219,6 +219,7 @@ public class MainActivity extends FlutterActivity {
                     switch (call.method) {
                         case "addNote":
                             addNote(deck, sentence, word, reading, meaning, image, audio, extra, contextParam);
+                            result.success("Added note");
                             break;
                         case "getDecks":
                             result.success(api.getDeckList());

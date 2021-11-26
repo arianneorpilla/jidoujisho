@@ -63,6 +63,12 @@ class CreatorPageState extends State<CreatorPage> {
       ValueNotifier<List<NetworkToFileImage>>(const []);
   final ValueNotifier<File?> imageNotifier = ValueNotifier<File?>(null);
   final ValueNotifier<File?> audioNotifier = ValueNotifier<File?>(null);
+  final ValueNotifier<bool> imageSearchingNotifier = ValueNotifier<bool>(false);
+
+  final ValueNotifier<String> imageSearchTermNotifier =
+      ValueNotifier<String>("");
+  final ValueNotifier<int> imageListNotifier = ValueNotifier<int>(0);
+
   AudioPlayer audioPlayer = AudioPlayer();
 
   final ValueNotifier<Duration> positionNotifier =
@@ -132,15 +138,21 @@ class CreatorPageState extends State<CreatorPage> {
       exportParams = widget.initialParams!;
     }
 
-    exportParams.addListener(checkForButtonRefresh);
-
     for (AnkiExportField field in AnkiExportField.values) {
       AnkiExportEnhancement? enhancement =
           appModel.getAutoFieldEnhancement(field);
       if (enhancement != null) {
-        exportParams = await enhancement.enhanceParams(exportParams);
+        exportParams = await enhancement.enhanceParams(
+          context: context,
+          appModel: appModel,
+          params: exportParams,
+          autoMode: true,
+          state: this,
+        );
       }
     }
+
+    exportParams.addListener(checkForButtonRefresh);
 
     setCurrentParams(exportParams);
   }
@@ -232,6 +244,7 @@ class CreatorPageState extends State<CreatorPage> {
             editMode: widget.editMode,
             autoMode: widget.autoMode,
             position: 0,
+            state: this,
           ),
         );
       }
@@ -260,6 +273,7 @@ class CreatorPageState extends State<CreatorPage> {
               editMode: widget.editMode,
               autoMode: widget.autoMode,
               position: position,
+              state: this,
             ),
           );
         }
@@ -332,9 +346,11 @@ class CreatorPageState extends State<CreatorPage> {
 
     return Scaffold(
       backgroundColor: widget.backgroundColor,
-      extendBodyBehindAppBar: (imagesNotifier.value.isNotEmpty &&
-          orientation == Orientation.landscape),
-      appBar: (imagesNotifier.value.isNotEmpty &&
+      extendBodyBehindAppBar:
+          ((imagesNotifier.value.isNotEmpty || imageSearchingNotifier.value) &&
+              orientation == Orientation.landscape),
+      appBar: ((imagesNotifier.value.isNotEmpty ||
+                  imageSearchingNotifier.value) &&
               orientation == Orientation.landscape)
           ? null
           : AppBar(
@@ -373,7 +389,7 @@ class CreatorPageState extends State<CreatorPage> {
 
   Widget buildFields() {
     Orientation orientation = MediaQuery.of(context).orientation;
-    if (imagesNotifier.value.isNotEmpty &&
+    if ((imagesNotifier.value.isNotEmpty || imageSearchingNotifier.value) &&
         orientation == Orientation.landscape) {
       return buildLandscapeFields();
     } else {
@@ -438,7 +454,7 @@ class CreatorPageState extends State<CreatorPage> {
                 onTap: (canExport)
                     ? () async {
                         if (exportParams != AnkiExportParams()) {
-                          addNote(
+                          await addNote(
                             deck: appModel.getLastAnkiDroidDeck(),
                             params: exportParams,
                           );
@@ -470,162 +486,165 @@ class CreatorPageState extends State<CreatorPage> {
   Widget buildLandscapeFields() {
     ScrollController scrollerImage = ScrollController();
     ScrollController scrollerText = ScrollController();
-    return Row(
-      children: [
-        Flexible(
-          flex: 3,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              AppBar(
-                backgroundColor: widget.appBarColor,
-                title: Text(
-                  getTitle(),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                actions: [
-                  if (!widget.editMode &&
-                      !widget.autoMode &&
-                      !widget.hideActions)
-                    getSeeMoreButton(context),
-                ],
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: RawScrollbar(
-                    controller: scrollerImage,
-                    thumbColor: (appModel.getIsDarkMode())
-                        ? Colors.grey[700]
-                        : Colors.grey[400],
-                    child: SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(
-                          parent: BouncingScrollPhysics()),
-                      controller: scrollerImage,
-                      child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.max,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            if (imagesNotifier.value.isNotEmpty)
-                              ImageSelectWidget(
-                                appModel: appModel,
-                                fileNotifier: imageNotifier,
-                                filesNotifier: imagesNotifier,
-                              ),
-                            if (audioNotifier.value != null) buildAudioPlayer(),
-                            if (!widget.autoMode && !widget.editMode)
-                              buildDeckDropDown(),
-                          ]),
+    return SafeArea(
+      child: Row(
+        children: [
+          Flexible(
+            flex: 3,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                AppBar(
+                  backgroundColor: widget.appBarColor,
+                  title: Text(
+                    getTitle(),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
-        Flexible(
-          flex: 4,
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: RawScrollbar(
-              controller: scrollerText,
-              thumbColor: (appModel.getIsDarkMode())
-                  ? Colors.grey[700]
-                  : Colors.grey[400],
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Expanded(
-                    child: Scrollbar(
-                      controller: scrollController,
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: RawScrollbar(
+                      controller: scrollerImage,
+                      thumbColor: (appModel.getIsDarkMode())
+                          ? Colors.grey[700]
+                          : Colors.grey[400],
                       child: SingleChildScrollView(
                         physics: const AlwaysScrollableScrollPhysics(
                             parent: BouncingScrollPhysics()),
-                        controller: scrollController,
+                        controller: scrollerImage,
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.max,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            displayField(
-                              context: context,
-                              field: AnkiExportField.sentence,
-                              onFieldSubmitted: (value) {},
-                              onChanged: (value) {
-                                exportParams.setSentence(value);
-                              },
-                              maxLines: null,
-                              keyboardType: TextInputType.multiline,
-                            ),
-                            displayField(
-                              context: context,
-                              field: AnkiExportField.word,
-                              onFieldSubmitted: (value) {},
-                              onChanged: (value) {
-                                exportParams.setWord(value);
-                              },
-                            ),
-                            displayField(
-                              context: context,
-                              field: AnkiExportField.reading,
-                              onFieldSubmitted: (value) {},
-                              onChanged: (value) {
-                                exportParams.setReading(value);
-                              },
-                            ),
-                            displayField(
-                              context: context,
-                              field: AnkiExportField.meaning,
-                              keyboardType: TextInputType.multiline,
-                              onFieldSubmitted: (value) {},
-                              onChanged: (value) {
-                                exportParams.setMeaning(value);
-                              },
-                            ),
-                            displayField(
-                              context: context,
-                              field: AnkiExportField.image,
-                              onFieldSubmitted: (value) {},
-                              onChanged: (value) {
-                                exportParams.setImageSearch(value);
-                              },
-                            ),
-                            displayField(
-                              context: context,
-                              field: AnkiExportField.audio,
-                              onFieldSubmitted: (value) {},
-                              onChanged: (value) {
-                                exportParams.setAudioSearch(value);
-                              },
-                            ),
-                            displayField(
-                              context: context,
-                              field: AnkiExportField.extra,
-                              onFieldSubmitted: (value) {},
-                              onChanged: (value) {
-                                exportParams.setExtra(value);
-                              },
-                            ),
-                          ],
-                        ),
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.max,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              if (imagesNotifier.value.isNotEmpty ||
+                                  imageSearchingNotifier.value)
+                                ImageSelectWidget(
+                                  appModel: appModel,
+                                  imageSearchingNotifier:
+                                      imageSearchingNotifier,
+                                  imageListNotifier: imageListNotifier,
+                                  imageSearchTermNotifier:
+                                      imageSearchTermNotifier,
+                                  fileNotifier: imageNotifier,
+                                  filesNotifier: imagesNotifier,
+                                ),
+                              if (audioNotifier.value != null)
+                                buildAudioPlayer(),
+                              if (!widget.autoMode && !widget.editMode)
+                                buildDeckDropDown(),
+                            ]),
                       ),
                     ),
                   ),
-                  buildExportButton(),
-                ],
+                ),
+              ],
+            ),
+          ),
+          Flexible(
+            flex: 4,
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: RawScrollbar(
+                controller: scrollerText,
+                thumbColor: (appModel.getIsDarkMode())
+                    ? Colors.grey[700]
+                    : Colors.grey[400],
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Expanded(
+                      child: Scrollbar(
+                        controller: scrollController,
+                        child: SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(
+                              parent: BouncingScrollPhysics()),
+                          controller: scrollController,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.max,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              displayField(
+                                context: context,
+                                field: AnkiExportField.sentence,
+                                onFieldSubmitted: (value) {},
+                                onChanged: (value) {
+                                  exportParams.setSentence(value);
+                                },
+                                maxLines: null,
+                                keyboardType: TextInputType.multiline,
+                              ),
+                              displayField(
+                                context: context,
+                                field: AnkiExportField.word,
+                                onFieldSubmitted: (value) {},
+                                onChanged: (value) {
+                                  exportParams.setWord(value);
+                                },
+                              ),
+                              displayField(
+                                context: context,
+                                field: AnkiExportField.reading,
+                                onFieldSubmitted: (value) {},
+                                onChanged: (value) {
+                                  exportParams.setReading(value);
+                                },
+                              ),
+                              displayField(
+                                context: context,
+                                field: AnkiExportField.meaning,
+                                keyboardType: TextInputType.multiline,
+                                onFieldSubmitted: (value) {},
+                                onChanged: (value) {
+                                  exportParams.setMeaning(value);
+                                },
+                              ),
+                              displayField(
+                                context: context,
+                                field: AnkiExportField.image,
+                                onFieldSubmitted: (value) {},
+                                onChanged: (value) {
+                                  exportParams.setImageSearch(value);
+                                },
+                              ),
+                              displayField(
+                                context: context,
+                                field: AnkiExportField.audio,
+                                onFieldSubmitted: (value) {},
+                                onChanged: (value) {
+                                  exportParams.setAudioSearch(value);
+                                },
+                              ),
+                              displayField(
+                                context: context,
+                                field: AnkiExportField.extra,
+                                onFieldSubmitted: (value) {},
+                                onChanged: (value) {
+                                  exportParams.setExtra(value);
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    buildExportButton(),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -655,9 +674,13 @@ class CreatorPageState extends State<CreatorPage> {
                 mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (imagesNotifier.value.isNotEmpty)
+                  if (imagesNotifier.value.isNotEmpty ||
+                      imageSearchingNotifier.value)
                     ImageSelectWidget(
                       appModel: appModel,
+                      imageSearchingNotifier: imageSearchingNotifier,
+                      imageSearchTermNotifier: imageSearchTermNotifier,
+                      imageListNotifier: imageListNotifier,
                       fileNotifier: imageNotifier,
                       filesNotifier: imagesNotifier,
                     ),
@@ -730,6 +753,40 @@ class CreatorPageState extends State<CreatorPage> {
         buildExportButton(),
       ],
     );
+  }
+
+  // The [ImageSelectWidget] needs to know if the search term for the image
+  /// has changed. If your [AnkiExportEnhancement] uses search, notify it with
+  /// the search term using this.
+  void notifyImageSearching({required searchTerm}) {
+    setState(() {
+      imageSearchingNotifier.value = true;
+      imageSearchTermNotifier.value = searchTerm;
+    });
+  }
+
+  /// The [ImageSelectWidget] needs to know if the search term for the image
+  /// has changed. If your [AnkiExportEnhancement] uses search, notify it with
+  /// the search term using this.
+  void notifyImageDetails({required String searchTerm, int? index}) {
+    setState(() {
+      imageSearchTermNotifier.value = searchTerm;
+      imageSearchingNotifier.value = false;
+      if (index != null) {
+        imageListNotifier.value = index;
+      }
+    });
+  }
+
+  /// The [ImageSelectWidget] needs to know if the search term for the image
+  /// has changed. If your [AnkiExportEnhancement] uses search, notify it with
+  /// the search term using this.
+  void notifyImageNotSearching() {
+    setState(() {
+      imageSearchTermNotifier.value = "";
+      imageListNotifier.value = 0;
+      imageSearchingNotifier.value = false;
+    });
   }
 
   Widget buildPlayButton() {

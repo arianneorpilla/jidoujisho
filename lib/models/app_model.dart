@@ -3,6 +3,9 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
+import 'package:chisa/anki/enhancements/bing_search_enhancement.dart';
+import 'package:chisa/anki/enhancements/dictionary_menu_enhancement.dart';
+import 'package:chisa/anki/enhancements/text_segmentation_enhancement.dart';
 import 'package:chisa/media/media_sources/player_network_stream_source.dart';
 import 'package:chisa/media/media_sources/reader_browser_media_source.dart';
 import 'package:chisa/media/media_sources/reader_ttu_media_source.dart';
@@ -174,6 +177,14 @@ class AppModel with ChangeNotifier {
       resumableNotifier = ValueNotifier<bool>(isResumable());
 
       _hasInitialised = true;
+      if (!isFirstTimeInitialised()) {
+        for (AnkiExportField field in AnkiExportField.values) {
+          await ClearButtonEnhancement(appModel: this, enhancementField: field)
+              .setEnabled(field, 4);
+        }
+
+        setFirstTimeInitialised();
+      }
       notifyListeners();
     }
   }
@@ -220,6 +231,7 @@ class AppModel with ChangeNotifier {
         appModel: this,
         enhancementField: AnkiExportField.image,
       ),
+      BingSearchEnhancement(appModel: this),
     ];
     List<AnkiExportEnhancement> audioEnhancements = [
       ClearButtonEnhancement(
@@ -232,12 +244,14 @@ class AppModel with ChangeNotifier {
         appModel: this,
         enhancementField: AnkiExportField.sentence,
       ),
+      TextSegmentationEnhancement(appModel: this),
     ];
     List<AnkiExportEnhancement> wordEnhancements = [
       ClearButtonEnhancement(
         appModel: this,
         enhancementField: AnkiExportField.word,
       ),
+      DictionaryMenuEnhancement(appModel: this),
     ];
     List<AnkiExportEnhancement> readingEnhancements = [
       ClearButtonEnhancement(
@@ -1339,6 +1353,14 @@ class AppModel with ChangeNotifier {
 
   bool isResumable() {
     return getResumeMediaHistoryItem() != null;
+  }
+
+  bool isFirstTimeInitialised() {
+    return sharedPreferences.getBool("firstTimeInitialisation") ?? false;
+  }
+
+  Future<void> setFirstTimeInitialised() async {
+    await sharedPreferences.setBool("firstTimeInitialisation", true);
   }
 
   bool isPlayerOrientationPortrait() {

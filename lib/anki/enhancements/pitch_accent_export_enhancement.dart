@@ -5,6 +5,7 @@ import 'package:chisa/anki/anki_export_params.dart';
 import 'package:chisa/dictionary/dictionary_entry.dart';
 import 'package:chisa/dictionary/enhancements/pitch_accent_enhancement.dart';
 import 'package:chisa/models/app_model.dart';
+import 'package:chisa/pages/creator_page.dart';
 import 'package:chisa/util/anki_export_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,7 +24,13 @@ class PitchAccentExportEnhancement extends AnkiExportEnhancement {
   final Map<String, Map<String, DictionaryEntry>> kanjiumDictionary = {};
 
   @override
-  FutureOr<AnkiExportParams> enhanceParams(AnkiExportParams params) {
+  FutureOr<AnkiExportParams> enhanceParams({
+    required BuildContext context,
+    required AppModel appModel,
+    required AnkiExportParams params,
+    required bool autoMode,
+    required CreatorPageState state,
+  }) {
     DictionaryEntry? closestReadingMatch = getClosestPitchEntry(
       DictionaryEntry(
         word: params.word,

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:chisa/anki/anki_export_enhancement.dart';
 import 'package:chisa/anki/anki_export_params.dart';
 import 'package:chisa/models/app_model.dart';
+import 'package:chisa/pages/creator_page.dart';
 import 'package:chisa/util/anki_export_field.dart';
 import 'package:flutter/material.dart';
 
@@ -18,7 +19,13 @@ class ClearButtonEnhancement extends AnkiExportEnhancement {
             enhancementField: enhancementField);
 
   @override
-  FutureOr<AnkiExportParams> enhanceParams(AnkiExportParams params) {
+  FutureOr<AnkiExportParams> enhanceParams({
+    required BuildContext context,
+    required AppModel appModel,
+    required AnkiExportParams params,
+    required bool autoMode,
+    required CreatorPageState state,
+  }) {
     switch (enhancementField) {
       case AnkiExportField.sentence:
         params.sentence = "";
@@ -36,10 +43,14 @@ class ClearButtonEnhancement extends AnkiExportEnhancement {
         params.extra = "";
         break;
       case AnkiExportField.image:
+        params.imageFiles = [];
         params.imageFile = null;
+        params.imageSearch = "";
+        state.notifyImageNotSearching();
         break;
       case AnkiExportField.audio:
         params.audioFile = null;
+        params.audioSearch = "";
         break;
     }
     return params;
