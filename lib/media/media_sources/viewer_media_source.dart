@@ -246,6 +246,7 @@ abstract class ViewerMediaSource extends MediaSource {
                     placeholder: MemoryImage(kTransparentImage),
                     image: getHistoryThumbnailAlias(item) ??
                         getHistoryThumbnail(item),
+                    alignment: Alignment.topCenter,
                     fit: BoxFit.fitWidth,
                   ),
                 ),
@@ -385,6 +386,7 @@ abstract class ViewerMediaSource extends MediaSource {
             child: FadeInImage(
               placeholder: MemoryImage(kTransparentImage),
               image: getHistoryThumbnail(item),
+              alignment: Alignment.topCenter,
               fit: BoxFit.fitWidth,
             ),
           ),

@@ -5,9 +5,14 @@ import 'dart:typed_data';
 
 import 'package:chisa/anki/anki_export_enhancement.dart';
 import 'package:chisa/anki/anki_export_params.dart';
+import 'package:chisa/dictionary/dictionary_entry.dart';
+import 'package:chisa/language/languages/chinese_simplified_language.dart';
+import 'package:chisa/language/languages/chinese_traditional_language.dart';
+import 'package:chisa/language/languages/japanese_language.dart';
 import 'package:chisa/media/media_sources/viewer_media_source.dart';
 import 'package:chisa/util/anki_creator.dart';
 import 'package:chisa/util/anki_export_field.dart';
+import 'package:chisa/util/cached_memory_image.dart';
 import 'package:chisa/util/ocr.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -37,6 +42,7 @@ import 'package:chisa/util/bottom_sheet_dialog.dart';
 import 'package:chisa/util/dictionary_scrollable_widget.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:wakelock/wakelock.dart';
+import 'package:collection/collection.dart';
 
 import 'package:image/image.dart' as imglib;
 
@@ -73,6 +79,8 @@ class ViewerPageState extends State<ViewerPage> {
   late Color dictionaryColor;
   double menuHeight = 48;
 
+  GlobalKey searchAreaKey = GlobalKey();
+
   final ValueNotifier<bool> isMenuHidden = ValueNotifier<bool>(false);
 
   List<ImageProvider<Object>> sourceImages = [];
@@ -85,6 +93,9 @@ class ViewerPageState extends State<ViewerPage> {
 
   List<String> chapters = [];
   String chapterName = "";
+
+  bool shouldDialogBeTop = false;
+  double sentenceFieldHeight = 48;
 
   DictionarySearchResult? searchResult;
   ValueNotifier<String> searchTerm = ValueNotifier<String>("");
@@ -99,6 +110,7 @@ class ViewerPageState extends State<ViewerPage> {
   List<TouchPoints?> touchPoints = [];
   ValueNotifier<bool> ocrBusy = ValueNotifier<bool>(false);
   bool ocrOverlayShown = false;
+  bool promptProcessed = false;
 
   @override
   void initState() {
@@ -118,8 +130,8 @@ class ViewerPageState extends State<ViewerPage> {
           ? const Color(0xcc424242)
           : const Color(0xdeeeeeee);
       dictionaryColor = appModel.getIsDarkMode()
-          ? Colors.grey.shade800.withOpacity(0.6)
-          : Colors.white.withOpacity(0.8);
+          ? Colors.grey.shade800.withOpacity(0.97)
+          : Colors.grey.shade200.withOpacity(0.97);
 
       await initialiseViewer();
       setState(() {
@@ -145,8 +157,9 @@ class ViewerPageState extends State<ViewerPage> {
 
   Future<void> processOcr(Offset a, Offset b) async {
     if (!ocrBusy.value) {
+      promptProcessed = false;
       ocrBusy.value = true;
-      print("OCR START");
+      debugPrint("OCR START");
 
       Uint8List? imageBytes = await screenshotController.capture();
       imglib.Image? screenshot = imglib.decodeImage(imageBytes!)!;
@@ -174,28 +187,57 @@ class ViewerPageState extends State<ViewerPage> {
       File file = File('${tempDir.path}/${now.millisecondsSinceEpoch}.jpg');
       await file.writeAsBytes(croppedImageBytes);
 
-      print("CROPPED IMAGE WRITTEN");
+      debugPrint("CROPPED IMAGE WRITTEN");
+
+      TextRecognitionOptions script = TextRecognitionOptions.DEFAULT;
+      if (appModel.getCurrentLanguage() is JapaneseLanguage) {
+        script = TextRecognitionOptions.JAPANESE;
+      }
+      if (appModel.getCurrentLanguage() is ChineseSimplifiedLanguage ||
+          appModel.getCurrentLanguage() is ChineseTraditionalLanguage) {
+        script = TextRecognitionOptions.CHINESE;
+      }
 
       final textDetector = GoogleMlKit.vision.textDetectorV2();
-      RecognisedText recognisedText = await textDetector.processImage(
+      String sentence = "";
+
+      try {
+        RecognisedText recognisedText = await textDetector.processImage(
           InputImage.fromFile(file),
-          script: TextRecognitionOptions.JAPANESE);
-
-      setState(() {
-        ocrBusy.value = false;
-        ocrOverlayShown = false;
+          script: script,
+        );
+        sentence = recognisedText.text;
+      } catch (e) {
+        ocrOverlayShown = true;
         touchPoints.clear();
-      });
+      } finally {
+        setState(() {
+          promptProcessed = true;
+          ocrBusy.value = false;
+        });
+      }
 
-      print(recognisedText);
-      recognisedText.blocks.forEach((block) {
-        print(block.cornerPoints);
-        print(block.lines);
-        print(block.rect);
-        print(block.text);
-      });
+      promptProcessed = false;
+      ocrOverlayShown = false;
+      touchPoints.clear();
+
+      if (sentence.isEmpty) {
+        ocrOverlayShown = true;
+      } else {
+        await showOCRHelperDialog(sentence);
+      }
+
+      setState(() {});
+
+      // print(recognisedText);
+      // recognisedText.blocks.forEach((block) {
+      //   print(block.cornerPoints);
+      //   print(block.lines);
+      //   print(block.rect);
+      //   print(block.text);
+      // });
     } else {
-      print("OCR IS BUSY -- WAITING TO FINISH");
+      debugPrint("OCR IS BUSY -- WAITING TO FINISH");
     }
   }
 
@@ -227,6 +269,7 @@ class ViewerPageState extends State<ViewerPage> {
                 onPressed: () async {
                   setState(() {
                     touchPoints.clear();
+                    setSearchTerm("");
                     ocrOverlayShown = !ocrOverlayShown;
                   });
                 },
@@ -240,7 +283,7 @@ class ViewerPageState extends State<ViewerPage> {
 
   void promptTimerOcr(Offset a, Offset b) {
     Future.delayed(const Duration(seconds: 1), () {
-      if (touchPoints.isNotEmpty) {
+      if (touchPoints.isNotEmpty && !promptProcessed) {
         if (touchPoints[0]!.points == a && touchPoints[1]!.points == b) {
           processOcr(a, b);
         }
@@ -274,6 +317,12 @@ class ViewerPageState extends State<ViewerPage> {
         setState(() {
           final container = context.findRenderObject() as RenderBox;
           touchPoints = [touchPoints.first];
+
+          if (details.globalPosition.dy >
+              MediaQuery.of(context).size.height / 2) {
+            shouldDialogBeTop = true;
+          }
+
           touchPoints.add(
             TouchPoints(
               points: container.globalToLocal(details.globalPosition),
@@ -285,6 +334,11 @@ class ViewerPageState extends State<ViewerPage> {
       onPanEnd: (details) {
         setState(() {
           touchPoints.add(null);
+        });
+      },
+      onTap: () {
+        setState(() {
+          ocrOverlayShown = false;
         });
       },
     );
@@ -322,6 +376,8 @@ class ViewerPageState extends State<ViewerPage> {
               ]);
 
               Navigator.of(context).popUntil((route) => route.isFirst);
+              appModel.dictionaryUpdateFlipflop.value =
+                  !appModel.dictionaryUpdateFlipflop.value;
             }),
         TextButton(
           child: Text(
@@ -416,6 +472,212 @@ class ViewerPageState extends State<ViewerPage> {
           ),
         ),
       ),
+    );
+  }
+
+  List<Widget> getTextWidgetsFromWords(
+      List<String> words, ValueNotifier<List<bool>> notifier) {
+    words.forEachIndexed((i, word) {
+      words[i] = word.trim();
+    });
+
+    List<Widget> widgets = [];
+    for (int i = 0; i < words.length; i++) {
+      widgets.add(
+        GestureDetector(
+          onTap: () {
+            List<bool> values = notifier.value;
+            values[i] = !values[i];
+            notifier.value = [...values];
+          },
+          child: ValueListenableBuilder(
+              valueListenable: notifier,
+              builder:
+                  (BuildContext context, List<bool> values, Widget? child) {
+                return Container(
+                  padding: const EdgeInsets.all(8),
+                  margin: const EdgeInsets.only(top: 10, right: 10),
+                  color: (notifier.value[i])
+                      ? Colors.red.withOpacity(0.3)
+                      : appModel.getIsDarkMode()
+                          ? Colors.white.withOpacity(0.1)
+                          : Colors.black.withOpacity(0.1),
+                  child: Text(
+                    words[i],
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 18,
+                    ),
+                  ),
+                );
+              }),
+        ),
+      );
+    }
+
+    return widgets;
+  }
+
+  Future<void> showOCRHelperDialog(String sentence) async {
+    ValueNotifier<List<bool>> indexesSelected;
+    List<Widget> textWidgets;
+    List<String> words =
+        await appModel.getCurrentLanguage().textToWords(sentence);
+
+    words.removeWhere((word) => word.trim().isEmpty);
+
+    indexesSelected = ValueNotifier<List<bool>>(
+      List.generate(
+        words.length,
+        (index) => false,
+      ),
+    );
+    textWidgets = getTextWidgetsFromWords(words, indexesSelected);
+
+    ScrollController scrollController = ScrollController();
+
+    BuildContext keyContext = searchAreaKey.currentContext!;
+
+    // widget is visible
+    final box = keyContext.findRenderObject() as RenderBox;
+
+    sentenceFieldHeight = box.size.height;
+
+    bool isSpaceDelimited = appModel.getCurrentLanguage().isSpaceDelimited;
+
+    await showDialog(
+      barrierColor: Colors.transparent,
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          alignment: (shouldDialogBeTop)
+              ? Alignment.topCenter
+              : Alignment.bottomCenter,
+          insetPadding: EdgeInsets.only(
+            bottom: 60,
+            left: 12,
+            right: 12,
+            top: (sentenceFieldHeight + 12),
+          ),
+          contentPadding:
+              const EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
+          ),
+          title: SizedBox(
+            width: double.maxFinite,
+            child: ValueListenableBuilder(
+              valueListenable: indexesSelected,
+              builder: (BuildContext context, List<bool> _, Widget? widget) {
+                return RawScrollbar(
+                  thumbColor: (appModel.getIsDarkMode())
+                      ? Colors.grey[700]
+                      : Colors.grey[400],
+                  controller: scrollController,
+                  child: SingleChildScrollView(
+                    controller: scrollController,
+                    child: Wrap(children: textWidgets),
+                  ),
+                );
+              },
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(appModel.translate('dialog_set'),
+                  style: const TextStyle(color: Colors.red)),
+              onPressed: () {
+                if (indexesSelected.value
+                    .every((selected) => selected == false)) {
+                  sentenceController.text = sentence;
+                } else {
+                  String wordsJoined = "";
+
+                  for (int i = 0; i < words.length; i++) {
+                    if (indexesSelected.value[i]) {
+                      wordsJoined += words[i];
+                    }
+                    if (isSpaceDelimited) {
+                      wordsJoined += " ";
+                    }
+                  }
+
+                  sentenceController.text = wordsJoined.trim();
+                }
+
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              child: Text(appModel.translate('dialog_search')),
+              onPressed: () {
+                if (indexesSelected.value
+                    .every((selected) => selected == false)) {
+                  setSearchTerm(sentence);
+                } else {
+                  String wordsJoined = "";
+
+                  for (int i = 0; i < words.length; i++) {
+                    if (indexesSelected.value[i]) {
+                      wordsJoined += words[i];
+                    }
+                    if (isSpaceDelimited) {
+                      wordsJoined += " ";
+                    }
+                  }
+
+                  setSearchTerm(wordsJoined.trim());
+                }
+
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              child: Text(appModel.translate("dialog_add")),
+              onLongPress: () {
+                if (indexesSelected.value
+                    .every((selected) => selected == false)) {
+                  sentenceController.text += sentence;
+                } else {
+                  String wordsJoined = "";
+
+                  for (int i = 0; i < words.length; i++) {
+                    if (indexesSelected.value[i]) {
+                      wordsJoined += words[i];
+                    }
+                  }
+
+                  sentenceController.text += wordsJoined;
+                }
+
+                Navigator.pop(context);
+              },
+              onPressed: () async {
+                if (indexesSelected.value
+                    .every((selected) => selected == false)) {
+                  sentenceController.text += sentence;
+                } else {
+                  String wordsJoined = "";
+
+                  for (int i = 0; i < words.length; i++) {
+                    if (indexesSelected.value[i]) {
+                      wordsJoined += words[i];
+                    }
+                    if (isSpaceDelimited) {
+                      wordsJoined += " ";
+                    }
+                  }
+
+                  setSearchTerm(wordsJoined.trim());
+                }
+
+                Navigator.pop(context);
+                ocrOverlayShown = true;
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -986,6 +1248,7 @@ class ViewerPageState extends State<ViewerPage> {
         focusedBorder: UnderlineInputBorder(
           borderSide: BorderSide(color: Theme.of(context).focusColor),
         ),
+        contentPadding: const EdgeInsets.all(16.0),
         prefixIcon: Icon(field.icon(appModel)),
         suffixIcon: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1084,6 +1347,7 @@ class ViewerPageState extends State<ViewerPage> {
     return Align(
       alignment: Alignment.topCenter,
       child: Container(
+        key: searchAreaKey,
         color: menuColor,
         child: GestureDetector(
           onTap: () {
@@ -1158,7 +1422,16 @@ class ViewerPageState extends State<ViewerPage> {
           controller: screenshotController,
           child: Stack(
             children: <Widget>[
-              buildViewer(),
+              GestureDetector(
+                  child: buildViewer(),
+                  onLongPress: () {
+                    setState(() {
+                      isMenuHidden.value = false;
+                      touchPoints.clear();
+                      setSearchTerm("");
+                      ocrOverlayShown = !ocrOverlayShown;
+                    });
+                  }),
               if (ocrOverlayShown) buildOcrOverlay(),
               buildCurrentPage(),
               buildMenuArea(),
@@ -1293,13 +1566,31 @@ class ViewerPageState extends State<ViewerPage> {
 
   Future<void> openCardCreator() async {
     File file = await getFileFromCurrentImage();
+    MediaHistoryItem? contextItem = generateContextHistoryItem();
+    String? contextJson = "";
+    if (contextItem != null) {
+      contextJson = Uri.encodeFull(
+          "https://jidoujisho.context/${generateContextHistoryItem()!.toJson()}");
+    }
+
     AnkiExportParams initialParams = // todo other params
         AnkiExportParams(
+      sentence: sentenceController.text,
       imageFile: file,
       imageFiles: [NetworkToFileImage(file: file)],
+      context: contextJson,
     );
 
+    if (latestResult != null) {
+      DictionaryEntry entry =
+          latestResult!.entries[latestResultEntryIndex.value];
+      initialParams.word = entry.word;
+      initialParams.meaning = entry.meaning;
+      initialParams.reading = entry.reading;
+    }
+
     searchTerm.value = "";
+    sentenceController.clear();
 
     ClipboardListener.removeListener(copyClipboardAction);
 
@@ -1319,6 +1610,11 @@ class ViewerPageState extends State<ViewerPage> {
           duration: const Duration(seconds: 3),
         );
       },
+    );
+
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: [SystemUiOverlay.bottom],
     );
 
     await Clipboard.setData(const ClipboardData(text: ""));
@@ -1341,6 +1637,9 @@ class ViewerPageState extends State<ViewerPage> {
     }
     if (image is NetworkToFileImage) {
       return image.file!;
+    }
+    if (image is CacheImageProvider) {
+      return File.fromRawPath(image.img);
     }
 
     throw UnsupportedError("ImageProvider type not implemented for share");
@@ -1422,7 +1721,7 @@ class ViewerPageState extends State<ViewerPage> {
           double sliderValue = validPosition ? currentProgress.toDouble() : 0;
 
           if (currentProgress == completeProgress) {
-            sliderValue = 1;
+            sliderValue = completeProgress.toDouble();
           }
 
           Slider slider = Slider(

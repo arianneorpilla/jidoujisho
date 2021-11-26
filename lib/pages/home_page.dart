@@ -170,8 +170,15 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   void changeTab(int index) {
     if (selectedTabIndex.value == index) {
-      appModel.getScrollController(getCurrentMediaTabType()).animateTo(0,
+      ScrollController scrollController = appModel.getScrollController(getCurrentMediaTabType());
+    
+
+          if (scrollController.offset > 5000) {
+ scrollController.jumpTo(0);
+          } else {
+             scrollController.animateTo(0,
           duration: const Duration(milliseconds: 200), curve: Curves.easeInOut);
+          }
       appModel.getSearchController(getCurrentMediaTabType()).clear();
       appModel.getSearchController(getCurrentMediaTabType()).close();
     } else {

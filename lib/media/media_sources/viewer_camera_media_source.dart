@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:camera/camera.dart';
 import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'dart:async';
 
@@ -24,7 +23,6 @@ class ViewerCameraMediaSource extends ViewerMediaSource {
           icon: Icons.camera,
         );
 
-  List<CameraDescription>? cameras;
   String cameraImagePath = "";
 
   @override

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:chisa/util/reading_direction.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -206,6 +205,7 @@ abstract class ReaderMediaSource extends MediaSource {
                     Image(
                       image: getHistoryThumbnailAlias(item) ??
                           getHistoryThumbnail(item),
+                      alignment: Alignment.topCenter,
                       fit: BoxFit.fitWidth,
                     ),
                   ],
@@ -228,6 +228,7 @@ abstract class ReaderMediaSource extends MediaSource {
                     placeholder: MemoryImage(kTransparentImage),
                     image: getHistoryThumbnailAlias(item) ??
                         getHistoryThumbnail(item),
+                    alignment: Alignment.topCenter,
                     fit: BoxFit.fitWidth,
                   ),
                 ),
@@ -349,6 +350,7 @@ abstract class ReaderMediaSource extends MediaSource {
             child: FadeInImage(
               placeholder: MemoryImage(kTransparentImage),
               image: getHistoryThumbnail(item),
+              alignment: Alignment.topCenter,
               fit: BoxFit.fitWidth,
             ),
           ),

@@ -61,7 +61,7 @@ class ReaderBrowserSource extends ReaderMediaSource {
       mediaHistoryItem: item,
       mediaSource: this,
       appModel: appModel,
-      saveHistoryItem: true,
+      saveHistoryItem: false,
     );
   }
 
@@ -83,7 +83,7 @@ class ReaderBrowserSource extends ReaderMediaSource {
           refreshCallback: refreshCallback,
           showIfClosed: false,
           showIfOpened: true,
-          icon: Icons.delete,
+          icon: Icons.delete_forever,
           onPressed: () async {
             appModel.setSearchHistory([], historyType: getIdentifier());
             refreshCallback();
@@ -177,12 +177,12 @@ class ReaderBrowserSource extends ReaderMediaSource {
                                 shape: BoxShape.circle,
                                 color: (value)
                                     ? Colors.red.withOpacity(0.5)
-                                    : state.dictionaryColor.withOpacity(0.5)),
+                                    : state.dictionaryColor.withOpacity(0.7)),
                             child: Icon(
                               Icons.bookmark,
-                              color: (state.isDarkMode
+                              color: state.isDarkMode
                                   ? Colors.white
-                                  : Colors.black),
+                                  : Colors.black,
                               size: 20,
                             ),
                           ),
@@ -226,16 +226,17 @@ class ReaderBrowserSource extends ReaderMediaSource {
                               shape: BoxShape.circle,
                               color: (value)
                                   ? Colors.red.withOpacity(0.5)
-                                  : state.dictionaryColor.withOpacity(0.5)),
+                                  : state.dictionaryColor.withOpacity(0.7)),
                           child: Icon(
                             Icons.explore,
-                            color: (state.isDarkMode
-                                ? Colors.white
-                                : Colors.black),
+                            color:
+                                state.isDarkMode ? Colors.white : Colors.black,
                             size: 20,
                           ),
                         ),
                         onTap: () async {
+                          state.setSearchTerm("");
+
                           justNavigated.value = true;
                           String url = (await controller.getUrl()).toString();
                           String newUrl = url;
@@ -246,6 +247,11 @@ class ReaderBrowserSource extends ReaderMediaSource {
                             context: context,
                             builder: (context) {
                               return AlertDialog(
+                                contentPadding: const EdgeInsets.only(
+                                    top: 20, left: 20, right: 20, bottom: 20),
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.zero,
+                                ),
                                 actions: [
                                   TextButton(
                                     child: Text(
@@ -311,12 +317,11 @@ class ReaderBrowserSource extends ReaderMediaSource {
                               shape: BoxShape.circle,
                               color: (value)
                                   ? Colors.red.withOpacity(0.5)
-                                  : state.dictionaryColor.withOpacity(0.5)),
+                                  : state.dictionaryColor.withOpacity(0.7)),
                           child: Icon(
                             Icons.arrow_back,
-                            color: (state.isDarkMode
-                                ? Colors.white
-                                : Colors.black),
+                            color:
+                                state.isDarkMode ? Colors.white : Colors.black,
                             size: 20,
                           ),
                         ),
@@ -343,12 +348,11 @@ class ReaderBrowserSource extends ReaderMediaSource {
                               shape: BoxShape.circle,
                               color: (value)
                                   ? Colors.red.withOpacity(0.5)
-                                  : state.dictionaryColor.withOpacity(0.5)),
+                                  : state.dictionaryColor.withOpacity(0.7)),
                           child: Icon(
                             Icons.arrow_forward,
-                            color: (state.isDarkMode
-                                ? Colors.white
-                                : Colors.black),
+                            color:
+                                state.isDarkMode ? Colors.white : Colors.black,
                             size: 20,
                           ),
                         ),

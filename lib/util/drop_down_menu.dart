@@ -27,6 +27,16 @@ class DropDownMenuState extends State<DropDownMenu> {
 
     return DropdownButton<String>(
       isExpanded: true,
+      underline: Container(
+        decoration: BoxDecoration(
+          border: Border.fromBorderSide(
+            BorderSide(
+              width: 0.5,
+              color: Theme.of(context).unselectedWidgetColor.withOpacity(0.5),
+            ),
+          ),
+        ),
+      ),
       value: selectedOption,
       items: widget.options.map((String value) {
         return DropdownMenuItem<String>(

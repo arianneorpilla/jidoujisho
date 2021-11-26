@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:chisa/util/reading_direction.dart';
 import 'package:chisa/language/language.dart';
@@ -12,6 +13,7 @@ class EnglishLanguage extends Language {
           countryCode: "US",
           readingDirection: ReadingDirection.horizontalLTR,
           isSpaceDelimited: true,
+          textBaseline: TextBaseline.alphabetic,
         );
 
   @override

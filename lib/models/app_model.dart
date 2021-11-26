@@ -74,6 +74,8 @@ class AppModel with ChangeNotifier {
   final SharedPreferences _sharedPreferences;
   SharedPreferences get sharedPreferences => _sharedPreferences;
 
+  ValueNotifier<bool> dictionaryUpdateFlipflop = ValueNotifier<bool>(false);
+
   /// Necessary to get version details upon app start.
   final PackageInfo _packageInfo;
   PackageInfo get packageInfo => _packageInfo;
@@ -1039,6 +1041,31 @@ class AppModel with ChangeNotifier {
     await sharedPreferences.setString('$type/lastPickedFile', directory.path);
   }
 
+  TextStyle getTextStyle() {
+    return TextStyle(
+      locale: getCurrentLanguage().getLocale(),
+      textBaseline: getCurrentLanguage().getTextBaseline(),
+    );
+  }
+
+  TextTheme getTextTheme() {
+    return TextTheme(
+      headline1: getTextStyle(),
+      headline2: getTextStyle(),
+      headline3: getTextStyle(),
+      headline4: getTextStyle(),
+      headline5: getTextStyle(),
+      headline6: getTextStyle(),
+      bodyText1: getTextStyle(),
+      bodyText2: getTextStyle(),
+      subtitle1: getTextStyle(),
+      subtitle2: getTextStyle(),
+      caption: getTextStyle(),
+      button: getTextStyle(),
+      overline: getTextStyle(),
+    );
+  }
+
   ThemeData getLightTheme(BuildContext context) {
     return ThemeData(
       backgroundColor: Colors.white,
@@ -1058,6 +1085,7 @@ class AppModel with ChangeNotifier {
           primary: Colors.black,
         ),
       ),
+      textTheme: (hasInitialized) ? getTextTheme() : null,
       iconTheme: const IconThemeData(color: Colors.black),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.white,
@@ -1099,6 +1127,7 @@ class AppModel with ChangeNotifier {
           primary: Colors.white,
         ),
       ),
+      textTheme: (hasInitialized) ? getTextTheme() : null,
       iconTheme: const IconThemeData(color: Colors.white),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.black,
@@ -1121,17 +1150,26 @@ class AppModel with ChangeNotifier {
     );
   }
 
-  Locale? getLocale() {
+  TextBaseline? getBaseline() {
     try {
       getCurrentLanguage();
     } catch (e) {
       return null;
     }
 
-    return Locale(
-      getCurrentLanguage().languageCode,
-      getCurrentLanguage().countryCode,
-    );
+    Language language = getCurrentLanguage();
+
+    if (language is JapaneseLanguage ||
+        language is ChineseSimplifiedLanguage ||
+        language is ChineseTraditionalLanguage) {
+      return TextBaseline.ideographic;
+    }
+
+    if (language is EnglishLanguage) {
+      return TextBaseline.alphabetic;
+    }
+
+    return null;
   }
 
   bool getIncognitoMode() {

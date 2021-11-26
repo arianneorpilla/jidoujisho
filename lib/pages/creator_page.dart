@@ -349,7 +349,7 @@ class CreatorPageState extends State<CreatorPage> {
                 overflow: TextOverflow.ellipsis,
               ),
               actions: [
-                if (!widget.editMode && !widget.autoMode && widget.hideActions)
+                if (!widget.editMode && !widget.autoMode && !widget.hideActions)
                   getSeeMoreButton(context),
               ],
             ),
@@ -439,7 +439,7 @@ class CreatorPageState extends State<CreatorPage> {
                     ? () async {
                         if (exportParams != AnkiExportParams()) {
                           addNote(
-                            deck: "Default",
+                            deck: appModel.getLastAnkiDroidDeck(),
                             params: exportParams,
                           );
 
@@ -493,7 +493,7 @@ class CreatorPageState extends State<CreatorPage> {
                 actions: [
                   if (!widget.editMode &&
                       !widget.autoMode &&
-                      widget.backgroundColor == null)
+                      !widget.hideActions)
                     getSeeMoreButton(context),
                 ],
               ),

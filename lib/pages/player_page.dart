@@ -112,6 +112,8 @@ class PlayerPageState extends State<PlayerPage>
   Future<bool> onWillPop() async {
     if (playerController.value.isEnded) {
       Navigator.pop(context, true);
+      appModel.dictionaryUpdateFlipflop.value =
+          !appModel.dictionaryUpdateFlipflop.value;
     } else {
       Widget alertDialog = AlertDialog(
         shape: const RoundedRectangleBorder(
@@ -130,6 +132,8 @@ class PlayerPageState extends State<PlayerPage>
               ),
               onPressed: () async {
                 Navigator.pop(context, true);
+                appModel.dictionaryUpdateFlipflop.value =
+                    !appModel.dictionaryUpdateFlipflop.value;
               }),
           TextButton(
             child: Text(
@@ -227,8 +231,8 @@ class PlayerPageState extends State<PlayerPage>
           ? const Color(0xcc424242)
           : const Color(0xdeeeeeee);
       dictionaryColor = appModel.getIsDarkMode()
-          ? Colors.grey.shade800.withOpacity(0.6)
-          : Colors.white.withOpacity(0.8);
+          ? Colors.grey.shade800.withOpacity(0.97)
+          : Colors.grey.shade200.withOpacity(0.97);
 
       playerController = await preparePlayerController(widget.params);
       playPauseIconAnimationController = AnimationController(
@@ -1886,6 +1890,7 @@ class PlayerPageState extends State<PlayerPage>
 
     try {
       imageFiles = await exportImages(subtitles);
+
       audioFile = await exportCurrentAudio(
         subtitles,
         allowanceMs,

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:chaquopy/chaquopy.dart';
 
@@ -13,6 +14,7 @@ class ChineseTraditionalLanguage extends Language {
           countryCode: "TW",
           readingDirection: ReadingDirection.verticalRTL,
           isSpaceDelimited: false,
+          textBaseline: TextBaseline.ideographic,
         );
 
   @override

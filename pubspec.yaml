@@ -106,7 +106,6 @@ dependencies:
   flutter_keyboard_visibility:
   image:
   screenshot:
-  camera:
 dev_dependencies:
   flutter_test:
     sdk: flutter

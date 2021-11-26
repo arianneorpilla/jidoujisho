@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:kana_kit/kana_kit.dart';
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:ve_dart/ve_dart.dart';
@@ -15,6 +16,7 @@ class JapaneseLanguage extends Language {
           countryCode: "JP",
           readingDirection: ReadingDirection.verticalRTL,
           isSpaceDelimited: false,
+          textBaseline: TextBaseline.ideographic,
         );
 
   Mecab mecab = Mecab();

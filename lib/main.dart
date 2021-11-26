@@ -59,7 +59,9 @@ class App extends StatelessWidget {
       child: Consumer<AppModel>(
         builder: (context, appModel, __) {
           return MaterialApp(
-            locale: appModel.getLocale(),
+            locale: (appModel.hasInitialized)
+                ? appModel.getCurrentLanguage().getLocale()
+                : null,
             debugShowCheckedModeBanner: false,
             theme: appModel.getLightTheme(context),
             darkTheme: appModel.getDarkTheme(context),

@@ -1,4 +1,5 @@
 import 'package:chisa/anki/anki_export_params.dart';
+import 'package:chisa/dictionary/dictionary_entry.dart';
 import 'package:chisa/dictionary/dictionary_search_result.dart';
 import 'package:chisa/media/media_histories/media_history.dart';
 import 'package:chisa/media/media_history_items/media_history_item.dart';
@@ -87,10 +88,7 @@ class ReaderPageState extends State<ReaderPage> {
         ]);
       }
 
-      themeData = appModel.getIsDarkMode()
-          ? appModel.getDarkTheme(context)
-          : appModel.getLightTheme(context);
-      isDarkMode = appModel.getIsDarkMode();
+      setIsDarkMode(appModel.getIsDarkMode());
       setState(() {});
     });
   }
@@ -168,6 +166,7 @@ class ReaderPageState extends State<ReaderPage> {
 
   void setIsDarkMode(bool value) {
     isDarkMode = value;
+
     dictionaryColor = isDarkMode
         ? Colors.grey.shade800.withOpacity(0.97)
         : Colors.grey.shade200.withOpacity(0.97);
@@ -187,14 +186,17 @@ class ReaderPageState extends State<ReaderPage> {
       ),
       actions: <Widget>[
         TextButton(
-          child: Text(
-            appModel.translate("dialog_yes"),
-            style: TextStyle(
-              color: Theme.of(context).focusColor,
+            child: Text(
+              appModel.translate("dialog_yes"),
+              style: TextStyle(
+                color: Theme.of(context).focusColor,
+              ),
             ),
-          ),
-          onPressed: () => Navigator.pop(context, true),
-        ),
+            onPressed: () {
+              Navigator.pop(context, true);
+              appModel.dictionaryUpdateFlipflop.value =
+                  !appModel.dictionaryUpdateFlipflop.value;
+            }),
         TextButton(
           child: Text(
             appModel.translate("dialog_no"),
@@ -628,7 +630,25 @@ class ReaderPageState extends State<ReaderPage> {
   }
 
   Future<void> openCardCreator(String selection) async {
-    AnkiExportParams initialParams = AnkiExportParams(sentence: selection);
+    MediaHistoryItem? contextItem = generateContextHistoryItem();
+    String? contextJson = "";
+    if (contextItem != null) {
+      contextJson = Uri.encodeFull(
+          "https://jidoujisho.context/${generateContextHistoryItem()!.toJson()}");
+    }
+
+    AnkiExportParams initialParams = AnkiExportParams(
+      sentence: selection,
+      context: contextJson,
+    );
+
+    if (latestResult != null) {
+      DictionaryEntry entry =
+          latestResult!.entries[latestResultEntryIndex.value];
+      initialParams.word = entry.word;
+      initialParams.meaning = entry.meaning;
+      initialParams.reading = entry.reading;
+    }
 
     searchTerm.value = "";
 

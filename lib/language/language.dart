@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:chisa/util/reading_direction.dart';
 
@@ -10,6 +11,7 @@ abstract class Language {
     required this.countryCode,
     required this.readingDirection,
     required this.isSpaceDelimited,
+    required this.textBaseline,
   });
 
   /// The name of the language, as known to native speakers.
@@ -40,6 +42,9 @@ abstract class Language {
   /// Whether or not this language is typically space-delimited.
   final bool isSpaceDelimited;
 
+  /// If this language uses an alphabetic or ideographic text baseline.
+  final TextBaseline textBaseline;
+
   /// Whether or not the language is initialised. Do not override.
   bool isInitialised = false;
 
@@ -53,6 +58,15 @@ abstract class Language {
   /// Initialise text segmentation and other tools necessary for this language
   /// to function.
   Future<void> initialiseLanguage();
+
+  /// For theming and other services.
+  Locale getLocale() {
+    return Locale(languageCode, countryCode);
+  }
+
+  TextBaseline getTextBaseline() {
+    return textBaseline;
+  }
 
   /// Given unsegmented [text], perform text segmentation particular to the
   /// language and return a list of parsed words.

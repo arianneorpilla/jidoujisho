@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:chaquopy/chaquopy.dart';
 
@@ -13,6 +14,7 @@ class ChineseSimplifiedLanguage extends Language {
           countryCode: "CN",
           readingDirection: ReadingDirection.verticalRTL,
           isSpaceDelimited: false,
+          textBaseline: TextBaseline.ideographic,
         );
 
   @override

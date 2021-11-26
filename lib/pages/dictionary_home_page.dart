@@ -80,26 +80,31 @@ class DictionaryPageState extends State<DictionaryHomePage>
   Widget build(BuildContext context) {
     super.build(context);
     appModel = Provider.of<AppModel>(context);
-
     if (!appModel.hasInitialized) {
       return Container();
     }
+    return ValueListenableBuilder(
+        valueListenable: appModel.dictionaryUpdateFlipflop,
+        builder: (_, __, ___) {
+          if (appModel
+              .getDictionaryMediaHistory()
+              .getDictionaryItems()
+              .isEmpty) {
+            return Stack(
+              children: [
+                buildEmptyBody(),
+                buildDictionarySearchWidget(),
+              ],
+            );
+          }
 
-    if (appModel.getDictionaryMediaHistory().getDictionaryItems().isEmpty) {
-      return Stack(
-        children: [
-          buildEmptyBody(),
-          buildDictionarySearchWidget(),
-        ],
-      );
-    }
-
-    return Stack(
-      children: [
-        buildBody(),
-        buildDictionarySearchWidget(),
-      ],
-    );
+          return Stack(
+            children: [
+              buildBody(),
+              buildDictionarySearchWidget(),
+            ],
+          );
+        });
   }
 
   Widget buildBody() {

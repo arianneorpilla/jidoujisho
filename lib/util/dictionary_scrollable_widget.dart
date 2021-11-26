@@ -54,6 +54,10 @@ class DictionaryScrollableWidget extends StatelessWidget {
     return ValueListenableBuilder<int>(
       valueListenable: indexNotifier,
       builder: (context, index, child) {
+        if (result.entries.length <= indexNotifier.value) {
+          indexNotifier.value = 0;
+        }
+
         DictionaryEntry dictionaryEntry = result.entries[indexNotifier.value];
 
         return GestureDetector(

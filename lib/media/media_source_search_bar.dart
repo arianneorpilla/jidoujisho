@@ -226,14 +226,16 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
   }
 
   Future<void> onSubmitted(String query) async {
-    if (mediaSource.isDirectTextEntry) {
-      appModel.addToSearchHistory(query,
+    if (searchBarController.query.trim().isNotEmpty) {
+      appModel.addToSearchHistory(searchBarController.query,
           historyType: mediaSource.getIdentifier());
+
       await mediaSource.onDirectTextEntrySubmit(
           context, searchBarController.query);
 
       searchBarController.clear();
-      return;
+      searchBarController.close();
+      widget.refreshCallback();
     }
 
     query = query.trim();
@@ -471,15 +473,17 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
           showIfClosed: true,
           showIfOpened: true,
           onPressed: () async {
-            appModel.addToSearchHistory(searchBarController.query,
-                historyType: mediaSource.getIdentifier());
-            await mediaSource.onDirectTextEntrySubmit(
-                context, searchBarController.query);
+            if (searchBarController.query.trim().isNotEmpty) {
+              appModel.addToSearchHistory(searchBarController.query,
+                  historyType: mediaSource.getIdentifier());
 
-            setState(() {});
-            widget.refreshCallback();
+              await mediaSource.onDirectTextEntrySubmit(
+                  context, searchBarController.query);
 
-            searchBarController.clear();
+              searchBarController.clear();
+              searchBarController.close();
+              widget.refreshCallback();
+            }
           },
         ),
       );

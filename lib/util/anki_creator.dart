@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:chisa/anki/anki_export_params.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/creator_page.dart';
+import 'package:chisa/util/export_paths.dart';
 import 'package:device_apps/device_apps.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -52,8 +55,10 @@ Future<void> addNote({
     String audio = "";
 
     if (params.imageFile != null && params.imageFile!.existsSync()) {
+      File exportImageFile = File(getPreviewImagePath());
+      params.imageFile!.copySync(exportImageFile.path);
       image = await addMediaFromUri(
-        "file:///${params.imageFile!.uri}",
+        "file:///${exportImageFile.uri}",
         newFileName,
         "image",
       );
@@ -61,8 +66,11 @@ Future<void> addNote({
     }
 
     if (params.audioFile != null && params.audioFile!.existsSync()) {
+      File exportAudioFile = File(getPreviewAudioPath());
+      params.audioFile!.copySync(exportAudioFile.path);
+
       audio = await addMediaFromUri(
-        "file:///${params.audioFile!.uri}",
+        "file:///${exportAudioFile.uri}",
         newFileName,
         "audio",
       );
