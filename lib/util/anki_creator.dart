@@ -55,7 +55,7 @@ Future<void> addNote({
     String audio = "";
 
     if (params.imageFile != null && params.imageFile!.existsSync()) {
-      File exportImageFile = File(getPreviewImagePath());
+      File exportImageFile = File(getExportImagePath());
       params.imageFile!.copySync(exportImageFile.path);
       image = await addMediaFromUri(
         "file:///${exportImageFile.uri}",
@@ -66,7 +66,7 @@ Future<void> addNote({
     }
 
     if (params.audioFile != null && params.audioFile!.existsSync()) {
-      File exportAudioFile = File(getPreviewAudioPath());
+      File exportAudioFile = File(getExportAudioPath());
       params.audioFile!.copySync(exportAudioFile.path);
 
       audio = await addMediaFromUri(

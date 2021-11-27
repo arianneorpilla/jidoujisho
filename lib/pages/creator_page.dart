@@ -78,6 +78,7 @@ class CreatorPageState extends State<CreatorPage> {
   final ValueNotifier<PlayerState> playerStateNotifier =
       ValueNotifier<PlayerState>(PlayerState.PAUSED);
   final ValueNotifier<bool> canExportNotifier = ValueNotifier<bool>(false);
+  bool isExportingBusy = false;
 
   TextEditingController getFieldController(AnkiExportField field) {
     switch (field) {
@@ -454,6 +455,11 @@ class CreatorPageState extends State<CreatorPage> {
                 ),
                 onTap: (canExport)
                     ? () async {
+                        if (isExportingBusy) {
+                          return;
+                        }
+
+                        isExportingBusy = true;
                         if (exportParams != AnkiExportParams()) {
                           await addNote(
                             deck: appModel.getLastAnkiDroidDeck(),
@@ -476,6 +482,7 @@ class CreatorPageState extends State<CreatorPage> {
                             );
                           }
                         }
+                        isExportingBusy = false;
                       }
                     : null,
               );

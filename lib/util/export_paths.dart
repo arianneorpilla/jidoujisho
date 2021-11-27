@@ -18,13 +18,21 @@ File getDCIMNoMediaFile() {
 }
 
 String getPreviewImagePath() {
-  return getDCIMDirectory().path + "exportImage.jpg";
+  return getDCIMDirectory().path + "previewImage.jpg";
 }
 
 String getPreviewImageMultiPath(int index) {
-  return getDCIMDirectory().path + "exportImage$index.jpg";
+  return getDCIMDirectory().path + "previewImage$index.jpg";
 }
 
 String getPreviewAudioPath() {
+  return getDCIMDirectory().path + "previewAudio.mp3";
+}
+
+String getExportImagePath() {
+  return getDCIMDirectory().path + "exportImage.jpg";
+}
+
+String getExportAudioPath() {
   return getDCIMDirectory().path + "exportAudio.mp3";
 }
