@@ -5,7 +5,8 @@ Widget showCenterIconMessage(
     {required BuildContext context,
     required String label,
     required IconData icon,
-    required bool jumpingDots}) {
+    required bool jumpingDots,
+    bool fullWidth = true}) {
   return SizedBox(
     width: double.maxFinite,
     child: Column(

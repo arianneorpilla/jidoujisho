@@ -43,17 +43,18 @@ class DictionaryDialogState extends State<DictionaryDialog> {
       content: buildContent(),
       actions: (widget.manageAllowed)
           ? <Widget>[
-              TextButton(
-                child: Text(
-                  appModel.translate("dialog_remove"),
-                  style: TextStyle(
-                    color: Theme.of(context).focusColor,
+              if (appModel.getCurrentDictionary() != null)
+                TextButton(
+                  child: Text(
+                    appModel.translate("dialog_remove"),
+                    style: TextStyle(
+                      color: Theme.of(context).focusColor,
+                    ),
                   ),
+                  onPressed: () async {
+                    showDictionaryDeleteDialog(context);
+                  },
                 ),
-                onPressed: () async {
-                  showDictionaryDeleteDialog(context);
-                },
-              ),
               TextButton(
                 child: Text(
                   appModel.translate("dialog_import"),
@@ -63,14 +64,6 @@ class DictionaryDialogState extends State<DictionaryDialog> {
                       context, appModel, lastDictionaryFormat);
                   //await dictionaryImport(context);
                   setState(() {});
-                },
-              ),
-              TextButton(
-                child: Text(
-                  appModel.translate("dialog_close"),
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
                 },
               ),
             ]
@@ -141,6 +134,7 @@ class DictionaryDialogState extends State<DictionaryDialog> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 24),
       child: showCenterIconMessage(
+        fullWidth: false,
         context: context,
         label: appModel.translate("import_dictionaries_for_use"),
         icon: Icons.auto_stories,

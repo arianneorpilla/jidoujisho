@@ -64,7 +64,6 @@ class TextSegmentationEnhancement extends AnkiExportEnhancement {
             borderRadius: BorderRadius.zero,
           ),
           title: SizedBox(
-            width: double.maxFinite,
             child: ValueListenableBuilder(
               valueListenable: indexesSelected,
               builder: (BuildContext context, List<bool> _, Widget? widget) {

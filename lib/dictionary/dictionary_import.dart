@@ -44,7 +44,7 @@ Future<void> dictionaryFileImport(
   if (!dictionaryFormat.isOnline) {
     Iterable<String>? filePaths = await FilesystemPicker.open(
       pickText: appModel.translate("dialog_select"),
-      cancelText: appModel.translate("dialog_return"),
+      cancelText: appModel.translate("dialog_cancel"),
       context: context,
       rootDirectories: await appModel.getMediaTypeDirectories(mediaType),
       fsType: FilesystemType.file,
