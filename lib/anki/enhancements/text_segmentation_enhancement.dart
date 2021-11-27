@@ -55,7 +55,6 @@ class TextSegmentationEnhancement extends AnkiExportEnhancement {
     String searchTerm = "";
 
     await showDialog(
-      barrierColor: Colors.transparent,
       context: context,
       builder: (context) {
         return AlertDialog(

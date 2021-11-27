@@ -61,6 +61,8 @@ class ReaderBrowserSource extends ReaderMediaSource {
       mediaHistoryItem: item,
       mediaSource: this,
       appModel: appModel,
+      // Should probably be false, linking to context from outside the app
+      // could be a serious security issue.
       saveHistoryItem: false,
     );
   }
@@ -116,6 +118,8 @@ class ReaderBrowserSource extends ReaderMediaSource {
           completeProgress: 0,
           mediaTypePrefs: mediaType.prefsDirectory(),
         ),
+        // Should probably be false, linking to context from outside the app
+        // could be a serious security issue.
         saveHistoryItem: false,
       ),
     );

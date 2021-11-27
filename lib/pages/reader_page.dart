@@ -102,6 +102,9 @@ class ReaderPageState extends State<ReaderPage> {
   Future<void> updateHistory() async {
     MediaHistory history =
         widget.params.mediaSource.mediaType.getMediaHistory(appModel);
+
+    widget.params.mediaHistoryItem.currentProgress = currentProgress;
+
     MediaHistoryItem item = MediaHistoryItem(
       currentProgress: currentProgress,
       completeProgress: completeProgress,
@@ -111,6 +114,8 @@ class ReaderPageState extends State<ReaderPage> {
         "scrollX": -1,
         "scrollY": -1,
       },
+      thumbnailPath: widget.params.mediaHistoryItem.thumbnailPath,
+      alias: widget.params.mediaHistoryItem.alias,
       title: title,
       author: author,
       sourceName: source.sourceName,

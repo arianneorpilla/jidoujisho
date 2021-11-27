@@ -145,8 +145,8 @@ class ViewerPageState extends State<ViewerPage> {
           ? const Color(0xcc424242)
           : const Color(0xdeeeeeee);
       dictionaryColor = appModel.getIsDarkMode()
-          ? Colors.grey.shade800.withOpacity(0.97)
-          : Colors.grey.shade200.withOpacity(0.97);
+          ? Colors.grey.shade800.withOpacity(0.75)
+          : Colors.grey.shade200.withOpacity(0.75);
 
       await initialiseViewer();
       setState(() {

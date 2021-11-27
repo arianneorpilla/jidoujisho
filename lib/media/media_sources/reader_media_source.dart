@@ -438,7 +438,7 @@ abstract class ReaderMediaSource extends MediaSource {
     return item.alias;
   }
 
-  ImageProvider<Object>? getHistoryThumbnailAlias(MediaHistoryItem item) {
+  FileImage? getHistoryThumbnailAlias(MediaHistoryItem item) {
     if (item.thumbnailPath.isEmpty) {
       return null;
     }
@@ -486,7 +486,7 @@ abstract class ReaderMediaSource extends MediaSource {
       text: "a",
     );
 
-    File? newCover;
+    FileImage? newCover = getHistoryThumbnailAlias(item);
     ValueNotifier<ImageProvider> imageProviderNotifier =
         ValueNotifier<ImageProvider>(thumbnail);
 
@@ -574,8 +574,8 @@ abstract class ReaderMediaSource extends MediaSource {
                             ImagePicker imagePicker = ImagePicker();
                             final pickedFile = await imagePicker.pickImage(
                                 source: ImageSource.gallery);
-                            newCover = File(pickedFile!.path);
-                            imageProviderNotifier.value = FileImage(newCover!);
+                            newCover = FileImage(File(pickedFile!.path));
+                            imageProviderNotifier.value = newCover!;
                           },
                           icon: const Icon(Icons.file_upload),
                         ),
@@ -634,7 +634,10 @@ abstract class ReaderMediaSource extends MediaSource {
                     if (thumbnailFile.existsSync()) {
                       thumbnailFile.deleteSync();
                     }
-                    newCover?.copySync(thumbnailPath);
+
+                    if (newCover != null) {
+                      newCover?.file.copySync(thumbnailPath);
+                    }
 
                     item.thumbnailPath = thumbnailPath;
                   } else {
