@@ -594,30 +594,6 @@ class ViewerPageState extends State<ViewerPage> {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text(appModel.translate('dialog_set')),
-              onPressed: () {
-                if (indexesSelected.value
-                    .every((selected) => selected == false)) {
-                  sentenceController.text = sentence;
-                } else {
-                  String wordsJoined = "";
-
-                  for (int i = 0; i < words.length; i++) {
-                    if (indexesSelected.value[i]) {
-                      wordsJoined += words[i];
-                    }
-                    if (isSpaceDelimited) {
-                      wordsJoined += " ";
-                    }
-                  }
-
-                  sentenceController.text = wordsJoined.trim();
-                }
-
-                Navigator.pop(context);
-              },
-            ),
-            TextButton(
               child: Text(appModel.translate('dialog_search')),
               onPressed: () {
                 if (indexesSelected.value
@@ -636,6 +612,30 @@ class ViewerPageState extends State<ViewerPage> {
                   }
 
                   setSearchTerm(wordsJoined.trim());
+                }
+
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              child: Text(appModel.translate('dialog_set')),
+              onPressed: () {
+                if (indexesSelected.value
+                    .every((selected) => selected == false)) {
+                  sentenceController.text = sentence;
+                } else {
+                  String wordsJoined = "";
+
+                  for (int i = 0; i < words.length; i++) {
+                    if (indexesSelected.value[i]) {
+                      wordsJoined += words[i];
+                    }
+                    if (isSpaceDelimited) {
+                      wordsJoined += " ";
+                    }
+                  }
+
+                  sentenceController.text = wordsJoined.trim();
                 }
 
                 Navigator.pop(context);
