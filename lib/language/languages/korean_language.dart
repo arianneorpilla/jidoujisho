@@ -21,7 +21,7 @@ class KoreanLanguage extends Language {
 
   @override
   Future<void> initialiseLanguage() async {
-    await mecab.init("assets/ipadic_korean/", true);
+    await mecab.init("assets/ipadic_korean", true);
   }
 
   @override

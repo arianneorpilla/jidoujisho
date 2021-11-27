@@ -21,9 +21,12 @@ void main() async {
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
+
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
+  await Permission.storage.request();
   await Permission.manageExternalStorage.request();
+
   requestAnkiDroidPermissions();
 
   initialiseExportPaths();

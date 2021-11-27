@@ -528,7 +528,7 @@ class ViewerPageState extends State<ViewerPage> {
   }
 
   Future<void> showOCRHelperDialog(String sentence,
-      {bool forFormField = true}) async {
+      {bool forFormField = false}) async {
     ValueNotifier<List<bool>> indexesSelected;
     List<Widget> textWidgets;
     List<String> words =
