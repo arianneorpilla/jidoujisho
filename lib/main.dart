@@ -10,6 +10,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/home_page.dart';
 import 'package:wakelock/wakelock.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 
 /// Application execution starts here.
 void main() async {
@@ -25,7 +26,9 @@ void main() async {
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   await Permission.storage.request();
-  await Permission.manageExternalStorage.request();
+  if ((await DeviceInfoPlugin().androidInfo).version.sdkInt! >= 30) {
+    await Permission.manageExternalStorage.request();
+  }
 
   requestAnkiDroidPermissions();
 

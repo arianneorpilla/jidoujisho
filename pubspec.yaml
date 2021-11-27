@@ -99,6 +99,7 @@ dependencies:
   image:
   screenshot:
   crop_image:
+  device_info_plus:
 dev_dependencies:
   # flutter_test:
   #   sdk: flutter
