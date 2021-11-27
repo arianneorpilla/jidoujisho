@@ -9,7 +9,6 @@
         android:label="jidoujisho"
         android:icon="@mipmap/launcher_icon"
         android:usesCleartextTraffic="true"
-        android:requestLegacyExternalStorage="true"
         xmlns:tools="http://schemas.android.com/tools"
         tools:replace="android:label">
         <activity

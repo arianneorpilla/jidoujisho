@@ -250,7 +250,7 @@ class ViewerLocalMediaSource extends ViewerMediaSource {
           overlays: [SystemUiOverlay.bottom],
         );
 
-        launchMediaPage(
+        await launchMediaPage(
           context,
           ViewerLaunchParams(
             appModel: appModel,
