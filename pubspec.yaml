@@ -1,5 +1,5 @@
-name: daijidoujisho
-description: A new Flutter project.
+name: chisa
+description: A highly versatile and modular framework leveraging a suite of natural language processing tools, enabling language-agnostic immersion learning on mobile.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -30,14 +30,81 @@ dependencies:
   flutter:
     sdk: flutter
 
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.2
-
+  provider: ^6.0.1
+  transparent_image: ^2.0.0
+  package_info_plus: ^1.3.0
+  url_launcher: ^6.0.10
+  shared_preferences: ^2.0.7
+  ve_dart:
+    git:
+      url: https://github.com/lrorpilla/ve_dart
+      ref: c366bb1ae24f6fad4f5c7e3a1efad5f2b8122e58
+  mecab_dart: ^0.1.3
+  path: ^1.8.0
+  mime: ^1.0.0
+  flutter_inappwebview:
+    git:
+      url: https://github.com/lrorpilla/flutter_inappwebview
+      ref: 1e4da7a5e5fa00903d981510a0b7c154ad3febe1
+  flutter_archive: ^4.0.1
+  path_provider: ^2.0.4
+  objectbox: ^1.2.0
+  objectbox_flutter_libs: any
+  progress_indicators: ^1.0.0
+  collection: ^1.15.0
+  kana_kit: ^2.0.0
+  fluttertoast: ^8.0.8
+  filesystem_picker:
+    git:
+      url: https://github.com/lrorpilla/filesystem_picker
+      ref: fc65b3a0b2f27db6b090ad9fbedd50d1eea7f132
+      path: package/
+  flutter_vlc_player: ^6.0.5
+  external_path: ^1.0.1
+  subtitle:
+    git:
+      url: https://github.com/lrorpilla/subtitle
+      ref: 89da88c1eba2eefc0f0ad4bc71d4ef1a4eb0e581
+  multi_value_listenable_builder: ^0.0.1
+  flutter_ffmpeg: ^0.4.2
+  permission_handler:
+  google_ml_kit: ^0.7.3
+  chaquopy:
+  share_plus:
+  scrollable_positioned_list:
+  blurrycontainer:
+    git:
+      url: https://github.com/Krish-Ideausher/blurry_container/
+      ref: fb26dd1fa81edeb048b14703f1c1f28e93ee43d0
+  flutter_colorpicker:
+  wakelock:
+  network_to_file_image:
+  audioplayers:
+  photo_view:
+  intl:
+  device_apps:
+  clipboard_listener:
+  youtube_explode_dart:
+    git:
+      url: https://github.com/Hexer10/youtube_explode_dart
+      ref: a51e38dcf8299f11271511922dc90ac48e7f5a47
+  infinite_scroll_pagination:
+  material_floating_search_bar:
+  http:
+  receive_sharing_intent:
+  image_picker:
+  flutter_cache_manager:
+  marquee:
+  flutter_keyboard_visibility:
+  image:
+  screenshot:
+  crop_image:
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
+  # flutter_test:
+  #   sdk: flutter
+  
+  build_runner: ^2.1.2
+  objectbox_generator: any
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -45,9 +112,17 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^1.0.0
+  flutter_launcher_icons: ^0.9.2
+  flutter_native_splash: ^1.3.1
+  dependency_validator: ^3.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/icon.png"
 
 # The following section is specific to Flutter.
 flutter:
@@ -61,6 +136,12 @@ flutter:
   # assets:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
+  assets:
+    - assets/icon/icon.png
+    - assets/icon/icon_small.png
+    - assets/ipadic_korean/
+    - assets/ipadic_japanese/
+    - assets/kanjium/accents.txt
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
@@ -84,6 +165,25 @@ flutter:
   #       - asset: fonts/TrajanPro.ttf
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
+  fonts:
+    - family: Noto Serif JP
+      fonts:
+        - asset: fonts/NotoSerifJP-ExtraLight.otf
+          weight: 200
+        - asset: fonts/NotoSerifJP-Light.otf
+          weight: 300
+        - asset: fonts/NotoSerifJP-Regular.otf
+          weight: 400
+        - asset: fonts/NotoSerifJP-Medium.otf
+          weight: 500
+        - asset: fonts/NotoSerifJP-SemiBold.otf
+          weight: 600
+        - asset: fonts/NotoSerifJP-Bold.otf
+          weight: 700
+        - asset: fonts/NotoSerifJP-Black.otf
+          weight: 900
+        
+
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
