@@ -611,7 +611,7 @@ abstract class ViewerMediaSource extends MediaSource {
           actions: <Widget>[
             TextButton(
               child: Text(
-                appModel.translate('dialog_return'),
+                appModel.translate('dialog_cancel'),
               ),
               onPressed: () {
                 Navigator.pop(context);
@@ -914,7 +914,7 @@ class ChapterMenuState extends State<ChapterMenu> {
     return [
       TextButton(
         child: Text(
-          appModel.translate('dialog_return'),
+          appModel.translate('dialog_cancel'),
         ),
         onPressed: () {
           toggleEditMode();

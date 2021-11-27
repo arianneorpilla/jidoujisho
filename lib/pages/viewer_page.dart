@@ -1144,7 +1144,7 @@ class ViewerPageState extends State<ViewerPage> {
       actions: <Widget>[
         TextButton(
           child: Text(
-            appModel.translate('dialog_return'),
+            appModel.translate('dialog_cancel'),
           ),
           onPressed: () => Navigator.pop(context),
         ),

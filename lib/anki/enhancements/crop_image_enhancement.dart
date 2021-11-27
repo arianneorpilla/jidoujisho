@@ -100,12 +100,6 @@ class CropImageEnhancement extends AnkiExportEnhancement {
               ),
               actions: <Widget>[
                 TextButton(
-                  child: Text(appModel.translate("dialog_return")),
-                  onPressed: () async {
-                    return Navigator.pop(context, false);
-                  },
-                ),
-                TextButton(
                   child: Text(appModel.translate("dialog_set")),
                   onPressed: () async {
                     return Navigator.pop(context, true);

@@ -48,7 +48,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     Iterable<String>? filePaths = await FilesystemPicker.open(
       title: "",
       pickText: appModel.translate("dialog_select"),
-      cancelText: appModel.translate("dialog_return"),
+      cancelText: appModel.translate("dialog_cancel"),
       context: context,
       rootDirectories: await appModel.getMediaTypeDirectories(mediaType),
       fsType: FilesystemType.file,

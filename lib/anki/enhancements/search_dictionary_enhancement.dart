@@ -61,14 +61,6 @@ class SearchDictionaryEnhancement extends AnkiExportEnhancement {
         actions: [
           TextButton(
             child: Text(
-              appModel.translate("dialog_return"),
-            ),
-            onPressed: () async {
-              Navigator.pop(context);
-            },
-          ),
-          TextButton(
-            child: Text(
               appModel.translate("dialog_set"),
             ),
             onPressed: () async {

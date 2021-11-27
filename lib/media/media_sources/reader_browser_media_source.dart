@@ -259,14 +259,6 @@ class ReaderBrowserSource extends ReaderMediaSource {
                                 actions: [
                                   TextButton(
                                     child: Text(
-                                      appModel.translate('dialog_return'),
-                                    ),
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                  ),
-                                  TextButton(
-                                    child: Text(
                                       appModel.translate('dialog_set'),
                                     ),
                                     onPressed: () async {
