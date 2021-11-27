@@ -82,32 +82,6 @@ class TextSegmentationEnhancement extends AnkiExportEnhancement {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text(
-                appModel.translate('dialog_set'),
-              ),
-              onPressed: () {
-                if (indexesSelected.value
-                    .every((selected) => selected == false)) {
-                  params.sentence = params.sentence;
-                } else {
-                  String wordsJoined = "";
-
-                  for (int i = 0; i < words.length; i++) {
-                    if (indexesSelected.value[i]) {
-                      wordsJoined += words[i];
-                    }
-                    if (isSpaceDelimited) {
-                      wordsJoined += " ";
-                    }
-                  }
-
-                  params.word = wordsJoined.trim();
-                }
-
-                Navigator.pop(context);
-              },
-            ),
-            TextButton(
               child: Text(appModel.translate('dialog_search')),
               onPressed: () async {
                 isSearch = true;
@@ -128,6 +102,32 @@ class TextSegmentationEnhancement extends AnkiExportEnhancement {
                   }
 
                   searchTerm = wordsJoined.trim();
+                }
+
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              child: Text(
+                appModel.translate('dialog_set'),
+              ),
+              onPressed: () {
+                if (indexesSelected.value
+                    .every((selected) => selected == false)) {
+                  params.sentence = params.sentence;
+                } else {
+                  String wordsJoined = "";
+
+                  for (int i = 0; i < words.length; i++) {
+                    if (indexesSelected.value[i]) {
+                      wordsJoined += words[i];
+                    }
+                    if (isSpaceDelimited) {
+                      wordsJoined += " ";
+                    }
+                  }
+
+                  params.word = wordsJoined.trim();
                 }
 
                 Navigator.pop(context);

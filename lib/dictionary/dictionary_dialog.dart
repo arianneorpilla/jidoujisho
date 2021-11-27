@@ -66,6 +66,14 @@ class DictionaryDialogState extends State<DictionaryDialog> {
                   setState(() {});
                 },
               ),
+              TextButton(
+                child: Text(
+                  appModel.translate("dialog_close"),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
             ]
           : [],
     );
@@ -134,7 +142,6 @@ class DictionaryDialogState extends State<DictionaryDialog> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 24),
       child: showCenterIconMessage(
-        fullWidth: false,
         context: context,
         label: appModel.translate("import_dictionaries_for_use"),
         icon: Icons.auto_stories,
