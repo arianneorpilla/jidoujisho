@@ -33,28 +33,39 @@ Future<void> dictionaryFileImport(
   receivePort.listen((data) {
     if (data is String) {
       progressNotifier.value = data;
+      debugPrint(data);
     }
   });
 
   MediaType mediaType = MediaType.dictionary;
 
-  Iterable<String>? filePaths = await FilesystemPicker.open(
-    pickText: appModel.translate("dialog_select"),
-    cancelText: appModel.translate("dialog_return"),
-    context: context,
-    rootDirectories: await appModel.getMediaTypeDirectories(mediaType),
-    fsType: FilesystemType.file,
-    folderIconColor: Colors.red,
-    themeData: Theme.of(context),
-  );
+  String filePath;
 
-  if (filePaths == null || filePaths.isEmpty) {
-    return;
+  if (!dictionaryFormat.isOnline) {
+    Iterable<String>? filePaths = await FilesystemPicker.open(
+      pickText: appModel.translate("dialog_select"),
+      cancelText: appModel.translate("dialog_return"),
+      context: context,
+      rootDirectories: await appModel.getMediaTypeDirectories(mediaType),
+      fsType: FilesystemType.file,
+      folderIconColor: Colors.red,
+      themeData: Theme.of(context),
+    );
+
+    if (filePaths == null || filePaths.isEmpty) {
+      return;
+    }
+
+    filePath = filePaths.first;
+
+    appModel.setLastPickedDirectory(mediaType, Directory(p.dirname(filePath)));
+  } else {
+    File workaroundFile =
+        File("${(await getApplicationSupportDirectory()).path}/temp");
+    workaroundFile.createSync();
+
+    filePath = workaroundFile.path;
   }
-
-  String filePath = filePaths.first;
-
-  appModel.setLastPickedDirectory(mediaType, Directory(p.dirname(filePath)));
 
   /// This file will be passed to a [DictionaryFormat]'s
   /// [prepareWorkingDirectory] method. Direct interaction with the file is

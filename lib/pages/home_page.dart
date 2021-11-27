@@ -224,6 +224,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Widget getResumeButton() {
+
+    
     return ValueListenableBuilder<bool>(
       valueListenable: appModel.resumableNotifier,
       builder: (context, bool resumable, _) {

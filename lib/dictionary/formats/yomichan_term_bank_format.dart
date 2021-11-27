@@ -21,6 +21,7 @@ class YomichanTermBankFormat extends DictionaryFormat {
   YomichanTermBankFormat()
       : super(
           formatName: "Yomichan Term Bank",
+          isOnline: false,
           prepareWorkingDirectory:
               prepareWorkingDirectoryYomichanTermBankFormat,
           getDictionaryName: getDictionaryNameYomichanTermBankFormat,

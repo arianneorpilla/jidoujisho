@@ -11,6 +11,7 @@ class CCCEdictSimplifiedFormat extends DictionaryFormat {
   CCCEdictSimplifiedFormat()
       : super(
           formatName: "CC-CEDICT (Simplified)",
+          isOnline: false,
           prepareWorkingDirectory:
               prepareWorkingDirectoryCCCEdictSimplifiedFormat,
           getDictionaryName: getDictionaryNameCCCEdictSimplifiedFormat,

@@ -9,7 +9,6 @@ import 'package:chisa/util/anki_export_field.dart';
 import 'package:chisa/util/export_paths.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 import 'package:network_to_file_image/network_to_file_image.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;

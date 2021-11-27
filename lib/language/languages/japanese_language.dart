@@ -24,7 +24,7 @@ class JapaneseLanguage extends Language {
 
   @override
   Future<void> initialiseLanguage() async {
-    await mecab.init("assets/ipadic", true);
+    await mecab.init("assets/ipadic_japanese/", true);
   }
 
   @override

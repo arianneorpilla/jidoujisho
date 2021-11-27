@@ -6,7 +6,7 @@
   <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
   <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
    <application
-        android:label="Chisa"
+        android:label="jidoujisho"
         android:icon="@mipmap/launcher_icon"
         android:usesCleartextTraffic="true"
         xmlns:tools="http://schemas.android.com/tools"

@@ -154,7 +154,7 @@ class AppLocalizations {
       'ankidroid_api': 'AnkiDroid API',
       'ankidroid_api_message':
           'The Card Creator requires the AnkiDroid API to be active in the background. Launch AnkiDroid in order to continue.',
-      'dialog_launch_ankidroid': 'LAUNCH ANKIDROID',
+      'dialog_launch_ankidroid': 'ANKIDROID',
       'enter_a_link': 'Enter a link',
       'youtube_trending': 'YouTube Trending',
       'localisation_warning': 'Community addons and enhancements are managed '
@@ -314,7 +314,7 @@ class AppLocalizations {
       'ankidroid_api': 'AnkiDroid API',
       'ankidroid_api_message':
           'Kailangan na buhay ang AnkiDroid API upang gamitin anYouTubeg Pagawaan ng Card. Buksan ang AnkiDroid upang magpatuloy.',
-      'dialog_launch_ankidroid': 'BUKSAN ANG ANKIDROID',
+      'dialog_launch_ankidroid': 'ANKIDROID',
       'enter_a_link': 'Magbigay ng link',
       'youtube_trending': 'Trending sa YouTube',
       'localisation_warning': 'Ang mga mod na gawa ng komunidad ay maaring '

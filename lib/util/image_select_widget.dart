@@ -18,6 +18,7 @@ class ImageSelectWidget extends StatefulWidget {
     required this.imageListNotifier,
     required this.imageSearchTermNotifier,
     required this.imageSearchingNotifier,
+    required this.setImageFile,
   }) : super(key: key);
 
   final AppModel appModel;
@@ -26,6 +27,7 @@ class ImageSelectWidget extends StatefulWidget {
   final ValueNotifier<int> imageListNotifier;
   final ValueNotifier<String> imageSearchTermNotifier;
   final ValueNotifier<bool> imageSearchingNotifier;
+  final Function(int) setImageFile;
 
   @override
   State<StatefulWidget> createState() => ImageSelectWidgetState();
@@ -138,7 +140,13 @@ class ImageSelectWidgetState extends State<ImageSelectWidget> {
           }
         }
 
-        setState(() {});
+        setState(() {
+          precacheImage(
+                  widget.filesNotifier.value[imageListNotifier.value], context)
+              .then((_) {
+            widget.setImageFile(imageListNotifier.value);
+          });
+        });
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,

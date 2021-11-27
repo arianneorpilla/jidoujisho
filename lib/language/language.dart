@@ -40,6 +40,7 @@ abstract class Language {
   final ReadingDirection readingDirection;
 
   /// Whether or not this language is typically space-delimited.
+  /// Korean is space delimited -- this should really be renamed.
   final bool isSpaceDelimited;
 
   /// If this language uses an alphabetic or ideographic text baseline.

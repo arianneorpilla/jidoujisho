@@ -529,15 +529,20 @@ class CreatorPageState extends State<CreatorPage> {
                               if (imagesNotifier.value.isNotEmpty ||
                                   imageSearchingNotifier.value)
                                 ImageSelectWidget(
-                                  appModel: appModel,
-                                  imageSearchingNotifier:
-                                      imageSearchingNotifier,
-                                  imageListNotifier: imageListNotifier,
-                                  imageSearchTermNotifier:
-                                      imageSearchTermNotifier,
-                                  fileNotifier: imageNotifier,
-                                  filesNotifier: imagesNotifier,
-                                ),
+                                    appModel: appModel,
+                                    imageSearchingNotifier:
+                                        imageSearchingNotifier,
+                                    imageListNotifier: imageListNotifier,
+                                    imageSearchTermNotifier:
+                                        imageSearchTermNotifier,
+                                    fileNotifier: imageNotifier,
+                                    filesNotifier: imagesNotifier,
+                                    setImageFile: (index) {
+                                      NetworkToFileImage networkToFileImage =
+                                          imagesNotifier.value[index];
+                                      exportParams.setImageFile(
+                                          networkToFileImage.file);
+                                    }),
                               if (audioNotifier.value != null)
                                 buildAudioPlayer(),
                               if (!widget.autoMode && !widget.editMode)
@@ -684,6 +689,12 @@ class CreatorPageState extends State<CreatorPage> {
                       imageListNotifier: imageListNotifier,
                       fileNotifier: imageNotifier,
                       filesNotifier: imagesNotifier,
+                      setImageFile: (index) {
+                        NetworkToFileImage networkToFileImage =
+                            imagesNotifier.value[index];
+
+                        exportParams.setImageFile(networkToFileImage.file);
+                      },
                     ),
                   if (audioNotifier.value != null) buildAudioPlayer(),
                   if (!widget.autoMode && !widget.editMode) buildDeckDropDown(),

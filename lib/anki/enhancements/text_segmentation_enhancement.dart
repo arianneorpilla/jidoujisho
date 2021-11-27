@@ -84,32 +84,6 @@ class TextSegmentationEnhancement extends AnkiExportEnhancement {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text(appModel.translate('dialog_search')),
-              onPressed: () async {
-                isSearch = true;
-
-                if (indexesSelected.value
-                    .every((selected) => selected == false)) {
-                  searchTerm = params.sentence;
-                } else {
-                  String wordsJoined = "";
-
-                  for (int i = 0; i < words.length; i++) {
-                    if (indexesSelected.value[i]) {
-                      wordsJoined += words[i];
-                    }
-                    if (isSpaceDelimited) {
-                      wordsJoined += " ";
-                    }
-                  }
-
-                  searchTerm = wordsJoined.trim();
-                }
-
-                Navigator.pop(context);
-              },
-            ),
-            TextButton(
               child: Text(
                 appModel.translate('dialog_set'),
               ),
@@ -130,6 +104,32 @@ class TextSegmentationEnhancement extends AnkiExportEnhancement {
                   }
 
                   params.word = wordsJoined.trim();
+                }
+
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              child: Text(appModel.translate('dialog_search')),
+              onPressed: () async {
+                isSearch = true;
+
+                if (indexesSelected.value
+                    .every((selected) => selected == false)) {
+                  searchTerm = params.sentence;
+                } else {
+                  String wordsJoined = "";
+
+                  for (int i = 0; i < words.length; i++) {
+                    if (indexesSelected.value[i]) {
+                      wordsJoined += words[i];
+                    }
+                    if (isSpaceDelimited) {
+                      wordsJoined += " ";
+                    }
+                  }
+
+                  searchTerm = wordsJoined.trim();
                 }
 
                 Navigator.pop(context);

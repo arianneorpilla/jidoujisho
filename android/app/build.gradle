@@ -45,10 +45,6 @@ android {
         jvmTarget = '1.8'
     }
 
-    ext {
-        flutterFFmpegPackage  = "<flutter ffmpeg package name listed in section 2.1>"
-    }
-
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
@@ -64,7 +60,6 @@ android {
         python {
             pip {
                 install "jieba"
-                install "yt-dlp"
             }
         }
         ndk {

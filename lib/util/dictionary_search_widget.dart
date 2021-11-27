@@ -217,7 +217,7 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
     );
   }
 
-  Future<void> onQueryChanged(String query) async {
+  Future<void> onSubmitted(String query) async {
     query = query.trim();
     if (appModel.getCurrentDictionary() == null) {
       return;
@@ -228,6 +228,40 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
       return;
     }
     if (!isSearching) {
+      setState(() {
+        isSearching = true;
+      });
+
+      selectedIndex = 0;
+
+      searchResult = await appModel.searchDictionary(query);
+      appModel.addToSearchHistory(query);
+
+      setState(() {
+        isSearching = false;
+      });
+    }
+  }
+
+  Future<void> onQueryChanged(String query) async {
+    query = query.trim();
+    if (appModel.getCurrentDictionary() == null) {
+      return;
+    }
+    if (query.isEmpty) {
+      searchResult = null;
+      setState(() {});
+      return;
+    }
+
+    if (!isSearching) {
+      if (!appModel
+          .getDictionaryFormatFromName(
+              appModel.getCurrentDictionary()!.formatName)
+          .isOnline) {
+        await Future.delayed(const Duration(seconds: 2), () {});
+      }
+
       setState(() {
         isSearching = true;
       });
@@ -259,73 +293,78 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return FloatingSearchBar(
-      controller: searchBarController,
-      hint: (appModel.getCurrentDictionary() != null)
-          ? appModel.getCurrentDictionaryName()
-          : appModel.translate("import_dictionaries_for_use"),
-      borderRadius: BorderRadius.zero,
-      scrollPadding: const EdgeInsets.only(top: 16, bottom: 56),
-      transitionDuration: Duration.zero,
-      margins: const EdgeInsets.symmetric(horizontal: 6),
-      width: double.maxFinite,
-      openAxisAlignment: 0.0,
-      elevation: 0,
-      closeOnBackdropTap: true,
-      debounceDelay: const Duration(milliseconds: 500),
-      progress: isSearching,
-      transition: SlideFadeFloatingSearchBarTransition(),
-      onFocusChanged: onFocusChanged,
-      backgroundColor: (appModel.getIsDarkMode())
-          ? Theme.of(context).cardColor
-          : const Color(0xFFE5E5E5),
-      backdropColor: (appModel.getIsDarkMode())
-          ? Colors.black.withOpacity(0.95)
-          : Colors.white.withOpacity(0.95),
-      physics:
-          const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-      clearQueryOnClose: true,
-      accentColor: Theme.of(context).focusColor,
-      onQueryChanged: onQueryChanged,
-      onSubmitted: onQueryChanged,
-      leadingActions: [
-        buildDictionaryButton(),
-        buildBackButton(),
-      ],
-      automaticallyImplyBackButton: false,
-      actions: [
-        FloatingSearchBarAction.icon(
-          onTap: () async {
-            DictionaryEntry entry = searchResult!.entries[selectedIndex];
+    return SafeArea(
+      maintainBottomViewPadding: true,
+      child: FloatingSearchBar(
+        controller: searchBarController,
+        hint: (appModel.getCurrentDictionary() != null)
+            ? appModel.getCurrentDictionaryName()
+            : appModel.translate("import_dictionaries_for_use"),
+        borderRadius: BorderRadius.zero,
+        scrollPadding: const EdgeInsets.only(top: 16, bottom: 56),
+        transitionDuration: Duration.zero,
+        margins: const EdgeInsets.symmetric(horizontal: 6),
+        height: 48,
+        width: double.maxFinite,
+        openAxisAlignment: 0.0,
+        elevation: 0,
+        closeOnBackdropTap: true,
+        debounceDelay: const Duration(milliseconds: 500),
+        progress: isSearching,
+        transition: SlideFadeFloatingSearchBarTransition(),
+        onFocusChanged: onFocusChanged,
+        backgroundColor: (appModel.getIsDarkMode())
+            ? Theme.of(context).cardColor
+            : const Color(0xFFE5E5E5),
+        backdropColor: (appModel.getIsDarkMode())
+            ? Colors.black.withOpacity(0.95)
+            : Colors.white.withOpacity(0.95),
+        physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics()),
+        clearQueryOnClose: true,
+        accentColor: Theme.of(context).focusColor,
+        onQueryChanged: onQueryChanged,
+        onSubmitted: onSubmitted,
+        leadingActions: [
+          buildDictionaryButton(),
+          buildBackButton(),
+        ],
+        automaticallyImplyBackButton: false,
+        actions: [
+          FloatingSearchBarAction.icon(
+            onTap: () async {
+              DictionaryEntry entry = searchResult!.entries[selectedIndex];
 
-            await navigateToCreator(
-              context: context,
-              appModel: appModel,
-              initialParams: AnkiExportParams(
-                word: entry.word,
-                meaning: entry.meaning,
-                reading: entry.reading,
-              ),
-            );
-          },
-          icon: Icon(
-            Icons.note_add,
+              await navigateToCreator(
+                context: context,
+                appModel: appModel,
+                initialParams: AnkiExportParams(
+                  word: entry.word,
+                  meaning: entry.meaning,
+                  reading: entry.reading,
+                ),
+              );
+            },
+            icon: Icon(
+              Icons.note_add,
+              color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
+            ),
+            size: 20,
+            showIfClosed: false,
+          ),
+          FloatingSearchBarAction.searchToClear(
+            size: 20,
+            duration: Duration.zero,
+            showIfClosed: true,
             color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
           ),
-          size: 20,
-          showIfClosed: false,
-        ),
-        FloatingSearchBarAction.searchToClear(
-          size: 20,
-          duration: Duration.zero,
-          showIfClosed: true,
-          color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
-        ),
-      ],
-      isScrollControlled: searchResult == null || searchResult!.entries.isEmpty,
-      builder: (context, transition) {
-        return buildBody();
-      },
+        ],
+        isScrollControlled:
+            searchResult == null || searchResult!.entries.isEmpty,
+        builder: (context, transition) {
+          return buildBody();
+        },
+      ),
     );
   }
 

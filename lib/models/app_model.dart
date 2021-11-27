@@ -10,6 +10,8 @@ import 'package:chisa/anki/enhancements/dictionary_menu_enhancement.dart';
 import 'package:chisa/anki/enhancements/image_picker_enhancement.dart';
 import 'package:chisa/anki/enhancements/search_dictionary_enhancement.dart';
 import 'package:chisa/anki/enhancements/text_segmentation_enhancement.dart';
+import 'package:chisa/dictionary/formats/naver_dictionary_format.dart';
+import 'package:chisa/language/languages/korean_language.dart';
 import 'package:chisa/media/media_sources/player_network_stream_source.dart';
 import 'package:chisa/media/media_sources/reader_browser_media_source.dart';
 import 'package:chisa/media/media_sources/reader_ttu_media_source.dart';
@@ -150,6 +152,7 @@ class AppModel with ChangeNotifier {
     YomichanTermBankFormat(),
     CCCEdictTraditionalFormat(),
     CCCEdictSimplifiedFormat(),
+    NaverDictionaryFormat(),
   ];
   List<PlayerMediaSource> playerMediaSources = [
     PlayerLocalMediaSource(),
@@ -210,10 +213,10 @@ class AppModel with ChangeNotifier {
 
   void populateLanguages() {
     List<Language> languages = [
-      JapaneseLanguage(),
       ChineseTraditionalLanguage(),
       ChineseSimplifiedLanguage(),
-      EnglishLanguage(),
+      JapaneseLanguage(),
+      KoreanLanguage(),
     ];
 
     for (Language language in languages) {
@@ -755,8 +758,7 @@ class AppModel with ChangeNotifier {
   }
 
   String getTargetLanguageName() {
-    return _sharedPreferences.getString("targetLanguage") ??
-        availableLanguages.keys.first;
+    return _sharedPreferences.getString("targetLanguage") ?? "日本語";
   }
 
   Future<void> setTargetLanguageName(String targetLanguage) async {
@@ -805,7 +807,7 @@ class AppModel with ChangeNotifier {
     // For isolate updates.
     ReceivePort receivePort = ReceivePort();
     receivePort.listen((data) {
-      debugPrint(data);
+      debugPrint(data.toString());
     });
 
     Language currentLanguage = getCurrentLanguage();
@@ -860,11 +862,20 @@ class AppModel with ChangeNotifier {
       metadata: currentDictionary.metadata,
       sendPort: receivePort.sendPort,
     );
-    if (dictionaryFormat.searchResultsEnhancement != null) {
-      processedResult =
-          await compute(dictionaryFormat.searchResultsEnhancement!, params);
+    if (!dictionaryFormat.isOnline) {
+      if (dictionaryFormat.searchResultsEnhancement != null) {
+        processedResult =
+            await compute(dictionaryFormat.searchResultsEnhancement!, params);
+      } else {
+        processedResult = unprocessedResult;
+      }
     } else {
-      processedResult = unprocessedResult;
+      if (dictionaryFormat.searchResultsEnhancement != null) {
+        processedResult =
+            await dictionaryFormat.searchResultsEnhancement!(params);
+      } else {
+        processedResult = unprocessedResult;
+      }
     }
 
     if (processedResult.entries.isNotEmpty) {
@@ -875,8 +886,10 @@ class AppModel with ChangeNotifier {
       );
     }
 
-    _resultsCache[currentDictionary.dictionaryName]![searchTerm] =
-        processedResult;
+    if (processedResult.entries.isNotEmpty) {
+      _resultsCache[currentDictionary.dictionaryName]![searchTerm] =
+          processedResult;
+    }
 
     _isSearching = false;
 
@@ -1192,7 +1205,8 @@ class AppModel with ChangeNotifier {
 
     if (language is JapaneseLanguage ||
         language is ChineseSimplifiedLanguage ||
-        language is ChineseTraditionalLanguage) {
+        language is ChineseTraditionalLanguage ||
+        language is KoreanLanguage) {
       return TextBaseline.ideographic;
     }
 

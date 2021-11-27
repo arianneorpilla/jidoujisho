@@ -175,8 +175,6 @@ class ViewerCameraMediaSource extends ViewerMediaSource {
 
   @override
   Widget? buildSourceButton(BuildContext context, ViewerPageState page) {
-    AppModel appModel = Provider.of<AppModel>(context, listen: false);
-
     return Row(
       children: [
         Material(

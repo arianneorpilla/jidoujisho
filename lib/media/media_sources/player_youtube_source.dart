@@ -281,7 +281,7 @@ class PlayerYouTubeSource extends PlayerMediaSource {
   }
 
   @override
-  int get getSearchDebounceDelay => 1000;
+  int get getSearchDebounceDelay => 2000;
 
   @override
   FutureOr<List<SubtitleItem>> provideSubtitles(
@@ -907,6 +907,8 @@ class PlayerYouTubeSource extends PlayerMediaSource {
         return "PLFgquLnL59alUOZtPriN3d3nnnDVhPX3J";
       case "zh-TW": // Traditional Chinese (Taiwan)
         return "PLPv96SVEnDc1xDQPAHzjKnkOKHopdG6hL";
+      case "ko-KR": // Korean (South Korea)
+        return "PLmtapKaZsgZsjfcjrumAR4KVu5LDDeugN";
       default:
         return null;
     }

@@ -8,6 +8,7 @@ import 'package:chisa/dictionary/dictionary_entry.dart';
 import 'package:chisa/language/languages/chinese_simplified_language.dart';
 import 'package:chisa/language/languages/chinese_traditional_language.dart';
 import 'package:chisa/language/languages/japanese_language.dart';
+import 'package:chisa/language/languages/korean_language.dart';
 import 'package:chisa/media/media_sources/viewer_media_source.dart';
 import 'package:chisa/util/anki_creator.dart';
 import 'package:chisa/util/anki_export_field.dart';
@@ -97,6 +98,8 @@ class ViewerPageState extends State<ViewerPage> {
   bool shouldDialogBeTop = false;
   double sentenceFieldHeight = 48;
 
+  late TextRecognitionOptions script;
+
   DictionarySearchResult? searchResult;
   ValueNotifier<String> searchTerm = ValueNotifier<String>("");
   ValueNotifier<String> searchMessage = ValueNotifier<String>("");
@@ -126,6 +129,18 @@ class ViewerPageState extends State<ViewerPage> {
     });
 
     WidgetsBinding.instance!.addPostFrameCallback((_) async {
+      script = TextRecognitionOptions.DEFAULT;
+      if (appModel.getCurrentLanguage() is JapaneseLanguage) {
+        script = TextRecognitionOptions.JAPANESE;
+      }
+      if (appModel.getCurrentLanguage() is ChineseSimplifiedLanguage ||
+          appModel.getCurrentLanguage() is ChineseTraditionalLanguage) {
+        script = TextRecognitionOptions.CHINESE;
+      }
+      if (appModel.getCurrentLanguage() is KoreanLanguage) {
+        script = TextRecognitionOptions.KOREAN;
+      }
+
       menuColor = appModel.getIsDarkMode()
           ? const Color(0xcc424242)
           : const Color(0xdeeeeeee);
@@ -188,15 +203,6 @@ class ViewerPageState extends State<ViewerPage> {
       await file.writeAsBytes(croppedImageBytes);
 
       debugPrint("CROPPED IMAGE WRITTEN");
-
-      TextRecognitionOptions script = TextRecognitionOptions.DEFAULT;
-      if (appModel.getCurrentLanguage() is JapaneseLanguage) {
-        script = TextRecognitionOptions.JAPANESE;
-      }
-      if (appModel.getCurrentLanguage() is ChineseSimplifiedLanguage ||
-          appModel.getCurrentLanguage() is ChineseTraditionalLanguage) {
-        script = TextRecognitionOptions.CHINESE;
-      }
 
       final textDetector = GoogleMlKit.vision.textDetectorV2();
       String sentence = "";
@@ -1208,8 +1214,6 @@ class ViewerPageState extends State<ViewerPage> {
   Widget buildSentenceField({
     TextInputType keyboardType = TextInputType.multiline,
   }) {
-    AnkiExportField field = AnkiExportField.sentence;
-
     return TextFormField(
       minLines: 1,
       maxLines: 5,

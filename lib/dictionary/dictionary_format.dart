@@ -12,6 +12,7 @@ import 'package:chisa/dictionary/dictionary_search_result.dart';
 abstract class DictionaryFormat {
   DictionaryFormat({
     required this.formatName,
+    required this.isOnline,
     required this.prepareWorkingDirectory,
     required this.getDictionaryName,
     required this.getDictionaryEntries,
@@ -24,6 +25,10 @@ abstract class DictionaryFormat {
   /// The name of this dictionary format. For example, this could be a
   /// "Yomichan Term Bank Dictionary" or "ABBYY Lingvo".
   late String formatName;
+
+  /// Whether or not this dictionary is online. If so, a [File] will not be
+  /// required for installing the format.
+  late bool isOnline;
 
   /// An appropriate icon for this dictionary format.
   late IconData formatIcon;

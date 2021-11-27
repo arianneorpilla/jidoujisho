@@ -226,7 +226,8 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
   }
 
   Future<void> onSubmitted(String query) async {
-    if (searchBarController.query.trim().isNotEmpty) {
+    if (mediaSource.isDirectTextEntry &&
+        searchBarController.query.trim().isNotEmpty) {
       appModel.addToSearchHistory(searchBarController.query,
           historyType: mediaSource.getIdentifier());
 
@@ -298,104 +299,106 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
           .toList();
     }
 
-    return FloatingSearchBar(
-      controller: searchBarController,
-      hint: mediaSource.sourceName,
-      borderRadius: BorderRadius.zero,
-      scrollPadding: const EdgeInsets.only(top: 16, bottom: 56),
-      transitionDuration: Duration.zero,
-      margins: const EdgeInsets.symmetric(horizontal: 6),
-      openAxisAlignment: 0.0,
-      height: 48,
-      width: double.maxFinite,
-      closeOnBackdropTap: true,
-      debounceDelay: Duration.zero,
-      showCursor: !mediaSource.noSearchAction,
-      elevation: 0,
-      progress: isSearching,
-      transition: SlideFadeFloatingSearchBarTransition(),
-      onSubmitted: onSubmitted,
-      onFocusChanged: onFocusChanged,
-      backgroundColor: (appModel.getIsDarkMode())
-          ? Theme.of(context).cardColor
-          : const Color(0xFFE5E5E5),
-      backdropColor: (appModel.getIsDarkMode())
-          ? Colors.black.withOpacity(0.95)
-          : Colors.white.withOpacity(0.95),
-      physics:
-          const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-      clearQueryOnClose: true,
-      accentColor: Theme.of(context).focusColor,
-      onQueryChanged: onQueryChanged,
-      leadingActions: [
-        buildSourceButton(),
-        if (!mediaSource.noSearchAction) buildBackButton(),
-      ],
-      automaticallyImplyBackButton: false,
-      actions: getAllActions(),
-      isScrollControlled: true,
-      builder: (context, transition) {
-        if (mediaSource.noSearchAction) {
-          return Container();
-        }
+    return SafeArea(
+      child: FloatingSearchBar(
+        controller: searchBarController,
+        hint: mediaSource.sourceName,
+        borderRadius: BorderRadius.zero,
+        scrollPadding: const EdgeInsets.only(top: 16, bottom: 56),
+        transitionDuration: Duration.zero,
+        margins: const EdgeInsets.symmetric(horizontal: 6),
+        openAxisAlignment: 0.0,
+        height: 48,
+        width: double.maxFinite,
+        closeOnBackdropTap: true,
+        debounceDelay: Duration.zero,
+        showCursor: !mediaSource.noSearchAction,
+        elevation: 0,
+        progress: isSearching,
+        transition: SlideFadeFloatingSearchBarTransition(),
+        onSubmitted: onSubmitted,
+        onFocusChanged: onFocusChanged,
+        backgroundColor: (appModel.getIsDarkMode())
+            ? Theme.of(context).cardColor
+            : const Color(0xFFE5E5E5),
+        backdropColor: (appModel.getIsDarkMode())
+            ? Colors.black.withOpacity(0.95)
+            : Colors.white.withOpacity(0.95),
+        physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics()),
+        clearQueryOnClose: true,
+        accentColor: Theme.of(context).focusColor,
+        onQueryChanged: onQueryChanged,
+        leadingActions: [
+          buildSourceButton(),
+          if (!mediaSource.noSearchAction) buildBackButton(),
+        ],
+        automaticallyImplyBackButton: false,
+        actions: getAllActions(),
+        isScrollControlled: true,
+        builder: (context, transition) {
+          if (mediaSource.noSearchAction) {
+            return Container();
+          }
 
-        if (searchSuggestions.isEmpty) {
-          searchSuggestions = appModel
-              .getSearchHistory(historyType: mediaSource.getIdentifier())
-              .reversed
-              .toList();
-        }
+          if (searchSuggestions.isEmpty) {
+            searchSuggestions = appModel
+                .getSearchHistory(historyType: mediaSource.getIdentifier())
+                .reversed
+                .toList();
+          }
 
-        if (searchBarController.query.isEmpty && searchSuggestions.isEmpty) {
-          if (mediaSource.isDirectTextEntry) {
+          if (searchBarController.query.isEmpty && searchSuggestions.isEmpty) {
+            if (mediaSource.isDirectTextEntry) {
+              return buildPlaceholderMessage(
+                label: appModel.translate("enter_a_link"),
+                icon: Icons.subdirectory_arrow_left,
+              );
+            } else {
+              return buildPlaceholderMessage(
+                label: appModel.translate("enter_a_search_term"),
+                icon: Icons.search,
+              );
+            }
+          } else if (pagingController == null) {
+            return buildSearchSuggestions();
+          }
+
+          if (pagingController!.itemList != null &&
+              pagingController!.itemList!.isEmpty) {
             return buildPlaceholderMessage(
-              label: appModel.translate("enter_a_link"),
-              icon: Icons.subdirectory_arrow_left,
-            );
-          } else {
-            return buildPlaceholderMessage(
-              label: appModel.translate("enter_a_search_term"),
-              icon: Icons.search,
+              label:
+                  "${appModel.translate("dictionary_nomatch_before")}『${searchBarController.query}』${appModel.translate("dictionary_nomatch_after")}",
+              icon: Icons.search_off,
             );
           }
-        } else if (pagingController == null) {
-          return buildSearchSuggestions();
-        }
 
-        if (pagingController!.itemList != null &&
-            pagingController!.itemList!.isEmpty) {
+          if (pagingController!.itemList != null || isSearching) {
+            return RawScrollbar(
+              controller: scrollController,
+              thumbColor: (appModel.getIsDarkMode())
+                  ? Colors.grey[700]
+                  : Colors.grey[400],
+              child: mediaSource.getDisplayLayout(
+                appModel: appModel,
+                context: context,
+                homeRefreshCallback: widget.refreshCallback,
+                searchRefreshCallback: () {
+                  setState(() {});
+                },
+                scrollController: scrollController,
+                pagingController: pagingController!,
+              ),
+            );
+          }
+
           return buildPlaceholderMessage(
             label:
                 "${appModel.translate("dictionary_nomatch_before")}『${searchBarController.query}』${appModel.translate("dictionary_nomatch_after")}",
             icon: Icons.search_off,
           );
-        }
-
-        if (pagingController!.itemList != null || isSearching) {
-          return RawScrollbar(
-            controller: scrollController,
-            thumbColor: (appModel.getIsDarkMode())
-                ? Colors.grey[700]
-                : Colors.grey[400],
-            child: mediaSource.getDisplayLayout(
-              appModel: appModel,
-              context: context,
-              homeRefreshCallback: widget.refreshCallback,
-              searchRefreshCallback: () {
-                setState(() {});
-              },
-              scrollController: scrollController,
-              pagingController: pagingController!,
-            ),
-          );
-        }
-
-        return buildPlaceholderMessage(
-          label:
-              "${appModel.translate("dictionary_nomatch_before")}『${searchBarController.query}』${appModel.translate("dictionary_nomatch_after")}",
-          icon: Icons.search_off,
-        );
-      },
+        },
+      ),
     );
   }
 
