@@ -1,0 +1,57 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "1:7041703081449884989",
+      "lastPropertyId": "6:624579025683556172",
+      "name": "DictionaryEntry",
+      "properties": [
+        {
+          "id": "1:768952278332524501",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:6225214747296226372",
+          "name": "word",
+          "type": 9
+        },
+        {
+          "id": "3:8620385421435412407",
+          "name": "reading",
+          "type": 9
+        },
+        {
+          "id": "4:8710289386171597190",
+          "name": "meaning",
+          "type": 9
+        },
+        {
+          "id": "5:1062204330975600162",
+          "name": "extra",
+          "type": 9
+        },
+        {
+          "id": "6:624579025683556172",
+          "name": "popularity",
+          "type": 8
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "1:7041703081449884989",
+  "lastIndexId": "0:0",
+  "lastRelationId": "0:0",
+  "lastSequenceId": "0:0",
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [],
+  "retiredRelationUids": [],
+  "version": 1
+}
