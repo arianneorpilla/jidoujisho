@@ -255,7 +255,7 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
     }
 
     if (!isSearching) {
-      if (!appModel
+      if (appModel
           .getDictionaryFormatFromName(
               appModel.getCurrentDictionary()!.formatName)
           .isOnline) {

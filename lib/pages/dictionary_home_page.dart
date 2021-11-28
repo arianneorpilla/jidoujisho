@@ -143,7 +143,7 @@ class DictionaryPageState extends State<DictionaryHomePage>
   Widget buildEmptyBody() {
     return Column(
       children: [
-        const SizedBox(height: 60),
+        const SizedBox(height: 48),
         buildEmptyMessage(),
       ],
     );
