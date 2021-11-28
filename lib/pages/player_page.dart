@@ -1495,6 +1495,8 @@ class PlayerPageState extends State<PlayerPage>
               options: getSubtitleDialogOptions(subtitleEmbeddedTracks),
             ),
           );
+
+          refreshSubtitleWidget();
         },
       ),
       BottomSheetDialogOption(
