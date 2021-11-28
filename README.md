@@ -173,12 +173,14 @@ A primer on the basics of the application is as follows.
 
 jidoujisho is written in <b><a href="https://dart.dev/">Dart</a></b> and powered by <b><a href="https://flutter.dev/">Flutter</a></b>. Reader WebView linked to <b><a href="https://ttu-ebook.web.app">ッツ Ebook Reader</b></a>. Video streaming via <b><a href="https://youtube.com/">YouTube</a></b>. Image search via <b><a href="https://bing.com//">Bing</a></b>.
 
-Natural language processing tools include <b><a href="https://github.com/fxsjy/jieba">jieba</a></b> for Chinese, <b><a href="https://github.com/Kimtaro/ve">Ve</a></b> and <b><a href="https://pub.dev/packages/mecab_dart">MeCab</a></b> for Japanese and <a href="https://github.com/shirakaba/mecab-ko"><b>MeCab</a></b> for Korean. Japanese pitch accent patterns are sourced from <b><a href="https://github.com/mifunetoshiro/kanjium">Kanjium</a></b>. Optical character recognition powered by <b><a href="https://developers.google.com/ml-kit">Google ML Kit</b></a>. 
+Natural language processing tools include <b><a href="https://github.com/fxsjy/jieba">jieba</a></b> for Chinese via <b><a href="https://chaquo.com/chaquopy/">Chaquopy</a></b>, <b><a href="https://github.com/Kimtaro/ve">Ve</a></b> and <b><a href="https://pub.dev/packages/mecab_dart">MeCab</a></b> for Japanese and <a href="https://github.com/shirakaba/mecab-ko"><b>MeCab</a></b> for Korean. Japanese pitch accent patterns are sourced from <b><a href="https://github.com/mifunetoshiro/kanjium">Kanjium</a></b>. Optical character recognition powered by <b><a href="https://developers.google.com/ml-kit">Google ML Kit</b></a>. 
 
 If you like what I've done so far, you can help me out by testing the application on various devices so that I can gauge the compatibility of the application with different versions of Android, <b><a href="https://www.buymeacoffee.com/lrorpilla">making a donation</a></b> or collaborating with me on further improvements.
 
 The logo of the application is both by <b><a href="https://88suzysuzy.carrd.co/">suzy</b></a> and <b><a href="https://www.buymeacoffee.com/marblesaa">Aaron Marbella</a></b>, support their awesome work if you can!
 
 # ⚖️ Licensing
+
+<b><a href="https://chaquo.com/chaquopy/">Chaquopy</a></b>: jidoujisho makes use of Chaquopy to run Python packages on Android devices, and has been granted a free open-source license to use the SDK. If you wish to build from source and make code changes to the project, inquire for the license key.
 
 <a href="https://github.com/mifunetoshiro/kanjium"><b>Kanjium</b></a>: The pitch accent notation, verb particle data, phonetics, homonyms and other additions or modifications to EDICT, KANJIDIC or KRADFILE were provided by Uros O. through his free database.
