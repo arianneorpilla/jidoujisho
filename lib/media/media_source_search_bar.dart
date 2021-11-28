@@ -88,8 +88,11 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
 
   Widget buildSearchHistoryItem(String historyItem) {
     return InkWell(
-      onTap: () {
+      onTap: () async {
         searchBarController.query = historyItem;
+        if (mediaSource.isDirectTextEntry) {
+          await onSubmitted(searchBarController.query);
+        }
       },
       onLongPress: () async {
         if (searchBarController.query.isEmpty) {

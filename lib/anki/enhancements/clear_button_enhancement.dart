@@ -53,6 +53,8 @@ class ClearButtonEnhancement extends AnkiExportEnhancement {
         params.audioSearch = "";
         break;
     }
+
+    FocusScope.of(context).unfocus();
     return params;
   }
 }

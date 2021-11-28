@@ -269,6 +269,19 @@ class PlayerPageState extends State<PlayerPage>
       setState(() {});
       startHideTimer();
 
+      Wakelock.enable();
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+      if (appModel.isPlayerOrientationPortrait()) {
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+        ]);
+      } else {
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight,
+        ]);
+      }
+
       Future.delayed(const Duration(seconds: 3), () {
         unhideDuringInitFlag = true;
       });
@@ -1233,6 +1246,7 @@ class PlayerPageState extends State<PlayerPage>
         if (details.primaryVelocity!.abs() > 0) {
           bool exporting = false;
           await dialogSmartPause();
+
           await openTranscript(
               context: context,
               subtitles: subtitleItem.controller.subtitles,
@@ -1310,19 +1324,6 @@ class PlayerPageState extends State<PlayerPage>
 
     if (!isPlayerReady) {
       return buildPlaceholder();
-    }
-
-    Wakelock.enable();
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    if (appModel.isPlayerOrientationPortrait()) {
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-      ]);
-    } else {
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.landscapeLeft,
-        DeviceOrientation.landscapeRight,
-      ]);
     }
 
     Duration position = playerController.value.position;
@@ -1501,6 +1502,7 @@ class PlayerPageState extends State<PlayerPage>
         icon: Icons.timer,
         action: () async {
           await dialogSmartPause();
+
           await openTranscript(
               context: context,
               subtitles: subtitleItem.controller.subtitles,
@@ -1530,6 +1532,7 @@ class PlayerPageState extends State<PlayerPage>
 
                 refreshSubtitleWidget();
               });
+
           await dialogSmartResume();
         },
       ),
@@ -2051,6 +2054,7 @@ class PlayerPageState extends State<PlayerPage>
 
     clearDictionaryMessage();
     dialogSmartPause();
+
     await navigateToCreator(
         context: context,
         appModel: appModel,
@@ -2146,6 +2150,7 @@ class PlayerPageState extends State<PlayerPage>
 
   Future<void> importExternalSubtitle() async {
     MediaType mediaType = widget.params.mediaSource.mediaType;
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     Iterable<String>? filePaths = await FilesystemPicker.open(
       title: "",
       pickText: appModel.translate("dialog_select"),
@@ -2157,6 +2162,7 @@ class PlayerPageState extends State<PlayerPage>
       folderIconColor: Colors.red,
       themeData: Theme.of(context),
     );
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
     if (filePaths == null || filePaths.isEmpty) {
       return;

@@ -88,6 +88,17 @@ Future<void> showSubtitleOptionsDialog(
                     decoration: InputDecoration(
                         labelText:
                             appModel.translate("player_option_subtitle_delay"),
+                        suffixIcon: IconButton(
+                          iconSize: 18,
+                          color: appModel.getIsDarkMode()
+                              ? Colors.white
+                              : Colors.black,
+                          onPressed: () async {
+                            delayController.text = "0";
+                            FocusScope.of(context).unfocus();
+                          },
+                          icon: const Icon(Icons.undo),
+                        ),
                         suffixText: " ms"),
                   ),
                   TextField(
@@ -100,6 +111,17 @@ Future<void> showSubtitleOptionsDialog(
                     decoration: InputDecoration(
                         labelText:
                             appModel.translate("player_option_audio_allowance"),
+                        suffixIcon: IconButton(
+                          iconSize: 18,
+                          color: appModel.getIsDarkMode()
+                              ? Colors.white
+                              : Colors.black,
+                          onPressed: () async {
+                            allowanceController.text = "0";
+                            FocusScope.of(context).unfocus();
+                          },
+                          icon: const Icon(Icons.undo),
+                        ),
                         suffixText: " ms"),
                   ),
                   TextField(
@@ -112,6 +134,17 @@ Future<void> showSubtitleOptionsDialog(
                     decoration: InputDecoration(
                         labelText:
                             appModel.translate("player_option_font_size"),
+                        suffixIcon: IconButton(
+                          iconSize: 18,
+                          color: appModel.getIsDarkMode()
+                              ? Colors.white
+                              : Colors.black,
+                          onPressed: () async {
+                            fontSizeController.text = "24.0";
+                            FocusScope.of(context).unfocus();
+                          },
+                          icon: const Icon(Icons.undo),
+                        ),
                         suffixText: " px"),
                   ),
                   TextField(
@@ -121,6 +154,17 @@ Future<void> showSubtitleOptionsDialog(
                     decoration: InputDecoration(
                       labelText:
                           appModel.translate("player_option_regex_filter"),
+                      suffixIcon: IconButton(
+                        iconSize: 18,
+                        color: appModel.getIsDarkMode()
+                            ? Colors.white
+                            : Colors.black,
+                        onPressed: () async {
+                          regexFilterController.clear();
+                          FocusScope.of(context).unfocus();
+                        },
+                        icon: const Icon(Icons.undo),
+                      ),
                     ),
                   ),
                 ],

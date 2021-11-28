@@ -543,6 +543,7 @@ abstract class ViewerMediaSource extends MediaSource {
                             : Colors.black,
                         onPressed: () async {
                           nameAliasController.text = defaultTitle;
+                          FocusScope.of(context).unfocus();
                         },
                         icon: const Icon(Icons.undo),
                       ),

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:chisa/util/busy_icon_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 
 import 'package:collection/collection.dart';
@@ -177,10 +178,13 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
         iconSize: 20,
         onPressed: () async {
           page.dialogSmartPause();
+          await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
           await showFilePicker(
             context,
             pushReplacement: true,
           );
+          await SystemChrome.setEnabledSystemUIMode(
+              SystemUiMode.immersiveSticky);
           page.dialogSmartResume();
         },
       ),

@@ -250,6 +250,14 @@ class ReaderBrowserSource extends ReaderMediaSource {
                           await showDialog(
                             context: context,
                             builder: (context) {
+                              editingController.selection = TextSelection(
+                                  baseOffset: 0,
+                                  extentOffset:
+                                      editingController.value.text.length);
+                              TextSelection(
+                                  baseOffset: 0,
+                                  extentOffset:
+                                      editingController.value.text.length);
                               return AlertDialog(
                                 contentPadding: const EdgeInsets.only(
                                     top: 20, left: 20, right: 20, bottom: 20),
@@ -258,9 +266,6 @@ class ReaderBrowserSource extends ReaderMediaSource {
                                 ),
                                 content: TextFormField(
                                   autofocus: true,
-                                  onEditingComplete: () {
-                                    Navigator.pop(context);
-                                  },
                                   onFieldSubmitted: (value) async {
                                     Navigator.pop(context);
                                     await controller.loadUrl(
@@ -278,13 +283,28 @@ class ReaderBrowserSource extends ReaderMediaSource {
                                   decoration: InputDecoration(
                                     enabledBorder: UnderlineInputBorder(
                                       borderSide: BorderSide(
-                                          color: Theme.of(context)
-                                              .unselectedWidgetColor
-                                              .withOpacity(0.5)),
+                                        color: Theme.of(context)
+                                            .unselectedWidgetColor
+                                            .withOpacity(0.5),
+                                      ),
                                     ),
                                     focusedBorder: UnderlineInputBorder(
                                       borderSide: BorderSide(
                                           color: Theme.of(context).focusColor),
+                                    ),
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        Icons.subdirectory_arrow_left,
+                                        color: state.isDarkMode
+                                            ? Colors.white
+                                            : Colors.black,
+                                      ),
+                                      onPressed: () async {
+                                        Navigator.pop(context);
+                                        await controller.loadUrl(
+                                            urlRequest: URLRequest(
+                                                url: Uri.parse(newUrl)));
+                                      },
                                     ),
                                     hintText:
                                         appModel.translate("enter_a_link"),

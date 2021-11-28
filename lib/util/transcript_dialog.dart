@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/util/time_format.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:subtitle/subtitle.dart';
@@ -74,57 +75,60 @@ Widget transcriptDialog({
       String offsetEndText = getTimestampFromDuration(offsetEnd);
       String subtitleDuration = "$offsetStartText - $offsetEndText";
 
-      return ListTile(
-        selected: selectedIndex == index,
-        selectedTileColor: Colors.red.withOpacity(0.15),
-        dense: true,
-        title: Column(
-          children: [
-            const SizedBox(height: 6),
-            Row(
-              children: [
-                const Icon(
-                  Icons.textsms_outlined,
-                  size: 12.0,
-                  color: Colors.red,
-                ),
-                const SizedBox(width: 16.0),
-                Text(
-                  subtitleDuration,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: durationColor,
+      return Material(
+        color: Colors.transparent,
+        child: ListTile(
+          selected: selectedIndex == index,
+          selectedTileColor: Colors.red.withOpacity(0.15),
+          dense: true,
+          title: Column(
+            children: [
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.textsms_outlined,
+                    size: 12.0,
+                    color: Colors.red,
                   ),
-                ),
-                const SizedBox(width: 4.0),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(
-              subtitleText,
-              textAlign: TextAlign.center,
-              softWrap: true,
-              style: TextStyle(
-                fontSize: 20,
-                color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
+                  const SizedBox(width: 16.0),
+                  Text(
+                    subtitleDuration,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: durationColor,
+                    ),
+                  ),
+                  const SizedBox(width: 4.0),
+                ],
               ),
-            ),
-            const SizedBox(height: 6),
-          ],
+              const SizedBox(height: 6),
+              Text(
+                subtitleText,
+                textAlign: TextAlign.center,
+                softWrap: true,
+                style: TextStyle(
+                  fontSize: 20,
+                  color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
+                ),
+              ),
+              const SizedBox(height: 6),
+            ],
+          ),
+          onTap: () async {
+            if (onTapCallback != null) {
+              onTapCallback(index);
+              Navigator.pop(context);
+            }
+          },
+          onLongPress: () async {
+            if (onLongPressCallback != null) {
+              onLongPressCallback(index);
+              Navigator.pop(context);
+            }
+          },
         ),
-        onTap: () async {
-          if (onTapCallback != null) {
-            onTapCallback(index);
-            Navigator.pop(context);
-          }
-        },
-        onLongPress: () async {
-          if (onLongPressCallback != null) {
-            onLongPressCallback(index);
-            Navigator.pop(context);
-          }
-        },
       );
     },
   );
@@ -144,11 +148,13 @@ Future<void> openTranscript({
       ? const Color(0xcc212121)
       : const Color(0xefeeeeee);
 
-  await showModalBottomSheet(
-    backgroundColor: backgroundColor,
+  await SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.edgeToEdge,
+  );
+
+  await showDialog(
+    barrierColor: backgroundColor,
     context: context,
-    isScrollControlled: true,
-    useRootNavigator: true,
     builder: (context) => transcriptDialog(
       context: context,
       subtitles: subtitles,
@@ -158,5 +164,9 @@ Future<void> openTranscript({
       onTapCallback: onTapCallback,
       onLongPressCallback: onLongPressCallback,
     ),
+  );
+
+  await SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.immersiveSticky,
   );
 }
