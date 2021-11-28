@@ -84,6 +84,9 @@ class AppModel with ChangeNotifier {
   SharedPreferences get sharedPreferences => _sharedPreferences;
 
   ValueNotifier<bool> dictionaryUpdateFlipflop = ValueNotifier<bool>(false);
+  ValueNotifier<bool> playerUpdateFlipflop = ValueNotifier<bool>(false);
+  ValueNotifier<bool> readerUpdateFlipflop = ValueNotifier<bool>(false);
+  ValueNotifier<bool> viewerUpdateFlipflop = ValueNotifier<bool>(false);
 
   /// Necessary to get version details upon app start.
   final PackageInfo _packageInfo;

@@ -50,15 +50,17 @@ class BusyIconButtonState extends State<BusyIconButton> {
       icon: widget.icon,
       enableFeedback: !enabled,
       onPressed: () async {
-        setState(() {
-          enabled = false;
-        });
-        try {
-          await widget.onPressed();
-        } finally {
+        if (enabled) {
           setState(() {
-            enabled = true;
+            enabled = false;
           });
+          try {
+            await widget.onPressed();
+          } finally {
+            setState(() {
+              enabled = true;
+            });
+          }
         }
       },
       color: (enabled) ? enabledColor : disabledColor,

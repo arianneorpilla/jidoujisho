@@ -249,7 +249,7 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
           state.setThumbnail(messageJson["base64Image"]);
         }
 
-        Future.delayed(const Duration(seconds: 1), () async {
+        Future.delayed(const Duration(seconds: 2), () async {
           if (state.scrollX != -1) {
             await controller.scrollTo(x: state.scrollX, y: 0, animated: false);
             state.setScrollX(-1);

@@ -387,6 +387,8 @@ class ViewerPageState extends State<ViewerPage> {
               Navigator.of(context).popUntil((route) => route.isFirst);
               appModel.dictionaryUpdateFlipflop.value =
                   !appModel.dictionaryUpdateFlipflop.value;
+              appModel.viewerUpdateFlipflop.value =
+                  !appModel.viewerUpdateFlipflop.value;
             }),
         TextButton(
           child: Text(

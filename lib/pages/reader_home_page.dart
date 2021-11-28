@@ -67,21 +67,29 @@ class ReaderHomePageState extends State<ReaderHomePage>
 
     appModel = Provider.of<AppModel>(context);
 
-    if (widget.mediaType.getMediaHistory(appModel).getItems().isEmpty) {
-      return Stack(
-        children: [
-          buildEmptyBody(),
-          buildSearchBar(),
-        ],
-      );
+    if (!appModel.hasInitialized) {
+      return Container();
     }
 
-    return Stack(
-      children: [
-        buildBody(),
-        buildSearchBar(),
-      ],
-    );
+    return ValueListenableBuilder(
+        valueListenable: appModel.readerUpdateFlipflop,
+        builder: (_, __, ___) {
+          if (widget.mediaType.getMediaHistory(appModel).getItems().isEmpty) {
+            return Stack(
+              children: [
+                buildEmptyBody(),
+                buildSearchBar(),
+              ],
+            );
+          }
+
+          return Stack(
+            children: [
+              buildBody(),
+              buildSearchBar(),
+            ],
+          );
+        });
   }
 
   Widget buildBody() {

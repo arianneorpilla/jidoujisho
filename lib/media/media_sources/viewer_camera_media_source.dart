@@ -114,7 +114,7 @@ class ViewerCameraMediaSource extends ViewerMediaSource {
           chapterName: "Camera Roll",
           canOpenHistory: false,
           hideSlider: true,
-          pushReplacement: true,
+          pushReplacement: pushFillerScreen,
           mediaHistoryItem: MediaHistoryItem(
             key: cameraImagePath,
             sourceName: sourceName,
@@ -180,7 +180,7 @@ class ViewerCameraMediaSource extends ViewerMediaSource {
         Material(
           color: Colors.transparent,
           child: BusyIconButton(
-            iconSize: 20,
+            iconSize: 24,
             icon: const Icon(Icons.photo_rounded),
             onPressed: () async {
               await showCameraScreen(context, ImageSource.gallery);
@@ -191,7 +191,7 @@ class ViewerCameraMediaSource extends ViewerMediaSource {
           color: Colors.transparent,
           child: BusyIconButton(
             icon: const Icon(Icons.add_a_photo),
-            iconSize: 20,
+            iconSize: 24,
             onPressed: () async {
               await showCameraScreen(context, ImageSource.camera);
             },
@@ -203,11 +203,6 @@ class ViewerCameraMediaSource extends ViewerMediaSource {
 
   @override
   Future<void> onSearchBarTap(BuildContext context) async {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (context) => Container(color: Colors.black),
-      ),
-    );
     await showCameraScreen(
       context,
       ImageSource.camera,

@@ -201,6 +201,8 @@ class ReaderPageState extends State<ReaderPage> {
               Navigator.pop(context, true);
               appModel.dictionaryUpdateFlipflop.value =
                   !appModel.dictionaryUpdateFlipflop.value;
+              appModel.readerUpdateFlipflop.value =
+                  !appModel.readerUpdateFlipflop.value;
             }),
         TextButton(
           child: Text(

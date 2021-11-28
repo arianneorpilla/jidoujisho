@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:chisa/anki/anki_export_enhancement.dart';
 import 'package:chisa/anki/anki_export_params.dart';
 import 'package:chisa/anki/enhancements/bing_search_enhancement.dart';
+import 'package:chisa/anki/enhancements/pitch_accent_export_enhancement.dart';
 import 'package:chisa/dictionary/dictionary_entry.dart';
 import 'package:chisa/dictionary/dictionary_search_result.dart';
 import 'package:chisa/media/media_history_items/dictionary_media_history_item.dart';
@@ -79,7 +80,8 @@ class SearchDictionaryEnhancement extends AnkiExportEnhancement {
     );
 
     if (searched) {
-      Future.delayed(const Duration(milliseconds: 200), () {
+      Future.delayed(const Duration(milliseconds: 50), () {
+        FocusScope.of(context).unfocus();
         runPiggybackEnhancements(context, appModel, params, state);
       });
     }
@@ -87,7 +89,10 @@ class SearchDictionaryEnhancement extends AnkiExportEnhancement {
     return params;
   }
 
-  List<Type> piggybackEnhancements = [BingSearchEnhancement];
+  List<Type> piggybackEnhancements = [
+    BingSearchEnhancement,
+    PitchAccentExportEnhancement,
+  ];
 
   /// This function takes every function listed above and executes them (if
   /// activated as auto) after the search.
@@ -108,6 +113,7 @@ class SearchDictionaryEnhancement extends AnkiExportEnhancement {
           appModel.getAutoFieldEnhancement(field);
       if (enhancement != null) {
         if (piggybackEnhancements.contains(enhancement.runtimeType)) {
+          print(enhancement.runtimeType);
           AnkiExportParams piggybackParams = await enhancement.enhanceParams(
             context: context,
             params: state.getCurrentParams(),
@@ -116,7 +122,10 @@ class SearchDictionaryEnhancement extends AnkiExportEnhancement {
             appModel: appModel,
           );
 
+          print(piggybackParams.reading);
+
           state.setCurrentParams(piggybackParams, field: field);
+          state.setState(() {});
         }
       }
     }

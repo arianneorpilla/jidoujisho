@@ -247,7 +247,7 @@ class ReaderBrowserSource extends ReaderMediaSource {
                           TextEditingController editingController =
                               TextEditingController(text: url);
 
-                          showDialog(
+                          await showDialog(
                             context: context,
                             builder: (context) {
                               return AlertDialog(
@@ -256,22 +256,24 @@ class ReaderBrowserSource extends ReaderMediaSource {
                                 shape: const RoundedRectangleBorder(
                                   borderRadius: BorderRadius.zero,
                                 ),
-                                actions: [
-                                  TextButton(
-                                    child: Text(
-                                      appModel.translate('dialog_set'),
-                                    ),
-                                    onPressed: () async {
-                                      Navigator.pop(context);
-                                      await controller.loadUrl(
-                                          urlRequest: URLRequest(
-                                              url: Uri.parse(newUrl)));
-                                    },
-                                  ),
-                                ],
                                 content: TextFormField(
+                                  autofocus: true,
+                                  onEditingComplete: () {
+                                    Navigator.pop(context);
+                                  },
+                                  onFieldSubmitted: (value) async {
+                                    Navigator.pop(context);
+                                    await controller.loadUrl(
+                                        urlRequest:
+                                            URLRequest(url: Uri.parse(newUrl)));
+                                  },
                                   controller: editingController,
                                   maxLines: 1,
+                                  onTap: () => editingController.selection =
+                                      TextSelection(
+                                          baseOffset: 0,
+                                          extentOffset: editingController
+                                              .value.text.length),
                                   keyboardType: TextInputType.url,
                                   decoration: InputDecoration(
                                     enabledBorder: UnderlineInputBorder(

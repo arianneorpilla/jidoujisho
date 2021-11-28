@@ -191,7 +191,7 @@ class PitchAccentExportEnhancement extends AnkiExportEnhancement {
     for (int i = 0; i < pitchAccentEntries.length; i++) {
       allPitches += getHtmlPitch(reading, pitchAccentEntries[i]);
       if (i != pitchAccentEntries.length - 1) {
-        allPitches += "\n";
+        allPitches += "<br>";
       }
     }
 

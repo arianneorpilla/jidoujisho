@@ -67,21 +67,28 @@ class ViewerHomePageState extends State<ViewerHomePage>
 
     appModel = Provider.of<AppModel>(context);
 
-    if (widget.mediaType.getMediaHistory(appModel).getItems().isEmpty) {
-      return Stack(
-        children: [
-          buildEmptyBody(),
-          buildSearchBar(),
-        ],
-      );
+    if (!appModel.hasInitialized) {
+      return Container();
     }
+    return ValueListenableBuilder(
+        valueListenable: appModel.viewerUpdateFlipflop,
+        builder: (_, __, ___) {
+          if (widget.mediaType.getMediaHistory(appModel).getItems().isEmpty) {
+            return Stack(
+              children: [
+                buildEmptyBody(),
+                buildSearchBar(),
+              ],
+            );
+          }
 
-    return Stack(
-      children: [
-        buildBody(),
-        buildSearchBar(),
-      ],
-    );
+          return Stack(
+            children: [
+              buildBody(),
+              buildSearchBar(),
+            ],
+          );
+        });
   }
 
   Widget buildBody() {

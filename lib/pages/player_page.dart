@@ -115,6 +115,8 @@ class PlayerPageState extends State<PlayerPage>
       Navigator.pop(context, true);
       appModel.dictionaryUpdateFlipflop.value =
           !appModel.dictionaryUpdateFlipflop.value;
+      appModel.playerUpdateFlipflop.value =
+          !appModel.playerUpdateFlipflop.value;
     } else {
       Widget alertDialog = AlertDialog(
         shape: const RoundedRectangleBorder(
@@ -135,6 +137,8 @@ class PlayerPageState extends State<PlayerPage>
                 Navigator.pop(context, true);
                 appModel.dictionaryUpdateFlipflop.value =
                     !appModel.dictionaryUpdateFlipflop.value;
+                appModel.playerUpdateFlipflop.value =
+                    !appModel.playerUpdateFlipflop.value;
               }),
           TextButton(
             child: Text(
