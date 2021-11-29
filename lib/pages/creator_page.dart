@@ -166,6 +166,11 @@ class CreatorPageState extends State<CreatorPage> {
   void setCurrentParams(AnkiExportParams newParams, {AnkiExportField? field}) {
     exportParams.setAllValues(newParams);
 
+    bool audioChanged = false;
+    if (exportParams.audioFile != audioNotifier.value) {
+      audioChanged = true;
+    }
+
     setState(() {
       sentenceController.text = exportParams.sentence;
       wordController.text = exportParams.word;
@@ -178,7 +183,7 @@ class CreatorPageState extends State<CreatorPage> {
       imageNotifier.value = exportParams.imageFile;
       audioNotifier.value = exportParams.audioFile;
 
-      if (audioNotifier.value != null) {
+      if (audioChanged) {
         audioPlayer.setUrl(audioNotifier.value!.path, isLocal: true).then((_) {
           audioPlayer.getDuration().then((milliseconds) {
             positionNotifier.value = Duration.zero;

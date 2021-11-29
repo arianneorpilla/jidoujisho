@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_sources/player_media_source.dart';
 import 'package:chisa/media/media_sources/reader_media_source.dart';
@@ -51,4 +53,6 @@ Future<void> returnFromAppLink(BuildContext context, String link) async {
 
   MediaHistoryItem item = MediaHistoryItem.fromJson(mediaHistoryJson);
   await returnFromContext(context, item);
+
+  exit(0);
 }

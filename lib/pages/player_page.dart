@@ -192,8 +192,8 @@ class PlayerPageState extends State<PlayerPage>
 
   @override
   void dispose() async {
+    super.dispose();
     playerController.removeListener(listener);
-    playerController.dispose();
     ClipboardListener.removeListener(copyClipboardAction);
 
     await Wakelock.disable();
@@ -203,8 +203,7 @@ class PlayerPageState extends State<PlayerPage>
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
-
-    super.dispose();
+    await playerController.dispose();
   }
 
   Future<void> copyClipboardAction() async {
@@ -264,9 +263,9 @@ class PlayerPageState extends State<PlayerPage>
         initialiseEmbeddedSubtitles();
       });
 
-      isPlayerReady = true;
-
-      setState(() {});
+      setState(() {
+        isPlayerReady = true;
+      });
       startHideTimer();
 
       Wakelock.enable();
@@ -307,6 +306,7 @@ class PlayerPageState extends State<PlayerPage>
     cancelDragSubtitlesTimer();
     dragSearchTimer = Timer(const Duration(milliseconds: 500), () {
       setSearchTerm(newTerm);
+      dragToSelectFocusNode.unfocus();
     });
   }
 
@@ -1096,13 +1096,11 @@ class PlayerPageState extends State<PlayerPage>
           await playerController.stop();
         }
         playPauseIconAnimationController.forward();
-        await playerController.play();
 
-        if (isFinished) {
-          Future.delayed(const Duration(seconds: 3), () async {
-            await playerController.seekTo(Duration.zero);
-          });
-        }
+        await playerController.play();
+        await Future.delayed(const Duration(seconds: 2), () async {
+          await playerController.seekTo(Duration.zero);
+        });
       }
     }
   }

@@ -201,6 +201,7 @@ class AppModel with ChangeNotifier {
             .setEnabled(AnkiExportField.word, 1);
         await BingSearchEnhancement(appModel: this)
             .setEnabled(AnkiExportField.image, 2);
+        await BingSearchEnhancement(appModel: this).setAuto();
 
         setFirstTimeInitialised();
       }
