@@ -107,6 +107,7 @@ public class MainActivity extends FlutterActivity {
                             "  text-align: center;\n" +
                             "  color: black;\n" +
                             "  background-color: white;\n" +
+                            "  white-space: pre-line;\n" +
                             "}\n" +
                             "\n" +
                             "#sentence {\n" +

@@ -41,7 +41,7 @@ class CropImageEnhancement extends AnkiExportEnhancement {
     CropController cropController = CropController();
 
     if (await showCropDialog(
-        context, cropController, FileImage(params.imageFile!))) {
+        context, cropController, FileImage(params.imageFile!), state)) {
       ui.Image croppedImage = await cropController.croppedBitmap();
       ByteData? data =
           await croppedImage.toByteData(format: ui.ImageByteFormat.png);
@@ -62,8 +62,6 @@ class CropImageEnhancement extends AnkiExportEnhancement {
       ];
     }
 
-    state.notifyImageNotSearching();
-
     return params;
   }
 
@@ -71,6 +69,7 @@ class CropImageEnhancement extends AnkiExportEnhancement {
     BuildContext context,
     CropController cropController,
     ImageProvider image,
+    CreatorPageState state,
   ) async {
     ScrollController scrollController = ScrollController();
 
@@ -102,6 +101,7 @@ class CropImageEnhancement extends AnkiExportEnhancement {
                 TextButton(
                   child: Text(appModel.translate("dialog_set")),
                   onPressed: () async {
+                    state.notifyImageNotSearching();
                     return Navigator.pop(context, true);
                   },
                 ),
