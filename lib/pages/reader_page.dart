@@ -95,8 +95,8 @@ class ReaderPageState extends State<ReaderPage> {
 
   @override
   void dispose() async {
-    ClipboardListener.removeListener(copyClipboardAction);
     super.dispose();
+    ClipboardListener.removeListener(copyClipboardAction);
   }
 
   Future<void> updateHistory() async {

@@ -63,21 +63,19 @@ class TextSegmentationEnhancement extends AnkiExportEnhancement {
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.zero,
           ),
-          title: SizedBox(
-            child: ValueListenableBuilder(
-              valueListenable: indexesSelected,
-              builder: (BuildContext context, List<bool> _, Widget? widget) {
-                return RawScrollbar(
-                  thumbColor: (appModel.getIsDarkMode())
-                      ? Colors.grey[700]
-                      : Colors.grey[400],
-                  controller: scrollController,
-                  child: SingleChildScrollView(
-                    controller: scrollController,
-                    child: Wrap(children: textWidgets),
-                  ),
-                );
-              },
+          content: RawScrollbar(
+            thumbColor: (appModel.getIsDarkMode())
+                ? Colors.grey[700]
+                : Colors.grey[400],
+            controller: scrollController,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: ValueListenableBuilder(
+                valueListenable: indexesSelected,
+                builder: (BuildContext context, List<bool> _, Widget? widget) {
+                  return Wrap(children: textWidgets);
+                },
+              ),
             ),
           ),
           actions: <Widget>[

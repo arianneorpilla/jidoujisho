@@ -157,11 +157,10 @@ class ViewerPageState extends State<ViewerPage> {
 
   @override
   void dispose() async {
+    super.dispose();
     ClipboardListener.removeListener(copyClipboardAction);
     pageController.dispose();
-    visibilitySubscription.cancel();
-
-    super.dispose();
+    await visibilitySubscription.cancel();
   }
 
   Future<void> copyClipboardAction() async {
@@ -576,22 +575,23 @@ class ViewerPageState extends State<ViewerPage> {
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.zero,
           ),
-          title: SizedBox(
+          content: SizedBox(
             width: double.maxFinite,
-            child: ValueListenableBuilder(
-              valueListenable: indexesSelected,
-              builder: (BuildContext context, List<bool> _, Widget? widget) {
-                return RawScrollbar(
-                  thumbColor: (appModel.getIsDarkMode())
-                      ? Colors.grey[700]
-                      : Colors.grey[400],
-                  controller: scrollController,
-                  child: SingleChildScrollView(
-                    controller: scrollController,
-                    child: Wrap(children: textWidgets),
-                  ),
-                );
-              },
+            child: RawScrollbar(
+              thumbColor: (appModel.getIsDarkMode())
+                  ? Colors.grey[700]
+                  : Colors.grey[400],
+              controller: scrollController,
+              child: SingleChildScrollView(
+                controller: scrollController,
+                child: ValueListenableBuilder(
+                  valueListenable: indexesSelected,
+                  builder:
+                      (BuildContext context, List<bool> _, Widget? widget) {
+                    return Wrap(children: textWidgets);
+                  },
+                ),
+              ),
             ),
           ),
           actions: <Widget>[
