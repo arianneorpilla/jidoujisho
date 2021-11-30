@@ -549,7 +549,6 @@ class ViewerPageState extends State<ViewerPage> {
 
     BuildContext keyContext = searchAreaKey.currentContext!;
 
-    // widget is visible
     final box = keyContext.findRenderObject() as RenderBox;
 
     sentenceFieldHeight = box.size.height;
@@ -703,15 +702,23 @@ class ViewerPageState extends State<ViewerPage> {
         String searchTerm = values.elementAt(0);
         String searchMessage = values.elementAt(1);
 
+        BuildContext keyContext = searchAreaKey.currentContext!;
+
+        final box = keyContext.findRenderObject() as RenderBox;
+
+        if (box.hasSize) {
+          sentenceFieldHeight = box.size.height;
+        }
+
         if (searchMessage.isNotEmpty) {
           return Align(
             alignment: Alignment.topCenter,
             child: Padding(
-              padding: const EdgeInsets.only(
-                left: 16,
-                right: 16,
-                top: 16,
-                bottom: 96,
+              padding: EdgeInsets.only(
+                bottom: 60,
+                left: 12,
+                right: 12,
+                top: (sentenceFieldHeight + 12),
               ),
               child: GestureDetector(
                 onTap: () {
