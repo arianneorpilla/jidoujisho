@@ -176,56 +176,56 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
       setState(() {});
     });
 
-    if (!isSearching) {
-      String before = query;
+    // if (!isSearching) {
+    //   String before = query;
 
-      await Future.delayed(const Duration(milliseconds: 500), () async {
-        String after = searchBarController.query;
-        if (before == after) {
-          setState(() {
-            isSearching = true;
-          });
+    //   await Future.delayed(const Duration(milliseconds: 500), () async {
+    //     String after = searchBarController.query;
+    //     if (before == after) {
+    //       setState(() {
+    //         isSearching = true;
+    //       });
 
-          await Future.delayed(
-              Duration(milliseconds: mediaSource.getSearchDebounceDelay));
-          pagingController = PagingController(firstPageKey: 1);
-          try {
-            List<MediaHistoryItem>? newItems =
-                await mediaSource.getSearchMediaHistoryItems(
-              context: context,
-              searchTerm: query,
-              pageKey: 1,
-            );
-            if (newItems != null && newItems.isNotEmpty) {
-              pagingController?.appendPage(newItems, 2);
-            }
-          } catch (e) {
-            pagingController?.appendLastPage([]);
-          }
-          pagingController?.addPageRequestListener((pageKey) async {
-            try {
-              List<MediaHistoryItem>? newItems =
-                  await mediaSource.getSearchMediaHistoryItems(
-                context: context,
-                searchTerm: query,
-                pageKey: pageKey,
-              );
-              if (newItems != null && newItems.isNotEmpty) {
-                pagingController?.appendPage(newItems, pageKey + 1);
-              }
-            } catch (e) {
-              pagingController?.appendLastPage([]);
-            }
-          });
-          appModel.addToSearchHistory(query,
-              historyType: mediaSource.getIdentifier());
+    //       await Future.delayed(
+    //           Duration(milliseconds: mediaSource.getSearchDebounceDelay));
+    //       pagingController = PagingController(firstPageKey: 1);
+    //       try {
+    //         List<MediaHistoryItem>? newItems =
+    //             await mediaSource.getSearchMediaHistoryItems(
+    //           context: context,
+    //           searchTerm: query,
+    //           pageKey: 1,
+    //         );
+    //         if (newItems != null && newItems.isNotEmpty) {
+    //           pagingController?.appendPage(newItems, 2);
+    //         }
+    //       } catch (e) {
+    //         pagingController?.appendLastPage([]);
+    //       }
+    //       pagingController?.addPageRequestListener((pageKey) async {
+    //         try {
+    //           List<MediaHistoryItem>? newItems =
+    //               await mediaSource.getSearchMediaHistoryItems(
+    //             context: context,
+    //             searchTerm: query,
+    //             pageKey: pageKey,
+    //           );
+    //           if (newItems != null && newItems.isNotEmpty) {
+    //             pagingController?.appendPage(newItems, pageKey + 1);
+    //           }
+    //         } catch (e) {
+    //           pagingController?.appendLastPage([]);
+    //         }
+    //       });
+    //       appModel.addToSearchHistory(query,
+    //           historyType: mediaSource.getIdentifier());
 
-          setState(() {
-            isSearching = false;
-          });
-        }
-      });
-    }
+    //       setState(() {
+    //         isSearching = false;
+    //       });
+    //     }
+    //   });
+    // }
   }
 
   Future<void> onSubmitted(String query) async {
@@ -450,26 +450,6 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
         mediaSource.getSearchBarActions(context, widget.refreshCallback));
 
     if (mediaSource.isDirectTextEntry) {
-      actions.add(
-        MediaSourceActionButton(
-          context: context,
-          source: mediaSource,
-          refreshCallback: widget.refreshCallback,
-          icon: Icons.paste,
-          showIfClosed: false,
-          showIfOpened: true,
-          onPressed: () async {
-            ClipboardData? clipboardData =
-                await Clipboard.getData('text/plain');
-            setState(() {
-              if (clipboardData != null && clipboardData.text != null) {
-                searchBarController.query = clipboardData.text!;
-              }
-            });
-          },
-        ),
-      );
-
       actions.add(
         MediaSourceActionButton(
           context: context,
