@@ -278,7 +278,6 @@ class ReaderPageState extends State<ReaderPage> {
       completeProgress: completeProgress,
       key: url,
       extra: {
-        "thumbnail": thumbnail,
         "scrollX": scrollX,
         "scrollY": scrollY,
       },
