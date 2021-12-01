@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:chisa/models/app_model.dart';
+import 'package:flutter/services.dart';
 import 'package:network_to_file_image/network_to_file_image.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
@@ -114,13 +115,15 @@ class ImageSelectWidgetState extends State<ImageSelectWidget> {
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () {
-        Navigator.push(
+      onTap: () async {
+        await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+        await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => fullViewGallery(),
           ),
         );
+        await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
       },
       onHorizontalDragEnd: (details) {
         if (details.primaryVelocity == 0) return;

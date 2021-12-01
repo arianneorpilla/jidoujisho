@@ -103,6 +103,9 @@ class AppModel with ChangeNotifier {
   /// Used to indicate if the app is currently in a source page.
   bool isInSource = false;
 
+  /// If the app is returned from a deep link.
+  bool isFromDeepLink = false;
+
   final Map<MediaType, ScrollController> _scrollOffsets = {};
   final Map<MediaType, FloatingSearchBarController> _homeSearchControllers = {};
   final Map<String, Map<String, DictionarySearchResult>> _resultsCache = {};
@@ -190,17 +193,17 @@ class AppModel with ChangeNotifier {
       if (!isFirstTimeInitialised()) {
         for (AnkiExportField field in AnkiExportField.values) {
           await ClearButtonEnhancement(appModel: this, enhancementField: field)
-              .setEnabled(field, 3);
+              .setEnabled(field, 4);
         }
 
         await TextSegmentationEnhancement(appModel: this)
-            .setEnabled(AnkiExportField.sentence, 2);
+            .setEnabled(AnkiExportField.sentence, 3);
         await DictionaryMenuEnhancement(appModel: this)
-            .setEnabled(AnkiExportField.word, 2);
+            .setEnabled(AnkiExportField.word, 3);
         await SearchDictionaryEnhancement(appModel: this)
-            .setEnabled(AnkiExportField.word, 1);
+            .setEnabled(AnkiExportField.word, 2);
         await BingSearchEnhancement(appModel: this)
-            .setEnabled(AnkiExportField.image, 2);
+            .setEnabled(AnkiExportField.image, 3);
         await BingSearchEnhancement(appModel: this).setAuto();
 
         setFirstTimeInitialised();
@@ -914,7 +917,7 @@ class AppModel with ChangeNotifier {
       AnkiExportField field) {
     List<AnkiExportEnhancement?> enhancements = [];
 
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 5; i++) {
       String? positionKey = sharedPreferences.getString(
         AnkiExportEnhancement.getFieldEnabledPositionKey(field, i),
       );

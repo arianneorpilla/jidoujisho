@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:chisa/anki/anki_export_params.dart';
 import 'package:chisa/media/media_history_items/media_history_item.dart';
+import 'package:chisa/media/media_sources/player_local_media_source.dart';
 import 'package:chisa/media/media_sources/player_media_source.dart';
 import 'package:chisa/media/media_type.dart';
 import 'package:chisa/models/app_model.dart';
@@ -19,6 +22,7 @@ Future<void> textShareIntentAction(BuildContext context, String text) async {
     await SystemNavigator.pop();
     return;
   }
+
   // If a valid video ID or YouTube URL, play the video.
   String? videoId = VideoId.parseVideoId(text);
   if (videoId != null) {

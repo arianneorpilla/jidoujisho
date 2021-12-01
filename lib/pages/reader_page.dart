@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:chisa/anki/anki_export_params.dart';
 import 'package:chisa/dictionary/dictionary_entry.dart';
 import 'package:chisa/dictionary/dictionary_search_result.dart';
@@ -191,19 +193,14 @@ class ReaderPageState extends State<ReaderPage> {
       ),
       actions: <Widget>[
         TextButton(
-            child: Text(
-              appModel.translate("dialog_yes"),
-              style: TextStyle(
-                color: Theme.of(context).focusColor,
-              ),
+          child: Text(
+            appModel.translate("dialog_yes"),
+            style: TextStyle(
+              color: Theme.of(context).focusColor,
             ),
-            onPressed: () {
-              Navigator.pop(context, true);
-              appModel.dictionaryUpdateFlipflop.value =
-                  !appModel.dictionaryUpdateFlipflop.value;
-              appModel.readerUpdateFlipflop.value =
-                  !appModel.readerUpdateFlipflop.value;
-            }),
+          ),
+          onPressed: () => exitPage(),
+        ),
         TextButton(
           child: Text(
             appModel.translate("dialog_no"),
@@ -222,6 +219,17 @@ class ReaderPageState extends State<ReaderPage> {
               : alertDialog,
         ) ??
         false;
+  }
+
+  void exitPage() {
+    Navigator.pop(context, true);
+    appModel.dictionaryUpdateFlipflop.value =
+        !appModel.dictionaryUpdateFlipflop.value;
+    appModel.readerUpdateFlipflop.value = !appModel.readerUpdateFlipflop.value;
+
+    if (appModel.isFromDeepLink) {
+      exit(0);
+    }
   }
 
   @override

@@ -376,20 +376,22 @@ class CreatorPageState extends State<CreatorPage> {
                   getSeeMoreButton(context),
               ],
             ),
-      body: Stack(
-        children: [
-          if (widget.backgroundColor != null)
-            ClipRect(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
-                child: Container(),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            if (widget.backgroundColor != null)
+              ClipRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
+                  child: Container(),
+                ),
               ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: buildFields(),
             ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: buildFields(),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -499,170 +501,167 @@ class CreatorPageState extends State<CreatorPage> {
   Widget buildLandscapeFields() {
     ScrollController scrollerImage = ScrollController();
     ScrollController scrollerText = ScrollController();
-    return SafeArea(
-      child: Row(
-        children: [
-          Flexible(
-            flex: 3,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                AppBar(
-                  backgroundColor: widget.appBarColor,
-                  title: Text(
-                    getTitle(),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+    return Row(
+      children: [
+        Flexible(
+          flex: 3,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AppBar(
+                backgroundColor: widget.appBarColor,
+                title: Text(
+                  getTitle(),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: RawScrollbar(
+                    controller: scrollerImage,
+                    thumbColor: (appModel.getIsDarkMode())
+                        ? Colors.grey[700]
+                        : Colors.grey[400],
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(
+                          parent: BouncingScrollPhysics()),
+                      controller: scrollerImage,
+                      child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.max,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (imagesNotifier.value.isNotEmpty ||
+                                imageSearchingNotifier.value)
+                              ImageSelectWidget(
+                                  appModel: appModel,
+                                  imageSearchingNotifier:
+                                      imageSearchingNotifier,
+                                  imageListNotifier: imageListNotifier,
+                                  imageSearchTermNotifier:
+                                      imageSearchTermNotifier,
+                                  fileNotifier: imageNotifier,
+                                  filesNotifier: imagesNotifier,
+                                  setImageFile: (index) {
+                                    NetworkToFileImage networkToFileImage =
+                                        imagesNotifier.value[index];
+                                    exportParams
+                                        .setImageFile(networkToFileImage.file);
+                                  }),
+                            if (audioNotifier.value != null) buildAudioPlayer(),
+                            if (!widget.autoMode && !widget.editMode)
+                              buildDeckDropDown(),
+                          ]),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: RawScrollbar(
-                      controller: scrollerImage,
-                      thumbColor: (appModel.getIsDarkMode())
-                          ? Colors.grey[700]
-                          : Colors.grey[400],
+              ),
+            ],
+          ),
+        ),
+        Flexible(
+          flex: 4,
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: RawScrollbar(
+              controller: scrollerText,
+              thumbColor: (appModel.getIsDarkMode())
+                  ? Colors.grey[700]
+                  : Colors.grey[400],
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Expanded(
+                    child: Scrollbar(
+                      controller: scrollController,
                       child: SingleChildScrollView(
                         physics: const AlwaysScrollableScrollPhysics(
                             parent: BouncingScrollPhysics()),
-                        controller: scrollerImage,
-                        child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.max,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              if (imagesNotifier.value.isNotEmpty ||
-                                  imageSearchingNotifier.value)
-                                ImageSelectWidget(
-                                    appModel: appModel,
-                                    imageSearchingNotifier:
-                                        imageSearchingNotifier,
-                                    imageListNotifier: imageListNotifier,
-                                    imageSearchTermNotifier:
-                                        imageSearchTermNotifier,
-                                    fileNotifier: imageNotifier,
-                                    filesNotifier: imagesNotifier,
-                                    setImageFile: (index) {
-                                      NetworkToFileImage networkToFileImage =
-                                          imagesNotifier.value[index];
-                                      exportParams.setImageFile(
-                                          networkToFileImage.file);
-                                    }),
-                              if (audioNotifier.value != null)
-                                buildAudioPlayer(),
-                              if (!widget.autoMode && !widget.editMode)
-                                buildDeckDropDown(),
-                            ]),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Flexible(
-            flex: 4,
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: RawScrollbar(
-                controller: scrollerText,
-                thumbColor: (appModel.getIsDarkMode())
-                    ? Colors.grey[700]
-                    : Colors.grey[400],
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Expanded(
-                      child: Scrollbar(
                         controller: scrollController,
-                        child: SingleChildScrollView(
-                          physics: const AlwaysScrollableScrollPhysics(
-                              parent: BouncingScrollPhysics()),
-                          controller: scrollController,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.max,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              displayField(
-                                context: context,
-                                field: AnkiExportField.sentence,
-                                onFieldSubmitted: (value) {},
-                                onChanged: (value) {
-                                  exportParams.setSentence(value);
-                                },
-                                maxLines: null,
-                                keyboardType: TextInputType.multiline,
-                              ),
-                              displayField(
-                                context: context,
-                                field: AnkiExportField.word,
-                                onFieldSubmitted: (value) {},
-                                onChanged: (value) {
-                                  exportParams.setWord(value);
-                                },
-                              ),
-                              displayField(
-                                context: context,
-                                field: AnkiExportField.reading,
-                                onFieldSubmitted: (value) {},
-                                onChanged: (value) {
-                                  exportParams.setReading(value);
-                                },
-                              ),
-                              displayField(
-                                context: context,
-                                field: AnkiExportField.meaning,
-                                keyboardType: TextInputType.multiline,
-                                onFieldSubmitted: (value) {},
-                                onChanged: (value) {
-                                  exportParams.setMeaning(value);
-                                },
-                              ),
-                              displayField(
-                                context: context,
-                                field: AnkiExportField.image,
-                                onFieldSubmitted: (value) {},
-                                onChanged: (value) {
-                                  exportParams.setImageSearch(value);
-                                },
-                              ),
-                              displayField(
-                                context: context,
-                                field: AnkiExportField.audio,
-                                onFieldSubmitted: (value) {},
-                                onChanged: (value) {
-                                  exportParams.setAudioSearch(value);
-                                },
-                              ),
-                              displayField(
-                                context: context,
-                                field: AnkiExportField.extra,
-                                onFieldSubmitted: (value) {},
-                                onChanged: (value) {
-                                  exportParams.setExtra(value);
-                                },
-                              ),
-                            ],
-                          ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.max,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            displayField(
+                              context: context,
+                              field: AnkiExportField.sentence,
+                              onFieldSubmitted: (value) {},
+                              onChanged: (value) {
+                                exportParams.setSentence(value);
+                              },
+                              maxLines: null,
+                              keyboardType: TextInputType.multiline,
+                            ),
+                            displayField(
+                              context: context,
+                              field: AnkiExportField.word,
+                              onFieldSubmitted: (value) {},
+                              onChanged: (value) {
+                                exportParams.setWord(value);
+                              },
+                            ),
+                            displayField(
+                              context: context,
+                              field: AnkiExportField.reading,
+                              onFieldSubmitted: (value) {},
+                              onChanged: (value) {
+                                exportParams.setReading(value);
+                              },
+                            ),
+                            displayField(
+                              context: context,
+                              field: AnkiExportField.meaning,
+                              keyboardType: TextInputType.multiline,
+                              onFieldSubmitted: (value) {},
+                              onChanged: (value) {
+                                exportParams.setMeaning(value);
+                              },
+                            ),
+                            displayField(
+                              context: context,
+                              field: AnkiExportField.image,
+                              onFieldSubmitted: (value) {},
+                              onChanged: (value) {
+                                exportParams.setImageSearch(value);
+                              },
+                            ),
+                            displayField(
+                              context: context,
+                              field: AnkiExportField.audio,
+                              onFieldSubmitted: (value) {},
+                              onChanged: (value) {
+                                exportParams.setAudioSearch(value);
+                              },
+                            ),
+                            displayField(
+                              context: context,
+                              field: AnkiExportField.extra,
+                              onFieldSubmitted: (value) {},
+                              onChanged: (value) {
+                                exportParams.setExtra(value);
+                              },
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                    buildExportButton(),
-                  ],
-                ),
+                  ),
+                  buildExportButton(),
+                ],
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

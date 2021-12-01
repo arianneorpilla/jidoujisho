@@ -40,7 +40,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     );
   }
 
-  Future<void> showFilePicker(
+  Future<void> pickFileAndShow(
     BuildContext context, {
     bool pushReplacement = false,
   }) async {
@@ -62,7 +62,19 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
       return;
     }
 
-    String filePath = filePaths.first;
+    await showFileFromPath(
+      context,
+      filePaths.first,
+      pushReplacement: pushReplacement,
+    );
+  }
+
+  Future<void> showFileFromPath(
+    BuildContext context,
+    String filePath, {
+    bool pushReplacement = false,
+  }) async {
+    AppModel appModel = Provider.of<AppModel>(context, listen: false);
 
     appModel.setLastPickedDirectory(mediaType, Directory(p.dirname(filePath)));
 
@@ -179,7 +191,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
         onPressed: () async {
           page.dialogSmartPause();
           await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-          await showFilePicker(
+          await pickFileAndShow(
             context,
             pushReplacement: true,
           );
@@ -211,7 +223,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
         showIfOpened: false,
         icon: Icons.perm_media,
         onPressed: () async {
-          await showFilePicker(context);
+          await pickFileAndShow(context);
           refreshCallback();
         },
       )
@@ -223,7 +235,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
 
   @override
   Future<void> onSearchBarTap(BuildContext context) async {
-    await showFilePicker(context);
+    await pickFileAndShow(context);
   }
 
   @override

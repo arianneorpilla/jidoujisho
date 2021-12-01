@@ -52,7 +52,7 @@ Future<void> returnFromAppLink(BuildContext context, String link) async {
   String mediaHistoryJson = Uri.decodeFull(encodedJson);
 
   MediaHistoryItem item = MediaHistoryItem.fromJson(mediaHistoryJson);
+  AppModel appModel = Provider.of<AppModel>(context, listen: false);
+  appModel.isFromDeepLink = true;
   await returnFromContext(context, item);
-
-  exit(0);
 }

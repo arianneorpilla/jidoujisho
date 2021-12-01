@@ -20,24 +20,27 @@ Widget transcriptDialog({
   AppModel appModel = Provider.of<AppModel>(context);
 
   if (subtitles.isEmpty) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.subtitles_off_outlined,
-            color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
-            size: 72,
-          ),
-          const SizedBox(height: 6),
-          Text(
-            appModel.translate("player_subtitles_transcript_empty"),
-            style: TextStyle(
-              fontSize: 20,
+    return Material(
+      color: Colors.transparent,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.subtitles_off_outlined,
               color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
+              size: 72,
             ),
-          ),
-        ],
+            const SizedBox(height: 6),
+            Text(
+              appModel.translate("player_subtitles_transcript_empty"),
+              style: TextStyle(
+                fontSize: 20,
+                color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

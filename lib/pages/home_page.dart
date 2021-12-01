@@ -343,9 +343,9 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           label: appModel.translate("options_licenses"),
           icon: Icons.info,
           action: () async {
-            const String legalese = "A mobile video player, reader assistant, "
-            "image mining workflow and card creation toolkit tailored for "
-            "language learners.\n\nBuilt for the Japanese language learning "
+            const String legalese = "A highly versatile and modular framework "
+            "enabling language-agnostic immersion learning on mobile. \n\n"
+            "Originally built for the Japanese language learning "
             "community by Leo Rafael Orpilla. Logo by Aaron Marbella.\n\n"
                 "jidoujisho is free and open source software. Visit the "
                 "repository for a more comprehensive list of other licenses "

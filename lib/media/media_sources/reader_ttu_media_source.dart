@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:chisa/util/cached_memory_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -16,6 +15,7 @@ import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/pages/reader_page.dart';
+import 'package:chisa/util/cached_memory_image.dart';
 import 'package:chisa/util/media_source_action_button.dart';
 
 class ReaderTtuMediaSource extends ReaderMediaSource {
@@ -370,6 +370,8 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
                 DeviceOrientation.portraitUp,
               ]);
 
+              state.setScrollX(await controller.getScrollX() ?? -1);
+
               String searchTerm = await getWebViewTextSelection(controller);
               Clipboard.setData(ClipboardData(text: searchTerm));
               unselectWebViewTextSelection(controller);
@@ -457,6 +459,7 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
             iosId: "3",
             title: appModel.translate("creator"),
             action: () async {
+              state.setScrollX(await controller.getScrollX() ?? -1);
               String searchTerm = await getWebViewTextSelection(controller);
               Clipboard.setData(ClipboardData(text: searchTerm));
               unselectWebViewTextSelection(controller);

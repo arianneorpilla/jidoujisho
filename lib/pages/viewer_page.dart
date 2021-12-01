@@ -374,21 +374,7 @@ class ViewerPageState extends State<ViewerPage> {
                 color: Theme.of(context).focusColor,
               ),
             ),
-            onPressed: () async {
-              Wakelock.disable();
-              SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-              SystemChrome.setPreferredOrientations([
-                DeviceOrientation.portraitUp,
-                DeviceOrientation.landscapeLeft,
-                DeviceOrientation.landscapeRight,
-              ]);
-
-              Navigator.of(context).popUntil((route) => route.isFirst);
-              appModel.dictionaryUpdateFlipflop.value =
-                  !appModel.dictionaryUpdateFlipflop.value;
-              appModel.viewerUpdateFlipflop.value =
-                  !appModel.viewerUpdateFlipflop.value;
-            }),
+            onPressed: () => exitPage()),
         TextButton(
           child: Text(
             appModel.translate("dialog_no"),
@@ -405,6 +391,26 @@ class ViewerPageState extends State<ViewerPage> {
           builder: (context) => alertDialog,
         ) ??
         false;
+  }
+
+  void exitPage() {
+    Wakelock.disable();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+
+    Navigator.of(context).popUntil((route) => route.isFirst);
+
+    appModel.dictionaryUpdateFlipflop.value =
+        !appModel.dictionaryUpdateFlipflop.value;
+    appModel.viewerUpdateFlipflop.value = !appModel.viewerUpdateFlipflop.value;
+
+    if (appModel.isFromDeepLink) {
+      exit(0);
+    }
   }
 
   Future<void> initialiseViewer() async {

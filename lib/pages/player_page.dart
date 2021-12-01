@@ -112,11 +112,7 @@ class PlayerPageState extends State<PlayerPage>
 
   Future<bool> onWillPop() async {
     if (playerController.value.isEnded) {
-      Navigator.pop(context, true);
-      appModel.dictionaryUpdateFlipflop.value =
-          !appModel.dictionaryUpdateFlipflop.value;
-      appModel.playerUpdateFlipflop.value =
-          !appModel.playerUpdateFlipflop.value;
+      exitPage();
     } else {
       Widget alertDialog = AlertDialog(
         shape: const RoundedRectangleBorder(
@@ -127,19 +123,14 @@ class PlayerPageState extends State<PlayerPage>
         ),
         actions: <Widget>[
           TextButton(
-              child: Text(
-                appModel.translate("dialog_yes"),
-                style: TextStyle(
-                  color: Theme.of(context).focusColor,
-                ),
+            child: Text(
+              appModel.translate("dialog_yes"),
+              style: TextStyle(
+                color: Theme.of(context).focusColor,
               ),
-              onPressed: () async {
-                Navigator.pop(context, true);
-                appModel.dictionaryUpdateFlipflop.value =
-                    !appModel.dictionaryUpdateFlipflop.value;
-                appModel.playerUpdateFlipflop.value =
-                    !appModel.playerUpdateFlipflop.value;
-              }),
+            ),
+            onPressed: () => exitPage(),
+          ),
           TextButton(
             child: Text(
               appModel.translate("dialog_no"),
@@ -159,6 +150,17 @@ class PlayerPageState extends State<PlayerPage>
     }
 
     return false;
+  }
+
+  void exitPage() {
+    Navigator.pop(context, true);
+    appModel.dictionaryUpdateFlipflop.value =
+        !appModel.dictionaryUpdateFlipflop.value;
+    appModel.playerUpdateFlipflop.value = !appModel.playerUpdateFlipflop.value;
+
+    if (appModel.isFromDeepLink) {
+      exit(0);
+    }
   }
 
   void initialiseEmbeddedSubtitles() async {
@@ -1092,15 +1094,17 @@ class PlayerPageState extends State<PlayerPage>
           playPauseIconAnimationController.forward();
         });
       } else {
-        if (isFinished) {
-          await playerController.stop();
-        }
         playPauseIconAnimationController.forward();
 
         await playerController.play();
-        await Future.delayed(const Duration(seconds: 2), () async {
-          await playerController.seekTo(Duration.zero);
-        });
+
+        if (isFinished) {
+          await playerController.stop();
+          await playerController.play();
+          await Future.delayed(const Duration(seconds: 2), () async {
+            await playerController.seekTo(Duration.zero);
+          });
+        }
       }
     }
   }

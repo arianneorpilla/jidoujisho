@@ -100,6 +100,7 @@ dependencies:
   screenshot:
   crop_image:
   device_info_plus:
+  uri_to_file:
 dev_dependencies:
   # flutter_test:
   #   sdk: flutter
@@ -166,23 +167,7 @@ flutter:
   #       - asset: fonts/TrajanPro.ttf
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
-  fonts:
-    - family: Noto Serif JP
-      fonts:
-        - asset: fonts/NotoSerifJP-ExtraLight.otf
-          weight: 200
-        - asset: fonts/NotoSerifJP-Light.otf
-          weight: 300
-        - asset: fonts/NotoSerifJP-Regular.otf
-          weight: 400
-        - asset: fonts/NotoSerifJP-Medium.otf
-          weight: 500
-        - asset: fonts/NotoSerifJP-SemiBold.otf
-          weight: 600
-        - asset: fonts/NotoSerifJP-Bold.otf
-          weight: 700
-        - asset: fonts/NotoSerifJP-Black.otf
-          weight: 900
+  #fonts:
         
 
   #
