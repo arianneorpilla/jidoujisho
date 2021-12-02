@@ -20,6 +20,7 @@ import 'package:external_path/external_path.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -1251,15 +1252,6 @@ class AppModel with ChangeNotifier {
         "playerListeningComprehensionMode", !getListeningComprehensionMode());
   }
 
-  bool getPlayerDragToSelectMode() {
-    return sharedPreferences.getBool("playerDragToSelectMode") ?? false;
-  }
-
-  Future<void> togglePlayerDragToSelectMode() async {
-    await sharedPreferences.setBool(
-        "playerDragToSelectMode", !getPlayerDragToSelectMode());
-  }
-
   BlurWidgetOptions getBlurWidgetOptions() {
     double width = sharedPreferences.getDouble("blurWidgetWidth") ?? 200;
     double height = sharedPreferences.getDouble("blurWidgetHeight") ?? 200;
@@ -1312,14 +1304,79 @@ class AppModel with ChangeNotifier {
     int audioAllowance = sharedPreferences.getInt("audioAllowance") ?? 0;
     int subtitleDelay = sharedPreferences.getInt("subtitleDelay") ?? 0;
     double fontSize = sharedPreferences.getDouble("fontSize") ?? 24;
+    String fontName = sharedPreferences
+            .getString("fontName/${getCurrentLanguage().languageName}") ??
+        "Roboto";
     String regexFilter = sharedPreferences.getString("regexFilter") ?? "";
 
     return SubtitleOptions(
       audioAllowance,
       subtitleDelay,
       fontSize,
+      fontName,
       regexFilter,
     );
+  }
+
+  List<String> getAvailableFonts() {
+    Language language = getCurrentLanguage();
+
+    if (language is JapaneseLanguage) {
+      return [
+        "Hachi Maru Pop",
+        "Kosugi",
+        "Kosugi Maru",
+        "M PLUS 1p",
+        "M PLUS Rounded 1c",
+        "Potta One",
+        "Roboto",
+        "Sawarabi Gothic",
+        "Sawarabi Mincho",
+        "Yusei Magic",
+      ];
+    } else if (language is ChineseSimplifiedLanguage ||
+        language is ChineseTraditionalLanguage) {
+      return [
+        "Liu Jian Mao Cao",
+        "Long Cang",
+        "Ma Shan Zheng",
+        "Roboto",
+        "ZCOOL KuaiLe",
+        "ZCOOL QingKe HuangYou",
+        "ZCOOL Xiao Wei",
+        "Zhi Mang Xing"
+      ];
+    } else if (language is KoreanLanguage) {
+      return [
+        "Black And White Picture",
+        "Black Han Sans",
+        "Cute Font",
+        "Do Hyeon",
+        "Dokdo",
+        "East Sea Dokdo",
+        "Gaegu",
+        "Gamja Flower",
+        "Gothic A1",
+        "Gugi",
+        "Hi Melody",
+        "Jua",
+        "Kirang Haerang",
+        "Nanum Brush Script",
+        "Nanum Gothic",
+        "Nanum Gothic Coding",
+        "Nanum Myeongjo",
+        "Nanum Pen Script",
+        "Poor Story",
+        "Roboto",
+        "Single Day",
+        "Song Myung",
+        "Stylish",
+        "Sunflower",
+        "Yeon Sung",
+      ];
+    }
+
+    return GoogleFonts.asMap().keys.toList();
   }
 
   Future setSubtitleOptions(SubtitleOptions subtitleOptions) async {
@@ -1328,6 +1385,9 @@ class AppModel with ChangeNotifier {
     await sharedPreferences.setInt(
         "subtitleDelay", subtitleOptions.subtitleDelay);
     await sharedPreferences.setDouble("fontSize", subtitleOptions.fontSize);
+    await sharedPreferences.setString(
+        "fontName/${getCurrentLanguage().languageName}",
+        subtitleOptions.fontName);
     await sharedPreferences.setString(
         "regexFilter", subtitleOptions.regexFilter);
   }

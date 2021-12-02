@@ -101,6 +101,7 @@ dependencies:
   crop_image:
   device_info_plus:
   uri_to_file:
+  google_fonts:
 dev_dependencies:
   # flutter_test:
   #   sdk: flutter

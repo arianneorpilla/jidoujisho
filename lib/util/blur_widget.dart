@@ -423,6 +423,17 @@ Future<void> showBlurWidgetOptionsDialog(
                     ),
                     maxLines: 1,
                     decoration: InputDecoration(
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(
+                            color: Theme.of(context)
+                                .unselectedWidgetColor
+                                .withOpacity(0.5)),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide:
+                            BorderSide(color: Theme.of(context).focusColor),
+                      ),
+                      floatingLabelBehavior: FloatingLabelBehavior.always,
                       suffixText: "px",
                       suffixIcon: IconButton(
                         iconSize: 18,

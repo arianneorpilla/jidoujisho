@@ -4,6 +4,7 @@ import 'package:chisa/models/app_model.dart';
 import 'package:chisa/util/time_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:subtitle/subtitle.dart';
@@ -13,6 +14,7 @@ Widget transcriptDialog({
   required List<Subtitle> subtitles,
   required Subtitle? currentSubtitle,
   required String regexFilter,
+  required String fontName,
   required Duration subtitleDelay,
   required FutureOr<void> Function(int)? onTapCallback,
   required FutureOr<void> Function(int)? onLongPressCallback,
@@ -111,7 +113,8 @@ Widget transcriptDialog({
                 subtitleText,
                 textAlign: TextAlign.center,
                 softWrap: true,
-                style: TextStyle(
+                style: GoogleFonts.getFont(
+                  fontName,
                   fontSize: 20,
                   color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
                 ),
@@ -143,6 +146,7 @@ Future<void> openTranscript({
   required Duration subtitleDelay,
   Subtitle? currentSubtitle,
   required String regexFilter,
+  required String fontName,
   FutureOr<void> Function(int)? onTapCallback,
   FutureOr<void> Function(int)? onLongPressCallback,
 }) async {
@@ -156,13 +160,14 @@ Future<void> openTranscript({
   );
 
   await showDialog(
-    barrierColor: backgroundColor,
     context: context,
+    barrierColor: backgroundColor,
     builder: (context) => transcriptDialog(
       context: context,
       subtitles: subtitles,
       currentSubtitle: currentSubtitle,
       subtitleDelay: subtitleDelay,
+      fontName: fontName,
       regexFilter: regexFilter,
       onTapCallback: onTapCallback,
       onLongPressCallback: onLongPressCallback,

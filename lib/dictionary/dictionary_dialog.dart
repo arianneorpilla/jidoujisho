@@ -106,11 +106,11 @@ class DictionaryDialogState extends State<DictionaryDialog> {
         Container(
           margin: const EdgeInsets.symmetric(vertical: 8),
           height: 1.0,
-          decoration: const BoxDecoration(
-            border: Border(
-              bottom: BorderSide(
-                color: Color(0xFFBDBDBD),
-                width: 0.0,
+          decoration: BoxDecoration(
+            border: Border.fromBorderSide(
+              BorderSide(
+                width: 0.5,
+                color: Theme.of(context).unselectedWidgetColor.withOpacity(0.5),
               ),
             ),
           ),

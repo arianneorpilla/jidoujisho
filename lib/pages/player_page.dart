@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:chisa/util/busy_icon_button.dart';
+import 'package:collection/collection.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:clipboard_listener/clipboard_listener.dart';
 import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:multi_value_listenable_builder/multi_value_listenable_builder.dart';
 import 'package:network_to_file_image/network_to_file_image.dart';
 import 'package:progress_indicators/progress_indicators.dart';
@@ -21,13 +23,13 @@ import 'package:path/path.dart' as p;
 import 'package:chisa/anki/anki_export_params.dart';
 import 'package:chisa/dictionary/dictionary_entry.dart';
 import 'package:chisa/dictionary/dictionary_search_result.dart';
-import 'package:chisa/language/tap_to_select.dart';
 import 'package:chisa/media/media_histories/media_history.dart';
 import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_type.dart';
 import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/util/anki_creator.dart';
+import 'package:chisa/util/busy_icon_button.dart';
 import 'package:chisa/util/blur_widget.dart';
 import 'package:chisa/util/bottom_sheet_dialog.dart';
 import 'package:chisa/util/dictionary_scrollable_widget.dart';
@@ -92,7 +94,6 @@ class PlayerPageState extends State<PlayerPage>
   bool isPlayerReady = false;
   bool unhideDuringInitFlag = false;
 
-  bool tapToSelectMode = true;
   double subtitleFontSize = 24;
   int subtitlesDelay = 0;
   final FocusNode dragToSelectFocusNode = FocusNode();
@@ -308,7 +309,7 @@ class PlayerPageState extends State<PlayerPage>
     cancelDragSubtitlesTimer();
     dragSearchTimer = Timer(const Duration(milliseconds: 500), () {
       setSearchTerm(newTerm);
-      dragToSelectFocusNode.unfocus();
+      refreshSubtitleWidget();
     });
   }
 
@@ -854,129 +855,75 @@ class PlayerPageState extends State<PlayerPage>
           subtitleText = subtitleText.replaceAll(RegExp(regex), "");
         }
 
-        if (appModel.getPlayerDragToSelectMode()) {
-          return dragToSelectSubtitle(subtitleText);
-        } else {
-          return tapToSelectWidget(subtitleText);
-        }
+        return dragToSelectSubtitle(subtitleText);
       },
     );
   }
 
-  Widget getOutlineText(String character) {
-    return Text(
-      character,
-      style: TextStyle(
+  Paint get subtitlePaintStyle => Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 3
+    ..color = Colors.black.withOpacity(0.75);
+
+  TextStyle get subtitleOutlineStyle => GoogleFonts.getFont(
+        subtitleOptionsNotifier.value.fontName,
         fontSize: subtitleOptionsNotifier.value.fontSize,
-        foreground: Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 3
-          ..color = Colors.black.withOpacity(0.75),
-      ),
-    );
+        foreground: subtitlePaintStyle,
+      );
+
+  TextStyle get subtitleTextStyle => GoogleFonts.getFont(
+        subtitleOptionsNotifier.value.fontName,
+        fontSize: subtitleOptionsNotifier.value.fontSize,
+        color: Colors.white,
+      );
+
+  List<InlineSpan> getSubtitleSpans(String subtitleText) {
+    List<InlineSpan> spans = [];
+
+    subtitleText.runes.forEachIndexed((index, rune) {
+      String character = String.fromCharCode(rune);
+      spans.add(TextSpan(
+          text: character,
+          style: subtitleTextStyle,
+          recognizer: TapGestureRecognizer()
+            ..onTap = () async {
+              String word = await appModel
+                  .getCurrentLanguage()
+                  .wordFromIndex(currentSubtitle.value!.data, index);
+
+              setSearchTerm(word);
+            }));
+    });
+
+    return spans;
   }
 
-  Widget getText(String character, int index) {
-    return InkWell(
-      onTap: () async {
-        String word = await appModel
-            .getCurrentLanguage()
-            .wordFromIndex(currentSubtitle.value!.data, index);
+  List<InlineSpan> getSubtitleOutlineSpans(String subtitleText) {
+    List<InlineSpan> spans = [];
 
-        setSearchTerm(word);
-      },
-      child: Text(
-        character,
-        style: TextStyle(
-          fontSize: subtitleOptionsNotifier.value.fontSize,
-          color: Colors.white,
-        ),
-      ),
-    );
-  }
+    subtitleText.runes.forEachIndexed((index, rune) {
+      String character = String.fromCharCode(rune);
+      spans.add(TextSpan(
+        text: character,
+        style: subtitleOutlineStyle,
+      ));
+    });
 
-  Widget tapToSelectWidget(String subtitleText) {
-    TapToSelectInfo tapToSelectInfo = getLinesFromCharacters(
-      context,
-      subtitleText.split(''),
-      subtitleFontSize,
-    );
-
-    List<Widget> rows = [];
-    List<Widget> outlinedRows = [];
-    for (int i = 0; i < tapToSelectInfo.lines.length; i++) {
-      List<String> line = tapToSelectInfo.lines[i];
-      List<int> lineIndex = tapToSelectInfo.lineIndexes[i];
-
-      List<Widget> textWidgets = [];
-      List<Widget> outlinedTextWidgets = [];
-
-      for (int i = 0; i < line.length; i++) {
-        String character = line[i];
-        int index = lineIndex[i];
-        outlinedTextWidgets.add(getOutlineText(character));
-        textWidgets.add(getText(character, index));
-      }
-
-      outlinedRows.add(
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: outlinedTextWidgets,
-        ),
-      );
-      rows.add(
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: textWidgets,
-        ),
-      );
-    }
-
-    return Stack(
-      children: <Widget>[
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: outlinedRows,
-        ),
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: rows,
-        ),
-      ],
-    );
+    return spans;
   }
 
   Widget dragToSelectSubtitle(String subtitleText) {
     return Stack(
       alignment: Alignment.bottomCenter,
       children: <Widget>[
-        SelectableText(
-          subtitleText,
+        SelectableText.rich(
+          TextSpan(children: getSubtitleOutlineSpans(subtitleText)),
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: subtitleOptionsNotifier.value.fontSize,
-            foreground: Paint()
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = 3
-              ..color = Colors.black.withOpacity(0.75),
-          ),
           enableInteractiveSelection: false,
         ),
-        SelectableText(
-          subtitleText,
+        SelectableText.rich(
+          TextSpan(children: getSubtitleSpans(subtitleText)),
           textAlign: TextAlign.center,
-          onSelectionChanged: (selection, cause) {
-            String newTerm = selection.textInside(subtitleText);
-            startDragSubtitlesTimer(newTerm);
-          },
-          style: TextStyle(
-            fontSize: subtitleOptionsNotifier.value.fontSize,
-            color: Colors.white,
-          ),
           focusNode: dragToSelectFocusNode,
           toolbarOptions: const ToolbarOptions(
             copy: false,
@@ -984,6 +931,10 @@ class PlayerPageState extends State<PlayerPage>
             selectAll: false,
             paste: false,
           ),
+          onSelectionChanged: (selection, cause) {
+            String newTerm = selection.textInside(subtitleText);
+            startDragSubtitlesTimer(newTerm);
+          },
         ),
       ],
     );
@@ -1254,6 +1205,7 @@ class PlayerPageState extends State<PlayerPage>
               subtitles: subtitleItem.controller.subtitles,
               subtitleDelay: getSubtitleDelay(),
               currentSubtitle: getNearestSubtitle(),
+              fontName: subtitleOptionsNotifier.value.fontName,
               regexFilter: subtitleOptionsNotifier.value.regexFilter,
               onTapCallback: (int selectedIndex) async {
                 await playerController.seekTo(
@@ -1512,6 +1464,7 @@ class PlayerPageState extends State<PlayerPage>
               subtitles: subtitleItem.controller.subtitles,
               subtitleDelay: getSubtitleDelay(),
               currentSubtitle: getNearestSubtitle(),
+              fontName: subtitleOptionsNotifier.value.fontName,
               regexFilter: subtitleOptionsNotifier.value.regexFilter,
               onTapCallback: (int selectedIndex) async {
                 Subtitle subtitle =
@@ -1563,25 +1516,6 @@ class PlayerPageState extends State<PlayerPage>
               options: getBlurOptions(),
             ),
           );
-        },
-      ),
-      BottomSheetDialogOption(
-        label: appModel.translate("player_change_player_orientation"),
-        icon: appModel.isPlayerOrientationPortrait()
-            ? Icons.stay_current_landscape
-            : Icons.stay_current_portrait,
-        action: () async {
-          await appModel.togglePlayerOrientationPortrait();
-          if (appModel.isPlayerOrientationPortrait()) {
-            await SystemChrome.setPreferredOrientations([
-              DeviceOrientation.portraitUp,
-            ]);
-          } else {
-            await SystemChrome.setPreferredOrientations([
-              DeviceOrientation.landscapeLeft,
-              DeviceOrientation.landscapeRight,
-            ]);
-          }
         },
       ),
       BottomSheetDialogOption(
@@ -1812,18 +1746,6 @@ class PlayerPageState extends State<PlayerPage>
         },
       ),
       BottomSheetDialogOption(
-        label: (appModel.getPlayerDragToSelectMode())
-            ? appModel.translate("player_option_tap_to_select")
-            : appModel.translate("player_option_drag_to_select"),
-        icon: (appModel.getPlayerDragToSelectMode())
-            ? Icons.touch_app
-            : Icons.select_all,
-        action: () async {
-          await appModel.togglePlayerDragToSelectMode();
-          refreshSubtitleWidget();
-        },
-      ),
-      BottomSheetDialogOption(
         label: appModel.translate("player_option_dictionary_menu"),
         icon: Icons.auto_stories,
         action: () async {
@@ -1832,6 +1754,25 @@ class PlayerPageState extends State<PlayerPage>
             refreshDictionaryWidget();
           });
           await dialogSmartResume();
+        },
+      ),
+      BottomSheetDialogOption(
+        label: appModel.translate("player_change_player_orientation"),
+        icon: appModel.isPlayerOrientationPortrait()
+            ? Icons.stay_current_landscape
+            : Icons.stay_current_portrait,
+        action: () async {
+          await appModel.togglePlayerOrientationPortrait();
+          if (appModel.isPlayerOrientationPortrait()) {
+            await SystemChrome.setPreferredOrientations([
+              DeviceOrientation.portraitUp,
+            ]);
+          } else {
+            await SystemChrome.setPreferredOrientations([
+              DeviceOrientation.landscapeLeft,
+              DeviceOrientation.landscapeRight,
+            ]);
+          }
         },
       ),
       // BottomSheetDialogOption(
