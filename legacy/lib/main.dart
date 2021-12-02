@@ -2124,7 +2124,7 @@ class _HomeState extends State<Home> {
         const String legalese = "A mobile video player, reader assistant, image mining workflow and card creation toolkit tailored for language learners.\n\n" +
             "Built for the Japanese language learning community by Leo Rafael Orpilla. " +
             "Bilingual online definitions queried from Jisho.org. Monolingual online definitions queried from Sora. Pitch accent patterns from Kanjium. " +
-            "Reader WebView linked to ッツ Ebook Reader. Video streaming via YouTube. Image search via Bing. Logo by suzy and Aaron Marbella.\n\n" +
+            "Reader WebView linked to ッツ Ebook Reader. Video streaming via YouTube. Image search via Bing. Logo by Aaron Marbella.\n\n" +
             "jidoujisho is free and open source software. Liking the application? " +
             "Help out by providing feedback, making a donation, reporting issues or collaborating " +
             "for further improvements on GitHub.";

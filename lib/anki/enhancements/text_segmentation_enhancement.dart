@@ -18,7 +18,7 @@ class TextSegmentationEnhancement extends AnkiExportEnhancement {
           enhancementDescription:
               "Split text into words and open a picker dialog.",
           enhancementIcon: Icons.account_tree,
-          enhancementField: AnkiExportField.image,
+          enhancementField: AnkiExportField.sentence,
         );
 
   @override

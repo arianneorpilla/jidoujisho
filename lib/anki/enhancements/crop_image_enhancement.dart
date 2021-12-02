@@ -8,7 +8,6 @@ import 'package:chisa/anki/anki_export_params.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/creator_page.dart';
 import 'package:chisa/util/anki_export_field.dart';
-import 'package:chisa/util/export_paths.dart';
 import 'package:crop_image/crop_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -39,9 +38,12 @@ class CropImageEnhancement extends AnkiExportEnhancement {
     }
 
     CropController cropController = CropController();
+    imageCache!.clear();
 
-    if (await showCropDialog(
-        context, cropController, FileImage(params.imageFile!), state)) {
+    print(params.imageFile!.path);
+
+    if (await showCropDialog(context, cropController,
+        params.imageFiles[state.imageListNotifier.value], state)) {
       ui.Image croppedImage = await cropController.croppedBitmap();
       ByteData? data =
           await croppedImage.toByteData(format: ui.ImageByteFormat.png);
@@ -57,9 +59,9 @@ class CropImageEnhancement extends AnkiExportEnhancement {
       croppedImageFile.createSync();
       croppedImageFile.writeAsBytesSync(bytes);
       params.imageFile = croppedImageFile;
-      params.imageFiles = [
-        NetworkToFileImage(file: File(getPreviewImagePath()))
-      ];
+      params.imageFiles = [NetworkToFileImage(file: croppedImageFile)];
+
+      state.notifyImageNotSearching();
     }
 
     return params;
@@ -101,7 +103,6 @@ class CropImageEnhancement extends AnkiExportEnhancement {
                 TextButton(
                   child: Text(appModel.translate("dialog_set")),
                   onPressed: () async {
-                    state.notifyImageNotSearching();
                     return Navigator.pop(context, true);
                   },
                 ),
