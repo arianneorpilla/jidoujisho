@@ -184,10 +184,12 @@ class CreatorPageState extends State<CreatorPage> {
       audioNotifier.value = exportParams.audioFile;
 
       if (audioChanged) {
-        audioPlayer.setUrl(audioNotifier.value!.path, isLocal: true).then((_) {
-          audioPlayer.getDuration().then((milliseconds) {
-            positionNotifier.value = Duration.zero;
-            durationNotifier.value = Duration(milliseconds: milliseconds);
+        Future.delayed(const Duration(milliseconds: 500), () {
+          audioPlayer.play(audioNotifier.value!.path, isLocal: true).then((_) {
+            audioPlayer.getDuration().then((milliseconds) {
+              positionNotifier.value = Duration.zero;
+              durationNotifier.value = Duration(milliseconds: milliseconds);
+            });
           });
         });
       }

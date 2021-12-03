@@ -77,6 +77,7 @@ class AppLocalizations {
       'player_pick_video': 'Pick Video File',
       'player_option_shadowing': 'Shadowing Mode',
       'player_option_definition_focus': 'Definition Focus Mode',
+      'player_option_subtitle_focus': 'Subtitle Focus Mode',
       'player_option_listening_comprehension': 'Listening Comprehension Mode',
       'player_option_drag_to_select': 'Use Drag to Select Subtitle Selection',
       'player_option_tap_to_select': 'Use Tap to Select Subtitle Selection',
@@ -233,6 +234,7 @@ class AppLocalizations {
       'player_pick_video': 'Pumili ng Video',
       'player_option_shadowing': 'Ulitin ang Pangkasalukuyang Subtitle',
       'player_option_definition_focus': 'Huminto kapag Naghanap ng Salita',
+      'player_option_subtitle_focus': 'Huminto kapag Nagpalit ang Subtitle',
       'player_option_listening_comprehension': 'Itago ang Subtitle at Makinig',
       'player_option_drag_to_select':
           'Humila ng Subtitle para Maghanap ng Salita',

@@ -101,6 +101,10 @@ class PlayerPageState extends State<PlayerPage>
   bool dialogSmartPaused = false;
   bool dialogSmartFocusFlag = false;
 
+  bool autoPauseFlag = false;
+  Subtitle? autoPauseSubtitle;
+  bool draggingSlider = false;
+
   String? audioPath;
 
   Orientation? currentOrientation;
@@ -720,6 +724,16 @@ class PlayerPageState extends State<PlayerPage>
           .durationSearch(position.value + getSubtitleDelay());
 
       if (currentSubtitle.value != newSubtitle) {
+        if (!draggingSlider &&
+            !autoPauseFlag &&
+            appModel.getPlayerSubtitleFocusMode() &&
+            currentSubtitle.value != null) {
+          autoPauseSubtitle = currentSubtitle.value;
+          autoPauseFlag = true;
+          dialogSmartPause();
+          return;
+        }
+
         currentSubtitle.value = newSubtitle;
         // For remembering the last subtitle even if it has disappeared.
         if (newSubtitle != null) {
@@ -850,6 +864,9 @@ class PlayerPageState extends State<PlayerPage>
         }
 
         String subtitleText = currentSubtitle.data;
+        if (autoPauseFlag) {
+          subtitleText = autoPauseSubtitle!.data;
+        }
         String regex = subtitleOptionsNotifier.value.regexFilter;
         if (regex.isNotEmpty) {
           subtitleText = subtitleText.replaceAll(RegExp(regex), "");
@@ -889,7 +906,7 @@ class PlayerPageState extends State<PlayerPage>
             ..onTap = () async {
               String word = await appModel
                   .getCurrentLanguage()
-                  .wordFromIndex(currentSubtitle.value!.data, index);
+                  .wordFromIndex(subtitleText, index);
 
               setSearchTerm(word);
             }));
@@ -1027,6 +1044,7 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   Future<void> playPause() async {
+    autoPauseFlag = false;
     dialogSmartPaused = false;
 
     final isFinished = playerController.value.isEnded;
@@ -1073,6 +1091,10 @@ class PlayerPageState extends State<PlayerPage>
       } else {
         if (!playerController.value.isInitialized) {
           return const Icon(Icons.play_arrow, color: Colors.transparent);
+        }
+
+        if (!playerController.value.isPlaying) {
+          return const Icon(Icons.play_arrow);
         }
 
         return AnimatedIcon(
@@ -1126,6 +1148,7 @@ class PlayerPageState extends State<PlayerPage>
           child: GestureDetector(
             onDoubleTap: () async {
               cancelHideTimer();
+
               await playerController
                   .seekTo(position.value - const Duration(seconds: 10));
 
@@ -1140,6 +1163,7 @@ class PlayerPageState extends State<PlayerPage>
           child: GestureDetector(
             onDoubleTap: () async {
               cancelHideTimer();
+
               await playerController
                   .seekTo(position.value + const Duration(seconds: 10));
 
@@ -1649,6 +1673,8 @@ class PlayerPageState extends State<PlayerPage>
             if (!subtitleItem.controller.initialized) {
               subtitleItem.controller.initial();
             }
+            currentSubtitle.value = null;
+            refreshSubtitleWidget();
           });
 
       options.add(option);
@@ -1660,6 +1686,8 @@ class PlayerPageState extends State<PlayerPage>
         active: subtitleItem == emptySubtitleItem,
         action: () {
           subtitleItem = emptySubtitleItem;
+          currentSubtitle.value = null;
+          refreshSubtitleWidget();
         }));
 
     return options;
@@ -1734,6 +1762,16 @@ class PlayerPageState extends State<PlayerPage>
           await appModel.togglePlayerDefinitionFocusMode();
         },
       ),
+      // BottomSheetDialogOption(
+      //   label: appModel.translate("player_option_subtitle_focus"),
+      //   icon: (appModel.getPlayerSubtitleFocusMode())
+      //       ? Icons.motion_photos_paused_rounded
+      //       : Icons.motion_photos_pause_outlined,
+      //   active: appModel.getPlayerSubtitleFocusMode(),
+      //   action: () async {
+      //     await appModel.togglePlayerSubtitleFocusMode();
+      //   },
+      // ),
       BottomSheetDialogOption(
         label: appModel.translate("player_option_listening_comprehension"),
         icon: (appModel.getListeningComprehensionMode())
@@ -1745,6 +1783,7 @@ class PlayerPageState extends State<PlayerPage>
           refreshSubtitleWidget();
         },
       ),
+
       BottomSheetDialogOption(
         label: appModel.translate("player_option_dictionary_menu"),
         icon: Icons.auto_stories,
@@ -1775,6 +1814,7 @@ class PlayerPageState extends State<PlayerPage>
           }
         },
       ),
+
       // BottomSheetDialogOption(
       //   label: appModel.translate("player_option_cast_video"),
       //   icon: Icons.cast_connected,
@@ -2052,9 +2092,16 @@ class PlayerPageState extends State<PlayerPage>
                 ? 1.0
                 : playerController.value.duration.inSeconds.toDouble(),
             onChangeStart: (value) {
+              draggingSlider = true;
+              autoPauseSubtitle = null;
+              autoPauseFlag = false;
+              dialogSmartPaused = false;
+              dialogSmartFocusFlag = false;
+
               cancelHideTimer();
             },
             onChangeEnd: (value) {
+              draggingSlider = false;
               startHideTimer();
             },
             onChanged: validPosition
@@ -2079,6 +2126,8 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   Future<void> dialogSmartResume({bool isSmartFocus = false}) async {
+    autoPauseFlag = false;
+
     if (dialogSmartFocusFlag && !isSmartFocus) {
       return;
     }
@@ -2130,6 +2179,7 @@ class PlayerPageState extends State<PlayerPage>
 
     subtitleItems.add(item);
     subtitleItem = item;
+    currentSubtitle.value = null;
     refreshSubtitleWidget();
   }
 }

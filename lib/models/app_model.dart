@@ -1242,6 +1242,15 @@ class AppModel with ChangeNotifier {
         "playerDefinitionFocusMode", !getPlayerDefinitionFocusMode());
   }
 
+  bool getPlayerSubtitleFocusMode() {
+    return sharedPreferences.getBool("playerSubtitleFocusMode") ?? false;
+  }
+
+  Future<void> togglePlayerSubtitleFocusMode() async {
+    await sharedPreferences.setBool(
+        "playerSubtitleFocusMode", !getPlayerSubtitleFocusMode());
+  }
+
   bool getListeningComprehensionMode() {
     return sharedPreferences.getBool("playerListeningComprehensionMode") ??
         false;
