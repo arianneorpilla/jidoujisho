@@ -175,7 +175,7 @@ jidoujisho is written in <b><a href="https://dart.dev/">Dart</a></b> and powered
 
 Natural language processing tools include <b><a href="https://github.com/fxsjy/jieba">jieba</a></b> for Chinese via <b><a href="https://chaquo.com/chaquopy/">Chaquopy</a></b>, <b><a href="https://github.com/Kimtaro/ve">Ve</a></b> and <b><a href="https://pub.dev/packages/mecab_dart">MeCab</a></b> for Japanese and <a href="https://github.com/shirakaba/mecab-ko"><b>MeCab</a></b> for Korean. Japanese pitch accent patterns are sourced from <b><a href="https://github.com/mifunetoshiro/kanjium">Kanjium</a></b>. Optical character recognition powered by <b><a href="https://developers.google.com/ml-kit">Google ML Kit</b></a>. 
 
-If you like what I've done so far, you can help me out by testing the application on various devices so that I can gauge the compatibility of the application with different versions of Android, <b><a href="https://www.buymeacoffee.com/lrorpilla">making a donation</a></b> or collaborating with me on further improvements.
+If you like what I've done so far, you can help me out by testing the application on various devices so that I can gauge the compatibility of the application with different versions of Android, <b><a href="https://www.ko-fi.com/lrorpilla">making a donation</a></b> or collaborating with me on further improvements.
 
 The logo of the application is both by <b><a href="https://88suzysuzy.carrd.co/">suzy</b></a> and <b><a href="https://www.buymeacoffee.com/marblesaa">Aaron Marbella</a></b>, support their awesome work if you can!
 
