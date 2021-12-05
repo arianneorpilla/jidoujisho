@@ -227,7 +227,7 @@ class ReaderPageState extends State<ReaderPage> {
         !appModel.dictionaryUpdateFlipflop.value;
     appModel.readerUpdateFlipflop.value = !appModel.readerUpdateFlipflop.value;
 
-    if (appModel.isFromDeepLink) {
+    if (appModel.killOnExit) {
       exit(0);
     }
   }

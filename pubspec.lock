@@ -36,6 +36,34 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.8.2"
+  audio_service:
+    dependency: "direct main"
+    description:
+      name: audio_service
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.18.1"
+  audio_service_platform_interface:
+    dependency: transitive
+    description:
+      name: audio_service_platform_interface
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.0"
+  audio_service_web:
+    dependency: transitive
+    description:
+      name: audio_service_web
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.1"
+  audio_session:
+    dependency: transitive
+    description:
+      name: audio_session
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.6+1"
   audioplayers:
     dependency: "direct main"
     description:
@@ -1055,8 +1083,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "89da88c1eba2eefc0f0ad4bc71d4ef1a4eb0e581"
-      resolved-ref: "89da88c1eba2eefc0f0ad4bc71d4ef1a4eb0e581"
+      ref: "9c5307d1cbe3a9ca84c387e2023251896c9ff47f"
+      resolved-ref: "9c5307d1cbe3a9ca84c387e2023251896c9ff47f"
       url: "https://github.com/lrorpilla/subtitle"
     source: git
     version: "0.1.0-beta.2"

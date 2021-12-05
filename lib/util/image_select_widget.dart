@@ -116,14 +116,12 @@ class ImageSelectWidgetState extends State<ImageSelectWidget> {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () async {
-        await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
         await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => fullViewGallery(),
           ),
         );
-        await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
       },
       onHorizontalDragEnd: (details) {
         if (details.primaryVelocity == 0) return;

@@ -73,6 +73,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     BuildContext context,
     String filePath, {
     bool pushReplacement = false,
+    bool scopedStorage = false,
   }) async {
     AppModel appModel = Provider.of<AppModel>(context, listen: false);
 

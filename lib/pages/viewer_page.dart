@@ -408,7 +408,7 @@ class ViewerPageState extends State<ViewerPage> {
         !appModel.dictionaryUpdateFlipflop.value;
     appModel.viewerUpdateFlipflop.value = !appModel.viewerUpdateFlipflop.value;
 
-    if (appModel.isFromDeepLink) {
+    if (appModel.killOnExit) {
       exit(0);
     }
   }

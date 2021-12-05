@@ -70,6 +70,7 @@ class CreatorPageState extends State<CreatorPage> {
   final ValueNotifier<int> imageListNotifier = ValueNotifier<int>(0);
 
   AudioPlayer audioPlayer = AudioPlayer();
+  late AudioCache audioCache;
 
   final ValueNotifier<Duration> positionNotifier =
       ValueNotifier<Duration>(Duration.zero);
@@ -106,6 +107,7 @@ class CreatorPageState extends State<CreatorPage> {
   @override
   void initState() {
     super.initState();
+    audioCache = AudioCache(fixedPlayer: audioPlayer);
 
     if (widget.initialParams != null) {
       setCurrentParams(widget.initialParams!);
@@ -184,15 +186,16 @@ class CreatorPageState extends State<CreatorPage> {
       audioNotifier.value = exportParams.audioFile;
 
       if (audioChanged) {
-        Future.delayed(const Duration(milliseconds: 500), () {
-          audioPlayer.play(audioNotifier.value!.path, isLocal: true).then((_) {
-            audioPlayer.getDuration().then((milliseconds) {
-              positionNotifier.value = Duration.zero;
-              durationNotifier.value = Duration(milliseconds: milliseconds);
-            });
-          });
-        });
+        initialiseAudio();
       }
+    });
+  }
+
+  Future<void> initialiseAudio() async {
+    await audioPlayer.setUrl(audioNotifier.value!.path);
+    await audioPlayer.getDuration().then((milliseconds) {
+      positionNotifier.value = Duration.zero;
+      durationNotifier.value = Duration(milliseconds: milliseconds);
     });
   }
 

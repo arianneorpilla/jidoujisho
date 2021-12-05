@@ -13,6 +13,7 @@ Widget transcriptDialog({
   required BuildContext context,
   required List<Subtitle> subtitles,
   required Subtitle? currentSubtitle,
+  required double fontSize,
   required String regexFilter,
   required String fontName,
   required Duration subtitleDelay,
@@ -115,7 +116,7 @@ Widget transcriptDialog({
                 softWrap: true,
                 style: GoogleFonts.getFont(
                   fontName,
-                  fontSize: 20,
+                  fontSize: fontSize,
                   color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
                 ),
               ),
@@ -145,6 +146,7 @@ Future<void> openTranscript({
   required List<Subtitle> subtitles,
   required Duration subtitleDelay,
   Subtitle? currentSubtitle,
+  required double fontSize,
   required String regexFilter,
   required String fontName,
   FutureOr<void> Function(int)? onTapCallback,
@@ -164,6 +166,7 @@ Future<void> openTranscript({
     barrierColor: backgroundColor,
     builder: (context) => transcriptDialog(
       context: context,
+      fontSize: fontSize,
       subtitles: subtitles,
       currentSubtitle: currentSubtitle,
       subtitleDelay: subtitleDelay,

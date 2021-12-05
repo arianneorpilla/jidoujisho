@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
+import 'package:audio_service/audio_service.dart';
 import 'package:chisa/anki/enhancements/bing_search_enhancement.dart';
 import 'package:chisa/anki/enhancements/camera_image_enhancement.dart';
 import 'package:chisa/anki/enhancements/crop_image_enhancement.dart';
@@ -16,6 +17,7 @@ import 'package:chisa/media/media_sources/player_network_stream_source.dart';
 import 'package:chisa/media/media_sources/reader_browser_media_source.dart';
 import 'package:chisa/media/media_sources/reader_ttu_media_source.dart';
 import 'package:chisa/media/media_sources/viewer_camera_media_source.dart';
+import 'package:chisa/util/audio_handler.dart';
 import 'package:external_path/external_path.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -79,6 +81,7 @@ class AppModel with ChangeNotifier {
         _packageInfo = packageInfo;
 
   late ValueNotifier<bool> resumableNotifier;
+  late AudioHandler audioHandler;
 
   /// For saving options and settings and persisting across app restarts.
   final SharedPreferences _sharedPreferences;
@@ -88,6 +91,8 @@ class AppModel with ChangeNotifier {
   ValueNotifier<bool> playerUpdateFlipflop = ValueNotifier<bool>(false);
   ValueNotifier<bool> readerUpdateFlipflop = ValueNotifier<bool>(false);
   ValueNotifier<bool> viewerUpdateFlipflop = ValueNotifier<bool>(false);
+
+  ValueNotifier<bool> playPauseFlipflop = ValueNotifier<bool>(false);
 
   /// Necessary to get version details upon app start.
   final PackageInfo _packageInfo;
@@ -105,7 +110,7 @@ class AppModel with ChangeNotifier {
   bool isInSource = false;
 
   /// If the app is returned from a deep link.
-  bool isFromDeepLink = false;
+  bool killOnExit = false;
 
   final Map<MediaType, ScrollController> _scrollOffsets = {};
   final Map<MediaType, FloatingSearchBarController> _homeSearchControllers = {};
@@ -183,6 +188,7 @@ class AppModel with ChangeNotifier {
       populateExportEnhancements();
       populateWidgetEnhancements();
 
+      await initialiseAudioHandler();
       await initialiseImportedDictionaries();
       await initialiseExportEnhancements();
       await initialiseWidgetEnhancements();
@@ -211,6 +217,23 @@ class AppModel with ChangeNotifier {
       }
       notifyListeners();
     }
+  }
+
+  Future<void> initialiseAudioHandler() async {
+    audioHandler = await AudioService.init(
+      builder: () => ChisaAudioHandler(
+        playCallback: () {
+          playPauseFlipflop.value = !playPauseFlipflop.value;
+        },
+        pauseCallback: () {
+          playPauseFlipflop.value = !playPauseFlipflop.value;
+        },
+      ),
+      config: const AudioServiceConfig(
+        androidNotificationChannelId: 'app.lrorpilla.jidoujisho.channel.audio',
+        androidNotificationChannelName: 'jidoujisho',
+      ),
+    );
   }
 
   void populateDictionaryFormats() {

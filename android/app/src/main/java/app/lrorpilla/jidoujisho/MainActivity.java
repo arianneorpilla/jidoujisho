@@ -33,6 +33,7 @@ import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.MethodChannel;
 
+import com.ryanheise.audioservice.AudioServicePlugin;
 import com.ichi2.anki.api.AddContentApi;
 
 import java.util.ArrayList;
@@ -50,6 +51,11 @@ public class MainActivity extends FlutterActivity {
 
     private Activity context;
     private AnkiDroidHelper mAnkiDroid;
+
+    @Override
+    public FlutterEngine provideFlutterEngine(Context context) {
+        return AudioServicePlugin.getFlutterEngine(context);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

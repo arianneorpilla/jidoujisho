@@ -15,7 +15,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.16+3
+version: 1.0.18+5
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
@@ -64,7 +64,7 @@ dependencies:
   subtitle:
     git:
       url: https://github.com/lrorpilla/subtitle
-      ref: 89da88c1eba2eefc0f0ad4bc71d4ef1a4eb0e581
+      ref: 9c5307d1cbe3a9ca84c387e2023251896c9ff47f
   multi_value_listenable_builder: ^0.0.1
   flutter_ffmpeg: ^0.4.2
   permission_handler:
@@ -102,6 +102,7 @@ dependencies:
   device_info_plus:
   uri_to_file:
   google_fonts:
+  audio_service:
 dev_dependencies:
   # flutter_test:
   #   sdk: flutter

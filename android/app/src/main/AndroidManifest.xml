@@ -5,6 +5,8 @@
   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
   <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
   <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+  <uses-permission android:name="android.permission.WAKE_LOCK"/>
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
    <application
         android:label="jidoujisho"
         android:icon="@mipmap/launcher_icon"
@@ -64,6 +66,7 @@
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
 
+              
                 <data android:scheme="" />
                 <data android:scheme="ftp"/>
                 <data android:scheme="ftps"/>
@@ -83,8 +86,20 @@
                 <data android:scheme="httplive"/>
                 <data android:scheme="udp"/>
                 <data android:scheme="vlc"/>
+                <data android:mimeType="video/*"/>
+                <data android:mimeType="audio/*"/>
             </intent-filter>
         </activity>
+        <service android:name="com.ryanheise.audioservice.AudioService">
+          <intent-filter>
+            <action android:name="android.media.browse.MediaBrowserService" />
+          </intent-filter>
+        </service>
+        <receiver android:name="com.ryanheise.audioservice.MediaButtonReceiver" >
+          <intent-filter>
+            <action android:name="android.intent.action.MEDIA_BUTTON" />
+          </intent-filter>
+        </receiver> 
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

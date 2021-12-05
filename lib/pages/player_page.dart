@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:audio_service/audio_service.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -163,7 +164,7 @@ class PlayerPageState extends State<PlayerPage>
         !appModel.dictionaryUpdateFlipflop.value;
     appModel.playerUpdateFlipflop.value = !appModel.playerUpdateFlipflop.value;
 
-    if (appModel.isFromDeepLink) {
+    if (appModel.killOnExit) {
       exit(0);
     }
   }
@@ -201,6 +202,7 @@ class PlayerPageState extends State<PlayerPage>
   void dispose() async {
     super.dispose();
     playerController.removeListener(listener);
+    appModel.playPauseFlipflop.removeListener(playPause);
     ClipboardListener.removeListener(copyClipboardAction);
 
     await Wakelock.disable();
@@ -269,6 +271,8 @@ class PlayerPageState extends State<PlayerPage>
       playerController.addOnInitListener(() {
         initialiseEmbeddedSubtitles();
       });
+
+      appModel.playPauseFlipflop.addListener(playPause);
 
       setState(() {
         isPlayerReady = true;
@@ -1229,6 +1233,7 @@ class PlayerPageState extends State<PlayerPage>
               subtitles: subtitleItem.controller.subtitles,
               subtitleDelay: getSubtitleDelay(),
               currentSubtitle: getNearestSubtitle(),
+              fontSize: subtitleOptionsNotifier.value.fontSize,
               fontName: subtitleOptionsNotifier.value.fontName,
               regexFilter: subtitleOptionsNotifier.value.regexFilter,
               onTapCallback: (int selectedIndex) async {
@@ -1488,6 +1493,7 @@ class PlayerPageState extends State<PlayerPage>
               subtitles: subtitleItem.controller.subtitles,
               subtitleDelay: getSubtitleDelay(),
               currentSubtitle: getNearestSubtitle(),
+              fontSize: subtitleOptionsNotifier.value.fontSize,
               fontName: subtitleOptionsNotifier.value.fontName,
               regexFilter: subtitleOptionsNotifier.value.regexFilter,
               onTapCallback: (int selectedIndex) async {
@@ -1957,11 +1963,11 @@ class PlayerPageState extends State<PlayerPage>
       String timestamp = getTimestampFromDuration(currentTime);
       String inputPath = playerController.dataSource;
 
-      String? altInputPath = await widget.params.mediaSource
-          .getExportVideoDataSource(widget.params);
-      if (altInputPath != null) {
-        inputPath = altInputPath;
-      }
+      // String? altInputPath = await widget.params.mediaSource
+      //     .getExportVideoDataSource(widget.params);
+      // if (altInputPath != null) {
+      //   inputPath = altInputPath;
+      // }
 
       String command =
           "-loglevel quiet -ss $timestamp -y -i \"$inputPath\" -frames:v 1 -q:v 2 \"$outputPath\"";
