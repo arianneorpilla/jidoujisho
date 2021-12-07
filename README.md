@@ -6,7 +6,7 @@
 <p align="center">A highly versatile and modular framework enabling language-agnostic immersion learning on mobile.</p>
 
 <p align="center" style="margin:0"><b>Latest GitHub Release:<br>
-<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/1.0.0">1.0.0</a> 🇨🇳 🇯🇵 🇰🇷</b><br>
+<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/1.0.0">1.0</a> 🇨🇳 🇯🇵 🇰🇷</b><br>
 </p>
 
 <p align="center" style="margin:0"><b>Release Archive:<br>
