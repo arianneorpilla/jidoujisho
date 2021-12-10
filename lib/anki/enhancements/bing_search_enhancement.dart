@@ -26,6 +26,8 @@ class BingSearchEnhancement extends AnkiExportEnhancement {
           enhancementField: AnkiExportField.image,
         );
 
+  Map<String, http.Response> bingCache = {};
+
   @override
   Future<AnkiExportParams> enhanceParams({
     required BuildContext context,
@@ -54,9 +56,11 @@ class BingSearchEnhancement extends AnkiExportEnhancement {
     /// Notify the [CreatorPageState] that we are searching.
     state.notifyImageSearching(searchTerm: searchTerm);
 
+    String cacheKey = "${appModel.getCurrentLanguage()}/$searchTerm";
+
     try {
       List<NetworkToFileImage> images =
-          await scrapeBingImages(context, searchTerm);
+          await scrapeBingImages(context, searchTerm, cacheKey);
 
       if (images.isNotEmpty) {
         params.imageFiles = images;
@@ -78,13 +82,21 @@ class BingSearchEnhancement extends AnkiExportEnhancement {
   }
 
   Future<List<NetworkToFileImage>> scrapeBingImages(
-      BuildContext context, String searchTerm) async {
+      BuildContext context, String searchTerm, String cacheKey) async {
     List<NetworkToFileImage> images = [];
 
-    var client = http.Client();
-    http.Response response = await client.get(Uri.parse(
-        'https://www.bing.com/images/search?q=$searchTerm&FORM=HDRSC2'));
-    var document = parser.parse(response.body);
+    late http.Response response;
+
+    if (bingCache[cacheKey] != null) {
+      response = bingCache[cacheKey]!;
+    } else {
+      var client = http.Client();
+      response = await client.get(Uri.parse(
+          'https://www.bing.com/images/search?q=$searchTerm&FORM=HDRSC2'));
+      bingCache[cacheKey] = response;
+    }
+
+    dom.Document document = parser.parse(response.body);
 
     List<dom.Element> imgElements = document.getElementsByClassName("iusc");
 

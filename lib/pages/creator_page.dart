@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:audioplayers/audioplayers.dart';
 import 'package:chisa/anki/anki_export_enhancement.dart';
 import 'package:chisa/anki/anki_export_enhancement_dialog.dart';
 import 'package:chisa/anki/anki_export_params.dart';
@@ -17,6 +16,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:multi_value_listenable_builder/multi_value_listenable_builder.dart';
 import 'package:network_to_file_image/network_to_file_image.dart';
 import 'package:provider/provider.dart';
+import 'package:just_audio/just_audio.dart';
 
 class CreatorPage extends StatefulWidget {
   const CreatorPage({
@@ -64,20 +64,20 @@ class CreatorPageState extends State<CreatorPage> {
   final ValueNotifier<File?> imageNotifier = ValueNotifier<File?>(null);
   final ValueNotifier<File?> audioNotifier = ValueNotifier<File?>(null);
   final ValueNotifier<bool> imageSearchingNotifier = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> audioSearchingNotifier = ValueNotifier<bool>(false);
 
   final ValueNotifier<String> imageSearchTermNotifier =
       ValueNotifier<String>("");
   final ValueNotifier<int> imageListNotifier = ValueNotifier<int>(0);
 
   AudioPlayer audioPlayer = AudioPlayer();
-  late AudioCache audioCache;
 
   final ValueNotifier<Duration> positionNotifier =
       ValueNotifier<Duration>(Duration.zero);
   final ValueNotifier<Duration> durationNotifier =
       ValueNotifier<Duration>(Duration.zero);
-  final ValueNotifier<PlayerState> playerStateNotifier =
-      ValueNotifier<PlayerState>(PlayerState.PAUSED);
+  final ValueNotifier<PlayerState?> playerStateNotifier =
+      ValueNotifier<PlayerState?>(null);
   final ValueNotifier<bool> canExportNotifier = ValueNotifier<bool>(false);
   bool isExportingBusy = false;
 
@@ -107,7 +107,6 @@ class CreatorPageState extends State<CreatorPage> {
   @override
   void initState() {
     super.initState();
-    audioCache = AudioCache(fixedPlayer: audioPlayer);
 
     if (widget.initialParams != null) {
       setCurrentParams(widget.initialParams!);
@@ -119,13 +118,13 @@ class CreatorPageState extends State<CreatorPage> {
       exportParams.addListener(checkForButtonRefresh);
     });
 
-    audioPlayer.onDurationChanged.listen((duration) {
-      durationNotifier.value = duration;
+    audioPlayer.durationStream.listen((duration) {
+      durationNotifier.value = duration!;
     });
-    audioPlayer.onAudioPositionChanged.listen((duration) {
-      positionNotifier.value = duration;
+    audioPlayer.positionStream.listen((position) {
+      positionNotifier.value = position;
     });
-    audioPlayer.onPlayerStateChanged.listen((playerState) {
+    audioPlayer.playerStateStream.listen((playerState) {
       playerStateNotifier.value = playerState;
     });
   }
@@ -133,7 +132,7 @@ class CreatorPageState extends State<CreatorPage> {
   @override
   void dispose() {
     audioPlayer.stop();
-    audioPlayer.release();
+    audioPlayer.dispose();
     super.dispose();
   }
 
@@ -148,21 +147,27 @@ class CreatorPageState extends State<CreatorPage> {
       AnkiExportEnhancement? enhancement =
           appModel.getAutoFieldEnhancement(field);
       if (enhancement != null) {
-        exportParams = await enhancement.enhanceParams(
+        enhancement
+            .enhanceParams(
           context: context,
           appModel: appModel,
           params: exportParams,
           autoMode: true,
           state: this,
-        );
+        )
+            .then((exportParams) {
+          setCurrentParams(exportParams);
+        });
       }
     }
-
-    setCurrentParams(exportParams);
   }
 
   AnkiExportParams getCurrentParams() {
     return exportParams;
+  }
+
+  void refresh() {
+    setState(() {});
   }
 
   void setCurrentParams(AnkiExportParams newParams, {AnkiExportField? field}) {
@@ -192,11 +197,10 @@ class CreatorPageState extends State<CreatorPage> {
   }
 
   Future<void> initialiseAudio() async {
-    await audioPlayer.setUrl(audioNotifier.value!.path);
-    await audioPlayer.getDuration().then((milliseconds) {
-      positionNotifier.value = Duration.zero;
-      durationNotifier.value = Duration(milliseconds: milliseconds);
-    });
+    await audioPlayer.setFilePath(audioNotifier.value!.path);
+    await audioPlayer.pause();
+    positionNotifier.value = audioPlayer.position;
+    durationNotifier.value = audioPlayer.duration ?? Duration.zero;
   }
 
   Widget getEmptyBox(
@@ -226,10 +230,6 @@ class CreatorPageState extends State<CreatorPage> {
       },
       icon: Icon((widget.autoMode) ? Icons.hdr_auto : Icons.widgets),
     );
-  }
-
-  void refresh() {
-    setState(() {});
   }
 
   List<Widget> getFieldEnhancementWidgets(
@@ -783,13 +783,23 @@ class CreatorPageState extends State<CreatorPage> {
     );
   }
 
-  // The [ImageSelectWidget] needs to know if the search term for the image
+  /// The [ImageSelectWidget] needs to know if the search term for the image
   /// has changed. If your [AnkiExportEnhancement] uses search, notify it with
   /// the search term using this.
   void notifyImageSearching({required searchTerm}) {
     setState(() {
       imageSearchingNotifier.value = true;
       imageSearchTermNotifier.value = searchTerm;
+    });
+  }
+
+  /// Sometimes it's useful to distinguish audio that should not be replaced
+  /// unless manually discarded from audio that is searched and should be
+  /// replaced from the next search. If your [AnkiExportEnhancement] uses
+  /// search, notify the enhancement using this.
+  void notifyAudioSearching() {
+    setState(() {
+      audioSearchingNotifier.value = true;
     });
   }
 
@@ -817,45 +827,46 @@ class CreatorPageState extends State<CreatorPage> {
     });
   }
 
+  /// Sometimes it's useful to distinguish audio that should not be replaced
+  /// unless manually discarded from audio that is searched and should be
+  /// replaced from the next search. If your [AnkiExportEnhancement] uses
+  /// search, notify the enhancement using this.
+  void notifyAudioNotSearching() {
+    setState(() {
+      audioSearchingNotifier.value = false;
+    });
+  }
+
   Widget buildPlayButton() {
     return MultiValueListenableBuider(
       valueListenables: [
         playerStateNotifier,
       ],
       builder: (context, values, _) {
-        PlayerState playerState = values.elementAt(0);
+        PlayerState? playerState = values.elementAt(0);
 
         IconData iconData = Icons.play_arrow;
 
-        switch (playerState) {
-          case PlayerState.STOPPED:
-            iconData = Icons.replay;
-            break;
-          case PlayerState.PLAYING:
-            iconData = Icons.pause;
-            break;
-          case PlayerState.PAUSED:
-          case PlayerState.COMPLETED:
-            iconData = Icons.play_arrow;
-            break;
+        if (playerState == null ||
+            playerState.processingState == ProcessingState.completed) {
+          iconData = Icons.play_arrow;
+        } else if (playerState.playing) {
+          iconData = Icons.pause;
+        } else {
+          iconData = Icons.play_arrow;
         }
 
         return IconButton(
           icon: Icon(iconData, size: 24),
-          onPressed: () {
-            switch (playerState) {
-              case PlayerState.STOPPED:
-                audioPlayer.play(audioNotifier.value!.path);
-                break;
-              case PlayerState.PLAYING:
-                audioPlayer.pause();
-                break;
-              case PlayerState.PAUSED:
-                audioPlayer.play(audioNotifier.value!.path);
-                break;
-              case PlayerState.COMPLETED:
-                audioPlayer.play(audioNotifier.value!.path);
-                break;
+          onPressed: () async {
+            if (playerState == null ||
+                playerState.processingState == ProcessingState.completed) {
+              await audioPlayer.seek(Duration.zero);
+              await audioPlayer.play();
+            } else if (playerState.playing) {
+              await audioPlayer.pause();
+            } else {
+              await audioPlayer.play();
             }
           },
         );
@@ -873,14 +884,15 @@ class CreatorPageState extends State<CreatorPage> {
       builder: (context, values, _) {
         Duration duration = values.elementAt(0);
         Duration position = values.elementAt(1);
-        PlayerState playerState = values.elementAt(2);
+        PlayerState? playerState = values.elementAt(2);
 
         if (duration == Duration.zero) {
           return const SizedBox.shrink();
         }
 
         String getPositionText() {
-          if (playerState == PlayerState.COMPLETED) {
+          if (playerState == null ||
+              playerState.processingState == ProcessingState.completed) {
             position = Duration.zero;
           }
 
@@ -918,43 +930,37 @@ class CreatorPageState extends State<CreatorPage> {
       builder: (context, values, _) {
         Duration duration = values.elementAt(0);
         Duration position = values.elementAt(1);
-        PlayerState playerState = values.elementAt(2);
+        PlayerState? playerState = values.elementAt(2);
 
-        bool validPosition = duration.compareTo(position) >= 0;
-        double sliderValue =
-            validPosition ? position.inMilliseconds.toDouble() : 0;
+        double sliderValue = position.inMilliseconds.toDouble();
 
-        if (playerState == PlayerState.COMPLETED) {
+        if (playerState == null ||
+            playerState.processingState == ProcessingState.completed) {
           sliderValue = 0;
         }
 
         return Expanded(
           child: Slider(
-            activeColor: Theme.of(context).focusColor,
-            inactiveColor: Theme.of(context).unselectedWidgetColor,
-            value: sliderValue,
-            min: 0.0,
-            max: (!validPosition || playerState == PlayerState.COMPLETED)
-                ? 1.0
-                : duration.inMilliseconds.toDouble(),
-            onChanged: validPosition
-                ? (progress) {
-                    if (playerState == PlayerState.COMPLETED) {
-                      sliderValue = progress.floor().toDouble();
-                      audioPlayer.play(
-                        audioNotifier.value!.path,
-                        position: Duration(
-                          milliseconds: sliderValue.toInt(),
-                        ),
-                      );
-                    } else {
-                      sliderValue = progress.floor().toDouble();
-                      audioPlayer
-                          .seek(Duration(milliseconds: sliderValue.toInt()));
-                    }
-                  }
-                : null,
-          ),
+              activeColor: Theme.of(context).focusColor,
+              inactiveColor: Theme.of(context).unselectedWidgetColor,
+              value: sliderValue,
+              min: 0.0,
+              max: (playerState == null ||
+                      playerState.processingState == ProcessingState.completed)
+                  ? 1.0
+                  : duration.inMilliseconds.toDouble(),
+              onChanged: (progress) {
+                if (playerState == null ||
+                    playerState.processingState == ProcessingState.completed) {
+                  sliderValue = progress.floor().toDouble();
+                  audioPlayer.seek(Duration(
+                    milliseconds: sliderValue.toInt(),
+                  ));
+                } else {
+                  sliderValue = progress.floor().toDouble();
+                  audioPlayer.seek(Duration(milliseconds: sliderValue.toInt()));
+                }
+              }),
         );
       },
     );

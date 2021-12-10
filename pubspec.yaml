@@ -15,7 +15,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.18+5
+version: 1.1.0+6
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
@@ -57,7 +57,7 @@ dependencies:
   filesystem_picker:
     git:
       url: https://github.com/lrorpilla/filesystem_picker
-      ref: fc65b3a0b2f27db6b090ad9fbedd50d1eea7f132
+      ref: 3827555ff8cbf8cfdcadc4f382e611dc6f3d40d9
       path: package/
   flutter_vlc_player: ^6.0.5
   external_path: ^1.0.1
@@ -79,7 +79,6 @@ dependencies:
   flutter_colorpicker:
   wakelock:
   network_to_file_image:
-  audioplayers:
   photo_view:
   intl:
   device_apps:
@@ -103,6 +102,10 @@ dependencies:
   uri_to_file:
   google_fonts:
   audio_service:
+  just_audio:
+  firebase_crashlytics: ^2.4.3
+  firebase_analytics: ^9.0.2
+  flutter_html: ^2.2.1
 dev_dependencies:
   # flutter_test:
   #   sdk: flutter

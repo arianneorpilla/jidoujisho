@@ -1,50 +1,61 @@
-import 'package:audio_service/audio_service.dart';
-import 'package:chisa/util/anki_creator.dart';
-import 'package:chisa/util/audio_handler.dart';
-import 'package:chisa/util/export_paths.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:chisa/models/app_model.dart';
+import 'package:chisa/pages/home_page.dart';
+import 'package:chisa/util/anki_creator.dart';
+import 'package:chisa/util/export_paths.dart';
+import 'package:chisa/firebase_options.dart';
+
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:chisa/models/app_model.dart';
-import 'package:chisa/pages/home_page.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 
 /// Application execution starts here.
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  runZonedGuarded<Future<void>>(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
 
-  await Wakelock.disable();
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.landscapeLeft,
-    DeviceOrientation.landscapeRight,
-  ]);
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
 
-  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    await Wakelock.disable();
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
 
-  await Permission.storage.request();
-  if ((await DeviceInfoPlugin().androidInfo).version.sdkInt! >= 30) {
-    await Permission.manageExternalStorage.request();
-  }
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
-  requestAnkiDroidPermissions();
+    await Permission.storage.request();
+    if ((await DeviceInfoPlugin().androidInfo).version.sdkInt! >= 30) {
+      await Permission.manageExternalStorage.request();
+    }
 
-  initialiseExportPaths();
+    requestAnkiDroidPermissions();
 
-  SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-  PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    initialiseExportPaths();
 
-  runApp(
-    App(
-      sharedPreferences: sharedPreferences,
-      packageInfo: packageInfo,
-    ),
-  );
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+
+    runApp(
+      App(
+        sharedPreferences: sharedPreferences,
+        packageInfo: packageInfo,
+      ),
+    );
+  }, (error, stack) => FirebaseCrashlytics.instance.recordError(error, stack));
 }
 
 class App extends StatelessWidget {

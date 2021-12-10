@@ -10,11 +10,13 @@ import 'package:chisa/util/greyscale_wrapper.dart';
 import 'package:chisa/util/popup_item.dart';
 import 'package:chisa/util/return_from_context.dart';
 import 'package:chisa/util/share_intent.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({

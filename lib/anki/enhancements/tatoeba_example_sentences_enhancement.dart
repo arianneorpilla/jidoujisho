@@ -1,26 +1,33 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:chisa/anki/anki_export_enhancement.dart';
 import 'package:chisa/anki/anki_export_params.dart';
-import 'package:chisa/anki/enhancements/search_dictionary_enhancement.dart';
+import 'package:chisa/language/language.dart';
+import 'package:chisa/language/languages/chinese_simplified_language.dart';
+import 'package:chisa/language/languages/chinese_traditional_language.dart';
+import 'package:chisa/language/languages/english_language.dart';
+import 'package:chisa/language/languages/japanese_language.dart';
+import 'package:chisa/language/languages/korean_language.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/creator_page.dart';
 import 'package:chisa/util/anki_export_field.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
-class TextSegmentationEnhancement extends AnkiExportEnhancement {
-  TextSegmentationEnhancement({
-    required AnkiExportField field,
+class TatoebaExampleSentencesEnhancement extends AnkiExportEnhancement {
+  TatoebaExampleSentencesEnhancement({
     required AppModel appModel,
   }) : super(
           appModel: appModel,
-          enhancementName: "Text Segmentation",
-          enhancementDescription:
-              "Split text into words and open a picker dialog.",
-          enhancementIcon: Icons.account_tree,
-          enhancementField: field,
+          enhancementName: "Tatoeba Example Sentences",
+          enhancementDescription: "Get example sentences via Tatoeba.",
+          enhancementIcon: Icons.article_outlined,
+          enhancementField: AnkiExportField.word,
         );
+
+  Map<String, List<String>> tatoebaCache = {};
 
   @override
   Future<AnkiExportParams> enhanceParams({
@@ -31,43 +38,61 @@ class TextSegmentationEnhancement extends AnkiExportEnhancement {
     required CreatorPageState state,
   }) async {
     String text = "";
-
-    switch (enhancementField) {
-      case AnkiExportField.sentence:
-        if (params.sentence.isEmpty) {
-          return params;
-        }
-        text = params.sentence;
-        break;
-      case AnkiExportField.meaning:
-        if (params.meaning.isEmpty) {
-          return params;
-        }
-        text = params.meaning;
-        break;
-      default:
-        throw UnimplementedError("Unimplemented for non sentence/meaning");
+    if (params.word.isEmpty) {
+      return params;
     }
+
+    text = params.word;
 
     ValueNotifier<List<bool>> indexesSelected;
     List<Widget> textWidgets;
-    List<String> words = await appModel.getCurrentLanguage().textToWords(text);
 
-    words.removeWhere((word) => word.trim().isEmpty);
+    String lang = "";
+    Language currentLanguage = appModel.getCurrentLanguage();
+    if (currentLanguage is JapaneseLanguage) {
+      lang = "jpn";
+    } else if (currentLanguage is ChineseSimplifiedLanguage) {
+      lang = "cmn";
+    } else if (currentLanguage is ChineseTraditionalLanguage) {
+      lang = "yue";
+    } else if (currentLanguage is KoreanLanguage) {
+      lang = "kor";
+    } else {
+      throw UnimplementedError("This language is not implemented for Tatoeba");
+    }
+
+    List<String> sentences = [];
+
+    String cacheKey = "${appModel.getCurrentLanguage()}/$text";
+    if (tatoebaCache[cacheKey] != null) {
+      sentences = tatoebaCache[cacheKey]!;
+    } else {
+      var client = http.Client();
+      http.Response response = await client.get(Uri.parse(
+          'https://tatoeba.org/en/api_v0/search?from=$lang&has_audio=&native=&orphans=no&query=$text&sort=relevance&sort_reverse=&tags=&to=none&trans_filter=limit&trans_has_audio=&trans_link=&trans_orphan=&trans_to=&trans_unapproved=&trans_user=&unapproved=no&user='));
+
+      Map<String, dynamic> json = jsonDecode(response.body);
+      List<dynamic> results = json["results"];
+
+      sentences = results.map((result) => result["text"].toString()).toList();
+      tatoebaCache[cacheKey] = sentences;
+    }
 
     indexesSelected = ValueNotifier<List<bool>>(
       List.generate(
-        words.length,
+        sentences.length,
         (index) => false,
       ),
     );
-    textWidgets = getTextWidgetsFromWords(words, indexesSelected);
+    textWidgets = getTextWidgetsFromSentences(sentences, indexesSelected);
 
     ScrollController scrollController = ScrollController();
 
     bool isSpaceDelimited = appModel.getCurrentLanguage().isSpaceDelimited;
-    bool isSearch = false;
-    String searchTerm = "";
+
+    if (sentences.isEmpty) {
+      return params;
+    }
 
     await showDialog(
       context: context,
@@ -95,53 +120,24 @@ class TextSegmentationEnhancement extends AnkiExportEnhancement {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text(appModel.translate('dialog_search')),
-              onPressed: () async {
-                isSearch = true;
-
-                if (indexesSelected.value
-                    .every((selected) => selected == false)) {
-                  searchTerm = text;
-                } else {
-                  String wordsJoined = "";
-
-                  for (int i = 0; i < words.length; i++) {
-                    if (indexesSelected.value[i]) {
-                      wordsJoined += words[i];
-                    }
-                    if (isSpaceDelimited) {
-                      wordsJoined += " ";
-                    }
-                  }
-
-                  searchTerm = wordsJoined.trim();
-                }
-
-                Navigator.pop(context);
-              },
-            ),
-            TextButton(
               child: Text(
                 appModel.translate('dialog_set'),
               ),
               onPressed: () {
-                if (indexesSelected.value
-                    .every((selected) => selected == false)) {
-                  params.word = text;
-                } else {
-                  String wordsJoined = "";
+                String sentencesJoined = "";
 
-                  for (int i = 0; i < words.length; i++) {
-                    if (indexesSelected.value[i]) {
-                      wordsJoined += words[i];
-                    }
-                    if (isSpaceDelimited) {
-                      wordsJoined += " ";
-                    }
+                for (int i = 0; i < sentences.length; i++) {
+                  if (indexesSelected.value[i]) {
+                    sentencesJoined += sentences[i];
+                    sentencesJoined += "\n";
                   }
-
-                  params.word = wordsJoined.trim();
+                  if (isSpaceDelimited) {
+                    sentencesJoined += " ";
+                    sentencesJoined += "\n";
+                  }
                 }
+
+                params.sentence = sentencesJoined.trim();
 
                 Navigator.pop(context);
               },
@@ -151,30 +147,17 @@ class TextSegmentationEnhancement extends AnkiExportEnhancement {
       },
     );
 
-    if (isSearch) {
-      AnkiExportEnhancement enhancement =
-          SearchDictionaryEnhancement(appModel: appModel);
-      params.word = searchTerm;
-      return enhancement.enhanceParams(
-        context: context,
-        appModel: appModel,
-        params: params,
-        autoMode: autoMode,
-        state: state,
-      );
-    } else {
-      return params;
-    }
+    return params;
   }
 
-  List<Widget> getTextWidgetsFromWords(
-      List<String> words, ValueNotifier<List<bool>> notifier) {
-    words.forEachIndexed((i, word) {
-      words[i] = word.trim();
+  List<Widget> getTextWidgetsFromSentences(
+      List<String> sentences, ValueNotifier<List<bool>> notifier) {
+    sentences.forEachIndexed((i, word) {
+      sentences[i] = word.trim();
     });
 
     List<Widget> widgets = [];
-    for (int i = 0; i < words.length; i++) {
+    for (int i = 0; i < sentences.length; i++) {
       widgets.add(
         GestureDetector(
           onTap: () {
@@ -195,7 +178,7 @@ class TextSegmentationEnhancement extends AnkiExportEnhancement {
                           ? Colors.white.withOpacity(0.1)
                           : Colors.black.withOpacity(0.1),
                   child: Text(
-                    words[i],
+                    sentences[i],
                     style: const TextStyle(
                       fontWeight: FontWeight.w500,
                       fontSize: 18,

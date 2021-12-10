@@ -8,8 +8,11 @@ import 'package:chisa/anki/enhancements/bing_search_enhancement.dart';
 import 'package:chisa/anki/enhancements/camera_image_enhancement.dart';
 import 'package:chisa/anki/enhancements/crop_image_enhancement.dart';
 import 'package:chisa/anki/enhancements/dictionary_menu_enhancement.dart';
+import 'package:chisa/anki/enhancements/forvo_audio_enhancement.dart';
 import 'package:chisa/anki/enhancements/image_picker_enhancement.dart';
+import 'package:chisa/anki/enhancements/massif_example_sentences_enhancement.dart';
 import 'package:chisa/anki/enhancements/search_dictionary_enhancement.dart';
+import 'package:chisa/anki/enhancements/tatoeba_example_sentences_enhancement.dart';
 import 'package:chisa/anki/enhancements/text_segmentation_enhancement.dart';
 import 'package:chisa/dictionary/formats/naver_dictionary_format.dart';
 import 'package:chisa/language/languages/korean_language.dart';
@@ -203,8 +206,14 @@ class AppModel with ChangeNotifier {
               .setEnabled(field, 4);
         }
 
-        await TextSegmentationEnhancement(appModel: this)
-            .setEnabled(AnkiExportField.sentence, 3);
+        await TextSegmentationEnhancement(
+          appModel: this,
+          field: AnkiExportField.sentence,
+        ).setEnabled(AnkiExportField.sentence, 3);
+        await TextSegmentationEnhancement(
+          appModel: this,
+          field: AnkiExportField.meaning,
+        ).setEnabled(AnkiExportField.meaning, 3);
         await DictionaryMenuEnhancement(appModel: this)
             .setEnabled(AnkiExportField.word, 3);
         await SearchDictionaryEnhancement(appModel: this)
@@ -288,13 +297,17 @@ class AppModel with ChangeNotifier {
         appModel: this,
         enhancementField: AnkiExportField.audio,
       ),
+      ForvoAudioEnhancement(appModel: this),
     ];
     List<AnkiExportEnhancement> sentenceEnhancements = [
       ClearButtonEnhancement(
         appModel: this,
         enhancementField: AnkiExportField.sentence,
       ),
-      TextSegmentationEnhancement(appModel: this),
+      TextSegmentationEnhancement(
+        appModel: this,
+        field: AnkiExportField.sentence,
+      ),
     ];
     List<AnkiExportEnhancement> wordEnhancements = [
       ClearButtonEnhancement(
@@ -303,6 +316,8 @@ class AppModel with ChangeNotifier {
       ),
       DictionaryMenuEnhancement(appModel: this),
       SearchDictionaryEnhancement(appModel: this),
+      MassifExampleSentencesEnhancement(appModel: this),
+      TatoebaExampleSentencesEnhancement(appModel: this),
     ];
     List<AnkiExportEnhancement> readingEnhancements = [
       ClearButtonEnhancement(
@@ -315,6 +330,10 @@ class AppModel with ChangeNotifier {
       ClearButtonEnhancement(
         appModel: this,
         enhancementField: AnkiExportField.meaning,
+      ),
+      TextSegmentationEnhancement(
+        appModel: this,
+        field: AnkiExportField.meaning,
       ),
     ];
     List<AnkiExportEnhancement> extraEnhancements = [

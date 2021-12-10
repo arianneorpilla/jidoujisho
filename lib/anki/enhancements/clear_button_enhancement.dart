@@ -51,6 +51,7 @@ class ClearButtonEnhancement extends AnkiExportEnhancement {
       case AnkiExportField.audio:
         params.audioFile = null;
         params.audioSearch = "";
+        state.notifyAudioNotSearching();
         break;
     }
 

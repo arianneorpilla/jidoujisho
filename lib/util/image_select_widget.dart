@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:chisa/models/app_model.dart';
-import 'package:flutter/services.dart';
 import 'package:network_to_file_image/network_to_file_image.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
@@ -288,9 +287,9 @@ class ImageSelectWidgetState extends State<ImageSelectWidget> {
               height: 12,
               width: 12,
               child: JumpingDotsProgressIndicator(
-                color: widget.appModel.getIsDarkMode()
-                    ? Colors.white
-                    : Colors.black,
+                color: Theme.of(context).backgroundColor == Colors.white
+                    ? Colors.black
+                    : Colors.white,
               ),
             ),
           ),
