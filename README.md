@@ -6,10 +6,15 @@
 <p align="center">A highly versatile and modular framework enabling language-agnostic immersion learning on mobile.</p>
 
 <p align="center" style="margin:0"><b>Latest GitHub Release:<br>
-<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/1.0.0">1.0</a> 🇨🇳 🇯🇵 🇰🇷</b><br>
+<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/1.1">1.1</a> 🇨🇳 🇯🇵 🇰🇷</b><br>
 </p>
 
-<p align="center" style="margin:0"><b>Release Archive:<br>
+<p align="center" style="margin:0"><b>Chisa Releases:<br>
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/1.0.0">1.0</a> · 
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/1.1">1.1</a> 
+</b></p>
+
+<p align="center" style="margin:0"><b>Legacy Releases:<br>
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.3.0-beta">0.3</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.4-beta">0.4</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.5.2-beta">0.5</a> · 
@@ -171,7 +176,7 @@ A primer on the basics of the application is as follows.
 
 # 👥 Contribution and attribution
 
-jidoujisho is written in <b><a href="https://dart.dev/">Dart</a></b> and powered by <b><a href="https://flutter.dev/">Flutter</a></b>. Reader WebView linked to <b><a href="https://ttu-ebook.web.app">ッツ Ebook Reader</b></a>. Video streaming via <b><a href="https://youtube.com/">YouTube</a></b>. Image search via <b><a href="https://bing.com//">Bing</a></b>.
+jidoujisho is written in <b><a href="https://dart.dev/">Dart</a></b> and powered by <b><a href="https://flutter.dev/">Flutter</a></b>. Reader WebView linked to <b><a href="https://ttu-ebook.web.app">ッツ Ebook Reader</b></a>. Video streaming via <b><a href="https://youtube.com/">YouTube</a></b>. Image search via <b><a href="https://bing.com//">Bing</a></b>. Audio search via <b><a href="https://forvo.com//">Forvo</a></b>. Example sentences from <b><a href="https://massif.la">Massif</a></b> and <b><a href="https://tatoeba.org/">Tatoeba</a></b>.
 
 Natural language processing tools include <b><a href="https://github.com/fxsjy/jieba">jieba</a></b> for Chinese via <b><a href="https://chaquo.com/chaquopy/">Chaquopy</a></b>, <b><a href="https://github.com/Kimtaro/ve">Ve</a></b> and <b><a href="https://pub.dev/packages/mecab_dart">MeCab</a></b> for Japanese and <a href="https://github.com/shirakaba/mecab-ko"><b>MeCab</a></b> for Korean. Japanese pitch accent patterns are sourced from <b><a href="https://github.com/mifunetoshiro/kanjium">Kanjium</a></b>. Optical character recognition powered by <b><a href="https://developers.google.com/ml-kit">Google ML Kit</b></a>. 
 
