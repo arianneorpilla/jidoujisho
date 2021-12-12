@@ -161,6 +161,9 @@ class AppLocalizations {
       'dialog_launch_ankidroid': 'ANKIDROID',
       'enter_a_link': 'Enter a link',
       'youtube_trending': 'YouTube Trending',
+      'clear_dictionary_history': 'Clear Dictionary History',
+      'clear_dictionary_history_warning':
+          'This will clear all search results in your dictionary history. Are you sure you want to do this?',
       'localisation_warning': 'Community addons and enhancements are managed '
           'by their respective developers, and these may appear in their '
           'original language.',
@@ -324,6 +327,9 @@ class AppLocalizations {
       'dialog_launch_ankidroid': 'ANKIDROID',
       'enter_a_link': 'Magbigay ng link',
       'youtube_trending': 'Trending sa YouTube',
+      'clear_dictionary_history': 'Burahin ang Kasaysayan',
+      'clear_dictionary_history_warning':
+          'Mawawala ang lahat ng mga resultang nahanap galing sa mga diksyunaryo. Gusto mo ba talagang gawin ito?',
       'localisation_warning': 'Ang mga mod na gawa ng komunidad ay maaring '
           'hindi naisalin at magpakita sa orihinal na wikang '
           'pinanggalingan.',

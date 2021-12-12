@@ -291,6 +291,48 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
     searchResult = null;
   }
 
+  void showClearAllDialog(BuildContext context) {
+    Widget alertDialog = AlertDialog(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+      title: Text(
+        appModel.translate("clear_dictionary_history"),
+      ),
+      content: Text(
+        appModel.translate("clear_dictionary_history_warning"),
+        textAlign: TextAlign.justify,
+      ),
+      actions: <Widget>[
+        TextButton(
+            child: Text(
+              appModel.translate("dialog_yes"),
+              style: TextStyle(
+                color: Theme.of(context).focusColor,
+              ),
+            ),
+            onPressed: () async {
+              await appModel.setSearchHistory([]);
+              await appModel.clearDictionaryHistory();
+
+              Navigator.pop(context);
+
+              appModel.refresh();
+            }),
+        TextButton(
+            child: Text(
+              appModel.translate("dialog_no"),
+            ),
+            onPressed: () => Navigator.pop(context)),
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) => alertDialog,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -333,24 +375,14 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
         actions: [
           FloatingSearchBarAction.icon(
             onTap: () async {
-              DictionaryEntry entry = searchResult!.entries[selectedIndex];
-
-              await navigateToCreator(
-                context: context,
-                appModel: appModel,
-                initialParams: AnkiExportParams(
-                  word: entry.word,
-                  meaning: entry.meaning,
-                  reading: entry.reading,
-                ),
-              );
+              showClearAllDialog(context);
             },
             icon: Icon(
-              Icons.note_add,
+              Icons.clear_all,
               color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
             ),
             size: 20,
-            showIfClosed: false,
+            showIfClosed: true,
           ),
           FloatingSearchBarAction.searchToClear(
             size: 20,

@@ -867,9 +867,16 @@ class AppModel with ChangeNotifier {
 
     _resultsCache[currentDictionary.dictionaryName] ??= {};
 
-    if (_resultsCache[currentDictionary.dictionaryName]![searchTerm] != null) {
-      return Future.value(
-          _resultsCache[currentDictionary.dictionaryName]![searchTerm]!);
+    DictionarySearchResult? cachedResult =
+        _resultsCache[currentDictionary.dictionaryName]![searchTerm];
+
+    if (cachedResult != null) {
+      await addDictionaryHistoryItem(
+        DictionaryMediaHistoryItem.fromDictionarySearchResult(
+          cachedResult,
+        ),
+      );
+      return Future.value(cachedResult);
     }
 
     Store store = _dictionaryStores[currentDictionary.dictionaryName]!;
@@ -1108,6 +1115,13 @@ class AppModel with ChangeNotifier {
     return AppLocalizations.getLanguageCode(
       getAppLanguageName(),
     );
+  }
+
+  Future<void> clearDictionaryHistory() async {
+    DictionaryMediaHistory history = getDictionaryMediaHistory();
+    history.getDictionaryItems().forEach((item) async {
+      await history.removeDictionaryItem(item);
+    });
   }
 
   Directory getLastPickedDirectory(MediaType type) {

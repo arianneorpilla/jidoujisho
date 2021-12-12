@@ -85,7 +85,7 @@ class ReaderBrowserSource extends ReaderMediaSource {
           refreshCallback: refreshCallback,
           showIfClosed: false,
           showIfOpened: true,
-          icon: Icons.delete_forever,
+          icon: Icons.clear_all,
           onPressed: () async {
             appModel.setSearchHistory([], historyType: getIdentifier());
             refreshCallback();
