@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:chisa/anki/anki_export_enhancement.dart';
 import 'package:chisa/anki/anki_export_params.dart';
@@ -61,21 +62,20 @@ class MassifExampleSentencesEnhancement extends AnkiExportEnhancement {
       results = massifCache[cacheKey]!;
     } else {
       var client = http.Client();
-      http.Response response =
-          await client.get(Uri.parse('https://massif.la/ja/search?q=$text'));
-      var document = parser.parse(response.body);
+      http.Response response = await client
+          .get(Uri.parse('https://massif.la/ja/search?q=$text&fmt=json'));
+      Map<String, dynamic> json = jsonDecode(utf8.decode(response.bodyBytes));
 
-      List<dom.Element> textJapaneseElements = document
-          .getElementsByClassName("text-japanese")
-          .where((element) => element.localName == "li")
-          .toList();
+      List<dynamic> resultsJson = json['results'];
+      for (Map<String, dynamic> resultJson in resultsJson) {
+        String context = resultJson['sample_source']['title'];
+        String text = resultJson['text'];
 
-      results = textJapaneseElements.map((element) {
-        String innerHtml = element.children[0].innerHtml;
         List<InlineSpan> spans = [];
 
+        String highlightedText = resultJson['highlighted_html'];
         List<String> splitWithDelims =
-            innerHtml.splitWithDelim(RegExp(r"<em>(.*?)<\/em>"));
+            highlightedText.splitWithDelim(RegExp(r"<em>(.*?)<\/em>"));
 
         for (String splitWithDelim in splitWithDelims) {
           if (splitWithDelim.startsWith("<em>") &&
@@ -104,12 +104,14 @@ class MassifExampleSentencesEnhancement extends AnkiExportEnhancement {
           }
         }
 
-        return MassifResult(
+        MassifResult result = MassifResult(
           spans: spans,
-          text: element.children[0].text,
-          context: element.children[1].text,
+          text: text,
+          context: context,
         );
-      }).toList();
+
+        results.add(result);
+      }
 
       massifCache[cacheKey] = results;
     }

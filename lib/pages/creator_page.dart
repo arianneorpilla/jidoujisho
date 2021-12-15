@@ -838,7 +838,7 @@ class CreatorPageState extends State<CreatorPage> {
   }
 
   Widget buildPlayButton() {
-    return MultiValueListenableBuider(
+    return MultiValueListenableBuilder(
       valueListenables: [
         playerStateNotifier,
       ],
@@ -875,7 +875,7 @@ class CreatorPageState extends State<CreatorPage> {
   }
 
   Widget buildDurationAndPosition() {
-    return MultiValueListenableBuider(
+    return MultiValueListenableBuilder(
       valueListenables: [
         durationNotifier,
         positionNotifier,
@@ -921,7 +921,7 @@ class CreatorPageState extends State<CreatorPage> {
   }
 
   Widget buildSlider() {
-    return MultiValueListenableBuider(
+    return MultiValueListenableBuilder(
       valueListenables: [
         durationNotifier,
         positionNotifier,

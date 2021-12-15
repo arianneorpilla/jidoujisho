@@ -313,11 +313,13 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
             ),
             onPressed: () async {
               await appModel.setSearchHistory([]);
-              await appModel.clearDictionaryHistory();
+              await appModel
+                  .getDictionaryMediaHistory()
+                  .clearAllDictionaryItems();
 
               Navigator.pop(context);
 
-              appModel.refresh();
+              widget.focusCallback?.call();
             }),
         TextButton(
             child: Text(

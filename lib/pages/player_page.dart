@@ -316,7 +316,9 @@ class PlayerPageState extends State<PlayerPage>
   void startDragSubtitlesTimer(String newTerm) {
     cancelDragSubtitlesTimer();
     dragSearchTimer = Timer(const Duration(milliseconds: 500), () {
-      setSearchTerm(newTerm);
+      if (newTerm.isNotEmpty) {
+        setSearchTerm(newTerm);
+      }
       refreshSubtitleWidget();
     });
   }
@@ -338,7 +340,7 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   Widget buildDictionary() {
-    return MultiValueListenableBuider(
+    return MultiValueListenableBuilder(
       valueListenables: [
         searchTerm,
         searchMessage,
@@ -847,7 +849,7 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   Widget buildSubtitle() {
-    return MultiValueListenableBuider(
+    return MultiValueListenableBuilder(
       valueListenables: [
         currentSubtitle,
         listeningSubtitle,
@@ -1109,7 +1111,7 @@ class PlayerPageState extends State<PlayerPage>
       }
     }
 
-    return MultiValueListenableBuider(
+    return MultiValueListenableBuilder(
       valueListenables: [
         isPlaying,
         isEnded,
@@ -1339,7 +1341,7 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   Widget buildDurationAndPosition() {
-    return MultiValueListenableBuider(
+    return MultiValueListenableBuilder(
       valueListenables: [
         duration,
         position,
@@ -1412,7 +1414,7 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   Widget buildPlayButton() {
-    return MultiValueListenableBuider(
+    return MultiValueListenableBuilder(
       valueListenables: [
         isPlaying,
         isEnded,
@@ -2070,7 +2072,7 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   Widget buildSlider() {
-    return MultiValueListenableBuider(
+    return MultiValueListenableBuilder(
       valueListenables: [
         duration,
         position,

@@ -323,7 +323,7 @@ class AppLocalizations {
       'source_list_emmpty': 'Walang mga pagkukunan',
       'ankidroid_api': 'AnkiDroid API',
       'ankidroid_api_message':
-          'Kailangan na buhay ang AnkiDroid API upang gamitin anYouTubeg Pagawaan ng Card. Buksan ang AnkiDroid upang magpatuloy.',
+          'Kailangan na buhay ang AnkiDroid API upang gamitin ang Pagawaan ng Card. Buksan ang AnkiDroid upang magpatuloy.',
       'dialog_launch_ankidroid': 'ANKIDROID',
       'enter_a_link': 'Magbigay ng link',
       'youtube_trending': 'Trending sa YouTube',

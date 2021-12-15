@@ -78,8 +78,7 @@ Future<void> textShareIntentAction(BuildContext context, String text) async {
         ),
       );
 
-      Uri uri = Uri.parse(text);
-      File file = await toFile(uri);
+      File file = await toFile(text);
 
       PlayerMediaSource source = appModel.getMediaSourceFromName(
           MediaType.player, "Local Media") as PlayerMediaSource;

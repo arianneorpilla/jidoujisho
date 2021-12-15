@@ -299,7 +299,7 @@ class ReaderPageState extends State<ReaderPage> {
   }
 
   Widget buildDictionary() {
-    return MultiValueListenableBuider(
+    return MultiValueListenableBuilder(
       valueListenables: [
         searchTerm,
         searchMessage,

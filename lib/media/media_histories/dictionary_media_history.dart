@@ -45,6 +45,18 @@ class DictionaryMediaHistory extends MediaHistory {
     await setKeys(keys);
   }
 
+  Future<void> clearAllDictionaryItems() async {
+    await setKeys([]);
+    List<String> valuesToDelete = appModel.sharedPreferences
+        .getKeys()
+        .where((key) => key.startsWith("$prefsDirectory/values/"))
+        .toList();
+
+    for (String valueToDelete in valuesToDelete) {
+      await appModel.sharedPreferences.remove(valueToDelete);
+    }
+  }
+
   List<DictionaryMediaHistoryItem> getDictionaryItems() {
     List<String> keys = getKeys();
     List<DictionaryMediaHistoryItem> history = [];

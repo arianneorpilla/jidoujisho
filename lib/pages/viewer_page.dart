@@ -699,7 +699,7 @@ class ViewerPageState extends State<ViewerPage> {
   }
 
   Widget buildDictionary() {
-    return MultiValueListenableBuider(
+    return MultiValueListenableBuilder(
       valueListenables: [
         searchTerm,
         searchMessage,
@@ -1733,7 +1733,7 @@ class ViewerPageState extends State<ViewerPage> {
   }
 
   Widget buildSlider() {
-    return MultiValueListenableBuider(
+    return MultiValueListenableBuilder(
         valueListenables: [
           currentProgress,
         ],

@@ -1117,13 +1117,6 @@ class AppModel with ChangeNotifier {
     );
   }
 
-  Future<void> clearDictionaryHistory() async {
-    DictionaryMediaHistory history = getDictionaryMediaHistory();
-    history.getDictionaryItems().forEach((item) async {
-      await history.removeDictionaryItem(item);
-    });
-  }
-
   Directory getLastPickedDirectory(MediaType type) {
     return Directory(sharedPreferences.getString('$type/lastPickedFile') ??
         'storage/emulated/0');
