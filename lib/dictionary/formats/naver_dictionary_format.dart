@@ -159,5 +159,3 @@ FutureOr<DictionarySearchResult> searchResultsEnhancementNaverDictionaryFormat(
 
   return result;
 }
-
-class Document {}

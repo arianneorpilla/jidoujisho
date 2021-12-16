@@ -267,7 +267,7 @@ class ReaderPageState extends State<ReaderPage> {
 
   void refreshDictionaryWidget() {
     String holder = searchTerm.value;
-    searchTerm.value = "";
+    setSearchTerm('');
     searchTerm.value = holder;
   }
 
@@ -372,26 +372,32 @@ class ReaderPageState extends State<ReaderPage> {
               child: Container(
                 color: dictionaryColor,
                 padding: const EdgeInsets.all(16),
-                child: FutureBuilder<DictionarySearchResult>(
-                  future: appModel.searchDictionary(
-                    searchTerm,
-                    mediaHistoryItem: generateContextHistoryItem(),
-                  ), // a previously-obtained Future<String> or null
-                  builder: (BuildContext context,
-                      AsyncSnapshot<DictionarySearchResult> snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return buildDictionarySearching();
-                    }
+                child: (latestResult != null)
+                    ? (latestResult!.entries.isEmpty)
+                        ? buildDictionaryNoMatch()
+                        : buildDictionaryMatch()
+                    : FutureBuilder<DictionarySearchResult>(
+                        future: appModel.searchDictionary(
+                          searchTerm,
+                          mediaHistoryItem: generateContextHistoryItem(),
+                        ), // a previously-obtained Future<String> or null
+                        builder: (BuildContext context,
+                            AsyncSnapshot<DictionarySearchResult> snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return buildDictionarySearching();
+                          }
 
-                    latestResult = snapshot.data;
+                          latestResult = snapshot.data;
 
-                    if (!snapshot.hasData || latestResult!.entries.isEmpty) {
-                      return buildDictionaryNoMatch();
-                    } else {
-                      return buildDictionaryMatch();
-                    }
-                  },
-                ),
+                          if (!snapshot.hasData ||
+                              latestResult!.entries.isEmpty) {
+                            return buildDictionaryNoMatch();
+                          } else {
+                            return buildDictionaryMatch();
+                          }
+                        },
+                      ),
               ),
             ),
           ),

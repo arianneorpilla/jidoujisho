@@ -685,7 +685,7 @@ class ViewerPageState extends State<ViewerPage> {
                       }
                     }
 
-                    setSearchTerm(wordsJoined.trim());
+                    sentenceController.text += wordsJoined;
                   }
 
                   Navigator.pop(context);
@@ -730,6 +730,7 @@ class ViewerPageState extends State<ViewerPage> {
                 onTap: () {
                   setSearchTerm("");
                 },
+                onLongPress: () {},
                 child: Container(
                   color: dictionaryColor,
                   padding: const EdgeInsets.all(16),
@@ -776,25 +777,31 @@ class ViewerPageState extends State<ViewerPage> {
               child: Container(
                 color: dictionaryColor,
                 padding: const EdgeInsets.all(16),
-                child: FutureBuilder<DictionarySearchResult>(
-                  future: appModel.searchDictionary(
-                    searchTerm,
-                    mediaHistoryItem: generateContextHistoryItem(),
-                  ), // a previously-obtained Future<String> or null
-                  builder: (BuildContext context,
-                      AsyncSnapshot<DictionarySearchResult> snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return buildDictionarySearching();
-                    }
-                    latestResult = snapshot.data;
+                child: (latestResult != null)
+                    ? (latestResult!.entries.isEmpty)
+                        ? buildDictionaryNoMatch()
+                        : buildDictionaryMatch()
+                    : FutureBuilder<DictionarySearchResult>(
+                        future: appModel.searchDictionary(
+                          searchTerm,
+                          mediaHistoryItem: generateContextHistoryItem(),
+                        ), // a previously-obtained Future<String> or null
+                        builder: (BuildContext context,
+                            AsyncSnapshot<DictionarySearchResult> snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return buildDictionarySearching();
+                          }
+                          latestResult = snapshot.data;
 
-                    if (!snapshot.hasData || latestResult!.entries.isEmpty) {
-                      return buildDictionaryNoMatch();
-                    } else {
-                      return buildDictionaryMatch();
-                    }
-                  },
-                ),
+                          if (!snapshot.hasData ||
+                              latestResult!.entries.isEmpty) {
+                            return buildDictionaryNoMatch();
+                          } else {
+                            return buildDictionaryMatch();
+                          }
+                        },
+                      ),
               ),
             ),
           ),
@@ -1527,7 +1534,7 @@ class ViewerPageState extends State<ViewerPage> {
 
   void refreshDictionaryWidget() {
     String holder = searchTerm.value;
-    searchTerm.value = "";
+    setSearchTerm('');
     searchTerm.value = holder;
   }
 
@@ -1700,7 +1707,6 @@ class ViewerPageState extends State<ViewerPage> {
                     onColorChanged: (newColor) async {
                       widgetColor = newColor;
                     },
-                    showLabel: true,
                     pickerAreaHeightPercent: 0.8,
                   ),
                 ],

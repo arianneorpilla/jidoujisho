@@ -412,7 +412,6 @@ Future<void> showBlurWidgetOptionsDialog(
                     onColorChanged: (newColor) async {
                       widgetColor = newColor;
                     },
-                    showLabel: true,
                     pickerAreaHeightPercent: 0.8,
                   ),
                   TextField(
