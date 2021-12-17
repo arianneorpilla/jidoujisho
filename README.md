@@ -171,7 +171,6 @@ A primer on the basics of the application is as follows.
 * ⚠️ **If AnkiDroid is not running in the background**, tap on the export message to open it
 * 🗃 **The AnkiDroid deck you last export to will be remembered** for your next export
 * 📹 The quality closest to the **last selected quality** will be selected by default for YouTube videos
-* 📢 **Automatic captions** are more excellent in **podcasts and news programs** with clear speakers
 * ✂️ **Crop manga panels before exporting them** within the *Creator* to have better context for your cards 
 
 # 👥 Contribution and attribution
