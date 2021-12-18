@@ -32,8 +32,6 @@ class DictionaryMediaHistory extends MediaHistory {
 
     await appModel.sharedPreferences
         .setString("$prefsDirectory/values/${item.key}", item.toJson());
-    await appModel.sharedPreferences
-        .setString("resumeMediaHistoryItem", item.toJson());
     await setKeys(keys);
   }
 
