@@ -69,6 +69,18 @@ class MediaHistory {
         [];
   }
 
+  Future<void> clearAllItems() async {
+    await setKeys([]);
+    List<String> valuesToDelete = appModel.sharedPreferences
+        .getKeys()
+        .where((key) => key.startsWith("$prefsDirectory/values/"))
+        .toList();
+
+    for (String valueToDelete in valuesToDelete) {
+      await appModel.sharedPreferences.remove(valueToDelete);
+    }
+  }
+
   /// Get the serialised history in [prefsDirectory] of a Hive [Box]
   /// and deserialise each [MediaHistoryItem] and return the list.
   List<MediaHistoryItem> getItems() {

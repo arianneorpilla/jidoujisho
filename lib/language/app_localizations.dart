@@ -161,6 +161,9 @@ class AppLocalizations {
       'dialog_launch_ankidroid': 'ANKIDROID',
       'enter_a_link': 'Enter a link',
       'youtube_trending': 'YouTube Trending',
+      'clear_reader_history': 'Clear Reader History',
+      'clear_reader_history_warning':
+          'This will clear all of your data in ッツ Ebook Reader. Are you sure you want to do this?',
       'clear_dictionary_history': 'Clear Dictionary History',
       'clear_dictionary_history_warning':
           'This will clear all search results in your dictionary history. Are you sure you want to do this?',
@@ -327,9 +330,12 @@ class AppLocalizations {
       'dialog_launch_ankidroid': 'ANKIDROID',
       'enter_a_link': 'Magbigay ng link',
       'youtube_trending': 'Trending sa YouTube',
+      'clear_reader_history': 'Burahin ang Kasaysayan',
+      'clear_reader_history_warning':
+          'Mawawala ang lahat ng mga resultang nahanap galing sa ッツ Ebook Reader. Nais mo ba talagang gawin ito?',
       'clear_dictionary_history': 'Burahin ang Kasaysayan',
       'clear_dictionary_history_warning':
-          'Mawawala ang lahat ng mga resultang nahanap galing sa mga diksyunaryo. Gusto mo ba talagang gawin ito?',
+          'Mawawala ang lahat ng mga resultang nahanap galing sa mga diksyunaryo. Nais mo ba talagang gawin ito?',
       'localisation_warning': 'Ang mga mod na gawa ng komunidad ay maaring '
           'hindi naisalin at magpakita sa orihinal na wikang '
           'pinanggalingan.',

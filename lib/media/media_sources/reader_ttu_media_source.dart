@@ -86,38 +86,69 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
     );
   }
 
+  Future<void> showClearAllDialog(
+    BuildContext context,
+  ) async {
+    AppModel appModel = Provider.of<AppModel>(context, listen: false);
+
+    Widget alertDialog = AlertDialog(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+      title: Text(
+        appModel.translate("clear_reader_history"),
+      ),
+      content: Text(
+        appModel.translate("clear_reader_history_warning"),
+        textAlign: TextAlign.justify,
+      ),
+      actions: <Widget>[
+        TextButton(
+            child: Text(
+              appModel.translate("dialog_yes"),
+              style: TextStyle(
+                color: Theme.of(context).focusColor,
+              ),
+            ),
+            onPressed: () async {
+              await mediaType.getMediaHistory(appModel).clearAllItems();
+              await setClearCache(context, true);
+
+              Navigator.pop(context);
+            }),
+        TextButton(
+            child: Text(
+              appModel.translate("dialog_no"),
+            ),
+            onPressed: () => Navigator.pop(context)),
+      ],
+    );
+
+    await showDialog(
+      context: context,
+      builder: (context) => alertDialog,
+    );
+  }
+
   @override
   List<Widget> getSearchBarActions(
     BuildContext context,
     Function() refreshCallback,
   ) {
-    ValueNotifier<bool> horizontalHackNotifier =
-        ValueNotifier<bool>(getHorizontalHack(context));
+    AppModel appModel = Provider.of<AppModel>(context, listen: false);
+
     return [
-      FloatingSearchBarAction(
+      FloatingSearchBarAction.icon(
+        onTap: () async {
+          await showClearAllDialog(context);
+        },
+        icon: Icon(
+          Icons.clear_all,
+          color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
+        ),
+        size: 20,
         showIfClosed: true,
         showIfOpened: true,
-        child: ValueListenableBuilder<bool>(
-          valueListenable: horizontalHackNotifier,
-          builder: (context, bool isHorizontal, child) {
-            return CircularButton(
-              icon: Icon(
-                (isHorizontal)
-                    ? Icons.text_rotation_none
-                    : Icons.text_rotate_vertical,
-                size: 20,
-                color: (Provider.of<AppModel>(context, listen: false)
-                        .getIsDarkMode()
-                    ? Colors.white
-                    : Colors.black),
-              ),
-              onPressed: () async {
-                await toggleHorizontalHack(context);
-                horizontalHackNotifier.value = getHorizontalHack(context);
-              },
-            );
-          },
-        ),
       ),
       MediaSourceActionButton(
         context: context,
@@ -149,25 +180,20 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
       contextMenu: getContextMenu(state),
       initialUrlRequest:
           URLRequest(url: Uri.parse(state.widget.params.mediaHistoryItem.key)),
-      initialOptions: getInitialOptions(),
+      initialOptions: getInitialOptions(context),
       onWebViewCreated: (newController) {
         controller = newController;
       },
       onConsoleMessage: (controller, consoleMessage) async {
+        print(consoleMessage);
         await onConsoleMessage(controller, consoleMessage, state);
       },
       onLoadStop: (controller, uri) async {
         await controller.evaluateJavascript(source: textClickJs);
-        if (getHorizontalHack(context)) {
-          await controller.evaluateJavascript(source: horizontalHackJs);
-        }
         await onLoadStop(controller, uri, state);
       },
       onTitleChanged: (controller, title) async {
         await controller.evaluateJavascript(source: textClickJs);
-        if (getHorizontalHack(context)) {
-          await controller.evaluateJavascript(source: horizontalHackJs);
-        }
         await onTitleChanged(controller, title, state);
       },
     );
@@ -189,6 +215,7 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
         String? isCreator = messageJson["isCreator"];
 
         state.setScrollX(await controller.getScrollX() ?? -1);
+        state.setScrollY(await controller.getScrollY() ?? -1);
 
         try {
           if (index != -1 && index >= 0) {
@@ -232,10 +259,11 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
         state.setAuthor("");
 
         if (messageJson["bookmark"] != null) {
-          String wordCountText = messageJson["bookmark"];
+          String wordCountText = messageJson["bookmark"].trim();
           int currentProgress = int.tryParse(wordCountText.split("/")[0]) ?? 0;
           int completeProgress =
-              int.tryParse(wordCountText.split("/")[1].split(" ")[0]) ?? 0;
+              int.tryParse(wordCountText.split("/")[1].trim().split(" ")[0]) ??
+                  0;
 
           state.setCurrentProgress(currentProgress);
           state.setCompleteProgress(completeProgress);
@@ -251,26 +279,22 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
 
         Future.delayed(const Duration(seconds: 2), () async {
           if (state.scrollX != -1) {
-            await controller.scrollTo(x: state.scrollX, y: 0, animated: false);
+            await controller.scrollTo(
+              x: state.scrollX,
+              y: state.scrollY,
+              animated: false,
+            );
             state.setScrollX(-1);
             state.setScrollY(-1);
           }
         });
 
         break;
-      case "jidoujisho-theme":
-        String themeName = messageJson["themeName"];
-        changeTheme(themeName, state);
-        break;
     }
   }
 
   Future<void> onLoadStop(InAppWebViewController controller, Uri? uri,
       ReaderPageState state) async {
-    String themeName = await controller.evaluateJavascript(
-        source: "document.documentElement.className");
-    changeTheme(themeName, state);
-
     String currentTitle = await controller.getTitle() ?? "";
 
     currentTitle = currentTitle.replaceAll("| ッツ Ebook Reader", "");
@@ -283,10 +307,6 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
 
   Future<void> onTitleChanged(InAppWebViewController controller, String? title,
       ReaderPageState state) async {
-    String themeName = await controller.evaluateJavascript(
-        source: "document.documentElement.className");
-    changeTheme(themeName, state);
-
     String currentTitle = await controller.getTitle() ?? "";
 
     currentTitle = currentTitle.replaceAll("| ッツ Ebook Reader", "");
@@ -295,21 +315,6 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
     }
 
     state.setTitle(currentTitle);
-  }
-
-  void changeTheme(String themeName, ReaderPageState state) {
-    switch (themeName) {
-      case "light-theme":
-      case "ecru-theme":
-      case "blue-theme":
-        state.setIsDarkMode(false);
-        break;
-      case "grey-theme":
-      case "black-theme":
-      case "dark-theme":
-        state.setIsDarkMode(true);
-        break;
-    }
   }
 
   Future<void> unselectWebViewTextSelection(
@@ -335,9 +340,13 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
     return selectedText;
   }
 
-  InAppWebViewGroupOptions getInitialOptions() {
+  InAppWebViewGroupOptions getInitialOptions(BuildContext context) {
+    bool clearCache = getClearCache(context);
+    setClearCache(context, false);
+
     return InAppWebViewGroupOptions(
       crossPlatform: InAppWebViewOptions(
+        clearCache: clearCache,
         useShouldOverrideUrlLoading: true,
         mediaPlaybackRequiresUserGesture: false,
         verticalScrollBarEnabled: false,
@@ -500,185 +509,9 @@ var getBase64Image = async function(url) {
 }
 var touchmoved;
 var touchevent;
-var reader = document.getElementsByTagName('app-reader')[0];
-var bookmark = document.getElementsByClassName('fa-bookmark')[0].parentElement.parentElement;
-var settings = document.getElementsByClassName('fa-cog')[0].parentElement.parentElement;
-var info = document.getElementsByClassName('information-overlay bottom-overlay scroll-information')[0];
-var firstImage = document.getElementsByTagName("image")[0];
-var firstImg = document.getElementsByTagName("img")[0];
-var blob;
-if (firstImage != null) {
-  blob = firstImage.attributes.href.textContent;
-} else if (firstImg != null) {
-  blob = firstImg.src;
-} else {
-  blob = "";
-}
-if (blob != null) {
-  getBase64Image(blob).then(base64Image => console.log(JSON.stringify({
-				"base64Image": base64Image,
-        "bookmark": info.textContent,
-				"jidoujisho": "jidoujisho-metadata"
-			})));
-}
-bookmark.addEventListener('touchstart', function() {
-  console.log(JSON.stringify({
-				"bookmark": info.textContent,
-				"jidoujisho": "jidoujisho-bookmark"
-			}));
-});
-reader.addEventListener('touchend', function() {
-	if (touchmoved !== true) {
-		var touch = touchevent.touches[0];
-		var result = document.caretRangeFromPoint(touch.clientX, touch.clientY);
-		var selectedElement = result.startContainer;
-    var paragraph = result.startContainer;
-    while (paragraph && paragraph.nodeName !== 'P') {
-      paragraph = paragraph.parentNode;
-    }
-    if (paragraph == null) {
-      paragraph = result.startContainer.parentNode;
-    }
-    console.log(paragraph.nodeName);
-		var noFuriganaText = [];
-		var noFuriganaNodes = [];
-		var selectedFound = false;
-		var index = 0;
-		for (var value of paragraph.childNodes.values()) {
-			if (value.nodeName === "#text") {
-				noFuriganaText.push(value.textContent);
-				noFuriganaNodes.push(value);
-				if (selectedFound === false) {
-					if (selectedElement !== value) {
-						index = index + value.textContent.length;
-					} else {
-						index = index + result.startOffset;
-						selectedFound = true;
-					}
-				}
-			} else {
-				for (var node of value.childNodes.values()) {
-					if (node.nodeName === "#text") {
-						noFuriganaText.push(node.textContent);
-						noFuriganaNodes.push(node);
-						if (selectedFound === false) {
-							if (selectedElement !== node) {
-								index = index + node.textContent.length;
-							} else {
-								index = index + result.startOffset;
-								selectedFound = true;
-							}
-						}
-					} else if (node.firstChild.nodeName === "#text" && node.nodeName !== "RT" && node.nodeName !== "RP") {
-						noFuriganaText.push(node.firstChild.textContent);
-						noFuriganaNodes.push(node.firstChild);
-						if (selectedFound === false) {
-							if (selectedElement !== node.firstChild) {
-								index = index + node.firstChild.textContent.length;
-							} else {
-								index = index + result.startOffset;
-								selectedFound = true;
-							}
-						}
-					}
-				}
-			}
-		}
-		var text = noFuriganaText.join("");
-		var offset = index;
-    
-		console.log(JSON.stringify({
-				"offset": offset,
-				"text": text,
-				"jidoujisho": "jidoujisho"
-			}));
-	}
-});
-reader.addEventListener('touchmove', () => {
-	touchmoved = true;
-	touchevent = null;
-});
-reader.addEventListener('touchstart', (e) => {
-	touchmoved = false;
-	touchevent = e;
-});
-function getSelectionText() {
-    function getRangeSelectedNodes(range) {
-      var node = range.startContainer;
-      var endNode = range.endContainer;
-      if (node == endNode) return [node];
-      var rangeNodes = [];
-      while (node && node != endNode) rangeNodes.push(node = nextNode(node));
-      node = range.startContainer;
-      while (node && node != range.commonAncestorContainer) {
-        rangeNodes.unshift(node);
-        node = node.parentNode;
-      }
-      return rangeNodes;
-      function nextNode(node) {
-        if (node.hasChildNodes()) return node.firstChild;
-        else {
-          while (node && !node.nextSibling) node = node.parentNode;
-          if (!node) return null;
-          return node.nextSibling;
-        }
-      }
-    }
-    var txt = "";
-    var nodesInRange;
-    var selection;
-    if (window.getSelection) {
-      selection = window.getSelection();
-      nodesInRange = getRangeSelectedNodes(selection.getRangeAt(0));
-      nodes = nodesInRange.filter((node) => node.nodeName == "#text" && node.parentElement.nodeName !== "RT" && node.parentElement.nodeName !== "RP" && node.parentElement.parentElement.nodeName !== "RT" && node.parentElement.parentElement.nodeName !== "RP");
-      if (selection.anchorNode === selection.focusNode) {
-          txt = txt.concat(selection.anchorNode.textContent.substring(selection.baseOffset, selection.extentOffset));
-      } else {
-          for (var i = 0; i < nodes.length; i++) {
-              var node = nodes[i];
-              if (i === 0) {
-                  txt = txt.concat(node.textContent.substring(selection.getRangeAt(0).startOffset));
-              } else if (i === nodes.length - 1) {
-                  txt = txt.concat(node.textContent.substring(0, selection.getRangeAt(0).endOffset));
-              } else {
-                  txt = txt.concat(node.textContent);
-              }
-          }
-      }
-    } else if (window.document.getSelection) {
-      selection = window.document.getSelection();
-      nodesInRange = getRangeSelectedNodes(selection.getRangeAt(0));
-      nodes = nodesInRange.filter((node) => node.nodeName == "#text" && node.parentElement.nodeName !== "RT" && node.parentElement.nodeName !== "RP" && node.parentElement.parentElement.nodeName !== "RT" && node.parentElement.parentElement.nodeName !== "RP");
-      if (selection.anchorNode === selection.focusNode) {
-          txt = txt.concat(selection.anchorNode.textContent.substring(selection.baseOffset, selection.extentOffset));
-      } else {
-          for (var i = 0; i < nodes.length; i++) {
-              var node = nodes[i];
-              if (i === 0) {
-                  txt = txt.concat(node.textContent.substring(selection.getRangeAt(0).startOffset));
-              } else if (i === nodes.length - 1) {
-                  txt = txt.concat(node.textContent.substring(0, selection.getRangeAt(0).endOffset));
-              } else {
-                  txt = txt.concat(node.textContent);
-              }
-          }
-      }
-    } else if (window.document.selection) {
-      txt = window.document.selection.createRange().text;
-    }
-    return txt;
-};
-reader.addEventListener('auxclick', (e) => {
-  if (getSelectionText()) {
-    console.log(JSON.stringify({
-				"offset": -1,
-				"text": getSelectionText(),
-				"jidoujisho": "jidoujisho",
-        "isCreator": "yes",
-			}));
-  }
-});
-reader.addEventListener('click', (e) => {
+var reader = document.getElementsByTagName('app-book-reader');
+if (reader.length != 0) {
+  reader[0].addEventListener('click', (e) => {
   if (getSelectionText()) {
     console.log(JSON.stringify({
 				"offset": -1,
@@ -751,21 +584,140 @@ reader.addEventListener('click', (e) => {
 			}));
   }
 });
+}
+var info = document.getElementsByClassName('bottom-2')[0];
+var firstImage = document.getElementsByTagName("image")[0];
+var firstImg = document.getElementsByTagName("img")[0];
+var input = document.body.getElementsByTagName("input");
 
-document.getElementsByClassName('custom-svg-icon')[0].remove();
+function removeElementsByClass(className){
+    var elements = document.getElementsByClassName(className);
+    while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+    }
+}
 
-var MutationObserver = window.MutationObserver;
-var observer = new MutationObserver(function(mutations) {
-  mutations.forEach(function(mutation) {
-   	console.log(JSON.stringify({
-				"themeName": mutation.target.className,
-				"jidoujisho": "jidoujisho-theme"
-			}));
-  });
+MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+
+var observer = new MutationObserver(function(mutations, observer) {
+    removeElementsByClass("rounded-full");
+    var input = document.body.getElementsByTagName("input");
+    if (input.length == 2) {
+      input[1].parentElement.remove();
+    }
+
+    if (document.body.getElementsByClassName('fa-bookmark').length != 0) {
+       document.body.getElementsByClassName("flex items-center text-xl xl:text-lg px-4 xl:px-3")[0].remove();
+      document.body.getElementsByClassName("fa-expand")[0].parentElement.remove();
+    }
+    
 });
 
-var config = {attributes: true,  childList: false,  characterData: false};
-observer.observe(document.documentElement, config);
+observer.observe(document, {
+  subtree: true,
+  attributes: true
+});
+
+if (input.length == 2) {
+  input[1].parentElement.remove();
+}
+if (document.body.getElementsByClassName('fa-bookmark').length != 0) {
+  document.body.getElementsByClassName("flex items-center text-xl xl:text-lg px-4 xl:px-3")[0].remove();
+  document.body.getElementsByClassName("fa-expand")[0].parentElement.remove();
+}
+
+var blob;
+if (firstImage != null) {
+  blob = firstImage.attributes.href.textContent;
+} else if (firstImg != null) {
+  blob = firstImg.src;
+} else {
+  blob = "";
+}
+if (blob != null) {
+  getBase64Image(blob).then(base64Image => console.log(JSON.stringify({
+				"base64Image": base64Image,
+        "bookmark": info.textContent,
+				"jidoujisho": "jidoujisho-metadata"
+			})));
+}
+
+document.querySelector('body').addEventListener('click', function(e) {
+  if (e.target.classList.contains('fa-bookmark') || e.target.firstChild.classList.contains('fa-bookmark')) {
+    console.log(JSON.stringify({
+              "bookmark": info.textContent,
+              "jidoujisho": "jidoujisho-bookmark"
+            }));
+  }
+}, true);
+
+
+function getSelectionText() {
+    function getRangeSelectedNodes(range) {
+      var node = range.startContainer;
+      var endNode = range.endContainer;
+      if (node == endNode) return [node];
+      var rangeNodes = [];
+      while (node && node != endNode) rangeNodes.push(node = nextNode(node));
+      node = range.startContainer;
+      while (node && node != range.commonAncestorContainer) {
+        rangeNodes.unshift(node);
+        node = node.parentNode;
+      }
+      return rangeNodes;
+      function nextNode(node) {
+        if (node.hasChildNodes()) return node.firstChild;
+        else {
+          while (node && !node.nextSibling) node = node.parentNode;
+          if (!node) return null;
+          return node.nextSibling;
+        }
+      }
+    }
+    var txt = "";
+    var nodesInRange;
+    var selection;
+    if (window.getSelection) {
+      selection = window.getSelection();
+      nodesInRange = getRangeSelectedNodes(selection.getRangeAt(0));
+      nodes = nodesInRange.filter((node) => node.nodeName == "#text" && node.parentElement.nodeName !== "RT" && node.parentElement.nodeName !== "RP" && node.parentElement.parentElement.nodeName !== "RT" && node.parentElement.parentElement.nodeName !== "RP");
+      if (selection.anchorNode === selection.focusNode) {
+          txt = txt.concat(selection.anchorNode.textContent.substring(selection.baseOffset, selection.extentOffset));
+      } else {
+          for (var i = 0; i < nodes.length; i++) {
+              var node = nodes[i];
+              if (i === 0) {
+                  txt = txt.concat(node.textContent.substring(selection.getRangeAt(0).startOffset));
+              } else if (i === nodes.length - 1) {
+                  txt = txt.concat(node.textContent.substring(0, selection.getRangeAt(0).endOffset));
+              } else {
+                  txt = txt.concat(node.textContent);
+              }
+          }
+      }
+    } else if (window.document.getSelection) {
+      selection = window.document.getSelection();
+      nodesInRange = getRangeSelectedNodes(selection.getRangeAt(0));
+      nodes = nodesInRange.filter((node) => node.nodeName == "#text" && node.parentElement.nodeName !== "RT" && node.parentElement.nodeName !== "RP" && node.parentElement.parentElement.nodeName !== "RT" && node.parentElement.parentElement.nodeName !== "RP");
+      if (selection.anchorNode === selection.focusNode) {
+          txt = txt.concat(selection.anchorNode.textContent.substring(selection.baseOffset, selection.extentOffset));
+      } else {
+          for (var i = 0; i < nodes.length; i++) {
+              var node = nodes[i];
+              if (i === 0) {
+                  txt = txt.concat(node.textContent.substring(selection.getRangeAt(0).startOffset));
+              } else if (i === nodes.length - 1) {
+                  txt = txt.concat(node.textContent.substring(0, selection.getRangeAt(0).endOffset));
+              } else {
+                  txt = txt.concat(node.textContent);
+              }
+          }
+      }
+    } else if (window.document.selection) {
+      txt = window.document.selection.createRange().text;
+    }
+    return txt;
+};
 """;
 
   String horizontalHackJs = """
@@ -775,27 +727,20 @@ for (var i = 0; i < icons.length; i++) {
     icon.style.setProperty("-webkit-transform", "rotate(90deg)", null);
 }
 
-settings.addEventListener('touchstart', function() {
-  console.log(JSON.stringify({
-				"bookmark": info.textContent,
-				"jidoujisho": "jidoujisho-bookmark"
-			}));
-});
-
 document.body.style.setProperty('text-orientation', 'sideways', 'important');
 """;
 
   @override
-  bool getHorizontalHack(BuildContext context) {
+  bool getClearCache(BuildContext context) {
     AppModel appModel = Provider.of<AppModel>(context, listen: false);
     return appModel.sharedPreferences
-            .getBool("$getIdentifier()://horizontalHack") ??
+            .getBool("$getIdentifier()://clearCache") ??
         false;
   }
 
-  Future<void> toggleHorizontalHack(BuildContext context) async {
+  Future<void> setClearCache(BuildContext context, bool clearCache) async {
     AppModel appModel = Provider.of<AppModel>(context, listen: false);
-    await appModel.sharedPreferences.setBool(
-        "$getIdentifier()://horizontalHack", !getHorizontalHack(context));
+    await appModel.sharedPreferences
+        .setBool("$getIdentifier()://clearCache", clearCache);
   }
 }
