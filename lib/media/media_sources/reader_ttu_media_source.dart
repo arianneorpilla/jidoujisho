@@ -39,7 +39,7 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
 
   @override
   ImageProvider<Object> getHistoryThumbnail(MediaHistoryItem item) {
-    if (item.extra["thumbnail"] == null) {
+    if (item.extra["thumbnail"] == null || item.extra["thumbnail"].isEmpty) {
       return MemoryImage(kTransparentImage);
     }
 
@@ -584,81 +584,6 @@ function tapToSelect(e) {
   }
 }
 
-if (reader.length != 0) {
-  reader[0].addEventListener('click', tapToSelect);
-}
-var info = document.getElementsByClassName('bottom-2')[0];
-var firstImage = document.getElementsByTagName("image")[0];
-var firstImg = document.getElementsByTagName("img")[0];
-var input = document.body.getElementsByTagName("input");
-
-function removeElementsByClass(className){
-    var elements = document.getElementsByClassName(className);
-    while(elements.length > 0){
-        elements[0].parentNode.removeChild(elements[0]);
-    }
-}
-
-MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
-
-var observer = new MutationObserver(function(mutations, observer) {
-    removeElementsByClass("rounded-full");
-    var input = document.body.getElementsByTagName("input");
-    if (input.length == 2) {
-      input[1].parentElement.remove();
-    }
-
-    if (document.body.getElementsByClassName('fa-bookmark').length != 0) {
-       document.body.getElementsByClassName("flex items-center text-xl xl:text-lg px-4 xl:px-3")[0].remove();
-      document.body.getElementsByClassName("fa-expand")[0].parentElement.remove();
-    }
-
-    var reader = document.getElementsByTagName('app-book-reader');
-    if (reader.length != 0) {
-      reader[0].addEventListener('click', tapToSelect);
-    }
-    
-});
-
-observer.observe(document, {
-  subtree: true,
-  attributes: true
-});
-
-if (input.length == 2) {
-  input[1].parentElement.remove();
-}
-if (document.body.getElementsByClassName('fa-bookmark').length != 0) {
-  document.body.getElementsByClassName("flex items-center text-xl xl:text-lg px-4 xl:px-3")[0].remove();
-  document.body.getElementsByClassName("fa-expand")[0].parentElement.remove();
-}
-
-var blob;
-if (firstImage != null) {
-  blob = firstImage.attributes.href.textContent;
-} else if (firstImg != null) {
-  blob = firstImg.src;
-} else {
-  blob = "";
-}
-if (blob != null) {
-  getBase64Image(blob).then(base64Image => console.log(JSON.stringify({
-				"base64Image": base64Image,
-        "bookmark": info.textContent,
-				"jidoujisho": "jidoujisho-metadata"
-			})));
-}
-
-document.querySelector('body').addEventListener('click', function(e) {
-  if (e.target.classList.contains('fa-bookmark') || e.target.firstChild.classList.contains('fa-bookmark')) {
-    console.log(JSON.stringify({
-              "bookmark": info.textContent,
-              "jidoujisho": "jidoujisho-bookmark"
-            }));
-  }
-}, true);
-
-
 function getSelectionText() {
     function getRangeSelectedNodes(range) {
       var node = range.startContainer;
@@ -725,6 +650,82 @@ function getSelectionText() {
     }
     return txt;
 };
+
+if (reader.length != 0) {
+  reader[0].addEventListener('click', tapToSelect);
+}
+
+var firstImage = document.getElementsByTagName("image")[0];
+var firstImg = document.getElementsByTagName("img")[0];
+var input = document.body.getElementsByTagName("input");
+
+var blob;
+if (firstImage != null) {
+  blob = firstImage.attributes.href.textContent;
+} else if (firstImg != null) {
+  blob = firstImg.src;
+} else {
+  blob = "";
+}
+if (blob != null) {
+  var info = document.getElementsByClassName('bottom-2')[0];
+  getBase64Image(blob).then(base64Image => console.log(JSON.stringify({
+				"base64Image": base64Image,
+        "bookmark": info.textContent,
+				"jidoujisho": "jidoujisho-metadata"
+			})));
+}
+
+function removeElementsByClass(className){
+    var elements = document.getElementsByClassName(className);
+    while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+    }
+}
+
+MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+
+var observer = new MutationObserver(function(mutations, observer) {
+    removeElementsByClass("rounded-full");
+    var input = document.body.getElementsByTagName("input");
+    if (input.length == 2) {
+      input[1].parentElement.remove();
+    }
+
+    if (document.body.getElementsByClassName('fa-bookmark').length != 0) {
+       document.body.getElementsByClassName("flex items-center text-xl xl:text-lg px-4 xl:px-3")[0].remove();
+      document.body.getElementsByClassName("fa-expand")[0].parentElement.remove();
+    }
+
+    var reader = document.getElementsByTagName('app-book-reader');
+    if (reader.length != 0) {
+      reader[0].addEventListener('click', tapToSelect);
+    }
+    
+});
+
+observer.observe(document, {
+  subtree: true,
+  attributes: true
+});
+
+if (input.length == 2) {
+  input[1].parentElement.remove();
+}
+if (document.body.getElementsByClassName('fa-bookmark').length != 0) {
+  document.body.getElementsByClassName("flex items-center text-xl xl:text-lg px-4 xl:px-3")[0].remove();
+  document.body.getElementsByClassName("fa-expand")[0].parentElement.remove();
+}
+
+document.querySelector('body').addEventListener('click', function(e) {
+  if (e.target.classList.contains('fa-bookmark') || e.target.firstChild.classList.contains('fa-bookmark')) {
+    var info = document.getElementsByClassName('bottom-2')[0];
+    console.log(JSON.stringify({
+              "bookmark": info.textContent,
+              "jidoujisho": "jidoujisho-bookmark"
+            }));
+  }
+}, true);
 """;
 
   bool getClearCache(BuildContext context) {

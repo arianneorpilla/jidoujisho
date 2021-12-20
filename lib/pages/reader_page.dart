@@ -118,7 +118,7 @@ class ReaderPageState extends State<ReaderPage> {
       mediaTypePrefs: MediaType.reader.prefsDirectory(),
     );
 
-    if (completeProgress != 0 && thumbnail.isNotEmpty && title.isNotEmpty) {
+    if (completeProgress != 0 && title.isNotEmpty) {
       if (widget.params.saveHistoryItem) {
         if (!appModel.getIncognitoMode()) {
           await history.addItem(item);
