@@ -510,8 +510,8 @@ var getBase64Image = async function(url) {
 var touchmoved;
 var touchevent;
 var reader = document.getElementsByTagName('app-book-reader');
-if (reader.length != 0) {
-  reader[0].addEventListener('click', (e) => {
+
+function tapToSelect(e) {
   if (getSelectionText()) {
     console.log(JSON.stringify({
 				"offset": -1,
@@ -529,7 +529,6 @@ if (reader.length != 0) {
     if (paragraph == null) {
       paragraph = result.startContainer.parentNode;
     }
-    console.log(paragraph.nodeName);
 		var noFuriganaText = [];
 		var noFuriganaNodes = [];
 		var selectedFound = false;
@@ -583,7 +582,10 @@ if (reader.length != 0) {
 				"jidoujisho": "jidoujisho"
 			}));
   }
-});
+}
+
+if (reader.length != 0) {
+  reader[0].addEventListener('click', tapToSelect);
 }
 var info = document.getElementsByClassName('bottom-2')[0];
 var firstImage = document.getElementsByTagName("image")[0];
@@ -609,6 +611,11 @@ var observer = new MutationObserver(function(mutations, observer) {
     if (document.body.getElementsByClassName('fa-bookmark').length != 0) {
        document.body.getElementsByClassName("flex items-center text-xl xl:text-lg px-4 xl:px-3")[0].remove();
       document.body.getElementsByClassName("fa-expand")[0].parentElement.remove();
+    }
+
+    var reader = document.getElementsByTagName('app-book-reader');
+    if (reader.length != 0) {
+      reader[0].addEventListener('click', tapToSelect);
     }
     
 });
@@ -720,17 +727,6 @@ function getSelectionText() {
 };
 """;
 
-  String horizontalHackJs = """
-var icons = document.getElementsByTagName('fa-icon');
-for (var i = 0; i < icons.length; i++) {
-    var icon = icons[i];
-    icon.style.setProperty("-webkit-transform", "rotate(90deg)", null);
-}
-
-document.body.style.setProperty('text-orientation', 'sideways', 'important');
-""";
-
-  @override
   bool getClearCache(BuildContext context) {
     AppModel appModel = Provider.of<AppModel>(context, listen: false);
     return appModel.sharedPreferences

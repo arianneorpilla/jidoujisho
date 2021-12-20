@@ -84,12 +84,6 @@ class ReaderPageState extends State<ReaderPage> {
     author = widget.params.mediaHistoryItem.author;
 
     WidgetsBinding.instance!.addPostFrameCallback((_) {
-      if (widget.params.mediaSource.getHorizontalHack(context)) {
-        SystemChrome.setPreferredOrientations([
-          DeviceOrientation.landscapeRight,
-        ]);
-      }
-
       setIsDarkMode(appModel.getIsDarkMode());
       setState(() {});
     });
@@ -248,12 +242,7 @@ class ReaderPageState extends State<ReaderPage> {
             alignment: Alignment.center,
             children: <Widget>[
               buildReaderArea(),
-              (source.getHorizontalHack(context))
-                  ? RotatedBox(
-                      quarterTurns: 1,
-                      child: buildDictionary(),
-                    )
-                  : buildDictionary(),
+              buildDictionary(),
             ],
           ),
         ),
@@ -355,7 +344,6 @@ class ReaderPageState extends State<ReaderPage> {
                   onDictionaryChange: () {
                     refreshDictionaryWidget();
                   },
-                  horizontalHack: source.getHorizontalHack(context),
                   themeData: themeData,
                 );
               },
