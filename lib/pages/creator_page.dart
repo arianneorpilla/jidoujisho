@@ -13,10 +13,13 @@ import 'package:chisa/util/image_select_widget.dart';
 import 'package:chisa/util/popup_item.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 import 'package:multi_value_listenable_builder/multi_value_listenable_builder.dart';
 import 'package:network_to_file_image/network_to_file_image.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:http/http.dart' as http;
 
 class CreatorPage extends StatefulWidget {
   const CreatorPage({
@@ -473,6 +476,29 @@ class CreatorPageState extends State<CreatorPage> {
 
                         isExportingBusy = true;
                         if (exportParams != AnkiExportParams()) {
+                          if (exportParams.imageFiles.isNotEmpty) {
+                            NetworkToFileImage image = exportParams
+                                .imageFiles[imageListNotifier.value];
+                            exportParams.imageFile = image.file;
+
+                            if (!image.file!.existsSync()) {
+                              String temporaryDirectoryPath =
+                                  (await getTemporaryDirectory()).path;
+
+                              String temporaryFileName = "jidoujisho-" +
+                                  DateFormat('yyyyMMddTkkmmss')
+                                      .format(DateTime.now());
+                              File tempFile = File(
+                                  '$temporaryDirectoryPath/$temporaryFileName');
+
+                              var response =
+                                  await http.get(Uri.parse(image.url!));
+                              tempFile.writeAsBytesSync(response.bodyBytes);
+
+                              exportParams.imageFile = tempFile;
+                            }
+                          }
+
                           await addNote(
                             deck: appModel.getLastAnkiDroidDeck(),
                             params: exportParams,
