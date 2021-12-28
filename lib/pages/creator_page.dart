@@ -555,9 +555,11 @@ class CreatorPageState extends State<CreatorPage> {
                                       imageSearchTermNotifier,
                                   fileNotifier: imageNotifier,
                                   filesNotifier: imagesNotifier,
-                                  setImageFile: (index) {
+                                  setImageFile: (index) async {
                                     NetworkToFileImage networkToFileImage =
                                         imagesNotifier.value[index];
+                                    await precacheImage(
+                                        networkToFileImage, context);
                                     exportParams
                                         .setImageFile(networkToFileImage.file);
                                   }),
@@ -705,10 +707,10 @@ class CreatorPageState extends State<CreatorPage> {
                       imageListNotifier: imageListNotifier,
                       fileNotifier: imageNotifier,
                       filesNotifier: imagesNotifier,
-                      setImageFile: (index) {
+                      setImageFile: (index) async {
                         NetworkToFileImage networkToFileImage =
                             imagesNotifier.value[index];
-
+                        await precacheImage(networkToFileImage, context);
                         exportParams.setImageFile(networkToFileImage.file);
                       },
                     ),

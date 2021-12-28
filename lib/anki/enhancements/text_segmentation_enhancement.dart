@@ -152,15 +152,16 @@ class TextSegmentationEnhancement extends AnkiExportEnhancement {
     );
 
     if (isSearch) {
-      AnkiExportEnhancement enhancement =
+      SearchDictionaryEnhancement enhancement =
           SearchDictionaryEnhancement(appModel: appModel);
-      params.word = searchTerm;
+
       return enhancement.enhanceParams(
         context: context,
         appModel: appModel,
         params: params,
         autoMode: autoMode,
         state: state,
+        searchTerm: searchTerm,
       );
     } else {
       return params;

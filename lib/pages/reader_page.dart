@@ -681,7 +681,6 @@ class ReaderPageState extends State<ReaderPage> {
       },
     );
 
-    await Clipboard.setData(const ClipboardData(text: ""));
     ClipboardListener.addListener(copyClipboardAction);
   }
 }

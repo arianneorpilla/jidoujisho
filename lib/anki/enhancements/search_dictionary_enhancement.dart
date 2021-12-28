@@ -33,13 +33,14 @@ class SearchDictionaryEnhancement extends AnkiExportEnhancement {
     required AnkiExportParams params,
     required bool autoMode,
     required CreatorPageState state,
+    String? searchTerm,
   }) async {
     if (params.word.isEmpty) {
       return params;
     }
 
     DictionarySearchResult result =
-        await appModel.searchDictionary(params.word);
+        await appModel.searchDictionary(searchTerm ?? params.word);
 
     if (result.entries.isEmpty) {
       return params;

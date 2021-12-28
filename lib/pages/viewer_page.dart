@@ -1655,7 +1655,6 @@ class ViewerPageState extends State<ViewerPage> {
       overlays: [SystemUiOverlay.bottom],
     );
 
-    await Clipboard.setData(const ClipboardData(text: ""));
     ClipboardListener.addListener(copyClipboardAction);
   }
 

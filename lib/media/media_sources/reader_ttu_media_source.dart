@@ -228,11 +228,11 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
             if (isCreator == "yes") {
               state.openCardCreator(term);
             } else {
-              Clipboard.setData(ClipboardData(text: term));
+              state.setSearchTerm(term);
             }
           }
         } catch (e) {
-          Clipboard.setData(const ClipboardData(text: ""));
+          state.setSearchTerm("");
           debugPrint("Out of range deselect");
         } finally {
           unselectWebViewTextSelection(controller);
@@ -382,7 +382,7 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
               state.setScrollX(await controller.getScrollX() ?? -1);
 
               String searchTerm = await getWebViewTextSelection(controller);
-              Clipboard.setData(ClipboardData(text: searchTerm));
+              state.setSearchTerm("");
               unselectWebViewTextSelection(controller);
               await state.openCardCreator(searchTerm);
 
@@ -405,9 +405,7 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
                 horizontalHack: true,
                 themeData: state.themeData,
                 onDictionaryChange: () {
-                  Clipboard.setData(
-                    ClipboardData(text: searchTerm),
-                  );
+                  state.refreshDictionaryWidget();
                 },
               );
             },
@@ -420,7 +418,7 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
               String searchTerm = await getWebViewTextSelection(controller);
 
               state.setScrollX(await controller.getScrollX() ?? -1);
-              Clipboard.setData(ClipboardData(text: searchTerm));
+              state.setSearchTerm(searchTerm);
               unselectWebViewTextSelection(controller);
             },
           ),
@@ -441,7 +439,7 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
               String searchTerm = await getWebViewTextSelection(controller);
 
               state.setScrollX(await controller.getScrollX() ?? -1);
-              Clipboard.setData(ClipboardData(text: searchTerm));
+              state.setSearchTerm(searchTerm);
               unselectWebViewTextSelection(controller);
             },
           ),
@@ -458,7 +456,7 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
                 state.context,
                 themeData: state.themeData,
                 onDictionaryChange: () {
-                  Clipboard.setData(ClipboardData(text: searchTerm));
+                  state.setSearchTerm(searchTerm);
                 },
               );
             },
@@ -470,7 +468,7 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
             action: () async {
               state.setScrollX(await controller.getScrollX() ?? -1);
               String searchTerm = await getWebViewTextSelection(controller);
-              Clipboard.setData(ClipboardData(text: searchTerm));
+              state.setSearchTerm(searchTerm);
               unselectWebViewTextSelection(controller);
               state.openCardCreator(searchTerm);
             },

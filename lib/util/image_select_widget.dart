@@ -77,6 +77,7 @@ class ImageSelectWidgetState extends State<ImageSelectWidget> {
       pageController: PageController(initialPage: imageListNotifier.value),
       onPageChanged: (index) {
         imageListNotifier.value = index;
+        widget.setImageFile(imageListNotifier.value);
         setState(() {});
       },
     );
@@ -141,11 +142,7 @@ class ImageSelectWidgetState extends State<ImageSelectWidget> {
         }
 
         setState(() {
-          precacheImage(
-                  widget.filesNotifier.value[imageListNotifier.value], context)
-              .then((_) {
-            widget.setImageFile(imageListNotifier.value);
-          });
+          widget.setImageFile(imageListNotifier.value);
         });
       },
       child: Column(
