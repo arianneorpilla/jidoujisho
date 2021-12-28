@@ -51,7 +51,7 @@ class DictionaryMediaHistory extends MediaHistory {
         .toList();
 
     for (String valueToDelete in valuesToDelete) {
-      await appModel.sharedPreferences.remove(valueToDelete);
+      appModel.sharedPreferences.remove(valueToDelete);
     }
   }
 

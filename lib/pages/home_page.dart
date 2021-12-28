@@ -1,8 +1,13 @@
+import 'dart:io';
+
 import 'package:chisa/dictionary/dictionary.dart';
 import 'package:chisa/dictionary/dictionary_widget_enhancement.dart';
 import 'package:chisa/dictionary/dictionary_widget_enhancement_dialog.dart';
+import 'package:chisa/media/media_history_items/media_history_item.dart';
+import 'package:chisa/media/media_sources/viewer_camera_media_source.dart';
 
 import 'package:chisa/media/media_type.dart';
+import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/util/anki_creator.dart';
 import 'package:chisa/util/dictionary_widget_field.dart';
@@ -10,13 +15,15 @@ import 'package:chisa/util/greyscale_wrapper.dart';
 import 'package:chisa/util/popup_item.dart';
 import 'package:chisa/util/return_from_context.dart';
 import 'package:chisa/util/share_intent.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:path/path.dart' as p;
 
 class HomePage extends StatefulWidget {
   const HomePage({
@@ -60,7 +67,16 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
         textShareIntentAction(context, text);
       }
     });
+    
+    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+      ViewerCameraMediaSource cameraSource = appModel.getMediaSourceFromName(MediaType.viewer, "Camera") as ViewerCameraMediaSource;
+      cameraSource.getLostData(context);
+    });
   }
+
+  
+
+
 
   // @override
   // void didChangeDependencies() {

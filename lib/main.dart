@@ -43,73 +43,44 @@ void main() async {
     }
 
     requestAnkiDroidPermissions();
-
     initialiseExportPaths();
 
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
-
-    runApp(
-      App(
-        sharedPreferences: sharedPreferences,
-        packageInfo: packageInfo,
-      ),
+    AppModel appModel = AppModel(
+      sharedPreferences: sharedPreferences,
+      packageInfo: packageInfo,
     );
+    await appModel.initialiseAppModel();
+    runApp(App(appModel: appModel));
   }, (error, stack) => FirebaseCrashlytics.instance.recordError(error, stack));
 }
 
 class App extends StatelessWidget {
   const App({
     Key? key,
-    required this.sharedPreferences,
-    required this.packageInfo,
+    required this.appModel,
   }) : super(key: key);
 
-  final SharedPreferences sharedPreferences;
-  final PackageInfo packageInfo;
+  final AppModel appModel;
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<AppModel>(
-      create: (_) => AppModel(
-        sharedPreferences: sharedPreferences,
-        packageInfo: packageInfo,
-      ),
+    return ChangeNotifierProvider<AppModel>.value(
+      value: appModel,
       child: Consumer<AppModel>(
         builder: (context, appModel, __) {
           return MaterialApp(
-            locale: (appModel.hasInitialized)
-                ? appModel.getCurrentLanguage().getLocale()
-                : null,
+            locale: appModel.getCurrentLanguage().getLocale(),
             debugShowCheckedModeBanner: false,
             theme: appModel.getLightTheme(context),
             darkTheme: appModel.getDarkTheme(context),
             themeMode:
                 appModel.getIsDarkMode() ? ThemeMode.dark : ThemeMode.light,
-            home: blankWhileUninitialised(context),
+            home: const HomePage(),
           );
         },
       ),
     );
-  }
-
-  Widget blankWhileUninitialised(BuildContext context) {
-    AppModel appModel = Provider.of<AppModel>(context);
-    Future<void> initialiseAppModel = appModel.initialiseAppModel();
-
-    if (appModel.hasInitialized) {
-      return const HomePage();
-    } else {
-      return FutureBuilder(
-        future: initialiseAppModel,
-        builder: (BuildContext context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Container();
-          } else {
-            return const HomePage();
-          }
-        },
-      );
-    }
   }
 }

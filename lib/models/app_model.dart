@@ -5,7 +5,6 @@ import 'dart:typed_data';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:chisa/anki/enhancements/bing_search_enhancement.dart';
-import 'package:chisa/anki/enhancements/camera_image_enhancement.dart';
 import 'package:chisa/anki/enhancements/crop_image_enhancement.dart';
 import 'package:chisa/anki/enhancements/dictionary_menu_enhancement.dart';
 import 'package:chisa/anki/enhancements/forvo_audio_enhancement.dart';
@@ -290,7 +289,6 @@ class AppModel with ChangeNotifier {
       BingSearchEnhancement(appModel: this),
       CropImageEnhancement(appModel: this),
       ImagePickerEnhancement(appModel: this),
-      CameraImageEnhancement(appModel: this),
     ];
     List<AnkiExportEnhancement> audioEnhancements = [
       ClearButtonEnhancement(

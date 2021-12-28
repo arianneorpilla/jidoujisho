@@ -132,6 +132,60 @@ class ViewerCameraMediaSource extends ViewerMediaSource {
     }
   }
 
+  Future<void> getLostData(BuildContext context) async {
+    AppModel appModel = Provider.of<AppModel>(context, listen: false);
+
+    ImagePicker picker = ImagePicker();
+    final LostDataResponse lostData = await picker.retrieveLostData();
+
+    if (lostData.isEmpty) {
+      return;
+    }
+
+    if (lostData.file != null) {
+      XFile file = lostData.file!;
+
+      Directory appDirDoc = await getApplicationDocumentsDirectory();
+      int mills = DateTime.now().millisecondsSinceEpoch;
+
+      String ext = p.extension(file.path);
+      cameraImagePath = "${appDirDoc.path}/camera/$mills$ext";
+      File tempFile = File(cameraImagePath);
+
+      if (tempFile.existsSync()) {
+        tempFile.deleteSync();
+      }
+
+      imageCache?.clear();
+
+      Directory("${appDirDoc.path}/camera/").createSync();
+      await file.saveTo(cameraImagePath);
+
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
+      await launchMediaPage(
+        context,
+        ViewerLaunchParams(
+          appModel: appModel,
+          mediaSource: this,
+          chapters: ["Camera Roll"],
+          chapterName: "Camera Roll",
+          canOpenHistory: false,
+          hideSlider: true,
+          pushReplacement: false,
+          mediaHistoryItem: MediaHistoryItem(
+            key: cameraImagePath,
+            sourceName: sourceName,
+            currentProgress: 1,
+            completeProgress: 1,
+            extra: {"chapters": "Camera Roll"},
+            mediaTypePrefs: mediaType.prefsDirectory(),
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   List<MediaSourceActionButton> getSearchBarActions(
     BuildContext context,

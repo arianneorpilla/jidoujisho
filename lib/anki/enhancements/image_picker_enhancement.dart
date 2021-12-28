@@ -57,7 +57,7 @@ class ImagePickerEnhancement extends AnkiExportEnhancement {
     croppedImageFile.createSync();
     croppedImageFile.writeAsBytesSync(await pickedFile.readAsBytes());
     params.imageFile = croppedImageFile;
-    params.imageFiles = [NetworkToFileImage(file: File(getPreviewImagePath()))];
+    params.imageFiles = [NetworkToFileImage(file: croppedImageFile)];
 
     state.notifyImageNotSearching();
 
