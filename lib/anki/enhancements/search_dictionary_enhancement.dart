@@ -35,7 +35,7 @@ class SearchDictionaryEnhancement extends AnkiExportEnhancement {
     required CreatorPageState state,
     String? searchTerm,
   }) async {
-    if (params.word.isEmpty) {
+    if (searchTerm == null && params.word.isEmpty) {
       return params;
     }
 
