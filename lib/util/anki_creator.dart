@@ -19,7 +19,10 @@ Future<void> requestAnkiDroidPermissions() async {
 Future<List<String>> getDecks() async {
   Map<dynamic, dynamic> deckMap =
       await ankiDroidMethodChannel.invokeMethod('getDecks');
-  return deckMap.values.toList().cast<String>();
+  List<String> decks = deckMap.values.toList().cast<String>();
+  decks.sort((a, b) => a.compareTo(b));
+
+  return decks;
 }
 
 Future<String> addMediaFromUri(
