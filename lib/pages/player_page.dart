@@ -35,6 +35,7 @@ import 'package:chisa/util/blur_widget.dart';
 import 'package:chisa/util/bottom_sheet_dialog.dart';
 import 'package:chisa/util/dictionary_scrollable_widget.dart';
 import 'package:chisa/util/export_paths.dart';
+import 'package:chisa/util/footer_layout.dart';
 import 'package:chisa/util/subtitle_options.dart';
 import 'package:chisa/util/subtitle_utils.dart';
 import 'package:chisa/util/time_format.dart';
@@ -80,6 +81,7 @@ class PlayerPageState extends State<PlayerPage>
   ValueNotifier<Duration> duration = ValueNotifier<Duration>(Duration.zero);
   ValueNotifier<bool> isPlaying = ValueNotifier<bool>(true);
   ValueNotifier<bool> isEnded = ValueNotifier<bool>(false);
+  ValueNotifier<bool> isCasting = ValueNotifier<bool>(false);
 
   late ValueNotifier<BlurWidgetOptions> blurWidgetOptionsNotifier;
   late ValueNotifier<SubtitleOptions> subtitleOptionsNotifier;
@@ -1829,12 +1831,21 @@ class PlayerPageState extends State<PlayerPage>
         },
       ),
 
-      // BottomSheetDialogOption(
-      //   label: appModel.translate("player_option_cast_video"),
-      //   icon: Icons.cast_connected,
-      //   action: () {
-      //   },
-      // ),
+      BottomSheetDialogOption(
+        label: (isCasting.value)
+            ? appModel.translate("player_option_stop_cast_video")
+            : appModel.translate("player_option_cast_video"),
+        icon: (isCasting.value)
+            ? Icons.cast_connected
+            : Icons.cast,
+        action: () async {
+          if (isCasting.value) {
+            await stopCasting();
+          } else {
+            await startCasting();
+          }
+        },
+      ),
       BottomSheetDialogOption(
         label: appModel.translate("player_option_share_subtitle"),
         icon: Icons.share,
@@ -1859,6 +1870,148 @@ class PlayerPageState extends State<PlayerPage>
     ];
 
     return options;
+  }
+
+  Future<void> stopCasting() async {
+    bool wasPlaying = playerController.value.isPlaying;
+
+    await playerController.castToRenderer('');
+    isCasting.value = false;
+    await playerController.stopRendererScanning();
+
+    if (!wasPlaying) {
+      await playerController.pause();
+    }
+  }
+
+  Future<void> startCasting() async {
+    await dialogSmartPause();
+
+    await playerController.startRendererScanning();
+    ValueNotifier<Map<String, String>> castDevices =
+        ValueNotifier<Map<String, String>>({});
+    castDevices.value = await playerController.getRendererDevices();
+
+    void updateRendererList() async {
+      castDevices.value = await playerController.getRendererDevices();
+    }
+
+    Timer updateTimer = Timer.periodic(
+        Duration(milliseconds: 2000), (Timer t) => updateRendererList());
+
+    ScrollController scrollController = ScrollController();
+
+    String? selectedCastDeviceName = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero
+          ),
+          title: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(appModel.translate("player_option_cast_scanning")),
+              SizedBox(
+                height: 16,
+                width: 12,
+                child: JumpingDotsProgressIndicator(color: Colors.white)
+              )
+            ],
+          ),
+          content: Container(
+            width: double.maxFinite,
+            height: 250,
+            child: FooterLayout(
+              body: Container(
+                child: ValueListenableBuilder(
+                  valueListenable: castDevices,
+                  builder: (BuildContext context,
+                    Map<String, String> castDevices, Widget? child) {
+                    return Scrollbar(
+                      controller: scrollController,
+                      child: ListView.builder(
+                        controller: scrollController,
+                        shrinkWrap: true,
+                        physics: ClampingScrollPhysics(),
+                        itemCount: castDevices.keys.length,
+                        itemBuilder: (context, index) {
+                          return ListTile(
+                            dense: true,
+                            title: Row(
+                              children: [
+                                Icon(
+                                  Icons.cast_sharp,
+                                  size: 20.0,
+                                  color: Colors.white
+                                ),
+                                const SizedBox(width: 16.0),
+                                Text(
+                                  castDevices.values
+                                      .elementAt(index)
+                                      .toString(),
+                                  style: TextStyle(fontSize: 16),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                            onTap: () {
+                              Navigator.pop(
+                                  context, castDevices.keys.elementAt(index));
+                            },
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+              footer: Container(
+                child: ListTile(
+                  dense: true,
+                  title: Wrap(
+                    children: [
+                      Icon(Icons.info,
+                        size: 14.0, color: Colors.lightBlue[300]),
+                      const SizedBox(width: 8.0),
+                      Text(
+                        appModel.translate("player_option_cast_warning"),
+                        style: TextStyle(
+                            fontSize: 14, color: Colors.lightBlue[300]),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    ) ?? '';
+
+    if (selectedCastDeviceName != '') {
+      Duration position = playerController.value.position;
+      int activeAudioTrack = await playerController.getAudioTrack() ?? 1;
+
+      isCasting.value = true;
+      await playerController.castToRenderer(selectedCastDeviceName);
+      // NOTE: possibly there is a better way to know when renderer is
+      // ready to process further operations
+      Future.delayed(Duration(seconds: 2), () async {
+        if (selectedCastDeviceName != '') {
+          await playerController.setAudioTrack(activeAudioTrack);
+          while (!(await playerController.isPlaying() ?? false)) {
+            await Future.delayed(Duration(milliseconds: 50));
+          }
+          await playerController.seekTo(position);
+        }
+      });
+
+    } else {
+      await dialogSmartResume();
+    }
+
+    updateTimer.cancel();
   }
 
   Future<AnkiExportParams> prepareExportParams(List<Subtitle> subtitles) async {
