@@ -9,6 +9,7 @@ import 'package:chisa/anki/enhancements/crop_image_enhancement.dart';
 import 'package:chisa/anki/enhancements/dictionary_menu_enhancement.dart';
 import 'package:chisa/anki/enhancements/forvo_audio_enhancement.dart';
 import 'package:chisa/anki/enhancements/image_picker_enhancement.dart';
+import 'package:chisa/anki/enhancements/japanesepod101_audio_enhancement.dart';
 import 'package:chisa/anki/enhancements/massif_example_sentences_enhancement.dart';
 import 'package:chisa/anki/enhancements/search_dictionary_enhancement.dart';
 import 'package:chisa/anki/enhancements/tatoeba_example_sentences_enhancement.dart';
@@ -296,6 +297,7 @@ class AppModel with ChangeNotifier {
         enhancementField: AnkiExportField.audio,
       ),
       ForvoAudioEnhancement(appModel: this),
+      JapanesePod101AudioEnhancement(appModel: this),
     ];
     List<AnkiExportEnhancement> sentenceEnhancements = [
       ClearButtonEnhancement(

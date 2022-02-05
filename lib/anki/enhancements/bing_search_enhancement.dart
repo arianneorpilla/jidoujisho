@@ -8,6 +8,7 @@ import 'package:chisa/models/app_model.dart';
 import 'package:chisa/pages/creator_page.dart';
 import 'package:chisa/util/anki_export_field.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:html/parser.dart' as parser;
 import 'package:html/dom.dart' as dom;
 import 'package:http/http.dart' as http;
@@ -96,36 +97,55 @@ class BingSearchEnhancement extends AnkiExportEnhancement {
       bingCache[cacheKey] = response;
     }
 
-    dom.Document document = parser.parse(response.body);
+    bool webViewBusy = true;
 
-    List<dom.Element> imgElements = document.getElementsByClassName("iusc");
+    HeadlessInAppWebView webView = HeadlessInAppWebView(
+        initialUrlRequest: URLRequest(
+          url: Uri.parse("https://www.bing.com/images/search?q=$searchTerm')"),
+        ),
+        onLoadStop: (controller, uri) async {
+          await Future.delayed(const Duration(milliseconds: 500), () {});
 
-    for (int i = 0; i < imgElements.length; i++) {
-      Map<dynamic, dynamic> imgMap =
-          jsonDecode(imgElements[i].attributes["m"]!);
-      String imageURL = imgMap["turl"];
+          dom.Document document = parser.parse(await controller.getHtml());
 
-      Directory appDirDoc = await getApplicationSupportDirectory();
-      String bingImagesPath = "${appDirDoc.path}/bingImages";
-      Directory bingImagesDir = Directory(bingImagesPath);
-      if (!bingImagesDir.existsSync()) {
-        bingImagesDir.createSync();
-      }
+          List<dom.Element> imgElements =
+              document.getElementsByClassName("iusc");
 
-      String imagePath = "$bingImagesPath/$i";
-      File imageFile = File(imagePath);
-      if (imageFile.existsSync()) {
-        imageFile.deleteSync();
-      }
+          for (int i = 0; i < imgElements.length; i++) {
+            Map<dynamic, dynamic> imgMap =
+                jsonDecode(imgElements[i].attributes["m"]!);
+            String imageURL = imgMap["turl"];
 
-      NetworkToFileImage image =
-          NetworkToFileImage(url: imageURL, file: imageFile);
-      if (i == 0) {
-        await precacheImage(image, context);
-      } else {
-        precacheImage(image, context);
-      }
-      images.add(image);
+            Directory appDirDoc = await getApplicationSupportDirectory();
+            String bingImagesPath = "${appDirDoc.path}/bingImages";
+            Directory bingImagesDir = Directory(bingImagesPath);
+            if (!bingImagesDir.existsSync()) {
+              bingImagesDir.createSync();
+            }
+
+            String imagePath = "$bingImagesPath/$i";
+            File imageFile = File(imagePath);
+            if (imageFile.existsSync()) {
+              imageFile.deleteSync();
+            }
+
+            NetworkToFileImage image =
+                NetworkToFileImage(url: imageURL, file: imageFile);
+            if (i == 0) {
+              await precacheImage(image, context);
+            } else {
+              precacheImage(image, context);
+            }
+            images.add(image);
+          }
+
+          webViewBusy = false;
+        });
+
+    await webView.run();
+
+    while (webViewBusy) {
+      await Future.delayed(const Duration(milliseconds: 100), () {});
     }
 
     return images;
