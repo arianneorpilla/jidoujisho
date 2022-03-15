@@ -37,15 +37,6 @@ void main() {
   });
 }
 
-/// All global [Provider] objects should be specified below. These are
-/// accessible anywhere a [WidgetRef] is within scope. See RiverPod for more
-/// documentation on state management.
-///
-/// A global [Provider] for app-wide configuration and state management.
-final appProvider = ChangeNotifierProvider<AppModel>((ref) {
-  return AppModel();
-});
-
 /// Encapsulates theming, spacing and other configurable options pertaining to
 /// the entire app, with some parameters dependent on the [AppModel].
 class JidoujishoApp extends ConsumerStatefulWidget {
@@ -77,7 +68,8 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
 
   /// The current theme mode, which by default is based on system setting
   /// and toggleable.
-  ThemeMode get themeMode => ThemeMode.light;
+  ThemeMode get themeMode =>
+      appModel.isDarkMode ? ThemeMode.dark : ThemeMode.light;
 
   /// The current locale, dependent on the active target language.
   Locale get locale => appModel.targetLanguage.locale;
@@ -115,6 +107,7 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
   /// Shows when the current [themeMode] is a light theme.
   ThemeData get theme => ThemeData(
         backgroundColor: Colors.white,
+        scaffoldBackgroundColor: Colors.white,
         colorScheme: ColorScheme.fromSwatch().copyWith(
           primary: Colors.red,
           secondary: Colors.red,
@@ -126,6 +119,7 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
   /// Shows when the current [themeMode] is a dark theme.
   ThemeData get darkTheme => ThemeData(
         backgroundColor: Colors.black,
+        scaffoldBackgroundColor: Colors.black,
         colorScheme: ColorScheme.fromSwatch().copyWith(
           primary: Colors.red,
           secondary: Colors.red,

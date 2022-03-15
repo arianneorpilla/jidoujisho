@@ -13,6 +13,6 @@ class HomePage extends ConsumerStatefulWidget {
 class _HomePageState extends ConsumerState<HomePage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Container(color: Colors.red));
+    return Scaffold(body: Container());
   }
 }
