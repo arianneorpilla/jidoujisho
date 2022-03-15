@@ -22,8 +22,62 @@ linter:
   # `// ignore_for_file: name_of_lint` syntax on the line or in the file
   # producing the lint.
   rules:
-    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
-    # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
-
-# Additional information about this file can be found at
-# https://dart.dev/guides/language/analysis-options
+    always_use_package_imports: true
+    always_put_control_body_on_new_line: true
+    always_put_required_named_parameters_first: true
+    avoid_dynamic_calls: true
+    avoid_multiple_declarations_per_line: true
+    avoid_positional_boolean_parameters: true
+    avoid_private_typedef_functions: true
+    avoid_redundant_argument_values: true
+    avoid_relative_lib_imports: true
+    avoid_returning_this: true
+    avoid_returning_null: true
+    avoid_returning_null_for_future: true
+    avoid_setters_without_getters: true
+    avoid_slow_async_io: true
+    avoid_types_on_closure_parameters: true
+    cancel_subscriptions: true
+    comment_references: true
+    do_not_use_environment: true
+    eol_at_end_of_file: true
+    library_private_types_in_public_api: true
+    literal_only_boolean_expressions: true
+    leading_newlines_in_multiline_strings: true
+    missing_whitespace_between_adjacent_strings: true
+    noop_primitive_operations: true
+    no_adjacent_strings_in_list: true
+    no_default_cases: true
+    one_member_abstracts: true
+    only_throw_errors: true
+    package_api_docs: true
+    prefer_asserts_in_initializer_lists: true
+    prefer_constructors_over_static_methods: true
+    prefer_if_elements_to_conditional_expressions: true
+    prefer_int_literals: true
+    prefer_interpolation_to_compose_strings: true
+    prefer_null_aware_method_calls: true
+    prefer_foreach: true
+    prefer_single_quotes: true
+    prefer_asserts_with_message: true
+    public_member_api_docs: true
+    sort_constructors_first: true
+    sort_pub_dependencies: true
+    throw_in_finally: true
+    unnecessary_await_in_return: true
+    unnecessary_lambdas: true
+    unnecessary_late: true
+    unnecessary_null_aware_assignments: true
+    unnecessary_null_checks: true
+    unnecessary_nullable_for_final_variable_declarations: true
+    unnecessary_parenthesis: true
+    unnecessary_raw_strings: true
+    use_colored_box: true
+    use_decorated_box: true
+    use_enums: true
+    use_is_even_rather_than_modulo: true
+    use_named_constants: true
+    use_rethrow_when_possible: true
+    use_string_buffers: true
+    use_super_parameters: true
+    use_to_and_as_if_applicable: true
