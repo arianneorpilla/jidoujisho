@@ -6,9 +6,9 @@ import 'dart:ui';
 /// segmentation behaviour for different languages. Override the variables
 /// and functions of this abstract class in order to implement a target
 /// language.
-abstract class TargetLanguage {
+abstract class Language {
   /// Initialise the language with the required details.
-  TargetLanguage({
+  Language({
     required this.languageName,
     required this.languageCode,
     required this.countryCode,

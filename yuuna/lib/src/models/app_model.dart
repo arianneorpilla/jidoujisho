@@ -7,6 +7,8 @@ import 'package:flutter_settings_screens/flutter_settings_screens.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yuuna/language.dart';
+import 'package:yuuna/media.dart';
+import 'package:yuuna/src/utils/jidoujisho_localisations.dart';
 
 /// A global [Provider] for app-wide configuration and state management.
 final appProvider = ChangeNotifierProvider<AppModel>((ref) {
@@ -27,21 +29,46 @@ class AppModel with ChangeNotifier {
 
   /// Used to fetch a language by its locale tag with constant time performance.
   /// Initialised with [populateLanguages] at startup.
-  late final Map<String, TargetLanguage> languagesByLocaleTag;
+  late final Map<String, Language> languagesByLocaleTag;
+
+  /// Used to fetch a media type by its unique key with constant time
+  /// performance. Initialised with [populateMediaTypes] at startup.
+  late final Map<String, MediaType> mediaTypesByUniqueKey;
 
   /// A list of languages that the app will support at runtime.
-  final List<TargetLanguage> languages = List<TargetLanguage>.unmodifiable(
+  final List<Language> languages = List<Language>.unmodifiable(
     [
       EnglishLanguage(),
     ],
   );
 
+  /// A list of media types that the app will support at runtime.
+  final List<MediaType> mediaTypes = List<MediaType>.unmodifiable(
+    [
+      PlayerMediaType(),
+      ReaderMediaType(),
+      ViewerMediaType(),
+      DictionaryMediaType(),
+    ],
+  );
+
   /// Populate languages with maps at startup to optimise performance.
   Future<void> populateLanguages() async {
-    languagesByLocaleTag = Map<String, TargetLanguage>.unmodifiable(
-      Map<String, TargetLanguage>.fromEntries(
+    languagesByLocaleTag = Map<String, Language>.unmodifiable(
+      Map<String, Language>.fromEntries(
         languages.map(
           (language) => MapEntry(language.locale.toLanguageTag(), language),
+        ),
+      ),
+    );
+  }
+
+  /// Populate languages with maps at startup to optimise performance.
+  Future<void> populateMediaTypes() async {
+    mediaTypesByUniqueKey = Map<String, MediaType>.unmodifiable(
+      Map<String, MediaType>.fromEntries(
+        mediaTypes.map(
+          (mediaType) => MapEntry(mediaType.uniqueKey, mediaType),
         ),
       ),
     );
@@ -60,27 +87,44 @@ class AppModel with ChangeNotifier {
 
     /// Populate entities with key-value maps for constant time performance.
     await populateLanguages();
+    await populateMediaTypes();
   }
 
   /// Get whether or not the current theme is dark mode.
   bool get isDarkMode {
     bool isSystemDarkMode = Brightness.dark ==
         (SchedulerBinding.instance?.window.platformBrightness ?? false);
-    bool isDarkMode = Settings.getValue('isDarkMode', isSystemDarkMode);
+    bool isDarkMode = Settings.getValue<bool>('is_dark_mode', isSystemDarkMode);
     return isDarkMode;
   }
 
   /// Toggle between light and dark mode.
   Future<void> toggleDarkMode() async {
-    await Settings.setValue('isDarkMode', !isDarkMode);
+    await Settings.setValue<bool>('is_dark_mode', !isDarkMode);
     notifyListeners();
   }
 
   /// Get the target language from persisted settings.
-  TargetLanguage get targetLanguage {
+  Language get targetLanguage {
     String defaultLocaleTag = languages.first.locale.toLanguageTag();
-    String localeTag = Settings.getValue('targetLanguage', defaultLocaleTag);
+    String localeTag =
+        Settings.getValue<String>('target_language', defaultLocaleTag);
 
     return languagesByLocaleTag[localeTag]!;
+  }
+
+  /// Get the target language from persisted settings.
+  int get currentHomeTabIndex =>
+      Settings.getValue<int>('current_home_tab_index', 0);
+
+  /// Persist the new tab after switching home tabs.
+  Future<void> setCurrentHomeTabIndex(int index) async {
+    await Settings.setValue<int>('current_home_tab_index', index);
+  }
+
+  /// Get the value of a localisation item given the current target language.
+  String translate(String key) {
+    return JidoujishoLocalisations
+        .localisations[targetLanguage.locale.toLanguageTag()]![key]!;
   }
 }

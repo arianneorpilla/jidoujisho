@@ -4,7 +4,7 @@ import 'dart:ui';
 import 'package:yuuna/language.dart';
 
 /// Language implementation of the English language.
-class EnglishLanguage extends TargetLanguage {
+class EnglishLanguage extends Language {
   /// Get a new instance of this language.
   EnglishLanguage()
       : super(
