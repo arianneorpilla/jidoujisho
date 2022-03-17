@@ -8,6 +8,7 @@ abstract class MediaType {
   const MediaType({
     required this.uniqueKey,
     required this.icon,
+    required this.outlinedIcon,
   });
 
   /// A unique name that allows distinguishing this type from others,
@@ -17,6 +18,9 @@ abstract class MediaType {
 
   /// An icon that will represent this media type in its home tab.
   final IconData icon;
+
+  /// An icon that represents this media type when unselected in its home tab.
+  final IconData outlinedIcon;
 
   /// The body that will be shown when this media type's tab is the current
   /// selected home tab.

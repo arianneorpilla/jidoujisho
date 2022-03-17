@@ -8,6 +8,7 @@ class PlayerMediaType extends MediaType {
       : super(
           uniqueKey: 'player_media_type',
           icon: Icons.video_library,
+          outlinedIcon: Icons.video_library_outlined,
         );
 
   @override

@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yuuna/models.dart';
 
@@ -13,7 +13,8 @@ abstract class BasePage extends ConsumerStatefulWidget {
 }
 
 /// A base class for providing all pages in the app with a collection
-/// of shared functions and variables.
+/// of shared functions and variables. In large part, this was implemented to
+/// define shortcuts for common lengthy methods across UI code.
 class BasePageState<T extends BasePage> extends ConsumerState<T> {
   /// Access the global model responsible for app-wide state management.
   AppModel get appModel => ref.watch(appProvider);
@@ -21,6 +22,9 @@ class BasePageState<T extends BasePage> extends ConsumerState<T> {
   /// Access the global model responsible for app-wide state management without
   /// listening to state updates. Useful when accessing state from [initState].
   AppModel get appModelNoUpdate => ref.read(appProvider);
+
+  /// Shortcut for accessing the app-wide theme-defined text theme.
+  TextTheme get textTheme => Theme.of(context).textTheme;
 
   @override
   Widget build(BuildContext context) {

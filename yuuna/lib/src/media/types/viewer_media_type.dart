@@ -8,6 +8,7 @@ class ViewerMediaType extends MediaType {
       : super(
           uniqueKey: 'viewer_media_type',
           icon: Icons.photo_library,
+          outlinedIcon: Icons.photo_library_outlined,
         );
 
   @override

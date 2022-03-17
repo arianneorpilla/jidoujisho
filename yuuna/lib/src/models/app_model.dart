@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_settings_screens/flutter_settings_screens.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yuuna/language.dart';
@@ -82,9 +81,6 @@ class AppModel with ChangeNotifier {
     _sharedPreferences = await SharedPreferences.getInstance();
     _packageInfo = await PackageInfo.fromPlatform();
 
-    /// Initialise persisted settings.
-    await Settings.init();
-
     /// Populate entities with key-value maps for constant time performance.
     await populateLanguages();
     await populateMediaTypes();
@@ -94,13 +90,14 @@ class AppModel with ChangeNotifier {
   bool get isDarkMode {
     bool isSystemDarkMode = Brightness.dark ==
         (SchedulerBinding.instance?.window.platformBrightness ?? false);
-    bool isDarkMode = Settings.getValue<bool>('is_dark_mode', isSystemDarkMode);
+    bool isDarkMode =
+        _sharedPreferences.getBool('is_dark_mode') ?? isSystemDarkMode;
     return isDarkMode;
   }
 
   /// Toggle between light and dark mode.
   Future<void> toggleDarkMode() async {
-    await Settings.setValue<bool>('is_dark_mode', !isDarkMode);
+    await _sharedPreferences.setBool('is_dark_mode', !isDarkMode);
     notifyListeners();
   }
 
@@ -108,18 +105,19 @@ class AppModel with ChangeNotifier {
   Language get targetLanguage {
     String defaultLocaleTag = languages.first.locale.toLanguageTag();
     String localeTag =
-        Settings.getValue<String>('target_language', defaultLocaleTag);
+        _sharedPreferences.getString('target_language') ?? defaultLocaleTag;
 
     return languagesByLocaleTag[localeTag]!;
   }
 
-  /// Get the target language from persisted settings.
+  /// Get the current home tab index. The order of the tab indexes are based on
+  /// the ordering in [mediaTypes].
   int get currentHomeTabIndex =>
-      Settings.getValue<int>('current_home_tab_index', 0);
+      _sharedPreferences.getInt('current_home_tab_index') ?? 0;
 
   /// Persist the new tab after switching home tabs.
   Future<void> setCurrentHomeTabIndex(int index) async {
-    await Settings.setValue<int>('current_home_tab_index', index);
+    await _sharedPreferences.setInt('current_home_tab_index', index);
   }
 
   /// Get the value of a localisation item given the current target language.

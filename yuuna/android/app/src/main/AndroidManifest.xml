@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.yuuna">
    <application
-        android:label="yuuna"
+        android:label="jidoujisho"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity

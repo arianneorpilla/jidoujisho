@@ -8,6 +8,7 @@ class DictionaryMediaType extends MediaType {
       : super(
           uniqueKey: 'dictionary_media_type',
           icon: Icons.auto_stories,
+          outlinedIcon: Icons.auto_stories_outlined,
         );
 
   @override

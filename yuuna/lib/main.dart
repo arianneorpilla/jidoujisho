@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:spaces/spaces.dart';
 
 import 'package:yuuna/models.dart';
 import 'package:yuuna/pages.dart';
@@ -57,6 +58,18 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
       themeMode: themeMode,
       theme: theme,
       darkTheme: darkTheme,
+      // This is responsible for the initialising the global spacing across
+      // the entire project, making use of the [spaces] package.
+      builder: (context, child) => Spacing(
+        dataBuilder: (context) {
+          final mediaQuery = MediaQuery.of(context);
+          if (mediaQuery.size.width > 500) {
+            return SpacingData.generate(30);
+          }
+          return SpacingData.generate(10);
+        },
+        child: child!,
+      ),
     );
   }
 
@@ -113,6 +126,33 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
           secondary: Colors.red,
           brightness: Brightness.light,
         ),
+        appBarTheme: const AppBarTheme(
+          elevation: 0,
+          centerTitle: false,
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+        ),
+        switchTheme: SwitchThemeData(
+          thumbColor: MaterialStateColor.resolveWith((states) {
+            return states.contains(MaterialState.selected)
+                ? Colors.red
+                : Colors.white;
+          }),
+          trackColor: MaterialStateColor.resolveWith((states) {
+            return states.contains(MaterialState.selected)
+                ? Colors.red.withOpacity(0.5)
+                : Colors.grey;
+          }),
+        ),
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          elevation: 0,
+          type: BottomNavigationBarType.fixed,
+          selectedLabelStyle: textTheme.labelSmall,
+          unselectedLabelStyle: textTheme.labelSmall,
+          showSelectedLabels: true,
+          showUnselectedLabels: true,
+          backgroundColor: Colors.white,
+        ),
         textTheme: textTheme,
       );
 
@@ -124,6 +164,33 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
           primary: Colors.red,
           secondary: Colors.red,
           brightness: Brightness.dark,
+        ),
+        switchTheme: SwitchThemeData(
+          thumbColor: MaterialStateColor.resolveWith((states) {
+            return states.contains(MaterialState.selected)
+                ? Colors.red
+                : Colors.grey;
+          }),
+          trackColor: MaterialStateColor.resolveWith((states) {
+            return states.contains(MaterialState.selected)
+                ? Colors.red.withOpacity(0.5)
+                : Colors.grey;
+          }),
+        ),
+        appBarTheme: const AppBarTheme(
+          elevation: 0,
+          centerTitle: false,
+          backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
+        ),
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          elevation: 0,
+          type: BottomNavigationBarType.fixed,
+          selectedLabelStyle: textTheme.labelSmall,
+          unselectedLabelStyle: textTheme.labelSmall,
+          showSelectedLabels: true,
+          showUnselectedLabels: true,
+          backgroundColor: Colors.black,
         ),
         textTheme: textTheme,
       );
