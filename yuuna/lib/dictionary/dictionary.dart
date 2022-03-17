@@ -32,9 +32,7 @@ class Dictionary {
   /// Dictionary" or "大辞林" or "JMdict".
   ///
   /// Dictionary names are meant to be unique, meaning two dictionaries of the
-  /// same name should not be allowed to be added in the database. The
-  /// database will also effectively use this dictionary name as a directory
-  /// prefix.
+  /// same name should not be allowed to be added in the database.
   final String dictionaryName;
 
   /// The format that the dictionary was sourced from.
@@ -46,7 +44,7 @@ class Dictionary {
   /// Get the metadata pertaining to this dictionary from import. Used for
   /// format-specific enhancements.
   Map<String, dynamic> get metadata {
-    _metadata ??= jsonDecode(metadataJson);
+    _metadata ??= Map<String, dynamic>.unmodifiable(jsonDecode(metadataJson));
     return _metadata!;
   }
 

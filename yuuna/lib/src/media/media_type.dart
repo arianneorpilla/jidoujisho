@@ -1,11 +1,13 @@
 import 'package:flutter/widgets.dart';
+import 'package:hive/hive.dart';
+import 'package:yuuna/media.dart';
 
 /// A type of media that is significantly distinguishable from other media such
 /// that it is deserving of its own core functionality when viewing media items.
 /// A [MediaType] has its own history and home tab.
 abstract class MediaType {
   /// Initialise this media type with the predetermined and hardset values.
-  const MediaType({
+  MediaType({
     required this.uniqueKey,
     required this.icon,
     required this.outlinedIcon,
@@ -25,6 +27,48 @@ abstract class MediaType {
   /// The body that will be shown when this media type's tab is the current
   /// selected home tab.
   StatelessWidget get home;
+
+  /// Used to open [Hive] boxes for storing progress and duration respectively.
+  String get _progressKey => '$uniqueKey/progress';
+  String get _durationKey => '$uniqueKey/duration';
+
+  /// The key-value stores that this media type will use to store media history.
+  late Box _persistedProgress;
+  late Box _persistedDuration;
+
+  /// Whether or not [initialise] has been called for the media type.
+  bool _initialised = false;
+
+  /// Given a media [item], get its persisted progress.
+  int getItemProgress(MediaItem item) {
+    return _persistedProgress.get(item.uniqueKey);
+  }
+
+  /// Given a media [item], get its persisted duration.
+  int getItemDuration(MediaItem item) {
+    return _persistedDuration.get(item.uniqueKey);
+  }
+
+  /// Given a media [item], update its persisted [progress].
+  void persistItemProgress(MediaItem item, int progress) {
+    _persistedProgress.put(item.uniqueKey, progress);
+  }
+
+  /// Given a media [item], update its persisted [duration].
+  void persistItemDuration(MediaItem item, int duration) {
+    _persistedDuration.put(item.uniqueKey, duration);
+  }
+
+  /// This function is run at startup. It is not called again if already run.
+  Future<void> initialise() async {
+    if (_initialised) {
+      return;
+    } else {
+      _persistedProgress = await Hive.openBox(_progressKey);
+      _persistedDuration = await Hive.openBox(_durationKey);
+      _initialised = true;
+    }
+  }
 
   @override
   operator ==(Object other) =>

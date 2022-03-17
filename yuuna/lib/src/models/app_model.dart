@@ -3,8 +3,8 @@ import 'dart:ui';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive/hive.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yuuna/language.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/src/utils/jidoujisho_localisations.dart';
@@ -19,8 +19,7 @@ final appProvider = ChangeNotifierProvider<AppModel>((ref) {
 /// especially for preferences that persist across application restarts.
 class AppModel with ChangeNotifier {
   /// Used for storing and retrieving persistent data. See [initialise].
-  SharedPreferences get sharedPreferences => _sharedPreferences;
-  late final SharedPreferences _sharedPreferences;
+  late final Box _preferences;
 
   /// Used to get the versioning metadata of the app. See [initialise].
   PackageInfo get packageInfo => _packageInfo;
@@ -73,12 +72,29 @@ class AppModel with ChangeNotifier {
     );
   }
 
+  /// Get the current target language and prepare its resources for use. This
+  /// will not re-run if the target language is already initialised, as
+  /// a [Language] should always have a singleton instance and will not
+  /// re-prepare its resources if already initialised. See
+  /// [Language.initialise] for more details.
+  Future<void> initialiseLanguage() async {
+    await targetLanguage.initialise();
+  }
+
+  /// Ready the progress and duration persistent stores of all [MediaType]
+  /// histories at startup.
+  Future<void> initialiseMediaTypes() async {
+    for (MediaType mediaType in mediaTypes) {
+      await mediaType.initialise();
+    }
+  }
+
   /// Prepare application data and state to be ready of use upon starting up
   /// the application. [AppModel] is initialised in the main function before
   /// [runApp] is executed.
   Future<void> initialise() async {
     /// Prepare late entities that are required at startup.
-    _sharedPreferences = await SharedPreferences.getInstance();
+    _preferences = await Hive.openBox('appModel');
     _packageInfo = await PackageInfo.fromPlatform();
 
     /// Populate entities with key-value maps for constant time performance.
@@ -86,12 +102,9 @@ class AppModel with ChangeNotifier {
     populateLanguages();
     populateMediaTypes();
 
-    /// Get the current target language and prepare its resources for use. This
-    /// will not re-run if the target language is already initialised, as
-    /// a [Language] should always have a singleton instance and will not
-    /// re-prepare its resources if already initialised. See
-    /// [Language.initialise] for more details.
-    await targetLanguage.initialise();
+    /// Prepare entities for use at startup.
+    await initialiseLanguage();
+    await initialiseMediaTypes();
   }
 
   /// Get whether or not the current theme is dark mode.
@@ -99,13 +112,13 @@ class AppModel with ChangeNotifier {
     bool isSystemDarkMode = Brightness.dark ==
         (SchedulerBinding.instance?.window.platformBrightness ?? false);
     bool isDarkMode =
-        _sharedPreferences.getBool('is_dark_mode') ?? isSystemDarkMode;
+        _preferences.get('is_dark_mode', defaultValue: isSystemDarkMode);
     return isDarkMode;
   }
 
   /// Toggle between light and dark mode.
   Future<void> toggleDarkMode() async {
-    await _sharedPreferences.setBool('is_dark_mode', !isDarkMode);
+    await _preferences.put('is_dark_mode', !isDarkMode);
     notifyListeners();
   }
 
@@ -113,7 +126,7 @@ class AppModel with ChangeNotifier {
   Language get targetLanguage {
     String defaultLocaleTag = languages.first.locale.toLanguageTag();
     String localeTag =
-        _sharedPreferences.getString('target_language') ?? defaultLocaleTag;
+        _preferences.get('target_language', defaultValue: defaultLocaleTag);
 
     return languagesByLocaleTag[localeTag]!;
   }
@@ -121,17 +134,17 @@ class AppModel with ChangeNotifier {
   /// Persist a new target language in preferences.
   Future<void> setTargetLanguage(Language language) async {
     String localeTag = language.locale.toLanguageTag();
-    await _sharedPreferences.setString('target_language', localeTag);
+    await _preferences.put('target_language', localeTag);
   }
 
   /// Get the current home tab index. The order of the tab indexes are based on
   /// the ordering in [mediaTypes].
   int get currentHomeTabIndex =>
-      _sharedPreferences.getInt('current_home_tab_index') ?? 0;
+      _preferences.get('current_home_tab_index', defaultValue: 0);
 
   /// Persist the new tab after switching home tabs.
   Future<void> setCurrentHomeTabIndex(int index) async {
-    await _sharedPreferences.setInt('current_home_tab_index', index);
+    await _preferences.put('current_home_tab_index', index);
   }
 
   /// Get the value of a localisation item given the current target language.

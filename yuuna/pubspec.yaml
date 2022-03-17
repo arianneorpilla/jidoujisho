@@ -16,13 +16,13 @@ dependencies:
   flutter_native_splash: ^2.1.1
   flutter_riverpod: ^1.0.3
   flutter_screenutil: ^5.3.1
+  hive: ^2.0.6
   isar: ^2.2.1
   json_annotation: ^4.4.0
   json_serializable: ^6.1.5
   package_info_plus: ^1.4.0
   pretty_json: ^2.0.0
   settings_ui: ^2.0.2
-  shared_preferences: ^2.0.13
   spaces:
     git:
       url: https://github.com/triskell/spaces
