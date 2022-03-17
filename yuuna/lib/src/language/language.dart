@@ -52,7 +52,7 @@ abstract class Language {
   final TextBaseline textBaseline;
 
   /// Whether or not [initialise] has been called for the language.
-  bool initialised = false;
+  bool _initialised = false;
 
   /// Some implementations of tap-to-select are very unoptimised for a high
   /// length of text. It is impractical to run text segmentation in some cases.
@@ -61,12 +61,23 @@ abstract class Language {
   /// used.
   int? indexMaxDistance;
 
-  /// Prepare text segmentation tools and other dependencies necessary for this
-  /// langauge to function.
-  Future<void> initialise();
+  /// This function is run at startup or when changing languages. It is not
+  /// called again if already run.
+  Future<void> initialise() async {
+    if (_initialised) {
+      return;
+    } else {
+      await prepareResources();
+      _initialised = true;
+    }
+  }
 
   /// Extract a [Locale] from the language code and country code.
   Locale get locale => Locale(languageCode, countryCode);
+
+  /// Prepare text segmentation tools and other dependencies necessary for this
+  /// langauge to function.
+  Future<void> prepareResources();
 
   /// Given unsegmented [text], perform text segmentation particular to the
   /// language and return a list of parsed words.

@@ -37,22 +37,22 @@ class AppModel with ChangeNotifier {
   /// A list of languages that the app will support at runtime.
   final List<Language> languages = List<Language>.unmodifiable(
     [
-      EnglishLanguage(),
+      EnglishLanguage.instance,
     ],
   );
 
   /// A list of media types that the app will support at runtime.
   final List<MediaType> mediaTypes = List<MediaType>.unmodifiable(
     [
-      PlayerMediaType(),
-      ReaderMediaType(),
-      ViewerMediaType(),
-      DictionaryMediaType(),
+      PlayerMediaType.instance,
+      ReaderMediaType.instance,
+      ViewerMediaType.instance,
+      DictionaryMediaType.instance,
     ],
   );
 
   /// Populate languages with maps at startup to optimise performance.
-  Future<void> populateLanguages() async {
+  void populateLanguages() async {
     languagesByLocaleTag = Map<String, Language>.unmodifiable(
       Map<String, Language>.fromEntries(
         languages.map(
@@ -63,7 +63,7 @@ class AppModel with ChangeNotifier {
   }
 
   /// Populate languages with maps at startup to optimise performance.
-  Future<void> populateMediaTypes() async {
+  void populateMediaTypes() async {
     mediaTypesByUniqueKey = Map<String, MediaType>.unmodifiable(
       Map<String, MediaType>.fromEntries(
         mediaTypes.map(
@@ -82,8 +82,16 @@ class AppModel with ChangeNotifier {
     _packageInfo = await PackageInfo.fromPlatform();
 
     /// Populate entities with key-value maps for constant time performance.
-    await populateLanguages();
-    await populateMediaTypes();
+    /// This is not the initialisation step, which occurs below.
+    populateLanguages();
+    populateMediaTypes();
+
+    /// Get the current target language and prepare its resources for use. This
+    /// will not re-run if the target language is already initialised, as
+    /// a [Language] should always have a singleton instance and will not
+    /// re-prepare its resources if already initialised. See
+    /// [Language.initialise] for more details.
+    await targetLanguage.initialise();
   }
 
   /// Get whether or not the current theme is dark mode.
@@ -101,13 +109,19 @@ class AppModel with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Get the target language from persisted settings.
+  /// Get the target language from persisted preferences.
   Language get targetLanguage {
     String defaultLocaleTag = languages.first.locale.toLanguageTag();
     String localeTag =
         _sharedPreferences.getString('target_language') ?? defaultLocaleTag;
 
     return languagesByLocaleTag[localeTag]!;
+  }
+
+  /// Persist a new target language in preferences.
+  Future<void> setTargetLanguage(Language language) async {
+    String localeTag = language.locale.toLanguageTag();
+    await _sharedPreferences.setString('target_language', localeTag);
   }
 
   /// Get the current home tab index. The order of the tab indexes are based on

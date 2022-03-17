@@ -5,8 +5,7 @@ import 'package:yuuna/language.dart';
 
 /// Language implementation of the English language.
 class EnglishLanguage extends Language {
-  /// Get a new instance of this language.
-  EnglishLanguage()
+  EnglishLanguage._privateConstructor()
       : super(
           languageName: 'English',
           languageCode: 'en',
@@ -17,8 +16,14 @@ class EnglishLanguage extends Language {
           textBaseline: TextBaseline.alphabetic,
         );
 
+  /// Get the singleton instance of this media type.
+  static EnglishLanguage get instance => _instance;
+
+  static final EnglishLanguage _instance =
+      EnglishLanguage._privateConstructor();
+
   @override
-  Future<void> initialise() async {}
+  Future<void> prepareResources() async {}
 
   @override
   FutureOr<String> getRootForm(String word) {

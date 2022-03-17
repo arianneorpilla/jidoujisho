@@ -24,5 +24,12 @@ abstract class MediaType {
 
   /// The body that will be shown when this media type's tab is the current
   /// selected home tab.
-  Widget get home;
+  StatelessWidget get home;
+
+  @override
+  operator ==(Object other) =>
+      other is MediaType && other.uniqueKey == uniqueKey;
+
+  @override
+  int get hashCode => uniqueKey.hashCode;
 }
