@@ -22,6 +22,8 @@ class MediaItem {
     this.author,
     this.sourceMetadata,
     this.references,
+    this.position,
+    this.duration,
   });
 
   /// Create an instance of this class from a serialized format.
@@ -67,6 +69,15 @@ class MediaItem {
   /// dictionary entry, allowing a dictionary search result bundling multiple
   /// entries to be stored as a single media item in media history.
   List<int>? references;
+
+  /// The current progress of the media in the time this context was made.
+  /// This could be the seconds of a playing video or the page number of a
+  /// book or comic.
+  final int? position;
+
+  /// The media's full duration, used to be able to tell the completion of
+  /// this media context relative to the position.
+  final int? duration;
 
   @override
   operator ==(Object other) =>

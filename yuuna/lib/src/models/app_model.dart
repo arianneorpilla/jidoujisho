@@ -1,10 +1,14 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:path/path.dart' as path;
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:yuuna/creator.dart';
 import 'package:yuuna/language.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/src/utils/jidoujisho_localisations.dart';
@@ -25,13 +29,31 @@ class AppModel with ChangeNotifier {
   PackageInfo get packageInfo => _packageInfo;
   late final PackageInfo _packageInfo;
 
+  /// These directories are prepared at startup in order to reduce redundancy
+  /// in actual runtime.
+  /// Directory where data that may be dumped is stored.
+  Directory get temporaryDirectory => _temporaryDirectory;
+  late final Directory _temporaryDirectory;
+
+  /// Directory where data may be persisted.
+  Directory get appDirectory => _appDirectory;
+  late final Directory _appDirectory;
+
+  /// Directory where key-value data is stored.
+  Directory get hiveDirectory => _hiveDirectory;
+  late final Directory _hiveDirectory;
+
   /// Used to fetch a language by its locale tag with constant time performance.
   /// Initialised with [populateLanguages] at startup.
-  late final Map<String, Language> languagesByLocaleTag;
+  late final Map<String, Language> sortedLanguages;
 
   /// Used to fetch a media type by its unique key with constant time
   /// performance. Initialised with [populateMediaTypes] at startup.
-  late final Map<String, MediaType> mediaTypesByUniqueKey;
+  late final Map<String, MediaType> sortedMediaTypes;
+
+  /// Used to fetch initialised enhancements by their unique key with constant
+  /// time performance. Initialised with [populateEnhancements] at startup.
+  late final Map<Field, Map<String, Enhancement>> sortedEnhancements;
 
   /// A list of languages that the app will support at runtime.
   final List<Language> languages = List<Language>.unmodifiable(
@@ -50,9 +72,20 @@ class AppModel with ChangeNotifier {
     ],
   );
 
+  /// A list of enhancements that the app will support at runtime.
+  final Map<Field, List<Enhancement>> fieldEnhancements = {
+    Field.audio: [],
+    Field.extra: [],
+    Field.image: [],
+    Field.meaning: [],
+    Field.reading: [],
+    Field.sentence: [],
+    Field.word: [],
+  };
+
   /// Populate languages with maps at startup to optimise performance.
   void populateLanguages() async {
-    languagesByLocaleTag = Map<String, Language>.unmodifiable(
+    sortedLanguages = Map<String, Language>.unmodifiable(
       Map<String, Language>.fromEntries(
         languages.map(
           (language) => MapEntry(language.locale.toLanguageTag(), language),
@@ -63,10 +96,28 @@ class AppModel with ChangeNotifier {
 
   /// Populate languages with maps at startup to optimise performance.
   void populateMediaTypes() async {
-    mediaTypesByUniqueKey = Map<String, MediaType>.unmodifiable(
+    sortedMediaTypes = Map<String, MediaType>.unmodifiable(
       Map<String, MediaType>.fromEntries(
         mediaTypes.map(
           (mediaType) => MapEntry(mediaType.uniqueKey, mediaType),
+        ),
+      ),
+    );
+  }
+
+  /// Populate enhancements with maps at startup to optimise performance.
+  void populateEnhancements() async {
+    sortedEnhancements = Map<Field, Map<String, Enhancement>>.unmodifiable(
+      fieldEnhancements.map(
+        (field, enhancements) => MapEntry(
+          field,
+          Map<String, Enhancement>.unmodifiable(
+            Map<String, Enhancement>.fromEntries(
+              enhancements.map(
+                (enhancement) => MapEntry(enhancement.uniqueKey, enhancement),
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -93,9 +144,17 @@ class AppModel with ChangeNotifier {
   /// the application. [AppModel] is initialised in the main function before
   /// [runApp] is executed.
   Future<void> initialise() async {
-    /// Prepare late entities that are required at startup.
-    _preferences = await Hive.openBox('appModel');
+    /// Prepare entities that may be repeatedly used at runtime.
     _packageInfo = await PackageInfo.fromPlatform();
+
+    /// These directories will commonly be accessed.
+    _temporaryDirectory = await getTemporaryDirectory();
+    _appDirectory = await getApplicationDocumentsDirectory();
+    _hiveDirectory = Directory(path.join(appDirectory.path, 'hive'));
+
+    /// Initialise persistent store or all Hive boxes.
+    await Hive.initFlutter();
+    _preferences = await Hive.openBox('appModel');
 
     /// Populate entities with key-value maps for constant time performance.
     /// This is not the initialisation step, which occurs below.
@@ -117,7 +176,7 @@ class AppModel with ChangeNotifier {
   }
 
   /// Toggle between light and dark mode.
-  Future<void> toggleDarkMode() async {
+  void toggleDarkMode() async {
     await _preferences.put('is_dark_mode', !isDarkMode);
     notifyListeners();
   }
@@ -128,7 +187,7 @@ class AppModel with ChangeNotifier {
     String localeTag =
         _preferences.get('target_language', defaultValue: defaultLocaleTag);
 
-    return languagesByLocaleTag[localeTag]!;
+    return sortedLanguages[localeTag]!;
   }
 
   /// Persist a new target language in preferences.
@@ -151,5 +210,26 @@ class AppModel with ChangeNotifier {
   String translate(String key) {
     return JidoujishoLocalisations
         .localisations[targetLanguage.locale.toLanguageTag()]![key]!;
+  }
+
+  /// Given a slot [position] of a certain field, get the unique key of the
+  /// [Enhancement] assigned to it.
+  Enhancement? getEnhancement({
+    required Field field,
+    required int position,
+  }) {
+    String uniqueKey = _preferences.get('field_slots_${field.name}/$position');
+    return sortedEnhancements[field]![uniqueKey];
+  }
+
+  /// Given an [enhancement], persist to a numbered slot [position] for a
+  /// [field].
+  Future<void> persistEnhancement({
+    required Field field,
+    required Enhancement enhancement,
+    required int position,
+  }) async {
+    await _preferences.put(
+        'field_slots_${field.name}/$position', enhancement.uniqueKey);
   }
 }

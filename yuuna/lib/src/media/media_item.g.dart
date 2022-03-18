@@ -15,6 +15,8 @@ MediaItem _$MediaItemFromJson(Map<String, dynamic> json) => MediaItem(
       sourceMetadata: json['sourceMetadata'] as String?,
       references:
           (json['references'] as List<dynamic>?)?.map((e) => e as int).toList(),
+      position: json['position'] as int?,
+      duration: json['duration'] as int?,
     );
 
 Map<String, dynamic> _$MediaItemToJson(MediaItem instance) => <String, dynamic>{
@@ -25,4 +27,6 @@ Map<String, dynamic> _$MediaItemToJson(MediaItem instance) => <String, dynamic>{
       'author': instance.author,
       'sourceMetadata': instance.sourceMetadata,
       'references': instance.references,
+      'position': instance.position,
+      'duration': instance.duration,
     };
