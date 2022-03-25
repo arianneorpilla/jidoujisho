@@ -6,7 +6,7 @@ class DictionaryMediaType extends MediaType {
   /// Initialise this media type.
   DictionaryMediaType._privateConstructor()
       : super(
-          uniqueKey: 'dictionary_media_type',
+          uniqueKey: 'dictionary',
           icon: Icons.auto_stories,
           outlinedIcon: Icons.auto_stories_outlined,
         );

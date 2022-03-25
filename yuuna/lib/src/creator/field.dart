@@ -26,6 +26,9 @@ enum Field {
 
   /// Auditory supplements.
   audio,
+
+  /// Where this word was sourced from, i.e. a video or an image.
+  context,
 }
 
 /// Extra methods for [Field].
@@ -57,6 +60,8 @@ extension AnkiExportFieldLocalisation on Field {
         return Icons.image;
       case Field.audio:
         return Icons.audiotrack;
+      case Field.context:
+        return Icons.info_outlined;
     }
   }
 }

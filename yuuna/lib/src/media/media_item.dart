@@ -17,7 +17,7 @@ class MediaItem {
   MediaItem({
     required this.uniqueKey,
     required this.title,
-    required this.sourceId,
+    required this.sourceIdentifier,
     this.id,
     this.author,
     this.sourceMetadata,
@@ -49,12 +49,13 @@ class MediaItem {
   String title;
 
   /// The media source where this item is from. All media sources have a
-  /// unique identifier that takes the format of [mediaType/sourceName].
+  /// unique identifier that takes the format of [media/type/source] or
+  /// [enhancement/field/key].
   /// This is used to generate resources that the media item may require for
   /// preview purposes. For example, for a local media item to display its
   /// screenshot, the player page will need to invoke a function pertaining
   /// to the media source in order to generate its thumbnail.
-  String sourceId;
+  String sourceIdentifier;
 
   /// This field is a convenience field as it may be common to store this
   /// detail. For a web video, this could be the channel where the video is
@@ -88,4 +89,19 @@ class MediaItem {
 
   @override
   String toString() => prettyJson(toJson());
+
+  /// The category from which this media item is from, enhancement or media.
+  String get identifierCategory => sourceIdentifier.split('/')[0];
+
+  /// The media type or field from the source identifier.
+  String get identifierType => sourceIdentifier.split('/')[1];
+
+  /// The media source or the enhancement unique key from the source identifier.
+  String get identifierKey => sourceIdentifier.split('/')[2];
+
+  /// If this media item was from an enhancement.
+  bool get fromEnhancement => identifierCategory == 'enhancement';
+
+  /// If this media item was from media.
+  bool get fromMedia => identifierCategory == 'enhancement';
 }

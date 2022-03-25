@@ -1,1 +1,1 @@
-export 'dictionary/dictionary_entry.dart';
+export 'src/dictionary/dictionary_entry.dart';

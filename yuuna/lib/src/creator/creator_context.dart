@@ -1,11 +1,14 @@
+import 'package:isar/isar.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:yuuna/media.dart';
+import 'package:yuuna/utils.dart';
 part 'creator_context.g.dart';
 
-/// A bundle entity of items that can be used to start the card
-/// creator with export parameters. This entity is serializable
-/// as these must be storable in a peristent queue.
+/// A bundle entity of items that can be used to start the card creator with
+/// given parameters. This entity is serializable as these must be storable in
+/// a peristent queue.
 @JsonSerializable()
+@Collection()
 class CreatorContext {
   /// Initialise an immutable context context with the final parameters.
   const CreatorContext({
@@ -59,8 +62,6 @@ class CreatorContext {
     );
   }
 
-  /// Create an instance of this class from a serialized format.
-
   /// The written context of the sourced word, i.e. an example sentence or
   /// scene dialogue.
   final String? sentence;
@@ -69,7 +70,7 @@ class CreatorContext {
   /// to be memorised from the card.
   final String? word;
 
-  /// reading or reading. May be overriden with some characteristics such
+  /// Pronunciation or reading. May be overriden with some characteristics such
   /// as pitch accent diagrams, by particular languages.
   final String? reading;
 
@@ -90,14 +91,17 @@ class CreatorContext {
   /// serialized data.
 
   /// A serialised [MediaItem] that can be used to generate an image file.
+  @MediaItemConverter()
   final MediaItem? imageSeed;
 
   /// A list that may contain multiple serialised [MediaItem] that can be
   /// used to generate an image file. This can be used if there are multiple
   /// images in a context.
+  @MediaItemConverter()
   final List<MediaItem>? imageSuggestions;
 
   /// A serialised [MediaItem] that can be used to generate an audio file.
+  @MediaItemConverter()
   final MediaItem? audioSeed;
 
   /// The content of the image search controller for the Creator.
@@ -107,5 +111,6 @@ class CreatorContext {
   final String? audioSearch;
 
   /// A serialised [MediaItem] to allow return to context.
+  @MediaItemConverter()
   final MediaItem? context;
 }

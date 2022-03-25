@@ -9,7 +9,7 @@ part of 'dictionary.dart';
 Dictionary _$DictionaryFromJson(Map<String, dynamic> json) => Dictionary(
       dictionaryName: json['dictionaryName'] as String,
       formatName: json['formatName'] as String,
-      metadataJson: json['metadataJson'] as String,
+      metadata: json['metadata'] as Map<String, dynamic>,
     )..id = json['id'] as int?;
 
 Map<String, dynamic> _$DictionaryToJson(Dictionary instance) =>
@@ -17,5 +17,5 @@ Map<String, dynamic> _$DictionaryToJson(Dictionary instance) =>
       'id': instance.id,
       'dictionaryName': instance.dictionaryName,
       'formatName': instance.formatName,
-      'metadataJson': instance.metadataJson,
+      'metadata': instance.metadata,
     };

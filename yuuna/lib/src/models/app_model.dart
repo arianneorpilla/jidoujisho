@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path/path.dart' as path;
@@ -29,6 +30,10 @@ class AppModel with ChangeNotifier {
   PackageInfo get packageInfo => _packageInfo;
   late final PackageInfo _packageInfo;
 
+  /// Used for caching images and audio produced from media seeds.
+  DefaultCacheManager get cacheManager => _cacheManager;
+  late final _cacheManager = DefaultCacheManager();
+
   /// These directories are prepared at startup in order to reduce redundancy
   /// in actual runtime.
   /// Directory where data that may be dumped is stored.
@@ -47,6 +52,10 @@ class AppModel with ChangeNotifier {
   /// Initialised with [populateLanguages] at startup.
   late final Map<String, Language> sortedLanguages;
 
+  /// Used to fetch an app locale by its locale tag with constant time
+  /// performance. Initialised with [populateLocales] at startup.
+  late final Map<String, Locale> sortedLocales;
+
   /// Used to fetch a media type by its unique key with constant time
   /// performance. Initialised with [populateMediaTypes] at startup.
   late final Map<String, MediaType> sortedMediaTypes;
@@ -55,10 +64,22 @@ class AppModel with ChangeNotifier {
   /// time performance. Initialised with [populateEnhancements] at startup.
   late final Map<Field, Map<String, Enhancement>> sortedEnhancements;
 
+  /// Used to fetch initialised sources by their unique key with constant
+  /// time performance. Initialised with [populateMediaSources] at startup.
+  late final Map<MediaType, Map<String, MediaSource>> sortedMediaSources;
+
   /// A list of languages that the app will support at runtime.
   final List<Language> languages = List<Language>.unmodifiable(
     [
       EnglishLanguage.instance,
+    ],
+  );
+
+  /// A list of locales that the app will support at runtime. This is not
+  /// related to supported target languages.
+  final List<Locale> locales = List<Locale>.unmodifiable(
+    [
+      const Locale('en', 'US'),
     ],
   );
 
@@ -71,6 +92,14 @@ class AppModel with ChangeNotifier {
       DictionaryMediaType.instance,
     ],
   );
+
+  /// A list of media sources that the app will support at runtime.
+  final Map<MediaType, List<MediaSource>> mediaSources = {
+    PlayerMediaType.instance: [],
+    ReaderMediaType.instance: [],
+    ViewerMediaType.instance: [],
+    DictionaryMediaType.instance: [],
+  };
 
   /// A list of enhancements that the app will support at runtime.
   final Map<Field, List<Enhancement>> fieldEnhancements = {
@@ -94,12 +123,41 @@ class AppModel with ChangeNotifier {
     );
   }
 
-  /// Populate languages with maps at startup to optimise performance.
+  /// Populate locales with maps at startup to optimise performance.
+  void populateLocales() async {
+    sortedLocales = Map<String, Locale>.unmodifiable(
+      Map<String, Locale>.fromEntries(
+        locales.map(
+          (locale) => MapEntry(locale.toLanguageTag(), locale),
+        ),
+      ),
+    );
+  }
+
+  /// Populate media types with maps at startup to optimise performance.
   void populateMediaTypes() async {
     sortedMediaTypes = Map<String, MediaType>.unmodifiable(
       Map<String, MediaType>.fromEntries(
         mediaTypes.map(
           (mediaType) => MapEntry(mediaType.uniqueKey, mediaType),
+        ),
+      ),
+    );
+  }
+
+  /// Populate media sources with maps at startup to optimise performance.
+  void populateMediaSources() async {
+    sortedMediaSources = Map<MediaType, Map<String, MediaSource>>.unmodifiable(
+      mediaSources.map(
+        (type, sources) => MapEntry(
+          type,
+          Map<String, MediaSource>.unmodifiable(
+            Map<String, MediaSource>.fromEntries(
+              sources.map(
+                (source) => MapEntry(source.uniqueKey, source),
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -160,6 +218,7 @@ class AppModel with ChangeNotifier {
     /// This is not the initialisation step, which occurs below.
     populateLanguages();
     populateMediaTypes();
+    populateMediaSources();
 
     /// Prepare entities for use at startup.
     await initialiseLanguage();
@@ -188,6 +247,15 @@ class AppModel with ChangeNotifier {
         _preferences.get('target_language', defaultValue: defaultLocaleTag);
 
     return sortedLanguages[localeTag]!;
+  }
+
+  /// Get the current app locale from persisted preferences.
+  Locale get appLocale {
+    String defaultLocaleTag = locales.first.toLanguageTag();
+    String localeTag =
+        _preferences.get('app_locale', defaultValue: defaultLocaleTag);
+
+    return sortedLocales[localeTag]!;
   }
 
   /// Persist a new target language in preferences.

@@ -1,7 +1,6 @@
-import 'dart:convert';
-
 import 'package:isar/isar.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:yuuna/utils.dart';
 part 'dictionary.g.dart';
 
 /// A dictionary that can be imported into the application. Dictionary details
@@ -14,7 +13,7 @@ class Dictionary {
   Dictionary({
     required this.dictionaryName,
     required this.formatName,
-    required this.metadataJson,
+    required this.metadata,
   });
 
   /// Create an instance of this class from a serialized format.
@@ -38,15 +37,8 @@ class Dictionary {
   /// The format that the dictionary was sourced from.
   final String formatName;
 
-  /// The serialized metadata of this dictionary.
-  final String metadataJson;
-
-  /// Get the metadata pertaining to this dictionary from import. Used for
-  /// format-specific enhancements.
-  Map<String, dynamic> get metadata {
-    _metadata ??= Map<String, dynamic>.unmodifiable(jsonDecode(metadataJson));
-    return _metadata!;
-  }
-
-  late final Map<String, dynamic>? _metadata;
+  /// Any extra dictionary-specific information that this dictionary may
+  /// decide to store for use at runtime.
+  @ImmutableStringMapConverter()
+  final Map<String, dynamic> metadata;
 }

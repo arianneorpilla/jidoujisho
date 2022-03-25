@@ -9,7 +9,7 @@ part of 'media_item.dart';
 MediaItem _$MediaItemFromJson(Map<String, dynamic> json) => MediaItem(
       uniqueKey: json['uniqueKey'] as String,
       title: json['title'] as String,
-      sourceId: json['sourceId'] as String,
+      sourceIdentifier: json['sourceIdentifier'] as String,
       id: json['id'] as int?,
       author: json['author'] as String?,
       sourceMetadata: json['sourceMetadata'] as String?,
@@ -23,7 +23,7 @@ Map<String, dynamic> _$MediaItemToJson(MediaItem instance) => <String, dynamic>{
       'id': instance.id,
       'uniqueKey': instance.uniqueKey,
       'title': instance.title,
-      'sourceId': instance.sourceId,
+      'sourceIdentifier': instance.sourceIdentifier,
       'author': instance.author,
       'sourceMetadata': instance.sourceMetadata,
       'references': instance.references,

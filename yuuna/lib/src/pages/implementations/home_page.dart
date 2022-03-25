@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/pages.dart';
-import 'package:yuuna/src/components.dart';
+import 'package:yuuna/utils.dart';
 
 /// Appears at startup as the portal from which a user may select media and
 /// broadly select their activity of choice. The page characteristically has
