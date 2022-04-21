@@ -240,6 +240,19 @@ class AppModel with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Get whether or not the app is in incognito mode.
+  bool get isIncognitoMode {
+    bool isDarkMode =
+        _preferences.get('is_incognito_mode', defaultValue: false);
+    return isDarkMode;
+  }
+
+  /// Toggle incognito mode.
+  void toggleIncognitoMode() async {
+    await _preferences.put('is_incognito_mode', !isIncognitoMode);
+    notifyListeners();
+  }
+
   /// Get the target language from persisted preferences.
   Language get targetLanguage {
     String defaultLocaleTag = languages.first.locale.toLanguageTag();

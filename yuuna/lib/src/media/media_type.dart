@@ -24,7 +24,11 @@ abstract class MediaType {
 
   /// The body that will be shown when this media type's tab is the current
   /// selected home tab.
-  StatelessWidget get home;
+  Widget get home;
+
+  /// The controller to be used for this media type's home tab when it has
+  /// enough media items to display that require the tab to be scrollable.
+  ScrollController scrollController = ScrollController();
 
   /// Used to open database instances for storing progress and duration
   /// respectively.

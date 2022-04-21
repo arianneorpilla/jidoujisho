@@ -6,11 +6,12 @@ import 'package:flutter/material.dart';
 /// [onPressed] action is on-going and processing, which can be used to
 /// indicate when a button cannot be pressed once its click action has been
 /// executed and is busy.
-class JidoujishoIcon extends StatefulWidget {
+class JidoujishoIconButton extends StatefulWidget {
   /// Creates a busy icon button. Default values rely on [IconTheme].
-  const JidoujishoIcon({
+  const JidoujishoIconButton({
     required this.icon,
     required this.onPressed,
+    required this.tooltip,
     this.busy = false,
     this.enabled = true,
     this.size,
@@ -24,6 +25,10 @@ class JidoujishoIcon extends StatefulWidget {
 
   /// The size of the icon. By default, this is 24.0.
   final double? size;
+
+  /// Enforces all icons to have a tooltip that explains the purpose of this
+  /// icon for accessibility and tutorial purposes.
+  final String tooltip;
 
   /// Whether or not this icon should have busy behaviour, locking the icon
   /// out from being pressed when its [onPressed] action is on-going.
@@ -44,10 +49,10 @@ class JidoujishoIcon extends StatefulWidget {
   final bool enabled;
 
   @override
-  State<StatefulWidget> createState() => _JidoujishoIconState();
+  State<StatefulWidget> createState() => _JidoujishoIconButtonState();
 }
 
-class _JidoujishoIconState extends State<JidoujishoIcon> {
+class _JidoujishoIconButtonState extends State<JidoujishoIconButton> {
   late bool enabled;
   late Color enabledColor;
   late Color disabledColor;
@@ -93,6 +98,7 @@ class _JidoujishoIconState extends State<JidoujishoIcon> {
               }
             }
           : null,
+      tooltip: widget.tooltip,
       color: enabled ? enabledColor : disabledColor,
       iconSize: widget.size,
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yuuna/media.dart';
+import 'package:yuuna/pages.dart';
 
 /// Media type that encapsulates static visual media, like comics or pictures.
 class ViewerMediaType extends MediaType {
@@ -18,5 +19,5 @@ class ViewerMediaType extends MediaType {
       ViewerMediaType._privateConstructor();
 
   @override
-  StatelessWidget get home => Container();
+  Widget get home => const HomeViewerPage();
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yuuna/media.dart';
+import 'package:yuuna/pages.dart';
 
 /// Media type that encapsulates text-based media, like books or articles.
 class ReaderMediaType extends MediaType {
@@ -18,5 +19,5 @@ class ReaderMediaType extends MediaType {
       ReaderMediaType._privateConstructor();
 
   @override
-  StatelessWidget get home => Container();
+  Widget get home => const HomeReaderPage();
 }

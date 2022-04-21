@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yuuna/media.dart';
+import 'package:yuuna/pages.dart';
 
 /// Media type that encapsulates dictionary search results.
 class DictionaryMediaType extends MediaType {
@@ -18,5 +19,5 @@ class DictionaryMediaType extends MediaType {
       DictionaryMediaType._privateConstructor();
 
   @override
-  StatelessWidget get home => Container();
+  Widget get home => const HomeDictionaryPage();
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yuuna/media.dart';
+import 'package:yuuna/pages.dart';
 
 /// Media type that encapsulates videos or music.
 class PlayerMediaType extends MediaType {
@@ -18,5 +19,5 @@ class PlayerMediaType extends MediaType {
       PlayerMediaType._privateConstructor();
 
   @override
-  StatelessWidget get home => Container();
+  Widget get home => const HomePlayerPage();
 }

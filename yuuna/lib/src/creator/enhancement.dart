@@ -17,11 +17,10 @@ enum EnhancementTriggerCause {
   cascade,
 }
 
-/// An entity that functionally mutates creator fields and
-/// returns an output. An enhancement is given and assigned
-/// a field at runtime in the initialisation step, and can
-/// be assigned to a field enhancement slot. In the creator,
-/// the user can then tap on the icon representing the
+/// An entity that functionally mutates creator fields and returns an output.
+/// An enhancement is given and assigned a field at runtime in the
+/// initialisation step, and can be assigned to a field enhancement slot.
+/// In the creator, the user can then tap on the icon representing the
 /// enhancement to execute its functionality.
 abstract class Enhancement {
   /// Initialise this enhancement with the predetermined and hardset values.

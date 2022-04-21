@@ -153,6 +153,9 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
           showUnselectedLabels: true,
           backgroundColor: Colors.white,
         ),
+        popupMenuTheme: const PopupMenuThemeData(
+          shape: RoundedRectangleBorder(),
+        ),
         textTheme: textTheme,
       );
 
@@ -191,6 +194,9 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
           showSelectedLabels: true,
           showUnselectedLabels: true,
           backgroundColor: Colors.black,
+        ),
+        popupMenuTheme: const PopupMenuThemeData(
+          shape: RoundedRectangleBorder(),
         ),
         textTheme: textTheme,
       );

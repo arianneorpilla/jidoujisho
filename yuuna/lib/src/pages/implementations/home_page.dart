@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
 
@@ -23,6 +24,17 @@ class _HomePageState extends BasePageState<HomePage> {
   late final Image appIcon;
 
   int get currentHomeTabIndex => appModel.currentHomeTabIndex;
+
+  String get optionsToggleDark => appModel.translate('options_theme_dark');
+  String get optionsToggleLight => appModel.translate('options_theme_light');
+  String get optionsIncognitoOn => appModel.translate('options_incognito_on');
+  String get optionsIncognitoOff => appModel.translate('options_incognito_off');
+  String get optionsDictionaries => appModel.translate('options_dictionaries');
+  String get optionsProfiles => appModel.translate('options_profiles');
+  String get optionsEnhancements => appModel.translate('options_enhancements');
+  String get optionsLanguage => appModel.translate('options_language');
+  String get optionsGithub => appModel.translate('options_github');
+  String get optionsAttribution => appModel.translate('options_attribution');
 
   @override
   void initState() {
@@ -58,6 +70,7 @@ class _HomePageState extends BasePageState<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: buildAppBar(),
       body: buildBody(),
       bottomNavigationBar: buildBottomNavigationBar(),
@@ -124,15 +137,16 @@ class _HomePageState extends BasePageState<HomePage> {
 
   List<Widget> buildActions() {
     return [
-      buildQueueButton(),
+      buildStashButton(),
       buildCreatorButton(),
-      buildSettingsButton(),
-      const Space.normal(),
+      buildShowMenuButton(),
+      const Space.extraSmall(),
     ];
   }
 
-  Widget buildQueueButton() {
-    return JidoujishoIcon(
+  Widget buildStashButton() {
+    return JidoujishoIconButton(
+      tooltip: appModel.translate('stash'),
       icon: Icons.queue_outlined,
       enabled: false,
       onPressed: openQueue,
@@ -140,23 +154,138 @@ class _HomePageState extends BasePageState<HomePage> {
   }
 
   Widget buildCreatorButton() {
-    return JidoujishoIcon(
+    return JidoujishoIconButton(
+      tooltip: appModel.translate('card_creator'),
       icon: Icons.note_add_outlined,
       onPressed: openCreator,
     );
   }
 
-  Widget buildSettingsButton() {
-    return JidoujishoIcon(
-      icon: Icons.settings_outlined,
-      onPressed: openSettings,
+  Widget buildShowMenuButton() {
+    return JidoujishoIconButton(
+      tooltip: appModel.translate('show_menu'),
+      icon: Icons.more_vert,
+      onPressed: openMenu,
+    );
+  }
+
+  PopupMenuItem<VoidCallback> buildPopupItem({
+    required String label,
+    required IconData icon,
+    required Function() action,
+  }) {
+    return PopupMenuItem<VoidCallback>(
+      child: Row(
+        children: [
+          Icon(icon, size: textTheme.bodyMedium?.fontSize),
+          const Space.normal(),
+          Text(label, style: textTheme.bodyMedium),
+        ],
+      ),
+      value: action,
     );
   }
 
   void openQueue() {}
+
   void openCreator() {}
-  void openSettings() {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (_) => const SettingsPage()));
+
+  void openMenu() async {
+    RelativeRect position =
+        const RelativeRect.fromLTRB(double.maxFinite, 0, 0, 0);
+    Function()? selectedAction = await showMenu(
+      context: context,
+      position: position,
+      items: getMenuItems(),
+    );
+
+    selectedAction?.call();
+  }
+
+  void browseToGithub() async {
+    launch('https://github.com/lrorpilla/jidoujisho');
+  }
+
+  void navigateToLicensePage() async {
+    String applicationLegalese = 'A highly versatile and modular framework '
+        'enabling language-agnostic immersion learning on mobile. \n\n'
+        'Originally built for the Japanese language learning '
+        'community by Leo Rafael Orpilla. Logo by suzy and Aaron Marbella.'
+        '\n\njidoujisho is free and open source software. Visit the '
+        'repository for a more comprehensive list of other licenses '
+        'and attribution notices. Liking the application? Help out by '
+        'providing feedback, making a donation, reporting issues or '
+        'collaborating for further improvements on GitHub.';
+
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => Theme(
+          data: Theme.of(context).copyWith(
+            cardColor: Theme.of(context).backgroundColor,
+          ),
+          child: LicensePage(
+            applicationName: appModel.packageInfo.appName,
+            applicationVersion: appModel.packageInfo.version,
+            applicationLegalese: applicationLegalese,
+            applicationIcon: Padding(
+              padding: Spacing.of(context).insets.all.normal,
+              child: Image.asset(
+                'assets/meta/icon.png',
+                height: 128,
+                width: 128,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<PopupMenuItem<VoidCallback>> getMenuItems() {
+    return [
+      buildPopupItem(
+        label: appModel.isDarkMode ? optionsToggleLight : optionsToggleDark,
+        icon: appModel.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+        action: appModel.toggleDarkMode,
+      ),
+      buildPopupItem(
+        label:
+            appModel.isIncognitoMode ? optionsIncognitoOff : optionsIncognitoOn,
+        icon: appModel.isIncognitoMode
+            ? Icons.person_off_outlined
+            : Icons.person_off,
+        action: appModel.toggleIncognitoMode,
+      ),
+      buildPopupItem(
+        label: optionsDictionaries,
+        icon: Icons.auto_stories,
+        action: () {},
+      ),
+      buildPopupItem(
+        label: optionsEnhancements,
+        icon: Icons.auto_fix_high,
+        action: () {},
+      ),
+      buildPopupItem(
+        label: optionsLanguage,
+        icon: Icons.translate,
+        action: () {},
+      ),
+      buildPopupItem(
+        label: optionsProfiles,
+        icon: Icons.send_to_mobile,
+        action: () {},
+      ),
+      buildPopupItem(
+        label: optionsGithub,
+        icon: Icons.code,
+        action: browseToGithub,
+      ),
+      buildPopupItem(
+        label: optionsAttribution,
+        icon: Icons.info,
+        action: navigateToLicensePage,
+      ),
+    ];
   }
 }
