@@ -42,5 +42,17 @@ class JidoujishoLocalisations {
     'options_attribution': 'Licenses and attribution',
     'info_empty_home_tab': 'History is empty',
     'import_format': 'Import format',
+    'import_in_progress': 'Import in progress',
+    'import_message_start': 'Importing dictionary...',
+    'import_message_clean': 'Clearing working space...',
+    'import_message_extraction': 'Extracting files...',
+    'import_message_name': 'Importing 『%name%』...',
+    'import_message_entries': 'Processing entries...',
+    'import_message_count': 'Found %count% entries...',
+    'import_message_metadata': 'Processing metadata...',
+    'import_message_database': 'Adding entries to database...',
+    'import_message_error': 'Import error: %error%',
+    'import_message_failed': 'Dictionary import failed.',
+    'import_message_complete': 'Dictionary import complete.',
   };
 }

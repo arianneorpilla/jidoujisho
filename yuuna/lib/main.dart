@@ -49,10 +49,13 @@ class JidoujishoApp extends ConsumerStatefulWidget {
 }
 
 class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
+  final navigatorKey = GlobalKey<NavigatorState>();
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      navigatorKey: appModel.navigatorKey,
       home: home,
       locale: locale,
       themeMode: themeMode,
@@ -121,6 +124,8 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
   ThemeData get theme => ThemeData(
         backgroundColor: Colors.white,
         scaffoldBackgroundColor: Colors.white,
+        selectedRowColor: Colors.grey.shade300,
+        textTheme: textTheme,
         colorScheme: ColorScheme.fromSwatch().copyWith(
           primary: Colors.red,
           secondary: Colors.red,
@@ -156,13 +161,22 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
         popupMenuTheme: const PopupMenuThemeData(
           shape: RoundedRectangleBorder(),
         ),
-        textTheme: textTheme,
+        dialogTheme: const DialogTheme(
+          shape: RoundedRectangleBorder(),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            primary: Colors.black,
+          ),
+        ),
       );
 
   /// Shows when the current [themeMode] is a dark theme.
   ThemeData get darkTheme => ThemeData(
         backgroundColor: Colors.black,
         scaffoldBackgroundColor: Colors.black,
+        selectedRowColor: Colors.grey.shade600,
+        textTheme: textTheme,
         colorScheme: ColorScheme.fromSwatch().copyWith(
           primary: Colors.red,
           secondary: Colors.red,
@@ -198,6 +212,13 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
         popupMenuTheme: const PopupMenuThemeData(
           shape: RoundedRectangleBorder(),
         ),
-        textTheme: textTheme,
+        dialogTheme: const DialogTheme(
+          shape: RoundedRectangleBorder(),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            primary: Colors.white,
+          ),
+        ),
       );
 }

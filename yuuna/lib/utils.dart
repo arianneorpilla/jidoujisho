@@ -7,3 +7,4 @@ export 'src/utils/components/jidoujisho_placeholder_message.dart';
 
 export 'src/utils/converters/immutable_string_map_converter.dart';
 export 'src/utils/converters/media_item_converter.dart';
+export 'src/utils/converters/field_converter.dart';

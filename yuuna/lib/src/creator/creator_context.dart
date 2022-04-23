@@ -11,7 +11,7 @@ part 'creator_context.g.dart';
 @Collection()
 class CreatorContext {
   /// Initialise an immutable context context with the final parameters.
-  const CreatorContext({
+  CreatorContext({
     this.sentence,
     this.word,
     this.reading,
@@ -23,6 +23,7 @@ class CreatorContext {
     this.audioSeed,
     this.audioSearch,
     this.context,
+    this.id,
   });
 
   /// Create an instance of this class from a serialized format.
@@ -48,17 +49,17 @@ class CreatorContext {
     MediaItem? context,
   }) {
     return CreatorContext(
-      sentence: sentence,
-      word: word,
-      reading: reading,
-      meaning: meaning,
-      extra: extra,
-      imageSeed: imageSeed,
-      imageSearch: imageSearch,
-      imageSuggestions: imageSuggestions,
-      audioSeed: audioSeed,
-      audioSearch: audioSearch,
-      context: context,
+      sentence: sentence ?? this.sentence,
+      word: word ?? this.word,
+      reading: reading ?? this.reading,
+      meaning: meaning ?? this.meaning,
+      extra: extra ?? this.extra,
+      imageSeed: imageSeed ?? this.imageSeed,
+      imageSearch: imageSearch ?? this.imageSearch,
+      imageSuggestions: imageSuggestions ?? this.imageSuggestions,
+      audioSeed: audioSeed ?? this.audioSeed,
+      audioSearch: audioSearch ?? this.audioSearch,
+      context: context ?? this.context,
     );
   }
 
@@ -113,4 +114,8 @@ class CreatorContext {
   /// A serialised [MediaItem] to allow return to context.
   @MediaItemConverter()
   final MediaItem? context;
+
+  /// A unique identifier for the purposes of database storage.
+  @Id()
+  int? id;
 }

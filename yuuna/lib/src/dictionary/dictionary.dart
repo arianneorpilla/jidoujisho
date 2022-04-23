@@ -27,11 +27,12 @@ class Dictionary {
   @Id()
   int? id;
 
-  /// The name of the dictionary. For example, this could be "Merriam-Webster
-  /// Dictionary" or "大辞林" or "JMdict".
+  /// The name of the dictionary. For example, this could be 'Merriam-Webster
+  /// Dictionary' or '大辞林' or 'JMdict'.
   ///
   /// Dictionary names are meant to be unique, meaning two dictionaries of the
   /// same name should not be allowed to be added in the database.
+  @Index()
   final String dictionaryName;
 
   /// The format that the dictionary was sourced from.

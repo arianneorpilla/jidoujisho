@@ -1,18 +1,23 @@
 import 'dart:io';
-import 'dart:ui';
+import 'dart:isolate';
 
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:isar/isar.dart';
 import 'package:path/path.dart' as path;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:yuuna/creator.dart';
+import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/language.dart';
 import 'package:yuuna/media.dart';
-import 'package:yuuna/src/utils/jidoujisho_localisations.dart';
+import 'package:yuuna/pages.dart';
+import 'package:yuuna/utils.dart';
 
 /// A global [Provider] for app-wide configuration and state management.
 final appProvider = ChangeNotifierProvider<AppModel>((ref) {
@@ -23,8 +28,16 @@ final appProvider = ChangeNotifierProvider<AppModel>((ref) {
 /// RiverPod is used for global state management across multiple layers,
 /// especially for preferences that persist across application restarts.
 class AppModel with ChangeNotifier {
-  /// Used for storing and retrieving persistent data. See [initialise].
+  /// Used for showing dialogs without needing to pass around a [BuildContext].
+  GlobalKey<NavigatorState> get navigatorKey => _navigatorKey;
+  late final GlobalKey<NavigatorState> _navigatorKey =
+      GlobalKey<NavigatorState>();
+
+  /// Used for accessing persistent key-value data. See [initialise].
   late final Box _preferences;
+
+  /// Used for accessing persistent database data. See [initialise].
+  late final Isar _database;
 
   /// Used to get the versioning metadata of the app. See [initialise].
   PackageInfo get packageInfo => _packageInfo;
@@ -32,7 +45,7 @@ class AppModel with ChangeNotifier {
 
   /// Used for caching images and audio produced from media seeds.
   DefaultCacheManager get cacheManager => _cacheManager;
-  late final _cacheManager = DefaultCacheManager();
+  final _cacheManager = DefaultCacheManager();
 
   /// These directories are prepared at startup in order to reduce redundancy
   /// in actual runtime.
@@ -44,9 +57,18 @@ class AppModel with ChangeNotifier {
   Directory get appDirectory => _appDirectory;
   late final Directory _appDirectory;
 
-  /// Directory where key-value data is stored.
+  /// Directory where Hive key-value data is stored.
   Directory get hiveDirectory => _hiveDirectory;
   late final Directory _hiveDirectory;
+
+  /// Directory where Isar database data is stored.
+  Directory get isarDirectory => _isarDirectory;
+  late final Directory _isarDirectory;
+
+  /// Directory used as a working directory for dictionary imports.
+  Directory get dictionaryImportWorkingDirectory =>
+      _dictionaryImportWorkingDirectory;
+  late final Directory _dictionaryImportWorkingDirectory;
 
   /// Used to fetch a language by its locale tag with constant time performance.
   /// Initialised with [populateLanguages] at startup.
@@ -55,6 +77,10 @@ class AppModel with ChangeNotifier {
   /// Used to fetch an app locale by its locale tag with constant time
   /// performance. Initialised with [populateLocales] at startup.
   late final Map<String, Locale> sortedLocales;
+
+  /// Used to fetch a dictionary format by its unique key with constant time
+  /// performance. Initialised with [populateFormats] at startup.
+  late final Map<String, DictionaryFormat> sortedFormats;
 
   /// Used to fetch a media type by its unique key with constant time
   /// performance. Initialised with [populateMediaTypes] at startup.
@@ -101,6 +127,14 @@ class AppModel with ChangeNotifier {
     DictionaryMediaType.instance: [],
   };
 
+  /// A list of dictionary formats that the app will support at runtime.
+  final List<DictionaryFormat> dictionaryFormats =
+      List<DictionaryFormat>.unmodifiable(
+    [
+      YomichanTermBankFormat.instance,
+    ],
+  );
+
   /// A list of enhancements that the app will support at runtime.
   final Map<Field, List<Enhancement>> fieldEnhancements = {
     Field.audio: [],
@@ -112,7 +146,7 @@ class AppModel with ChangeNotifier {
     Field.word: [],
   };
 
-  /// Populate languages with maps at startup to optimise performance.
+  /// Populate maps for languages at startup to optimise performance.
   void populateLanguages() async {
     sortedLanguages = Map<String, Language>.unmodifiable(
       Map<String, Language>.fromEntries(
@@ -123,7 +157,7 @@ class AppModel with ChangeNotifier {
     );
   }
 
-  /// Populate locales with maps at startup to optimise performance.
+  /// Populate maps for locales at startup to optimise performance.
   void populateLocales() async {
     sortedLocales = Map<String, Locale>.unmodifiable(
       Map<String, Locale>.fromEntries(
@@ -134,7 +168,7 @@ class AppModel with ChangeNotifier {
     );
   }
 
-  /// Populate media types with maps at startup to optimise performance.
+  /// Populate maps for media types at startup to optimise performance.
   void populateMediaTypes() async {
     sortedMediaTypes = Map<String, MediaType>.unmodifiable(
       Map<String, MediaType>.fromEntries(
@@ -145,7 +179,7 @@ class AppModel with ChangeNotifier {
     );
   }
 
-  /// Populate media sources with maps at startup to optimise performance.
+  /// Populate maps for media sources at startup to optimise performance.
   void populateMediaSources() async {
     sortedMediaSources = Map<MediaType, Map<String, MediaSource>>.unmodifiable(
       mediaSources.map(
@@ -163,7 +197,21 @@ class AppModel with ChangeNotifier {
     );
   }
 
-  /// Populate enhancements with maps at startup to optimise performance.
+  /// Populate maps for dictionary formats at startup to optimise performance.
+  void populateFormats() async {
+    sortedFormats = Map<String, DictionaryFormat>.unmodifiable(
+      Map<String, DictionaryFormat>.fromEntries(
+        dictionaryFormats.map(
+          (dictionaryFormat) => MapEntry(
+            dictionaryFormat.formatName,
+            dictionaryFormat,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Populate maps for enhancements at startup to optimise performance.
   void populateEnhancements() async {
     sortedEnhancements = Map<Field, Map<String, Enhancement>>.unmodifiable(
       fieldEnhancements.map(
@@ -209,16 +257,35 @@ class AppModel with ChangeNotifier {
     _temporaryDirectory = await getTemporaryDirectory();
     _appDirectory = await getApplicationDocumentsDirectory();
     _hiveDirectory = Directory(path.join(appDirectory.path, 'hive'));
+    _isarDirectory = Directory(path.join(appDirectory.path, 'isar'));
+    _dictionaryImportWorkingDirectory = Directory(
+        path.join(appDirectory.path, 'dictionaryImportWorkingDirectory'));
 
-    /// Initialise persistent store or all Hive boxes.
+    hiveDirectory.createSync();
+    isarDirectory.createSync();
+    dictionaryImportWorkingDirectory.createSync();
+
+    /// Initialise persistent key-value store.
     await Hive.initFlutter();
     _preferences = await Hive.openBox('appModel');
+
+    /// Initialise persistent database.
+    _database = await Isar.open(
+      directory: isarDirectory.path,
+      schemas: [
+        DictionarySchema,
+        DictionaryEntrySchema,
+        MediaItemSchema,
+        CreatorContextSchema,
+      ],
+    );
 
     /// Populate entities with key-value maps for constant time performance.
     /// This is not the initialisation step, which occurs below.
     populateLanguages();
     populateMediaTypes();
     populateMediaSources();
+    populateFormats();
 
     /// Prepare entities for use at startup.
     await initialiseLanguage();
@@ -262,6 +329,17 @@ class AppModel with ChangeNotifier {
     return sortedLanguages[localeTag]!;
   }
 
+  /// Get the target language from persisted preferences.
+  DictionaryFormat get lastSelectedDictionaryFormat {
+    String firstDictionaryFormatName = dictionaryFormats.first.formatName;
+    String lastDictionaryFormatName = _preferences.get(
+      'last_selected_dictionary_format',
+      defaultValue: firstDictionaryFormatName,
+    );
+
+    return sortedFormats[lastDictionaryFormatName]!;
+  }
+
   /// Get the current app locale from persisted preferences.
   Locale get appLocale {
     String defaultLocaleTag = locales.first.toLanguageTag();
@@ -277,6 +355,20 @@ class AppModel with ChangeNotifier {
     await _preferences.put('target_language', localeTag);
   }
 
+  /// Persist a new last selected dictionary format. This is called when the
+  /// user changes the import format in the dictionary menu.
+  Future<void> setLastSelectedDictionaryFormat(
+      DictionaryFormat dictionaryFormat) async {
+    String lastDictionaryFormatName = dictionaryFormat.formatName;
+    await _preferences.put(
+        'last_selected_dictionary_format', lastDictionaryFormatName);
+  }
+
+  /// Save a new active dictionary and remember it on application restart.
+  Future<void> setCurrentDictionaryName(String dictionaryName) async {
+    await _preferences.put('current_dictionary_name', dictionaryName);
+  }
+
   /// Get the current home tab index. The order of the tab indexes are based on
   /// the ordering in [mediaTypes].
   int get currentHomeTabIndex =>
@@ -289,8 +381,13 @@ class AppModel with ChangeNotifier {
 
   /// Get the value of a localisation item given the current target language.
   String translate(String key) {
-    return JidoujishoLocalisations
-        .localisations[targetLanguage.locale.toLanguageTag()]![key]!;
+    String tag = targetLanguage.locale.toLanguageTag();
+    try {
+      return JidoujishoLocalisations.localisations[tag]![key]!;
+    } catch (e) {
+      debugPrint('Localisation for key $key not found for locale $tag');
+      rethrow;
+    }
   }
 
   /// Given a slot [position] of a certain field, get the unique key of the
@@ -312,5 +409,211 @@ class AppModel with ChangeNotifier {
   }) async {
     await _preferences.put(
         'field_slots_${field.name}/$position', enhancement.uniqueKey);
+  }
+
+  /// Show the dictionary menu. This should be callable from many parts of the
+  /// app, so it is appropriately handled by the model.
+  Future<void> showDictionaryMenu() async {
+    await showDialog(
+      barrierDismissible: true,
+      context: navigatorKey.currentContext!,
+      builder: (context) => const DictionaryDialogPage(),
+    );
+  }
+
+  /// Start the process of importing a dictionary. This is called from the
+  /// dictionary menu, and starts the process of importing for the
+  /// [lastSelectedDictionaryFormat].
+  Future<void> importDictionary() async {
+    /// The last selected dictionary format in the dictionary menu is used for
+    /// dictionary import.
+    DictionaryFormat dictionaryFormat = lastSelectedDictionaryFormat;
+
+    /// This is the directory where files are prepared for processing.
+    Directory workingDirectory = dictionaryImportWorkingDirectory;
+
+    /// Over-engineered way to deliver localised dictionary progress messages
+    /// across multiple isolates.
+    DictionaryImportLocalisation localisation = DictionaryImportLocalisation(
+      importMessageStart: translate('import_message_start'),
+      importMessageClean: translate('import_message_clean'),
+      importMessageExtraction: translate('import_message_extraction'),
+      importMessageName: translate('import_message_name'),
+      importMessageEntries: translate('import_message_entries'),
+      importMessageCount: translate('import_message_count'),
+      importMessageMetadata: translate('import_message_metadata'),
+      importMessageDatabase: translate('import_message_database'),
+      importMessageError: translate('import_message_error'),
+      importMessageFailed: translate('import_message_failed'),
+      importMessageComplete: translate('import_message_complete'),
+    );
+
+    /// A [ValueNotifier] that will update a message based on the progress of
+    /// the ongoing dictionary file import. See [DictionaryImportProgressPage].
+    ValueNotifier<String> progressNotifier = ValueNotifier<String>('');
+
+    /// Importing makes heavy use of isolates as it is very performance
+    /// intensive to work with files. In order to ensure the UI isolate isn't
+    /// blocked, a [ReceivePort] is necessary to receive UI updates.
+    ReceivePort receivePort = ReceivePort();
+    SendPort sendPort = receivePort.sendPort;
+    receivePort.listen((data) {
+      if (data is String) {
+        progressNotifier.value = data;
+        debugPrint(data);
+      }
+    });
+
+    /// If any [Exception] occurs, the process is aborted with a message as
+    /// shown below. A dialog is shown to show the progress of the dictionary
+    /// file import, with messages pertaining to the above [ValueNotifier].
+    try {
+      File? file;
+      if (lastSelectedDictionaryFormat.requiresFile) {
+        FilePickerResult? result = await FilePicker.platform.pickFiles();
+        file = File(result!.files.single.path!);
+      }
+
+      showDialog(
+        barrierDismissible: false,
+        context: navigatorKey.currentContext!,
+        builder: (context) =>
+            DictionaryImportProgressPage(progressNotifier: progressNotifier),
+      );
+
+      /// The following hard waits give enough time to inform the user to read
+      /// the progress messages.
+      progressNotifier.value = localisation.importMessageStart;
+      await Future.delayed(const Duration(milliseconds: 500), () {});
+
+      /// The working directory should always be emptied before and after
+      /// dictionary import to ensure that no files bloat the system and that
+      /// files from previous imports do not carry over.
+      if (workingDirectory.existsSync()) {
+        progressNotifier.value = localisation.importMessageClean;
+        await Future.delayed(const Duration(milliseconds: 500), () {});
+        workingDirectory.deleteSync(recursive: true);
+        workingDirectory.createSync();
+      }
+
+      /// Show the file picker if the [lastSelectedDictionaryFormat] requires a
+      /// file for dictionary import.
+      late final PrepareDirectoryParams prepareDirectoryParams;
+      if (lastSelectedDictionaryFormat.requiresFile) {
+        prepareDirectoryParams = PrepareDirectoryParams(
+          file: file,
+          workingDirectory: workingDirectory,
+          sendPort: sendPort,
+          localisation: localisation,
+        );
+
+        /// Many formats require ZIP extraction, while others have their own
+        /// particular cases.
+        ///
+        /// The purpose of this function is to make it such that it can be
+        /// assumed that the remaining operations after this can be performed
+        /// from the working directory, and allow different formats to
+        /// gracefully follow the remaining generic steps.
+        progressNotifier.value = localisation.importMessageExtraction;
+        await dictionaryFormat.prepareDirectory(prepareDirectoryParams);
+      } else {
+        prepareDirectoryParams = PrepareDirectoryParams(
+          file: null,
+          workingDirectory: workingDirectory,
+          sendPort: sendPort,
+          localisation: localisation,
+        );
+      }
+
+      /// It is now assumed that the rest of the operations can be performed
+      /// from the working area. A dictionary name is required for import, and
+      /// all dictionaries in the database must have a unique name. Hence,
+      /// through the [workingDirectory], a [String] name must be obtainable,
+      /// and generically handled by all formats.
+      ///
+      /// If a format does not keep the name of a dictionary as metadata, it
+      /// should provide a sufficiently unique and considerate name with no
+      /// collision with other existing dictionaries and other dictionary
+      /// formats.
+      String dictionaryName = await compute(
+        dictionaryFormat.prepareName,
+        prepareDirectoryParams,
+      );
+      progressNotifier.value =
+          localisation.importMessageNameWithVar(dictionaryName);
+
+      Dictionary? duplicateDictionary = _database.dictionarys
+          .filter()
+          .dictionaryNameEqualTo(dictionaryName)
+          .findFirstSync();
+
+      if (duplicateDictionary != null) {
+        throw Exception('Dictionary with same name found.');
+      }
+
+      /// From the working directory, the format is mainly responsible for
+      /// parsing its entries. [extractAndDepositEntries] handles two main
+      /// performance-intensive operations. Firstly, the format-defined entry
+      /// extraction function [getDictionaryEntries]. Then, it adds these to an
+      /// Isar database -- ensuring other developers don't have to learn Isar to
+      /// implement their own formats is vital.
+      ///
+      /// It is necessary to perform the database deposit in another isolate
+      /// itself as receiving the entries and then pushing these arguments to
+      /// another isolate will cause a lot of jank. Therefore, one isolate is
+      /// necessary for these two operations.
+      progressNotifier.value = localisation.importMessageEntries;
+      PrepareDictionaryParams prepareDictionaryParams = PrepareDictionaryParams(
+        dictionaryName: dictionaryName,
+        dictionaryFormat: dictionaryFormat,
+        workingDirectory: workingDirectory,
+        sendPort: sendPort,
+        isarDirectoryPath: isarDirectory.path,
+        localisation: localisation,
+      );
+      await compute(depositDictionaryEntries, prepareDictionaryParams);
+
+      /// Finally, any necessary metadata that is pertaining to the dictionary
+      /// format that will come in handy when in actual use (i.e. interacting
+      /// with the database or during searches) should be provided in this step.
+      progressNotifier.value = localisation.importMessageMetadata;
+      Map<String, String> dictionaryMetadata = await compute(
+        dictionaryFormat.prepareMetadata,
+        prepareDictionaryParams,
+      );
+
+      Dictionary dictionary = Dictionary(
+        dictionaryName: dictionaryName,
+        formatName: dictionaryFormat.formatName,
+        metadata: dictionaryMetadata,
+      );
+
+      _database.writeTxnSync((isar) {
+        _database.dictionarys.putSync(dictionary);
+      });
+
+      /// The working directory should always be emptied before and after
+      /// dictionary import to ensure that no files bloat the system and that
+      /// files from previous imports do not carry over.
+      if (workingDirectory.existsSync()) {
+        progressNotifier.value = localisation.importMessageClean;
+        await Future.delayed(const Duration(milliseconds: 500), () {});
+        workingDirectory.deleteSync(recursive: true);
+        workingDirectory.createSync();
+      }
+
+      progressNotifier.value = localisation.importMessageComplete;
+      await Future.delayed(const Duration(seconds: 1), () {});
+    } catch (e) {
+      progressNotifier.value = localisation.importMessageErrorWithVar('$e');
+      await Future.delayed(const Duration(seconds: 3), () {});
+      progressNotifier.value = localisation.importMessageFailed;
+      await Future.delayed(const Duration(seconds: 1), () {});
+
+      throw Exception(e);
+    } finally {
+      /// Close the import progress dialog opened earlier.
+      Navigator.pop(navigatorKey.currentContext!);
+    }
   }
 }

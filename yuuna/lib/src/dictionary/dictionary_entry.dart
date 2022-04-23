@@ -1,6 +1,7 @@
 import 'package:isar/isar.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:pretty_json/pretty_json.dart';
+
 part 'dictionary_entry.g.dart';
 
 /// A base class representing a generic implementation of a dictionary entry.
@@ -15,11 +16,10 @@ class DictionaryEntry {
   DictionaryEntry({
     required this.word,
     required this.dictionaryName,
+    required this.meanings,
     this.id,
     this.reading,
-    this.meaning,
     this.extra,
-    this.meanings,
     this.meaningTags,
     this.wordTags,
     this.popularity,
@@ -38,23 +38,25 @@ class DictionaryEntry {
   int? id;
 
   /// The word represented by this dictionary entry.
-  final String? word;
+  @Index()
+  final String word;
+
+  /// The dictionary from which this entry was imported from. This is used for
+  /// database query purposes.
+  @Index()
+  final String dictionaryName;
 
   /// The pronunciation of the word represented by this dictionary entry.
+  @Index()
   final String? reading;
 
-  /// A simple text representation of the definition of the word represented
-  /// by this dictionary entry. More complex structures that may contain plural
-  /// definitions should use [meanings] instead.
-  final String? meaning;
+  /// A list of definitions for a word. If there is only a single [String] item,
+  /// this should be a single item list.
+  final List<String> meanings;
 
   /// A bonus field for storing any additional kind of information. For example,
   /// if there are any grammar rules related to this term.
   final String? extra;
-
-  /// If this term has multiple definition entries, they can be stored here
-  /// rather than [meaning], which should be used for the singular case instead.
-  final List<String>? meanings;
 
   /// Tags that are used to indicate a certain trait to the definitions of
   /// this word.
@@ -65,15 +67,13 @@ class DictionaryEntry {
 
   /// A value that can be used to sort entries when performing a database
   /// search.
-  final int? popularity;
+  @Index()
+  final double? popularity;
 
   /// A value that can be used to group similar entries with the same value
   /// together.
+  @Index()
   final int? sequence;
-
-  /// The dictionary from which this entry was imported from. This is used for
-  /// database query purposes.
-  final String? dictionaryName;
 
   @override
   operator ==(Object other) =>

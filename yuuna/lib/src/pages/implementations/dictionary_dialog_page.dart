@@ -18,8 +18,27 @@ class _DictionaryDialogPageState extends BasePageState {
 
   @override
   Widget build(BuildContext context) {
-    return const AlertDialog(
-      title: Text('Dictionary'),
+    return AlertDialog(
+      actions: actions,
+    );
+  }
+
+  List<Widget> get actions => [
+        buildImportButton(),
+        buildCloseButton(),
+      ];
+
+  Widget buildImportButton() {
+    return TextButton(
+      child: Text(dialogImport),
+      onPressed: appModel.importDictionary,
+    );
+  }
+
+  Widget buildCloseButton() {
+    return TextButton(
+      child: Text(dialogClose),
+      onPressed: () => Navigator.pop(context),
     );
   }
 }

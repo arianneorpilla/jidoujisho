@@ -15,10 +15,10 @@ abstract class DictionaryFormat {
     required this.formatName,
     required this.formatIcon,
     required this.requiresFile,
-    required this.prepareDirectoryFunction,
-    required this.prepareNameFunction,
-    required this.prepareEntriesFunction,
-    required this.prepareMetadataFunction,
+    required this.prepareDirectory,
+    required this.prepareName,
+    required this.prepareEntries,
+    required this.prepareMetadata,
   });
 
   /// The name of this dictionary format. For example, this could be a
@@ -51,7 +51,7 @@ abstract class DictionaryFormat {
   ///
   /// See [PrepareDirectoryParams] for how to work with the individual input
   /// parameters.
-  Future<void> Function(PrepareDirectoryParams params) prepareDirectoryFunction;
+  Future<void> Function(PrepareDirectoryParams params) prepareDirectory;
 
   /// Given a [Directory] of files pertaining to this dictionary format,
   /// return a [String] that will refer to a dictionary's name in this format.
@@ -62,7 +62,7 @@ abstract class DictionaryFormat {
   ///
   /// See [PrepareDictionaryParams] for how to work with the individual input
   /// parameters.
-  Future<String> Function(PrepareDictionaryParams params) prepareNameFunction;
+  Future<String> Function(PrepareDirectoryParams params) prepareName;
 
   /// Given a [Directory] of files pertaining to this dictionary format,
   /// return a list of [DictionaryEntry] that will be added to the database.
@@ -70,7 +70,7 @@ abstract class DictionaryFormat {
   /// See [PrepareDictionaryParams] for how to work with the individual input
   /// parameters.
   Future<List<DictionaryEntry>> Function(PrepareDictionaryParams params)
-      prepareEntriesFunction;
+      prepareEntries;
 
   /// Given a [Directory] of files pertaining to this dictionary format,
   /// prepare a [Map] of metadata that will be used for cleaning up and
@@ -83,5 +83,5 @@ abstract class DictionaryFormat {
   /// See [PrepareDictionaryParams] for how to work with the individual input
   /// parameters.
   Future<Map<String, String>> Function(PrepareDictionaryParams params)
-      prepareMetadataFunction;
+      prepareMetadata;
 }

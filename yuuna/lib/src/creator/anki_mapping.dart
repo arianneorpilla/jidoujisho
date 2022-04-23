@@ -1,13 +1,11 @@
-import 'package:isar/isar.dart';
 import 'package:yuuna/creator.dart';
 
 /// A user-generated mapping to allow customisation of the fields exported from
 /// the application. A mapping is bound to a [model], which must have a length
 /// of fields equal or more than the length of [fields].
-@Collection()
 class AnkiMapping {
   /// Initialise a model mapping with the given parameters.
-  const AnkiMapping({
+  AnkiMapping({
     required this.label,
     required this.model,
     required this.fields,
@@ -17,7 +15,7 @@ class AnkiMapping {
   /// Get the default mapping that is included with the application at first
   /// startup.
   factory AnkiMapping.defaultMapping() {
-    return const AnkiMapping(
+    return AnkiMapping(
       label: 'jidoujisho Yuuna Default',
       model: 'jidoujisho Yuuna',
       fields: [

@@ -259,7 +259,7 @@ class _HomePageState extends BasePageState<HomePage> {
       buildPopupItem(
         label: optionsDictionaries,
         icon: Icons.auto_stories,
-        action: () {},
+        action: appModel.showDictionaryMenu,
       ),
       buildPopupItem(
         label: optionsEnhancements,
