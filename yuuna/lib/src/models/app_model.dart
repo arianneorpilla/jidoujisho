@@ -119,7 +119,7 @@ class AppModel with ChangeNotifier {
     /// A list of languages that the app will support at runtime.
     final List<Language> availableLanguages = List<Language>.unmodifiable(
       [
-        EnglishLanguage.instance,
+        JapaneseLanguage.instance,
       ],
     );
 
@@ -286,6 +286,7 @@ class AppModel with ChangeNotifier {
     /// Populate entities with key-value maps for constant time performance.
     /// This is not the initialisation step, which occurs below.
     populateLanguages();
+    populateLocales();
     populateMediaTypes();
     populateMediaSources();
     populateDictionaryFormats();
@@ -389,7 +390,7 @@ class AppModel with ChangeNotifier {
 
   /// Get the value of a localisation item given the current target language.
   String translate(String key) {
-    String tag = targetLanguage.locale.toLanguageTag();
+    String tag = appLocale.toLanguageTag();
     try {
       return JidoujishoLocalisations.localisations[tag]![key]!;
     } catch (e) {
@@ -673,5 +674,22 @@ class AppModel with ChangeNotifier {
     await compute(deleteDictionaryData, params);
 
     Navigator.pop(navigatorKey.currentContext!);
+  }
+
+  /// Gets the raw unprocessed entries straight from a dictionary database
+  /// given a search term. This will be processed later for user viewing.
+  Future<List<DictionaryEntry>> getDictionarySearchEntries(
+      String searchTerm) async {
+    String fallbackTerm = await targetLanguage.getRootForm(searchTerm);
+    DictionarySearchParams params = DictionarySearchParams(
+      searchTerm: searchTerm,
+      fallbackTerm: fallbackTerm,
+      isarDirectoryPath: isarDirectory.path,
+    );
+
+    List<DictionaryEntry> entries =
+        await compute(targetLanguage.prepareSearchResults!, params);
+
+    return entries;
   }
 }

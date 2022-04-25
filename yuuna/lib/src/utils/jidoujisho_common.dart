@@ -27,4 +27,21 @@ class JidoujishoCommon {
 
     return jidoujishoDirectory;
   }
+
+  /// From a term that is length n, get all prefixes of the word for n-1 up to 1.
+  static List<String> allPrefixes(
+    String term, {
+    List<String>? prefixes,
+  }) {
+    prefixes ??= [];
+
+    if (term.length <= 1) {
+      return prefixes;
+    } else {
+      String nextTerm = term.substring(0, term.length - 1);
+      prefixes.add(term);
+
+      return allPrefixes(nextTerm, prefixes: prefixes);
+    }
+  }
 }

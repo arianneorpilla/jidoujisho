@@ -5,7 +5,7 @@ class JidoujishoLocalisations {
   /// native would understand them.
   static Map<String, String> languageNames = {
     'en-US': 'English',
-    'tl-PH': 'Tagalog',
+    'ja-JP': '日本語'
   };
 
   /// A map storing localisation key-value data pairs sorted by app languages.

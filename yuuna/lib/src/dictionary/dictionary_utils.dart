@@ -135,6 +135,26 @@ class DeleteDictionaryParams {
   final String isarDirectoryPath;
 }
 
+/// For isolate communication purposes. Used for dictionary search.
+class DictionarySearchParams {
+  /// Prepare parameters needed for searching the dictioanry database from a
+  /// separate isolate.
+  DictionarySearchParams({
+    required this.searchTerm,
+    required this.fallbackTerm,
+    required this.isarDirectoryPath,
+  });
+
+  /// Primary search term, likely taken from context.
+  final String searchTerm;
+
+  /// Fallback search term, likely sanitised with deinflection.
+  final String fallbackTerm;
+
+  /// Used to pass the path to the database to open from the other isolate.
+  final String isarDirectoryPath;
+}
+
 /// Bundles relevant localisation information for use in dictionary imports.
 class DictionaryImportLocalisation {
   /// Manually define messages for localisation.

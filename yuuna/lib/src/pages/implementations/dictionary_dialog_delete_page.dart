@@ -23,15 +23,18 @@ class _DictionaryDialogDeletePageState
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      contentPadding: EdgeInsets.all(Spacing.of(context).spaces.big),
-      content: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          buildProgressSpinner(),
-          const Space.semiBig(),
-          buildProgressMessage(),
-        ],
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: AlertDialog(
+        contentPadding: EdgeInsets.all(Spacing.of(context).spaces.big),
+        content: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            buildProgressSpinner(),
+            const Space.semiBig(),
+            buildProgressMessage(),
+          ],
+        ),
       ),
     );
   }

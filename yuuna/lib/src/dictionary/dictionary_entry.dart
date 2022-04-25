@@ -38,7 +38,7 @@ class DictionaryEntry {
   int? id;
 
   /// The word represented by this dictionary entry.
-  @Index()
+  @Index(composite: [CompositeIndex('reading'), CompositeIndex('popularity')])
   final String word;
 
   /// The dictionary from which this entry was imported from. This is used for
@@ -74,6 +74,14 @@ class DictionaryEntry {
   /// together.
   @Index()
   final int? sequence;
+
+  /// The length of word is used as an index.
+  @Index(composite: [CompositeIndex('popularity')])
+  int get wordLength => word.length;
+
+  /// The length of reading is used as an index.
+  @Index(composite: [CompositeIndex('popularity')])
+  int get readingLength => reading?.length ?? 0;
 
   @override
   operator ==(Object other) =>

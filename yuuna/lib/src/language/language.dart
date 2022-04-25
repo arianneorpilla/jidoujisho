@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:yuuna/dictionary.dart';
+
 /// Defines common characteristics required for tuning locale and text
 /// segmentation behaviour for different languages. Override the variables
 /// and functions of this abstract class in order to implement a target
@@ -16,6 +18,7 @@ abstract class Language {
     required this.preferVerticalReading,
     required this.isSpaceDelimited,
     required this.textBaseline,
+    this.prepareSearchResults = prepareSearchResultsStandard,
   });
 
   /// The name of the language, as known to native speakers.
@@ -50,6 +53,11 @@ abstract class Language {
 
   /// If this language uses an alphabetic or ideographic text baseline.
   final TextBaseline textBaseline;
+
+  /// Overrides the base search function and implements search specific to
+  /// a language.
+  final Future<List<DictionaryEntry>> Function(DictionarySearchParams params)?
+      prepareSearchResults;
 
   /// Whether or not [initialise] has been called for the language.
   bool _initialised = false;
@@ -181,4 +189,10 @@ abstract class Language {
 
     return fallbackTerms;
   }
+}
+
+/// Top-level function for use in compute. See [Language] for details.
+Future<List<DictionaryEntry>> prepareSearchResultsStandard(
+    DictionarySearchParams params) {
+  throw UnimplementedError();
 }

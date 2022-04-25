@@ -17,7 +17,7 @@ extension GetDictionaryEntryCollection on Isar {
 final DictionaryEntrySchema = CollectionSchema(
   name: 'DictionaryEntry',
   schema:
-      '{"name":"DictionaryEntry","idName":"id","properties":[{"name":"dictionaryName","type":"String"},{"name":"extra","type":"String"},{"name":"hashCode","type":"Long"},{"name":"meaningTags","type":"StringList"},{"name":"meanings","type":"StringList"},{"name":"popularity","type":"Double"},{"name":"reading","type":"String"},{"name":"sequence","type":"Long"},{"name":"word","type":"String"},{"name":"wordTags","type":"StringList"}],"indexes":[{"name":"dictionaryName","unique":false,"properties":[{"name":"dictionaryName","type":"Hash","caseSensitive":true}]},{"name":"popularity","unique":false,"properties":[{"name":"popularity","type":"Value","caseSensitive":false}]},{"name":"reading","unique":false,"properties":[{"name":"reading","type":"Hash","caseSensitive":true}]},{"name":"sequence","unique":false,"properties":[{"name":"sequence","type":"Value","caseSensitive":false}]},{"name":"word","unique":false,"properties":[{"name":"word","type":"Hash","caseSensitive":true}]}],"links":[]}',
+      '{"name":"DictionaryEntry","idName":"id","properties":[{"name":"dictionaryName","type":"String"},{"name":"extra","type":"String"},{"name":"hashCode","type":"Long"},{"name":"meaningTags","type":"StringList"},{"name":"meanings","type":"StringList"},{"name":"popularity","type":"Double"},{"name":"reading","type":"String"},{"name":"readingLength","type":"Long"},{"name":"sequence","type":"Long"},{"name":"word","type":"String"},{"name":"wordLength","type":"Long"},{"name":"wordTags","type":"StringList"}],"indexes":[{"name":"dictionaryName","unique":false,"properties":[{"name":"dictionaryName","type":"Hash","caseSensitive":true}]},{"name":"popularity","unique":false,"properties":[{"name":"popularity","type":"Value","caseSensitive":false}]},{"name":"reading","unique":false,"properties":[{"name":"reading","type":"Hash","caseSensitive":true}]},{"name":"readingLength_popularity","unique":false,"properties":[{"name":"readingLength","type":"Value","caseSensitive":false},{"name":"popularity","type":"Value","caseSensitive":false}]},{"name":"sequence","unique":false,"properties":[{"name":"sequence","type":"Value","caseSensitive":false}]},{"name":"wordLength_popularity","unique":false,"properties":[{"name":"wordLength","type":"Value","caseSensitive":false},{"name":"popularity","type":"Value","caseSensitive":false}]},{"name":"word_reading_popularity","unique":false,"properties":[{"name":"word","type":"Hash","caseSensitive":true},{"name":"reading","type":"Hash","caseSensitive":true},{"name":"popularity","type":"Value","caseSensitive":false}]}],"links":[]}',
   nativeAdapter: const _DictionaryEntryNativeAdapter(),
   webAdapter: const _DictionaryEntryWebAdapter(),
   idName: 'id',
@@ -29,17 +29,21 @@ final DictionaryEntrySchema = CollectionSchema(
     'meanings': 4,
     'popularity': 5,
     'reading': 6,
-    'sequence': 7,
-    'word': 8,
-    'wordTags': 9
+    'readingLength': 7,
+    'sequence': 8,
+    'word': 9,
+    'wordLength': 10,
+    'wordTags': 11
   },
   listProperties: {'meaningTags', 'meanings', 'wordTags'},
   indexIds: {
     'dictionaryName': 0,
     'popularity': 1,
     'reading': 2,
-    'sequence': 3,
-    'word': 4
+    'readingLength_popularity': 3,
+    'sequence': 4,
+    'wordLength_popularity': 5,
+    'word_reading_popularity': 6
   },
   indexTypes: {
     'dictionaryName': [
@@ -51,11 +55,21 @@ final DictionaryEntrySchema = CollectionSchema(
     'reading': [
       NativeIndexType.stringHash,
     ],
+    'readingLength_popularity': [
+      NativeIndexType.long,
+      NativeIndexType.double,
+    ],
     'sequence': [
       NativeIndexType.long,
     ],
-    'word': [
+    'wordLength_popularity': [
+      NativeIndexType.long,
+      NativeIndexType.double,
+    ],
+    'word_reading_popularity': [
       NativeIndexType.stringHash,
+      NativeIndexType.stringHash,
+      NativeIndexType.double,
     ]
   },
   linkIds: {},
@@ -88,8 +102,10 @@ class _DictionaryEntryWebAdapter extends IsarWebTypeAdapter<DictionaryEntry> {
     IsarNative.jsObjectSet(jsObj, 'meanings', object.meanings);
     IsarNative.jsObjectSet(jsObj, 'popularity', object.popularity);
     IsarNative.jsObjectSet(jsObj, 'reading', object.reading);
+    IsarNative.jsObjectSet(jsObj, 'readingLength', object.readingLength);
     IsarNative.jsObjectSet(jsObj, 'sequence', object.sequence);
     IsarNative.jsObjectSet(jsObj, 'word', object.word);
+    IsarNative.jsObjectSet(jsObj, 'wordLength', object.wordLength);
     IsarNative.jsObjectSet(jsObj, 'wordTags', object.wordTags);
     return jsObj;
   }
@@ -149,10 +165,16 @@ class _DictionaryEntryWebAdapter extends IsarWebTypeAdapter<DictionaryEntry> {
         return (IsarNative.jsObjectGet(jsObj, 'popularity')) as P;
       case 'reading':
         return (IsarNative.jsObjectGet(jsObj, 'reading')) as P;
+      case 'readingLength':
+        return (IsarNative.jsObjectGet(jsObj, 'readingLength') ??
+            double.negativeInfinity) as P;
       case 'sequence':
         return (IsarNative.jsObjectGet(jsObj, 'sequence')) as P;
       case 'word':
         return (IsarNative.jsObjectGet(jsObj, 'word') ?? '') as P;
+      case 'wordLength':
+        return (IsarNative.jsObjectGet(jsObj, 'wordLength') ??
+            double.negativeInfinity) as P;
       case 'wordTags':
         return ((IsarNative.jsObjectGet(jsObj, 'wordTags') as List?)
             ?.map((e) => e ?? '')
@@ -220,23 +242,27 @@ class _DictionaryEntryNativeAdapter
       _reading = IsarBinaryWriter.utf8Encoder.convert(value6);
     }
     dynamicSize += (_reading?.length ?? 0) as int;
-    final value7 = object.sequence;
-    final _sequence = value7;
-    final value8 = object.word;
-    final _word = IsarBinaryWriter.utf8Encoder.convert(value8);
+    final value7 = object.readingLength;
+    final _readingLength = value7;
+    final value8 = object.sequence;
+    final _sequence = value8;
+    final value9 = object.word;
+    final _word = IsarBinaryWriter.utf8Encoder.convert(value9);
     dynamicSize += (_word.length) as int;
-    final value9 = object.wordTags;
-    dynamicSize += (value9?.length ?? 0) * 8;
-    List<IsarUint8List?>? bytesList9;
-    if (value9 != null) {
-      bytesList9 = [];
-      for (var str in value9) {
+    final value10 = object.wordLength;
+    final _wordLength = value10;
+    final value11 = object.wordTags;
+    dynamicSize += (value11?.length ?? 0) * 8;
+    List<IsarUint8List?>? bytesList11;
+    if (value11 != null) {
+      bytesList11 = [];
+      for (var str in value11) {
         final bytes = IsarBinaryWriter.utf8Encoder.convert(str);
-        bytesList9.add(bytes);
+        bytesList11.add(bytes);
         dynamicSize += bytes.length as int;
       }
     }
-    final _wordTags = bytesList9;
+    final _wordTags = bytesList11;
     final size = staticSize + dynamicSize;
 
     rawObj.buffer = alloc(size);
@@ -250,9 +276,11 @@ class _DictionaryEntryNativeAdapter
     writer.writeStringList(offsets[4], _meanings);
     writer.writeDouble(offsets[5], _popularity);
     writer.writeBytes(offsets[6], _reading);
-    writer.writeLong(offsets[7], _sequence);
-    writer.writeBytes(offsets[8], _word);
-    writer.writeStringList(offsets[9], _wordTags);
+    writer.writeLong(offsets[7], _readingLength);
+    writer.writeLong(offsets[8], _sequence);
+    writer.writeBytes(offsets[9], _word);
+    writer.writeLong(offsets[10], _wordLength);
+    writer.writeStringList(offsets[11], _wordTags);
   }
 
   @override
@@ -266,9 +294,9 @@ class _DictionaryEntryNativeAdapter
       meanings: reader.readStringList(offsets[4]) ?? [],
       popularity: reader.readDoubleOrNull(offsets[5]),
       reading: reader.readStringOrNull(offsets[6]),
-      sequence: reader.readLongOrNull(offsets[7]),
-      word: reader.readString(offsets[8]),
-      wordTags: reader.readStringList(offsets[9]),
+      sequence: reader.readLongOrNull(offsets[8]),
+      word: reader.readString(offsets[9]),
+      wordTags: reader.readStringList(offsets[11]),
     );
     return object;
   }
@@ -294,10 +322,14 @@ class _DictionaryEntryNativeAdapter
       case 6:
         return (reader.readStringOrNull(offset)) as P;
       case 7:
-        return (reader.readLongOrNull(offset)) as P;
+        return (reader.readLong(offset)) as P;
       case 8:
-        return (reader.readString(offset)) as P;
+        return (reader.readLongOrNull(offset)) as P;
       case 9:
+        return (reader.readString(offset)) as P;
+      case 10:
+        return (reader.readLong(offset)) as P;
+      case 11:
         return (reader.readStringList(offset)) as P;
       default:
         throw 'Illegal propertyIndex';
@@ -328,12 +360,26 @@ extension DictionaryEntryQueryWhereSort
     return addWhereClauseInternal(const WhereClause(indexName: 'reading'));
   }
 
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere>
+      anyReadingLengthPopularity() {
+    return addWhereClauseInternal(
+        const WhereClause(indexName: 'readingLength_popularity'));
+  }
+
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere> anySequence() {
     return addWhereClauseInternal(const WhereClause(indexName: 'sequence'));
   }
 
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere> anyWord() {
-    return addWhereClauseInternal(const WhereClause(indexName: 'word'));
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere>
+      anyWordLengthPopularity() {
+    return addWhereClauseInternal(
+        const WhereClause(indexName: 'wordLength_popularity'));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere>
+      anyWordReadingPopularity() {
+    return addWhereClauseInternal(
+        const WhereClause(indexName: 'word_reading_popularity'));
   }
 }
 
@@ -555,6 +601,114 @@ extension DictionaryEntryQueryWhere
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      readingLengthEqualTo(int readingLength) {
+    return addWhereClauseInternal(WhereClause(
+      indexName: 'readingLength_popularity',
+      lower: [readingLength],
+      includeLower: true,
+      upper: [readingLength],
+      includeUpper: true,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      readingLengthNotEqualTo(int readingLength) {
+    if (whereSortInternal == Sort.asc) {
+      return addWhereClauseInternal(WhereClause(
+        indexName: 'readingLength_popularity',
+        upper: [readingLength],
+        includeUpper: false,
+      )).addWhereClauseInternal(WhereClause(
+        indexName: 'readingLength_popularity',
+        lower: [readingLength],
+        includeLower: false,
+      ));
+    } else {
+      return addWhereClauseInternal(WhereClause(
+        indexName: 'readingLength_popularity',
+        lower: [readingLength],
+        includeLower: false,
+      )).addWhereClauseInternal(WhereClause(
+        indexName: 'readingLength_popularity',
+        upper: [readingLength],
+        includeUpper: false,
+      ));
+    }
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      readingLengthGreaterThan(
+    int readingLength, {
+    bool include = false,
+  }) {
+    return addWhereClauseInternal(WhereClause(
+      indexName: 'readingLength_popularity',
+      lower: [readingLength],
+      includeLower: include,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      readingLengthLessThan(
+    int readingLength, {
+    bool include = false,
+  }) {
+    return addWhereClauseInternal(WhereClause(
+      indexName: 'readingLength_popularity',
+      upper: [readingLength],
+      includeUpper: include,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      readingLengthBetween(
+    int lowerReadingLength,
+    int upperReadingLength, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return addWhereClauseInternal(WhereClause(
+      indexName: 'readingLength_popularity',
+      lower: [lowerReadingLength],
+      includeLower: includeLower,
+      upper: [upperReadingLength],
+      includeUpper: includeUpper,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      readingLengthEqualToPopularityGreaterThan(
+          int readingLength, double? popularity) {
+    return addWhereClauseInternal(WhereClause(
+      indexName: 'readingLength_popularity',
+      lower: [readingLength, popularity],
+      includeLower: false,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      readingLengthEqualToPopularityLessThan(
+          int readingLength, double? popularity) {
+    return addWhereClauseInternal(WhereClause(
+      indexName: 'readingLength_popularity',
+      upper: [readingLength, popularity],
+      includeUpper: false,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      readingLengthEqualToPopularityBetween(
+          int readingLength, double? lowerPopularity, double? upperPopularity) {
+    return addWhereClauseInternal(WhereClause(
+      indexName: 'readingLength_popularity',
+      lower: [readingLength, lowerPopularity],
+      includeLower: false,
+      upper: [readingLength, upperPopularity],
+      includeUpper: false,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       sequenceEqualTo(int? sequence) {
     return addWhereClauseInternal(WhereClause(
       indexName: 'sequence',
@@ -650,10 +804,117 @@ extension DictionaryEntryQueryWhere
     ));
   }
 
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      wordLengthEqualTo(int wordLength) {
+    return addWhereClauseInternal(WhereClause(
+      indexName: 'wordLength_popularity',
+      lower: [wordLength],
+      includeLower: true,
+      upper: [wordLength],
+      includeUpper: true,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      wordLengthNotEqualTo(int wordLength) {
+    if (whereSortInternal == Sort.asc) {
+      return addWhereClauseInternal(WhereClause(
+        indexName: 'wordLength_popularity',
+        upper: [wordLength],
+        includeUpper: false,
+      )).addWhereClauseInternal(WhereClause(
+        indexName: 'wordLength_popularity',
+        lower: [wordLength],
+        includeLower: false,
+      ));
+    } else {
+      return addWhereClauseInternal(WhereClause(
+        indexName: 'wordLength_popularity',
+        lower: [wordLength],
+        includeLower: false,
+      )).addWhereClauseInternal(WhereClause(
+        indexName: 'wordLength_popularity',
+        upper: [wordLength],
+        includeUpper: false,
+      ));
+    }
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      wordLengthGreaterThan(
+    int wordLength, {
+    bool include = false,
+  }) {
+    return addWhereClauseInternal(WhereClause(
+      indexName: 'wordLength_popularity',
+      lower: [wordLength],
+      includeLower: include,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      wordLengthLessThan(
+    int wordLength, {
+    bool include = false,
+  }) {
+    return addWhereClauseInternal(WhereClause(
+      indexName: 'wordLength_popularity',
+      upper: [wordLength],
+      includeUpper: include,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      wordLengthBetween(
+    int lowerWordLength,
+    int upperWordLength, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return addWhereClauseInternal(WhereClause(
+      indexName: 'wordLength_popularity',
+      lower: [lowerWordLength],
+      includeLower: includeLower,
+      upper: [upperWordLength],
+      includeUpper: includeUpper,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      wordLengthEqualToPopularityGreaterThan(
+          int wordLength, double? popularity) {
+    return addWhereClauseInternal(WhereClause(
+      indexName: 'wordLength_popularity',
+      lower: [wordLength, popularity],
+      includeLower: false,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      wordLengthEqualToPopularityLessThan(int wordLength, double? popularity) {
+    return addWhereClauseInternal(WhereClause(
+      indexName: 'wordLength_popularity',
+      upper: [wordLength, popularity],
+      includeUpper: false,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      wordLengthEqualToPopularityBetween(
+          int wordLength, double? lowerPopularity, double? upperPopularity) {
+    return addWhereClauseInternal(WhereClause(
+      indexName: 'wordLength_popularity',
+      lower: [wordLength, lowerPopularity],
+      includeLower: false,
+      upper: [wordLength, upperPopularity],
+      includeUpper: false,
+    ));
+  }
+
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause> wordEqualTo(
       String word) {
     return addWhereClauseInternal(WhereClause(
-      indexName: 'word',
+      indexName: 'word_reading_popularity',
       lower: [word],
       includeLower: true,
       upper: [word],
@@ -665,25 +926,93 @@ extension DictionaryEntryQueryWhere
       wordNotEqualTo(String word) {
     if (whereSortInternal == Sort.asc) {
       return addWhereClauseInternal(WhereClause(
-        indexName: 'word',
+        indexName: 'word_reading_popularity',
         upper: [word],
         includeUpper: false,
       )).addWhereClauseInternal(WhereClause(
-        indexName: 'word',
+        indexName: 'word_reading_popularity',
         lower: [word],
         includeLower: false,
       ));
     } else {
       return addWhereClauseInternal(WhereClause(
-        indexName: 'word',
+        indexName: 'word_reading_popularity',
         lower: [word],
         includeLower: false,
       )).addWhereClauseInternal(WhereClause(
-        indexName: 'word',
+        indexName: 'word_reading_popularity',
         upper: [word],
         includeUpper: false,
       ));
     }
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      wordReadingEqualTo(String word, String? reading) {
+    return addWhereClauseInternal(WhereClause(
+      indexName: 'word_reading_popularity',
+      lower: [word, reading],
+      includeLower: true,
+      upper: [word, reading],
+      includeUpper: true,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      wordReadingNotEqualTo(String word, String? reading) {
+    if (whereSortInternal == Sort.asc) {
+      return addWhereClauseInternal(WhereClause(
+        indexName: 'word_reading_popularity',
+        upper: [word, reading],
+        includeUpper: false,
+      )).addWhereClauseInternal(WhereClause(
+        indexName: 'word_reading_popularity',
+        lower: [word, reading],
+        includeLower: false,
+      ));
+    } else {
+      return addWhereClauseInternal(WhereClause(
+        indexName: 'word_reading_popularity',
+        lower: [word, reading],
+        includeLower: false,
+      )).addWhereClauseInternal(WhereClause(
+        indexName: 'word_reading_popularity',
+        upper: [word, reading],
+        includeUpper: false,
+      ));
+    }
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      wordReadingEqualToPopularityGreaterThan(
+          String word, String? reading, double? popularity) {
+    return addWhereClauseInternal(WhereClause(
+      indexName: 'word_reading_popularity',
+      lower: [word, reading, popularity],
+      includeLower: false,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      wordReadingEqualToPopularityLessThan(
+          String word, String? reading, double? popularity) {
+    return addWhereClauseInternal(WhereClause(
+      indexName: 'word_reading_popularity',
+      upper: [word, reading, popularity],
+      includeUpper: false,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      wordReadingEqualToPopularityBetween(String word, String? reading,
+          double? lowerPopularity, double? upperPopularity) {
+    return addWhereClauseInternal(WhereClause(
+      indexName: 'word_reading_popularity',
+      lower: [word, reading, lowerPopularity],
+      includeLower: false,
+      upper: [word, reading, upperPopularity],
+      includeUpper: false,
+    ));
   }
 }
 
@@ -1412,6 +1741,57 @@ extension DictionaryEntryQueryFilter
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
+      readingLengthEqualTo(int value) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.eq,
+      property: 'readingLength',
+      value: value,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
+      readingLengthGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.gt,
+      include: include,
+      property: 'readingLength',
+      value: value,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
+      readingLengthLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.lt,
+      include: include,
+      property: 'readingLength',
+      value: value,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
+      readingLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition.between(
+      property: 'readingLength',
+      lower: lower,
+      includeLower: includeLower,
+      upper: upper,
+      includeUpper: includeUpper,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
       sequenceIsNull() {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.isNull,
@@ -1575,6 +1955,57 @@ extension DictionaryEntryQueryFilter
       property: 'word',
       value: pattern,
       caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
+      wordLengthEqualTo(int value) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.eq,
+      property: 'wordLength',
+      value: value,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
+      wordLengthGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.gt,
+      include: include,
+      property: 'wordLength',
+      value: value,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
+      wordLengthLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.lt,
+      include: include,
+      property: 'wordLength',
+      value: value,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
+      wordLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition.between(
+      property: 'wordLength',
+      lower: lower,
+      includeLower: includeLower,
+      upper: upper,
+      includeUpper: includeUpper,
     ));
   }
 
@@ -1766,6 +2197,16 @@ extension DictionaryEntryQueryWhereSortBy
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
+      sortByReadingLength() {
+    return addSortByInternal('readingLength', Sort.asc);
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
+      sortByReadingLengthDesc() {
+    return addSortByInternal('readingLength', Sort.desc);
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
       sortBySequence() {
     return addSortByInternal('sequence', Sort.asc);
   }
@@ -1782,6 +2223,16 @@ extension DictionaryEntryQueryWhereSortBy
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
       sortByWordDesc() {
     return addSortByInternal('word', Sort.desc);
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
+      sortByWordLength() {
+    return addSortByInternal('wordLength', Sort.asc);
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
+      sortByWordLengthDesc() {
+    return addSortByInternal('wordLength', Sort.desc);
   }
 }
 
@@ -1844,6 +2295,16 @@ extension DictionaryEntryQueryWhereSortThenBy
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
+      thenByReadingLength() {
+    return addSortByInternal('readingLength', Sort.asc);
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
+      thenByReadingLengthDesc() {
+    return addSortByInternal('readingLength', Sort.desc);
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
       thenBySequence() {
     return addSortByInternal('sequence', Sort.asc);
   }
@@ -1860,6 +2321,16 @@ extension DictionaryEntryQueryWhereSortThenBy
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
       thenByWordDesc() {
     return addSortByInternal('word', Sort.desc);
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
+      thenByWordLength() {
+    return addSortByInternal('wordLength', Sort.asc);
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
+      thenByWordLengthDesc() {
+    return addSortByInternal('wordLength', Sort.desc);
   }
 }
 
@@ -1896,6 +2367,11 @@ extension DictionaryEntryQueryWhereDistinct
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QDistinct>
+      distinctByReadingLength() {
+    return addDistinctByInternal('readingLength');
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QDistinct>
       distinctBySequence() {
     return addDistinctByInternal('sequence');
   }
@@ -1903,6 +2379,11 @@ extension DictionaryEntryQueryWhereDistinct
   QueryBuilder<DictionaryEntry, DictionaryEntry, QDistinct> distinctByWord(
       {bool caseSensitive = true}) {
     return addDistinctByInternal('word', caseSensitive: caseSensitive);
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QDistinct>
+      distinctByWordLength() {
+    return addDistinctByInternal('wordLength');
   }
 }
 
@@ -1944,12 +2425,20 @@ extension DictionaryEntryQueryProperty
     return addPropertyNameInternal('reading');
   }
 
+  QueryBuilder<DictionaryEntry, int, QQueryOperations> readingLengthProperty() {
+    return addPropertyNameInternal('readingLength');
+  }
+
   QueryBuilder<DictionaryEntry, int?, QQueryOperations> sequenceProperty() {
     return addPropertyNameInternal('sequence');
   }
 
   QueryBuilder<DictionaryEntry, String, QQueryOperations> wordProperty() {
     return addPropertyNameInternal('word');
+  }
+
+  QueryBuilder<DictionaryEntry, int, QQueryOperations> wordLengthProperty() {
+    return addPropertyNameInternal('wordLength');
   }
 
   QueryBuilder<DictionaryEntry, List<String>?, QQueryOperations>
