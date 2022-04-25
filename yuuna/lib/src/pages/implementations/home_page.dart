@@ -44,9 +44,9 @@ class _HomePageState extends BasePageState<HomePage> {
     /// on the media types specified and ordered by [AppModel]. As [ref.watch]
     /// cannot be used here, [ref.read] is used instead, via [appModelNoUpdate].
     mediaTypeBodies = List.unmodifiable(
-        appModelNoUpdate.mediaTypes.map((mediaType) => mediaType.home));
+        appModelNoUpdate.mediaTypes.values.map((mediaType) => mediaType.home));
     navBarItems = List.unmodifiable(
-      appModelNoUpdate.mediaTypes.map(
+      appModelNoUpdate.mediaTypes.values.map(
         (mediaType) => BottomNavigationBarItem(
           activeIcon: Icon(mediaType.icon),
           icon: Icon(mediaType.outlinedIcon),
@@ -138,7 +138,9 @@ class _HomePageState extends BasePageState<HomePage> {
   List<Widget> buildActions() {
     return [
       buildStashButton(),
+      const Space.small(),
       buildCreatorButton(),
+      const Space.small(),
       buildShowMenuButton(),
       const Space.extraSmall(),
     ];
@@ -149,7 +151,7 @@ class _HomePageState extends BasePageState<HomePage> {
       tooltip: appModel.translate('stash'),
       icon: Icons.queue_outlined,
       enabled: false,
-      onPressed: openQueue,
+      onTap: openQueue,
     );
   }
 
@@ -157,7 +159,7 @@ class _HomePageState extends BasePageState<HomePage> {
     return JidoujishoIconButton(
       tooltip: appModel.translate('card_creator'),
       icon: Icons.note_add_outlined,
-      onPressed: openCreator,
+      onTap: openCreator,
     );
   }
 
@@ -165,7 +167,7 @@ class _HomePageState extends BasePageState<HomePage> {
     return JidoujishoIconButton(
       tooltip: appModel.translate('show_menu'),
       icon: Icons.more_vert,
-      onPressed: openMenu,
+      onTapDown: openMenu,
     );
   }
 
@@ -173,13 +175,18 @@ class _HomePageState extends BasePageState<HomePage> {
     required String label,
     required IconData icon,
     required Function() action,
+    Color? color,
   }) {
     return PopupMenuItem<VoidCallback>(
       child: Row(
         children: [
-          Icon(icon, size: textTheme.bodyMedium?.fontSize),
+          Icon(
+            icon,
+            size: textTheme.bodyMedium?.fontSize,
+            color: color,
+          ),
           const Space.normal(),
-          Text(label, style: textTheme.bodyMedium),
+          Text(label, style: textTheme.bodyMedium?.copyWith(color: color)),
         ],
       ),
       value: action,
@@ -190,9 +197,9 @@ class _HomePageState extends BasePageState<HomePage> {
 
   void openCreator() {}
 
-  void openMenu() async {
-    RelativeRect position =
-        const RelativeRect.fromLTRB(double.maxFinite, 0, 0, 0);
+  void openMenu(TapDownDetails details) async {
+    RelativeRect position = RelativeRect.fromLTRB(
+        details.globalPosition.dx, details.globalPosition.dy, 0, 0);
     Function()? selectedAction = await showMenu(
       context: context,
       position: position,

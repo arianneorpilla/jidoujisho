@@ -14,6 +14,9 @@ class Dictionary {
     required this.dictionaryName,
     required this.formatName,
     required this.metadata,
+    required this.order,
+    required this.collapsed,
+    required this.hidden,
   });
 
   /// Create an instance of this class from a serialized format.
@@ -32,11 +35,22 @@ class Dictionary {
   ///
   /// Dictionary names are meant to be unique, meaning two dictionaries of the
   /// same name should not be allowed to be added in the database.
-  @Index()
+  @Index(unique: true)
   final String dictionaryName;
 
   /// The format that the dictionary was sourced from.
   final String formatName;
+
+  /// The order of this dictionary in terms of user sorting, relative to other
+  /// dictionaries.
+  @Index(unique: true)
+  int order;
+
+  /// Whether this dictionary is collapsed or not by default in search results.
+  bool collapsed;
+
+  /// Whether this dictionary is shown or not in search results.
+  bool hidden;
 
   /// Any extra dictionary-specific information that this dictionary may
   /// decide to store for use at runtime.

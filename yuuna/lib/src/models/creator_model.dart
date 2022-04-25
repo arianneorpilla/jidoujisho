@@ -26,15 +26,14 @@ final creatorImageProvider =
   if (seed.fromEnhancement) {
     Field field = Field.values.byName(seed.identifierType);
     Enhancement enhancement =
-        appModel.sortedEnhancements[field]![seed.identifierKey]!;
+        appModel.enhancements[field]![seed.identifierKey]!;
     Future<NetworkToFileImage?> image =
         (enhancement as ImageGeneratorMixin).getImageFromSeed(seed);
 
     return image;
   } else if (seed.fromMedia) {
-    MediaType type = appModel.sortedMediaTypes[seed.identifierType]!;
-    MediaSource source =
-        appModel.sortedMediaSources[type]![seed.identifierKey]!;
+    MediaType type = appModel.mediaTypes[seed.identifierType]!;
+    MediaSource source = appModel.mediaSources[type]![seed.identifierKey]!;
     Future<NetworkToFileImage?> image =
         (source as ImageGeneratorMixin).getImageFromSeed(seed);
 
@@ -57,15 +56,14 @@ final creatorAudioProvider =
   if (seed.fromEnhancement) {
     Field field = Field.values.byName(seed.identifierType);
     Enhancement enhancement =
-        appModel.sortedEnhancements[field]![seed.identifierKey]!;
+        appModel.enhancements[field]![seed.identifierKey]!;
     Future<File?> audio =
         (enhancement as AudioGeneratorMixin).getAudioFileFromSeed(seed);
 
     return audio;
   } else if (seed.fromMedia) {
-    MediaType type = appModel.sortedMediaTypes[seed.identifierType]!;
-    MediaSource source =
-        appModel.sortedMediaSources[type]![seed.identifierKey]!;
+    MediaType type = appModel.mediaTypes[seed.identifierType]!;
+    MediaSource source = appModel.mediaSources[type]![seed.identifierKey]!;
     Future<File?> audio =
         (source as AudioGeneratorMixin).getAudioFileFromSeed(seed);
 

@@ -22,6 +22,7 @@ dependencies:
   flutter_native_splash: ^2.1.1
   flutter_riverpod: ^1.0.3
   flutter_screenutil: ^5.3.1
+  fluttertoast: ^8.0.9
   hive: ^2.0.6
   hive_flutter: ^1.1.0
   infinite_scroll_pagination: ^3.1.0
@@ -30,6 +31,7 @@ dependencies:
   isar_flutter_libs: ^2.2.1
   json_annotation: ^4.4.0
   json_serializable: ^6.1.5
+  marquee: ^2.2.1
   material_floating_search_bar: ^0.3.7
   network_to_file_image: ^3.1.0
   package_info_plus: ^1.4.0

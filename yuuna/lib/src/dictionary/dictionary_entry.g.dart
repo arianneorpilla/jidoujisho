@@ -17,7 +17,7 @@ extension GetDictionaryEntryCollection on Isar {
 final DictionaryEntrySchema = CollectionSchema(
   name: 'DictionaryEntry',
   schema:
-      '{"name":"DictionaryEntry","idName":"id","properties":[{"name":"dictionaryName","type":"String"},{"name":"extra","type":"String"},{"name":"hashCode","type":"Long"},{"name":"meaningTags","type":"StringList"},{"name":"meanings","type":"StringList"},{"name":"popularity","type":"Double"},{"name":"reading","type":"String"},{"name":"sequence","type":"Long"},{"name":"word","type":"String"},{"name":"wordTags","type":"StringList"}],"indexes":[],"links":[]}',
+      '{"name":"DictionaryEntry","idName":"id","properties":[{"name":"dictionaryName","type":"String"},{"name":"extra","type":"String"},{"name":"hashCode","type":"Long"},{"name":"meaningTags","type":"StringList"},{"name":"meanings","type":"StringList"},{"name":"popularity","type":"Double"},{"name":"reading","type":"String"},{"name":"sequence","type":"Long"},{"name":"word","type":"String"},{"name":"wordTags","type":"StringList"}],"indexes":[{"name":"dictionaryName","unique":false,"properties":[{"name":"dictionaryName","type":"Hash","caseSensitive":true}]},{"name":"popularity","unique":false,"properties":[{"name":"popularity","type":"Value","caseSensitive":false}]},{"name":"reading","unique":false,"properties":[{"name":"reading","type":"Hash","caseSensitive":true}]},{"name":"sequence","unique":false,"properties":[{"name":"sequence","type":"Value","caseSensitive":false}]},{"name":"word","unique":false,"properties":[{"name":"word","type":"Hash","caseSensitive":true}]}],"links":[]}',
   nativeAdapter: const _DictionaryEntryNativeAdapter(),
   webAdapter: const _DictionaryEntryWebAdapter(),
   idName: 'id',
@@ -34,8 +34,30 @@ final DictionaryEntrySchema = CollectionSchema(
     'wordTags': 9
   },
   listProperties: {'meaningTags', 'meanings', 'wordTags'},
-  indexIds: {},
-  indexTypes: {},
+  indexIds: {
+    'dictionaryName': 0,
+    'popularity': 1,
+    'reading': 2,
+    'sequence': 3,
+    'word': 4
+  },
+  indexTypes: {
+    'dictionaryName': [
+      NativeIndexType.stringHash,
+    ],
+    'popularity': [
+      NativeIndexType.double,
+    ],
+    'reading': [
+      NativeIndexType.stringHash,
+    ],
+    'sequence': [
+      NativeIndexType.long,
+    ],
+    'word': [
+      NativeIndexType.stringHash,
+    ]
+  },
   linkIds: {},
   backlinkIds: {},
   linkedCollections: [],
@@ -291,6 +313,28 @@ extension DictionaryEntryQueryWhereSort
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere> anyId() {
     return addWhereClauseInternal(const WhereClause(indexName: null));
   }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere>
+      anyDictionaryName() {
+    return addWhereClauseInternal(
+        const WhereClause(indexName: 'dictionaryName'));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere> anyPopularity() {
+    return addWhereClauseInternal(const WhereClause(indexName: 'popularity'));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere> anyReading() {
+    return addWhereClauseInternal(const WhereClause(indexName: 'reading'));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere> anySequence() {
+    return addWhereClauseInternal(const WhereClause(indexName: 'sequence'));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere> anyWord() {
+    return addWhereClauseInternal(const WhereClause(indexName: 'word'));
+  }
 }
 
 extension DictionaryEntryQueryWhere
@@ -367,6 +411,279 @@ extension DictionaryEntryQueryWhere
       upper: [upperId],
       includeUpper: includeUpper,
     ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      dictionaryNameEqualTo(String dictionaryName) {
+    return addWhereClauseInternal(WhereClause(
+      indexName: 'dictionaryName',
+      lower: [dictionaryName],
+      includeLower: true,
+      upper: [dictionaryName],
+      includeUpper: true,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      dictionaryNameNotEqualTo(String dictionaryName) {
+    if (whereSortInternal == Sort.asc) {
+      return addWhereClauseInternal(WhereClause(
+        indexName: 'dictionaryName',
+        upper: [dictionaryName],
+        includeUpper: false,
+      )).addWhereClauseInternal(WhereClause(
+        indexName: 'dictionaryName',
+        lower: [dictionaryName],
+        includeLower: false,
+      ));
+    } else {
+      return addWhereClauseInternal(WhereClause(
+        indexName: 'dictionaryName',
+        lower: [dictionaryName],
+        includeLower: false,
+      )).addWhereClauseInternal(WhereClause(
+        indexName: 'dictionaryName',
+        upper: [dictionaryName],
+        includeUpper: false,
+      ));
+    }
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      popularityIsNull() {
+    return addWhereClauseInternal(const WhereClause(
+      indexName: 'popularity',
+      upper: [null],
+      includeUpper: true,
+      lower: [null],
+      includeLower: true,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      popularityIsNotNull() {
+    return addWhereClauseInternal(const WhereClause(
+      indexName: 'popularity',
+      lower: [null],
+      includeLower: false,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      popularityGreaterThan(double? popularity) {
+    return addWhereClauseInternal(WhereClause(
+      indexName: 'popularity',
+      lower: [popularity],
+      includeLower: false,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      popularityLessThan(double? popularity) {
+    return addWhereClauseInternal(WhereClause(
+      indexName: 'popularity',
+      upper: [popularity],
+      includeUpper: false,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      popularityBetween(double? lowerPopularity, double? upperPopularity) {
+    return addWhereClauseInternal(WhereClause(
+      indexName: 'popularity',
+      lower: [lowerPopularity],
+      includeLower: false,
+      upper: [upperPopularity],
+      includeUpper: false,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      readingEqualTo(String? reading) {
+    return addWhereClauseInternal(WhereClause(
+      indexName: 'reading',
+      lower: [reading],
+      includeLower: true,
+      upper: [reading],
+      includeUpper: true,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      readingNotEqualTo(String? reading) {
+    if (whereSortInternal == Sort.asc) {
+      return addWhereClauseInternal(WhereClause(
+        indexName: 'reading',
+        upper: [reading],
+        includeUpper: false,
+      )).addWhereClauseInternal(WhereClause(
+        indexName: 'reading',
+        lower: [reading],
+        includeLower: false,
+      ));
+    } else {
+      return addWhereClauseInternal(WhereClause(
+        indexName: 'reading',
+        lower: [reading],
+        includeLower: false,
+      )).addWhereClauseInternal(WhereClause(
+        indexName: 'reading',
+        upper: [reading],
+        includeUpper: false,
+      ));
+    }
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      readingIsNull() {
+    return addWhereClauseInternal(const WhereClause(
+      indexName: 'reading',
+      upper: [null],
+      includeUpper: true,
+      lower: [null],
+      includeLower: true,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      readingIsNotNull() {
+    return addWhereClauseInternal(const WhereClause(
+      indexName: 'reading',
+      lower: [null],
+      includeLower: false,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      sequenceEqualTo(int? sequence) {
+    return addWhereClauseInternal(WhereClause(
+      indexName: 'sequence',
+      lower: [sequence],
+      includeLower: true,
+      upper: [sequence],
+      includeUpper: true,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      sequenceNotEqualTo(int? sequence) {
+    if (whereSortInternal == Sort.asc) {
+      return addWhereClauseInternal(WhereClause(
+        indexName: 'sequence',
+        upper: [sequence],
+        includeUpper: false,
+      )).addWhereClauseInternal(WhereClause(
+        indexName: 'sequence',
+        lower: [sequence],
+        includeLower: false,
+      ));
+    } else {
+      return addWhereClauseInternal(WhereClause(
+        indexName: 'sequence',
+        lower: [sequence],
+        includeLower: false,
+      )).addWhereClauseInternal(WhereClause(
+        indexName: 'sequence',
+        upper: [sequence],
+        includeUpper: false,
+      ));
+    }
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      sequenceIsNull() {
+    return addWhereClauseInternal(const WhereClause(
+      indexName: 'sequence',
+      upper: [null],
+      includeUpper: true,
+      lower: [null],
+      includeLower: true,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      sequenceIsNotNull() {
+    return addWhereClauseInternal(const WhereClause(
+      indexName: 'sequence',
+      lower: [null],
+      includeLower: false,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      sequenceGreaterThan(
+    int? sequence, {
+    bool include = false,
+  }) {
+    return addWhereClauseInternal(WhereClause(
+      indexName: 'sequence',
+      lower: [sequence],
+      includeLower: include,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      sequenceLessThan(
+    int? sequence, {
+    bool include = false,
+  }) {
+    return addWhereClauseInternal(WhereClause(
+      indexName: 'sequence',
+      upper: [sequence],
+      includeUpper: include,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      sequenceBetween(
+    int? lowerSequence,
+    int? upperSequence, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return addWhereClauseInternal(WhereClause(
+      indexName: 'sequence',
+      lower: [lowerSequence],
+      includeLower: includeLower,
+      upper: [upperSequence],
+      includeUpper: includeUpper,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause> wordEqualTo(
+      String word) {
+    return addWhereClauseInternal(WhereClause(
+      indexName: 'word',
+      lower: [word],
+      includeLower: true,
+      upper: [word],
+      includeUpper: true,
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      wordNotEqualTo(String word) {
+    if (whereSortInternal == Sort.asc) {
+      return addWhereClauseInternal(WhereClause(
+        indexName: 'word',
+        upper: [word],
+        includeUpper: false,
+      )).addWhereClauseInternal(WhereClause(
+        indexName: 'word',
+        lower: [word],
+        includeLower: false,
+      ));
+    } else {
+      return addWhereClauseInternal(WhereClause(
+        indexName: 'word',
+        lower: [word],
+        includeLower: false,
+      )).addWhereClauseInternal(WhereClause(
+        indexName: 'word',
+        upper: [word],
+        includeUpper: false,
+      ));
+    }
   }
 }
 

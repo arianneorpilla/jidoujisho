@@ -5,9 +5,9 @@ import 'package:yuuna/pages.dart';
 /// The content of the dialog used for showing dictionary import progress when
 /// importing a dictionary from the dictionary menu. See the
 /// [DictionaryDialogPage].
-class DictionaryImportProgressPage extends BasePage {
+class DictionaryDialogImportPage extends BasePage {
   /// Create an instance of this page.
-  const DictionaryImportProgressPage({
+  const DictionaryDialogImportPage({
     required this.progressNotifier,
     Key? key,
   }) : super(key: key);
@@ -17,20 +17,17 @@ class DictionaryImportProgressPage extends BasePage {
   final ValueNotifier<String> progressNotifier;
 
   @override
-  BasePageState createState() => _DictionaryImportProgressPageState();
+  BasePageState createState() => _DictionaryDialogImportPageState();
 }
 
-class _DictionaryImportProgressPageState
-    extends BasePageState<DictionaryImportProgressPage> {
+class _DictionaryDialogImportPageState
+    extends BasePageState<DictionaryDialogImportPage> {
   String get importInProgressLabel => appModel.translate('import_in_progress');
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      contentPadding: EdgeInsets.symmetric(
-        horizontal: Spacing.of(context).spaces.big,
-        vertical: Spacing.of(context).spaces.semiBig,
-      ),
+      contentPadding: EdgeInsets.all(Spacing.of(context).spaces.big),
       content: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -56,6 +53,7 @@ class _DictionaryImportProgressPageState
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
+          const Space.extraSmall(),
           Padding(
             padding: const EdgeInsets.only(left: 0.5),
             child: Text(

@@ -169,6 +169,12 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
             primary: Colors.black,
           ),
         ),
+        listTileTheme: ListTileThemeData(
+          dense: true,
+          selectedTileColor: Colors.grey.shade300,
+          selectedColor: Colors.black,
+          horizontalTitleGap: 0,
+        ),
       );
 
   /// Shows when the current [themeMode] is a dark theme.
@@ -219,6 +225,12 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
           style: TextButton.styleFrom(
             primary: Colors.white,
           ),
+        ),
+        listTileTheme: ListTileThemeData(
+          dense: true,
+          selectedTileColor: Colors.grey.shade600,
+          selectedColor: Colors.white,
+          horizontalTitleGap: 0,
         ),
       );
 }

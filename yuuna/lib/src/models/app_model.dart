@@ -72,85 +72,60 @@ class AppModel with ChangeNotifier {
 
   /// Used to fetch a language by its locale tag with constant time performance.
   /// Initialised with [populateLanguages] at startup.
-  late final Map<String, Language> sortedLanguages;
+  late final Map<String, Language> languages;
 
   /// Used to fetch an app locale by its locale tag with constant time
   /// performance. Initialised with [populateLocales] at startup.
-  late final Map<String, Locale> sortedLocales;
+  late final Map<String, Locale> locales;
 
   /// Used to fetch a dictionary format by its unique key with constant time
-  /// performance. Initialised with [populateFormats] at startup.
-  late final Map<String, DictionaryFormat> sortedFormats;
+  /// performance. Initialised with [populateDictionaryFormats] at startup.
+  late final Map<String, DictionaryFormat> dictionaryFormats;
 
   /// Used to fetch a media type by its unique key with constant time
   /// performance. Initialised with [populateMediaTypes] at startup.
-  late final Map<String, MediaType> sortedMediaTypes;
+  late final Map<String, MediaType> mediaTypes;
 
   /// Used to fetch initialised enhancements by their unique key with constant
   /// time performance. Initialised with [populateEnhancements] at startup.
-  late final Map<Field, Map<String, Enhancement>> sortedEnhancements;
+  late final Map<Field, Map<String, Enhancement>> enhancements;
 
   /// Used to fetch initialised sources by their unique key with constant
   /// time performance. Initialised with [populateMediaSources] at startup.
-  late final Map<MediaType, Map<String, MediaSource>> sortedMediaSources;
+  late final Map<MediaType, Map<String, MediaSource>> mediaSources;
 
-  /// A list of languages that the app will support at runtime.
-  final List<Language> languages = List<Language>.unmodifiable(
-    [
-      EnglishLanguage.instance,
-    ],
-  );
+  /// Returns all dictionaries imported into the database. Sorted by the
+  /// user-defined order in the dictionary menu.
+  List<Dictionary> get dictionaries =>
+      _database.dictionarys.where().sortByOrder().findAllSync();
 
-  /// A list of locales that the app will support at runtime. This is not
-  /// related to supported target languages.
-  final List<Locale> locales = List<Locale>.unmodifiable(
-    [
-      const Locale('en', 'US'),
-    ],
-  );
+  /// Update the user-defined order of a given dictionary in the database.
+  /// See the dictionary dialog's [ReorderableListView] for usage.
+  void updateDictionaryOrder(int oldIndex, int newIndex) async {
+    _database.writeTxnSync((isar) {
+      Dictionary dictionaryPick = dictionaries[oldIndex];
+      Dictionary dictionarySwap = dictionaries[newIndex];
 
-  /// A list of media types that the app will support at runtime.
-  final List<MediaType> mediaTypes = List<MediaType>.unmodifiable(
-    [
-      PlayerMediaType.instance,
-      ReaderMediaType.instance,
-      ViewerMediaType.instance,
-      DictionaryMediaType.instance,
-    ],
-  );
+      _database.dictionarys.deleteAllByOrderSync([oldIndex, newIndex]);
+      dictionaryPick.order = newIndex;
+      dictionarySwap.order = oldIndex;
 
-  /// A list of media sources that the app will support at runtime.
-  final Map<MediaType, List<MediaSource>> mediaSources = {
-    PlayerMediaType.instance: [],
-    ReaderMediaType.instance: [],
-    ViewerMediaType.instance: [],
-    DictionaryMediaType.instance: [],
-  };
-
-  /// A list of dictionary formats that the app will support at runtime.
-  final List<DictionaryFormat> dictionaryFormats =
-      List<DictionaryFormat>.unmodifiable(
-    [
-      YomichanTermBankFormat.instance,
-    ],
-  );
-
-  /// A list of enhancements that the app will support at runtime.
-  final Map<Field, List<Enhancement>> fieldEnhancements = {
-    Field.audio: [],
-    Field.extra: [],
-    Field.image: [],
-    Field.meaning: [],
-    Field.reading: [],
-    Field.sentence: [],
-    Field.word: [],
-  };
+      _database.dictionarys.putAllSync([dictionaryPick, dictionarySwap]);
+    });
+  }
 
   /// Populate maps for languages at startup to optimise performance.
   void populateLanguages() async {
-    sortedLanguages = Map<String, Language>.unmodifiable(
+    /// A list of languages that the app will support at runtime.
+    final List<Language> availableLanguages = List<Language>.unmodifiable(
+      [
+        EnglishLanguage.instance,
+      ],
+    );
+
+    languages = Map<String, Language>.unmodifiable(
       Map<String, Language>.fromEntries(
-        languages.map(
+        availableLanguages.map(
           (language) => MapEntry(language.locale.toLanguageTag(), language),
         ),
       ),
@@ -159,9 +134,17 @@ class AppModel with ChangeNotifier {
 
   /// Populate maps for locales at startup to optimise performance.
   void populateLocales() async {
-    sortedLocales = Map<String, Locale>.unmodifiable(
+    /// A list of locales that the app will support at runtime. This is not
+    /// related to supported target languages.
+    final List<Locale> availableLocales = List<Locale>.unmodifiable(
+      [
+        const Locale('en', 'US'),
+      ],
+    );
+
+    locales = Map<String, Locale>.unmodifiable(
       Map<String, Locale>.fromEntries(
-        locales.map(
+        availableLocales.map(
           (locale) => MapEntry(locale.toLanguageTag(), locale),
         ),
       ),
@@ -170,9 +153,19 @@ class AppModel with ChangeNotifier {
 
   /// Populate maps for media types at startup to optimise performance.
   void populateMediaTypes() async {
-    sortedMediaTypes = Map<String, MediaType>.unmodifiable(
+    /// A list of media types that the app will support at runtime.
+    final List<MediaType> availableMediaTypes = List<MediaType>.unmodifiable(
+      [
+        PlayerMediaType.instance,
+        ReaderMediaType.instance,
+        ViewerMediaType.instance,
+        DictionaryMediaType.instance,
+      ],
+    );
+
+    mediaTypes = Map<String, MediaType>.unmodifiable(
       Map<String, MediaType>.fromEntries(
-        mediaTypes.map(
+        availableMediaTypes.map(
           (mediaType) => MapEntry(mediaType.uniqueKey, mediaType),
         ),
       ),
@@ -181,8 +174,16 @@ class AppModel with ChangeNotifier {
 
   /// Populate maps for media sources at startup to optimise performance.
   void populateMediaSources() async {
-    sortedMediaSources = Map<MediaType, Map<String, MediaSource>>.unmodifiable(
-      mediaSources.map(
+    /// A list of media sources that the app will support at runtime.
+    final Map<MediaType, List<MediaSource>> availableMediaSources = {
+      PlayerMediaType.instance: [],
+      ReaderMediaType.instance: [],
+      ViewerMediaType.instance: [],
+      DictionaryMediaType.instance: [],
+    };
+
+    mediaSources = Map<MediaType, Map<String, MediaSource>>.unmodifiable(
+      availableMediaSources.map(
         (type, sources) => MapEntry(
           type,
           Map<String, MediaSource>.unmodifiable(
@@ -198,10 +199,18 @@ class AppModel with ChangeNotifier {
   }
 
   /// Populate maps for dictionary formats at startup to optimise performance.
-  void populateFormats() async {
-    sortedFormats = Map<String, DictionaryFormat>.unmodifiable(
+  void populateDictionaryFormats() async {
+    /// A list of dictionary formats that the app will support at runtime.
+    final List<DictionaryFormat> availableDictionaryFormats =
+        List<DictionaryFormat>.unmodifiable(
+      [
+        YomichanTermBankFormat.instance,
+      ],
+    );
+
+    dictionaryFormats = Map<String, DictionaryFormat>.unmodifiable(
       Map<String, DictionaryFormat>.fromEntries(
-        dictionaryFormats.map(
+        availableDictionaryFormats.map(
           (dictionaryFormat) => MapEntry(
             dictionaryFormat.formatName,
             dictionaryFormat,
@@ -213,8 +222,19 @@ class AppModel with ChangeNotifier {
 
   /// Populate maps for enhancements at startup to optimise performance.
   void populateEnhancements() async {
-    sortedEnhancements = Map<Field, Map<String, Enhancement>>.unmodifiable(
-      fieldEnhancements.map(
+    /// A list of enhancements that the app will support at runtime.
+    final Map<Field, List<Enhancement>> availableEnhancements = {
+      Field.audio: [],
+      Field.extra: [],
+      Field.image: [],
+      Field.meaning: [],
+      Field.reading: [],
+      Field.sentence: [],
+      Field.word: [],
+    };
+
+    enhancements = Map<Field, Map<String, Enhancement>>.unmodifiable(
+      availableEnhancements.map(
         (field, enhancements) => MapEntry(
           field,
           Map<String, Enhancement>.unmodifiable(
@@ -227,23 +247,6 @@ class AppModel with ChangeNotifier {
         ),
       ),
     );
-  }
-
-  /// Get the current target language and prepare its resources for use. This
-  /// will not re-run if the target language is already initialised, as
-  /// a [Language] should always have a singleton instance and will not
-  /// re-prepare its resources if already initialised. See
-  /// [Language.initialise] for more details.
-  Future<void> initialiseLanguage() async {
-    await targetLanguage.initialise();
-  }
-
-  /// Ready the progress and duration persistent stores of all [MediaType]
-  /// histories at startup.
-  Future<void> initialiseMediaTypes() async {
-    for (MediaType mediaType in mediaTypes) {
-      await mediaType.initialise();
-    }
   }
 
   /// Prepare application data and state to be ready of use upon starting up
@@ -285,11 +288,20 @@ class AppModel with ChangeNotifier {
     populateLanguages();
     populateMediaTypes();
     populateMediaSources();
-    populateFormats();
+    populateDictionaryFormats();
 
-    /// Prepare entities for use at startup.
-    await initialiseLanguage();
-    await initialiseMediaTypes();
+    /// Get the current target language and prepare its resources for use. This
+    /// will not re-run if the target language is already initialised, as
+    /// a [Language] should always have a singleton instance and will not
+    /// re-prepare its resources if already initialised. See
+    /// [Language.initialise] for more details.
+    await targetLanguage.initialise();
+
+    /// Ready the progress and duration persistent stores of all [MediaType]
+    /// histories at startup.
+    for (MediaType mediaType in mediaTypes.values) {
+      await mediaType.initialise();
+    }
   }
 
   /// Get whether or not the current theme is dark mode.
@@ -322,31 +334,32 @@ class AppModel with ChangeNotifier {
 
   /// Get the target language from persisted preferences.
   Language get targetLanguage {
-    String defaultLocaleTag = languages.first.locale.toLanguageTag();
+    String defaultLocaleTag = languages.values.first.locale.toLanguageTag();
     String localeTag =
         _preferences.get('target_language', defaultValue: defaultLocaleTag);
 
-    return sortedLanguages[localeTag]!;
+    return languages[localeTag]!;
   }
 
   /// Get the target language from persisted preferences.
   DictionaryFormat get lastSelectedDictionaryFormat {
-    String firstDictionaryFormatName = dictionaryFormats.first.formatName;
+    String firstDictionaryFormatName =
+        dictionaryFormats.values.first.formatName;
     String lastDictionaryFormatName = _preferences.get(
       'last_selected_dictionary_format',
       defaultValue: firstDictionaryFormatName,
     );
 
-    return sortedFormats[lastDictionaryFormatName]!;
+    return dictionaryFormats[lastDictionaryFormatName]!;
   }
 
   /// Get the current app locale from persisted preferences.
   Locale get appLocale {
-    String defaultLocaleTag = locales.first.toLanguageTag();
+    String defaultLocaleTag = locales.values.first.toLanguageTag();
     String localeTag =
         _preferences.get('app_locale', defaultValue: defaultLocaleTag);
 
-    return sortedLocales[localeTag]!;
+    return locales[localeTag]!;
   }
 
   /// Persist a new target language in preferences.
@@ -362,11 +375,6 @@ class AppModel with ChangeNotifier {
     String lastDictionaryFormatName = dictionaryFormat.formatName;
     await _preferences.put(
         'last_selected_dictionary_format', lastDictionaryFormatName);
-  }
-
-  /// Save a new active dictionary and remember it on application restart.
-  Future<void> setCurrentDictionaryName(String dictionaryName) async {
-    await _preferences.put('current_dictionary_name', dictionaryName);
   }
 
   /// Get the current home tab index. The order of the tab indexes are based on
@@ -397,7 +405,7 @@ class AppModel with ChangeNotifier {
     required int position,
   }) {
     String uniqueKey = _preferences.get('field_slots_${field.name}/$position');
-    return sortedEnhancements[field]![uniqueKey];
+    return enhancements[field]![uniqueKey];
   }
 
   /// Given an [enhancement], persist to a numbered slot [position] for a
@@ -424,7 +432,7 @@ class AppModel with ChangeNotifier {
   /// Start the process of importing a dictionary. This is called from the
   /// dictionary menu, and starts the process of importing for the
   /// [lastSelectedDictionaryFormat].
-  Future<void> importDictionary() async {
+  Future<void> importDictionary({required Function() onImportSuccess}) async {
     /// The last selected dictionary format in the dictionary menu is used for
     /// dictionary import.
     DictionaryFormat dictionaryFormat = lastSelectedDictionaryFormat;
@@ -478,7 +486,7 @@ class AppModel with ChangeNotifier {
         barrierDismissible: false,
         context: navigatorKey.currentContext!,
         builder: (context) =>
-            DictionaryImportProgressPage(progressNotifier: progressNotifier),
+            DictionaryDialogImportPage(progressNotifier: progressNotifier),
       );
 
       /// The following hard waits give enough time to inform the user to read
@@ -582,10 +590,23 @@ class AppModel with ChangeNotifier {
         prepareDictionaryParams,
       );
 
+      /// Get the highest order in the dictionary database.
+      Dictionary? highestOrderDictionary =
+          _database.dictionarys.where().sortByOrderDesc().findFirstSync();
+      late int order;
+      if (highestOrderDictionary != null) {
+        order = highestOrderDictionary.order + 1;
+      } else {
+        order = 0;
+      }
+
       Dictionary dictionary = Dictionary(
         dictionaryName: dictionaryName,
         formatName: dictionaryFormat.formatName,
         metadata: dictionaryMetadata,
+        order: order,
+        collapsed: false,
+        hidden: false,
       );
 
       _database.writeTxnSync((isar) {
@@ -604,6 +625,8 @@ class AppModel with ChangeNotifier {
 
       progressNotifier.value = localisation.importMessageComplete;
       await Future.delayed(const Duration(seconds: 1), () {});
+
+      onImportSuccess();
     } catch (e) {
       progressNotifier.value = localisation.importMessageErrorWithVar('$e');
       await Future.delayed(const Duration(seconds: 3), () {});
@@ -615,5 +638,40 @@ class AppModel with ChangeNotifier {
       /// Close the import progress dialog opened earlier.
       Navigator.pop(navigatorKey.currentContext!);
     }
+  }
+
+  /// Toggle a dictionary's between collapsed and expanded state. This will
+  /// affect how a dictionary's search results are shown by default.
+  void toggleDictionaryCollapsed(Dictionary dictionary) {
+    _database.writeTxnSync((isar) {
+      dictionary.collapsed = !dictionary.collapsed;
+      _database.dictionarys.putSync(dictionary);
+    });
+  }
+
+  /// Toggle a dictionary's between hidden and shown state. This will
+  /// affect how a dictionary's search results are shown by default.
+  void toggleDictionaryHidden(Dictionary dictionary) {
+    _database.writeTxnSync((isar) {
+      dictionary.hidden = !dictionary.hidden;
+      _database.dictionarys.putSync(dictionary);
+    });
+  }
+
+  /// Delete a selected dictionary from the dictionary database.
+  Future<void> deleteDictionary(Dictionary dictionary) async {
+    showDialog(
+      barrierDismissible: false,
+      context: navigatorKey.currentContext!,
+      builder: (context) => const DictionaryDialogDeletePage(),
+    );
+
+    DeleteDictionaryParams params = DeleteDictionaryParams(
+      dictionaryName: dictionary.dictionaryName,
+      isarDirectoryPath: isarDirectory.path,
+    );
+    await compute(deleteDictionaryData, params);
+
+    Navigator.pop(navigatorKey.currentContext!);
   }
 }

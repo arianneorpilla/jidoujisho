@@ -26,12 +26,33 @@ Future<void> depositDictionaryEntries(PrepareDictionaryParams params) async {
     ],
   );
 
-  database.writeTxnSync((isar) {
+  database.writeTxnSync((database) {
     database.dictionaryEntrys
         .filter()
         .dictionaryNameEqualTo(params.dictionaryName)
         .deleteAllSync();
     database.dictionaryEntrys.putAllSync(dictionaryEntries);
+  });
+}
+
+/// Delete a selected dictionary from the dictionary database.
+Future<void> deleteDictionaryData(DeleteDictionaryParams params) async {
+  final Isar database = await Isar.open(
+    directory: params.isarDirectoryPath,
+    schemas: [
+      DictionarySchema,
+      DictionaryEntrySchema,
+      MediaItemSchema,
+      CreatorContextSchema,
+    ],
+  );
+
+  database.writeTxnSync((database) {
+    database.dictionarys.deleteByDictionaryNameSync(params.dictionaryName);
+    database.dictionaryEntrys
+        .filter()
+        .dictionaryNameEqualTo(params.dictionaryName)
+        .deleteAllSync();
   });
 }
 
@@ -95,6 +116,23 @@ class PrepareDictionaryParams {
 
   /// Used to send localised message count updates from a separate isolate.
   final DictionaryImportLocalisation localisation;
+}
+
+/// For isolate communication purposes. Used for dictionary deletion.
+class DeleteDictionaryParams {
+  /// Prepare parameters needed for deleting a dictionary from a separate
+  /// isolate.
+  DeleteDictionaryParams({
+    required this.dictionaryName,
+    required this.isarDirectoryPath,
+  });
+
+  /// The dictionary name obtained in the previous stage, used to indicate
+  /// that entries are from a certain dictionary.
+  final String dictionaryName;
+
+  /// Used to pass the path to the database to open from the other isolate.
+  final String isarDirectoryPath;
 }
 
 /// Bundles relevant localisation information for use in dictionary imports.
