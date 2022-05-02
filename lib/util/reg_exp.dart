@@ -3,7 +3,7 @@ extension RegExpExtension on RegExp {
     var result = <String>[];
     for (var match in allMatches(input, start)) {
       result.add(input.substring(start, match.start));
-      result.add(match[0] ?? "");
+      result.add(match[0] ?? '');
       start = match.end;
     }
     result.add(input.substring(start));

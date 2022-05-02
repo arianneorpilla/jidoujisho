@@ -36,7 +36,7 @@ Widget transcriptDialog({
             ),
             const SizedBox(height: 6),
             Text(
-              appModel.translate("player_subtitles_transcript_empty"),
+              appModel.translate('player_subtitles_transcript_empty'),
               style: TextStyle(
                 fontSize: 20,
                 color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
@@ -67,10 +67,10 @@ Widget transcriptDialog({
       String subtitleText = subtitle.data;
 
       if (regexFilter.isNotEmpty) {
-        subtitleText = subtitleText.replaceAll(RegExp(regexFilter), "");
+        subtitleText = subtitleText.replaceAll(RegExp(regexFilter), '');
       }
       if (subtitleText.trim().isNotEmpty) {
-        subtitleText = "『$subtitleText』";
+        subtitleText = '『$subtitleText』';
       }
 
       Color durationColor = Theme.of(context).unselectedWidgetColor;
@@ -79,7 +79,7 @@ Widget transcriptDialog({
       Duration offsetEnd = subtitle.end - subtitleDelay;
       String offsetStartText = getTimestampFromDuration(offsetStart);
       String offsetEndText = getTimestampFromDuration(offsetEnd);
-      String subtitleDuration = "$offsetStartText - $offsetEndText";
+      String subtitleDuration = '$offsetStartText - $offsetEndText';
 
       return Material(
         color: Colors.transparent,

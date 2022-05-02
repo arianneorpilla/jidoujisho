@@ -33,13 +33,13 @@ extension MediaTypeParameters on MediaType {
   String prefsDirectory() {
     switch (this) {
       case MediaType.player:
-        return "player_media_type";
+        return 'player_media_type';
       case MediaType.reader:
-        return "reader_media_type";
+        return 'reader_media_type';
       case MediaType.viewer:
-        return "viewer_media_type";
+        return 'viewer_media_type';
       case MediaType.dictionary:
-        return "dictionary_media_type";
+        return 'dictionary_media_type';
     }
   }
 
@@ -87,53 +87,53 @@ extension MediaTypeParameters on MediaType {
     switch (this) {
       case MediaType.player:
         return const [
-          ".3gp",
-          ".aaf",
-          ".asf",
-          ".avchd",
-          ".avi",
-          ".drc",
-          ".flv",
-          ".m2v",
-          ".m4p",
-          ".m4v",
-          ".mkv",
-          ".mng",
-          ".mov",
-          ".mp2",
-          ".mp4",
-          ".mpe",
-          ".mpeg",
-          ".mpg",
-          ".mpv",
-          ".mxf",
-          ".nsv",
-          ".ogg",
-          ".ogv",
-          ".ogm",
-          ".qt",
-          ".rm",
-          ".rmvb",
-          ".roq",
-          ".srt",
-          ".svi",
-          ".vob",
-          ".webm",
-          ".wmv",
-          ".yuv"
+          '.3gp',
+          '.aaf',
+          '.asf',
+          '.avchd',
+          '.avi',
+          '.drc',
+          '.flv',
+          '.m2v',
+          '.m4p',
+          '.m4v',
+          '.mkv',
+          '.mng',
+          '.mov',
+          '.mp2',
+          '.mp4',
+          '.mpe',
+          '.mpeg',
+          '.mpg',
+          '.mpv',
+          '.mxf',
+          '.nsv',
+          '.ogg',
+          '.ogv',
+          '.ogm',
+          '.qt',
+          '.rm',
+          '.rmvb',
+          '.roq',
+          '.srt',
+          '.svi',
+          '.vob',
+          '.webm',
+          '.wmv',
+          '.yuv'
         ];
       case MediaType.reader:
         return const [
-          ".epub",
+          '.epub',
         ];
       case MediaType.viewer:
         return const [
-          ".jpg",
-          ".jpeg",
-          ".png",
+          '.jpg',
+          '.jpeg',
+          '.png',
         ];
       case MediaType.dictionary:
-        throw UnsupportedError("Operation invalid for dictionary media type.");
+        throw UnsupportedError('Operation invalid for dictionary media type.');
     }
   }
 }

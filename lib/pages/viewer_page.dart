@@ -93,7 +93,7 @@ class ViewerPageState extends State<ViewerPage> {
   bool isDragging = false;
 
   List<String> chapters = [];
-  String chapterName = "";
+  String chapterName = '';
 
   bool shouldDialogBeTop = false;
   double sentenceFieldHeight = 48;
@@ -101,8 +101,8 @@ class ViewerPageState extends State<ViewerPage> {
   late TextRecognitionOptions script;
 
   DictionarySearchResult? searchResult;
-  ValueNotifier<String> searchTerm = ValueNotifier<String>("");
-  ValueNotifier<String> searchMessage = ValueNotifier<String>("");
+  ValueNotifier<String> searchTerm = ValueNotifier<String>('');
+  ValueNotifier<String> searchMessage = ValueNotifier<String>('');
 
   TextEditingController sentenceController = TextEditingController();
   FocusNode sentenceFocusNode = FocusNode();
@@ -166,14 +166,14 @@ class ViewerPageState extends State<ViewerPage> {
   Future<void> copyClipboardAction() async {
     setSearchTerm((await Clipboard.getData(Clipboard.kTextPlain))!
         .text!
-        .replaceAll("￼", ""));
+        .replaceAll('￼', ''));
   }
 
   Future<void> processOcr(Offset a, Offset b) async {
     if (!ocrBusy.value) {
       promptProcessed = false;
       ocrBusy.value = true;
-      debugPrint("OCR START");
+      debugPrint('OCR START');
 
       Uint8List? imageBytes = await screenshotController.capture();
       imglib.Image? screenshot = imglib.decodeImage(imageBytes!)!;
@@ -201,10 +201,10 @@ class ViewerPageState extends State<ViewerPage> {
       File file = File('${tempDir.path}/${now.millisecondsSinceEpoch}.jpg');
       await file.writeAsBytes(croppedImageBytes);
 
-      debugPrint("CROPPED IMAGE WRITTEN");
+      debugPrint('CROPPED IMAGE WRITTEN');
 
       final textDetector = GoogleMlKit.vision.textDetectorV2();
-      String sentence = "";
+      String sentence = '';
 
       try {
         RecognisedText recognisedText = await textDetector.processImage(
@@ -242,7 +242,7 @@ class ViewerPageState extends State<ViewerPage> {
       //   print(block.text);
       // });
     } else {
-      debugPrint("OCR IS BUSY -- WAITING TO FINISH");
+      debugPrint('OCR IS BUSY -- WAITING TO FINISH');
     }
   }
 
@@ -276,7 +276,7 @@ class ViewerPageState extends State<ViewerPage> {
                   onPressed: () async {
                     setState(() {
                       touchPoints.clear();
-                      setSearchTerm("");
+                      setSearchTerm('');
                       ocrOverlayShown = !ocrOverlayShown;
                     });
                   },
@@ -364,12 +364,12 @@ class ViewerPageState extends State<ViewerPage> {
         borderRadius: BorderRadius.zero,
       ),
       title: Text(
-        appModel.translate("dialog_exit_viewer"),
+        appModel.translate('dialog_exit_viewer'),
       ),
       actions: <Widget>[
         TextButton(
             child: Text(
-              appModel.translate("dialog_yes"),
+              appModel.translate('dialog_yes'),
               style: TextStyle(
                 color: Theme.of(context).focusColor,
               ),
@@ -377,7 +377,7 @@ class ViewerPageState extends State<ViewerPage> {
             onPressed: () => exitPage()),
         TextButton(
           child: Text(
-            appModel.translate("dialog_no"),
+            appModel.translate('dialog_no'),
           ),
           onPressed: () async {
             Navigator.pop(context, false);
@@ -607,14 +607,14 @@ class ViewerPageState extends State<ViewerPage> {
                     .every((selected) => selected == false)) {
                   setSearchTerm(sentence);
                 } else {
-                  String wordsJoined = "";
+                  String wordsJoined = '';
 
                   for (int i = 0; i < words.length; i++) {
                     if (indexesSelected.value[i]) {
                       wordsJoined += words[i];
                     }
                     if (isSpaceDelimited) {
-                      wordsJoined += " ";
+                      wordsJoined += ' ';
                     }
                   }
 
@@ -631,14 +631,14 @@ class ViewerPageState extends State<ViewerPage> {
                     .every((selected) => selected == false)) {
                   sentenceController.text = sentence;
                 } else {
-                  String wordsJoined = "";
+                  String wordsJoined = '';
 
                   for (int i = 0; i < words.length; i++) {
                     if (indexesSelected.value[i]) {
                       wordsJoined += words[i];
                     }
                     if (isSpaceDelimited) {
-                      wordsJoined += " ";
+                      wordsJoined += ' ';
                     }
                   }
 
@@ -650,13 +650,13 @@ class ViewerPageState extends State<ViewerPage> {
             ),
             if (!forFormField)
               TextButton(
-                child: Text(appModel.translate("dialog_add")),
+                child: Text(appModel.translate('dialog_add')),
                 onLongPress: () {
                   if (indexesSelected.value
                       .every((selected) => selected == false)) {
                     sentenceController.text += sentence;
                   } else {
-                    String wordsJoined = "";
+                    String wordsJoined = '';
 
                     for (int i = 0; i < words.length; i++) {
                       if (indexesSelected.value[i]) {
@@ -674,14 +674,14 @@ class ViewerPageState extends State<ViewerPage> {
                       .every((selected) => selected == false)) {
                     sentenceController.text += sentence;
                   } else {
-                    String wordsJoined = "";
+                    String wordsJoined = '';
 
                     for (int i = 0; i < words.length; i++) {
                       if (indexesSelected.value[i]) {
                         wordsJoined += words[i];
                       }
                       if (isSpaceDelimited) {
-                        wordsJoined += " ";
+                        wordsJoined += ' ';
                       }
                     }
 
@@ -728,7 +728,7 @@ class ViewerPageState extends State<ViewerPage> {
               ),
               child: GestureDetector(
                 onTap: () {
-                  setSearchTerm("");
+                  setSearchTerm('');
                 },
                 onLongPress: () {},
                 child: Container(
@@ -756,7 +756,7 @@ class ViewerPageState extends State<ViewerPage> {
             ),
             child: GestureDetector(
               onTap: () {
-                setSearchTerm("");
+                setSearchTerm('');
               },
               onLongPress: () async {
                 await appModel.showDictionaryMenu(context,
@@ -827,11 +827,11 @@ class ViewerPageState extends State<ViewerPage> {
         text: '',
         children: <InlineSpan>[
           TextSpan(
-            text: appModel.translate("searching_before"),
+            text: appModel.translate('searching_before'),
             style: const TextStyle(),
           ),
           TextSpan(
-            text: "『",
+            text: '『',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Theme.of(context).unselectedWidgetColor,
@@ -844,14 +844,14 @@ class ViewerPageState extends State<ViewerPage> {
             ),
           ),
           TextSpan(
-            text: "』",
+            text: '』',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Theme.of(context).unselectedWidgetColor,
             ),
           ),
           TextSpan(
-            text: appModel.translate("searching_after"),
+            text: appModel.translate('searching_after'),
           ),
           WidgetSpan(
             child: SizedBox(
@@ -883,7 +883,7 @@ class ViewerPageState extends State<ViewerPage> {
             style: const TextStyle(),
           ),
           TextSpan(
-            text: "『",
+            text: '『',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Theme.of(context).unselectedWidgetColor,
@@ -896,7 +896,7 @@ class ViewerPageState extends State<ViewerPage> {
             ),
           ),
           TextSpan(
-            text: "』",
+            text: '』',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Theme.of(context).unselectedWidgetColor,
@@ -933,7 +933,7 @@ class ViewerPageState extends State<ViewerPage> {
             style: const TextStyle(),
           ),
           TextSpan(
-            text: "『",
+            text: '『',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Theme.of(context).unselectedWidgetColor,
@@ -946,7 +946,7 @@ class ViewerPageState extends State<ViewerPage> {
             ),
           ),
           TextSpan(
-            text: "』",
+            text: '』',
             style: TextStyle(
               color: Theme.of(context).unselectedWidgetColor,
             ),
@@ -969,12 +969,12 @@ class ViewerPageState extends State<ViewerPage> {
 
   Widget buildDictionaryMessage(String messageText) {
     // Handle special cases with certain reserved patterns.
-    if (messageText.startsWith("deckExport://")) {
-      String deckName = messageText.replaceAll("deckExport://", "");
+    if (messageText.startsWith('deckExport://')) {
+      String deckName = messageText.replaceAll('deckExport://', '');
       return buildDictionaryMessageArgument(
-        appModel.translate("deck_label_before"),
+        appModel.translate('deck_label_before'),
         deckName,
-        appModel.translate("deck_label_after"),
+        appModel.translate('deck_label_after'),
         false,
       );
     }
@@ -984,9 +984,9 @@ class ViewerPageState extends State<ViewerPage> {
         text: '',
         children: <InlineSpan>[
           TextSpan(
-            text: messageText.replaceAll("...", ""),
+            text: messageText.replaceAll('...', ''),
           ),
-          if (messageText.endsWith("..."))
+          if (messageText.endsWith('...'))
             WidgetSpan(
               child: SizedBox(
                 height: 12,
@@ -1007,10 +1007,10 @@ class ViewerPageState extends State<ViewerPage> {
         text: '',
         children: <InlineSpan>[
           TextSpan(
-            text: appModel.translate("dictionary_nomatch_before"),
+            text: appModel.translate('dictionary_nomatch_before'),
           ),
           TextSpan(
-            text: "『",
+            text: '『',
             style: TextStyle(
               color: Theme.of(context).unselectedWidgetColor,
             ),
@@ -1022,14 +1022,14 @@ class ViewerPageState extends State<ViewerPage> {
             ),
           ),
           TextSpan(
-            text: "』",
+            text: '』',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Theme.of(context).unselectedWidgetColor,
             ),
           ),
           TextSpan(
-            text: appModel.translate("dictionary_nomatch_after"),
+            text: appModel.translate('dictionary_nomatch_after'),
             style: const TextStyle(),
           ),
         ],
@@ -1049,7 +1049,7 @@ class ViewerPageState extends State<ViewerPage> {
     item = widget.params.mediaSource
         .setChapterPageTotal(item, chapterName, completeProgress);
     item = widget.params.mediaSource.setCurrentChapterName(item, chapterName);
-    item.extra["chapters"] = chapters;
+    item.extra['chapters'] = chapters;
 
     if (item.completeProgress != 0) {
       if (!appModel.getIncognitoMode() &&
@@ -1348,7 +1348,7 @@ class ViewerPageState extends State<ViewerPage> {
                     Positioned(
                       bottom: 10,
                       child: Text(
-                        "$progress / $completeProgress",
+                        '$progress / $completeProgress',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 12,
@@ -1362,7 +1362,7 @@ class ViewerPageState extends State<ViewerPage> {
                     Positioned(
                       bottom: 10,
                       child: Text(
-                        "$progress / $completeProgress",
+                        '$progress / $completeProgress',
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           fontSize: 12,
@@ -1437,7 +1437,7 @@ class ViewerPageState extends State<ViewerPage> {
   }
 
   void clearDictionaryMessage() {
-    searchMessage.value = "";
+    searchMessage.value = '';
   }
 
   @override
@@ -1463,7 +1463,7 @@ class ViewerPageState extends State<ViewerPage> {
                     setState(() {
                       isMenuHidden.value = false;
                       touchPoints.clear();
-                      setSearchTerm("");
+                      setSearchTerm('');
                       ocrOverlayShown = !ocrOverlayShown;
                     });
                   }),
@@ -1497,7 +1497,7 @@ class ViewerPageState extends State<ViewerPage> {
               valueListenable: currentProgress,
               builder: (BuildContext context, int progress, Widget? child) {
                 return Text(
-                  "$progress / $completeProgress",
+                  '$progress / $completeProgress',
                   style: TextStyle(
                     fontSize: 14.0,
                     color:
@@ -1542,7 +1542,7 @@ class ViewerPageState extends State<ViewerPage> {
     List<BottomSheetDialogOption> options = [
       if (widget.params.canOpenHistory)
         BottomSheetDialogOption(
-          label: appModel.translate("viewer_option_chapter_menu"),
+          label: appModel.translate('viewer_option_chapter_menu'),
           icon: Icons.book,
           action: () async {
             await widget.params.mediaSource.showChapterMenu(
@@ -1554,7 +1554,7 @@ class ViewerPageState extends State<ViewerPage> {
           },
         ),
       BottomSheetDialogOption(
-        label: appModel.translate("viewer_option_dictionary_menu"),
+        label: appModel.translate('viewer_option_dictionary_menu'),
         icon: Icons.auto_stories,
         action: () async {
           await appModel.showDictionaryMenu(context, onDictionaryChange: () {
@@ -1565,8 +1565,8 @@ class ViewerPageState extends State<ViewerPage> {
       if (!widget.params.hideSlider)
         BottomSheetDialogOption(
           label: (appModel.isViewerRightToLeft())
-              ? appModel.translate("viewer_option_direction_ltr")
-              : appModel.translate("viewer_option_direction_rtl"),
+              ? appModel.translate('viewer_option_direction_ltr')
+              : appModel.translate('viewer_option_direction_rtl'),
           icon: (appModel.isViewerRightToLeft())
               ? Icons.format_textdirection_l_to_r
               : Icons.format_textdirection_r_to_l,
@@ -1576,14 +1576,14 @@ class ViewerPageState extends State<ViewerPage> {
           },
         ),
       BottomSheetDialogOption(
-        label: appModel.translate("viewer_option_background_color"),
+        label: appModel.translate('viewer_option_background_color'),
         icon: Icons.color_lens,
         action: () async {
           await showColorOptionsDialog();
         },
       ),
       BottomSheetDialogOption(
-        label: appModel.translate("viewer_option_share_image"),
+        label: appModel.translate('viewer_option_share_image'),
         icon: Icons.share,
         action: () async {
           File file = await getFileFromCurrentImage();
@@ -1591,7 +1591,7 @@ class ViewerPageState extends State<ViewerPage> {
         },
       ),
       BottomSheetDialogOption(
-        label: appModel.translate("player_option_export"),
+        label: appModel.translate('player_option_export'),
         icon: Icons.mobile_screen_share,
         action: () async {
           await openCardCreator();
@@ -1605,10 +1605,10 @@ class ViewerPageState extends State<ViewerPage> {
   Future<void> openCardCreator() async {
     File file = await getFileFromCurrentImage();
     MediaHistoryItem? contextItem = generateContextHistoryItem();
-    String? contextJson = "";
+    String? contextJson = '';
     if (contextItem != null) {
       contextJson = Uri.encodeFull(
-          "https://jidoujisho.context/${generateContextHistoryItem()!.toJson()}");
+          'https://jidoujisho.context/${generateContextHistoryItem()!.toJson()}');
     }
 
     AnkiExportParams initialParams = // todo other params
@@ -1627,7 +1627,7 @@ class ViewerPageState extends State<ViewerPage> {
       initialParams.reading = entry.reading;
     }
 
-    searchTerm.value = "";
+    searchTerm.value = '';
     sentenceController.clear();
 
     ClipboardListener.removeListener(copyClipboardAction);
@@ -1644,7 +1644,7 @@ class ViewerPageState extends State<ViewerPage> {
         Navigator.of(context).pop();
         String lastDeck = appModel.getLastAnkiDroidDeck();
         setDictionaryMessage(
-          "deckExport://$lastDeck",
+          'deckExport://$lastDeck',
           duration: const Duration(seconds: 3),
         );
       },
@@ -1679,7 +1679,7 @@ class ViewerPageState extends State<ViewerPage> {
       return File.fromRawPath(image.img);
     }
 
-    throw UnsupportedError("ImageProvider type not implemented for share");
+    throw UnsupportedError('ImageProvider type not implemented for share');
   }
 
   Future<void> showColorOptionsDialog() async {
@@ -1715,7 +1715,7 @@ class ViewerPageState extends State<ViewerPage> {
           actions: <Widget>[
             TextButton(
               child: Text(
-                appModel.translate("dialog_cancel"),
+                appModel.translate('dialog_cancel'),
               ),
               onPressed: () {
                 Navigator.pop(context);
@@ -1723,7 +1723,7 @@ class ViewerPageState extends State<ViewerPage> {
             ),
             TextButton(
               child: Text(
-                appModel.translate("dialog_set"),
+                appModel.translate('dialog_set'),
               ),
               onPressed: () async {
                 await appModel.setViewerColorBackground(widgetColor);

@@ -6,10 +6,10 @@ import 'package:objectbox/objectbox.dart';
 class DictionaryEntry {
   DictionaryEntry({
     this.id = 0,
-    this.word = "",
-    this.reading = "",
-    this.meaning = "",
-    this.extra = "",
+    this.word = '',
+    this.reading = '',
+    this.meaning = '',
+    this.extra = '',
     this.popularity = 0,
   });
 
@@ -43,11 +43,11 @@ class DictionaryEntry {
   /// and persistence purposes.
   String toJson() {
     Map<String, dynamic> map = {
-      "word": word,
-      "reading": reading,
-      "meaning": meaning,
-      "extra": extra,
-      "popularity": popularity,
+      'word': word,
+      'reading': reading,
+      'meaning': meaning,
+      'extra': extra,
+      'popularity': popularity,
     };
 
     return jsonEncode(map);
@@ -58,11 +58,11 @@ class DictionaryEntry {
     Map<String, dynamic> map = jsonDecode(json);
 
     return DictionaryEntry(
-      word: map["word"],
-      reading: map["reading"],
-      meaning: map["meaning"],
-      extra: map["extra"].toString(),
-      popularity: map["popularity"],
+      word: map['word'],
+      reading: map['reading'],
+      meaning: map['meaning'],
+      extra: map['extra'].toString(),
+      popularity: map['popularity'],
     );
   }
 
@@ -84,7 +84,7 @@ class DictionaryEntry {
 
   @override
   String toString() {
-    return "DictionaryEntry(word: $word, reading: $reading, "
-        "meaning: $meaning, extra: $extra, popularity: $popularity)";
+    return 'DictionaryEntry(word: $word, reading: $reading, '
+        'meaning: $meaning, extra: $extra, popularity: $popularity)';
   }
 }

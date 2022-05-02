@@ -21,7 +21,7 @@ import 'package:wakelock/wakelock.dart';
 class ViewerLocalMediaSource extends ViewerMediaSource {
   ViewerLocalMediaSource()
       : super(
-          sourceName: "Local Source",
+          sourceName: 'Local Source',
           icon: Icons.photo_album,
         );
 
@@ -123,7 +123,7 @@ class ViewerLocalMediaSource extends ViewerMediaSource {
 
     for (FileSystemEntity entity in entities) {
       if (entity is File) {
-        if (p.basenameWithoutExtension(entity.path) == "cover") {
+        if (p.basenameWithoutExtension(entity.path) == 'cover') {
           if (extensions.contains(p.extension(entity.path))) {
             return entity;
           }
@@ -158,9 +158,9 @@ class ViewerLocalMediaSource extends ViewerMediaSource {
     AppModel appModel = Provider.of<AppModel>(context, listen: false);
 
     Iterable<String>? filePaths = await FilesystemPicker.open(
-      title: "",
-      pickText: appModel.translate("dialog_select"),
-      cancelText: appModel.translate("dialog_cancel"),
+      title: '',
+      pickText: appModel.translate('dialog_select'),
+      cancelText: appModel.translate('dialog_cancel'),
       context: context,
       rootDirectories: await appModel.getMediaTypeDirectories(mediaType),
       fsType: FilesystemType.folder,
@@ -206,7 +206,7 @@ class ViewerLocalMediaSource extends ViewerMediaSource {
             continue;
           }
 
-          item.extra["chapters"] = chapters;
+          item.extra['chapters'] = chapters;
 
           await history.addItem(item);
         } catch (e) {
@@ -260,7 +260,7 @@ class ViewerLocalMediaSource extends ViewerMediaSource {
           ),
         );
 
-        item.extra["chapters"] = chapters;
+        item.extra['chapters'] = chapters;
       } finally {}
     }
   }

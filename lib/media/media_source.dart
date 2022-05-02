@@ -41,7 +41,7 @@ abstract class MediaSource {
   /// A unique identifier that represents the media source's name along with
   /// its media type. Useful for storing entries in shared preferences.
   String getIdentifier() {
-    return "${mediaType.prefsDirectory()}/$sourceName";
+    return '${mediaType.prefsDirectory()}/$sourceName';
   }
 
   /// From a [MediaHistoryItem], generate the thumbnail of this item that will

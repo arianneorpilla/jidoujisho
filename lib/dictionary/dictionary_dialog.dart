@@ -46,7 +46,7 @@ class DictionaryDialogState extends State<DictionaryDialog> {
               if (appModel.getCurrentDictionary() != null)
                 TextButton(
                   child: Text(
-                    appModel.translate("dialog_remove"),
+                    appModel.translate('dialog_remove'),
                     style: TextStyle(
                       color: Theme.of(context).focusColor,
                     ),
@@ -57,7 +57,7 @@ class DictionaryDialogState extends State<DictionaryDialog> {
                 ),
               TextButton(
                 child: Text(
-                  appModel.translate("dialog_import"),
+                  appModel.translate('dialog_import'),
                 ),
                 onPressed: () async {
                   await dictionaryFileImport(
@@ -68,7 +68,7 @@ class DictionaryDialogState extends State<DictionaryDialog> {
               ),
               TextButton(
                 child: Text(
-                  appModel.translate("dialog_close"),
+                  appModel.translate('dialog_close'),
                 ),
                 onPressed: () {
                   Navigator.pop(context);
@@ -119,7 +119,7 @@ class DictionaryDialogState extends State<DictionaryDialog> {
           alignment: Alignment.centerLeft,
           padding: const EdgeInsets.only(left: 8),
           child: Text(
-            appModel.translate("import_format"),
+            appModel.translate('import_format'),
             style: TextStyle(
               fontSize: 10,
               color: Theme.of(context).unselectedWidgetColor,
@@ -143,7 +143,7 @@ class DictionaryDialogState extends State<DictionaryDialog> {
       padding: const EdgeInsets.symmetric(vertical: 24),
       child: showCenterIconMessage(
         context: context,
-        label: appModel.translate("import_dictionaries_for_use"),
+        label: appModel.translate('import_dictionaries_for_use'),
         icon: Icons.auto_stories,
         jumpingDots: false,
       ),
@@ -239,13 +239,13 @@ class DictionaryDialogState extends State<DictionaryDialog> {
       ),
       title: Text(appModel.getCurrentDictionaryName()),
       content: Text(
-        appModel.translate("remove_dictionary_confirmation"),
+        appModel.translate('remove_dictionary_confirmation'),
         textAlign: TextAlign.justify,
       ),
       actions: <Widget>[
         TextButton(
             child: Text(
-              appModel.translate("dialog_yes"),
+              appModel.translate('dialog_yes'),
               style: TextStyle(
                 color: Theme.of(context).focusColor,
               ),
@@ -257,7 +257,7 @@ class DictionaryDialogState extends State<DictionaryDialog> {
             }),
         TextButton(
             child: Text(
-              appModel.translate("dialog_no"),
+              appModel.translate('dialog_no'),
             ),
             onPressed: () => Navigator.pop(context)),
       ],

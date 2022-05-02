@@ -24,7 +24,7 @@ Future<void> dictionaryFileImport(
 ) async {
   /// A [ValueNotifier] that will update a message based on the progress of the
   /// on-going dictionary file import.
-  ValueNotifier<String> progressNotifier = ValueNotifier<String>("");
+  ValueNotifier<String> progressNotifier = ValueNotifier<String>('');
 
   /// Importing makes heavy use of isolates as it is very performance intensive
   /// to work with files. In order to ensure the UI isolate isn't blocked, a
@@ -43,8 +43,8 @@ Future<void> dictionaryFileImport(
 
   if (!dictionaryFormat.isOnline) {
     Iterable<String>? filePaths = await FilesystemPicker.open(
-      pickText: appModel.translate("dialog_select"),
-      cancelText: appModel.translate("dialog_cancel"),
+      pickText: appModel.translate('dialog_select'),
+      cancelText: appModel.translate('dialog_cancel'),
       context: context,
       rootDirectories: await appModel.getMediaTypeDirectories(mediaType),
       fsType: FilesystemType.file,
@@ -61,7 +61,7 @@ Future<void> dictionaryFileImport(
     appModel.setLastPickedDirectory(mediaType, Directory(p.dirname(filePath)));
   } else {
     File workaroundFile =
-        File("${(await getApplicationSupportDirectory()).path}/temp");
+        File('${(await getApplicationSupportDirectory()).path}/temp');
     workaroundFile.createSync();
 
     filePath = workaroundFile.path;
@@ -88,7 +88,7 @@ Future<void> dictionaryFileImport(
     /// Foremostly, the process should not begin if a file does not match the
     /// correct [Uri] to start with.
     if (!dictionaryFormat.isUriSupported(file.uri)) {
-      throw Exception("Dictionary file does not match format Uri.");
+      throw Exception('Dictionary file does not match format Uri.');
     }
 
     /// Import process starts here.
@@ -146,7 +146,7 @@ Future<void> dictionaryFileImport(
     /// If the dictionary name collides with an existing dictionary, the
     /// process is halted.
     if (appModel.getImportedDictionaryNames().contains(dictionaryName)) {
-      throw Exception("Name collision with existing dictionary");
+      throw Exception('Name collision with existing dictionary');
     }
 
     /// Initialise an ObjectBox [Store], where the new database will be
@@ -160,7 +160,7 @@ Future<void> dictionaryFileImport(
         appModel.removeDictionaryStore(dictionaryName);
 
         Directory objectBoxDirDirectory = Directory(
-          p.join(appDirDocPath, "customDictionaries", dictionaryName),
+          p.join(appDirDocPath, 'customDictionaries', dictionaryName),
         );
         if (objectBoxDirDirectory.existsSync()) {
           objectBoxDirDirectory.deleteSync(recursive: true);
@@ -245,7 +245,7 @@ Future<void> extractAndDepositEntries(ImportEntriesParams params) async {
   List<DictionaryEntry> dictionaryEntries = await params.dictionaryFormat
       .getDictionaryEntries(params.importDirectoryParams);
 
-  params.sendPort.send("Adding entries to database...");
+  params.sendPort.send('Adding entries to database...');
   Store entryStore = Store.fromReference(
     getObjectBoxModel(),
     params.storeReference,
@@ -280,7 +280,7 @@ Widget showProgressDialog(
               Padding(
                 padding: const EdgeInsets.only(left: 0.7),
                 child: Text(
-                  appModel.translate("import_in_progress"),
+                  appModel.translate('import_in_progress'),
                   style: TextStyle(
                     fontSize: 10,
                     color: Theme.of(context).unselectedWidgetColor,
@@ -394,43 +394,43 @@ class ResultsProcessingParams {
 
 /// These duplicate functions are necessary for later localisation.
 void importMessageStart(ValueNotifier<String> progressNotifier) {
-  progressNotifier.value = "Importing dictionary...";
+  progressNotifier.value = 'Importing dictionary...';
 }
 
 void importMessageClean(ValueNotifier<String> progressNotifier) {
-  progressNotifier.value = "Clearing working space...";
+  progressNotifier.value = 'Clearing working space...';
 }
 
 void importMessageExtraction(ValueNotifier<String> progressNotifier) {
-  progressNotifier.value = "Extracting files...";
+  progressNotifier.value = 'Extracting files...';
 }
 
 void importMessageName(ValueNotifier<String> progressNotifier, String name) {
-  progressNotifier.value = "Importing as 『$name』...";
+  progressNotifier.value = 'Importing as 『$name』...';
 }
 
 void importMessageEntries(ValueNotifier<String> progressNotifier) {
-  progressNotifier.value = "Processing entries...";
+  progressNotifier.value = 'Processing entries...';
 }
 
 void importMessageMetadata(ValueNotifier<String> progressNotifier) {
-  progressNotifier.value = "Processing metadata...";
+  progressNotifier.value = 'Processing metadata...';
 }
 
 void importMessageDatabase(ValueNotifier<String> progressNotifier) {
-  progressNotifier.value = "Adding entries to database...";
+  progressNotifier.value = 'Adding entries to database...';
 }
 
 void importMessageComplete(ValueNotifier<String> progressNotifier) {
-  progressNotifier.value = "Dictionary import complete.";
+  progressNotifier.value = 'Dictionary import complete.';
 }
 
 void importMessageError(ValueNotifier<String> progressNotifier, String error) {
-  progressNotifier.value = "Import error: $error";
+  progressNotifier.value = 'Import error: $error';
 }
 
 void importMessageFailed(ValueNotifier<String> progressNotifier) {
-  progressNotifier.value = "Dictionary import failed.";
+  progressNotifier.value = 'Dictionary import failed.';
 }
 
 Future<DictionarySearchResult> searchDatabase(

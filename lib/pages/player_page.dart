@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:audio_service/audio_service.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -111,8 +110,8 @@ class PlayerPageState extends State<PlayerPage>
   Orientation? currentOrientation;
 
   DictionarySearchResult? searchResult;
-  ValueNotifier<String> searchTerm = ValueNotifier<String>("");
-  ValueNotifier<String> searchMessage = ValueNotifier<String>("");
+  ValueNotifier<String> searchTerm = ValueNotifier<String>('');
+  ValueNotifier<String> searchMessage = ValueNotifier<String>('');
   ValueNotifier<Subtitle?> shadowingSubtitle = ValueNotifier<Subtitle?>(null);
   ValueNotifier<Subtitle?> listeningSubtitle = ValueNotifier<Subtitle?>(null);
 
@@ -125,12 +124,12 @@ class PlayerPageState extends State<PlayerPage>
           borderRadius: BorderRadius.zero,
         ),
         title: Text(
-          appModel.translate("dialog_exit_player"),
+          appModel.translate('dialog_exit_player'),
         ),
         actions: <Widget>[
           TextButton(
             child: Text(
-              appModel.translate("dialog_yes"),
+              appModel.translate('dialog_yes'),
               style: TextStyle(
                 color: Theme.of(context).focusColor,
               ),
@@ -139,7 +138,7 @@ class PlayerPageState extends State<PlayerPage>
           ),
           TextButton(
             child: Text(
-              appModel.translate("dialog_no"),
+              appModel.translate('dialog_no'),
             ),
             onPressed: () async {
               Navigator.pop(context, false);
@@ -218,7 +217,7 @@ class PlayerPageState extends State<PlayerPage>
   Future<void> copyClipboardAction() async {
     setSearchTerm((await Clipboard.getData(Clipboard.kTextPlain))!
         .text!
-        .replaceAll("￼", ""));
+        .replaceAll('￼', ''));
   }
 
   @override
@@ -230,7 +229,7 @@ class PlayerPageState extends State<PlayerPage>
     emptySubtitleItem = SubtitleItem(
       controller: SubtitleController(
         provider: SubtitleProvider.fromString(
-          data: "",
+          data: '',
           type: SubtitleType.srt,
         ),
       ),
@@ -361,7 +360,7 @@ class PlayerPageState extends State<PlayerPage>
               ),
               child: GestureDetector(
                 onTap: () {
-                  setSearchTerm("");
+                  setSearchTerm('');
                 },
                 child: Container(
                   color: dictionaryColor,
@@ -392,7 +391,7 @@ class PlayerPageState extends State<PlayerPage>
                   dialogSmartResume(isSmartFocus: true);
                 }
 
-                setSearchTerm("");
+                setSearchTerm('');
               },
               onLongPress: () async {
                 await appModel.showDictionaryMenu(context,
@@ -469,11 +468,11 @@ class PlayerPageState extends State<PlayerPage>
         text: '',
         children: <InlineSpan>[
           TextSpan(
-            text: appModel.translate("searching_before"),
+            text: appModel.translate('searching_before'),
             style: const TextStyle(),
           ),
           TextSpan(
-            text: "『",
+            text: '『',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Theme.of(context).unselectedWidgetColor,
@@ -486,14 +485,14 @@ class PlayerPageState extends State<PlayerPage>
             ),
           ),
           TextSpan(
-            text: "』",
+            text: '』',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Theme.of(context).unselectedWidgetColor,
             ),
           ),
           TextSpan(
-            text: appModel.translate("searching_after"),
+            text: appModel.translate('searching_after'),
           ),
           WidgetSpan(
             child: SizedBox(
@@ -525,7 +524,7 @@ class PlayerPageState extends State<PlayerPage>
             style: const TextStyle(),
           ),
           TextSpan(
-            text: "『",
+            text: '『',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Theme.of(context).unselectedWidgetColor,
@@ -538,7 +537,7 @@ class PlayerPageState extends State<PlayerPage>
             ),
           ),
           TextSpan(
-            text: "』",
+            text: '』',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Theme.of(context).unselectedWidgetColor,
@@ -575,7 +574,7 @@ class PlayerPageState extends State<PlayerPage>
             style: const TextStyle(),
           ),
           TextSpan(
-            text: "『",
+            text: '『',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Theme.of(context).unselectedWidgetColor,
@@ -588,7 +587,7 @@ class PlayerPageState extends State<PlayerPage>
             ),
           ),
           TextSpan(
-            text: "』",
+            text: '』',
             style: TextStyle(
               color: Theme.of(context).unselectedWidgetColor,
             ),
@@ -611,12 +610,12 @@ class PlayerPageState extends State<PlayerPage>
 
   Widget buildDictionaryMessage(String messageText) {
     // Handle special cases with certain reserved patterns.
-    if (messageText.startsWith("deckExport://")) {
-      String deckName = messageText.replaceAll("deckExport://", "");
+    if (messageText.startsWith('deckExport://')) {
+      String deckName = messageText.replaceAll('deckExport://', '');
       return buildDictionaryMessageArgument(
-        appModel.translate("deck_label_before"),
+        appModel.translate('deck_label_before'),
         deckName,
-        appModel.translate("deck_label_after"),
+        appModel.translate('deck_label_after'),
         false,
       );
     }
@@ -626,9 +625,9 @@ class PlayerPageState extends State<PlayerPage>
         text: '',
         children: <InlineSpan>[
           TextSpan(
-            text: messageText.replaceAll("...", ""),
+            text: messageText.replaceAll('...', ''),
           ),
-          if (messageText.endsWith("..."))
+          if (messageText.endsWith('...'))
             WidgetSpan(
               child: SizedBox(
                 height: 12,
@@ -649,10 +648,10 @@ class PlayerPageState extends State<PlayerPage>
         text: '',
         children: <InlineSpan>[
           TextSpan(
-            text: appModel.translate("dictionary_nomatch_before"),
+            text: appModel.translate('dictionary_nomatch_before'),
           ),
           TextSpan(
-            text: "『",
+            text: '『',
             style: TextStyle(
               color: Theme.of(context).unselectedWidgetColor,
             ),
@@ -664,14 +663,14 @@ class PlayerPageState extends State<PlayerPage>
             ),
           ),
           TextSpan(
-            text: "』",
+            text: '』',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Theme.of(context).unselectedWidgetColor,
             ),
           ),
           TextSpan(
-            text: appModel.translate("dictionary_nomatch_after"),
+            text: appModel.translate('dictionary_nomatch_after'),
             style: const TextStyle(),
           ),
         ],
@@ -683,10 +682,10 @@ class PlayerPageState extends State<PlayerPage>
   Future<VlcPlayerController> preparePlayerController(
       PlayerLaunchParams params) async {
     int startTime = widget.params.mediaHistoryItem.currentProgress;
-    List<String> advancedParams = ["--start-time=$startTime"];
-    List<String> audioParams = ["--audio-track=0", "--sub-track=99999"];
+    List<String> advancedParams = ['--start-time=$startTime'];
+    List<String> audioParams = ['--audio-track=0', '--sub-track=99999'];
     if (params.audioPath != null) {
-      audioParams.add("--input-slave=${params.audioPath}");
+      audioParams.add('--input-slave=${params.audioPath}');
       audioPath = params.audioPath!;
     }
 
@@ -704,7 +703,7 @@ class PlayerPageState extends State<PlayerPage>
         String? audioUrl = await params.mediaSource.getAudioStreamUrl(params);
 
         if (audioUrl != null) {
-          audioParams.add("--input-slave=$audioUrl");
+          audioParams.add('--input-slave=$audioUrl');
           audioPath = audioUrl;
         }
 
@@ -881,7 +880,7 @@ class PlayerPageState extends State<PlayerPage>
         }
         String regex = subtitleOptionsNotifier.value.regexFilter;
         if (regex.isNotEmpty) {
-          subtitleText = subtitleText.replaceAll(RegExp(regex), "");
+          subtitleText = subtitleText.replaceAll(RegExp(regex), '');
         }
 
         return dragToSelectSubtitle(subtitleText);
@@ -1200,7 +1199,7 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   void clearDictionaryMessage() {
-    searchMessage.value = "";
+    searchMessage.value = '';
   }
 
   Duration getSubtitleDelay() {
@@ -1400,7 +1399,7 @@ class PlayerPageState extends State<PlayerPage>
               height: menuHeight,
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
-                "${getPositionText()} / ${getDurationText()}",
+                '${getPositionText()} / ${getDurationText()}',
                 style: TextStyle(
                   color: (shadowingSubtitle != null)
                       ? Theme.of(context).focusColor
@@ -1451,7 +1450,7 @@ class PlayerPageState extends State<PlayerPage>
 
   Widget buildAudioSubtitlesButton() {
     BottomSheetDialogOption audioOption = BottomSheetDialogOption(
-      label: appModel.translate("player_option_select_audio"),
+      label: appModel.translate('player_option_select_audio'),
       icon: Icons.music_note_outlined,
       action: () async {
         Map<int, String> audioEmbeddedTracks =
@@ -1472,7 +1471,7 @@ class PlayerPageState extends State<PlayerPage>
 
     options.addAll([
       BottomSheetDialogOption(
-        label: appModel.translate("player_option_select_subtitle"),
+        label: appModel.translate('player_option_select_subtitle'),
         icon: Icons.subtitles_outlined,
         action: () async {
           Map<int, String> subtitleEmbeddedTracks =
@@ -1491,7 +1490,7 @@ class PlayerPageState extends State<PlayerPage>
         },
       ),
       BottomSheetDialogOption(
-        label: appModel.translate("player_align_subtitle_transcript"),
+        label: appModel.translate('player_align_subtitle_transcript'),
         icon: Icons.timer,
         action: () async {
           await dialogSmartPause();
@@ -1532,7 +1531,7 @@ class PlayerPageState extends State<PlayerPage>
         },
       ),
       BottomSheetDialogOption(
-        label: appModel.translate("player_option_subtitle_appearance"),
+        label: appModel.translate('player_option_subtitle_appearance'),
         icon: Icons.text_fields,
         action: () async {
           await dialogSmartPause();
@@ -1543,7 +1542,7 @@ class PlayerPageState extends State<PlayerPage>
         },
       ),
       BottomSheetDialogOption(
-        label: appModel.translate("player_option_blur_preferences"),
+        label: appModel.translate('player_option_blur_preferences'),
         icon: Icons.blur_circular_sharp,
         action: () async {
           await showModalBottomSheet(
@@ -1557,7 +1556,7 @@ class PlayerPageState extends State<PlayerPage>
         },
       ),
       BottomSheetDialogOption(
-        label: appModel.translate("player_option_load_subtitles"),
+        label: appModel.translate('player_option_load_subtitles'),
         icon: Icons.upload_file,
         action: () async {
           await dialogSmartPause();
@@ -1594,7 +1593,7 @@ class PlayerPageState extends State<PlayerPage>
   List<BottomSheetDialogOption> getBlurOptions() {
     List<BottomSheetDialogOption> options = [
       BottomSheetDialogOption(
-        label: appModel.translate("player_option_blur_use"),
+        label: appModel.translate('player_option_blur_use'),
         active: appModel.getBlurWidgetOptions().visible,
         icon: appModel.getBlurWidgetOptions().visible
             ? Icons.blur_on_outlined
@@ -1607,7 +1606,7 @@ class PlayerPageState extends State<PlayerPage>
         },
       ),
       BottomSheetDialogOption(
-        label: appModel.translate("player_option_blur_options"),
+        label: appModel.translate('player_option_blur_options'),
         icon: Icons.blur_circular_sharp,
         action: () async {
           await dialogSmartPause();
@@ -1618,7 +1617,7 @@ class PlayerPageState extends State<PlayerPage>
         },
       ),
       BottomSheetDialogOption(
-        label: appModel.translate("player_option_blur_reset"),
+        label: appModel.translate('player_option_blur_reset'),
         icon: Icons.timer_sharp,
         action: () async {
           BlurWidgetOptions blurWidgetOptions = appModel.getBlurWidgetOptions();
@@ -1639,11 +1638,11 @@ class PlayerPageState extends State<PlayerPage>
   List<BottomSheetDialogOption> getAudioDialogOptions(
       Map<int, String> embeddedTracks, int audioTrack) {
     List<BottomSheetDialogOption> options = [];
-    String audio = appModel.translate("player_option_audio");
+    String audio = appModel.translate('player_option_audio');
 
     embeddedTracks.forEach((index, label) {
       BottomSheetDialogOption option = BottomSheetDialogOption(
-          label: "$audio - $label",
+          label: '$audio - $label',
           icon: Icons.music_note_outlined,
           active: audioTrack == index,
           action: () {
@@ -1657,20 +1656,20 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   String getSubtitleLabel(SubtitleItem item, Map<int, String> embeddedTracks) {
-    String subtitle = appModel.translate("player_option_subtitle");
+    String subtitle = appModel.translate('player_option_subtitle');
     String subtitleExternal =
-        appModel.translate("player_option_subtitle_external");
-    String subtitleNone = appModel.translate("player_option_subtitle_none");
+        appModel.translate('player_option_subtitle_external');
+    String subtitleNone = appModel.translate('player_option_subtitle_none');
 
     switch (item.type) {
       case SubtitleItemType.externalSubtitle:
-        return "$subtitle - $subtitleExternal [${item.metadata}]";
+        return '$subtitle - $subtitleExternal [${item.metadata}]';
       case SubtitleItemType.embeddedSubtitle:
-        return "$subtitle - ${embeddedTracks.values.toList()[item.index!]}";
+        return '$subtitle - ${embeddedTracks.values.toList()[item.index!]}';
       case SubtitleItemType.webSubtitle:
-        return "$subtitle - ${item.metadata}";
+        return '$subtitle - ${item.metadata}';
       case SubtitleItemType.noneSubtitle:
-        return "$subtitle - $subtitleNone";
+        return '$subtitle - $subtitleNone';
     }
   }
 
@@ -1745,7 +1744,7 @@ class PlayerPageState extends State<PlayerPage>
     } else {
       if (subtitleItem.controller.subtitles.isEmpty) {
         shadowingSubtitle.value = Subtitle(
-          data: "",
+          data: '',
           start: position.value,
           end: position.value,
           index: 0,
@@ -1759,7 +1758,7 @@ class PlayerPageState extends State<PlayerPage>
   List<BottomSheetDialogOption> getOptions() {
     List<BottomSheetDialogOption> options = [
       BottomSheetDialogOption(
-        label: appModel.translate("player_option_shadowing"),
+        label: appModel.translate('player_option_shadowing'),
         icon: Icons.loop,
         active: shadowingSubtitle.value != null,
         action: () {
@@ -1767,7 +1766,7 @@ class PlayerPageState extends State<PlayerPage>
         },
       ),
       BottomSheetDialogOption(
-        label: appModel.translate("player_option_definition_focus"),
+        label: appModel.translate('player_option_definition_focus'),
         icon: (appModel.getPlayerDefinitionFocusMode())
             ? Icons.flash_on
             : Icons.flash_off,
@@ -1787,7 +1786,7 @@ class PlayerPageState extends State<PlayerPage>
       //   },
       // ),
       BottomSheetDialogOption(
-        label: appModel.translate("player_option_listening_comprehension"),
+        label: appModel.translate('player_option_listening_comprehension'),
         icon: (appModel.getListeningComprehensionMode())
             ? Icons.hearing
             : Icons.hearing_disabled,
@@ -1799,7 +1798,7 @@ class PlayerPageState extends State<PlayerPage>
       ),
 
       BottomSheetDialogOption(
-        label: appModel.translate("player_option_dictionary_menu"),
+        label: appModel.translate('player_option_dictionary_menu'),
         icon: Icons.auto_stories,
         action: () async {
           await dialogSmartPause();
@@ -1810,7 +1809,7 @@ class PlayerPageState extends State<PlayerPage>
         },
       ),
       BottomSheetDialogOption(
-        label: appModel.translate("player_change_player_orientation"),
+        label: appModel.translate('player_change_player_orientation'),
         icon: appModel.isPlayerOrientationPortrait()
             ? Icons.stay_current_landscape
             : Icons.stay_current_portrait,
@@ -1836,14 +1835,14 @@ class PlayerPageState extends State<PlayerPage>
       //   },
       // ),
       BottomSheetDialogOption(
-        label: appModel.translate("player_option_share_subtitle"),
+        label: appModel.translate('player_option_share_subtitle'),
         icon: Icons.share,
         action: () async {
-          await Share.share(getNearestSubtitle()?.data ?? "");
+          await Share.share(getNearestSubtitle()?.data ?? '');
         },
       ),
       BottomSheetDialogOption(
-        label: appModel.translate("player_option_export"),
+        label: appModel.translate('player_option_export'),
         icon: Icons.mobile_screen_share,
         action: () async {
           List<Subtitle> subtitles = [];
@@ -1862,10 +1861,10 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   Future<AnkiExportParams> prepareExportParams(List<Subtitle> subtitles) async {
-    String sentence = "";
-    String word = "";
-    String meaning = "";
-    String reading = "";
+    String sentence = '';
+    String word = '';
+    String meaning = '';
+    String reading = '';
 
     int allowanceMs = subtitleOptionsNotifier.value.audioAllowance;
 
@@ -1880,7 +1879,7 @@ class PlayerPageState extends State<PlayerPage>
         Subtitle(
           start: position.value - allowance,
           end: position.value + allowance,
-          data: "",
+          data: '',
           index: 0,
         )
       ];
@@ -1890,9 +1889,9 @@ class PlayerPageState extends State<PlayerPage>
       String subtitleText = subtitle.data;
       String regex = subtitleOptionsNotifier.value.regexFilter;
       if (regex.isNotEmpty) {
-        subtitleText = subtitleText.replaceAll(RegExp(regex), "");
+        subtitleText = subtitleText.replaceAll(RegExp(regex), '');
       }
-      sentence += "$subtitleText\n";
+      sentence += '$subtitleText\n';
     }
     if (subtitles.isNotEmpty) {
       String removeLastNewline(String n) => n = n.substring(0, n.length - 1);
@@ -1941,7 +1940,7 @@ class PlayerPageState extends State<PlayerPage>
     MediaHistoryItem? contextItem = generateContextHistoryItem();
     if (contextItem != null) {
       exportParams.context = Uri.encodeFull(
-          "https://jidoujisho.context/${generateContextHistoryItem()!.toJson()}");
+          'https://jidoujisho.context/${generateContextHistoryItem()!.toJson()}');
     }
 
     return exportParams;
@@ -1978,7 +1977,7 @@ class PlayerPageState extends State<PlayerPage>
       // }
 
       String command =
-          "-loglevel quiet -ss $timestamp -y -i \"$inputPath\" -frames:v 1 -q:v 2 \"$outputPath\"";
+          '-loglevel quiet -ss $timestamp -y -i \"$inputPath\" -frames:v 1 -q:v 2 \"$outputPath\"';
 
       final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
       await _flutterFFmpeg.execute(command);
@@ -2007,12 +2006,12 @@ class PlayerPageState extends State<PlayerPage>
       audioFile.deleteSync();
     }
 
-    String timeStart = "";
-    String timeEnd = "";
+    String timeStart = '';
+    String timeEnd = '';
 
-    String audioIndex = "${playerController.value.activeAudioTrack - 1}";
+    String audioIndex = '${playerController.value.activeAudioTrack - 1}';
     if (audioPath != null) {
-      audioIndex = "0";
+      audioIndex = '0';
     }
 
     Duration allowance = Duration(milliseconds: audioAllowance);
@@ -2033,7 +2032,7 @@ class PlayerPageState extends State<PlayerPage>
     }
 
     String command =
-        "-loglevel quiet -ss $timeStart -to $timeEnd -y -i \"$inputPath\" -map 0:a:$audioIndex \"$outputPath\"";
+        '-loglevel quiet -ss $timeStart -to $timeEnd -y -i \"$inputPath\" -map 0:a:$audioIndex \"$outputPath\"';
 
     final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
     await _flutterFFmpeg.execute(command);
@@ -2042,12 +2041,12 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   Future<void> openCardCreator(List<Subtitle> subtitles) async {
-    setDictionaryMessage(appModel.translate("player_prepare_export"));
+    setDictionaryMessage(appModel.translate('player_prepare_export'));
 
     imageCache!.clear();
     AnkiExportParams initialParams = await prepareExportParams(subtitles);
 
-    searchTerm.value = "";
+    searchTerm.value = '';
 
     ClipboardListener.removeListener(copyClipboardAction);
 
@@ -2066,14 +2065,14 @@ class PlayerPageState extends State<PlayerPage>
           Navigator.of(context).pop();
           String lastDeck = appModel.getLastAnkiDroidDeck();
           setDictionaryMessage(
-            "deckExport://$lastDeck",
+            'deckExport://$lastDeck',
             duration: const Duration(seconds: 3),
           );
         });
 
     dialogSmartResume(isSmartFocus: true);
 
-    await Clipboard.setData(const ClipboardData(text: ""));
+    await Clipboard.setData(const ClipboardData(text: ''));
     ClipboardListener.addListener(copyClipboardAction);
   }
 
@@ -2160,9 +2159,9 @@ class PlayerPageState extends State<PlayerPage>
     MediaType mediaType = widget.params.mediaSource.mediaType;
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     Iterable<String>? filePaths = await FilesystemPicker.open(
-      title: "",
-      pickText: appModel.translate("dialog_select"),
-      cancelText: appModel.translate("dialog_cancel"),
+      title: '',
+      pickText: appModel.translate('dialog_select'),
+      cancelText: appModel.translate('dialog_cancel'),
       context: context,
       rootDirectories: await appModel.getMediaTypeDirectories(mediaType),
       fsType: FilesystemType.file,

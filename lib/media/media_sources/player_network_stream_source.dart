@@ -14,7 +14,7 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 class PlayerNetworkStreamSource extends PlayerMediaSource {
   PlayerNetworkStreamSource()
       : super(
-          sourceName: "Network Stream",
+          sourceName: 'Network Stream',
           icon: Icons.podcasts,
         );
 
@@ -65,7 +65,7 @@ class PlayerNetworkStreamSource extends PlayerMediaSource {
 
   @override
   ImageProvider<Object> getHistoryThumbnail(MediaHistoryItem item) {
-    String thumbnailUrl = item.extra["thumbnail"]!;
+    String thumbnailUrl = item.extra['thumbnail']!;
     return NetworkImage(thumbnailUrl);
   }
 
@@ -116,8 +116,8 @@ class PlayerNetworkStreamSource extends PlayerMediaSource {
     AppModel appModel = Provider.of<AppModel>(context, listen: false);
     MediaHistoryItem item = MediaHistoryItem(
       key: query,
-      title: "",
-      author: "",
+      title: '',
+      author: '',
       sourceName: sourceName,
       mediaTypePrefs: mediaType.prefsDirectory(),
       currentProgress: 0,

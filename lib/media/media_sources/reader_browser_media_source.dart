@@ -21,7 +21,7 @@ import 'package:transparent_image/transparent_image.dart';
 class ReaderBrowserSource extends ReaderMediaSource {
   ReaderBrowserSource()
       : super(
-          sourceName: "Browser",
+          sourceName: 'Browser',
           icon: Icons.public,
         );
 
@@ -38,17 +38,17 @@ class ReaderBrowserSource extends ReaderMediaSource {
 
   @override
   String getHistorySubcaption(MediaHistoryItem item) {
-    throw UnsupportedError("Not supported for browser");
+    throw UnsupportedError('Not supported for browser');
   }
 
   @override
   ImageProvider<Object> getHistoryThumbnail(MediaHistoryItem item) {
-    if (item.extra["thumbnail"] == null) {
+    if (item.extra['thumbnail'] == null) {
       return MemoryImage(kTransparentImage);
     }
 
     Uint8List thumbnail =
-        Uint8List.fromList(List<int>.from(item.extra["thumbnail"]));
+        Uint8List.fromList(List<int>.from(item.extra['thumbnail']));
 
     /// A cached version of [MemoryImage] so that the image does not reload
     /// on every revisit
@@ -110,8 +110,8 @@ class ReaderBrowserSource extends ReaderMediaSource {
         mediaSource: this,
         mediaHistoryItem: MediaHistoryItem(
           key: query,
-          title: "",
-          alias: "",
+          title: '',
+          alias: '',
           extra: {},
           sourceName: sourceName,
           currentProgress: 0,
@@ -193,7 +193,7 @@ class ReaderBrowserSource extends ReaderMediaSource {
                           onTap: () async {
                             justBookmarked.value = true;
                             String url = (await controller.getUrl()).toString();
-                            String title = await controller.getTitle() ?? "";
+                            String title = await controller.getTitle() ?? '';
                             Uint8List? thumbnail =
                                 await controller.takeScreenshot();
 
@@ -201,7 +201,7 @@ class ReaderBrowserSource extends ReaderMediaSource {
                               key: url,
                               title: title,
                               extra: (thumbnail != null)
-                                  ? {"thumbnail": thumbnail}
+                                  ? {'thumbnail': thumbnail}
                                   : {},
                               sourceName: sourceName,
                               currentProgress: 0,
@@ -239,7 +239,7 @@ class ReaderBrowserSource extends ReaderMediaSource {
                           ),
                         ),
                         onTap: () async {
-                          state.setSearchTerm("");
+                          state.setSearchTerm('');
 
                           justNavigated.value = true;
                           String url = (await controller.getUrl()).toString();
@@ -307,7 +307,7 @@ class ReaderBrowserSource extends ReaderMediaSource {
                                       },
                                     ),
                                     hintText:
-                                        appModel.translate("enter_a_link"),
+                                        appModel.translate('enter_a_link'),
                                   ),
                                   onChanged: (value) {
                                     newUrl = value;
@@ -394,16 +394,16 @@ class ReaderBrowserSource extends ReaderMediaSource {
 
   Future<void> unselectWebViewTextSelection(
       InAppWebViewController webViewController) async {
-    String unselectJs = "window.getSelection().removeAllRanges();";
+    String unselectJs = 'window.getSelection().removeAllRanges();';
     await webViewController.evaluateJavascript(source: unselectJs);
   }
 
   String sanitizeWebViewTextSelection(String? text) {
     if (text == null) {
-      return "";
+      return '';
     }
 
-    text = text.replaceAll("\\n", "\n");
+    text = text.replaceAll('\\n', '\n');
     text = text.trim();
     return text;
   }
@@ -432,8 +432,8 @@ class ReaderBrowserSource extends ReaderMediaSource {
       menuItems: [
         ContextMenuItem(
           androidId: 1,
-          iosId: "1",
-          title: appModel.translate("search"),
+          iosId: '1',
+          title: appModel.translate('search'),
           action: () async {
             String searchTerm = await getWebViewTextSelection(controller);
 
@@ -443,8 +443,8 @@ class ReaderBrowserSource extends ReaderMediaSource {
         ),
         ContextMenuItem(
           androidId: 2,
-          iosId: "2",
-          title: appModel.translate("dictionaries"),
+          iosId: '2',
+          title: appModel.translate('dictionaries'),
           action: () async {
             String searchTerm = await getWebViewTextSelection(controller);
 
@@ -460,8 +460,8 @@ class ReaderBrowserSource extends ReaderMediaSource {
         ),
         ContextMenuItem(
           androidId: 3,
-          iosId: "3",
-          title: appModel.translate("creator"),
+          iosId: '3',
+          title: appModel.translate('creator'),
           action: () async {
             String searchTerm = await getWebViewTextSelection(controller);
             Clipboard.setData(ClipboardData(text: searchTerm));
@@ -471,7 +471,7 @@ class ReaderBrowserSource extends ReaderMediaSource {
         ),
       ],
       onCreateContextMenu: (result) {
-        state.setSearchTerm("");
+        state.setSearchTerm('');
       },
     );
   }

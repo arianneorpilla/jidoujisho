@@ -1,28 +1,28 @@
 String getTimestampFromDuration(Duration duration) {
-  String twoDigits(int n) => n.toString().padLeft(2, "0");
-  String threeDigits(int n) => n.toString().padLeft(3, "0");
+  String twoDigits(int n) => n.toString().padLeft(2, '0');
+  String threeDigits(int n) => n.toString().padLeft(3, '0');
 
   String hours = twoDigits(duration.inHours);
   String mins = twoDigits(duration.inMinutes.remainder(60));
   String secs = twoDigits(duration.inSeconds.remainder(60));
   String mills = threeDigits(duration.inMilliseconds.remainder(1000));
 
-  return "$hours:$mins:$secs.$mills";
+  return '$hours:$mins:$secs.$mills';
 }
 
 String getDurationText(Duration duration) {
-  String twoDigits(int n) => n.toString().padLeft(2, "0");
+  String twoDigits(int n) => n.toString().padLeft(2, '0');
 
   String hours = twoDigits(duration.inHours);
   String mins = twoDigits(duration.inMinutes.remainder(60));
   String secs = twoDigits(duration.inSeconds.remainder(60));
 
   if (duration.inHours != 0) {
-    return "  $hours:$mins:$secs  ";
+    return '  $hours:$mins:$secs  ';
   } else if (duration.inMinutes != 0) {
-    return "  $mins:$secs  ";
+    return '  $mins:$secs  ';
   } else {
-    return "  0:$secs  ";
+    return '  0:$secs  ';
   }
 }
 
@@ -62,13 +62,13 @@ String getTimeAgoFormatted(DateTime videoDate) {
 
 String getViewCountFormatted(int num) {
   if (num > 999 && num < 99999) {
-    return "${(num / 1000).toStringAsFixed(1)}K";
+    return '${(num / 1000).toStringAsFixed(1)}K';
   } else if (num > 99999 && num < 999999) {
-    return "${(num / 1000).toStringAsFixed(0)}K";
+    return '${(num / 1000).toStringAsFixed(0)}K';
   } else if (num > 999999 && num < 999999999) {
-    return "${(num / 1000000).toStringAsFixed(1)}M";
+    return '${(num / 1000000).toStringAsFixed(1)}M';
   } else if (num > 999999999) {
-    return "${(num / 1000000000).toStringAsFixed(1)}B";
+    return '${(num / 1000000000).toStringAsFixed(1)}B';
   } else {
     return num.toString();
   }
@@ -81,17 +81,17 @@ String formatTimeString(double time) {
   int minutes = (time / 60 % 60).floor();
   int hours = (time / 60 / 60 % 60).floor();
 
-  String millisecondsPadded = milliseconds.toString().padLeft(3, "0");
-  String secondsPadded = seconds.toString().padLeft(2, "0");
-  String minutesPadded = minutes.toString().padLeft(2, "0");
-  String hoursPadded = hours.toString().padLeft(2, "0");
+  String millisecondsPadded = milliseconds.toString().padLeft(3, '0');
+  String secondsPadded = seconds.toString().padLeft(2, '0');
+  String minutesPadded = minutes.toString().padLeft(2, '0');
+  String hoursPadded = hours.toString().padLeft(2, '0');
 
   String formatted = hoursPadded +
-      ":" +
+      ':' +
       minutesPadded +
-      ":" +
+      ':' +
       secondsPadded +
-      "," +
+      ',' +
       millisecondsPadded;
   return formatted;
 }

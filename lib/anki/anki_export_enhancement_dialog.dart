@@ -71,7 +71,7 @@ class AnkiExportEnhancementDialogState
       padding: const EdgeInsets.symmetric(vertical: 24),
       child: showCenterIconMessage(
         context: context,
-        label: appModel.translate("no_more_available_enhancements"),
+        label: appModel.translate('no_more_available_enhancements'),
         icon: Icons.auto_fix_high,
         jumpingDots: false,
       ),

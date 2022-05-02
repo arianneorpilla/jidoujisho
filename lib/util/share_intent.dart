@@ -19,7 +19,7 @@ Future<void> textShareIntentAction(BuildContext context, String text) async {
   appModel.killOnExit = true;
 
   // If a context link, let the other case handle this.
-  if (text.startsWith("https://jidoujisho.context/")) {
+  if (text.startsWith('https://jidoujisho.context/')) {
     await returnFromAppLink(context, text);
 
     return;
@@ -29,7 +29,7 @@ Future<void> textShareIntentAction(BuildContext context, String text) async {
   String? videoId = VideoId.parseVideoId(text);
   if (videoId != null) {
     PlayerMediaSource source = appModel.getMediaSourceFromName(
-        MediaType.player, "YouTube") as PlayerMediaSource;
+        MediaType.player, 'YouTube') as PlayerMediaSource;
     YoutubeExplode yt = YoutubeExplode();
     Video video = await yt.videos.get(videoId);
     MediaHistoryItem item = MediaHistoryItem(
@@ -40,16 +40,16 @@ Future<void> textShareIntentAction(BuildContext context, String text) async {
       mediaTypePrefs: source.mediaType.prefsDirectory(),
       currentProgress: 0,
       completeProgress: video.duration?.inSeconds ?? 0,
-      extra: {"thumbnail": video.thumbnails.mediumResUrl},
+      extra: {'thumbnail': video.thumbnails.mediumResUrl},
     );
     await returnFromContext(context, item);
-  } else if (text.startsWith("http://") || text.startsWith("https://")) {
+  } else if (text.startsWith('http://') || text.startsWith('https://')) {
     PlayerMediaSource source = appModel.getMediaSourceFromName(
-        MediaType.player, "Network Stream") as PlayerMediaSource;
+        MediaType.player, 'Network Stream') as PlayerMediaSource;
     MediaHistoryItem item = MediaHistoryItem(
       key: text,
-      title: "",
-      author: "",
+      title: '',
+      author: '',
       sourceName: source.sourceName,
       mediaTypePrefs: source.mediaType.prefsDirectory(),
       currentProgress: 0,
@@ -57,7 +57,7 @@ Future<void> textShareIntentAction(BuildContext context, String text) async {
       extra: {},
     );
     await returnFromContext(context, item);
-  } else if (text.startsWith("content://") || (File(text).existsSync())) {
+  } else if (text.startsWith('content://') || (File(text).existsSync())) {
     try {
       Navigator.popUntil(context, (route) => route.isFirst);
       Navigator.of(context).pushReplacement(
@@ -81,11 +81,11 @@ Future<void> textShareIntentAction(BuildContext context, String text) async {
       File file = await toFile(text);
 
       PlayerMediaSource source = appModel.getMediaSourceFromName(
-          MediaType.player, "Local Media") as PlayerMediaSource;
+          MediaType.player, 'Local Media') as PlayerMediaSource;
       MediaHistoryItem item = MediaHistoryItem(
         key: file.path,
-        title: "",
-        author: "",
+        title: '',
+        author: '',
         sourceName: source.sourceName,
         mediaTypePrefs: source.mediaType.prefsDirectory(),
         currentProgress: 0,
@@ -102,7 +102,7 @@ Future<void> textShareIntentAction(BuildContext context, String text) async {
       );
       source.launchMediaPage(context, params, pushReplacement: true);
     } catch (e) {
-      debugPrint("$e");
+      debugPrint('$e');
     }
   } else {
     await navigateToCreator(

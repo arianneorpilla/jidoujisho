@@ -19,9 +19,9 @@ class SearchDictionaryEnhancement extends AnkiExportEnhancement {
     required AppModel appModel,
   }) : super(
           appModel: appModel,
-          enhancementName: "Search Dictionary",
+          enhancementName: 'Search Dictionary',
           enhancementDescription:
-              "Search the current dictionary and show a picker dialog.",
+              'Search the current dictionary and show a picker dialog.',
           enhancementIcon: Icons.search,
           enhancementField: AnkiExportField.word,
         );
@@ -64,7 +64,7 @@ class SearchDictionaryEnhancement extends AnkiExportEnhancement {
         actions: [
           TextButton(
             child: Text(
-              appModel.translate("dialog_set"),
+              appModel.translate('dialog_set'),
             ),
             onPressed: () async {
               DictionaryEntry entry = result.entries[indexNotifier.value];

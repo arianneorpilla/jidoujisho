@@ -41,7 +41,7 @@ class DropDownMenuState extends State<DropDownMenu> {
       items: widget.options.map((String value) {
         return DropdownMenuItem<String>(
           value: value,
-          child: Text("  $value"),
+          child: Text('  $value'),
         );
       }).toList(),
       onChanged: (newOption) async {

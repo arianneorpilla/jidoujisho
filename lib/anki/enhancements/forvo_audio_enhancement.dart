@@ -30,9 +30,9 @@ class ForvoAudioEnhancement extends AnkiExportEnhancement {
     required AppModel appModel,
   }) : super(
           appModel: appModel,
-          enhancementName: "Forvo Audio",
+          enhancementName: 'Forvo Audio',
           enhancementDescription:
-              "Search for matching word pronunciations from Forvo.",
+              'Search for matching word pronunciations from Forvo.',
           enhancementIcon: Icons.record_voice_over,
           enhancementField: AnkiExportField.audio,
         );
@@ -55,7 +55,7 @@ class ForvoAudioEnhancement extends AnkiExportEnhancement {
       return params;
     }
 
-    String searchTerm = "";
+    String searchTerm = '';
 
     if (params.audioSearch.trim().isNotEmpty) {
       searchTerm = params.audioSearch;
@@ -68,7 +68,7 @@ class ForvoAudioEnhancement extends AnkiExportEnhancement {
     ValueNotifier<List<bool>> indexesSelected;
     List<Widget> textWidgets;
 
-    String cacheKey = "${appModel.getCurrentLanguage()}/$searchTerm";
+    String cacheKey = '${appModel.getCurrentLanguage()}/$searchTerm';
     List<ForvoResult> results = [];
 
     if (forvoCache[cacheKey] != null) {
@@ -82,40 +82,40 @@ class ForvoAudioEnhancement extends AnkiExportEnhancement {
       try {
         List<dom.Element> liElements = document
             .getElementById(
-                "language-container-${appModel.getCurrentLanguage().languageCode}")!
+                'language-container-${appModel.getCurrentLanguage().languageCode}')!
             .children
             .first
-            .getElementsByClassName("show-all-pronunciations")
+            .getElementsByClassName('show-all-pronunciations')
             .first
             .children
             .where((element) =>
-                element.localName == "li" &&
-                element.children.first.id.startsWith("play_"))
+                element.localName == 'li' &&
+                element.children.first.id.startsWith('play_'))
             .toList();
 
         results = liElements.map((element) {
-          String onClick = element.children[0].attributes["onclick"]!;
-          String? contributor = element.children[1].attributes["data-p2"];
+          String onClick = element.children[0].attributes['onclick']!;
+          String? contributor = element.children[1].attributes['data-p2'];
 
           if (contributor == null) {
             element.children
                 .where((child) =>
-                    child.className == "more" || child.className == "from")
+                    child.className == 'more' || child.className == 'from')
                 .toList()
                 .forEach((child) => child.remove());
 
             contributor = element.text
                 .replaceAll(
-                    RegExp(r"[\s\S]*?(?=Pronunciation by)Pronunciation by"), "")
+                    RegExp(r'[\s\S]*?(?=Pronunciation by)Pronunciation by'), '')
                 .trim();
           }
 
-          String onClickCut = onClick.substring(onClick.indexOf(",") + 2);
+          String onClickCut = onClick.substring(onClick.indexOf(',') + 2);
           String base64 = onClickCut.substring(0, onClickCut.indexOf("'"));
 
           String fileUrl = stringToBase64Url.decode(base64);
 
-          String audioUrl = "https://audio.forvo.com/mp3/$fileUrl";
+          String audioUrl = 'https://audio.forvo.com/mp3/$fileUrl';
 
           return ForvoResult(
             audioUrl: audioUrl,
@@ -126,7 +126,7 @@ class ForvoAudioEnhancement extends AnkiExportEnhancement {
         forvoCache[cacheKey] = results;
       } catch (e) {
         if (autoMode) {
-          params.audioSearch = "";
+          params.audioSearch = '';
           params.audioFile = null;
 
           state.notifyAudioNotSearching();
@@ -143,7 +143,7 @@ class ForvoAudioEnhancement extends AnkiExportEnhancement {
     AudioPlayer audioPlayer = AudioPlayer();
 
     Directory appDirDoc = await getApplicationDocumentsDirectory();
-    String forvoAudioPath = "${appDirDoc.path}/forvoAudio";
+    String forvoAudioPath = '${appDirDoc.path}/forvoAudio';
     Directory forvoAudioDir = Directory(forvoAudioPath);
     if (forvoAudioDir.existsSync()) {
       forvoAudioDir.deleteSync(recursive: true);
@@ -159,7 +159,7 @@ class ForvoAudioEnhancement extends AnkiExportEnhancement {
       Uint8List bytes = request.bodyBytes;
       await file.writeAsBytes(bytes);
 
-      params.audioSearch = "";
+      params.audioSearch = '';
       params.audioFile = file;
 
       state.notifyAudioSearching();
@@ -222,7 +222,7 @@ class ForvoAudioEnhancement extends AnkiExportEnhancement {
                   Uint8List bytes = request.bodyBytes;
                   await file.writeAsBytes(bytes);
 
-                  params.audioSearch = "";
+                  params.audioSearch = '';
                   params.audioFile = file;
 
                   state.notifyAudioSearching();

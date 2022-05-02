@@ -17,9 +17,9 @@ class JapanesePod101AudioEnhancement extends AnkiExportEnhancement {
     required AppModel appModel,
   }) : super(
           appModel: appModel,
-          enhancementName: "JapanesePod101 Audio",
+          enhancementName: 'JapanesePod101 Audio',
           enhancementDescription:
-              "Search for matching word pronunciations from JapanesePod101.",
+              'Search for matching word pronunciations from JapanesePod101.',
           enhancementIcon: Icons.record_voice_over,
           enhancementField: AnkiExportField.audio,
         );
@@ -35,7 +35,7 @@ class JapanesePod101AudioEnhancement extends AnkiExportEnhancement {
     required CreatorPageState state,
   }) async {
     Directory appDirDoc = await getApplicationDocumentsDirectory();
-    String jpdAudioPath = "${appDirDoc.path}/japanesePod101";
+    String jpdAudioPath = '${appDirDoc.path}/japanesePod101';
     Directory jpdAudioDir = Directory(jpdAudioPath);
     if (jpdAudioDir.existsSync()) {
       jpdAudioDir.deleteSync(recursive: true);
@@ -48,7 +48,7 @@ class JapanesePod101AudioEnhancement extends AnkiExportEnhancement {
       return params;
     }
 
-    String searchTerm = "";
+    String searchTerm = '';
 
     if (params.audioSearch.trim().isNotEmpty) {
       searchTerm = params.audioSearch;
@@ -63,32 +63,32 @@ class JapanesePod101AudioEnhancement extends AnkiExportEnhancement {
     if (params.audioSearch.isEmpty) {
       if (kanaKit.isKana(searchTerm)) {
         audioUrl =
-            "http://assets.languagepod101.com/dictionary/japanese/audiomp3.php?kana=${params.word}";
+            'http://assets.languagepod101.com/dictionary/japanese/audiomp3.php?kana=${params.word}';
       } else {
         String reading = params.reading;
-        reading = reading.split("\n").first;
+        reading = reading.split('\n').first;
         reading = reading.replaceAll(
-            RegExp(r'(<[^>]*>)', multiLine: true, caseSensitive: true), "");
-        reading = reading.replaceAll(r"\[([^\[\]]++|(?R))*+\]", "");
+            RegExp(r'(<[^>]*>)', multiLine: true, caseSensitive: true), '');
+        reading = reading.replaceAll(r'\[([^\[\]]++|(?R))*+\]', '');
         reading = reading.trim();
 
         audioUrl =
-            "http://assets.languagepod101.com/dictionary/japanese/audiomp3.php?kanji=${params.word}&kana=$reading";
+            'http://assets.languagepod101.com/dictionary/japanese/audiomp3.php?kanji=${params.word}&kana=$reading';
       }
     } else {
       if (kanaKit.isKana(params.audioSearch)) {
         audioUrl =
-            "http://assets.languagepod101.com/dictionary/japanese/audiomp3.php?kana=${params.audioSearch}";
+            'http://assets.languagepod101.com/dictionary/japanese/audiomp3.php?kana=${params.audioSearch}';
       } else {
         String reading = params.reading;
-        reading = reading.split("\n").first;
+        reading = reading.split('\n').first;
         reading = reading.replaceAll(
-            RegExp(r'(<[^>]*>)', multiLine: true, caseSensitive: true), "");
-        reading = reading.replaceAll(r"\[([^\[\]]++|(?R))*+\]", "");
+            RegExp(r'(<[^>]*>)', multiLine: true, caseSensitive: true), '');
+        reading = reading.replaceAll(r'\[([^\[\]]++|(?R))*+\]', '');
         reading = reading.trim();
 
         audioUrl =
-            "http://assets.languagepod101.com/dictionary/japanese/audiomp3.php?kanji=${params.audioSearch}&kana=$reading";
+            'http://assets.languagepod101.com/dictionary/japanese/audiomp3.php?kanji=${params.audioSearch}&kana=$reading';
       }
     }
 
@@ -102,7 +102,7 @@ class JapanesePod101AudioEnhancement extends AnkiExportEnhancement {
     Uint8List bytes = request.bodyBytes;
     await file.writeAsBytes(bytes);
 
-    params.audioSearch = "";
+    params.audioSearch = '';
     params.audioFile = file;
 
     state.notifyAudioSearching();

@@ -70,7 +70,7 @@ class CreatorPageState extends State<CreatorPage> {
   final ValueNotifier<bool> audioSearchingNotifier = ValueNotifier<bool>(false);
 
   final ValueNotifier<String> imageSearchTermNotifier =
-      ValueNotifier<String>("");
+      ValueNotifier<String>('');
   final ValueNotifier<int> imageListNotifier = ValueNotifier<int>(0);
 
   AudioPlayer audioPlayer = AudioPlayer();
@@ -346,11 +346,11 @@ class CreatorPageState extends State<CreatorPage> {
 
   String getTitle() {
     if (widget.editMode) {
-      return appModel.translate("creator_options_menu");
+      return appModel.translate('creator_options_menu');
     } else if (widget.autoMode) {
-      return appModel.translate("creator_options_auto");
+      return appModel.translate('creator_options_auto');
     } else {
-      return appModel.translate("card_creator");
+      return appModel.translate('card_creator');
     }
   }
 
@@ -455,7 +455,7 @@ class CreatorPageState extends State<CreatorPage> {
                         ),
                         const SizedBox(width: 5),
                         Text(
-                          appModel.translate("export_card"),
+                          appModel.translate('export_card'),
                           style: TextStyle(
                             fontSize: 16,
                             color: (canExport)
@@ -485,7 +485,7 @@ class CreatorPageState extends State<CreatorPage> {
                               String temporaryDirectoryPath =
                                   (await getTemporaryDirectory()).path;
 
-                              String temporaryFileName = "jidoujisho-" +
+                              String temporaryFileName = 'jidoujisho-' +
                                   DateFormat('yyyyMMddTkkmmss')
                                       .format(DateTime.now());
                               File tempFile = File(
@@ -849,7 +849,7 @@ class CreatorPageState extends State<CreatorPage> {
   /// not the result of an image search, use this.
   void notifyImageNotSearching() {
     setState(() {
-      imageSearchTermNotifier.value = "";
+      imageSearchTermNotifier.value = '';
       imageListNotifier.value = 0;
       imageSearchingNotifier.value = false;
     });
@@ -942,7 +942,7 @@ class CreatorPageState extends State<CreatorPage> {
         }
 
         return Text(
-          "${getPositionText()} / ${getDurationText()}",
+          '${getPositionText()} / ${getDurationText()}',
         );
       },
     );
@@ -1003,7 +1003,7 @@ class CreatorPageState extends State<CreatorPage> {
       position: RelativeRect.fromLTRB(left, top, 0, 0),
       items: [
         popupItem(
-          label: appModel.translate("creator_options_menu"),
+          label: appModel.translate('creator_options_menu'),
           icon: Icons.widgets,
           action: () async {
             await navigateToCreator(
@@ -1015,7 +1015,7 @@ class CreatorPageState extends State<CreatorPage> {
           },
         ),
         popupItem(
-          label: appModel.translate("creator_options_auto"),
+          label: appModel.translate('creator_options_auto'),
           icon: Icons.hdr_auto,
           action: () async {
             await navigateToCreator(

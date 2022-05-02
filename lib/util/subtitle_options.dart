@@ -4,7 +4,6 @@ import 'package:chisa/language/languages/chinese_traditional_language.dart';
 import 'package:chisa/language/languages/japanese_language.dart';
 import 'package:chisa/language/languages/korean_language.dart';
 import 'package:chisa/models/app_model.dart';
-import 'package:chisa/util/drop_down_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -114,19 +113,19 @@ Future<void> showSubtitleOptionsDialog(
                         ),
                         floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText:
-                            appModel.translate("player_option_subtitle_delay"),
+                            appModel.translate('player_option_subtitle_delay'),
                         suffixIcon: IconButton(
                           iconSize: 18,
                           color: appModel.getIsDarkMode()
                               ? Colors.white
                               : Colors.black,
                           onPressed: () async {
-                            delayController.text = "0";
+                            delayController.text = '0';
                             FocusScope.of(context).unfocus();
                           },
                           icon: const Icon(Icons.undo),
                         ),
-                        suffixText: " ms"),
+                        suffixText: ' ms'),
                   ),
                   TextField(
                     controller: allowanceController,
@@ -148,19 +147,19 @@ Future<void> showSubtitleOptionsDialog(
                         ),
                         floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText:
-                            appModel.translate("player_option_audio_allowance"),
+                            appModel.translate('player_option_audio_allowance'),
                         suffixIcon: IconButton(
                           iconSize: 18,
                           color: appModel.getIsDarkMode()
                               ? Colors.white
                               : Colors.black,
                           onPressed: () async {
-                            allowanceController.text = "0";
+                            allowanceController.text = '0';
                             FocusScope.of(context).unfocus();
                           },
                           icon: const Icon(Icons.undo),
                         ),
-                        suffixText: " ms"),
+                        suffixText: ' ms'),
                   ),
                   TextField(
                     controller: fontNameController,
@@ -177,7 +176,7 @@ Future<void> showSubtitleOptionsDialog(
                             BorderSide(color: Theme.of(context).focusColor),
                       ),
                       floatingLabelBehavior: FloatingLabelBehavior.always,
-                      labelText: appModel.translate("player_option_font_name"),
+                      labelText: appModel.translate('player_option_font_name'),
                       suffixIcon: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         mainAxisSize: MainAxisSize.min,
@@ -192,20 +191,20 @@ Future<void> showSubtitleOptionsDialog(
 
                               if (language is JapaneseLanguage) {
                                 launch(
-                                    "https://fonts.google.com/?subset=japanese");
+                                    'https://fonts.google.com/?subset=japanese');
                               } else if (language
                                   is ChineseSimplifiedLanguage) {
                                 launch(
-                                    "https://fonts.google.com/?subset=chinese-simplified");
+                                    'https://fonts.google.com/?subset=chinese-simplified');
                               } else if (language
                                   is ChineseTraditionalLanguage) {
                                 launch(
-                                    "https://fonts.google.com/?subset=chinese-traditional");
+                                    'https://fonts.google.com/?subset=chinese-traditional');
                               } else if (language is KoreanLanguage) {
                                 launch(
-                                    "https://fonts.google.com/?subset=korean");
+                                    'https://fonts.google.com/?subset=korean');
                               } else {
-                                launch("https://fonts.google.com/");
+                                launch('https://fonts.google.com/');
                               }
                             },
                             icon: const Icon(Icons.font_download),
@@ -216,7 +215,7 @@ Future<void> showSubtitleOptionsDialog(
                                 ? Colors.white
                                 : Colors.black,
                             onPressed: () async {
-                              fontNameController.text = "Roboto";
+                              fontNameController.text = 'Roboto';
                               FocusScope.of(context).unfocus();
                             },
                             icon: const Icon(Icons.undo),
@@ -245,19 +244,19 @@ Future<void> showSubtitleOptionsDialog(
                         ),
                         floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText:
-                            appModel.translate("player_option_font_size"),
+                            appModel.translate('player_option_font_size'),
                         suffixIcon: IconButton(
                           iconSize: 18,
                           color: appModel.getIsDarkMode()
                               ? Colors.white
                               : Colors.black,
                           onPressed: () async {
-                            fontSizeController.text = "24.0";
+                            fontSizeController.text = '24.0';
                             FocusScope.of(context).unfocus();
                           },
                           icon: const Icon(Icons.undo),
                         ),
-                        suffixText: " px"),
+                        suffixText: ' px'),
                   ),
                   TextField(
                     controller: regexFilterController,
@@ -276,7 +275,7 @@ Future<void> showSubtitleOptionsDialog(
                       ),
                       floatingLabelBehavior: FloatingLabelBehavior.always,
                       labelText:
-                          appModel.translate("player_option_regex_filter"),
+                          appModel.translate('player_option_regex_filter'),
                       suffixIcon: IconButton(
                         iconSize: 18,
                         color: appModel.getIsDarkMode()
@@ -298,7 +297,7 @@ Future<void> showSubtitleOptionsDialog(
           actions: <Widget>[
             TextButton(
               child: Text(
-                appModel.translate("dialog_close"),
+                appModel.translate('dialog_close'),
               ),
               onPressed: () {
                 Navigator.pop(context);
@@ -306,7 +305,7 @@ Future<void> showSubtitleOptionsDialog(
             ),
             TextButton(
               child: Text(
-                appModel.translate("dialog_set_remember"),
+                appModel.translate('dialog_set_remember'),
               ),
               onPressed: () {
                 setValues(true);
@@ -314,7 +313,7 @@ Future<void> showSubtitleOptionsDialog(
             ),
             TextButton(
               child: Text(
-                appModel.translate("dialog_set"),
+                appModel.translate('dialog_set'),
               ),
               onPressed: () {
                 setValues(false);

@@ -26,18 +26,18 @@ class DictionaryMediaHistory extends MediaHistory {
       for (int i = 0; i < keys.length - maxItemCount; i++) {
         keys.remove(keys[i]);
         await appModel.sharedPreferences
-            .remove("$prefsDirectory/values/${keys[i]}");
+            .remove('$prefsDirectory/values/${keys[i]}');
       }
     }
 
     await appModel.sharedPreferences
-        .setString("$prefsDirectory/values/${item.key}", item.toJson());
+        .setString('$prefsDirectory/values/${item.key}', item.toJson());
     await setKeys(keys);
   }
 
   Future<void> removeDictionaryItem(DictionaryMediaHistoryItem item) async {
     await appModel.sharedPreferences
-        .remove("$prefsDirectory/values/${item.key}");
+        .remove('$prefsDirectory/values/${item.key}');
     List<String> keys = getKeys();
     keys.removeWhere((historyKey) => item.key == historyKey);
     await setKeys(keys);
@@ -47,7 +47,7 @@ class DictionaryMediaHistory extends MediaHistory {
     await setKeys([]);
     List<String> valuesToDelete = appModel.sharedPreferences
         .getKeys()
-        .where((key) => key.startsWith("$prefsDirectory/values/"))
+        .where((key) => key.startsWith('$prefsDirectory/values/'))
         .toList();
 
     for (String valueToDelete in valuesToDelete) {

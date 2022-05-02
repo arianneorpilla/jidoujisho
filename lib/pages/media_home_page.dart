@@ -16,7 +16,7 @@ abstract class MediaHomePageState extends State<MediaHomePage>
     with AutomaticKeepAliveClientMixin {
   late AppModel appModel;
 
-  TextEditingController wordController = TextEditingController(text: "");
+  TextEditingController wordController = TextEditingController(text: '');
 
   @override
   bool get wantKeepAlive => true;

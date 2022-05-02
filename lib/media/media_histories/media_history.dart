@@ -34,22 +34,22 @@ class MediaHistory {
 
       for (int i = 0; i < keys.length - maxItemCount; i++) {
         await appModel.sharedPreferences
-            .remove("$prefsDirectory/values/${keys[i]}");
+            .remove('$prefsDirectory/values/${keys[i]}');
         keys.remove(keys[i]);
       }
     }
 
     await appModel.sharedPreferences
-        .setString("$prefsDirectory/values/${item.key}", item.toJson());
+        .setString('$prefsDirectory/values/${item.key}', item.toJson());
     await appModel.sharedPreferences
-        .setString("resumeMediaHistoryItem", item.toJson());
+        .setString('resumeMediaHistoryItem', item.toJson());
     await setKeys(keys);
   }
 
   /// Remove a given media history item with a given unique identifier.
   /// If the key identifier does not exist, do nothing.
   Future<void> removeItem(String key) async {
-    await appModel.sharedPreferences.remove("$prefsDirectory/values/$key");
+    await appModel.sharedPreferences.remove('$prefsDirectory/values/$key');
     List<String> keys = getKeys();
     keys.removeWhere((historyKey) => key == historyKey);
     await setKeys(keys);
@@ -59,13 +59,13 @@ class MediaHistory {
   /// and deserialise each [MediaHistoryItem] and return the list.
   Future<bool> setKeys(List<String> keys) async {
     return await appModel.sharedPreferences
-        .setStringList("$prefsDirectory/keys", keys);
+        .setStringList('$prefsDirectory/keys', keys);
   }
 
   /// Get the serialised history in [prefsDirectory] of a Hive [Box]
   /// and deserialise each [MediaHistoryItem] and return the list.
   List<String> getKeys() {
-    return appModel.sharedPreferences.getStringList("$prefsDirectory/keys") ??
+    return appModel.sharedPreferences.getStringList('$prefsDirectory/keys') ??
         [];
   }
 
@@ -73,7 +73,7 @@ class MediaHistory {
     await setKeys([]);
     List<String> valuesToDelete = appModel.sharedPreferences
         .getKeys()
-        .where((key) => key.startsWith("$prefsDirectory/values/"))
+        .where((key) => key.startsWith('$prefsDirectory/values/'))
         .toList();
 
     for (String valueToDelete in valuesToDelete) {

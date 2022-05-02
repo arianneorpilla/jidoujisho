@@ -103,7 +103,7 @@ abstract class ReaderMediaSource extends MediaSource {
             actions.add(
               TextButton(
                 child: Text(
-                  appModel.translate("dialog_remove"),
+                  appModel.translate('dialog_remove'),
                   style: TextStyle(
                     color: Theme.of(context).focusColor,
                   ),
@@ -121,7 +121,7 @@ abstract class ReaderMediaSource extends MediaSource {
             actions.add(
               TextButton(
                 child: Text(
-                  appModel.translate("dialog_edit"),
+                  appModel.translate('dialog_edit'),
                 ),
                 onPressed: () async {
                   await showAliasDialog(
@@ -148,7 +148,7 @@ abstract class ReaderMediaSource extends MediaSource {
           actions.add(
             TextButton(
               child: Text(
-                appModel.translate("dialog_read"),
+                appModel.translate('dialog_read'),
                 style: const TextStyle(),
               ),
               onPressed: () async {
@@ -483,7 +483,7 @@ abstract class ReaderMediaSource extends MediaSource {
       text: title,
     );
     TextEditingController coverAliasController = TextEditingController(
-      text: "a",
+      text: 'a',
     );
 
     FileImage? newCover = getHistoryThumbnailAlias(item);
@@ -621,7 +621,7 @@ abstract class ReaderMediaSource extends MediaSource {
                     Directory appDocDir =
                         await getApplicationDocumentsDirectory();
                     Directory thumbsDir = Directory(
-                        appDocDir.path + "/thumbs/${getIdentifier()}");
+                        appDocDir.path + '/thumbs/${getIdentifier()}');
                     if (!thumbsDir.existsSync()) {
                       thumbsDir.createSync(recursive: true);
                     }
@@ -629,7 +629,7 @@ abstract class ReaderMediaSource extends MediaSource {
                     DateTime dateTime = DateTime.now();
 
                     String thumbnailPath =
-                        "${thumbsDir.path}/${dateTime.millisecondsSinceEpoch}.jpg";
+                        '${thumbsDir.path}/${dateTime.millisecondsSinceEpoch}.jpg';
 
                     File thumbnailFile = File(thumbnailPath);
                     if (thumbnailFile.existsSync()) {
@@ -642,7 +642,7 @@ abstract class ReaderMediaSource extends MediaSource {
 
                     item.thumbnailPath = thumbnailPath;
                   } else {
-                    item.thumbnailPath = "";
+                    item.thumbnailPath = '';
                   }
                 }
 

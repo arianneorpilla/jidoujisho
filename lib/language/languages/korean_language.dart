@@ -9,9 +9,9 @@ import 'package:mecab_dart/mecab_dart.dart';
 class KoreanLanguage extends Language {
   KoreanLanguage()
       : super(
-          languageName: "한국어",
-          languageCode: "ko",
-          countryCode: "KR",
+          languageName: '한국어',
+          languageCode: 'ko',
+          countryCode: 'KR',
           readingDirection: ReadingDirection.horizontalLTR,
           isSpaceDelimited: false,
           textBaseline: TextBaseline.ideographic,
@@ -21,7 +21,7 @@ class KoreanLanguage extends Language {
 
   @override
   Future<void> initialiseLanguage() async {
-    await mecab.init("assets/ipadic_korean", true);
+    await mecab.init('assets/ipadic_korean', true);
   }
 
   @override
@@ -49,7 +49,7 @@ class KoreanLanguage extends Language {
       tokenTape.add(token.surface.trim());
       currentLength += token.surface.trim().length as int;
       if (spaceIndexes.contains(currentLength)) {
-        tokenTape.add(" ");
+        tokenTape.add(' ');
         currentLength += 1;
       }
     });

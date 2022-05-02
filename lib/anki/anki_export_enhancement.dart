@@ -93,20 +93,20 @@ abstract class AnkiExportEnhancement {
 
   /// Below fields are for saving and persisting data.
   static String getFieldAutoKey(AnkiExportField field) {
-    return "enhancementPrefs/${field.toString()}/auto/";
+    return 'enhancementPrefs/${field.toString()}/auto/';
   }
 
   static String getFieldEnabledPositionKey(
       AnkiExportField field, int position) {
-    return "enhancementPrefs/${field.toString()}/$position/";
+    return 'enhancementPrefs/${field.toString()}/$position/';
   }
 
   String getEnhancementFieldAutoKey() {
-    return "enhancementPrefs/${enhancementField.toString()}/auto/";
+    return 'enhancementPrefs/${enhancementField.toString()}/auto/';
   }
 
   String getEnhancementSettingKey() {
-    return "enhancementPrefs/${enhancementField.toString()}/$enhancementName";
+    return 'enhancementPrefs/${enhancementField.toString()}/$enhancementName';
   }
 
   Future<void> setAuto() async {
@@ -117,7 +117,7 @@ abstract class AnkiExportEnhancement {
 
   Future<void> setNotAuto() {
     return appModel.sharedPreferences
-        .setString(getEnhancementFieldAutoKey(), "");
+        .setString(getEnhancementFieldAutoKey(), '');
   }
 
   Future<void> setEnabled(AnkiExportField field, int position) async {
@@ -128,13 +128,13 @@ abstract class AnkiExportEnhancement {
 
   Future<void> setDisabled(AnkiExportField field, int position) {
     return appModel.sharedPreferences
-        .setString(getFieldEnabledPositionKey(field, position), "");
+        .setString(getFieldEnabledPositionKey(field, position), '');
   }
 
   Map<String, dynamic> getSettings() {
     return jsonDecode(
         appModel.sharedPreferences.getString(getEnhancementSettingKey()) ??
-            "{}");
+            '{}');
   }
 
   Future<void> setSettings(Map<String, dynamic> settings) async {

@@ -11,9 +11,9 @@ import 'package:chisa/language/language.dart';
 class JapaneseLanguage extends Language {
   JapaneseLanguage()
       : super(
-          languageName: "日本語",
-          languageCode: "ja",
-          countryCode: "JP",
+          languageName: '日本語',
+          languageCode: 'ja',
+          countryCode: 'JP',
           readingDirection: ReadingDirection.verticalRTL,
           isSpaceDelimited: false,
           textBaseline: TextBaseline.ideographic,
@@ -24,7 +24,7 @@ class JapaneseLanguage extends Language {
 
   @override
   Future<void> initialiseLanguage() async {
-    await mecab.init("assets/ipadic_japanese", true);
+    await mecab.init('assets/ipadic_japanese', true);
   }
 
   @override
@@ -34,14 +34,14 @@ class JapaneseLanguage extends Language {
     }
 
     List<Word> wordTokens = parseVe(mecab, word);
-    return wordTokens.first.lemma ?? "";
+    return wordTokens.first.lemma ?? '';
   }
 
   @override
   FutureOr<List<String>> textToWords(String text) {
     String delimiterSanitisedText = text
-        .replaceAll("﻿", "␝")
-        .replaceAll("　", "␝")
+        .replaceAll('﻿', '␝')
+        .replaceAll('　', '␝')
         .replaceAll('\n', '␜')
         .replaceAll(' ', '␝');
 
@@ -50,7 +50,7 @@ class JapaneseLanguage extends Language {
     List<String> words = [];
 
     for (Word token in tokens) {
-      String word = "";
+      String word = '';
       for (TokenNode token in token.tokens) {
         word += token.surface;
       }
@@ -93,7 +93,7 @@ class JapaneseLanguage extends Language {
       }
 
       if (searchTerm.length > 4) {
-        if (searchTerm.endsWith("そうに")) {
+        if (searchTerm.endsWith('そうに')) {
           fallbackTerms.add(searchTerm.substring(0, searchTerm.length - 3));
         }
         fallbackTerms.add(searchTerm.substring(0, searchTerm.length - 2));

@@ -5,17 +5,17 @@ import 'package:network_to_file_image/network_to_file_image.dart';
 
 class AnkiExportParams with ChangeNotifier {
   AnkiExportParams({
-    this.sentence = "",
-    this.word = "",
-    this.reading = "",
-    this.meaning = "",
-    this.extra = "",
-    this.imageSearch = "",
-    this.audioSearch = "",
+    this.sentence = '',
+    this.word = '',
+    this.reading = '',
+    this.meaning = '',
+    this.extra = '',
+    this.imageSearch = '',
+    this.audioSearch = '',
     this.imageFiles = const [],
     this.imageFile,
     this.audioFile,
-    this.context = "",
+    this.context = '',
   });
 
   /// The written context of the sourced word, i.e. an example sentence or
@@ -72,14 +72,14 @@ class AnkiExportParams with ChangeNotifier {
 
   @override
   int get hashCode => {
-        "sentence": sentence,
-        "word": word,
-        "reading": reading,
-        "meaning": meaning,
-        "extra": extra,
-        "imageFiles": imageFiles.hashCode,
-        "imageFile": imageFile.hashCode,
-        "audioFile": audioFile.hashCode,
+        'sentence': sentence,
+        'word': word,
+        'reading': reading,
+        'meaning': meaning,
+        'extra': extra,
+        'imageFiles': imageFiles.hashCode,
+        'imageFile': imageFile.hashCode,
+        'audioFile': audioFile.hashCode,
       }.hashCode;
 
   bool isEmpty() {

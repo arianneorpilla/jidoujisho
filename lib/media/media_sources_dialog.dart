@@ -44,7 +44,7 @@ class MediaSourcesDialogState extends State<MediaSourcesDialog> {
               if (isShown)
                 TextButton(
                   child: Text(
-                    appModel.translate("dialog_hide"),
+                    appModel.translate('dialog_hide'),
                   ),
                   onPressed: () async {
                     await appModel.setMediaSourceShown(source, false);
@@ -54,7 +54,7 @@ class MediaSourcesDialogState extends State<MediaSourcesDialog> {
               if (!isShown)
                 TextButton(
                   child: Text(
-                    appModel.translate("dialog_show"),
+                    appModel.translate('dialog_show'),
                   ),
                   onPressed: () async {
                     await appModel.setMediaSourceShown(source, true);
@@ -63,7 +63,7 @@ class MediaSourcesDialogState extends State<MediaSourcesDialog> {
                 ),
               TextButton(
                 child: Text(
-                  appModel.translate("dialog_close"),
+                  appModel.translate('dialog_close'),
                 ),
                 onPressed: () {
                   Navigator.pop(context);
@@ -94,7 +94,7 @@ class MediaSourcesDialogState extends State<MediaSourcesDialog> {
       padding: const EdgeInsets.symmetric(vertical: 24),
       child: showCenterIconMessage(
         context: context,
-        label: appModel.translate("source_list_empty"),
+        label: appModel.translate('source_list_empty'),
         icon: Icons.perm_media,
         jumpingDots: false,
       ),

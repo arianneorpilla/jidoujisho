@@ -43,7 +43,7 @@ class DictionaryPageState extends State<DictionaryHomePage>
   @override
   bool get wantKeepAlive => true;
 
-  TextEditingController wordController = TextEditingController(text: "");
+  TextEditingController wordController = TextEditingController(text: '');
 
   DictionarySearchResult? searchResult;
   DictionarySearchWidget? dictionaryVerticalWidget;
@@ -153,7 +153,7 @@ class DictionaryPageState extends State<DictionaryHomePage>
     return Expanded(
       child: showCenterIconMessage(
         context: context,
-        label: appModel.translate("history_empty"),
+        label: appModel.translate('history_empty'),
         icon: Icons.auto_stories,
         jumpingDots: false,
       ),
@@ -184,10 +184,10 @@ class DictionaryPageState extends State<DictionaryHomePage>
           contentPadding: const EdgeInsets.all(0),
           labelText: appModel.translate(
             (appModel.getCurrentDictionary() != null)
-                ? "search"
-                : "import_dictionaries_for_use",
+                ? 'search'
+                : 'import_dictionaries_for_use',
           ),
-          hintText: appModel.translate("enter_search_term_here"),
+          hintText: appModel.translate('enter_search_term_here'),
           prefixIcon: Icon(widget.mediaType.icon()),
           suffixIcon: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -274,7 +274,7 @@ class DictionaryPageState extends State<DictionaryHomePage>
               actions: [
                 TextButton(
                   child: Text(
-                    appModel.translate("dialog_remove"),
+                    appModel.translate('dialog_remove'),
                     style: TextStyle(
                       color: Theme.of(context).focusColor,
                     ),
@@ -291,7 +291,7 @@ class DictionaryPageState extends State<DictionaryHomePage>
                 if (mediaHistoryItem.contextItem != null)
                   TextButton(
                     child: Text(
-                      appModel.translate("dialog_context"),
+                      appModel.translate('dialog_context'),
                     ),
                     onPressed: () async {
                       Navigator.pop(context);
@@ -303,7 +303,7 @@ class DictionaryPageState extends State<DictionaryHomePage>
                   ),
                 TextButton(
                   child: Text(
-                    appModel.translate("dialog_creator"),
+                    appModel.translate('dialog_creator'),
                   ),
                   onPressed: () async {
                     DictionaryEntry dialogEntry =

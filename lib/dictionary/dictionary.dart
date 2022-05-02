@@ -27,9 +27,9 @@ class Dictionary {
   /// for history and persistence purposes.
   String toJson() {
     Map<String, String> map = {
-      "dictionaryName": dictionaryName,
-      "formatName": formatName,
-      "metadata": jsonEncode(metadata),
+      'dictionaryName': dictionaryName,
+      'formatName': formatName,
+      'metadata': jsonEncode(metadata),
     };
 
     return jsonEncode(map);
@@ -39,10 +39,10 @@ class Dictionary {
     Map<String, String> map = Map.castFrom(jsonDecode(json));
 
     return Dictionary(
-      dictionaryName: map["dictionaryName"]!,
-      formatName: map["formatName"]!,
+      dictionaryName: map['dictionaryName']!,
+      formatName: map['formatName']!,
       metadata: Map.castFrom(
-        jsonDecode(map["metadata"]!),
+        jsonDecode(map['metadata']!),
       ),
     );
   }

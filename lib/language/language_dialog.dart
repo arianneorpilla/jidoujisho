@@ -31,7 +31,7 @@ class LanguageDialogState extends State<LanguageDialog> {
       actions: <Widget>[
         TextButton(
           child: Text(
-            appModel.translate("dialog_close"),
+            appModel.translate('dialog_close'),
           ),
           onPressed: () {
             Navigator.pop(context);
@@ -51,7 +51,7 @@ class LanguageDialogState extends State<LanguageDialog> {
             alignment: Alignment.centerLeft,
             padding: const EdgeInsets.only(left: 8),
             child: Text(
-              appModel.translate("target_language"),
+              appModel.translate('target_language'),
               style: TextStyle(
                 fontSize: 10,
                 color: Theme.of(context).unselectedWidgetColor,
@@ -70,7 +70,7 @@ class LanguageDialogState extends State<LanguageDialog> {
             alignment: Alignment.centerLeft,
             padding: const EdgeInsets.only(left: 8),
             child: Text(
-              appModel.translate("app_language"),
+              appModel.translate('app_language'),
               style: TextStyle(
                 fontSize: 10,
                 color: Theme.of(context).unselectedWidgetColor,
@@ -102,7 +102,7 @@ class LanguageDialogState extends State<LanguageDialog> {
                     child: SizedBox(width: 8.0),
                   ),
                   TextSpan(
-                    text: appModel.translate("localisation_warning"),
+                    text: appModel.translate('localisation_warning'),
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.lightBlue.shade400,

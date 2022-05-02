@@ -41,8 +41,8 @@ class ReaderPageState extends State<ReaderPage> {
   late InAppWebViewController webViewController;
 
   DictionarySearchResult? latestResult;
-  ValueNotifier<String> searchTerm = ValueNotifier<String>("");
-  ValueNotifier<String> searchMessage = ValueNotifier<String>("");
+  ValueNotifier<String> searchTerm = ValueNotifier<String>('');
+  ValueNotifier<String> searchMessage = ValueNotifier<String>('');
 
   final ValueNotifier<int> latestResultEntryIndex = ValueNotifier<int>(0);
 
@@ -78,9 +78,9 @@ class ReaderPageState extends State<ReaderPage> {
     currentProgress = widget.params.mediaHistoryItem.currentProgress;
     completeProgress = widget.params.mediaHistoryItem.completeProgress;
     url = widget.params.mediaHistoryItem.key;
-    scrollX = widget.params.mediaHistoryItem.extra["scrollX"] ?? -1;
-    scrollY = widget.params.mediaHistoryItem.extra["scrollY"] ?? -1;
-    thumbnail = widget.params.mediaHistoryItem.extra["thumbnail"] ?? "";
+    scrollX = widget.params.mediaHistoryItem.extra['scrollX'] ?? -1;
+    scrollY = widget.params.mediaHistoryItem.extra['scrollY'] ?? -1;
+    thumbnail = widget.params.mediaHistoryItem.extra['thumbnail'] ?? '';
     author = widget.params.mediaHistoryItem.author;
 
     WidgetsBinding.instance!.addPostFrameCallback((_) {
@@ -106,9 +106,9 @@ class ReaderPageState extends State<ReaderPage> {
       completeProgress: completeProgress,
       key: url,
       extra: {
-        "thumbnail": thumbnail,
-        "scrollX": -1,
-        "scrollY": -1,
+        'thumbnail': thumbnail,
+        'scrollX': -1,
+        'scrollY': -1,
       },
       thumbnailPath: widget.params.mediaHistoryItem.thumbnailPath,
       alias: widget.params.mediaHistoryItem.alias,
@@ -130,7 +130,7 @@ class ReaderPageState extends State<ReaderPage> {
   Future<void> copyClipboardAction() async {
     setSearchTerm((await Clipboard.getData(Clipboard.kTextPlain))!
         .text!
-        .replaceAll("￼", ""));
+        .replaceAll('￼', ''));
   }
 
   void setCurrentProgress(int value) {
@@ -183,12 +183,12 @@ class ReaderPageState extends State<ReaderPage> {
         borderRadius: BorderRadius.zero,
       ),
       title: Text(
-        appModel.translate("dialog_exit_reader"),
+        appModel.translate('dialog_exit_reader'),
       ),
       actions: <Widget>[
         TextButton(
           child: Text(
-            appModel.translate("dialog_yes"),
+            appModel.translate('dialog_yes'),
             style: TextStyle(
               color: Theme.of(context).focusColor,
             ),
@@ -197,7 +197,7 @@ class ReaderPageState extends State<ReaderPage> {
         ),
         TextButton(
           child: Text(
-            appModel.translate("dialog_no"),
+            appModel.translate('dialog_no'),
           ),
           onPressed: () async {
             Navigator.pop(context, false);
@@ -275,8 +275,8 @@ class ReaderPageState extends State<ReaderPage> {
       completeProgress: completeProgress,
       key: url,
       extra: {
-        "scrollX": scrollX,
-        "scrollY": scrollY,
+        'scrollX': scrollX,
+        'scrollY': scrollY,
       },
       title: title,
       author: author,
@@ -309,7 +309,7 @@ class ReaderPageState extends State<ReaderPage> {
               ),
               child: GestureDetector(
                 onTap: () {
-                  setSearchTerm("");
+                  setSearchTerm('');
                 },
                 child: Container(
                   color: dictionaryColor,
@@ -336,7 +336,7 @@ class ReaderPageState extends State<ReaderPage> {
             ),
             child: GestureDetector(
               onTap: () {
-                setSearchTerm("");
+                setSearchTerm('');
               },
               onLongPress: () async {
                 await appModel.showDictionaryMenu(
@@ -411,11 +411,11 @@ class ReaderPageState extends State<ReaderPage> {
         text: '',
         children: <InlineSpan>[
           TextSpan(
-            text: appModel.translate("searching_before"),
+            text: appModel.translate('searching_before'),
             style: const TextStyle(),
           ),
           TextSpan(
-            text: "『",
+            text: '『',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: themeData!.unselectedWidgetColor,
@@ -428,14 +428,14 @@ class ReaderPageState extends State<ReaderPage> {
             ),
           ),
           TextSpan(
-            text: "』",
+            text: '』',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: themeData!.unselectedWidgetColor,
             ),
           ),
           TextSpan(
-            text: appModel.translate("searching_after"),
+            text: appModel.translate('searching_after'),
           ),
           WidgetSpan(
             child: SizedBox(
@@ -467,7 +467,7 @@ class ReaderPageState extends State<ReaderPage> {
             style: const TextStyle(),
           ),
           TextSpan(
-            text: "『",
+            text: '『',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: themeData!.unselectedWidgetColor,
@@ -480,7 +480,7 @@ class ReaderPageState extends State<ReaderPage> {
             ),
           ),
           TextSpan(
-            text: "』",
+            text: '』',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: themeData!.unselectedWidgetColor,
@@ -517,7 +517,7 @@ class ReaderPageState extends State<ReaderPage> {
             style: const TextStyle(),
           ),
           TextSpan(
-            text: "『",
+            text: '『',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: themeData!.unselectedWidgetColor,
@@ -530,7 +530,7 @@ class ReaderPageState extends State<ReaderPage> {
             ),
           ),
           TextSpan(
-            text: "』",
+            text: '』',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: themeData!.unselectedWidgetColor,
@@ -554,12 +554,12 @@ class ReaderPageState extends State<ReaderPage> {
 
   Widget buildDictionaryMessage(String messageText) {
     // Handle special cases with certain reserved patterns.
-    if (messageText.startsWith("deckExport://")) {
-      String deckName = messageText.replaceAll("deckExport://", "");
+    if (messageText.startsWith('deckExport://')) {
+      String deckName = messageText.replaceAll('deckExport://', '');
       return buildDictionaryMessageArgument(
-        appModel.translate("deck_label_before"),
+        appModel.translate('deck_label_before'),
         deckName,
-        appModel.translate("deck_label_after"),
+        appModel.translate('deck_label_after'),
         false,
       );
     }
@@ -569,9 +569,9 @@ class ReaderPageState extends State<ReaderPage> {
         text: '',
         children: <InlineSpan>[
           TextSpan(
-            text: messageText.replaceAll("...", ""),
+            text: messageText.replaceAll('...', ''),
           ),
-          if (messageText.endsWith("..."))
+          if (messageText.endsWith('...'))
             WidgetSpan(
               child: SizedBox(
                 height: 12,
@@ -592,10 +592,10 @@ class ReaderPageState extends State<ReaderPage> {
         text: '',
         children: <InlineSpan>[
           TextSpan(
-            text: appModel.translate("dictionary_nomatch_before"),
+            text: appModel.translate('dictionary_nomatch_before'),
           ),
           TextSpan(
-            text: "『",
+            text: '『',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: themeData!.unselectedWidgetColor,
@@ -608,14 +608,14 @@ class ReaderPageState extends State<ReaderPage> {
             ),
           ),
           TextSpan(
-            text: "』",
+            text: '』',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: themeData!.unselectedWidgetColor,
             ),
           ),
           TextSpan(
-            text: appModel.translate("dictionary_nomatch_after"),
+            text: appModel.translate('dictionary_nomatch_after'),
             style: const TextStyle(),
           ),
         ],
@@ -634,15 +634,15 @@ class ReaderPageState extends State<ReaderPage> {
   }
 
   void clearDictionaryMessage() {
-    searchMessage.value = "";
+    searchMessage.value = '';
   }
 
   Future<void> openCardCreator(String selection) async {
     MediaHistoryItem? contextItem = generateContextHistoryItem();
-    String? contextJson = "";
+    String? contextJson = '';
     if (contextItem != null) {
       contextJson = Uri.encodeFull(
-          "https://jidoujisho.context/${generateContextHistoryItem()!.toJson()}");
+          'https://jidoujisho.context/${generateContextHistoryItem()!.toJson()}');
     }
 
     AnkiExportParams initialParams = AnkiExportParams(
@@ -658,7 +658,7 @@ class ReaderPageState extends State<ReaderPage> {
       initialParams.reading = entry.reading;
     }
 
-    searchTerm.value = "";
+    searchTerm.value = '';
 
     ClipboardListener.removeListener(copyClipboardAction);
 
@@ -675,7 +675,7 @@ class ReaderPageState extends State<ReaderPage> {
         Navigator.of(context).pop();
         String lastDeck = appModel.getLastAnkiDroidDeck();
         setDictionaryMessage(
-          "deckExport://$lastDeck",
+          'deckExport://$lastDeck',
           duration: const Duration(seconds: 3),
         );
       },

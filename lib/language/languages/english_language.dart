@@ -8,9 +8,9 @@ import 'package:chisa/util/reg_exp.dart';
 class EnglishLanguage extends Language {
   EnglishLanguage()
       : super(
-          languageName: "English",
-          languageCode: "en",
-          countryCode: "US",
+          languageName: 'English',
+          languageCode: 'en',
+          countryCode: 'US',
           readingDirection: ReadingDirection.horizontalLTR,
           isSpaceDelimited: true,
           textBaseline: TextBaseline.alphabetic,
@@ -28,6 +28,6 @@ class EnglishLanguage extends Language {
 
   @override
   FutureOr<List<String>> textToWords(String text) {
-    return text.splitWithDelim(RegExp(r" "));
+    return text.splitWithDelim(RegExp(r' '));
   }
 }

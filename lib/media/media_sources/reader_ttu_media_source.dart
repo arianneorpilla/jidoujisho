@@ -21,7 +21,7 @@ import 'package:chisa/util/media_source_action_button.dart';
 class ReaderTtuMediaSource extends ReaderMediaSource {
   ReaderTtuMediaSource()
       : super(
-          sourceName: "ッツ Ebook Reader",
+          sourceName: 'ッツ Ebook Reader',
           icon: Icons.chrome_reader_mode_outlined,
         );
 
@@ -39,11 +39,11 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
 
   @override
   ImageProvider<Object> getHistoryThumbnail(MediaHistoryItem item) {
-    if (item.extra["thumbnail"] == null || item.extra["thumbnail"].isEmpty) {
+    if (item.extra['thumbnail'] == null || item.extra['thumbnail'].isEmpty) {
       return MemoryImage(kTransparentImage);
     }
 
-    UriData data = Uri.parse(item.extra["thumbnail"]).data!;
+    UriData data = Uri.parse(item.extra['thumbnail']).data!;
 
     /// A cached version of [MemoryImage] so that the image does not reload
     /// on every revisit
@@ -58,7 +58,7 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
     AppModel appModel = Provider.of<AppModel>(context, listen: false);
 
     MediaHistoryItem item = MediaHistoryItem(
-      key: "https://ttu-ebook.web.app/?min=",
+      key: 'https://ttu-ebook.web.app/?min=',
       mediaTypePrefs: MediaType.reader.prefsDirectory(),
       sourceName: sourceName,
       currentProgress: 0,
@@ -96,16 +96,16 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
         borderRadius: BorderRadius.zero,
       ),
       title: Text(
-        appModel.translate("clear_reader_history"),
+        appModel.translate('clear_reader_history'),
       ),
       content: Text(
-        appModel.translate("clear_reader_history_warning"),
+        appModel.translate('clear_reader_history_warning'),
         textAlign: TextAlign.justify,
       ),
       actions: <Widget>[
         TextButton(
             child: Text(
-              appModel.translate("dialog_yes"),
+              appModel.translate('dialog_yes'),
               style: TextStyle(
                 color: Theme.of(context).focusColor,
               ),
@@ -118,7 +118,7 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
             }),
         TextButton(
             child: Text(
-              appModel.translate("dialog_no"),
+              appModel.translate('dialog_no'),
             ),
             onPressed: () => Navigator.pop(context)),
       ],
@@ -185,7 +185,7 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
         controller = newController;
       },
       onConsoleMessage: (controller, consoleMessage) async {
-        print(consoleMessage);
+        debugPrint('$consoleMessage');
         await onConsoleMessage(controller, consoleMessage, state);
       },
       onLoadStop: (controller, uri) async {
@@ -208,11 +208,11 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
       return;
     }
 
-    switch (messageJson["jidoujisho"]) {
-      case "jidoujisho":
-        int index = messageJson["offset"];
-        String text = messageJson["text"];
-        String? isCreator = messageJson["isCreator"];
+    switch (messageJson['jidoujisho']) {
+      case 'jidoujisho':
+        int index = messageJson['offset'];
+        String text = messageJson['text'];
+        String? isCreator = messageJson['isCreator'];
 
         state.setScrollX(await controller.getScrollX() ?? -1);
         state.setScrollY(await controller.getScrollY() ?? -1);
@@ -225,44 +225,44 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
 
             unselectWebViewTextSelection(controller);
 
-            if (isCreator == "yes") {
+            if (isCreator == 'yes') {
               state.openCardCreator(term);
             } else {
               state.setSearchTerm(term);
             }
           }
         } catch (e) {
-          state.setSearchTerm("");
-          debugPrint("Out of range deselect");
+          state.setSearchTerm('');
+          debugPrint('Out of range deselect');
         } finally {
           unselectWebViewTextSelection(controller);
         }
 
         break;
-      case "jidoujisho-bookmark":
+      case 'jidoujisho-bookmark':
         String currentIndexText = (await controller.getUrl())
             .toString()
-            .replaceAll("https://ttu-ebook.web.app/b/", "")
-            .replaceAll("?min=", "");
+            .replaceAll('https://ttu-ebook.web.app/b?id=', '')
+            .replaceAll('?min=', '');
         int currentIndex = int.parse(currentIndexText);
 
         String currentTitle = (await controller.getTitle()).toString();
-        currentTitle = currentTitle.replaceAll("| ッツ Ebook Reader", "");
-        if (currentTitle == "ッツ Ebook Reader") {
-          currentTitle = "";
+        currentTitle = currentTitle.replaceAll('| ッツ Ebook Reader', '');
+        if (currentTitle == 'ッツ Ebook Reader') {
+          currentTitle = '';
         }
 
-        state.setUrl("https://ttu-ebook.web.app/b/$currentIndex?min=");
+        state.setUrl('https://ttu-ebook.web.app/b?id=$currentIndex?min=');
 
         state.setTitle(currentTitle);
 
-        state.setAuthor("");
+        state.setAuthor('');
 
-        if (messageJson["bookmark"] != null) {
-          String wordCountText = messageJson["bookmark"].trim();
-          int currentProgress = int.tryParse(wordCountText.split("/")[0]) ?? 0;
+        if (messageJson['bookmark'] != null) {
+          String wordCountText = messageJson['bookmark'].trim();
+          int currentProgress = int.tryParse(wordCountText.split('/')[0]) ?? 0;
           int completeProgress =
-              int.tryParse(wordCountText.split("/")[1].trim().split(" ")[0]) ??
+              int.tryParse(wordCountText.split('/')[1].trim().split(' ')[0]) ??
                   0;
 
           state.setCurrentProgress(currentProgress);
@@ -272,9 +272,9 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
         await state.updateHistory();
 
         break;
-      case "jidoujisho-metadata":
-        if (messageJson["base64Image"].startsWith("data:image/")) {
-          state.setThumbnail(messageJson["base64Image"]);
+      case 'jidoujisho-metadata':
+        if (messageJson['base64Image'].startsWith('data:image/')) {
+          state.setThumbnail(messageJson['base64Image']);
         }
 
         Future.delayed(const Duration(seconds: 2), () async {
@@ -295,11 +295,11 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
 
   Future<void> onLoadStop(InAppWebViewController controller, Uri? uri,
       ReaderPageState state) async {
-    String currentTitle = await controller.getTitle() ?? "";
+    String currentTitle = await controller.getTitle() ?? '';
 
-    currentTitle = currentTitle.replaceAll("| ッツ Ebook Reader", "");
-    if (currentTitle == "ッツ Ebook Reader") {
-      currentTitle = "";
+    currentTitle = currentTitle.replaceAll('| ッツ Ebook Reader', '');
+    if (currentTitle == 'ッツ Ebook Reader') {
+      currentTitle = '';
     }
 
     state.setTitle(currentTitle);
@@ -307,11 +307,11 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
 
   Future<void> onTitleChanged(InAppWebViewController controller, String? title,
       ReaderPageState state) async {
-    String currentTitle = await controller.getTitle() ?? "";
+    String currentTitle = await controller.getTitle() ?? '';
 
-    currentTitle = currentTitle.replaceAll("| ッツ Ebook Reader", "");
-    if (currentTitle == "ッツ Ebook Reader") {
-      currentTitle = "";
+    currentTitle = currentTitle.replaceAll('| ッツ Ebook Reader', '');
+    if (currentTitle == 'ッツ Ebook Reader') {
+      currentTitle = '';
     }
 
     state.setTitle(currentTitle);
@@ -319,16 +319,16 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
 
   Future<void> unselectWebViewTextSelection(
       InAppWebViewController webViewController) async {
-    String unselectJs = "window.getSelection().removeAllRanges();";
+    String unselectJs = 'window.getSelection().removeAllRanges();';
     await webViewController.evaluateJavascript(source: unselectJs);
   }
 
   String sanitizeWebViewTextSelection(String? text) {
     if (text == null) {
-      return "";
+      return '';
     }
 
-    text = text.replaceAll("\\n", "\n");
+    text = text.replaceAll('\\n', '\n');
     text = text.trim();
     return text;
   }
@@ -372,8 +372,8 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
         menuItems: [
           ContextMenuItem(
             androidId: 3,
-            iosId: "3",
-            title: "➡️",
+            iosId: '3',
+            title: '➡️',
             action: () async {
               SystemChrome.setPreferredOrientations([
                 DeviceOrientation.portraitUp,
@@ -382,7 +382,7 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
               state.setScrollX(await controller.getScrollX() ?? -1);
 
               String searchTerm = await getWebViewTextSelection(controller);
-              state.setSearchTerm("");
+              state.setSearchTerm('');
               unselectWebViewTextSelection(controller);
               await state.openCardCreator(searchTerm);
 
@@ -393,11 +393,9 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
           ),
           ContextMenuItem(
             androidId: 2,
-            iosId: "2",
-            title: "📚",
+            iosId: '2',
+            title: '📚',
             action: () async {
-              String searchTerm = await getWebViewTextSelection(controller);
-
               state.setScrollX(await controller.getScrollX() ?? -1);
               unselectWebViewTextSelection(controller);
               await appModel.showDictionaryMenu(
@@ -412,8 +410,8 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
           ),
           ContextMenuItem(
             androidId: 1,
-            iosId: "1",
-            title: "🔎",
+            iosId: '1',
+            title: '🔎',
             action: () async {
               String searchTerm = await getWebViewTextSelection(controller);
 
@@ -424,7 +422,7 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
           ),
         ],
         onCreateContextMenu: (result) {
-          state.setSearchTerm("");
+          state.setSearchTerm('');
         },
       );
     } else {
@@ -433,8 +431,8 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
         menuItems: [
           ContextMenuItem(
             androidId: 1,
-            iosId: "1",
-            title: appModel.translate("search"),
+            iosId: '1',
+            title: appModel.translate('search'),
             action: () async {
               String searchTerm = await getWebViewTextSelection(controller);
 
@@ -445,8 +443,8 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
           ),
           ContextMenuItem(
             androidId: 2,
-            iosId: "2",
-            title: appModel.translate("dictionaries"),
+            iosId: '2',
+            title: appModel.translate('dictionaries'),
             action: () async {
               String searchTerm = await getWebViewTextSelection(controller);
 
@@ -463,8 +461,8 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
           ),
           ContextMenuItem(
             androidId: 3,
-            iosId: "3",
-            title: appModel.translate("creator"),
+            iosId: '3',
+            title: appModel.translate('creator'),
             action: () async {
               state.setScrollX(await controller.getScrollX() ?? -1);
               String searchTerm = await getWebViewTextSelection(controller);
@@ -475,7 +473,7 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
           ),
         ],
         onCreateContextMenu: (result) {
-          state.setSearchTerm("");
+          state.setSearchTerm('');
         },
       );
     }
@@ -695,7 +693,7 @@ var observer = new MutationObserver(function(mutations, observer) {
       document.body.getElementsByClassName("fa-expand")[0].parentElement.remove();
     }
 
-    var reader = document.getElementsByTagName('app-book-reader');
+    var reader = document.getElementsByClassName('book-content')
     if (reader.length != 0) {
       reader[0].addEventListener('click', tapToSelect);
     }
@@ -715,8 +713,14 @@ if (document.body.getElementsByClassName('fa-bookmark').length != 0) {
   document.body.getElementsByClassName("fa-expand")[0].parentElement.remove();
 }
 
-document.querySelector('body').addEventListener('click', function(e) {
-  if (e.target.classList.contains('fa-bookmark') || e.target.firstChild.classList.contains('fa-bookmark')) {
+var reader = document.getElementsByClassName('book-content')
+if (reader.length != 0) {
+  document.querySelector('body').addEventListener('click', function(e) {
+  var reader = document.getElementsByClassName('book-content')
+    
+
+  var element = document.getElementsByClassName('svelte-fa')[0];
+  if (e.target === element && element.contains(e.target)) {
     var info = document.getElementsByClassName('bottom-2')[0];
     console.log(JSON.stringify({
               "bookmark": info.textContent,
@@ -724,18 +728,19 @@ document.querySelector('body').addEventListener('click', function(e) {
             }));
   }
 }, true);
+}
 """;
 
   bool getClearCache(BuildContext context) {
     AppModel appModel = Provider.of<AppModel>(context, listen: false);
     return appModel.sharedPreferences
-            .getBool("$getIdentifier()://clearCache") ??
+            .getBool('$getIdentifier()://clearCache') ??
         false;
   }
 
   Future<void> setClearCache(BuildContext context, bool clearCache) async {
     AppModel appModel = Provider.of<AppModel>(context, listen: false);
     await appModel.sharedPreferences
-        .setBool("$getIdentifier()://clearCache", clearCache);
+        .setBool('$getIdentifier()://clearCache', clearCache);
   }
 }

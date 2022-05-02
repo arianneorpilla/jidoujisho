@@ -15,9 +15,9 @@ class TextSegmentationEnhancement extends AnkiExportEnhancement {
     required AppModel appModel,
   }) : super(
           appModel: appModel,
-          enhancementName: "Text Segmentation",
+          enhancementName: 'Text Segmentation',
           enhancementDescription:
-              "Split text into words and open a picker dialog.",
+              'Split text into words and open a picker dialog.',
           enhancementIcon: Icons.account_tree,
           enhancementField: field,
         );
@@ -30,7 +30,7 @@ class TextSegmentationEnhancement extends AnkiExportEnhancement {
     required bool autoMode,
     required CreatorPageState state,
   }) async {
-    String text = "";
+    String text = '';
 
     switch (enhancementField) {
       case AnkiExportField.sentence:
@@ -46,7 +46,7 @@ class TextSegmentationEnhancement extends AnkiExportEnhancement {
         text = params.meaning;
         break;
       default:
-        throw UnimplementedError("Unimplemented for non sentence/meaning");
+        throw UnimplementedError('Unimplemented for non sentence/meaning');
     }
 
     ValueNotifier<List<bool>> indexesSelected;
@@ -67,7 +67,7 @@ class TextSegmentationEnhancement extends AnkiExportEnhancement {
 
     bool isSpaceDelimited = appModel.getCurrentLanguage().isSpaceDelimited;
     bool isSearch = false;
-    String searchTerm = "";
+    String searchTerm = '';
 
     await showDialog(
       context: context,
@@ -103,14 +103,14 @@ class TextSegmentationEnhancement extends AnkiExportEnhancement {
                     .every((selected) => selected == false)) {
                   searchTerm = text;
                 } else {
-                  String wordsJoined = "";
+                  String wordsJoined = '';
 
                   for (int i = 0; i < words.length; i++) {
                     if (indexesSelected.value[i]) {
                       wordsJoined += words[i];
                     }
                     if (isSpaceDelimited) {
-                      wordsJoined += " ";
+                      wordsJoined += ' ';
                     }
                   }
 
@@ -129,14 +129,14 @@ class TextSegmentationEnhancement extends AnkiExportEnhancement {
                     .every((selected) => selected == false)) {
                   params.word = text;
                 } else {
-                  String wordsJoined = "";
+                  String wordsJoined = '';
 
                   for (int i = 0; i < words.length; i++) {
                     if (indexesSelected.value[i]) {
                       wordsJoined += words[i];
                     }
                     if (isSpaceDelimited) {
-                      wordsJoined += " ";
+                      wordsJoined += ' ';
                     }
                   }
 

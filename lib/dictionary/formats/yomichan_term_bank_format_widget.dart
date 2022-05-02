@@ -48,19 +48,19 @@ class YomichanTermBankFormatWidget extends DictionaryWidget {
   Widget buildTermTags() {
     List<Widget> tagWidgets = [];
 
-    if (getDictionaryCache()["yomichanTags"] == null) {
+    if (getDictionaryCache()['yomichanTags'] == null) {
       List<YomichanTag> yomichanTags =
           YomichanTag.getTagsFromMetadata(dictionary.metadata);
-      getDictionaryCache()["yomichanTags"] = yomichanTags;
+      getDictionaryCache()['yomichanTags'] = yomichanTags;
     }
     Map<String, dynamic> map = jsonDecode(dictionaryEntry.extra);
-    List<YomichanTag> tagsStore = getDictionaryCache()["yomichanTags"];
+    List<YomichanTag> tagsStore = getDictionaryCache()['yomichanTags'];
 
-    if (map["meanings"] == null) {
+    if (map['meanings'] == null) {
       return super.buildMeaning(selectable);
     }
 
-    List<dynamic> uncastNames = map["termTags"];
+    List<dynamic> uncastNames = map['termTags'];
     List<String> termTagNames =
         uncastNames.map((uncastName) => uncastName.toString()).toList();
 
@@ -72,7 +72,7 @@ class YomichanTermBankFormatWidget extends DictionaryWidget {
         GestureDetector(
           onTap: () {
             Fluttertoast.showToast(
-              msg: "${tag.tagName} - ${tag.tagNotes}",
+              msg: '${tag.tagName} - ${tag.tagNotes}',
               toastLength: Toast.LENGTH_SHORT,
               gravity: ToastGravity.BOTTOM,
               timeInSecForIosWeb: 1,
@@ -101,8 +101,8 @@ class YomichanTermBankFormatWidget extends DictionaryWidget {
       GestureDetector(
         onTap: () {
           Fluttertoast.showToast(
-            msg: "${dictionary.dictionaryName} - Dictionary entry sourced from"
-                " ${dictionary.dictionaryName} with ${dictionaryFormat.formatName} format",
+            msg: '${dictionary.dictionaryName} - Dictionary entry sourced from'
+                ' ${dictionary.dictionaryName} with ${dictionaryFormat.formatName} format',
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.BOTTOM,
             timeInSecForIosWeb: 1,
@@ -134,26 +134,26 @@ class YomichanTermBankFormatWidget extends DictionaryWidget {
 
   @override
   Widget buildMeaning(bool selectable) {
-    if (getDictionaryCache()["yomichanTags"] == null) {
+    if (getDictionaryCache()['yomichanTags'] == null) {
       List<YomichanTag> yomichanTags =
           YomichanTag.getTagsFromMetadata(dictionary.metadata);
-      getDictionaryCache()["yomichanTags"] = yomichanTags;
+      getDictionaryCache()['yomichanTags'] = yomichanTags;
     }
     Map<String, dynamic> map = jsonDecode(dictionaryEntry.extra);
-    List<YomichanTag> tagsStore = getDictionaryCache()["yomichanTags"];
+    List<YomichanTag> tagsStore = getDictionaryCache()['yomichanTags'];
 
-    if (map["meanings"] == null) {
+    if (map['meanings'] == null) {
       return super.buildMeaning(selectable);
     }
 
     List<List<String>> definitionTagNames = [];
-    List<dynamic> listOfListOfTags = map["definitionTags"];
+    List<dynamic> listOfListOfTags = map['definitionTags'];
     for (List<dynamic> listOfTags in listOfListOfTags) {
       List<String> castTags =
           listOfTags.map((uncastTag) => uncastTag.toString()).toList();
       definitionTagNames.add(castTags);
     }
-    List<String> meanings = List.castFrom(map["meanings"]);
+    List<String> meanings = List.castFrom(map['meanings']);
     List<List<YomichanTag>> yomichanDefinitionTags = definitionTagNames
         .map((tagList) => YomichanTag.getTagsFromNames(tagsStore, tagList))
         .toList();
@@ -166,7 +166,7 @@ class YomichanTermBankFormatWidget extends DictionaryWidget {
           GestureDetector(
             onTap: () {
               Fluttertoast.showToast(
-                msg: "${tag.tagName} - ${tag.tagNotes}",
+                msg: '${tag.tagName} - ${tag.tagNotes}',
                 toastLength: Toast.LENGTH_SHORT,
                 gravity: ToastGravity.BOTTOM,
                 timeInSecForIosWeb: 1,

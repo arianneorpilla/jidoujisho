@@ -1,13 +1,9 @@
-import 'dart:io';
-
 import 'package:chisa/dictionary/dictionary.dart';
 import 'package:chisa/dictionary/dictionary_widget_enhancement.dart';
 import 'package:chisa/dictionary/dictionary_widget_enhancement_dialog.dart';
-import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_sources/viewer_camera_media_source.dart';
 
 import 'package:chisa/media/media_type.dart';
-import 'package:chisa/media/media_types/media_launch_params.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:chisa/util/anki_creator.dart';
 import 'package:chisa/util/dictionary_widget_field.dart';
@@ -16,14 +12,10 @@ import 'package:chisa/util/popup_item.dart';
 import 'package:chisa/util/return_from_context.dart';
 import 'package:chisa/util/share_intent.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:path/path.dart' as p;
 
 class HomePage extends StatefulWidget {
   const HomePage({
@@ -49,8 +41,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   bool initialTextProcessed = false;
   bool initialLinkProcessed = false;
 
-  ImageProvider<Object> imageIcon = const AssetImage("assets/icon/icon.png");
-  ImageProvider<Object> imageSmallIcon = const AssetImage("assets/icon/icon_small.png");
+  ImageProvider<Object> imageIcon = const AssetImage('assets/icon/icon.png');
+  ImageProvider<Object> imageSmallIcon = const AssetImage('assets/icon/icon_small.png');
   ValueNotifier<bool>? incognitoNotifier;
 
   @override
@@ -69,7 +61,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     });
     
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-      ViewerCameraMediaSource cameraSource = appModel.getMediaSourceFromName(MediaType.viewer, "Camera") as ViewerCameraMediaSource;
+      ViewerCameraMediaSource cameraSource = appModel.getMediaSourceFromName(MediaType.viewer, 'Camera') as ViewerCameraMediaSource;
       cameraSource.getLostData(context);
     });
   }
@@ -166,7 +158,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          appModel.translate("app_title"),
+          appModel.translate('app_title'),
           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
         ),
         getVersion(),
@@ -177,7 +169,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Widget getVersion() {
     String version = appModel.packageInfo.version;
    return Text(
-      " $version",
+      ' $version',
       style: const TextStyle(
         fontWeight: FontWeight.w700,
         fontSize: 11,
@@ -293,8 +285,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       items: [
         popupItem(
           label: appModel.getIsDarkMode()
-              ? appModel.translate("options_theme_light")
-              : appModel.translate("options_theme_dark"),
+              ? appModel.translate('options_theme_light')
+              : appModel.translate('options_theme_dark'),
           icon: appModel.getIsDarkMode() ? Icons.light_mode : Icons.dark_mode,
           action: () async {
             await appModel.toggleActiveTheme();
@@ -302,8 +294,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
         ),
         popupItem(
           label: appModel.getIncognitoMode()
-              ? appModel.translate("options_incognito_off")
-              : appModel.translate("options_incognito_on"),
+              ? appModel.translate('options_incognito_off')
+              : appModel.translate('options_incognito_on'),
           icon: appModel.getIncognitoMode()
               ? Icons.person_off_outlined
               : Icons.person_off,
@@ -313,7 +305,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           },
         ),
         popupItem(
-          label: appModel.translate("options_dictionaries"),
+          label: appModel.translate('options_dictionaries'),
           icon: Icons.auto_stories,
           action: () async {
             List<Dictionary> dictionaryRecord = appModel.getDictionaryRecord();
@@ -328,21 +320,21 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           },
         ),
         popupItem(
-          label: appModel.translate("options_sources"),
+          label: appModel.translate('options_sources'),
           icon: Icons.perm_media,
           action: () async {
             showMediaSourceOptions(context, offset);
           },
         ),
         popupItem(
-          label: appModel.translate("options_enhancements"),
+          label: appModel.translate('options_enhancements'),
           icon: Icons.auto_fix_high,
           action: () async {
             showEnhancementOptions(context, offset);
           },
         ),
         popupItem(
-          label: appModel.translate("options_language"),
+          label: appModel.translate('options_language'),
           icon: Icons.translate,
           action: () async {
             await appModel.showLanguageMenu(
@@ -351,25 +343,25 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           },
         ),
         popupItem(
-          label: appModel.translate("options_github"),
+          label: appModel.translate('options_github'),
           icon: Icons.code,
           action: () async {
-            await launch("https://github.com/lrorpilla/jidoujisho");
+            await launch('https://github.com/lrorpilla/jidoujisho');
           },
         ),
         popupItem(
-          label: appModel.translate("options_licenses"),
+          label: appModel.translate('options_licenses'),
           icon: Icons.info,
           action: () async {
-            const String legalese = "A highly versatile and modular framework "
-            "enabling language-agnostic immersion learning on mobile. \n\n"
-            "Originally built for the Japanese language learning "
-            "community by Leo Rafael Orpilla. Logo by suzy and Aaron Marbella."
-            "\n\njidoujisho is free and open source software. Visit the "
-                "repository for a more comprehensive list of other licenses "
-                "and attribution notices. Liking the application? Help out by "
-                "providing feedback, making a donation, reporting issues or "
-                "collaborating for further improvements on GitHub.";
+            const String legalese = 'A highly versatile and modular framework '
+            'enabling language-agnostic immersion learning on mobile. \n\n'
+            'Originally built for the Japanese language learning '
+            'community by Leo Rafael Orpilla. Logo by suzy and Aaron Marbella.'
+            '\n\njidoujisho is free and open source software. Visit the '
+                'repository for a more comprehensive list of other licenses '
+                'and attribution notices. Liking the application? Help out by '
+                'providing feedback, making a donation, reporting issues or '
+                'collaborating for further improvements on GitHub.';
 
             Navigator.of(context).push(
               MaterialPageRoute<void>(
@@ -379,7 +371,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         appModel.getIsDarkMode() ? Colors.black : Colors.white,
                   ),
                   child: LicensePage(
-                      applicationName: appModel.translate("app_title"),
+                      applicationName: appModel.translate('app_title'),
                       applicationVersion: appModel.packageInfo.version,
                       applicationIcon: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8),
@@ -414,7 +406,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       position: RelativeRect.fromLTRB(left, top, 0, 0),
       items: [
         popupItem(
-          label: appModel.translate("creator_options_menu"),
+          label: appModel.translate('creator_options_menu'),
           icon: Icons.widgets,
           action: () async {
             await navigateToCreator(
@@ -426,7 +418,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           },
         ),
         popupItem(
-          label: appModel.translate("creator_options_auto"),
+          label: appModel.translate('creator_options_auto'),
           icon: Icons.hdr_auto,
           action: () async {
             await navigateToCreator(
@@ -438,7 +430,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           },
         ),
         popupItem(
-          label: appModel.translate("widget_options"),
+          label: appModel.translate('widget_options'),
           icon: Icons.auto_stories,
           action: () async {
             showWidgetFieldOptions(context, offset);
@@ -480,21 +472,21 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       position: RelativeRect.fromLTRB(left, top, 0, 0),
       items: [
         popupItem(
-          label: appModel.translate("field_label_word"),
+          label: appModel.translate('field_label_word'),
           icon: Icons.speaker_notes_outlined,
           action: () async {
             await changeFieldWidget(DictionaryWidgetField.word);
           },
         ),
         popupItem(
-          label: appModel.translate("field_label_reading"),
+          label: appModel.translate('field_label_reading'),
           icon: Icons.surround_sound_outlined,
           action: () async {
             await changeFieldWidget(DictionaryWidgetField.reading);
           },
         ),
         popupItem(
-          label: appModel.translate("field_label_meaning"),
+          label: appModel.translate('field_label_meaning'),
           icon: Icons.translate_rounded,
           action: () async {
             await changeFieldWidget(DictionaryWidgetField.meaning);
@@ -518,7 +510,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       position: RelativeRect.fromLTRB(left, top, 0, 0),
       items: [
         popupItem(
-          label: appModel.translate("player_media_type"),
+          label: appModel.translate('player_media_type'),
           icon: Icons.video_library,
           action: () async {
             String sourceName =
@@ -536,7 +528,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           },
         ),
         popupItem(
-          label: appModel.translate("reader_media_type"),
+          label: appModel.translate('reader_media_type'),
           icon: Icons.library_books,
           action: () async {
             String sourceName =
@@ -554,7 +546,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           },
         ),
         popupItem(
-          label: appModel.translate("viewer_media_type"),
+          label: appModel.translate('viewer_media_type'),
           icon: Icons.photo_library,
           action: () async {
             String sourceName =

@@ -406,7 +406,7 @@ class AppModel with ChangeNotifier {
     String appDirDocPath = (await getApplicationDocumentsDirectory()).path;
 
     Directory objectBoxDirDirectory = Directory(
-      p.join(appDirDocPath, "customDictionaries", dictionaryName),
+      p.join(appDirDocPath, 'customDictionaries', dictionaryName),
     );
     if (!objectBoxDirDirectory.existsSync()) {
       objectBoxDirDirectory.createSync(recursive: true);
@@ -471,7 +471,7 @@ class AppModel with ChangeNotifier {
 
   /// Get the current theme, whether or not dark mode should be on.
   bool getIsDarkMode() {
-    return _sharedPreferences.getBool("isDarkMode") ??
+    return _sharedPreferences.getBool('isDarkMode') ??
         Brightness.dark ==
             (SchedulerBinding.instance?.window.platformBrightness ?? false);
   }
@@ -480,7 +480,7 @@ class AppModel with ChangeNotifier {
   /// and toggles between light and dark mode, also saving the option.
   Future<void> toggleActiveTheme() async {
     bool isDarkMode = getIsDarkMode();
-    _sharedPreferences.setBool("isDarkMode", !isDarkMode);
+    _sharedPreferences.setBool('isDarkMode', !isDarkMode);
 
     notifyListeners();
   }
@@ -488,7 +488,7 @@ class AppModel with ChangeNotifier {
   /// Get the saved last main menu item so it can be shown on application start.
   int getLastActiveTabIndex() {
     int tabIndex = mediaTypes.indexWhere((mediaType) =>
-        "$mediaType" == _sharedPreferences.getString("lastActiveMediaType"));
+        '$mediaType' == _sharedPreferences.getString('lastActiveMediaType'));
 
     if (tabIndex == -1) {
       return 0;
@@ -500,17 +500,17 @@ class AppModel with ChangeNotifier {
   /// Save the last index and remember it on application restart.
   Future<void> setLastActiveTabIndex(int tabIndex) async {
     await _sharedPreferences.setString(
-        "lastActiveMediaType", mediaTypes[tabIndex].toString());
+        'lastActiveMediaType', mediaTypes[tabIndex].toString());
   }
 
   /// Get the current active dictionary, the last one used.
   String getCurrentDictionaryName() {
-    return _sharedPreferences.getString("currentDictionaryName") ?? "";
+    return _sharedPreferences.getString('currentDictionaryName') ?? '';
   }
 
   /// Save a new active dictionary and remember it on application restart.
   Future<void> setCurrentDictionaryName(String dictionaryName) async {
-    await _sharedPreferences.setString("currentDictionaryName", dictionaryName);
+    await _sharedPreferences.setString('currentDictionaryName', dictionaryName);
   }
 
   MediaSource getCurrentMediaTypeSource(MediaType mediaType) {
@@ -520,25 +520,25 @@ class AppModel with ChangeNotifier {
 
   String getCurrentMediaTypeSourceName(MediaType mediaType) {
     return _sharedPreferences
-            .getString("${mediaType.prefsDirectory()}/currentSource") ??
+            .getString('${mediaType.prefsDirectory()}/currentSource') ??
         availableMediaSources[mediaType]!.values.first.sourceName;
   }
 
   Future<void> setCurrentMediaTypeSourceName(
       MediaType mediaType, String sourceName) async {
     await _sharedPreferences.setString(
-        "${mediaType.prefsDirectory()}/currentSource", sourceName);
+        '${mediaType.prefsDirectory()}/currentSource', sourceName);
   }
 
   bool getMediaSourceShown(MediaSource source) {
     return _sharedPreferences.getBool(
-            "${source.mediaType.prefsDirectory()}/${source.sourceName}/shown") ??
+            '${source.mediaType.prefsDirectory()}/${source.sourceName}/shown') ??
         true;
   }
 
   Future<void> setMediaSourceShown(MediaSource source, bool shown) async {
     await _sharedPreferences.setBool(
-        "${source.mediaType.prefsDirectory()}/${source.sourceName}/shown",
+        '${source.mediaType.prefsDirectory()}/${source.sourceName}/shown',
         shown);
   }
 
@@ -693,13 +693,13 @@ class AppModel with ChangeNotifier {
 
   /// Get the last selected dictionary format.
   String getLastDictionaryFormatName() {
-    return _sharedPreferences.getString("lastDictionaryFormat") ??
+    return _sharedPreferences.getString('lastDictionaryFormat') ??
         getDictionaryFormatNames().first;
   }
 
   /// Save a new active dictionary and remember it on application restart.
   Future<void> setLastDictionaryFormatName(String formatName) async {
-    await _sharedPreferences.setString("lastDictionaryFormat", formatName);
+    await _sharedPreferences.setString('lastDictionaryFormat', formatName);
   }
 
   Store? getDictionaryStore(String dictionaryName) {
@@ -728,7 +728,7 @@ class AppModel with ChangeNotifier {
     if (getDictionaryRecord().length != 1) {
       setPrevDictionary();
     } else {
-      await setCurrentDictionaryName("");
+      await setCurrentDictionaryName('');
     }
 
     try {
@@ -739,7 +739,7 @@ class AppModel with ChangeNotifier {
       removeDictionaryStore(dictionaryName);
 
       Directory objectBoxDirDirectory = Directory(
-        p.join(appDirDocPath, "customDictionaries", dictionaryName),
+        p.join(appDirDocPath, 'customDictionaries', dictionaryName),
       );
       objectBoxDirDirectory.deleteSync(recursive: true);
     } finally {
@@ -766,7 +766,7 @@ class AppModel with ChangeNotifier {
   }
 
   List<Dictionary> getDictionaryRecord() {
-    String jsonList = _sharedPreferences.getString("dictionaryRecord") ?? '[]';
+    String jsonList = _sharedPreferences.getString('dictionaryRecord') ?? '[]';
 
     List<dynamic> serialisedItems = (jsonDecode(jsonList) as List<dynamic>);
 
@@ -788,7 +788,7 @@ class AppModel with ChangeNotifier {
     }
 
     await _sharedPreferences.setString(
-      "dictionaryRecord",
+      'dictionaryRecord',
       jsonEncode(serialisedItems),
     );
   }
@@ -808,11 +808,11 @@ class AppModel with ChangeNotifier {
   }
 
   String getTargetLanguageName() {
-    return _sharedPreferences.getString("targetLanguage") ?? "日本語";
+    return _sharedPreferences.getString('targetLanguage') ?? '日本語';
   }
 
   Future<void> setTargetLanguageName(String targetLanguage) async {
-    await _sharedPreferences.setString("targetLanguage", targetLanguage);
+    await _sharedPreferences.setString('targetLanguage', targetLanguage);
     await initialiseCurrentLanguage();
     notifyListeners();
   }
@@ -822,12 +822,12 @@ class AppModel with ChangeNotifier {
   }
 
   String getAppLanguageName() {
-    return _sharedPreferences.getString("appLanguage") ??
+    return _sharedPreferences.getString('appLanguage') ??
         AppLocalizations.localizations().first;
   }
 
   Future<void> setAppLanguageName(String appLanguage) async {
-    await _sharedPreferences.setString("appLanguage", appLanguage);
+    await _sharedPreferences.setString('appLanguage', appLanguage);
     notifyListeners();
   }
 
@@ -954,11 +954,11 @@ class AppModel with ChangeNotifier {
   }
 
   void clearExportParams(AnkiExportParams params) {
-    params.sentence = "";
-    params.word = "";
-    params.reading = "";
-    params.meaning = "";
-    params.extra = "";
+    params.sentence = '';
+    params.word = '';
+    params.reading = '';
+    params.meaning = '';
+    params.extra = '';
     params.imageFile = null;
     params.audioFile = null;
   }
@@ -1010,14 +1010,14 @@ class AppModel with ChangeNotifier {
 
   DictionaryMediaHistory getDictionaryMediaHistory() {
     return DictionaryMediaHistory(
-      prefsDirectory: "dictionary_media_type",
+      prefsDirectory: 'dictionary_media_type',
       appModel: this,
     );
   }
 
   Map<String, int> getDictionaryHistoryIndexMap() {
     String indexMapJson =
-        sharedPreferences.getString("dictionaryHistoryIndexMap") ?? "{}";
+        sharedPreferences.getString('dictionaryHistoryIndexMap') ?? '{}';
     Map<String, int> indexMap = Map<String, int>.from(jsonDecode(indexMapJson));
 
     return indexMap;
@@ -1025,7 +1025,7 @@ class AppModel with ChangeNotifier {
 
   Future<void> setDictionaryHistoryIndexMap(Map<String, int> indexMap) async {
     await sharedPreferences.setString(
-        "dictionaryHistoryIndexMap", jsonEncode(indexMap));
+        'dictionaryHistoryIndexMap', jsonEncode(indexMap));
   }
 
   Future<void> addDictionaryHistoryItem(DictionaryMediaHistoryItem item) {
@@ -1034,16 +1034,16 @@ class AppModel with ChangeNotifier {
 
   int getDictionaryHistoryIndex(DictionaryMediaHistoryItem item) {
     Map<String, int> indexMap = getDictionaryHistoryIndexMap();
-    return indexMap["${item.title}/${item.author}"] ?? 0;
+    return indexMap['${item.title}/${item.author}'] ?? 0;
   }
 
   Future<void> setDictionaryHistoryIndex(
       DictionaryMediaHistoryItem item, int? index) async {
     Map<String, int> indexMap = getDictionaryHistoryIndexMap();
     if (index == null) {
-      indexMap.remove("${item.title}/${item.author}");
+      indexMap.remove('${item.title}/${item.author}');
     } else {
-      indexMap["${item.title}/${item.author}"] = index;
+      indexMap['${item.title}/${item.author}'] = index;
     }
     await setDictionaryHistoryIndexMap(indexMap);
   }
@@ -1275,61 +1275,61 @@ class AppModel with ChangeNotifier {
   }
 
   bool getIncognitoMode() {
-    return sharedPreferences.getBool("incognitoMode") ?? false;
+    return sharedPreferences.getBool('incognitoMode') ?? false;
   }
 
   Future<void> toggleIncognitoMode() async {
-    await sharedPreferences.setBool("incognitoMode", !getIncognitoMode());
+    await sharedPreferences.setBool('incognitoMode', !getIncognitoMode());
   }
 
   bool getPlayerDefinitionFocusMode() {
-    return sharedPreferences.getBool("playerDefinitionFocusMode") ?? false;
+    return sharedPreferences.getBool('playerDefinitionFocusMode') ?? false;
   }
 
   Future<void> togglePlayerDefinitionFocusMode() async {
     await sharedPreferences.setBool(
-        "playerDefinitionFocusMode", !getPlayerDefinitionFocusMode());
+        'playerDefinitionFocusMode', !getPlayerDefinitionFocusMode());
   }
 
   bool getPlayerSubtitleFocusMode() {
-    return sharedPreferences.getBool("playerSubtitleFocusMode") ?? false;
+    return sharedPreferences.getBool('playerSubtitleFocusMode') ?? false;
   }
 
   Future<void> togglePlayerSubtitleFocusMode() async {
     await sharedPreferences.setBool(
-        "playerSubtitleFocusMode", !getPlayerSubtitleFocusMode());
+        'playerSubtitleFocusMode', !getPlayerSubtitleFocusMode());
   }
 
   bool getListeningComprehensionMode() {
-    return sharedPreferences.getBool("playerListeningComprehensionMode") ??
+    return sharedPreferences.getBool('playerListeningComprehensionMode') ??
         false;
   }
 
   Future<void> toggleListeningComprehensionMode() async {
     await sharedPreferences.setBool(
-        "playerListeningComprehensionMode", !getListeningComprehensionMode());
+        'playerListeningComprehensionMode', !getListeningComprehensionMode());
   }
 
   BlurWidgetOptions getBlurWidgetOptions() {
-    double width = sharedPreferences.getDouble("blurWidgetWidth") ?? 200;
-    double height = sharedPreferences.getDouble("blurWidgetHeight") ?? 200;
-    double left = sharedPreferences.getDouble("blurWidgetLeft") ?? -1;
-    double top = sharedPreferences.getDouble("blurWidthTop") ?? -1;
+    double width = sharedPreferences.getDouble('blurWidgetWidth') ?? 200;
+    double height = sharedPreferences.getDouble('blurWidgetHeight') ?? 200;
+    double left = sharedPreferences.getDouble('blurWidgetLeft') ?? -1;
+    double top = sharedPreferences.getDouble('blurWidthTop') ?? -1;
 
-    int colorRed = sharedPreferences.getInt("blurWidgetRed") ??
+    int colorRed = sharedPreferences.getInt('blurWidgetRed') ??
         Colors.black.withOpacity(0.5).red;
-    int colorGreen = sharedPreferences.getInt("blurWidgetGreen") ??
+    int colorGreen = sharedPreferences.getInt('blurWidgetGreen') ??
         Colors.black.withOpacity(0.5).green;
-    int colorBlue = sharedPreferences.getInt("blurWidgetBlue") ??
+    int colorBlue = sharedPreferences.getInt('blurWidgetBlue') ??
         Colors.black.withOpacity(0.5).blue;
-    double colorOpacity = sharedPreferences.getDouble("blurWidgetOpacity") ??
+    double colorOpacity = sharedPreferences.getDouble('blurWidgetOpacity') ??
         Colors.black.withOpacity(0.5).opacity;
 
     Color color = Color.fromRGBO(colorRed, colorGreen, colorBlue, colorOpacity);
 
     double blurRadius =
-        sharedPreferences.getDouble("blurWidgetBlurRadius") ?? 5;
-    bool visible = sharedPreferences.getBool("blurWidgetVisible") ?? false;
+        sharedPreferences.getDouble('blurWidgetBlurRadius') ?? 5;
+    bool visible = sharedPreferences.getBool('blurWidgetVisible') ?? false;
 
     return BlurWidgetOptions(
         width, height, left, top, color, blurRadius, visible);
@@ -1337,35 +1337,35 @@ class AppModel with ChangeNotifier {
 
   Future<void> setBlurWidgetOptions(BlurWidgetOptions blurWidgetOptions) async {
     await sharedPreferences.setDouble(
-        "blurWidgetWidth", blurWidgetOptions.width);
+        'blurWidgetWidth', blurWidgetOptions.width);
     await sharedPreferences.setDouble(
-        "blurWidgetHeight", blurWidgetOptions.height);
-    await sharedPreferences.setDouble("blurWidgetLeft", blurWidgetOptions.left);
-    await sharedPreferences.setDouble("blurWidthTop", blurWidgetOptions.top);
+        'blurWidgetHeight', blurWidgetOptions.height);
+    await sharedPreferences.setDouble('blurWidgetLeft', blurWidgetOptions.left);
+    await sharedPreferences.setDouble('blurWidthTop', blurWidgetOptions.top);
 
     await sharedPreferences.setInt(
-        "blurWidgetRed", blurWidgetOptions.color.red);
+        'blurWidgetRed', blurWidgetOptions.color.red);
     await sharedPreferences.setInt(
-        "blurWidgetGreen", blurWidgetOptions.color.green);
+        'blurWidgetGreen', blurWidgetOptions.color.green);
     await sharedPreferences.setInt(
-        "blurWidgetBlue", blurWidgetOptions.color.blue);
+        'blurWidgetBlue', blurWidgetOptions.color.blue);
     await sharedPreferences.setDouble(
-        "blurWidgetOpacity", blurWidgetOptions.color.opacity);
+        'blurWidgetOpacity', blurWidgetOptions.color.opacity);
 
     await sharedPreferences.setDouble(
-        "blurWidgetBlurRadius", blurWidgetOptions.blurRadius);
+        'blurWidgetBlurRadius', blurWidgetOptions.blurRadius);
     await sharedPreferences.setBool(
-        "blurWidgetVisible", blurWidgetOptions.visible);
+        'blurWidgetVisible', blurWidgetOptions.visible);
   }
 
   SubtitleOptions getSubtitleOptions() {
-    int audioAllowance = sharedPreferences.getInt("audioAllowance") ?? 0;
-    int subtitleDelay = sharedPreferences.getInt("subtitleDelay") ?? 0;
-    double fontSize = sharedPreferences.getDouble("fontSize") ?? 24;
+    int audioAllowance = sharedPreferences.getInt('audioAllowance') ?? 0;
+    int subtitleDelay = sharedPreferences.getInt('subtitleDelay') ?? 0;
+    double fontSize = sharedPreferences.getDouble('fontSize') ?? 24;
     String fontName = sharedPreferences
-            .getString("fontName/${getCurrentLanguage().languageName}") ??
-        "Roboto";
-    String regexFilter = sharedPreferences.getString("regexFilter") ?? "";
+            .getString('fontName/${getCurrentLanguage().languageName}') ??
+        'Roboto';
+    String regexFilter = sharedPreferences.getString('regexFilter') ?? '';
 
     return SubtitleOptions(
       audioAllowance,
@@ -1381,56 +1381,56 @@ class AppModel with ChangeNotifier {
 
     if (language is JapaneseLanguage) {
       return [
-        "Hachi Maru Pop",
-        "Kosugi",
-        "Kosugi Maru",
-        "M PLUS 1p",
-        "M PLUS Rounded 1c",
-        "Potta One",
-        "Roboto",
-        "Sawarabi Gothic",
-        "Sawarabi Mincho",
-        "Yusei Magic",
+        'Hachi Maru Pop',
+        'Kosugi',
+        'Kosugi Maru',
+        'M PLUS 1p',
+        'M PLUS Rounded 1c',
+        'Potta One',
+        'Roboto',
+        'Sawarabi Gothic',
+        'Sawarabi Mincho',
+        'Yusei Magic',
       ];
     } else if (language is ChineseSimplifiedLanguage ||
         language is ChineseTraditionalLanguage) {
       return [
-        "Liu Jian Mao Cao",
-        "Long Cang",
-        "Ma Shan Zheng",
-        "Roboto",
-        "ZCOOL KuaiLe",
-        "ZCOOL QingKe HuangYou",
-        "ZCOOL Xiao Wei",
-        "Zhi Mang Xing"
+        'Liu Jian Mao Cao',
+        'Long Cang',
+        'Ma Shan Zheng',
+        'Roboto',
+        'ZCOOL KuaiLe',
+        'ZCOOL QingKe HuangYou',
+        'ZCOOL Xiao Wei',
+        'Zhi Mang Xing'
       ];
     } else if (language is KoreanLanguage) {
       return [
-        "Black And White Picture",
-        "Black Han Sans",
-        "Cute Font",
-        "Do Hyeon",
-        "Dokdo",
-        "East Sea Dokdo",
-        "Gaegu",
-        "Gamja Flower",
-        "Gothic A1",
-        "Gugi",
-        "Hi Melody",
-        "Jua",
-        "Kirang Haerang",
-        "Nanum Brush Script",
-        "Nanum Gothic",
-        "Nanum Gothic Coding",
-        "Nanum Myeongjo",
-        "Nanum Pen Script",
-        "Poor Story",
-        "Roboto",
-        "Single Day",
-        "Song Myung",
-        "Stylish",
-        "Sunflower",
-        "Yeon Sung",
+        'Black And White Picture',
+        'Black Han Sans',
+        'Cute Font',
+        'Do Hyeon',
+        'Dokdo',
+        'East Sea Dokdo',
+        'Gaegu',
+        'Gamja Flower',
+        'Gothic A1',
+        'Gugi',
+        'Hi Melody',
+        'Jua',
+        'Kirang Haerang',
+        'Nanum Brush Script',
+        'Nanum Gothic',
+        'Nanum Gothic Coding',
+        'Nanum Myeongjo',
+        'Nanum Pen Script',
+        'Poor Story',
+        'Roboto',
+        'Single Day',
+        'Song Myung',
+        'Stylish',
+        'Sunflower',
+        'Yeon Sung',
       ];
     }
 
@@ -1439,27 +1439,27 @@ class AppModel with ChangeNotifier {
 
   Future setSubtitleOptions(SubtitleOptions subtitleOptions) async {
     await sharedPreferences.setInt(
-        "audioAllowance", subtitleOptions.audioAllowance);
+        'audioAllowance', subtitleOptions.audioAllowance);
     await sharedPreferences.setInt(
-        "subtitleDelay", subtitleOptions.subtitleDelay);
-    await sharedPreferences.setDouble("fontSize", subtitleOptions.fontSize);
+        'subtitleDelay', subtitleOptions.subtitleDelay);
+    await sharedPreferences.setDouble('fontSize', subtitleOptions.fontSize);
     await sharedPreferences.setString(
-        "fontName/${getCurrentLanguage().languageName}",
+        'fontName/${getCurrentLanguage().languageName}',
         subtitleOptions.fontName);
     await sharedPreferences.setString(
-        "regexFilter", subtitleOptions.regexFilter);
+        'regexFilter', subtitleOptions.regexFilter);
   }
 
   String getLastAnkiDroidDeck() {
-    return _sharedPreferences.getString("lastAnkiDroidDeck") ?? "Default";
+    return _sharedPreferences.getString('lastAnkiDroidDeck') ?? 'Default';
   }
 
   Future<void> setLastAnkiDroidDeck(String deckName) async {
-    await _sharedPreferences.setString("lastAnkiDroidDeck", deckName);
+    await _sharedPreferences.setString('lastAnkiDroidDeck', deckName);
   }
 
   Future<void> addToSearchHistory(String key,
-      {String historyType = "dictionary"}) async {
+      {String historyType = 'dictionary'}) async {
     if (getIncognitoMode()) {
       return;
     }
@@ -1479,26 +1479,26 @@ class AppModel with ChangeNotifier {
   }
 
   Future<void> removeFromSearchHistory(String key,
-      {String historyType = "dictionary"}) async {
+      {String historyType = 'dictionary'}) async {
     List<String> searchHistory = getSearchHistory(historyType: historyType);
     searchHistory.remove(key);
     await setSearchHistory(searchHistory, historyType: historyType);
   }
 
   Future<void> setSearchHistory(List<String> searchHistory,
-      {String historyType = "dictionary"}) async {
+      {String historyType = 'dictionary'}) async {
     await sharedPreferences.setStringList(
-        "searchHistory/$historyType", searchHistory);
+        'searchHistory/$historyType', searchHistory);
   }
 
-  List<String> getSearchHistory({String historyType = "dictionary"}) {
+  List<String> getSearchHistory({String historyType = 'dictionary'}) {
     List<String> searchHistory =
-        sharedPreferences.getStringList("searchHistory/$historyType") ?? [];
+        sharedPreferences.getStringList('searchHistory/$historyType') ?? [];
     return searchHistory;
   }
 
   MediaHistoryItem? getResumeMediaHistoryItem() {
-    String? itemJson = sharedPreferences.getString("resumeMediaHistoryItem");
+    String? itemJson = sharedPreferences.getString('resumeMediaHistoryItem');
 
     if (itemJson == null) {
       return null;
@@ -1512,37 +1512,37 @@ class AppModel with ChangeNotifier {
   }
 
   bool isFirstTimeInitialised() {
-    return sharedPreferences.getBool("firstTimeInitialisation") ?? false;
+    return sharedPreferences.getBool('firstTimeInitialisation') ?? false;
   }
 
   Future<void> setFirstTimeInitialised() async {
-    await sharedPreferences.setBool("firstTimeInitialisation", true);
+    await sharedPreferences.setBool('firstTimeInitialisation', true);
   }
 
   bool isPlayerOrientationPortrait() {
-    return sharedPreferences.getBool("isPlayerOrientationPortrait") ?? false;
+    return sharedPreferences.getBool('isPlayerOrientationPortrait') ?? false;
   }
 
   Future<void> togglePlayerOrientationPortrait() async {
     await sharedPreferences.setBool(
-        "isPlayerOrientationPortrait", !isPlayerOrientationPortrait());
+        'isPlayerOrientationPortrait', !isPlayerOrientationPortrait());
   }
 
   bool isViewerRightToLeft() {
-    return sharedPreferences.getBool("isViewerRightToLeft") ?? false;
+    return sharedPreferences.getBool('isViewerRightToLeft') ?? false;
   }
 
   Future<void> toggleViewerRightToLeft() async {
     await sharedPreferences.setBool(
-        "isViewerRightToLeft", !isViewerRightToLeft());
+        'isViewerRightToLeft', !isViewerRightToLeft());
   }
 
   Color getViewerColorBackground() {
-    int colorRed = sharedPreferences.getInt("viewerBackgroundRed") ??
+    int colorRed = sharedPreferences.getInt('viewerBackgroundRed') ??
         Colors.black.withOpacity(0).red;
-    int colorGreen = sharedPreferences.getInt("viewerBackgroundGreen") ??
+    int colorGreen = sharedPreferences.getInt('viewerBackgroundGreen') ??
         Colors.black.withOpacity(0).green;
-    int colorBlue = sharedPreferences.getInt("viewerBackgroundBlue") ??
+    int colorBlue = sharedPreferences.getInt('viewerBackgroundBlue') ??
         Colors.black.withOpacity(0).blue;
 
     Color color = Color.fromRGBO(colorRed, colorGreen, colorBlue, 1.0);
@@ -1551,9 +1551,9 @@ class AppModel with ChangeNotifier {
   }
 
   Future<void> setViewerColorBackground(Color color) async {
-    await sharedPreferences.setInt("viewerBackgroundRed", color.red);
-    await sharedPreferences.setInt("viewerBackgroundGreen", color.green);
-    await sharedPreferences.setInt("viewerBackgroundBlue", color.blue);
+    await sharedPreferences.setInt('viewerBackgroundRed', color.red);
+    await sharedPreferences.setInt('viewerBackgroundGreen', color.green);
+    await sharedPreferences.setInt('viewerBackgroundBlue', color.blue);
   }
 
   void refresh() {

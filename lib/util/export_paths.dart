@@ -10,29 +10,29 @@ Future<void> initialiseExportPaths() async {
 }
 
 Directory getDCIMDirectory() {
-  return Directory("storage/emulated/0/DCIM/jidoujisho/");
+  return Directory('storage/emulated/0/DCIM/jidoujisho/');
 }
 
 File getDCIMNoMediaFile() {
-  return File("storage/emulated/0/DCIM/jidoujisho/.nomedia");
+  return File('storage/emulated/0/DCIM/jidoujisho/.nomedia');
 }
 
 String getPreviewImagePath() {
-  return getDCIMDirectory().path + "previewImage.jpg";
+  return getDCIMDirectory().path + 'previewImage.jpg';
 }
 
 String getPreviewImageMultiPath(int index) {
-  return getDCIMDirectory().path + "previewImage$index.jpg";
+  return getDCIMDirectory().path + 'previewImage$index.jpg';
 }
 
 String getPreviewAudioPath() {
-  return getDCIMDirectory().path + "previewAudio.mp3";
+  return getDCIMDirectory().path + 'previewAudio.mp3';
 }
 
 String getExportImagePath() {
-  return getDCIMDirectory().path + "exportImage.jpg";
+  return getDCIMDirectory().path + 'exportImage.jpg';
 }
 
 String getExportAudioPath() {
-  return getDCIMDirectory().path + "exportAudio.mp3";
+  return getDCIMDirectory().path + 'exportAudio.mp3';
 }

@@ -25,7 +25,7 @@ import 'package:chisa/util/time_format.dart';
 class PlayerLocalMediaSource extends PlayerMediaSource {
   PlayerLocalMediaSource()
       : super(
-          sourceName: "Local Media",
+          sourceName: 'Local Media',
           icon: Icons.storage,
         );
 
@@ -47,9 +47,9 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     AppModel appModel = Provider.of<AppModel>(context, listen: false);
 
     Iterable<String>? filePaths = await FilesystemPicker.open(
-      title: "",
-      pickText: appModel.translate("dialog_select"),
-      cancelText: appModel.translate("dialog_cancel"),
+      title: '',
+      pickText: appModel.translate('dialog_select'),
+      cancelText: appModel.translate('dialog_cancel'),
       context: context,
       rootDirectories: await appModel.getMediaTypeDirectories(mediaType),
       fsType: FilesystemType.file,
@@ -80,13 +80,13 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     appModel.setLastPickedDirectory(mediaType, Directory(p.dirname(filePath)));
 
     Directory appDocDir = await getApplicationDocumentsDirectory();
-    Directory thumbsDir = Directory(appDocDir.path + "/thumbs");
+    Directory thumbsDir = Directory(appDocDir.path + '/thumbs');
     if (!thumbsDir.existsSync()) {
       thumbsDir.createSync(recursive: true);
     }
 
     String thumbnailPath =
-        "${thumbsDir.path}${p.withoutExtension(filePath)}.jpg";
+        '${thumbsDir.path}${p.withoutExtension(filePath)}.jpg';
     File thumbnailFile = File(thumbnailPath);
     thumbnailFile.createSync(recursive: true);
 
@@ -136,15 +136,15 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     List<FileSystemEntity> matchingEntities = entityList.where((entity) {
       return entity is File &&
           p.basename(entity.path).startsWith(videoFileBasename) &&
-          (p.extension(entity.path).toLowerCase() == ".ass" ||
-              p.extension(entity.path).toLowerCase() == ".srt") &&
+          (p.extension(entity.path).toLowerCase() == '.ass' ||
+              p.extension(entity.path).toLowerCase() == '.srt') &&
           videoFile.path != entity.path;
     }).toList();
 
     for (FileSystemEntity file in matchingEntities) {
       if (file is File) {
         String metadata =
-            p.basename(file.path).replaceAll(videoFileBasename, "");
+            p.basename(file.path).replaceAll(videoFileBasename, '');
         SubtitleItem? item = await prepareSubtitleControllerFromFile(
           file: file,
           metadata: metadata,
@@ -162,7 +162,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
 
     String command =
-        "-ss $timestamp -y -i \"$inputPath\" -frames:v 1 -q:v 2 \"$targetPath\"";
+        '-ss $timestamp -y -i \"$inputPath\" -frames:v 1 -q:v 2 \"$targetPath\"';
 
     await _flutterFFmpeg.execute(command);
   }
@@ -209,7 +209,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
   @override
   FutureOr<String> getNetworkStreamUrl(PlayerLaunchParams params) {
     throw UnsupportedError(
-        "Local media source does not support network stream");
+        'Local media source does not support network stream');
   }
 
   @override
@@ -247,6 +247,6 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     required String searchTerm,
     required int pageKey,
   }) {
-    throw UnsupportedError("Local media does not support search");
+    throw UnsupportedError('Local media does not support search');
   }
 }

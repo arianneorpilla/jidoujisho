@@ -12,9 +12,9 @@ class DictionaryMenuEnhancement extends AnkiExportEnhancement {
     required AppModel appModel,
   }) : super(
           appModel: appModel,
-          enhancementName: "Dictionary Menu",
+          enhancementName: 'Dictionary Menu',
           enhancementDescription:
-              "Open the dictionary menu to change the current dictionary.",
+              'Open the dictionary menu to change the current dictionary.',
           enhancementIcon: Icons.auto_stories,
           enhancementField: AnkiExportField.word,
         );

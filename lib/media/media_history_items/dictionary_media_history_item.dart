@@ -15,7 +15,7 @@ class DictionaryMediaHistoryItem extends MediaHistoryItem {
     required int completeProgress,
     required this.contextItem,
     required Map<String, dynamic> extra,
-    String alias = "",
+    String alias = '',
   }) : super(
           key: key,
           author: author,
@@ -49,18 +49,18 @@ class DictionaryMediaHistoryItem extends MediaHistoryItem {
   factory DictionaryMediaHistoryItem.fromJson(String json) {
     Map<String, dynamic> map = jsonDecode(json);
 
-    String key = map["key"] ?? "";
-    String title = map["title"] ?? "";
-    String alias = map["alias"] ?? "";
-    String author = map["author"] ?? "";
-    String sourceName = map["sourceName"] ?? "";
-    String mediaTypePrefs = map["mediaTypePrefs"] ?? "";
-    int currentProgress = int.tryParse(map["currentProgress"] ?? "") ?? 0;
-    int completeProgress = int.tryParse(map["completeProgress"] ?? "") ?? 0;
-    Map<String, dynamic> extra = jsonDecode(map["extra"] ?? "{}");
+    String key = map['key'] ?? '';
+    String title = map['title'] ?? '';
+    String alias = map['alias'] ?? '';
+    String author = map['author'] ?? '';
+    String sourceName = map['sourceName'] ?? '';
+    String mediaTypePrefs = map['mediaTypePrefs'] ?? '';
+    int currentProgress = int.tryParse(map['currentProgress'] ?? '') ?? 0;
+    int completeProgress = int.tryParse(map['completeProgress'] ?? '') ?? 0;
+    Map<String, dynamic> extra = jsonDecode(map['extra'] ?? '{}');
 
     MediaHistoryItem? contextItem;
-    String? itemJson = map["contextItem"];
+    String? itemJson = map['contextItem'];
     if (itemJson != null && itemJson.isNotEmpty) {
       contextItem = MediaHistoryItem.fromJson(itemJson);
     }
@@ -82,20 +82,20 @@ class DictionaryMediaHistoryItem extends MediaHistoryItem {
   @override
   String toJson() {
     Map<String, String> map = {
-      "key": key,
-      "title": title,
-      "author": author,
-      "alias": alias,
-      "sourceName": sourceName,
-      "mediaTypePrefs": mediaTypePrefs,
-      "currentProgress": currentProgress.toString(),
-      "completeProgress": completeProgress.toString(),
-      "thumbnailPath": thumbnailPath,
-      "extra": jsonEncode(extra),
+      'key': key,
+      'title': title,
+      'author': author,
+      'alias': alias,
+      'sourceName': sourceName,
+      'mediaTypePrefs': mediaTypePrefs,
+      'currentProgress': currentProgress.toString(),
+      'completeProgress': completeProgress.toString(),
+      'thumbnailPath': thumbnailPath,
+      'extra': jsonEncode(extra),
     };
 
     if (contextItem != null) {
-      map["contextItem"] = contextItem!.toJson();
+      map['contextItem'] = contextItem!.toJson();
     }
 
     return jsonEncode(map);

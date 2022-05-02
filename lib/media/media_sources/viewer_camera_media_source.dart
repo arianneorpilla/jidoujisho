@@ -20,11 +20,11 @@ import 'package:path/path.dart' as p;
 class ViewerCameraMediaSource extends ViewerMediaSource {
   ViewerCameraMediaSource()
       : super(
-          sourceName: "Camera",
+          sourceName: 'Camera',
           icon: Icons.camera,
         );
 
-  String cameraImagePath = "";
+  String cameraImagePath = '';
 
   @override
   Future<List<ImageProvider<Object>>> getChapterImages(
@@ -42,22 +42,22 @@ class ViewerCameraMediaSource extends ViewerMediaSource {
 
   @override
   Future<List<String>> getChapters(MediaHistoryItem item) async {
-    return Future.value(["Camera Roll"]);
+    return Future.value(['Camera Roll']);
   }
 
   @override
   String getHistoryCaption(MediaHistoryItem item) {
-    throw UnsupportedError("Invalid for camera source");
+    throw UnsupportedError('Invalid for camera source');
   }
 
   @override
   String getHistorySubcaption(MediaHistoryItem item) {
-    throw UnsupportedError("Invalid for camera source");
+    throw UnsupportedError('Invalid for camera source');
   }
 
   @override
   ImageProvider<Object> getHistoryThumbnail(MediaHistoryItem item) {
-    throw UnsupportedError("Invalid for camera source");
+    throw UnsupportedError('Invalid for camera source');
   }
 
   @override
@@ -91,7 +91,7 @@ class ViewerCameraMediaSource extends ViewerMediaSource {
     int mills = DateTime.now().millisecondsSinceEpoch;
     if (file != null) {
       String ext = p.extension(file.path);
-      cameraImagePath = "${appDirDoc.path}/camera/$mills$ext";
+      cameraImagePath = '${appDirDoc.path}/camera/$mills$ext';
       File tempFile = File(cameraImagePath);
 
       if (tempFile.existsSync()) {
@@ -100,7 +100,7 @@ class ViewerCameraMediaSource extends ViewerMediaSource {
 
       imageCache?.clear();
 
-      Directory("${appDirDoc.path}/camera/").createSync();
+      Directory('${appDirDoc.path}/camera/').createSync();
       await file.saveTo(cameraImagePath);
 
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
@@ -110,8 +110,8 @@ class ViewerCameraMediaSource extends ViewerMediaSource {
         ViewerLaunchParams(
           appModel: appModel,
           mediaSource: this,
-          chapters: ["Camera Roll"],
-          chapterName: "Camera Roll",
+          chapters: ['Camera Roll'],
+          chapterName: 'Camera Roll',
           canOpenHistory: false,
           hideSlider: true,
           pushReplacement: pushFillerScreen,
@@ -120,7 +120,7 @@ class ViewerCameraMediaSource extends ViewerMediaSource {
             sourceName: sourceName,
             currentProgress: 1,
             completeProgress: 1,
-            extra: {"chapters": "Camera Roll"},
+            extra: {'chapters': 'Camera Roll'},
             mediaTypePrefs: mediaType.prefsDirectory(),
           ),
         ),
@@ -149,7 +149,7 @@ class ViewerCameraMediaSource extends ViewerMediaSource {
       int mills = DateTime.now().millisecondsSinceEpoch;
 
       String ext = p.extension(file.path);
-      cameraImagePath = "${appDirDoc.path}/camera/$mills$ext";
+      cameraImagePath = '${appDirDoc.path}/camera/$mills$ext';
       File tempFile = File(cameraImagePath);
 
       if (tempFile.existsSync()) {
@@ -158,7 +158,7 @@ class ViewerCameraMediaSource extends ViewerMediaSource {
 
       imageCache?.clear();
 
-      Directory("${appDirDoc.path}/camera/").createSync();
+      Directory('${appDirDoc.path}/camera/').createSync();
       await file.saveTo(cameraImagePath);
 
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
@@ -168,8 +168,8 @@ class ViewerCameraMediaSource extends ViewerMediaSource {
         ViewerLaunchParams(
           appModel: appModel,
           mediaSource: this,
-          chapters: ["Camera Roll"],
-          chapterName: "Camera Roll",
+          chapters: ['Camera Roll'],
+          chapterName: 'Camera Roll',
           canOpenHistory: false,
           hideSlider: true,
           pushReplacement: false,
@@ -178,7 +178,7 @@ class ViewerCameraMediaSource extends ViewerMediaSource {
             sourceName: sourceName,
             currentProgress: 1,
             completeProgress: 1,
-            extra: {"chapters": "Camera Roll"},
+            extra: {'chapters': 'Camera Roll'},
             mediaTypePrefs: mediaType.prefsDirectory(),
           ),
         ),

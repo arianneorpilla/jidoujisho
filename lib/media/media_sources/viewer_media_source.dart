@@ -86,7 +86,7 @@ abstract class ViewerMediaSource extends MediaSource {
   }
 
   int? getUnfinishedChapters(MediaHistoryItem item) {
-    List<dynamic>? chapterCache = item.extra["chapters"];
+    List<dynamic>? chapterCache = item.extra['chapters'];
     List<String>? chapters;
     if (chapterCache != null) {
       chapters = List<String>.from(chapterCache);
@@ -125,7 +125,7 @@ abstract class ViewerMediaSource extends MediaSource {
       actions.add(
         TextButton(
           child: Text(
-            appModel.translate("dialog_remove"),
+            appModel.translate('dialog_remove'),
             style: TextStyle(
               color: Theme.of(context).focusColor,
             ),
@@ -143,7 +143,7 @@ abstract class ViewerMediaSource extends MediaSource {
       actions.add(
         TextButton(
           child: Text(
-            appModel.translate("dialog_edit"),
+            appModel.translate('dialog_edit'),
           ),
           onPressed: () async {
             await showAliasDialog(
@@ -171,7 +171,7 @@ abstract class ViewerMediaSource extends MediaSource {
     actions.add(
       TextButton(
         child: Text(
-          appModel.translate("dialog_read"),
+          appModel.translate('dialog_read'),
         ),
         onPressed: () async {
           ViewerLaunchParams params = ViewerLaunchParams(
@@ -265,7 +265,7 @@ abstract class ViewerMediaSource extends MediaSource {
                           color: Colors.black.withOpacity(0.6),
                           alignment: Alignment.center,
                           child: Text(
-                            "  ${getUnfinishedChapters(item)}  ",
+                            '  ${getUnfinishedChapters(item)}  ',
                             style: const TextStyle(
                               fontSize: 12,
                               color: Colors.white,
@@ -492,7 +492,7 @@ abstract class ViewerMediaSource extends MediaSource {
       text: title,
     );
     TextEditingController coverAliasController = TextEditingController(
-      text: "a",
+      text: 'a',
     );
 
     FileImage? newCover = getHistoryThumbnailAlias(item);
@@ -632,7 +632,7 @@ abstract class ViewerMediaSource extends MediaSource {
                     Directory appDocDir =
                         await getApplicationDocumentsDirectory();
                     Directory thumbsDir = Directory(
-                        appDocDir.path + "/thumbs/${getIdentifier()}");
+                        appDocDir.path + '/thumbs/${getIdentifier()}');
                     if (!thumbsDir.existsSync()) {
                       thumbsDir.createSync(recursive: true);
                     }
@@ -640,7 +640,7 @@ abstract class ViewerMediaSource extends MediaSource {
                     DateTime dateTime = DateTime.now();
 
                     String thumbnailPath =
-                        "${thumbsDir.path}/${dateTime.millisecondsSinceEpoch}.jpg";
+                        '${thumbsDir.path}/${dateTime.millisecondsSinceEpoch}.jpg';
 
                     File thumbnailFile = File(thumbnailPath);
                     if (thumbnailFile.existsSync()) {
@@ -650,7 +650,7 @@ abstract class ViewerMediaSource extends MediaSource {
 
                     item.thumbnailPath = thumbnailPath;
                   } else {
-                    item.thumbnailPath = "";
+                    item.thumbnailPath = '';
                   }
                 }
 
@@ -672,14 +672,14 @@ abstract class ViewerMediaSource extends MediaSource {
   /// Get the name of the last chapter read pertaining to a [MediaHistoryItem].
   MediaHistoryItem setCurrentChapterName(
       MediaHistoryItem item, String chapter) {
-    item.extra["currentChapterName"] = chapter;
+    item.extra['currentChapterName'] = chapter;
     return item;
   }
 
   /// Get the last chapter read pertaining to a [MediaHistoryItem] and a given
   /// list of [Chapter].
   String? getCurrentChapter(MediaHistoryItem item, List<String> chapters) {
-    return item.extra["currentChapterName"];
+    return item.extra['currentChapterName'];
   }
 
   /// Get the chapter before the last read chapter pertaining to a
@@ -698,6 +698,8 @@ abstract class ViewerMediaSource extends MediaSource {
         }
       }
     }
+
+    return null;
   }
 
   /// Get the chapter after the last read chapter pertaining to a
@@ -716,6 +718,8 @@ abstract class ViewerMediaSource extends MediaSource {
         }
       }
     }
+
+    return null;
   }
 
   ChapterProgressState getChapterProgress(
@@ -740,7 +744,7 @@ abstract class ViewerMediaSource extends MediaSource {
     MediaHistoryItem item,
     String chapter,
   ) {
-    return item.extra["$chapter/pageProgress"];
+    return item.extra['$chapter/pageProgress'];
   }
 
   MediaHistoryItem setChapterPageProgress(
@@ -748,7 +752,7 @@ abstract class ViewerMediaSource extends MediaSource {
     String chapter,
     int? pageProgress,
   ) {
-    item.extra["$chapter/pageProgress"] = pageProgress;
+    item.extra['$chapter/pageProgress'] = pageProgress;
     return item;
   }
 
@@ -756,7 +760,7 @@ abstract class ViewerMediaSource extends MediaSource {
     MediaHistoryItem item,
     String chapter,
   ) {
-    return item.extra["$chapter/pageTotal"];
+    return item.extra['$chapter/pageTotal'];
   }
 
   MediaHistoryItem setChapterPageTotal(
@@ -764,7 +768,7 @@ abstract class ViewerMediaSource extends MediaSource {
     String chapter,
     int? pageTotal,
   ) {
-    item.extra["$chapter/pageTotal"] = pageTotal;
+    item.extra['$chapter/pageTotal'] = pageTotal;
     return item;
   }
 
@@ -1184,9 +1188,9 @@ class ChapterMenuState extends State<ChapterMenu> {
         }
 
         List<String> chapters = snapshot.data;
-        if (item.extra["chapters"] != null &&
-            item.extra["chapters"].length != chapters.length) {
-          item.extra["chapters"] = chapters;
+        if (item.extra['chapters'] != null &&
+            item.extra['chapters'].length != chapters.length) {
+          item.extra['chapters'] = chapters;
           widget.shouldRefreshNotifier?.value = true;
           if (widget.chapterValueNotifier != null) {
             widget.chapterValueNotifier!.value =

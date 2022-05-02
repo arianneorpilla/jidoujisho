@@ -3,15 +3,15 @@ import 'dart:convert';
 class MediaHistoryItem {
   MediaHistoryItem({
     required this.key,
-    this.title = "",
-    this.author = "",
-    this.alias = "",
+    this.title = '',
+    this.author = '',
+    this.alias = '',
     required this.sourceName,
     required this.mediaTypePrefs,
     required this.currentProgress,
     required this.completeProgress,
     required this.extra,
-    this.thumbnailPath = "",
+    this.thumbnailPath = '',
   });
 
   /// The unique identifier of this item. If the same item exists in history,
@@ -61,16 +61,16 @@ class MediaHistoryItem {
   factory MediaHistoryItem.fromJson(String json) {
     Map<String, dynamic> map = jsonDecode(json);
 
-    String key = map["key"] ?? "";
-    String title = map["title"] ?? "";
-    String author = map["author"] ?? "";
-    String alias = map["alias"] ?? "";
-    String sourceName = map["sourceName"] ?? "";
-    String mediaTypePrefs = map["mediaTypePrefs"] ?? "";
-    int currentProgress = int.tryParse(map["currentProgress"] ?? "") ?? 0;
-    int completeProgress = int.tryParse(map["completeProgress"] ?? "") ?? 0;
-    String thumbnailPath = map["thumbnailPath"] ?? "";
-    Map<String, dynamic> extra = jsonDecode(map["extra"] ?? "{}");
+    String key = map['key'] ?? '';
+    String title = map['title'] ?? '';
+    String author = map['author'] ?? '';
+    String alias = map['alias'] ?? '';
+    String sourceName = map['sourceName'] ?? '';
+    String mediaTypePrefs = map['mediaTypePrefs'] ?? '';
+    int currentProgress = int.tryParse(map['currentProgress'] ?? '') ?? 0;
+    int completeProgress = int.tryParse(map['completeProgress'] ?? '') ?? 0;
+    String thumbnailPath = map['thumbnailPath'] ?? '';
+    Map<String, dynamic> extra = jsonDecode(map['extra'] ?? '{}');
 
     return MediaHistoryItem(
       key: key,
@@ -88,16 +88,16 @@ class MediaHistoryItem {
 
   String toJson() {
     Map<String, String> map = {
-      "key": key,
-      "title": title,
-      "author": author,
-      "alias": alias,
-      "sourceName": sourceName,
-      "mediaTypePrefs": mediaTypePrefs,
-      "currentProgress": currentProgress.toString(),
-      "completeProgress": completeProgress.toString(),
-      "thumbnailPath": thumbnailPath,
-      "extra": jsonEncode(extra),
+      'key': key,
+      'title': title,
+      'author': author,
+      'alias': alias,
+      'sourceName': sourceName,
+      'mediaTypePrefs': mediaTypePrefs,
+      'currentProgress': currentProgress.toString(),
+      'completeProgress': completeProgress.toString(),
+      'thumbnailPath': thumbnailPath,
+      'extra': jsonEncode(extra),
     };
 
     return jsonEncode(map);

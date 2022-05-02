@@ -38,34 +38,34 @@ Future<String> addMediaFromUri(
       'mimeType': mimeType,
     });
   } on PlatformException catch (e) {
-    debugPrint("Failed to add media from URI");
+    debugPrint('Failed to add media from URI');
     debugPrint(e.toString());
   }
 
-  return "";
+  return '';
 }
 
 Future<void> addNote({
-  String deck = "Default",
+  String deck = 'Default',
   required AnkiExportParams params,
 }) async {
   try {
     DateTime now = DateTime.now();
     String newFileName =
-        "jidoujisho-" + intl.DateFormat('yyyyMMddTkkmmss').format(now);
+        'jidoujisho-' + intl.DateFormat('yyyyMMddTkkmmss').format(now);
 
-    String image = "";
-    String audio = "";
+    String image = '';
+    String audio = '';
 
     if (params.imageFile != null && params.imageFile!.existsSync()) {
       File exportImageFile = File(getExportImagePath());
       params.imageFile!.copySync(exportImageFile.path);
       image = await addMediaFromUri(
-        "file:///${exportImageFile.uri}",
+        'file:///${exportImageFile.uri}',
         newFileName,
-        "image",
+        'image',
       );
-      debugPrint("IMAGE FILE EXPORTED: $image");
+      debugPrint('IMAGE FILE EXPORTED: $image');
     }
 
     if (params.audioFile != null && params.audioFile!.existsSync()) {
@@ -73,11 +73,11 @@ Future<void> addNote({
       params.audioFile!.copySync(exportAudioFile.path);
 
       audio = await addMediaFromUri(
-        "file:///${exportAudioFile.uri}",
+        'file:///${exportAudioFile.uri}',
         newFileName,
-        "audio",
+        'audio',
       );
-      debugPrint("AUDIO FILE EXPORTED: $audio");
+      debugPrint('AUDIO FILE EXPORTED: $audio');
     }
 
     String sentence = params.sentence;
@@ -87,7 +87,7 @@ Future<void> addNote({
     String extra = params.extra;
     String context = params.context;
 
-    String zeroWidthSpace = "​";
+    String zeroWidthSpace = '​';
 
     if (sentence.isEmpty) {
       sentence = zeroWidthSpace;
@@ -117,7 +117,7 @@ Future<void> addNote({
       'contextParam': context,
     });
   } on PlatformException catch (e) {
-    debugPrint("Failed to add note via AnkiDroid API");
+    debugPrint('Failed to add note via AnkiDroid API');
     debugPrint(e.toString());
   }
 }
@@ -175,16 +175,16 @@ Future<void> navigateToCreator({
             borderRadius: BorderRadius.zero,
           ),
           title: Text(
-            appModel.translate("ankidroid_api"),
+            appModel.translate('ankidroid_api'),
           ),
           content: Text(
-            appModel.translate("ankidroid_api_message"),
+            appModel.translate('ankidroid_api_message'),
             textAlign: TextAlign.justify,
           ),
           actions: <Widget>[
             TextButton(
               child: Text(
-                appModel.translate("dialog_launch_ankidroid"),
+                appModel.translate('dialog_launch_ankidroid'),
               ),
               onPressed: () async {
                 DeviceApps.openApp('com.ichi2.anki');

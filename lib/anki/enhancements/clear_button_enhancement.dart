@@ -13,7 +13,7 @@ class ClearButtonEnhancement extends AnkiExportEnhancement {
     required AnkiExportField enhancementField,
   }) : super(
             appModel: appModel,
-            enhancementName: "Clear Button",
+            enhancementName: 'Clear Button',
             enhancementDescription: "Quickly empty a field's parameters.",
             enhancementIcon: Icons.clear,
             enhancementField: enhancementField);
@@ -28,29 +28,29 @@ class ClearButtonEnhancement extends AnkiExportEnhancement {
   }) async {
     switch (enhancementField) {
       case AnkiExportField.sentence:
-        params.sentence = "";
+        params.sentence = '';
         break;
       case AnkiExportField.word:
-        params.word = "";
+        params.word = '';
         break;
       case AnkiExportField.reading:
-        params.reading = "";
+        params.reading = '';
         break;
       case AnkiExportField.meaning:
-        params.meaning = "";
+        params.meaning = '';
         break;
       case AnkiExportField.extra:
-        params.extra = "";
+        params.extra = '';
         break;
       case AnkiExportField.image:
         params.imageFiles = [];
         params.imageFile = null;
-        params.imageSearch = "";
+        params.imageSearch = '';
         state.notifyImageNotSearching();
         break;
       case AnkiExportField.audio:
         params.audioFile = null;
-        params.audioSearch = "";
+        params.audioSearch = '';
         state.notifyAudioNotSearching();
         break;
     }

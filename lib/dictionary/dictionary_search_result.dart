@@ -50,15 +50,15 @@ class DictionarySearchResult {
     }
 
     Map<String, dynamic> map = {
-      "dictionaryName": dictionaryName,
-      "formatName": formatName,
-      "originalSearchTerm": originalSearchTerm,
-      "fallbackSearchTerms": jsonEncode(fallbackSearchTerms),
-      "entries": jsonEncode(serialisedItems),
+      'dictionaryName': dictionaryName,
+      'formatName': formatName,
+      'originalSearchTerm': originalSearchTerm,
+      'fallbackSearchTerms': jsonEncode(fallbackSearchTerms),
+      'entries': jsonEncode(serialisedItems),
     };
 
     if (mediaHistoryItem != null) {
-      map["mediaHistoryItem"] = mediaHistoryItem!.toJson();
+      map['mediaHistoryItem'] = mediaHistoryItem!.toJson();
     }
 
     return jsonEncode(map);
@@ -67,9 +67,9 @@ class DictionarySearchResult {
   factory DictionarySearchResult.fromJson(String json) {
     Map<String, dynamic> map = Map.castFrom(jsonDecode(json));
 
-    List<String> entriesJson = List.castFrom(jsonDecode(map["entries"]));
+    List<String> entriesJson = List.castFrom(jsonDecode(map['entries']));
     List<String> fallbackSearchTerms =
-        List.castFrom(jsonDecode(map["fallbackSearchTerms"]));
+        List.castFrom(jsonDecode(map['fallbackSearchTerms']));
 
     List<DictionaryEntry> entries = [];
     for (String entryJson in entriesJson) {
@@ -79,15 +79,15 @@ class DictionarySearchResult {
     }
 
     MediaHistoryItem? mediaHistoryItem;
-    String? itemJson = map["mediaHistoryItem"];
+    String? itemJson = map['mediaHistoryItem'];
     if (itemJson != null && itemJson.isNotEmpty) {
       mediaHistoryItem = MediaHistoryItem.fromJson(itemJson);
     }
 
     return DictionarySearchResult(
-      dictionaryName: map["dictionaryName"],
-      formatName: map["formatName"],
-      originalSearchTerm: map["originalSearchTerm"],
+      dictionaryName: map['dictionaryName'],
+      formatName: map['formatName'],
+      originalSearchTerm: map['originalSearchTerm'],
       fallbackSearchTerms: fallbackSearchTerms,
       entries: entries,
       mediaHistoryItem: mediaHistoryItem,

@@ -35,7 +35,7 @@ class ReaderHomePageState extends State<ReaderHomePage>
   @override
   bool get wantKeepAlive => true;
 
-  TextEditingController searchController = TextEditingController(text: "");
+  TextEditingController searchController = TextEditingController(text: '');
   ScrollController? scrollController;
 
   @override
@@ -159,7 +159,7 @@ class ReaderHomePageState extends State<ReaderHomePage>
     return Expanded(
       child: showCenterIconMessage(
         context: context,
-        label: appModel.translate("history_empty"),
+        label: appModel.translate('history_empty'),
         icon: widget.mediaType.icon(),
         jumpingDots: false,
       ),

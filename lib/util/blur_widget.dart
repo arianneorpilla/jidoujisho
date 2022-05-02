@@ -433,20 +433,20 @@ Future<void> showBlurWidgetOptionsDialog(
                             BorderSide(color: Theme.of(context).focusColor),
                       ),
                       floatingLabelBehavior: FloatingLabelBehavior.always,
-                      suffixText: "px",
+                      suffixText: 'px',
                       suffixIcon: IconButton(
                         iconSize: 18,
                         color: appModel.getIsDarkMode()
                             ? Colors.white
                             : Colors.black,
                         onPressed: () async {
-                          blurrinessController.text = "5.0";
+                          blurrinessController.text = '5.0';
                           FocusScope.of(context).unfocus();
                         },
                         icon: const Icon(Icons.undo),
                       ),
                       labelText:
-                          appModel.translate("player_option_blur_radius"),
+                          appModel.translate('player_option_blur_radius'),
                     ),
                   ),
                 ],
@@ -456,7 +456,7 @@ Future<void> showBlurWidgetOptionsDialog(
           actions: <Widget>[
             TextButton(
               child: Text(
-                appModel.translate("dialog_cancel"),
+                appModel.translate('dialog_cancel'),
               ),
               onPressed: () {
                 Navigator.pop(context);
@@ -464,7 +464,7 @@ Future<void> showBlurWidgetOptionsDialog(
             ),
             TextButton(
               child: Text(
-                appModel.translate("dialog_set"),
+                appModel.translate('dialog_set'),
               ),
               onPressed: () async {
                 await setValues();

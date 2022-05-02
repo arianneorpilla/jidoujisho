@@ -35,7 +35,7 @@ enum YouTubeVideoQuality {
 class PlayerYouTubeSource extends PlayerMediaSource {
   PlayerYouTubeSource()
       : super(
-          sourceName: "YouTube",
+          sourceName: 'YouTube',
           icon: Icons.smart_display,
         );
 
@@ -69,8 +69,8 @@ class PlayerYouTubeSource extends PlayerMediaSource {
       currentProgress: 0,
       completeProgress: video.duration?.inSeconds ?? 0,
       extra: {
-        "thumbnail": video.thumbnails.mediumResUrl,
-        "channelId": video.channelId.toString(),
+        'thumbnail': video.thumbnails.mediumResUrl,
+        'channelId': video.channelId.toString(),
       },
     );
   }
@@ -184,14 +184,14 @@ class PlayerYouTubeSource extends PlayerMediaSource {
 
     AudioStreamInfo streamAudioInfo = manifest.audioOnly
         .sortByBitrate()
-        .lastWhere((info) => info.audioCodec.contains("mp4a"));
+        .lastWhere((info) => info.audioCodec.contains('mp4a'));
     return streamAudioInfo.url.toString();
   }
 
   String getVideoFromManifest(
       StreamManifest manifest, YouTubeVideoQuality preferredQuality) {
     for (VideoStreamInfo streamInfo in manifest.video) {
-      if (!streamInfo.videoCodec.contains("avc1")) {
+      if (!streamInfo.videoCodec.contains('avc1')) {
         continue;
       }
 
@@ -203,7 +203,7 @@ class PlayerYouTubeSource extends PlayerMediaSource {
       }
     }
 
-    throw Exception("Preferred quality not found");
+    throw Exception('Preferred quality not found');
   }
 
   @override
@@ -218,7 +218,7 @@ class PlayerYouTubeSource extends PlayerMediaSource {
 
   @override
   ImageProvider<Object> getHistoryThumbnail(MediaHistoryItem item) {
-    String thumbnailUrl = item.extra["thumbnail"]!;
+    String thumbnailUrl = item.extra['thumbnail']!;
     return NetworkImage(thumbnailUrl);
   }
 
@@ -232,7 +232,7 @@ class PlayerYouTubeSource extends PlayerMediaSource {
 
     String storeKey = searchTerm;
     if (getCaptionFilter(context)) {
-      storeKey = "$searchTerm [filter:cc]";
+      storeKey = '$searchTerm [filter:cc]';
     }
 
     searchListStore[storeKey] ??= {};
@@ -310,7 +310,7 @@ class PlayerYouTubeSource extends PlayerMediaSource {
               type: SubtitleType.vtt,
             ),
           ),
-          metadata: "YouTube - [$languageCode]",
+          metadata: 'YouTube - [$languageCode]',
           type: SubtitleItemType.webSubtitle,
         ),
       );
@@ -381,7 +381,7 @@ class PlayerYouTubeSource extends PlayerMediaSource {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    appModel.translate("closed_captions_target"),
+                    appModel.translate('closed_captions_target'),
                     style: TextStyle(
                       color: appModel.getIsDarkMode()
                           ? Colors.green[200]
@@ -407,7 +407,7 @@ class PlayerYouTubeSource extends PlayerMediaSource {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    appModel.translate("closed_captions_app"),
+                    appModel.translate('closed_captions_app'),
                     style: TextStyle(
                       color: appModel.getIsDarkMode()
                           ? Colors.blue[200]
@@ -436,7 +436,7 @@ class PlayerYouTubeSource extends PlayerMediaSource {
             ),
             const SizedBox(width: 4),
             Text(
-              appModel.translate("closed_captions_other"),
+              appModel.translate('closed_captions_other'),
               style: TextStyle(
                 color: appModel.getIsDarkMode()
                     ? Colors.orange[200]
@@ -461,7 +461,7 @@ class PlayerYouTubeSource extends PlayerMediaSource {
           ),
           const SizedBox(width: 4),
           Text(
-            appModel.translate("closed_captions_unavailable"),
+            appModel.translate('closed_captions_unavailable'),
             style: TextStyle(
               color:
                   appModel.getIsDarkMode() ? Colors.red[200] : Colors.red[600],
@@ -490,7 +490,7 @@ class PlayerYouTubeSource extends PlayerMediaSource {
               ),
               const SizedBox(width: 4),
               Text(
-                appModel.translate("closed_captions_query"),
+                appModel.translate('closed_captions_query'),
                 style: TextStyle(
                   color: Theme.of(context).unselectedWidgetColor,
                   fontSize: 12,
@@ -543,7 +543,7 @@ class PlayerYouTubeSource extends PlayerMediaSource {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      appModel.translate("closed_captions_target"),
+                      appModel.translate('closed_captions_target'),
                       style: TextStyle(
                         color: appModel.getIsDarkMode()
                             ? Colors.green[200]
@@ -569,7 +569,7 @@ class PlayerYouTubeSource extends PlayerMediaSource {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      appModel.translate("closed_captions_app"),
+                      appModel.translate('closed_captions_app'),
                       style: TextStyle(
                         color: appModel.getIsDarkMode()
                             ? Colors.blue[200]
@@ -598,7 +598,7 @@ class PlayerYouTubeSource extends PlayerMediaSource {
               ),
               const SizedBox(width: 4),
               Text(
-                appModel.translate("closed_captions_other"),
+                appModel.translate('closed_captions_other'),
                 style: TextStyle(
                   color: appModel.getIsDarkMode()
                       ? Colors.orange[200]
@@ -624,7 +624,7 @@ class PlayerYouTubeSource extends PlayerMediaSource {
             ),
             const SizedBox(width: 4),
             Text(
-              appModel.translate("closed_captions_unavailable"),
+              appModel.translate('closed_captions_unavailable'),
               style: TextStyle(
                 color: appModel.getIsDarkMode()
                     ? Colors.red[200]
@@ -646,7 +646,7 @@ class PlayerYouTubeSource extends PlayerMediaSource {
     List<YouTubeVideoQuality> qualities = [];
 
     for (VideoStreamInfo streamInfo in manifest.video) {
-      if (!streamInfo.videoCodec.contains("avc1")) {
+      if (!streamInfo.videoCodec.contains('avc1')) {
         continue;
       }
 
@@ -664,25 +664,25 @@ class PlayerYouTubeSource extends PlayerMediaSource {
 
   YouTubeVideoQuality? qualityFromLabel(String label) {
     switch (label) {
-      case "144p":
+      case '144p':
         return YouTubeVideoQuality.sd_144;
-      case "240p":
+      case '240p':
         return YouTubeVideoQuality.sd_240;
-      case "360p":
+      case '360p':
         return YouTubeVideoQuality.sd_360;
-      case "480p":
+      case '480p':
         return YouTubeVideoQuality.sd_360;
-      case "720p":
-      case "720p60":
+      case '720p':
+      case '720p60':
         return YouTubeVideoQuality.sd_720;
-      case "1080p":
-      case "1080p60":
+      case '1080p':
+      case '1080p60':
         return YouTubeVideoQuality.hd_1080;
-      case "1440p":
-      case "1440p60":
+      case '1440p':
+      case '1440p60':
         return YouTubeVideoQuality.hd_1440;
-      case "2160p":
-      case "2160p60":
+      case '2160p':
+      case '2160p60':
         return YouTubeVideoQuality.uhd_2160;
       default:
         return null;
@@ -710,21 +710,21 @@ class PlayerYouTubeSource extends PlayerMediaSource {
   String? labelFromQuality(YouTubeVideoQuality quality) {
     switch (quality) {
       case YouTubeVideoQuality.sd_144:
-        return "144p";
+        return '144p';
       case YouTubeVideoQuality.sd_240:
-        return "240p";
+        return '240p';
       case YouTubeVideoQuality.sd_360:
-        return "360p";
+        return '360p';
       case YouTubeVideoQuality.sd_480:
-        return "480p";
+        return '480p';
       case YouTubeVideoQuality.sd_720:
-        return "720p";
+        return '720p';
       case YouTubeVideoQuality.hd_1080:
-        return "1080p";
+        return '1080p';
       case YouTubeVideoQuality.hd_1440:
-        return "1440p";
+        return '1440p';
       case YouTubeVideoQuality.uhd_2160:
-        return "2160p";
+        return '2160p';
       default:
         return null;
     }
@@ -790,11 +790,11 @@ class PlayerYouTubeSource extends PlayerMediaSource {
   }
 
   String getCaptionsPrefsKey(String videoId) {
-    return "${getIdentifier()}://captions/$videoId";
+    return '${getIdentifier()}://captions/$videoId';
   }
 
   String getQualityPrefsKey() {
-    return "${getIdentifier()}://quality/";
+    return '${getIdentifier()}://quality/';
   }
 
   /// Particular to YouTube export... For some reason it needs a specific
@@ -841,7 +841,7 @@ class PlayerYouTubeSource extends PlayerMediaSource {
     return [
       TextButton(
         child: Text(
-          appModel.translate("dialog_channel"),
+          appModel.translate('dialog_channel'),
           style: const TextStyle(),
         ),
         onPressed: () async {
@@ -857,7 +857,7 @@ class PlayerYouTubeSource extends PlayerMediaSource {
   Future<void> showChannelPage(
       BuildContext context, MediaHistoryItem item) async {
     String author = item.author;
-    String channelId = item.extra["channelId"];
+    String channelId = item.extra['channelId'];
 
     PagingController<int, MediaHistoryItem> pagingController =
         PagingController(firstPageKey: 1);
@@ -898,17 +898,17 @@ class PlayerYouTubeSource extends PlayerMediaSource {
 
   String? getTrendingPlaylistId(Language language) {
     // Add your target language country's Trending 20 playlist ID if you want it supported here
-    switch ("${language.languageCode}-${language.countryCode}") {
-      case "ja-JP": // Japanese (Japan)
-        return "PLuXL6NS58Dyx-wTr5o7NiC7CZRbMA91DC";
-      case "en-US": // English (United States)
-        return "PLrEnWoR732-DtKgaDdnPkezM_nDidBU9H";
-      case "zh-CN": // Simplified Chinese (Singapore)
-        return "PLFgquLnL59alUOZtPriN3d3nnnDVhPX3J";
-      case "zh-TW": // Traditional Chinese (Taiwan)
-        return "PLPv96SVEnDc1xDQPAHzjKnkOKHopdG6hL";
-      case "ko-KR": // Korean (South Korea)
-        return "PLmtapKaZsgZsjfcjrumAR4KVu5LDDeugN";
+    switch ('${language.languageCode}-${language.countryCode}') {
+      case 'ja-JP': // Japanese (Japan)
+        return 'PLuXL6NS58Dyx-wTr5o7NiC7CZRbMA91DC';
+      case 'en-US': // English (United States)
+        return 'PLrEnWoR732-DtKgaDdnPkezM_nDidBU9H';
+      case 'zh-CN': // Simplified Chinese (Singapore)
+        return 'PLFgquLnL59alUOZtPriN3d3nnnDVhPX3J';
+      case 'zh-TW': // Traditional Chinese (Taiwan)
+        return 'PLPv96SVEnDc1xDQPAHzjKnkOKHopdG6hL';
+      case 'ko-KR': // Korean (South Korea)
+        return 'PLmtapKaZsgZsjfcjrumAR4KVu5LDDeugN';
       default:
         return null;
     }
@@ -1002,13 +1002,13 @@ class PlayerYouTubeSource extends PlayerMediaSource {
   bool getCaptionFilter(BuildContext context) {
     AppModel appModel = Provider.of<AppModel>(context, listen: false);
     return appModel.sharedPreferences
-            .getBool("$getIdentifier()://captionfilter") ??
+            .getBool('$getIdentifier()://captionfilter') ??
         false;
   }
 
   Future<void> toggleCaptionFilter(BuildContext context) async {
     AppModel appModel = Provider.of<AppModel>(context, listen: false);
     await appModel.sharedPreferences.setBool(
-        "$getIdentifier()://captionfilter", !getCaptionFilter(context));
+        '$getIdentifier()://captionfilter', !getCaptionFilter(context));
   }
 }

@@ -9,9 +9,9 @@ import 'package:chisa/language/language.dart';
 class ChineseTraditionalLanguage extends Language {
   ChineseTraditionalLanguage()
       : super(
-          languageName: "漢語",
-          languageCode: "zh",
-          countryCode: "TW",
+          languageName: '漢語',
+          languageCode: 'zh',
+          countryCode: 'TW',
           readingDirection: ReadingDirection.verticalRTL,
           isSpaceDelimited: false,
           textBaseline: TextBaseline.ideographic,
@@ -35,8 +35,8 @@ for seg in seg_list:
   @override
   FutureOr<List<String>> textToWords(String text) async {
     String delimiterSanitisedText = text
-        .replaceAll("﻿", "␝")
-        .replaceAll("　", "␝")
+        .replaceAll('﻿', '␝')
+        .replaceAll('　', '␝')
         .replaceAll('\n', '␜')
         .replaceAll(' ', '␝');
 
@@ -54,7 +54,7 @@ for seg in seg_list:
 
     // debugPrint((output.split("\n")));
 
-    return output.split("\n");
+    return output.split('\n');
   }
 
   @override

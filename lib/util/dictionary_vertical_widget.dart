@@ -167,28 +167,28 @@ class DictionaryVerticalWidgetState extends State<DictionaryVerticalWidget> {
         children: <InlineSpan>[
           getContextSourceIcon(),
           TextSpan(
-            text: widget.appModel.translate("search_label_before"),
+            text: widget.appModel.translate('search_label_before'),
             style: TextStyle(
               fontSize: 12,
               color: labelColor,
             ),
           ),
           TextSpan(
-            text: "${indexNotifier.value + 1} ",
+            text: '${indexNotifier.value + 1} ',
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 12,
             ),
           ),
           TextSpan(
-            text: widget.appModel.translate("search_label_middle"),
+            text: widget.appModel.translate('search_label_middle'),
             style: TextStyle(
               fontSize: 12,
               color: labelColor,
             ),
           ),
           TextSpan(
-            text: "${widget.result.entries.length} ",
+            text: '${widget.result.entries.length} ',
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 12,
@@ -197,14 +197,14 @@ class DictionaryVerticalWidgetState extends State<DictionaryVerticalWidget> {
           // if (entry.contextDataSource != "-1")
           //   getContextDataSourceSpan(entry.contextDataSource),
           TextSpan(
-            text: widget.appModel.translate("search_label_after"),
+            text: widget.appModel.translate('search_label_after'),
             style: TextStyle(
               fontSize: 12,
               color: labelColor,
             ),
           ),
           TextSpan(
-            text: "『",
+            text: '『',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 12,
@@ -219,7 +219,7 @@ class DictionaryVerticalWidgetState extends State<DictionaryVerticalWidget> {
             ),
           ),
           TextSpan(
-            text: "』",
+            text: '』',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 12,

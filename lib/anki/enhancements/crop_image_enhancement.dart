@@ -19,8 +19,8 @@ class CropImageEnhancement extends AnkiExportEnhancement {
     required AppModel appModel,
   }) : super(
           appModel: appModel,
-          enhancementName: "Crop Image",
-          enhancementDescription: "Crop the current selected image.",
+          enhancementName: 'Crop Image',
+          enhancementDescription: 'Crop the current selected image.',
           enhancementIcon: Icons.crop,
           enhancementField: AnkiExportField.image,
         );
@@ -40,8 +40,6 @@ class CropImageEnhancement extends AnkiExportEnhancement {
     CropController cropController = CropController();
     imageCache!.clear();
 
-    print(params.imageFile!.path);
-
     if (await showCropDialog(context, cropController,
         params.imageFiles[state.imageListNotifier.value], state)) {
       ui.Image croppedImage = await cropController.croppedBitmap();
@@ -52,7 +50,7 @@ class CropImageEnhancement extends AnkiExportEnhancement {
       String temporaryDirectoryPath = (await getTemporaryDirectory()).path;
 
       String temporaryFileName =
-          "jidoujisho-" + DateFormat('yyyyMMddTkkmmss').format(DateTime.now());
+          'jidoujisho-' + DateFormat('yyyyMMddTkkmmss').format(DateTime.now());
       File croppedImageFile =
           File('$temporaryDirectoryPath/$temporaryFileName');
 
@@ -101,7 +99,7 @@ class CropImageEnhancement extends AnkiExportEnhancement {
               ),
               actions: <Widget>[
                 TextButton(
-                  child: Text(appModel.translate("dialog_set")),
+                  child: Text(appModel.translate('dialog_set')),
                   onPressed: () async {
                     return Navigator.pop(context, true);
                   },

@@ -14,9 +14,9 @@ class PitchAccentExportEnhancement extends AnkiExportEnhancement {
   PitchAccentExportEnhancement({required AppModel appModel})
       : super(
           appModel: appModel,
-          enhancementName: "Pitch Accent Export Diagrams",
+          enhancementName: 'Pitch Accent Export Diagrams',
           enhancementDescription:
-              "Generate HTML pitch accent diagrams to replace a plain text reading.",
+              'Generate HTML pitch accent diagrams to replace a plain text reading.',
           enhancementIcon: Icons.record_voice_over,
           enhancementField: AnkiExportField.reading,
         );
@@ -47,13 +47,13 @@ class PitchAccentExportEnhancement extends AnkiExportEnhancement {
   @override
   Future<void> initialiseEnhancement() async {
     String kanjiumRaw =
-        await rootBundle.loadString("assets/kanjium/accents.txt");
+        await rootBundle.loadString('assets/kanjium/accents.txt');
 
-    List<String> kanjiumLines = kanjiumRaw.split("\n");
+    List<String> kanjiumLines = kanjiumRaw.split('\n');
     List<List<String>> kanjiumFields = [];
 
     for (String line in kanjiumLines) {
-      kanjiumFields.add(line.split("\t"));
+      kanjiumFields.add(line.split('\t'));
     }
 
     for (List<String> field in kanjiumFields) {
@@ -63,7 +63,7 @@ class PitchAccentExportEnhancement extends AnkiExportEnhancement {
         word: field[0],
         reading: field[1],
       );
-      entry.workingArea["pitch_accent"] = pitch;
+      entry.workingArea['pitch_accent'] = pitch;
 
       if (kanjiumDictionary[entry.word] == null) {
         kanjiumDictionary[entry.word] = {};
@@ -76,19 +76,19 @@ class PitchAccentExportEnhancement extends AnkiExportEnhancement {
   List<PitchAccentInformation> parseKanjiumNumbers(String numbers) {
     List<PitchAccentInformation> pitches = [];
 
-    List<String> splitNumbers = numbers.split(",");
+    List<String> splitNumbers = numbers.split(',');
 
     for (String number in splitNumbers) {
       PitchAccentInformation pitch;
 
-      if (!number.contains("(")) {
+      if (!number.contains('(')) {
         pitch = PitchAccentInformation(
           number: int.parse(number),
         );
       } else {
         String partOfSpeechRaw =
-            number.substring(number.indexOf("(") + 1, number.indexOf(")"));
-        int indexRaw = int.parse(number.substring(number.indexOf(")") + 1));
+            number.substring(number.indexOf('(') + 1, number.indexOf(')'));
+        int indexRaw = int.parse(number.substring(number.indexOf(')') + 1));
 
         pitch = PitchAccentInformation(
           partOfSpeech: partOfSpeechRaw,
@@ -103,10 +103,10 @@ class PitchAccentExportEnhancement extends AnkiExportEnhancement {
   }
 
   String getHtmlPitch(String reading, PitchAccentInformation pitch) {
-    String htmlPitch = "";
+    String htmlPitch = '';
 
-    if (pitch.partOfSpeech != "") {
-      htmlPitch += "<span>[<b>${pitch.partOfSpeech}</b>]</span> ";
+    if (pitch.partOfSpeech != '') {
+      htmlPitch += '<span>[<b>${pitch.partOfSpeech}</b>]</span> ';
     }
 
     List<String> moras = [];
@@ -117,7 +117,7 @@ class PitchAccentExportEnhancement extends AnkiExportEnhancement {
         next = reading[i + 1];
       }
 
-      if (next != null && "ゃゅょぁぃぅぇぉャュョァィゥェォ".contains(next)) {
+      if (next != null && 'ゃゅょぁぃぅぇぉャュョァィゥェォ'.contains(next)) {
         moras.add(current + next);
         i += 1;
         continue;
@@ -128,11 +128,11 @@ class PitchAccentExportEnhancement extends AnkiExportEnhancement {
 
     if (pitch.number == 0) {
       htmlPitch += moras[0];
-      htmlPitch += "<span class=\"pitch\">";
+      htmlPitch += '<span class=\"pitch\">';
       for (int i = 1; i < moras.length; i++) {
         htmlPitch += moras[i];
       }
-      htmlPitch += "</span>";
+      htmlPitch += '</span>';
     } else {
       List<int> beforePitchNumbers = [];
       for (int i = 1; i < moras.length; i++) {
@@ -150,13 +150,13 @@ class PitchAccentExportEnhancement extends AnkiExportEnhancement {
 
       for (int i = 0; i < moras.length; i++) {
         if (i == firstBeforePitchNumber) {
-          htmlPitch += "<span class=\"pitch\">";
+          htmlPitch += '<span class=\"pitch\">';
         } else if (i == pitch.number! - 1) {
-          htmlPitch += "<span class=\"pitch_end\">";
+          htmlPitch += '<span class=\"pitch_end\">';
         }
         htmlPitch += moras[i];
         if (i == lastBeforePitchNumber || i == pitch.number! - 1) {
-          htmlPitch += "</span>";
+          htmlPitch += '</span>';
         }
       }
     }
@@ -166,8 +166,8 @@ class PitchAccentExportEnhancement extends AnkiExportEnhancement {
 
   DictionaryEntry? getClosestPitchEntry(DictionaryEntry entry) {
     String firstReading = entry.reading;
-    if (firstReading.contains(";")) {
-      firstReading = entry.reading.split(";").first;
+    if (firstReading.contains(';')) {
+      firstReading = entry.reading.split(';').first;
     }
 
     if (kanjiumDictionary[entry.word] == null ||
@@ -179,19 +179,19 @@ class PitchAccentExportEnhancement extends AnkiExportEnhancement {
   }
 
   String getAllHtmlPitch(DictionaryEntry entry) {
-    String allPitches = "";
+    String allPitches = '';
     String reading = entry.reading;
     if (reading.isEmpty) {
       reading = entry.word;
     }
 
     List<PitchAccentInformation> pitchAccentEntries =
-        entry.workingArea["pitch_accent"] ?? [];
+        entry.workingArea['pitch_accent'] ?? [];
 
     for (int i = 0; i < pitchAccentEntries.length; i++) {
       allPitches += getHtmlPitch(reading, pitchAccentEntries[i]);
       if (i != pitchAccentEntries.length - 1) {
-        allPitches += "<br>";
+        allPitches += '<br>';
       }
     }
 

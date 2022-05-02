@@ -170,28 +170,28 @@ class ImageSelectWidgetState extends State<ImageSelectWidget> {
         text: '',
         children: <InlineSpan>[
           TextSpan(
-            text: widget.appModel.translate("image_label_before"),
+            text: widget.appModel.translate('image_label_before'),
             style: TextStyle(
               fontSize: 12,
               color: labelColor,
             ),
           ),
           TextSpan(
-            text: "${imageListNotifier.value + 1} ",
+            text: '${imageListNotifier.value + 1} ',
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 12,
             ),
           ),
           TextSpan(
-            text: widget.appModel.translate("image_label_middle"),
+            text: widget.appModel.translate('image_label_middle'),
             style: TextStyle(
               fontSize: 12,
               color: labelColor,
             ),
           ),
           TextSpan(
-            text: "${widget.filesNotifier.value.length} ",
+            text: '${widget.filesNotifier.value.length} ',
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 12,
@@ -199,7 +199,7 @@ class ImageSelectWidgetState extends State<ImageSelectWidget> {
           ),
           if (widget.imageSearchTermNotifier.value.isNotEmpty)
             TextSpan(
-              text: widget.appModel.translate("image_label_after"),
+              text: widget.appModel.translate('image_label_after'),
               style: TextStyle(
                 fontSize: 12,
                 color: labelColor,
@@ -207,7 +207,7 @@ class ImageSelectWidgetState extends State<ImageSelectWidget> {
             ),
           if (widget.imageSearchTermNotifier.value.isNotEmpty)
             TextSpan(
-              text: "『",
+              text: '『',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 12,
@@ -224,7 +224,7 @@ class ImageSelectWidgetState extends State<ImageSelectWidget> {
             ),
           if (widget.imageSearchTermNotifier.value.isNotEmpty)
             TextSpan(
-              text: "』",
+              text: '』',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 12,
@@ -243,14 +243,14 @@ class ImageSelectWidgetState extends State<ImageSelectWidget> {
         text: '',
         children: <InlineSpan>[
           TextSpan(
-            text: widget.appModel.translate("searching_before"),
+            text: widget.appModel.translate('searching_before'),
             style: TextStyle(
               fontSize: 12,
               color: labelColor,
             ),
           ),
           TextSpan(
-            text: "『",
+            text: '『',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 12,
@@ -265,7 +265,7 @@ class ImageSelectWidgetState extends State<ImageSelectWidget> {
             ),
           ),
           TextSpan(
-            text: "』",
+            text: '』',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 12,
@@ -273,7 +273,7 @@ class ImageSelectWidgetState extends State<ImageSelectWidget> {
             ),
           ),
           TextSpan(
-            text: widget.appModel.translate("searching_after"),
+            text: widget.appModel.translate('searching_after'),
             style: TextStyle(
               fontSize: 12,
               color: labelColor,

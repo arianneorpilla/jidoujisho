@@ -20,7 +20,7 @@ import 'package:chisa/util/number_tag.dart';
 class YomichanTermBankFormat extends DictionaryFormat {
   YomichanTermBankFormat()
       : super(
-          formatName: "Yomichan Term Bank",
+          formatName: 'Yomichan Term Bank',
           isOnline: false,
           prepareWorkingDirectory:
               prepareWorkingDirectoryYomichanTermBankFormat,
@@ -34,7 +34,7 @@ class YomichanTermBankFormat extends DictionaryFormat {
 
   @override
   bool isUriSupported(Uri uri) {
-    return (lookupMimeType(uri.path) ?? "") == 'application/zip';
+    return (lookupMimeType(uri.path) ?? '') == 'application/zip';
   }
 }
 
@@ -48,11 +48,11 @@ FutureOr<void> prepareWorkingDirectoryYomichanTermBankFormat(
 @override
 FutureOr<String> getDictionaryNameYomichanTermBankFormat(
     ImportDirectoryParams params) {
-  String indexJsonPath = p.join(params.workingDirectory.path, "index.json");
+  String indexJsonPath = p.join(params.workingDirectory.path, 'index.json');
   File indexJson = File(indexJsonPath);
   Map<String, dynamic> index = jsonDecode(indexJson.readAsStringSync());
 
-  String dictionaryName = (index["title"] as String).trim();
+  String dictionaryName = (index['title'] as String).trim();
   return dictionaryName;
 }
 
@@ -68,7 +68,7 @@ FutureOr<List<DictionaryEntry>> getDictionaryEntriesYomichanTermBankFormat(
         return list.first as String;
       }
       String reduced = list.reduce((value, element) {
-        return "$value; $element";
+        return '$value; $element';
       });
       return reduced;
     } catch (e) {
@@ -88,7 +88,7 @@ FutureOr<List<DictionaryEntry>> getDictionaryEntriesYomichanTermBankFormat(
 
   for (int i = 0; i < 999; i++) {
     String termBankPath =
-        p.join(params.workingDirectory.path, "term_bank_$i.json");
+        p.join(params.workingDirectory.path, 'term_bank_$i.json');
     File termBank = File(termBankPath);
 
     if (termBank.existsSync()) {
@@ -98,11 +98,11 @@ FutureOr<List<DictionaryEntry>> getDictionaryEntriesYomichanTermBankFormat(
       for (var termJson in termJsons) {
         List<String> meaningTags = [];
         String meaningTagsUnsplit = termJson[2].toString();
-        meaningTags = meaningTagsUnsplit.split(" ");
+        meaningTags = meaningTagsUnsplit.split(' ');
 
         List<String> termTags = [];
         String termTagsUnsplit = termJson[7].toString();
-        termTags = termTagsUnsplit.split(" ");
+        termTags = termTagsUnsplit.split(' ');
 
         String word = termJson[0].toString();
         String reading = termJson[1].toString();
@@ -110,8 +110,8 @@ FutureOr<List<DictionaryEntry>> getDictionaryEntriesYomichanTermBankFormat(
         double popularity = parsePopularity(termJson[4]);
 
         Map<String, String> extraMap = {
-          "meaningTags": jsonEncode(meaningTags),
-          "termTags": jsonEncode(termTags),
+          'meaningTags': jsonEncode(meaningTags),
+          'termTags': jsonEncode(termTags),
         };
         String extra = jsonEncode(extraMap);
 
@@ -127,7 +127,7 @@ FutureOr<List<DictionaryEntry>> getDictionaryEntriesYomichanTermBankFormat(
       }
     }
 
-    params.sendPort.send("Found ${entries.length} entries...");
+    params.sendPort.send('Found ${entries.length} entries...');
   }
 
   return entries;
@@ -148,7 +148,7 @@ FutureOr<Map<String, String>> getDictionaryMetadataYomichanTermBankFormat(
 
   for (int i = 0; i < 999; i++) {
     String tagBankPath =
-        p.join(params.workingDirectory.path, "tag_bank_$i.json");
+        p.join(params.workingDirectory.path, 'tag_bank_$i.json');
     File tagBank = File(tagBankPath);
 
     if (tagBank.existsSync()) {
@@ -163,17 +163,17 @@ FutureOr<Map<String, String>> getDictionaryMetadataYomichanTermBankFormat(
 
         String key = tagName;
         String value = jsonEncode({
-          "frequencyName": frequencyName,
-          "sortingOrder": sortingOrder,
-          "tagNotes": tagNotes,
-          "popularity": popularity,
+          'frequencyName': frequencyName,
+          'sortingOrder': sortingOrder,
+          'tagNotes': tagNotes,
+          'popularity': popularity,
         });
 
         metadata[key] = value;
       }
     }
 
-    params.sendPort.send("Found ${metadata.length} tags...");
+    params.sendPort.send('Found ${metadata.length} tags...');
   }
 
   return metadata;
@@ -200,31 +200,31 @@ FutureOr<DictionarySearchResult> searchResultsEnhancementYomichanTermBankFormat(
       readingMap[entry.reading]![entry.word] = DictionaryEntry(
         word: entry.word,
         reading: entry.reading,
-        meaning: "",
+        meaning: '',
         extra: entry.extra,
         popularity: 0,
       );
     }
 
     DictionaryEntry monoEntry = readingMap[entry.reading]![entry.word]!;
-    if (monoEntry.workingArea["yomichanDefinitionTags"] == null) {
+    if (monoEntry.workingArea['yomichanDefinitionTags'] == null) {
       final List<List<String>> yomichanDefinitionTags = [];
-      monoEntry.workingArea["yomichanDefinitionTags"] = yomichanDefinitionTags;
+      monoEntry.workingArea['yomichanDefinitionTags'] = yomichanDefinitionTags;
     }
-    if (monoEntry.workingArea["meanings"] == null) {
+    if (monoEntry.workingArea['meanings'] == null) {
       final List<String> meanings = [];
-      monoEntry.workingArea["meanings"] = meanings;
+      monoEntry.workingArea['meanings'] = meanings;
     }
-    if (monoEntry.workingArea["duplicateCount"] == null) {
-      monoEntry.workingArea["duplicateCount"] = 0;
+    if (monoEntry.workingArea['duplicateCount'] == null) {
+      monoEntry.workingArea['duplicateCount'] = 0;
     }
-    monoEntry.workingArea["duplicateCount"] += 1;
-    monoEntry.meaning += getBetterNumberTag("• ${entry.meaning}\n");
-    monoEntry.workingArea["duplicateWorkingMeaning"] = entry.meaning;
+    monoEntry.workingArea['duplicateCount'] += 1;
+    monoEntry.meaning += getBetterNumberTag('• ${entry.meaning}\n');
+    monoEntry.workingArea['duplicateWorkingMeaning'] = entry.meaning;
     monoEntry.popularity += entry.popularity;
 
-    monoEntry.workingArea["meanings"].add(entry.meaning);
-    (monoEntry.workingArea["yomichanDefinitionTags"] as List<List<String>>)
+    monoEntry.workingArea['meanings'].add(entry.meaning);
+    (monoEntry.workingArea['yomichanDefinitionTags'] as List<List<String>>)
         .add(YomichanTag.getMeaningTagNames(entry));
   }
 
@@ -236,38 +236,38 @@ FutureOr<DictionarySearchResult> searchResultsEnhancementYomichanTermBankFormat(
 
   String removeLastNewline(String n) => n = n.substring(0, n.length - 1);
   for (DictionaryEntry entry in mergedEntries) {
-    if (entry.workingArea["duplicateCount"] == 1) {
-      entry.meaning = entry.workingArea["duplicateWorkingMeaning"];
+    if (entry.workingArea['duplicateCount'] == 1) {
+      entry.meaning = entry.workingArea['duplicateWorkingMeaning'];
     } else {
       entry.meaning = removeLastNewline(entry.meaning);
     }
 
-    entry.popularity = entry.popularity / entry.workingArea["duplicateCount"];
+    entry.popularity = entry.popularity / entry.workingArea['duplicateCount'];
 
     List<YomichanTag> termTags =
         YomichanTag.getTermTagsFromEntry(entry, tagStore);
-    entry.workingArea["yomichanTermTags"] = termTags;
+    entry.workingArea['yomichanTermTags'] = termTags;
 
     List<String> termTagNames = termTags.map((tag) => tag.tagName).toList();
 
     entry.extra = jsonEncode({
-      "termTags": termTagNames,
-      "definitionTags": entry.workingArea["yomichanDefinitionTags"],
-      "meanings": entry.workingArea["meanings"],
+      'termTags': termTagNames,
+      'definitionTags': entry.workingArea['yomichanDefinitionTags'],
+      'meanings': entry.workingArea['meanings'],
     });
   }
 
-  mergedEntries.sort((a, b) => b.workingArea["yomichanDefinitionTags"].length
-      .compareTo(a.workingArea["yomichanDefinitionTags"].length));
+  mergedEntries.sort((a, b) => b.workingArea['yomichanDefinitionTags'].length
+      .compareTo(a.workingArea['yomichanDefinitionTags'].length));
   mergedEntries.sort((a, b) =>
-      YomichanTag.getPopularitySum(b.workingArea["yomichanTermTags"]).compareTo(
-          YomichanTag.getPopularitySum(a.workingArea["yomichanTermTags"])));
+      YomichanTag.getPopularitySum(b.workingArea['yomichanTermTags']).compareTo(
+          YomichanTag.getPopularitySum(a.workingArea['yomichanTermTags'])));
   mergedEntries.sort((a, b) =>
-      (YomichanTag.getTagCount(b.workingArea["yomichanTermTags"]) +
-              b.workingArea["duplicateCount"] * 0.3)
+      (YomichanTag.getTagCount(b.workingArea['yomichanTermTags']) +
+              b.workingArea['duplicateCount'] * 0.3)
           .compareTo(
-              YomichanTag.getTagCount(a.workingArea["yomichanTermTags"]) +
-                  a.workingArea["duplicateCount"] * 0.3));
+              YomichanTag.getTagCount(a.workingArea['yomichanTermTags']) +
+                  a.workingArea['duplicateCount'] * 0.3));
 
   KanaKit kanaKit = const KanaKit();
   List<DictionaryEntry> exactFirstEntries = [];
@@ -320,41 +320,41 @@ class YomichanTag {
   late double popularity;
 
   YomichanTag({
-    this.tagName = "",
-    this.frequencyName = "",
+    this.tagName = '',
+    this.frequencyName = '',
     this.sortingOrder = 0,
-    this.tagNotes = "",
+    this.tagNotes = '',
     this.popularity = 0,
   });
 
   YomichanTag.fromJson(String json) {
     Map<String, dynamic> metadata = jsonDecode(json);
     tagName = metadata.keys.first;
-    Map<String, dynamic> map = jsonDecode(metadata["tagName"]);
+    Map<String, dynamic> map = jsonDecode(metadata['tagName']);
 
-    frequencyName = map["frequencyName"];
-    sortingOrder = map["sortingOrder"];
-    tagNotes = map["tagNotes"];
-    popularity = map["popularity"];
+    frequencyName = map['frequencyName'];
+    sortingOrder = map['sortingOrder'];
+    tagNotes = map['tagNotes'];
+    popularity = map['popularity'];
   }
 
   Color getTagColor() {
     switch (frequencyName) {
-      case "name":
+      case 'name':
         return const Color(0xffd46a6a);
-      case "expression":
+      case 'expression':
         return const Color(0xffff4d4d);
-      case "popular":
+      case 'popular':
         return const Color(0xff550000);
-      case "partOfSpeech":
+      case 'partOfSpeech':
         return const Color(0xff565656);
-      case "archaism":
+      case 'archaism':
         return Colors.grey.shade700;
-      case "dictionary":
+      case 'dictionary':
         return const Color(0xffa15151);
-      case "frequency":
+      case 'frequency':
         return const Color(0xffd46a6a);
-      case "frequent":
+      case 'frequent':
         return const Color(0xff801515);
     }
 
@@ -378,10 +378,10 @@ class YomichanTag {
       Map<String, dynamic> tagMap = jsonDecode(map[key]);
       YomichanTag tag = YomichanTag(
         tagName: key,
-        frequencyName: tagMap["frequencyName"],
-        sortingOrder: checkDouble(tagMap["sortingOrder"]),
-        tagNotes: tagMap["tagNotes"],
-        popularity: checkDouble(tagMap["popularity"]),
+        frequencyName: tagMap['frequencyName'],
+        sortingOrder: checkDouble(tagMap['sortingOrder']),
+        tagNotes: tagMap['tagNotes'],
+        popularity: checkDouble(tagMap['popularity']),
       );
       tags.add(tag);
     }
@@ -400,13 +400,13 @@ class YomichanTag {
   }
 
   static List<String> getMeaningTagNames(DictionaryEntry entry) {
-    return List.castFrom(jsonDecode(jsonDecode(entry.extra)["meaningTags"]));
+    return List.castFrom(jsonDecode(jsonDecode(entry.extra)['meaningTags']));
   }
 
   static List<YomichanTag> getTermTagsFromEntry(
       DictionaryEntry entry, List<YomichanTag> tagStore) {
     List<String> tagNames =
-        List.castFrom(jsonDecode(jsonDecode(entry.extra)["termTags"]));
+        List.castFrom(jsonDecode(jsonDecode(entry.extra)['termTags']));
 
     return getTagsFromNames(tagStore, tagNames);
   }
@@ -414,7 +414,7 @@ class YomichanTag {
   static List<YomichanTag> getMeaningTagsFromEntry(
       DictionaryEntry entry, List<YomichanTag> tagStore) {
     List<String> tagNames =
-        List.castFrom(jsonDecode(jsonDecode(entry.extra)["meaningTags"]));
+        List.castFrom(jsonDecode(jsonDecode(entry.extra)['meaningTags']));
 
     return getTagsFromNames(tagStore, tagNames);
   }
@@ -425,10 +425,10 @@ class YomichanTag {
     for (YomichanTag _ in tags) {
       String key = tagName;
       String value = jsonEncode({
-        "frequencyName": frequencyName,
-        "sortingOrder": sortingOrder,
-        "tagNotes": tagNotes,
-        "popularity": popularity,
+        'frequencyName': frequencyName,
+        'sortingOrder': sortingOrder,
+        'tagNotes': tagNotes,
+        'popularity': popularity,
       });
 
       metadata[key] = value;

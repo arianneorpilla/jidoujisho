@@ -13,7 +13,7 @@ import 'package:intl/intl.dart';
 class NaverDictionaryFormat extends DictionaryFormat {
   NaverDictionaryFormat()
       : super(
-          formatName: "Naver Dictionary",
+          formatName: 'Naver Dictionary',
           isOnline: true,
           prepareWorkingDirectory: prepareWorkingDirectoryNaverDictionaryFormat,
           getDictionaryName: getDictionaryNameNaverDictionaryFormat,
@@ -34,7 +34,7 @@ FutureOr<void> prepareWorkingDirectoryNaverDictionaryFormat(
 @override
 FutureOr<String> getDictionaryNameNaverDictionaryFormat(
     ImportDirectoryParams params) {
-  return "Naver Dictionary";
+  return 'Naver Dictionary';
 }
 
 @override
@@ -60,43 +60,43 @@ FutureOr<DictionarySearchResult> searchResultsEnhancementNaverDictionaryFormat(
   HeadlessInAppWebView webView = HeadlessInAppWebView(
       initialUrlRequest: URLRequest(
         url: Uri.parse(
-            "https://korean.dict.naver.com/koendict/#/search?range=word&query=${params.result.originalSearchTerm}&shouldSearchOpen=false"),
+            'https://korean.dict.naver.com/koendict/#/search?range=word&query=${params.result.originalSearchTerm}&shouldSearchOpen=false'),
       ),
       onLoadStop: (controller, uri) async {
         await Future.delayed(const Duration(milliseconds: 500), () {});
 
         dom.Document document = parser.parse(await controller.getHtml());
 
-        List<dom.Element> rowElements = document.getElementsByClassName("row");
+        List<dom.Element> rowElements = document.getElementsByClassName('row');
 
         rowElements.forEachIndexed((i, rowElement) {
           dom.Element wordElement = rowElement
-              .getElementsByClassName("origin")
+              .getElementsByClassName('origin')
               .first
-              .getElementsByTagName("a")
+              .getElementsByTagName('a')
               .first;
 
           for (dom.Element element in wordElement.children) {
-            if (element.className == "num") {
+            if (element.className == 'num') {
               element.remove();
             }
           }
 
           String word = Bidi.stripHtmlIfNeeded(wordElement.innerHtml)
-              .split("\n")
+              .split('\n')
               .map((line) => line.trim())
-              .join(" ")
+              .join(' ')
               .trim();
 
           dom.Element meaningElement =
-              rowElement.getElementsByClassName("mean_list").first;
+              rowElement.getElementsByClassName('mean_list').first;
 
           meaningElement
-              .querySelectorAll("div.user_info")
+              .querySelectorAll('div.user_info')
               .forEach((element) => element.remove());
 
           for (dom.Element element in wordElement.children) {
-            if (element.className == "num") {
+            if (element.className == 'num') {
               element.remove();
             }
           }
@@ -104,38 +104,38 @@ FutureOr<DictionarySearchResult> searchResultsEnhancementNaverDictionaryFormat(
           List<String> meanings = [];
 
           for (dom.Element element in rowElement
-              .getElementsByClassName("mean_list")
+              .getElementsByClassName('mean_list')
               .first
               .children) {
             meanings.add(Bidi.stripHtmlIfNeeded(element.innerHtml)
-                .split("\n")
+                .split('\n')
                 .map((line) => line.trim())
-                .join(" ")
+                .join(' ')
                 .trim());
           }
 
-          String meaning = meanings.join("\n");
+          String meaning = meanings.join('\n');
 
           List<String> readings = [];
 
-          if (rowElement.getElementsByClassName("listen_list").isNotEmpty) {
+          if (rowElement.getElementsByClassName('listen_list').isNotEmpty) {
             for (dom.Element element in rowElement
-                .getElementsByClassName("listen_list")
+                .getElementsByClassName('listen_list')
                 .first
                 .children) {
               readings.add(Bidi.stripHtmlIfNeeded(element.innerHtml)
-                  .split("\n")
+                  .split('\n')
                   .map((line) => line.trim())
-                  .join(" ")
+                  .join(' ')
                   .trim());
             }
           }
 
-          readings.removeWhere((reading) => reading == "Listen");
+          readings.removeWhere((reading) => reading == 'Listen');
           String reading = readings
               .map((reading) =>
-                  reading.replaceAll("[", "").replaceAll(']', "").trim())
-              .join(" / ");
+                  reading.replaceAll('[', '').replaceAll(']', '').trim())
+              .join(' / ');
 
           DictionaryEntry entry = DictionaryEntry(
             word: word,

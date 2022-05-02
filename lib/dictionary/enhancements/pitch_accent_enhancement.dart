@@ -9,17 +9,17 @@ import 'package:flutter/services.dart';
 
 class PitchAccentInformation {
   int? number;
-  String partOfSpeech = "";
+  String partOfSpeech = '';
 
   PitchAccentInformation({
     this.number,
-    this.partOfSpeech = "",
+    this.partOfSpeech = '',
   });
 
   Map<String, dynamic> toMap() {
     return {
-      "number": number,
-      "partOfSpeech": partOfSpeech,
+      'number': number,
+      'partOfSpeech': partOfSpeech,
     };
   }
 
@@ -33,8 +33,8 @@ class PitchAccentEnhancement extends DictionaryWidgetEnhancement {
   PitchAccentEnhancement({required AppModel appModel})
       : super(
           appModel: appModel,
-          enhancementName: "Pitch Accent Diagrams",
-          enhancementDescription: "Show pitch accent diagrams over a reading.",
+          enhancementName: 'Pitch Accent Diagrams',
+          enhancementDescription: 'Show pitch accent diagrams over a reading.',
           enhancementIcon: Icons.record_voice_over,
           enhancementField: DictionaryWidgetField.reading,
         );
@@ -44,13 +44,13 @@ class PitchAccentEnhancement extends DictionaryWidgetEnhancement {
   @override
   Future<void> initialiseEnhancement() async {
     String kanjiumRaw =
-        await rootBundle.loadString("assets/kanjium/accents.txt");
+        await rootBundle.loadString('assets/kanjium/accents.txt');
 
-    List<String> kanjiumLines = kanjiumRaw.split("\n");
+    List<String> kanjiumLines = kanjiumRaw.split('\n');
     List<List<String>> kanjiumFields = [];
 
     for (String line in kanjiumLines) {
-      kanjiumFields.add(line.split("\t"));
+      kanjiumFields.add(line.split('\t'));
     }
 
     for (List<String> field in kanjiumFields) {
@@ -60,7 +60,7 @@ class PitchAccentEnhancement extends DictionaryWidgetEnhancement {
         word: field[0],
         reading: field[1],
       );
-      entry.workingArea["pitch_accent"] = pitch;
+      entry.workingArea['pitch_accent'] = pitch;
 
       if (kanjiumDictionary[entry.word] == null) {
         kanjiumDictionary[entry.word] = {};
@@ -83,20 +83,20 @@ class PitchAccentEnhancement extends DictionaryWidgetEnhancement {
   List<PitchAccentInformation> parseKanjiumNumbers(String numbers) {
     List<PitchAccentInformation> pitches = [];
 
-    List<String> splitNumbers = numbers.split(",");
+    List<String> splitNumbers = numbers.split(',');
 
     for (String number in splitNumbers) {
       PitchAccentInformation pitch;
 
-      if (!number.contains("(")) {
+      if (!number.contains('(')) {
         pitch = PitchAccentInformation(
           number: int.parse(number),
         );
       } else {
         String partOfSpeechRaw =
-            number.substring(number.indexOf("(") + 1, number.indexOf(")"));
+            number.substring(number.indexOf('(') + 1, number.indexOf(')'));
 
-        int indexRaw = int.parse(number.substring(number.indexOf(")") + 1));
+        int indexRaw = int.parse(number.substring(number.indexOf(')') + 1));
         pitch = PitchAccentInformation(
           partOfSpeech: partOfSpeechRaw,
           number: indexRaw,
@@ -149,8 +149,8 @@ class PitchAccentEnhancement extends DictionaryWidgetEnhancement {
       );
     }
 
-    if (pitch.partOfSpeech != "") {
-      listWidgets.add(const Text("["));
+    if (pitch.partOfSpeech != '') {
+      listWidgets.add(const Text('['));
       listWidgets.add(
         Text(
           pitch.partOfSpeech,
@@ -159,7 +159,7 @@ class PitchAccentEnhancement extends DictionaryWidgetEnhancement {
           ),
         ),
       );
-      listWidgets.add(const Text("] "));
+      listWidgets.add(const Text('] '));
     }
 
     List<String> moras = [];
@@ -170,7 +170,7 @@ class PitchAccentEnhancement extends DictionaryWidgetEnhancement {
         next = reading[i + 1];
       }
 
-      if (next != null && "ゃゅょぁぃぅぇぉャュョァィゥェォ".contains(next)) {
+      if (next != null && 'ゃゅょぁぃぅぇぉャュョァィゥェォ'.contains(next)) {
         moras.add(current + next);
         i += 1;
         continue;
@@ -210,8 +210,8 @@ class PitchAccentEnhancement extends DictionaryWidgetEnhancement {
 
   DictionaryEntry? getClosestPitchEntry(DictionaryEntry entry) {
     String firstReading = entry.reading;
-    if (firstReading.contains(";")) {
-      firstReading = entry.reading.split(";").first;
+    if (firstReading.contains(';')) {
+      firstReading = entry.reading.split(';').first;
     }
 
     if (kanjiumDictionary[entry.word] == null ||
@@ -229,7 +229,7 @@ class PitchAccentEnhancement extends DictionaryWidgetEnhancement {
       reading = entry.word;
     }
 
-    List<PitchAccentInformation> pitch = entry.workingArea["pitch_accent"];
+    List<PitchAccentInformation> pitch = entry.workingArea['pitch_accent'];
 
     for (int i = 0; i < pitch.length; i++) {
       listWidgets.add(getPitchWidget(reading, pitch[i]));

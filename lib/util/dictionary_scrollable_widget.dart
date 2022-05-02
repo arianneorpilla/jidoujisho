@@ -136,28 +136,28 @@ class DictionaryScrollableWidget extends StatelessWidget {
         children: <InlineSpan>[
           getContextSourceIcon(context),
           TextSpan(
-            text: appModel.translate("search_label_before"),
+            text: appModel.translate('search_label_before'),
             style: TextStyle(
               fontSize: 12,
               color: Theme.of(context).unselectedWidgetColor,
             ),
           ),
           TextSpan(
-            text: "${indexNotifier.value + 1} ",
+            text: '${indexNotifier.value + 1} ',
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 12,
             ),
           ),
           TextSpan(
-            text: appModel.translate("search_label_middle"),
+            text: appModel.translate('search_label_middle'),
             style: TextStyle(
               fontSize: 12,
               color: Theme.of(context).unselectedWidgetColor,
             ),
           ),
           TextSpan(
-            text: "${result.entries.length} ",
+            text: '${result.entries.length} ',
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 12,
@@ -166,14 +166,14 @@ class DictionaryScrollableWidget extends StatelessWidget {
           // if (entry.contextDataSource != "-1")
           //   getContextDataSourceSpan(entry.contextDataSource),
           TextSpan(
-            text: appModel.translate("search_label_after"),
+            text: appModel.translate('search_label_after'),
             style: TextStyle(
               fontSize: 12,
               color: Theme.of(context).unselectedWidgetColor,
             ),
           ),
           TextSpan(
-            text: "『",
+            text: '『',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 12,
@@ -188,7 +188,7 @@ class DictionaryScrollableWidget extends StatelessWidget {
             ),
           ),
           TextSpan(
-            text: "』",
+            text: '』',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 12,

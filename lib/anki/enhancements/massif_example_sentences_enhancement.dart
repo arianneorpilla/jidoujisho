@@ -8,8 +8,6 @@ import 'package:chisa/pages/creator_page.dart';
 import 'package:chisa/util/anki_export_field.dart';
 import 'package:chisa/util/reg_exp.dart';
 import 'package:flutter/material.dart';
-import 'package:html/parser.dart' as parser;
-import 'package:html/dom.dart' as dom;
 import 'package:http/http.dart' as http;
 
 class MassifResult {
@@ -29,8 +27,8 @@ class MassifExampleSentencesEnhancement extends AnkiExportEnhancement {
     required AppModel appModel,
   }) : super(
           appModel: appModel,
-          enhancementName: "Massif Example Sentences",
-          enhancementDescription: "Get curated example sentences via Massif.",
+          enhancementName: 'Massif Example Sentences',
+          enhancementDescription: 'Get curated example sentences via Massif.',
           enhancementIcon: Icons.article,
           enhancementField: AnkiExportField.word,
         );
@@ -45,7 +43,7 @@ class MassifExampleSentencesEnhancement extends AnkiExportEnhancement {
     required bool autoMode,
     required CreatorPageState state,
   }) async {
-    String text = "";
+    String text = '';
     if (params.word.isEmpty) {
       return params;
     }
@@ -57,7 +55,7 @@ class MassifExampleSentencesEnhancement extends AnkiExportEnhancement {
 
     List<MassifResult> results = [];
 
-    String cacheKey = "${appModel.getCurrentLanguage()}/$text";
+    String cacheKey = '${appModel.getCurrentLanguage()}/$text';
     if (massifCache[cacheKey] != null) {
       results = massifCache[cacheKey]!;
     } else {
@@ -75,16 +73,16 @@ class MassifExampleSentencesEnhancement extends AnkiExportEnhancement {
 
         String highlightedText = resultJson['highlighted_html'];
         List<String> splitWithDelims =
-            highlightedText.splitWithDelim(RegExp(r"<em>(.*?)<\/em>"));
+            highlightedText.splitWithDelim(RegExp(r'<em>(.*?)<\/em>'));
 
         for (String splitWithDelim in splitWithDelims) {
-          if (splitWithDelim.startsWith("<em>") &&
-              splitWithDelim.endsWith("</em>")) {
+          if (splitWithDelim.startsWith('<em>') &&
+              splitWithDelim.endsWith('</em>')) {
             spans.add(
               TextSpan(
                 text: splitWithDelim
-                    .replaceAll("<em>", "")
-                    .replaceAll("</em>", ""),
+                    .replaceAll('<em>', '')
+                    .replaceAll('</em>', ''),
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.red,
@@ -160,12 +158,12 @@ class MassifExampleSentencesEnhancement extends AnkiExportEnhancement {
                 appModel.translate('dialog_set'),
               ),
               onPressed: () {
-                String sentencesJoined = "";
+                String sentencesJoined = '';
 
                 for (int i = 0; i < results.length; i++) {
                   if (indexesSelected.value[i]) {
                     sentencesJoined += results[i].text;
-                    sentencesJoined += "\n";
+                    sentencesJoined += '\n';
                   }
                 }
 

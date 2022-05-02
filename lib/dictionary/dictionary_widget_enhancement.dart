@@ -57,7 +57,7 @@ abstract class DictionaryWidgetEnhancement {
   }
 
   static String getFieldKey(DictionaryWidgetField field) {
-    return "widgetPrefs/${field.toString()}";
+    return 'widgetPrefs/${field.toString()}';
   }
 
   Future<void> setEnabled(DictionaryWidgetField field) async {
@@ -67,6 +67,6 @@ abstract class DictionaryWidgetEnhancement {
   }
 
   Future<void> setDisabled(DictionaryWidgetField field) {
-    return appModel.sharedPreferences.setString(getFieldKey(field), "");
+    return appModel.sharedPreferences.setString(getFieldKey(field), '');
   }
 }

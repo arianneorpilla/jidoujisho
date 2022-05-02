@@ -112,7 +112,7 @@ abstract class Language {
           originalIndexTape.add(i);
         }
 
-        String newText = "";
+        String newText = '';
         int newIndex = -1;
 
         for (int i = 0; i < text.runes.length; i++) {

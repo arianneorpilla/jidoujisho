@@ -15,38 +15,38 @@ extension AnkiExportFieldLocalisation on AnkiExportField {
   String label(AppModel appModel) {
     switch (this) {
       case AnkiExportField.sentence:
-        return appModel.translate("field_label_sentence");
+        return appModel.translate('field_label_sentence');
       case AnkiExportField.word:
-        return appModel.translate("field_label_word");
+        return appModel.translate('field_label_word');
       case AnkiExportField.reading:
-        return appModel.translate("field_label_reading");
+        return appModel.translate('field_label_reading');
       case AnkiExportField.meaning:
-        return appModel.translate("field_label_meaning");
+        return appModel.translate('field_label_meaning');
       case AnkiExportField.extra:
-        return appModel.translate("field_label_extra");
+        return appModel.translate('field_label_extra');
       case AnkiExportField.image:
-        return appModel.translate("field_label_image");
+        return appModel.translate('field_label_image');
       case AnkiExportField.audio:
-        return appModel.translate("field_label_audio");
+        return appModel.translate('field_label_audio');
     }
   }
 
   String hint(AppModel appModel) {
     switch (this) {
       case AnkiExportField.sentence:
-        return appModel.translate("field_hint_context");
+        return appModel.translate('field_hint_context');
       case AnkiExportField.word:
-        return appModel.translate("field_hint_word");
+        return appModel.translate('field_hint_word');
       case AnkiExportField.reading:
-        return appModel.translate("field_hint_reading");
+        return appModel.translate('field_hint_reading');
       case AnkiExportField.meaning:
-        return appModel.translate("field_hint_meaning");
+        return appModel.translate('field_hint_meaning');
       case AnkiExportField.extra:
-        return appModel.translate("field_hint_extra");
+        return appModel.translate('field_hint_extra');
       case AnkiExportField.image:
-        return appModel.translate("field_hint_image");
+        return appModel.translate('field_hint_image');
       case AnkiExportField.audio:
-        return appModel.translate("field_hint_audio");
+        return appModel.translate('field_hint_audio');
     }
   }
 

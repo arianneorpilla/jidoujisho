@@ -90,7 +90,7 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
   Widget buildBody() {
     if (appModel.getCurrentDictionary() == null) {
       return buildPlaceholderMessage(
-        label: appModel.translate("import_dictionaries_for_use"),
+        label: appModel.translate('import_dictionaries_for_use'),
         icon: Icons.auto_stories,
       );
     }
@@ -98,7 +98,7 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
     List<String> searchHistory = appModel.getSearchHistory().reversed.toList();
     if (searchBarController.query.isEmpty && searchHistory.isEmpty) {
       return buildPlaceholderMessage(
-        label: appModel.translate("enter_a_search_term"),
+        label: appModel.translate('enter_a_search_term'),
         icon: Icons.search,
       );
     } else if (searchResult == null) {
@@ -297,16 +297,16 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
         borderRadius: BorderRadius.zero,
       ),
       title: Text(
-        appModel.translate("clear_dictionary_history"),
+        appModel.translate('clear_dictionary_history'),
       ),
       content: Text(
-        appModel.translate("clear_dictionary_history_warning"),
+        appModel.translate('clear_dictionary_history_warning'),
         textAlign: TextAlign.justify,
       ),
       actions: <Widget>[
         TextButton(
             child: Text(
-              appModel.translate("dialog_yes"),
+              appModel.translate('dialog_yes'),
               style: TextStyle(
                 color: Theme.of(context).focusColor,
               ),
@@ -323,7 +323,7 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
             }),
         TextButton(
             child: Text(
-              appModel.translate("dialog_no"),
+              appModel.translate('dialog_no'),
             ),
             onPressed: () => Navigator.pop(context)),
       ],
@@ -343,7 +343,7 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
         controller: searchBarController,
         hint: (appModel.getCurrentDictionary() != null)
             ? appModel.getCurrentDictionaryName()
-            : appModel.translate("import_dictionaries_for_use"),
+            : appModel.translate('import_dictionaries_for_use'),
         borderRadius: BorderRadius.zero,
         scrollPadding: const EdgeInsets.only(top: 16, bottom: 56),
         transitionDuration: Duration.zero,
@@ -463,28 +463,28 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
         children: <InlineSpan>[
           getContextSourceIcon(),
           TextSpan(
-            text: appModel.translate("instant_search_label_before"),
+            text: appModel.translate('instant_search_label_before'),
             style: TextStyle(
               fontSize: 12,
               color: labelColor,
             ),
           ),
           TextSpan(
-            text: "${searchResult!.entries.length}",
+            text: '${searchResult!.entries.length}',
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 12,
             ),
           ),
           TextSpan(
-            text: appModel.translate("instant_search_label_after"),
+            text: appModel.translate('instant_search_label_after'),
             style: TextStyle(
               fontSize: 12,
               color: labelColor,
             ),
           ),
           TextSpan(
-            text: "『",
+            text: '『',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 12,
@@ -499,7 +499,7 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
             ),
           ),
           TextSpan(
-            text: "』",
+            text: '』',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 12,

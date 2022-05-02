@@ -85,7 +85,7 @@ abstract class PlayerMediaSource extends MediaSource {
           if (isHistory) {
             actions.add(TextButton(
               child: Text(
-                appModel.translate("dialog_remove"),
+                appModel.translate('dialog_remove'),
                 style: TextStyle(
                   color: Theme.of(context).focusColor,
                 ),
@@ -113,7 +113,7 @@ abstract class PlayerMediaSource extends MediaSource {
           actions.add(
             TextButton(
               child: Text(
-                appModel.translate("dialog_play"),
+                appModel.translate('dialog_play'),
                 style: const TextStyle(),
               ),
               onPressed: () async {

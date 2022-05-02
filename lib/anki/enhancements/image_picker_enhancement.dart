@@ -18,9 +18,9 @@ class ImagePickerEnhancement extends AnkiExportEnhancement {
     required AppModel appModel,
   }) : super(
           appModel: appModel,
-          enhancementName: "Image Picker",
+          enhancementName: 'Image Picker',
           enhancementDescription:
-              "Upload your own image to use in the Creator.",
+              'Upload your own image to use in the Creator.',
           enhancementIcon: Icons.file_upload,
           enhancementField: AnkiExportField.image,
         );
@@ -51,7 +51,7 @@ class ImagePickerEnhancement extends AnkiExportEnhancement {
     String temporaryDirectoryPath = (await getTemporaryDirectory()).path;
 
     String temporaryFileName =
-        "jidoujisho-" + DateFormat('yyyyMMddTkkmmss').format(DateTime.now());
+        'jidoujisho-' + DateFormat('yyyyMMddTkkmmss').format(DateTime.now());
     File croppedImageFile = File('$temporaryDirectoryPath/$temporaryFileName');
 
     croppedImageFile.createSync();

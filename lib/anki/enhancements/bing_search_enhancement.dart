@@ -20,9 +20,9 @@ class BingSearchEnhancement extends AnkiExportEnhancement {
     required AppModel appModel,
   }) : super(
           appModel: appModel,
-          enhancementName: "Bing Image Search",
+          enhancementName: 'Bing Image Search',
           enhancementDescription:
-              "Search Bing for images with the current image query or the word.",
+              'Search Bing for images with the current image query or the word.',
           enhancementIcon: Icons.image_search,
           enhancementField: AnkiExportField.image,
         );
@@ -44,7 +44,7 @@ class BingSearchEnhancement extends AnkiExportEnhancement {
       return params;
     }
 
-    String searchTerm = "";
+    String searchTerm = '';
 
     if (params.imageSearch.trim().isNotEmpty) {
       searchTerm = params.imageSearch;
@@ -57,7 +57,7 @@ class BingSearchEnhancement extends AnkiExportEnhancement {
     /// Notify the [CreatorPageState] that we are searching.
     state.notifyImageSearching(searchTerm: searchTerm);
 
-    String cacheKey = "${appModel.getCurrentLanguage()}/$searchTerm";
+    String cacheKey = '${appModel.getCurrentLanguage()}/$searchTerm';
 
     try {
       List<NetworkToFileImage> images =
@@ -66,7 +66,7 @@ class BingSearchEnhancement extends AnkiExportEnhancement {
       if (images.isNotEmpty) {
         params.imageFiles = images;
         params.imageFile = images.first.file;
-        params.imageSearch = "";
+        params.imageSearch = '';
 
         state.notifyImageDetails(
           searchTerm: searchTerm,
@@ -109,21 +109,21 @@ class BingSearchEnhancement extends AnkiExportEnhancement {
           dom.Document document = parser.parse(await controller.getHtml());
 
           List<dom.Element> imgElements =
-              document.getElementsByClassName("iusc");
+              document.getElementsByClassName('iusc');
 
           for (int i = 0; i < imgElements.length; i++) {
             Map<dynamic, dynamic> imgMap =
-                jsonDecode(imgElements[i].attributes["m"]!);
-            String imageURL = imgMap["turl"];
+                jsonDecode(imgElements[i].attributes['m']!);
+            String imageURL = imgMap['turl'];
 
             Directory appDirDoc = await getApplicationSupportDirectory();
-            String bingImagesPath = "${appDirDoc.path}/bingImages";
+            String bingImagesPath = '${appDirDoc.path}/bingImages';
             Directory bingImagesDir = Directory(bingImagesPath);
             if (!bingImagesDir.existsSync()) {
               bingImagesDir.createSync();
             }
 
-            String imagePath = "$bingImagesPath/$i";
+            String imagePath = '$bingImagesPath/$i';
             File imageFile = File(imagePath);
             if (imageFile.existsSync()) {
               imageFile.deleteSync();
