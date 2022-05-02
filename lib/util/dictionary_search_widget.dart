@@ -344,7 +344,7 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
         transitionDuration: Duration.zero,
         margins: const EdgeInsets.symmetric(horizontal: 6),
         width: double.maxFinite,
-        openAxisAlignment: 0.0,
+        openAxisAlignment: 0,
         elevation: 0,
         debounceDelay: const Duration(milliseconds: 500),
         progress: isSearching,

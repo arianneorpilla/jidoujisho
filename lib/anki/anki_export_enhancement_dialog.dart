@@ -35,9 +35,7 @@ class AnkiExportEnhancementDialogState
     return AlertDialog(
       contentPadding:
           const EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 20),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
+      shape: const RoundedRectangleBorder(),
       content: buildContent(),
     );
   }
@@ -58,9 +56,10 @@ class AnkiExportEnhancementDialogState
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          enhancements.isEmpty
-              ? showEmptyMessage()
-              : showEnhancementList(enhancements),
+          if (enhancements.isEmpty)
+            showEmptyMessage()
+          else
+            showEnhancementList(enhancements),
         ],
       ),
     );
@@ -100,9 +99,9 @@ class AnkiExportEnhancementDialogState
               children: [
                 Icon(
                   enhancement.enhancementIcon,
-                  size: 20.0,
+                  size: 20,
                 ),
-                const SizedBox(width: 16.0),
+                const SizedBox(width: 16),
                 Expanded(
                   child: SizedBox(
                     height: 48,

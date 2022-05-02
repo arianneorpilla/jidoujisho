@@ -120,9 +120,7 @@ class PlayerPageState extends State<PlayerPage>
       exitPage();
     } else {
       Widget alertDialog = AlertDialog(
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.zero,
-        ),
+        shape: const RoundedRectangleBorder(),
         title: Text(
           appModel.translate('dialog_exit_player'),
         ),
@@ -952,12 +950,7 @@ class PlayerPageState extends State<PlayerPage>
           TextSpan(children: getSubtitleSpans(subtitleText)),
           textAlign: TextAlign.center,
           focusNode: dragToSelectFocusNode,
-          toolbarOptions: const ToolbarOptions(
-            copy: false,
-            cut: false,
-            selectAll: false,
-            paste: false,
-          ),
+          toolbarOptions: const ToolbarOptions(),
           onSelectionChanged: (selection, cause) {
             String newTerm = selection.textInside(subtitleText);
             startDragSubtitlesTimer(newTerm);
@@ -1015,8 +1008,6 @@ class PlayerPageState extends State<PlayerPage>
           child: AbsorbPointer(
             absorbing: isMenuHidden.value,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 buildPlayButton(),
                 buildDurationAndPosition(),
@@ -1097,7 +1088,7 @@ class PlayerPageState extends State<PlayerPage>
 
     Widget getIcon() {
       if (playerController.value.isEnded) {
-        return const Icon(Icons.replay, size: 32.0);
+        return const Icon(Icons.replay, size: 32);
       } else {
         if (!playerController.value.isInitialized) {
           return const Icon(Icons.play_arrow, color: Colors.transparent);
@@ -1110,7 +1101,7 @@ class PlayerPageState extends State<PlayerPage>
         return AnimatedIcon(
           icon: AnimatedIcons.play_pause,
           progress: playPauseIconAnimationController,
-          size: 32.0,
+          size: 32,
         );
       }
     }
@@ -1132,10 +1123,10 @@ class PlayerPageState extends State<PlayerPage>
               child: Container(
                 decoration: BoxDecoration(
                   color: Theme.of(context).dialogBackgroundColor,
-                  borderRadius: BorderRadius.circular(48.0),
+                  borderRadius: BorderRadius.circular(48),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(12.0),
+                  padding: const EdgeInsets.all(12),
                   child: IconButton(
                     icon: getIcon(),
                     onPressed: () async {
@@ -1165,7 +1156,7 @@ class PlayerPageState extends State<PlayerPage>
               startHideTimer();
             },
             child: Container(
-              color: Colors.red.withOpacity(0.0),
+              color: Colors.red.withOpacity(0),
             ),
           ),
         ),
@@ -1180,7 +1171,7 @@ class PlayerPageState extends State<PlayerPage>
               startHideTimer();
             },
             child: Container(
-              color: Colors.blue.withOpacity(0.0),
+              color: Colors.blue.withOpacity(0),
             ),
           ),
         ),
@@ -1976,7 +1967,7 @@ class PlayerPageState extends State<PlayerPage>
       // }
 
       String command =
-          '-loglevel quiet -ss $timestamp -y -i \"$inputPath\" -frames:v 1 -q:v 2 \"$outputPath\"';
+          '-loglevel quiet -ss $timestamp -y -i "$inputPath" -frames:v 1 -q:v 2 "$outputPath"';
 
       final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
       await _flutterFFmpeg.execute(command);
@@ -2031,7 +2022,7 @@ class PlayerPageState extends State<PlayerPage>
     }
 
     String command =
-        '-loglevel quiet -ss $timeStart -to $timeEnd -y -i \"$inputPath\" -map 0:a:$audioIndex \"$outputPath\"';
+        '-loglevel quiet -ss $timeStart -to $timeEnd -y -i "$inputPath" -map 0:a:$audioIndex "$outputPath"';
 
     final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
     await _flutterFFmpeg.execute(command);
@@ -2099,7 +2090,6 @@ class PlayerPageState extends State<PlayerPage>
             activeColor: Theme.of(context).focusColor,
             inactiveColor: Theme.of(context).unselectedWidgetColor,
             value: sliderValue,
-            min: 0.0,
             max: (!validPosition || isEnded)
                 ? 1.0
                 : playerController.value.duration.inSeconds.toDouble(),
@@ -2164,7 +2154,6 @@ class PlayerPageState extends State<PlayerPage>
       context: context,
       rootDirectories: await appModel.getMediaTypeDirectories(mediaType),
       fsType: FilesystemType.file,
-      multiSelect: false,
       folderIconColor: Colors.red,
       themeData: Theme.of(context),
     );

@@ -81,7 +81,7 @@ class MediaSourcesDialogState extends State<MediaSourcesDialog> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          mediaSources.isEmpty ? showEmptyMessage() : showSourcesList(),
+          if (mediaSources.isEmpty) showEmptyMessage() else showSourcesList(),
         ],
       ),
     );
@@ -134,12 +134,12 @@ class MediaSourcesDialogState extends State<MediaSourcesDialog> {
               children: [
                 Icon(
                   source.icon,
-                  size: 20.0,
+                  size: 20,
                   color: appModel.getIsDarkMode()
                       ? Colors.white.withOpacity(opacity)
                       : Colors.black.withOpacity(opacity),
                 ),
-                const SizedBox(width: 16.0),
+                const SizedBox(width: 16),
                 Expanded(
                   child: SizedBox(
                     height: 48,

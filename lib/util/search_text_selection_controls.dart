@@ -7,8 +7,8 @@ typedef OffsetValue = void Function(int start, int end);
 
 class SearchTextSelectionControls extends MaterialTextSelectionControls {
   // Padding between the toolbar and the anchor.
-  static const double _kToolbarContentDistanceBelow = 20.0;
-  static const double _kToolbarContentDistance = 8.0;
+  static const double _kToolbarContentDistanceBelow = 20;
+  static const double _kToolbarContentDistance = 8;
 
   final Function(String) searchCallback;
   final String searchLabel;

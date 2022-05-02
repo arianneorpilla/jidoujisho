@@ -117,7 +117,7 @@ class PitchAccentEnhancement extends DictionaryWidgetEnhancement {
         padding: const EdgeInsets.only(top: 1),
         decoration: const BoxDecoration(
           border: Border(
-            top: BorderSide(width: 2.0, color: Colors.red),
+            top: BorderSide(width: 2, color: Colors.red),
           ),
         ),
         child: Text(text),
@@ -129,8 +129,8 @@ class PitchAccentEnhancement extends DictionaryWidgetEnhancement {
         padding: const EdgeInsets.only(top: 1),
         decoration: const BoxDecoration(
           border: Border(
-            top: BorderSide(width: 2.0, color: Colors.red),
-            right: BorderSide(width: 2.0, color: Colors.red),
+            top: BorderSide(width: 2, color: Colors.red),
+            right: BorderSide(width: 2, color: Colors.red),
           ),
         ),
         child: Text(text),
@@ -142,7 +142,7 @@ class PitchAccentEnhancement extends DictionaryWidgetEnhancement {
         padding: const EdgeInsets.only(top: 1),
         decoration: const BoxDecoration(
           border: Border(
-            top: BorderSide(width: 2.0, color: Colors.transparent),
+            top: BorderSide(width: 2, color: Colors.transparent),
           ),
         ),
         child: Text(text),

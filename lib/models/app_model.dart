@@ -1202,8 +1202,8 @@ class AppModel with ChangeNotifier {
       ),
       sliderTheme: const SliderThemeData(
         trackShape: RectangularSliderTrackShape(),
-        trackHeight: 2.0,
-        thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6.0),
+        trackHeight: 2,
+        thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6),
       ),
     );
   }
@@ -1243,8 +1243,8 @@ class AppModel with ChangeNotifier {
       ),
       sliderTheme: const SliderThemeData(
         trackShape: RectangularSliderTrackShape(),
-        trackHeight: 2.0,
-        thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6.0),
+        trackHeight: 2,
+        thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6),
       ),
     );
   }
@@ -1543,7 +1543,7 @@ class AppModel with ChangeNotifier {
     int colorBlue = sharedPreferences.getInt('viewerBackgroundBlue') ??
         Colors.black.withOpacity(0).blue;
 
-    Color color = Color.fromRGBO(colorRed, colorGreen, colorBlue, 1.0);
+    Color color = Color.fromRGBO(colorRed, colorGreen, colorBlue, 1);
 
     return color;
   }

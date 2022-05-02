@@ -389,7 +389,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           },
         ),
       ],
-      elevation: 8.0,
+      elevation: 8,
     );
 
     if (callbackAction != null) {
@@ -437,7 +437,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           },
         ),
       ],
-      elevation: 8.0,
+      elevation: 8,
     );
 
     if (callbackAction != null) {
@@ -493,7 +493,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           },
         ),
       ],
-      elevation: 8.0,
+      elevation: 8,
     );
 
     if (callbackAction != null) {
@@ -564,7 +564,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           },
         ),
       ],
-      elevation: 8.0,
+      elevation: 8,
     );
 
     if (callbackAction != null) {

@@ -85,9 +85,9 @@ class ListMenuState extends State<ListMenu> {
               children: [
                 Icon(
                   item.icon,
-                  size: 20.0,
+                  size: 20,
                 ),
-                const SizedBox(width: 16.0),
+                const SizedBox(width: 16),
                 Expanded(
                   child: SizedBox(
                     height: 48,

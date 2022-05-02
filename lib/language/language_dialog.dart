@@ -92,12 +92,12 @@ class LanguageDialogState extends State<LanguageDialog> {
                   WidgetSpan(
                     child: Icon(
                       Icons.info,
-                      size: 14.0,
+                      size: 14,
                       color: Colors.lightBlue.shade400,
                     ),
                   ),
                   const WidgetSpan(
-                    child: SizedBox(width: 8.0),
+                    child: SizedBox(width: 8),
                   ),
                   TextSpan(
                     text: appModel.translate('localisation_warning'),

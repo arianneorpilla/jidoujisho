@@ -258,8 +258,8 @@ abstract class ViewerMediaSource extends MediaSource {
                     if (getUnfinishedChapters(item) != null &&
                         getUnfinishedChapters(item) != 0) {
                       return Positioned(
-                        right: 5.0,
-                        top: 18.0,
+                        right: 5,
+                        top: 18,
                         child: Container(
                           height: 20,
                           color: Colors.black.withOpacity(0.6),
@@ -345,7 +345,7 @@ abstract class ViewerMediaSource extends MediaSource {
         ),
         const SizedBox(height: 2),
         if (isHistory)
-          Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+          Row(children: [
             Icon(
               icon,
               color: Theme.of(context).unselectedWidgetColor,
@@ -393,8 +393,8 @@ abstract class ViewerMediaSource extends MediaSource {
           ),
         ),
         Positioned(
-          right: 4.0,
-          bottom: 6.0,
+          right: 4,
+          bottom: 6,
           child: Container(
             height: 20,
             color: Colors.black.withOpacity(0.8),
@@ -443,7 +443,6 @@ abstract class ViewerMediaSource extends MediaSource {
     return PagedListView<int, MediaHistoryItem>(
       scrollController: scrollController,
       pagingController: pagingController,
-      addAutomaticKeepAlives: true,
       key: UniqueKey(),
       builderDelegate: PagedChildBuilderDelegate<MediaHistoryItem>(
           itemBuilder: (context, item, index) {
@@ -513,9 +512,7 @@ abstract class ViewerMediaSource extends MediaSource {
       context: context,
       builder: (context) {
         return AlertDialog(
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.zero,
-          ),
+          shape: const RoundedRectangleBorder(),
           content: SizedBox(
             width: double.maxFinite,
             child: SingleChildScrollView(
@@ -632,7 +629,7 @@ abstract class ViewerMediaSource extends MediaSource {
                     Directory appDocDir =
                         await getApplicationDocumentsDirectory();
                     Directory thumbsDir = Directory(
-                        appDocDir.path + '/thumbs/${getIdentifier()}');
+                        '${appDocDir.path}/thumbs/${getIdentifier()}');
                     if (!thumbsDir.existsSync()) {
                       thumbsDir.createSync(recursive: true);
                     }
@@ -901,9 +898,7 @@ class ChapterMenuState extends State<ChapterMenu> {
         right: 20,
         bottom: 10,
       ),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
+      shape: const RoundedRectangleBorder(),
       title: buildTitle(),
       content: buildChapterMenuContent(
         context,
@@ -1021,10 +1016,10 @@ class ChapterMenuState extends State<ChapterMenu> {
               children: [
                 Icon(
                   (editMode) ? Icons.history : Icons.book_sharp,
-                  size: 20.0,
+                  size: 20,
                   color: color,
                 ),
-                const SizedBox(width: 16.0),
+                const SizedBox(width: 16),
                 Expanded(
                   child: SizedBox(
                     height: 48,
@@ -1037,7 +1032,7 @@ class ChapterMenuState extends State<ChapterMenu> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 16.0),
+                const SizedBox(width: 16),
                 buildProgressIndicator(
                   context,
                   item,
@@ -1233,7 +1228,6 @@ class ChapterMenuState extends State<ChapterMenu> {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 16),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Icon(
                           widget.source.icon,

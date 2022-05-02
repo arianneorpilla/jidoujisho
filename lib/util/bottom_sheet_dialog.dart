@@ -49,7 +49,7 @@ class BottomSheetDialog extends StatelessWidget {
           dense: true,
           leading: Icon(
             option.icon,
-            size: 20.0,
+            size: 20,
             color: Colors.red,
           ),
           title: Text(

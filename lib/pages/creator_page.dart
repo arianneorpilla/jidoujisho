@@ -390,7 +390,7 @@ class CreatorPageState extends State<CreatorPage> {
             if (widget.backgroundColor != null)
               ClipRect(
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
+                  filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                   child: Container(),
                 ),
               ),
@@ -485,9 +485,8 @@ class CreatorPageState extends State<CreatorPage> {
                               String temporaryDirectoryPath =
                                   (await getTemporaryDirectory()).path;
 
-                              String temporaryFileName = 'jidoujisho-' +
-                                  DateFormat('yyyyMMddTkkmmss')
-                                      .format(DateTime.now());
+                              String temporaryFileName =
+                                  'jidoujisho-${DateFormat('yyyyMMddTkkmmss').format(DateTime.now())}';
                               File tempFile = File(
                                   '$temporaryDirectoryPath/$temporaryFileName');
 
@@ -535,8 +534,6 @@ class CreatorPageState extends State<CreatorPage> {
         Flexible(
           flex: 3,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            mainAxisSize: MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               AppBar(
@@ -565,7 +562,6 @@ class CreatorPageState extends State<CreatorPage> {
                       controller: scrollerImage,
                       child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.max,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             if (imagesNotifier.value.isNotEmpty ||
@@ -618,8 +614,6 @@ class CreatorPageState extends State<CreatorPage> {
                             parent: BouncingScrollPhysics()),
                         controller: scrollController,
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.max,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             displayField(
@@ -718,8 +712,6 @@ class CreatorPageState extends State<CreatorPage> {
                   parent: BouncingScrollPhysics()),
               controller: scrollController,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   if (imagesNotifier.value.isNotEmpty ||
@@ -970,7 +962,6 @@ class CreatorPageState extends State<CreatorPage> {
               activeColor: Theme.of(context).focusColor,
               inactiveColor: Theme.of(context).unselectedWidgetColor,
               value: sliderValue,
-              min: 0.0,
               max: (playerState == null ||
                       playerState.processingState == ProcessingState.completed)
                   ? 1.0
@@ -1025,7 +1016,7 @@ class CreatorPageState extends State<CreatorPage> {
           },
         ),
       ],
-      elevation: 8.0,
+      elevation: 8,
     );
 
     if (callbackAction != null) {

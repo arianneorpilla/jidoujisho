@@ -94,10 +94,10 @@ Widget transcriptDialog({
                 children: [
                   const Icon(
                     Icons.textsms_outlined,
-                    size: 12.0,
+                    size: 12,
                     color: Colors.red,
                   ),
-                  const SizedBox(width: 16.0),
+                  const SizedBox(width: 16),
                   Text(
                     subtitleDuration,
                     style: TextStyle(
@@ -106,7 +106,7 @@ Widget transcriptDialog({
                       color: durationColor,
                     ),
                   ),
-                  const SizedBox(width: 4.0),
+                  const SizedBox(width: 4),
                 ],
               ),
               const SizedBox(height: 6),

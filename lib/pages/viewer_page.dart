@@ -1074,8 +1074,8 @@ class ViewerPageState extends State<ViewerPage> {
       itemCount: galleryImages.length,
       loadingBuilder: (context, event) => Center(
         child: SizedBox(
-          width: 32.0,
-          height: 32.0,
+          width: 32,
+          height: 32,
           child: CircularProgressIndicator(
             value: event == null
                 ? 0
@@ -1125,7 +1125,7 @@ class ViewerPageState extends State<ViewerPage> {
       content: RichText(
         text: TextSpan(
           style: TextStyle(
-            fontSize: 16.0,
+            fontSize: 16,
             color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
           ),
           // Note: Styles for TextSpans must be explicitly defined.
@@ -1136,15 +1136,16 @@ class ViewerPageState extends State<ViewerPage> {
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             TextSpan(text: ': $chapterName\n'),
-            (previous)
-                ? TextSpan(
-                    text: appModel.translate('viewer_chapter_previous'),
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  )
-                : TextSpan(
-                    text: appModel.translate('viewer_chapter_next'),
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
+            if (previous)
+              TextSpan(
+                text: appModel.translate('viewer_chapter_previous'),
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              )
+            else
+              TextSpan(
+                text: appModel.translate('viewer_chapter_next'),
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
             TextSpan(text: ': $newChapterName'),
           ],
         ),
@@ -1236,7 +1237,7 @@ class ViewerPageState extends State<ViewerPage> {
         focusedBorder: UnderlineInputBorder(
           borderSide: BorderSide(color: Theme.of(context).focusColor),
         ),
-        contentPadding: const EdgeInsets.all(16.0),
+        contentPadding: const EdgeInsets.all(16),
         prefixIcon: const Icon(Icons.assignment_sharp),
         suffixIcon: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1475,7 +1476,7 @@ class ViewerPageState extends State<ViewerPage> {
     return GestureDetector(
       child: Padding(
         padding: const EdgeInsets.only(
-          left: 24.0,
+          left: 24,
         ),
         child: Row(
           children: [
@@ -1485,7 +1486,7 @@ class ViewerPageState extends State<ViewerPage> {
                 return Text(
                   '$progress / $completeProgress',
                   style: TextStyle(
-                    fontSize: 14.0,
+                    fontSize: 14,
                     color:
                         appModel.getIsDarkMode() ? Colors.white : Colors.black,
                   ),

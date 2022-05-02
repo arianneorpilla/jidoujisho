@@ -67,7 +67,6 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
 
   Widget buildSearchSuggestions() {
     return ClipRRect(
-      borderRadius: BorderRadius.zero,
       child: Material(
         color: Colors.transparent,
         child: ListView.builder(
@@ -308,11 +307,8 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
         scrollPadding: const EdgeInsets.only(top: 16, bottom: 56),
         transitionDuration: Duration.zero,
         margins: const EdgeInsets.symmetric(horizontal: 6),
-        openAxisAlignment: 0.0,
-        height: 48,
+        openAxisAlignment: 0,
         width: double.maxFinite,
-        closeOnBackdropTap: true,
-        debounceDelay: Duration.zero,
         showCursor: !mediaSource.noSearchAction,
         elevation: 0,
         progress: isSearching,
@@ -327,7 +323,6 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
             : Colors.white.withOpacity(0.95),
         physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics()),
-        clearQueryOnClose: true,
         accentColor: Theme.of(context).focusColor,
         onQueryChanged: onQueryChanged,
         leadingActions: [
@@ -406,7 +401,6 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
   Widget buildSourceButton() {
     return FloatingSearchBarAction(
       showIfOpened: mediaSource.noSearchAction,
-      showIfClosed: true,
       child: CircularButton(
         icon: Icon(
           mediaSource.icon,
@@ -435,7 +429,6 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
 
   Widget buildBackButton() {
     return FloatingSearchBarAction.back(
-      showIfClosed: false,
       color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
       size: 20,
     );
@@ -476,7 +469,6 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
         FloatingSearchBarAction.searchToClear(
           size: 20,
           duration: Duration.zero,
-          showIfClosed: true,
           color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
         ),
       );

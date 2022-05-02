@@ -354,8 +354,8 @@ abstract class ReaderMediaSource extends MediaSource {
           ),
         ),
         Positioned(
-          right: 4.0,
-          bottom: 6.0,
+          right: 4,
+          bottom: 6,
           child: Container(
             height: 20,
             color: Colors.black.withOpacity(0.8),
@@ -615,7 +615,7 @@ abstract class ReaderMediaSource extends MediaSource {
                     Directory appDocDir =
                         await getApplicationDocumentsDirectory();
                     Directory thumbsDir = Directory(
-                        appDocDir.path + '/thumbs/${getIdentifier()}');
+                        '${appDocDir.path}/thumbs/${getIdentifier()}');
                     if (!thumbsDir.existsSync()) {
                       thumbsDir.createSync(recursive: true);
                     }

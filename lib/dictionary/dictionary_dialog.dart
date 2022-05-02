@@ -85,9 +85,10 @@ class DictionaryDialogState extends State<DictionaryDialog> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          importedDictionaries.isEmpty
-              ? showEmptyMessage()
-              : showDictionaryList(),
+          if (importedDictionaries.isEmpty)
+            showEmptyMessage()
+          else
+            showDictionaryList(),
           if (widget.manageAllowed) showFormatSelection(),
         ],
       ),
@@ -103,7 +104,7 @@ class DictionaryDialogState extends State<DictionaryDialog> {
       children: [
         Container(
           margin: const EdgeInsets.symmetric(vertical: 8),
-          height: 1.0,
+          height: 1,
           decoration: BoxDecoration(
             border: Border.fromBorderSide(
               BorderSide(
@@ -171,9 +172,9 @@ class DictionaryDialogState extends State<DictionaryDialog> {
               children: [
                 const Icon(
                   Icons.auto_stories,
-                  size: 20.0,
+                  size: 20,
                 ),
-                const SizedBox(width: 16.0),
+                const SizedBox(width: 16),
                 Expanded(
                   child: SizedBox(
                     height: 48,

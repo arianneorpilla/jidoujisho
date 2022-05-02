@@ -17,7 +17,7 @@ class CacheImageProvider extends ImageProvider<CacheImageProvider> {
   ImageStreamCompleter load(CacheImageProvider key, DecoderCallback decode) {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(decode),
-      scale: 1.0,
+      scale: 1,
       debugLabel: tag,
       informationCollector: () sync* {
         yield ErrorDescription('Tag: $tag');

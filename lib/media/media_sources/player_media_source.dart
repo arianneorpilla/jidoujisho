@@ -299,8 +299,8 @@ abstract class PlayerMediaSource extends MediaSource {
           ),
         ),
         Positioned(
-          right: 4.0,
-          bottom: 6.0,
+          right: 4,
+          bottom: 6,
           child: Container(
             height: 20,
             color: Colors.black.withOpacity(0.8),
