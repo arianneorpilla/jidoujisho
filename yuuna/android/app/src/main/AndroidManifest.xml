@@ -1,9 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.yuuna">
+    package="app.lrorpilla.yuuna">
    <application
         android:label="jidoujisho"
         android:name="${applicationName}"
-        android:icon="@mipmap/launcher_icon">
+        android:icon="@mipmap/launcher_icon"
+        xmlns:tools="http://schemas.android.com/tools"
+        tools:replace="android:label">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -31,4 +33,8 @@
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
+    <!-- Used for AnkiDroid API -->
+    <queries>
+        <package android:name="com.ichi2.anki" />
+    </queries>
 </manifest>

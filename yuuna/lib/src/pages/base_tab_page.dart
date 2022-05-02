@@ -59,6 +59,21 @@ abstract class BaseTabPageState<T extends BaseTabPage> extends BasePageState {
       builder: buildSearchBarBody,
       borderRadius: BorderRadius.zero,
       elevation: 0,
+      backgroundColor:
+          appModel.isDarkMode ? theme.cardColor : const Color(0xFFE5E5E5),
+      backdropColor: appModel.isDarkMode
+          ? Colors.black.withOpacity(0.95)
+          : Colors.white.withOpacity(0.95),
+      physics:
+          const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+      scrollPadding: const EdgeInsets.only(top: 16, bottom: 56),
+      transitionDuration: Duration.zero,
+      margins: const EdgeInsets.symmetric(horizontal: 6),
+      width: double.maxFinite,
+      debounceDelay: const Duration(milliseconds: 500),
+      transition: SlideFadeFloatingSearchBarTransition(),
+      accentColor: theme.focusColor,
+      automaticallyImplyBackButton: false,
     );
   }
 

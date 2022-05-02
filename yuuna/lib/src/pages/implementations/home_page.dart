@@ -69,11 +69,14 @@ class _HomePageState extends BasePageState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: buildAppBar(),
-      body: buildBody(),
-      bottomNavigationBar: buildBottomNavigationBar(),
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        appBar: buildAppBar(),
+        body: buildBody(),
+        bottomNavigationBar: buildBottomNavigationBar(),
+      ),
     );
   }
 
@@ -111,7 +114,12 @@ class _HomePageState extends BasePageState<HomePage> {
   Widget? buildLeading() {
     return Padding(
       padding: Spacing.of(context).insets.onlyLeft.normal,
-      child: appIcon,
+      child: appModel.isIncognitoMode
+          ? ColorFiltered(
+              colorFilter: JidoujishoCommon.greyscaleWithAlphaFilter,
+              child: appIcon,
+            )
+          : appIcon,
     );
   }
 
@@ -227,8 +235,8 @@ class _HomePageState extends BasePageState<HomePage> {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => Theme(
-          data: Theme.of(context).copyWith(
-            cardColor: Theme.of(context).backgroundColor,
+          data: theme.copyWith(
+            cardColor: theme.backgroundColor,
           ),
           child: LicensePage(
             applicationName: appModel.packageInfo.appName,
@@ -276,12 +284,12 @@ class _HomePageState extends BasePageState<HomePage> {
       buildPopupItem(
         label: optionsLanguage,
         icon: Icons.translate,
-        action: () {},
+        action: appModel.showLanguageMenu,
       ),
       buildPopupItem(
         label: optionsProfiles,
         icon: Icons.send_to_mobile,
-        action: () {},
+        action: appModel.showProfilesMenu,
       ),
       buildPopupItem(
         label: optionsGithub,

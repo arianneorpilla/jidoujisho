@@ -18,16 +18,14 @@ class _DictionaryDialogPageState extends BasePageState {
   String get importFormatLabel => appModel.translate('import_format');
   String get dictionaryMenuEmptyLabel =>
       appModel.translate('dictionaries_menu_empty');
-  String get dictionaryOptionsLabel =>
-      appModel.translate('dictionaries_options');
-  String get dictionaryCollapseLabel =>
-      appModel.translate('dictionaries_collapse');
+  String get showOptionsLabel => appModel.translate('show_options');
+  String get dictionaryCollapseLabel => appModel.translate('options_collapse');
   String get dictionaryDeleteConfirmationLabel =>
       appModel.translate('dictionaries_delete_confirmation');
-  String get dictionaryExpandLabel => appModel.translate('dictionaries_expand');
-  String get dictionaryDeleteLabel => appModel.translate('dictionaries_delete');
-  String get dictionaryShowLabel => appModel.translate('dictionaries_show');
-  String get dictionaryHideLabel => appModel.translate('dictionaries_hide');
+  String get dictionaryExpandLabel => appModel.translate('options_expand');
+  String get dictionaryDeleteLabel => appModel.translate('options_delete');
+  String get dictionaryShowLabel => appModel.translate('options_show');
+  String get dictionaryHideLabel => appModel.translate('options_hide');
   String get dialogImportLabel => appModel.translate('dialog_import');
   String get dialogCloseLabel => appModel.translate('dialog_close');
   String get dialogDeleteLabel => appModel.translate('dialog_delete');
@@ -87,7 +85,11 @@ class _DictionaryDialogPageState extends BasePageState {
           if (dictionaries.isEmpty)
             buildEmptyMessage()
           else
-            buildDictionaryList()
+            Flexible(
+              child: buildDictionaryList(dictionaries),
+            ),
+          const JidoujishoDivider(),
+          buildImportDropdown(),
         ],
       ),
     );
@@ -105,9 +107,7 @@ class _DictionaryDialogPageState extends BasePageState {
     );
   }
 
-  Widget buildDictionaryList() {
-    List<Dictionary> dictionaries = appModel.dictionaries;
-
+  Widget buildDictionaryList(List<Dictionary> dictionaries) {
     return Scrollbar(
       controller: _scrollController,
       child: ReorderableListView.builder(
@@ -163,7 +163,7 @@ class _DictionaryDialogPageState extends BasePageState {
       icon: Icons.more_vert,
       onTapDown: (details) =>
           openDictionaryOptionsMenu(details: details, dictionary: dictionary),
-      tooltip: dictionaryOptionsLabel,
+      tooltip: showOptionsLabel,
     );
   }
 
@@ -223,7 +223,7 @@ class _DictionaryDialogPageState extends BasePageState {
         action: () {
           showDictionaryDeleteDialog(dictionary);
         },
-        color: Theme.of(context).colorScheme.primary,
+        color: theme.colorScheme.primary,
       ),
     ];
   }
@@ -239,7 +239,7 @@ class _DictionaryDialogPageState extends BasePageState {
         TextButton(
           child: Text(
             dialogDeleteLabel,
-            style: TextStyle(color: Theme.of(context).colorScheme.primary),
+            style: TextStyle(color: theme.colorScheme.primary),
           ),
           onPressed: () async {
             await appModel.deleteDictionary(dictionary);
@@ -259,6 +259,33 @@ class _DictionaryDialogPageState extends BasePageState {
     showDialog(
       context: context,
       builder: (context) => alertDialog,
+    );
+  }
+
+  Widget buildImportDropdown() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: Spacing.of(context).insets.onlyLeft.small,
+          child: Text(
+            importFormatLabel,
+            style: TextStyle(
+              fontSize: 10,
+              color: theme.unselectedWidgetColor,
+            ),
+          ),
+        ),
+        JidoujishoDropdown<DictionaryFormat>(
+          options: appModel.dictionaryFormats.values.toList(),
+          initialOption: appModel.lastSelectedDictionaryFormat,
+          generateLabel: (format) => format.formatName,
+          onChanged: (format) {
+            appModel.setLastSelectedDictionaryFormat(format!);
+            setState(() {});
+          },
+        ),
+      ],
     );
   }
 }

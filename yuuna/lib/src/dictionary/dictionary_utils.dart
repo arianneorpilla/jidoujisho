@@ -23,6 +23,7 @@ Future<void> depositDictionaryEntries(PrepareDictionaryParams params) async {
       DictionaryEntrySchema,
       MediaItemSchema,
       CreatorContextSchema,
+      AnkiMappingSchema,
     ],
   );
 
@@ -44,6 +45,7 @@ Future<void> deleteDictionaryData(DeleteDictionaryParams params) async {
       DictionaryEntrySchema,
       MediaItemSchema,
       CreatorContextSchema,
+      AnkiMappingSchema,
     ],
   );
 

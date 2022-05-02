@@ -17,7 +17,7 @@ extension GetDictionaryEntryCollection on Isar {
 final DictionaryEntrySchema = CollectionSchema(
   name: 'DictionaryEntry',
   schema:
-      '{"name":"DictionaryEntry","idName":"id","properties":[{"name":"dictionaryName","type":"String"},{"name":"extra","type":"String"},{"name":"hashCode","type":"Long"},{"name":"meaningTags","type":"StringList"},{"name":"meanings","type":"StringList"},{"name":"popularity","type":"Double"},{"name":"reading","type":"String"},{"name":"readingLength","type":"Long"},{"name":"sequence","type":"Long"},{"name":"word","type":"String"},{"name":"wordLength","type":"Long"},{"name":"wordTags","type":"StringList"}],"indexes":[{"name":"dictionaryName","unique":false,"properties":[{"name":"dictionaryName","type":"Hash","caseSensitive":true}]},{"name":"popularity","unique":false,"properties":[{"name":"popularity","type":"Value","caseSensitive":false}]},{"name":"reading","unique":false,"properties":[{"name":"reading","type":"Hash","caseSensitive":true}]},{"name":"readingLength_popularity","unique":false,"properties":[{"name":"readingLength","type":"Value","caseSensitive":false},{"name":"popularity","type":"Value","caseSensitive":false}]},{"name":"sequence","unique":false,"properties":[{"name":"sequence","type":"Value","caseSensitive":false}]},{"name":"wordLength_popularity","unique":false,"properties":[{"name":"wordLength","type":"Value","caseSensitive":false},{"name":"popularity","type":"Value","caseSensitive":false}]},{"name":"word_reading_popularity","unique":false,"properties":[{"name":"word","type":"Hash","caseSensitive":true},{"name":"reading","type":"Hash","caseSensitive":true},{"name":"popularity","type":"Value","caseSensitive":false}]}],"links":[]}',
+      '{"name":"DictionaryEntry","idName":"id","properties":[{"name":"dictionaryName","type":"String"},{"name":"extra","type":"String"},{"name":"hashCode","type":"Long"},{"name":"meaningTags","type":"StringList"},{"name":"meanings","type":"StringList"},{"name":"popularity","type":"Double"},{"name":"reading","type":"String"},{"name":"readingLength","type":"Long"},{"name":"sequence","type":"Long"},{"name":"word","type":"String"},{"name":"wordLength","type":"Long"},{"name":"wordTags","type":"StringList"}],"indexes":[{"name":"dictionaryName","unique":true,"properties":[{"name":"dictionaryName","type":"Hash","caseSensitive":true}]},{"name":"popularity","unique":false,"properties":[{"name":"popularity","type":"Value","caseSensitive":false}]},{"name":"reading","unique":false,"properties":[{"name":"reading","type":"Hash","caseSensitive":true}]},{"name":"readingLength_popularity","unique":false,"properties":[{"name":"readingLength","type":"Value","caseSensitive":false},{"name":"popularity","type":"Value","caseSensitive":false}]},{"name":"sequence","unique":false,"properties":[{"name":"sequence","type":"Value","caseSensitive":false}]},{"name":"wordLength_popularity","unique":false,"properties":[{"name":"wordLength","type":"Value","caseSensitive":false},{"name":"popularity","type":"Value","caseSensitive":false}]},{"name":"word_reading_popularity","unique":false,"properties":[{"name":"word","type":"Hash","caseSensitive":true},{"name":"reading","type":"Hash","caseSensitive":true},{"name":"popularity","type":"Value","caseSensitive":false}]}],"links":[]}',
   nativeAdapter: const _DictionaryEntryNativeAdapter(),
   webAdapter: const _DictionaryEntryWebAdapter(),
   idName: 'id',
@@ -118,22 +118,24 @@ class _DictionaryEntryWebAdapter extends IsarWebTypeAdapter<DictionaryEntry> {
       extra: IsarNative.jsObjectGet(jsObj, 'extra'),
       id: IsarNative.jsObjectGet(jsObj, 'id'),
       meaningTags: (IsarNative.jsObjectGet(jsObj, 'meaningTags') as List?)
-          ?.map((e) => e ?? '')
-          .toList()
-          .cast<String>(),
+              ?.map((e) => e ?? '')
+              .toList()
+              .cast<String>() ??
+          [],
       meanings: (IsarNative.jsObjectGet(jsObj, 'meanings') as List?)
               ?.map((e) => e ?? '')
               .toList()
               .cast<String>() ??
           [],
       popularity: IsarNative.jsObjectGet(jsObj, 'popularity'),
-      reading: IsarNative.jsObjectGet(jsObj, 'reading'),
+      reading: IsarNative.jsObjectGet(jsObj, 'reading') ?? '',
       sequence: IsarNative.jsObjectGet(jsObj, 'sequence'),
       word: IsarNative.jsObjectGet(jsObj, 'word') ?? '',
       wordTags: (IsarNative.jsObjectGet(jsObj, 'wordTags') as List?)
-          ?.map((e) => e ?? '')
-          .toList()
-          .cast<String>(),
+              ?.map((e) => e ?? '')
+              .toList()
+              .cast<String>() ??
+          [],
     );
     return object;
   }
@@ -152,9 +154,10 @@ class _DictionaryEntryWebAdapter extends IsarWebTypeAdapter<DictionaryEntry> {
         return (IsarNative.jsObjectGet(jsObj, 'id')) as P;
       case 'meaningTags':
         return ((IsarNative.jsObjectGet(jsObj, 'meaningTags') as List?)
-            ?.map((e) => e ?? '')
-            .toList()
-            .cast<String>()) as P;
+                ?.map((e) => e ?? '')
+                .toList()
+                .cast<String>() ??
+            []) as P;
       case 'meanings':
         return ((IsarNative.jsObjectGet(jsObj, 'meanings') as List?)
                 ?.map((e) => e ?? '')
@@ -164,7 +167,7 @@ class _DictionaryEntryWebAdapter extends IsarWebTypeAdapter<DictionaryEntry> {
       case 'popularity':
         return (IsarNative.jsObjectGet(jsObj, 'popularity')) as P;
       case 'reading':
-        return (IsarNative.jsObjectGet(jsObj, 'reading')) as P;
+        return (IsarNative.jsObjectGet(jsObj, 'reading') ?? '') as P;
       case 'readingLength':
         return (IsarNative.jsObjectGet(jsObj, 'readingLength') ??
             double.negativeInfinity) as P;
@@ -177,9 +180,10 @@ class _DictionaryEntryWebAdapter extends IsarWebTypeAdapter<DictionaryEntry> {
             double.negativeInfinity) as P;
       case 'wordTags':
         return ((IsarNative.jsObjectGet(jsObj, 'wordTags') as List?)
-            ?.map((e) => e ?? '')
-            .toList()
-            .cast<String>()) as P;
+                ?.map((e) => e ?? '')
+                .toList()
+                .cast<String>() ??
+            []) as P;
       default:
         throw 'Illegal propertyName';
     }
@@ -214,15 +218,12 @@ class _DictionaryEntryNativeAdapter
     final value2 = object.hashCode;
     final _hashCode = value2;
     final value3 = object.meaningTags;
-    dynamicSize += (value3?.length ?? 0) * 8;
-    List<IsarUint8List?>? bytesList3;
-    if (value3 != null) {
-      bytesList3 = [];
-      for (var str in value3) {
-        final bytes = IsarBinaryWriter.utf8Encoder.convert(str);
-        bytesList3.add(bytes);
-        dynamicSize += bytes.length as int;
-      }
+    dynamicSize += (value3.length) * 8;
+    final bytesList3 = <IsarUint8List>[];
+    for (var str in value3) {
+      final bytes = IsarBinaryWriter.utf8Encoder.convert(str);
+      bytesList3.add(bytes);
+      dynamicSize += bytes.length as int;
     }
     final _meaningTags = bytesList3;
     final value4 = object.meanings;
@@ -237,11 +238,8 @@ class _DictionaryEntryNativeAdapter
     final value5 = object.popularity;
     final _popularity = value5;
     final value6 = object.reading;
-    IsarUint8List? _reading;
-    if (value6 != null) {
-      _reading = IsarBinaryWriter.utf8Encoder.convert(value6);
-    }
-    dynamicSize += (_reading?.length ?? 0) as int;
+    final _reading = IsarBinaryWriter.utf8Encoder.convert(value6);
+    dynamicSize += (_reading.length) as int;
     final value7 = object.readingLength;
     final _readingLength = value7;
     final value8 = object.sequence;
@@ -252,15 +250,12 @@ class _DictionaryEntryNativeAdapter
     final value10 = object.wordLength;
     final _wordLength = value10;
     final value11 = object.wordTags;
-    dynamicSize += (value11?.length ?? 0) * 8;
-    List<IsarUint8List?>? bytesList11;
-    if (value11 != null) {
-      bytesList11 = [];
-      for (var str in value11) {
-        final bytes = IsarBinaryWriter.utf8Encoder.convert(str);
-        bytesList11.add(bytes);
-        dynamicSize += bytes.length as int;
-      }
+    dynamicSize += (value11.length) * 8;
+    final bytesList11 = <IsarUint8List>[];
+    for (var str in value11) {
+      final bytes = IsarBinaryWriter.utf8Encoder.convert(str);
+      bytesList11.add(bytes);
+      dynamicSize += bytes.length as int;
     }
     final _wordTags = bytesList11;
     final size = staticSize + dynamicSize;
@@ -290,13 +285,13 @@ class _DictionaryEntryNativeAdapter
       dictionaryName: reader.readString(offsets[0]),
       extra: reader.readStringOrNull(offsets[1]),
       id: id,
-      meaningTags: reader.readStringList(offsets[3]),
+      meaningTags: reader.readStringList(offsets[3]) ?? [],
       meanings: reader.readStringList(offsets[4]) ?? [],
       popularity: reader.readDoubleOrNull(offsets[5]),
-      reading: reader.readStringOrNull(offsets[6]),
+      reading: reader.readString(offsets[6]),
       sequence: reader.readLongOrNull(offsets[8]),
       word: reader.readString(offsets[9]),
-      wordTags: reader.readStringList(offsets[11]),
+      wordTags: reader.readStringList(offsets[11]) ?? [],
     );
     return object;
   }
@@ -314,13 +309,13 @@ class _DictionaryEntryNativeAdapter
       case 2:
         return (reader.readLong(offset)) as P;
       case 3:
-        return (reader.readStringList(offset)) as P;
+        return (reader.readStringList(offset) ?? []) as P;
       case 4:
         return (reader.readStringList(offset) ?? []) as P;
       case 5:
         return (reader.readDoubleOrNull(offset)) as P;
       case 6:
-        return (reader.readStringOrNull(offset)) as P;
+        return (reader.readString(offset)) as P;
       case 7:
         return (reader.readLong(offset)) as P;
       case 8:
@@ -330,7 +325,7 @@ class _DictionaryEntryNativeAdapter
       case 10:
         return (reader.readLong(offset)) as P;
       case 11:
-        return (reader.readStringList(offset)) as P;
+        return (reader.readStringList(offset) ?? []) as P;
       default:
         throw 'Illegal propertyIndex';
     }
@@ -338,6 +333,46 @@ class _DictionaryEntryNativeAdapter
 
   @override
   void attachLinks(Isar isar, int id, DictionaryEntry object) {}
+}
+
+extension DictionaryEntryByIndex on IsarCollection<DictionaryEntry> {
+  Future<DictionaryEntry?> getByDictionaryName(String dictionaryName) {
+    return getByIndex('dictionaryName', [dictionaryName]);
+  }
+
+  DictionaryEntry? getByDictionaryNameSync(String dictionaryName) {
+    return getByIndexSync('dictionaryName', [dictionaryName]);
+  }
+
+  Future<bool> deleteByDictionaryName(String dictionaryName) {
+    return deleteByIndex('dictionaryName', [dictionaryName]);
+  }
+
+  bool deleteByDictionaryNameSync(String dictionaryName) {
+    return deleteByIndexSync('dictionaryName', [dictionaryName]);
+  }
+
+  Future<List<DictionaryEntry?>> getAllByDictionaryName(
+      List<String> dictionaryNameValues) {
+    final values = dictionaryNameValues.map((e) => [e]).toList();
+    return getAllByIndex('dictionaryName', values);
+  }
+
+  List<DictionaryEntry?> getAllByDictionaryNameSync(
+      List<String> dictionaryNameValues) {
+    final values = dictionaryNameValues.map((e) => [e]).toList();
+    return getAllByIndexSync('dictionaryName', values);
+  }
+
+  Future<int> deleteAllByDictionaryName(List<String> dictionaryNameValues) {
+    final values = dictionaryNameValues.map((e) => [e]).toList();
+    return deleteAllByIndex('dictionaryName', values);
+  }
+
+  int deleteAllByDictionaryNameSync(List<String> dictionaryNameValues) {
+    final values = dictionaryNameValues.map((e) => [e]).toList();
+    return deleteAllByIndexSync('dictionaryName', values);
+  }
 }
 
 extension DictionaryEntryQueryWhereSort
@@ -545,7 +580,7 @@ extension DictionaryEntryQueryWhere
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      readingEqualTo(String? reading) {
+      readingEqualTo(String reading) {
     return addWhereClauseInternal(WhereClause(
       indexName: 'reading',
       lower: [reading],
@@ -556,7 +591,7 @@ extension DictionaryEntryQueryWhere
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      readingNotEqualTo(String? reading) {
+      readingNotEqualTo(String reading) {
     if (whereSortInternal == Sort.asc) {
       return addWhereClauseInternal(WhereClause(
         indexName: 'reading',
@@ -578,26 +613,6 @@ extension DictionaryEntryQueryWhere
         includeUpper: false,
       ));
     }
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      readingIsNull() {
-    return addWhereClauseInternal(const WhereClause(
-      indexName: 'reading',
-      upper: [null],
-      includeUpper: true,
-      lower: [null],
-      includeLower: true,
-    ));
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      readingIsNotNull() {
-    return addWhereClauseInternal(const WhereClause(
-      indexName: 'reading',
-      lower: [null],
-      includeLower: false,
-    ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
@@ -948,7 +963,7 @@ extension DictionaryEntryQueryWhere
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      wordReadingEqualTo(String word, String? reading) {
+      wordReadingEqualTo(String word, String reading) {
     return addWhereClauseInternal(WhereClause(
       indexName: 'word_reading_popularity',
       lower: [word, reading],
@@ -959,7 +974,7 @@ extension DictionaryEntryQueryWhere
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      wordReadingNotEqualTo(String word, String? reading) {
+      wordReadingNotEqualTo(String word, String reading) {
     if (whereSortInternal == Sort.asc) {
       return addWhereClauseInternal(WhereClause(
         indexName: 'word_reading_popularity',
@@ -985,7 +1000,7 @@ extension DictionaryEntryQueryWhere
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       wordReadingEqualToPopularityGreaterThan(
-          String word, String? reading, double? popularity) {
+          String word, String reading, double? popularity) {
     return addWhereClauseInternal(WhereClause(
       indexName: 'word_reading_popularity',
       lower: [word, reading, popularity],
@@ -995,7 +1010,7 @@ extension DictionaryEntryQueryWhere
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       wordReadingEqualToPopularityLessThan(
-          String word, String? reading, double? popularity) {
+          String word, String reading, double? popularity) {
     return addWhereClauseInternal(WhereClause(
       indexName: 'word_reading_popularity',
       upper: [word, reading, popularity],
@@ -1004,7 +1019,7 @@ extension DictionaryEntryQueryWhere
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      wordReadingEqualToPopularityBetween(String word, String? reading,
+      wordReadingEqualToPopularityBetween(String word, String reading,
           double? lowerPopularity, double? upperPopularity) {
     return addWhereClauseInternal(WhereClause(
       indexName: 'word_reading_popularity',
@@ -1353,26 +1368,8 @@ extension DictionaryEntryQueryFilter
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      meaningTagsIsNull() {
-    return addFilterConditionInternal(FilterCondition(
-      type: ConditionType.isNull,
-      property: 'meaningTags',
-      value: null,
-    ));
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      meaningTagsAnyIsNull() {
-    return addFilterConditionInternal(FilterCondition(
-      type: ConditionType.eq,
-      property: 'meaningTags',
-      value: null,
-    ));
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
       meaningTagsAnyEqualTo(
-    String? value, {
+    String value, {
     bool caseSensitive = true,
   }) {
     return addFilterConditionInternal(FilterCondition(
@@ -1385,7 +1382,7 @@ extension DictionaryEntryQueryFilter
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
       meaningTagsAnyGreaterThan(
-    String? value, {
+    String value, {
     bool caseSensitive = true,
     bool include = false,
   }) {
@@ -1400,7 +1397,7 @@ extension DictionaryEntryQueryFilter
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
       meaningTagsAnyLessThan(
-    String? value, {
+    String value, {
     bool caseSensitive = true,
     bool include = false,
   }) {
@@ -1415,8 +1412,8 @@ extension DictionaryEntryQueryFilter
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
       meaningTagsAnyBetween(
-    String? lower,
-    String? upper, {
+    String lower,
+    String upper, {
     bool caseSensitive = true,
     bool includeLower = true,
     bool includeUpper = true,
@@ -1625,17 +1622,8 @@ extension DictionaryEntryQueryFilter
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      readingIsNull() {
-    return addFilterConditionInternal(FilterCondition(
-      type: ConditionType.isNull,
-      property: 'reading',
-      value: null,
-    ));
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
       readingEqualTo(
-    String? value, {
+    String value, {
     bool caseSensitive = true,
   }) {
     return addFilterConditionInternal(FilterCondition(
@@ -1648,7 +1636,7 @@ extension DictionaryEntryQueryFilter
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
       readingGreaterThan(
-    String? value, {
+    String value, {
     bool caseSensitive = true,
     bool include = false,
   }) {
@@ -1663,7 +1651,7 @@ extension DictionaryEntryQueryFilter
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
       readingLessThan(
-    String? value, {
+    String value, {
     bool caseSensitive = true,
     bool include = false,
   }) {
@@ -1678,8 +1666,8 @@ extension DictionaryEntryQueryFilter
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
       readingBetween(
-    String? lower,
-    String? upper, {
+    String lower,
+    String upper, {
     bool caseSensitive = true,
     bool includeLower = true,
     bool includeUpper = true,
@@ -2010,26 +1998,8 @@ extension DictionaryEntryQueryFilter
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordTagsIsNull() {
-    return addFilterConditionInternal(FilterCondition(
-      type: ConditionType.isNull,
-      property: 'wordTags',
-      value: null,
-    ));
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordTagsAnyIsNull() {
-    return addFilterConditionInternal(FilterCondition(
-      type: ConditionType.eq,
-      property: 'wordTags',
-      value: null,
-    ));
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
       wordTagsAnyEqualTo(
-    String? value, {
+    String value, {
     bool caseSensitive = true,
   }) {
     return addFilterConditionInternal(FilterCondition(
@@ -2042,7 +2012,7 @@ extension DictionaryEntryQueryFilter
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
       wordTagsAnyGreaterThan(
-    String? value, {
+    String value, {
     bool caseSensitive = true,
     bool include = false,
   }) {
@@ -2057,7 +2027,7 @@ extension DictionaryEntryQueryFilter
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
       wordTagsAnyLessThan(
-    String? value, {
+    String value, {
     bool caseSensitive = true,
     bool include = false,
   }) {
@@ -2072,8 +2042,8 @@ extension DictionaryEntryQueryFilter
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
       wordTagsAnyBetween(
-    String? lower,
-    String? upper, {
+    String lower,
+    String upper, {
     bool caseSensitive = true,
     bool includeLower = true,
     bool includeUpper = true,
@@ -2406,7 +2376,7 @@ extension DictionaryEntryQueryProperty
     return addPropertyNameInternal('id');
   }
 
-  QueryBuilder<DictionaryEntry, List<String>?, QQueryOperations>
+  QueryBuilder<DictionaryEntry, List<String>, QQueryOperations>
       meaningTagsProperty() {
     return addPropertyNameInternal('meaningTags');
   }
@@ -2421,7 +2391,7 @@ extension DictionaryEntryQueryProperty
     return addPropertyNameInternal('popularity');
   }
 
-  QueryBuilder<DictionaryEntry, String?, QQueryOperations> readingProperty() {
+  QueryBuilder<DictionaryEntry, String, QQueryOperations> readingProperty() {
     return addPropertyNameInternal('reading');
   }
 
@@ -2441,7 +2411,7 @@ extension DictionaryEntryQueryProperty
     return addPropertyNameInternal('wordLength');
   }
 
-  QueryBuilder<DictionaryEntry, List<String>?, QQueryOperations>
+  QueryBuilder<DictionaryEntry, List<String>, QQueryOperations>
       wordTagsProperty() {
     return addPropertyNameInternal('wordTags');
   }
@@ -2457,15 +2427,17 @@ DictionaryEntry _$DictionaryEntryFromJson(Map<String, dynamic> json) =>
       dictionaryName: json['dictionaryName'] as String,
       meanings:
           (json['meanings'] as List<dynamic>).map((e) => e as String).toList(),
+      reading: json['reading'] as String? ?? '',
       id: json['id'] as int?,
-      reading: json['reading'] as String?,
       extra: json['extra'] as String?,
       meaningTags: (json['meaningTags'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
       wordTags: (json['wordTags'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
       popularity: (json['popularity'] as num?)?.toDouble(),
       sequence: json['sequence'] as int?,
     );

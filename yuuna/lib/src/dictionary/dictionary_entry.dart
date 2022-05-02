@@ -17,11 +17,11 @@ class DictionaryEntry {
     required this.word,
     required this.dictionaryName,
     required this.meanings,
+    this.reading = '',
     this.id,
-    this.reading,
     this.extra,
-    this.meaningTags,
-    this.wordTags,
+    this.meaningTags = const [],
+    this.wordTags = const [],
     this.popularity,
     this.sequence,
   });
@@ -43,12 +43,12 @@ class DictionaryEntry {
 
   /// The dictionary from which this entry was imported from. This is used for
   /// database query purposes.
-  @Index()
+  @Index(unique: true)
   final String dictionaryName;
 
   /// The pronunciation of the word represented by this dictionary entry.
   @Index()
-  final String? reading;
+  final String reading;
 
   /// A list of definitions for a word. If there is only a single [String] item,
   /// this should be a single item list.
@@ -60,10 +60,10 @@ class DictionaryEntry {
 
   /// Tags that are used to indicate a certain trait to the definitions of
   /// this word.
-  final List<String>? meaningTags;
+  final List<String> meaningTags;
 
   /// Tags that are used to indicate a certain trait to this particular word.
-  final List<String>? wordTags;
+  final List<String> wordTags;
 
   /// A value that can be used to sort entries when performing a database
   /// search.
@@ -81,7 +81,7 @@ class DictionaryEntry {
 
   /// The length of reading is used as an index.
   @Index(composite: [CompositeIndex('popularity')])
-  int get readingLength => reading?.length ?? 0;
+  int get readingLength => reading.length;
 
   @override
   operator ==(Object other) =>

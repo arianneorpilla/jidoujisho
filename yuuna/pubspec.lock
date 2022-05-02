@@ -842,6 +842,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.0+2"
+  tabbed_view:
+    dependency: "direct main"
+    description:
+      name: tabbed_view
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.12.0"
   term_glyph:
     dependency: transitive
     description:

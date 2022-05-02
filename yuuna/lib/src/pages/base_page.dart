@@ -26,6 +26,9 @@ class BasePageState<T extends BasePage> extends ConsumerState<T> {
   /// Shortcut for accessing the app-wide theme-defined text theme.
   TextTheme get textTheme => Theme.of(context).textTheme;
 
+  /// Shortcut for accessing the app-wide theme.
+  ThemeData get theme => Theme.of(context);
+
   @override
   Widget build(BuildContext context) {
     throw UnimplementedError();

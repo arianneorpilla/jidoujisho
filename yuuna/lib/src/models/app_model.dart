@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -99,6 +100,11 @@ class AppModel with ChangeNotifier {
   List<Dictionary> get dictionaries =>
       _database.dictionarys.where().sortByOrder().findAllSync();
 
+  /// Returns all dictionaries imported into the database. Sorted by the
+  /// user-defined order in the dictionary menu.
+  List<AnkiMapping> get mappings =>
+      _database.ankiMappings.where().sortByOrder().findAllSync();
+
   /// Update the user-defined order of a given dictionary in the database.
   /// See the dictionary dialog's [ReorderableListView] for usage.
   void updateDictionaryOrder(int oldIndex, int newIndex) async {
@@ -111,6 +117,21 @@ class AppModel with ChangeNotifier {
       dictionarySwap.order = oldIndex;
 
       _database.dictionarys.putAllSync([dictionaryPick, dictionarySwap]);
+    });
+  }
+
+  /// Update the user-defined order of a given dictionary in the database.
+  /// See the dictionary dialog's [ReorderableListView] for usage.
+  void updateMappingsOrder(int oldIndex, int newIndex) async {
+    _database.writeTxnSync((isar) {
+      AnkiMapping mappingPick = mappings[oldIndex];
+      AnkiMapping mappingSwap = mappings[newIndex];
+
+      _database.ankiMappings.deleteAllByOrderSync([oldIndex, newIndex]);
+      mappingPick.order = newIndex;
+      mappingSwap.order = oldIndex;
+
+      _database.ankiMappings.putAllSync([mappingPick, mappingSwap]);
     });
   }
 
@@ -249,6 +270,15 @@ class AppModel with ChangeNotifier {
     );
   }
 
+  /// Populate default mapping if it does not exist in the database.
+  void populateDefaultMapping() async {
+    if (_database.ankiMappings.where().findAllSync().isEmpty) {
+      _database.writeTxnSync((isar) {
+        _database.ankiMappings.putSync(AnkiMapping.defaultMapping(0));
+      });
+    }
+  }
+
   /// Prepare application data and state to be ready of use upon starting up
   /// the application. [AppModel] is initialised in the main function before
   /// [runApp] is executed.
@@ -280,6 +310,7 @@ class AppModel with ChangeNotifier {
         DictionaryEntrySchema,
         MediaItemSchema,
         CreatorContextSchema,
+        AnkiMappingSchema,
       ],
     );
 
@@ -290,6 +321,7 @@ class AppModel with ChangeNotifier {
     populateMediaTypes();
     populateMediaSources();
     populateDictionaryFormats();
+    populateDefaultMapping();
 
     /// Get the current target language and prepare its resources for use. This
     /// will not re-run if the target language is already initialised, as
@@ -363,10 +395,38 @@ class AppModel with ChangeNotifier {
     return locales[localeTag]!;
   }
 
+  /// Get the last selected model from persisted preferences.
+  String? get lastSelectedModel {
+    String? modelName = _preferences.get('last_selected_model');
+    return modelName;
+  }
+
+  /// Get the last selected mapping from persisted preferences. This should
+  /// always be guaranteed to have a result, as it is impossible to delete the
+  /// default mapping.
+  AnkiMapping? get lastSelectedMapping {
+    String mappingName = _preferences.get('last_selected_mapping',
+        defaultValue: mappings.first.label);
+
+    AnkiMapping? mapping = _database.ankiMappings
+        .filter()
+        .labelEqualTo(mappingName)
+        .findFirstSync();
+
+    return mapping;
+  }
+
   /// Persist a new target language in preferences.
   Future<void> setTargetLanguage(Language language) async {
     String localeTag = language.locale.toLanguageTag();
     await _preferences.put('target_language', localeTag);
+    notifyListeners();
+  }
+
+  /// Persist a new app locale in preferences.
+  Future<void> setAppLocale(String localeTag) async {
+    await _preferences.put('app_locale', localeTag);
+    notifyListeners();
   }
 
   /// Persist a new last selected dictionary format. This is called when the
@@ -376,6 +436,20 @@ class AppModel with ChangeNotifier {
     String lastDictionaryFormatName = dictionaryFormat.formatName;
     await _preferences.put(
         'last_selected_dictionary_format', lastDictionaryFormatName);
+  }
+
+  /// Persist a new last selected model name. This is called when the user
+  /// changes the selected model to map in the profiles menu.
+  Future<void> setLastSelectedModelName(String modelName) async {
+    await _preferences.put('last_selected_model', modelName);
+    notifyListeners();
+  }
+
+  /// Persist a new last selected model name. This is called when the user
+  /// changes the selected model to map in the profiles menu.
+  Future<void> setLastSelectedMapping(AnkiMapping mapping) async {
+    await _preferences.put('last_selected_mapping', mapping.label);
+    notifyListeners();
   }
 
   /// Get the current home tab index. The order of the tab indexes are based on
@@ -427,6 +501,32 @@ class AppModel with ChangeNotifier {
       barrierDismissible: true,
       context: navigatorKey.currentContext!,
       builder: (context) => const DictionaryDialogPage(),
+    );
+  }
+
+  /// Show the language menu. This should be callable from many parts of the
+  /// app, so it is appropriately handled by the model.
+  Future<void> showLanguageMenu() async {
+    await showDialog(
+      barrierDismissible: true,
+      context: navigatorKey.currentContext!,
+      builder: (context) => const LanguageDialogPage(),
+    );
+  }
+
+  /// Show the language menu. This should be callable from many parts of the
+  /// app, so it is appropriately handled by the model.
+  Future<void> showProfilesMenu() async {
+    List<String> models = await AnkiUtilities.getModelList();
+    String initialModel = lastSelectedModel ?? models.first;
+
+    await showDialog(
+      barrierDismissible: true,
+      context: navigatorKey.currentContext!,
+      builder: (context) => ProfilesDialogPage(
+        models: models,
+        initialModel: initialModel,
+      ),
     );
   }
 
@@ -659,7 +759,7 @@ class AppModel with ChangeNotifier {
     });
   }
 
-  /// Delete a selected dictionary from the dictionary database.
+  /// Delete a selected dictionary from the database.
   Future<void> deleteDictionary(Dictionary dictionary) async {
     showDialog(
       barrierDismissible: false,
@@ -676,9 +776,27 @@ class AppModel with ChangeNotifier {
     Navigator.pop(navigatorKey.currentContext!);
   }
 
+  /// Delete a selected mapping from the database.
+  void deleteMapping(AnkiMapping mapping) async {
+    _database.writeTxnSync((database) {
+      database.ankiMappings.deleteSync(mapping.id!);
+    });
+  }
+
+  /// Add a selected mapping to the database.
+  void addMapping(AnkiMapping mapping) async {
+    _database.writeTxnSync((database) {
+      if (mapping.id != null &&
+          database.ankiMappings.getSync(mapping.id!) != null) {
+        database.ankiMappings.deleteSync(mapping.id!);
+      }
+      database.ankiMappings.putSync(mapping);
+    });
+  }
+
   /// Gets the raw unprocessed entries straight from a dictionary database
   /// given a search term. This will be processed later for user viewing.
-  Future<List<DictionaryEntry>> getDictionarySearchEntries(
+  Future<DictionarySearchResult> getDictionarySearchEntries(
       String searchTerm) async {
     String fallbackTerm = await targetLanguage.getRootForm(searchTerm);
     DictionarySearchParams params = DictionarySearchParams(
@@ -690,6 +808,53 @@ class AppModel with ChangeNotifier {
     List<DictionaryEntry> entries =
         await compute(targetLanguage.prepareSearchResults!, params);
 
-    return entries;
+    Map<DictionaryPair, List<DictionaryEntry>> entriesByPair =
+        groupBy<DictionaryEntry, DictionaryPair>(
+      entries,
+      (entry) => DictionaryPair(word: entry.word, reading: entry.reading),
+    );
+
+    List<List<int>> mapping = entriesByPair.values
+        .map((entries) => entries.map((entry) => entry.id!).toList())
+        .toList();
+
+    DictionarySearchResult result = DictionarySearchResult(
+      searchTerm: searchTerm,
+      mapping: mapping,
+    );
+
+    return result;
+  }
+
+  /// Get a specific dictionary entry index from the database.
+  DictionaryEntry getEntryFromIndex(int index) {
+    return _database.dictionaryEntrys.getSync(index)!;
+  }
+
+  /// Check if a mapping with a certain name with a different order already
+  /// exists.
+  bool mappingNameHasDuplicate(AnkiMapping mapping) {
+    return _database.ankiMappings
+            .filter()
+            .labelEqualTo(mapping.label)
+            .and()
+            .not()
+            .orderEqualTo(mapping.order)
+            .findFirstSync() !=
+        null;
+  }
+
+  /// Get the newest available order for a new mapping.
+  int get nextMappingOrder {
+    AnkiMapping? highestOrderMapping =
+        _database.ankiMappings.where().sortByOrderDesc().findFirstSync();
+    late int order;
+    if (highestOrderMapping != null) {
+      order = highestOrderMapping.order + 1;
+    } else {
+      order = 0;
+    }
+
+    return order;
   }
 }

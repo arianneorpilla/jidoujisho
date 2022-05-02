@@ -7,10 +7,10 @@ import 'package:spaces/spaces.dart';
 class JidoujishoTag extends StatelessWidget {
   /// Create a tag that can be clicked on for more information.
   const JidoujishoTag({
-    required this.icon,
     required this.text,
-    required this.message,
     required this.backgroundColor,
+    this.message,
+    this.icon,
     this.foregroundColor = Colors.white,
     this.iconSize,
     this.style,
@@ -24,7 +24,7 @@ class JidoujishoTag extends StatelessWidget {
   final String text;
 
   /// The message to show when the tag has been clicked on.
-  final String message;
+  final String? message;
 
   /// The color of the tag background.
   final Color backgroundColor;
@@ -40,37 +40,42 @@ class JidoujishoTag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      child: Container(
-        color: backgroundColor,
-        padding: Spacing.of(context).insets.all.small,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (icon != null)
-              Icon(
-                icon,
-                color: foregroundColor,
-                size: Theme.of(context).textTheme.labelSmall?.fontSize,
+    return Padding(
+      padding: Spacing.of(context).insets.onlyRight.small,
+      child: InkWell(
+        child: Container(
+          color: backgroundColor,
+          padding: Spacing.of(context).insets.all.small,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (icon != null)
+                Icon(
+                  icon,
+                  color: foregroundColor,
+                  size: Theme.of(context).textTheme.labelSmall?.fontSize,
+                ),
+              if (icon != null) const Space.small(),
+              Text(
+                text,
+                style: Theme.of(context)
+                    .textTheme
+                    .labelSmall
+                    ?.copyWith(color: foregroundColor),
               ),
-            const Space.small(),
-            Text(
-              text,
-              style: Theme.of(context)
-                  .textTheme
-                  .labelSmall
-                  ?.copyWith(color: foregroundColor),
-            ),
-          ],
+            ],
+          ),
         ),
+        onTap: () {
+          if (message != null) {
+            Fluttertoast.showToast(
+              msg: message!,
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.BOTTOM,
+            );
+          }
+        },
       ),
-      onTap: () {
-        Fluttertoast.showToast(
-          msg: message,
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-        );
-      },
     );
   }
 }

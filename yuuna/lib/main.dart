@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spaces/spaces.dart';
-
+import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/pages.dart';
 
@@ -16,6 +16,9 @@ void main() {
     /// Necessary to initialise Flutter when running native code before
     /// starting the application.
     WidgetsFlutterBinding.ensureInitialized();
+
+    /// Perform startup activities unrelated to the [AppModel] here.
+    AnkiUtilities.requestAnkidroidPermissions();
 
     /// Used in order to access and initialise an [AppModel] without requiring
     /// a [WidgetRef].
@@ -175,6 +178,17 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
           selectedColor: Colors.black,
           horizontalTitleGap: 0,
         ),
+        inputDecorationTheme: InputDecorationTheme(
+          enabledBorder: UnderlineInputBorder(
+            borderSide: BorderSide(
+                color:
+                    Theme.of(context).unselectedWidgetColor.withOpacity(0.5)),
+          ),
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Theme.of(context).focusColor),
+          ),
+        ),
+        scrollbarTheme: const ScrollbarThemeData(isAlwaysShown: true),
       );
 
   /// Shows when the current [themeMode] is a dark theme.
@@ -232,5 +246,16 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
           selectedColor: Colors.white,
           horizontalTitleGap: 0,
         ),
+        inputDecorationTheme: InputDecorationTheme(
+          enabledBorder: UnderlineInputBorder(
+            borderSide: BorderSide(
+                color:
+                    Theme.of(context).unselectedWidgetColor.withOpacity(0.5)),
+          ),
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Theme.of(context).focusColor),
+          ),
+        ),
+        scrollbarTheme: const ScrollbarThemeData(isAlwaysShown: true),
       );
 }

@@ -32,7 +32,7 @@ enum Field {
 }
 
 /// Extra methods for [Field].
-extension AnkiExportFieldLocalisation on Field {
+extension FieldExtension on Field {
   /// Get the localised name of the field.
   String label(AppModel appModel) {
     return appModel.translate('field_label_$name');
@@ -63,5 +63,14 @@ extension AnkiExportFieldLocalisation on Field {
       case Field.context:
         return Icons.info_outlined;
     }
+  }
+
+  /// Get a list of all possible values in addition to null.
+  static List<Field?> get valuesWithNull {
+    List<Field?> valuesWithNull = [];
+    valuesWithNull.add(null);
+    valuesWithNull.addAll(Field.values);
+
+    return valuesWithNull;
   }
 }

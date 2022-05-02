@@ -12,7 +12,13 @@ import 'package:yuuna/utils.dart';
 class AnkiUtilities {
   /// Used to communicate back and forth with Dart and native code.
   static const MethodChannel methodChannel =
-      MethodChannel('app.lrorpilla.jidoujisho/anki');
+      MethodChannel('app.lrorpilla.yuuna/anki');
+
+  /// Used to ask for AnkiDroid database permissions. Should be called at
+  /// startup.
+  static void requestAnkidroidPermissions() async {
+    await methodChannel.invokeMethod('requestAnkidroidPermissions');
+  }
 
   /// Get the file to be written to for image export.
   static Future<File> getImageExportFile() async {
@@ -35,8 +41,8 @@ class AnkiUtilities {
   /// Get a list of decks from the Anki background service that can be used
   /// for export.
   static Future<List<String>> getDecks() async {
-    List<String> decks =
-        List<String>.from(await methodChannel.invokeMethod('getDecks'));
+    Map<dynamic, dynamic> result = await methodChannel.invokeMethod('getDecks');
+    List<String> decks = result.values.toList().cast<String>();
 
     decks.sort((a, b) => a.compareTo(b));
     return decks;
@@ -44,18 +50,26 @@ class AnkiUtilities {
 
   /// Get a list of models from the Anki background service that can be used
   /// for export.
-  static Future<List<String>> getModels() async {
-    List<String> models =
-        List<String>.from(await methodChannel.invokeMethod('getModels'));
+  static Future<List<String>> getModelList() async {
+    Map<dynamic, dynamic> result =
+        await methodChannel.invokeMethod('getModelList');
+    List<String> models = result.values.toList().cast<String>();
 
     models.sort((a, b) => a.compareTo(b));
     return models;
   }
 
-  /// Get a list of field names for a given [model] in Anki.
-  static Future<List<String>> getModelFields(String model) async {
-    List<String> fields =
-        List<String>.from(await methodChannel.invokeMethod('getModels', model));
+  /// Get a list of field names for a given [model] name in Anki. This function
+  /// assumes that the model name can be found in [getDecks] and is valid.
+  static Future<List<String>> getFieldList(String model) async {
+    List<String> fields = List<String>.from(
+      await methodChannel.invokeMethod(
+        'getFieldList',
+        <String, dynamic>{
+          'model': model,
+        },
+      ),
+    );
 
     return fields;
   }
@@ -166,7 +180,13 @@ class AnkiUtilities {
     required String? imageFileName,
     required String? audioFileName,
   }) {
-    List<String> fields = mapping.fields.map<String>((field) {
+    List<String> fields = mapping.fieldIndexes.map<String>((index) {
+      if (index == null) {
+        return '';
+      }
+
+      Field field = Field.values.elementAt(index);
+
       switch (field) {
         case Field.sentence:
           return details.sentence ?? '';

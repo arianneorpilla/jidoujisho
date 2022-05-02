@@ -45,7 +45,7 @@ class _DictionaryDialogImportPageState
   Widget buildProgressSpinner() {
     return CircularProgressIndicator(
       valueColor: AlwaysStoppedAnimation<Color>(
-        Theme.of(context).colorScheme.primary,
+        theme.colorScheme.primary,
       ),
     );
   }
@@ -62,8 +62,8 @@ class _DictionaryDialogImportPageState
             child: Text(
               importInProgressLabel,
               style: TextStyle(
-                fontSize: Theme.of(context).textTheme.bodySmall?.fontSize,
-                color: Theme.of(context).unselectedWidgetColor,
+                fontSize: textTheme.bodySmall?.fontSize,
+                color: theme.unselectedWidgetColor,
               ),
             ),
           ),

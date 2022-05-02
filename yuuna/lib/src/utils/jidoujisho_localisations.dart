@@ -3,9 +3,8 @@
 class JidoujishoLocalisations {
   /// A map sorting app language locale tags by their language names as a
   /// native would understand them.
-  static Map<String, String> languageNames = {
+  static Map<String, String> localeNames = {
     'en-US': 'English',
-    'ja-JP': '日本語'
   };
 
   /// A map storing localisation key-value data pairs sorted by app languages.
@@ -19,23 +18,28 @@ class JidoujishoLocalisations {
     'player_media_type': 'Player',
     'reader_media_type': 'Reader',
     'viewer_media_type': 'Viewer',
+    'search': 'Search',
     'show_menu': 'Show Menu',
     'stash': 'Stash',
     'card_creator': 'Card Creator',
+    'target_language': 'Target language',
+    'show_options': 'Show Options',
+    'app_locale': 'App locale',
+    'app_locale_warning': 'Community addons and enhancements are managed '
+        'by their respective developers, and these may appear in their '
+        'original language.',
     'dialog_import': 'IMPORT',
     'dialog_close': 'CLOSE',
+    'dialog_add_new': 'ADD NEW',
     'dialog_delete': 'DELETE',
     'dialog_cancel': 'CANCEL',
-    'dictionaries_collapse': 'Collapse',
-    'dictionaries_expand': 'Expand',
-    'dictionaries_delete': 'Delete',
-    'dictionaries_show': 'Show',
-    'dictionaries_hide': 'Hide',
+    'dialog_save': 'SAVE',
     'dictionaries_delete_confirmation':
         'This dictionary and its searched entries will be deleted. Are you '
             'sure you want to do this?',
+    'mappings_delete_confirmation': 'This mapping will be deleted. Are you '
+        'sure you want to do this?',
     'dictionaries_deleting_entries': 'Deleting dictionary entries...',
-    'dictionaries_options': 'Dictionary Options',
     'dictionaries_menu_empty': 'Import a dictionary for use',
     'options_theme_light': 'Use light theme',
     'options_theme_dark': 'Use dark theme',
@@ -47,6 +51,12 @@ class JidoujishoLocalisations {
     'options_language': 'Language settings',
     'options_github': 'View repository on GitHub',
     'options_attribution': 'Licenses and attribution',
+    'options_collapse': 'Collapse',
+    'options_expand': 'Expand',
+    'options_delete': 'Delete',
+    'options_show': 'Show',
+    'options_hide': 'Hide',
+    'options_edit': 'Edit',
     'info_empty_home_tab': 'History is empty',
     'delete_in_progress': 'Delete in progress',
     'import_format': 'Import format',
@@ -62,5 +72,30 @@ class JidoujishoLocalisations {
     'import_message_error': 'Import error: %error%',
     'import_message_failed': 'Dictionary import failed.',
     'import_message_complete': 'Dictionary import complete.',
+    'field_label_sentence': 'Sentence',
+    'field_label_word': 'Word',
+    'field_label_reading': 'Reading',
+    'field_label_meaning': 'Meaning',
+    'field_label_extra': 'Extra',
+    'field_label_image': 'Image',
+    'field_label_audio': 'Audio',
+    'field_label_context': 'Context',
+    'field_label_empty': 'Empty',
+    'field_hint_sentence': 'Sentence or written context',
+    'field_hint_word': 'The headword of the card',
+    'field_hint_reading': 'Reading or pronunciation',
+    'field_hint_meaning': 'Meaning or dictionary definition',
+    'field_hint_extra': 'Any extra information here',
+    'field_hint_image': 'Enter image search term',
+    'field_hint_audio': 'Enter audio search term',
+    'field_hint_context': 'Information on media context',
+    'field_hint_empty': 'Leave field blank',
+    'model_to_map': 'Model to map',
+    'mapping_name': 'Mapping name',
+    'mapping_name_hint': 'Name to assign to mapping',
+    'invalid_mapping_name': 'Invalid mapping name',
+    'invalid_mapping_name_content':
+        'A mapping with this name already exists or is not valid and cannot be '
+            'added.'
   };
 }
