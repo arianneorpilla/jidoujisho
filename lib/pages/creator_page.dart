@@ -307,7 +307,7 @@ class CreatorPageState extends State<CreatorPage> {
     int? maxLines = 1,
   }) {
     return TextFormField(
-      readOnly: (widget.editMode || widget.autoMode),
+      readOnly: widget.editMode || widget.autoMode,
       maxLines: null,
       controller: getFieldController(field),
       decoration: InputDecoration(
@@ -362,8 +362,8 @@ class CreatorPageState extends State<CreatorPage> {
     return Scaffold(
       backgroundColor: widget.backgroundColor,
       extendBodyBehindAppBar:
-          ((imagesNotifier.value.isNotEmpty || imageSearchingNotifier.value) &&
-              orientation == Orientation.landscape),
+          (imagesNotifier.value.isNotEmpty || imageSearchingNotifier.value) &&
+              orientation == Orientation.landscape,
       appBar: ((imagesNotifier.value.isNotEmpty ||
                   imageSearchingNotifier.value) &&
               orientation == Orientation.landscape)
@@ -435,7 +435,7 @@ class CreatorPageState extends State<CreatorPage> {
             builder: (context, canExport, _) {
               return InkWell(
                 child: Container(
-                  color: (canExport)
+                  color: canExport
                       ? Theme.of(context).unselectedWidgetColor.withOpacity(0.1)
                       : Theme.of(context)
                           .unselectedWidgetColor
@@ -449,7 +449,7 @@ class CreatorPageState extends State<CreatorPage> {
                         Icon(
                           Icons.note_add,
                           size: 16,
-                          color: (canExport)
+                          color: canExport
                               ? null
                               : Theme.of(context).unselectedWidgetColor,
                         ),
@@ -458,7 +458,7 @@ class CreatorPageState extends State<CreatorPage> {
                           appModel.translate('export_card'),
                           style: TextStyle(
                             fontSize: 16,
-                            color: (canExport)
+                            color: canExport
                                 ? null
                                 : Theme.of(context).unselectedWidgetColor,
                             fontWeight: FontWeight.bold,
@@ -468,7 +468,7 @@ class CreatorPageState extends State<CreatorPage> {
                     ),
                   ),
                 ),
-                onTap: (canExport)
+                onTap: canExport
                     ? () async {
                         if (isExportingBusy) {
                           return;

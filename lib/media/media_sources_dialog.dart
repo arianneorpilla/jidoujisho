@@ -128,7 +128,7 @@ class MediaSourcesDialogState extends State<MediaSourcesDialog> {
 
           return ListTile(
             dense: true,
-            selected: (currentMediaSource == source.sourceName),
+            selected: currentMediaSource == source.sourceName,
             selectedTileColor: Theme.of(context).selectedRowColor,
             title: Row(
               children: [

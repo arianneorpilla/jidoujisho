@@ -5,14 +5,6 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:provider/provider.dart';
 
 class BlurWidgetOptions {
-  double width;
-  double height;
-  double left;
-  double top;
-  Color color;
-  double blurRadius;
-  bool visible;
-
   BlurWidgetOptions(
     this.width,
     this.height,
@@ -22,6 +14,14 @@ class BlurWidgetOptions {
     this.blurRadius,
     this.visible,
   );
+
+  double width;
+  double height;
+  double left;
+  double top;
+  Color color;
+  double blurRadius;
+  bool visible;
 }
 
 class ResizeableWidget extends StatefulWidget {
@@ -354,8 +354,7 @@ class ManipulatingBallState extends State<ManipulatingBall> {
             width: ballDiameter,
             height: ballDiameter,
             decoration: BoxDecoration(
-              color:
-                  (visible) ? Colors.red.withOpacity(0.5) : Colors.transparent,
+              color: visible ? Colors.red.withOpacity(0.5) : Colors.transparent,
               shape: BoxShape.circle,
             ),
           ),
@@ -398,9 +397,7 @@ Future<void> showBlurWidgetOptionsDialog(
         return AlertDialog(
           contentPadding:
               const EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.zero,
-          ),
+          shape: const RoundedRectangleBorder(),
           content: SingleChildScrollView(
             child: SizedBox(
               width: MediaQuery.of(context).size.width * (2 / 3),
@@ -417,10 +414,8 @@ Future<void> showBlurWidgetOptionsDialog(
                   TextField(
                     controller: blurrinessController,
                     keyboardType: const TextInputType.numberWithOptions(
-                      signed: false,
                       decimal: true,
                     ),
-                    maxLines: 1,
                     decoration: InputDecoration(
                       enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(

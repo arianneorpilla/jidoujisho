@@ -166,7 +166,7 @@ class DictionaryDialogState extends State<DictionaryDialog> {
 
           return ListTile(
             dense: true,
-            selected: (currentDictionaryName == dictionary.dictionaryName),
+            selected: currentDictionaryName == dictionary.dictionaryName,
             selectedTileColor: Theme.of(context).selectedRowColor,
             title: Row(
               children: [
@@ -217,7 +217,7 @@ class DictionaryDialogState extends State<DictionaryDialog> {
               await appModel
                   .setCurrentDictionaryName(dictionary.dictionaryName);
               if (widget.onDictionaryChange != null) {
-                widget.onDictionaryChange!();
+                widget.onDictionaryChange?.call();
               }
 
               if (!widget.manageAllowed) {

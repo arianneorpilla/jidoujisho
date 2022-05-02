@@ -6,16 +6,17 @@ import 'package:flutter/rendering.dart';
 typedef OffsetValue = void Function(int start, int end);
 
 class SearchTextSelectionControls extends MaterialTextSelectionControls {
+  SearchTextSelectionControls({
+    required this.searchCallback,
+    required this.searchLabel,
+  });
+
   // Padding between the toolbar and the anchor.
   static const double _kToolbarContentDistanceBelow = 20;
   static const double _kToolbarContentDistance = 8;
 
   final Function(String) searchCallback;
   final String searchLabel;
-  SearchTextSelectionControls({
-    required this.searchCallback,
-    required this.searchLabel,
-  });
 
   /// Builder for material-style copy/paste text selection toolbar.
   @override

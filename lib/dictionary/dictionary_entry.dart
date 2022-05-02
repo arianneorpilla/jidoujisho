@@ -13,6 +13,19 @@ class DictionaryEntry {
     this.popularity = 0,
   });
 
+  /// Deserialise JSON and get a result from history as a result item.
+  factory DictionaryEntry.fromJson(String json) {
+    Map<String, dynamic> map = jsonDecode(json);
+
+    return DictionaryEntry(
+      word: map['word'],
+      reading: map['reading'],
+      meaning: map['meaning'],
+      extra: map['extra'].toString(),
+      popularity: map['popularity'],
+    );
+  }
+
   /// ObjectBox identifier parameter.
   int id;
 
@@ -51,19 +64,6 @@ class DictionaryEntry {
     };
 
     return jsonEncode(map);
-  }
-
-  /// Deserialise JSON and get a result from history as a result item.
-  factory DictionaryEntry.fromJson(String json) {
-    Map<String, dynamic> map = jsonDecode(json);
-
-    return DictionaryEntry(
-      word: map['word'],
-      reading: map['reading'],
-      meaning: map['meaning'],
-      extra: map['extra'].toString(),
-      popularity: map['popularity'],
-    );
   }
 
   @override

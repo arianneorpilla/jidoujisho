@@ -48,12 +48,12 @@ import 'package:collection/collection.dart';
 import 'package:image/image.dart' as imglib;
 
 class ViewerPage extends StatefulWidget {
-  final ViewerLaunchParams params;
-
   const ViewerPage({
     required this.params,
     Key? key,
   }) : super(key: key);
+
+  final ViewerLaunchParams params;
 
   @override
   ViewerPageState createState() => ViewerPageState();
@@ -178,8 +178,8 @@ class ViewerPageState extends State<ViewerPage> {
 
       double actualWidth = MediaQuery.of(context).size.width;
       double actualHeight = MediaQuery.of(context).size.height;
-      double widthRatioMultiplier = (screenshot.width / actualWidth);
-      double heightRatioMultiplier = (screenshot.height / actualHeight);
+      double widthRatioMultiplier = screenshot.width / actualWidth;
+      double heightRatioMultiplier = screenshot.height / actualHeight;
 
       Offset scaledA = a.scale(widthRatioMultiplier, heightRatioMultiplier);
       Offset scaledB = b.scale(widthRatioMultiplier, heightRatioMultiplier);
@@ -267,7 +267,7 @@ class ViewerPageState extends State<ViewerPage> {
               return Material(
                 color: Colors.transparent,
                 child: BusyIconButton(
-                  icon: (ocrOverlayShown)
+                  icon: ocrOverlayShown
                       ? const Icon(Icons.highlight_remove)
                       : const Icon(Icons.qr_code_sharp),
                   iconSize: 24,
@@ -568,7 +568,7 @@ class ViewerPageState extends State<ViewerPage> {
             bottom: 60,
             left: 12,
             right: 12,
-            top: (sentenceFieldHeight + 12),
+            top: sentenceFieldHeight + 12,
           ),
           contentPadding:
               const EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
@@ -716,7 +716,7 @@ class ViewerPageState extends State<ViewerPage> {
                 bottom: 60,
                 left: 12,
                 right: 12,
-                top: (sentenceFieldHeight + 12),
+                top: sentenceFieldHeight + 12,
               ),
               child: GestureDetector(
                 onTap: () {
@@ -1054,7 +1054,7 @@ class ViewerPageState extends State<ViewerPage> {
 
   Widget buildViewer() {
     return PhotoViewGallery.builder(
-      reverse: (appModel.isViewerRightToLeft()),
+      reverse: appModel.isViewerRightToLeft(),
       builder: (context, index) {
         return PhotoViewGalleryPageOptions(
           imageProvider: galleryImages[index],
@@ -1161,7 +1161,7 @@ class ViewerPageState extends State<ViewerPage> {
         ),
         TextButton(
           child: Text(
-            (previous)
+            previous
                 ? appModel.translate('dialog_previous')
                 : appModel.translate('dialog_next'),
           ),

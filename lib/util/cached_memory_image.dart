@@ -8,10 +8,10 @@ import 'package:flutter/material.dart';
 // https://gist.github.com/darmawan01/9be266df44594ea59f07032e325ffa3b
 
 class CacheImageProvider extends ImageProvider<CacheImageProvider> {
+  CacheImageProvider(this.tag, this.img);
+
   final String tag; //the cache id use to get cache
   final Uint8List img; //the bytes of image to cache
-
-  CacheImageProvider(this.tag, this.img);
 
   @override
   ImageStreamCompleter load(CacheImageProvider key, DecoderCallback decode) {

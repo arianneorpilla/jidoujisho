@@ -45,8 +45,12 @@ class TextSegmentationEnhancement extends AnkiExportEnhancement {
         }
         text = params.meaning;
         break;
-      default:
-        throw UnimplementedError('Unimplemented for non sentence/meaning');
+      case AnkiExportField.word:
+      case AnkiExportField.reading:
+      case AnkiExportField.extra:
+      case AnkiExportField.image:
+      case AnkiExportField.audio:
+        break;
     }
 
     ValueNotifier<List<bool>> indexesSelected;

@@ -15,6 +15,36 @@ class DictionarySearchResult {
     this.storeReference,
   });
 
+  factory DictionarySearchResult.fromJson(String json) {
+    Map<String, dynamic> map = Map.castFrom(jsonDecode(json));
+
+    List<String> entriesJson = List.castFrom(jsonDecode(map['entries']));
+    List<String> fallbackSearchTerms =
+        List.castFrom(jsonDecode(map['fallbackSearchTerms']));
+
+    List<DictionaryEntry> entries = [];
+    for (String entryJson in entriesJson) {
+      entries.add(
+        DictionaryEntry.fromJson(entryJson),
+      );
+    }
+
+    MediaHistoryItem? mediaHistoryItem;
+    String? itemJson = map['mediaHistoryItem'];
+    if (itemJson != null && itemJson.isNotEmpty) {
+      mediaHistoryItem = MediaHistoryItem.fromJson(itemJson);
+    }
+
+    return DictionarySearchResult(
+      dictionaryName: map['dictionaryName'],
+      formatName: map['formatName'],
+      originalSearchTerm: map['originalSearchTerm'],
+      fallbackSearchTerms: fallbackSearchTerms,
+      entries: entries,
+      mediaHistoryItem: mediaHistoryItem,
+    );
+  }
+
   /// The dictionary where the results were sourced from.
   final String dictionaryName;
 
@@ -62,35 +92,5 @@ class DictionarySearchResult {
     }
 
     return jsonEncode(map);
-  }
-
-  factory DictionarySearchResult.fromJson(String json) {
-    Map<String, dynamic> map = Map.castFrom(jsonDecode(json));
-
-    List<String> entriesJson = List.castFrom(jsonDecode(map['entries']));
-    List<String> fallbackSearchTerms =
-        List.castFrom(jsonDecode(map['fallbackSearchTerms']));
-
-    List<DictionaryEntry> entries = [];
-    for (String entryJson in entriesJson) {
-      entries.add(
-        DictionaryEntry.fromJson(entryJson),
-      );
-    }
-
-    MediaHistoryItem? mediaHistoryItem;
-    String? itemJson = map['mediaHistoryItem'];
-    if (itemJson != null && itemJson.isNotEmpty) {
-      mediaHistoryItem = MediaHistoryItem.fromJson(itemJson);
-    }
-
-    return DictionarySearchResult(
-      dictionaryName: map['dictionaryName'],
-      formatName: map['formatName'],
-      originalSearchTerm: map['originalSearchTerm'],
-      fallbackSearchTerms: fallbackSearchTerms,
-      entries: entries,
-      mediaHistoryItem: mediaHistoryItem,
-    );
   }
 }

@@ -40,12 +40,12 @@ import 'package:chisa/util/time_format.dart';
 import 'package:chisa/util/transcript_dialog.dart';
 
 class PlayerPage extends StatefulWidget {
-  final PlayerLaunchParams params;
-
   const PlayerPage({
     required this.params,
     Key? key,
   }) : super(key: key);
+
+  final PlayerLaunchParams params;
 
   @override
   PlayerPageState createState() => PlayerPageState();

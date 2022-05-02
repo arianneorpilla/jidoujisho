@@ -28,8 +28,6 @@ class DictionaryMediaHistoryItem extends MediaHistoryItem {
           extra: extra,
         );
 
-  final MediaHistoryItem? contextItem;
-
   factory DictionaryMediaHistoryItem.fromDictionarySearchResult(
       DictionarySearchResult result,
       {int currentProgress = 0}) {
@@ -78,6 +76,8 @@ class DictionaryMediaHistoryItem extends MediaHistoryItem {
       extra: extra,
     );
   }
+
+  final MediaHistoryItem? contextItem;
 
   @override
   String toJson() {

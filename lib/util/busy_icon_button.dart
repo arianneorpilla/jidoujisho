@@ -63,7 +63,7 @@ class BusyIconButtonState extends State<BusyIconButton> {
           }
         }
       },
-      color: (enabled) ? enabledColor : disabledColor,
+      color: enabled ? enabledColor : disabledColor,
       iconSize: widget.iconSize,
     );
   }

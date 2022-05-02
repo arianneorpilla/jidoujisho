@@ -29,7 +29,7 @@ class ExportButtonState extends State<ExportButton> {
       margin: const EdgeInsets.only(bottom: 12, left: 6, right: 6),
       child: InkWell(
           child: Container(
-            color: (justClicked)
+            color: justClicked
                 ? Theme.of(context).unselectedWidgetColor.withOpacity(0.05)
                 : Theme.of(context).unselectedWidgetColor.withOpacity(0.1),
             child: Padding(
@@ -41,7 +41,7 @@ class ExportButtonState extends State<ExportButton> {
                   Icon(
                     widget.icon,
                     size: 16,
-                    color: (justClicked)
+                    color: justClicked
                         ? Theme.of(context).unselectedWidgetColor
                         : null,
                   ),
@@ -50,7 +50,7 @@ class ExportButtonState extends State<ExportButton> {
                     widget.label,
                     style: TextStyle(
                       fontSize: 16,
-                      color: (justClicked)
+                      color: justClicked
                           ? Theme.of(context).unselectedWidgetColor
                           : null,
                       fontWeight: FontWeight.bold,
@@ -60,7 +60,7 @@ class ExportButtonState extends State<ExportButton> {
               ),
             ),
           ),
-          onTap: (justClicked)
+          onTap: justClicked
               ? null
               : () async {
                   widget.onTap();

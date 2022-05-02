@@ -241,7 +241,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       builder: (context, resumable, _) {
         return IconButton(
             icon: const Icon(Icons.update),
-            onPressed: (resumable)
+            onPressed: resumable
                 ? () async {
                     returnFromContext(
                         context, appModel.getResumeMediaHistoryItem()!);

@@ -14,6 +14,34 @@ class MediaHistoryItem {
     this.thumbnailPath = '',
   });
 
+  factory MediaHistoryItem.fromJson(String json) {
+    Map<String, dynamic> map = jsonDecode(json);
+
+    String key = map['key'] ?? '';
+    String title = map['title'] ?? '';
+    String author = map['author'] ?? '';
+    String alias = map['alias'] ?? '';
+    String sourceName = map['sourceName'] ?? '';
+    String mediaTypePrefs = map['mediaTypePrefs'] ?? '';
+    int currentProgress = int.tryParse(map['currentProgress'] ?? '') ?? 0;
+    int completeProgress = int.tryParse(map['completeProgress'] ?? '') ?? 0;
+    String thumbnailPath = map['thumbnailPath'] ?? '';
+    Map<String, dynamic> extra = jsonDecode(map['extra'] ?? '{}');
+
+    return MediaHistoryItem(
+      key: key,
+      title: title,
+      author: author,
+      alias: alias,
+      mediaTypePrefs: mediaTypePrefs,
+      sourceName: sourceName,
+      currentProgress: currentProgress,
+      completeProgress: completeProgress,
+      thumbnailPath: thumbnailPath,
+      extra: extra,
+    );
+  }
+
   /// The unique identifier of this item. If the same item exists in history,
   /// then the item is replaced with a newer item in the addition operation.
   String key;
@@ -57,34 +85,6 @@ class MediaHistoryItem {
 
   /// Extra parameters are provided should a media history item require it.
   Map<String, dynamic> extra;
-
-  factory MediaHistoryItem.fromJson(String json) {
-    Map<String, dynamic> map = jsonDecode(json);
-
-    String key = map['key'] ?? '';
-    String title = map['title'] ?? '';
-    String author = map['author'] ?? '';
-    String alias = map['alias'] ?? '';
-    String sourceName = map['sourceName'] ?? '';
-    String mediaTypePrefs = map['mediaTypePrefs'] ?? '';
-    int currentProgress = int.tryParse(map['currentProgress'] ?? '') ?? 0;
-    int completeProgress = int.tryParse(map['completeProgress'] ?? '') ?? 0;
-    String thumbnailPath = map['thumbnailPath'] ?? '';
-    Map<String, dynamic> extra = jsonDecode(map['extra'] ?? '{}');
-
-    return MediaHistoryItem(
-      key: key,
-      title: title,
-      author: author,
-      alias: alias,
-      mediaTypePrefs: mediaTypePrefs,
-      sourceName: sourceName,
-      currentProgress: currentProgress,
-      completeProgress: completeProgress,
-      thumbnailPath: thumbnailPath,
-      extra: extra,
-    );
-  }
 
   String toJson() {
     Map<String, String> map = {

@@ -8,24 +8,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class PitchAccentInformation {
-  int? number;
-  String partOfSpeech = '';
-
   PitchAccentInformation({
     this.number,
     this.partOfSpeech = '',
   });
+
+  PitchAccentInformation.fromMap(Map<String, dynamic> map) {
+    number = map['number'];
+    partOfSpeech = map['partOfSpeech'];
+  }
+
+  int? number;
+  String partOfSpeech = '';
 
   Map<String, dynamic> toMap() {
     return {
       'number': number,
       'partOfSpeech': partOfSpeech,
     };
-  }
-
-  PitchAccentInformation.fromMap(Map<String, dynamic> map) {
-    number = map['number'];
-    partOfSpeech = map['partOfSpeech'];
   }
 }
 

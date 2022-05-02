@@ -281,7 +281,7 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
       setState(() {});
 
       if (widget.focusCallback != null) {
-        widget.focusCallback!();
+        widget.focusCallback?.call();
       }
     }
 

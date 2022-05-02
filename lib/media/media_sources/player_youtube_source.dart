@@ -702,8 +702,6 @@ class PlayerYouTubeSource extends PlayerMediaSource {
         return Icons.hd;
       case YouTubeVideoQuality.uhd_2160:
         return Icons.four_k;
-      default:
-        return null;
     }
   }
 
@@ -725,8 +723,6 @@ class PlayerYouTubeSource extends PlayerMediaSource {
         return '1440p';
       case YouTubeVideoQuality.uhd_2160:
         return '2160p';
-      default:
-        return null;
     }
   }
 
@@ -981,7 +977,7 @@ class PlayerYouTubeSource extends PlayerMediaSource {
               icon: Icon(
                 Icons.closed_caption,
                 size: 20,
-                color: (active)
+                color: active
                     ? Colors.red
                     : (Provider.of<AppModel>(context, listen: false)
                             .getIsDarkMode()

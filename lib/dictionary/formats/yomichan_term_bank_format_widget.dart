@@ -210,7 +210,7 @@ class YomichanTermBankFormatWidget extends DictionaryWidget {
       );
 
       meaningWidgets.add(
-        (selectable)
+        selectable
             ? SelectableText.rich(
                 TextSpan(
                   text: '',

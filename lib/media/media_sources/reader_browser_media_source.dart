@@ -177,7 +177,7 @@ class ReaderBrowserSource extends ReaderMediaSource {
                             height: 28,
                             decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: (value)
+                                color: value
                                     ? Colors.red.withOpacity(0.5)
                                     : state.dictionaryColor.withOpacity(0.7)),
                             child: Icon(
@@ -226,7 +226,7 @@ class ReaderBrowserSource extends ReaderMediaSource {
                           height: 28,
                           decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: (value)
+                              color: value
                                   ? Colors.red.withOpacity(0.5)
                                   : state.dictionaryColor.withOpacity(0.7)),
                           child: Icon(
@@ -328,7 +328,7 @@ class ReaderBrowserSource extends ReaderMediaSource {
                           height: 28,
                           decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: (value)
+                              color: value
                                   ? Colors.red.withOpacity(0.5)
                                   : state.dictionaryColor.withOpacity(0.7)),
                           child: Icon(
@@ -359,7 +359,7 @@ class ReaderBrowserSource extends ReaderMediaSource {
                           height: 28,
                           decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: (value)
+                              color: value
                                   ? Colors.red.withOpacity(0.5)
                                   : state.dictionaryColor.withOpacity(0.7)),
                           child: Icon(

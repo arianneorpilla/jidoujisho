@@ -10,12 +10,6 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SubtitleOptions {
-  int audioAllowance;
-  int subtitleDelay;
-  double fontSize;
-  String fontName;
-  String regexFilter;
-
   SubtitleOptions(
     this.audioAllowance,
     this.subtitleDelay,
@@ -23,6 +17,12 @@ class SubtitleOptions {
     this.fontName,
     this.regexFilter,
   );
+
+  int audioAllowance;
+  int subtitleDelay;
+  double fontSize;
+  String fontName;
+  String regexFilter;
 }
 
 Future<void> showSubtitleOptionsDialog(
@@ -84,9 +84,7 @@ Future<void> showSubtitleOptionsDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.zero,
-          ),
+          shape: const RoundedRectangleBorder(),
           content: SingleChildScrollView(
             child: SizedBox(
               width: MediaQuery.of(context).size.width * (1 / 3),
@@ -97,9 +95,7 @@ Future<void> showSubtitleOptionsDialog(
                     controller: delayController,
                     keyboardType: const TextInputType.numberWithOptions(
                       signed: true,
-                      decimal: false,
                     ),
-                    maxLines: 1,
                     decoration: InputDecoration(
                         enabledBorder: UnderlineInputBorder(
                           borderSide: BorderSide(
@@ -131,9 +127,7 @@ Future<void> showSubtitleOptionsDialog(
                     controller: allowanceController,
                     keyboardType: const TextInputType.numberWithOptions(
                       signed: true,
-                      decimal: false,
                     ),
-                    maxLines: 1,
                     decoration: InputDecoration(
                         enabledBorder: UnderlineInputBorder(
                           borderSide: BorderSide(
@@ -163,7 +157,6 @@ Future<void> showSubtitleOptionsDialog(
                   ),
                   TextField(
                     controller: fontNameController,
-                    maxLines: 1,
                     decoration: InputDecoration(
                       enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(
@@ -227,10 +220,8 @@ Future<void> showSubtitleOptionsDialog(
                   TextField(
                     controller: fontSizeController,
                     keyboardType: const TextInputType.numberWithOptions(
-                      signed: false,
                       decimal: true,
                     ),
-                    maxLines: 1,
                     decoration: InputDecoration(
                         enabledBorder: UnderlineInputBorder(
                           borderSide: BorderSide(
@@ -261,7 +252,6 @@ Future<void> showSubtitleOptionsDialog(
                   TextField(
                     controller: regexFilterController,
                     keyboardType: TextInputType.text,
-                    maxLines: 1,
                     decoration: InputDecoration(
                       enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(

@@ -23,10 +23,10 @@ class MediaSourceActionButton extends FloatingSearchBarAction {
           child: CircularButton(
             icon: Icon(icon,
                 size: 20,
-                color: (Provider.of<AppModel>(context, listen: false)
+                color: Provider.of<AppModel>(context, listen: false)
                         .getIsDarkMode()
                     ? Colors.white
-                    : Colors.black)),
+                    : Colors.black),
             onPressed: () async {
               await onPressed();
               refreshCallback();

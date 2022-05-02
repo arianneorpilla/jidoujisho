@@ -605,7 +605,7 @@ class AppModel with ChangeNotifier {
         context: context,
         builder: (context) => Theme(
           data: themeData,
-          child: (horizontalHack)
+          child: horizontalHack
               ? RotatedBox(quarterTurns: 1, child: dictionaryDialog)
               : dictionaryDialog,
         ),
@@ -614,7 +614,7 @@ class AppModel with ChangeNotifier {
       await showDialog(
         barrierDismissible: true,
         context: context,
-        builder: (context) => (horizontalHack)
+        builder: (context) => horizontalHack
             ? RotatedBox(quarterTurns: 1, child: dictionaryDialog)
             : dictionaryDialog,
       );
@@ -768,7 +768,7 @@ class AppModel with ChangeNotifier {
   List<Dictionary> getDictionaryRecord() {
     String jsonList = _sharedPreferences.getString('dictionaryRecord') ?? '[]';
 
-    List<dynamic> serialisedItems = (jsonDecode(jsonList) as List<dynamic>);
+    List<dynamic> serialisedItems = jsonDecode(jsonList) as List<dynamic>;
 
     List<Dictionary> dictionaries = [];
     for (var serialisedItem in serialisedItems) {
@@ -1185,7 +1185,7 @@ class AppModel with ChangeNotifier {
           primary: Colors.black,
         ),
       ),
-      textTheme: (hasInitialized) ? getTextTheme() : null,
+      textTheme: hasInitialized ? getTextTheme() : null,
       iconTheme: const IconThemeData(color: Colors.black),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.white,
@@ -1226,7 +1226,7 @@ class AppModel with ChangeNotifier {
           primary: Colors.white,
         ),
       ),
-      textTheme: (hasInitialized) ? getTextTheme() : null,
+      textTheme: hasInitialized ? getTextTheme() : null,
       iconTheme: const IconThemeData(color: Colors.white),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.black,

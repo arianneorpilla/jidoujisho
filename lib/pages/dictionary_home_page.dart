@@ -166,7 +166,7 @@ class DictionaryPageState extends State<DictionaryHomePage>
       child: TextFormField(
         keyboardType: TextInputType.text,
         controller: wordController,
-        enabled: (appModel.getCurrentDictionary() != null),
+        enabled: appModel.getCurrentDictionary() != null,
         onFieldSubmitted: (result) async {
           setState(() {});
           await appModel.searchDictionary(wordController.text);
@@ -195,8 +195,8 @@ class DictionaryPageState extends State<DictionaryHomePage>
               BusyIconButton(
                 iconSize: 18,
                 icon: const Icon(Icons.search),
-                enabled: (appModel.getCurrentDictionary() != null &&
-                    !appModel.isSearching),
+                enabled: appModel.getCurrentDictionary() != null &&
+                    !appModel.isSearching,
                 onPressed: () async {
                   await appModel.searchDictionary(wordController.text);
                   setState(() {});
@@ -205,13 +205,13 @@ class DictionaryPageState extends State<DictionaryHomePage>
               BusyIconButton(
                 iconSize: 18,
                 icon: const Icon(Icons.auto_stories),
-                enabled: (appModel.getCurrentDictionary() != null),
+                enabled: appModel.getCurrentDictionary() != null,
                 onPressed: () => appModel.showDictionaryMenu(context),
               ),
               BusyIconButton(
                 iconSize: 18,
                 icon: const Icon(Icons.clear),
-                enabled: (appModel.getCurrentDictionary() != null),
+                enabled: appModel.getCurrentDictionary() != null,
                 onPressed: () async {
                   wordController.clear();
                 },

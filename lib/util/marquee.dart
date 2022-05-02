@@ -5,27 +5,6 @@ import 'package:marquee/marquee.dart' as wrapped;
 /// https://github.com/MarcelGarus/marquee/issues/36
 
 class Marquee extends StatelessWidget {
-  final String text;
-  final TextStyle? style;
-  final double? textScaleFactor;
-  final TextDirection textDirection;
-  final Axis scrollAxis;
-  final CrossAxisAlignment crossAxisAlignment;
-  final double blankSpace;
-  final double velocity;
-  final Duration startAfter;
-  final Duration pauseAfterRound;
-  final int? numberOfRounds;
-  final bool showFadingOnlyWhenScrolling;
-  final double fadingEdgeStartFraction;
-  final double fadingEdgeEndFraction;
-  final double startPadding;
-  final Duration accelerationDuration;
-  final Curve accelerationCurve;
-  final Duration decelerationDuration;
-  final Curve decelerationCurve;
-  final VoidCallback? onDone;
-
   const Marquee({
     required this.text,
     Key? key,
@@ -49,6 +28,27 @@ class Marquee extends StatelessWidget {
     this.decelerationCurve = Curves.decelerate,
     this.onDone,
   }) : super(key: key);
+
+  final String text;
+  final TextStyle? style;
+  final double? textScaleFactor;
+  final TextDirection textDirection;
+  final Axis scrollAxis;
+  final CrossAxisAlignment crossAxisAlignment;
+  final double blankSpace;
+  final double velocity;
+  final Duration startAfter;
+  final Duration pauseAfterRound;
+  final int? numberOfRounds;
+  final bool showFadingOnlyWhenScrolling;
+  final double fadingEdgeStartFraction;
+  final double fadingEdgeEndFraction;
+  final double startPadding;
+  final Duration accelerationDuration;
+  final Curve accelerationCurve;
+  final Duration decelerationDuration;
+  final Curve decelerationCurve;
+  final VoidCallback? onDone;
 
   @override
   Widget build(BuildContext context) {

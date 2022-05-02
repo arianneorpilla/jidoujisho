@@ -41,8 +41,8 @@ Future<void> returnFromContext(
       );
 
       break;
-    default:
-      throw UnimplementedError();
+    case MediaType.dictionary:
+      break;
   }
 }
 

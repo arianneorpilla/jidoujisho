@@ -227,9 +227,7 @@ FutureOr<DictionarySearchResult> searchResultsEnhancementYomichanTermBankFormat(
   }
 
   for (Map<String, DictionaryEntry> headwordMap in readingMap.values) {
-    for (DictionaryEntry dictionaryEntry in headwordMap.values) {
-      mergedEntries.add(dictionaryEntry);
-    }
+    headwordMap.values.forEach((entry) => mergedEntries.add(entry));
   }
 
   String removeLastNewline(String n) => n = n.substring(0, n.length - 1);
@@ -311,12 +309,6 @@ FutureOr<DictionarySearchResult> searchResultsEnhancementYomichanTermBankFormat(
 }
 
 class YomichanTag {
-  late String tagName;
-  late String frequencyName;
-  late double sortingOrder;
-  late String tagNotes;
-  late double popularity;
-
   YomichanTag({
     this.tagName = '',
     this.frequencyName = '',
@@ -335,6 +327,12 @@ class YomichanTag {
     tagNotes = map['tagNotes'];
     popularity = map['popularity'];
   }
+
+  late String tagName;
+  late String frequencyName;
+  late double sortingOrder;
+  late String tagNotes;
+  late double popularity;
 
   Color getTagColor() {
     switch (frequencyName) {

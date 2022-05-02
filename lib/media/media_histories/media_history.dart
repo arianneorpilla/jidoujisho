@@ -76,9 +76,8 @@ class MediaHistory {
         .where((key) => key.startsWith('$prefsDirectory/values/'))
         .toList();
 
-    for (String valueToDelete in valuesToDelete) {
-      appModel.sharedPreferences.remove(valueToDelete);
-    }
+    valuesToDelete.forEach(
+        (valueToDelete) => appModel.sharedPreferences.remove(valueToDelete));
   }
 
   /// Get the serialised history in [prefsDirectory] of a Hive [Box]

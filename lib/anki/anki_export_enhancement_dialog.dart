@@ -90,9 +90,8 @@ class AnkiExportEnhancementDialogState
           AnkiExportEnhancement enhancement = enhancements[index];
 
           return ListTile(
-            selected: (widget.autoMode &&
-                enhancement ==
-                    (appModel.getAutoFieldEnhancement(widget.field))),
+            selected: widget.autoMode &&
+                enhancement == (appModel.getAutoFieldEnhancement(widget.field)),
             selectedTileColor: Theme.of(context).selectedRowColor,
             dense: true,
             title: Row(

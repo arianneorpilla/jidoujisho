@@ -28,6 +28,6 @@ class EnglishLanguage extends Language {
 
   @override
   FutureOr<List<String>> textToWords(String text) {
-    return text.splitWithDelim(RegExp(r' '));
+    return text.splitWithDelim(RegExp(' '));
   }
 }

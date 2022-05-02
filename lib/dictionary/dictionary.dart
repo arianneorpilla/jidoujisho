@@ -7,6 +7,18 @@ class Dictionary {
     required this.metadata,
   });
 
+  factory Dictionary.fromJson(String json) {
+    Map<String, String> map = Map.castFrom(jsonDecode(json));
+
+    return Dictionary(
+      dictionaryName: map['dictionaryName']!,
+      formatName: map['formatName']!,
+      metadata: Map.castFrom(
+        jsonDecode(map['metadata']!),
+      ),
+    );
+  }
+
   /// The name of the dictionary. For example, this could be "Merriam-Webster
   /// Dictionary" or "大辞林" or "JMdict".
   ///
@@ -33,17 +45,5 @@ class Dictionary {
     };
 
     return jsonEncode(map);
-  }
-
-  factory Dictionary.fromJson(String json) {
-    Map<String, String> map = Map.castFrom(jsonDecode(json));
-
-    return Dictionary(
-      dictionaryName: map['dictionaryName']!,
-      formatName: map['formatName']!,
-      metadata: Map.castFrom(
-        jsonDecode(map['metadata']!),
-      ),
-    );
   }
 }

@@ -106,7 +106,7 @@ class ListMenuState extends State<ListMenu> {
             ),
             onTap: () async {
               if (item.action != null) {
-                item.action!();
+                item.action?.call();
               }
               setState(() {});
               if (widget.popOnSelect) {

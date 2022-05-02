@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 
 class DropDownMenu extends StatefulWidget {
-  final List<String> options;
-  final String initialOption;
-  final Function(String) optionCallback;
-  final VoidCallback voidCallback;
-
   const DropDownMenu({
     required this.options,
     required this.initialOption,
@@ -13,6 +8,11 @@ class DropDownMenu extends StatefulWidget {
     required this.voidCallback,
     Key? key,
   }) : super(key: key);
+
+  final List<String> options;
+  final String initialOption;
+  final Function(String) optionCallback;
+  final VoidCallback voidCallback;
 
   @override
   DropDownMenuState createState() => DropDownMenuState();

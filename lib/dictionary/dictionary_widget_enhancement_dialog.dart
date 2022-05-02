@@ -81,8 +81,8 @@ class AnkiExportEnhancementDialogState
 
           return ListTile(
             dense: true,
-            selected: (enhancement ==
-                (appModel.getFieldWidgetEnhancement(widget.field))),
+            selected: enhancement ==
+                (appModel.getFieldWidgetEnhancement(widget.field)),
             selectedTileColor: Theme.of(context).selectedRowColor,
             title: Row(
               children: [
