@@ -145,10 +145,10 @@ Future<void> openTranscript({
   required BuildContext context,
   required List<Subtitle> subtitles,
   required Duration subtitleDelay,
-  Subtitle? currentSubtitle,
   required double fontSize,
   required String regexFilter,
   required String fontName,
+  Subtitle? currentSubtitle,
   FutureOr<void> Function(int)? onTapCallback,
   FutureOr<void> Function(int)? onLongPressCallback,
 }) async {

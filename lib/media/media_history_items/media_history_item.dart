@@ -3,14 +3,14 @@ import 'dart:convert';
 class MediaHistoryItem {
   MediaHistoryItem({
     required this.key,
-    this.title = '',
-    this.author = '',
-    this.alias = '',
     required this.sourceName,
     required this.mediaTypePrefs,
     required this.currentProgress,
     required this.completeProgress,
     required this.extra,
+    this.title = '',
+    this.author = '',
+    this.alias = '',
     this.thumbnailPath = '',
   });
 

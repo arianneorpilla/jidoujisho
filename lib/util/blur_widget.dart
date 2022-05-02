@@ -93,9 +93,9 @@ class ResizeableWidgetState extends State<ResizeableWidget> {
   Widget build(BuildContext context) {
     appModel = Provider.of<AppModel>(context);
 
-    return ValueListenableBuilder(
+    return ValueListenableBuilder<BlurWidgetOptions>(
         valueListenable: widget.blurWidgetNotifier,
-        builder: (BuildContext context, options, _) {
+        builder: (context, options, _) {
           if (!blurWidgetNotifier.value.visible) {
             return Container();
           }
@@ -344,9 +344,9 @@ class ManipulatingBallState extends State<ManipulatingBall> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
+    return ValueListenableBuilder<bool>(
       valueListenable: widget.visibleBalls,
-      builder: (BuildContext context, bool visible, _) {
+      builder: (context, visible, _) {
         return GestureDetector(
           onPanStart: handleDrag,
           onPanUpdate: handleUpdate,

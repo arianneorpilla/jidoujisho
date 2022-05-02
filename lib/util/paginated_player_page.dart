@@ -8,10 +8,10 @@ import 'package:provider/provider.dart';
 
 class PaginatedPlayerPage extends StatefulWidget {
   const PaginatedPlayerPage({
-    Key? key,
     required this.title,
     required this.source,
     required this.pagingController,
+    Key? key,
     this.actions = const [],
   }) : super(key: key);
 

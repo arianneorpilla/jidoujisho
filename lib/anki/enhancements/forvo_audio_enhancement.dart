@@ -199,8 +199,7 @@ class ForvoAudioEnhancement extends AnkiExportEnhancement {
                   controller: scrollController,
                   child: ValueListenableBuilder(
                     valueListenable: indexesSelected,
-                    builder:
-                        (BuildContext context, List<bool> _, Widget? widget) {
+                    builder: (context, _, widget) {
                       return Wrap(children: textWidgets);
                     },
                   ),
@@ -260,8 +259,7 @@ class ForvoAudioEnhancement extends AnkiExportEnhancement {
           },
           child: ValueListenableBuilder(
               valueListenable: notifier,
-              builder:
-                  (BuildContext context, List<bool> values, Widget? child) {
+              builder: (context, values, child) {
                 if (notifier.value[i]) {
                   audioPlayer.stop().then((_) {
                     audioPlayer.setUrl(results[i].audioUrl).then((_) {

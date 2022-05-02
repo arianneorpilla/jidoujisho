@@ -10,8 +10,8 @@ import 'package:chisa/util/dictionary_widget_field.dart';
 
 class DictionaryWidgetEnhancementDialog extends StatefulWidget {
   const DictionaryWidgetEnhancementDialog({
-    Key? key,
     required this.field,
+    Key? key,
   }) : super(key: key);
 
   final DictionaryWidgetField field;

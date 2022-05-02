@@ -9,8 +9,8 @@ import 'package:chisa/models/app_model.dart';
 
 class MediaSourcesDialog extends StatefulWidget {
   const MediaSourcesDialog({
-    Key? key,
     required this.mediaType,
+    Key? key,
     this.manageAllowed = false,
   }) : super(key: key);
 

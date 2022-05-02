@@ -11,7 +11,6 @@ import 'package:transparent_image/transparent_image.dart';
 
 class ImageSelectWidget extends StatefulWidget {
   const ImageSelectWidget({
-    Key? key,
     required this.appModel,
     required this.filesNotifier,
     required this.fileNotifier,
@@ -19,6 +18,7 @@ class ImageSelectWidget extends StatefulWidget {
     required this.imageSearchTermNotifier,
     required this.imageSearchingNotifier,
     required this.setImageFile,
+    Key? key,
   }) : super(key: key);
 
   final AppModel appModel;
@@ -47,7 +47,7 @@ class ImageSelectWidgetState extends State<ImageSelectWidget> {
 
   Widget fullViewGallery() {
     return PhotoViewGallery.builder(
-      builder: (BuildContext context, int index) {
+      builder: (context, index) {
         return PhotoViewGalleryPageOptions(
           initialScale: PhotoViewComputedScale.contained * 1,
           minScale: PhotoViewComputedScale.contained * 1,

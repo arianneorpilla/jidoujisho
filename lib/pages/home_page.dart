@@ -49,12 +49,12 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
 
-    ReceiveSharingIntent.getInitialText().then((String? text) {
+    ReceiveSharingIntent.getInitialText().then((text) {
       if (text != null) {
         textShareIntentAction(context, text);
       }
     });
-    ReceiveSharingIntent.getTextStream().listen((String? text) {
+    ReceiveSharingIntent.getTextStream().listen((text) {
       if (text != null) {
         textShareIntentAction(context, text);
       }
@@ -133,7 +133,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     incognitoNotifier ??= ValueNotifier<bool>(appModel.getIncognitoMode());
     return ValueListenableBuilder<bool>(
       valueListenable: incognitoNotifier!,
-      builder: (BuildContext context, bool incognito, Widget? child) {
+      builder: (context, incognito, child) {
         if (incognito) {
           return GreyscaleWrapper(child: getIcon());
         } else {
@@ -210,7 +210,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
     return ValueListenableBuilder<int>(
       valueListenable: selectedTabIndex,
-      builder: (context, int currentIndex, _) {
+      builder: (context, currentIndex, _) {
         return BottomNavigationBar(
           elevation: 0,
           items: items,
@@ -238,7 +238,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     
     return ValueListenableBuilder<bool>(
       valueListenable: appModel.resumableNotifier,
-      builder: (context, bool resumable, _) {
+      builder: (context, resumable, _) {
         return IconButton(
             icon: const Icon(Icons.update),
             onPressed: (resumable)
@@ -269,7 +269,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       padding: const EdgeInsets.fromLTRB(12, 0, 14, 0),
       child: GestureDetector(
         child: const Icon(Icons.more_vert),
-        onTapDown: (TapDownDetails details) =>
+        onTapDown: (details) =>
             showDropDownOptions(context, details.globalPosition),
       ),
     );

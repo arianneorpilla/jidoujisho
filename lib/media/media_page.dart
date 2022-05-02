@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 
 abstract class MediaPage extends StatefulWidget {
   const MediaPage({
-    Key? key,
     required this.mediaType,
     required this.uri,
+    Key? key,
     this.initialProgress = 0,
   }) : super(key: key);
 

@@ -10,13 +10,13 @@ import 'package:chisa/util/dictionary_scrollable_widget.dart';
 
 class DictionaryDialogWidget extends StatefulWidget {
   const DictionaryDialogWidget({
-    Key? key,
     required this.result,
     required this.mediaHistoryItem,
     required this.dictionaryFormat,
     required this.dictionary,
     required this.indexNotifier,
     required this.actions,
+    Key? key,
     this.callback,
   }) : super(key: key);
 

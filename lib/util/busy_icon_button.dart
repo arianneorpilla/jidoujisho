@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 
 class BusyIconButton extends StatefulWidget {
   const BusyIconButton({
-    Key? key,
-    this.enabledColor,
-    this.disabledColor,
-    this.enabled = true,
     required this.icon,
     required this.onPressed,
     required this.iconSize,
+    this.enabledColor,
+    this.disabledColor,
+    this.enabled = true,
+    Key? key,
   }) : super(key: key);
 
   final Icon icon;

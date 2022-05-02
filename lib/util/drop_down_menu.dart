@@ -7,11 +7,11 @@ class DropDownMenu extends StatefulWidget {
   final VoidCallback voidCallback;
 
   const DropDownMenu({
-    Key? key,
     required this.options,
     required this.initialOption,
     required this.optionCallback,
     required this.voidCallback,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -38,7 +38,7 @@ class DropDownMenuState extends State<DropDownMenu> {
         ),
       ),
       value: selectedOption,
-      items: widget.options.map((String value) {
+      items: widget.options.map((value) {
         return DropdownMenuItem<String>(
           value: value,
           child: Text('  $value'),

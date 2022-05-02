@@ -46,8 +46,8 @@ Future<String> addMediaFromUri(
 }
 
 Future<void> addNote({
-  String deck = 'Default',
   required AnkiExportParams params,
+  String deck = 'Default',
 }) async {
   try {
     DateTime now = DateTime.now();

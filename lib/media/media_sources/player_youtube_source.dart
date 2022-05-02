@@ -976,7 +976,7 @@ class PlayerYouTubeSource extends PlayerMediaSource {
         showIfOpened: true,
         child: ValueListenableBuilder<bool>(
           valueListenable: captionFilterNotifier,
-          builder: (context, bool active, child) {
+          builder: (context, active, child) {
             return CircularButton(
               icon: Icon(
                 Icons.closed_caption,

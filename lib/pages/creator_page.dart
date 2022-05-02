@@ -23,7 +23,7 @@ import 'package:http/http.dart' as http;
 
 class CreatorPage extends StatefulWidget {
   const CreatorPage({
-    Key? key,
+    required this.decks,
     this.initialParams,
     this.editMode = false,
     this.autoMode = false,
@@ -32,7 +32,7 @@ class CreatorPage extends StatefulWidget {
     this.popOnExport = false,
     this.hideActions = false,
     this.exportCallback,
-    required this.decks,
+    Key? key,
   }) : super(key: key);
 
   final AnkiExportParams? initialParams;
@@ -338,7 +338,7 @@ class CreatorPageState extends State<CreatorPage> {
       padding: const EdgeInsets.fromLTRB(12, 0, 14, 0),
       child: GestureDetector(
         child: const Icon(Icons.more_vert),
-        onTapDown: (TapDownDetails details) =>
+        onTapDown: (details) =>
             showDropDownOptions(context, details.globalPosition),
       ),
     );
@@ -432,7 +432,7 @@ class CreatorPageState extends State<CreatorPage> {
         margin: const EdgeInsets.only(bottom: 12, left: 6, right: 6),
         child: ValueListenableBuilder<bool>(
             valueListenable: canExportNotifier,
-            builder: (context, bool canExport, _) {
+            builder: (context, canExport, _) {
               return InkWell(
                 child: Container(
                   color: (canExport)

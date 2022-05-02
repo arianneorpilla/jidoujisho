@@ -43,8 +43,8 @@ class PlayerPage extends StatefulWidget {
   final PlayerLaunchParams params;
 
   const PlayerPage({
-    Key? key,
     required this.params,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -421,8 +421,7 @@ class PlayerPageState extends State<PlayerPage>
                           searchTerm,
                           mediaHistoryItem: generateContextHistoryItem(),
                         ), // a previously-obtained Future<String> or null
-                        builder: (BuildContext context,
-                            AsyncSnapshot<DictionarySearchResult> snapshot) {
+                        builder: (context, snapshot) {
                           if (appModel.getPlayerDefinitionFocusMode()) {
                             dialogSmartFocusFlag = true;
                             dialogSmartPause();
@@ -979,9 +978,9 @@ class PlayerPageState extends State<PlayerPage>
   Widget buildMenuArea() {
     return Align(
       alignment: Alignment.topCenter,
-      child: ValueListenableBuilder(
+      child: ValueListenableBuilder<bool>(
         valueListenable: isMenuHidden,
-        builder: (BuildContext context, bool value, _) {
+        builder: (context, value, _) {
           return AnimatedOpacity(
             opacity: value ? 0.0 : 1.0,
             duration: const Duration(milliseconds: 300),
@@ -1243,12 +1242,12 @@ class PlayerPageState extends State<PlayerPage>
               fontSize: subtitleOptionsNotifier.value.fontSize,
               fontName: subtitleOptionsNotifier.value.fontName,
               regexFilter: subtitleOptionsNotifier.value.regexFilter,
-              onTapCallback: (int selectedIndex) async {
+              onTapCallback: (selectedIndex) async {
                 await playerController.seekTo(
                     subtitleItem.controller.subtitles[selectedIndex].start -
                         getSubtitleDelay());
               },
-              onLongPressCallback: (int selectedIndex) async {
+              onLongPressCallback: (selectedIndex) async {
                 exporting = true;
                 await exportMultipleSubtitles(selectedIndex);
               });
@@ -1503,7 +1502,7 @@ class PlayerPageState extends State<PlayerPage>
               fontSize: subtitleOptionsNotifier.value.fontSize,
               fontName: subtitleOptionsNotifier.value.fontName,
               regexFilter: subtitleOptionsNotifier.value.regexFilter,
-              onTapCallback: (int selectedIndex) async {
+              onTapCallback: (selectedIndex) async {
                 Subtitle subtitle =
                     subtitleItem.controller.subtitles[selectedIndex];
 
@@ -1512,7 +1511,7 @@ class PlayerPageState extends State<PlayerPage>
 
                 refreshSubtitleWidget();
               },
-              onLongPressCallback: (int selectedIndex) async {
+              onLongPressCallback: (selectedIndex) async {
                 Subtitle subtitle =
                     subtitleItem.controller.subtitles[selectedIndex];
 

@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 
 class ExportButton extends StatefulWidget {
   const ExportButton({
-    Key? key,
     required this.label,
     required this.icon,
     required this.exportParams,
     required this.onTap,
+    Key? key,
   }) : super(key: key);
 
   final String label;

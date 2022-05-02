@@ -58,8 +58,8 @@ void main() async {
 
 class App extends StatelessWidget {
   const App({
-    Key? key,
     required this.appModel,
+    Key? key,
   }) : super(key: key);
 
   final AppModel appModel;

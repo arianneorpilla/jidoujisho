@@ -24,8 +24,8 @@ import 'package:wakelock/wakelock.dart';
 
 class ReaderPage extends StatefulWidget {
   const ReaderPage({
-    Key? key,
     required this.params,
+    Key? key,
   }) : super(key: key);
 
   final ReaderLaunchParams params;
@@ -369,8 +369,7 @@ class ReaderPageState extends State<ReaderPage> {
                           searchTerm,
                           mediaHistoryItem: generateContextHistoryItem(),
                         ), // a previously-obtained Future<String> or null
-                        builder: (BuildContext context,
-                            AsyncSnapshot<DictionarySearchResult> snapshot) {
+                        builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
                             return buildDictionarySearching();

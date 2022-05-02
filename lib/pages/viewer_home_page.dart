@@ -14,9 +14,9 @@ import 'package:chisa/util/center_icon_message.dart';
 
 class ViewerHomePage extends MediaHomePage {
   const ViewerHomePage({
-    Key? key,
     required MediaType mediaType,
     required this.searchBarController,
+    Key? key,
   }) : super(
           key: key,
           mediaType: mediaType,
@@ -112,7 +112,7 @@ class ViewerHomePageState extends State<ViewerHomePage>
         controller: scrollController,
         addAutomaticKeepAlives: true,
         itemCount: 2,
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (context, index) {
           if (index == 0) {
             return const SizedBox(height: 48);
           }
@@ -126,7 +126,7 @@ class ViewerHomePageState extends State<ViewerHomePage>
             controller: scrollController,
             addAutomaticKeepAlives: true,
             itemCount: mediaHistoryItems.length,
-            itemBuilder: (BuildContext context, int index) {
+            itemBuilder: (context, index) {
               MediaHistoryItem item = mediaHistoryItems[index];
               MediaSource source = appModel.getMediaSourceFromName(
                   MediaType.viewer, item.sourceName);

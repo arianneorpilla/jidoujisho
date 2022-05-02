@@ -64,12 +64,12 @@ class SearchTextSelectionControls extends MaterialTextSelectionControls {
 
 class SearchTextSelectionToolbar extends StatefulWidget {
   const SearchTextSelectionToolbar({
-    Key? key,
     required this.anchorAbove,
     required this.anchorBelow,
     required this.clipboardStatus,
     required this.searchCallback,
     required this.searchLabel,
+    Key? key,
   }) : super(key: key);
 
   final Offset anchorAbove;
@@ -131,10 +131,10 @@ class SearchTextSelectionToolbarState
     return TextSelectionToolbar(
       anchorAbove: widget.anchorAbove,
       anchorBelow: widget.anchorBelow,
-      toolbarBuilder: (BuildContext context, Widget child) {
+      toolbarBuilder: (context, child) {
         return Card(child: child);
       },
-      children: itemDatas.map((TextSelectionToolbarItemData itemData) {
+      children: itemDatas.map((itemData) {
         return TextSelectionToolbarTextButton(
           padding: TextSelectionToolbarTextButton.getPadding(
               childIndex++, itemDatas.length),

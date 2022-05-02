@@ -20,8 +20,8 @@ class TatoebaExampleSentencesEnhancement extends AnkiExportEnhancement {
     required AppModel appModel,
   }) : super(
           appModel: appModel,
-          enhancementName: 'Tatoeba Example Sentences',
-          enhancementDescription: 'Get example sentences via Tatoeba.',
+          enhancementName: "Tatoeba Example Sentences",
+          enhancementDescription: "Get example sentences via Tatoeba.",
           enhancementIcon: Icons.article_outlined,
           enhancementField: AnkiExportField.word,
         );
@@ -36,7 +36,7 @@ class TatoebaExampleSentencesEnhancement extends AnkiExportEnhancement {
     required bool autoMode,
     required CreatorPageState state,
   }) async {
-    String text = '';
+    String text = "";
     if (params.word.isEmpty) {
       return params;
     }
@@ -46,23 +46,23 @@ class TatoebaExampleSentencesEnhancement extends AnkiExportEnhancement {
     ValueNotifier<List<bool>> indexesSelected;
     List<Widget> textWidgets;
 
-    String lang = '';
+    String lang = "";
     Language currentLanguage = appModel.getCurrentLanguage();
     if (currentLanguage is JapaneseLanguage) {
-      lang = 'jpn';
+      lang = "jpn";
     } else if (currentLanguage is ChineseSimplifiedLanguage) {
-      lang = 'cmn';
+      lang = "cmn";
     } else if (currentLanguage is ChineseTraditionalLanguage) {
-      lang = 'yue';
+      lang = "yue";
     } else if (currentLanguage is KoreanLanguage) {
-      lang = 'kor';
+      lang = "kor";
     } else {
-      throw UnimplementedError('This language is not implemented for Tatoeba');
+      throw UnimplementedError("This language is not implemented for Tatoeba");
     }
 
     List<String> sentences = [];
 
-    String cacheKey = '${appModel.getCurrentLanguage()}/$text';
+    String cacheKey = "${appModel.getCurrentLanguage()}/$text";
     if (tatoebaCache[cacheKey] != null) {
       sentences = tatoebaCache[cacheKey]!;
     } else {
@@ -71,9 +71,9 @@ class TatoebaExampleSentencesEnhancement extends AnkiExportEnhancement {
           'https://tatoeba.org/en/api_v0/search?from=$lang&has_audio=&native=&orphans=no&query=$text&sort=relevance&sort_reverse=&tags=&to=none&trans_filter=limit&trans_has_audio=&trans_link=&trans_orphan=&trans_to=&trans_unapproved=&trans_user=&unapproved=no&user='));
 
       Map<String, dynamic> json = jsonDecode(response.body);
-      List<dynamic> results = json['results'];
+      List<dynamic> results = json["results"];
 
-      sentences = results.map((result) => result['text'].toString()).toList();
+      sentences = results.map((result) => result["text"].toString()).toList();
       tatoebaCache[cacheKey] = sentences;
     }
 
@@ -109,9 +109,9 @@ class TatoebaExampleSentencesEnhancement extends AnkiExportEnhancement {
             controller: scrollController,
             child: SingleChildScrollView(
               controller: scrollController,
-              child: ValueListenableBuilder(
+              child: ValueListenableBuilder<List<bool>>(
                 valueListenable: indexesSelected,
-                builder: (BuildContext context, List<bool> _, Widget? widget) {
+                builder: (context, _, widget) {
                   return Wrap(children: textWidgets);
                 },
               ),
@@ -123,16 +123,16 @@ class TatoebaExampleSentencesEnhancement extends AnkiExportEnhancement {
                 appModel.translate('dialog_set'),
               ),
               onPressed: () {
-                String sentencesJoined = '';
+                String sentencesJoined = "";
 
                 for (int i = 0; i < sentences.length; i++) {
                   if (indexesSelected.value[i]) {
                     sentencesJoined += sentences[i];
-                    sentencesJoined += '\n';
+                    sentencesJoined += "\n";
                   }
                   if (isSpaceDelimited) {
-                    sentencesJoined += ' ';
-                    sentencesJoined += '\n';
+                    sentencesJoined += " ";
+                    sentencesJoined += "\n";
                   }
                 }
 
@@ -164,10 +164,9 @@ class TatoebaExampleSentencesEnhancement extends AnkiExportEnhancement {
             values[i] = !values[i];
             notifier.value = [...values];
           },
-          child: ValueListenableBuilder(
+          child: ValueListenableBuilder<List<bool>>(
               valueListenable: notifier,
-              builder:
-                  (BuildContext context, List<bool> values, Widget? child) {
+              builder: (context, values, child) {
                 return Container(
                   padding: const EdgeInsets.all(8),
                   margin: const EdgeInsets.only(top: 10, right: 10),

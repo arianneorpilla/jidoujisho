@@ -27,8 +27,8 @@ class Marquee extends StatelessWidget {
   final VoidCallback? onDone;
 
   const Marquee({
-    Key? key,
     required this.text,
+    Key? key,
     this.style,
     this.textScaleFactor,
     this.textDirection = TextDirection.ltr,

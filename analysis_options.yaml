@@ -10,7 +10,11 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
-  exclude: [legacy/**]
+  exclude:
+    - '**.freezed.dart'
+    - '**.g.dart'
+    - '**/generated_plugin_registrant.dart'
+    - 'legacy/**'
 
 linter:
   # The lint rules applied to this project can be customized in the

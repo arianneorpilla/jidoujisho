@@ -22,9 +22,9 @@ import 'package:chisa/util/return_from_context.dart';
 
 class DictionaryHomePage extends MediaHomePage {
   const DictionaryHomePage({
-    Key? key,
     required MediaType mediaType,
     required this.searchBarController,
+    Key? key,
   }) : super(
           key: key,
           mediaType: mediaType,
@@ -127,7 +127,7 @@ class DictionaryPageState extends State<DictionaryHomePage>
             parent: BouncingScrollPhysics()),
         controller: scrollController,
         itemCount: mediaHistoryItems.length + 1,
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (context, index) {
           if (index == 0) {
             return const SizedBox(height: 60);
           }

@@ -17,21 +17,21 @@ class PlayerLaunchParams {
   PlayerLaunchParams.file({
     required this.appModel,
     required this.videoFile,
-    this.networkPath,
-    this.audioPath,
     required this.mediaSource,
     required this.mediaHistoryItem,
     required this.saveHistoryItem,
+    this.networkPath,
+    this.audioPath,
   });
 
   PlayerLaunchParams.network({
     required this.appModel,
-    this.videoFile,
     required this.networkPath,
-    this.audioPath,
     required this.mediaSource,
     required this.mediaHistoryItem,
     required this.saveHistoryItem,
+    this.videoFile,
+    this.audioPath,
   });
 
   final AppModel appModel;
@@ -62,10 +62,10 @@ class ReaderLaunchParams {
 
   ReaderLaunchParams.network({
     required this.appModel,
-    this.bookFile,
     required this.mediaSource,
     required this.mediaHistoryItem,
     required this.saveHistoryItem,
+    this.bookFile,
   });
 
   final AppModel appModel;

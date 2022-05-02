@@ -11,13 +11,13 @@ import 'package:chisa/models/app_model.dart';
 
 class DictionaryScrollableWidget extends StatelessWidget {
   const DictionaryScrollableWidget({
-    Key? key,
     required this.appModel,
     required this.mediaHistoryItem,
     required this.result,
     required this.dictionaryFormat,
     required this.dictionary,
     required this.indexNotifier,
+    Key? key,
     this.selectable = false,
     this.callback,
   }) : super(key: key);

@@ -146,7 +146,7 @@ class MassifExampleSentencesEnhancement extends AnkiExportEnhancement {
               controller: scrollController,
               child: ValueListenableBuilder(
                 valueListenable: indexesSelected,
-                builder: (BuildContext context, List<bool> _, Widget? widget) {
+                builder: (context, _, widget) {
                   return Wrap(children: textWidgets);
                 },
               ),
@@ -193,8 +193,7 @@ class MassifExampleSentencesEnhancement extends AnkiExportEnhancement {
           },
           child: ValueListenableBuilder(
               valueListenable: notifier,
-              builder:
-                  (BuildContext context, List<bool> values, Widget? child) {
+              builder: (context, values, child) {
                 return Container(
                     padding: const EdgeInsets.all(8),
                     margin: const EdgeInsets.only(top: 10, right: 10),

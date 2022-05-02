@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 class MediaTypeButton extends StatelessWidget {
   const MediaTypeButton({
-    Key? key,
     required this.label,
     required this.icon,
     required this.onTap,
+    Key? key,
   }) : super(key: key);
 
   final String label;

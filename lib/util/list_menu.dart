@@ -18,12 +18,12 @@ class ListMenuItem {
 
 class ListMenu extends StatefulWidget {
   const ListMenu({
-    Key? key,
     required this.items,
     required this.indexNotifier,
     required this.emptyWidget,
     required this.stateCallback,
     required this.popOnSelect,
+    Key? key,
   }) : super(key: key);
 
   final List<ListMenuItem> items;

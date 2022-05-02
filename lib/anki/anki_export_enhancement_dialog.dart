@@ -10,9 +10,9 @@ import 'package:chisa/util/center_icon_message.dart';
 
 class AnkiExportEnhancementDialog extends StatefulWidget {
   const AnkiExportEnhancementDialog({
-    Key? key,
     required this.field,
     required this.autoMode,
+    Key? key,
   }) : super(key: key);
 
   final AnkiExportField field;

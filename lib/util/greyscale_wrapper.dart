@@ -25,8 +25,8 @@ const ColorFilter greyscale = ColorFilter.matrix(<double>[
 
 class GreyscaleWrapper extends StatelessWidget {
   const GreyscaleWrapper({
-    Key? key,
     required this.child,
+    Key? key,
   }) : super(key: key);
 
   final Widget child;

@@ -280,25 +280,26 @@ abstract class ViewerMediaSource extends MediaSource {
                   },
                 ),
               LayoutBuilder(
-                  builder: (BuildContext context, BoxConstraints constraints) {
-                return Container(
-                  alignment: Alignment.center,
-                  height: constraints.maxHeight * 0.175,
-                  width: double.maxFinite,
-                  color: Colors.black.withOpacity(0.6),
-                  child: Text(
-                    (item.alias.isEmpty) ? item.title : item.alias,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 2,
-                    textAlign: TextAlign.center,
-                    softWrap: true,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 9,
+                builder: (context, constraints) {
+                  return Container(
+                    alignment: Alignment.center,
+                    height: constraints.maxHeight * 0.175,
+                    width: double.maxFinite,
+                    color: Colors.black.withOpacity(0.6),
+                    child: Text(
+                      (item.alias.isEmpty) ? item.title : item.alias,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                      textAlign: TextAlign.center,
+                      softWrap: true,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 9,
+                      ),
                     ),
-                  ),
-                );
-              }),
+                  );
+                },
+              ),
             ],
           ),
         ),
@@ -500,10 +501,9 @@ abstract class ViewerMediaSource extends MediaSource {
         ValueNotifier<ImageProvider>(thumbnail);
 
     Widget showPreviewImage() {
-      return ValueListenableBuilder(
+      return ValueListenableBuilder<ImageProvider>(
         valueListenable: imageProviderNotifier,
-        builder:
-            (BuildContext context, ImageProvider imageProvider, Widget? child) {
+        builder: (context, imageProvider, child) {
           return Image(image: imageProvider);
         },
       );
@@ -855,12 +855,12 @@ abstract class ViewerMediaSource extends MediaSource {
 
 class ChapterMenu extends StatefulWidget {
   const ChapterMenu({
-    Key? key,
     required this.item,
     required this.source,
     required this.shouldRefreshNotifier,
     required this.chapterValueNotifier,
     required this.actions,
+    Key? key,
     this.pushReplacement = false,
   }) : super(key: key);
 
@@ -1169,7 +1169,7 @@ class ChapterMenuState extends State<ChapterMenu> {
     return FutureBuilder(
       initialData: widget.source.chaptersCache[item.key],
       future: widget.source.getCachedChapters(item),
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
+      builder: (context, snapshot) {
         if (!snapshot.hasData &&
             snapshot.connectionState == ConnectionState.waiting) {
           return SizedBox(

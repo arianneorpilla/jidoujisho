@@ -51,8 +51,8 @@ class ViewerPage extends StatefulWidget {
   final ViewerLaunchParams params;
 
   const ViewerPage({
-    Key? key,
     required this.params,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -122,7 +122,7 @@ class ViewerPageState extends State<ViewerPage> {
     ClipboardListener.addListener(copyClipboardAction);
 
     visibilitySubscription =
-        keyboardVisibilityController.onChange.listen((bool visible) {
+        keyboardVisibilityController.onChange.listen((visible) {
       if (!visible) {
         sentenceFocusNode.unfocus();
       }
@@ -506,10 +506,9 @@ class ViewerPageState extends State<ViewerPage> {
             values[i] = !values[i];
             notifier.value = [...values];
           },
-          child: ValueListenableBuilder(
+          child: ValueListenableBuilder<List<bool>>(
               valueListenable: notifier,
-              builder:
-                  (BuildContext context, List<bool> values, Widget? child) {
+              builder: (context, values, child) {
                 return Container(
                   padding: const EdgeInsets.all(8),
                   margin: const EdgeInsets.only(top: 10, right: 10),
@@ -589,10 +588,9 @@ class ViewerPageState extends State<ViewerPage> {
               controller: scrollController,
               child: SingleChildScrollView(
                 controller: scrollController,
-                child: ValueListenableBuilder(
+                child: ValueListenableBuilder<List<bool>>(
                   valueListenable: indexesSelected,
-                  builder:
-                      (BuildContext context, List<bool> _, Widget? widget) {
+                  builder: (context, _, widget) {
                     return Wrap(children: textWidgets);
                   },
                 ),
@@ -786,8 +784,7 @@ class ViewerPageState extends State<ViewerPage> {
                           searchTerm,
                           mediaHistoryItem: generateContextHistoryItem(),
                         ), // a previously-obtained Future<String> or null
-                        builder: (BuildContext context,
-                            AsyncSnapshot<DictionarySearchResult> snapshot) {
+                        builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
                             return buildDictionarySearching();
@@ -1064,7 +1061,7 @@ class ViewerPageState extends State<ViewerPage> {
   Widget buildViewer() {
     return PhotoViewGallery.builder(
       reverse: (appModel.isViewerRightToLeft()),
-      builder: (BuildContext context, int index) {
+      builder: (context, index) {
         return PhotoViewGalleryPageOptions(
           imageProvider: galleryImages[index],
           initialScale: PhotoViewComputedScale.contained * 1,
@@ -1212,9 +1209,9 @@ class ViewerPageState extends State<ViewerPage> {
   Widget buildSearchArea() {
     return Align(
       alignment: Alignment.topCenter,
-      child: ValueListenableBuilder(
+      child: ValueListenableBuilder<bool>(
         valueListenable: isMenuHidden,
-        builder: (BuildContext context, bool value, _) {
+        builder: (context, value, _) {
           return AnimatedOpacity(
             opacity: value ? 0.0 : 1.0,
             duration: const Duration(milliseconds: 300),
@@ -1299,9 +1296,9 @@ class ViewerPageState extends State<ViewerPage> {
   Widget buildMenuArea() {
     return Align(
       alignment: Alignment.bottomCenter,
-      child: ValueListenableBuilder(
+      child: ValueListenableBuilder<bool>(
         valueListenable: isMenuHidden,
-        builder: (BuildContext context, bool value, _) {
+        builder: (context, value, _) {
           return AnimatedOpacity(
             opacity: value ? 0.0 : 1.0,
             duration: const Duration(milliseconds: 300),
@@ -1333,15 +1330,15 @@ class ViewerPageState extends State<ViewerPage> {
   }
 
   Widget buildCurrentPage() {
-    return ValueListenableBuilder(
+    return ValueListenableBuilder<bool>(
         valueListenable: isMenuHidden,
-        builder: (BuildContext context, bool value, Widget? child) {
+        builder: (context, value, child) {
           return AnimatedOpacity(
             opacity: value ? 1.0 : 0.0,
             duration: const Duration(milliseconds: 300),
             child: ValueListenableBuilder(
               valueListenable: currentProgress,
-              builder: (BuildContext context, int progress, Widget? child) {
+              builder: (context, progress, child) {
                 return Stack(
                   alignment: Alignment.center,
                   children: <Widget>[
@@ -1495,7 +1492,7 @@ class ViewerPageState extends State<ViewerPage> {
           children: [
             ValueListenableBuilder(
               valueListenable: currentProgress,
-              builder: (BuildContext context, int progress, Widget? child) {
+              builder: (context, progress, child) {
                 return Text(
                   '$progress / $completeProgress',
                   style: TextStyle(

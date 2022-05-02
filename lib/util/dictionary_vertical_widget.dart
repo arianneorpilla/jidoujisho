@@ -14,7 +14,6 @@ import 'package:flutter/services.dart';
 
 class DictionaryVerticalWidget extends StatefulWidget {
   const DictionaryVerticalWidget({
-    Key? key,
     required this.appModel,
     required this.mediaHistoryItem,
     required this.result,
@@ -22,6 +21,7 @@ class DictionaryVerticalWidget extends StatefulWidget {
     required this.dictionary,
     required this.indexNotifier,
     required this.itemsColor,
+    Key? key,
     this.itemMaxWidth = double.maxFinite,
     this.selectable = false,
     this.callback,
@@ -31,8 +31,8 @@ class DictionaryVerticalWidget extends StatefulWidget {
     required AppModel appModel,
     required DictionarySearchResult result,
     required ValueNotifier<int> indexNotifier,
-    double? itemMaxWidth,
     required Color itemsColor,
+    double? itemMaxWidth,
     bool selectable = false,
   }) {
     return DictionaryVerticalWidget(

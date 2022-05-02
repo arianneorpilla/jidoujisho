@@ -233,8 +233,7 @@ abstract class ReaderMediaSource extends MediaSource {
                   ),
                 ),
               ),
-              LayoutBuilder(
-                  builder: (BuildContext context, BoxConstraints constraints) {
+              LayoutBuilder(builder: (context, constraints) {
                 return Container(
                   alignment: Alignment.center,
                   padding: const EdgeInsets.fromLTRB(2, 2, 2, 4),
@@ -491,10 +490,9 @@ abstract class ReaderMediaSource extends MediaSource {
         ValueNotifier<ImageProvider>(thumbnail);
 
     Widget showPreviewImage() {
-      return ValueListenableBuilder(
+      return ValueListenableBuilder<ImageProvider>(
         valueListenable: imageProviderNotifier,
-        builder:
-            (BuildContext context, ImageProvider imageProvider, Widget? child) {
+        builder: (context, imageProvider, child) {
           return Image(image: imageProvider);
         },
       );

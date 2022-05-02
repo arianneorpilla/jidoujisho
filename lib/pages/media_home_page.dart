@@ -5,8 +5,8 @@ import 'package:provider/provider.dart';
 
 abstract class MediaHomePage extends StatefulWidget {
   const MediaHomePage({
-    Key? key,
     required this.mediaType,
+    Key? key,
   }) : super(key: key);
 
   final MediaType mediaType;
