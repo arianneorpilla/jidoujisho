@@ -54,10 +54,10 @@ String getTimeAgoFormatted(DateTime videoDate) {
     timeUnit = 'year';
   }
 
-  timeAgo = timeValue.toString() + ' ' + timeUnit;
+  timeAgo = '$timeValue $timeUnit';
   timeAgo += timeValue > 1 ? 's' : '';
 
-  return timeAgo + ' ago';
+  return '$timeAgo ago';
 }
 
 String getViewCountFormatted(int num) {
@@ -86,12 +86,7 @@ String formatTimeString(double time) {
   String minutesPadded = minutes.toString().padLeft(2, '0');
   String hoursPadded = hours.toString().padLeft(2, '0');
 
-  String formatted = hoursPadded +
-      ':' +
-      minutesPadded +
-      ':' +
-      secondsPadded +
-      ',' +
-      millisecondsPadded;
+  String formatted =
+      '$hoursPadded:$minutesPadded:$secondsPadded,$millisecondsPadded';
   return formatted;
 }

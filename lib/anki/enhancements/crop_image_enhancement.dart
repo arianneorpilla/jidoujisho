@@ -50,7 +50,7 @@ class CropImageEnhancement extends AnkiExportEnhancement {
       String temporaryDirectoryPath = (await getTemporaryDirectory()).path;
 
       String temporaryFileName =
-          'jidoujisho-' + DateFormat('yyyyMMddTkkmmss').format(DateTime.now());
+          'jidoujisho-${DateFormat('yyyyMMddTkkmmss').format(DateTime.now())}';
       File croppedImageFile =
           File('$temporaryDirectoryPath/$temporaryFileName');
 

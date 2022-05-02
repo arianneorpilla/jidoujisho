@@ -59,7 +59,7 @@ class ListMenuState extends State<ListMenu> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          widget.items.isEmpty ? widget.emptyWidget : buildList(),
+          if (widget.items.isEmpty) widget.emptyWidget else buildList(),
         ],
       ),
     );

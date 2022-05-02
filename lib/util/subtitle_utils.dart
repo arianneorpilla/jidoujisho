@@ -94,7 +94,7 @@ Future<List<SubtitleItem>> prepareSubtitleControllersFromVideo(
   List<File> outputFiles = [];
 
   Directory appDocDir = await getApplicationDocumentsDirectory();
-  Directory subsDir = Directory(appDocDir.path + '/subtitles');
+  Directory subsDir = Directory('${appDocDir.path}/subtitles');
   if (!subsDir.existsSync()) {
     subsDir.createSync(recursive: true);
   }
@@ -104,7 +104,7 @@ Future<List<SubtitleItem>> prepareSubtitleControllersFromVideo(
   for (int i = 0; i < embeddedTrackCount - 1; i++) {
     String outputPath = '${subsDir.path}/extractSrt$i.srt';
     String command =
-        '-loglevel verbose -i \"$inputPath\" -map 0:s:$i \"$outputPath\"';
+        '-loglevel verbose -i "$inputPath" -map 0:s:$i "$outputPath"';
 
     File outputFile = File(outputPath);
 
@@ -144,7 +144,7 @@ Future<List<SubtitleItem>> prepareSubtitleControllersFromVideo(
 
 Future<String> convertAssSubtitles(String inputPath) async {
   Directory appDocDir = await getApplicationDocumentsDirectory();
-  Directory subsDir = Directory(appDocDir.path + '/subtitles');
+  Directory subsDir = Directory('${appDocDir.path}/subtitles');
   if (!subsDir.existsSync()) {
     subsDir.createSync(recursive: true);
   }
@@ -152,7 +152,7 @@ Future<String> convertAssSubtitles(String inputPath) async {
   String outputPath = '${subsDir.path}/assSubtitles.srt';
   File targetFile = File(outputPath);
 
-  String command = '-i \"$inputPath\" \"$outputPath\"';
+  String command = '-i "$inputPath" "$outputPath"';
 
   final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
 

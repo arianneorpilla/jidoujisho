@@ -128,7 +128,7 @@ class PitchAccentExportEnhancement extends AnkiExportEnhancement {
 
     if (pitch.number == 0) {
       htmlPitch += moras[0];
-      htmlPitch += '<span class=\"pitch\">';
+      htmlPitch += '<span class="pitch">';
       for (int i = 1; i < moras.length; i++) {
         htmlPitch += moras[i];
       }
@@ -150,9 +150,9 @@ class PitchAccentExportEnhancement extends AnkiExportEnhancement {
 
       for (int i = 0; i < moras.length; i++) {
         if (i == firstBeforePitchNumber) {
-          htmlPitch += '<span class=\"pitch\">';
+          htmlPitch += '<span class="pitch">';
         } else if (i == pitch.number! - 1) {
-          htmlPitch += '<span class=\"pitch_end\">';
+          htmlPitch += '<span class="pitch_end">';
         }
         htmlPitch += moras[i];
         if (i == lastBeforePitchNumber || i == pitch.number! - 1) {

@@ -79,7 +79,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     appModel.setLastPickedDirectory(mediaType, Directory(p.dirname(filePath)));
 
     Directory appDocDir = await getApplicationDocumentsDirectory();
-    Directory thumbsDir = Directory(appDocDir.path + '/thumbs');
+    Directory thumbsDir = Directory('${appDocDir.path}/thumbs');
     if (!thumbsDir.existsSync()) {
       thumbsDir.createSync(recursive: true);
     }
@@ -161,7 +161,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
 
     String command =
-        '-ss $timestamp -y -i \"$inputPath\" -frames:v 1 -q:v 2 \"$targetPath\"';
+        '-ss $timestamp -y -i "$inputPath" -frames:v 1 -q:v 2 "$targetPath"';
 
     await _flutterFFmpeg.execute(command);
   }
