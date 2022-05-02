@@ -63,7 +63,9 @@ class DictionaryScrollableWidget extends StatelessWidget {
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
           onHorizontalDragEnd: (details) async {
-            if (details.primaryVelocity == 0) return;
+            if (details.primaryVelocity == 0) {
+              return;
+            }
 
             if (details.primaryVelocity!.compareTo(0) == -1) {
               if (indexNotifier.value == result.entries.length - 1) {

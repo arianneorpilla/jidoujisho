@@ -38,7 +38,7 @@ class YomichanTermBankFormatWidget extends DictionaryWidget {
         buildTermTags(),
         Flexible(
           child: SingleChildScrollView(
-            child: meaning ?? buildMeaning(selectable),
+            child: meaning ?? buildMeaning(selectable: selectable),
           ),
         ),
       ],
@@ -57,7 +57,7 @@ class YomichanTermBankFormatWidget extends DictionaryWidget {
     List<YomichanTag> tagsStore = getDictionaryCache()['yomichanTags'];
 
     if (map['meanings'] == null) {
-      return super.buildMeaning(selectable);
+      return super.buildMeaning(selectable: selectable);
     }
 
     List<dynamic> uncastNames = map['termTags'];
@@ -129,7 +129,7 @@ class YomichanTermBankFormatWidget extends DictionaryWidget {
   }
 
   @override
-  Widget buildMeaning(bool selectable) {
+  Widget buildMeaning({required bool selectable}) {
     if (getDictionaryCache()['yomichanTags'] == null) {
       List<YomichanTag> yomichanTags =
           YomichanTag.getTagsFromMetadata(dictionary.metadata);
@@ -139,7 +139,7 @@ class YomichanTermBankFormatWidget extends DictionaryWidget {
     List<YomichanTag> tagsStore = getDictionaryCache()['yomichanTags'];
 
     if (map['meanings'] == null) {
-      return super.buildMeaning(selectable);
+      return super.buildMeaning(selectable: selectable);
     }
 
     List<List<String>> definitionTagNames = [];

@@ -5,15 +5,15 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:provider/provider.dart';
 
 class BlurWidgetOptions {
-  BlurWidgetOptions(
-    this.width,
-    this.height,
-    this.left,
-    this.top,
-    this.color,
-    this.blurRadius,
-    this.visible,
-  );
+  BlurWidgetOptions({
+    required this.width,
+    required this.height,
+    required this.left,
+    required this.top,
+    required this.color,
+    required this.blurRadius,
+    required this.visible,
+  });
 
   double width;
   double height;
@@ -117,9 +117,7 @@ class ResizeableWidgetState extends State<ResizeableWidget> {
                 top: top,
                 left: left,
                 child: GestureDetector(
-                  onTap: () {
-                    showAndHide();
-                  },
+                  onTap: showAndHide,
                   child: BlurryContainer(
                     borderRadius: BorderRadius.zero,
                     blur: blurRadius,

@@ -27,101 +27,93 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  flutter:
-    sdk: flutter
-
-  provider: ^6.0.1
-  transparent_image: ^2.0.0
-  package_info_plus: ^1.3.0
-  url_launcher: ^6.0.10
-  shared_preferences: ^2.0.7
-  ve_dart:
+  audio_service:
+  blurrycontainer:
     git:
-      url: https://github.com/lrorpilla/ve_dart
-      ref: c366bb1ae24f6fad4f5c7e3a1efad5f2b8122e58
-  mecab_dart: ^0.1.3
-  path: ^1.8.0
-  mime: ^1.0.0
-  flutter_inappwebview:
-    git:
-      url: https://github.com/lrorpilla/flutter_inappwebview
-      ref: 1e4da7a5e5fa00903d981510a0b7c154ad3febe1
-  flutter_archive: ^4.0.1
-  path_provider: ^2.0.4
-  objectbox: ^1.2.0
-  objectbox_flutter_libs: any
-  progress_indicators: ^1.0.0
+      url: https://github.com/Krish-Ideausher/blurry_container/
+      ref: fb26dd1fa81edeb048b14703f1c1f28e93ee43d0
+  chaquopy:
+  clipboard_listener:
   collection: ^1.15.0
-  kana_kit: ^2.0.0
-  fluttertoast: ^8.0.8
+  crop_image:
+  device_apps:
+  device_info_plus:
+  external_path: ^1.0.1
   filesystem_picker:
     git:
       url: https://github.com/lrorpilla/filesystem_picker
       ref: 968a4b3e04c4b19de5f3ae8e9c922a220ec67c62
       path: package/
+  firebase_analytics: ^9.0.2
+  firebase_crashlytics: ^2.4.3
+  flutter:
+    sdk: flutter
+  flutter_archive: ^4.0.1
+  flutter_cache_manager:
+  flutter_colorpicker:
+  flutter_ffmpeg: ^0.4.2
+  flutter_html: ^2.2.1
+  flutter_inappwebview:
+     git:
+      url: https://github.com/lrorpilla/flutter_inappwebview
+      ref: 1e4da7a5e5fa00903d981510a0b7c154ad3febe1
+  flutter_keyboard_visibility:
   flutter_vlc_player: ^6.0.5
-  external_path: ^1.0.1
+  fluttertoast: ^8.0.8
+  google_fonts:
+  google_ml_kit: ^0.7.3
+  http:
+  image:
+  image_picker:
+  infinite_scroll_pagination:
+  intl:
+  just_audio:
+  kana_kit: ^2.0.0
+  marquee:
+  material_floating_search_bar:
+  mecab_dart: ^0.1.3
+  mime: ^1.0.0
+  multi_value_listenable_builder: ^0.0.1
+  network_to_file_image:
+  objectbox: ^1.2.0
+  objectbox_flutter_libs: any
+  package_info_plus: ^1.3.0
+  path: ^1.8.0
+  path_provider: ^2.0.4
+  permission_handler:
+  photo_view:
+  progress_indicators: ^1.0.0
+  provider: ^6.0.1
+  receive_sharing_intent:
+  screenshot:
+  scrollable_positioned_list:
+  share_plus:
+  shared_preferences: ^2.0.7
   subtitle:
     git:
       url: https://github.com/lrorpilla/subtitle
       ref: 9c5307d1cbe3a9ca84c387e2023251896c9ff47f
-  multi_value_listenable_builder: ^0.0.1
-  flutter_ffmpeg: ^0.4.2
-  permission_handler:
-  google_ml_kit: ^0.7.3
-  chaquopy:
-  share_plus:
-  scrollable_positioned_list:
-  blurrycontainer:
-    git:
-      url: https://github.com/Krish-Ideausher/blurry_container/
-      ref: fb26dd1fa81edeb048b14703f1c1f28e93ee43d0
-  flutter_colorpicker:
+  transparent_image: ^2.0.0
+  uri_to_file:
+  url_launcher: ^6.0.10
+  ve_dart:
+     git:
+      url: https://github.com/lrorpilla/ve_dart
+      ref: c366bb1ae24f6fad4f5c7e3a1efad5f2b8122e58
   wakelock:
-  network_to_file_image:
-  photo_view:
-  intl:
-  device_apps:
-  clipboard_listener:
   youtube_explode_dart:
     git:
       url: https://github.com/Hexer10/youtube_explode_dart
       ref: a51e38dcf8299f11271511922dc90ac48e7f5a47
-  infinite_scroll_pagination:
-  material_floating_search_bar:
-  http:
-  receive_sharing_intent:
-  image_picker:
-  flutter_cache_manager:
-  marquee:
-  flutter_keyboard_visibility:
-  image:
-  screenshot:
-  crop_image:
-  device_info_plus:
-  uri_to_file:
-  google_fonts:
-  audio_service:
-  just_audio:
-  firebase_crashlytics: ^2.4.3
-  firebase_analytics: ^9.0.2
-  flutter_html: ^2.2.1
-dev_dependencies:
-  # flutter_test:
-  #   sdk: flutter
   
-  build_runner: ^2.1.2
-  objectbox_generator: any
 
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
+dev_dependencies:
+  build_runner: ^2.1.2
+  dependency_validator: ^3.0.0
   flutter_lints: ^1.0.0
   flutter_launcher_icons: ^0.9.2
   flutter_native_splash: ^1.3.1
-  dependency_validator: ^3.0.0
+  objectbox_generator: any
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

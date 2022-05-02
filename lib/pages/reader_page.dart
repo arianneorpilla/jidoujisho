@@ -84,7 +84,7 @@ class ReaderPageState extends State<ReaderPage> {
     author = widget.params.mediaHistoryItem.author;
 
     WidgetsBinding.instance!.addPostFrameCallback((_) {
-      setIsDarkMode(appModel.getIsDarkMode());
+      setIsDarkMode(value: appModel.getIsDarkMode());
       setState(() {});
     });
   }
@@ -165,7 +165,7 @@ class ReaderPageState extends State<ReaderPage> {
     author = value;
   }
 
-  void setIsDarkMode(bool value) {
+  void setIsDarkMode({required bool value}) {
     isDarkMode = value;
 
     dictionaryColor = isDarkMode
@@ -191,7 +191,7 @@ class ReaderPageState extends State<ReaderPage> {
               color: Theme.of(context).focusColor,
             ),
           ),
-          onPressed: () => exitPage(),
+          onPressed: exitPage,
         ),
         TextButton(
           child: Text(
@@ -346,7 +346,9 @@ class ReaderPageState extends State<ReaderPage> {
                 );
               },
               onVerticalDragEnd: (details) {
-                if (details.primaryVelocity == 0) return;
+                if (details.primaryVelocity == 0) {
+                  return;
+                }
 
                 if (details.primaryVelocity!.compareTo(0) == -1) {
                   appModel.setPrevDictionary();
@@ -449,12 +451,12 @@ class ReaderPageState extends State<ReaderPage> {
     );
   }
 
-  Widget buildDictionaryMessage1Argument(
-    String beforeText,
-    String boldedText,
-    String afterText,
-    bool jumpingDots,
-  ) {
+  Widget buildDictionaryMessage1Argument({
+    required String beforeText,
+    required String boldedText,
+    required String afterText,
+    required bool jumpingDots,
+  }) {
     return Text.rich(
       TextSpan(
         text: '',
@@ -499,12 +501,12 @@ class ReaderPageState extends State<ReaderPage> {
     );
   }
 
-  Widget buildDictionaryMessageArgument(
-    String beforeText,
-    String boldedText,
-    String afterText,
-    bool jumpingDots,
-  ) {
+  Widget buildDictionaryMessageArgument({
+    required String beforeText,
+    required String boldedText,
+    required String afterText,
+    required bool jumpingDots,
+  }) {
     return Text.rich(
       TextSpan(
         text: '',
@@ -554,10 +556,10 @@ class ReaderPageState extends State<ReaderPage> {
     if (messageText.startsWith('deckExport://')) {
       String deckName = messageText.replaceAll('deckExport://', '');
       return buildDictionaryMessageArgument(
-        appModel.translate('deck_label_before'),
-        deckName,
-        appModel.translate('deck_label_after'),
-        false,
+        beforeText: appModel.translate('deck_label_before'),
+        boldedText: deckName,
+        afterText: appModel.translate('deck_label_after'),
+        jumpingDots: false,
       );
     }
 
@@ -624,9 +626,7 @@ class ReaderPageState extends State<ReaderPage> {
   void setDictionaryMessage(String messageText, {Duration? duration}) {
     searchMessage.value = messageText;
     if (duration != null) {
-      Future.delayed(duration, () {
-        clearDictionaryMessage();
-      });
+      Future.delayed(duration, clearDictionaryMessage);
     }
   }
 

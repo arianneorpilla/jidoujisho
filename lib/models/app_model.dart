@@ -536,7 +536,8 @@ class AppModel with ChangeNotifier {
         true;
   }
 
-  Future<void> setMediaSourceShown(MediaSource source, bool shown) async {
+  Future<void> setMediaSourceShown(
+      {required MediaSource source, required bool shown}) async {
     await _sharedPreferences.setBool(
         '${source.mediaType.prefsDirectory()}/${source.sourceName}/shown',
         shown);
@@ -1330,7 +1331,14 @@ class AppModel with ChangeNotifier {
     bool visible = sharedPreferences.getBool('blurWidgetVisible') ?? false;
 
     return BlurWidgetOptions(
-        width, height, left, top, color, blurRadius, visible);
+      width: width,
+      height: height,
+      left: left,
+      top: top,
+      color: color,
+      blurRadius: blurRadius,
+      visible: visible,
+    );
   }
 
   Future<void> setBlurWidgetOptions(BlurWidgetOptions blurWidgetOptions) async {

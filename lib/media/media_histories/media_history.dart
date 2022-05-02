@@ -58,7 +58,7 @@ class MediaHistory {
   /// Get the serialised history in [prefsDirectory] of a Hive [Box]
   /// and deserialise each [MediaHistoryItem] and return the list.
   Future<bool> setKeys(List<String> keys) async {
-    return await appModel.sharedPreferences
+    return appModel.sharedPreferences
         .setStringList('$prefsDirectory/keys', keys);
   }
 
@@ -76,8 +76,9 @@ class MediaHistory {
         .where((key) => key.startsWith('$prefsDirectory/values/'))
         .toList();
 
-    valuesToDelete.forEach(
-        (valueToDelete) => appModel.sharedPreferences.remove(valueToDelete));
+    for (String valueToDelete in valuesToDelete) {
+      appModel.sharedPreferences.remove(valueToDelete);
+    }
   }
 
   /// Get the serialised history in [prefsDirectory] of a Hive [Box]

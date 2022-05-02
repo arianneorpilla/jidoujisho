@@ -180,7 +180,7 @@ class DictionaryPageState extends State<DictionaryHomePage>
           focusedBorder: UnderlineInputBorder(
             borderSide: BorderSide(color: Theme.of(context).focusColor),
           ),
-          contentPadding: const EdgeInsets.all(0),
+          contentPadding: EdgeInsets.zero,
           labelText: appModel.translate(
             (appModel.getCurrentDictionary() != null)
                 ? 'search'

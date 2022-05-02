@@ -110,7 +110,7 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
             ),
             onPressed: () async {
               await mediaType.getMediaHistory(appModel).clearAllItems();
-              await setClearCache(context, true);
+              await setClearCache(context: context, clearCache: true);
 
               Navigator.pop(context);
             }),
@@ -338,7 +338,7 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
 
   InAppWebViewGroupOptions getInitialOptions(BuildContext context) {
     bool clearCache = getClearCache(context);
-    setClearCache(context, false);
+    setClearCache(context: context, clearCache: false);
 
     return InAppWebViewGroupOptions(
       crossPlatform: InAppWebViewOptions(
@@ -734,7 +734,8 @@ if (reader.length != 0) {
         false;
   }
 
-  Future<void> setClearCache(BuildContext context, bool clearCache) async {
+  Future<void> setClearCache(
+      {required BuildContext context, required bool clearCache}) async {
     AppModel appModel = Provider.of<AppModel>(context, listen: false);
     await appModel.sharedPreferences
         .setBool('$getIdentifier()://clearCache', clearCache);

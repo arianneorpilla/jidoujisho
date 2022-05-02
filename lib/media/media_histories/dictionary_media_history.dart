@@ -50,8 +50,9 @@ class DictionaryMediaHistory extends MediaHistory {
         .where((key) => key.startsWith('$prefsDirectory/values/'))
         .toList();
 
-    valuesToDelete.forEach(
-        (valueToDelete) => appModel.sharedPreferences.remove(valueToDelete));
+    for (String valueToDelete in valuesToDelete) {
+      appModel.sharedPreferences.remove(valueToDelete);
+    }
   }
 
   List<DictionaryMediaHistoryItem> getDictionaryItems() {

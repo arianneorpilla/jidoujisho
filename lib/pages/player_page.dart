@@ -132,7 +132,7 @@ class PlayerPageState extends State<PlayerPage>
                 color: Theme.of(context).focusColor,
               ),
             ),
-            onPressed: () => exitPage(),
+            onPressed: exitPage,
           ),
           TextButton(
             child: Text(
@@ -265,9 +265,7 @@ class PlayerPageState extends State<PlayerPage>
           ValueNotifier<SubtitleOptions>(appModel.getSubtitleOptions());
 
       playerController.addListener(listener);
-      playerController.addOnInitListener(() {
-        initialiseEmbeddedSubtitles();
-      });
+      playerController.addOnInitListener(initialiseEmbeddedSubtitles);
 
       appModel.playPauseFlipflop.addListener(playPause);
 
@@ -398,7 +396,9 @@ class PlayerPageState extends State<PlayerPage>
                 });
               },
               onVerticalDragEnd: (details) {
-                if (details.primaryVelocity == 0) return;
+                if (details.primaryVelocity == 0) {
+                  return;
+                }
 
                 if (details.primaryVelocity!.compareTo(0) == -1) {
                   appModel.setPrevDictionary();
@@ -506,12 +506,12 @@ class PlayerPageState extends State<PlayerPage>
     );
   }
 
-  Widget buildDictionaryMessage1Argument(
-    String beforeText,
-    String boldedText,
-    String afterText,
-    bool jumpingDots,
-  ) {
+  Widget buildDictionaryMessage1Argument({
+    required String beforeText,
+    required String boldedText,
+    required String afterText,
+    required bool jumpingDots,
+  }) {
     return Text.rich(
       TextSpan(
         text: '',
@@ -556,12 +556,12 @@ class PlayerPageState extends State<PlayerPage>
     );
   }
 
-  Widget buildDictionaryMessageArgument(
-    String beforeText,
-    String boldedText,
-    String afterText,
-    bool jumpingDots,
-  ) {
+  Widget buildDictionaryMessageArgument({
+    required String beforeText,
+    required String boldedText,
+    required String afterText,
+    required bool jumpingDots,
+  }) {
     return Text.rich(
       TextSpan(
         text: '',
@@ -610,10 +610,10 @@ class PlayerPageState extends State<PlayerPage>
     if (messageText.startsWith('deckExport://')) {
       String deckName = messageText.replaceAll('deckExport://', '');
       return buildDictionaryMessageArgument(
-        appModel.translate('deck_label_before'),
-        deckName,
-        appModel.translate('deck_label_after'),
-        false,
+        beforeText: appModel.translate('deck_label_before'),
+        boldedText: deckName,
+        afterText: appModel.translate('deck_label_after'),
+        jumpingDots: false,
       );
     }
 
@@ -683,7 +683,7 @@ class PlayerPageState extends State<PlayerPage>
     List<String> audioParams = ['--audio-track=0', '--sub-track=99999'];
     if (params.audioPath != null) {
       audioParams.add('--input-slave=${params.audioPath}');
-      audioPath = params.audioPath!;
+      audioPath = params.audioPath;
     }
 
     switch (params.getMode()) {
@@ -720,7 +720,9 @@ class PlayerPageState extends State<PlayerPage>
   }
 
   void listener() async {
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
 
     if (playerController.value.isInitialized) {
       position.value = playerController.value.position;
@@ -1002,9 +1004,7 @@ class PlayerPageState extends State<PlayerPage>
         height: menuHeight,
         color: menuColor,
         child: GestureDetector(
-          onTap: () {
-            toggleMenuVisibility();
-          },
+          onTap: toggleMenuVisibility,
           child: AbsorbPointer(
             absorbing: isMenuHidden.value,
             child: Row(
@@ -1120,7 +1120,7 @@ class PlayerPageState extends State<PlayerPage>
             opacity: unhideDuringInitFlag && (!playing || ended) ? 1.0 : 0.0,
             duration: const Duration(milliseconds: 300),
             child: GestureDetector(
-              child: Container(
+              child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: Theme.of(context).dialogBackgroundColor,
                   borderRadius: BorderRadius.circular(48),
@@ -1182,9 +1182,7 @@ class PlayerPageState extends State<PlayerPage>
   void setDictionaryMessage(String messageText, {Duration? duration}) {
     searchMessage.value = messageText;
     if (duration != null) {
-      Future.delayed(duration, () {
-        clearDictionaryMessage();
-      });
+      Future.delayed(duration, clearDictionaryMessage);
     }
   }
 
@@ -1248,9 +1246,7 @@ class PlayerPageState extends State<PlayerPage>
           }
         }
       },
-      onTap: () {
-        toggleMenuVisibility();
-      },
+      onTap: toggleMenuVisibility,
       child: Stack(
         children: [
           buildScrubDetectors(),
@@ -1399,9 +1395,7 @@ class PlayerPageState extends State<PlayerPage>
                 ),
               ),
             ),
-            onTap: () {
-              setShadowingSubtitle();
-            },
+            onTap: setShadowingSubtitle,
           ),
         );
       },

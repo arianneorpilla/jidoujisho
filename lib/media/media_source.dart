@@ -1,12 +1,11 @@
 import 'dart:async';
 
+import 'package:chisa/media/media_histories/media_history.dart';
 import 'package:chisa/media/media_history_items/media_history_item.dart';
 import 'package:chisa/media/media_type.dart';
 import 'package:chisa/models/app_model.dart';
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
-
-import 'media_histories/media_history.dart';
 
 /// A source for a [MediaType] that will appear on the list of sources when
 /// set as active. Handles sourcing and delivery of arguments such that the

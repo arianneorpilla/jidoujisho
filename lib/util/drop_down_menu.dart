@@ -27,7 +27,7 @@ class DropDownMenuState extends State<DropDownMenu> {
 
     return DropdownButton<String>(
       isExpanded: true,
-      underline: Container(
+      underline: DecoratedBox(
         decoration: BoxDecoration(
           border: Border.fromBorderSide(
             BorderSide(

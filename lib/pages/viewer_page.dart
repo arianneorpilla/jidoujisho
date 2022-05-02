@@ -174,7 +174,7 @@ class ViewerPageState extends State<ViewerPage> {
       debugPrint('OCR START');
 
       Uint8List? imageBytes = await screenshotController.capture();
-      imglib.Image? screenshot = imglib.decodeImage(imageBytes!)!;
+      imglib.Image screenshot = imglib.decodeImage(imageBytes!)!;
 
       double actualWidth = MediaQuery.of(context).size.width;
       double actualHeight = MediaQuery.of(context).size.height;
@@ -370,7 +370,7 @@ class ViewerPageState extends State<ViewerPage> {
                 color: Theme.of(context).focusColor,
               ),
             ),
-            onPressed: () => exitPage()),
+            onPressed: exitPage),
         TextButton(
           child: Text(
             appModel.translate('dialog_no'),
@@ -757,7 +757,9 @@ class ViewerPageState extends State<ViewerPage> {
                 });
               },
               onVerticalDragEnd: (details) {
-                if (details.primaryVelocity == 0) return;
+                if (details.primaryVelocity == 0) {
+                  return;
+                }
 
                 if (details.primaryVelocity!.compareTo(0) == -1) {
                   appModel.setPrevDictionary();
@@ -859,12 +861,12 @@ class ViewerPageState extends State<ViewerPage> {
     );
   }
 
-  Widget buildDictionaryMessage1Argument(
-    String beforeText,
-    String boldedText,
-    String afterText,
-    bool jumpingDots,
-  ) {
+  Widget buildDictionaryMessage1Argument({
+    required String beforeText,
+    required String boldedText,
+    required String afterText,
+    required bool jumpingDots,
+  }) {
     return Text.rich(
       TextSpan(
         text: '',
@@ -909,12 +911,12 @@ class ViewerPageState extends State<ViewerPage> {
     );
   }
 
-  Widget buildDictionaryMessageArgument(
-    String beforeText,
-    String boldedText,
-    String afterText,
-    bool jumpingDots,
-  ) {
+  Widget buildDictionaryMessageArgument({
+    required String beforeText,
+    required String boldedText,
+    required String afterText,
+    required bool jumpingDots,
+  }) {
     return Text.rich(
       TextSpan(
         text: '',
@@ -963,10 +965,10 @@ class ViewerPageState extends State<ViewerPage> {
     if (messageText.startsWith('deckExport://')) {
       String deckName = messageText.replaceAll('deckExport://', '');
       return buildDictionaryMessageArgument(
-        appModel.translate('deck_label_before'),
-        deckName,
-        appModel.translate('deck_label_after'),
-        false,
+        beforeText: appModel.translate('deck_label_before'),
+        boldedText: deckName,
+        afterText: appModel.translate('deck_label_after'),
+        jumpingDots: false,
       );
     }
 
@@ -1374,9 +1376,7 @@ class ViewerPageState extends State<ViewerPage> {
         key: searchAreaKey,
         color: menuColor,
         child: GestureDetector(
-          onTap: () {
-            toggleMenuVisibility();
-          },
+          onTap: toggleMenuVisibility,
           child: AbsorbPointer(
             absorbing: isMenuHidden.value,
             child: buildSentenceField(),
@@ -1393,9 +1393,7 @@ class ViewerPageState extends State<ViewerPage> {
         height: menuHeight,
         color: menuColor,
         child: GestureDetector(
-          onTap: () {
-            toggleMenuVisibility();
-          },
+          onTap: toggleMenuVisibility,
           child: AbsorbPointer(
             absorbing: isMenuHidden.value,
             child: Row(
@@ -1417,9 +1415,7 @@ class ViewerPageState extends State<ViewerPage> {
   void setDictionaryMessage(String messageText, {Duration? duration}) {
     searchMessage.value = messageText;
     if (duration != null) {
-      Future.delayed(duration, () {
-        clearDictionaryMessage();
-      });
+      Future.delayed(duration, clearDictionaryMessage);
     }
   }
 

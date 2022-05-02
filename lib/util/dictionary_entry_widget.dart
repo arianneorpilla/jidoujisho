@@ -34,7 +34,7 @@ class DictionaryWidget {
     return Text(dictionaryEntry.reading);
   }
 
-  Widget buildMeaning(bool selectable) {
+  Widget buildMeaning({required bool selectable}) {
     return SelectableText(
       dictionaryEntry.meaning,
       enableInteractiveSelection: selectable,
@@ -55,7 +55,7 @@ class DictionaryWidget {
         const SizedBox(height: 10),
         Flexible(
           child: SingleChildScrollView(
-            child: meaning ?? buildMeaning(selectable),
+            child: meaning ?? buildMeaning(selectable: selectable),
           ),
         ),
       ],

@@ -111,7 +111,7 @@ class ImageSelectWidgetState extends State<ImageSelectWidget> {
     }
     NetworkToFileImage imageToShow =
         widget.filesNotifier.value[imageListNotifier.value];
-    fileNotifier.value = imageToShow.file!;
+    fileNotifier.value = imageToShow.file;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -124,7 +124,9 @@ class ImageSelectWidgetState extends State<ImageSelectWidget> {
         );
       },
       onHorizontalDragEnd: (details) {
-        if (details.primaryVelocity == 0) return;
+        if (details.primaryVelocity == 0) {
+          return;
+        }
 
         if (details.primaryVelocity!.compareTo(0) == -1) {
           if (imageListNotifier.value ==

@@ -35,7 +35,7 @@ class CacheImageProvider extends ImageProvider<CacheImageProvider> {
       throw StateError('$tag is empty and cannot be loaded as an image.');
     }
 
-    return await decode(bytes);
+    return decode(bytes);
   }
 
   @override
@@ -45,7 +45,9 @@ class CacheImageProvider extends ImageProvider<CacheImageProvider> {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) return false;
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
     bool res = other is CacheImageProvider && other.tag == tag;
     return res;
   }

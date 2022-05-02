@@ -43,7 +43,7 @@ Future<void> showSubtitleOptionsDialog(
   TextEditingController regexFilterController =
       TextEditingController(text: subtitleOptions.regexFilter.trim());
 
-  Future<void> setValues(bool remember) async {
+  Future<void> setValues({required bool remember}) async {
     String allowanceText = allowanceController.text;
     int? newAllowance = int.tryParse(allowanceText);
 
@@ -298,7 +298,7 @@ Future<void> showSubtitleOptionsDialog(
                 appModel.translate('dialog_set_remember'),
               ),
               onPressed: () {
-                setValues(true);
+                setValues(remember: true);
               },
             ),
             TextButton(
@@ -306,7 +306,7 @@ Future<void> showSubtitleOptionsDialog(
                 appModel.translate('dialog_set'),
               ),
               onPressed: () {
-                setValues(false);
+                setValues(remember: false);
               },
             ),
           ],

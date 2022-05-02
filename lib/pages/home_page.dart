@@ -55,9 +55,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       }
     });
     ReceiveSharingIntent.getTextStream().listen((text) {
-      if (text != null) {
-        textShareIntentAction(context, text);
-      }
+      textShareIntentAction(context, text);
     });
     
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
@@ -216,7 +214,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           items: items,
           type: BottomNavigationBarType.fixed,
           currentIndex: currentIndex,
-          onTap: (index) => changeTab(index),
+          onTap: changeTab,
           selectedFontSize: 10,
           unselectedFontSize: 10,
           selectedIconTheme: IconThemeData(

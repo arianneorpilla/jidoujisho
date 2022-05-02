@@ -133,7 +133,7 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
 
   ScrollController scrollController = ScrollController();
 
-  Future<void> onFocusChanged(bool focus) async {
+  Future<void> onFocusChanged({required bool focus}) async {
     isFocus = focus;
 
     if (!isFocus) {
@@ -314,7 +314,7 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
         progress: isSearching,
         transition: SlideFadeFloatingSearchBarTransition(),
         onSubmitted: onSubmitted,
-        onFocusChanged: onFocusChanged,
+        onFocusChanged: (focus) => onFocusChanged(focus: focus),
         backgroundColor: (appModel.getIsDarkMode())
             ? Theme.of(context).cardColor
             : const Color(0xFFE5E5E5),

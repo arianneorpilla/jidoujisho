@@ -274,7 +274,7 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
     }
   }
 
-  Future<void> onFocusChanged(bool focus) async {
+  Future<void> onFocusChanged({required bool focus}) async {
     isFocus = focus;
     if (!isFocus) {
       searchBarController.close();
@@ -349,7 +349,7 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
         debounceDelay: const Duration(milliseconds: 500),
         progress: isSearching,
         transition: SlideFadeFloatingSearchBarTransition(),
-        onFocusChanged: onFocusChanged,
+        onFocusChanged: (focus) => onFocusChanged(focus: focus),
         backgroundColor: (appModel.getIsDarkMode())
             ? Theme.of(context).cardColor
             : const Color(0xFFE5E5E5),

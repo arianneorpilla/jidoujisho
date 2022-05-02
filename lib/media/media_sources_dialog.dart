@@ -45,7 +45,8 @@ class MediaSourcesDialogState extends State<MediaSourcesDialog> {
                     appModel.translate('dialog_hide'),
                   ),
                   onPressed: () async {
-                    await appModel.setMediaSourceShown(source, false);
+                    await appModel.setMediaSourceShown(
+                        source: source, shown: false);
                     setState(() {});
                   },
                 ),
@@ -55,7 +56,8 @@ class MediaSourcesDialogState extends State<MediaSourcesDialog> {
                     appModel.translate('dialog_show'),
                   ),
                   onPressed: () async {
-                    await appModel.setMediaSourceShown(source, true);
+                    await appModel.setMediaSourceShown(
+                        source: source, shown: true);
                     setState(() {});
                   },
                 ),

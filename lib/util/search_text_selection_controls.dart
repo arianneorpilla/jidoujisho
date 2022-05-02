@@ -119,7 +119,8 @@ class SearchTextSelectionToolbarState
 
   @override
   Widget build(BuildContext context) {
-    assert(debugCheckHasMaterialLocalizations(context));
+    assert(
+        debugCheckHasMaterialLocalizations(context), 'Check for localisations');
     final List<TextSelectionToolbarItemData> itemDatas =
         <TextSelectionToolbarItemData>[
       TextSelectionToolbarItemData(
