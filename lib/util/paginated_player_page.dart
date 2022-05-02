@@ -56,7 +56,6 @@ class PaginatedPlayerPageState extends State<PaginatedPlayerPage> {
               parent: BouncingScrollPhysics()),
           scrollController: scrollController,
           pagingController: widget.pagingController,
-          addAutomaticKeepAlives: true,
           key: UniqueKey(),
           builderDelegate: PagedChildBuilderDelegate<MediaHistoryItem>(
               itemBuilder: (context, item, index) {

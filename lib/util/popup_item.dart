@@ -7,9 +7,6 @@ PopupMenuItem<VoidCallback> popupItem({
 }) {
   return PopupMenuItem<VoidCallback>(
     child: Row(
-      mainAxisSize: MainAxisSize.max,
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Icon(icon, size: 16),
         const SizedBox(width: 12),

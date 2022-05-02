@@ -515,8 +515,6 @@ class CreatorPageState extends State<CreatorPage> {
                                   "${appModel.translate("deck_label_before")}『${appModel.getLastAnkiDroidDeck()}』${appModel.translate("deck_label_after")}",
                               toastLength: Toast.LENGTH_SHORT,
                               gravity: ToastGravity.BOTTOM,
-                              timeInSecForIosWeb: 1,
-                              fontSize: 16.0,
                             );
                           }
                         }

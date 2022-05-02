@@ -72,9 +72,7 @@ class ViewerPageState extends State<ViewerPage> {
 
   Timer? menuHideTimer;
 
-  PageController pageController = PageController(
-    viewportFraction: 1,
-  );
+  PageController pageController = PageController();
 
   late Color menuColor;
   late Color dictionaryColor;
@@ -360,9 +358,7 @@ class ViewerPageState extends State<ViewerPage> {
 
   Future<bool> onWillPop() async {
     Widget alertDialog = AlertDialog(
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
+      shape: const RoundedRectangleBorder(),
       title: Text(
         appModel.translate('dialog_exit_viewer'),
       ),
@@ -576,9 +572,7 @@ class ViewerPageState extends State<ViewerPage> {
           ),
           contentPadding:
               const EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.zero,
-          ),
+          shape: const RoundedRectangleBorder(),
           content: SizedBox(
             width: double.maxFinite,
             child: RawScrollbar(
@@ -1109,7 +1103,6 @@ class ViewerPageState extends State<ViewerPage> {
           if (nextChapterName != null) {
             await showChapterRedirectionDialog(
               nextChapterName,
-              previous: false,
             );
           }
           pageController.jumpToPage(completeProgress);
@@ -1128,9 +1121,7 @@ class ViewerPageState extends State<ViewerPage> {
     bool previous = false,
   }) async {
     Widget alertDialog = AlertDialog(
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
+      shape: const RoundedRectangleBorder(),
       content: RichText(
         text: TextSpan(
           style: TextStyle(
@@ -1407,8 +1398,6 @@ class ViewerPageState extends State<ViewerPage> {
           child: AbsorbPointer(
             absorbing: isMenuHidden.value,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 if (widget.params.hideSlider) const Spacer(),
                 if (!widget.params.hideSlider) buildPosition(),
@@ -1689,9 +1678,7 @@ class ViewerPageState extends State<ViewerPage> {
         return AlertDialog(
           contentPadding:
               const EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.zero,
-          ),
+          shape: const RoundedRectangleBorder(),
           content: SingleChildScrollView(
             child: SizedBox(
               width: MediaQuery.of(context).size.width * (2 / 3),
@@ -1785,7 +1772,6 @@ class ViewerPageState extends State<ViewerPage> {
                 if (nextChapterName != null) {
                   await showChapterRedirectionDialog(
                     nextChapterName,
-                    previous: false,
                   );
                 }
                 pageController.jumpToPage(completeProgress);

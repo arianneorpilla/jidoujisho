@@ -200,9 +200,7 @@ FutureOr<DictionarySearchResult> searchResultsEnhancementYomichanTermBankFormat(
       readingMap[entry.reading]![entry.word] = DictionaryEntry(
         word: entry.word,
         reading: entry.reading,
-        meaning: '',
         extra: entry.extra,
-        popularity: 0,
       );
     }
 

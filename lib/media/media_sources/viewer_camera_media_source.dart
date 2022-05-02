@@ -172,7 +172,6 @@ class ViewerCameraMediaSource extends ViewerMediaSource {
           chapterName: 'Camera Roll',
           canOpenHistory: false,
           hideSlider: true,
-          pushReplacement: false,
           mediaHistoryItem: MediaHistoryItem(
             key: cameraImagePath,
             sourceName: sourceName,

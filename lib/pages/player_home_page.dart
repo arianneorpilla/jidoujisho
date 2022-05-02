@@ -109,7 +109,6 @@ class PlayerHomePageState extends State<PlayerHomePage>
         physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics()),
         controller: scrollController,
-        addAutomaticKeepAlives: true,
         itemCount: mediaHistoryItems.length + 1,
         itemBuilder: (context, index) {
           if (index == 0) {

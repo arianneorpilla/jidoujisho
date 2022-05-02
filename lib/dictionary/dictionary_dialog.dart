@@ -37,9 +37,7 @@ class DictionaryDialogState extends State<DictionaryDialog> {
     return AlertDialog(
       contentPadding:
           const EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
+      shape: const RoundedRectangleBorder(),
       content: buildContent(),
       actions: (widget.manageAllowed)
           ? <Widget>[
@@ -234,9 +232,7 @@ class DictionaryDialogState extends State<DictionaryDialog> {
 
   void showDictionaryDeleteDialog(BuildContext context) {
     Widget alertDialog = AlertDialog(
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
+      shape: const RoundedRectangleBorder(),
       title: Text(appModel.getCurrentDictionaryName()),
       content: Text(
         appModel.translate('remove_dictionary_confirmation'),

@@ -134,9 +134,7 @@ class MassifExampleSentencesEnhancement extends AnkiExportEnhancement {
         return AlertDialog(
           contentPadding:
               const EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 10),
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.zero,
-          ),
+          shape: const RoundedRectangleBorder(),
           content: RawScrollbar(
             thumbColor: (appModel.getIsDarkMode())
                 ? Colors.grey[700]

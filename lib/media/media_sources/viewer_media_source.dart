@@ -1166,7 +1166,7 @@ class ChapterMenuState extends State<ChapterMenu> {
     ValueNotifier<bool>? shouldRefreshNotifier,
     bool pushReplacement = false,
   }) {
-    return FutureBuilder(
+    return FutureBuilder<List<String>>(
       initialData: widget.source.chaptersCache[item.key],
       future: widget.source.getCachedChapters(item),
       builder: (context, snapshot) {
@@ -1187,7 +1187,7 @@ class ChapterMenuState extends State<ChapterMenu> {
           );
         }
 
-        List<String> chapters = snapshot.data;
+        List<String> chapters = snapshot.data!;
         if (item.extra['chapters'] != null &&
             item.extra['chapters'].length != chapters.length) {
           item.extra['chapters'] = chapters;

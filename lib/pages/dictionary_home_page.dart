@@ -165,7 +165,6 @@ class DictionaryPageState extends State<DictionaryHomePage>
       padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
       child: TextFormField(
         keyboardType: TextInputType.text,
-        maxLines: 1,
         controller: wordController,
         enabled: (appModel.getCurrentDictionary() != null),
         onFieldSubmitted: (result) async {

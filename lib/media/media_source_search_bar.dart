@@ -107,7 +107,6 @@ class MediaSourceSearchBarState extends State<MediaSourceSearchBar> {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 8, 24, 8),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const Padding(
               padding: EdgeInsets.only(top: 2),

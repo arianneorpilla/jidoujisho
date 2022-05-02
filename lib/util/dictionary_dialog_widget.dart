@@ -44,9 +44,7 @@ class DictionaryDialogWidgetState extends State<DictionaryDialogWidget> {
     return AlertDialog(
       contentPadding:
           const EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 20),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
+      shape: const RoundedRectangleBorder(),
       content: DictionaryScrollableWidget(
         appModel: appModel,
         mediaHistoryItem: widget.mediaHistoryItem,

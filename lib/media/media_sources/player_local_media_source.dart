@@ -53,7 +53,6 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
       context: context,
       rootDirectories: await appModel.getMediaTypeDirectories(mediaType),
       fsType: FilesystemType.file,
-      multiSelect: false,
       folderIconColor: Colors.red,
       themeData: Theme.of(context),
     );

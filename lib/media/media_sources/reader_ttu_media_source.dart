@@ -92,9 +92,7 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
     AppModel appModel = Provider.of<AppModel>(context, listen: false);
 
     Widget alertDialog = AlertDialog(
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
+      shape: const RoundedRectangleBorder(),
       title: Text(
         appModel.translate('clear_reader_history'),
       ),
@@ -147,7 +145,6 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
           color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
         ),
         size: 20,
-        showIfClosed: true,
         showIfOpened: true,
       ),
       MediaSourceActionButton(
@@ -282,7 +279,6 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
             await controller.scrollTo(
               x: state.scrollX,
               y: state.scrollY,
-              animated: false,
             );
             state.setScrollX(-1);
             state.setScrollY(-1);

@@ -69,7 +69,6 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
   Widget buildSearchHistory() {
     List<String> searchHistory = appModel.getSearchHistory().reversed.toList();
     return ClipRRect(
-      borderRadius: BorderRadius.zero,
       child: Material(
         color: Colors.transparent,
         child: ListView.builder(
@@ -172,7 +171,6 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
     }
 
     return ClipRRect(
-      borderRadius: BorderRadius.zero,
       child: Material(
         color: Colors.transparent,
         child: Column(
@@ -195,7 +193,6 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 8, 24, 8),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const Padding(
               padding: EdgeInsets.only(top: 2),
@@ -293,9 +290,7 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
 
   void showClearAllDialog(BuildContext context) {
     Widget alertDialog = AlertDialog(
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
+      shape: const RoundedRectangleBorder(),
       title: Text(
         appModel.translate('clear_dictionary_history'),
       ),
@@ -348,11 +343,9 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
         scrollPadding: const EdgeInsets.only(top: 16, bottom: 56),
         transitionDuration: Duration.zero,
         margins: const EdgeInsets.symmetric(horizontal: 6),
-        height: 48,
         width: double.maxFinite,
         openAxisAlignment: 0.0,
         elevation: 0,
-        closeOnBackdropTap: true,
         debounceDelay: const Duration(milliseconds: 500),
         progress: isSearching,
         transition: SlideFadeFloatingSearchBarTransition(),
@@ -365,7 +358,6 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
             : Colors.white.withOpacity(0.95),
         physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics()),
-        clearQueryOnClose: true,
         accentColor: Theme.of(context).focusColor,
         onQueryChanged: onQueryChanged,
         onSubmitted: onSubmitted,
@@ -384,12 +376,10 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
               color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
             ),
             size: 20,
-            showIfClosed: true,
           ),
           FloatingSearchBarAction.searchToClear(
             size: 20,
             duration: Duration.zero,
-            showIfClosed: true,
             color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
           ),
         ],
@@ -404,8 +394,6 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
 
   Widget buildDictionaryButton() {
     return FloatingSearchBarAction(
-      showIfOpened: false,
-      showIfClosed: true,
       child: CircularButton(
         icon: Icon(
           Icons.auto_stories,
@@ -421,7 +409,6 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
 
   Widget buildBackButton() {
     return FloatingSearchBarAction.back(
-      showIfClosed: false,
       color: appModel.getIsDarkMode() ? Colors.white : Colors.black,
       size: 20,
     );

@@ -111,7 +111,6 @@ class ReaderHomePageState extends State<ReaderHomePage>
           parent: BouncingScrollPhysics(),
         ),
         controller: scrollController,
-        addAutomaticKeepAlives: true,
         itemCount: 2,
         itemBuilder: (context, index) {
           if (index == 0) {
@@ -125,7 +124,6 @@ class ReaderHomePageState extends State<ReaderHomePage>
             ),
             shrinkWrap: true,
             controller: scrollController,
-            addAutomaticKeepAlives: true,
             itemCount: mediaHistoryItems.length,
             itemBuilder: (context, index) {
               MediaHistoryItem item = mediaHistoryItems[index];

@@ -165,9 +165,7 @@ abstract class ReaderMediaSource extends MediaSource {
             barrierDismissible: true,
             context: context,
             builder: (context) => AlertDialog(
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.zero,
-              ),
+              shape: const RoundedRectangleBorder(),
               title: Text(
                 (item.alias.isNotEmpty)
                     ? getHistoryCaptionAlias(item)
@@ -180,7 +178,6 @@ abstract class ReaderMediaSource extends MediaSource {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Icon(
                           icon,
@@ -307,25 +304,27 @@ abstract class ReaderMediaSource extends MediaSource {
         ),
         const SizedBox(height: 2),
         if (isHistory)
-          Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-            Icon(
-              icon,
-              color: Theme.of(context).unselectedWidgetColor,
-              size: 12,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              item.sourceName,
-              style: TextStyle(
+          Row(
+            children: [
+              Icon(
+                icon,
                 color: Theme.of(context).unselectedWidgetColor,
-                fontWeight: FontWeight.w500,
-                fontSize: 12,
+                size: 12,
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              softWrap: true,
-            ),
-          ]),
+              const SizedBox(width: 4),
+              Text(
+                item.sourceName,
+                style: TextStyle(
+                  color: Theme.of(context).unselectedWidgetColor,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 12,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                softWrap: true,
+              ),
+            ],
+          ),
         if (extraMetadata != null) extraMetadata
       ],
     );
@@ -416,7 +415,6 @@ abstract class ReaderMediaSource extends MediaSource {
     return PagedListView<int, MediaHistoryItem>(
       scrollController: scrollController,
       pagingController: pagingController,
-      addAutomaticKeepAlives: true,
       key: UniqueKey(),
       builderDelegate: PagedChildBuilderDelegate<MediaHistoryItem>(
           itemBuilder: (context, item, index) {
@@ -502,9 +500,7 @@ abstract class ReaderMediaSource extends MediaSource {
       context: context,
       builder: (context) {
         return AlertDialog(
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.zero,
-          ),
+          shape: const RoundedRectangleBorder(),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,

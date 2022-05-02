@@ -179,9 +179,7 @@ class ReaderPageState extends State<ReaderPage> {
 
   Future<bool> onWillPop() async {
     Widget alertDialog = AlertDialog(
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
+      shape: const RoundedRectangleBorder(),
       title: Text(
         appModel.translate('dialog_exit_reader'),
       ),

@@ -120,7 +120,7 @@ class AppModel with ChangeNotifier {
   final Map<String, Map<String, DictionarySearchResult>> _resultsCache = {};
 
   ScrollController getScrollController(MediaType type) {
-    _scrollOffsets[type] ??= ScrollController(initialScrollOffset: 0);
+    _scrollOffsets[type] ??= ScrollController();
     return _scrollOffsets[type]!;
   }
 
@@ -1179,8 +1179,7 @@ class AppModel with ChangeNotifier {
       cardColor: Colors.white,
       focusColor: Colors.red,
       selectedRowColor: Colors.grey.shade300,
-      primaryTextTheme:
-          Typography.material2018(platform: TargetPlatform.android).black,
+      primaryTextTheme: Typography.material2018().black,
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           primary: Colors.black,
@@ -1221,8 +1220,7 @@ class AppModel with ChangeNotifier {
       cardColor: Colors.grey.shade900,
       focusColor: Colors.red,
       selectedRowColor: Colors.grey.shade600,
-      primaryTextTheme:
-          Typography.material2018(platform: TargetPlatform.android).white,
+      primaryTextTheme: Typography.material2018().white,
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           primary: Colors.white,

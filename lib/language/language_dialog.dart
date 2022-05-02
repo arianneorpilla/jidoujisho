@@ -24,9 +24,7 @@ class LanguageDialogState extends State<LanguageDialog> {
     return AlertDialog(
       contentPadding:
           const EdgeInsets.only(top: 30, left: 20, right: 20, bottom: 20),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
+      shape: const RoundedRectangleBorder(),
       content: buildContent(),
       actions: <Widget>[
         TextButton(

@@ -116,8 +116,6 @@ class PlayerNetworkStreamSource extends PlayerMediaSource {
     AppModel appModel = Provider.of<AppModel>(context, listen: false);
     MediaHistoryItem item = MediaHistoryItem(
       key: query,
-      title: '',
-      author: '',
       sourceName: sourceName,
       mediaTypePrefs: mediaType.prefsDirectory(),
       currentProgress: 0,

@@ -260,9 +260,7 @@ Widget showProgressDialog(
   AppModel appModel = Provider.of<AppModel>(context);
 
   return AlertDialog(
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.zero,
-    ),
+    shape: const RoundedRectangleBorder(),
     contentPadding:
         const EdgeInsets.only(top: 20, bottom: 20, left: 30, right: 30),
     content: Row(

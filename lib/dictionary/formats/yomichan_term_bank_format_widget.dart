@@ -75,10 +75,8 @@ class YomichanTermBankFormatWidget extends DictionaryWidget {
               msg: '${tag.tagName} - ${tag.tagNotes}',
               toastLength: Toast.LENGTH_SHORT,
               gravity: ToastGravity.BOTTOM,
-              timeInSecForIosWeb: 1,
               backgroundColor: tag.getTagColor(),
               textColor: Colors.white,
-              fontSize: 16.0,
             );
           },
           child: Container(
@@ -105,10 +103,8 @@ class YomichanTermBankFormatWidget extends DictionaryWidget {
                 ' ${dictionary.dictionaryName} with ${dictionaryFormat.formatName} format',
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
             backgroundColor: const Color(0xffa15151),
             textColor: Colors.white,
-            fontSize: 16.0,
           );
         },
         child: Container(
@@ -169,10 +165,8 @@ class YomichanTermBankFormatWidget extends DictionaryWidget {
                 msg: '${tag.tagName} - ${tag.tagNotes}',
                 toastLength: Toast.LENGTH_SHORT,
                 gravity: ToastGravity.BOTTOM,
-                timeInSecForIosWeb: 1,
                 backgroundColor: tag.getTagColor(),
                 textColor: Colors.white,
-                fontSize: 16.0,
               );
             },
             child: Container(
@@ -225,7 +219,6 @@ class YomichanTermBankFormatWidget extends DictionaryWidget {
                   ),
                   children: inlineSpanWidgets,
                 ),
-                enableInteractiveSelection: true,
                 toolbarOptions: const ToolbarOptions(copy: true),
               )
             : Text.rich(

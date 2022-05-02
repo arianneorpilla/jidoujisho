@@ -67,8 +67,7 @@ class JapanesePod101AudioEnhancement extends AnkiExportEnhancement {
       } else {
         String reading = params.reading;
         reading = reading.split('\n').first;
-        reading = reading.replaceAll(
-            RegExp(r'(<[^>]*>)', multiLine: true, caseSensitive: true), '');
+        reading = reading.replaceAll(RegExp(r'(<[^>]*>)', multiLine: true), '');
         reading = reading.replaceAll(r'\[([^\[\]]++|(?R))*+\]', '');
         reading = reading.trim();
 
@@ -82,8 +81,7 @@ class JapanesePod101AudioEnhancement extends AnkiExportEnhancement {
       } else {
         String reading = params.reading;
         reading = reading.split('\n').first;
-        reading = reading.replaceAll(
-            RegExp(r'(<[^>]*>)', multiLine: true, caseSensitive: true), '');
+        reading = reading.replaceAll(RegExp(r'(<[^>]*>)', multiLine: true), '');
         reading = reading.replaceAll(r'\[([^\[\]]++|(?R))*+\]', '');
         reading = reading.trim();
 

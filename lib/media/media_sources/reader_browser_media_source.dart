@@ -110,8 +110,6 @@ class ReaderBrowserSource extends ReaderMediaSource {
         mediaSource: this,
         mediaHistoryItem: MediaHistoryItem(
           key: query,
-          title: '',
-          alias: '',
           extra: {},
           sourceName: sourceName,
           currentProgress: 0,
@@ -261,9 +259,7 @@ class ReaderBrowserSource extends ReaderMediaSource {
                               return AlertDialog(
                                 contentPadding: const EdgeInsets.only(
                                     top: 20, left: 20, right: 20, bottom: 20),
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.zero,
-                                ),
+                                shape: const RoundedRectangleBorder(),
                                 content: TextFormField(
                                   autofocus: true,
                                   onFieldSubmitted: (value) async {
@@ -273,7 +269,6 @@ class ReaderBrowserSource extends ReaderMediaSource {
                                             URLRequest(url: Uri.parse(newUrl)));
                                   },
                                   controller: editingController,
-                                  maxLines: 1,
                                   onTap: () => editingController.selection =
                                       TextSelection(
                                           baseOffset: 0,
