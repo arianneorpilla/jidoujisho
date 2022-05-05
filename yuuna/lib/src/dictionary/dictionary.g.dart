@@ -6,20 +6,16 @@ part of 'dictionary.dart';
 // IsarCollectionGenerator
 // **************************************************************************
 
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, unused_local_variable
 
 extension GetDictionaryCollection on Isar {
-  IsarCollection<Dictionary> get dictionarys {
-    return getCollection('Dictionary');
-  }
+  IsarCollection<Dictionary> get dictionarys => getCollection();
 }
 
-final DictionarySchema = CollectionSchema(
+const DictionarySchema = CollectionSchema(
   name: 'Dictionary',
   schema:
       '{"name":"Dictionary","idName":"id","properties":[{"name":"collapsed","type":"Bool"},{"name":"dictionaryName","type":"String"},{"name":"formatName","type":"String"},{"name":"hidden","type":"Bool"},{"name":"metadata","type":"String"},{"name":"order","type":"Long"}],"indexes":[{"name":"dictionaryName","unique":true,"properties":[{"name":"dictionaryName","type":"Hash","caseSensitive":true}]},{"name":"order","unique":true,"properties":[{"name":"order","type":"Value","caseSensitive":false}]}],"links":[]}',
-  nativeAdapter: const _DictionaryNativeAdapter(),
-  webAdapter: const _DictionaryWebAdapter(),
   idName: 'id',
   propertyIds: {
     'collapsed': 0,
@@ -31,176 +27,175 @@ final DictionarySchema = CollectionSchema(
   },
   listProperties: {},
   indexIds: {'dictionaryName': 0, 'order': 1},
-  indexTypes: {
+  indexValueTypes: {
     'dictionaryName': [
-      NativeIndexType.stringHash,
+      IndexValueType.stringHash,
     ],
     'order': [
-      NativeIndexType.long,
+      IndexValueType.long,
     ]
   },
   linkIds: {},
-  backlinkIds: {},
-  linkedCollections: [],
-  getId: (obj) {
-    if (obj.id == Isar.autoIncrement) {
-      return null;
-    } else {
-      return obj.id;
-    }
-  },
-  setId: (obj, id) => obj.id = id,
-  getLinks: (obj) => [],
-  version: 2,
+  backlinkLinkNames: {},
+  getId: _dictionaryGetId,
+  setId: _dictionarySetId,
+  getLinks: _dictionaryGetLinks,
+  attachLinks: _dictionaryAttachLinks,
+  serializeNative: _dictionarySerializeNative,
+  deserializeNative: _dictionaryDeserializeNative,
+  deserializePropNative: _dictionaryDeserializePropNative,
+  serializeWeb: _dictionarySerializeWeb,
+  deserializeWeb: _dictionaryDeserializeWeb,
+  deserializePropWeb: _dictionaryDeserializePropWeb,
+  version: 3,
 );
+
+int? _dictionaryGetId(Dictionary object) {
+  if (object.id == Isar.autoIncrement) {
+    return null;
+  } else {
+    return object.id;
+  }
+}
+
+void _dictionarySetId(Dictionary object, int id) {
+  object.id = id;
+}
+
+List<IsarLinkBase> _dictionaryGetLinks(Dictionary object) {
+  return [];
+}
 
 const _dictionaryImmutableStringMapConverter = ImmutableStringMapConverter();
 
-class _DictionaryWebAdapter extends IsarWebTypeAdapter<Dictionary> {
-  const _DictionaryWebAdapter();
+void _dictionarySerializeNative(
+    IsarCollection<Dictionary> collection,
+    IsarRawObject rawObj,
+    Dictionary object,
+    int staticSize,
+    List<int> offsets,
+    AdapterAlloc alloc) {
+  var dynamicSize = 0;
+  final value0 = object.collapsed;
+  final _collapsed = value0;
+  final value1 = object.dictionaryName;
+  final _dictionaryName = IsarBinaryWriter.utf8Encoder.convert(value1);
+  dynamicSize += (_dictionaryName.length) as int;
+  final value2 = object.formatName;
+  final _formatName = IsarBinaryWriter.utf8Encoder.convert(value2);
+  dynamicSize += (_formatName.length) as int;
+  final value3 = object.hidden;
+  final _hidden = value3;
+  final value4 = _dictionaryImmutableStringMapConverter.toIsar(object.metadata);
+  final _metadata = IsarBinaryWriter.utf8Encoder.convert(value4);
+  dynamicSize += (_metadata.length) as int;
+  final value5 = object.order;
+  final _order = value5;
+  final size = staticSize + dynamicSize;
 
-  @override
-  Object serialize(IsarCollection<Dictionary> collection, Dictionary object) {
-    final jsObj = IsarNative.newJsObject();
-    IsarNative.jsObjectSet(jsObj, 'collapsed', object.collapsed);
-    IsarNative.jsObjectSet(jsObj, 'dictionaryName', object.dictionaryName);
-    IsarNative.jsObjectSet(jsObj, 'formatName', object.formatName);
-    IsarNative.jsObjectSet(jsObj, 'hidden', object.hidden);
-    IsarNative.jsObjectSet(jsObj, 'id', object.id);
-    IsarNative.jsObjectSet(jsObj, 'metadata',
-        _dictionaryImmutableStringMapConverter.toIsar(object.metadata));
-    IsarNative.jsObjectSet(jsObj, 'order', object.order);
-    return jsObj;
-  }
-
-  @override
-  Dictionary deserialize(IsarCollection<Dictionary> collection, dynamic jsObj) {
-    final object = Dictionary(
-      collapsed: IsarNative.jsObjectGet(jsObj, 'collapsed') ?? false,
-      dictionaryName: IsarNative.jsObjectGet(jsObj, 'dictionaryName') ?? '',
-      formatName: IsarNative.jsObjectGet(jsObj, 'formatName') ?? '',
-      hidden: IsarNative.jsObjectGet(jsObj, 'hidden') ?? false,
-      metadata: _dictionaryImmutableStringMapConverter
-          .fromIsar(IsarNative.jsObjectGet(jsObj, 'metadata') ?? ''),
-      order: IsarNative.jsObjectGet(jsObj, 'order') ?? double.negativeInfinity,
-    );
-    object.id = IsarNative.jsObjectGet(jsObj, 'id');
-    return object;
-  }
-
-  @override
-  P deserializeProperty<P>(Object jsObj, String propertyName) {
-    switch (propertyName) {
-      case 'collapsed':
-        return (IsarNative.jsObjectGet(jsObj, 'collapsed') ?? false) as P;
-      case 'dictionaryName':
-        return (IsarNative.jsObjectGet(jsObj, 'dictionaryName') ?? '') as P;
-      case 'formatName':
-        return (IsarNative.jsObjectGet(jsObj, 'formatName') ?? '') as P;
-      case 'hidden':
-        return (IsarNative.jsObjectGet(jsObj, 'hidden') ?? false) as P;
-      case 'id':
-        return (IsarNative.jsObjectGet(jsObj, 'id')) as P;
-      case 'metadata':
-        return (_dictionaryImmutableStringMapConverter
-            .fromIsar(IsarNative.jsObjectGet(jsObj, 'metadata') ?? '')) as P;
-      case 'order':
-        return (IsarNative.jsObjectGet(jsObj, 'order') ??
-            double.negativeInfinity) as P;
-      default:
-        throw 'Illegal propertyName';
-    }
-  }
-
-  @override
-  void attachLinks(Isar isar, int id, Dictionary object) {}
+  rawObj.buffer = alloc(size);
+  rawObj.buffer_length = size;
+  final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
+  final writer = IsarBinaryWriter(buffer, staticSize);
+  writer.writeBool(offsets[0], _collapsed);
+  writer.writeBytes(offsets[1], _dictionaryName);
+  writer.writeBytes(offsets[2], _formatName);
+  writer.writeBool(offsets[3], _hidden);
+  writer.writeBytes(offsets[4], _metadata);
+  writer.writeLong(offsets[5], _order);
 }
 
-class _DictionaryNativeAdapter extends IsarNativeTypeAdapter<Dictionary> {
-  const _DictionaryNativeAdapter();
-
-  @override
-  void serialize(
-      IsarCollection<Dictionary> collection,
-      IsarRawObject rawObj,
-      Dictionary object,
-      int staticSize,
-      List<int> offsets,
-      AdapterAlloc alloc) {
-    var dynamicSize = 0;
-    final value0 = object.collapsed;
-    final _collapsed = value0;
-    final value1 = object.dictionaryName;
-    final _dictionaryName = IsarBinaryWriter.utf8Encoder.convert(value1);
-    dynamicSize += (_dictionaryName.length) as int;
-    final value2 = object.formatName;
-    final _formatName = IsarBinaryWriter.utf8Encoder.convert(value2);
-    dynamicSize += (_formatName.length) as int;
-    final value3 = object.hidden;
-    final _hidden = value3;
-    final value4 =
-        _dictionaryImmutableStringMapConverter.toIsar(object.metadata);
-    final _metadata = IsarBinaryWriter.utf8Encoder.convert(value4);
-    dynamicSize += (_metadata.length) as int;
-    final value5 = object.order;
-    final _order = value5;
-    final size = staticSize + dynamicSize;
-
-    rawObj.buffer = alloc(size);
-    rawObj.buffer_length = size;
-    final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
-    final writer = IsarBinaryWriter(buffer, staticSize);
-    writer.writeBool(offsets[0], _collapsed);
-    writer.writeBytes(offsets[1], _dictionaryName);
-    writer.writeBytes(offsets[2], _formatName);
-    writer.writeBool(offsets[3], _hidden);
-    writer.writeBytes(offsets[4], _metadata);
-    writer.writeLong(offsets[5], _order);
-  }
-
-  @override
-  Dictionary deserialize(IsarCollection<Dictionary> collection, int id,
-      IsarBinaryReader reader, List<int> offsets) {
-    final object = Dictionary(
-      collapsed: reader.readBool(offsets[0]),
-      dictionaryName: reader.readString(offsets[1]),
-      formatName: reader.readString(offsets[2]),
-      hidden: reader.readBool(offsets[3]),
-      metadata: _dictionaryImmutableStringMapConverter
-          .fromIsar(reader.readString(offsets[4])),
-      order: reader.readLong(offsets[5]),
-    );
-    object.id = id;
-    return object;
-  }
-
-  @override
-  P deserializeProperty<P>(
-      int id, IsarBinaryReader reader, int propertyIndex, int offset) {
-    switch (propertyIndex) {
-      case -1:
-        return id as P;
-      case 0:
-        return (reader.readBool(offset)) as P;
-      case 1:
-        return (reader.readString(offset)) as P;
-      case 2:
-        return (reader.readString(offset)) as P;
-      case 3:
-        return (reader.readBool(offset)) as P;
-      case 4:
-        return (_dictionaryImmutableStringMapConverter
-            .fromIsar(reader.readString(offset))) as P;
-      case 5:
-        return (reader.readLong(offset)) as P;
-      default:
-        throw 'Illegal propertyIndex';
-    }
-  }
-
-  @override
-  void attachLinks(Isar isar, int id, Dictionary object) {}
+Dictionary _dictionaryDeserializeNative(IsarCollection<Dictionary> collection,
+    int id, IsarBinaryReader reader, List<int> offsets) {
+  final object = Dictionary(
+    collapsed: reader.readBool(offsets[0]),
+    dictionaryName: reader.readString(offsets[1]),
+    formatName: reader.readString(offsets[2]),
+    hidden: reader.readBool(offsets[3]),
+    metadata: _dictionaryImmutableStringMapConverter
+        .fromIsar(reader.readString(offsets[4])),
+    order: reader.readLong(offsets[5]),
+  );
+  object.id = id;
+  return object;
 }
+
+P _dictionaryDeserializePropNative<P>(
+    int id, IsarBinaryReader reader, int propertyIndex, int offset) {
+  switch (propertyIndex) {
+    case -1:
+      return id as P;
+    case 0:
+      return (reader.readBool(offset)) as P;
+    case 1:
+      return (reader.readString(offset)) as P;
+    case 2:
+      return (reader.readString(offset)) as P;
+    case 3:
+      return (reader.readBool(offset)) as P;
+    case 4:
+      return (_dictionaryImmutableStringMapConverter
+          .fromIsar(reader.readString(offset))) as P;
+    case 5:
+      return (reader.readLong(offset)) as P;
+    default:
+      throw 'Illegal propertyIndex';
+  }
+}
+
+dynamic _dictionarySerializeWeb(
+    IsarCollection<Dictionary> collection, Dictionary object) {
+  final jsObj = IsarNative.newJsObject();
+  IsarNative.jsObjectSet(jsObj, 'collapsed', object.collapsed);
+  IsarNative.jsObjectSet(jsObj, 'dictionaryName', object.dictionaryName);
+  IsarNative.jsObjectSet(jsObj, 'formatName', object.formatName);
+  IsarNative.jsObjectSet(jsObj, 'hidden', object.hidden);
+  IsarNative.jsObjectSet(jsObj, 'id', object.id);
+  IsarNative.jsObjectSet(jsObj, 'metadata',
+      _dictionaryImmutableStringMapConverter.toIsar(object.metadata));
+  IsarNative.jsObjectSet(jsObj, 'order', object.order);
+  return jsObj;
+}
+
+Dictionary _dictionaryDeserializeWeb(
+    IsarCollection<Dictionary> collection, dynamic jsObj) {
+  final object = Dictionary(
+    collapsed: IsarNative.jsObjectGet(jsObj, 'collapsed') ?? false,
+    dictionaryName: IsarNative.jsObjectGet(jsObj, 'dictionaryName') ?? '',
+    formatName: IsarNative.jsObjectGet(jsObj, 'formatName') ?? '',
+    hidden: IsarNative.jsObjectGet(jsObj, 'hidden') ?? false,
+    metadata: _dictionaryImmutableStringMapConverter
+        .fromIsar(IsarNative.jsObjectGet(jsObj, 'metadata') ?? ''),
+    order: IsarNative.jsObjectGet(jsObj, 'order') ?? double.negativeInfinity,
+  );
+  object.id = IsarNative.jsObjectGet(jsObj, 'id');
+  return object;
+}
+
+P _dictionaryDeserializePropWeb<P>(Object jsObj, String propertyName) {
+  switch (propertyName) {
+    case 'collapsed':
+      return (IsarNative.jsObjectGet(jsObj, 'collapsed') ?? false) as P;
+    case 'dictionaryName':
+      return (IsarNative.jsObjectGet(jsObj, 'dictionaryName') ?? '') as P;
+    case 'formatName':
+      return (IsarNative.jsObjectGet(jsObj, 'formatName') ?? '') as P;
+    case 'hidden':
+      return (IsarNative.jsObjectGet(jsObj, 'hidden') ?? false) as P;
+    case 'id':
+      return (IsarNative.jsObjectGet(jsObj, 'id')) as P;
+    case 'metadata':
+      return (_dictionaryImmutableStringMapConverter
+          .fromIsar(IsarNative.jsObjectGet(jsObj, 'metadata') ?? '')) as P;
+    case 'order':
+      return (IsarNative.jsObjectGet(jsObj, 'order') ?? double.negativeInfinity)
+          as P;
+    default:
+      throw 'Illegal propertyName';
+  }
+}
+
+void _dictionaryAttachLinks(IsarCollection col, int id, Dictionary object) {}
 
 extension DictionaryByIndex on IsarCollection<Dictionary> {
   Future<Dictionary?> getByDictionaryName(String dictionaryName) {
@@ -281,122 +276,101 @@ extension DictionaryByIndex on IsarCollection<Dictionary> {
 extension DictionaryQueryWhereSort
     on QueryBuilder<Dictionary, Dictionary, QWhere> {
   QueryBuilder<Dictionary, Dictionary, QAfterWhere> anyId() {
-    return addWhereClauseInternal(const WhereClause(indexName: null));
+    return addWhereClauseInternal(const IdWhereClause.any());
   }
 
   QueryBuilder<Dictionary, Dictionary, QAfterWhere> anyDictionaryName() {
     return addWhereClauseInternal(
-        const WhereClause(indexName: 'dictionaryName'));
+        const IndexWhereClause.any(indexName: 'dictionaryName'));
   }
 
   QueryBuilder<Dictionary, Dictionary, QAfterWhere> anyOrder() {
-    return addWhereClauseInternal(const WhereClause(indexName: 'order'));
+    return addWhereClauseInternal(
+        const IndexWhereClause.any(indexName: 'order'));
   }
 }
 
 extension DictionaryQueryWhere
     on QueryBuilder<Dictionary, Dictionary, QWhereClause> {
-  QueryBuilder<Dictionary, Dictionary, QAfterWhereClause> idEqualTo(int? id) {
-    return addWhereClauseInternal(WhereClause(
-      indexName: null,
-      lower: [id],
+  QueryBuilder<Dictionary, Dictionary, QAfterWhereClause> idEqualTo(int id) {
+    return addWhereClauseInternal(IdWhereClause.between(
+      lower: id,
       includeLower: true,
-      upper: [id],
+      upper: id,
       includeUpper: true,
     ));
   }
 
-  QueryBuilder<Dictionary, Dictionary, QAfterWhereClause> idNotEqualTo(
-      int? id) {
+  QueryBuilder<Dictionary, Dictionary, QAfterWhereClause> idNotEqualTo(int id) {
     if (whereSortInternal == Sort.asc) {
-      return addWhereClauseInternal(WhereClause(
-        indexName: null,
-        upper: [id],
-        includeUpper: false,
-      )).addWhereClauseInternal(WhereClause(
-        indexName: null,
-        lower: [id],
-        includeLower: false,
-      ));
+      return addWhereClauseInternal(
+        IdWhereClause.lessThan(upper: id, includeUpper: false),
+      ).addWhereClauseInternal(
+        IdWhereClause.greaterThan(lower: id, includeLower: false),
+      );
     } else {
-      return addWhereClauseInternal(WhereClause(
-        indexName: null,
-        lower: [id],
-        includeLower: false,
-      )).addWhereClauseInternal(WhereClause(
-        indexName: null,
-        upper: [id],
-        includeUpper: false,
-      ));
+      return addWhereClauseInternal(
+        IdWhereClause.greaterThan(lower: id, includeLower: false),
+      ).addWhereClauseInternal(
+        IdWhereClause.lessThan(upper: id, includeUpper: false),
+      );
     }
   }
 
-  QueryBuilder<Dictionary, Dictionary, QAfterWhereClause> idGreaterThan(
-    int? id, {
-    bool include = false,
-  }) {
-    return addWhereClauseInternal(WhereClause(
-      indexName: null,
-      lower: [id],
-      includeLower: include,
-    ));
+  QueryBuilder<Dictionary, Dictionary, QAfterWhereClause> idGreaterThan(int id,
+      {bool include = false}) {
+    return addWhereClauseInternal(
+      IdWhereClause.greaterThan(lower: id, includeLower: include),
+    );
   }
 
-  QueryBuilder<Dictionary, Dictionary, QAfterWhereClause> idLessThan(
-    int? id, {
-    bool include = false,
-  }) {
-    return addWhereClauseInternal(WhereClause(
-      indexName: null,
-      upper: [id],
-      includeUpper: include,
-    ));
+  QueryBuilder<Dictionary, Dictionary, QAfterWhereClause> idLessThan(int id,
+      {bool include = false}) {
+    return addWhereClauseInternal(
+      IdWhereClause.lessThan(upper: id, includeUpper: include),
+    );
   }
 
   QueryBuilder<Dictionary, Dictionary, QAfterWhereClause> idBetween(
-    int? lowerId,
-    int? upperId, {
+    int lowerId,
+    int upperId, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
-    return addWhereClauseInternal(WhereClause(
-      indexName: null,
-      lower: [lowerId],
+    return addWhereClauseInternal(IdWhereClause.between(
+      lower: lowerId,
       includeLower: includeLower,
-      upper: [upperId],
+      upper: upperId,
       includeUpper: includeUpper,
     ));
   }
 
   QueryBuilder<Dictionary, Dictionary, QAfterWhereClause> dictionaryNameEqualTo(
       String dictionaryName) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.equalTo(
       indexName: 'dictionaryName',
-      lower: [dictionaryName],
-      includeLower: true,
-      upper: [dictionaryName],
-      includeUpper: true,
+      value: [dictionaryName],
     ));
   }
 
   QueryBuilder<Dictionary, Dictionary, QAfterWhereClause>
       dictionaryNameNotEqualTo(String dictionaryName) {
     if (whereSortInternal == Sort.asc) {
-      return addWhereClauseInternal(WhereClause(
+      return addWhereClauseInternal(IndexWhereClause.lessThan(
         indexName: 'dictionaryName',
         upper: [dictionaryName],
         includeUpper: false,
-      )).addWhereClauseInternal(WhereClause(
+      )).addWhereClauseInternal(IndexWhereClause.greaterThan(
         indexName: 'dictionaryName',
         lower: [dictionaryName],
         includeLower: false,
       ));
     } else {
-      return addWhereClauseInternal(WhereClause(
+      return addWhereClauseInternal(IndexWhereClause.greaterThan(
         indexName: 'dictionaryName',
         lower: [dictionaryName],
         includeLower: false,
-      )).addWhereClauseInternal(WhereClause(
+      )).addWhereClauseInternal(IndexWhereClause.lessThan(
         indexName: 'dictionaryName',
         upper: [dictionaryName],
         includeUpper: false,
@@ -406,33 +380,30 @@ extension DictionaryQueryWhere
 
   QueryBuilder<Dictionary, Dictionary, QAfterWhereClause> orderEqualTo(
       int order) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.equalTo(
       indexName: 'order',
-      lower: [order],
-      includeLower: true,
-      upper: [order],
-      includeUpper: true,
+      value: [order],
     ));
   }
 
   QueryBuilder<Dictionary, Dictionary, QAfterWhereClause> orderNotEqualTo(
       int order) {
     if (whereSortInternal == Sort.asc) {
-      return addWhereClauseInternal(WhereClause(
+      return addWhereClauseInternal(IndexWhereClause.lessThan(
         indexName: 'order',
         upper: [order],
         includeUpper: false,
-      )).addWhereClauseInternal(WhereClause(
+      )).addWhereClauseInternal(IndexWhereClause.greaterThan(
         indexName: 'order',
         lower: [order],
         includeLower: false,
       ));
     } else {
-      return addWhereClauseInternal(WhereClause(
+      return addWhereClauseInternal(IndexWhereClause.greaterThan(
         indexName: 'order',
         lower: [order],
         includeLower: false,
-      )).addWhereClauseInternal(WhereClause(
+      )).addWhereClauseInternal(IndexWhereClause.lessThan(
         indexName: 'order',
         upper: [order],
         includeUpper: false,
@@ -444,7 +415,7 @@ extension DictionaryQueryWhere
     int order, {
     bool include = false,
   }) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.greaterThan(
       indexName: 'order',
       lower: [order],
       includeLower: include,
@@ -455,7 +426,7 @@ extension DictionaryQueryWhere
     int order, {
     bool include = false,
   }) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.lessThan(
       indexName: 'order',
       upper: [order],
       includeUpper: include,
@@ -468,7 +439,7 @@ extension DictionaryQueryWhere
     bool includeLower = true,
     bool includeUpper = true,
   }) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.between(
       indexName: 'order',
       lower: [lowerOrder],
       includeLower: includeLower,
@@ -720,7 +691,7 @@ extension DictionaryQueryFilter
   }
 
   QueryBuilder<Dictionary, Dictionary, QAfterFilterCondition> idEqualTo(
-      int? value) {
+      int value) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.eq,
       property: 'id',
@@ -729,7 +700,7 @@ extension DictionaryQueryFilter
   }
 
   QueryBuilder<Dictionary, Dictionary, QAfterFilterCondition> idGreaterThan(
-    int? value, {
+    int value, {
     bool include = false,
   }) {
     return addFilterConditionInternal(FilterCondition(
@@ -741,7 +712,7 @@ extension DictionaryQueryFilter
   }
 
   QueryBuilder<Dictionary, Dictionary, QAfterFilterCondition> idLessThan(
-    int? value, {
+    int value, {
     bool include = false,
   }) {
     return addFilterConditionInternal(FilterCondition(
@@ -753,8 +724,8 @@ extension DictionaryQueryFilter
   }
 
   QueryBuilder<Dictionary, Dictionary, QAfterFilterCondition> idBetween(
-    int? lower,
-    int? upper, {
+    int lower,
+    int upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {

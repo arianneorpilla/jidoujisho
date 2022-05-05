@@ -36,6 +36,10 @@ class _HomePageState extends BasePageState<HomePage> {
   String get optionsGithub => appModel.translate('options_github');
   String get optionsAttribution => appModel.translate('options_attribution');
 
+  String get stashLabel => appModel.translate('stash');
+  String get cardCreatorLabel => appModel.translate('card_creator');
+  String get showMenuLabel => appModel.translate('show_menu');
+
   @override
   void initState() {
     super.initState();
@@ -59,6 +63,14 @@ class _HomePageState extends BasePageState<HomePage> {
     appIcon = Image.asset(
       'assets/meta/icon.png',
     );
+
+    /// Check if the current profile is valid and report any discrepancies.
+    WidgetsBinding.instance?.addPostFrameCallback((_) {
+      appModel.validateSelectedMapping(
+        context: context,
+        mapping: appModel.lastSelectedMapping,
+      );
+    });
   }
 
   @override
@@ -156,7 +168,7 @@ class _HomePageState extends BasePageState<HomePage> {
 
   Widget buildStashButton() {
     return JidoujishoIconButton(
-      tooltip: appModel.translate('stash'),
+      tooltip: stashLabel,
       icon: Icons.queue_outlined,
       enabled: false,
       onTap: openQueue,
@@ -165,15 +177,15 @@ class _HomePageState extends BasePageState<HomePage> {
 
   Widget buildCreatorButton() {
     return JidoujishoIconButton(
-      tooltip: appModel.translate('card_creator'),
+      tooltip: cardCreatorLabel,
       icon: Icons.note_add_outlined,
-      onTap: openCreator,
+      onTap: appModel.openCreator,
     );
   }
 
   Widget buildShowMenuButton() {
     return JidoujishoIconButton(
-      tooltip: appModel.translate('show_menu'),
+      tooltip: showMenuLabel,
       icon: Icons.more_vert,
       onTapDown: openMenu,
     );
@@ -181,20 +193,24 @@ class _HomePageState extends BasePageState<HomePage> {
 
   PopupMenuItem<VoidCallback> buildPopupItem({
     required String label,
-    required IconData icon,
     required Function() action,
+    IconData? icon,
     Color? color,
   }) {
     return PopupMenuItem<VoidCallback>(
       child: Row(
         children: [
-          Icon(
-            icon,
-            size: textTheme.bodyMedium?.fontSize,
-            color: color,
+          if (icon != null)
+            Icon(
+              icon,
+              size: textTheme.bodyMedium?.fontSize,
+              color: color,
+            ),
+          if (icon != null) const Space.normal(),
+          Text(
+            label,
+            style: TextStyle(color: color),
           ),
-          const Space.normal(),
-          Text(label, style: textTheme.bodyMedium?.copyWith(color: color)),
         ],
       ),
       value: action,
@@ -202,8 +218,6 @@ class _HomePageState extends BasePageState<HomePage> {
   }
 
   void openQueue() {}
-
-  void openCreator() {}
 
   void openMenu(TapDownDetails details) async {
     RelativeRect position = RelativeRect.fromLTRB(
@@ -218,7 +232,10 @@ class _HomePageState extends BasePageState<HomePage> {
   }
 
   void browseToGithub() async {
-    launch('https://github.com/lrorpilla/jidoujisho');
+    launchUrl(
+      Uri.parse('https://github.com/lrorpilla/jidoujisho'),
+      mode: LaunchMode.externalApplication,
+    );
   }
 
   void navigateToLicensePage() async {
@@ -288,7 +305,7 @@ class _HomePageState extends BasePageState<HomePage> {
       ),
       buildPopupItem(
         label: optionsProfiles,
-        icon: Icons.send_to_mobile,
+        icon: Icons.switch_account,
         action: appModel.showProfilesMenu,
       ),
       buildPopupItem(

@@ -30,7 +30,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
   String get optionsDeleteLabel => appModel.translate('options_delete');
   String get optionsEditLabel => appModel.translate('options_edit');
   String get showOptionsLabel => appModel.translate('show_options');
-  String get dialogAddNewLabel => appModel.translate('dialog_add_new');
+  String get dialogCreateLabel => appModel.translate('dialog_create');
   String get dialogCloseLabel => appModel.translate('dialog_close');
   String get dialogDeleteLabel => appModel.translate('dialog_delete');
   String get dialogSaveLabel => appModel.translate('dialog_save');
@@ -39,17 +39,35 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
   String get emptyFieldLabel => appModel.translate('field_label_empty');
   String get mappingNameHintLabel => appModel.translate('mapping_name_hint');
   String get modelToMapLabel => appModel.translate('model_to_map');
-  String get invalidMappingName => appModel.translate('invalid_mapping_name');
-  String get invalidMappingNameContent =>
-      appModel.translate('invalid_mapping_name_content');
+  String get errorMappingName => appModel.translate('error_profile_name');
+  String get errorMappingNameContent =>
+      appModel.translate('error_profile_name_content');
+  String get errorStandardProfileName =>
+      appModel.translate('error_standard_profile_name');
+  String get errorStandardProfileNameContent =>
+      appModel.translate('error_standard_profile_name_content');
 
   final ScrollController _scrollController = ScrollController();
   int _selectedOrder = 0;
 
   @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance?.addPostFrameCallback((_) async {
+      await appModel.validateSelectedMapping(
+        context: context,
+        mapping: appModel.lastSelectedMapping,
+      );
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      contentPadding: Spacing.of(context).insets.exceptBottom.big,
+      contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
+          ? Spacing.of(context).insets.exceptBottom.big
+          : Spacing.of(context).insets.exceptBottom.normal,
       content: buildContent(),
       actions: actions,
     );
@@ -62,10 +80,10 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
 
   Widget buildAddNewButton() {
     return TextButton(
-      child: Text(dialogAddNewLabel),
+      child: Text(dialogCreateLabel),
       onPressed: () async {
         String model = appModel.lastSelectedModel ?? widget.initialModel;
-        List<String> modelFields = await AnkiUtilities.getFieldList(model);
+        List<String> modelFields = await appModel.getFieldList(model);
         List<int?> fieldIndexes =
             List.generate(modelFields.length, (index) => null);
 
@@ -118,20 +136,28 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
     return Scrollbar(
       controller: _scrollController,
       child: ReorderableListView.builder(
+        scrollController: _scrollController,
         shrinkWrap: true,
         itemCount: mappings.length,
         itemBuilder: (context, index) => buildMappingTile(mappings[index]),
-        onReorder: (oldIndex, newIndex) {
+        onReorder: (oldIndex, newIndex) async {
           /// Moving a mapping to the last entry results in an index equal
           /// to the length of mappings, so this has to be readjusted.
           if (newIndex == mappings.length) {
             newIndex = mappings.length - 1;
           }
 
-          appModel.setLastSelectedMapping(mappings[newIndex]);
-          updateSelectedOrder(newIndex);
+          AnkiMapping newSelectedMapping = mappings[newIndex];
+          appModel.setLastSelectedMapping(newSelectedMapping);
+          updateSelectedOrder(newSelectedMapping.order);
+
           appModel.updateMappingsOrder(oldIndex, newIndex);
           setState(() {});
+
+          await appModel.validateSelectedMapping(
+            context: context,
+            mapping: newSelectedMapping,
+          );
         },
       ),
     );
@@ -139,25 +165,39 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
 
   Widget buildMappingTile(AnkiMapping mapping) {
     return ListTile(
-        key: ValueKey(mapping.label),
-        selected: appModel.lastSelectedMapping?.label == mapping.label,
-        leading: const Icon(Icons.send_to_mobile),
-        title: Row(
-          children: [
-            Expanded(
-              child: JidoujishoMarquee(
+      key: ValueKey(mapping.label),
+      selected: appModel.lastSelectedMapping.label == mapping.label,
+      leading: const Icon(Icons.account_box),
+      title: Row(
+        children: [
+          Expanded(
+            child: Column(
+              children: [
+                JidoujishoMarquee(
                   text: mapping.label,
-                  style: TextStyle(fontSize: textTheme.bodyMedium?.fontSize)),
+                  style: TextStyle(fontSize: textTheme.bodyMedium?.fontSize),
+                ),
+                JidoujishoMarquee(
+                  text: mapping.model,
+                  style: TextStyle(fontSize: textTheme.bodySmall?.fontSize),
+                ),
+              ],
             ),
-            if (_selectedOrder == mapping.order) const Space.normal(),
-            if (_selectedOrder == mapping.order)
-              buildMappingTileTrailing(mapping)
-          ],
-        ),
-        onTap: () async {
-          await appModel.setLastSelectedMapping(mapping);
-          updateSelectedOrder(mapping.order);
-        });
+          ),
+          if (_selectedOrder == mapping.order) const Space.normal(),
+          if (_selectedOrder == mapping.order) buildMappingTileTrailing(mapping)
+        ],
+      ),
+      onTap: () async {
+        appModel.setLastSelectedMapping(mapping);
+        updateSelectedOrder(mapping.order);
+
+        await appModel.validateSelectedMapping(
+          context: context,
+          mapping: mapping,
+        );
+      },
+    );
   }
 
   Widget buildMappingTileTrailing(AnkiMapping mapping) {
@@ -173,21 +213,24 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
 
   PopupMenuItem<VoidCallback> buildPopupItem({
     required String label,
-    required IconData icon,
     required Function() action,
+    IconData? icon,
     Color? color,
   }) {
     return PopupMenuItem<VoidCallback>(
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: textTheme.bodyMedium?.fontSize,
-            color: color,
+          if (icon != null)
+            Icon(
+              icon,
+              size: textTheme.bodyMedium?.fontSize,
+              color: color,
+            ),
+          if (icon != null) const Space.normal(),
+          Text(
+            label,
+            style: TextStyle(color: color),
           ),
-          const Space.normal(),
-          Text(label, style: textTheme.bodyMedium?.copyWith(color: color)),
         ],
       ),
       value: action,
@@ -216,7 +259,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
           await showMappingEditDialog(mapping);
         },
       ),
-      if (AnkiMapping.defaultMappingName != mapping.label)
+      if (AnkiMapping.standardProfileName != mapping.label)
         buildPopupItem(
           label: optionsDeleteLabel,
           icon: Icons.delete,
@@ -294,20 +337,29 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
     required AnkiMapping mappingClone,
     required TextEditingController controller,
   }) {
+    ScrollController contentController = ScrollController();
+
     return SizedBox(
       width: double.maxFinite,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          buildMappingNameFormField(controller: controller),
-          const Space.normal(),
-          Flexible(
-            child: buildMappingFieldDropdowns(
-              modelFields: modelFields,
-              mappingClone: mappingClone,
-            ),
+      child: Scrollbar(
+        controller: contentController,
+        child: SingleChildScrollView(
+          controller: contentController,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              buildMappingNameFormField(controller: controller),
+              const Space.normal(),
+              Flexible(
+                child: buildMappingFieldDropdowns(
+                  modelFields: modelFields,
+                  mappingClone: mappingClone,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -358,7 +410,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
                   setState(() {});
                 },
               ),
-              const Space.normal(),
+              if (index != modelFields.length - 1) const Space.normal(),
             ],
           );
         },
@@ -372,14 +424,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(
-        enabledBorder: UnderlineInputBorder(
-          borderSide: BorderSide(
-              color: Theme.of(context).unselectedWidgetColor.withOpacity(0.5)),
-        ),
-        focusedBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: Theme.of(context).focusColor),
-        ),
-        prefixIcon: const Icon(Icons.send_to_mobile),
+        prefixIcon: const Icon(Icons.account_box),
         labelText: mappingNameLabel,
         hintText: mappingNameHintLabel,
       ),
@@ -392,9 +437,12 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
     AnkiMapping mappingClone = mapping.copyWith();
     TextEditingController controller =
         TextEditingController(text: mapping.label);
-    List<String> modelFields = await AnkiUtilities.getFieldList(mapping.model);
+    List<String> modelFields = await appModel.getFieldList(mapping.model);
 
     Widget alertDialog = AlertDialog(
+      contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
+          ? Spacing.of(context).insets.exceptBottom.big
+          : Spacing.of(context).insets.exceptBottom.normal,
       content: buildEditContent(
         modelFields: modelFields,
         mappingClone: mappingClone,
@@ -430,8 +478,32 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
     /// Assign the name to the mapping.
     AnkiMapping newMapping = mapping.copyWith(
       label: name,
-      tags: [name],
+      tags: [mapping.model],
     );
+
+    /// Error if the mapping attempts to rename the standard profile.
+    if (mapping.label == AnkiMapping.standardProfileName &&
+        name != AnkiMapping.standardProfileName) {
+      await showDialog(
+        barrierDismissible: true,
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(errorStandardProfileName),
+          content: Text(
+            errorStandardProfileNameContent,
+            textAlign: TextAlign.justify,
+          ),
+          actions: [
+            TextButton(
+              child: Text(dialogCloseLabel),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      );
+
+      return;
+    }
 
     /// If this mapping does not already exist in the database.
     if (mapping.id == null) {
@@ -446,8 +518,11 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
           barrierDismissible: true,
           context: context,
           builder: (context) => AlertDialog(
-            title: Text(invalidMappingName),
-            content: Text(invalidMappingNameContent),
+            title: Text(errorMappingName),
+            content: Text(
+              errorMappingNameContent,
+              textAlign: TextAlign.justify,
+            ),
             actions: [
               TextButton(
                 child: Text(dialogCloseLabel),

@@ -43,11 +43,12 @@ class JidoujishoPlaceholderMessage extends StatelessWidget {
           size: Theme.of(context).textTheme.headlineMedium?.fontSize,
           color: color ?? Theme.of(context).unselectedWidgetColor,
         ),
-        const Space.normal(),
+        const Space.small(),
         Text(
           message,
           style: messageStyle ??
-              Theme.of(context).textTheme.titleMedium?.copyWith(
+              Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.normal,
                     color: color ?? Theme.of(context).unselectedWidgetColor,
                   ),
         )

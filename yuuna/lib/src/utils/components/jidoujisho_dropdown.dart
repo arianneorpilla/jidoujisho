@@ -49,12 +49,12 @@ class _JidoujishoDropdownState<T> extends State<JidoujishoDropdown<T>> {
               border: Border.fromBorderSide(
                 BorderSide(
                   width: 0.5,
-                  color:
-                      Theme.of(context).unselectedWidgetColor.withOpacity(0.5),
+                  color: Theme.of(context).unselectedWidgetColor,
                 ),
               ),
             ),
           ),
+          focusColor: Theme.of(context).selectedRowColor,
           value: selectedOption,
           items: widget.options.map((value) {
             String text = widget.generateLabel(value);

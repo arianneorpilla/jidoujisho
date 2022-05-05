@@ -55,13 +55,13 @@ extension FieldExtension on Field {
       case Field.meaning:
         return Icons.translate_rounded;
       case Field.extra:
-        return Icons.more_horiz;
+        return Icons.description;
       case Field.image:
         return Icons.image;
       case Field.audio:
         return Icons.audiotrack;
       case Field.context:
-        return Icons.info_outlined;
+        return Icons.perm_media;
     }
   }
 

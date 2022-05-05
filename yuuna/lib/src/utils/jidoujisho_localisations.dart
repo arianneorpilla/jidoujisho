@@ -24,16 +24,19 @@ class JidoujishoLocalisations {
     'card_creator': 'Card Creator',
     'target_language': 'Target language',
     'show_options': 'Show Options',
+    'switch_profiles': 'Switch Profiles',
+    'enhancements': 'Enhancements',
     'app_locale': 'App locale',
     'app_locale_warning': 'Community addons and enhancements are managed '
         'by their respective developers, and these may appear in their '
         'original language.',
     'dialog_import': 'IMPORT',
     'dialog_close': 'CLOSE',
-    'dialog_add_new': 'ADD NEW',
+    'dialog_create': 'CREATE',
     'dialog_delete': 'DELETE',
     'dialog_cancel': 'CANCEL',
     'dialog_save': 'SAVE',
+    'dialog_launch_ankidroid': 'LAUNCH ANKIDROID',
     'dictionaries_delete_confirmation':
         'This dictionary and its searched entries will be deleted. Are you '
             'sure you want to do this?',
@@ -90,12 +93,43 @@ class JidoujishoLocalisations {
     'field_hint_audio': 'Enter audio search term',
     'field_hint_context': 'Information on media context',
     'field_hint_empty': 'Leave field blank',
-    'model_to_map': 'Model to map',
-    'mapping_name': 'Mapping name',
-    'mapping_name_hint': 'Name to assign to mapping',
-    'invalid_mapping_name': 'Invalid mapping name',
-    'invalid_mapping_name_content':
-        'A mapping with this name already exists or is not valid and cannot be '
-            'added.'
+    'model_to_map': 'Card type to use for new profile',
+    'mapping_name': 'Profile name',
+    'mapping_name_hint': 'Name to assign to profile',
+    'error_profile_name': 'Invalid profile name',
+    'error_profile_name_content':
+        'A profile with this name already exists or is not valid and cannot be '
+            'saved.',
+    'error_standard_profile_name': 'Invalid profile name',
+    'error_standard_profile_name_content':
+        'Cannot rename the standard profile.',
+    'error_ankidroid_api': 'AnkiDroid API',
+    'error_ankidroid_api_content':
+        'The AnkiDroid API could not be found in the background.\n\nLaunch '
+            'AnkiDroid and ensure the app and background service is active in '
+            'order to continue.',
+    'info_standard_model': 'Standard model added',
+    'info_standard_model_content':
+        '『jidoujisho Yuuna』 has been added to AnkiDroid as a new card type.'
+            '\n\nSetups making use of a different card type or field order may'
+            ' be used by adding a new export profile.',
+    'error_model_missing': 'Missing card type',
+    'error_model_missing_content':
+        'The corresponding card type of the currently selected profile is'
+            ' missing.\n\nThe standard profile has been selected in its place.',
+    'error_model_changed': 'Card type changed',
+    'error_model_changed_content':
+        'The number of fields of the card type corresponding to the selected'
+            ' profile has changed.\n\nThe fields of the currently selected'
+            ' profile have been reset and will require reconfiguration.',
+    'creator_exporting_as': 'Creating card with profile',
+    'creator_export_card': 'Create Card',
+    'info_enhancements':
+        'Enhancements enable the automation of field editing prior to card'
+            ' creation. Pick a slot on the right of a field to allow use of an'
+            ' enhancement. Up to four right slots may be utilised for each'
+            ' field. The enhancement in the left slot of a field will be'
+            ' automatically applied in instant card creation or upon launch of'
+            ' the Card Creator.'
   };
 }

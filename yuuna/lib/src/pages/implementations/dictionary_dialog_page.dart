@@ -37,7 +37,9 @@ class _DictionaryDialogPageState extends BasePageState {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      contentPadding: Spacing.of(context).insets.exceptBottom.big,
+      contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
+          ? Spacing.of(context).insets.exceptBottom.big
+          : Spacing.of(context).insets.exceptBottom.normal,
       content: buildContent(),
       actions: actions,
     );
@@ -76,29 +78,36 @@ class _DictionaryDialogPageState extends BasePageState {
 
   Widget buildContent() {
     List<Dictionary> dictionaries = appModel.dictionaries;
+    ScrollController contentController = ScrollController();
 
     return SizedBox(
       width: double.maxFinite,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (dictionaries.isEmpty)
-            buildEmptyMessage()
-          else
-            Flexible(
-              child: buildDictionaryList(dictionaries),
-            ),
-          const JidoujishoDivider(),
-          buildImportDropdown(),
-        ],
+      child: Scrollbar(
+        controller: contentController,
+        child: SingleChildScrollView(
+          controller: contentController,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (dictionaries.isEmpty)
+                buildEmptyMessage()
+              else
+                Flexible(
+                  child: buildDictionaryList(dictionaries),
+                ),
+              const JidoujishoDivider(),
+              buildImportDropdown(),
+            ],
+          ),
+        ),
       ),
     );
   }
 
   Widget buildEmptyMessage() {
     return Padding(
-      padding: EdgeInsets.symmetric(
-        vertical: Spacing.of(context).spaces.semiBig,
+      padding: EdgeInsets.only(
+        bottom: Spacing.of(context).spaces.normal,
       ),
       child: JidoujishoPlaceholderMessage(
         icon: DictionaryMediaType.instance.outlinedIcon,
@@ -111,6 +120,7 @@ class _DictionaryDialogPageState extends BasePageState {
     return Scrollbar(
       controller: _scrollController,
       child: ReorderableListView.builder(
+        scrollController: _scrollController,
         shrinkWrap: true,
         itemCount: dictionaries.length,
         itemBuilder: (context, index) =>
@@ -142,9 +152,18 @@ class _DictionaryDialogPageState extends BasePageState {
         title: Row(
           children: [
             Expanded(
-              child: JidoujishoMarquee(
-                  text: dictionary.dictionaryName,
-                  style: TextStyle(fontSize: textTheme.bodyMedium?.fontSize)),
+              child: Column(
+                children: [
+                  JidoujishoMarquee(
+                    text: dictionary.dictionaryName,
+                    style: TextStyle(fontSize: textTheme.bodyMedium?.fontSize),
+                  ),
+                  JidoujishoMarquee(
+                    text: dictionary.formatName,
+                    style: TextStyle(fontSize: textTheme.bodySmall?.fontSize),
+                  ),
+                ],
+              ),
             ),
             if (_selectedOrder == dictionary.order) const Space.normal(),
             if (_selectedOrder == dictionary.order)
@@ -169,21 +188,24 @@ class _DictionaryDialogPageState extends BasePageState {
 
   PopupMenuItem<VoidCallback> buildPopupItem({
     required String label,
-    required IconData icon,
     required Function() action,
+    IconData? icon,
     Color? color,
   }) {
     return PopupMenuItem<VoidCallback>(
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: textTheme.bodyMedium?.fontSize,
-            color: color,
+          if (icon != null)
+            Icon(
+              icon,
+              size: textTheme.bodyMedium?.fontSize,
+              color: color,
+            ),
+          if (icon != null) const Space.normal(),
+          Text(
+            label,
+            style: TextStyle(color: color),
           ),
-          const Space.normal(),
-          Text(label, style: textTheme.bodyMedium?.copyWith(color: color)),
         ],
       ),
       value: action,

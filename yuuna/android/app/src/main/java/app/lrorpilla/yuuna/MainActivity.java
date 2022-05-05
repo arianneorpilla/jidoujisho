@@ -58,6 +58,99 @@ public class MainActivity extends FlutterActivity {
         mAnkiDroid = new AnkiDroidHelper(context);
     }
 
+    private boolean deckExists(String deck) {
+        Long deckId = mAnkiDroid.findDeckIdByName(deck);
+        return (deckId != null);
+    }
+
+    private boolean modelExists(String model) {
+        Long deckId = mAnkiDroid.findModelIdByName(model, 8);
+        return (deckId != null);
+    }
+
+    public void addDefaultModel() {
+        final AddContentApi api = new AddContentApi(context);
+
+        long modelId;
+        if (modelExists("jidoujisho Yuuna")) {
+            modelId = mAnkiDroid.findModelIdByName("jidoujisho Yuuna", 8);
+        } else {
+            modelId = api.addNewCustomModel("jidoujisho Yuuna",
+                new String[] {
+                    "Sentence",
+                    "Word",
+                    "Reading",
+                    "Meaning",
+                    "Extra",
+                    "Image",
+                    "Audio",
+                    "Context",
+                },
+                new String[] {
+                    "jidoujisho Yuuna"
+                },
+                new String[] {"<p id=\"sentence\">{{Sentence}}</p><div id=\"word\">{{Word}}</div>"},
+                    new String[] {"<p id=\"sentence\">{{Sentence}}</p><div id=\"word\">{{Word}}</div><br>{{Audio}}<div class=\"image\">{{Image}}</div><hr id=reading><p id=\"reading\">{{Reading}}</p><h2 id=\"word\">{{Word}}</h2><br><p><small id=\"meaning\">{{Meaning}}</small></p><br>{{#Context}}<a style=\"text-decoration:none;color:red;\" href=\"{{Context}}\">↩</a>{{/Context}}"},
+                            "p {\n" +
+                            "    margin: 0px\n" +
+                            "}\n" +
+                            "\n" +
+                            "h2 {\n" +
+                            "    margin: 0px\n" +
+                            "}\n" +
+                            "\n" +
+                            "small {\n" +
+                            "    margin: 0px\n" +
+                            "}\n" +
+                            "\n" +
+                            ".card {\n" +
+                            "  font-family: arial;\n" +
+                            "  font-size: 20px;\n" +
+                            "  text-align: center;\n" +
+                            "  color: black;\n" +
+                            "  background-color: white;\n" +
+                            "  white-space: pre-line;\n" +
+                            "}\n" +
+                            "\n" +
+                            "#sentence {\n" +
+                            "    font-size: 30px\n" +
+                            "}\n" +
+                            "\n" +
+                            ".context.night_mode {\n" + 
+                            "    text-decoration: none;\n" +
+                            "    color: red;\n" +
+                            "}\n" +
+                            ".context {\n" +
+                            "    text-decoration: none;\n" +
+                            "    color: red;\n" +
+                            "}\n" +
+                            "\n" +
+                            ".image img {\n" +
+                            "  position: static;\n" +
+                            "  height: auto;\n" +
+                            "  width: auto;\n" +
+                            "  max-height: 250px;\n" +
+                            "}\n" +
+                            ".pitch{\n" +
+                            "  border-top: solid red 2px;\n" +
+                            "  padding-top: 1px;\n" +
+                            "}\n" +
+                            "\n" +
+                            ".pitch_end{\n" +
+                            "  border-color: red;\n" +
+                            "  border-right: solid red 2px;\n" +
+                            "  border-top: solid red 2px;  \n" +
+                            "  line-height: 1px;\n" +
+                            "  margin-right: 1px;\n" +
+                            "  padding-right: 1px;\n" +
+                            "  padding-top:1px;\n" +
+                            "}",
+                    null,
+                    null
+                    );
+        }
+    }
+
     @Override
     public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
 
@@ -78,6 +171,9 @@ public class MainActivity extends FlutterActivity {
                         case "getFieldList":
                             Long mid = mAnkiDroid.findModelIdByName(model, 1);
                             result.success(Arrays.asList(api.getFieldList(mid)));
+                            break;
+                        case "addDefaultModel":
+                            addDefaultModel();
                             break;
                         case "requestAnkidroidPermissions":
                             if (mAnkiDroid.shouldRequestPermission()) {

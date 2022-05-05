@@ -13,7 +13,7 @@ class JidoujishoDivider extends StatelessWidget {
         border: Border.fromBorderSide(
           BorderSide(
             width: 0.5,
-            color: Theme.of(context).unselectedWidgetColor.withOpacity(0.5),
+            color: Theme.of(context).unselectedWidgetColor,
           ),
         ),
       ),

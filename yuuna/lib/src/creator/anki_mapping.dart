@@ -22,8 +22,8 @@ class AnkiMapping {
   /// startup.
   factory AnkiMapping.defaultMapping(int order) {
     return AnkiMapping(
-      label: defaultMappingName,
-      model: defaultMappingName,
+      label: standardProfileName,
+      model: standardModelName,
       fieldIndexes: [
         Field.sentence.index,
         Field.word.index,
@@ -35,12 +35,15 @@ class AnkiMapping {
         Field.context.index,
       ],
       order: order,
-      tags: [defaultMappingName],
+      tags: [standardModelName],
     );
   }
 
   /// The default mapping name which cannot be deleted or reused.
-  static String defaultMappingName = 'jidoujisho Yuuna';
+  static String standardModelName = 'jidoujisho Yuuna';
+
+  /// The default mapping name which cannot be deleted or reused.
+  static String standardProfileName = 'Standard';
 
   /// A unique identifier for the purposes of database storage.
   @Id()

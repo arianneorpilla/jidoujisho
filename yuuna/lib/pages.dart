@@ -1,3 +1,4 @@
+export 'src/pages/implementations/creator_page.dart';
 export 'src/pages/implementations/dictionary_result_page.dart';
 export 'src/pages/implementations/dictionary_dialog_page.dart';
 export 'src/pages/implementations/dictionary_dialog_delete_page.dart';
@@ -12,5 +13,3 @@ export 'src/pages/implementations/home_page.dart';
 
 export 'src/pages/base_page.dart';
 export 'src/pages/base_tab_page.dart';
-
-export 'src/pages/implementations/home_page.dart';

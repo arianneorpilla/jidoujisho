@@ -10,7 +10,10 @@ import 'package:yuuna/models.dart';
 
 /// A global [Provider] for the card creator.
 final creatorProvider = ChangeNotifierProvider<CreatorModel>((ref) {
-  return CreatorModel();
+  CreatorModel creatorModel = CreatorModel();
+  creatorModel.initialise();
+
+  return creatorModel;
 });
 
 /// A global [Provider] for state management of getting images for the
@@ -78,14 +81,16 @@ final creatorAudioProvider =
 /// showing the creator and sharing code across the entire application.
 class CreatorModel with ChangeNotifier {
   /// A map of [TextEditingController] for every creator [Field].
-  final Map<Field, TextEditingController> _controllersByField =
-      Map.unmodifiable(
-    Map.fromIterable(
-      Field.values.map(
-        (field) => TextEditingController(),
-      ),
-    ),
-  );
+  Map<Field, TextEditingController> get controllersByField =>
+      _controllersByField;
+  late final Map<Field, TextEditingController> _controllersByField;
+
+  /// Prepare the [CreatorModel]'s final variables for use.
+  void initialise() {
+    _controllersByField = Map.unmodifiable(
+      {for (Field field in Field.values) field: TextEditingController()},
+    );
+  }
 
   /// The current context at the top of the creator being highlighted for export.
   /// The seed of the current image at the top of the creator being highlighted
@@ -134,9 +139,12 @@ class CreatorModel with ChangeNotifier {
   }
 
   /// Clear all fields and current context.
-  void clearAll(Field field) {
-    Field.values.forEach(clearField);
+  void clearAll() {
+    for (Field field in Field.values) {
+      clearField(field, notify: false);
+    }
     currentContext = null;
+    notifyListeners();
   }
 
   /// Get the [TextEditingController] for a particular field.
@@ -145,7 +153,7 @@ class CreatorModel with ChangeNotifier {
   }
 
   /// Clear a controller for a particular [Field].
-  void clearField(Field field) {
+  void clearField(Field field, {bool notify = true}) {
     switch (field) {
       case Field.audio:
         currentAudioSeed = null;
@@ -164,6 +172,9 @@ class CreatorModel with ChangeNotifier {
     }
 
     getFieldController(field).clear();
+    if (notify) {
+      notifyListeners();
+    }
   }
 
   /// Clone the [CreatorContext]'s contents into the model.
@@ -211,7 +222,7 @@ class CreatorModel with ChangeNotifier {
   ExportDetails getExportDetails(WidgetRef ref) {
     return ExportDetails(
       sentence: getFieldController(Field.sentence).text,
-      word: getFieldController(Field.extra).text,
+      word: getFieldController(Field.word).text,
       reading: getFieldController(Field.reading).text,
       meaning: getFieldController(Field.meaning).text,
       extra: getFieldController(Field.extra).text,

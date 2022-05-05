@@ -43,7 +43,7 @@ class DictionaryEntry {
 
   /// The dictionary from which this entry was imported from. This is used for
   /// database query purposes.
-  @Index(unique: true)
+  @Index()
   final String dictionaryName;
 
   /// The pronunciation of the word represented by this dictionary entry.

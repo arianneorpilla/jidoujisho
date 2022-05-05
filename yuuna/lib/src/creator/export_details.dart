@@ -1,20 +1,21 @@
 import 'dart:io';
 
 import 'package:yuuna/media.dart';
+import 'package:equatable/equatable.dart';
 
 /// Represents an entity exported from the creator model that can be used to
 /// interface with export options.
-class ExportDetails {
+class ExportDetails extends Equatable {
   /// Initialise an immutable context export with the final parameters.
   const ExportDetails({
-    this.sentence,
-    this.word,
-    this.reading,
-    this.meaning,
-    this.extra,
+    this.sentence = '',
+    this.word = '',
+    this.reading = '',
+    this.meaning = '',
+    this.extra = '',
+    this.context = '',
     this.image,
     this.audio,
-    this.context,
   });
 
   /// The written context of the sourced word, i.e. an example sentence or
@@ -46,4 +47,24 @@ class ExportDetails {
 
   /// The audio file to export.
   final File? audio;
+
+  /// Check if this export details is equivalent to the empty export details.
+  bool get isExportable {
+    return this != const ExportDetails();
+  }
+
+  @override
+  List<Object?> get props => [
+        sentence,
+        word,
+        reading,
+        meaning,
+        extra,
+        context,
+        image?.path,
+        audio?.path
+      ];
+
+  @override
+  bool? get stringify => true;
 }

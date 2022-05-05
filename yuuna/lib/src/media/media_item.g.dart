@@ -6,20 +6,16 @@ part of 'media_item.dart';
 // IsarCollectionGenerator
 // **************************************************************************
 
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, unused_local_variable
 
 extension GetMediaItemCollection on Isar {
-  IsarCollection<MediaItem> get mediaItems {
-    return getCollection('MediaItem');
-  }
+  IsarCollection<MediaItem> get mediaItems => getCollection();
 }
 
-final MediaItemSchema = CollectionSchema(
+const MediaItemSchema = CollectionSchema(
   name: 'MediaItem',
   schema:
       '{"name":"MediaItem","idName":"id","properties":[{"name":"author","type":"String"},{"name":"duration","type":"Long"},{"name":"fromEnhancement","type":"Bool"},{"name":"fromMedia","type":"Bool"},{"name":"hashCode","type":"Long"},{"name":"identifierCategory","type":"String"},{"name":"identifierKey","type":"String"},{"name":"identifierType","type":"String"},{"name":"position","type":"Long"},{"name":"references","type":"LongList"},{"name":"sourceIdentifier","type":"String"},{"name":"sourceMetadata","type":"String"},{"name":"title","type":"String"},{"name":"uniqueKey","type":"String"}],"indexes":[],"links":[]}',
-  nativeAdapter: const _MediaItemNativeAdapter(),
-  webAdapter: const _MediaItemWebAdapter(),
   idName: 'id',
   propertyIds: {
     'author': 0,
@@ -39,320 +35,307 @@ final MediaItemSchema = CollectionSchema(
   },
   listProperties: {'references'},
   indexIds: {},
-  indexTypes: {},
+  indexValueTypes: {},
   linkIds: {},
-  backlinkIds: {},
-  linkedCollections: [],
-  getId: (obj) {
-    if (obj.id == Isar.autoIncrement) {
-      return null;
-    } else {
-      return obj.id;
-    }
-  },
-  setId: (obj, id) => obj.id = id,
-  getLinks: (obj) => [],
-  version: 2,
+  backlinkLinkNames: {},
+  getId: _mediaItemGetId,
+  setId: _mediaItemSetId,
+  getLinks: _mediaItemGetLinks,
+  attachLinks: _mediaItemAttachLinks,
+  serializeNative: _mediaItemSerializeNative,
+  deserializeNative: _mediaItemDeserializeNative,
+  deserializePropNative: _mediaItemDeserializePropNative,
+  serializeWeb: _mediaItemSerializeWeb,
+  deserializeWeb: _mediaItemDeserializeWeb,
+  deserializePropWeb: _mediaItemDeserializePropWeb,
+  version: 3,
 );
 
-class _MediaItemWebAdapter extends IsarWebTypeAdapter<MediaItem> {
-  const _MediaItemWebAdapter();
-
-  @override
-  Object serialize(IsarCollection<MediaItem> collection, MediaItem object) {
-    final jsObj = IsarNative.newJsObject();
-    IsarNative.jsObjectSet(jsObj, 'author', object.author);
-    IsarNative.jsObjectSet(jsObj, 'duration', object.duration);
-    IsarNative.jsObjectSet(jsObj, 'fromEnhancement', object.fromEnhancement);
-    IsarNative.jsObjectSet(jsObj, 'fromMedia', object.fromMedia);
-    IsarNative.jsObjectSet(jsObj, 'hashCode', object.hashCode);
-    IsarNative.jsObjectSet(jsObj, 'id', object.id);
-    IsarNative.jsObjectSet(
-        jsObj, 'identifierCategory', object.identifierCategory);
-    IsarNative.jsObjectSet(jsObj, 'identifierKey', object.identifierKey);
-    IsarNative.jsObjectSet(jsObj, 'identifierType', object.identifierType);
-    IsarNative.jsObjectSet(jsObj, 'position', object.position);
-    IsarNative.jsObjectSet(jsObj, 'references', object.references);
-    IsarNative.jsObjectSet(jsObj, 'sourceIdentifier', object.sourceIdentifier);
-    IsarNative.jsObjectSet(jsObj, 'sourceMetadata', object.sourceMetadata);
-    IsarNative.jsObjectSet(jsObj, 'title', object.title);
-    IsarNative.jsObjectSet(jsObj, 'uniqueKey', object.uniqueKey);
-    return jsObj;
+int? _mediaItemGetId(MediaItem object) {
+  if (object.id == Isar.autoIncrement) {
+    return null;
+  } else {
+    return object.id;
   }
+}
 
-  @override
-  MediaItem deserialize(IsarCollection<MediaItem> collection, dynamic jsObj) {
-    final object = MediaItem(
-      author: IsarNative.jsObjectGet(jsObj, 'author'),
-      duration: IsarNative.jsObjectGet(jsObj, 'duration'),
-      id: IsarNative.jsObjectGet(jsObj, 'id'),
-      position: IsarNative.jsObjectGet(jsObj, 'position'),
-      references: (IsarNative.jsObjectGet(jsObj, 'references') as List?)
+void _mediaItemSetId(MediaItem object, int id) {
+  object.id = id;
+}
+
+List<IsarLinkBase> _mediaItemGetLinks(MediaItem object) {
+  return [];
+}
+
+void _mediaItemSerializeNative(
+    IsarCollection<MediaItem> collection,
+    IsarRawObject rawObj,
+    MediaItem object,
+    int staticSize,
+    List<int> offsets,
+    AdapterAlloc alloc) {
+  var dynamicSize = 0;
+  final value0 = object.author;
+  IsarUint8List? _author;
+  if (value0 != null) {
+    _author = IsarBinaryWriter.utf8Encoder.convert(value0);
+  }
+  dynamicSize += (_author?.length ?? 0) as int;
+  final value1 = object.duration;
+  final _duration = value1;
+  final value2 = object.fromEnhancement;
+  final _fromEnhancement = value2;
+  final value3 = object.fromMedia;
+  final _fromMedia = value3;
+  final value4 = object.hashCode;
+  final _hashCode = value4;
+  final value5 = object.identifierCategory;
+  final _identifierCategory = IsarBinaryWriter.utf8Encoder.convert(value5);
+  dynamicSize += (_identifierCategory.length) as int;
+  final value6 = object.identifierKey;
+  final _identifierKey = IsarBinaryWriter.utf8Encoder.convert(value6);
+  dynamicSize += (_identifierKey.length) as int;
+  final value7 = object.identifierType;
+  final _identifierType = IsarBinaryWriter.utf8Encoder.convert(value7);
+  dynamicSize += (_identifierType.length) as int;
+  final value8 = object.position;
+  final _position = value8;
+  final value9 = object.references;
+  dynamicSize += (value9?.length ?? 0) * 8;
+  final _references = value9;
+  final value10 = object.sourceIdentifier;
+  final _sourceIdentifier = IsarBinaryWriter.utf8Encoder.convert(value10);
+  dynamicSize += (_sourceIdentifier.length) as int;
+  final value11 = object.sourceMetadata;
+  IsarUint8List? _sourceMetadata;
+  if (value11 != null) {
+    _sourceMetadata = IsarBinaryWriter.utf8Encoder.convert(value11);
+  }
+  dynamicSize += (_sourceMetadata?.length ?? 0) as int;
+  final value12 = object.title;
+  final _title = IsarBinaryWriter.utf8Encoder.convert(value12);
+  dynamicSize += (_title.length) as int;
+  final value13 = object.uniqueKey;
+  final _uniqueKey = IsarBinaryWriter.utf8Encoder.convert(value13);
+  dynamicSize += (_uniqueKey.length) as int;
+  final size = staticSize + dynamicSize;
+
+  rawObj.buffer = alloc(size);
+  rawObj.buffer_length = size;
+  final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
+  final writer = IsarBinaryWriter(buffer, staticSize);
+  writer.writeBytes(offsets[0], _author);
+  writer.writeLong(offsets[1], _duration);
+  writer.writeBool(offsets[2], _fromEnhancement);
+  writer.writeBool(offsets[3], _fromMedia);
+  writer.writeLong(offsets[4], _hashCode);
+  writer.writeBytes(offsets[5], _identifierCategory);
+  writer.writeBytes(offsets[6], _identifierKey);
+  writer.writeBytes(offsets[7], _identifierType);
+  writer.writeLong(offsets[8], _position);
+  writer.writeLongList(offsets[9], _references);
+  writer.writeBytes(offsets[10], _sourceIdentifier);
+  writer.writeBytes(offsets[11], _sourceMetadata);
+  writer.writeBytes(offsets[12], _title);
+  writer.writeBytes(offsets[13], _uniqueKey);
+}
+
+MediaItem _mediaItemDeserializeNative(IsarCollection<MediaItem> collection,
+    int id, IsarBinaryReader reader, List<int> offsets) {
+  final object = MediaItem(
+    author: reader.readStringOrNull(offsets[0]),
+    duration: reader.readLongOrNull(offsets[1]),
+    id: id,
+    position: reader.readLongOrNull(offsets[8]),
+    references: reader.readLongList(offsets[9]),
+    sourceIdentifier: reader.readString(offsets[10]),
+    sourceMetadata: reader.readStringOrNull(offsets[11]),
+    title: reader.readString(offsets[12]),
+    uniqueKey: reader.readString(offsets[13]),
+  );
+  return object;
+}
+
+P _mediaItemDeserializePropNative<P>(
+    int id, IsarBinaryReader reader, int propertyIndex, int offset) {
+  switch (propertyIndex) {
+    case -1:
+      return id as P;
+    case 0:
+      return (reader.readStringOrNull(offset)) as P;
+    case 1:
+      return (reader.readLongOrNull(offset)) as P;
+    case 2:
+      return (reader.readBool(offset)) as P;
+    case 3:
+      return (reader.readBool(offset)) as P;
+    case 4:
+      return (reader.readLong(offset)) as P;
+    case 5:
+      return (reader.readString(offset)) as P;
+    case 6:
+      return (reader.readString(offset)) as P;
+    case 7:
+      return (reader.readString(offset)) as P;
+    case 8:
+      return (reader.readLongOrNull(offset)) as P;
+    case 9:
+      return (reader.readLongList(offset)) as P;
+    case 10:
+      return (reader.readString(offset)) as P;
+    case 11:
+      return (reader.readStringOrNull(offset)) as P;
+    case 12:
+      return (reader.readString(offset)) as P;
+    case 13:
+      return (reader.readString(offset)) as P;
+    default:
+      throw 'Illegal propertyIndex';
+  }
+}
+
+dynamic _mediaItemSerializeWeb(
+    IsarCollection<MediaItem> collection, MediaItem object) {
+  final jsObj = IsarNative.newJsObject();
+  IsarNative.jsObjectSet(jsObj, 'author', object.author);
+  IsarNative.jsObjectSet(jsObj, 'duration', object.duration);
+  IsarNative.jsObjectSet(jsObj, 'fromEnhancement', object.fromEnhancement);
+  IsarNative.jsObjectSet(jsObj, 'fromMedia', object.fromMedia);
+  IsarNative.jsObjectSet(jsObj, 'hashCode', object.hashCode);
+  IsarNative.jsObjectSet(jsObj, 'id', object.id);
+  IsarNative.jsObjectSet(
+      jsObj, 'identifierCategory', object.identifierCategory);
+  IsarNative.jsObjectSet(jsObj, 'identifierKey', object.identifierKey);
+  IsarNative.jsObjectSet(jsObj, 'identifierType', object.identifierType);
+  IsarNative.jsObjectSet(jsObj, 'position', object.position);
+  IsarNative.jsObjectSet(jsObj, 'references', object.references);
+  IsarNative.jsObjectSet(jsObj, 'sourceIdentifier', object.sourceIdentifier);
+  IsarNative.jsObjectSet(jsObj, 'sourceMetadata', object.sourceMetadata);
+  IsarNative.jsObjectSet(jsObj, 'title', object.title);
+  IsarNative.jsObjectSet(jsObj, 'uniqueKey', object.uniqueKey);
+  return jsObj;
+}
+
+MediaItem _mediaItemDeserializeWeb(
+    IsarCollection<MediaItem> collection, dynamic jsObj) {
+  final object = MediaItem(
+    author: IsarNative.jsObjectGet(jsObj, 'author'),
+    duration: IsarNative.jsObjectGet(jsObj, 'duration'),
+    id: IsarNative.jsObjectGet(jsObj, 'id'),
+    position: IsarNative.jsObjectGet(jsObj, 'position'),
+    references: (IsarNative.jsObjectGet(jsObj, 'references') as List?)
+        ?.map((e) => e ?? double.negativeInfinity)
+        .toList()
+        .cast<int>(),
+    sourceIdentifier: IsarNative.jsObjectGet(jsObj, 'sourceIdentifier') ?? '',
+    sourceMetadata: IsarNative.jsObjectGet(jsObj, 'sourceMetadata'),
+    title: IsarNative.jsObjectGet(jsObj, 'title') ?? '',
+    uniqueKey: IsarNative.jsObjectGet(jsObj, 'uniqueKey') ?? '',
+  );
+  return object;
+}
+
+P _mediaItemDeserializePropWeb<P>(Object jsObj, String propertyName) {
+  switch (propertyName) {
+    case 'author':
+      return (IsarNative.jsObjectGet(jsObj, 'author')) as P;
+    case 'duration':
+      return (IsarNative.jsObjectGet(jsObj, 'duration')) as P;
+    case 'fromEnhancement':
+      return (IsarNative.jsObjectGet(jsObj, 'fromEnhancement') ?? false) as P;
+    case 'fromMedia':
+      return (IsarNative.jsObjectGet(jsObj, 'fromMedia') ?? false) as P;
+    case 'hashCode':
+      return (IsarNative.jsObjectGet(jsObj, 'hashCode') ??
+          double.negativeInfinity) as P;
+    case 'id':
+      return (IsarNative.jsObjectGet(jsObj, 'id')) as P;
+    case 'identifierCategory':
+      return (IsarNative.jsObjectGet(jsObj, 'identifierCategory') ?? '') as P;
+    case 'identifierKey':
+      return (IsarNative.jsObjectGet(jsObj, 'identifierKey') ?? '') as P;
+    case 'identifierType':
+      return (IsarNative.jsObjectGet(jsObj, 'identifierType') ?? '') as P;
+    case 'position':
+      return (IsarNative.jsObjectGet(jsObj, 'position')) as P;
+    case 'references':
+      return ((IsarNative.jsObjectGet(jsObj, 'references') as List?)
           ?.map((e) => e ?? double.negativeInfinity)
           .toList()
-          .cast<int>(),
-      sourceIdentifier: IsarNative.jsObjectGet(jsObj, 'sourceIdentifier') ?? '',
-      sourceMetadata: IsarNative.jsObjectGet(jsObj, 'sourceMetadata'),
-      title: IsarNative.jsObjectGet(jsObj, 'title') ?? '',
-      uniqueKey: IsarNative.jsObjectGet(jsObj, 'uniqueKey') ?? '',
-    );
-    return object;
+          .cast<int>()) as P;
+    case 'sourceIdentifier':
+      return (IsarNative.jsObjectGet(jsObj, 'sourceIdentifier') ?? '') as P;
+    case 'sourceMetadata':
+      return (IsarNative.jsObjectGet(jsObj, 'sourceMetadata')) as P;
+    case 'title':
+      return (IsarNative.jsObjectGet(jsObj, 'title') ?? '') as P;
+    case 'uniqueKey':
+      return (IsarNative.jsObjectGet(jsObj, 'uniqueKey') ?? '') as P;
+    default:
+      throw 'Illegal propertyName';
   }
-
-  @override
-  P deserializeProperty<P>(Object jsObj, String propertyName) {
-    switch (propertyName) {
-      case 'author':
-        return (IsarNative.jsObjectGet(jsObj, 'author')) as P;
-      case 'duration':
-        return (IsarNative.jsObjectGet(jsObj, 'duration')) as P;
-      case 'fromEnhancement':
-        return (IsarNative.jsObjectGet(jsObj, 'fromEnhancement') ?? false) as P;
-      case 'fromMedia':
-        return (IsarNative.jsObjectGet(jsObj, 'fromMedia') ?? false) as P;
-      case 'hashCode':
-        return (IsarNative.jsObjectGet(jsObj, 'hashCode') ??
-            double.negativeInfinity) as P;
-      case 'id':
-        return (IsarNative.jsObjectGet(jsObj, 'id')) as P;
-      case 'identifierCategory':
-        return (IsarNative.jsObjectGet(jsObj, 'identifierCategory') ?? '') as P;
-      case 'identifierKey':
-        return (IsarNative.jsObjectGet(jsObj, 'identifierKey') ?? '') as P;
-      case 'identifierType':
-        return (IsarNative.jsObjectGet(jsObj, 'identifierType') ?? '') as P;
-      case 'position':
-        return (IsarNative.jsObjectGet(jsObj, 'position')) as P;
-      case 'references':
-        return ((IsarNative.jsObjectGet(jsObj, 'references') as List?)
-            ?.map((e) => e ?? double.negativeInfinity)
-            .toList()
-            .cast<int>()) as P;
-      case 'sourceIdentifier':
-        return (IsarNative.jsObjectGet(jsObj, 'sourceIdentifier') ?? '') as P;
-      case 'sourceMetadata':
-        return (IsarNative.jsObjectGet(jsObj, 'sourceMetadata')) as P;
-      case 'title':
-        return (IsarNative.jsObjectGet(jsObj, 'title') ?? '') as P;
-      case 'uniqueKey':
-        return (IsarNative.jsObjectGet(jsObj, 'uniqueKey') ?? '') as P;
-      default:
-        throw 'Illegal propertyName';
-    }
-  }
-
-  @override
-  void attachLinks(Isar isar, int id, MediaItem object) {}
 }
 
-class _MediaItemNativeAdapter extends IsarNativeTypeAdapter<MediaItem> {
-  const _MediaItemNativeAdapter();
-
-  @override
-  void serialize(IsarCollection<MediaItem> collection, IsarRawObject rawObj,
-      MediaItem object, int staticSize, List<int> offsets, AdapterAlloc alloc) {
-    var dynamicSize = 0;
-    final value0 = object.author;
-    IsarUint8List? _author;
-    if (value0 != null) {
-      _author = IsarBinaryWriter.utf8Encoder.convert(value0);
-    }
-    dynamicSize += (_author?.length ?? 0) as int;
-    final value1 = object.duration;
-    final _duration = value1;
-    final value2 = object.fromEnhancement;
-    final _fromEnhancement = value2;
-    final value3 = object.fromMedia;
-    final _fromMedia = value3;
-    final value4 = object.hashCode;
-    final _hashCode = value4;
-    final value5 = object.identifierCategory;
-    final _identifierCategory = IsarBinaryWriter.utf8Encoder.convert(value5);
-    dynamicSize += (_identifierCategory.length) as int;
-    final value6 = object.identifierKey;
-    final _identifierKey = IsarBinaryWriter.utf8Encoder.convert(value6);
-    dynamicSize += (_identifierKey.length) as int;
-    final value7 = object.identifierType;
-    final _identifierType = IsarBinaryWriter.utf8Encoder.convert(value7);
-    dynamicSize += (_identifierType.length) as int;
-    final value8 = object.position;
-    final _position = value8;
-    final value9 = object.references;
-    dynamicSize += (value9?.length ?? 0) * 8;
-    final _references = value9;
-    final value10 = object.sourceIdentifier;
-    final _sourceIdentifier = IsarBinaryWriter.utf8Encoder.convert(value10);
-    dynamicSize += (_sourceIdentifier.length) as int;
-    final value11 = object.sourceMetadata;
-    IsarUint8List? _sourceMetadata;
-    if (value11 != null) {
-      _sourceMetadata = IsarBinaryWriter.utf8Encoder.convert(value11);
-    }
-    dynamicSize += (_sourceMetadata?.length ?? 0) as int;
-    final value12 = object.title;
-    final _title = IsarBinaryWriter.utf8Encoder.convert(value12);
-    dynamicSize += (_title.length) as int;
-    final value13 = object.uniqueKey;
-    final _uniqueKey = IsarBinaryWriter.utf8Encoder.convert(value13);
-    dynamicSize += (_uniqueKey.length) as int;
-    final size = staticSize + dynamicSize;
-
-    rawObj.buffer = alloc(size);
-    rawObj.buffer_length = size;
-    final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
-    final writer = IsarBinaryWriter(buffer, staticSize);
-    writer.writeBytes(offsets[0], _author);
-    writer.writeLong(offsets[1], _duration);
-    writer.writeBool(offsets[2], _fromEnhancement);
-    writer.writeBool(offsets[3], _fromMedia);
-    writer.writeLong(offsets[4], _hashCode);
-    writer.writeBytes(offsets[5], _identifierCategory);
-    writer.writeBytes(offsets[6], _identifierKey);
-    writer.writeBytes(offsets[7], _identifierType);
-    writer.writeLong(offsets[8], _position);
-    writer.writeLongList(offsets[9], _references);
-    writer.writeBytes(offsets[10], _sourceIdentifier);
-    writer.writeBytes(offsets[11], _sourceMetadata);
-    writer.writeBytes(offsets[12], _title);
-    writer.writeBytes(offsets[13], _uniqueKey);
-  }
-
-  @override
-  MediaItem deserialize(IsarCollection<MediaItem> collection, int id,
-      IsarBinaryReader reader, List<int> offsets) {
-    final object = MediaItem(
-      author: reader.readStringOrNull(offsets[0]),
-      duration: reader.readLongOrNull(offsets[1]),
-      id: id,
-      position: reader.readLongOrNull(offsets[8]),
-      references: reader.readLongList(offsets[9]),
-      sourceIdentifier: reader.readString(offsets[10]),
-      sourceMetadata: reader.readStringOrNull(offsets[11]),
-      title: reader.readString(offsets[12]),
-      uniqueKey: reader.readString(offsets[13]),
-    );
-    return object;
-  }
-
-  @override
-  P deserializeProperty<P>(
-      int id, IsarBinaryReader reader, int propertyIndex, int offset) {
-    switch (propertyIndex) {
-      case -1:
-        return id as P;
-      case 0:
-        return (reader.readStringOrNull(offset)) as P;
-      case 1:
-        return (reader.readLongOrNull(offset)) as P;
-      case 2:
-        return (reader.readBool(offset)) as P;
-      case 3:
-        return (reader.readBool(offset)) as P;
-      case 4:
-        return (reader.readLong(offset)) as P;
-      case 5:
-        return (reader.readString(offset)) as P;
-      case 6:
-        return (reader.readString(offset)) as P;
-      case 7:
-        return (reader.readString(offset)) as P;
-      case 8:
-        return (reader.readLongOrNull(offset)) as P;
-      case 9:
-        return (reader.readLongList(offset)) as P;
-      case 10:
-        return (reader.readString(offset)) as P;
-      case 11:
-        return (reader.readStringOrNull(offset)) as P;
-      case 12:
-        return (reader.readString(offset)) as P;
-      case 13:
-        return (reader.readString(offset)) as P;
-      default:
-        throw 'Illegal propertyIndex';
-    }
-  }
-
-  @override
-  void attachLinks(Isar isar, int id, MediaItem object) {}
-}
+void _mediaItemAttachLinks(IsarCollection col, int id, MediaItem object) {}
 
 extension MediaItemQueryWhereSort
     on QueryBuilder<MediaItem, MediaItem, QWhere> {
   QueryBuilder<MediaItem, MediaItem, QAfterWhere> anyId() {
-    return addWhereClauseInternal(const WhereClause(indexName: null));
+    return addWhereClauseInternal(const IdWhereClause.any());
   }
 }
 
 extension MediaItemQueryWhere
     on QueryBuilder<MediaItem, MediaItem, QWhereClause> {
-  QueryBuilder<MediaItem, MediaItem, QAfterWhereClause> idEqualTo(int? id) {
-    return addWhereClauseInternal(WhereClause(
-      indexName: null,
-      lower: [id],
+  QueryBuilder<MediaItem, MediaItem, QAfterWhereClause> idEqualTo(int id) {
+    return addWhereClauseInternal(IdWhereClause.between(
+      lower: id,
       includeLower: true,
-      upper: [id],
+      upper: id,
       includeUpper: true,
     ));
   }
 
-  QueryBuilder<MediaItem, MediaItem, QAfterWhereClause> idNotEqualTo(int? id) {
+  QueryBuilder<MediaItem, MediaItem, QAfterWhereClause> idNotEqualTo(int id) {
     if (whereSortInternal == Sort.asc) {
-      return addWhereClauseInternal(WhereClause(
-        indexName: null,
-        upper: [id],
-        includeUpper: false,
-      )).addWhereClauseInternal(WhereClause(
-        indexName: null,
-        lower: [id],
-        includeLower: false,
-      ));
+      return addWhereClauseInternal(
+        IdWhereClause.lessThan(upper: id, includeUpper: false),
+      ).addWhereClauseInternal(
+        IdWhereClause.greaterThan(lower: id, includeLower: false),
+      );
     } else {
-      return addWhereClauseInternal(WhereClause(
-        indexName: null,
-        lower: [id],
-        includeLower: false,
-      )).addWhereClauseInternal(WhereClause(
-        indexName: null,
-        upper: [id],
-        includeUpper: false,
-      ));
+      return addWhereClauseInternal(
+        IdWhereClause.greaterThan(lower: id, includeLower: false),
+      ).addWhereClauseInternal(
+        IdWhereClause.lessThan(upper: id, includeUpper: false),
+      );
     }
   }
 
-  QueryBuilder<MediaItem, MediaItem, QAfterWhereClause> idGreaterThan(
-    int? id, {
-    bool include = false,
-  }) {
-    return addWhereClauseInternal(WhereClause(
-      indexName: null,
-      lower: [id],
-      includeLower: include,
-    ));
+  QueryBuilder<MediaItem, MediaItem, QAfterWhereClause> idGreaterThan(int id,
+      {bool include = false}) {
+    return addWhereClauseInternal(
+      IdWhereClause.greaterThan(lower: id, includeLower: include),
+    );
   }
 
-  QueryBuilder<MediaItem, MediaItem, QAfterWhereClause> idLessThan(
-    int? id, {
-    bool include = false,
-  }) {
-    return addWhereClauseInternal(WhereClause(
-      indexName: null,
-      upper: [id],
-      includeUpper: include,
-    ));
+  QueryBuilder<MediaItem, MediaItem, QAfterWhereClause> idLessThan(int id,
+      {bool include = false}) {
+    return addWhereClauseInternal(
+      IdWhereClause.lessThan(upper: id, includeUpper: include),
+    );
   }
 
   QueryBuilder<MediaItem, MediaItem, QAfterWhereClause> idBetween(
-    int? lowerId,
-    int? upperId, {
+    int lowerId,
+    int upperId, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
-    return addWhereClauseInternal(WhereClause(
-      indexName: null,
-      lower: [lowerId],
+    return addWhereClauseInternal(IdWhereClause.between(
+      lower: lowerId,
       includeLower: includeLower,
-      upper: [upperId],
+      upper: upperId,
       includeUpper: includeUpper,
     ));
   }
@@ -602,7 +585,7 @@ extension MediaItemQueryFilter
   }
 
   QueryBuilder<MediaItem, MediaItem, QAfterFilterCondition> idEqualTo(
-      int? value) {
+      int value) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.eq,
       property: 'id',
@@ -611,7 +594,7 @@ extension MediaItemQueryFilter
   }
 
   QueryBuilder<MediaItem, MediaItem, QAfterFilterCondition> idGreaterThan(
-    int? value, {
+    int value, {
     bool include = false,
   }) {
     return addFilterConditionInternal(FilterCondition(
@@ -623,7 +606,7 @@ extension MediaItemQueryFilter
   }
 
   QueryBuilder<MediaItem, MediaItem, QAfterFilterCondition> idLessThan(
-    int? value, {
+    int value, {
     bool include = false,
   }) {
     return addFilterConditionInternal(FilterCondition(
@@ -635,8 +618,8 @@ extension MediaItemQueryFilter
   }
 
   QueryBuilder<MediaItem, MediaItem, QAfterFilterCondition> idBetween(
-    int? lower,
-    int? upper, {
+    int lower,
+    int upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {

@@ -6,20 +6,16 @@ part of 'anki_mapping.dart';
 // IsarCollectionGenerator
 // **************************************************************************
 
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, unused_local_variable
 
 extension GetAnkiMappingCollection on Isar {
-  IsarCollection<AnkiMapping> get ankiMappings {
-    return getCollection('AnkiMapping');
-  }
+  IsarCollection<AnkiMapping> get ankiMappings => getCollection();
 }
 
-final AnkiMappingSchema = CollectionSchema(
+const AnkiMappingSchema = CollectionSchema(
   name: 'AnkiMapping',
   schema:
       '{"name":"AnkiMapping","idName":"id","properties":[{"name":"fieldIndexes","type":"LongList"},{"name":"label","type":"String"},{"name":"model","type":"String"},{"name":"order","type":"Long"},{"name":"tags","type":"StringList"}],"indexes":[{"name":"label","unique":true,"properties":[{"name":"label","type":"Hash","caseSensitive":true}]},{"name":"order","unique":true,"properties":[{"name":"order","type":"Value","caseSensitive":false}]}],"links":[]}',
-  nativeAdapter: const _AnkiMappingNativeAdapter(),
-  webAdapter: const _AnkiMappingWebAdapter(),
   idName: 'id',
   propertyIds: {
     'fieldIndexes': 0,
@@ -30,178 +26,180 @@ final AnkiMappingSchema = CollectionSchema(
   },
   listProperties: {'fieldIndexes', 'tags'},
   indexIds: {'label': 0, 'order': 1},
-  indexTypes: {
+  indexValueTypes: {
     'label': [
-      NativeIndexType.stringHash,
+      IndexValueType.stringHash,
     ],
     'order': [
-      NativeIndexType.long,
+      IndexValueType.long,
     ]
   },
   linkIds: {},
-  backlinkIds: {},
-  linkedCollections: [],
-  getId: (obj) {
-    if (obj.id == Isar.autoIncrement) {
-      return null;
-    } else {
-      return obj.id;
-    }
-  },
-  setId: (obj, id) => obj.id = id,
-  getLinks: (obj) => [],
-  version: 2,
+  backlinkLinkNames: {},
+  getId: _ankiMappingGetId,
+  setId: _ankiMappingSetId,
+  getLinks: _ankiMappingGetLinks,
+  attachLinks: _ankiMappingAttachLinks,
+  serializeNative: _ankiMappingSerializeNative,
+  deserializeNative: _ankiMappingDeserializeNative,
+  deserializePropNative: _ankiMappingDeserializePropNative,
+  serializeWeb: _ankiMappingSerializeWeb,
+  deserializeWeb: _ankiMappingDeserializeWeb,
+  deserializePropWeb: _ankiMappingDeserializePropWeb,
+  version: 3,
 );
 
-class _AnkiMappingWebAdapter extends IsarWebTypeAdapter<AnkiMapping> {
-  const _AnkiMappingWebAdapter();
-
-  @override
-  Object serialize(IsarCollection<AnkiMapping> collection, AnkiMapping object) {
-    final jsObj = IsarNative.newJsObject();
-    IsarNative.jsObjectSet(jsObj, 'fieldIndexes', object.fieldIndexes);
-    IsarNative.jsObjectSet(jsObj, 'id', object.id);
-    IsarNative.jsObjectSet(jsObj, 'label', object.label);
-    IsarNative.jsObjectSet(jsObj, 'model', object.model);
-    IsarNative.jsObjectSet(jsObj, 'order', object.order);
-    IsarNative.jsObjectSet(jsObj, 'tags', object.tags);
-    return jsObj;
+int? _ankiMappingGetId(AnkiMapping object) {
+  if (object.id == Isar.autoIncrement) {
+    return null;
+  } else {
+    return object.id;
   }
+}
 
-  @override
-  AnkiMapping deserialize(
-      IsarCollection<AnkiMapping> collection, dynamic jsObj) {
-    final object = AnkiMapping(
-      fieldIndexes: (IsarNative.jsObjectGet(jsObj, 'fieldIndexes') as List?)
+void _ankiMappingSetId(AnkiMapping object, int id) {
+  object.id = id;
+}
+
+List<IsarLinkBase> _ankiMappingGetLinks(AnkiMapping object) {
+  return [];
+}
+
+void _ankiMappingSerializeNative(
+    IsarCollection<AnkiMapping> collection,
+    IsarRawObject rawObj,
+    AnkiMapping object,
+    int staticSize,
+    List<int> offsets,
+    AdapterAlloc alloc) {
+  var dynamicSize = 0;
+  final value0 = object.fieldIndexes;
+  dynamicSize += (value0.length) * 8;
+  final _fieldIndexes = value0;
+  final value1 = object.label;
+  final _label = IsarBinaryWriter.utf8Encoder.convert(value1);
+  dynamicSize += (_label.length) as int;
+  final value2 = object.model;
+  final _model = IsarBinaryWriter.utf8Encoder.convert(value2);
+  dynamicSize += (_model.length) as int;
+  final value3 = object.order;
+  final _order = value3;
+  final value4 = object.tags;
+  dynamicSize += (value4.length) * 8;
+  final bytesList4 = <IsarUint8List>[];
+  for (var str in value4) {
+    final bytes = IsarBinaryWriter.utf8Encoder.convert(str);
+    bytesList4.add(bytes);
+    dynamicSize += bytes.length as int;
+  }
+  final _tags = bytesList4;
+  final size = staticSize + dynamicSize;
+
+  rawObj.buffer = alloc(size);
+  rawObj.buffer_length = size;
+  final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
+  final writer = IsarBinaryWriter(buffer, staticSize);
+  writer.writeLongList(offsets[0], _fieldIndexes);
+  writer.writeBytes(offsets[1], _label);
+  writer.writeBytes(offsets[2], _model);
+  writer.writeLong(offsets[3], _order);
+  writer.writeStringList(offsets[4], _tags);
+}
+
+AnkiMapping _ankiMappingDeserializeNative(
+    IsarCollection<AnkiMapping> collection,
+    int id,
+    IsarBinaryReader reader,
+    List<int> offsets) {
+  final object = AnkiMapping(
+    fieldIndexes: reader.readLongOrNullList(offsets[0]) ?? [],
+    id: id,
+    label: reader.readString(offsets[1]),
+    model: reader.readString(offsets[2]),
+    order: reader.readLong(offsets[3]),
+    tags: reader.readStringList(offsets[4]) ?? [],
+  );
+  return object;
+}
+
+P _ankiMappingDeserializePropNative<P>(
+    int id, IsarBinaryReader reader, int propertyIndex, int offset) {
+  switch (propertyIndex) {
+    case -1:
+      return id as P;
+    case 0:
+      return (reader.readLongOrNullList(offset) ?? []) as P;
+    case 1:
+      return (reader.readString(offset)) as P;
+    case 2:
+      return (reader.readString(offset)) as P;
+    case 3:
+      return (reader.readLong(offset)) as P;
+    case 4:
+      return (reader.readStringList(offset) ?? []) as P;
+    default:
+      throw 'Illegal propertyIndex';
+  }
+}
+
+dynamic _ankiMappingSerializeWeb(
+    IsarCollection<AnkiMapping> collection, AnkiMapping object) {
+  final jsObj = IsarNative.newJsObject();
+  IsarNative.jsObjectSet(jsObj, 'fieldIndexes', object.fieldIndexes);
+  IsarNative.jsObjectSet(jsObj, 'id', object.id);
+  IsarNative.jsObjectSet(jsObj, 'label', object.label);
+  IsarNative.jsObjectSet(jsObj, 'model', object.model);
+  IsarNative.jsObjectSet(jsObj, 'order', object.order);
+  IsarNative.jsObjectSet(jsObj, 'tags', object.tags);
+  return jsObj;
+}
+
+AnkiMapping _ankiMappingDeserializeWeb(
+    IsarCollection<AnkiMapping> collection, dynamic jsObj) {
+  final object = AnkiMapping(
+    fieldIndexes: (IsarNative.jsObjectGet(jsObj, 'fieldIndexes') as List?)
+            ?.cast<int?>() ??
+        [],
+    id: IsarNative.jsObjectGet(jsObj, 'id'),
+    label: IsarNative.jsObjectGet(jsObj, 'label') ?? '',
+    model: IsarNative.jsObjectGet(jsObj, 'model') ?? '',
+    order: IsarNative.jsObjectGet(jsObj, 'order') ?? double.negativeInfinity,
+    tags: (IsarNative.jsObjectGet(jsObj, 'tags') as List?)
+            ?.map((e) => e ?? '')
+            .toList()
+            .cast<String>() ??
+        [],
+  );
+  return object;
+}
+
+P _ankiMappingDeserializePropWeb<P>(Object jsObj, String propertyName) {
+  switch (propertyName) {
+    case 'fieldIndexes':
+      return ((IsarNative.jsObjectGet(jsObj, 'fieldIndexes') as List?)
               ?.cast<int?>() ??
-          [],
-      id: IsarNative.jsObjectGet(jsObj, 'id'),
-      label: IsarNative.jsObjectGet(jsObj, 'label') ?? '',
-      model: IsarNative.jsObjectGet(jsObj, 'model') ?? '',
-      order: IsarNative.jsObjectGet(jsObj, 'order') ?? double.negativeInfinity,
-      tags: (IsarNative.jsObjectGet(jsObj, 'tags') as List?)
+          []) as P;
+    case 'id':
+      return (IsarNative.jsObjectGet(jsObj, 'id')) as P;
+    case 'label':
+      return (IsarNative.jsObjectGet(jsObj, 'label') ?? '') as P;
+    case 'model':
+      return (IsarNative.jsObjectGet(jsObj, 'model') ?? '') as P;
+    case 'order':
+      return (IsarNative.jsObjectGet(jsObj, 'order') ?? double.negativeInfinity)
+          as P;
+    case 'tags':
+      return ((IsarNative.jsObjectGet(jsObj, 'tags') as List?)
               ?.map((e) => e ?? '')
               .toList()
               .cast<String>() ??
-          [],
-    );
-    return object;
+          []) as P;
+    default:
+      throw 'Illegal propertyName';
   }
-
-  @override
-  P deserializeProperty<P>(Object jsObj, String propertyName) {
-    switch (propertyName) {
-      case 'fieldIndexes':
-        return ((IsarNative.jsObjectGet(jsObj, 'fieldIndexes') as List?)
-                ?.cast<int?>() ??
-            []) as P;
-      case 'id':
-        return (IsarNative.jsObjectGet(jsObj, 'id')) as P;
-      case 'label':
-        return (IsarNative.jsObjectGet(jsObj, 'label') ?? '') as P;
-      case 'model':
-        return (IsarNative.jsObjectGet(jsObj, 'model') ?? '') as P;
-      case 'order':
-        return (IsarNative.jsObjectGet(jsObj, 'order') ??
-            double.negativeInfinity) as P;
-      case 'tags':
-        return ((IsarNative.jsObjectGet(jsObj, 'tags') as List?)
-                ?.map((e) => e ?? '')
-                .toList()
-                .cast<String>() ??
-            []) as P;
-      default:
-        throw 'Illegal propertyName';
-    }
-  }
-
-  @override
-  void attachLinks(Isar isar, int id, AnkiMapping object) {}
 }
 
-class _AnkiMappingNativeAdapter extends IsarNativeTypeAdapter<AnkiMapping> {
-  const _AnkiMappingNativeAdapter();
-
-  @override
-  void serialize(
-      IsarCollection<AnkiMapping> collection,
-      IsarRawObject rawObj,
-      AnkiMapping object,
-      int staticSize,
-      List<int> offsets,
-      AdapterAlloc alloc) {
-    var dynamicSize = 0;
-    final value0 = object.fieldIndexes;
-    dynamicSize += (value0.length) * 8;
-    final _fieldIndexes = value0;
-    final value1 = object.label;
-    final _label = IsarBinaryWriter.utf8Encoder.convert(value1);
-    dynamicSize += (_label.length) as int;
-    final value2 = object.model;
-    final _model = IsarBinaryWriter.utf8Encoder.convert(value2);
-    dynamicSize += (_model.length) as int;
-    final value3 = object.order;
-    final _order = value3;
-    final value4 = object.tags;
-    dynamicSize += (value4.length) * 8;
-    final bytesList4 = <IsarUint8List>[];
-    for (var str in value4) {
-      final bytes = IsarBinaryWriter.utf8Encoder.convert(str);
-      bytesList4.add(bytes);
-      dynamicSize += bytes.length as int;
-    }
-    final _tags = bytesList4;
-    final size = staticSize + dynamicSize;
-
-    rawObj.buffer = alloc(size);
-    rawObj.buffer_length = size;
-    final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
-    final writer = IsarBinaryWriter(buffer, staticSize);
-    writer.writeLongList(offsets[0], _fieldIndexes);
-    writer.writeBytes(offsets[1], _label);
-    writer.writeBytes(offsets[2], _model);
-    writer.writeLong(offsets[3], _order);
-    writer.writeStringList(offsets[4], _tags);
-  }
-
-  @override
-  AnkiMapping deserialize(IsarCollection<AnkiMapping> collection, int id,
-      IsarBinaryReader reader, List<int> offsets) {
-    final object = AnkiMapping(
-      fieldIndexes: reader.readLongOrNullList(offsets[0]) ?? [],
-      id: id,
-      label: reader.readString(offsets[1]),
-      model: reader.readString(offsets[2]),
-      order: reader.readLong(offsets[3]),
-      tags: reader.readStringList(offsets[4]) ?? [],
-    );
-    return object;
-  }
-
-  @override
-  P deserializeProperty<P>(
-      int id, IsarBinaryReader reader, int propertyIndex, int offset) {
-    switch (propertyIndex) {
-      case -1:
-        return id as P;
-      case 0:
-        return (reader.readLongOrNullList(offset) ?? []) as P;
-      case 1:
-        return (reader.readString(offset)) as P;
-      case 2:
-        return (reader.readString(offset)) as P;
-      case 3:
-        return (reader.readLong(offset)) as P;
-      case 4:
-        return (reader.readStringList(offset) ?? []) as P;
-      default:
-        throw 'Illegal propertyIndex';
-    }
-  }
-
-  @override
-  void attachLinks(Isar isar, int id, AnkiMapping object) {}
-}
+void _ankiMappingAttachLinks(IsarCollection col, int id, AnkiMapping object) {}
 
 extension AnkiMappingByIndex on IsarCollection<AnkiMapping> {
   Future<AnkiMapping?> getByLabel(String label) {
@@ -280,121 +278,103 @@ extension AnkiMappingByIndex on IsarCollection<AnkiMapping> {
 extension AnkiMappingQueryWhereSort
     on QueryBuilder<AnkiMapping, AnkiMapping, QWhere> {
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterWhere> anyId() {
-    return addWhereClauseInternal(const WhereClause(indexName: null));
+    return addWhereClauseInternal(const IdWhereClause.any());
   }
 
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterWhere> anyLabel() {
-    return addWhereClauseInternal(const WhereClause(indexName: 'label'));
+    return addWhereClauseInternal(
+        const IndexWhereClause.any(indexName: 'label'));
   }
 
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterWhere> anyOrder() {
-    return addWhereClauseInternal(const WhereClause(indexName: 'order'));
+    return addWhereClauseInternal(
+        const IndexWhereClause.any(indexName: 'order'));
   }
 }
 
 extension AnkiMappingQueryWhere
     on QueryBuilder<AnkiMapping, AnkiMapping, QWhereClause> {
-  QueryBuilder<AnkiMapping, AnkiMapping, QAfterWhereClause> idEqualTo(int? id) {
-    return addWhereClauseInternal(WhereClause(
-      indexName: null,
-      lower: [id],
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterWhereClause> idEqualTo(int id) {
+    return addWhereClauseInternal(IdWhereClause.between(
+      lower: id,
       includeLower: true,
-      upper: [id],
+      upper: id,
       includeUpper: true,
     ));
   }
 
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterWhereClause> idNotEqualTo(
-      int? id) {
+      int id) {
     if (whereSortInternal == Sort.asc) {
-      return addWhereClauseInternal(WhereClause(
-        indexName: null,
-        upper: [id],
-        includeUpper: false,
-      )).addWhereClauseInternal(WhereClause(
-        indexName: null,
-        lower: [id],
-        includeLower: false,
-      ));
+      return addWhereClauseInternal(
+        IdWhereClause.lessThan(upper: id, includeUpper: false),
+      ).addWhereClauseInternal(
+        IdWhereClause.greaterThan(lower: id, includeLower: false),
+      );
     } else {
-      return addWhereClauseInternal(WhereClause(
-        indexName: null,
-        lower: [id],
-        includeLower: false,
-      )).addWhereClauseInternal(WhereClause(
-        indexName: null,
-        upper: [id],
-        includeUpper: false,
-      ));
+      return addWhereClauseInternal(
+        IdWhereClause.greaterThan(lower: id, includeLower: false),
+      ).addWhereClauseInternal(
+        IdWhereClause.lessThan(upper: id, includeUpper: false),
+      );
     }
   }
 
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterWhereClause> idGreaterThan(
-    int? id, {
-    bool include = false,
-  }) {
-    return addWhereClauseInternal(WhereClause(
-      indexName: null,
-      lower: [id],
-      includeLower: include,
-    ));
+      int id,
+      {bool include = false}) {
+    return addWhereClauseInternal(
+      IdWhereClause.greaterThan(lower: id, includeLower: include),
+    );
   }
 
-  QueryBuilder<AnkiMapping, AnkiMapping, QAfterWhereClause> idLessThan(
-    int? id, {
-    bool include = false,
-  }) {
-    return addWhereClauseInternal(WhereClause(
-      indexName: null,
-      upper: [id],
-      includeUpper: include,
-    ));
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterWhereClause> idLessThan(int id,
+      {bool include = false}) {
+    return addWhereClauseInternal(
+      IdWhereClause.lessThan(upper: id, includeUpper: include),
+    );
   }
 
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterWhereClause> idBetween(
-    int? lowerId,
-    int? upperId, {
+    int lowerId,
+    int upperId, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
-    return addWhereClauseInternal(WhereClause(
-      indexName: null,
-      lower: [lowerId],
+    return addWhereClauseInternal(IdWhereClause.between(
+      lower: lowerId,
       includeLower: includeLower,
-      upper: [upperId],
+      upper: upperId,
       includeUpper: includeUpper,
     ));
   }
 
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterWhereClause> labelEqualTo(
       String label) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.equalTo(
       indexName: 'label',
-      lower: [label],
-      includeLower: true,
-      upper: [label],
-      includeUpper: true,
+      value: [label],
     ));
   }
 
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterWhereClause> labelNotEqualTo(
       String label) {
     if (whereSortInternal == Sort.asc) {
-      return addWhereClauseInternal(WhereClause(
+      return addWhereClauseInternal(IndexWhereClause.lessThan(
         indexName: 'label',
         upper: [label],
         includeUpper: false,
-      )).addWhereClauseInternal(WhereClause(
+      )).addWhereClauseInternal(IndexWhereClause.greaterThan(
         indexName: 'label',
         lower: [label],
         includeLower: false,
       ));
     } else {
-      return addWhereClauseInternal(WhereClause(
+      return addWhereClauseInternal(IndexWhereClause.greaterThan(
         indexName: 'label',
         lower: [label],
         includeLower: false,
-      )).addWhereClauseInternal(WhereClause(
+      )).addWhereClauseInternal(IndexWhereClause.lessThan(
         indexName: 'label',
         upper: [label],
         includeUpper: false,
@@ -404,33 +384,30 @@ extension AnkiMappingQueryWhere
 
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterWhereClause> orderEqualTo(
       int order) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.equalTo(
       indexName: 'order',
-      lower: [order],
-      includeLower: true,
-      upper: [order],
-      includeUpper: true,
+      value: [order],
     ));
   }
 
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterWhereClause> orderNotEqualTo(
       int order) {
     if (whereSortInternal == Sort.asc) {
-      return addWhereClauseInternal(WhereClause(
+      return addWhereClauseInternal(IndexWhereClause.lessThan(
         indexName: 'order',
         upper: [order],
         includeUpper: false,
-      )).addWhereClauseInternal(WhereClause(
+      )).addWhereClauseInternal(IndexWhereClause.greaterThan(
         indexName: 'order',
         lower: [order],
         includeLower: false,
       ));
     } else {
-      return addWhereClauseInternal(WhereClause(
+      return addWhereClauseInternal(IndexWhereClause.greaterThan(
         indexName: 'order',
         lower: [order],
         includeLower: false,
-      )).addWhereClauseInternal(WhereClause(
+      )).addWhereClauseInternal(IndexWhereClause.lessThan(
         indexName: 'order',
         upper: [order],
         includeUpper: false,
@@ -442,7 +419,7 @@ extension AnkiMappingQueryWhere
     int order, {
     bool include = false,
   }) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.greaterThan(
       indexName: 'order',
       lower: [order],
       includeLower: include,
@@ -453,7 +430,7 @@ extension AnkiMappingQueryWhere
     int order, {
     bool include = false,
   }) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.lessThan(
       indexName: 'order',
       upper: [order],
       includeUpper: include,
@@ -466,7 +443,7 @@ extension AnkiMappingQueryWhere
     bool includeLower = true,
     bool includeUpper = true,
   }) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.between(
       indexName: 'order',
       lower: [lowerOrder],
       includeLower: includeLower,
@@ -538,7 +515,7 @@ extension AnkiMappingQueryFilter
   }
 
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition> idEqualTo(
-      int? value) {
+      int value) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.eq,
       property: 'id',
@@ -547,7 +524,7 @@ extension AnkiMappingQueryFilter
   }
 
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition> idGreaterThan(
-    int? value, {
+    int value, {
     bool include = false,
   }) {
     return addFilterConditionInternal(FilterCondition(
@@ -559,7 +536,7 @@ extension AnkiMappingQueryFilter
   }
 
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition> idLessThan(
-    int? value, {
+    int value, {
     bool include = false,
   }) {
     return addFilterConditionInternal(FilterCondition(
@@ -571,8 +548,8 @@ extension AnkiMappingQueryFilter
   }
 
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition> idBetween(
-    int? lower,
-    int? upper, {
+    int lower,
+    int upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {

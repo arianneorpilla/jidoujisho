@@ -2,17 +2,23 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:collection/collection.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:external_app_launcher/external_app_launcher.dart';
+import 'package:external_path/external_path.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:isar/isar.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:path/path.dart' as path;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/language.dart';
@@ -65,6 +71,11 @@ class AppModel with ChangeNotifier {
   /// Directory where Isar database data is stored.
   Directory get isarDirectory => _isarDirectory;
   late final Directory _isarDirectory;
+
+  /// Directory where media for export is stored for communication with
+  /// third-party APIs.
+  Directory get exportDirectory => _exportDirectory;
+  late final Directory _exportDirectory;
 
   /// Directory used as a working directory for dictionary imports.
   Directory get dictionaryImportWorkingDirectory =>
@@ -279,12 +290,40 @@ class AppModel with ChangeNotifier {
     }
   }
 
+  /// Return the app external directory found in the public DCIM directory.
+  /// This path also initialises the folder if it does not exist, and includes
+  /// a .nomedia file within the folder.
+  Future<Directory> prepareJidoujishoDirectory() async {
+    String dcimDirectory = await ExternalPath.getExternalStoragePublicDirectory(
+      ExternalPath.DIRECTORY_DCIM,
+    );
+
+    String directoryPath = path.join(dcimDirectory, 'jidoujisho');
+    String noMediaFilePath = path.join(dcimDirectory, 'jidoujisho', '.nomedia');
+
+    Directory jidoujishoDirectory = Directory(directoryPath);
+    File noMediaFile = File(noMediaFilePath);
+
+    if (!jidoujishoDirectory.existsSync()) {
+      jidoujishoDirectory.createSync(recursive: true);
+    }
+    if (!noMediaFile.existsSync()) {
+      noMediaFile.createSync();
+    }
+
+    return jidoujishoDirectory;
+  }
+
   /// Prepare application data and state to be ready of use upon starting up
   /// the application. [AppModel] is initialised in the main function before
   /// [runApp] is executed.
   Future<void> initialise() async {
     /// Prepare entities that may be repeatedly used at runtime.
     _packageInfo = await PackageInfo.fromPlatform();
+
+    /// Perform startup activities unnecessary to further initialisation here.
+    requestAnkidroidPermissions();
+    requestExternalStoragePermissions();
 
     /// These directories will commonly be accessed.
     _temporaryDirectory = await getTemporaryDirectory();
@@ -293,6 +332,7 @@ class AppModel with ChangeNotifier {
     _isarDirectory = Directory(path.join(appDirectory.path, 'isar'));
     _dictionaryImportWorkingDirectory = Directory(
         path.join(appDirectory.path, 'dictionaryImportWorkingDirectory'));
+    _exportDirectory = await prepareJidoujishoDirectory();
 
     hiveDirectory.createSync();
     isarDirectory.createSync();
@@ -322,6 +362,9 @@ class AppModel with ChangeNotifier {
     populateMediaSources();
     populateDictionaryFormats();
     populateDefaultMapping();
+
+    /// Add the default card type to the list of Anki card types if missing.
+    addDefaultModelIfMissing();
 
     /// Get the current target language and prepare its resources for use. This
     /// will not re-run if the target language is already initialised, as
@@ -374,6 +417,13 @@ class AppModel with ChangeNotifier {
     return languages[localeTag]!;
   }
 
+  /// Get the last selected deck from persisted preferences.
+  String get lastSelectedDeckName {
+    String deckName =
+        _preferences.get('last_selected_deck', defaultValue: 'Default');
+    return deckName;
+  }
+
   /// Get the target language from persisted preferences.
   DictionaryFormat get lastSelectedDictionaryFormat {
     String firstDictionaryFormatName =
@@ -404,16 +454,28 @@ class AppModel with ChangeNotifier {
   /// Get the last selected mapping from persisted preferences. This should
   /// always be guaranteed to have a result, as it is impossible to delete the
   /// default mapping.
-  AnkiMapping? get lastSelectedMapping {
+  AnkiMapping get lastSelectedMapping {
     String mappingName = _preferences.get('last_selected_mapping',
         defaultValue: mappings.first.label);
 
-    AnkiMapping? mapping = _database.ankiMappings
-        .filter()
-        .labelEqualTo(mappingName)
-        .findFirstSync();
+    AnkiMapping mapping = _database.ankiMappings
+            .filter()
+            .labelEqualTo(mappingName)
+            .findFirstSync() ??
+        _database.ankiMappings
+            .filter()
+            .labelEqualTo(mappings.first.label)
+            .findFirstSync()!;
 
     return mapping;
+  }
+
+  /// Get the last selected mapping's name from persisted preferences. This is
+  /// faster than getting the mapping specifically from the database.
+  String get lastSelectedMappingName {
+    String mappingName = _preferences.get('last_selected_mapping',
+        defaultValue: mappings.first.label);
+    return mappingName;
   }
 
   /// Persist a new target language in preferences.
@@ -443,6 +505,12 @@ class AppModel with ChangeNotifier {
   Future<void> setLastSelectedModelName(String modelName) async {
     await _preferences.put('last_selected_model', modelName);
     notifyListeners();
+  }
+
+  /// Persist a new last selected deck name. This is called when the user
+  /// changes the selected deck to map in the creator.
+  Future<void> setLastSelectedDeck(String deckName) async {
+    await _preferences.put('last_selected_deck', deckName);
   }
 
   /// Persist a new last selected model name. This is called when the user
@@ -517,7 +585,7 @@ class AppModel with ChangeNotifier {
   /// Show the language menu. This should be callable from many parts of the
   /// app, so it is appropriately handled by the model.
   Future<void> showProfilesMenu() async {
-    List<String> models = await AnkiUtilities.getModelList();
+    List<String> models = await getModelList();
     String initialModel = lastSelectedModel ?? models.first;
 
     await showDialog(
@@ -856,5 +924,407 @@ class AppModel with ChangeNotifier {
     }
 
     return order;
+  }
+
+  /// Requests for full external storage permissions. Required to handle video
+  /// files and their subtitle files in the same directory.
+  static Future<void> requestExternalStoragePermissions() async {
+    AndroidDeviceInfo androidDeviceInfo = await DeviceInfoPlugin().androidInfo;
+    await Permission.storage.request();
+
+    if (androidDeviceInfo.version.sdkInt! >= 30) {
+      await Permission.manageExternalStorage.request();
+    }
+  }
+
+  /// Used to communicate back and forth with Dart and native code.
+  static const MethodChannel methodChannel =
+      MethodChannel('app.lrorpilla.yuuna/anki');
+
+  /// Shows the AnkiDroid API message. Called when an Anki-related API get call
+  /// fails.
+  void showAnkidroidApiMessage() async {
+    String errorAnkidroidApi = translate('error_ankidroid_api');
+    String errorAnkidroidApiContent = translate('error_ankidroid_api_content');
+    String dialogCloseLabel = translate('dialog_close');
+    String dialogLaunchAnkidroidLabel = translate('dialog_launch_ankidroid');
+
+    await showDialog(
+      barrierDismissible: true,
+      context: _navigatorKey.currentContext!,
+      builder: (context) => AlertDialog(
+        title: Text(errorAnkidroidApi),
+        content: Text(
+          errorAnkidroidApiContent,
+          textAlign: TextAlign.justify,
+        ),
+        actions: [
+          TextButton(
+            child: Text(dialogLaunchAnkidroidLabel),
+            onPressed: () async {
+              await LaunchApp.openApp(
+                androidPackageName: 'com.ichi2.anki',
+                openStore: true,
+              );
+              Navigator.pop(context);
+            },
+          ),
+          TextButton(
+            child: Text(dialogCloseLabel),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Used to ask for AnkiDroid database permissions. Should be called at
+  /// startup.
+  void requestAnkidroidPermissions() async {
+    methodChannel.invokeMethod('requestAnkidroidPermissions');
+  }
+
+  /// Adds the default 'jidoujisho Yuuna' model to the list of Anki card types.
+  void addDefaultModelIfMissing() async {
+    String infoStandardModel = translate('info_standard_model');
+    String infoStandardModelContent = translate('info_standard_model_content');
+    String dialogCloseLabel = translate('dialog_close');
+
+    List<String> models = await getModelList();
+    if (!models.contains(AnkiMapping.standardModelName)) {
+      methodChannel.invokeMethod('addDefaultModel');
+
+      await showDialog(
+        barrierDismissible: true,
+        context: _navigatorKey.currentContext!,
+        builder: (context) => AlertDialog(
+          title: Text(infoStandardModel),
+          content: Text(
+            infoStandardModelContent,
+            textAlign: TextAlign.justify,
+          ),
+          actions: [
+            TextButton(
+              child: Text(dialogCloseLabel),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  /// Get the file to be written to for image export.
+  File getImageExportFile() {
+    String imagePath = path.join(exportDirectory.path, 'exportImage.jpg');
+    return File(imagePath);
+  }
+
+  /// Get the file to be written to for audio export.
+  File getAudioExportFile() {
+    String audioPath = path.join(exportDirectory.path, 'exportAudio.mp3');
+    return File(audioPath);
+  }
+
+  /// Get a list of decks from the Anki background service that can be used
+  /// for export.
+  Future<List<String>> getDecks() async {
+    try {
+      Map<dynamic, dynamic> result =
+          await methodChannel.invokeMethod('getDecks');
+      List<String> decks = result.values.toList().cast<String>();
+
+      decks.sort((a, b) => a.compareTo(b));
+      return decks;
+    } catch (e) {
+      showAnkidroidApiMessage();
+      rethrow;
+    }
+  }
+
+  /// Get a list of models from the Anki background service that can be used
+  /// for export.
+  Future<List<String>> getModelList() async {
+    try {
+      Map<dynamic, dynamic> result =
+          await methodChannel.invokeMethod('getModelList');
+      List<String> models = result.values.toList().cast<String>();
+
+      models.sort((a, b) => a.compareTo(b));
+      return models;
+    } catch (e) {
+      showAnkidroidApiMessage();
+      rethrow;
+    }
+  }
+
+  /// Get a list of field names for a given [model] name in Anki. This function
+  /// assumes that the model name can be found in [getDecks] and is valid.
+  Future<List<String>> getFieldList(String model) async {
+    try {
+      List<String> fields = List<String>.from(
+        await methodChannel.invokeMethod(
+          'getFieldList',
+          <String, dynamic>{
+            'model': model,
+          },
+        ),
+      );
+
+      return fields;
+    } catch (e) {
+      showAnkidroidApiMessage();
+      rethrow;
+    }
+  }
+
+  /// Add a note with certain [details] and a [mapping] of fields to a model
+  /// to a given [deck].
+  Future<void> addNote({
+    required ExportDetails details,
+    required AnkiMapping mapping,
+    required String deck,
+  }) async {
+    String timestamp =
+        intl.DateFormat('yyyyMMddTkkmmss').format(DateTime.now());
+    String preferredName = 'jidoujisho-$timestamp';
+
+    String? imageFileName;
+    String? audioFileName;
+
+    if (details.image != null) {
+      imageFileName = await addFileToMedia(
+        exportFile: details.image!,
+        preferredName: preferredName,
+        mimeType: 'image',
+      );
+    }
+
+    if (details.audio != null) {
+      audioFileName = await addFileToMedia(
+        exportFile: details.audio!,
+        preferredName: preferredName,
+        mimeType: 'audio',
+      );
+    }
+
+    String model = mapping.model;
+    List<String> fields = getCardFields(
+      details: details,
+      mapping: mapping,
+      imageFileName: imageFileName,
+      audioFileName: audioFileName,
+    );
+
+    try {
+      return await methodChannel.invokeMethod(
+        'addNote',
+        <String, dynamic>{
+          'deck': deck,
+          'model': model,
+          'fields': fields,
+        },
+      );
+    } on PlatformException {
+      debugPrint('Failed to add note for [$preferredName]');
+      rethrow;
+    } finally {
+      debugPrint('Added note for [$preferredName] to Anki media');
+    }
+  }
+
+  /// Add a file to Anki media. [mimeType] can be 'image' or 'audio'.
+  /// [preferredName] is used as a prefix to the file when exported to the
+  /// media store. Returns the name of the file once successfully added to
+  /// Anki media.
+  Future<String> addFileToMedia({
+    required File exportFile,
+    required String preferredName,
+    required String mimeType,
+  }) async {
+    late File destinationFile;
+    if (mimeType == 'image') {
+      destinationFile = getImageExportFile();
+    } else if (mimeType == 'audio') {
+      destinationFile = getAudioExportFile();
+    } else {
+      throw Exception('Invalid mime type, must be image or audio');
+    }
+
+    String destinationPath = destinationFile.path;
+    exportFile.copySync(destinationPath);
+
+    String uriPath = 'file:///${destinationFile.uri}';
+
+    try {
+      return await methodChannel.invokeMethod(
+        'addFileToMedia',
+        <String, String>{
+          'uriPath': uriPath,
+          'preferredName': preferredName,
+          'mimeType': mimeType,
+        },
+      );
+    } on PlatformException {
+      debugPrint('Failed to add [$mimeType] to Anki media');
+      rethrow;
+    } finally {
+      debugPrint('Added $mimeType for [$preferredName] to Anki media');
+    }
+  }
+
+  /// Returns the list that will be passed to the Anki card creation API to
+  /// fill a card's fields. The contents of the list will correspond to the
+  /// order of the [mapping] provided, with each field in the list replaced
+  /// with the corresponding [details] or in the case of the image and audio
+  /// fields, the file names.
+  static List<String> getCardFields({
+    required ExportDetails details,
+    required AnkiMapping mapping,
+    required String? imageFileName,
+    required String? audioFileName,
+  }) {
+    List<String> fields = mapping.fieldIndexes.map<String>((index) {
+      if (index == null) {
+        return '';
+      }
+
+      Field field = Field.values.elementAt(index);
+
+      switch (field) {
+        case Field.sentence:
+          return details.sentence ?? '';
+        case Field.word:
+          return details.word ?? '';
+        case Field.reading:
+          return details.reading ?? '';
+        case Field.meaning:
+          return details.meaning ?? '';
+        case Field.extra:
+          return details.extra ?? '';
+        case Field.context:
+          return details.context ?? '';
+        case Field.image:
+          return imageFileName ?? '';
+        case Field.audio:
+          return audioFileName ?? '';
+      }
+    }).toList();
+
+    return fields;
+  }
+
+  /// Returns whether or not a given [AnkiMapping] has the same amount of
+  /// fields as the model it uses.
+  Future<bool> profileFieldMatchesCardTypeCount(AnkiMapping mapping) async {
+    List<String> fields = await getFieldList(mapping.model);
+    return mapping.fieldIndexes.length == fields.length;
+  }
+
+  /// Returns whether or not a given [AnkiMapping]'s model exists in Anki.
+  Future<bool> profileModelExists(AnkiMapping mapping) async {
+    List<String> models = await getModelList();
+    return models.contains(mapping.model);
+  }
+
+  /// Persist the standard profile as the last selected mapping.
+  Future<void> selectStandardProfile() async {
+    await _preferences.put(
+        'last_selected_mapping', AnkiMapping.standardProfileName);
+    notifyListeners();
+  }
+
+  /// Resets a profile's fields such that it will have the model's number of
+  /// fields, all empty.
+  Future<void> resetProfileFields(AnkiMapping mapping) async {
+    List<String> fields = await getFieldList(mapping.model);
+    List<int?> fieldIndexes = List.generate(fields.length, (index) => null);
+
+    AnkiMapping resetMapping = mapping.copyWith(fieldIndexes: fieldIndexes);
+    _database.writeTxnSync((database) {
+      if (mapping.id != null &&
+          database.ankiMappings.getSync(resetMapping.id!) != null) {
+        database.ankiMappings.deleteSync(resetMapping.id!);
+      }
+      database.ankiMappings.putSync(resetMapping);
+    });
+  }
+
+  /// Check for errors relating to the current selected export profile.
+  Future<void> validateSelectedMapping({
+    required BuildContext context,
+    required AnkiMapping mapping,
+  }) async {
+    String errorModelChanged = translate('error_model_changed');
+    String errorModelChangedContent = translate('error_model_changed_content');
+    String errorModelMissing = translate('error_model_missing');
+    String errorModelMissingContent = translate('error_model_missing_content');
+    String dialogCloseLabel = translate('dialog_close');
+
+    bool newMappingModelExists = await profileModelExists(mapping);
+
+    /// Ensure that the following case never happens to the default profile.
+    addDefaultModelIfMissing();
+
+    if (!newMappingModelExists) {
+      await showDialog(
+        barrierDismissible: true,
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(errorModelMissing),
+          content: Text(
+            errorModelMissingContent,
+            textAlign: TextAlign.justify,
+          ),
+          actions: [
+            TextButton(
+              child: Text(dialogCloseLabel),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      );
+
+      await selectStandardProfile();
+      return;
+    }
+
+    bool newMappingModelLengthMatches =
+        await profileFieldMatchesCardTypeCount(mapping);
+
+    if (!newMappingModelLengthMatches) {
+      await showDialog(
+        barrierDismissible: true,
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(errorModelChanged),
+          content: Text(
+            errorModelChangedContent,
+            textAlign: TextAlign.justify,
+          ),
+          actions: [
+            TextButton(
+              child: Text(dialogCloseLabel),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      );
+
+      await resetProfileFields(mapping);
+    }
+  }
+
+  /// A helper function for opening the creator from any page in the
+  /// application.
+  Future<void> openCreator() async {
+    List<String> decks = await getDecks();
+
+    await Navigator.push(
+      _navigatorKey.currentContext!,
+      MaterialPageRoute(
+        builder: (context) => CreatorPage(decks: decks),
+      ),
+    );
   }
 }

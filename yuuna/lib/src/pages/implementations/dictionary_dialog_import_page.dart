@@ -29,7 +29,7 @@ class _DictionaryDialogImportPageState
     return WillPopScope(
       onWillPop: () async => false,
       child: AlertDialog(
-        contentPadding: EdgeInsets.all(Spacing.of(context).spaces.big),
+        contentPadding: Spacing.of(context).insets.all.big,
         content: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

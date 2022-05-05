@@ -6,20 +6,16 @@ part of 'creator_context.dart';
 // IsarCollectionGenerator
 // **************************************************************************
 
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, unused_local_variable
 
 extension GetCreatorContextCollection on Isar {
-  IsarCollection<CreatorContext> get creatorContexts {
-    return getCollection('CreatorContext');
-  }
+  IsarCollection<CreatorContext> get creatorContexts => getCollection();
 }
 
-final CreatorContextSchema = CollectionSchema(
+const CreatorContextSchema = CollectionSchema(
   name: 'CreatorContext',
   schema:
       '{"name":"CreatorContext","idName":"id","properties":[{"name":"audioSearch","type":"String"},{"name":"audioSeed","type":"String"},{"name":"context","type":"String"},{"name":"extra","type":"String"},{"name":"imageSearch","type":"String"},{"name":"imageSeed","type":"String"},{"name":"meaning","type":"String"},{"name":"reading","type":"String"},{"name":"sentence","type":"String"},{"name":"word","type":"String"}],"indexes":[],"links":[]}',
-  nativeAdapter: const _CreatorContextNativeAdapter(),
-  webAdapter: const _CreatorContextWebAdapter(),
   idName: 'id',
   propertyIds: {
     'audioSearch': 0,
@@ -35,336 +31,321 @@ final CreatorContextSchema = CollectionSchema(
   },
   listProperties: {},
   indexIds: {},
-  indexTypes: {},
+  indexValueTypes: {},
   linkIds: {},
-  backlinkIds: {},
-  linkedCollections: [],
-  getId: (obj) {
-    if (obj.id == Isar.autoIncrement) {
-      return null;
-    } else {
-      return obj.id;
-    }
-  },
-  setId: (obj, id) => obj.id = id,
-  getLinks: (obj) => [],
-  version: 2,
+  backlinkLinkNames: {},
+  getId: _creatorContextGetId,
+  setId: _creatorContextSetId,
+  getLinks: _creatorContextGetLinks,
+  attachLinks: _creatorContextAttachLinks,
+  serializeNative: _creatorContextSerializeNative,
+  deserializeNative: _creatorContextDeserializeNative,
+  deserializePropNative: _creatorContextDeserializePropNative,
+  serializeWeb: _creatorContextSerializeWeb,
+  deserializeWeb: _creatorContextDeserializeWeb,
+  deserializePropWeb: _creatorContextDeserializePropWeb,
+  version: 3,
 );
+
+int? _creatorContextGetId(CreatorContext object) {
+  if (object.id == Isar.autoIncrement) {
+    return null;
+  } else {
+    return object.id;
+  }
+}
+
+void _creatorContextSetId(CreatorContext object, int id) {
+  object.id = id;
+}
+
+List<IsarLinkBase> _creatorContextGetLinks(CreatorContext object) {
+  return [];
+}
 
 const _creatorContextMediaItemConverter = MediaItemConverter();
 
-class _CreatorContextWebAdapter extends IsarWebTypeAdapter<CreatorContext> {
-  const _CreatorContextWebAdapter();
-
-  @override
-  Object serialize(
-      IsarCollection<CreatorContext> collection, CreatorContext object) {
-    final jsObj = IsarNative.newJsObject();
-    IsarNative.jsObjectSet(jsObj, 'audioSearch', object.audioSearch);
-    IsarNative.jsObjectSet(jsObj, 'audioSeed',
-        _creatorContextMediaItemConverter.toIsar(object.audioSeed));
-    IsarNative.jsObjectSet(jsObj, 'context',
-        _creatorContextMediaItemConverter.toIsar(object.context));
-    IsarNative.jsObjectSet(jsObj, 'extra', object.extra);
-    IsarNative.jsObjectSet(jsObj, 'id', object.id);
-    IsarNative.jsObjectSet(jsObj, 'imageSearch', object.imageSearch);
-    IsarNative.jsObjectSet(jsObj, 'imageSeed',
-        _creatorContextMediaItemConverter.toIsar(object.imageSeed));
-    IsarNative.jsObjectSet(jsObj, 'meaning', object.meaning);
-    IsarNative.jsObjectSet(jsObj, 'reading', object.reading);
-    IsarNative.jsObjectSet(jsObj, 'sentence', object.sentence);
-    IsarNative.jsObjectSet(jsObj, 'word', object.word);
-    return jsObj;
+void _creatorContextSerializeNative(
+    IsarCollection<CreatorContext> collection,
+    IsarRawObject rawObj,
+    CreatorContext object,
+    int staticSize,
+    List<int> offsets,
+    AdapterAlloc alloc) {
+  var dynamicSize = 0;
+  final value0 = object.audioSearch;
+  IsarUint8List? _audioSearch;
+  if (value0 != null) {
+    _audioSearch = IsarBinaryWriter.utf8Encoder.convert(value0);
   }
-
-  @override
-  CreatorContext deserialize(
-      IsarCollection<CreatorContext> collection, dynamic jsObj) {
-    final object = CreatorContext(
-      audioSearch: IsarNative.jsObjectGet(jsObj, 'audioSearch'),
-      audioSeed: _creatorContextMediaItemConverter
-          .fromIsar(IsarNative.jsObjectGet(jsObj, 'audioSeed')),
-      context: _creatorContextMediaItemConverter
-          .fromIsar(IsarNative.jsObjectGet(jsObj, 'context')),
-      extra: IsarNative.jsObjectGet(jsObj, 'extra'),
-      id: IsarNative.jsObjectGet(jsObj, 'id'),
-      imageSearch: IsarNative.jsObjectGet(jsObj, 'imageSearch'),
-      imageSeed: _creatorContextMediaItemConverter
-          .fromIsar(IsarNative.jsObjectGet(jsObj, 'imageSeed')),
-      meaning: IsarNative.jsObjectGet(jsObj, 'meaning'),
-      reading: IsarNative.jsObjectGet(jsObj, 'reading'),
-      sentence: IsarNative.jsObjectGet(jsObj, 'sentence'),
-      word: IsarNative.jsObjectGet(jsObj, 'word'),
-    );
-    return object;
+  dynamicSize += (_audioSearch?.length ?? 0) as int;
+  final value1 = _creatorContextMediaItemConverter.toIsar(object.audioSeed);
+  IsarUint8List? _audioSeed;
+  if (value1 != null) {
+    _audioSeed = IsarBinaryWriter.utf8Encoder.convert(value1);
   }
-
-  @override
-  P deserializeProperty<P>(Object jsObj, String propertyName) {
-    switch (propertyName) {
-      case 'audioSearch':
-        return (IsarNative.jsObjectGet(jsObj, 'audioSearch')) as P;
-      case 'audioSeed':
-        return (_creatorContextMediaItemConverter
-            .fromIsar(IsarNative.jsObjectGet(jsObj, 'audioSeed'))) as P;
-      case 'context':
-        return (_creatorContextMediaItemConverter
-            .fromIsar(IsarNative.jsObjectGet(jsObj, 'context'))) as P;
-      case 'extra':
-        return (IsarNative.jsObjectGet(jsObj, 'extra')) as P;
-      case 'id':
-        return (IsarNative.jsObjectGet(jsObj, 'id')) as P;
-      case 'imageSearch':
-        return (IsarNative.jsObjectGet(jsObj, 'imageSearch')) as P;
-      case 'imageSeed':
-        return (_creatorContextMediaItemConverter
-            .fromIsar(IsarNative.jsObjectGet(jsObj, 'imageSeed'))) as P;
-      case 'meaning':
-        return (IsarNative.jsObjectGet(jsObj, 'meaning')) as P;
-      case 'reading':
-        return (IsarNative.jsObjectGet(jsObj, 'reading')) as P;
-      case 'sentence':
-        return (IsarNative.jsObjectGet(jsObj, 'sentence')) as P;
-      case 'word':
-        return (IsarNative.jsObjectGet(jsObj, 'word')) as P;
-      default:
-        throw 'Illegal propertyName';
-    }
+  dynamicSize += (_audioSeed?.length ?? 0) as int;
+  final value2 = _creatorContextMediaItemConverter.toIsar(object.context);
+  IsarUint8List? _context;
+  if (value2 != null) {
+    _context = IsarBinaryWriter.utf8Encoder.convert(value2);
   }
+  dynamicSize += (_context?.length ?? 0) as int;
+  final value3 = object.extra;
+  IsarUint8List? _extra;
+  if (value3 != null) {
+    _extra = IsarBinaryWriter.utf8Encoder.convert(value3);
+  }
+  dynamicSize += (_extra?.length ?? 0) as int;
+  final value4 = object.imageSearch;
+  IsarUint8List? _imageSearch;
+  if (value4 != null) {
+    _imageSearch = IsarBinaryWriter.utf8Encoder.convert(value4);
+  }
+  dynamicSize += (_imageSearch?.length ?? 0) as int;
+  final value5 = _creatorContextMediaItemConverter.toIsar(object.imageSeed);
+  IsarUint8List? _imageSeed;
+  if (value5 != null) {
+    _imageSeed = IsarBinaryWriter.utf8Encoder.convert(value5);
+  }
+  dynamicSize += (_imageSeed?.length ?? 0) as int;
+  final value6 = object.meaning;
+  IsarUint8List? _meaning;
+  if (value6 != null) {
+    _meaning = IsarBinaryWriter.utf8Encoder.convert(value6);
+  }
+  dynamicSize += (_meaning?.length ?? 0) as int;
+  final value7 = object.reading;
+  IsarUint8List? _reading;
+  if (value7 != null) {
+    _reading = IsarBinaryWriter.utf8Encoder.convert(value7);
+  }
+  dynamicSize += (_reading?.length ?? 0) as int;
+  final value8 = object.sentence;
+  IsarUint8List? _sentence;
+  if (value8 != null) {
+    _sentence = IsarBinaryWriter.utf8Encoder.convert(value8);
+  }
+  dynamicSize += (_sentence?.length ?? 0) as int;
+  final value9 = object.word;
+  IsarUint8List? _word;
+  if (value9 != null) {
+    _word = IsarBinaryWriter.utf8Encoder.convert(value9);
+  }
+  dynamicSize += (_word?.length ?? 0) as int;
+  final size = staticSize + dynamicSize;
 
-  @override
-  void attachLinks(Isar isar, int id, CreatorContext object) {}
+  rawObj.buffer = alloc(size);
+  rawObj.buffer_length = size;
+  final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
+  final writer = IsarBinaryWriter(buffer, staticSize);
+  writer.writeBytes(offsets[0], _audioSearch);
+  writer.writeBytes(offsets[1], _audioSeed);
+  writer.writeBytes(offsets[2], _context);
+  writer.writeBytes(offsets[3], _extra);
+  writer.writeBytes(offsets[4], _imageSearch);
+  writer.writeBytes(offsets[5], _imageSeed);
+  writer.writeBytes(offsets[6], _meaning);
+  writer.writeBytes(offsets[7], _reading);
+  writer.writeBytes(offsets[8], _sentence);
+  writer.writeBytes(offsets[9], _word);
 }
 
-class _CreatorContextNativeAdapter
-    extends IsarNativeTypeAdapter<CreatorContext> {
-  const _CreatorContextNativeAdapter();
-
-  @override
-  void serialize(
-      IsarCollection<CreatorContext> collection,
-      IsarRawObject rawObj,
-      CreatorContext object,
-      int staticSize,
-      List<int> offsets,
-      AdapterAlloc alloc) {
-    var dynamicSize = 0;
-    final value0 = object.audioSearch;
-    IsarUint8List? _audioSearch;
-    if (value0 != null) {
-      _audioSearch = IsarBinaryWriter.utf8Encoder.convert(value0);
-    }
-    dynamicSize += (_audioSearch?.length ?? 0) as int;
-    final value1 = _creatorContextMediaItemConverter.toIsar(object.audioSeed);
-    IsarUint8List? _audioSeed;
-    if (value1 != null) {
-      _audioSeed = IsarBinaryWriter.utf8Encoder.convert(value1);
-    }
-    dynamicSize += (_audioSeed?.length ?? 0) as int;
-    final value2 = _creatorContextMediaItemConverter.toIsar(object.context);
-    IsarUint8List? _context;
-    if (value2 != null) {
-      _context = IsarBinaryWriter.utf8Encoder.convert(value2);
-    }
-    dynamicSize += (_context?.length ?? 0) as int;
-    final value3 = object.extra;
-    IsarUint8List? _extra;
-    if (value3 != null) {
-      _extra = IsarBinaryWriter.utf8Encoder.convert(value3);
-    }
-    dynamicSize += (_extra?.length ?? 0) as int;
-    final value4 = object.imageSearch;
-    IsarUint8List? _imageSearch;
-    if (value4 != null) {
-      _imageSearch = IsarBinaryWriter.utf8Encoder.convert(value4);
-    }
-    dynamicSize += (_imageSearch?.length ?? 0) as int;
-    final value5 = _creatorContextMediaItemConverter.toIsar(object.imageSeed);
-    IsarUint8List? _imageSeed;
-    if (value5 != null) {
-      _imageSeed = IsarBinaryWriter.utf8Encoder.convert(value5);
-    }
-    dynamicSize += (_imageSeed?.length ?? 0) as int;
-    final value6 = object.meaning;
-    IsarUint8List? _meaning;
-    if (value6 != null) {
-      _meaning = IsarBinaryWriter.utf8Encoder.convert(value6);
-    }
-    dynamicSize += (_meaning?.length ?? 0) as int;
-    final value7 = object.reading;
-    IsarUint8List? _reading;
-    if (value7 != null) {
-      _reading = IsarBinaryWriter.utf8Encoder.convert(value7);
-    }
-    dynamicSize += (_reading?.length ?? 0) as int;
-    final value8 = object.sentence;
-    IsarUint8List? _sentence;
-    if (value8 != null) {
-      _sentence = IsarBinaryWriter.utf8Encoder.convert(value8);
-    }
-    dynamicSize += (_sentence?.length ?? 0) as int;
-    final value9 = object.word;
-    IsarUint8List? _word;
-    if (value9 != null) {
-      _word = IsarBinaryWriter.utf8Encoder.convert(value9);
-    }
-    dynamicSize += (_word?.length ?? 0) as int;
-    final size = staticSize + dynamicSize;
-
-    rawObj.buffer = alloc(size);
-    rawObj.buffer_length = size;
-    final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
-    final writer = IsarBinaryWriter(buffer, staticSize);
-    writer.writeBytes(offsets[0], _audioSearch);
-    writer.writeBytes(offsets[1], _audioSeed);
-    writer.writeBytes(offsets[2], _context);
-    writer.writeBytes(offsets[3], _extra);
-    writer.writeBytes(offsets[4], _imageSearch);
-    writer.writeBytes(offsets[5], _imageSeed);
-    writer.writeBytes(offsets[6], _meaning);
-    writer.writeBytes(offsets[7], _reading);
-    writer.writeBytes(offsets[8], _sentence);
-    writer.writeBytes(offsets[9], _word);
-  }
-
-  @override
-  CreatorContext deserialize(IsarCollection<CreatorContext> collection, int id,
-      IsarBinaryReader reader, List<int> offsets) {
-    final object = CreatorContext(
-      audioSearch: reader.readStringOrNull(offsets[0]),
-      audioSeed: _creatorContextMediaItemConverter
-          .fromIsar(reader.readStringOrNull(offsets[1])),
-      context: _creatorContextMediaItemConverter
-          .fromIsar(reader.readStringOrNull(offsets[2])),
-      extra: reader.readStringOrNull(offsets[3]),
-      id: id,
-      imageSearch: reader.readStringOrNull(offsets[4]),
-      imageSeed: _creatorContextMediaItemConverter
-          .fromIsar(reader.readStringOrNull(offsets[5])),
-      meaning: reader.readStringOrNull(offsets[6]),
-      reading: reader.readStringOrNull(offsets[7]),
-      sentence: reader.readStringOrNull(offsets[8]),
-      word: reader.readStringOrNull(offsets[9]),
-    );
-    return object;
-  }
-
-  @override
-  P deserializeProperty<P>(
-      int id, IsarBinaryReader reader, int propertyIndex, int offset) {
-    switch (propertyIndex) {
-      case -1:
-        return id as P;
-      case 0:
-        return (reader.readStringOrNull(offset)) as P;
-      case 1:
-        return (_creatorContextMediaItemConverter
-            .fromIsar(reader.readStringOrNull(offset))) as P;
-      case 2:
-        return (_creatorContextMediaItemConverter
-            .fromIsar(reader.readStringOrNull(offset))) as P;
-      case 3:
-        return (reader.readStringOrNull(offset)) as P;
-      case 4:
-        return (reader.readStringOrNull(offset)) as P;
-      case 5:
-        return (_creatorContextMediaItemConverter
-            .fromIsar(reader.readStringOrNull(offset))) as P;
-      case 6:
-        return (reader.readStringOrNull(offset)) as P;
-      case 7:
-        return (reader.readStringOrNull(offset)) as P;
-      case 8:
-        return (reader.readStringOrNull(offset)) as P;
-      case 9:
-        return (reader.readStringOrNull(offset)) as P;
-      default:
-        throw 'Illegal propertyIndex';
-    }
-  }
-
-  @override
-  void attachLinks(Isar isar, int id, CreatorContext object) {}
+CreatorContext _creatorContextDeserializeNative(
+    IsarCollection<CreatorContext> collection,
+    int id,
+    IsarBinaryReader reader,
+    List<int> offsets) {
+  final object = CreatorContext(
+    audioSearch: reader.readStringOrNull(offsets[0]),
+    audioSeed: _creatorContextMediaItemConverter
+        .fromIsar(reader.readStringOrNull(offsets[1])),
+    context: _creatorContextMediaItemConverter
+        .fromIsar(reader.readStringOrNull(offsets[2])),
+    extra: reader.readStringOrNull(offsets[3]),
+    id: id,
+    imageSearch: reader.readStringOrNull(offsets[4]),
+    imageSeed: _creatorContextMediaItemConverter
+        .fromIsar(reader.readStringOrNull(offsets[5])),
+    meaning: reader.readStringOrNull(offsets[6]),
+    reading: reader.readStringOrNull(offsets[7]),
+    sentence: reader.readStringOrNull(offsets[8]),
+    word: reader.readStringOrNull(offsets[9]),
+  );
+  return object;
 }
+
+P _creatorContextDeserializePropNative<P>(
+    int id, IsarBinaryReader reader, int propertyIndex, int offset) {
+  switch (propertyIndex) {
+    case -1:
+      return id as P;
+    case 0:
+      return (reader.readStringOrNull(offset)) as P;
+    case 1:
+      return (_creatorContextMediaItemConverter
+          .fromIsar(reader.readStringOrNull(offset))) as P;
+    case 2:
+      return (_creatorContextMediaItemConverter
+          .fromIsar(reader.readStringOrNull(offset))) as P;
+    case 3:
+      return (reader.readStringOrNull(offset)) as P;
+    case 4:
+      return (reader.readStringOrNull(offset)) as P;
+    case 5:
+      return (_creatorContextMediaItemConverter
+          .fromIsar(reader.readStringOrNull(offset))) as P;
+    case 6:
+      return (reader.readStringOrNull(offset)) as P;
+    case 7:
+      return (reader.readStringOrNull(offset)) as P;
+    case 8:
+      return (reader.readStringOrNull(offset)) as P;
+    case 9:
+      return (reader.readStringOrNull(offset)) as P;
+    default:
+      throw 'Illegal propertyIndex';
+  }
+}
+
+dynamic _creatorContextSerializeWeb(
+    IsarCollection<CreatorContext> collection, CreatorContext object) {
+  final jsObj = IsarNative.newJsObject();
+  IsarNative.jsObjectSet(jsObj, 'audioSearch', object.audioSearch);
+  IsarNative.jsObjectSet(jsObj, 'audioSeed',
+      _creatorContextMediaItemConverter.toIsar(object.audioSeed));
+  IsarNative.jsObjectSet(jsObj, 'context',
+      _creatorContextMediaItemConverter.toIsar(object.context));
+  IsarNative.jsObjectSet(jsObj, 'extra', object.extra);
+  IsarNative.jsObjectSet(jsObj, 'id', object.id);
+  IsarNative.jsObjectSet(jsObj, 'imageSearch', object.imageSearch);
+  IsarNative.jsObjectSet(jsObj, 'imageSeed',
+      _creatorContextMediaItemConverter.toIsar(object.imageSeed));
+  IsarNative.jsObjectSet(jsObj, 'meaning', object.meaning);
+  IsarNative.jsObjectSet(jsObj, 'reading', object.reading);
+  IsarNative.jsObjectSet(jsObj, 'sentence', object.sentence);
+  IsarNative.jsObjectSet(jsObj, 'word', object.word);
+  return jsObj;
+}
+
+CreatorContext _creatorContextDeserializeWeb(
+    IsarCollection<CreatorContext> collection, dynamic jsObj) {
+  final object = CreatorContext(
+    audioSearch: IsarNative.jsObjectGet(jsObj, 'audioSearch'),
+    audioSeed: _creatorContextMediaItemConverter
+        .fromIsar(IsarNative.jsObjectGet(jsObj, 'audioSeed')),
+    context: _creatorContextMediaItemConverter
+        .fromIsar(IsarNative.jsObjectGet(jsObj, 'context')),
+    extra: IsarNative.jsObjectGet(jsObj, 'extra'),
+    id: IsarNative.jsObjectGet(jsObj, 'id'),
+    imageSearch: IsarNative.jsObjectGet(jsObj, 'imageSearch'),
+    imageSeed: _creatorContextMediaItemConverter
+        .fromIsar(IsarNative.jsObjectGet(jsObj, 'imageSeed')),
+    meaning: IsarNative.jsObjectGet(jsObj, 'meaning'),
+    reading: IsarNative.jsObjectGet(jsObj, 'reading'),
+    sentence: IsarNative.jsObjectGet(jsObj, 'sentence'),
+    word: IsarNative.jsObjectGet(jsObj, 'word'),
+  );
+  return object;
+}
+
+P _creatorContextDeserializePropWeb<P>(Object jsObj, String propertyName) {
+  switch (propertyName) {
+    case 'audioSearch':
+      return (IsarNative.jsObjectGet(jsObj, 'audioSearch')) as P;
+    case 'audioSeed':
+      return (_creatorContextMediaItemConverter
+          .fromIsar(IsarNative.jsObjectGet(jsObj, 'audioSeed'))) as P;
+    case 'context':
+      return (_creatorContextMediaItemConverter
+          .fromIsar(IsarNative.jsObjectGet(jsObj, 'context'))) as P;
+    case 'extra':
+      return (IsarNative.jsObjectGet(jsObj, 'extra')) as P;
+    case 'id':
+      return (IsarNative.jsObjectGet(jsObj, 'id')) as P;
+    case 'imageSearch':
+      return (IsarNative.jsObjectGet(jsObj, 'imageSearch')) as P;
+    case 'imageSeed':
+      return (_creatorContextMediaItemConverter
+          .fromIsar(IsarNative.jsObjectGet(jsObj, 'imageSeed'))) as P;
+    case 'meaning':
+      return (IsarNative.jsObjectGet(jsObj, 'meaning')) as P;
+    case 'reading':
+      return (IsarNative.jsObjectGet(jsObj, 'reading')) as P;
+    case 'sentence':
+      return (IsarNative.jsObjectGet(jsObj, 'sentence')) as P;
+    case 'word':
+      return (IsarNative.jsObjectGet(jsObj, 'word')) as P;
+    default:
+      throw 'Illegal propertyName';
+  }
+}
+
+void _creatorContextAttachLinks(
+    IsarCollection col, int id, CreatorContext object) {}
 
 extension CreatorContextQueryWhereSort
     on QueryBuilder<CreatorContext, CreatorContext, QWhere> {
   QueryBuilder<CreatorContext, CreatorContext, QAfterWhere> anyId() {
-    return addWhereClauseInternal(const WhereClause(indexName: null));
+    return addWhereClauseInternal(const IdWhereClause.any());
   }
 }
 
 extension CreatorContextQueryWhere
     on QueryBuilder<CreatorContext, CreatorContext, QWhereClause> {
   QueryBuilder<CreatorContext, CreatorContext, QAfterWhereClause> idEqualTo(
-      int? id) {
-    return addWhereClauseInternal(WhereClause(
-      indexName: null,
-      lower: [id],
+      int id) {
+    return addWhereClauseInternal(IdWhereClause.between(
+      lower: id,
       includeLower: true,
-      upper: [id],
+      upper: id,
       includeUpper: true,
     ));
   }
 
   QueryBuilder<CreatorContext, CreatorContext, QAfterWhereClause> idNotEqualTo(
-      int? id) {
+      int id) {
     if (whereSortInternal == Sort.asc) {
-      return addWhereClauseInternal(WhereClause(
-        indexName: null,
-        upper: [id],
-        includeUpper: false,
-      )).addWhereClauseInternal(WhereClause(
-        indexName: null,
-        lower: [id],
-        includeLower: false,
-      ));
+      return addWhereClauseInternal(
+        IdWhereClause.lessThan(upper: id, includeUpper: false),
+      ).addWhereClauseInternal(
+        IdWhereClause.greaterThan(lower: id, includeLower: false),
+      );
     } else {
-      return addWhereClauseInternal(WhereClause(
-        indexName: null,
-        lower: [id],
-        includeLower: false,
-      )).addWhereClauseInternal(WhereClause(
-        indexName: null,
-        upper: [id],
-        includeUpper: false,
-      ));
+      return addWhereClauseInternal(
+        IdWhereClause.greaterThan(lower: id, includeLower: false),
+      ).addWhereClauseInternal(
+        IdWhereClause.lessThan(upper: id, includeUpper: false),
+      );
     }
   }
 
   QueryBuilder<CreatorContext, CreatorContext, QAfterWhereClause> idGreaterThan(
-    int? id, {
-    bool include = false,
-  }) {
-    return addWhereClauseInternal(WhereClause(
-      indexName: null,
-      lower: [id],
-      includeLower: include,
-    ));
+      int id,
+      {bool include = false}) {
+    return addWhereClauseInternal(
+      IdWhereClause.greaterThan(lower: id, includeLower: include),
+    );
   }
 
   QueryBuilder<CreatorContext, CreatorContext, QAfterWhereClause> idLessThan(
-    int? id, {
-    bool include = false,
-  }) {
-    return addWhereClauseInternal(WhereClause(
-      indexName: null,
-      upper: [id],
-      includeUpper: include,
-    ));
+      int id,
+      {bool include = false}) {
+    return addWhereClauseInternal(
+      IdWhereClause.lessThan(upper: id, includeUpper: include),
+    );
   }
 
   QueryBuilder<CreatorContext, CreatorContext, QAfterWhereClause> idBetween(
-    int? lowerId,
-    int? upperId, {
+    int lowerId,
+    int upperId, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
-    return addWhereClauseInternal(WhereClause(
-      indexName: null,
-      lower: [lowerId],
+    return addWhereClauseInternal(IdWhereClause.between(
+      lower: lowerId,
       includeLower: includeLower,
-      upper: [upperId],
+      upper: upperId,
       includeUpper: includeUpper,
     ));
   }
@@ -846,7 +827,7 @@ extension CreatorContextQueryFilter
   }
 
   QueryBuilder<CreatorContext, CreatorContext, QAfterFilterCondition> idEqualTo(
-      int? value) {
+      int value) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.eq,
       property: 'id',
@@ -856,7 +837,7 @@ extension CreatorContextQueryFilter
 
   QueryBuilder<CreatorContext, CreatorContext, QAfterFilterCondition>
       idGreaterThan(
-    int? value, {
+    int value, {
     bool include = false,
   }) {
     return addFilterConditionInternal(FilterCondition(
@@ -869,7 +850,7 @@ extension CreatorContextQueryFilter
 
   QueryBuilder<CreatorContext, CreatorContext, QAfterFilterCondition>
       idLessThan(
-    int? value, {
+    int value, {
     bool include = false,
   }) {
     return addFilterConditionInternal(FilterCondition(
@@ -881,8 +862,8 @@ extension CreatorContextQueryFilter
   }
 
   QueryBuilder<CreatorContext, CreatorContext, QAfterFilterCondition> idBetween(
-    int? lower,
-    int? upper, {
+    int lower,
+    int upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {

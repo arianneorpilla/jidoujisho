@@ -6,20 +6,16 @@ part of 'dictionary_entry.dart';
 // IsarCollectionGenerator
 // **************************************************************************
 
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, unused_local_variable
 
 extension GetDictionaryEntryCollection on Isar {
-  IsarCollection<DictionaryEntry> get dictionaryEntrys {
-    return getCollection('DictionaryEntry');
-  }
+  IsarCollection<DictionaryEntry> get dictionaryEntrys => getCollection();
 }
 
-final DictionaryEntrySchema = CollectionSchema(
+const DictionaryEntrySchema = CollectionSchema(
   name: 'DictionaryEntry',
   schema:
-      '{"name":"DictionaryEntry","idName":"id","properties":[{"name":"dictionaryName","type":"String"},{"name":"extra","type":"String"},{"name":"hashCode","type":"Long"},{"name":"meaningTags","type":"StringList"},{"name":"meanings","type":"StringList"},{"name":"popularity","type":"Double"},{"name":"reading","type":"String"},{"name":"readingLength","type":"Long"},{"name":"sequence","type":"Long"},{"name":"word","type":"String"},{"name":"wordLength","type":"Long"},{"name":"wordTags","type":"StringList"}],"indexes":[{"name":"dictionaryName","unique":true,"properties":[{"name":"dictionaryName","type":"Hash","caseSensitive":true}]},{"name":"popularity","unique":false,"properties":[{"name":"popularity","type":"Value","caseSensitive":false}]},{"name":"reading","unique":false,"properties":[{"name":"reading","type":"Hash","caseSensitive":true}]},{"name":"readingLength_popularity","unique":false,"properties":[{"name":"readingLength","type":"Value","caseSensitive":false},{"name":"popularity","type":"Value","caseSensitive":false}]},{"name":"sequence","unique":false,"properties":[{"name":"sequence","type":"Value","caseSensitive":false}]},{"name":"wordLength_popularity","unique":false,"properties":[{"name":"wordLength","type":"Value","caseSensitive":false},{"name":"popularity","type":"Value","caseSensitive":false}]},{"name":"word_reading_popularity","unique":false,"properties":[{"name":"word","type":"Hash","caseSensitive":true},{"name":"reading","type":"Hash","caseSensitive":true},{"name":"popularity","type":"Value","caseSensitive":false}]}],"links":[]}',
-  nativeAdapter: const _DictionaryEntryNativeAdapter(),
-  webAdapter: const _DictionaryEntryWebAdapter(),
+      '{"name":"DictionaryEntry","idName":"id","properties":[{"name":"dictionaryName","type":"String"},{"name":"extra","type":"String"},{"name":"hashCode","type":"Long"},{"name":"meaningTags","type":"StringList"},{"name":"meanings","type":"StringList"},{"name":"popularity","type":"Double"},{"name":"reading","type":"String"},{"name":"readingLength","type":"Long"},{"name":"sequence","type":"Long"},{"name":"word","type":"String"},{"name":"wordLength","type":"Long"},{"name":"wordTags","type":"StringList"}],"indexes":[{"name":"dictionaryName","unique":false,"properties":[{"name":"dictionaryName","type":"Hash","caseSensitive":true}]},{"name":"popularity","unique":false,"properties":[{"name":"popularity","type":"Value","caseSensitive":false}]},{"name":"reading","unique":false,"properties":[{"name":"reading","type":"Hash","caseSensitive":true}]},{"name":"readingLength_popularity","unique":false,"properties":[{"name":"readingLength","type":"Value","caseSensitive":false},{"name":"popularity","type":"Value","caseSensitive":false}]},{"name":"sequence","unique":false,"properties":[{"name":"sequence","type":"Value","caseSensitive":false}]},{"name":"wordLength_popularity","unique":false,"properties":[{"name":"wordLength","type":"Value","caseSensitive":false},{"name":"popularity","type":"Value","caseSensitive":false}]},{"name":"word_reading_popularity","unique":false,"properties":[{"name":"word","type":"Hash","caseSensitive":true},{"name":"reading","type":"Hash","caseSensitive":true},{"name":"popularity","type":"Value","caseSensitive":false}]}],"links":[]}',
   idName: 'id',
   propertyIds: {
     'dictionaryName': 0,
@@ -45,484 +41,427 @@ final DictionaryEntrySchema = CollectionSchema(
     'wordLength_popularity': 5,
     'word_reading_popularity': 6
   },
-  indexTypes: {
+  indexValueTypes: {
     'dictionaryName': [
-      NativeIndexType.stringHash,
+      IndexValueType.stringHash,
     ],
     'popularity': [
-      NativeIndexType.double,
+      IndexValueType.double,
     ],
     'reading': [
-      NativeIndexType.stringHash,
+      IndexValueType.stringHash,
     ],
     'readingLength_popularity': [
-      NativeIndexType.long,
-      NativeIndexType.double,
+      IndexValueType.long,
+      IndexValueType.double,
     ],
     'sequence': [
-      NativeIndexType.long,
+      IndexValueType.long,
     ],
     'wordLength_popularity': [
-      NativeIndexType.long,
-      NativeIndexType.double,
+      IndexValueType.long,
+      IndexValueType.double,
     ],
     'word_reading_popularity': [
-      NativeIndexType.stringHash,
-      NativeIndexType.stringHash,
-      NativeIndexType.double,
+      IndexValueType.stringHash,
+      IndexValueType.stringHash,
+      IndexValueType.double,
     ]
   },
   linkIds: {},
-  backlinkIds: {},
-  linkedCollections: [],
-  getId: (obj) {
-    if (obj.id == Isar.autoIncrement) {
-      return null;
-    } else {
-      return obj.id;
-    }
-  },
-  setId: (obj, id) => obj.id = id,
-  getLinks: (obj) => [],
-  version: 2,
+  backlinkLinkNames: {},
+  getId: _dictionaryEntryGetId,
+  setId: _dictionaryEntrySetId,
+  getLinks: _dictionaryEntryGetLinks,
+  attachLinks: _dictionaryEntryAttachLinks,
+  serializeNative: _dictionaryEntrySerializeNative,
+  deserializeNative: _dictionaryEntryDeserializeNative,
+  deserializePropNative: _dictionaryEntryDeserializePropNative,
+  serializeWeb: _dictionaryEntrySerializeWeb,
+  deserializeWeb: _dictionaryEntryDeserializeWeb,
+  deserializePropWeb: _dictionaryEntryDeserializePropWeb,
+  version: 3,
 );
 
-class _DictionaryEntryWebAdapter extends IsarWebTypeAdapter<DictionaryEntry> {
-  const _DictionaryEntryWebAdapter();
-
-  @override
-  Object serialize(
-      IsarCollection<DictionaryEntry> collection, DictionaryEntry object) {
-    final jsObj = IsarNative.newJsObject();
-    IsarNative.jsObjectSet(jsObj, 'dictionaryName', object.dictionaryName);
-    IsarNative.jsObjectSet(jsObj, 'extra', object.extra);
-    IsarNative.jsObjectSet(jsObj, 'hashCode', object.hashCode);
-    IsarNative.jsObjectSet(jsObj, 'id', object.id);
-    IsarNative.jsObjectSet(jsObj, 'meaningTags', object.meaningTags);
-    IsarNative.jsObjectSet(jsObj, 'meanings', object.meanings);
-    IsarNative.jsObjectSet(jsObj, 'popularity', object.popularity);
-    IsarNative.jsObjectSet(jsObj, 'reading', object.reading);
-    IsarNative.jsObjectSet(jsObj, 'readingLength', object.readingLength);
-    IsarNative.jsObjectSet(jsObj, 'sequence', object.sequence);
-    IsarNative.jsObjectSet(jsObj, 'word', object.word);
-    IsarNative.jsObjectSet(jsObj, 'wordLength', object.wordLength);
-    IsarNative.jsObjectSet(jsObj, 'wordTags', object.wordTags);
-    return jsObj;
+int? _dictionaryEntryGetId(DictionaryEntry object) {
+  if (object.id == Isar.autoIncrement) {
+    return null;
+  } else {
+    return object.id;
   }
+}
 
-  @override
-  DictionaryEntry deserialize(
-      IsarCollection<DictionaryEntry> collection, dynamic jsObj) {
-    final object = DictionaryEntry(
-      dictionaryName: IsarNative.jsObjectGet(jsObj, 'dictionaryName') ?? '',
-      extra: IsarNative.jsObjectGet(jsObj, 'extra'),
-      id: IsarNative.jsObjectGet(jsObj, 'id'),
-      meaningTags: (IsarNative.jsObjectGet(jsObj, 'meaningTags') as List?)
+void _dictionaryEntrySetId(DictionaryEntry object, int id) {
+  object.id = id;
+}
+
+List<IsarLinkBase> _dictionaryEntryGetLinks(DictionaryEntry object) {
+  return [];
+}
+
+void _dictionaryEntrySerializeNative(
+    IsarCollection<DictionaryEntry> collection,
+    IsarRawObject rawObj,
+    DictionaryEntry object,
+    int staticSize,
+    List<int> offsets,
+    AdapterAlloc alloc) {
+  var dynamicSize = 0;
+  final value0 = object.dictionaryName;
+  final _dictionaryName = IsarBinaryWriter.utf8Encoder.convert(value0);
+  dynamicSize += (_dictionaryName.length) as int;
+  final value1 = object.extra;
+  IsarUint8List? _extra;
+  if (value1 != null) {
+    _extra = IsarBinaryWriter.utf8Encoder.convert(value1);
+  }
+  dynamicSize += (_extra?.length ?? 0) as int;
+  final value2 = object.hashCode;
+  final _hashCode = value2;
+  final value3 = object.meaningTags;
+  dynamicSize += (value3.length) * 8;
+  final bytesList3 = <IsarUint8List>[];
+  for (var str in value3) {
+    final bytes = IsarBinaryWriter.utf8Encoder.convert(str);
+    bytesList3.add(bytes);
+    dynamicSize += bytes.length as int;
+  }
+  final _meaningTags = bytesList3;
+  final value4 = object.meanings;
+  dynamicSize += (value4.length) * 8;
+  final bytesList4 = <IsarUint8List>[];
+  for (var str in value4) {
+    final bytes = IsarBinaryWriter.utf8Encoder.convert(str);
+    bytesList4.add(bytes);
+    dynamicSize += bytes.length as int;
+  }
+  final _meanings = bytesList4;
+  final value5 = object.popularity;
+  final _popularity = value5;
+  final value6 = object.reading;
+  final _reading = IsarBinaryWriter.utf8Encoder.convert(value6);
+  dynamicSize += (_reading.length) as int;
+  final value7 = object.readingLength;
+  final _readingLength = value7;
+  final value8 = object.sequence;
+  final _sequence = value8;
+  final value9 = object.word;
+  final _word = IsarBinaryWriter.utf8Encoder.convert(value9);
+  dynamicSize += (_word.length) as int;
+  final value10 = object.wordLength;
+  final _wordLength = value10;
+  final value11 = object.wordTags;
+  dynamicSize += (value11.length) * 8;
+  final bytesList11 = <IsarUint8List>[];
+  for (var str in value11) {
+    final bytes = IsarBinaryWriter.utf8Encoder.convert(str);
+    bytesList11.add(bytes);
+    dynamicSize += bytes.length as int;
+  }
+  final _wordTags = bytesList11;
+  final size = staticSize + dynamicSize;
+
+  rawObj.buffer = alloc(size);
+  rawObj.buffer_length = size;
+  final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
+  final writer = IsarBinaryWriter(buffer, staticSize);
+  writer.writeBytes(offsets[0], _dictionaryName);
+  writer.writeBytes(offsets[1], _extra);
+  writer.writeLong(offsets[2], _hashCode);
+  writer.writeStringList(offsets[3], _meaningTags);
+  writer.writeStringList(offsets[4], _meanings);
+  writer.writeDouble(offsets[5], _popularity);
+  writer.writeBytes(offsets[6], _reading);
+  writer.writeLong(offsets[7], _readingLength);
+  writer.writeLong(offsets[8], _sequence);
+  writer.writeBytes(offsets[9], _word);
+  writer.writeLong(offsets[10], _wordLength);
+  writer.writeStringList(offsets[11], _wordTags);
+}
+
+DictionaryEntry _dictionaryEntryDeserializeNative(
+    IsarCollection<DictionaryEntry> collection,
+    int id,
+    IsarBinaryReader reader,
+    List<int> offsets) {
+  final object = DictionaryEntry(
+    dictionaryName: reader.readString(offsets[0]),
+    extra: reader.readStringOrNull(offsets[1]),
+    id: id,
+    meaningTags: reader.readStringList(offsets[3]) ?? [],
+    meanings: reader.readStringList(offsets[4]) ?? [],
+    popularity: reader.readDoubleOrNull(offsets[5]),
+    reading: reader.readString(offsets[6]),
+    sequence: reader.readLongOrNull(offsets[8]),
+    word: reader.readString(offsets[9]),
+    wordTags: reader.readStringList(offsets[11]) ?? [],
+  );
+  return object;
+}
+
+P _dictionaryEntryDeserializePropNative<P>(
+    int id, IsarBinaryReader reader, int propertyIndex, int offset) {
+  switch (propertyIndex) {
+    case -1:
+      return id as P;
+    case 0:
+      return (reader.readString(offset)) as P;
+    case 1:
+      return (reader.readStringOrNull(offset)) as P;
+    case 2:
+      return (reader.readLong(offset)) as P;
+    case 3:
+      return (reader.readStringList(offset) ?? []) as P;
+    case 4:
+      return (reader.readStringList(offset) ?? []) as P;
+    case 5:
+      return (reader.readDoubleOrNull(offset)) as P;
+    case 6:
+      return (reader.readString(offset)) as P;
+    case 7:
+      return (reader.readLong(offset)) as P;
+    case 8:
+      return (reader.readLongOrNull(offset)) as P;
+    case 9:
+      return (reader.readString(offset)) as P;
+    case 10:
+      return (reader.readLong(offset)) as P;
+    case 11:
+      return (reader.readStringList(offset) ?? []) as P;
+    default:
+      throw 'Illegal propertyIndex';
+  }
+}
+
+dynamic _dictionaryEntrySerializeWeb(
+    IsarCollection<DictionaryEntry> collection, DictionaryEntry object) {
+  final jsObj = IsarNative.newJsObject();
+  IsarNative.jsObjectSet(jsObj, 'dictionaryName', object.dictionaryName);
+  IsarNative.jsObjectSet(jsObj, 'extra', object.extra);
+  IsarNative.jsObjectSet(jsObj, 'hashCode', object.hashCode);
+  IsarNative.jsObjectSet(jsObj, 'id', object.id);
+  IsarNative.jsObjectSet(jsObj, 'meaningTags', object.meaningTags);
+  IsarNative.jsObjectSet(jsObj, 'meanings', object.meanings);
+  IsarNative.jsObjectSet(jsObj, 'popularity', object.popularity);
+  IsarNative.jsObjectSet(jsObj, 'reading', object.reading);
+  IsarNative.jsObjectSet(jsObj, 'readingLength', object.readingLength);
+  IsarNative.jsObjectSet(jsObj, 'sequence', object.sequence);
+  IsarNative.jsObjectSet(jsObj, 'word', object.word);
+  IsarNative.jsObjectSet(jsObj, 'wordLength', object.wordLength);
+  IsarNative.jsObjectSet(jsObj, 'wordTags', object.wordTags);
+  return jsObj;
+}
+
+DictionaryEntry _dictionaryEntryDeserializeWeb(
+    IsarCollection<DictionaryEntry> collection, dynamic jsObj) {
+  final object = DictionaryEntry(
+    dictionaryName: IsarNative.jsObjectGet(jsObj, 'dictionaryName') ?? '',
+    extra: IsarNative.jsObjectGet(jsObj, 'extra'),
+    id: IsarNative.jsObjectGet(jsObj, 'id'),
+    meaningTags: (IsarNative.jsObjectGet(jsObj, 'meaningTags') as List?)
+            ?.map((e) => e ?? '')
+            .toList()
+            .cast<String>() ??
+        [],
+    meanings: (IsarNative.jsObjectGet(jsObj, 'meanings') as List?)
+            ?.map((e) => e ?? '')
+            .toList()
+            .cast<String>() ??
+        [],
+    popularity: IsarNative.jsObjectGet(jsObj, 'popularity'),
+    reading: IsarNative.jsObjectGet(jsObj, 'reading') ?? '',
+    sequence: IsarNative.jsObjectGet(jsObj, 'sequence'),
+    word: IsarNative.jsObjectGet(jsObj, 'word') ?? '',
+    wordTags: (IsarNative.jsObjectGet(jsObj, 'wordTags') as List?)
+            ?.map((e) => e ?? '')
+            .toList()
+            .cast<String>() ??
+        [],
+  );
+  return object;
+}
+
+P _dictionaryEntryDeserializePropWeb<P>(Object jsObj, String propertyName) {
+  switch (propertyName) {
+    case 'dictionaryName':
+      return (IsarNative.jsObjectGet(jsObj, 'dictionaryName') ?? '') as P;
+    case 'extra':
+      return (IsarNative.jsObjectGet(jsObj, 'extra')) as P;
+    case 'hashCode':
+      return (IsarNative.jsObjectGet(jsObj, 'hashCode') ??
+          double.negativeInfinity) as P;
+    case 'id':
+      return (IsarNative.jsObjectGet(jsObj, 'id')) as P;
+    case 'meaningTags':
+      return ((IsarNative.jsObjectGet(jsObj, 'meaningTags') as List?)
               ?.map((e) => e ?? '')
               .toList()
               .cast<String>() ??
-          [],
-      meanings: (IsarNative.jsObjectGet(jsObj, 'meanings') as List?)
+          []) as P;
+    case 'meanings':
+      return ((IsarNative.jsObjectGet(jsObj, 'meanings') as List?)
               ?.map((e) => e ?? '')
               .toList()
               .cast<String>() ??
-          [],
-      popularity: IsarNative.jsObjectGet(jsObj, 'popularity'),
-      reading: IsarNative.jsObjectGet(jsObj, 'reading') ?? '',
-      sequence: IsarNative.jsObjectGet(jsObj, 'sequence'),
-      word: IsarNative.jsObjectGet(jsObj, 'word') ?? '',
-      wordTags: (IsarNative.jsObjectGet(jsObj, 'wordTags') as List?)
+          []) as P;
+    case 'popularity':
+      return (IsarNative.jsObjectGet(jsObj, 'popularity')) as P;
+    case 'reading':
+      return (IsarNative.jsObjectGet(jsObj, 'reading') ?? '') as P;
+    case 'readingLength':
+      return (IsarNative.jsObjectGet(jsObj, 'readingLength') ??
+          double.negativeInfinity) as P;
+    case 'sequence':
+      return (IsarNative.jsObjectGet(jsObj, 'sequence')) as P;
+    case 'word':
+      return (IsarNative.jsObjectGet(jsObj, 'word') ?? '') as P;
+    case 'wordLength':
+      return (IsarNative.jsObjectGet(jsObj, 'wordLength') ??
+          double.negativeInfinity) as P;
+    case 'wordTags':
+      return ((IsarNative.jsObjectGet(jsObj, 'wordTags') as List?)
               ?.map((e) => e ?? '')
               .toList()
               .cast<String>() ??
-          [],
-    );
-    return object;
-  }
-
-  @override
-  P deserializeProperty<P>(Object jsObj, String propertyName) {
-    switch (propertyName) {
-      case 'dictionaryName':
-        return (IsarNative.jsObjectGet(jsObj, 'dictionaryName') ?? '') as P;
-      case 'extra':
-        return (IsarNative.jsObjectGet(jsObj, 'extra')) as P;
-      case 'hashCode':
-        return (IsarNative.jsObjectGet(jsObj, 'hashCode') ??
-            double.negativeInfinity) as P;
-      case 'id':
-        return (IsarNative.jsObjectGet(jsObj, 'id')) as P;
-      case 'meaningTags':
-        return ((IsarNative.jsObjectGet(jsObj, 'meaningTags') as List?)
-                ?.map((e) => e ?? '')
-                .toList()
-                .cast<String>() ??
-            []) as P;
-      case 'meanings':
-        return ((IsarNative.jsObjectGet(jsObj, 'meanings') as List?)
-                ?.map((e) => e ?? '')
-                .toList()
-                .cast<String>() ??
-            []) as P;
-      case 'popularity':
-        return (IsarNative.jsObjectGet(jsObj, 'popularity')) as P;
-      case 'reading':
-        return (IsarNative.jsObjectGet(jsObj, 'reading') ?? '') as P;
-      case 'readingLength':
-        return (IsarNative.jsObjectGet(jsObj, 'readingLength') ??
-            double.negativeInfinity) as P;
-      case 'sequence':
-        return (IsarNative.jsObjectGet(jsObj, 'sequence')) as P;
-      case 'word':
-        return (IsarNative.jsObjectGet(jsObj, 'word') ?? '') as P;
-      case 'wordLength':
-        return (IsarNative.jsObjectGet(jsObj, 'wordLength') ??
-            double.negativeInfinity) as P;
-      case 'wordTags':
-        return ((IsarNative.jsObjectGet(jsObj, 'wordTags') as List?)
-                ?.map((e) => e ?? '')
-                .toList()
-                .cast<String>() ??
-            []) as P;
-      default:
-        throw 'Illegal propertyName';
-    }
-  }
-
-  @override
-  void attachLinks(Isar isar, int id, DictionaryEntry object) {}
-}
-
-class _DictionaryEntryNativeAdapter
-    extends IsarNativeTypeAdapter<DictionaryEntry> {
-  const _DictionaryEntryNativeAdapter();
-
-  @override
-  void serialize(
-      IsarCollection<DictionaryEntry> collection,
-      IsarRawObject rawObj,
-      DictionaryEntry object,
-      int staticSize,
-      List<int> offsets,
-      AdapterAlloc alloc) {
-    var dynamicSize = 0;
-    final value0 = object.dictionaryName;
-    final _dictionaryName = IsarBinaryWriter.utf8Encoder.convert(value0);
-    dynamicSize += (_dictionaryName.length) as int;
-    final value1 = object.extra;
-    IsarUint8List? _extra;
-    if (value1 != null) {
-      _extra = IsarBinaryWriter.utf8Encoder.convert(value1);
-    }
-    dynamicSize += (_extra?.length ?? 0) as int;
-    final value2 = object.hashCode;
-    final _hashCode = value2;
-    final value3 = object.meaningTags;
-    dynamicSize += (value3.length) * 8;
-    final bytesList3 = <IsarUint8List>[];
-    for (var str in value3) {
-      final bytes = IsarBinaryWriter.utf8Encoder.convert(str);
-      bytesList3.add(bytes);
-      dynamicSize += bytes.length as int;
-    }
-    final _meaningTags = bytesList3;
-    final value4 = object.meanings;
-    dynamicSize += (value4.length) * 8;
-    final bytesList4 = <IsarUint8List>[];
-    for (var str in value4) {
-      final bytes = IsarBinaryWriter.utf8Encoder.convert(str);
-      bytesList4.add(bytes);
-      dynamicSize += bytes.length as int;
-    }
-    final _meanings = bytesList4;
-    final value5 = object.popularity;
-    final _popularity = value5;
-    final value6 = object.reading;
-    final _reading = IsarBinaryWriter.utf8Encoder.convert(value6);
-    dynamicSize += (_reading.length) as int;
-    final value7 = object.readingLength;
-    final _readingLength = value7;
-    final value8 = object.sequence;
-    final _sequence = value8;
-    final value9 = object.word;
-    final _word = IsarBinaryWriter.utf8Encoder.convert(value9);
-    dynamicSize += (_word.length) as int;
-    final value10 = object.wordLength;
-    final _wordLength = value10;
-    final value11 = object.wordTags;
-    dynamicSize += (value11.length) * 8;
-    final bytesList11 = <IsarUint8List>[];
-    for (var str in value11) {
-      final bytes = IsarBinaryWriter.utf8Encoder.convert(str);
-      bytesList11.add(bytes);
-      dynamicSize += bytes.length as int;
-    }
-    final _wordTags = bytesList11;
-    final size = staticSize + dynamicSize;
-
-    rawObj.buffer = alloc(size);
-    rawObj.buffer_length = size;
-    final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
-    final writer = IsarBinaryWriter(buffer, staticSize);
-    writer.writeBytes(offsets[0], _dictionaryName);
-    writer.writeBytes(offsets[1], _extra);
-    writer.writeLong(offsets[2], _hashCode);
-    writer.writeStringList(offsets[3], _meaningTags);
-    writer.writeStringList(offsets[4], _meanings);
-    writer.writeDouble(offsets[5], _popularity);
-    writer.writeBytes(offsets[6], _reading);
-    writer.writeLong(offsets[7], _readingLength);
-    writer.writeLong(offsets[8], _sequence);
-    writer.writeBytes(offsets[9], _word);
-    writer.writeLong(offsets[10], _wordLength);
-    writer.writeStringList(offsets[11], _wordTags);
-  }
-
-  @override
-  DictionaryEntry deserialize(IsarCollection<DictionaryEntry> collection,
-      int id, IsarBinaryReader reader, List<int> offsets) {
-    final object = DictionaryEntry(
-      dictionaryName: reader.readString(offsets[0]),
-      extra: reader.readStringOrNull(offsets[1]),
-      id: id,
-      meaningTags: reader.readStringList(offsets[3]) ?? [],
-      meanings: reader.readStringList(offsets[4]) ?? [],
-      popularity: reader.readDoubleOrNull(offsets[5]),
-      reading: reader.readString(offsets[6]),
-      sequence: reader.readLongOrNull(offsets[8]),
-      word: reader.readString(offsets[9]),
-      wordTags: reader.readStringList(offsets[11]) ?? [],
-    );
-    return object;
-  }
-
-  @override
-  P deserializeProperty<P>(
-      int id, IsarBinaryReader reader, int propertyIndex, int offset) {
-    switch (propertyIndex) {
-      case -1:
-        return id as P;
-      case 0:
-        return (reader.readString(offset)) as P;
-      case 1:
-        return (reader.readStringOrNull(offset)) as P;
-      case 2:
-        return (reader.readLong(offset)) as P;
-      case 3:
-        return (reader.readStringList(offset) ?? []) as P;
-      case 4:
-        return (reader.readStringList(offset) ?? []) as P;
-      case 5:
-        return (reader.readDoubleOrNull(offset)) as P;
-      case 6:
-        return (reader.readString(offset)) as P;
-      case 7:
-        return (reader.readLong(offset)) as P;
-      case 8:
-        return (reader.readLongOrNull(offset)) as P;
-      case 9:
-        return (reader.readString(offset)) as P;
-      case 10:
-        return (reader.readLong(offset)) as P;
-      case 11:
-        return (reader.readStringList(offset) ?? []) as P;
-      default:
-        throw 'Illegal propertyIndex';
-    }
-  }
-
-  @override
-  void attachLinks(Isar isar, int id, DictionaryEntry object) {}
-}
-
-extension DictionaryEntryByIndex on IsarCollection<DictionaryEntry> {
-  Future<DictionaryEntry?> getByDictionaryName(String dictionaryName) {
-    return getByIndex('dictionaryName', [dictionaryName]);
-  }
-
-  DictionaryEntry? getByDictionaryNameSync(String dictionaryName) {
-    return getByIndexSync('dictionaryName', [dictionaryName]);
-  }
-
-  Future<bool> deleteByDictionaryName(String dictionaryName) {
-    return deleteByIndex('dictionaryName', [dictionaryName]);
-  }
-
-  bool deleteByDictionaryNameSync(String dictionaryName) {
-    return deleteByIndexSync('dictionaryName', [dictionaryName]);
-  }
-
-  Future<List<DictionaryEntry?>> getAllByDictionaryName(
-      List<String> dictionaryNameValues) {
-    final values = dictionaryNameValues.map((e) => [e]).toList();
-    return getAllByIndex('dictionaryName', values);
-  }
-
-  List<DictionaryEntry?> getAllByDictionaryNameSync(
-      List<String> dictionaryNameValues) {
-    final values = dictionaryNameValues.map((e) => [e]).toList();
-    return getAllByIndexSync('dictionaryName', values);
-  }
-
-  Future<int> deleteAllByDictionaryName(List<String> dictionaryNameValues) {
-    final values = dictionaryNameValues.map((e) => [e]).toList();
-    return deleteAllByIndex('dictionaryName', values);
-  }
-
-  int deleteAllByDictionaryNameSync(List<String> dictionaryNameValues) {
-    final values = dictionaryNameValues.map((e) => [e]).toList();
-    return deleteAllByIndexSync('dictionaryName', values);
+          []) as P;
+    default:
+      throw 'Illegal propertyName';
   }
 }
+
+void _dictionaryEntryAttachLinks(
+    IsarCollection col, int id, DictionaryEntry object) {}
 
 extension DictionaryEntryQueryWhereSort
     on QueryBuilder<DictionaryEntry, DictionaryEntry, QWhere> {
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere> anyId() {
-    return addWhereClauseInternal(const WhereClause(indexName: null));
+    return addWhereClauseInternal(const IdWhereClause.any());
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere>
       anyDictionaryName() {
     return addWhereClauseInternal(
-        const WhereClause(indexName: 'dictionaryName'));
+        const IndexWhereClause.any(indexName: 'dictionaryName'));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere> anyPopularity() {
-    return addWhereClauseInternal(const WhereClause(indexName: 'popularity'));
+    return addWhereClauseInternal(
+        const IndexWhereClause.any(indexName: 'popularity'));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere> anyReading() {
-    return addWhereClauseInternal(const WhereClause(indexName: 'reading'));
+    return addWhereClauseInternal(
+        const IndexWhereClause.any(indexName: 'reading'));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere>
       anyReadingLengthPopularity() {
     return addWhereClauseInternal(
-        const WhereClause(indexName: 'readingLength_popularity'));
+        const IndexWhereClause.any(indexName: 'readingLength_popularity'));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere> anySequence() {
-    return addWhereClauseInternal(const WhereClause(indexName: 'sequence'));
+    return addWhereClauseInternal(
+        const IndexWhereClause.any(indexName: 'sequence'));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere>
       anyWordLengthPopularity() {
     return addWhereClauseInternal(
-        const WhereClause(indexName: 'wordLength_popularity'));
+        const IndexWhereClause.any(indexName: 'wordLength_popularity'));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere>
       anyWordReadingPopularity() {
     return addWhereClauseInternal(
-        const WhereClause(indexName: 'word_reading_popularity'));
+        const IndexWhereClause.any(indexName: 'word_reading_popularity'));
   }
 }
 
 extension DictionaryEntryQueryWhere
     on QueryBuilder<DictionaryEntry, DictionaryEntry, QWhereClause> {
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause> idEqualTo(
-      int? id) {
-    return addWhereClauseInternal(WhereClause(
-      indexName: null,
-      lower: [id],
+      int id) {
+    return addWhereClauseInternal(IdWhereClause.between(
+      lower: id,
       includeLower: true,
-      upper: [id],
+      upper: id,
       includeUpper: true,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      idNotEqualTo(int? id) {
+      idNotEqualTo(int id) {
     if (whereSortInternal == Sort.asc) {
-      return addWhereClauseInternal(WhereClause(
-        indexName: null,
-        upper: [id],
-        includeUpper: false,
-      )).addWhereClauseInternal(WhereClause(
-        indexName: null,
-        lower: [id],
-        includeLower: false,
-      ));
+      return addWhereClauseInternal(
+        IdWhereClause.lessThan(upper: id, includeUpper: false),
+      ).addWhereClauseInternal(
+        IdWhereClause.greaterThan(lower: id, includeLower: false),
+      );
     } else {
-      return addWhereClauseInternal(WhereClause(
-        indexName: null,
-        lower: [id],
-        includeLower: false,
-      )).addWhereClauseInternal(WhereClause(
-        indexName: null,
-        upper: [id],
-        includeUpper: false,
-      ));
+      return addWhereClauseInternal(
+        IdWhereClause.greaterThan(lower: id, includeLower: false),
+      ).addWhereClauseInternal(
+        IdWhereClause.lessThan(upper: id, includeUpper: false),
+      );
     }
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      idGreaterThan(
-    int? id, {
-    bool include = false,
-  }) {
-    return addWhereClauseInternal(WhereClause(
-      indexName: null,
-      lower: [id],
-      includeLower: include,
-    ));
+      idGreaterThan(int id, {bool include = false}) {
+    return addWhereClauseInternal(
+      IdWhereClause.greaterThan(lower: id, includeLower: include),
+    );
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause> idLessThan(
-    int? id, {
-    bool include = false,
-  }) {
-    return addWhereClauseInternal(WhereClause(
-      indexName: null,
-      upper: [id],
-      includeUpper: include,
-    ));
+      int id,
+      {bool include = false}) {
+    return addWhereClauseInternal(
+      IdWhereClause.lessThan(upper: id, includeUpper: include),
+    );
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause> idBetween(
-    int? lowerId,
-    int? upperId, {
+    int lowerId,
+    int upperId, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
-    return addWhereClauseInternal(WhereClause(
-      indexName: null,
-      lower: [lowerId],
+    return addWhereClauseInternal(IdWhereClause.between(
+      lower: lowerId,
       includeLower: includeLower,
-      upper: [upperId],
+      upper: upperId,
       includeUpper: includeUpper,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       dictionaryNameEqualTo(String dictionaryName) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.equalTo(
       indexName: 'dictionaryName',
-      lower: [dictionaryName],
-      includeLower: true,
-      upper: [dictionaryName],
-      includeUpper: true,
+      value: [dictionaryName],
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       dictionaryNameNotEqualTo(String dictionaryName) {
     if (whereSortInternal == Sort.asc) {
-      return addWhereClauseInternal(WhereClause(
+      return addWhereClauseInternal(IndexWhereClause.lessThan(
         indexName: 'dictionaryName',
         upper: [dictionaryName],
         includeUpper: false,
-      )).addWhereClauseInternal(WhereClause(
+      )).addWhereClauseInternal(IndexWhereClause.greaterThan(
         indexName: 'dictionaryName',
         lower: [dictionaryName],
         includeLower: false,
       ));
     } else {
-      return addWhereClauseInternal(WhereClause(
+      return addWhereClauseInternal(IndexWhereClause.greaterThan(
         indexName: 'dictionaryName',
         lower: [dictionaryName],
         includeLower: false,
-      )).addWhereClauseInternal(WhereClause(
+      )).addWhereClauseInternal(IndexWhereClause.lessThan(
         indexName: 'dictionaryName',
         upper: [dictionaryName],
         includeUpper: false,
@@ -532,18 +471,15 @@ extension DictionaryEntryQueryWhere
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       popularityIsNull() {
-    return addWhereClauseInternal(const WhereClause(
+    return addWhereClauseInternal(const IndexWhereClause.equalTo(
       indexName: 'popularity',
-      upper: [null],
-      includeUpper: true,
-      lower: [null],
-      includeLower: true,
+      value: [null],
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       popularityIsNotNull() {
-    return addWhereClauseInternal(const WhereClause(
+    return addWhereClauseInternal(const IndexWhereClause.greaterThan(
       indexName: 'popularity',
       lower: [null],
       includeLower: false,
@@ -552,7 +488,7 @@ extension DictionaryEntryQueryWhere
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       popularityGreaterThan(double? popularity) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.greaterThan(
       indexName: 'popularity',
       lower: [popularity],
       includeLower: false,
@@ -561,7 +497,7 @@ extension DictionaryEntryQueryWhere
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       popularityLessThan(double? popularity) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.lessThan(
       indexName: 'popularity',
       upper: [popularity],
       includeUpper: false,
@@ -570,7 +506,7 @@ extension DictionaryEntryQueryWhere
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       popularityBetween(double? lowerPopularity, double? upperPopularity) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.between(
       indexName: 'popularity',
       lower: [lowerPopularity],
       includeLower: false,
@@ -581,33 +517,30 @@ extension DictionaryEntryQueryWhere
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       readingEqualTo(String reading) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.equalTo(
       indexName: 'reading',
-      lower: [reading],
-      includeLower: true,
-      upper: [reading],
-      includeUpper: true,
+      value: [reading],
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       readingNotEqualTo(String reading) {
     if (whereSortInternal == Sort.asc) {
-      return addWhereClauseInternal(WhereClause(
+      return addWhereClauseInternal(IndexWhereClause.lessThan(
         indexName: 'reading',
         upper: [reading],
         includeUpper: false,
-      )).addWhereClauseInternal(WhereClause(
+      )).addWhereClauseInternal(IndexWhereClause.greaterThan(
         indexName: 'reading',
         lower: [reading],
         includeLower: false,
       ));
     } else {
-      return addWhereClauseInternal(WhereClause(
+      return addWhereClauseInternal(IndexWhereClause.greaterThan(
         indexName: 'reading',
         lower: [reading],
         includeLower: false,
-      )).addWhereClauseInternal(WhereClause(
+      )).addWhereClauseInternal(IndexWhereClause.lessThan(
         indexName: 'reading',
         upper: [reading],
         includeUpper: false,
@@ -617,33 +550,30 @@ extension DictionaryEntryQueryWhere
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       readingLengthEqualTo(int readingLength) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.equalTo(
       indexName: 'readingLength_popularity',
-      lower: [readingLength],
-      includeLower: true,
-      upper: [readingLength],
-      includeUpper: true,
+      value: [readingLength],
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       readingLengthNotEqualTo(int readingLength) {
     if (whereSortInternal == Sort.asc) {
-      return addWhereClauseInternal(WhereClause(
+      return addWhereClauseInternal(IndexWhereClause.lessThan(
         indexName: 'readingLength_popularity',
         upper: [readingLength],
         includeUpper: false,
-      )).addWhereClauseInternal(WhereClause(
+      )).addWhereClauseInternal(IndexWhereClause.greaterThan(
         indexName: 'readingLength_popularity',
         lower: [readingLength],
         includeLower: false,
       ));
     } else {
-      return addWhereClauseInternal(WhereClause(
+      return addWhereClauseInternal(IndexWhereClause.greaterThan(
         indexName: 'readingLength_popularity',
         lower: [readingLength],
         includeLower: false,
-      )).addWhereClauseInternal(WhereClause(
+      )).addWhereClauseInternal(IndexWhereClause.lessThan(
         indexName: 'readingLength_popularity',
         upper: [readingLength],
         includeUpper: false,
@@ -656,7 +586,7 @@ extension DictionaryEntryQueryWhere
     int readingLength, {
     bool include = false,
   }) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.greaterThan(
       indexName: 'readingLength_popularity',
       lower: [readingLength],
       includeLower: include,
@@ -668,7 +598,7 @@ extension DictionaryEntryQueryWhere
     int readingLength, {
     bool include = false,
   }) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.lessThan(
       indexName: 'readingLength_popularity',
       upper: [readingLength],
       includeUpper: include,
@@ -682,7 +612,7 @@ extension DictionaryEntryQueryWhere
     bool includeLower = true,
     bool includeUpper = true,
   }) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.between(
       indexName: 'readingLength_popularity',
       lower: [lowerReadingLength],
       includeLower: includeLower,
@@ -694,7 +624,7 @@ extension DictionaryEntryQueryWhere
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       readingLengthEqualToPopularityGreaterThan(
           int readingLength, double? popularity) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.greaterThan(
       indexName: 'readingLength_popularity',
       lower: [readingLength, popularity],
       includeLower: false,
@@ -704,7 +634,7 @@ extension DictionaryEntryQueryWhere
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       readingLengthEqualToPopularityLessThan(
           int readingLength, double? popularity) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.lessThan(
       indexName: 'readingLength_popularity',
       upper: [readingLength, popularity],
       includeUpper: false,
@@ -714,7 +644,7 @@ extension DictionaryEntryQueryWhere
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       readingLengthEqualToPopularityBetween(
           int readingLength, double? lowerPopularity, double? upperPopularity) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.between(
       indexName: 'readingLength_popularity',
       lower: [readingLength, lowerPopularity],
       includeLower: false,
@@ -725,33 +655,30 @@ extension DictionaryEntryQueryWhere
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       sequenceEqualTo(int? sequence) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.equalTo(
       indexName: 'sequence',
-      lower: [sequence],
-      includeLower: true,
-      upper: [sequence],
-      includeUpper: true,
+      value: [sequence],
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       sequenceNotEqualTo(int? sequence) {
     if (whereSortInternal == Sort.asc) {
-      return addWhereClauseInternal(WhereClause(
+      return addWhereClauseInternal(IndexWhereClause.lessThan(
         indexName: 'sequence',
         upper: [sequence],
         includeUpper: false,
-      )).addWhereClauseInternal(WhereClause(
+      )).addWhereClauseInternal(IndexWhereClause.greaterThan(
         indexName: 'sequence',
         lower: [sequence],
         includeLower: false,
       ));
     } else {
-      return addWhereClauseInternal(WhereClause(
+      return addWhereClauseInternal(IndexWhereClause.greaterThan(
         indexName: 'sequence',
         lower: [sequence],
         includeLower: false,
-      )).addWhereClauseInternal(WhereClause(
+      )).addWhereClauseInternal(IndexWhereClause.lessThan(
         indexName: 'sequence',
         upper: [sequence],
         includeUpper: false,
@@ -761,18 +688,15 @@ extension DictionaryEntryQueryWhere
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       sequenceIsNull() {
-    return addWhereClauseInternal(const WhereClause(
+    return addWhereClauseInternal(const IndexWhereClause.equalTo(
       indexName: 'sequence',
-      upper: [null],
-      includeUpper: true,
-      lower: [null],
-      includeLower: true,
+      value: [null],
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       sequenceIsNotNull() {
-    return addWhereClauseInternal(const WhereClause(
+    return addWhereClauseInternal(const IndexWhereClause.greaterThan(
       indexName: 'sequence',
       lower: [null],
       includeLower: false,
@@ -784,7 +708,7 @@ extension DictionaryEntryQueryWhere
     int? sequence, {
     bool include = false,
   }) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.greaterThan(
       indexName: 'sequence',
       lower: [sequence],
       includeLower: include,
@@ -796,7 +720,7 @@ extension DictionaryEntryQueryWhere
     int? sequence, {
     bool include = false,
   }) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.lessThan(
       indexName: 'sequence',
       upper: [sequence],
       includeUpper: include,
@@ -810,7 +734,7 @@ extension DictionaryEntryQueryWhere
     bool includeLower = true,
     bool includeUpper = true,
   }) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.between(
       indexName: 'sequence',
       lower: [lowerSequence],
       includeLower: includeLower,
@@ -821,33 +745,30 @@ extension DictionaryEntryQueryWhere
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       wordLengthEqualTo(int wordLength) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.equalTo(
       indexName: 'wordLength_popularity',
-      lower: [wordLength],
-      includeLower: true,
-      upper: [wordLength],
-      includeUpper: true,
+      value: [wordLength],
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       wordLengthNotEqualTo(int wordLength) {
     if (whereSortInternal == Sort.asc) {
-      return addWhereClauseInternal(WhereClause(
+      return addWhereClauseInternal(IndexWhereClause.lessThan(
         indexName: 'wordLength_popularity',
         upper: [wordLength],
         includeUpper: false,
-      )).addWhereClauseInternal(WhereClause(
+      )).addWhereClauseInternal(IndexWhereClause.greaterThan(
         indexName: 'wordLength_popularity',
         lower: [wordLength],
         includeLower: false,
       ));
     } else {
-      return addWhereClauseInternal(WhereClause(
+      return addWhereClauseInternal(IndexWhereClause.greaterThan(
         indexName: 'wordLength_popularity',
         lower: [wordLength],
         includeLower: false,
-      )).addWhereClauseInternal(WhereClause(
+      )).addWhereClauseInternal(IndexWhereClause.lessThan(
         indexName: 'wordLength_popularity',
         upper: [wordLength],
         includeUpper: false,
@@ -860,7 +781,7 @@ extension DictionaryEntryQueryWhere
     int wordLength, {
     bool include = false,
   }) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.greaterThan(
       indexName: 'wordLength_popularity',
       lower: [wordLength],
       includeLower: include,
@@ -872,7 +793,7 @@ extension DictionaryEntryQueryWhere
     int wordLength, {
     bool include = false,
   }) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.lessThan(
       indexName: 'wordLength_popularity',
       upper: [wordLength],
       includeUpper: include,
@@ -886,7 +807,7 @@ extension DictionaryEntryQueryWhere
     bool includeLower = true,
     bool includeUpper = true,
   }) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.between(
       indexName: 'wordLength_popularity',
       lower: [lowerWordLength],
       includeLower: includeLower,
@@ -898,7 +819,7 @@ extension DictionaryEntryQueryWhere
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       wordLengthEqualToPopularityGreaterThan(
           int wordLength, double? popularity) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.greaterThan(
       indexName: 'wordLength_popularity',
       lower: [wordLength, popularity],
       includeLower: false,
@@ -907,7 +828,7 @@ extension DictionaryEntryQueryWhere
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       wordLengthEqualToPopularityLessThan(int wordLength, double? popularity) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.lessThan(
       indexName: 'wordLength_popularity',
       upper: [wordLength, popularity],
       includeUpper: false,
@@ -917,7 +838,7 @@ extension DictionaryEntryQueryWhere
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       wordLengthEqualToPopularityBetween(
           int wordLength, double? lowerPopularity, double? upperPopularity) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.between(
       indexName: 'wordLength_popularity',
       lower: [wordLength, lowerPopularity],
       includeLower: false,
@@ -928,33 +849,30 @@ extension DictionaryEntryQueryWhere
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause> wordEqualTo(
       String word) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.equalTo(
       indexName: 'word_reading_popularity',
-      lower: [word],
-      includeLower: true,
-      upper: [word],
-      includeUpper: true,
+      value: [word],
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       wordNotEqualTo(String word) {
     if (whereSortInternal == Sort.asc) {
-      return addWhereClauseInternal(WhereClause(
+      return addWhereClauseInternal(IndexWhereClause.lessThan(
         indexName: 'word_reading_popularity',
         upper: [word],
         includeUpper: false,
-      )).addWhereClauseInternal(WhereClause(
+      )).addWhereClauseInternal(IndexWhereClause.greaterThan(
         indexName: 'word_reading_popularity',
         lower: [word],
         includeLower: false,
       ));
     } else {
-      return addWhereClauseInternal(WhereClause(
+      return addWhereClauseInternal(IndexWhereClause.greaterThan(
         indexName: 'word_reading_popularity',
         lower: [word],
         includeLower: false,
-      )).addWhereClauseInternal(WhereClause(
+      )).addWhereClauseInternal(IndexWhereClause.lessThan(
         indexName: 'word_reading_popularity',
         upper: [word],
         includeUpper: false,
@@ -964,33 +882,30 @@ extension DictionaryEntryQueryWhere
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       wordReadingEqualTo(String word, String reading) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.equalTo(
       indexName: 'word_reading_popularity',
-      lower: [word, reading],
-      includeLower: true,
-      upper: [word, reading],
-      includeUpper: true,
+      value: [word, reading],
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       wordReadingNotEqualTo(String word, String reading) {
     if (whereSortInternal == Sort.asc) {
-      return addWhereClauseInternal(WhereClause(
+      return addWhereClauseInternal(IndexWhereClause.lessThan(
         indexName: 'word_reading_popularity',
         upper: [word, reading],
         includeUpper: false,
-      )).addWhereClauseInternal(WhereClause(
+      )).addWhereClauseInternal(IndexWhereClause.greaterThan(
         indexName: 'word_reading_popularity',
         lower: [word, reading],
         includeLower: false,
       ));
     } else {
-      return addWhereClauseInternal(WhereClause(
+      return addWhereClauseInternal(IndexWhereClause.greaterThan(
         indexName: 'word_reading_popularity',
         lower: [word, reading],
         includeLower: false,
-      )).addWhereClauseInternal(WhereClause(
+      )).addWhereClauseInternal(IndexWhereClause.lessThan(
         indexName: 'word_reading_popularity',
         upper: [word, reading],
         includeUpper: false,
@@ -1001,7 +916,7 @@ extension DictionaryEntryQueryWhere
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       wordReadingEqualToPopularityGreaterThan(
           String word, String reading, double? popularity) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.greaterThan(
       indexName: 'word_reading_popularity',
       lower: [word, reading, popularity],
       includeLower: false,
@@ -1011,7 +926,7 @@ extension DictionaryEntryQueryWhere
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       wordReadingEqualToPopularityLessThan(
           String word, String reading, double? popularity) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.lessThan(
       indexName: 'word_reading_popularity',
       upper: [word, reading, popularity],
       includeUpper: false,
@@ -1021,7 +936,7 @@ extension DictionaryEntryQueryWhere
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       wordReadingEqualToPopularityBetween(String word, String reading,
           double? lowerPopularity, double? upperPopularity) {
-    return addWhereClauseInternal(WhereClause(
+    return addWhereClauseInternal(IndexWhereClause.between(
       indexName: 'word_reading_popularity',
       lower: [word, reading, lowerPopularity],
       includeLower: false,
@@ -1317,7 +1232,7 @@ extension DictionaryEntryQueryFilter
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      idEqualTo(int? value) {
+      idEqualTo(int value) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.eq,
       property: 'id',
@@ -1327,7 +1242,7 @@ extension DictionaryEntryQueryFilter
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
       idGreaterThan(
-    int? value, {
+    int value, {
     bool include = false,
   }) {
     return addFilterConditionInternal(FilterCondition(
@@ -1340,7 +1255,7 @@ extension DictionaryEntryQueryFilter
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
       idLessThan(
-    int? value, {
+    int value, {
     bool include = false,
   }) {
     return addFilterConditionInternal(FilterCondition(
@@ -1353,8 +1268,8 @@ extension DictionaryEntryQueryFilter
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
       idBetween(
-    int? lower,
-    int? upper, {
+    int lower,
+    int upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
