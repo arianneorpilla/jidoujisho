@@ -24,6 +24,7 @@ import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/language.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
+import 'package:yuuna/src/creator/enhancements/clear_field_enhancement.dart';
 import 'package:yuuna/utils.dart';
 
 /// A global [Provider] for app-wide configuration and state management.
@@ -256,13 +257,27 @@ class AppModel with ChangeNotifier {
   void populateEnhancements() async {
     /// A list of enhancements that the app will support at runtime.
     final Map<Field, List<Enhancement>> availableEnhancements = {
-      Field.audio: [],
-      Field.extra: [],
-      Field.image: [],
-      Field.meaning: [],
-      Field.reading: [],
-      Field.sentence: [],
-      Field.word: [],
+      Field.audio: [
+        ClearFieldEnhancement(field: Field.audio),
+      ],
+      Field.extra: [
+        ClearFieldEnhancement(field: Field.extra),
+      ],
+      Field.image: [
+        ClearFieldEnhancement(field: Field.image),
+      ],
+      Field.meaning: [
+        ClearFieldEnhancement(field: Field.meaning),
+      ],
+      Field.reading: [
+        ClearFieldEnhancement(field: Field.reading),
+      ],
+      Field.sentence: [
+        ClearFieldEnhancement(field: Field.sentence),
+      ],
+      Field.word: [
+        ClearFieldEnhancement(field: Field.word),
+      ],
     };
 
     enhancements = Map<Field, Map<String, Enhancement>>.unmodifiable(
@@ -322,8 +337,8 @@ class AppModel with ChangeNotifier {
     _packageInfo = await PackageInfo.fromPlatform();
 
     /// Perform startup activities unnecessary to further initialisation here.
-    requestAnkidroidPermissions();
     requestExternalStoragePermissions();
+    requestAnkidroidPermissions();
 
     /// These directories will commonly be accessed.
     _temporaryDirectory = await getTemporaryDirectory();
@@ -361,6 +376,7 @@ class AppModel with ChangeNotifier {
     populateMediaTypes();
     populateMediaSources();
     populateDictionaryFormats();
+    populateEnhancements();
     populateDefaultMapping();
 
     /// Add the default card type to the list of Anki card types if missing.
@@ -539,27 +555,6 @@ class AppModel with ChangeNotifier {
       debugPrint('Localisation for key $key not found for locale $tag');
       rethrow;
     }
-  }
-
-  /// Given a slot [position] of a certain field, get the unique key of the
-  /// [Enhancement] assigned to it.
-  Enhancement? getEnhancement({
-    required Field field,
-    required int position,
-  }) {
-    String uniqueKey = _preferences.get('field_slots_${field.name}/$position');
-    return enhancements[field]![uniqueKey];
-  }
-
-  /// Given an [enhancement], persist to a numbered slot [position] for a
-  /// [field].
-  Future<void> persistEnhancement({
-    required Field field,
-    required Enhancement enhancement,
-    required int position,
-  }) async {
-    await _preferences.put(
-        'field_slots_${field.name}/$position', enhancement.uniqueKey);
   }
 
   /// Show the dictionary menu. This should be callable from many parts of the
@@ -849,6 +844,10 @@ class AppModel with ChangeNotifier {
     _database.writeTxnSync((database) {
       database.ankiMappings.deleteSync(mapping.id!);
     });
+
+    if (mapping.label == lastSelectedMappingName) {
+      await setLastSelectedMapping(mappings.first);
+    }
   }
 
   /// Add a selected mapping to the database.
@@ -1316,15 +1315,93 @@ class AppModel with ChangeNotifier {
   }
 
   /// A helper function for opening the creator from any page in the
-  /// application.
+  /// application for card export purposes.
   Future<void> openCreator() async {
     List<String> decks = await getDecks();
 
     await Navigator.push(
       _navigatorKey.currentContext!,
       MaterialPageRoute(
-        builder: (context) => CreatorPage(decks: decks),
+        builder: (context) => CreatorPage(
+          decks: decks,
+          editMode: false,
+        ),
       ),
     );
+  }
+
+  /// A helper function for opening the creator from any page in the
+  /// application for editing purposes.
+  Future<void> openCreatorEnhancementsEditor() async {
+    List<String> decks = await getDecks();
+
+    await Navigator.push(
+      _navigatorKey.currentContext!,
+      MaterialPageRoute(
+        builder: (context) => CreatorPage(
+          decks: decks,
+          editMode: true,
+        ),
+      ),
+    );
+  }
+
+  /// Updates a given [mapping]'s persisted enhancement for a given [field]
+  /// and [slotNumber].
+  void setFieldEnhancement({
+    required AnkiMapping mapping,
+    required Field field,
+    required int slotNumber,
+    required Enhancement enhancement,
+  }) async {
+    mapping.enhancements[field]![slotNumber] = enhancement.uniqueKey;
+
+    _database.writeTxnSync((isar) {
+      isar.ankiMappings.putSync(mapping);
+    });
+  }
+
+  /// Removes a given [mapping]'s persisted enhancement for a given [field]
+  /// and [slotNumber].
+  void removeFieldEnhancement({
+    required AnkiMapping mapping,
+    required Field field,
+    required int slotNumber,
+  }) async {
+    mapping.enhancements[field]!.remove(slotNumber);
+
+    _database.writeTxnSync((isar) {
+      isar.ankiMappings.putSync(mapping);
+    });
+  }
+
+  /// Updates a given [mapping]'s persisted auto enhancement for a given
+  /// [field].
+  void setAutoFieldEnhancement({
+    required AnkiMapping mapping,
+    required Field field,
+    required Enhancement enhancement,
+  }) async {
+    /// -1 is reserved for the auto enhancement.
+    mapping.enhancements[field]![AnkiMapping.autoModeSlotNumber] =
+        enhancement.uniqueKey;
+
+    _database.writeTxnSync((isar) {
+      isar.ankiMappings.putSync(mapping);
+    });
+  }
+
+  /// Removes a given [mapping]'s persisted auto enhancement for a given
+  /// [field].
+  void removeAutoFieldEnhancement({
+    required AnkiMapping mapping,
+    required Field field,
+  }) async {
+    /// -1 is reserved for the auto enhancement.
+    mapping.enhancements[field]!.remove(AnkiMapping.autoModeSlotNumber);
+
+    _database.writeTxnSync((isar) {
+      isar.ankiMappings.putSync(mapping);
+    });
   }
 }

@@ -46,6 +46,7 @@ class JidoujishoPlaceholderMessage extends StatelessWidget {
         const Space.small(),
         Text(
           message,
+          textAlign: TextAlign.center,
           style: messageStyle ??
               Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.normal,

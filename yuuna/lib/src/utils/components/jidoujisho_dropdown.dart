@@ -9,6 +9,7 @@ class JidoujishoDropdown<T> extends StatefulWidget {
     required this.initialOption,
     required this.generateLabel,
     required this.onChanged,
+    this.enabled = true,
     Key? key,
   }) : super(key: key);
 
@@ -24,6 +25,9 @@ class JidoujishoDropdown<T> extends StatefulWidget {
 
   /// A callback that will occur when a new option has been selected.
   final Function(T?) onChanged;
+
+  /// Whether the button allows changing the option or not.
+  final bool enabled;
 
   @override
   State<JidoujishoDropdown<T>> createState() => _JidoujishoDropdownState<T>();
@@ -63,18 +67,20 @@ class _JidoujishoDropdownState<T> extends State<JidoujishoDropdown<T>> {
               child: Text('  $text'),
             );
           }).toList(),
-          onChanged: (newOption) async {
-            widget.onChanged(newOption);
-
-            setState(() {
-              selectedOption = newOption;
-            });
-          },
+          onChanged: widget.enabled ? onChanged : null,
         ),
 
         /// Used to always show the underline.
         Container(height: 0.1, color: Colors.transparent),
       ],
     );
+  }
+
+  void onChanged(T? value) {
+    widget.onChanged(value);
+
+    setState(() {
+      selectedOption = value;
+    });
   }
 }

@@ -9,11 +9,16 @@ class ClearFieldEnhancement extends Enhancement {
   /// Initialise this enhancement with the hardset parameters.
   ClearFieldEnhancement({required Field field})
       : super(
-            uniqueKey: 'clear_field',
-            label: 'Clear Field',
-            description: 'Quickly empty the parameters of a field.',
-            field: field,
-            icon: Icons.clear);
+          uniqueKey: key,
+          label: 'Clear Field',
+          description: 'Quickly empty the content of a field.',
+          field: field,
+          icon: Icons.clear,
+        );
+
+  /// Used to identify this enhancement and to allow a constant value for the
+  /// default mappings value of [AnkiMapping].
+  static const String key = 'clear_field';
 
   @override
   Future<void> enhanceCreatorParams({

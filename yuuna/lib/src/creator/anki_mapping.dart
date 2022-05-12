@@ -1,11 +1,16 @@
 import 'package:isar/isar.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:yuuna/creator.dart';
+import 'package:yuuna/models.dart';
+import 'package:yuuna/src/creator/enhancements/clear_field_enhancement.dart';
+import 'package:yuuna/utils.dart';
 
 part 'anki_mapping.g.dart';
 
 /// A user-generated mapping to allow customisation of the fields exported from
 /// the application. A mapping is bound to a [model], which must have a length
 /// of fields equal or more than the length of [getFields].
+@JsonSerializable()
 @Collection()
 class AnkiMapping {
   /// Initialise a model mapping with the given parameters.
@@ -15,6 +20,7 @@ class AnkiMapping {
     required this.fieldIndexes,
     required this.order,
     required this.tags,
+    required this.enhancements,
     this.id,
   });
 
@@ -36,8 +42,20 @@ class AnkiMapping {
       ],
       order: order,
       tags: [standardModelName],
+      enhancements: defaultEnhancements,
     );
   }
+
+  /// A default map of enhancements to use for new mappings.
+  static const Map<Field, Map<int, String>> defaultEnhancements = {
+    Field.sentence: {0: ClearFieldEnhancement.key},
+    Field.word: {0: ClearFieldEnhancement.key},
+    Field.reading: {0: ClearFieldEnhancement.key},
+    Field.meaning: {0: ClearFieldEnhancement.key},
+    Field.extra: {0: ClearFieldEnhancement.key},
+    Field.image: {0: ClearFieldEnhancement.key},
+    Field.audio: {0: ClearFieldEnhancement.key},
+  };
 
   /// The default mapping name which cannot be deleted or reused.
   static String standardModelName = 'jidoujisho Yuuna';
@@ -62,6 +80,14 @@ class AnkiMapping {
 
   /// A collection of tags to always include when exporting with this mapping.
   final List<String> tags;
+
+  /// Used to keep track of enhancements used in the creator per field.
+  @EnhancementsConverter()
+  final Map<Field, Map<int, String>> enhancements;
+
+  /// Reserved index for the auto mode field in the map of enhancement names
+  /// for a field.
+  static int autoModeSlotNumber = -1;
 
   /// The order of this dictionary in terms of user sorting, relative to other
   /// dictionaries.
@@ -95,6 +121,7 @@ class AnkiMapping {
     List<String>? tags,
     int? order,
     int? id,
+    Map<Field, Map<int, String>>? enhancements,
   }) {
     return AnkiMapping(
       label: label ?? this.label,
@@ -103,6 +130,50 @@ class AnkiMapping {
       tags: tags ?? this.tags,
       order: order ?? this.order,
       id: id ?? this.id,
+      enhancements: enhancements ?? this.enhancements,
     );
+  }
+
+  /// Returns a list of enhancement names active for a certain field in the
+  /// persisted enhancements map.
+  List<String> getManualFieldEnhancementNames({required Field field}) {
+    return enhancements[field]!
+        .entries
+        .where((entry) => entry.key != autoModeSlotNumber)
+        .map((entry) => entry.value)
+        .toList();
+  }
+
+  /// Returns the enhancement names active for a certain field in the persisted
+  /// enhancements map.
+  String? getAutoFieldEnhancementName({required Field field}) {
+    return enhancements[field]![autoModeSlotNumber];
+  }
+
+  /// Returns a list of enhancements active for a certain field in the
+  /// persisted enhancements map.
+  List<Enhancement> getManualFieldEnhancement(
+      {required AppModel appModel, required Field field}) {
+    List<String> enhancementNames =
+        getManualFieldEnhancementNames(field: field);
+    List<Enhancement> enhancements = enhancementNames
+        .map((enhancementName) =>
+            appModel.enhancements[field]![enhancementName]!)
+        .toList();
+
+    return enhancements;
+  }
+
+  /// Returns the enhancement active for a certain field in the persisted
+  /// enhancements map.
+  Enhancement? getAutoFieldEnhancement(
+      {required AppModel appModel, required Field field}) {
+    String? enhancementName = enhancements[field]![autoModeSlotNumber];
+    if (enhancementName == null) {
+      return null;
+    }
+
+    Enhancement? enhancement = appModel.enhancements[field]![enhancementName];
+    return enhancement;
   }
 }

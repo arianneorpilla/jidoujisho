@@ -54,6 +54,7 @@ class JidoujishoLocalisations {
     'options_language': 'Language settings',
     'options_github': 'View repository on GitHub',
     'options_attribution': 'Licenses and attribution',
+    'options_copy': 'Copy',
     'options_collapse': 'Collapse',
     'options_expand': 'Expand',
     'options_delete': 'Delete',
@@ -123,6 +124,7 @@ class JidoujishoLocalisations {
             ' profile has changed.\n\nThe fields of the currently selected'
             ' profile have been reset and will require reconfiguration.',
     'creator_exporting_as': 'Creating card with profile',
+    'creator_exporting_as_editing': 'Editing enhancements for profile',
     'creator_export_card': 'Create Card',
     'info_enhancements':
         'Enhancements enable the automation of field editing prior to card'
@@ -130,6 +132,12 @@ class JidoujishoLocalisations {
             ' enhancement. Up to four right slots may be utilised for each'
             ' field. The enhancement in the left slot of a field will be'
             ' automatically applied in instant card creation or upon launch of'
-            ' the Card Creator.'
+            ' the Card Creator.',
+    'no_more_available_enhancements':
+        'No more available enhancements for this field',
+    'assign_auto_enhancement': 'Assign Auto Enhancement',
+    'assign_manual_enhancement': 'Assign Manual Enhancement',
+    'remove_enhancement': 'Remove Enhancement',
+    'copy_of_mapping': 'Copy of %mapping_name%'
   };
 }

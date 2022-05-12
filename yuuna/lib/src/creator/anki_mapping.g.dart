@@ -15,14 +15,15 @@ extension GetAnkiMappingCollection on Isar {
 const AnkiMappingSchema = CollectionSchema(
   name: 'AnkiMapping',
   schema:
-      '{"name":"AnkiMapping","idName":"id","properties":[{"name":"fieldIndexes","type":"LongList"},{"name":"label","type":"String"},{"name":"model","type":"String"},{"name":"order","type":"Long"},{"name":"tags","type":"StringList"}],"indexes":[{"name":"label","unique":true,"properties":[{"name":"label","type":"Hash","caseSensitive":true}]},{"name":"order","unique":true,"properties":[{"name":"order","type":"Value","caseSensitive":false}]}],"links":[]}',
+      '{"name":"AnkiMapping","idName":"id","properties":[{"name":"enhancements","type":"String"},{"name":"fieldIndexes","type":"LongList"},{"name":"label","type":"String"},{"name":"model","type":"String"},{"name":"order","type":"Long"},{"name":"tags","type":"StringList"}],"indexes":[{"name":"label","unique":true,"properties":[{"name":"label","type":"Hash","caseSensitive":true}]},{"name":"order","unique":true,"properties":[{"name":"order","type":"Value","caseSensitive":false}]}],"links":[]}',
   idName: 'id',
   propertyIds: {
-    'fieldIndexes': 0,
-    'label': 1,
-    'model': 2,
-    'order': 3,
-    'tags': 4
+    'enhancements': 0,
+    'fieldIndexes': 1,
+    'label': 2,
+    'model': 3,
+    'order': 4,
+    'tags': 5
   },
   listProperties: {'fieldIndexes', 'tags'},
   indexIds: {'label': 0, 'order': 1},
@@ -65,6 +66,8 @@ List<IsarLinkBase> _ankiMappingGetLinks(AnkiMapping object) {
   return [];
 }
 
+const _ankiMappingEnhancementsConverter = EnhancementsConverter();
+
 void _ankiMappingSerializeNative(
     IsarCollection<AnkiMapping> collection,
     IsarRawObject rawObj,
@@ -73,37 +76,41 @@ void _ankiMappingSerializeNative(
     List<int> offsets,
     AdapterAlloc alloc) {
   var dynamicSize = 0;
-  final value0 = object.fieldIndexes;
-  dynamicSize += (value0.length) * 8;
-  final _fieldIndexes = value0;
-  final value1 = object.label;
-  final _label = IsarBinaryWriter.utf8Encoder.convert(value1);
+  final value0 = _ankiMappingEnhancementsConverter.toIsar(object.enhancements);
+  final _enhancements = IsarBinaryWriter.utf8Encoder.convert(value0);
+  dynamicSize += (_enhancements.length) as int;
+  final value1 = object.fieldIndexes;
+  dynamicSize += (value1.length) * 8;
+  final _fieldIndexes = value1;
+  final value2 = object.label;
+  final _label = IsarBinaryWriter.utf8Encoder.convert(value2);
   dynamicSize += (_label.length) as int;
-  final value2 = object.model;
-  final _model = IsarBinaryWriter.utf8Encoder.convert(value2);
+  final value3 = object.model;
+  final _model = IsarBinaryWriter.utf8Encoder.convert(value3);
   dynamicSize += (_model.length) as int;
-  final value3 = object.order;
-  final _order = value3;
-  final value4 = object.tags;
-  dynamicSize += (value4.length) * 8;
-  final bytesList4 = <IsarUint8List>[];
-  for (var str in value4) {
+  final value4 = object.order;
+  final _order = value4;
+  final value5 = object.tags;
+  dynamicSize += (value5.length) * 8;
+  final bytesList5 = <IsarUint8List>[];
+  for (var str in value5) {
     final bytes = IsarBinaryWriter.utf8Encoder.convert(str);
-    bytesList4.add(bytes);
+    bytesList5.add(bytes);
     dynamicSize += bytes.length as int;
   }
-  final _tags = bytesList4;
+  final _tags = bytesList5;
   final size = staticSize + dynamicSize;
 
   rawObj.buffer = alloc(size);
   rawObj.buffer_length = size;
   final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
   final writer = IsarBinaryWriter(buffer, staticSize);
-  writer.writeLongList(offsets[0], _fieldIndexes);
-  writer.writeBytes(offsets[1], _label);
-  writer.writeBytes(offsets[2], _model);
-  writer.writeLong(offsets[3], _order);
-  writer.writeStringList(offsets[4], _tags);
+  writer.writeBytes(offsets[0], _enhancements);
+  writer.writeLongList(offsets[1], _fieldIndexes);
+  writer.writeBytes(offsets[2], _label);
+  writer.writeBytes(offsets[3], _model);
+  writer.writeLong(offsets[4], _order);
+  writer.writeStringList(offsets[5], _tags);
 }
 
 AnkiMapping _ankiMappingDeserializeNative(
@@ -112,12 +119,14 @@ AnkiMapping _ankiMappingDeserializeNative(
     IsarBinaryReader reader,
     List<int> offsets) {
   final object = AnkiMapping(
-    fieldIndexes: reader.readLongOrNullList(offsets[0]) ?? [],
+    enhancements: _ankiMappingEnhancementsConverter
+        .fromIsar(reader.readString(offsets[0])),
+    fieldIndexes: reader.readLongOrNullList(offsets[1]) ?? [],
     id: id,
-    label: reader.readString(offsets[1]),
-    model: reader.readString(offsets[2]),
-    order: reader.readLong(offsets[3]),
-    tags: reader.readStringList(offsets[4]) ?? [],
+    label: reader.readString(offsets[2]),
+    model: reader.readString(offsets[3]),
+    order: reader.readLong(offsets[4]),
+    tags: reader.readStringList(offsets[5]) ?? [],
   );
   return object;
 }
@@ -128,14 +137,17 @@ P _ankiMappingDeserializePropNative<P>(
     case -1:
       return id as P;
     case 0:
-      return (reader.readLongOrNullList(offset) ?? []) as P;
+      return (_ankiMappingEnhancementsConverter
+          .fromIsar(reader.readString(offset))) as P;
     case 1:
-      return (reader.readString(offset)) as P;
+      return (reader.readLongOrNullList(offset) ?? []) as P;
     case 2:
       return (reader.readString(offset)) as P;
     case 3:
-      return (reader.readLong(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 4:
+      return (reader.readLong(offset)) as P;
+    case 5:
       return (reader.readStringList(offset) ?? []) as P;
     default:
       throw 'Illegal propertyIndex';
@@ -145,6 +157,8 @@ P _ankiMappingDeserializePropNative<P>(
 dynamic _ankiMappingSerializeWeb(
     IsarCollection<AnkiMapping> collection, AnkiMapping object) {
   final jsObj = IsarNative.newJsObject();
+  IsarNative.jsObjectSet(jsObj, 'enhancements',
+      _ankiMappingEnhancementsConverter.toIsar(object.enhancements));
   IsarNative.jsObjectSet(jsObj, 'fieldIndexes', object.fieldIndexes);
   IsarNative.jsObjectSet(jsObj, 'id', object.id);
   IsarNative.jsObjectSet(jsObj, 'label', object.label);
@@ -157,6 +171,8 @@ dynamic _ankiMappingSerializeWeb(
 AnkiMapping _ankiMappingDeserializeWeb(
     IsarCollection<AnkiMapping> collection, dynamic jsObj) {
   final object = AnkiMapping(
+    enhancements: _ankiMappingEnhancementsConverter
+        .fromIsar(IsarNative.jsObjectGet(jsObj, 'enhancements') ?? ''),
     fieldIndexes: (IsarNative.jsObjectGet(jsObj, 'fieldIndexes') as List?)
             ?.cast<int?>() ??
         [],
@@ -175,6 +191,9 @@ AnkiMapping _ankiMappingDeserializeWeb(
 
 P _ankiMappingDeserializePropWeb<P>(Object jsObj, String propertyName) {
   switch (propertyName) {
+    case 'enhancements':
+      return (_ankiMappingEnhancementsConverter
+          .fromIsar(IsarNative.jsObjectGet(jsObj, 'enhancements') ?? '')) as P;
     case 'fieldIndexes':
       return ((IsarNative.jsObjectGet(jsObj, 'fieldIndexes') as List?)
               ?.cast<int?>() ??
@@ -455,6 +474,114 @@ extension AnkiMappingQueryWhere
 
 extension AnkiMappingQueryFilter
     on QueryBuilder<AnkiMapping, AnkiMapping, QFilterCondition> {
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      enhancementsEqualTo(
+    Map<Field, Map<int, String>> value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.eq,
+      property: 'enhancements',
+      value: _ankiMappingEnhancementsConverter.toIsar(value),
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      enhancementsGreaterThan(
+    Map<Field, Map<int, String>> value, {
+    bool caseSensitive = true,
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.gt,
+      include: include,
+      property: 'enhancements',
+      value: _ankiMappingEnhancementsConverter.toIsar(value),
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      enhancementsLessThan(
+    Map<Field, Map<int, String>> value, {
+    bool caseSensitive = true,
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.lt,
+      include: include,
+      property: 'enhancements',
+      value: _ankiMappingEnhancementsConverter.toIsar(value),
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      enhancementsBetween(
+    Map<Field, Map<int, String>> lower,
+    Map<Field, Map<int, String>> upper, {
+    bool caseSensitive = true,
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition.between(
+      property: 'enhancements',
+      lower: _ankiMappingEnhancementsConverter.toIsar(lower),
+      includeLower: includeLower,
+      upper: _ankiMappingEnhancementsConverter.toIsar(upper),
+      includeUpper: includeUpper,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      enhancementsStartsWith(
+    Map<Field, Map<int, String>> value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.startsWith,
+      property: 'enhancements',
+      value: _ankiMappingEnhancementsConverter.toIsar(value),
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      enhancementsEndsWith(
+    Map<Field, Map<int, String>> value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.endsWith,
+      property: 'enhancements',
+      value: _ankiMappingEnhancementsConverter.toIsar(value),
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      enhancementsContains(Map<Field, Map<int, String>> value,
+          {bool caseSensitive = true}) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.contains,
+      property: 'enhancements',
+      value: _ankiMappingEnhancementsConverter.toIsar(value),
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      enhancementsMatches(String pattern, {bool caseSensitive = true}) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.matches,
+      property: 'enhancements',
+      value: pattern,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
       fieldIndexesAnyEqualTo(int value) {
     return addFilterConditionInternal(FilterCondition(
@@ -930,6 +1057,15 @@ extension AnkiMappingQueryLinks
 
 extension AnkiMappingQueryWhereSortBy
     on QueryBuilder<AnkiMapping, AnkiMapping, QSortBy> {
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy> sortByEnhancements() {
+    return addSortByInternal('enhancements', Sort.asc);
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy>
+      sortByEnhancementsDesc() {
+    return addSortByInternal('enhancements', Sort.desc);
+  }
+
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy> sortById() {
     return addSortByInternal('id', Sort.asc);
   }
@@ -965,6 +1101,15 @@ extension AnkiMappingQueryWhereSortBy
 
 extension AnkiMappingQueryWhereSortThenBy
     on QueryBuilder<AnkiMapping, AnkiMapping, QSortThenBy> {
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy> thenByEnhancements() {
+    return addSortByInternal('enhancements', Sort.asc);
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy>
+      thenByEnhancementsDesc() {
+    return addSortByInternal('enhancements', Sort.desc);
+  }
+
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy> thenById() {
     return addSortByInternal('id', Sort.asc);
   }
@@ -1000,6 +1145,11 @@ extension AnkiMappingQueryWhereSortThenBy
 
 extension AnkiMappingQueryWhereDistinct
     on QueryBuilder<AnkiMapping, AnkiMapping, QDistinct> {
+  QueryBuilder<AnkiMapping, AnkiMapping, QDistinct> distinctByEnhancements(
+      {bool caseSensitive = true}) {
+    return addDistinctByInternal('enhancements', caseSensitive: caseSensitive);
+  }
+
   QueryBuilder<AnkiMapping, AnkiMapping, QDistinct> distinctById() {
     return addDistinctByInternal('id');
   }
@@ -1021,6 +1171,11 @@ extension AnkiMappingQueryWhereDistinct
 
 extension AnkiMappingQueryProperty
     on QueryBuilder<AnkiMapping, AnkiMapping, QQueryProperty> {
+  QueryBuilder<AnkiMapping, Map<Field, Map<int, String>>, QQueryOperations>
+      enhancementsProperty() {
+    return addPropertyNameInternal('enhancements');
+  }
+
   QueryBuilder<AnkiMapping, List<int?>, QQueryOperations>
       fieldIndexesProperty() {
     return addPropertyNameInternal('fieldIndexes');
@@ -1046,3 +1201,48 @@ extension AnkiMappingQueryProperty
     return addPropertyNameInternal('tags');
   }
 }
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+AnkiMapping _$AnkiMappingFromJson(Map<String, dynamic> json) => AnkiMapping(
+      label: json['label'] as String,
+      model: json['model'] as String,
+      fieldIndexes: (json['fieldIndexes'] as List<dynamic>)
+          .map((e) => e as int?)
+          .toList(),
+      order: json['order'] as int,
+      tags: (json['tags'] as List<dynamic>).map((e) => e as String).toList(),
+      enhancements: (json['enhancements'] as Map<String, dynamic>).map(
+        (k, e) => MapEntry(
+            $enumDecode(_$FieldEnumMap, k),
+            (e as Map<String, dynamic>).map(
+              (k, e) => MapEntry(int.parse(k), e as String),
+            )),
+      ),
+      id: json['id'] as int?,
+    );
+
+Map<String, dynamic> _$AnkiMappingToJson(AnkiMapping instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'label': instance.label,
+      'model': instance.model,
+      'fieldIndexes': instance.fieldIndexes,
+      'tags': instance.tags,
+      'enhancements': instance.enhancements.map((k, e) => MapEntry(
+          _$FieldEnumMap[k], e.map((k, e) => MapEntry(k.toString(), e)))),
+      'order': instance.order,
+    };
+
+const _$FieldEnumMap = {
+  Field.sentence: 'sentence',
+  Field.word: 'word',
+  Field.reading: 'reading',
+  Field.meaning: 'meaning',
+  Field.extra: 'extra',
+  Field.image: 'image',
+  Field.audio: 'audio',
+  Field.context: 'context',
+};

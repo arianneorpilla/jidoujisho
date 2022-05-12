@@ -27,6 +27,8 @@ class ProfilesDialogPage extends BasePage {
 class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
   String get mappingsDeleteConfirmationLabel =>
       appModel.translate('mappings_delete_confirmation');
+  String get copyOfMappingLabel => appModel.translate('copy_of_mapping');
+  String get optionsCopyLabel => appModel.translate('options_copy');
   String get optionsDeleteLabel => appModel.translate('options_delete');
   String get optionsEditLabel => appModel.translate('options_edit');
   String get showOptionsLabel => appModel.translate('show_options');
@@ -93,6 +95,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
           fieldIndexes: fieldIndexes,
           tags: [],
           order: 0,
+          enhancements: AnkiMapping.defaultEnhancements,
         );
 
         await showMappingEditDialog(newMapping);
@@ -257,6 +260,22 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
         icon: Icons.edit,
         action: () async {
           await showMappingEditDialog(mapping);
+        },
+      ),
+      buildPopupItem(
+        label: optionsCopyLabel,
+        icon: Icons.copy,
+        action: () async {
+          AnkiMapping mappingClone = mapping.copyWith(
+            label: copyOfMappingLabel.replaceAll(
+              '%mapping_name%',
+              mapping.label,
+            ),
+          );
+
+          mappingClone.id = null;
+
+          await showMappingEditDialog(mappingClone);
         },
       ),
       if (AnkiMapping.standardProfileName != mapping.label)
@@ -513,7 +532,9 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
       newMapping = newMapping.copyWith(order: order);
 
       /// If the name is blank or the mapping exists, error.
-      if (name.isEmpty || appModel.mappingNameHasDuplicate(newMapping)) {
+      if (name.isEmpty ||
+          name.contains('%mappingName%') ||
+          appModel.mappingNameHasDuplicate(newMapping)) {
         await showDialog(
           barrierDismissible: true,
           context: context,

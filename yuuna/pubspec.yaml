@@ -31,7 +31,7 @@ dependencies:
   intl: ^0.17.0
   isar: ^2.2.1
   isar_flutter_libs: ^2.2.1
-  json_annotation: ^4.4.0
+  json_annotation: ^4.5.0
   json_serializable: ^6.1.5
   kana_kit: ^2.0.0
   marquee: ^2.2.1

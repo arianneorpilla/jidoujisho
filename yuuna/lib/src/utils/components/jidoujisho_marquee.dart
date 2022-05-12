@@ -14,7 +14,7 @@ class JidoujishoMarquee extends StatelessWidget {
     this.textDirection = TextDirection.ltr,
     this.scrollAxis = Axis.horizontal,
     this.crossAxisAlignment = CrossAxisAlignment.center,
-    this.blankSpace = 0.0,
+    this.blankSpace = 20.0,
     this.velocity = 30.0,
     this.startAfter = Duration.zero,
     this.pauseAfterRound = Duration.zero,

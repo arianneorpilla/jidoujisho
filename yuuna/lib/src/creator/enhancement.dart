@@ -32,16 +32,9 @@ abstract class Enhancement {
     required this.icon,
   });
 
-  /// Used when identifying whether a media item's image or audio context
-  /// is from a certain enhancement. If an enhancement is capable of
-  /// producing images or audio, its functions may be used to produce the
-  /// media at runtime from seeds.
-  String get databaseKey => 'enhancement/${field.name}/$uniqueKey';
-
   /// A unique name that allows distinguishing this type from others,
   /// particularly for the purposes of differentiating between persistent
-  /// settings keys. This will be suffixed to the [databaseKey] which is
-  /// used for persisting enhancement-specific data and identifying creator
+  /// settings keys.
   final String uniqueKey;
 
   /// Name of the enhancement that very shortly describes what it does.
@@ -77,7 +70,8 @@ abstract class Enhancement {
   /// Get the best localisation for the description of this enhancement. If
   /// there is no localisation, the fallback is [description].
   String getLocalisedDescription(AppModel appModel) {
-    return descriptionLocalisation[appModel.appLocale.toLanguageTag()] ?? label;
+    return descriptionLocalisation[appModel.appLocale.toLanguageTag()] ??
+        description;
   }
 
   /// Whether or not [initialise] has been called for this enhancement.
