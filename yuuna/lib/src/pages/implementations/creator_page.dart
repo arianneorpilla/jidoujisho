@@ -13,8 +13,8 @@ class CreatorPage extends BasePage {
   const CreatorPage({
     required this.decks,
     required this.editMode,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   /// List of decks that are fetched prior to navigating to this page.
   final List<String> decks;
@@ -53,6 +53,19 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
   Future<bool> onWillPop() async {
     creatorModel.clearAll();
     return true;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    /// Check if the current profile is valid and report any discrepancies.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      appModel.validateSelectedMapping(
+        context: context,
+        mapping: appModel.lastSelectedMapping,
+      );
+    });
   }
 
   @override
@@ -172,7 +185,8 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       child: Scrollbar(
         controller: _scrollController,
         child: ListView(
-          physics: const BouncingScrollPhysics(),
+          physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics()),
           controller: _scrollController,
           children: [
             if (widget.editMode) buildEditModeTutorialMessage(),

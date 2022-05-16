@@ -10,8 +10,8 @@ class JidoujishoDropdown<T> extends StatefulWidget {
     required this.generateLabel,
     required this.onChanged,
     this.enabled = true,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   /// List of options that are available to pick from.
   final List<T> options;

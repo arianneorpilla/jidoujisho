@@ -8,7 +8,7 @@ import 'package:yuuna/utils.dart';
 /// locale.
 class LanguageDialogPage extends BasePage {
   /// Create an instance of this page.
-  const LanguageDialogPage({Key? key}) : super(key: key);
+  const LanguageDialogPage({super.key});
 
   @override
   BasePageState createState() => _LanguageDialogPageState();

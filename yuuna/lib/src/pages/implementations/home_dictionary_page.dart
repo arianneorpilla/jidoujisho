@@ -9,7 +9,7 @@ import 'package:yuuna/utils.dart';
 /// The body content for the Dictionary tab in the main menu.
 class HomeDictionaryPage extends BaseTabPage {
   /// Create an instance of this page.
-  const HomeDictionaryPage({Key? key}) : super(key: key);
+  const HomeDictionaryPage({super.key});
 
   @override
   BaseTabPageState<BaseTabPage> createState() => _HomeDictionaryPageState();

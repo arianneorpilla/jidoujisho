@@ -31,7 +31,7 @@ class JidoujishoTextSelectionControls extends MaterialTextSelectionControls {
     Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier clipboardStatus,
+    ClipboardStatusNotifier? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     final TextSelectionPoint startTextSelectionPoint = endpoints[0];
@@ -53,7 +53,7 @@ class JidoujishoTextSelectionControls extends MaterialTextSelectionControls {
     return JidoujishoSelectionToolbar(
       anchorAbove: anchorAbove,
       anchorBelow: anchorBelow,
-      clipboardStatus: clipboardStatus,
+      clipboardStatus: clipboardStatus!,
       customAction: () {
         customAction(
           delegate.textEditingValue.selection
@@ -76,8 +76,8 @@ class JidoujishoSelectionToolbar extends StatefulWidget {
     required this.clipboardStatus,
     required this.customActionLabel,
     required this.customAction,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   /// Positioning details for the toolbar.
   final Offset anchorAbove;

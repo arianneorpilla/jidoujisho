@@ -147,7 +147,7 @@ packages:
       name: collection
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.15.0"
+    version: "1.16.0"
   convert:
     dependency: transitive
     description:
@@ -247,11 +247,13 @@ packages:
     source: hosted
     version: "1.0.1"
   fading_edge_scrollview:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: fading_edge_scrollview
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "."
+      ref: master
+      resolved-ref: "6f3b745b6af908fcbe2acd59f94cf607833708dd"
+      url: "https://github.com/ruslic19/fading_edge_scrollview"
+    source: git
     version: "2.0.1"
   fake_async:
     dependency: transitive
@@ -259,7 +261,7 @@ packages:
       name: fake_async
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.2.0"
+    version: "1.3.0"
   ffi:
     dependency: transitive
     description:
@@ -299,7 +301,7 @@ packages:
       name: flutter_archive
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.2.0"
+    version: "5.0.0"
   flutter_cache_manager:
     dependency: "direct main"
     description:
@@ -341,7 +343,7 @@ packages:
       name: flutter_riverpod
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.3"
+    version: "1.0.4"
   flutter_screenutil:
     dependency: "direct main"
     description:
@@ -372,7 +374,7 @@ packages:
       name: freezed_annotation
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.1"
+    version: "2.0.3"
   frontend_server_client:
     dependency: transitive
     description:
@@ -491,7 +493,7 @@ packages:
       name: js
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.6.3"
+    version: "0.6.4"
   json_annotation:
     dependency: "direct main"
     description:
@@ -537,9 +539,11 @@ packages:
   marquee:
     dependency: "direct main"
     description:
-      name: marquee
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "."
+      ref: master
+      resolved-ref: "7b7491c36d539f426daed0edc0f243c312b96bcb"
+      url: "https://github.com/ymback/marquee"
+    source: git
     version: "2.2.1"
   matcher:
     dependency: transitive
@@ -554,14 +558,16 @@ packages:
       name: material_color_utilities
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.3"
+    version: "0.1.4"
   material_floating_search_bar:
     dependency: "direct main"
     description:
-      name: material_floating_search_bar
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.3.7"
+      path: "."
+      ref: main
+      resolved-ref: e71c90e759f7b6bea64f846f5597c0a7734bbfe7
+      url: "https://github.com/lrorpilla/material_floating_search_bar"
+    source: git
+    version: "0.3.8"
   mecab_dart:
     dependency: "direct main"
     description:
@@ -589,7 +595,7 @@ packages:
       name: network_to_file_image
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.1.0"
+    version: "4.0.1"
   package_config:
     dependency: transitive
     description:
@@ -645,7 +651,7 @@ packages:
       name: path
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.8.0"
+    version: "1.8.1"
   path_provider:
     dependency: "direct main"
     description:
@@ -867,7 +873,7 @@ packages:
       name: source_span
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.8.1"
+    version: "1.8.2"
   spaces:
     dependency: "direct main"
     description:
@@ -953,7 +959,7 @@ packages:
       name: test_api
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.8"
+    version: "0.4.9"
   time:
     dependency: transitive
     description:
@@ -1060,7 +1066,7 @@ packages:
       name: vector_math
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.1"
+    version: "2.1.2"
   watcher:
     dependency: transitive
     description:
@@ -1104,5 +1110,5 @@ packages:
     source: hosted
     version: "3.1.0"
 sdks:
-  dart: ">=2.16.1 <3.0.0"
-  flutter: ">=2.10.0"
+  dart: ">=2.17.0 <3.0.0"
+  flutter: ">=3.0.0"

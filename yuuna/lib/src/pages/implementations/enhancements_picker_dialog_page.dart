@@ -11,8 +11,8 @@ class EnhancementsPickerDialogPage extends BasePage {
     required this.mapping,
     required this.field,
     required this.slotNumber,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   /// What mapping to alter upon picking an enhancement.
   final AnkiMapping mapping;

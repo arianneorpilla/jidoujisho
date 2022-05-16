@@ -8,7 +8,7 @@ import 'package:yuuna/utils.dart';
 /// The content of the dialog used for managing dictionaries.
 class DictionaryDialogPage extends BasePage {
   /// Create an instance of this page.
-  const DictionaryDialogPage({Key? key}) : super(key: key);
+  const DictionaryDialogPage({super.key});
 
   @override
   BasePageState createState() => _DictionaryDialogPageState();

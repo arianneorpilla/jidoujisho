@@ -179,6 +179,7 @@ public class MainActivity extends FlutterActivity {
                             if (mAnkiDroid.shouldRequestPermission()) {
                                 mAnkiDroid.requestPermission(MainActivity.this, AD_PERM_REQUEST);
                             }
+                            result.success(true);
                             break;
                         default:
                             result.notImplemented();

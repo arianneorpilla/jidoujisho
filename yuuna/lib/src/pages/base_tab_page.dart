@@ -10,8 +10,8 @@ import 'package:yuuna/utils.dart';
 abstract class BaseTabPage extends BasePage {
   /// Create an instance of this tab page.
   const BaseTabPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   BaseTabPageState<BaseTabPage> createState();

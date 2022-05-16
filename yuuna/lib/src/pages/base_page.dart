@@ -6,7 +6,7 @@ import 'package:yuuna/models.dart';
 /// in the app will conveniently share base functionality.
 abstract class BasePage extends ConsumerStatefulWidget {
   /// Create an instance of this page.
-  const BasePage({Key? key}) : super(key: key);
+  const BasePage({super.key});
 
   @override
   BasePageState<BasePage> createState() => BasePageState();

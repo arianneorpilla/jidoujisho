@@ -10,8 +10,8 @@ class ProfilesDialogPage extends BasePage {
   const ProfilesDialogPage({
     required this.models,
     required this.initialModel,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   /// A list of usable models obtained from Anki prior to calling this dialog
   /// page.
@@ -56,7 +56,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance?.addPostFrameCallback((_) async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       await appModel.validateSelectedMapping(
         context: context,
         mapping: appModel.lastSelectedMapping,

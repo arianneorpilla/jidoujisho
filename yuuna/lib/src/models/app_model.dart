@@ -337,8 +337,8 @@ class AppModel with ChangeNotifier {
     _packageInfo = await PackageInfo.fromPlatform();
 
     /// Perform startup activities unnecessary to further initialisation here.
-    requestExternalStoragePermissions();
-    requestAnkidroidPermissions();
+    await requestExternalStoragePermissions();
+    await requestAnkidroidPermissions();
 
     /// These directories will commonly be accessed.
     _temporaryDirectory = await getTemporaryDirectory();
@@ -379,9 +379,6 @@ class AppModel with ChangeNotifier {
     populateEnhancements();
     populateDefaultMapping();
 
-    /// Add the default card type to the list of Anki card types if missing.
-    addDefaultModelIfMissing();
-
     /// Get the current target language and prepare its resources for use. This
     /// will not re-run if the target language is already initialised, as
     /// a [Language] should always have a singleton instance and will not
@@ -398,8 +395,8 @@ class AppModel with ChangeNotifier {
 
   /// Get whether or not the current theme is dark mode.
   bool get isDarkMode {
-    bool isSystemDarkMode = Brightness.dark ==
-        (SchedulerBinding.instance?.window.platformBrightness ?? false);
+    bool isSystemDarkMode =
+        Brightness.dark == SchedulerBinding.instance.window.platformBrightness;
     bool isDarkMode =
         _preferences.get('is_dark_mode', defaultValue: isSystemDarkMode);
     return isDarkMode;
@@ -979,8 +976,8 @@ class AppModel with ChangeNotifier {
 
   /// Used to ask for AnkiDroid database permissions. Should be called at
   /// startup.
-  void requestAnkidroidPermissions() async {
-    methodChannel.invokeMethod('requestAnkidroidPermissions');
+  Future<void> requestAnkidroidPermissions() async {
+    await methodChannel.invokeMethod('requestAnkidroidPermissions');
   }
 
   /// Adds the default 'jidoujisho Yuuna' model to the list of Anki card types.

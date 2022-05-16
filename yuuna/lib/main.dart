@@ -41,7 +41,7 @@ void main() {
 /// the entire app, with some parameters dependent on the [AppModel].
 class JidoujishoApp extends ConsumerStatefulWidget {
   /// Initialises an instance of the app.
-  const JidoujishoApp({Key? key}) : super(key: key);
+  const JidoujishoApp({super.key});
 
   @override
   ConsumerState<JidoujishoApp> createState() => _JidoujishoAppState();
@@ -185,7 +185,9 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
             borderSide: BorderSide(color: Colors.red),
           ),
         ),
-        scrollbarTheme: const ScrollbarThemeData(isAlwaysShown: true),
+        scrollbarTheme: ScrollbarThemeData(
+          thumbVisibility: MaterialStateProperty.all(true),
+        ),
       );
 
   /// Shows when the current [themeMode] is a dark theme.
@@ -253,6 +255,8 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
             borderSide: BorderSide(color: Colors.red),
           ),
         ),
-        scrollbarTheme: const ScrollbarThemeData(isAlwaysShown: true),
+        scrollbarTheme: ScrollbarThemeData(
+          thumbVisibility: MaterialStateProperty.all(true),
+        ),
       );
 }

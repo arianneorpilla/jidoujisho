@@ -7,12 +7,11 @@ import 'package:yuuna/models.dart';
 /// of a [CreatorModel] pertaining to a certain [Field].
 class ClearFieldEnhancement extends Enhancement {
   /// Initialise this enhancement with the hardset parameters.
-  ClearFieldEnhancement({required Field field})
+  ClearFieldEnhancement({required super.field})
       : super(
           uniqueKey: key,
           label: 'Clear Field',
           description: 'Quickly empty the content of a field.',
-          field: field,
           icon: Icons.clear,
         );
 

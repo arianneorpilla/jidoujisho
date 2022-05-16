@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 /// A standard theme divider for use across the applicaton.
 class JidoujishoDivider extends StatelessWidget {
   /// Build a standard themed divider.
-  const JidoujishoDivider({Key? key}) : super(key: key);
+  const JidoujishoDivider({super.key});
 
   @override
   Widget build(BuildContext context) {

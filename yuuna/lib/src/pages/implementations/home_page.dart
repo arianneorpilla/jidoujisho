@@ -9,7 +9,7 @@ import 'package:yuuna/utils.dart';
 /// an [AppBar] and a [BottomNavigationBar].
 class HomePage extends BasePage {
   /// Construct an instance of the [HomePage].
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   BasePageState<HomePage> createState() => _HomePageState();
@@ -63,14 +63,6 @@ class _HomePageState extends BasePageState<HomePage> {
     appIcon = Image.asset(
       'assets/meta/icon.png',
     );
-
-    /// Check if the current profile is valid and report any discrepancies.
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
-      appModel.validateSelectedMapping(
-        context: context,
-        mapping: appModel.lastSelectedMapping,
-      );
-    });
   }
 
   @override

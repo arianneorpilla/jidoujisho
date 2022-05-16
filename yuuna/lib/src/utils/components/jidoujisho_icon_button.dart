@@ -20,8 +20,8 @@ class JidoujishoIconButton extends StatefulWidget {
     this.disabledColor,
     this.constraints,
     this.padding,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   /// The icon to display within the button.
   final IconData icon;

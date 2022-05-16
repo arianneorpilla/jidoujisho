@@ -12,8 +12,8 @@ class JidoujishoPlaceholderMessage extends StatelessWidget {
     this.color,
     this.iconSize,
     this.messageStyle,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   /// Decorative icon that is appropriate to relay the message even
   /// if a user may not understand the message.

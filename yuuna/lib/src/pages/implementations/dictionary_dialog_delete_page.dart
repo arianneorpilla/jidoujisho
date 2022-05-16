@@ -8,8 +8,8 @@ import 'package:yuuna/pages.dart';
 class DictionaryDialogDeletePage extends BasePage {
   /// Create an instance of this page.
   const DictionaryDialogDeletePage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   BasePageState createState() => _DictionaryDialogDeletePageState();

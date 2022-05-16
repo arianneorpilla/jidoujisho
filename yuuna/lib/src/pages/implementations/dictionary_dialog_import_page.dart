@@ -9,8 +9,8 @@ class DictionaryDialogImportPage extends BasePage {
   /// Create an instance of this page.
   const DictionaryDialogImportPage({
     required this.progressNotifier,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   /// A notifier for reporting text updates for the current progress text in
   /// the dialog.

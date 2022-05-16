@@ -14,8 +14,8 @@ class JidoujishoTag extends StatelessWidget {
     this.foregroundColor = Colors.white,
     this.iconSize,
     this.style,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   /// The icon to display on the tag.
   final IconData? icon;

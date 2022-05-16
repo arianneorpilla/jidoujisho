@@ -28,8 +28,8 @@ class JidoujishoMarquee extends StatelessWidget {
     this.decelerationDuration = Duration.zero,
     this.decelerationCurve = Curves.decelerate,
     this.onDone,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   /// The text to be displayed.
   ///
