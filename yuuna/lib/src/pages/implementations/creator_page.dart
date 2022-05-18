@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/pages.dart';
-import 'package:yuuna/src/pages/implementations/enhancements_picker_dialog_page.dart';
 import 'package:yuuna/utils.dart';
 import 'package:yuuna/models.dart';
 
@@ -38,12 +37,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
   String get assignAutoEnhancementLabel =>
       appModel.translate('assign_auto_enhancement');
   String get removeEnhancementLabel => appModel.translate('remove_enhancement');
-
-  /// Maximum number of manual enhancements in a field.
-  static const maximumFieldEnhancements = 4;
-
-  /// Access the global model responsible for creator state management.
-  CreatorModel get creatorModel => ref.watch(creatorProvider);
+  String get editActionsLabel => appModel.translate('edit_actions');
 
   /// Get the export details pertaining to the fields.
   ExportDetails get exportDetails => creatorModel.getExportDetails(ref);
@@ -51,9 +45,18 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
   final ScrollController _scrollController = ScrollController();
 
   Future<bool> onWillPop() async {
-    creatorModel.clearAll();
+    if (!widget.editMode) {
+      creatorModel.clearAll();
+    }
     return true;
   }
+
+  Color get activeButtonColor =>
+      Theme.of(context).unselectedWidgetColor.withOpacity(0.1);
+  Color get inactiveButtonColor =>
+      Theme.of(context).unselectedWidgetColor.withOpacity(0.05);
+  Color get activeTextColor => Theme.of(context).appBarTheme.foregroundColor!;
+  Color get inactiveTextColor => Theme.of(context).unselectedWidgetColor;
 
   @override
   void initState() {
@@ -131,13 +134,6 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       isExportable = exportDetails.isExportable;
     }
 
-    Color activeButtonColor =
-        Theme.of(context).unselectedWidgetColor.withOpacity(0.1);
-    Color inactiveButtonColor =
-        Theme.of(context).unselectedWidgetColor.withOpacity(0.05);
-    Color activeTextColor = Theme.of(context).appBarTheme.foregroundColor!;
-    Color inactiveTextColor = Theme.of(context).unselectedWidgetColor;
-
     return Padding(
       padding: Spacing.of(context).insets.all.normal,
       child: InkWell(
@@ -170,11 +166,51 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
     );
   }
 
+  Widget buildEditActionsButton() {
+    return Padding(
+      padding: Spacing.of(context).insets.all.normal,
+      child: InkWell(
+        onTap: showQuickActionsPage,
+        child: Container(
+          padding: Spacing.of(context).insets.vertical.normal,
+          alignment: Alignment.center,
+          width: double.infinity,
+          color: activeButtonColor,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.electric_bolt,
+                size: textTheme.titleSmall?.fontSize,
+                color: activeTextColor,
+              ),
+              const Space.small(),
+              Text(
+                editActionsLabel,
+                style: textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: activeTextColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void showQuickActionsPage() {
+    showDialog(
+      context: context,
+      builder: (context) => const CreatorQuickActionsPage(),
+    );
+  }
+
   Widget? buildBody() {
     return Column(
       children: [
         Expanded(child: buildPortraitFields()),
-        buildExportButton(),
+        if (widget.editMode) buildEditActionsButton() else buildExportButton(),
       ],
     );
   }
@@ -190,7 +226,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
           controller: _scrollController,
           children: [
             if (widget.editMode) buildEditModeTutorialMessage(),
-            buildDeckDropdown(),
+            if (!widget.editMode) buildDeckDropdown(),
             buildTextFields(),
           ],
         ),
@@ -297,7 +333,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       {required AnkiMapping mapping, required Field field}) {
     List<Widget> buttons = [];
 
-    for (int i = 0; i < maximumFieldEnhancements; i++) {
+    for (int i = 0; i < appModel.maximumFieldEnhancements; i++) {
       Widget button = buildManualEnhancementEditButton(
         mapping: mapping,
         field: field,
@@ -314,7 +350,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       {required AnkiMapping mapping, required Field field}) {
     List<Widget> buttons = [];
 
-    for (int i = 0; i < maximumFieldEnhancements; i++) {
+    for (int i = 0; i < appModel.maximumFieldEnhancements; i++) {
       Widget button = buildManualEnhancementButton(
         mapping: mapping,
         field: field,
@@ -434,6 +470,8 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
         onChanged: (value) {
           setState(() {});
         },
+        maxLines:
+            (field == Field.sentence || field == Field.meaning) ? null : 1,
         controller: creatorModel.getFieldController(field),
         decoration: InputDecoration(
           prefixIcon: Icon(field.icon(appModel)),

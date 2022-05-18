@@ -19,6 +19,9 @@ class BasePageState<T extends BasePage> extends ConsumerState<T> {
   /// Access the global model responsible for app-wide state management.
   AppModel get appModel => ref.watch(appProvider);
 
+  /// Access the global model responsible for creator state management.
+  CreatorModel get creatorModel => ref.watch(creatorProvider);
+
   /// Access the global model responsible for app-wide state management without
   /// listening to state updates. Useful when accessing state from [initState].
   AppModel get appModelNoUpdate => ref.read(appProvider);

@@ -18,13 +18,18 @@ class JidoujishoLocalisations {
     'player_media_type': 'Player',
     'reader_media_type': 'Reader',
     'viewer_media_type': 'Viewer',
+    'back': 'Back',
     'search': 'Search',
+    'search_ellipsis': 'Search...',
     'show_menu': 'Show Menu',
     'stash': 'Stash',
+    'clear': 'Clear',
+    'resume_last_media': 'Resume Last Media',
     'card_creator': 'Card Creator',
     'target_language': 'Target language',
     'show_options': 'Show Options',
     'switch_profiles': 'Switch Profiles',
+    'dictionaries': 'Dictionaries',
     'enhancements': 'Enhancements',
     'app_locale': 'App locale',
     'app_locale_warning': 'Community addons and enhancements are managed '
@@ -133,11 +138,22 @@ class JidoujishoLocalisations {
             ' field. The enhancement in the left slot of a field will be'
             ' automatically applied in instant card creation or upon launch of'
             ' the Card Creator.',
+    'info_actions':
+        'Quick actions allow for instant card creation and other automations'
+            ' to be used on dictionary search results. Actions can be assigned'
+            ' via the slots below. Up to six slots may be utilised.',
     'no_more_available_enhancements':
         'No more available enhancements for this field',
+    'no_more_available_quick_actions': 'No more available quick actions',
     'assign_auto_enhancement': 'Assign Auto Enhancement',
     'assign_manual_enhancement': 'Assign Manual Enhancement',
     'remove_enhancement': 'Remove Enhancement',
-    'copy_of_mapping': 'Copy of %mapping_name%'
+    'copy_of_mapping': 'Copy of %mapping_name%',
+    'enter_search_term': 'Enter a search term...',
+    'searching_for': 'Searching for 『%searchTerm%』...',
+    'no_search_results': 'No search results for 『%searchTerm%』',
+    'edit_actions': 'Edit Dictionary Quick Actions',
+    'remove_action': 'Remove Action',
+    'assign_action': 'Assign Action',
   };
 }

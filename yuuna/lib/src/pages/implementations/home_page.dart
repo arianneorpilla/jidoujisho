@@ -36,7 +36,7 @@ class _HomePageState extends BasePageState<HomePage> {
   String get optionsGithub => appModel.translate('options_github');
   String get optionsAttribution => appModel.translate('options_attribution');
 
-  String get stashLabel => appModel.translate('stash');
+  String get resumeLastMediaLabel => appModel.translate('resume_last_media');
   String get cardCreatorLabel => appModel.translate('card_creator');
   String get showMenuLabel => appModel.translate('show_menu');
 
@@ -149,7 +149,7 @@ class _HomePageState extends BasePageState<HomePage> {
 
   List<Widget> buildActions() {
     return [
-      buildStashButton(),
+      buildResumeButton(),
       const Space.small(),
       buildCreatorButton(),
       const Space.small(),
@@ -158,12 +158,12 @@ class _HomePageState extends BasePageState<HomePage> {
     ];
   }
 
-  Widget buildStashButton() {
+  Widget buildResumeButton() {
     return JidoujishoIconButton(
-      tooltip: stashLabel,
-      icon: Icons.queue_outlined,
+      tooltip: resumeLastMediaLabel,
+      icon: Icons.update,
       enabled: false,
-      onTap: openQueue,
+      onTap: resumeAction,
     );
   }
 
@@ -209,7 +209,7 @@ class _HomePageState extends BasePageState<HomePage> {
     );
   }
 
-  void openQueue() {}
+  void resumeAction() {}
 
   void openMenu(TapDownDetails details) async {
     RelativeRect position = RelativeRect.fromLTRB(
@@ -288,7 +288,7 @@ class _HomePageState extends BasePageState<HomePage> {
       buildPopupItem(
         label: optionsEnhancements,
         icon: Icons.auto_fix_high,
-        action: () {},
+        action: appModel.openCreatorEnhancementsEditor,
       ),
       buildPopupItem(
         label: optionsLanguage,

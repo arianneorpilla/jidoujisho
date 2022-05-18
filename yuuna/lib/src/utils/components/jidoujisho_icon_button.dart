@@ -16,6 +16,8 @@ class JidoujishoIconButton extends StatefulWidget {
     this.busy = false,
     this.enabled = true,
     this.size,
+    this.shapeBorder = const CircleBorder(),
+    this.backgroundColor,
     this.enabledColor,
     this.disabledColor,
     this.constraints,
@@ -43,6 +45,12 @@ class JidoujishoIconButton extends StatefulWidget {
 
   /// The action to execute and wait for. While enabled,
   final FutureOr<void> Function()? onTap;
+
+  /// For configuring a custom shaped button. By default, this is a circle.
+  final ShapeBorder shapeBorder;
+
+  /// Color of the shape around the icon.
+  final Color? backgroundColor;
 
   /// What color to show for this icon when enabled. If null, this is the
   /// theme's default icon color.
@@ -91,13 +99,16 @@ class _JidoujishoIconButtonState extends State<JidoujishoIconButton> {
       message: widget.tooltip,
       child: InkWell(
         enableFeedback: enabled,
-        customBorder: const CircleBorder(),
-        child: Padding(
-          padding: widget.padding ?? const EdgeInsets.all(8),
-          child: Icon(
-            widget.icon,
-            size: widget.size,
-            color: enabled ? enabledColor : disabledColor,
+        customBorder: widget.shapeBorder,
+        child: ColoredBox(
+          color: widget.backgroundColor ?? Colors.transparent,
+          child: Padding(
+            padding: widget.padding ?? const EdgeInsets.all(8),
+            child: Icon(
+              widget.icon,
+              size: widget.size,
+              color: enabled ? enabledColor : disabledColor,
+            ),
           ),
         ),
         onTap: enabled

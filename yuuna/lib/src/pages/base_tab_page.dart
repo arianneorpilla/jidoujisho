@@ -41,6 +41,12 @@ abstract class BaseTabPageState<T extends BaseTabPage> extends BasePageState {
   /// show in its history.
   bool get shouldPlaceholderBeShown;
 
+  /// Get padding meant for a placeholder message in a floating body.
+  EdgeInsets get floatingBodyPadding => EdgeInsets.only(
+        top: (MediaQuery.of(context).size.height / 2) -
+            (AppBar().preferredSize.height * 3),
+      );
+
   /// This is shown as the body when [shouldPlaceholderBeShown] is true.
   Widget buildPlaceholder() {
     return Center(

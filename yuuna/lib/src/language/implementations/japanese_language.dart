@@ -116,8 +116,9 @@ Future<List<DictionaryEntry>> prepareSearchResultsJapaneseLanguage(
 
   KanaKit kanaKit = const KanaKit();
 
-  if (kanaKit.isRomaji(searchTerm) && searchTerm == fallbackTerm) {
-    fallbackTerm = kanaKit.toHiragana(searchTerm);
+  if (kanaKit.isRomaji(searchTerm)) {
+    searchTerm = kanaKit.toHiragana(searchTerm);
+    fallbackTerm = kanaKit.toKatakana(searchTerm);
   }
 
   List<String> searchTermPrefixes = JidoujishoCommon.allPrefixes(searchTerm);
@@ -329,30 +330,30 @@ Future<List<DictionaryEntry>> prepareSearchResultsJapaneseLanguage(
   }
 
   // For debugging search results.
-  debugPrint('-' * 50);
-  debugPrint('SEARCH TERM: $searchTerm');
-  debugPrint('FALLBACK TERM: $fallbackTerm');
-  debugPrint(
-      'WORD EXACT MATCH: ${wordExactMatches.map((e) => e.word).toList()}');
-  debugPrint(
-      'WORD STARTS WITH MATCH:  ${wordStartsWithMatches.map((e) => e.word).toList()}');
-  debugPrint(
-      'READING EXACT MATCH: ${readingExactMatches.map((e) => e.word).toList()}');
-  debugPrint(
-      'READING STARTS WITH MATCH: ${readingStartsWithMatches.map((e) => e.word).toList()}');
-  debugPrint(
-      'FALLBACK WORD EXACT MATCH: ${fallbackWordExactMatches.map((e) => e.word).toList()}');
-  debugPrint(
-      'FALLBACK WORD STARTS WITH MATCH: ${fallbackWordStartsWithMatches.map((e) => e.word).toList()}');
-  debugPrint(
-      'FALLBACK READING EXACT MATCH: ${fallbackReadingExactMatches.map((e) => e.word).toList()}');
-  debugPrint(
-      'FALLBACK READING STARTS WITH MATCH: ${fallbackReadingStartsWithMatches.map((e) => e.word).toList()}');
-  debugPrint(
-      'FALLBACK TERM LESS DESPERATE THAN LONGEST EXACT WORD PREFIX: $fallbackTermLessDesperateThanLongestExactWordPrefix');
-  debugPrint(
-      'FALLBACK TERM LESS DESPERATE THAN LONGEST EXACT READING PREFIX: $fallbackTermLessDesperateThanLongestExactReadingPrefix');
-  debugPrint('-' * 50);
+  // debugPrint('-' * 50);
+  // debugPrint('SEARCH TERM: $searchTerm');
+  // debugPrint('FALLBACK TERM: $fallbackTerm');
+  // debugPrint(
+  //     'WORD EXACT MATCH: ${wordExactMatches.map((e) => e.word).toList()}');
+  // debugPrint(
+  //     'WORD STARTS WITH MATCH:  ${wordStartsWithMatches.map((e) => e.word).toList()}');
+  // debugPrint(
+  //     'READING EXACT MATCH: ${readingExactMatches.map((e) => e.word).toList()}');
+  // debugPrint(
+  //     'READING STARTS WITH MATCH: ${readingStartsWithMatches.map((e) => e.word).toList()}');
+  // debugPrint(
+  //     'FALLBACK WORD EXACT MATCH: ${fallbackWordExactMatches.map((e) => e.word).toList()}');
+  // debugPrint(
+  //     'FALLBACK WORD STARTS WITH MATCH: ${fallbackWordStartsWithMatches.map((e) => e.word).toList()}');
+  // debugPrint(
+  //     'FALLBACK READING EXACT MATCH: ${fallbackReadingExactMatches.map((e) => e.word).toList()}');
+  // debugPrint(
+  //     'FALLBACK READING STARTS WITH MATCH: ${fallbackReadingStartsWithMatches.map((e) => e.word).toList()}');
+  // debugPrint(
+  //     'FALLBACK TERM LESS DESPERATE THAN LONGEST EXACT WORD PREFIX: $fallbackTermLessDesperateThanLongestExactWordPrefix');
+  // debugPrint(
+  //     'FALLBACK TERM LESS DESPERATE THAN LONGEST EXACT READING PREFIX: $fallbackTermLessDesperateThanLongestExactReadingPrefix');
+  // debugPrint('-' * 50);
 
   return entries.values.toList();
 }

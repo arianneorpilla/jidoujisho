@@ -52,7 +52,7 @@ class JidoujishoPlaceholderMessage extends StatelessWidget {
                     fontWeight: FontWeight.normal,
                     color: color ?? Theme.of(context).unselectedWidgetColor,
                   ),
-        )
+        ),
       ],
     );
   }

@@ -9,7 +9,9 @@ export 'src/utils/components/jidoujisho_tag.dart';
 export 'src/utils/components/jidoujisho_placeholder_message.dart';
 export 'src/utils/components/jidoujisho_text_selection_controls.dart';
 
+export 'src/utils/converters/dictionary_entries_converter.dart';
 export 'src/utils/converters/immutable_string_map_converter.dart';
+export 'src/utils/converters/quick_actions_converter.dart';
 export 'src/utils/converters/enhancements_converter.dart';
 export 'src/utils/converters/media_item_converter.dart';
 export 'src/utils/converters/field_converter.dart';

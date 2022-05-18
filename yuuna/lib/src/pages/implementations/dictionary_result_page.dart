@@ -1,39 +1,55 @@
-// import 'package:flutter/material.dart';
-// import 'package:yuuna/dictionary.dart';
-// import 'package:yuuna/pages.dart';
+import 'package:flutter/material.dart';
+import 'package:yuuna/dictionary.dart';
+import 'package:yuuna/pages.dart';
+import 'package:yuuna/utils.dart';
 
-// /// Used for displaying and processing a [DictionarySearchResult].
-// class DictionaryResultPage extends BasePage {
-//   /// Create an instance of this page.
-//   const DictionaryResultPage({
-//     required this.result,
-//     Key? key,
-//   }) : super(key: key);
+/// Returns the widget for a [DictionaryResult] which returns a scrollable list
+/// of each [DictionaryEntry] in its mappings.
+class DictionaryResultPage extends BasePage {
+  /// Create the widget of a [DictionaryResult].
+  const DictionaryResultPage({
+    required this.result,
+    required this.onTextSelect,
+    super.key,
+  });
 
-//   /// This page must have an attached result to be displayed on it.
-//   final DictionarySearchResult result;
+  /// The result made from a dictionary database search.
+  final DictionaryResult result;
 
-//   @override
-//   BasePageState createState() => _DictionaryResultPageState();
-// }
+  /// Action to be done upon text select made when hovering over the text
+  /// elements contained in this widget.
+  final Function(String) onTextSelect;
 
-// class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
-//   @override
-//   void initState() {
-//     super.initState();
-//     widget.result.references.loadSync();
-//   }
+  @override
+  BasePageState<DictionaryResultPage> createState() =>
+      _DictionaryResultPageState();
+}
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return SingleChildScrollView(
-//       child: ListView.builder(
-//         shrinkWrap: true,
-//         itemCount: widget.result.references.length,
-//         itemBuilder: (context, index) {
-//           return Text(widget.result.references.elementAt(index).word);
-//         },
-//       ),
-//     );
-//   }
-// }
+class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
+  String get searchLabel => appModel.translate('search');
+
+  MaterialTextSelectionControls get selectionControls =>
+      JidoujishoTextSelectionControls(
+        customAction: widget.onTextSelect,
+        customActionLabel: searchLabel,
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: ListView.builder(
+        physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        itemCount: widget.result.mapping.length,
+        itemBuilder: (context, index) {
+          List<DictionaryEntry> entries = widget.result.mapping[index];
+
+          return DictionaryWordPage(
+            entries: entries,
+            onTextSelect: widget.onTextSelect,
+          );
+        },
+      ),
+    );
+  }
+}

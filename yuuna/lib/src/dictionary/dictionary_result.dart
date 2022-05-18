@@ -1,15 +1,18 @@
 import 'package:isar/isar.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:yuuna/dictionary.dart';
+import 'package:yuuna/utils.dart';
 
-part 'dictionary_search_result.g.dart';
+part 'dictionary_result.g.dart';
 
 /// A database entity for storing references to [DictionaryEntry] results that
 /// are yielded from dictionary database searches.
 @Collection()
-class DictionarySearchResult {
+@JsonSerializable()
+class DictionaryResult {
   /// Define a search result with the given references to [DictionaryEntry]
   /// items.
-  DictionarySearchResult({
+  DictionaryResult({
     required this.searchTerm,
     this.mapping = const [],
     this.id,
@@ -24,5 +27,6 @@ class DictionarySearchResult {
   late String searchTerm;
 
   /// A list of list of [DictionaryEntry] indexes sorted by [DictionaryPair].
-  final List<List<int>> mapping;
+  @DictionaryEntriesConverter()
+  final List<List<DictionaryEntry>> mapping;
 }

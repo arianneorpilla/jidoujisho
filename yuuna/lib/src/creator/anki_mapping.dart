@@ -2,7 +2,6 @@ import 'package:isar/isar.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
-import 'package:yuuna/src/creator/enhancements/clear_field_enhancement.dart';
 import 'package:yuuna/utils.dart';
 
 part 'anki_mapping.g.dart';
@@ -21,6 +20,7 @@ class AnkiMapping {
     required this.order,
     required this.tags,
     required this.enhancements,
+    required this.actions,
     this.id,
   });
 
@@ -43,6 +43,7 @@ class AnkiMapping {
       order: order,
       tags: [standardModelName],
       enhancements: defaultEnhancements,
+      actions: defaultActions,
     );
   }
 
@@ -56,6 +57,9 @@ class AnkiMapping {
     Field.image: {0: ClearFieldEnhancement.key},
     Field.audio: {0: ClearFieldEnhancement.key},
   };
+
+  /// A default map of enhancements to use for new mappings.
+  static const Map<int, String> defaultActions = {0: CardCreatorAction.key};
 
   /// The default mapping name which cannot be deleted or reused.
   static String standardModelName = 'jidoujisho Yuuna';
@@ -80,6 +84,10 @@ class AnkiMapping {
 
   /// A collection of tags to always include when exporting with this mapping.
   final List<String> tags;
+
+  /// Used to keep track of actions used in dictionary results.
+  @QuickActionsConverter()
+  final Map<int, String> actions;
 
   /// Used to keep track of enhancements used in the creator per field.
   @EnhancementsConverter()
@@ -122,6 +130,7 @@ class AnkiMapping {
     int? order,
     int? id,
     Map<Field, Map<int, String>>? enhancements,
+    Map<int, String>? actions,
   }) {
     return AnkiMapping(
       label: label ?? this.label,
@@ -131,6 +140,7 @@ class AnkiMapping {
       order: order ?? this.order,
       id: id ?? this.id,
       enhancements: enhancements ?? this.enhancements,
+      actions: actions ?? this.actions,
     );
   }
 
@@ -148,6 +158,11 @@ class AnkiMapping {
   /// enhancements map.
   String? getAutoFieldEnhancementName({required Field field}) {
     return enhancements[field]![autoModeSlotNumber];
+  }
+
+  /// Returns a list of action names active in the persisted actions map.
+  List<String> getActionNames() {
+    return actions.values.toList();
   }
 
   /// Returns a list of enhancements active for a certain field in the
@@ -175,5 +190,15 @@ class AnkiMapping {
 
     Enhancement? enhancement = appModel.enhancements[field]![enhancementName];
     return enhancement;
+  }
+
+  /// Returns a list of actions active for the persisted actions map.
+  List<QuickAction> getActions({required AppModel appModel}) {
+    List<String> actionNames = getActionNames();
+    List<QuickAction> actions = actionNames
+        .map((enhancementName) => appModel.quickActions[enhancementName]!)
+        .toList();
+
+    return actions;
   }
 }

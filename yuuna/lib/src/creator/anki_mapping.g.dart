@@ -15,15 +15,16 @@ extension GetAnkiMappingCollection on Isar {
 const AnkiMappingSchema = CollectionSchema(
   name: 'AnkiMapping',
   schema:
-      '{"name":"AnkiMapping","idName":"id","properties":[{"name":"enhancements","type":"String"},{"name":"fieldIndexes","type":"LongList"},{"name":"label","type":"String"},{"name":"model","type":"String"},{"name":"order","type":"Long"},{"name":"tags","type":"StringList"}],"indexes":[{"name":"label","unique":true,"properties":[{"name":"label","type":"Hash","caseSensitive":true}]},{"name":"order","unique":true,"properties":[{"name":"order","type":"Value","caseSensitive":false}]}],"links":[]}',
+      '{"name":"AnkiMapping","idName":"id","properties":[{"name":"actions","type":"String"},{"name":"enhancements","type":"String"},{"name":"fieldIndexes","type":"LongList"},{"name":"label","type":"String"},{"name":"model","type":"String"},{"name":"order","type":"Long"},{"name":"tags","type":"StringList"}],"indexes":[{"name":"label","unique":true,"properties":[{"name":"label","type":"Hash","caseSensitive":true}]},{"name":"order","unique":true,"properties":[{"name":"order","type":"Value","caseSensitive":false}]}],"links":[]}',
   idName: 'id',
   propertyIds: {
-    'enhancements': 0,
-    'fieldIndexes': 1,
-    'label': 2,
-    'model': 3,
-    'order': 4,
-    'tags': 5
+    'actions': 0,
+    'enhancements': 1,
+    'fieldIndexes': 2,
+    'label': 3,
+    'model': 4,
+    'order': 5,
+    'tags': 6
   },
   listProperties: {'fieldIndexes', 'tags'},
   indexIds: {'label': 0, 'order': 1},
@@ -66,6 +67,7 @@ List<IsarLinkBase> _ankiMappingGetLinks(AnkiMapping object) {
   return [];
 }
 
+const _ankiMappingQuickActionsConverter = QuickActionsConverter();
 const _ankiMappingEnhancementsConverter = EnhancementsConverter();
 
 void _ankiMappingSerializeNative(
@@ -76,41 +78,45 @@ void _ankiMappingSerializeNative(
     List<int> offsets,
     AdapterAlloc alloc) {
   var dynamicSize = 0;
-  final value0 = _ankiMappingEnhancementsConverter.toIsar(object.enhancements);
-  final _enhancements = IsarBinaryWriter.utf8Encoder.convert(value0);
+  final value0 = _ankiMappingQuickActionsConverter.toIsar(object.actions);
+  final _actions = IsarBinaryWriter.utf8Encoder.convert(value0);
+  dynamicSize += (_actions.length) as int;
+  final value1 = _ankiMappingEnhancementsConverter.toIsar(object.enhancements);
+  final _enhancements = IsarBinaryWriter.utf8Encoder.convert(value1);
   dynamicSize += (_enhancements.length) as int;
-  final value1 = object.fieldIndexes;
-  dynamicSize += (value1.length) * 8;
-  final _fieldIndexes = value1;
-  final value2 = object.label;
-  final _label = IsarBinaryWriter.utf8Encoder.convert(value2);
+  final value2 = object.fieldIndexes;
+  dynamicSize += (value2.length) * 8;
+  final _fieldIndexes = value2;
+  final value3 = object.label;
+  final _label = IsarBinaryWriter.utf8Encoder.convert(value3);
   dynamicSize += (_label.length) as int;
-  final value3 = object.model;
-  final _model = IsarBinaryWriter.utf8Encoder.convert(value3);
+  final value4 = object.model;
+  final _model = IsarBinaryWriter.utf8Encoder.convert(value4);
   dynamicSize += (_model.length) as int;
-  final value4 = object.order;
-  final _order = value4;
-  final value5 = object.tags;
-  dynamicSize += (value5.length) * 8;
-  final bytesList5 = <IsarUint8List>[];
-  for (var str in value5) {
+  final value5 = object.order;
+  final _order = value5;
+  final value6 = object.tags;
+  dynamicSize += (value6.length) * 8;
+  final bytesList6 = <IsarUint8List>[];
+  for (var str in value6) {
     final bytes = IsarBinaryWriter.utf8Encoder.convert(str);
-    bytesList5.add(bytes);
+    bytesList6.add(bytes);
     dynamicSize += bytes.length as int;
   }
-  final _tags = bytesList5;
+  final _tags = bytesList6;
   final size = staticSize + dynamicSize;
 
   rawObj.buffer = alloc(size);
   rawObj.buffer_length = size;
   final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
   final writer = IsarBinaryWriter(buffer, staticSize);
-  writer.writeBytes(offsets[0], _enhancements);
-  writer.writeLongList(offsets[1], _fieldIndexes);
-  writer.writeBytes(offsets[2], _label);
-  writer.writeBytes(offsets[3], _model);
-  writer.writeLong(offsets[4], _order);
-  writer.writeStringList(offsets[5], _tags);
+  writer.writeBytes(offsets[0], _actions);
+  writer.writeBytes(offsets[1], _enhancements);
+  writer.writeLongList(offsets[2], _fieldIndexes);
+  writer.writeBytes(offsets[3], _label);
+  writer.writeBytes(offsets[4], _model);
+  writer.writeLong(offsets[5], _order);
+  writer.writeStringList(offsets[6], _tags);
 }
 
 AnkiMapping _ankiMappingDeserializeNative(
@@ -119,14 +125,16 @@ AnkiMapping _ankiMappingDeserializeNative(
     IsarBinaryReader reader,
     List<int> offsets) {
   final object = AnkiMapping(
-    enhancements: _ankiMappingEnhancementsConverter
+    actions: _ankiMappingQuickActionsConverter
         .fromIsar(reader.readString(offsets[0])),
-    fieldIndexes: reader.readLongOrNullList(offsets[1]) ?? [],
+    enhancements: _ankiMappingEnhancementsConverter
+        .fromIsar(reader.readString(offsets[1])),
+    fieldIndexes: reader.readLongOrNullList(offsets[2]) ?? [],
     id: id,
-    label: reader.readString(offsets[2]),
-    model: reader.readString(offsets[3]),
-    order: reader.readLong(offsets[4]),
-    tags: reader.readStringList(offsets[5]) ?? [],
+    label: reader.readString(offsets[3]),
+    model: reader.readString(offsets[4]),
+    order: reader.readLong(offsets[5]),
+    tags: reader.readStringList(offsets[6]) ?? [],
   );
   return object;
 }
@@ -137,17 +145,20 @@ P _ankiMappingDeserializePropNative<P>(
     case -1:
       return id as P;
     case 0:
-      return (_ankiMappingEnhancementsConverter
+      return (_ankiMappingQuickActionsConverter
           .fromIsar(reader.readString(offset))) as P;
     case 1:
-      return (reader.readLongOrNullList(offset) ?? []) as P;
+      return (_ankiMappingEnhancementsConverter
+          .fromIsar(reader.readString(offset))) as P;
     case 2:
-      return (reader.readString(offset)) as P;
+      return (reader.readLongOrNullList(offset) ?? []) as P;
     case 3:
       return (reader.readString(offset)) as P;
     case 4:
-      return (reader.readLong(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 5:
+      return (reader.readLong(offset)) as P;
+    case 6:
       return (reader.readStringList(offset) ?? []) as P;
     default:
       throw 'Illegal propertyIndex';
@@ -157,6 +168,8 @@ P _ankiMappingDeserializePropNative<P>(
 dynamic _ankiMappingSerializeWeb(
     IsarCollection<AnkiMapping> collection, AnkiMapping object) {
   final jsObj = IsarNative.newJsObject();
+  IsarNative.jsObjectSet(jsObj, 'actions',
+      _ankiMappingQuickActionsConverter.toIsar(object.actions));
   IsarNative.jsObjectSet(jsObj, 'enhancements',
       _ankiMappingEnhancementsConverter.toIsar(object.enhancements));
   IsarNative.jsObjectSet(jsObj, 'fieldIndexes', object.fieldIndexes);
@@ -171,6 +184,8 @@ dynamic _ankiMappingSerializeWeb(
 AnkiMapping _ankiMappingDeserializeWeb(
     IsarCollection<AnkiMapping> collection, dynamic jsObj) {
   final object = AnkiMapping(
+    actions: _ankiMappingQuickActionsConverter
+        .fromIsar(IsarNative.jsObjectGet(jsObj, 'actions') ?? ''),
     enhancements: _ankiMappingEnhancementsConverter
         .fromIsar(IsarNative.jsObjectGet(jsObj, 'enhancements') ?? ''),
     fieldIndexes: (IsarNative.jsObjectGet(jsObj, 'fieldIndexes') as List?)
@@ -191,6 +206,9 @@ AnkiMapping _ankiMappingDeserializeWeb(
 
 P _ankiMappingDeserializePropWeb<P>(Object jsObj, String propertyName) {
   switch (propertyName) {
+    case 'actions':
+      return (_ankiMappingQuickActionsConverter
+          .fromIsar(IsarNative.jsObjectGet(jsObj, 'actions') ?? '')) as P;
     case 'enhancements':
       return (_ankiMappingEnhancementsConverter
           .fromIsar(IsarNative.jsObjectGet(jsObj, 'enhancements') ?? '')) as P;
@@ -474,6 +492,111 @@ extension AnkiMappingQueryWhere
 
 extension AnkiMappingQueryFilter
     on QueryBuilder<AnkiMapping, AnkiMapping, QFilterCondition> {
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition> actionsEqualTo(
+    Map<int, String> value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.eq,
+      property: 'actions',
+      value: _ankiMappingQuickActionsConverter.toIsar(value),
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      actionsGreaterThan(
+    Map<int, String> value, {
+    bool caseSensitive = true,
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.gt,
+      include: include,
+      property: 'actions',
+      value: _ankiMappingQuickActionsConverter.toIsar(value),
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition> actionsLessThan(
+    Map<int, String> value, {
+    bool caseSensitive = true,
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.lt,
+      include: include,
+      property: 'actions',
+      value: _ankiMappingQuickActionsConverter.toIsar(value),
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition> actionsBetween(
+    Map<int, String> lower,
+    Map<int, String> upper, {
+    bool caseSensitive = true,
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition.between(
+      property: 'actions',
+      lower: _ankiMappingQuickActionsConverter.toIsar(lower),
+      includeLower: includeLower,
+      upper: _ankiMappingQuickActionsConverter.toIsar(upper),
+      includeUpper: includeUpper,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      actionsStartsWith(
+    Map<int, String> value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.startsWith,
+      property: 'actions',
+      value: _ankiMappingQuickActionsConverter.toIsar(value),
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition> actionsEndsWith(
+    Map<int, String> value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.endsWith,
+      property: 'actions',
+      value: _ankiMappingQuickActionsConverter.toIsar(value),
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition> actionsContains(
+      Map<int, String> value,
+      {bool caseSensitive = true}) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.contains,
+      property: 'actions',
+      value: _ankiMappingQuickActionsConverter.toIsar(value),
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition> actionsMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.matches,
+      property: 'actions',
+      value: pattern,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
       enhancementsEqualTo(
     Map<Field, Map<int, String>> value, {
@@ -1057,6 +1180,14 @@ extension AnkiMappingQueryLinks
 
 extension AnkiMappingQueryWhereSortBy
     on QueryBuilder<AnkiMapping, AnkiMapping, QSortBy> {
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy> sortByActions() {
+    return addSortByInternal('actions', Sort.asc);
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy> sortByActionsDesc() {
+    return addSortByInternal('actions', Sort.desc);
+  }
+
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy> sortByEnhancements() {
     return addSortByInternal('enhancements', Sort.asc);
   }
@@ -1101,6 +1232,14 @@ extension AnkiMappingQueryWhereSortBy
 
 extension AnkiMappingQueryWhereSortThenBy
     on QueryBuilder<AnkiMapping, AnkiMapping, QSortThenBy> {
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy> thenByActions() {
+    return addSortByInternal('actions', Sort.asc);
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy> thenByActionsDesc() {
+    return addSortByInternal('actions', Sort.desc);
+  }
+
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy> thenByEnhancements() {
     return addSortByInternal('enhancements', Sort.asc);
   }
@@ -1145,6 +1284,11 @@ extension AnkiMappingQueryWhereSortThenBy
 
 extension AnkiMappingQueryWhereDistinct
     on QueryBuilder<AnkiMapping, AnkiMapping, QDistinct> {
+  QueryBuilder<AnkiMapping, AnkiMapping, QDistinct> distinctByActions(
+      {bool caseSensitive = true}) {
+    return addDistinctByInternal('actions', caseSensitive: caseSensitive);
+  }
+
   QueryBuilder<AnkiMapping, AnkiMapping, QDistinct> distinctByEnhancements(
       {bool caseSensitive = true}) {
     return addDistinctByInternal('enhancements', caseSensitive: caseSensitive);
@@ -1171,6 +1315,11 @@ extension AnkiMappingQueryWhereDistinct
 
 extension AnkiMappingQueryProperty
     on QueryBuilder<AnkiMapping, AnkiMapping, QQueryProperty> {
+  QueryBuilder<AnkiMapping, Map<int, String>, QQueryOperations>
+      actionsProperty() {
+    return addPropertyNameInternal('actions');
+  }
+
   QueryBuilder<AnkiMapping, Map<Field, Map<int, String>>, QQueryOperations>
       enhancementsProperty() {
     return addPropertyNameInternal('enhancements');
@@ -1221,6 +1370,9 @@ AnkiMapping _$AnkiMappingFromJson(Map<String, dynamic> json) => AnkiMapping(
               (k, e) => MapEntry(int.parse(k), e as String),
             )),
       ),
+      actions: (json['actions'] as Map<String, dynamic>).map(
+        (k, e) => MapEntry(int.parse(k), e as String),
+      ),
       id: json['id'] as int?,
     );
 
@@ -1231,6 +1383,7 @@ Map<String, dynamic> _$AnkiMappingToJson(AnkiMapping instance) =>
       'model': instance.model,
       'fieldIndexes': instance.fieldIndexes,
       'tags': instance.tags,
+      'actions': instance.actions.map((k, e) => MapEntry(k.toString(), e)),
       'enhancements': instance.enhancements.map((k, e) => MapEntry(
           _$FieldEnumMap[k], e.map((k, e) => MapEntry(k.toString(), e)))),
       'order': instance.order,

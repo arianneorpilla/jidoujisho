@@ -24,7 +24,7 @@ import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/language.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
-import 'package:yuuna/src/creator/enhancements/clear_field_enhancement.dart';
+import 'package:yuuna/src/creator/actions/instant_export_action.dart';
 import 'package:yuuna/utils.dart';
 
 /// A global [Provider] for app-wide configuration and state management.
@@ -103,9 +103,19 @@ class AppModel with ChangeNotifier {
   /// time performance. Initialised with [populateEnhancements] at startup.
   late final Map<Field, Map<String, Enhancement>> enhancements;
 
+  /// Used to fetch initialised actions by their unique key with constant
+  /// time performance. Initialised with [populateQuickActions] at startup.
+  late final Map<String, QuickAction> quickActions;
+
   /// Used to fetch initialised sources by their unique key with constant
   /// time performance. Initialised with [populateMediaSources] at startup.
   late final Map<MediaType, Map<String, MediaSource>> mediaSources;
+
+  /// Maximum number of manual enhancements in a field.
+  final int maximumFieldEnhancements = 4;
+
+  /// Maximum number of quick actions.
+  final int maximumQuickActions = 6;
 
   /// Returns all dictionaries imported into the database. Sorted by the
   /// user-defined order in the dictionary menu.
@@ -296,6 +306,23 @@ class AppModel with ChangeNotifier {
     );
   }
 
+  /// Populate maps for actions at startup to optimise performance.
+  void populateQuickActions() async {
+    /// A list of actions that the app will support at runtime.
+    final List<QuickAction> availableQuickActions = [
+      CardCreatorAction(),
+      InstantExportAction(),
+    ];
+
+    quickActions = Map<String, QuickAction>.unmodifiable(
+      Map<String, QuickAction>.fromEntries(
+        availableQuickActions.map(
+          (quickAction) => MapEntry(quickAction.uniqueKey, quickAction),
+        ),
+      ),
+    );
+  }
+
   /// Populate default mapping if it does not exist in the database.
   void populateDefaultMapping() async {
     if (_database.ankiMappings.where().findAllSync().isEmpty) {
@@ -377,6 +404,7 @@ class AppModel with ChangeNotifier {
     populateMediaSources();
     populateDictionaryFormats();
     populateEnhancements();
+    populateQuickActions();
     populateDefaultMapping();
 
     /// Get the current target language and prepare its resources for use. This
@@ -860,8 +888,14 @@ class AppModel with ChangeNotifier {
 
   /// Gets the raw unprocessed entries straight from a dictionary database
   /// given a search term. This will be processed later for user viewing.
-  Future<DictionarySearchResult> getDictionarySearchEntries(
-      String searchTerm) async {
+  Future<DictionaryResult> searchDictionary(String searchTerm) async {
+    if (searchTerm.trim().isEmpty) {
+      return DictionaryResult(
+        searchTerm: searchTerm,
+        mapping: [],
+      );
+    }
+
     String fallbackTerm = await targetLanguage.getRootForm(searchTerm);
     DictionarySearchParams params = DictionarySearchParams(
       searchTerm: searchTerm,
@@ -878,11 +912,11 @@ class AppModel with ChangeNotifier {
       (entry) => DictionaryPair(word: entry.word, reading: entry.reading),
     );
 
-    List<List<int>> mapping = entriesByPair.values
-        .map((entries) => entries.map((entry) => entry.id!).toList())
+    List<List<DictionaryEntry>> mapping = entriesByPair.values
+        .map((entries) => entries.map((entry) => entry).toList())
         .toList();
 
-    DictionarySearchResult result = DictionarySearchResult(
+    DictionaryResult result = DictionaryResult(
       searchTerm: searchTerm,
       mapping: mapping,
     );
@@ -1318,11 +1352,13 @@ class AppModel with ChangeNotifier {
 
     await Navigator.push(
       _navigatorKey.currentContext!,
-      MaterialPageRoute(
-        builder: (context) => CreatorPage(
+      PageRouteBuilder(
+        pageBuilder: (context, animation1, animation2) => CreatorPage(
           decks: decks,
           editMode: false,
         ),
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
       ),
     );
   }
@@ -1366,6 +1402,30 @@ class AppModel with ChangeNotifier {
     required int slotNumber,
   }) async {
     mapping.enhancements[field]!.remove(slotNumber);
+
+    _database.writeTxnSync((isar) {
+      isar.ankiMappings.putSync(mapping);
+    });
+  }
+
+  /// Updates a given [mapping]'s persisted action for a given [slotNumber].
+  void setQuickAction(
+      {required AnkiMapping mapping,
+      required int slotNumber,
+      required QuickAction quickAction}) async {
+    mapping.actions[slotNumber] = quickAction.uniqueKey;
+
+    _database.writeTxnSync((isar) {
+      isar.ankiMappings.putSync(mapping);
+    });
+  }
+
+  /// Removes a given [mapping]'s persisted action for a given [slotNumber].
+  void removeQuickAction({
+    required AnkiMapping mapping,
+    required int slotNumber,
+  }) async {
+    mapping.actions.remove(slotNumber);
 
     _database.writeTxnSync((isar) {
       isar.ankiMappings.putSync(mapping);
