@@ -1370,11 +1370,13 @@ class AppModel with ChangeNotifier {
 
     await Navigator.push(
       _navigatorKey.currentContext!,
-      MaterialPageRoute(
-        builder: (context) => CreatorPage(
+      PageRouteBuilder(
+        pageBuilder: (context, animation1, animation2) => CreatorPage(
           decks: decks,
           editMode: true,
         ),
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
       ),
     );
   }

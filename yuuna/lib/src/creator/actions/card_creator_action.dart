@@ -49,22 +49,20 @@ class CardCreatorAction extends QuickAction {
       for (DictionaryEntry entry in singleDictionaryEntries) {
         if (singleDictionaryEntries.length == 1) {
           entry.meanings.forEachIndexed((index, meaning) {
-            if (meaningsCount == 1) {
-              meaningBuffer.write(meaning);
+            if (meaningsCount != 1) {
+              meaningBuffer.write('• $meaning');
             } else {
-              if (index == 0) {
-                meaningBuffer.write('• ');
-              }
               meaningBuffer.write(meaning);
-              if (index != entry.meanings.length - 1) {
-                meaningBuffer.write('; ');
-              }
+            }
+
+            if (index != entry.meanings.length - 1) {
+              meaningBuffer.write('\n');
             }
           });
         } else {
           entry.meanings.forEachIndexed((index, meaning) {
             if (meaningsCount == 1) {
-              meaningBuffer.write(meaning);
+              meaningBuffer.write('$meaning\n');
             } else {
               if (index == 0) {
                 meaningBuffer.write('• ');
