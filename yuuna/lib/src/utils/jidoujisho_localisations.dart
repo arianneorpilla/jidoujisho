@@ -75,12 +75,17 @@ class JidoujishoLocalisations {
     'import_message_extraction': 'Extracting files...',
     'import_message_name': 'Importing 『%name%』...',
     'import_message_entries': 'Processing entries...',
-    'import_message_count': 'Found %count% entries...',
+    'import_message_entry_count': 'Found %count% entries...',
+    'import_message_tag_count': 'Found %count% tags...',
     'import_message_metadata': 'Processing metadata...',
     'import_message_database': 'Adding entries to database...',
     'import_message_error': 'Import error: %error%',
     'import_message_failed': 'Dictionary import failed.',
     'import_message_complete': 'Dictionary import complete.',
+    'same_name_dictionary_found': 'Dictionary with same name found.',
+    'import_file_extension_invalid':
+        'This format expects files with the following extensions:'
+            ' %extensions%',
     'field_label_sentence': 'Sentence',
     'field_label_word': 'Word',
     'field_label_reading': 'Reading',
@@ -155,5 +160,6 @@ class JidoujishoLocalisations {
     'edit_actions': 'Edit Dictionary Quick Actions',
     'remove_action': 'Remove Action',
     'assign_action': 'Assign Action',
+    'dictionary_name_notes': 'Dictionary entry from %dictionaryName%',
   };
 }

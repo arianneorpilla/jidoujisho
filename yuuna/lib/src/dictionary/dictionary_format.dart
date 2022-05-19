@@ -15,9 +15,11 @@ abstract class DictionaryFormat {
     required this.formatName,
     required this.formatIcon,
     required this.requiresFile,
+    required this.compatibleFileExtensions,
     required this.prepareDirectory,
     required this.prepareName,
     required this.prepareEntries,
+    required this.prepareTags,
     required this.prepareMetadata,
   });
 
@@ -32,6 +34,11 @@ abstract class DictionaryFormat {
   /// format. If so, a file will not be required for installing a dictionary
   /// of the matching format.
   late bool requiresFile;
+
+  /// This will be used to notify the user about the required extension if they
+  /// select a file with the wrong extension. Leave blank if [requiresFile] is
+  /// false. Include the leading dot and lowercase. This will be lowercased.
+  late List<String> compatibleFileExtensions;
 
   /// [IMPORTANT]: The following parameters below point to functions defined in
   /// the top-level, not within the inheriting class. They are meant to be
@@ -71,6 +78,17 @@ abstract class DictionaryFormat {
   /// parameters.
   Future<List<DictionaryEntry>> Function(PrepareDictionaryParams params)
       prepareEntries;
+
+  /// Given a [Directory] of files pertaining to this dictionary format,
+  /// prepare a list of [DictionaryTag] that will be added to the database.
+  ///
+  /// For example, a dictionary format may make use of tags separate from the
+  /// entry. This will be preserved by the dictionary.
+  ///
+  /// See [PrepareDictionaryParams] for how to work with the individual input
+  /// parameters.
+  Future<List<DictionaryTag>> Function(PrepareDictionaryParams params)
+      prepareTags;
 
   /// Given a [Directory] of files pertaining to this dictionary format,
   /// prepare a [Map] of metadata that will be used for cleaning up and

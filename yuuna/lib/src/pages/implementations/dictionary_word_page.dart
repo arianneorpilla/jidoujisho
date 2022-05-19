@@ -1,3 +1,4 @@
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
@@ -27,6 +28,7 @@ class DictionaryWordPage extends BasePage {
 
 class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
   String get searchLabel => appModel.translate('search');
+  String get dictionaryNameNotes => appModel.translate('dictionary_name_notes');
 
   MaterialTextSelectionControls get selectionControls =>
       JidoujishoTextSelectionControls(
@@ -36,6 +38,24 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
 
   String get word => widget.entries.first.word;
   String get reading => widget.entries.first.reading;
+
+  final Map<String, ExpandableController> _expandableControllers = {};
+  final Map<String, bool> _dictionaryHiddens = {};
+
+  @override
+  void initState() {
+    super.initState();
+    Set<String> dictionaryNames =
+        widget.entries.map((entry) => entry.dictionaryName).toSet();
+
+    for (String dictionaryName in dictionaryNames) {
+      Dictionary dictionary = appModelNoUpdate.getDictionary(dictionaryName);
+      _expandableControllers[dictionaryName] = ExpandableController(
+        initialExpanded: !dictionary.collapsed,
+      );
+      _dictionaryHiddens[dictionaryName] = dictionary.hidden;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,19 +70,88 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
     List<Widget> tags = [];
     tags.addAll(pairs.map((pair) {
       if (pair.reading.isNotEmpty) {
+        DictionaryTag tag = appModel.getDictionaryTag(
+          dictionaryName: pair.word,
+          tagName: pair.reading,
+        );
+
         return JidoujishoTag(
-          text: pair.reading,
-          backgroundColor: Colors.red.shade900,
+          text: tag.name,
+          message: tag.notes,
+          backgroundColor: tag.color,
         );
       } else {
         return const SizedBox.shrink();
       }
     }).toList());
 
+    List<Widget> children = [
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SelectableText(
+                  word,
+                  style: textTheme.titleLarge!
+                      .copyWith(fontWeight: FontWeight.bold),
+                  selectionControls: selectionControls,
+                ),
+                SelectableText(
+                  reading,
+                  style: textTheme.titleMedium,
+                  selectionControls: selectionControls,
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(
+              top: Spacing.of(context).spaces.small,
+              right: Spacing.of(context).spaces.small,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: buildQuickActions(),
+            ),
+          ),
+        ],
+      ),
+      const Space.normal(),
+      Wrap(children: tags),
+      const Space.normal(),
+      Padding(
+        padding: Spacing.of(context).insets.horizontal.small,
+        child: ListView.builder(
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          itemCount: widget.entries.length,
+          itemBuilder: (context, index) {
+            DictionaryEntry entry = widget.entries[index];
+
+            if (_dictionaryHiddens[entry.dictionaryName]!) {
+              return const SizedBox.shrink();
+            }
+
+            return DictionaryEntryPage(
+              expandableController:
+                  _expandableControllers[entry.dictionaryName]!,
+              entry: entry,
+              onTextSelect: widget.onTextSelect,
+            );
+          },
+        ),
+      ),
+    ];
+
     return Card(
       color: appModel.isDarkMode
-          ? theme.cardColor.withOpacity(0.75)
-          : Colors.grey.shade200.withOpacity(0.55),
+          ? const Color(0xff313131)
+          : const Color(0xfff6f6f6),
       elevation: 0,
       shape: const RoundedRectangleBorder(),
       child: Padding(
@@ -72,116 +161,13 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
           right: Spacing.of(context).spaces.normal,
           bottom: Spacing.of(context).spaces.normal,
         ),
-        child: ListView(
+        child: ListView.builder(
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SelectableText(
-                        word,
-                        style: textTheme.titleLarge!
-                            .copyWith(fontWeight: FontWeight.bold),
-                        selectionControls: selectionControls,
-                      ),
-                      SelectableText(
-                        reading,
-                        style: textTheme.titleMedium,
-                        selectionControls: selectionControls,
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(
-                    top: Spacing.of(context).spaces.small,
-                    right: Spacing.of(context).spaces.small,
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    mainAxisSize: MainAxisSize.min,
-                    children: buildQuickActions(),
-                  ),
-                ),
-              ],
-            ),
-            const Space.normal(),
-            Wrap(children: tags),
-            const Space.normal(),
-            Padding(
-              padding: Spacing.of(context).insets.horizontal.small,
-              child: ListView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: widget.entries.length,
-                itemBuilder: (context, index) {
-                  return buildEntrySection(widget.entries[index]);
-                },
-              ),
-            ),
-          ],
+          itemBuilder: (context, index) => children[index],
+          itemCount: children.length,
         ),
       ),
-    );
-  }
-
-  Widget buildEntrySection(DictionaryEntry entry) {
-    List<Widget> tags = [];
-    tags.add(
-      JidoujishoTag(
-        text: entry.dictionaryName,
-        backgroundColor: Colors.red.shade900,
-      ),
-    );
-    tags.addAll(entry.meaningTags.map((tag) {
-      if (tag.isNotEmpty) {
-        return JidoujishoTag(
-          text: tag,
-          backgroundColor: Colors.red.shade900.withOpacity(0.5),
-        );
-      } else {
-        return const SizedBox.shrink();
-      }
-    }).toList());
-
-    return ListView(
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      children: [
-        const Space.small(),
-        Wrap(children: tags),
-        Padding(
-          padding: EdgeInsets.only(
-            top: Spacing.of(context).spaces.small,
-            bottom: Spacing.of(context).spaces.normal,
-            left: Spacing.of(context).spaces.normal,
-          ),
-          child: ListView.builder(
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            itemCount: entry.meanings.length,
-            itemBuilder: (context, index) {
-              if (entry.meanings.length != 1) {
-                return SelectableText(
-                  '• ${entry.meanings[index]}',
-                  selectionControls: selectionControls,
-                );
-              } else {
-                return SelectableText(
-                  entry.meanings.first,
-                  selectionControls: selectionControls,
-                );
-              }
-            },
-          ),
-        ),
-      ],
     );
   }
 

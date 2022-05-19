@@ -27,6 +27,17 @@ import 'package:yuuna/pages.dart';
 import 'package:yuuna/src/creator/actions/instant_export_action.dart';
 import 'package:yuuna/utils.dart';
 
+/// Schemas used in Isar database.
+final List<CollectionSchema> globalSchemas = [
+  DictionarySchema,
+  DictionaryEntrySchema,
+  DictionaryTagSchema,
+  MediaItemSchema,
+  CreatorContextSchema,
+  AnkiMappingSchema,
+  SearchHistorySchema,
+];
+
 /// A global [Provider] for app-wide configuration and state management.
 final appProvider = ChangeNotifierProvider<AppModel>((ref) {
   return AppModel();
@@ -116,6 +127,9 @@ class AppModel with ChangeNotifier {
 
   /// Maximum number of quick actions.
   final int maximumQuickActions = 6;
+
+  /// Maximum number of search history items.
+  final int maximumSearchHistoryItems = 100;
 
   /// Returns all dictionaries imported into the database. Sorted by the
   /// user-defined order in the dictionary menu.
@@ -247,7 +261,7 @@ class AppModel with ChangeNotifier {
     final List<DictionaryFormat> availableDictionaryFormats =
         List<DictionaryFormat>.unmodifiable(
       [
-        YomichanTermBankFormat.instance,
+        YomichanDictionaryFormat.instance,
       ],
     );
 
@@ -387,13 +401,7 @@ class AppModel with ChangeNotifier {
     /// Initialise persistent database.
     _database = await Isar.open(
       directory: isarDirectory.path,
-      schemas: [
-        DictionarySchema,
-        DictionaryEntrySchema,
-        MediaItemSchema,
-        CreatorContextSchema,
-        AnkiMappingSchema,
-      ],
+      schemas: globalSchemas,
     );
 
     /// Populate entities with key-value maps for constant time performance.
@@ -637,12 +645,24 @@ class AppModel with ChangeNotifier {
       importMessageExtraction: translate('import_message_extraction'),
       importMessageName: translate('import_message_name'),
       importMessageEntries: translate('import_message_entries'),
-      importMessageCount: translate('import_message_count'),
+      importMessageEntryCount: translate('import_message_entry_count'),
+      importMessageTagCount: translate('import_message_tag_count'),
       importMessageMetadata: translate('import_message_metadata'),
       importMessageDatabase: translate('import_message_database'),
       importMessageError: translate('import_message_error'),
       importMessageFailed: translate('import_message_failed'),
       importMessageComplete: translate('import_message_complete'),
+    );
+
+    /// Message to notify user if a dictionary with the same name is already
+    /// imported.
+    String sameNameDictionaryMessage = translate('same_name_dictionary_found');
+
+    /// Message to notify user if selected file extension does not match.
+    String extensionErrorMessage =
+        translate('import_file_extension_invalid').replaceAll(
+      '%extensions%',
+      dictionaryFormat.compatibleFileExtensions.toString(),
     );
 
     /// A [ValueNotifier] that will update a message based on the progress of
@@ -678,7 +698,7 @@ class AppModel with ChangeNotifier {
             DictionaryDialogImportPage(progressNotifier: progressNotifier),
       );
 
-      /// The following hard waits give enough time to inform the user to read
+      /// Tfhe following hard waits give enough time to inform the user to read
       /// the progress messages.
       progressNotifier.value = localisation.importMessageStart;
       await Future.delayed(const Duration(milliseconds: 500), () {});
@@ -697,6 +717,11 @@ class AppModel with ChangeNotifier {
       /// file for dictionary import.
       late final PrepareDirectoryParams prepareDirectoryParams;
       if (lastSelectedDictionaryFormat.requiresFile) {
+        if (!dictionaryFormat.compatibleFileExtensions
+            .contains(path.extension(file!.path).toLowerCase())) {
+          throw Exception(extensionErrorMessage);
+        }
+
         prepareDirectoryParams = PrepareDirectoryParams(
           file: file,
           workingDirectory: workingDirectory,
@@ -745,7 +770,7 @@ class AppModel with ChangeNotifier {
           .findFirstSync();
 
       if (duplicateDictionary != null) {
-        throw Exception('Dictionary with same name found.');
+        throw Exception(sameNameDictionaryMessage);
       }
 
       /// From the working directory, the format is mainly responsible for
@@ -768,7 +793,7 @@ class AppModel with ChangeNotifier {
         isarDirectoryPath: isarDirectory.path,
         localisation: localisation,
       );
-      await compute(depositDictionaryEntries, prepareDictionaryParams);
+      await compute(depositDictionaryEntriesAndTags, prepareDictionaryParams);
 
       /// Finally, any necessary metadata that is pertaining to the dictionary
       /// format that will come in handy when in actual use (i.e. interacting
@@ -1285,6 +1310,9 @@ class AppModel with ChangeNotifier {
     required BuildContext context,
     required AnkiMapping mapping,
   }) async {
+    /// Ensure that the following case never happens to the default profile.
+    addDefaultModelIfMissing();
+
     String errorModelChanged = translate('error_model_changed');
     String errorModelChangedContent = translate('error_model_changed_content');
     String errorModelMissing = translate('error_model_missing');
@@ -1292,9 +1320,6 @@ class AppModel with ChangeNotifier {
     String dialogCloseLabel = translate('dialog_close');
 
     bool newMappingModelExists = await profileModelExists(mapping);
-
-    /// Ensure that the following case never happens to the default profile.
-    addDefaultModelIfMissing();
 
     if (!newMappingModelExists) {
       await showDialog(
@@ -1374,6 +1399,29 @@ class AppModel with ChangeNotifier {
         pageBuilder: (context, animation1, animation2) => CreatorPage(
           decks: decks,
           editMode: true,
+        ),
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+      ),
+    );
+  }
+
+  /// A helper function for doing a recursive dictionary search.
+  Future<void> openRecursiveDictionarySearch({
+    required String searchTerm,
+    required bool killOnPop,
+  }) async {
+    if (searchTerm.trim().isEmpty) {
+      return;
+    }
+
+    await Navigator.push(
+      _navigatorKey.currentContext!,
+      PageRouteBuilder(
+        pageBuilder: (context, animation1, animation2) =>
+            RecursiveDictionaryPage(
+          searchTerm: searchTerm,
+          killOnPop: killOnPop,
         ),
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
@@ -1462,5 +1510,97 @@ class AppModel with ChangeNotifier {
     _database.writeTxnSync((isar) {
       isar.ankiMappings.putSync(mapping);
     });
+  }
+
+  /// Add the search history entity to the database if it does not exist.
+  void initialiseSearchHistoryIfMissing({
+    required String uniqueKey,
+  }) async {
+    _database.writeTxnSync((isar) {
+      SearchHistory? history =
+          isar.searchHistorys.getByUniqueKeySync(uniqueKey);
+
+      if (history == null) {
+        isar.searchHistorys.putSync(
+          SearchHistory(
+            uniqueKey: uniqueKey,
+            items: [],
+          ),
+        );
+      }
+    });
+  }
+
+  /// Add the [searchTerm] to a search history with the given [uniqueKey]. If
+  /// there are already a maximum number of items in history, this will be
+  /// capped. Oldest items will be discarded in that scenario.
+  void addToSearchHistory({
+    required String uniqueKey,
+    required String searchTerm,
+  }) async {
+    if (isIncognitoMode) {
+      return;
+    }
+
+    if (searchTerm.trim().isEmpty) {
+      return;
+    }
+    initialiseSearchHistoryIfMissing(uniqueKey: uniqueKey);
+
+    _database.writeTxnSync((isar) {
+      SearchHistory history =
+          isar.searchHistorys.getByUniqueKeySync(uniqueKey)!;
+
+      history.items.removeWhere((item) => item == searchTerm);
+
+      if (history.items.length >= maximumSearchHistoryItems) {
+        history.items = history.items
+            .sublist(history.items.length - maximumSearchHistoryItems);
+      }
+
+      history.items.add(searchTerm);
+      isar.searchHistorys.putSync(history);
+    });
+  }
+
+  /// Remove the [searchTerm] from a search history with the given [uniqueKey].
+  Future<void> removeFromSearchHistory({
+    required String uniqueKey,
+    required String searchTerm,
+  }) async {
+    initialiseSearchHistoryIfMissing(uniqueKey: uniqueKey);
+
+    _database.writeTxnSync((isar) {
+      SearchHistory history =
+          isar.searchHistorys.getByUniqueKeySync(uniqueKey)!;
+
+      history.items.remove(searchTerm);
+      isar.searchHistorys.putSync(history);
+    });
+  }
+
+  /// Get the search history for a given collection named [uniqueKey].
+  List<String> getSearchHistory({required String uniqueKey}) {
+    initialiseSearchHistoryIfMissing(uniqueKey: uniqueKey);
+    SearchHistory history =
+        _database.searchHistorys.getByUniqueKeySync(uniqueKey)!;
+    return history.items;
+  }
+
+  /// Get the [DictionaryTag] given details from a [DictionaryEntry].
+  DictionaryTag getDictionaryTag({
+    required String dictionaryName,
+    required String tagName,
+  }) {
+    DictionaryTag? tag =
+        _database.dictionaryTags.getByUniqueKeySync('$dictionaryName/$tagName');
+    return tag!;
+  }
+
+  /// Get the [DictionaryTag] given details from a [DictionaryEntry].
+  Dictionary getDictionary(String dictionaryName) {
+    Dictionary? dictionary =
+        _database.dictionarys.getByDictionaryNameSync(dictionaryName);
+    return dictionary!;
   }
 }

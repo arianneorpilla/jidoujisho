@@ -2,36 +2,38 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:isar/isar.dart';
-import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
-import 'package:yuuna/media.dart';
+import 'package:yuuna/models.dart';
 
 /// Performed in another isolate with compute. This is a top-level utility
 /// function that makes use of Isar allowing instances to be opened through
-/// multiple isolates. The function for preparing entries according to the
-/// [DictionaryFormat] is also done in the same isolate, to remove having to
-/// communicate potentially hundreds of thousands of entries to another newly
-/// opened isolate.
-Future<void> depositDictionaryEntries(PrepareDictionaryParams params) async {
+/// multiple isolates. The function for preparing entries and tags according to
+/// the [DictionaryFormat] is also done in the same isolate, to remove having
+/// to communicate potentially hundreds of thousands of entries to another
+/// newly opened isolate.
+Future<void> depositDictionaryEntriesAndTags(
+    PrepareDictionaryParams params) async {
+  List<DictionaryTag> dictionaryTags =
+      await params.dictionaryFormat.prepareTags(params);
   List<DictionaryEntry> dictionaryEntries =
       await params.dictionaryFormat.prepareEntries(params);
 
   final Isar database = await Isar.open(
     directory: params.isarDirectoryPath,
-    schemas: [
-      DictionarySchema,
-      DictionaryEntrySchema,
-      MediaItemSchema,
-      CreatorContextSchema,
-      AnkiMappingSchema,
-    ],
+    schemas: globalSchemas,
   );
 
   database.writeTxnSync((database) {
+    database.dictionaryTags
+        .filter()
+        .dictionaryNameEqualTo(params.dictionaryName)
+        .deleteAllSync();
     database.dictionaryEntrys
         .filter()
         .dictionaryNameEqualTo(params.dictionaryName)
         .deleteAllSync();
+
+    database.dictionaryTags.putAllSync(dictionaryTags);
     database.dictionaryEntrys.putAllSync(dictionaryEntries);
   });
 }
@@ -40,17 +42,15 @@ Future<void> depositDictionaryEntries(PrepareDictionaryParams params) async {
 Future<void> deleteDictionaryData(DeleteDictionaryParams params) async {
   final Isar database = await Isar.open(
     directory: params.isarDirectoryPath,
-    schemas: [
-      DictionarySchema,
-      DictionaryEntrySchema,
-      MediaItemSchema,
-      CreatorContextSchema,
-      AnkiMappingSchema,
-    ],
+    schemas: globalSchemas,
   );
 
   database.writeTxnSync((database) {
     database.dictionarys.deleteByDictionaryNameSync(params.dictionaryName);
+    database.dictionaryTags
+        .filter()
+        .dictionaryNameEqualTo(params.dictionaryName)
+        .deleteAllSync();
     database.dictionaryEntrys
         .filter()
         .dictionaryNameEqualTo(params.dictionaryName)
@@ -166,7 +166,8 @@ class DictionaryImportLocalisation {
     required this.importMessageExtraction,
     required this.importMessageName,
     required this.importMessageEntries,
-    required this.importMessageCount,
+    required this.importMessageEntryCount,
+    required this.importMessageTagCount,
     required this.importMessageMetadata,
     required this.importMessageDatabase,
     required this.importMessageError,
@@ -175,8 +176,13 @@ class DictionaryImportLocalisation {
   });
 
   /// Return an entry count update message with a proper variable.
-  String importMessageCountWithVar(int count) {
-    return importMessageCount.replaceAll('%count%', '$count');
+  String importMessageEntryCountWithVar(int count) {
+    return importMessageEntryCount.replaceAll('%count%', '$count');
+  }
+
+  /// Return an entry count update message with a proper variable.
+  String importMessageTagCountWithVar(int count) {
+    return importMessageTagCount.replaceAll('%count%', '$count');
   }
 
   /// Return a message informing the dictionary name with a proper variable.
@@ -205,7 +211,10 @@ class DictionaryImportLocalisation {
   final String importMessageEntries;
 
   /// For message to show when updating entry count while processing entries.
-  final String importMessageCount;
+  final String importMessageEntryCount;
+
+  /// For message to show when updating tag count while processing tags.
+  final String importMessageTagCount;
 
   /// For message to show when current progress is processing metadata.
   final String importMessageMetadata;

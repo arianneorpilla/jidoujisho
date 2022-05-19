@@ -8,6 +8,7 @@ export 'src/utils/components/jidoujisho_marquee.dart';
 export 'src/utils/components/jidoujisho_tag.dart';
 export 'src/utils/components/jidoujisho_placeholder_message.dart';
 export 'src/utils/components/jidoujisho_text_selection_controls.dart';
+export 'src/utils/components/jidoujisho_search_history.dart';
 
 export 'src/utils/converters/dictionary_entries_converter.dart';
 export 'src/utils/converters/immutable_string_map_converter.dart';

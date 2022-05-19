@@ -3,76 +3,37 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_archive/flutter_archive.dart';
-import 'package:json_annotation/json_annotation.dart';
 import 'package:path/path.dart' as path;
 
 import 'package:yuuna/dictionary.dart';
 
-part 'yomichan_term_bank_format.g.dart';
-
-/// A dictionary format for archives in the Yomichan Term Bank V3 schema.
+/// A dictionary format for archives following the latest Yomichan bank schema.
 /// Example dictionaries for this format may be downloaded from the Yomichan
 /// website.
 ///
-/// Details on the schema can be found here:
+/// Details on the term bank schema particularly can be found here:
 /// https://github.com/FooSoft/yomichan/blob/master/ext/data/schemas/dictionary-term-bank-v3-schema.json
-class YomichanTermBankFormat extends DictionaryFormat {
+class YomichanDictionaryFormat extends DictionaryFormat {
   /// Define a format with the given metadata that has its behaviour for
-  /// import, search and display defined with a set of top-level helper methods.
-  YomichanTermBankFormat._privateConstructor()
+  /// import, search and display defined with af set of top-level helper methods.
+  YomichanDictionaryFormat._privateConstructor()
       : super(
-          formatName: 'Yomichan Term Bank',
+          formatName: 'Yomichan Dictionary',
           formatIcon: Icons.auto_stories,
           requiresFile: true,
+          compatibleFileExtensions: const ['.zip'],
           prepareDirectory: prepareDirectoryYomichanTermBankFormat,
           prepareName: prepareNameYomichanTermBankFormat,
           prepareEntries: prepareEntriesYomichanTermBankFormat,
+          prepareTags: prepareTagsYomichanTermBankFormat,
           prepareMetadata: prepareMetadataYomichanTermBankFormat,
         );
 
   /// Get the singleton instance of this dictionary format.
-  static YomichanTermBankFormat get instance => _instance;
+  static YomichanDictionaryFormat get instance => _instance;
 
-  static final YomichanTermBankFormat _instance =
-      YomichanTermBankFormat._privateConstructor();
-}
-
-/// A helper class for tags that are present in Yomichan imported dictionary
-/// entries.
-@JsonSerializable()
-class YomichanTag {
-  /// Define a tag with given parameters.
-  YomichanTag({
-    required this.name,
-    required this.category,
-    required this.sortingOrder,
-    required this.notes,
-    required this.popularity,
-  });
-
-  /// Create an instance of this class from a serialized format.
-  factory YomichanTag.fromJson(Map<String, dynamic> json) =>
-      _$YomichanTagFromJson(json);
-
-  /// Convert this into a serialized format.
-  Map<String, dynamic> toJson() => _$YomichanTagToJson(this);
-
-  /// Tag name.
-  String name;
-
-  /// Category for the tag.
-  String category;
-
-  /// Sorting order for the tag.
-  int sortingOrder;
-
-  /// Notes for this tag.
-  String notes;
-
-  /// Score used to determine popularity.
-  /// Negative values are more rare and positive values are more frequent.
-  /// This score is also used to sort search results.
-  double? popularity;
+  static final YomichanDictionaryFormat _instance =
+      YomichanDictionaryFormat._privateConstructor();
 }
 
 /// Top-level function for use in compute. See [DictionaryFormat] for details.
@@ -162,7 +123,7 @@ Future<List<DictionaryEntry>> prepareEntriesYomichanTermBankFormat(
       }
 
       String message =
-          params.localisation.importMessageCountWithVar(entries.length);
+          params.localisation.importMessageEntryCountWithVar(entries.length);
       params.sendPort.send(message);
     }
 
@@ -176,10 +137,10 @@ Future<List<DictionaryEntry>> prepareEntriesYomichanTermBankFormat(
 }
 
 /// Top-level function for use in compute. See [DictionaryFormat] for details.
-Future<Map<String, String>> prepareMetadataYomichanTermBankFormat(
+Future<List<DictionaryTag>> prepareTagsYomichanTermBankFormat(
     PrepareDictionaryParams params) async {
   try {
-    Map<String, String> metadata = {};
+    List<DictionaryTag> tags = [];
 
     final List<FileSystemEntity> entities = params.workingDirectory.listSync();
     final Iterable<File> files = entities.whereType<File>();
@@ -200,7 +161,8 @@ Future<Map<String, String>> prepareMetadataYomichanTermBankFormat(
         String notes = item[3] as String;
         double popularity = (item[4] as num).toDouble();
 
-        YomichanTag tag = YomichanTag(
+        DictionaryTag tag = DictionaryTag(
+          dictionaryName: params.dictionaryName,
           name: name,
           category: category,
           sortingOrder: sortingOrder,
@@ -208,20 +170,25 @@ Future<Map<String, String>> prepareMetadataYomichanTermBankFormat(
           popularity: popularity,
         );
 
-        String key = name;
-        String value = jsonEncode(tag.toJson());
-
-        metadata[key] = value;
+        tags.add(tag);
       }
 
-      params.sendPort.send('Found ${metadata.length} tags...');
+      String message =
+          params.localisation.importMessageTagCountWithVar(tags.length);
+      params.sendPort.send(message);
     }
 
-    return metadata;
+    return tags;
   } catch (e) {
     String message = params.localisation.importMessageErrorWithVar('$e');
     params.sendPort.send(message);
   }
 
-  throw Exception('Unable to get entries');
+  throw Exception('Unable to get tags');
+}
+
+/// Top-level function for use in compute. See [DictionaryFormat] for details.
+Future<Map<String, String>> prepareMetadataYomichanTermBankFormat(
+    PrepareDictionaryParams params) async {
+  return {};
 }

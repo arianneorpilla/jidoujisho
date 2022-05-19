@@ -44,7 +44,7 @@ class JidoujishoTag extends StatelessWidget {
       padding: Spacing.of(context).insets.onlyRight.small,
       child: InkWell(
         child: Container(
-          color: backgroundColor,
+          color: backgroundColor.withOpacity(0.8),
           padding: Spacing.of(context).insets.all.small,
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -69,6 +69,8 @@ class JidoujishoTag extends StatelessWidget {
         onTap: () {
           if (message != null) {
             Fluttertoast.showToast(
+              backgroundColor: backgroundColor,
+              textColor: foregroundColor,
               msg: message!,
               toastLength: Toast.LENGTH_SHORT,
               gravity: ToastGravity.BOTTOM,

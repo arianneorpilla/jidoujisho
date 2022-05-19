@@ -140,6 +140,30 @@ class _DictionaryDialogPageState extends BasePageState {
     );
   }
 
+  Icon getIcon({
+    required Dictionary dictionary,
+    required DictionaryFormat dictionaryFormat,
+  }) {
+    if (dictionary.hidden) {
+      return Icon(
+        Icons.visibility_off,
+        size: textTheme.titleLarge?.fontSize,
+        color: theme.unselectedWidgetColor,
+      );
+    } else if (dictionary.collapsed) {
+      return Icon(
+        Icons.close_fullscreen,
+        size: textTheme.titleLarge?.fontSize,
+        color: theme.unselectedWidgetColor,
+      );
+    } else {
+      return Icon(
+        dictionaryFormat.formatIcon,
+        size: textTheme.titleLarge?.fontSize,
+      );
+    }
+  }
+
   Widget buildDictionaryTile(Dictionary dictionary) {
     DictionaryFormat dictionaryFormat =
         appModel.dictionaryFormats[dictionary.formatName]!;
@@ -147,8 +171,10 @@ class _DictionaryDialogPageState extends BasePageState {
     return ListTile(
         key: ValueKey(dictionary.dictionaryName),
         selected: _selectedOrder == dictionary.order,
-        leading: Icon(dictionaryFormat.formatIcon,
-            size: textTheme.titleLarge?.fontSize),
+        leading: getIcon(
+          dictionary: dictionary,
+          dictionaryFormat: dictionaryFormat,
+        ),
         title: Row(
           children: [
             Expanded(
@@ -231,13 +257,20 @@ class _DictionaryDialogPageState extends BasePageState {
         label: dictionary.collapsed
             ? dictionaryExpandLabel
             : dictionaryCollapseLabel,
-        icon: dictionary.collapsed ? Icons.unfold_more : Icons.unfold_less,
-        action: () => appModel.toggleDictionaryCollapsed(dictionary),
+        icon:
+            dictionary.collapsed ? Icons.open_in_full : Icons.close_fullscreen,
+        action: () {
+          appModel.toggleDictionaryCollapsed(dictionary);
+          setState(() {});
+        },
       ),
       buildPopupItem(
         label: dictionary.hidden ? dictionaryShowLabel : dictionaryHideLabel,
         icon: dictionary.collapsed ? Icons.visibility : Icons.visibility_off,
-        action: () => appModel.toggleDictionaryHidden(dictionary),
+        action: () {
+          appModel.toggleDictionaryHidden(dictionary);
+          setState(() {});
+        },
       ),
       buildPopupItem(
         label: dictionaryDeleteLabel,

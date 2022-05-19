@@ -5,10 +5,9 @@ import 'package:isar/isar.dart';
 import 'package:kana_kit/kana_kit.dart';
 import 'package:mecab_dart/mecab_dart.dart';
 import 'package:ve_dart/ve_dart.dart';
-import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/language.dart';
-import 'package:yuuna/media.dart';
+import 'package:yuuna/models.dart';
 import 'package:yuuna/utils.dart';
 
 /// Language implementation of the Japanese language.
@@ -108,7 +107,7 @@ Future<List<DictionaryEntry>> prepareSearchResultsJapaneseLanguage(
     DictionarySearchParams params) async {
   String searchTerm = params.searchTerm.trim();
   String fallbackTerm = params.fallbackTerm.trim();
-  int limit = 50;
+  int limit = 30;
 
   if (searchTerm.isEmpty) {
     return [];
@@ -132,13 +131,7 @@ Future<List<DictionaryEntry>> prepareSearchResultsJapaneseLanguage(
 
   final Isar database = await Isar.open(
     directory: params.isarDirectoryPath,
-    schemas: [
-      DictionarySchema,
-      DictionaryEntrySchema,
-      MediaItemSchema,
-      CreatorContextSchema,
-      AnkiMappingSchema,
-    ],
+    schemas: globalSchemas,
   );
 
   Map<int?, DictionaryEntry> entries = {};

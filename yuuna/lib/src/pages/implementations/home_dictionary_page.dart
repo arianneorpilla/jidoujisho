@@ -75,6 +75,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       margins: const EdgeInsets.symmetric(horizontal: 6),
       width: double.maxFinite,
       transition: SlideFadeFloatingSearchBarTransition(),
+      debounceDelay: const Duration(milliseconds: 500),
       automaticallyImplyBackButton: false,
       progress: _isSearching,
       leadingActions: [
@@ -141,7 +142,21 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       return buildImportDictionariesPlaceholderMessage();
     }
     if (_controller.query.isEmpty) {
-      return buildEnterSearchTermPlaceholderMessage();
+      if (appModel.getSearchHistory(uniqueKey: mediaType.uniqueKey).isEmpty) {
+        return buildEnterSearchTermPlaceholderMessage();
+      } else {
+        return JidoujishoSearchHistory(
+          uniqueKey: mediaType.uniqueKey,
+          onSearchTermSelect: (searchTerm) {
+            setState(() {
+              _controller.query = searchTerm;
+            });
+          },
+          onUpdate: () {
+            setState(() {});
+          },
+        );
+      }
     }
     if (_isSearching || _result?.searchTerm != _controller.query) {
       if (_result != null) {
@@ -161,18 +176,11 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     return ClipRect(
       child: DictionaryResultPage(
         result: _result!,
-        onTextSelect: (selection) {
-          Navigator.push(
-            context,
-            PageRouteBuilder(
-              opaque: false,
-              pageBuilder: (context, animation1, animation2) =>
-                  RecursiveDictionaryPage(searchTerm: selection),
-              transitionDuration: Duration.zero,
-              reverseTransitionDuration: Duration.zero,
-            ),
-          );
-        },
+        onTextSelect: (searchTerm) => appModel.openRecursiveDictionarySearch(
+          searchTerm: searchTerm,
+          killOnPop: false,
+        ),
+        getCurrentSearchTerm: () => _controller.query,
       ),
     );
   }

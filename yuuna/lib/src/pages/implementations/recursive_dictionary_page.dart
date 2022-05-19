@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
+import 'package:spaces/spaces.dart';
 import 'package:yuuna/dictionary.dart';
+import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
 
@@ -9,11 +12,15 @@ class RecursiveDictionaryPage extends BasePage {
   /// Create an instance of this page.
   const RecursiveDictionaryPage({
     required this.searchTerm,
+    required this.killOnPop,
     super.key,
   });
 
   /// The initial search term that this page searches on initialisation.
   final String searchTerm;
+
+  /// If true, popping will exit the application.
+  final bool killOnPop;
 
   @override
   BasePageState<RecursiveDictionaryPage> createState() =>
@@ -57,9 +64,12 @@ class _RecursiveDictionaryPageState
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: Theme.of(context).backgroundColor.withOpacity(0.9),
+      backgroundColor: Theme.of(context).backgroundColor,
       body: SafeArea(
-        child: buildFloatingSearchBar(),
+        child: Padding(
+          padding: Spacing.of(context).insets.onlyTop.semiSmall,
+          child: buildFloatingSearchBar(),
+        ),
       ),
     );
   }
@@ -79,11 +89,16 @@ class _RecursiveDictionaryPageState
       transitionDuration: Duration.zero,
       margins: const EdgeInsets.symmetric(horizontal: 6),
       width: double.maxFinite,
+      debounceDelay: const Duration(milliseconds: 500),
       transition: SlideFadeFloatingSearchBarTransition(),
       automaticallyImplyBackButton: false,
       onFocusChanged: (focused) {
         if (!focused) {
-          Navigator.pop(context);
+          if (widget.killOnPop) {
+            SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+          } else {
+            Navigator.pop(context);
+          }
         }
       },
       progress: _isSearching,
@@ -130,7 +145,11 @@ class _RecursiveDictionaryPageState
         tooltip: backLabel,
         icon: Icons.arrow_back,
         onTap: () {
-          Navigator.pop(context);
+          if (widget.killOnPop) {
+            SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+          } else {
+            Navigator.pop(context);
+          }
         },
       ),
     );
@@ -153,7 +172,23 @@ class _RecursiveDictionaryPageState
       return buildImportDictionariesPlaceholderMessage();
     }
     if (_controller.query.isEmpty) {
-      return buildEnterSearchTermPlaceholderMessage();
+      if (appModel
+          .getSearchHistory(uniqueKey: DictionaryMediaType.instance.uniqueKey)
+          .isEmpty) {
+        return buildEnterSearchTermPlaceholderMessage();
+      } else {
+        return JidoujishoSearchHistory(
+          uniqueKey: DictionaryMediaType.instance.uniqueKey,
+          onSearchTermSelect: (searchTerm) {
+            setState(() {
+              _controller.query = searchTerm;
+            });
+          },
+          onUpdate: () {
+            setState(() {});
+          },
+        );
+      }
     }
     if (_isSearching || _result?.searchTerm != _controller.query) {
       if (_result != null) {
@@ -173,18 +208,11 @@ class _RecursiveDictionaryPageState
     return ClipRect(
       child: DictionaryResultPage(
         result: _result!,
-        onTextSelect: (selection) {
-          Navigator.push(
-            context,
-            PageRouteBuilder(
-              opaque: false,
-              pageBuilder: (context, animation1, animation2) =>
-                  RecursiveDictionaryPage(searchTerm: selection),
-              transitionDuration: Duration.zero,
-              reverseTransitionDuration: Duration.zero,
-            ),
-          );
-        },
+        onTextSelect: (searchTerm) => appModel.openRecursiveDictionarySearch(
+          searchTerm: searchTerm,
+          killOnPop: false,
+        ),
+        getCurrentSearchTerm: () => _controller.query,
       ),
     );
   }

@@ -221,6 +221,12 @@ class _HomePageState extends BasePageState<HomePage> {
     );
 
     selectedAction?.call();
+
+    if (selectedAction == null) {
+      Future.delayed(const Duration(milliseconds: 10), () {
+        FocusScope.of(context).unfocus();
+      });
+    }
   }
 
   void browseToGithub() async {

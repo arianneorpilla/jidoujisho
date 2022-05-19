@@ -78,7 +78,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       child: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
-          resizeToAvoidBottomInset: true,
+          resizeToAvoidBottomInset: false,
           appBar: buildAppBar(),
           body: buildBody(),
         ),

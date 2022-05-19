@@ -53,6 +53,8 @@ public class MainActivity extends FlutterActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        isAppRunning = false;
+        
         context = MainActivity.this;
         // Create the example data
         mAnkiDroid = new AnkiDroidHelper(context);
@@ -66,6 +68,12 @@ public class MainActivity extends FlutterActivity {
     private boolean modelExists(String model) {
         Long deckId = mAnkiDroid.findModelIdByName(model, 8);
         return (deckId != null);
+    }
+
+    private static boolean isAppRunning;
+
+    public static boolean getIsAppRunning() {
+        return isAppRunning;
     }
 
     public void addDefaultModel() {

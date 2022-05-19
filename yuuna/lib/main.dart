@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_process_text/flutter_process_text.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/models.dart';
@@ -48,7 +49,37 @@ class JidoujishoApp extends ConsumerStatefulWidget {
 }
 
 class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
+  String inputText = '';
+
   final navigatorKey = GlobalKey<NavigatorState>();
+
+  late final StreamSubscription _processText;
+
+  @override
+  void initState() {
+    super.initState();
+    FlutterProcessText.initialize(
+      showConfirmationToast: false,
+      showErrorToast: false,
+      showRefreshToast: false,
+    );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      String? searchTerm = await FlutterProcessText.refreshProcessText;
+      if (searchTerm != null) {
+        appModel.openRecursiveDictionarySearch(
+          searchTerm: searchTerm,
+          killOnPop: true,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _processText.cancel();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,10 +95,6 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
       // the entire project, making use of the [spaces] package.
       builder: (context, child) => Spacing(
         dataBuilder: (context) {
-          final mediaQuery = MediaQuery.of(context);
-          if (mediaQuery.size.width > 500) {
-            return SpacingData.generate(30);
-          }
           return SpacingData.generate(10);
         },
         child: child!,
