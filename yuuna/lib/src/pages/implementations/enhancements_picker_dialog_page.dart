@@ -61,7 +61,7 @@ class _EnhancementsPickerDialogPage
 
     return SizedBox(
       width: double.maxFinite,
-      child: Scrollbar(
+      child: RawScrollbar(
         controller: contentController,
         child: SingleChildScrollView(
           controller: contentController,
@@ -94,7 +94,7 @@ class _EnhancementsPickerDialogPage
   }
 
   Widget buildEnhancementTiles(List<Enhancement> enhancements) {
-    return Scrollbar(
+    return RawScrollbar(
       controller: _scrollController,
       child: ListView.builder(
         controller: _scrollController,
@@ -111,7 +111,6 @@ class _EnhancementsPickerDialogPage
       key: ValueKey(enhancement.uniqueKey),
       leading: Icon(
         enhancement.icon,
-        size: textTheme.titleLarge?.fontSize,
         color: theme.appBarTheme.foregroundColor,
       ),
       title: Row(

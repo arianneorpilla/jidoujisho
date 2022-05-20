@@ -1,3 +1,4 @@
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/media.dart';
@@ -44,31 +45,28 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
   Map<String, int>? dictionaryOrderCache;
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     if (dictionaryOrderCache == null) {
-      Map<String, int> dictionaryOrderCache = Map<String, int>.fromEntries(
+      dictionaryOrderCache = Map<String, int>.fromEntries(
         appModel.dictionaries.map(
           (dictionary) => MapEntry(dictionary.dictionaryName, dictionary.order),
         ),
       );
 
       for (List<DictionaryEntry> entriesGroup in widget.result.mapping) {
-        entriesGroup.sort((a, b) => (dictionaryOrderCache[a.dictionaryName]!)
-            .compareTo(dictionaryOrderCache[b.dictionaryName]!));
+        entriesGroup.sort((a, b) => (dictionaryOrderCache![a.dictionaryName]!)
+            .compareTo(dictionaryOrderCache![b.dictionaryName]!));
       }
     }
 
     Future.delayed(const Duration(milliseconds: 1000), () {
-      if (widget.getCurrentSearchTerm() == widget.result.searchTerm) {
-        appModel.addToSearchHistory(
-          uniqueKey: DictionaryMediaType.instance.uniqueKey,
-          searchTerm: widget.result.searchTerm,
-        );
+      if (mounted) {
+        if (widget.getCurrentSearchTerm() == widget.result.searchTerm) {
+          appModel.addToSearchHistory(
+            uniqueKey: DictionaryMediaType.instance.uniqueKey,
+            searchTerm: widget.result.searchTerm,
+          );
+        }
       }
     });
 
@@ -78,10 +76,26 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
       itemCount: widget.result.mapping.length,
       itemBuilder: (context, index) {
         List<DictionaryEntry> entries = widget.result.mapping[index];
+        Set<String> dictionaryNames =
+            entries.map((entry) => entry.dictionaryName).toSet();
+
+        final Map<String, ExpandableController> expandableControllers = {};
+        final Map<String, bool> dictionaryHiddens = {};
+
+        for (String dictionaryName in dictionaryNames) {
+          Dictionary dictionary =
+              appModelNoUpdate.getDictionary(dictionaryName);
+          expandableControllers[dictionaryName] = ExpandableController(
+            initialExpanded: !dictionary.collapsed,
+          );
+          dictionaryHiddens[dictionaryName] = dictionary.hidden;
+        }
 
         return DictionaryWordPage(
           entries: entries,
           onTextSelect: widget.onTextSelect,
+          expandableControllers: expandableControllers,
+          dictionaryHiddens: dictionaryHiddens,
         );
       },
     );

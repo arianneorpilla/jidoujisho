@@ -47,7 +47,7 @@ class _LanguageDialogPageState extends BasePageState {
 
     return SizedBox(
       width: double.maxFinite,
-      child: Scrollbar(
+      child: RawScrollbar(
         controller: contentController,
         child: SingleChildScrollView(
           controller: contentController,

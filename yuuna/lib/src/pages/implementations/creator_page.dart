@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/pages.dart';
@@ -12,6 +13,7 @@ class CreatorPage extends BasePage {
   const CreatorPage({
     required this.decks,
     required this.editMode,
+    required this.killOnPop,
     super.key,
   });
 
@@ -20,6 +22,9 @@ class CreatorPage extends BasePage {
 
   /// Whether or not the creator page allows editing of set enhancements.
   final bool editMode;
+
+  /// If true, popping will exit the application.
+  final bool killOnPop;
 
   @override
   BasePageState<CreatorPage> createState() => _CreatorPageState();
@@ -38,6 +43,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       appModel.translate('assign_auto_enhancement');
   String get removeEnhancementLabel => appModel.translate('remove_enhancement');
   String get editActionsLabel => appModel.translate('edit_actions');
+  String get backLabel => appModel.translate('back');
 
   /// Get the export details pertaining to the fields.
   ExportDetails get exportDetails => creatorModel.getExportDetails(ref);
@@ -48,6 +54,12 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
     if (!widget.editMode) {
       creatorModel.clearAll();
     }
+
+    if (widget.killOnPop) {
+      SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+      return false;
+    }
+
     return true;
   }
 
@@ -78,7 +90,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       child: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
-          resizeToAvoidBottomInset: false,
+          resizeToAvoidBottomInset: true,
           appBar: buildAppBar(),
           body: buildBody(),
         ),
@@ -88,7 +100,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
   PreferredSizeWidget? buildAppBar() {
     return AppBar(
-      leading: buildLeading(),
+      leading: buildBackButton(),
       title: buildTitle(),
       actions: buildActions(),
       titleSpacing: 8,
@@ -218,7 +230,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
   Widget buildPortraitFields() {
     return Padding(
       padding: Spacing.of(context).insets.horizontal.small,
-      child: Scrollbar(
+      child: RawScrollbar(
         controller: _scrollController,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(
@@ -264,8 +276,19 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
     );
   }
 
-  Widget? buildLeading() {
-    return const BackButton();
+  Widget buildBackButton() {
+    return JidoujishoIconButton(
+      size: textTheme.titleLarge?.fontSize,
+      tooltip: backLabel,
+      icon: Icons.arrow_back,
+      onTap: () {
+        if (widget.killOnPop) {
+          SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+        } else {
+          Navigator.pop(context);
+        }
+      },
+    );
   }
 
   Widget buildTitle() {
@@ -301,6 +324,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
     if (enhancement == null) {
       return JidoujishoIconButton(
+        size: textTheme.titleLarge?.fontSize,
         tooltip: assignAutoEnhancementLabel,
         icon: Icons.add_circle,
         onTap: () async {
@@ -318,6 +342,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       );
     } else {
       return JidoujishoIconButton(
+        size: textTheme.titleLarge?.fontSize,
         tooltip: removeEnhancementLabel,
         enabledColor: theme.colorScheme.primary,
         icon: enhancement.icon,
@@ -378,19 +403,23 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
     if (enhancement == null) {
       return const SizedBox.shrink();
     } else {
-      return JidoujishoIconButton(
-        tooltip: enhancement.getLocalisedLabel(appModel),
-        icon: enhancement.icon,
-        onTap: () async {
-          enhancement!.enhanceCreatorParams(
-            context: context,
-            ref: ref,
-            appModel: appModel,
-            creatorModel: creatorModel,
-            cause: EnhancementTriggerCause.manual,
-          );
-          setState(() {});
-        },
+      return Padding(
+        padding: Spacing.of(context).insets.onlyLeft.small,
+        child: JidoujishoIconButton(
+          busy: true,
+          size: textTheme.titleLarge?.fontSize,
+          tooltip: enhancement.getLocalisedLabel(appModel),
+          icon: enhancement.icon,
+          onTap: () async {
+            await enhancement!.enhanceCreatorParams(
+              context: context,
+              ref: ref,
+              appModel: appModel,
+              creatorModel: creatorModel,
+              cause: EnhancementTriggerCause.manual,
+            );
+          },
+        ),
       );
     }
   }
@@ -408,35 +437,43 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
     }
 
     if (enhancement == null) {
-      return JidoujishoIconButton(
-        tooltip: assignManualEnhancementLabel,
-        icon: Icons.add_circle,
-        onTap: () async {
-          await showDialog(
-            barrierDismissible: true,
-            context: context,
-            builder: (context) => EnhancementsPickerDialogPage(
-              mapping: mapping,
-              slotNumber: slotNumber,
-              field: field,
-            ),
-          );
-          setState(() {});
-        },
+      return Padding(
+        padding: Spacing.of(context).insets.onlyLeft.small,
+        child: JidoujishoIconButton(
+          size: textTheme.titleLarge?.fontSize,
+          tooltip: assignManualEnhancementLabel,
+          icon: Icons.add_circle,
+          onTap: () async {
+            await showDialog(
+              barrierDismissible: true,
+              context: context,
+              builder: (context) => EnhancementsPickerDialogPage(
+                mapping: mapping,
+                slotNumber: slotNumber,
+                field: field,
+              ),
+            );
+            setState(() {});
+          },
+        ),
       );
     } else {
-      return JidoujishoIconButton(
-        tooltip: removeEnhancementLabel,
-        enabledColor: theme.colorScheme.primary,
-        icon: enhancement.icon,
-        onTap: () async {
-          appModel.removeFieldEnhancement(
-            mapping: mapping,
-            field: field,
-            slotNumber: slotNumber,
-          );
-          setState(() {});
-        },
+      return Padding(
+        padding: Spacing.of(context).insets.onlyLeft.small,
+        child: JidoujishoIconButton(
+          size: textTheme.titleLarge?.fontSize,
+          tooltip: removeEnhancementLabel,
+          enabledColor: theme.colorScheme.primary,
+          icon: enhancement.icon,
+          onTap: () async {
+            appModel.removeFieldEnhancement(
+              mapping: mapping,
+              field: field,
+              slotNumber: slotNumber,
+            );
+            setState(() {});
+          },
+        ),
       );
     }
   }
@@ -474,7 +511,10 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
             (field == Field.sentence || field == Field.meaning) ? null : 1,
         controller: creatorModel.getFieldController(field),
         decoration: InputDecoration(
-          prefixIcon: Icon(field.icon(appModel)),
+          prefixIcon: Icon(
+            field.icon(appModel),
+            size: textTheme.titleLarge?.fontSize,
+          ),
           suffixIcon: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             mainAxisSize: MainAxisSize.min,

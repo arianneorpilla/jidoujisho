@@ -23,6 +23,7 @@ import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/language.dart';
 import 'package:yuuna/media.dart';
+import 'package:yuuna/models.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/src/creator/actions/instant_export_action.dart';
 import 'package:yuuna/utils.dart';
@@ -140,6 +141,13 @@ class AppModel with ChangeNotifier {
   /// user-defined order in the dictionary menu.
   List<AnkiMapping> get mappings =>
       _database.ankiMappings.where().sortByOrder().findAllSync();
+
+  /// Used to check whether or not the creator is currently in the navigation
+  /// stack.
+  bool get isCreatorOpen => _isCreatorOpen;
+  bool _isCreatorOpen = false;
+
+  /// Used to indicate that the
 
   /// Update the user-defined order of a given dictionary in the database.
   /// See the dictionary dialog's [ReorderableListView] for usage.
@@ -292,15 +300,19 @@ class AppModel with ChangeNotifier {
       ],
       Field.meaning: [
         ClearFieldEnhancement(field: Field.meaning),
+        TextSegmentationEnhancement(field: Field.meaning),
       ],
       Field.reading: [
         ClearFieldEnhancement(field: Field.reading),
       ],
       Field.sentence: [
         ClearFieldEnhancement(field: Field.sentence),
+        TextSegmentationEnhancement(field: Field.sentence),
       ],
       Field.word: [
         ClearFieldEnhancement(field: Field.word),
+        SearchDictionaryEnhancement(),
+        MassifExampleSentencesEnhancement(),
       ],
     };
 
@@ -1372,20 +1384,34 @@ class AppModel with ChangeNotifier {
 
   /// A helper function for opening the creator from any page in the
   /// application for card export purposes.
-  Future<void> openCreator() async {
+  Future<void> openCreator({
+    required WidgetRef ref,
+    required bool killOnPop,
+    CreatorContext? creatorContext,
+  }) async {
     List<String> decks = await getDecks();
 
+    CreatorModel creatorModel = ref.read(creatorProvider);
+    creatorModel.clearAll();
+    if (creatorContext != null) {
+      creatorModel.copyContext(creatorContext);
+    }
+
+    _isCreatorOpen = true;
     await Navigator.push(
       _navigatorKey.currentContext!,
       PageRouteBuilder(
         pageBuilder: (context, animation1, animation2) => CreatorPage(
           decks: decks,
           editMode: false,
+          killOnPop: killOnPop,
         ),
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
+        settings: RouteSettings(name: (CreatorPage).toString()),
       ),
     );
+    _isCreatorOpen = false;
   }
 
   /// A helper function for opening the creator from any page in the
@@ -1399,6 +1425,7 @@ class AppModel with ChangeNotifier {
         pageBuilder: (context, animation1, animation2) => CreatorPage(
           decks: decks,
           editMode: true,
+          killOnPop: false,
         ),
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
@@ -1425,6 +1452,58 @@ class AppModel with ChangeNotifier {
         ),
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
+      ),
+    );
+  }
+
+  /// A helper function for opening a text segmentation dialog.
+  Future<void> openTextSegmentationDialog({
+    required String sourceText,
+    required Function(String) onSelect,
+    required Function(String) onSearch,
+  }) async {
+    if (sourceText.trim().isEmpty) {
+      return;
+    }
+
+    List<String> segmentedText = await targetLanguage.textToWords(sourceText);
+
+    await showDialog(
+      context: _navigatorKey.currentContext!,
+      builder: (context) => TextSegmentationDialogPage(
+        sourceText: sourceText,
+        segmentedText: segmentedText,
+        onSelect: onSelect,
+        onSearch: onSearch,
+      ),
+    );
+  }
+
+  /// A helper function for opening an example sentence dialog.
+  Future<void> openExampleSentenceDialog({
+    required List<String> exampleSentences,
+    required Function(String) onSelect,
+  }) async {
+    await showDialog(
+      context: _navigatorKey.currentContext!,
+      builder: (context) => ExampleSentencesDialogPage(
+        exampleSentences: exampleSentences,
+        onSelect: onSelect,
+      ),
+    );
+  }
+
+  /// A helper function for opening an example sentence dialog for sentences
+  /// returned from Massif.
+  Future<void> openMassifSentenceDialog({
+    required List<MassifResult> exampleSentences,
+    required Function(String) onSelect,
+  }) async {
+    await showDialog(
+      context: _navigatorKey.currentContext!,
+      builder: (context) => MassifSentencesDialogPage(
+        exampleSentences: exampleSentences,
+        onSelect: onSelect,
       ),
     );
   }

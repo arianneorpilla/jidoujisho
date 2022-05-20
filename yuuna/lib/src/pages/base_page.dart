@@ -26,6 +26,10 @@ class BasePageState<T extends BasePage> extends ConsumerState<T> {
   /// listening to state updates. Useful when accessing state from [initState].
   AppModel get appModelNoUpdate => ref.read(appProvider);
 
+  /// Access the global model responsible for creator state management. without
+  /// listening to state updates. Useful when accessing state from [initState].
+  CreatorModel get creatorModelNoUpdate => ref.read(creatorProvider);
+
   /// Shortcut for accessing the app-wide theme-defined text theme.
   TextTheme get textTheme => Theme.of(context).textTheme;
 

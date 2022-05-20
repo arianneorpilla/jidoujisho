@@ -76,7 +76,7 @@ class _HomePageState extends BasePageState<HomePage> {
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
-        resizeToAvoidBottomInset: false,
+        resizeToAvoidBottomInset: true,
         appBar: buildAppBar(),
         body: buildBody(),
         bottomNavigationBar: buildBottomNavigationBar(),
@@ -171,7 +171,10 @@ class _HomePageState extends BasePageState<HomePage> {
     return JidoujishoIconButton(
       tooltip: cardCreatorLabel,
       icon: Icons.note_add_outlined,
-      onTap: appModel.openCreator,
+      onTap: () => appModel.openCreator(
+        ref: ref,
+        killOnPop: false,
+      ),
     );
   }
 

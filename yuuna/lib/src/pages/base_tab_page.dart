@@ -77,7 +77,6 @@ abstract class BaseTabPageState<T extends BaseTabPage> extends BasePageState {
       margins: const EdgeInsets.symmetric(horizontal: 6),
       width: double.maxFinite,
       debounceDelay: const Duration(milliseconds: 500),
-      transition: SlideFadeFloatingSearchBarTransition(),
       accentColor: theme.focusColor,
       automaticallyImplyBackButton: false,
     );

@@ -52,7 +52,7 @@ class _QuickActionsPickerDialogPageState
 
     return SizedBox(
       width: double.maxFinite,
-      child: Scrollbar(
+      child: RawScrollbar(
         controller: contentController,
         child: SingleChildScrollView(
           controller: contentController,
@@ -85,7 +85,7 @@ class _QuickActionsPickerDialogPageState
   }
 
   Widget buildQuickActionTiles(List<QuickAction> quickActions) {
-    return Scrollbar(
+    return RawScrollbar(
       controller: _scrollController,
       child: ListView.builder(
         controller: _scrollController,

@@ -425,7 +425,7 @@ packages:
     source: hosted
     version: "1.1.0"
   http:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: http
       url: "https://pub.dartlang.org"
@@ -546,12 +546,10 @@ packages:
   marquee:
     dependency: "direct main"
     description:
-      path: "."
-      ref: master
-      resolved-ref: "7b7491c36d539f426daed0edc0f243c312b96bcb"
-      url: "https://github.com/ymback/marquee"
-    source: git
-    version: "2.2.1"
+      name: marquee
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.2.2"
   matcher:
     dependency: transitive
     description:
@@ -806,6 +804,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.2.0"
+  receive_sharing_intent:
+    dependency: "direct main"
+    description:
+      name: receive_sharing_intent
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.4.5"
   reorderables:
     dependency: "direct main"
     description:

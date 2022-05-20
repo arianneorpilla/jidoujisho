@@ -137,7 +137,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
   Widget buildMappingList() {
     List<AnkiMapping> mappings = appModel.mappings;
 
-    return Scrollbar(
+    return RawScrollbar(
       controller: _scrollController,
       child: ReorderableListView.builder(
         scrollController: _scrollController,
@@ -361,7 +361,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
 
     return SizedBox(
       width: double.maxFinite,
-      child: Scrollbar(
+      child: RawScrollbar(
         controller: contentController,
         child: SingleChildScrollView(
           controller: contentController,

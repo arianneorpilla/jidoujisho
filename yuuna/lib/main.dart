@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_process_text/flutter_process_text.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:spaces/spaces.dart';
+import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/pages.dart';
 
@@ -49,11 +51,9 @@ class JidoujishoApp extends ConsumerStatefulWidget {
 }
 
 class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
-  String inputText = '';
-
   final navigatorKey = GlobalKey<NavigatorState>();
 
-  late final StreamSubscription _processText;
+  late final StreamSubscription _sharedTextIntent;
 
   @override
   void initState() {
@@ -65,6 +65,7 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      /// For processing text received via the global context menu option.
       String? searchTerm = await FlutterProcessText.refreshProcessText;
       if (searchTerm != null) {
         appModel.openRecursiveDictionarySearch(
@@ -72,13 +73,33 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
           killOnPop: true,
         );
       }
+
+      /// For receiving shared text when the app is in the background.
+      _sharedTextIntent = ReceiveSharingIntent.getTextStream().listen((text) {
+        appModel.openCreator(
+          creatorContext: CreatorContext(sentence: text),
+          killOnPop: true,
+          ref: ref,
+        );
+      }, onError: (err) {});
+
+      /// For receiving shared text when the app is initially launched.
+      ReceiveSharingIntent.getInitialText().then((text) {
+        if (text != null) {
+          appModel.openCreator(
+            creatorContext: CreatorContext(sentence: text),
+            killOnPop: true,
+            ref: ref,
+          );
+        }
+      });
     });
   }
 
   @override
   void dispose() {
     super.dispose();
-    _processText.cancel();
+    _sharedTextIntent.cancel();
   }
 
   @override
@@ -104,6 +125,9 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
 
   /// Responsible for managing global app-wide state.
   AppModel get appModel => ref.watch(appProvider);
+
+  /// Responsible for managing global app-wide state.
+  CreatorModel get creatorModel => ref.watch(creatorProvider);
 
   /// The application will open to this page upon startup.
   Widget get home => const HomePage();

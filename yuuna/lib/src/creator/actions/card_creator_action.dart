@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
+import 'package:yuuna/pages.dart';
 import 'package:yuuna/src/dictionary/dictionary_entry.dart';
 
 /// An enhancement used effectively as a shortcut for opening the Card Creator.
@@ -83,15 +84,27 @@ class CardCreatorAction extends QuickAction {
 
     String meaning = meaningBuffer.toString().trim();
 
-    creatorModel.clearAll();
-    creatorModel.copyContext(
-      CreatorContext(
-        word: word,
-        reading: reading,
-        meaning: meaning,
-      ),
-    );
-
-    appModel.openCreator();
+    if (appModel.isCreatorOpen) {
+      creatorModel.copyContext(
+        CreatorContext(
+          word: word,
+          reading: reading,
+          meaning: meaning,
+        ),
+      );
+      Navigator.of(context).popUntil(
+        (route) => route.settings.name == (CreatorPage).toString(),
+      );
+    } else {
+      appModel.openCreator(
+        ref: ref,
+        killOnPop: false,
+        creatorContext: CreatorContext(
+          word: word,
+          reading: reading,
+          meaning: meaning,
+        ),
+      );
+    }
   }
 }

@@ -40,6 +40,8 @@ class JidoujishoLocalisations {
     'dialog_create': 'CREATE',
     'dialog_delete': 'DELETE',
     'dialog_cancel': 'CANCEL',
+    'dialog_select': 'SELECT',
+    'dialog_search': 'SEARCH',
     'dialog_save': 'SAVE',
     'dialog_launch_ankidroid': 'LAUNCH ANKIDROID',
     'dictionaries_delete_confirmation':

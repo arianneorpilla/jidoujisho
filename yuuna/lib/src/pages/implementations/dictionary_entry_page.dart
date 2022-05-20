@@ -47,36 +47,39 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
   @override
   void initState() {
     super.initState();
-    tags.add(
-      JidoujishoTag(
-        text: widget.entry.dictionaryName,
-        message: dictionaryNameNotes.replaceAll(
-          '%dictionaryName%',
-          widget.entry.dictionaryName,
-        ),
-        backgroundColor: Colors.red.shade900,
-      ),
-    );
-    tags.addAll(widget.entry.meaningTags.map((tagName) {
-      if (tagName.isNotEmpty) {
-        DictionaryTag tag = appModelNoUpdate.getDictionaryTag(
-          dictionaryName: widget.entry.dictionaryName,
-          tagName: tagName,
-        );
-
-        return JidoujishoTag(
-          text: tag.name,
-          message: tag.notes,
-          backgroundColor: tag.color,
-        );
-      } else {
-        return const SizedBox.shrink();
-      }
-    }).toList());
   }
 
   @override
   Widget build(BuildContext context) {
+    if (tags.isEmpty) {
+      tags.add(
+        JidoujishoTag(
+          text: widget.entry.dictionaryName,
+          message: dictionaryNameNotes.replaceAll(
+            '%dictionaryName%',
+            widget.entry.dictionaryName,
+          ),
+          backgroundColor: Colors.red.shade900,
+        ),
+      );
+      tags.addAll(widget.entry.meaningTags.map((tagName) {
+        if (tagName.isNotEmpty) {
+          DictionaryTag tag = appModelNoUpdate.getDictionaryTag(
+            dictionaryName: widget.entry.dictionaryName,
+            tagName: tagName,
+          );
+
+          return JidoujishoTag(
+            text: tag.name,
+            message: tag.notes,
+            backgroundColor: tag.color,
+          );
+        } else {
+          return const SizedBox.shrink();
+        }
+      }).toList());
+    }
+
     return Padding(
       padding: EdgeInsets.only(
         top: Spacing.of(context).spaces.extraSmall,
@@ -100,6 +103,7 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
           children: [
             Padding(
               padding: EdgeInsets.only(
+                top: Spacing.of(context).spaces.small,
                 left: Spacing.of(context).spaces.normal,
               ),
               child: ListView.builder(
@@ -109,12 +113,12 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
                 itemBuilder: (context, index) {
                   if (widget.entry.meanings.length != 1) {
                     return SelectableText(
-                      '• ${widget.entry.meanings[index]}',
+                      '• ${widget.entry.meanings[index].trim()}',
                       selectionControls: selectionControls,
                     );
                   } else {
                     return SelectableText(
-                      widget.entry.meanings.first,
+                      widget.entry.meanings.first.trim(),
                       selectionControls: selectionControls,
                     );
                   }

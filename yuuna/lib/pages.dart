@@ -1,6 +1,7 @@
 export 'src/pages/implementations/creator_page.dart';
 export 'src/pages/implementations/creator_quick_actions_page.dart';
 export 'src/pages/implementations/enhancements_picker_dialog_page.dart';
+export 'src/pages/implementations/example_sentences_dialog_page.dart';
 export 'src/pages/implementations/quick_actions_picker_dialog_page.dart';
 export 'src/pages/implementations/dictionary_word_page.dart';
 export 'src/pages/implementations/dictionary_entry_page.dart';
@@ -9,6 +10,7 @@ export 'src/pages/implementations/dictionary_dialog_page.dart';
 export 'src/pages/implementations/dictionary_dialog_delete_page.dart';
 export 'src/pages/implementations/dictionary_dialog_import_page.dart';
 export 'src/pages/implementations/language_dialog_page.dart';
+export 'src/pages/implementations/massif_sentences_dialog_page.dart';
 export 'src/pages/implementations/profiles_dialog_page.dart';
 export 'src/pages/implementations/home_dictionary_page.dart';
 export 'src/pages/implementations/home_player_page.dart';
@@ -16,6 +18,7 @@ export 'src/pages/implementations/home_reader_page.dart';
 export 'src/pages/implementations/home_viewer_page.dart';
 export 'src/pages/implementations/home_page.dart';
 export 'src/pages/implementations/recursive_dictionary_page.dart';
+export 'src/pages/implementations/text_segmentation_dialog_page.dart';
 
 export 'src/pages/base_page.dart';
 export 'src/pages/base_tab_page.dart';

@@ -46,7 +46,7 @@ class _CreatorQuickActionsPageState extends BasePageState {
 
     return SizedBox(
       width: double.maxFinite,
-      child: Scrollbar(
+      child: RawScrollbar(
         controller: contentController,
         child: SingleChildScrollView(
           controller: contentController,
@@ -128,6 +128,7 @@ class _CreatorQuickActionsPageState extends BasePageState {
 
     if (action == null) {
       return JidoujishoIconButton(
+        size: textTheme.titleLarge?.fontSize,
         tooltip: assignActionLabel,
         icon: Icons.add_circle,
         onTap: () async {
@@ -144,6 +145,7 @@ class _CreatorQuickActionsPageState extends BasePageState {
       );
     } else {
       return JidoujishoIconButton(
+        size: textTheme.titleLarge?.fontSize,
         tooltip: removeActionLabel,
         enabledColor: theme.colorScheme.primary,
         icon: action.icon,

@@ -82,7 +82,7 @@ class _DictionaryDialogPageState extends BasePageState {
 
     return SizedBox(
       width: double.maxFinite,
-      child: Scrollbar(
+      child: RawScrollbar(
         controller: contentController,
         child: SingleChildScrollView(
           controller: contentController,
@@ -117,7 +117,7 @@ class _DictionaryDialogPageState extends BasePageState {
   }
 
   Widget buildDictionaryList(List<Dictionary> dictionaries) {
-    return Scrollbar(
+    return RawScrollbar(
       controller: _scrollController,
       child: ReorderableListView.builder(
         scrollController: _scrollController,

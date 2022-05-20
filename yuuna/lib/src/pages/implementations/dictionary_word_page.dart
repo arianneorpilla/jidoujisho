@@ -12,6 +12,8 @@ class DictionaryWordPage extends BasePage {
   const DictionaryWordPage({
     required this.entries,
     required this.onTextSelect,
+    required this.expandableControllers,
+    required this.dictionaryHiddens,
     super.key,
   });
 
@@ -21,6 +23,12 @@ class DictionaryWordPage extends BasePage {
   /// Action to be done upon text select made when hovering over the text
   /// elements contained in this widget.
   final Function(String) onTextSelect;
+
+  /// Controls expandables by dictionary name.
+  final Map<String, ExpandableController> expandableControllers;
+
+  /// Used to hide entries by dictionary name.
+  final Map<String, bool> dictionaryHiddens;
 
   @override
   BasePageState<DictionaryWordPage> createState() => _DictionaryWordPageState();
@@ -39,51 +47,43 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
   String get word => widget.entries.first.word;
   String get reading => widget.entries.first.reading;
 
-  final Map<String, ExpandableController> _expandableControllers = {};
-  final Map<String, bool> _dictionaryHiddens = {};
-
-  @override
-  void initState() {
-    super.initState();
-    Set<String> dictionaryNames =
-        widget.entries.map((entry) => entry.dictionaryName).toSet();
-
-    for (String dictionaryName in dictionaryNames) {
-      Dictionary dictionary = appModelNoUpdate.getDictionary(dictionaryName);
-      _expandableControllers[dictionaryName] = ExpandableController(
-        initialExpanded: !dictionary.collapsed,
-      );
-      _dictionaryHiddens[dictionaryName] = dictionary.hidden;
-    }
-  }
+  List<Widget>? tags;
 
   @override
   Widget build(BuildContext context) {
-    Set<DictionaryPair> pairs = {};
+    if (tags == null) {
+      tags = [];
 
-    for (DictionaryEntry entry in widget.entries) {
-      for (String tag in entry.wordTags) {
-        pairs.add(DictionaryPair(word: entry.dictionaryName, reading: tag));
+      Set<DictionaryPair> pairs = {};
+
+      for (DictionaryEntry entry in widget.entries) {
+        for (String tag in entry.wordTags) {
+          pairs.add(
+            DictionaryPair(
+              word: entry.dictionaryName,
+              reading: tag,
+            ),
+          );
+        }
       }
+
+      tags!.addAll(pairs.map((pair) {
+        if (pair.reading.isNotEmpty) {
+          DictionaryTag tag = appModel.getDictionaryTag(
+            dictionaryName: pair.word,
+            tagName: pair.reading,
+          );
+
+          return JidoujishoTag(
+            text: tag.name,
+            message: tag.notes,
+            backgroundColor: tag.color,
+          );
+        } else {
+          return const SizedBox.shrink();
+        }
+      }).toList());
     }
-
-    List<Widget> tags = [];
-    tags.addAll(pairs.map((pair) {
-      if (pair.reading.isNotEmpty) {
-        DictionaryTag tag = appModel.getDictionaryTag(
-          dictionaryName: pair.word,
-          tagName: pair.reading,
-        );
-
-        return JidoujishoTag(
-          text: tag.name,
-          message: tag.notes,
-          backgroundColor: tag.color,
-        );
-      } else {
-        return const SizedBox.shrink();
-      }
-    }).toList());
 
     List<Widget> children = [
       Row(
@@ -122,7 +122,7 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
         ],
       ),
       const Space.normal(),
-      Wrap(children: tags),
+      Wrap(children: tags!),
       const Space.normal(),
       Padding(
         padding: Spacing.of(context).insets.horizontal.small,
@@ -133,13 +133,13 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
           itemBuilder: (context, index) {
             DictionaryEntry entry = widget.entries[index];
 
-            if (_dictionaryHiddens[entry.dictionaryName]!) {
+            if (widget.dictionaryHiddens[entry.dictionaryName]!) {
               return const SizedBox.shrink();
             }
 
             return DictionaryEntryPage(
               expandableController:
-                  _expandableControllers[entry.dictionaryName]!,
+                  widget.expandableControllers[entry.dictionaryName]!,
               entry: entry,
               onTextSelect: widget.onTextSelect,
             );
@@ -204,10 +204,11 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
       return Padding(
         padding: Spacing.of(context).insets.onlyLeft.semiSmall,
         child: JidoujishoIconButton(
+          busy: true,
           shapeBorder: const RoundedRectangleBorder(),
           backgroundColor:
               Theme.of(context).appBarTheme.foregroundColor?.withOpacity(0.1),
-          size: 16,
+          size: Spacing.of(context).spaces.semiBig,
           tooltip: quickAction.getLocalisedLabel(appModel),
           icon: quickAction.icon,
           onTap: () async {
