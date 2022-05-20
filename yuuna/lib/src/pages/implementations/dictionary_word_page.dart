@@ -11,7 +11,8 @@ class DictionaryWordPage extends BasePage {
   /// Create the widget for a dictionary word.
   const DictionaryWordPage({
     required this.entries,
-    required this.onTextSelect,
+    required this.onSearch,
+    required this.onStash,
     required this.expandableControllers,
     required this.dictionaryHiddens,
     super.key,
@@ -20,9 +21,11 @@ class DictionaryWordPage extends BasePage {
   /// The result made from a dictionary database search.
   final List<DictionaryEntry> entries;
 
-  /// Action to be done upon text select made when hovering over the text
-  /// elements contained in this widget.
-  final Function(String) onTextSelect;
+  /// Action to be done upon selecting the search option.
+  final Function(String) onSearch;
+
+  /// Action to be done upon selecting the stash option.
+  final Function(String) onStash;
 
   /// Controls expandables by dictionary name.
   final Map<String, ExpandableController> expandableControllers;
@@ -36,12 +39,19 @@ class DictionaryWordPage extends BasePage {
 
 class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
   String get searchLabel => appModel.translate('search');
+  String get stashLabel => appModel.translate('stash');
   String get dictionaryNameNotes => appModel.translate('dictionary_name_notes');
 
   MaterialTextSelectionControls get selectionControls =>
       JidoujishoTextSelectionControls(
-        customAction: widget.onTextSelect,
-        customActionLabel: searchLabel,
+        searchAction: widget.onSearch,
+        searchActionLabel: searchLabel,
+        stashAction: widget.onStash,
+        stashActionLabel: stashLabel,
+        allowCopy: true,
+        allowSelectAll: true,
+        allowCut: false,
+        allowPaste: false,
       );
 
   String get word => widget.entries.first.word;
@@ -141,7 +151,8 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
               expandableController:
                   widget.expandableControllers[entry.dictionaryName]!,
               entry: entry,
-              onTextSelect: widget.onTextSelect,
+              onSearch: widget.onSearch,
+              onStash: widget.onStash,
             );
           },
         ),

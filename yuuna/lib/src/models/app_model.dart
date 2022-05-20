@@ -12,6 +12,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:isar/isar.dart';
 import 'package:intl/intl.dart' as intl;
@@ -25,7 +26,6 @@ import 'package:yuuna/language.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/pages.dart';
-import 'package:yuuna/src/creator/actions/instant_export_action.dart';
 import 'package:yuuna/utils.dart';
 
 /// Schemas used in Isar database.
@@ -131,6 +131,9 @@ class AppModel with ChangeNotifier {
 
   /// Maximum number of search history items.
   final int maximumSearchHistoryItems = 100;
+
+  /// Used as the unique key for the [SearchHistory] item used for the Stash.
+  final String stashKey = 'stash';
 
   /// Returns all dictionaries imported into the database. Sorted by the
   /// user-defined order in the dictionary menu.
@@ -308,11 +311,15 @@ class AppModel with ChangeNotifier {
       Field.sentence: [
         ClearFieldEnhancement(field: Field.sentence),
         TextSegmentationEnhancement(field: Field.sentence),
+        PickFromStashEnhancement(field: Field.sentence),
+        PopFromStashEnhancement(field: Field.sentence),
       ],
       Field.word: [
         ClearFieldEnhancement(field: Field.word),
         SearchDictionaryEnhancement(),
         MassifExampleSentencesEnhancement(),
+        PickFromStashEnhancement(field: Field.word),
+        PopFromStashEnhancement(field: Field.word),
       ],
     };
 
@@ -338,6 +345,7 @@ class AppModel with ChangeNotifier {
     final List<QuickAction> availableQuickActions = [
       CardCreatorAction(),
       InstantExportAction(),
+      AddToStashEnhancement(),
     ];
 
     quickActions = Map<String, QuickAction>.unmodifiable(
@@ -1433,6 +1441,22 @@ class AppModel with ChangeNotifier {
     );
   }
 
+  /// A helper function for opening the creator from any page in the
+  /// application for editing purposes.
+  Future<void> openStash({
+    required Function(String) onSelect,
+  }) async {
+    List<String> stashContents = getStash();
+
+    await showDialog(
+      context: _navigatorKey.currentContext!,
+      builder: (context) => PickFromStashDialogPage(
+        stashContents: stashContents,
+        onSelect: onSelect,
+      ),
+    );
+  }
+
   /// A helper function for doing a recursive dictionary search.
   Future<void> openRecursiveDictionarySearch({
     required String searchTerm,
@@ -1658,12 +1682,80 @@ class AppModel with ChangeNotifier {
     });
   }
 
+  /// Clear the search history with the given [uniqueKey].
+  void clearSearchHistory({
+    required String uniqueKey,
+  }) {
+    initialiseSearchHistoryIfMissing(uniqueKey: uniqueKey);
+
+    _database.writeTxnSync((isar) {
+      SearchHistory history =
+          isar.searchHistorys.getByUniqueKeySync(uniqueKey)!;
+
+      history.items = [];
+      isar.searchHistorys.putSync(history);
+    });
+  }
+
   /// Get the search history for a given collection named [uniqueKey].
   List<String> getSearchHistory({required String uniqueKey}) {
     initialiseSearchHistoryIfMissing(uniqueKey: uniqueKey);
     SearchHistory history =
         _database.searchHistorys.getByUniqueKeySync(uniqueKey)!;
     return history.items;
+  }
+
+  /// Adds the [terms] to the Stash and shows a message indicating the addition.
+  void addToStash({
+    required List<String> terms,
+  }) async {
+    if (terms.isEmpty) {
+      return;
+    }
+
+    for (String term in terms) {
+      addToSearchHistory(
+        uniqueKey: stashKey,
+        searchTerm: term,
+      );
+    }
+
+    if (terms.length == 1) {
+      String stashAddedSingle =
+          translate('stash_added_single').replaceAll('%term%', terms.first);
+      Fluttertoast.showToast(
+        msg: stashAddedSingle,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+      );
+    } else {
+      String stashAddedMultiple = translate('stash_added_multiple');
+      Fluttertoast.showToast(
+        msg: stashAddedMultiple,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+      );
+    }
+  }
+
+  /// Remove a certain [term] from the Stash.
+  Future<void> removeFromStash({
+    required String term,
+  }) async {
+    removeFromSearchHistory(
+      uniqueKey: stashKey,
+      searchTerm: term,
+    );
+  }
+
+  /// Clear the contents of the Stash.
+  void clearStash() {
+    clearSearchHistory(uniqueKey: stashKey);
+  }
+
+  /// Get the contents of the Stash.
+  List<String> getStash() {
+    return getSearchHistory(uniqueKey: stashKey);
   }
 
   /// Get the [DictionaryTag] given details from a [DictionaryEntry].

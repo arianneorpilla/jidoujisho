@@ -44,6 +44,8 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
   String get removeEnhancementLabel => appModel.translate('remove_enhancement');
   String get editActionsLabel => appModel.translate('edit_actions');
   String get backLabel => appModel.translate('back');
+  String get searchLabel => appModel.translate('search');
+  String get stashLabel => appModel.translate('stash');
 
   /// Get the export details pertaining to the fields.
   ExportDetails get exportDetails => creatorModel.getExportDetails(ref);
@@ -478,6 +480,23 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
     }
   }
 
+  MaterialTextSelectionControls get selectionControls =>
+      JidoujishoTextSelectionControls(
+        searchAction: (searchTerm) => appModel.openRecursiveDictionarySearch(
+          searchTerm: searchTerm,
+          killOnPop: false,
+        ),
+        searchActionLabel: searchLabel,
+        stashAction: (searchTerm) {
+          appModel.addToStash(terms: [searchTerm]);
+        },
+        stashActionLabel: stashLabel,
+        allowCopy: true,
+        allowSelectAll: true,
+        allowCut: false,
+        allowPaste: false,
+      );
+
   Widget buildTextField({
     required AnkiMapping mapping,
     required Field field,
@@ -501,6 +520,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
           labelText: field.label(appModel),
           hintText: field.hint(appModel),
         ),
+        selectionControls: selectionControls,
       );
     } else {
       return TextFormField(
@@ -526,6 +546,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
           labelText: field.label(appModel),
           hintText: field.hint(appModel),
         ),
+        selectionControls: selectionControls,
       );
     }
   }

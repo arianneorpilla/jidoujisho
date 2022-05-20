@@ -208,10 +208,13 @@ class _RecursiveDictionaryPageState
     return ClipRect(
       child: DictionaryResultPage(
         result: _result!,
-        onTextSelect: (searchTerm) => appModel.openRecursiveDictionarySearch(
+        onSearch: (searchTerm) => appModel.openRecursiveDictionarySearch(
           searchTerm: searchTerm,
           killOnPop: false,
         ),
+        onStash: (searchTerm) {
+          appModel.addToStash(terms: [searchTerm]);
+        },
         getCurrentSearchTerm: () => _controller.query,
       ),
     );

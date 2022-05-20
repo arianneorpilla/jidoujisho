@@ -11,7 +11,8 @@ class DictionaryResultPage extends BasePage {
   /// Create the widget of a [DictionaryResult].
   const DictionaryResultPage({
     required this.result,
-    required this.onTextSelect,
+    required this.onSearch,
+    required this.onStash,
     required this.getCurrentSearchTerm,
     super.key,
   });
@@ -19,9 +20,11 @@ class DictionaryResultPage extends BasePage {
   /// The result made from a dictionary database search.
   final DictionaryResult result;
 
-  /// Action to be done upon text select made when hovering over the text
-  /// elements contained in this widget.
-  final Function(String) onTextSelect;
+  /// Action to be done upon selecting the search option.
+  final Function(String) onSearch;
+
+  /// Action to be done upon selecting the stash option.
+  final Function(String) onStash;
 
   /// Used to check if the current search term is still the same. Used to
   /// add to search history without adding too many duplicate partial search
@@ -35,28 +38,33 @@ class DictionaryResultPage extends BasePage {
 
 class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
   String get searchLabel => appModel.translate('search');
+  String get stashLabel => appModel.translate('stash');
 
   MaterialTextSelectionControls get selectionControls =>
       JidoujishoTextSelectionControls(
-        customAction: widget.onTextSelect,
-        customActionLabel: searchLabel,
+        searchAction: widget.onSearch,
+        searchActionLabel: searchLabel,
+        stashAction: widget.onStash,
+        stashActionLabel: stashLabel,
+        allowCopy: true,
+        allowSelectAll: true,
+        allowCut: false,
+        allowPaste: false,
       );
 
   Map<String, int>? dictionaryOrderCache;
 
   @override
   Widget build(BuildContext context) {
-    if (dictionaryOrderCache == null) {
-      dictionaryOrderCache = Map<String, int>.fromEntries(
-        appModel.dictionaries.map(
-          (dictionary) => MapEntry(dictionary.dictionaryName, dictionary.order),
-        ),
-      );
+    dictionaryOrderCache = Map<String, int>.fromEntries(
+      appModel.dictionaries.map(
+        (dictionary) => MapEntry(dictionary.dictionaryName, dictionary.order),
+      ),
+    );
 
-      for (List<DictionaryEntry> entriesGroup in widget.result.mapping) {
-        entriesGroup.sort((a, b) => (dictionaryOrderCache![a.dictionaryName]!)
-            .compareTo(dictionaryOrderCache![b.dictionaryName]!));
-      }
+    for (List<DictionaryEntry> entriesGroup in widget.result.mapping) {
+      entriesGroup.sort((a, b) => (dictionaryOrderCache![a.dictionaryName]!)
+          .compareTo(dictionaryOrderCache![b.dictionaryName]!));
     }
 
     Future.delayed(const Duration(milliseconds: 1000), () {
@@ -93,7 +101,8 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
 
         return DictionaryWordPage(
           entries: entries,
-          onTextSelect: widget.onTextSelect,
+          onSearch: widget.onSearch,
+          onStash: widget.onStash,
           expandableControllers: expandableControllers,
           dictionaryHiddens: dictionaryHiddens,
         );

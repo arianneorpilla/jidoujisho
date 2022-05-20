@@ -51,6 +51,7 @@ dependencies:
   receive_sharing_intent: ^1.4.5
   reorderables: ^0.4.4
   settings_ui: ^2.0.2
+  share_plus: ^4.0.4
   spaces:
     git:
       url: https://github.com/triskell/spaces

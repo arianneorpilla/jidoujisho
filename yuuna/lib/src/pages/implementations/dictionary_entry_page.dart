@@ -11,7 +11,8 @@ class DictionaryEntryPage extends BasePage {
   /// Create the widget for a dictionary entry.
   const DictionaryEntryPage({
     required this.entry,
-    required this.onTextSelect,
+    required this.onSearch,
+    required this.onStash,
     required this.expandableController,
     super.key,
   });
@@ -19,9 +20,11 @@ class DictionaryEntryPage extends BasePage {
   /// The entry particular to this widget.
   final DictionaryEntry entry;
 
-  /// Action to be done upon text select made when hovering over the text
-  /// elements contained in this widget.
-  final Function(String) onTextSelect;
+  /// Action to be done upon selecting the search option.
+  final Function(String) onSearch;
+
+  /// Action to be done upon selecting the stash option.
+  final Function(String) onStash;
 
   /// Controller specific to a dictionary name.
   final ExpandableController expandableController;
@@ -33,13 +36,20 @@ class DictionaryEntryPage extends BasePage {
 
 class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
   String get searchLabel => appModelNoUpdate.translate('search');
+  String get stashLabel => appModelNoUpdate.translate('stash');
   String get dictionaryNameNotes =>
       appModelNoUpdate.translate('dictionary_name_notes');
 
   MaterialTextSelectionControls get selectionControls =>
       JidoujishoTextSelectionControls(
-        customAction: widget.onTextSelect,
-        customActionLabel: searchLabel,
+        searchAction: widget.onSearch,
+        searchActionLabel: searchLabel,
+        stashAction: widget.onStash,
+        stashActionLabel: stashLabel,
+        allowCopy: true,
+        allowSelectAll: true,
+        allowCut: false,
+        allowPaste: false,
       );
 
   final List<Widget> tags = [];

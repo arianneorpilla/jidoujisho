@@ -11,6 +11,7 @@ export 'src/pages/implementations/dictionary_dialog_delete_page.dart';
 export 'src/pages/implementations/dictionary_dialog_import_page.dart';
 export 'src/pages/implementations/language_dialog_page.dart';
 export 'src/pages/implementations/massif_sentences_dialog_page.dart';
+export 'src/pages/implementations/pick_from_stash_dialog_page.dart';
 export 'src/pages/implementations/profiles_dialog_page.dart';
 export 'src/pages/implementations/home_dictionary_page.dart';
 export 'src/pages/implementations/home_player_page.dart';

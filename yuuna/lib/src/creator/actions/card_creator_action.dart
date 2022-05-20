@@ -2,9 +2,9 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yuuna/creator.dart';
+import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/pages.dart';
-import 'package:yuuna/src/dictionary/dictionary_entry.dart';
 
 /// An enhancement used effectively as a shortcut for opening the Card Creator.
 class CardCreatorAction extends QuickAction {

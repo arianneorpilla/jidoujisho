@@ -2,34 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
-import 'package:yuuna/dictionary.dart';
 
-/// An enhancement used effectively as a shortcut for exporting a card.
-class InstantExportAction extends QuickAction {
+/// An enhancement used to view and manage the Stash.
+class PickFromStashEnhancement extends Enhancement {
   /// Initialise this enhancement with the hardset parameters.
-  InstantExportAction()
+  PickFromStashEnhancement({required super.field})
       : super(
           uniqueKey: key,
-          label: 'Instant Export',
-          description:
-              'Export a card with the selected dictionary entry parameters.',
-          icon: Icons.send,
+          label: 'Pick From Stash',
+          description: 'View and manage previously stashed text.',
+          icon: Icons.inventory_2,
         );
 
   /// Used to identify this enhancement and to allow a constant value for the
   /// default mappings value of [AnkiMapping].
-  static const String key = 'instant_export';
+  static const String key = 'pick_from_stash';
 
   @override
-  Future<void> executeAction({
+  Future<void> enhanceCreatorParams({
     required BuildContext context,
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,
-    required String word,
-    required String reading,
-    required List<DictionaryEntry> entries,
+    required EnhancementTriggerCause cause,
   }) async {
-    debugPrint('todo');
+    appModel.openStash(
+      onSelect: (selection) {
+        creatorModel.getFieldController(field).text = selection;
+      },
+    );
   }
 }

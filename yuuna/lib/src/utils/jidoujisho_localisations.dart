@@ -35,13 +35,16 @@ class JidoujishoLocalisations {
     'app_locale_warning': 'Community addons and enhancements are managed '
         'by their respective developers, and these may appear in their '
         'original language.',
+    'dialog_export': 'EXPORT',
     'dialog_import': 'IMPORT',
     'dialog_close': 'CLOSE',
+    'dialog_clear': 'CLEAR',
     'dialog_create': 'CREATE',
     'dialog_delete': 'DELETE',
     'dialog_cancel': 'CANCEL',
     'dialog_select': 'SELECT',
     'dialog_search': 'SEARCH',
+    'dialog_pop': 'POP',
     'dialog_save': 'SAVE',
     'dialog_launch_ankidroid': 'LAUNCH ANKIDROID',
     'dictionaries_delete_confirmation':
@@ -163,5 +166,12 @@ class JidoujishoLocalisations {
     'remove_action': 'Remove Action',
     'assign_action': 'Assign Action',
     'dictionary_name_notes': 'Dictionary entry from %dictionaryName%',
+    'stash_added_single': '『%term%』has been added to the Stash.',
+    'stash_added_multiple': 'Multiple items have been added to the Stash.',
+    'stash_clear_title': 'Clear Stash',
+    'stash_clear_description':
+        'The entire Stash will be cleared. Are you sure?',
+    'stash_placeholder': 'No items in the Stash',
+    'stash_nothing_to_pop': 'No items to be popped from the Stash.',
   };
 }

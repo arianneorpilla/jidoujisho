@@ -9,15 +9,39 @@ typedef OffsetValue = void Function(int start, int end);
 class JidoujishoTextSelectionControls extends MaterialTextSelectionControls {
   /// Define text selection controls with custom behaviour.
   JidoujishoTextSelectionControls({
-    required this.customAction,
-    required this.customActionLabel,
+    required this.searchAction,
+    required this.searchActionLabel,
+    required this.stashAction,
+    required this.stashActionLabel,
+    required this.allowCopy,
+    required this.allowCut,
+    required this.allowPaste,
+    required this.allowSelectAll,
   });
 
-  /// Localisation for the custom action.
-  final String customActionLabel;
+  /// Localisation for the search action.
+  final String searchActionLabel;
 
-  /// Behaviour for the custom action.
-  final Function(String) customAction;
+  /// Behaviour for the search action.
+  final Function(String) searchAction;
+
+  /// Localisation for the stash action.
+  final String stashActionLabel;
+
+  /// Behaviour for the stash action.
+  final Function(String) stashAction;
+
+  /// Whether or not to allow copying.
+  final bool allowCopy;
+
+  /// Whether or not to allow cutting.
+  final bool allowCut;
+
+  /// Whether or not to allow pasting.
+  final bool allowPaste;
+
+  /// Whether or not to allow selecting all.
+  final bool allowSelectAll;
 
   static const double _kToolbarContentDistanceBelow = 20;
   static const double _kToolbarContentDistance = 8;
@@ -54,15 +78,34 @@ class JidoujishoTextSelectionControls extends MaterialTextSelectionControls {
       anchorAbove: anchorAbove,
       anchorBelow: anchorBelow,
       clipboardStatus: clipboardStatus!,
-      customAction: () {
-        customAction(
+      searchAction: () {
+        searchAction(
           delegate.textEditingValue.selection
               .textInside(delegate.textEditingValue.text),
         );
 
         delegate.hideToolbar();
       },
-      customActionLabel: customActionLabel,
+      stashAction: () {
+        stashAction(
+          delegate.textEditingValue.selection
+              .textInside(delegate.textEditingValue.text),
+        );
+
+        delegate.hideToolbar();
+      },
+      searchActionLabel: searchActionLabel,
+      stashActionLabel: stashActionLabel,
+      handleCopy: canCopy(delegate) && allowCopy
+          ? () => handleCopy(delegate, clipboardStatus)
+          : null,
+      handleCut:
+          canCut(delegate) && allowCut ? () => handleCut(delegate) : null,
+      handlePaste:
+          canPaste(delegate) && allowPaste ? () => handlePaste(delegate) : null,
+      handleSelectAll: canSelectAll(delegate) && allowSelectAll
+          ? () => handleSelectAll(delegate)
+          : null,
     );
   }
 }
@@ -74,8 +117,14 @@ class JidoujishoSelectionToolbar extends StatefulWidget {
     required this.anchorAbove,
     required this.anchorBelow,
     required this.clipboardStatus,
-    required this.customActionLabel,
-    required this.customAction,
+    required this.searchActionLabel,
+    required this.searchAction,
+    required this.stashAction,
+    required this.stashActionLabel,
+    required this.handleCopy,
+    required this.handleCut,
+    required this.handlePaste,
+    required this.handleSelectAll,
     super.key,
   });
 
@@ -89,10 +138,28 @@ class JidoujishoSelectionToolbar extends StatefulWidget {
   final ClipboardStatusNotifier clipboardStatus;
 
   /// Localisation for the custom action.
-  final String customActionLabel;
+  final String searchActionLabel;
 
   /// Behaviour for the custom action.
-  final Function() customAction;
+  final Function() searchAction;
+
+  /// Localisation for the stash action.
+  final String stashActionLabel;
+
+  /// Behaviour for the stash action.
+  final Function() stashAction;
+
+  /// Behaviour for copying.
+  final VoidCallback? handleCopy;
+
+  /// Behaviour for cutting.
+  final VoidCallback? handleCut;
+
+  /// Behaviour for pasting.
+  final VoidCallback? handlePaste;
+
+  /// Behaviour for selecting all.
+  final VoidCallback? handleSelectAll;
 
   @override
   State<JidoujishoSelectionToolbar> createState() =>
@@ -134,12 +201,41 @@ class _JidoujishoSelectionToolbarState
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context), 'Must have i18n');
+    final MaterialLocalizations localizations =
+        MaterialLocalizations.of(context);
+
     final List<_TextSelectionToolbarItemData> itemDatas =
         <_TextSelectionToolbarItemData>[
       _TextSelectionToolbarItemData(
-        onPressed: widget.customAction,
-        label: widget.customActionLabel,
+        onPressed: widget.searchAction,
+        label: widget.searchActionLabel,
       ),
+      _TextSelectionToolbarItemData(
+        onPressed: widget.stashAction,
+        label: widget.stashActionLabel,
+      ),
+      if (widget.handleCut != null)
+        _TextSelectionToolbarItemData(
+          label: localizations.cutButtonLabel,
+          onPressed: widget.handleCut,
+        ),
+      if (widget.handleCopy != null)
+        _TextSelectionToolbarItemData(
+          label: localizations.copyButtonLabel,
+          onPressed: widget.handleCopy,
+        ),
+      if (widget.handlePaste != null &&
+          widget.clipboardStatus.value == ClipboardStatus.pasteable)
+        _TextSelectionToolbarItemData(
+          label: localizations.pasteButtonLabel,
+          onPressed: widget.handlePaste,
+        ),
+      if (widget.handleSelectAll != null)
+        _TextSelectionToolbarItemData(
+          label: localizations.selectAllButtonLabel,
+          onPressed: widget.handleSelectAll,
+        ),
     ];
 
     int childIndex = 0;

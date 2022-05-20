@@ -36,7 +36,7 @@ class TextSegmentationEnhancement extends Enhancement {
         );
       },
       onSelect: (selection) {
-        creatorModel.getFieldController(field).text = selection;
+        creatorModel.getFieldController(Field.word).text = selection;
       },
     );
   }

@@ -8,8 +8,12 @@ export 'src/creator/quick_action.dart';
 export 'src/creator/search_history.dart';
 
 export 'src/creator/actions/card_creator_action.dart';
+export 'src/creator/actions/instant_export_action.dart';
+export 'src/creator/actions/add_to_stash_enhancement.dart';
 
 export 'src/creator/enhancements/clear_field_enhancement.dart';
 export 'src/creator/enhancements/massif_example_sentences_enhancement.dart';
 export 'src/creator/enhancements/search_dictionary_enhancement.dart';
 export 'src/creator/enhancements/text_segmentation_enhancement.dart';
+export 'src/creator/enhancements/pick_from_stash_enhancement.dart';
+export 'src/creator/enhancements/pop_from_stash_enhancement.dart';
