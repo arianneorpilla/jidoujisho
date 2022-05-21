@@ -96,17 +96,6 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
           dictionaryHiddens[dictionaryName] = dictionary.hidden;
         }
 
-        bool hidePage = true;
-        for (bool dictionaryHidden in dictionaryHiddens.values) {
-          if (!dictionaryHidden) {
-            hidePage = false;
-          }
-        }
-
-        if (hidePage) {
-          return const SizedBox.shrink();
-        }
-
         return DictionaryWordPage(
           entries: entries,
           onSearch: widget.onSearch,

@@ -155,6 +155,10 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
           itemBuilder: (context, index) {
             DictionaryEntry entry = widget.entries[index];
 
+            if (widget.dictionaryHiddens[entry.dictionaryName]!) {
+              return const SizedBox.shrink();
+            }
+
             return DictionaryEntryPage(
               expandableController:
                   widget.expandableControllers[entry.dictionaryName]!,
