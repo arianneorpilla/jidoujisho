@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
+import 'package:spaces/spaces.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
@@ -18,9 +19,6 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
   @override
   MediaType get mediaType => DictionaryMediaType.instance;
 
-  @override
-  bool get shouldPlaceholderBeShown => true;
-
   String get backLabel => appModel.translate('back');
   String get dictionariesLabel => appModel.translate('dictionaries');
   String get searchLabel => appModel.translate('search');
@@ -30,6 +28,12 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
   String get noSearchResultsLabel => appModel.translate('no_search_results');
   String get enterSearchTermLabel => appModel.translate('enter_search_term');
   String get clearLabel => appModel.translate('clear');
+  String get dialogClearLabel => appModel.translate('dialog_clear');
+  String get dialogCancelLabel => appModel.translate('dialog_cancel');
+  String get clearDictionaryTitle =>
+      appModel.translate('clear_dictionary_title');
+  String get clearDictionaryDescription =>
+      appModel.translate('clear_dictionary_description');
 
   final FloatingSearchBarController _controller = FloatingSearchBarController();
 
@@ -40,6 +44,24 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
   bool? _lastDarkMode;
 
   @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      appModel.dictionaryNotifier.addListener(searchAgain);
+    });
+  }
+
+  @override
+  void dispose() {
+    appModel.dictionaryNotifier.removeListener(searchAgain);
+    super.dispose();
+  }
+
+  @override
+  bool get shouldPlaceholderBeShown => appModel.dictionaryHistory.isEmpty;
+
+  @override
   Widget build(BuildContext context) {
     if (_lastDarkMode != null) {
       if (appModel.isDarkMode != _lastDarkMode) {
@@ -48,9 +70,32 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     }
     _lastDarkMode = appModel.isDarkMode;
     return Stack(children: [
-      if (shouldPlaceholderBeShown) buildPlaceholder() else Container(),
+      if (shouldPlaceholderBeShown)
+        buildPlaceholder()
+      else
+        buildDictionaryHistory(),
       buildFloatingSearchBar(),
     ]);
+  }
+
+  Widget buildDictionaryHistory() {
+    return ListView(
+      children: [
+        const SizedBox(
+          height: 60,
+        ),
+        Padding(
+          padding: EdgeInsets.only(
+            left: Spacing.of(context).spaces.small,
+            right: Spacing.of(context).spaces.small,
+          ),
+          child: DictionaryHistoryPage(
+            onSearch: onSearch,
+            onStash: onStash,
+          ),
+        ),
+      ],
+    );
   }
 
   /// The search bar to show at the topmost of the tab body. When selected,
@@ -83,22 +128,30 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
         buildBackButton(),
       ],
       actions: [
+        buildClearButton(),
         buildSearchButton(),
       ],
-      onQueryChanged: (query) async {
-        setState(() {
-          _isSearching = true;
-        });
-
-        try {
-          _result = await appModel.searchDictionary(query);
-        } finally {
-          setState(() {
-            _isSearching = false;
-          });
-        }
-      },
+      onQueryChanged: onQueryChanged,
     );
+  }
+
+  void searchAgain() {
+    _result = null;
+    onQueryChanged(_controller.query);
+  }
+
+  void onQueryChanged(String query) async {
+    setState(() {
+      _isSearching = true;
+    });
+
+    try {
+      _result = await appModel.searchDictionary(query);
+    } finally {
+      setState(() {
+        _isSearching = false;
+      });
+    }
   }
 
   Widget buildDictionaryButton() {
@@ -125,12 +178,61 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     );
   }
 
+  Widget buildClearButton() {
+    return FloatingSearchBarAction(
+      child: JidoujishoIconButton(
+        size: textTheme.titleLarge?.fontSize,
+        tooltip: clearLabel,
+        icon: Icons.clear_all,
+        onTap: showDeleteDictionaryPrompt,
+      ),
+    );
+  }
+
   Widget buildSearchButton() {
     return FloatingSearchBarAction.searchToClear(
       color: theme.appBarTheme.foregroundColor,
       size: textTheme.titleLarge!.fontSize!,
       searchButtonSemanticLabel: searchLabel,
       clearButtonSemanticLabel: clearLabel,
+    );
+  }
+
+  void showDeleteDictionaryPrompt() async {
+    Widget alertDialog = AlertDialog(
+      contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
+          ? Spacing.of(context).insets.exceptBottom.big
+          : Spacing.of(context).insets.exceptBottom.normal,
+      title: Text(clearDictionaryTitle),
+      content: Text(
+        clearDictionaryDescription,
+        textAlign: TextAlign.justify,
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text(
+            dialogClearLabel,
+            style: TextStyle(
+              color: theme.colorScheme.primary,
+            ),
+          ),
+          onPressed: () async {
+            appModel.clearDictionaryHistory();
+
+            setState(() {});
+            Navigator.pop(context);
+          },
+        ),
+        TextButton(
+          child: Text(dialogCancelLabel),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ],
+    );
+
+    await showDialog(
+      context: context,
+      builder: (context) => alertDialog,
     );
   }
 
@@ -142,7 +244,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       return buildImportDictionariesPlaceholderMessage();
     }
     if (_controller.query.isEmpty) {
-      if (appModel.getSearchHistory(uniqueKey: mediaType.uniqueKey).isEmpty) {
+      if (appModel.getSearchHistory(historyKey: mediaType.uniqueKey).isEmpty) {
         return buildEnterSearchTermPlaceholderMessage();
       } else {
         return JidoujishoSearchHistory(
@@ -172,17 +274,23 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     return buildSearchResult();
   }
 
+  void onSearch(String searchTerm) {
+    appModel.openRecursiveDictionarySearch(
+      searchTerm: searchTerm,
+      killOnPop: false,
+    );
+  }
+
+  void onStash(String searchTerm) {
+    appModel.addToStash(terms: [searchTerm]);
+  }
+
   Widget buildSearchResult() {
     return ClipRect(
       child: DictionaryResultPage(
+        onSearch: onSearch,
+        onStash: onStash,
         result: _result!,
-        onSearch: (searchTerm) => appModel.openRecursiveDictionarySearch(
-          searchTerm: searchTerm,
-          killOnPop: false,
-        ),
-        onStash: (searchTerm) {
-          appModel.addToStash(terms: [searchTerm]);
-        },
         getCurrentSearchTerm: () => _controller.query,
       ),
     );

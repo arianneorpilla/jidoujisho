@@ -493,8 +493,8 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
         stashActionLabel: stashLabel,
         allowCopy: true,
         allowSelectAll: true,
-        allowCut: false,
-        allowPaste: false,
+        allowCut: true,
+        allowPaste: true,
       );
 
   Widget buildTextField({

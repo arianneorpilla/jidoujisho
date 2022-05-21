@@ -43,13 +43,14 @@ class JidoujishoLocalisations {
     'dialog_delete': 'DELETE',
     'dialog_cancel': 'CANCEL',
     'dialog_select': 'SELECT',
+    'dialog_stash': 'STASH',
     'dialog_search': 'SEARCH',
     'dialog_pop': 'POP',
     'dialog_save': 'SAVE',
     'dialog_launch_ankidroid': 'LAUNCH ANKIDROID',
     'dictionaries_delete_confirmation':
-        'This dictionary and its searched entries will be deleted. Are you '
-            'sure you want to do this?',
+        'Deleting a dictionary will also clear the dictionary search history.'
+            ' Are you sure you want to do this?',
     'mappings_delete_confirmation': 'This mapping will be deleted. Are you '
         'sure you want to do this?',
     'dictionaries_deleting_entries': 'Deleting dictionary entries...',
@@ -169,9 +170,16 @@ class JidoujishoLocalisations {
     'stash_added_single': '『%term%』has been added to the Stash.',
     'stash_added_multiple': 'Multiple items have been added to the Stash.',
     'stash_clear_title': 'Clear Stash',
-    'stash_clear_description':
-        'The entire Stash will be cleared. Are you sure?',
+    'stash_clear_description': 'All contents will be cleared. Are you sure?',
     'stash_placeholder': 'No items in the Stash',
     'stash_nothing_to_pop': 'No items to be popped from the Stash.',
+    'no_sentences_found': 'No sentences found',
+    'failed_online_service': 'Failed to communicate with online service',
+    'search_label_before': 'Search result ',
+    'search_label_middle': 'out of ',
+    'search_label_after': 'found for',
+    'clear_dictionary_title': 'Clear Dictionary History',
+    'clear_dictionary_description':
+        'This will clear all dictionary search history. Are you sure?',
   };
 }

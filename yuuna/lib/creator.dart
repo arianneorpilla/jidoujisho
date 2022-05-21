@@ -5,7 +5,7 @@ export 'src/creator/anki_mapping.dart';
 export 'src/creator/enhancement.dart';
 export 'src/creator/field.dart';
 export 'src/creator/quick_action.dart';
-export 'src/creator/search_history.dart';
+export 'src/creator/search_history_item.dart';
 
 export 'src/creator/actions/card_creator_action.dart';
 export 'src/creator/actions/instant_export_action.dart';

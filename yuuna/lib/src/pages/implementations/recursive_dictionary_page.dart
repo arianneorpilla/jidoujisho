@@ -44,7 +44,6 @@ class _RecursiveDictionaryPageState
   DictionaryResult? _result;
 
   bool _isSearching = false;
-
   @override
   void initState() {
     super.initState();
@@ -57,7 +56,15 @@ class _RecursiveDictionaryPageState
       Future.delayed(const Duration(milliseconds: 10), () {
         FocusScope.of(context).unfocus();
       });
+
+      appModel.dictionaryNotifier.addListener(searchAgain);
     });
+  }
+
+  @override
+  void dispose() {
+    appModel.dictionaryNotifier.removeListener(searchAgain);
+    super.dispose();
   }
 
   @override
@@ -109,20 +116,27 @@ class _RecursiveDictionaryPageState
       actions: [
         buildSearchButton(),
       ],
-      onQueryChanged: (query) async {
-        setState(() {
-          _isSearching = true;
-        });
-
-        try {
-          _result = await appModel.searchDictionary(query);
-        } finally {
-          setState(() {
-            _isSearching = false;
-          });
-        }
-      },
+      onQueryChanged: onQueryChanged,
     );
+  }
+
+  void searchAgain() {
+    _result = null;
+    onQueryChanged(_controller.query);
+  }
+
+  void onQueryChanged(String query) async {
+    setState(() {
+      _isSearching = true;
+    });
+
+    try {
+      _result = await appModel.searchDictionary(query);
+    } finally {
+      setState(() {
+        _isSearching = false;
+      });
+    }
   }
 
   Widget buildDictionaryButton() {
@@ -173,7 +187,7 @@ class _RecursiveDictionaryPageState
     }
     if (_controller.query.isEmpty) {
       if (appModel
-          .getSearchHistory(uniqueKey: DictionaryMediaType.instance.uniqueKey)
+          .getSearchHistory(historyKey: DictionaryMediaType.instance.uniqueKey)
           .isEmpty) {
         return buildEnterSearchTermPlaceholderMessage();
       } else {
@@ -204,17 +218,23 @@ class _RecursiveDictionaryPageState
     return buildSearchResult();
   }
 
+  void onSearch(String searchTerm) {
+    appModel.openRecursiveDictionarySearch(
+      searchTerm: searchTerm,
+      killOnPop: false,
+    );
+  }
+
+  void onStash(String searchTerm) {
+    appModel.addToStash(terms: [searchTerm]);
+  }
+
   Widget buildSearchResult() {
     return ClipRect(
       child: DictionaryResultPage(
+        onSearch: onSearch,
+        onStash: onStash,
         result: _result!,
-        onSearch: (searchTerm) => appModel.openRecursiveDictionarySearch(
-          searchTerm: searchTerm,
-          killOnPop: false,
-        ),
-        onStash: (searchTerm) {
-          appModel.addToStash(terms: [searchTerm]);
-        },
         getCurrentSearchTerm: () => _controller.query,
       ),
     );

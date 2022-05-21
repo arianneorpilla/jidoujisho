@@ -15,6 +15,9 @@ class DictionaryWordPage extends BasePage {
     required this.onStash,
     required this.expandableControllers,
     required this.dictionaryHiddens,
+    this.onScrollLeft,
+    this.onScrollRight,
+    this.footerWidget,
     super.key,
   });
 
@@ -32,6 +35,15 @@ class DictionaryWordPage extends BasePage {
 
   /// Used to hide entries by dictionary name.
   final Map<String, bool> dictionaryHiddens;
+
+  /// Called when the widget is scrolled to the left.
+  final Function()? onScrollLeft;
+
+  /// Called when the widget is scrolled to the right.
+  final Function()? onScrollRight;
+
+  /// Optional footer foor use in [DictionaryHistoryPage].
+  final Widget? footerWidget;
 
   @override
   BasePageState<DictionaryWordPage> createState() => _DictionaryWordPageState();
@@ -143,10 +155,6 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
           itemBuilder: (context, index) {
             DictionaryEntry entry = widget.entries[index];
 
-            if (widget.dictionaryHiddens[entry.dictionaryName]!) {
-              return const SizedBox.shrink();
-            }
-
             return DictionaryEntryPage(
               expandableController:
                   widget.expandableControllers[entry.dictionaryName]!,
@@ -157,28 +165,42 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
           },
         ),
       ),
+      if (widget.footerWidget != null) widget.footerWidget!
     ];
 
-    return Card(
-      color: appModel.isDarkMode
-          ? const Color(0xff313131)
-          : const Color(0xfff6f6f6),
-      elevation: 0,
-      shape: const RoundedRectangleBorder(),
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: Spacing.of(context).spaces.semiBig,
-          top: Spacing.of(context).spaces.normal,
-          right: Spacing.of(context).spaces.normal,
-          bottom: Spacing.of(context).spaces.normal,
-        ),
-        child: ListView.builder(
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          itemBuilder: (context, index) => children[index],
-          itemCount: children.length,
+    return GestureDetector(
+      child: Card(
+        color: appModel.isDarkMode
+            ? const Color(0xff313131)
+            : const Color(0xfff6f6f6),
+        elevation: 0,
+        shape: const RoundedRectangleBorder(),
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: Spacing.of(context).spaces.semiBig,
+            top: Spacing.of(context).spaces.normal,
+            right: Spacing.of(context).spaces.normal,
+            bottom: Spacing.of(context).spaces.normal,
+          ),
+          child: ListView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemBuilder: (context, index) => children[index],
+            itemCount: children.length,
+          ),
         ),
       ),
+      onHorizontalDragEnd: (details) async {
+        if (details.primaryVelocity == 0) {
+          return;
+        }
+
+        if (details.primaryVelocity!.compareTo(0) == -1) {
+          widget.onScrollRight?.call();
+        } else {
+          widget.onScrollLeft?.call();
+        }
+      },
     );
   }
 
@@ -216,6 +238,13 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
         padding: Spacing.of(context).insets.onlyLeft.semiSmall,
         child: JidoujishoIconButton(
           busy: true,
+          enabledColor: quickAction.getIconColor(
+            context: context,
+            appModel: appModel,
+            word: word,
+            reading: reading,
+            entries: widget.entries,
+          ),
           shapeBorder: const RoundedRectangleBorder(),
           backgroundColor:
               Theme.of(context).appBarTheme.foregroundColor?.withOpacity(0.1),
@@ -223,7 +252,7 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
           tooltip: quickAction.getLocalisedLabel(appModel),
           icon: quickAction.icon,
           onTap: () async {
-            quickAction?.executeAction(
+            await quickAction?.executeAction(
               context: context,
               ref: ref,
               appModel: appModel,

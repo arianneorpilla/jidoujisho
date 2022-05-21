@@ -35,7 +35,7 @@ class _JidoujishoSearchHistoryState
   @override
   Widget build(BuildContext context) {
     List<String> searchHistory = appModel
-        .getSearchHistory(uniqueKey: widget.uniqueKey)
+        .getSearchHistory(historyKey: widget.uniqueKey)
         .reversed
         .toList();
 
@@ -65,7 +65,7 @@ class _JidoujishoSearchHistoryState
       onTap: () => onSearchTermSelect(searchTerm),
       onLongPress: () {
         appModel.removeFromSearchHistory(
-          uniqueKey: uniqueKey,
+          historyKey: uniqueKey,
           searchTerm: searchTerm,
         );
         setState(() {});

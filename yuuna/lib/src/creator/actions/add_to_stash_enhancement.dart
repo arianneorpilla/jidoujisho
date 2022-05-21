@@ -13,12 +13,33 @@ class AddToStashEnhancement extends QuickAction {
           label: 'Add To Stash',
           description:
               'Quickly save the headword of a dictionary entry to the Stash.',
-          icon: Icons.file_download,
+          icon: Icons.bookmark_add,
         );
 
   /// Used to identify this enhancement and to allow a constant value for the
   /// default mappings value of [AnkiMapping].
   static const String key = 'add_to_stash';
+
+  @override
+  Color getIconColor({
+    required BuildContext context,
+    required AppModel appModel,
+    required String word,
+    required String reading,
+    required List<DictionaryEntry> entries,
+  }) {
+    if (appModel.isTermInStash(word)) {
+      return Theme.of(context).colorScheme.primary;
+    } else {
+      return super.getIconColor(
+        context: context,
+        appModel: appModel,
+        word: word,
+        reading: reading,
+        entries: entries,
+      );
+    }
+  }
 
   @override
   Future<void> executeAction({
@@ -30,6 +51,8 @@ class AddToStashEnhancement extends QuickAction {
     required String reading,
     required List<DictionaryEntry> entries,
   }) async {
-    appModel.addToStash(terms: [word]);
+    if (!appModel.isTermInStash(word)) {
+      appModel.addToStash(terms: [word]);
+    }
   }
 }

@@ -2,34 +2,33 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:spaces/spaces.dart';
-import 'package:yuuna/creator.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
 
 /// The content of the dialog used for managing and viewing items in the Stash.
-class PickFromStashDialogPage extends BasePage {
+class OpenStashDialogPage extends BasePage {
   /// Create an instance of this page.
-  const PickFromStashDialogPage({
-    required this.stashContents,
+  const OpenStashDialogPage({
     required this.onSelect,
+    required this.onSearch,
     super.key,
   });
-
-  /// The contents of the [SearchHistory] entity used for the Stash.
-  final List<String> stashContents;
 
   /// The callback to be called when a selection has been made.
   final Function(String)? onSelect;
 
+  /// The callback to be called for a selection to perform a search on.
+  final Function(String)? onSearch;
+
   @override
-  BasePageState createState() => _PickFromStashDialogPageState();
+  BasePageState createState() => _OpenStashDialogPage();
 }
 
-class _PickFromStashDialogPageState
-    extends BasePageState<PickFromStashDialogPage> {
+class _OpenStashDialogPage extends BasePageState<OpenStashDialogPage> {
   final ScrollController _scrollController = ScrollController();
 
   String get dialogExportLabel => appModel.translate('dialog_export');
+  String get dialogSearchLabel => appModel.translate('dialog_search');
   String get dialogSelectLabel => appModel.translate('dialog_select');
   String get dialogClearLabel => appModel.translate('dialog_clear');
   String get dialogCancelLabel => appModel.translate('dialog_cancel');
@@ -55,7 +54,7 @@ class _PickFromStashDialogPageState
           ? Spacing.of(context).insets.all.big
           : Spacing.of(context).insets.all.normal,
       content: buildContent(),
-      actions: widget.stashContents.isEmpty ? null : actions,
+      actions: appModel.getStash().isEmpty ? null : actions,
     );
   }
 
@@ -78,9 +77,9 @@ class _PickFromStashDialogPageState
         controller: _scrollController,
         child: SingleChildScrollView(
           controller: _scrollController,
-          child: widget.stashContents.isEmpty
+          child: appModel.getStash().isEmpty
               ? buildEmptyMessage()
-              : Wrap(children: getTextWidgets()),
+              : Wrap(children: getTextWidgets().reversed.toList()),
         ),
       ),
     );
@@ -89,10 +88,14 @@ class _PickFromStashDialogPageState
   List<Widget> getTextWidgets() {
     List<Widget> widgets = [];
 
-    widget.stashContents.forEachIndexed((index, segment) {
+    appModel.getStash().forEachIndexed((index, segment) {
       Widget widget = GestureDetector(
         onTap: () {
-          _selectionNotifier.value = index;
+          if (_selectionNotifier.value == index) {
+            _selectionNotifier.value = null;
+          } else {
+            _selectionNotifier.value = index;
+          }
         },
         child: ValueListenableBuilder<int?>(
           valueListenable: _selectionNotifier,
@@ -110,7 +113,6 @@ class _PickFromStashDialogPageState
                   ? theme.colorScheme.primary.withOpacity(0.3)
                   : theme.unselectedWidgetColor.withOpacity(0.1),
               child: SizedBox(
-                height: (textTheme.titleLarge?.fontSize)! * 1.3,
                 child: Text(
                   segment,
                   style: TextStyle(
@@ -131,9 +133,10 @@ class _PickFromStashDialogPageState
   }
 
   List<Widget> get actions => [
-        if (widget.stashContents.isNotEmpty) buildClearButton(),
-        if (widget.stashContents.isNotEmpty) buildExportButton(),
-        if (widget.stashContents.isNotEmpty) buildSelectButton(),
+        buildClearButton(),
+        buildExportButton(),
+        buildSearchButton(),
+        buildSelectButton(),
       ];
 
   Widget buildClearButton() {
@@ -153,6 +156,13 @@ class _PickFromStashDialogPageState
     );
   }
 
+  Widget buildSearchButton() {
+    return TextButton(
+      child: Text(dialogSearchLabel),
+      onPressed: executeSearch,
+    );
+  }
+
   Widget buildSelectButton() {
     return TextButton(
       child: Text(dialogSelectLabel),
@@ -160,16 +170,24 @@ class _PickFromStashDialogPageState
     );
   }
 
-  String get selection => widget.stashContents[_selectionNotifier.value!];
-
   void executeExport() async {
-    String exportText = widget.stashContents.join('\n');
+    String exportText = appModel.getStash().reversed.toList().join('\n');
     await Share.share(exportText);
   }
 
   void executeSelect() {
-    Navigator.pop(context);
-    widget.onSelect?.call(selection);
+    if (_selectionNotifier.value != null) {
+      String selection = appModel.getStash()[_selectionNotifier.value!];
+      widget.onSelect?.call(selection);
+      Navigator.pop(context);
+    }
+  }
+
+  void executeSearch() {
+    if (_selectionNotifier.value != null) {
+      String selection = appModel.getStash()[_selectionNotifier.value!];
+      widget.onSearch?.call(selection);
+    }
   }
 
   void executeClear() async {
@@ -184,9 +202,13 @@ class _PickFromStashDialogPageState
         ),
         actions: [
           TextButton(
-              child: Text(dialogClearLabel),
+              child: Text(
+                dialogClearLabel,
+                style: TextStyle(color: theme.colorScheme.primary),
+              ),
               onPressed: () {
                 appModel.clearStash();
+                Navigator.pop(context);
                 setState(() {});
               }),
           TextButton(

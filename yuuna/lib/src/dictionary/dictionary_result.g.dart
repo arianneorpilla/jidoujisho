@@ -15,9 +15,9 @@ extension GetDictionaryResultCollection on Isar {
 const DictionaryResultSchema = CollectionSchema(
   name: 'DictionaryResult',
   schema:
-      '{"name":"DictionaryResult","idName":"id","properties":[{"name":"mapping","type":"String"},{"name":"searchTerm","type":"String"}],"indexes":[{"name":"searchTerm","unique":true,"properties":[{"name":"searchTerm","type":"Hash","caseSensitive":true}]}],"links":[]}',
+      '{"name":"DictionaryResult","idName":"id","properties":[{"name":"mapping","type":"String"},{"name":"scrollIndex","type":"Long"},{"name":"searchTerm","type":"String"}],"indexes":[{"name":"searchTerm","unique":true,"properties":[{"name":"searchTerm","type":"Hash","caseSensitive":true}]}],"links":[]}',
   idName: 'id',
-  propertyIds: {'mapping': 0, 'searchTerm': 1},
+  propertyIds: {'mapping': 0, 'scrollIndex': 1, 'searchTerm': 2},
   listProperties: {},
   indexIds: {'searchTerm': 0},
   indexValueTypes: {
@@ -66,8 +66,10 @@ void _dictionaryResultSerializeNative(
       _dictionaryResultDictionaryEntriesConverter.toIsar(object.mapping);
   final _mapping = IsarBinaryWriter.utf8Encoder.convert(value0);
   dynamicSize += (_mapping.length) as int;
-  final value1 = object.searchTerm;
-  final _searchTerm = IsarBinaryWriter.utf8Encoder.convert(value1);
+  final value1 = object.scrollIndex;
+  final _scrollIndex = value1;
+  final value2 = object.searchTerm;
+  final _searchTerm = IsarBinaryWriter.utf8Encoder.convert(value2);
   dynamicSize += (_searchTerm.length) as int;
   final size = staticSize + dynamicSize;
 
@@ -76,7 +78,8 @@ void _dictionaryResultSerializeNative(
   final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
   final writer = IsarBinaryWriter(buffer, staticSize);
   writer.writeBytes(offsets[0], _mapping);
-  writer.writeBytes(offsets[1], _searchTerm);
+  writer.writeLong(offsets[1], _scrollIndex);
+  writer.writeBytes(offsets[2], _searchTerm);
 }
 
 DictionaryResult _dictionaryResultDeserializeNative(
@@ -88,7 +91,8 @@ DictionaryResult _dictionaryResultDeserializeNative(
     id: id,
     mapping: _dictionaryResultDictionaryEntriesConverter
         .fromIsar(reader.readString(offsets[0])),
-    searchTerm: reader.readString(offsets[1]),
+    scrollIndex: reader.readLong(offsets[1]),
+    searchTerm: reader.readString(offsets[2]),
   );
   return object;
 }
@@ -102,6 +106,8 @@ P _dictionaryResultDeserializePropNative<P>(
       return (_dictionaryResultDictionaryEntriesConverter
           .fromIsar(reader.readString(offset))) as P;
     case 1:
+      return (reader.readLong(offset)) as P;
+    case 2:
       return (reader.readString(offset)) as P;
     default:
       throw 'Illegal propertyIndex';
@@ -114,6 +120,7 @@ dynamic _dictionaryResultSerializeWeb(
   IsarNative.jsObjectSet(jsObj, 'id', object.id);
   IsarNative.jsObjectSet(jsObj, 'mapping',
       _dictionaryResultDictionaryEntriesConverter.toIsar(object.mapping));
+  IsarNative.jsObjectSet(jsObj, 'scrollIndex', object.scrollIndex);
   IsarNative.jsObjectSet(jsObj, 'searchTerm', object.searchTerm);
   return jsObj;
 }
@@ -124,6 +131,8 @@ DictionaryResult _dictionaryResultDeserializeWeb(
     id: IsarNative.jsObjectGet(jsObj, 'id'),
     mapping: _dictionaryResultDictionaryEntriesConverter
         .fromIsar(IsarNative.jsObjectGet(jsObj, 'mapping') ?? ''),
+    scrollIndex:
+        IsarNative.jsObjectGet(jsObj, 'scrollIndex') ?? double.negativeInfinity,
     searchTerm: IsarNative.jsObjectGet(jsObj, 'searchTerm') ?? '',
   );
   return object;
@@ -136,6 +145,9 @@ P _dictionaryResultDeserializePropWeb<P>(Object jsObj, String propertyName) {
     case 'mapping':
       return (_dictionaryResultDictionaryEntriesConverter
           .fromIsar(IsarNative.jsObjectGet(jsObj, 'mapping') ?? '')) as P;
+    case 'scrollIndex':
+      return (IsarNative.jsObjectGet(jsObj, 'scrollIndex') ??
+          double.negativeInfinity) as P;
     case 'searchTerm':
       return (IsarNative.jsObjectGet(jsObj, 'searchTerm') ?? '') as P;
     default:
@@ -461,6 +473,57 @@ extension DictionaryResultQueryFilter
   }
 
   QueryBuilder<DictionaryResult, DictionaryResult, QAfterFilterCondition>
+      scrollIndexEqualTo(int value) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.eq,
+      property: 'scrollIndex',
+      value: value,
+    ));
+  }
+
+  QueryBuilder<DictionaryResult, DictionaryResult, QAfterFilterCondition>
+      scrollIndexGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.gt,
+      include: include,
+      property: 'scrollIndex',
+      value: value,
+    ));
+  }
+
+  QueryBuilder<DictionaryResult, DictionaryResult, QAfterFilterCondition>
+      scrollIndexLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.lt,
+      include: include,
+      property: 'scrollIndex',
+      value: value,
+    ));
+  }
+
+  QueryBuilder<DictionaryResult, DictionaryResult, QAfterFilterCondition>
+      scrollIndexBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition.between(
+      property: 'scrollIndex',
+      lower: lower,
+      includeLower: includeLower,
+      upper: upper,
+      includeUpper: includeUpper,
+    ));
+  }
+
+  QueryBuilder<DictionaryResult, DictionaryResult, QAfterFilterCondition>
       searchTermEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -593,6 +656,16 @@ extension DictionaryResultQueryWhereSortBy
   }
 
   QueryBuilder<DictionaryResult, DictionaryResult, QAfterSortBy>
+      sortByScrollIndex() {
+    return addSortByInternal('scrollIndex', Sort.asc);
+  }
+
+  QueryBuilder<DictionaryResult, DictionaryResult, QAfterSortBy>
+      sortByScrollIndexDesc() {
+    return addSortByInternal('scrollIndex', Sort.desc);
+  }
+
+  QueryBuilder<DictionaryResult, DictionaryResult, QAfterSortBy>
       sortBySearchTerm() {
     return addSortByInternal('searchTerm', Sort.asc);
   }
@@ -625,6 +698,16 @@ extension DictionaryResultQueryWhereSortThenBy
   }
 
   QueryBuilder<DictionaryResult, DictionaryResult, QAfterSortBy>
+      thenByScrollIndex() {
+    return addSortByInternal('scrollIndex', Sort.asc);
+  }
+
+  QueryBuilder<DictionaryResult, DictionaryResult, QAfterSortBy>
+      thenByScrollIndexDesc() {
+    return addSortByInternal('scrollIndex', Sort.desc);
+  }
+
+  QueryBuilder<DictionaryResult, DictionaryResult, QAfterSortBy>
       thenBySearchTerm() {
     return addSortByInternal('searchTerm', Sort.asc);
   }
@@ -647,6 +730,11 @@ extension DictionaryResultQueryWhereDistinct
   }
 
   QueryBuilder<DictionaryResult, DictionaryResult, QDistinct>
+      distinctByScrollIndex() {
+    return addDistinctByInternal('scrollIndex');
+  }
+
+  QueryBuilder<DictionaryResult, DictionaryResult, QDistinct>
       distinctBySearchTerm({bool caseSensitive = true}) {
     return addDistinctByInternal('searchTerm', caseSensitive: caseSensitive);
   }
@@ -661,6 +749,10 @@ extension DictionaryResultQueryProperty
   QueryBuilder<DictionaryResult, List<List<DictionaryEntry>>, QQueryOperations>
       mappingProperty() {
     return addPropertyNameInternal('mapping');
+  }
+
+  QueryBuilder<DictionaryResult, int, QQueryOperations> scrollIndexProperty() {
+    return addPropertyNameInternal('scrollIndex');
   }
 
   QueryBuilder<DictionaryResult, String, QQueryOperations>
@@ -683,12 +775,14 @@ DictionaryResult _$DictionaryResultFromJson(Map<String, dynamic> json) =>
                   .toList())
               .toList() ??
           const [],
+      scrollIndex: json['scrollIndex'] as int? ?? 0,
       id: json['id'] as int?,
     );
 
 Map<String, dynamic> _$DictionaryResultToJson(DictionaryResult instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'scrollIndex': instance.scrollIndex,
       'searchTerm': instance.searchTerm,
       'mapping': instance.mapping,
     };

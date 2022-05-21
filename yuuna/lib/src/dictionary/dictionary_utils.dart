@@ -55,6 +55,7 @@ Future<void> deleteDictionaryData(DeleteDictionaryParams params) async {
         .filter()
         .dictionaryNameEqualTo(params.dictionaryName)
         .deleteAllSync();
+    database.dictionaryResults.clearSync();
   });
 }
 

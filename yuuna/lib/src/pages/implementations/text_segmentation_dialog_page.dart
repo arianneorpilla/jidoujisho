@@ -37,6 +37,7 @@ class _TextSegmentationDialogPage
   final ScrollController _scrollController = ScrollController();
 
   String get dialogSelectLabel => appModel.translate('dialog_select');
+  String get dialogStashLabel => appModel.translate('dialog_stash');
   String get dialogSearchLabel => appModel.translate('dialog_search');
 
   final Map<int, ValueNotifier<bool>> _valuesSelected = {};
@@ -118,7 +119,15 @@ class _TextSegmentationDialogPage
     return widgets;
   }
 
+  Widget buildStashButton() {
+    return TextButton(
+      child: Text(dialogStashLabel),
+      onPressed: executeStash,
+    );
+  }
+
   List<Widget> get actions => [
+        buildStashButton(),
         if (widget.onSearch != null) buildSearchButton(),
         if (widget.onSelect != null) buildSelectButton(),
       ];
@@ -151,6 +160,17 @@ class _TextSegmentationDialogPage
     });
 
     return buffer.toString().trim();
+  }
+
+  void executeStash() {
+    List<String> terms = [];
+    widget.segmentedText.forEachIndexed((index, segment) {
+      if (_valuesSelected[index]!.value) {
+        terms.add(segment);
+      }
+    });
+
+    appModel.addToStash(terms: terms);
   }
 
   void executeSearch() {

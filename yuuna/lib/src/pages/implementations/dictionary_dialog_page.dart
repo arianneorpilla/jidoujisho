@@ -182,11 +182,21 @@ class _DictionaryDialogPageState extends BasePageState {
                 children: [
                   JidoujishoMarquee(
                     text: dictionary.dictionaryName,
-                    style: TextStyle(fontSize: textTheme.bodyMedium?.fontSize),
+                    style: TextStyle(
+                      fontSize: textTheme.bodyMedium?.fontSize,
+                      color: dictionary.hidden
+                          ? theme.unselectedWidgetColor
+                          : null,
+                    ),
                   ),
                   JidoujishoMarquee(
                     text: dictionary.formatName,
-                    style: TextStyle(fontSize: textTheme.bodySmall?.fontSize),
+                    style: TextStyle(
+                      fontSize: textTheme.bodySmall?.fontSize,
+                      color: dictionary.hidden
+                          ? theme.unselectedWidgetColor
+                          : null,
+                    ),
                   ),
                 ],
               ),

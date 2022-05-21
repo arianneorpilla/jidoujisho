@@ -33,10 +33,11 @@ final List<CollectionSchema> globalSchemas = [
   DictionarySchema,
   DictionaryEntrySchema,
   DictionaryTagSchema,
+  DictionaryResultSchema,
   MediaItemSchema,
   CreatorContextSchema,
   AnkiMappingSchema,
-  SearchHistorySchema,
+  SearchHistoryItemSchema,
 ];
 
 /// A global [Provider] for app-wide configuration and state management.
@@ -66,6 +67,9 @@ class AppModel with ChangeNotifier {
   /// Used for caching images and audio produced from media seeds.
   DefaultCacheManager get cacheManager => _cacheManager;
   final _cacheManager = DefaultCacheManager();
+
+  /// Used to notify dictionary widgets to dictionary changes.
+  final ChangeNotifier dictionaryNotifier = ChangeNotifier();
 
   /// These directories are prepared at startup in order to reduce redundancy
   /// in actual runtime.
@@ -130,9 +134,12 @@ class AppModel with ChangeNotifier {
   final int maximumQuickActions = 6;
 
   /// Maximum number of search history items.
-  final int maximumSearchHistoryItems = 100;
+  final int maximumSearchHistoryItems = 250;
 
-  /// Used as the unique key for the [SearchHistory] item used for the Stash.
+  /// Maximum number of dictionary history items.
+  final int maximumDictionaryHistoryItems = 50;
+
+  /// Used as the history key used for the Stash.
   final String stashKey = 'stash';
 
   /// Returns all dictionaries imported into the database. Sorted by the
@@ -144,6 +151,13 @@ class AppModel with ChangeNotifier {
   /// user-defined order in the dictionary menu.
   List<AnkiMapping> get mappings =>
       _database.ankiMappings.where().sortByOrder().findAllSync();
+
+  /// Returns all dictionary history results. Oldest is first.
+  List<DictionaryResult> get dictionaryHistory =>
+      _database.dictionaryResults.where().findAllSync();
+
+  /// For watching the dictionary history collection.
+  Stream<void> get dictionaryWatcher => _database.dictionaryResults.watchLazy();
 
   /// Used to check whether or not the creator is currently in the navigation
   /// stack.
@@ -311,14 +325,14 @@ class AppModel with ChangeNotifier {
       Field.sentence: [
         ClearFieldEnhancement(field: Field.sentence),
         TextSegmentationEnhancement(field: Field.sentence),
-        PickFromStashEnhancement(field: Field.sentence),
+        OpenStashEnhancement(field: Field.sentence),
         PopFromStashEnhancement(field: Field.sentence),
       ],
       Field.word: [
         ClearFieldEnhancement(field: Field.word),
         SearchDictionaryEnhancement(),
         MassifExampleSentencesEnhancement(),
-        PickFromStashEnhancement(field: Field.word),
+        OpenStashEnhancement(field: Field.word),
         PopFromStashEnhancement(field: Field.word),
       ],
     };
@@ -618,6 +632,7 @@ class AppModel with ChangeNotifier {
       context: navigatorKey.currentContext!,
       builder: (context) => const DictionaryDialogPage(),
     );
+    notifyListeners();
   }
 
   /// Show the language menu. This should be callable from many parts of the
@@ -907,6 +922,7 @@ class AppModel with ChangeNotifier {
     await compute(deleteDictionaryData, params);
 
     Navigator.pop(navigatorKey.currentContext!);
+    dictionaryNotifier.notifyListeners();
   }
 
   /// Delete a selected mapping from the database.
@@ -1445,14 +1461,13 @@ class AppModel with ChangeNotifier {
   /// application for editing purposes.
   Future<void> openStash({
     required Function(String) onSelect,
+    required Function(String) onSearch,
   }) async {
-    List<String> stashContents = getStash();
-
     await showDialog(
       context: _navigatorKey.currentContext!,
-      builder: (context) => PickFromStashDialogPage(
-        stashContents: stashContents,
+      builder: (context) => OpenStashDialogPage(
         onSelect: onSelect,
+        onSearch: onSearch,
       ),
     );
   }
@@ -1476,6 +1491,20 @@ class AppModel with ChangeNotifier {
         ),
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
+      ),
+    );
+  }
+
+  /// A helper function for showing a result already in dictionary history.
+  Future<void> openResultFromHistory({
+    required DictionaryResult result,
+  }) async {
+    await Navigator.push(
+      _navigatorKey.currentContext!,
+      MaterialPageRoute(
+        builder: (context) => RecursiveDictionaryHistoryPage(
+          result: result,
+        ),
       ),
     );
   }
@@ -1571,6 +1600,8 @@ class AppModel with ChangeNotifier {
     _database.writeTxnSync((isar) {
       isar.ankiMappings.putSync(mapping);
     });
+
+    notifyListeners();
   }
 
   /// Removes a given [mapping]'s persisted action for a given [slotNumber].
@@ -1615,94 +1646,101 @@ class AppModel with ChangeNotifier {
     });
   }
 
-  /// Add the search history entity to the database if it does not exist.
-  void initialiseSearchHistoryIfMissing({
-    required String uniqueKey,
-  }) async {
-    _database.writeTxnSync((isar) {
-      SearchHistory? history =
-          isar.searchHistorys.getByUniqueKeySync(uniqueKey);
-
-      if (history == null) {
-        isar.searchHistorys.putSync(
-          SearchHistory(
-            uniqueKey: uniqueKey,
-            items: [],
-          ),
-        );
-      }
-    });
-  }
-
-  /// Add the [searchTerm] to a search history with the given [uniqueKey]. If
+  /// Add the [searchTerm] to a search history with the given [historyKey]. If
   /// there are already a maximum number of items in history, this will be
   /// capped. Oldest items will be discarded in that scenario.
   void addToSearchHistory({
-    required String uniqueKey,
+    required String historyKey,
     required String searchTerm,
   }) async {
-    if (isIncognitoMode) {
-      return;
-    }
-
     if (searchTerm.trim().isEmpty) {
       return;
     }
-    initialiseSearchHistoryIfMissing(uniqueKey: uniqueKey);
 
     _database.writeTxnSync((isar) {
-      SearchHistory history =
-          isar.searchHistorys.getByUniqueKeySync(uniqueKey)!;
+      SearchHistoryItem searchHistoryItem = SearchHistoryItem(
+        searchTerm: searchTerm,
+        historyKey: historyKey,
+      );
 
-      history.items.removeWhere((item) => item == searchTerm);
+      isar.searchHistoryItems
+          .deleteByUniqueKeySync(searchHistoryItem.uniqueKey);
 
-      if (history.items.length >= maximumSearchHistoryItems) {
-        history.items = history.items
-            .sublist(history.items.length - maximumSearchHistoryItems);
+      isar.searchHistoryItems.putSync(searchHistoryItem);
+
+      int countInSameHistory = isar.searchHistoryItems
+          .filter()
+          .historyKeyEqualTo(historyKey)
+          .countSync();
+
+      if (maximumSearchHistoryItems < countInSameHistory) {
+        int surplus = countInSameHistory - maximumSearchHistoryItems;
+        isar.searchHistoryItems
+            .filter()
+            .historyKeyEqualTo(historyKey)
+            .limit(surplus)
+            .build()
+            .deleteAllSync();
       }
-
-      history.items.add(searchTerm);
-      isar.searchHistorys.putSync(history);
     });
   }
 
-  /// Remove the [searchTerm] from a search history with the given [uniqueKey].
+  /// Remove the [searchTerm] from a search history with the given [historyKey].
   Future<void> removeFromSearchHistory({
-    required String uniqueKey,
+    required String historyKey,
     required String searchTerm,
   }) async {
-    initialiseSearchHistoryIfMissing(uniqueKey: uniqueKey);
-
     _database.writeTxnSync((isar) {
-      SearchHistory history =
-          isar.searchHistorys.getByUniqueKeySync(uniqueKey)!;
+      SearchHistoryItem searchHistoryItem = SearchHistoryItem(
+        searchTerm: searchTerm,
+        historyKey: historyKey,
+      );
 
-      history.items.remove(searchTerm);
-      isar.searchHistorys.putSync(history);
+      isar.searchHistoryItems
+          .deleteByUniqueKeySync(searchHistoryItem.uniqueKey);
     });
   }
 
-  /// Clear the search history with the given [uniqueKey].
+  /// Clear the search history with the given [historyKey].
   void clearSearchHistory({
-    required String uniqueKey,
+    required String historyKey,
   }) {
-    initialiseSearchHistoryIfMissing(uniqueKey: uniqueKey);
-
     _database.writeTxnSync((isar) {
-      SearchHistory history =
-          isar.searchHistorys.getByUniqueKeySync(uniqueKey)!;
-
-      history.items = [];
-      isar.searchHistorys.putSync(history);
+      isar.searchHistoryItems
+          .filter()
+          .historyKeyEqualTo(historyKey)
+          .build()
+          .deleteAllSync();
     });
   }
 
-  /// Get the search history for a given collection named [uniqueKey].
-  List<String> getSearchHistory({required String uniqueKey}) {
-    initialiseSearchHistoryIfMissing(uniqueKey: uniqueKey);
-    SearchHistory history =
-        _database.searchHistorys.getByUniqueKeySync(uniqueKey)!;
-    return history.items;
+  /// Get the search history for a given collection named [historyKey].
+  List<String> getSearchHistory({required String historyKey}) {
+    List<SearchHistoryItem> items = _database.searchHistoryItems
+        .filter()
+        .historyKeyEqualTo(historyKey)
+        .build()
+        .findAllSync();
+
+    List<String> history = items.map((item) => item.searchTerm).toList();
+
+    return history;
+  }
+
+  /// Get whether or not a certain [searchTerm] is in a certain history.
+  bool isTermInSearchHistory({
+    required String historyKey,
+    required String searchTerm,
+  }) {
+    SearchHistoryItem searchHistoryItem = SearchHistoryItem(
+      searchTerm: searchTerm,
+      historyKey: historyKey,
+    );
+
+    SearchHistoryItem? duplicateItem = _database.searchHistoryItems
+        .getByUniqueKeySync(searchHistoryItem.uniqueKey);
+
+    return duplicateItem != null;
   }
 
   /// Adds the [terms] to the Stash and shows a message indicating the addition.
@@ -1715,7 +1753,7 @@ class AppModel with ChangeNotifier {
 
     for (String term in terms) {
       addToSearchHistory(
-        uniqueKey: stashKey,
+        historyKey: stashKey,
         searchTerm: term,
       );
     }
@@ -1743,19 +1781,24 @@ class AppModel with ChangeNotifier {
     required String term,
   }) async {
     removeFromSearchHistory(
-      uniqueKey: stashKey,
+      historyKey: stashKey,
       searchTerm: term,
     );
   }
 
   /// Clear the contents of the Stash.
   void clearStash() {
-    clearSearchHistory(uniqueKey: stashKey);
+    clearSearchHistory(historyKey: stashKey);
   }
 
   /// Get the contents of the Stash.
   List<String> getStash() {
-    return getSearchHistory(uniqueKey: stashKey);
+    return getSearchHistory(historyKey: stashKey);
+  }
+
+  /// Get the contents of the Stash.
+  bool isTermInStash(String searchTerm) {
+    return isTermInSearchHistory(historyKey: stashKey, searchTerm: searchTerm);
   }
 
   /// Get the [DictionaryTag] given details from a [DictionaryEntry].
@@ -1773,5 +1816,57 @@ class AppModel with ChangeNotifier {
     Dictionary? dictionary =
         _database.dictionarys.getByDictionaryNameSync(dictionaryName);
     return dictionary!;
+  }
+
+  /// Shown when a query fails to be made to an online service. For example,
+  /// when there is no internet connection.
+  void showFailedToCommunicateMessage() {
+    String failedOnlineService = translate('failed_online_service');
+    Fluttertoast.showToast(
+      msg: failedOnlineService,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+    );
+  }
+
+  /// Add a [DictionaryResult] to the dictionary history. If the maximum value
+  /// is exceed, the dictionary history is cut down to the newest values.
+  void addToDictionaryHistory({
+    required DictionaryResult result,
+  }) async {
+    _database.writeTxnSync((isar) {
+      isar.dictionaryResults.deleteBySearchTermSync(result.searchTerm);
+      isar.dictionaryResults.putSync(result);
+
+      int countInSameHistory = isar.dictionaryResults.countSync();
+
+      if (maximumDictionaryHistoryItems < countInSameHistory) {
+        int surplus = countInSameHistory - maximumDictionaryHistoryItems;
+        isar.dictionaryResults.where().limit(surplus).build().deleteAllSync();
+      }
+    });
+  }
+
+  /// Update the scroll index of a given [DictionaryResult] in the database.
+  void updateDictionaryResultScrollIndex({
+    required DictionaryResult result,
+    required int newIndex,
+  }) {
+    _database.writeTxnSync((isar) {
+      DictionaryResult resultToUpdate =
+          isar.dictionaryResults.getBySearchTermSync(result.searchTerm)!;
+      resultToUpdate.scrollIndex = newIndex;
+      isar.dictionaryResults.putSync(resultToUpdate);
+    });
+  }
+
+  /// Clear the entire dictionary history. This must be performed when a
+  /// dictionary is deleted, otherwise history data cannot be viewed without
+  /// the necessary dictionary metadata.
+  void clearDictionaryHistory() async {
+    clearSearchHistory(historyKey: DictionaryMediaType.instance.uniqueKey);
+    _database.writeTxnSync((isar) {
+      isar.dictionaryResults.clearSync();
+    });
   }
 }

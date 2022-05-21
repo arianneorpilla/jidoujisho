@@ -15,12 +15,18 @@ class DictionaryResult {
   DictionaryResult({
     required this.searchTerm,
     this.mapping = const [],
+    this.scrollIndex = 0,
     this.id,
   });
 
   /// A unique identifier for the purposes of database storage.
   @Id()
   final int? id;
+
+  /// An index that indicates which in the mapping is the last viewed and
+  /// should be shown on the dashboard. Scrolling a result horizontally in the
+  /// dictionary history will change and update this result in the database.
+  int scrollIndex;
 
   /// Original search term used to make the result.
   @Index(unique: true)

@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/models.dart';
@@ -75,6 +75,18 @@ abstract class QuickAction {
   /// here and this function will be run once only at runtime during the
   /// initialisation step.
   Future<void> prepareResources() async {}
+
+  /// Get a custom enabled  color that this action should have for a certain
+  /// condition in the application. By default, this is
+  Color getIconColor({
+    required BuildContext context,
+    required AppModel appModel,
+    required String word,
+    required String reading,
+    required List<DictionaryEntry> entries,
+  }) {
+    return Theme.of(context).appBarTheme.foregroundColor!;
+  }
 
   /// Execute the functionality of this action.
   Future<void> executeAction({

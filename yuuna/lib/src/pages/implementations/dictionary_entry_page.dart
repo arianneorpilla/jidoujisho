@@ -52,8 +52,6 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
         allowPaste: false,
       );
 
-  final List<Widget> tags = [];
-
   @override
   void initState() {
     super.initState();
@@ -61,34 +59,34 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (tags.isEmpty) {
-      tags.add(
-        JidoujishoTag(
-          text: widget.entry.dictionaryName,
-          message: dictionaryNameNotes.replaceAll(
-            '%dictionaryName%',
-            widget.entry.dictionaryName,
-          ),
-          backgroundColor: Colors.red.shade900,
-        ),
-      );
-      tags.addAll(widget.entry.meaningTags.map((tagName) {
-        if (tagName.isNotEmpty) {
-          DictionaryTag tag = appModelNoUpdate.getDictionaryTag(
-            dictionaryName: widget.entry.dictionaryName,
-            tagName: tagName,
-          );
+    final List<Widget> tags = [];
 
-          return JidoujishoTag(
-            text: tag.name,
-            message: tag.notes,
-            backgroundColor: tag.color,
-          );
-        } else {
-          return const SizedBox.shrink();
-        }
-      }).toList());
-    }
+    tags.add(
+      JidoujishoTag(
+        text: widget.entry.dictionaryName,
+        message: dictionaryNameNotes.replaceAll(
+          '%dictionaryName%',
+          widget.entry.dictionaryName,
+        ),
+        backgroundColor: Colors.red.shade900,
+      ),
+    );
+    tags.addAll(widget.entry.meaningTags.map((tagName) {
+      if (tagName.isNotEmpty) {
+        DictionaryTag tag = appModel.getDictionaryTag(
+          dictionaryName: widget.entry.dictionaryName,
+          tagName: tagName,
+        );
+
+        return JidoujishoTag(
+          text: tag.name,
+          message: tag.notes,
+          backgroundColor: tag.color,
+        );
+      } else {
+        return const SizedBox.shrink();
+      }
+    }).toList());
 
     return Padding(
       padding: EdgeInsets.only(

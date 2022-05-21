@@ -4,19 +4,19 @@ import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
 
 /// An enhancement used to view and manage the Stash.
-class PickFromStashEnhancement extends Enhancement {
+class OpenStashEnhancement extends Enhancement {
   /// Initialise this enhancement with the hardset parameters.
-  PickFromStashEnhancement({required super.field})
+  OpenStashEnhancement({required super.field})
       : super(
           uniqueKey: key,
-          label: 'Pick From Stash',
+          label: 'Open Stash',
           description: 'View and manage previously stashed text.',
-          icon: Icons.inventory_2,
+          icon: Icons.collections_bookmark,
         );
 
   /// Used to identify this enhancement and to allow a constant value for the
   /// default mappings value of [AnkiMapping].
-  static const String key = 'pick_from_stash';
+  static const String key = 'open_stash';
 
   @override
   Future<void> enhanceCreatorParams({
@@ -29,6 +29,12 @@ class PickFromStashEnhancement extends Enhancement {
     appModel.openStash(
       onSelect: (selection) {
         creatorModel.getFieldController(field).text = selection;
+      },
+      onSearch: (selection) {
+        appModel.openRecursiveDictionarySearch(
+          searchTerm: selection,
+          killOnPop: false,
+        );
       },
     );
   }

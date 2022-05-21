@@ -14,6 +14,7 @@ class DictionaryResultPage extends BasePage {
     required this.onSearch,
     required this.onStash,
     required this.getCurrentSearchTerm,
+    this.updateHistory = true,
     super.key,
   });
 
@@ -25,6 +26,9 @@ class DictionaryResultPage extends BasePage {
 
   /// Action to be done upon selecting the stash option.
   final Function(String) onStash;
+
+  /// Whether or not to update dictionary history upon viewing this result.
+  final bool updateHistory;
 
   /// Used to check if the current search term is still the same. Used to
   /// add to search history without adding too many duplicate partial search
@@ -67,16 +71,21 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
           .compareTo(dictionaryOrderCache![b.dictionaryName]!));
     }
 
-    Future.delayed(const Duration(milliseconds: 1000), () {
-      if (mounted) {
-        if (widget.getCurrentSearchTerm() == widget.result.searchTerm) {
-          appModel.addToSearchHistory(
-            uniqueKey: DictionaryMediaType.instance.uniqueKey,
-            searchTerm: widget.result.searchTerm,
-          );
+    if (widget.updateHistory) {
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        if (mounted) {
+          if (widget.getCurrentSearchTerm() == widget.result.searchTerm) {
+            if (!appModel.isIncognitoMode) {
+              appModel.addToSearchHistory(
+                historyKey: DictionaryMediaType.instance.uniqueKey,
+                searchTerm: widget.result.searchTerm,
+              );
+              appModel.addToDictionaryHistory(result: widget.result);
+            }
+          }
         }
-      }
-    });
+      });
+    }
 
     return ListView.builder(
       physics: const NeverScrollableScrollPhysics(),
@@ -97,6 +106,17 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
             initialExpanded: !dictionary.collapsed,
           );
           dictionaryHiddens[dictionaryName] = dictionary.hidden;
+        }
+
+        bool hidePage = true;
+        for (bool dictionaryHidden in dictionaryHiddens.values) {
+          if (!dictionaryHidden) {
+            hidePage = false;
+          }
+        }
+
+        if (hidePage) {
+          return const SizedBox.shrink();
         }
 
         return DictionaryWordPage(

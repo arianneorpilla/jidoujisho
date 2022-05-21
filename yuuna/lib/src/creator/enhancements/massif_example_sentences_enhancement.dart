@@ -59,8 +59,9 @@ class MassifExampleSentencesEnhancement extends Enhancement {
     String searchTerm = creatorModel.getFieldController(field).text;
 
     List<MassifResult> exampleSentences = await searchForSentences(
-      searchTerm: searchTerm,
       context: context,
+      appModel: appModel,
+      searchTerm: searchTerm,
     );
 
     appModel.openMassifSentenceDialog(
@@ -73,8 +74,9 @@ class MassifExampleSentencesEnhancement extends Enhancement {
 
   /// Search the Massif API for example sentences and return a list of results.
   Future<List<MassifResult>> searchForSentences({
-    required String searchTerm,
     required BuildContext context,
+    required AppModel appModel,
+    required String searchTerm,
   }) async {
     if (massifCache[searchTerm] != null) {
       return massifCache[searchTerm]!;
@@ -82,83 +84,95 @@ class MassifExampleSentencesEnhancement extends Enhancement {
 
     List<MassifResult> results = [];
 
-    /// Query the Massif API for results.
-    http.Response response = await client
-        .get(Uri.parse('https://massif.la/ja/search?q=$searchTerm&fmt=json'));
-    Map<String, dynamic> json = jsonDecode(utf8.decode(response.bodyBytes));
+    late http.Response response;
 
-    /// For each response, create a [MassifResult] that can be used to display
-    /// the widget as well as hold the sentence and source data.
-    List<Map<String, dynamic>> queryResponses =
-        List<Map<String, dynamic>>.from(json['results']);
+    try {
+      /// Query the Massif API for results.
+      response = await client.get(
+          Uri.parse('https://massif.la/ja/search?&fmt=json&q=$searchTerm'));
 
-    for (Map<String, dynamic> queryResponse in queryResponses) {
-      Map<String, String> sampleSource =
-          Map<String, String>.from(queryResponse['sample_source']);
-      String source = sampleSource['title']!;
-      String text = queryResponse['text'];
+      Map<String, dynamic> json = jsonDecode(utf8.decode(response.bodyBytes));
 
-      List<InlineSpan> spans = [];
+      /// For each response, create a [MassifResult] that can be used to display
+      /// the widget as well as hold the sentence and source data.
+      List<Map<String, dynamic>> queryResponses =
+          List<Map<String, dynamic>>.from(json['results']);
 
-      String highlightedText = queryResponse['highlighted_html'];
-      List<String> splitWithDelims =
-          highlightedText.splitWithDelim(RegExp(r'<em>(.*?)<\/em>'));
+      for (Map<String, dynamic> queryResponse in queryResponses) {
+        Map<String, String> sampleSource =
+            Map<String, String>.from(queryResponse['sample_source']);
+        String source = sampleSource['title']!;
+        String text = queryResponse['text'];
 
-      for (String splitWithDelim in splitWithDelims) {
-        if (splitWithDelim.startsWith('<em>') &&
-            splitWithDelim.endsWith('</em>')) {
-          spans.add(
-            TextSpan(
-              text:
-                  splitWithDelim.replaceAll('<em>', '').replaceAll('</em>', ''),
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
-                fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
+        List<InlineSpan> spans = [];
+
+        String highlightedText = queryResponse['highlighted_html'];
+        List<String> splitWithDelims =
+            highlightedText.splitWithDelim(RegExp(r'<em>(.*?)<\/em>'));
+
+        for (String splitWithDelim in splitWithDelims) {
+          if (splitWithDelim.startsWith('<em>') &&
+              splitWithDelim.endsWith('</em>')) {
+            spans.add(
+              TextSpan(
+                text: splitWithDelim
+                    .replaceAll('<em>', '')
+                    .replaceAll('</em>', ''),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                  fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
+                ),
               ),
-            ),
-          );
-        } else {
-          spans.add(
-            TextSpan(
-              text: splitWithDelim,
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
+            );
+          } else {
+            spans.add(
+              TextSpan(
+                text: splitWithDelim,
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
+                ),
               ),
-            ),
-          );
+            );
+          }
         }
+
+        Widget widget = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text.rich(
+              TextSpan(children: spans),
+            ),
+            Text(
+              source,
+              style: TextStyle(
+                fontSize: Theme.of(context).textTheme.labelSmall?.fontSize,
+                color: Theme.of(context).unselectedWidgetColor,
+              ),
+            )
+          ],
+        );
+
+        MassifResult result = MassifResult(
+          widget: widget,
+          text: text,
+          source: source,
+        );
+
+        results.add(result);
       }
 
-      Widget widget = Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text.rich(
-            TextSpan(children: spans),
-          ),
-          Text(
-            source,
-            style: TextStyle(
-              fontSize: Theme.of(context).textTheme.labelSmall?.fontSize,
-              color: Theme.of(context).unselectedWidgetColor,
-            ),
-          )
-        ],
-      );
+      /// Save this into cache.
+      massifCache[searchTerm] = results;
 
-      MassifResult result = MassifResult(
-        widget: widget,
-        text: text,
-        source: source,
+      return results;
+    } catch (e) {
+      /// Used to log if this third-party service is down or changes domains.
+      appModel.showFailedToCommunicateMessage();
+      throw Exception(
+        'Failed to communicate with Massif: ${response.reasonPhrase}',
       );
-
-      results.add(result);
     }
-
-    /// Save this into cache.
-    massifCache[searchTerm] = results;
-
-    return results;
   }
 }
