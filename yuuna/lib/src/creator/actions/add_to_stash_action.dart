@@ -5,9 +5,9 @@ import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/models.dart';
 
 /// An enhancement used as a shortcut for adding text items to the Stash.
-class AddToStashEnhancement extends QuickAction {
+class AddToStashAction extends QuickAction {
   /// Initialise this enhancement with the hardset parameters.
-  AddToStashEnhancement()
+  AddToStashAction()
       : super(
           uniqueKey: key,
           label: 'Add To Stash',

@@ -27,7 +27,7 @@ class OpenStashDialogPage extends BasePage {
 class _OpenStashDialogPage extends BasePageState<OpenStashDialogPage> {
   final ScrollController _scrollController = ScrollController();
 
-  String get dialogExportLabel => appModel.translate('dialog_export');
+  String get dialogShareLabel => appModel.translate('dialog_share');
   String get dialogSearchLabel => appModel.translate('dialog_search');
   String get dialogSelectLabel => appModel.translate('dialog_select');
   String get dialogClearLabel => appModel.translate('dialog_clear');
@@ -151,7 +151,7 @@ class _OpenStashDialogPage extends BasePageState<OpenStashDialogPage> {
 
   Widget buildExportButton() {
     return TextButton(
-      child: Text(dialogExportLabel),
+      child: Text(dialogShareLabel),
       onPressed: executeExport,
     );
   }

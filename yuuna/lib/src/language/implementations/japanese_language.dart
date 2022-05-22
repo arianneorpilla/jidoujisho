@@ -1,9 +1,10 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 import 'package:kana_kit/kana_kit.dart';
 import 'package:mecab_dart/mecab_dart.dart';
+import 'package:ruby_text/ruby_text.dart';
 import 'package:ve_dart/ve_dart.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/language.dart';
@@ -35,6 +36,10 @@ class JapaneseLanguage extends Language {
 
   /// Used for processing Japanese characters from Kana to Romaji and so on.
   static KanaKit kanaKit = const KanaKit();
+
+  /// Used to cache furigana segments for already generated [DictionaryPair]
+  /// items.
+  final Map<DictionaryPair, List<RubyTextData>?> segmentsCache = {};
 
   @override
   Future<void> prepareResources() async {
@@ -99,6 +104,45 @@ class JapaneseLanguage extends Language {
     }
 
     return words;
+  }
+
+  /// Some languages may want to display custom widgets rather than the built
+  /// in word and reading text that is there by default. For example, Japanese
+  /// may want to display a furigana widget instead.
+  @override
+  Widget? getWordReadingOverrideWidget({
+    required BuildContext context,
+    required String word,
+    required String reading,
+    required List<DictionaryEntry> meanings,
+  }) {
+    if (reading.isEmpty) {
+      return null;
+    }
+
+    List<RubyTextData>? segments = fetchFurigana(word: word, reading: reading);
+    return RubyText(
+      segments ?? [RubyTextData(word, ruby: reading)],
+      style: Theme.of(context)
+          .textTheme
+          .titleLarge!
+          .copyWith(fontWeight: FontWeight.bold),
+      rubyStyle: Theme.of(context).textTheme.labelSmall,
+    );
+  }
+
+  /// Fetch furigana for a certain word and reading. If already obtained,
+  /// use the cache.
+  List<RubyTextData>? fetchFurigana({
+    required String word,
+    required String reading,
+  }) {
+    DictionaryPair pair = DictionaryPair(word: word, reading: reading);
+    if (segmentsCache.containsKey(pair)) {
+      return segmentsCache[pair];
+    }
+
+    return LanguageUtils.distributeFurigana(term: word, reading: reading);
   }
 }
 

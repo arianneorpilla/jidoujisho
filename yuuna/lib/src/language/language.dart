@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:math';
-import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:yuuna/dictionary.dart';
 
 /// Defines common characteristics required for tuning locale and text
@@ -188,6 +188,18 @@ abstract class Language {
     }
 
     return fallbackTerms;
+  }
+
+  /// Some languages may want to display custom widgets rather than the built
+  /// in word and reading text that is there by default. For example, Japanese
+  /// may want to display a furigana widget instead.
+  Widget? getWordReadingOverrideWidget({
+    required BuildContext context,
+    required String word,
+    required String reading,
+    required List<DictionaryEntry> meanings,
+  }) {
+    return null;
   }
 }
 

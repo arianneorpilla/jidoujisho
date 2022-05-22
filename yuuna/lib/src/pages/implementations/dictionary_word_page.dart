@@ -112,22 +112,13 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SelectableText(
-                  word,
-                  style: textTheme.titleLarge!
-                      .copyWith(fontWeight: FontWeight.bold),
-                  selectionControls: selectionControls,
-                ),
-                SelectableText(
-                  reading,
-                  style: textTheme.titleMedium,
-                  selectionControls: selectionControls,
-                ),
-              ],
-            ),
+            child: appModel.targetLanguage.getWordReadingOverrideWidget(
+                  context: context,
+                  word: word,
+                  reading: reading,
+                  meanings: widget.entries,
+                ) ??
+                buildDefaultWordReadingWidget(),
           ),
           Padding(
             padding: EdgeInsets.only(
@@ -270,5 +261,23 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
         ),
       );
     }
+  }
+
+  Widget buildDefaultWordReadingWidget() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SelectableText(
+          word,
+          style: textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
+          selectionControls: selectionControls,
+        ),
+        SelectableText(
+          reading,
+          style: textTheme.titleMedium,
+          selectionControls: selectionControls,
+        ),
+      ],
+    );
   }
 }

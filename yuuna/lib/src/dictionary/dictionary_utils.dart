@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:collection/collection.dart';
 import 'package:isar/isar.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/models.dart';
@@ -231,4 +232,62 @@ class DictionaryImportLocalisation {
 
   /// For marking completion of dictionary import.
   final String importMessageComplete;
+}
+
+/// A general purpose class for dictionary operations that do not require to be
+/// at the top-level.
+class DictionaryUtils {
+  /// Get a single combined text for all meanings in a list of entries.
+  static String flattenMeanings(List<DictionaryEntry> entries) {
+    StringBuffer meaningBuffer = StringBuffer();
+
+    Map<String, List<DictionaryEntry>> entriesByDictionaryName =
+        groupBy<DictionaryEntry, String>(
+      entries,
+      (entry) => entry.dictionaryName,
+    );
+
+    entriesByDictionaryName.forEach((dictionaryName, singleDictionaryEntries) {
+      int meaningsCount = 0;
+      for (DictionaryEntry entry in singleDictionaryEntries) {
+        meaningsCount += entry.meanings.length;
+      }
+
+      for (DictionaryEntry entry in singleDictionaryEntries) {
+        if (singleDictionaryEntries.length == 1) {
+          entry.meanings.forEachIndexed((index, meaning) {
+            if (meaningsCount != 1) {
+              meaningBuffer.write('• $meaning');
+            } else {
+              meaningBuffer.write(meaning);
+            }
+
+            if (index != entry.meanings.length - 1) {
+              meaningBuffer.write('\n');
+            }
+          });
+        } else {
+          entry.meanings.forEachIndexed((index, meaning) {
+            if (meaningsCount == 1) {
+              meaningBuffer.write('$meaning\n');
+            } else {
+              if (index == 0) {
+                meaningBuffer.write('• ');
+              }
+              meaningBuffer.write(meaning);
+              if (index != entry.meanings.length - 1) {
+                meaningBuffer.write('; ');
+              }
+            }
+          });
+        }
+
+        meaningBuffer.write('\n');
+      }
+
+      meaningBuffer.write('\n');
+    });
+
+    return meaningBuffer.toString().trim();
+  }
 }

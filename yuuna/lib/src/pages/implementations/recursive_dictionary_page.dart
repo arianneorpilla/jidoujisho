@@ -70,7 +70,7 @@ class _RecursiveDictionaryPageState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       backgroundColor: Theme.of(context).backgroundColor,
       body: SafeArea(
         child: Padding(
@@ -83,6 +83,8 @@ class _RecursiveDictionaryPageState
 
   Widget buildFloatingSearchBar() {
     return FloatingSearchBar(
+      physics:
+          const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
       hint: searchEllipsisLabel,
       controller: _controller,
       builder: buildFloatingSearchBody,

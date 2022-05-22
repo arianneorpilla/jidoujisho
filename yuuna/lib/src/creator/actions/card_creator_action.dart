@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yuuna/creator.dart';
@@ -33,56 +32,7 @@ class CardCreatorAction extends QuickAction {
     required String reading,
     required List<DictionaryEntry> entries,
   }) async {
-    StringBuffer meaningBuffer = StringBuffer();
-
-    Map<String, List<DictionaryEntry>> entriesByDictionaryName =
-        groupBy<DictionaryEntry, String>(
-      entries,
-      (entry) => entry.dictionaryName,
-    );
-
-    entriesByDictionaryName.forEach((dictionaryName, singleDictionaryEntries) {
-      int meaningsCount = 0;
-      for (DictionaryEntry entry in singleDictionaryEntries) {
-        meaningsCount += entry.meanings.length;
-      }
-
-      for (DictionaryEntry entry in singleDictionaryEntries) {
-        if (singleDictionaryEntries.length == 1) {
-          entry.meanings.forEachIndexed((index, meaning) {
-            if (meaningsCount != 1) {
-              meaningBuffer.write('• $meaning');
-            } else {
-              meaningBuffer.write(meaning);
-            }
-
-            if (index != entry.meanings.length - 1) {
-              meaningBuffer.write('\n');
-            }
-          });
-        } else {
-          entry.meanings.forEachIndexed((index, meaning) {
-            if (meaningsCount == 1) {
-              meaningBuffer.write('$meaning\n');
-            } else {
-              if (index == 0) {
-                meaningBuffer.write('• ');
-              }
-              meaningBuffer.write(meaning);
-              if (index != entry.meanings.length - 1) {
-                meaningBuffer.write('; ');
-              }
-            }
-          });
-        }
-
-        meaningBuffer.write('\n');
-      }
-
-      meaningBuffer.write('\n');
-    });
-
-    String meaning = meaningBuffer.toString().trim();
+    String meaning = DictionaryUtils.flattenMeanings(entries);
 
     if (appModel.isCreatorOpen) {
       creatorModel.copyContext(

@@ -20,6 +20,7 @@ import 'package:path/path.dart' as path;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:restart_app/restart_app.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/language.dart';
@@ -128,7 +129,7 @@ class AppModel with ChangeNotifier {
   late final Map<MediaType, Map<String, MediaSource>> mediaSources;
 
   /// Maximum number of manual enhancements in a field.
-  final int maximumFieldEnhancements = 4;
+  final int maximumFieldEnhancements = 5;
 
   /// Maximum number of quick actions.
   final int maximumQuickActions = 6;
@@ -359,7 +360,8 @@ class AppModel with ChangeNotifier {
     final List<QuickAction> availableQuickActions = [
       CardCreatorAction(),
       InstantExportAction(),
-      AddToStashEnhancement(),
+      AddToStashAction(),
+      ShareAction(),
     ];
 
     quickActions = Map<String, QuickAction>.unmodifiable(
@@ -475,7 +477,7 @@ class AppModel with ChangeNotifier {
   /// Toggle between light and dark mode.
   void toggleDarkMode() async {
     await _preferences.put('is_dark_mode', !isDarkMode);
-    notifyListeners();
+    Restart.restartApp();
   }
 
   /// Get whether or not the app is in incognito mode.
@@ -627,10 +629,13 @@ class AppModel with ChangeNotifier {
   /// Show the dictionary menu. This should be callable from many parts of the
   /// app, so it is appropriately handled by the model.
   Future<void> showDictionaryMenu() async {
-    await showDialog(
+    await showGeneralDialog(
       barrierDismissible: true,
+      barrierLabel: '',
       context: navigatorKey.currentContext!,
-      builder: (context) => const DictionaryDialogPage(),
+      pageBuilder: (context, animation1, animation2) =>
+          const DictionaryDialogPage(),
+      transitionDuration: Duration.zero,
     );
     notifyListeners();
   }

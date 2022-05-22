@@ -141,28 +141,7 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
       },
       child: Padding(
         padding: Spacing.of(context).insets.vertical.small,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            buildFooterIcon(result),
-            const Space.small(),
-            buildFooterTextSpans(result),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget buildFooterIcon(DictionaryResult result) {
-    return Padding(
-      child: Icon(
-        DictionaryMediaType.instance.icon,
-        size: fontSize,
-        color: Theme.of(context).unselectedWidgetColor,
-      ),
-      padding: EdgeInsets.only(
-        top: 1.5,
-        right: Spacing.of(context).spaces.small,
+        child: buildFooterTextSpans(result),
       ),
     );
   }
@@ -174,6 +153,20 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
       TextSpan(
         text: '',
         children: <InlineSpan>[
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: Padding(
+              child: Icon(
+                DictionaryMediaType.instance.icon,
+                size: fontSize,
+                color: Theme.of(context).unselectedWidgetColor,
+              ),
+              padding: EdgeInsets.only(
+                top: 1.25,
+                right: Spacing.of(context).spaces.small,
+              ),
+            ),
+          ),
           TextSpan(
             text: searchLabelBefore,
             style: TextStyle(

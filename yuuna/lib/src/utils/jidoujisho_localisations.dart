@@ -45,6 +45,7 @@ class JidoujishoLocalisations {
     'dialog_select': 'SELECT',
     'dialog_stash': 'STASH',
     'dialog_search': 'SEARCH',
+    'dialog_share': 'SHARE',
     'dialog_pop': 'POP',
     'dialog_save': 'SAVE',
     'dialog_launch_ankidroid': 'LAUNCH ANKIDROID',
@@ -120,11 +121,11 @@ class JidoujishoLocalisations {
     'error_standard_profile_name': 'Invalid profile name',
     'error_standard_profile_name_content':
         'Cannot rename the standard profile.',
-    'error_ankidroid_api': 'AnkiDroid API',
+    'error_ankidroid_api': '',
     'error_ankidroid_api_content':
-        'The AnkiDroid API could not be found in the background.\n\nLaunch '
-            'AnkiDroid and ensure the app and background service is active in '
-            'order to continue.',
+        'There was an issue communicating with AnkiDroid.\n\nEnsure that the'
+            ' AnkiDroid background service is active and all relevant app'
+            ' permissions are granted in order to continue.',
     'info_standard_model': 'Standard model added',
     'info_standard_model_content':
         '『jidoujisho Yuuna』 has been added to AnkiDroid as a new card type.'
@@ -145,7 +146,7 @@ class JidoujishoLocalisations {
     'info_enhancements':
         'Enhancements enable the automation of field editing prior to card'
             ' creation. Pick a slot on the right of a field to allow use of an'
-            ' enhancement. Up to four right slots may be utilised for each'
+            ' enhancement. Up to five right slots may be utilised for each'
             ' field. The enhancement in the left slot of a field will be'
             ' automatically applied in instant card creation or upon launch of'
             ' the Card Creator.',

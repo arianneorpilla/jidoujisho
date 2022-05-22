@@ -34,10 +34,12 @@ class _RecursiveDictionaryHistoryPageState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       backgroundColor: Theme.of(context).backgroundColor,
       appBar: buildAppBar(),
       body: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics()),
         child: DictionaryResultPage(
           result: widget.result,
           onSearch: onSearch,

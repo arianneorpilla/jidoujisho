@@ -80,6 +80,8 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
 
   Widget buildDictionaryHistory() {
     return ListView(
+      physics:
+          const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
       children: [
         const SizedBox(
           height: 60,
@@ -104,6 +106,8 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
   @override
   Widget buildFloatingSearchBar() {
     return FloatingSearchBar(
+      physics:
+          const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
       hint: searchEllipsisLabel,
       controller: _controller,
       builder: buildFloatingSearchBody,

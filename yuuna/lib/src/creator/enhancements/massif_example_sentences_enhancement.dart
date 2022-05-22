@@ -78,6 +78,10 @@ class MassifExampleSentencesEnhancement extends Enhancement {
     required AppModel appModel,
     required String searchTerm,
   }) async {
+    if (searchTerm.trim().isEmpty) {
+      return [];
+    }
+
     if (massifCache[searchTerm] != null) {
       return massifCache[searchTerm]!;
     }

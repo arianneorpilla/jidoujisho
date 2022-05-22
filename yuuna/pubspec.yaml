@@ -50,6 +50,8 @@ dependencies:
   pretty_json: ^2.0.0
   receive_sharing_intent: ^1.4.5
   reorderables: ^0.4.4
+  restart_app: ^1.1.0+1
+  ruby_text: ^3.0.1
   settings_ui: ^2.0.2
   share_plus: ^4.0.4
   spaces:
