@@ -53,6 +53,8 @@ class AddToStashAction extends QuickAction {
   }) async {
     if (!appModel.isTermInStash(word)) {
       appModel.addToStash(terms: [word]);
+    } else {
+      appModel.removeFromStash(term: word);
     }
   }
 }

@@ -10,6 +10,7 @@ class JidoujishoTag extends StatelessWidget {
     required this.text,
     required this.backgroundColor,
     this.message,
+    this.trailingText,
     this.icon,
     this.foregroundColor = Colors.white,
     this.iconSize,
@@ -25,6 +26,9 @@ class JidoujishoTag extends StatelessWidget {
 
   /// The message to show when the tag has been clicked on.
   final String? message;
+
+  /// An extra bit to put on a rectangle on the right of the message.
+  final String? trailingText;
 
   /// The color of the tag background.
   final Color backgroundColor;
@@ -63,6 +67,21 @@ class JidoujishoTag extends StatelessWidget {
                     .labelSmall
                     ?.copyWith(color: foregroundColor),
               ),
+              if (trailingText != null) const Space.small(),
+              if (trailingText != null)
+                Flexible(
+                  child: Container(
+                    padding: Spacing.of(context).insets.all.extraSmall,
+                    color: Colors.white.withOpacity(0.35),
+                    child: Text(
+                      trailingText!,
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelSmall
+                          ?.copyWith(color: foregroundColor),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),

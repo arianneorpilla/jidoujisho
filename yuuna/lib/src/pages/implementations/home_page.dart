@@ -1,3 +1,4 @@
+import 'package:change_notifier_builder/change_notifier_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -116,14 +117,19 @@ class _HomePageState extends BasePageState<HomePage> {
   }
 
   Widget? buildLeading() {
-    return Padding(
-      padding: Spacing.of(context).insets.onlyLeft.normal,
-      child: appModel.isIncognitoMode
-          ? ColorFiltered(
-              colorFilter: JidoujishoCommon.greyscaleWithAlphaFilter,
-              child: appIcon,
-            )
-          : appIcon,
+    return ChangeNotifierBuilder(
+      notifier: appModel.incognitoNotifier,
+      builder: (context, notifier, widget) {
+        return Padding(
+          padding: Spacing.of(context).insets.onlyLeft.normal,
+          child: appModel.isIncognitoMode
+              ? ColorFiltered(
+                  colorFilter: JidoujishoCommon.greyscaleWithAlphaFilter,
+                  child: appIcon,
+                )
+              : appIcon,
+        );
+      },
     );
   }
 
@@ -226,7 +232,7 @@ class _HomePageState extends BasePageState<HomePage> {
     selectedAction?.call();
 
     if (selectedAction == null) {
-      Future.delayed(const Duration(milliseconds: 10), () {
+      Future.delayed(const Duration(milliseconds: 50), () {
         FocusScope.of(context).unfocus();
       });
     }

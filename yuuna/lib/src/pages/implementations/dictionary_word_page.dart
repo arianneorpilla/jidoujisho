@@ -53,6 +53,7 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
   String get searchLabel => appModel.translate('search');
   String get stashLabel => appModel.translate('stash');
   String get dictionaryNameNotes => appModel.translate('dictionary_name_notes');
+  String get dictionaryInfoNotes => appModel.translate('dictionary_info_notes');
 
   MaterialTextSelectionControls get selectionControls =>
       JidoujishoTextSelectionControls(
@@ -73,93 +74,14 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (tags == null) {
-      tags = [];
-
-      Set<DictionaryPair> pairs = {};
-
-      for (DictionaryEntry entry in widget.entries) {
-        for (String tag in entry.wordTags) {
-          pairs.add(
-            DictionaryPair(
-              word: entry.dictionaryName,
-              reading: tag,
-            ),
-          );
-        }
-      }
-
-      tags!.addAll(pairs.map((pair) {
-        if (pair.reading.isNotEmpty) {
-          DictionaryTag tag = appModel.getDictionaryTag(
-            dictionaryName: pair.word,
-            tagName: pair.reading,
-          );
-
-          return JidoujishoTag(
-            text: tag.name,
-            message: tag.notes,
-            backgroundColor: tag.color,
-          );
-        } else {
-          return const SizedBox.shrink();
-        }
-      }).toList());
-    }
-
     List<Widget> children = [
-      Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: appModel.targetLanguage.getWordReadingOverrideWidget(
-                  context: context,
-                  word: word,
-                  reading: reading,
-                  meanings: widget.entries,
-                ) ??
-                buildDefaultWordReadingWidget(),
-          ),
-          Padding(
-            padding: EdgeInsets.only(
-              top: Spacing.of(context).spaces.small,
-              right: Spacing.of(context).spaces.small,
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.end,
-              mainAxisSize: MainAxisSize.min,
-              children: buildQuickActions(),
-            ),
-          ),
-        ],
-      ),
+      buildTopRow(),
       const Space.normal(),
-      Wrap(children: tags!),
+      buildTags(),
       const Space.normal(),
-      Padding(
-        padding: Spacing.of(context).insets.horizontal.small,
-        child: ListView.builder(
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          itemCount: widget.entries.length,
-          itemBuilder: (context, index) {
-            DictionaryEntry entry = widget.entries[index];
-
-            if (widget.dictionaryHiddens[entry.dictionaryName]!) {
-              return const SizedBox.shrink();
-            }
-
-            return DictionaryEntryPage(
-              expandableController:
-                  widget.expandableControllers[entry.dictionaryName]!,
-              entry: entry,
-              onSearch: widget.onSearch,
-              onStash: widget.onStash,
-            );
-          },
-        ),
-      ),
+      buildMetaWidgets(),
+      const Space.normal(),
+      buildEntries(),
       if (widget.footerWidget != null) widget.footerWidget!
     ];
 
@@ -263,21 +185,237 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
     }
   }
 
-  Widget buildDefaultWordReadingWidget() {
-    return Column(
+  Widget buildTopRow() {
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SelectableText(
-          word,
-          style: textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
-          selectionControls: selectionControls,
+        Expanded(
+          child: GestureDetector(
+            child: appModel.targetLanguage.getWordReadingOverrideWidget(
+              context: context,
+              appModel: appModel,
+              word: word,
+              reading: reading,
+              meanings: widget.entries,
+            ),
+            onTap: () => appModel.copyToClipboard(word),
+            onLongPress: () => appModel.copyToClipboard(word),
+          ),
         ),
-        SelectableText(
-          reading,
-          style: textTheme.titleMedium,
-          selectionControls: selectionControls,
+        Padding(
+          padding: EdgeInsets.only(
+            top: Spacing.of(context).spaces.small,
+            right: Spacing.of(context).spaces.small,
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: buildQuickActions(),
+          ),
         ),
       ],
+    );
+  }
+
+  Widget buildTags() {
+    if (tags == null) {
+      tags = [];
+
+      Set<DictionaryPair> pairs = {};
+
+      for (DictionaryEntry entry in widget.entries) {
+        for (String tag in entry.wordTags) {
+          pairs.add(
+            DictionaryPair(
+              word: entry.dictionaryName,
+              reading: tag,
+            ),
+          );
+        }
+      }
+
+      tags!.addAll(pairs.map((pair) {
+        if (pair.reading.isNotEmpty) {
+          DictionaryTag tag = appModel.getDictionaryTag(
+            dictionaryName: pair.word,
+            tagName: pair.reading,
+          );
+
+          return JidoujishoTag(
+            text: tag.name,
+            message: tag.notes,
+            backgroundColor: tag.color,
+          );
+        } else {
+          return const SizedBox.shrink();
+        }
+      }).toList());
+    }
+
+    return Wrap(children: tags!);
+  }
+
+  Widget buildMetaWidgets() {
+    List<DictionaryMetaEntry> metaEntries =
+        appModel.getMetaEntriesFromWord(word);
+
+    if (metaEntries.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return ListView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      itemCount: metaEntries.length,
+      itemBuilder: (context, index) {
+        DictionaryMetaEntry metaEntry = metaEntries[index];
+        if (appModel.getDictionary(metaEntry.dictionaryName).hidden) {
+          return const SizedBox.shrink();
+        }
+
+        return Padding(
+          padding: Spacing.of(context).insets.horizontal.small,
+          child: buildMetaWidget(metaEntry),
+        );
+      },
+    );
+  }
+
+  Widget buildMetaWidget(DictionaryMetaEntry metaEntry) {
+    if (metaEntry.frequency != null) {
+      return Row(
+        children: [
+          Padding(
+            padding: Spacing.of(context).insets.onlyBottom.normal,
+            child: JidoujishoTag(
+              text: metaEntry.dictionaryName,
+              message: dictionaryInfoNotes.replaceAll(
+                '%dictionaryName%',
+                metaEntry.dictionaryName,
+              ),
+              trailingText: metaEntry.frequency.toString(),
+              backgroundColor: Colors.red.shade900,
+            ),
+          ),
+          const Spacer(),
+        ],
+      );
+    } else if (metaEntry.pitches != null) {
+      List<Widget> children = [];
+      Widget tag = Padding(
+        padding: Spacing.of(context).insets.onlyRight.small,
+        child: JidoujishoTag(
+          text: metaEntry.dictionaryName,
+          message: dictionaryInfoNotes.replaceAll(
+            '%dictionaryName%',
+            metaEntry.dictionaryName,
+          ),
+          backgroundColor: Colors.red.shade900,
+        ),
+      );
+
+      List<PitchData> pitches = metaEntry.pitches!
+          .where((pitch) => pitch.reading == reading)
+          .toList();
+
+      if (pitches.isEmpty) {
+        return const SizedBox.shrink();
+      }
+
+      if (pitches.length == 1) {
+        for (PitchData data in metaEntry.pitches!) {
+          children.add(
+            appModel.targetLanguage.getPitchWidget(
+              context: context,
+              reading: data.reading,
+              downstep: data.downstep,
+            ),
+          );
+
+          children.add(const Space.small());
+        }
+
+        children.insert(
+          0,
+          Padding(
+            padding: Spacing.of(context).insets.onlyBottom.normal,
+            child: tag,
+          ),
+        );
+
+        return Wrap(children: children);
+      } else {
+        return Padding(
+          padding: Spacing.of(context).insets.onlyBottom.small,
+          child: ListView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return Row(
+                  children: [
+                    Padding(
+                      padding: Spacing.of(context).insets.onlyBottom.semiSmall,
+                      child: JidoujishoTag(
+                        text: metaEntry.dictionaryName,
+                        message: dictionaryInfoNotes.replaceAll(
+                          '%dictionaryName%',
+                          metaEntry.dictionaryName,
+                        ),
+                        backgroundColor: Colors.red.shade900,
+                      ),
+                    ),
+                    const Spacer(),
+                  ],
+                );
+              } else {
+                PitchData data = pitches[index - 1];
+                return Padding(
+                  padding: EdgeInsets.only(
+                    bottom: Spacing.of(context).spaces.small,
+                    left: Spacing.of(context).spaces.small,
+                  ),
+                  child: appModel.targetLanguage.getPitchWidget(
+                    context: context,
+                    reading: data.reading,
+                    downstep: data.downstep,
+                  ),
+                );
+              }
+            },
+            itemCount: pitches.length + 1,
+          ),
+        );
+      }
+    } else {
+      return const SizedBox.shrink();
+    }
+  }
+
+  Widget buildEntries() {
+    return Padding(
+      padding: Spacing.of(context).insets.horizontal.small,
+      child: ListView.builder(
+        physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        itemCount: widget.entries.length,
+        itemBuilder: (context, index) {
+          DictionaryEntry entry = widget.entries[index];
+
+          if (widget.dictionaryHiddens[entry.dictionaryName]!) {
+            return const SizedBox.shrink();
+          }
+
+          return DictionaryEntryPage(
+            expandableController:
+                widget.expandableControllers[entry.dictionaryName]!,
+            entry: entry,
+            onSearch: widget.onSearch,
+            onStash: widget.onStash,
+          );
+        },
+      ),
     );
   }
 }

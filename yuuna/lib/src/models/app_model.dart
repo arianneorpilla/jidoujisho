@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:collection/collection.dart';
+import 'package:clipboard/clipboard.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:external_path/external_path.dart';
@@ -33,6 +33,7 @@ import 'package:yuuna/utils.dart';
 final List<CollectionSchema> globalSchemas = [
   DictionarySchema,
   DictionaryEntrySchema,
+  DictionaryMetaEntrySchema,
   DictionaryTagSchema,
   DictionaryResultSchema,
   MediaItemSchema,
@@ -71,6 +72,10 @@ class AppModel with ChangeNotifier {
 
   /// Used to notify dictionary widgets to dictionary changes.
   final ChangeNotifier dictionaryNotifier = ChangeNotifier();
+
+  /// Used to notify toggling incognito. Updates the app logo to and from
+  /// grayscale.
+  final ChangeNotifier incognitoNotifier = ChangeNotifier();
 
   /// These directories are prepared at startup in order to reduce redundancy
   /// in actual runtime.
@@ -139,6 +144,14 @@ class AppModel with ChangeNotifier {
 
   /// Maximum number of dictionary history items.
   final int maximumDictionaryHistoryItems = 50;
+
+  /// Maximum number of headwords in a returned dictionary result for
+  /// performance purposes.
+  final int maximumDictionaryWordsInResult = 10;
+
+  /// Maximum number of dictionary entries that can be returned from a database
+  /// dictionary search.
+  final int maximumDictionaryEntrySearchMatch = 5;
 
   /// Used as the history key used for the Stash.
   final String stashKey = 'stash';
@@ -490,7 +503,7 @@ class AppModel with ChangeNotifier {
   /// Toggle incognito mode.
   void toggleIncognitoMode() async {
     await _preferences.put('is_incognito_mode', !isIncognitoMode);
-    notifyListeners();
+    incognitoNotifier.notifyListeners();
   }
 
   /// Get the target language from persisted preferences.
@@ -686,6 +699,7 @@ class AppModel with ChangeNotifier {
       importMessageName: translate('import_message_name'),
       importMessageEntries: translate('import_message_entries'),
       importMessageEntryCount: translate('import_message_entry_count'),
+      importMessageMetaEntryCount: translate('import_message_meta_entry_count'),
       importMessageTagCount: translate('import_message_tag_count'),
       importMessageMetadata: translate('import_message_metadata'),
       importMessageDatabase: translate('import_message_database'),
@@ -728,7 +742,11 @@ class AppModel with ChangeNotifier {
       File? file;
       if (lastSelectedDictionaryFormat.requiresFile) {
         FilePickerResult? result = await FilePicker.platform.pickFiles();
-        file = File(result!.files.single.path!);
+        if (result == null) {
+          return;
+        }
+
+        file = File(result.files.single.path!);
       }
 
       showDialog(
@@ -833,7 +851,7 @@ class AppModel with ChangeNotifier {
         isarDirectoryPath: isarDirectory.path,
         localisation: localisation,
       );
-      await compute(depositDictionaryEntriesAndTags, prepareDictionaryParams);
+      await compute(depositDictionaryDataHelper, prepareDictionaryParams);
 
       /// Finally, any necessary metadata that is pertaining to the dictionary
       /// format that will come in handy when in actual use (i.e. interacting
@@ -924,7 +942,7 @@ class AppModel with ChangeNotifier {
       dictionaryName: dictionary.dictionaryName,
       isarDirectoryPath: isarDirectory.path,
     );
-    await compute(deleteDictionaryData, params);
+    await compute(deleteDictionaryDataHelper, params);
 
     Navigator.pop(navigatorKey.currentContext!);
     dictionaryNotifier.notifyListeners();
@@ -965,22 +983,14 @@ class AppModel with ChangeNotifier {
     String fallbackTerm = await targetLanguage.getRootForm(searchTerm);
     DictionarySearchParams params = DictionarySearchParams(
       searchTerm: searchTerm,
+      maximumDictionaryEntrySearchMatch: maximumDictionaryEntrySearchMatch,
+      maximumDictionaryWordsInResult: maximumDictionaryWordsInResult,
       fallbackTerm: fallbackTerm,
       isarDirectoryPath: isarDirectory.path,
     );
 
-    List<DictionaryEntry> entries =
+    List<List<DictionaryEntry>> mapping =
         await compute(targetLanguage.prepareSearchResults!, params);
-
-    Map<DictionaryPair, List<DictionaryEntry>> entriesByPair =
-        groupBy<DictionaryEntry, DictionaryPair>(
-      entries,
-      (entry) => DictionaryPair(word: entry.word, reading: entry.reading),
-    );
-
-    List<List<DictionaryEntry>> mapping = entriesByPair.values
-        .map((entries) => entries.map((entry) => entry).toList())
-        .toList();
 
     DictionaryResult result = DictionaryResult(
       searchTerm: searchTerm,
@@ -1785,9 +1795,16 @@ class AppModel with ChangeNotifier {
   Future<void> removeFromStash({
     required String term,
   }) async {
+    String stashClearSingle = translate('stash_clear_single');
     removeFromSearchHistory(
       historyKey: stashKey,
       searchTerm: term,
+    );
+
+    Fluttertoast.showToast(
+      msg: stashClearSingle.replaceAll('%term%', term),
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
     );
   }
 
@@ -1836,33 +1853,29 @@ class AppModel with ChangeNotifier {
 
   /// Add a [DictionaryResult] to the dictionary history. If the maximum value
   /// is exceed, the dictionary history is cut down to the newest values.
-  void addToDictionaryHistory({
+  Future<void> addToDictionaryHistory({
     required DictionaryResult result,
   }) async {
-    _database.writeTxnSync((isar) {
-      isar.dictionaryResults.deleteBySearchTermSync(result.searchTerm);
-      isar.dictionaryResults.putSync(result);
-
-      int countInSameHistory = isar.dictionaryResults.countSync();
-
-      if (maximumDictionaryHistoryItems < countInSameHistory) {
-        int surplus = countInSameHistory - maximumDictionaryHistoryItems;
-        isar.dictionaryResults.where().limit(surplus).build().deleteAllSync();
-      }
-    });
+    UpdateDictionaryHistoryParams params = UpdateDictionaryHistoryParams(
+      result: result,
+      maximumDictionaryHistoryItems: maximumDictionaryHistoryItems,
+      isarDirectoryPath: isarDirectory.path,
+    );
+    await compute(addToDictionaryHistoryHelper, params);
   }
 
   /// Update the scroll index of a given [DictionaryResult] in the database.
-  void updateDictionaryResultScrollIndex({
+  Future<void> updateDictionaryResultScrollIndex({
     required DictionaryResult result,
     required int newIndex,
-  }) {
-    _database.writeTxnSync((isar) {
-      DictionaryResult resultToUpdate =
-          isar.dictionaryResults.getBySearchTermSync(result.searchTerm)!;
-      resultToUpdate.scrollIndex = newIndex;
-      isar.dictionaryResults.putSync(resultToUpdate);
-    });
+  }) async {
+    result.scrollIndex = newIndex;
+    UpdateDictionaryHistoryParams params = UpdateDictionaryHistoryParams(
+      result: result,
+      maximumDictionaryHistoryItems: maximumDictionaryHistoryItems,
+      isarDirectoryPath: isarDirectory.path,
+    );
+    await compute(addToDictionaryHistoryHelper, params);
   }
 
   /// Clear the entire dictionary history. This must be performed when a
@@ -1873,5 +1886,28 @@ class AppModel with ChangeNotifier {
     _database.writeTxnSync((isar) {
       isar.dictionaryResults.clearSync();
     });
+  }
+
+  /// Return a list of [DictionaryMetaEntry] for a certain word.
+  List<DictionaryMetaEntry> getMetaEntriesFromWord(String word) {
+    List<DictionaryMetaEntry> metaEntries = _database.dictionaryMetaEntrys
+        .filter()
+        .wordEqualTo(word)
+        .build()
+        .findAllSync();
+
+    return metaEntries;
+  }
+
+  /// Copies a [term] to clipboard and shows an appropriate toast.
+  void copyToClipboard(String term) {
+    FlutterClipboard.copy(term);
+
+    String copiedToClipboard = translate('copied_to_clipboard');
+    Fluttertoast.showToast(
+      msg: copiedToClipboard,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+    );
   }
 }

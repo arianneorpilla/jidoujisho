@@ -25,6 +25,7 @@ class YomichanDictionaryFormat extends DictionaryFormat {
           prepareDirectory: prepareDirectoryYomichanTermBankFormat,
           prepareName: prepareNameYomichanTermBankFormat,
           prepareEntries: prepareEntriesYomichanTermBankFormat,
+          prepareMetaEntries: prepareMetaEntriesYomichanTermBankFormat,
           prepareTags: prepareTagsYomichanTermBankFormat,
           prepareMetadata: prepareMetadataYomichanTermBankFormat,
         );
@@ -134,6 +135,77 @@ Future<List<DictionaryEntry>> prepareEntriesYomichanTermBankFormat(
   }
 
   throw Exception('Unable to get entries');
+}
+
+/// Top-level function for use in compute. See [DictionaryFormat] for details.
+Future<List<DictionaryMetaEntry>> prepareMetaEntriesYomichanTermBankFormat(
+    PrepareDictionaryParams params) async {
+  try {
+    List<DictionaryMetaEntry> metaEntries = [];
+
+    final List<FileSystemEntity> entities = params.workingDirectory.listSync();
+    final Iterable<File> files = entities.whereType<File>();
+
+    for (File file in files) {
+      String filename = path.basename(file.path);
+      if (!filename.startsWith('term_meta_bank')) {
+        continue;
+      }
+
+      String json = file.readAsStringSync();
+      List<dynamic> items = jsonDecode(json);
+
+      for (List<dynamic> item in items) {
+        String word = item[0] as String;
+        String type = item[1] as String;
+
+        int? frequency;
+        List<PitchData>? pitches;
+
+        if (type == 'pitch') {
+          pitches = [];
+
+          Map<String, dynamic> data = Map<String, dynamic>.from(item[2]);
+          String reading = data['reading'];
+
+          List<Map<String, dynamic>> distinctPitchJsons =
+              List<Map<String, dynamic>>.from(data['pitches']);
+          for (Map<String, dynamic> distinctPitch in distinctPitchJsons) {
+            int downstep = distinctPitch['position'];
+            PitchData pitch = PitchData(
+              reading: reading,
+              downstep: downstep,
+            );
+            pitches.add(pitch);
+          }
+        } else if (type == 'freq') {
+          frequency = item[2] as int;
+        } else {
+          continue;
+        }
+
+        DictionaryMetaEntry metaEntry = DictionaryMetaEntry(
+          dictionaryName: params.dictionaryName,
+          word: word,
+          frequency: frequency,
+          pitches: pitches,
+        );
+
+        metaEntries.add(metaEntry);
+      }
+
+      String message = params.localisation
+          .importMessageMetaEntryCountWithVar(metaEntries.length);
+      params.sendPort.send(message);
+    }
+
+    return metaEntries;
+  } catch (e) {
+    String message = params.localisation.importMessageErrorWithVar('$e');
+    params.sendPort.send(message);
+  }
+
+  throw Exception('Unable to get meta entries');
 }
 
 /// Top-level function for use in compute. See [DictionaryFormat] for details.

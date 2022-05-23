@@ -83,6 +83,7 @@ class JidoujishoLocalisations {
     'import_message_name': 'Importing 『%name%』...',
     'import_message_entries': 'Processing entries...',
     'import_message_entry_count': 'Found %count% entries...',
+    'import_message_meta_entry_count': 'Found %count% meta entries...',
     'import_message_tag_count': 'Found %count% tags...',
     'import_message_metadata': 'Processing metadata...',
     'import_message_database': 'Adding entries to database...',
@@ -168,8 +169,10 @@ class JidoujishoLocalisations {
     'remove_action': 'Remove Action',
     'assign_action': 'Assign Action',
     'dictionary_name_notes': 'Dictionary entry from %dictionaryName%',
+    'dictionary_info_notes': 'Information from %dictionaryName%',
     'stash_added_single': '『%term%』has been added to the Stash.',
     'stash_added_multiple': 'Multiple items have been added to the Stash.',
+    'stash_clear_single': '『%term%』has been removed from the Stash.',
     'stash_clear_title': 'Clear Stash',
     'stash_clear_description': 'All contents will be cleared. Are you sure?',
     'stash_placeholder': 'No items in the Stash',
@@ -182,5 +185,6 @@ class JidoujishoLocalisations {
     'clear_dictionary_title': 'Clear Dictionary History',
     'clear_dictionary_description':
         'This will clear all dictionary search history. Are you sure?',
+    'copied_to_clipboard': 'Copied to clipboard.',
   };
 }

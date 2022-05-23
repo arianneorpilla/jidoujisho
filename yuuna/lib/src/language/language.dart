@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:yuuna/dictionary.dart';
+import 'package:yuuna/models.dart';
 
 /// Defines common characteristics required for tuning locale and text
 /// segmentation behaviour for different languages. Override the variables
@@ -56,8 +57,8 @@ abstract class Language {
 
   /// Overrides the base search function and implements search specific to
   /// a language.
-  final Future<List<DictionaryEntry>> Function(DictionarySearchParams params)?
-      prepareSearchResults;
+  final Future<List<List<DictionaryEntry>>> Function(
+      DictionarySearchParams params)? prepareSearchResults;
 
   /// Whether or not [initialise] has been called for the language.
   bool _initialised = false;
@@ -193,18 +194,44 @@ abstract class Language {
   /// Some languages may want to display custom widgets rather than the built
   /// in word and reading text that is there by default. For example, Japanese
   /// may want to display a furigana widget instead.
-  Widget? getWordReadingOverrideWidget({
+  Widget getWordReadingOverrideWidget({
     required BuildContext context,
+    required AppModel appModel,
     required String word,
     required String reading,
     required List<DictionaryEntry> meanings,
   }) {
-    return null;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          word,
+          style: Theme.of(context)
+              .textTheme
+              .titleLarge!
+              .copyWith(fontWeight: FontWeight.bold),
+        ),
+        Text(
+          reading,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+      ],
+    );
+  }
+
+  /// Some languages may have custom widgets for generating pronunciation
+  /// diagrams.
+  Widget getPitchWidget({
+    required BuildContext context,
+    required String reading,
+    required int downstep,
+  }) {
+    return const SizedBox.shrink();
   }
 }
 
 /// Top-level function for use in compute. See [Language] for details.
-Future<List<DictionaryEntry>> prepareSearchResultsStandard(
+Future<List<List<DictionaryEntry>>> prepareSearchResultsStandard(
     DictionarySearchParams params) {
   throw UnimplementedError();
 }

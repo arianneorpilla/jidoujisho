@@ -72,7 +72,7 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
     }
 
     if (widget.updateHistory) {
-      Future.delayed(const Duration(milliseconds: 1000), () {
+      Future.delayed(const Duration(milliseconds: 1000), () async {
         if (mounted) {
           if (widget.getCurrentSearchTerm() == widget.result.searchTerm) {
             if (!appModel.isIncognitoMode) {

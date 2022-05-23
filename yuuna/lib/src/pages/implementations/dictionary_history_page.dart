@@ -102,26 +102,26 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
           onStash: widget.onStash,
           expandableControllers: expandableControllers,
           dictionaryHiddens: dictionaryHiddens,
-          onScrollRight: () {
+          onScrollRight: () async {
             if (result.scrollIndex == result.mapping.length - 1) {
               result.scrollIndex = 0;
             } else {
               result.scrollIndex += 1;
             }
 
-            appModel.updateDictionaryResultScrollIndex(
+            await appModel.updateDictionaryResultScrollIndex(
               result: result,
               newIndex: result.scrollIndex,
             );
           },
-          onScrollLeft: () {
+          onScrollLeft: () async {
             if (result.scrollIndex == 0) {
               result.scrollIndex = result.mapping.length - 1;
             } else {
               result.scrollIndex -= 1;
             }
 
-            appModel.updateDictionaryResultScrollIndex(
+            await appModel.updateDictionaryResultScrollIndex(
               result: result,
               newIndex: result.scrollIndex,
             );

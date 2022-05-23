@@ -12,10 +12,11 @@ import 'package:yuuna/models.dart';
 /// the [DictionaryFormat] is also done in the same isolate, to remove having
 /// to communicate potentially hundreds of thousands of entries to another
 /// newly opened isolate.
-Future<void> depositDictionaryEntriesAndTags(
-    PrepareDictionaryParams params) async {
+Future<void> depositDictionaryDataHelper(PrepareDictionaryParams params) async {
   List<DictionaryTag> dictionaryTags =
       await params.dictionaryFormat.prepareTags(params);
+  List<DictionaryMetaEntry> dictionaryMetaEntries =
+      await params.dictionaryFormat.prepareMetaEntries(params);
   List<DictionaryEntry> dictionaryEntries =
       await params.dictionaryFormat.prepareEntries(params);
 
@@ -29,18 +30,23 @@ Future<void> depositDictionaryEntriesAndTags(
         .filter()
         .dictionaryNameEqualTo(params.dictionaryName)
         .deleteAllSync();
+    database.dictionaryMetaEntrys
+        .filter()
+        .dictionaryNameEqualTo(params.dictionaryName)
+        .deleteAllSync();
     database.dictionaryEntrys
         .filter()
         .dictionaryNameEqualTo(params.dictionaryName)
         .deleteAllSync();
 
     database.dictionaryTags.putAllSync(dictionaryTags);
+    database.dictionaryMetaEntrys.putAllSync(dictionaryMetaEntries);
     database.dictionaryEntrys.putAllSync(dictionaryEntries);
   });
 }
 
 /// Delete a selected dictionary from the dictionary database.
-Future<void> deleteDictionaryData(DeleteDictionaryParams params) async {
+Future<void> deleteDictionaryDataHelper(DeleteDictionaryParams params) async {
   final Isar database = await Isar.open(
     directory: params.isarDirectoryPath,
     schemas: globalSchemas,
@@ -52,11 +58,40 @@ Future<void> deleteDictionaryData(DeleteDictionaryParams params) async {
         .filter()
         .dictionaryNameEqualTo(params.dictionaryName)
         .deleteAllSync();
+    database.dictionaryMetaEntrys
+        .filter()
+        .dictionaryNameEqualTo(params.dictionaryName)
+        .deleteAllSync();
     database.dictionaryEntrys
         .filter()
         .dictionaryNameEqualTo(params.dictionaryName)
         .deleteAllSync();
+
     database.dictionaryResults.clearSync();
+  });
+}
+
+/// Add a [DictionaryResult] to the dictionary history. If the maximum value
+/// is exceed, the dictionary history is cut down to the newest values.
+
+Future<void> addToDictionaryHistoryHelper(
+  UpdateDictionaryHistoryParams params,
+) async {
+  final Isar database = await Isar.open(
+    directory: params.isarDirectoryPath,
+    schemas: globalSchemas,
+  );
+
+  database.writeTxnSync((isar) {
+    isar.dictionaryResults.deleteBySearchTermSync(params.result.searchTerm);
+    isar.dictionaryResults.putSync(params.result);
+
+    int countInSameHistory = isar.dictionaryResults.countSync();
+
+    if (params.maximumDictionaryHistoryItems < countInSameHistory) {
+      int surplus = countInSameHistory - params.maximumDictionaryHistoryItems;
+      isar.dictionaryResults.where().limit(surplus).build().deleteAllSync();
+    }
   });
 }
 
@@ -139,12 +174,33 @@ class DeleteDictionaryParams {
   final String isarDirectoryPath;
 }
 
+/// For isolate communication purposes. Used for dictionary deletion.
+class UpdateDictionaryHistoryParams {
+  /// Prepare parameters needed to update dictionary history.
+  UpdateDictionaryHistoryParams({
+    required this.result,
+    required this.maximumDictionaryHistoryItems,
+    required this.isarDirectoryPath,
+  });
+
+  /// The result of a dictionary search to be added to history.
+  final DictionaryResult result;
+
+  /// Maximum number of history items.
+  final int maximumDictionaryHistoryItems;
+
+  /// Used to pass the path to the database to open from the other isolate.
+  final String isarDirectoryPath;
+}
+
 /// For isolate communication purposes. Used for dictionary search.
 class DictionarySearchParams {
   /// Prepare parameters needed for searching the dictioanry database from a
   /// separate isolate.
   DictionarySearchParams({
     required this.searchTerm,
+    required this.maximumDictionaryEntrySearchMatch,
+    required this.maximumDictionaryWordsInResult,
     required this.fallbackTerm,
     required this.isarDirectoryPath,
   });
@@ -157,6 +213,14 @@ class DictionarySearchParams {
 
   /// Used to pass the path to the database to open from the other isolate.
   final String isarDirectoryPath;
+
+  /// Maximum number of dictionary entries that can be returned from a database
+  /// dictionary search.
+  final int maximumDictionaryEntrySearchMatch;
+
+  /// Maximum number of headwords in a returned dictionary result for
+  /// performance purposes.
+  final int maximumDictionaryWordsInResult;
 }
 
 /// Bundles relevant localisation information for use in dictionary imports.
@@ -169,6 +233,7 @@ class DictionaryImportLocalisation {
     required this.importMessageName,
     required this.importMessageEntries,
     required this.importMessageEntryCount,
+    required this.importMessageMetaEntryCount,
     required this.importMessageTagCount,
     required this.importMessageMetadata,
     required this.importMessageDatabase,
@@ -185,6 +250,11 @@ class DictionaryImportLocalisation {
   /// Return an entry count update message with a proper variable.
   String importMessageTagCountWithVar(int count) {
     return importMessageTagCount.replaceAll('%count%', '$count');
+  }
+
+  /// Return an entry count update message with a proper variable.
+  String importMessageMetaEntryCountWithVar(int count) {
+    return importMessageMetaEntryCount.replaceAll('%count%', '$count');
   }
 
   /// Return a message informing the dictionary name with a proper variable.
@@ -214,6 +284,10 @@ class DictionaryImportLocalisation {
 
   /// For message to show when updating entry count while processing entries.
   final String importMessageEntryCount;
+
+  /// For message to show when updating entry count while processing meta
+  /// entries.
+  final String importMessageMetaEntryCount;
 
   /// For message to show when updating tag count while processing tags.
   final String importMessageTagCount;

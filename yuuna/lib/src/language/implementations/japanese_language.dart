@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 import 'package:kana_kit/kana_kit.dart';
@@ -110,14 +111,21 @@ class JapaneseLanguage extends Language {
   /// in word and reading text that is there by default. For example, Japanese
   /// may want to display a furigana widget instead.
   @override
-  Widget? getWordReadingOverrideWidget({
+  Widget getWordReadingOverrideWidget({
     required BuildContext context,
+    required AppModel appModel,
     required String word,
     required String reading,
     required List<DictionaryEntry> meanings,
   }) {
     if (reading.isEmpty) {
-      return null;
+      return super.getWordReadingOverrideWidget(
+        context: context,
+        appModel: appModel,
+        word: word,
+        reading: reading,
+        meanings: meanings,
+      );
     }
 
     List<RubyTextData>? segments = fetchFurigana(word: word, reading: reading);
@@ -144,14 +152,111 @@ class JapaneseLanguage extends Language {
 
     return LanguageUtils.distributeFurigana(term: word, reading: reading);
   }
+
+  @override
+  Widget getPitchWidget({
+    required BuildContext context,
+    required String reading,
+    required int downstep,
+  }) {
+    List<Widget> listWidgets = [];
+
+    Color foregroundColor = Theme.of(context).appBarTheme.foregroundColor!;
+    TextStyle style = TextStyle(
+      fontSize: Theme.of(context).textTheme.labelMedium!.fontSize,
+    );
+
+    Widget getAccentTop(String text) {
+      return Container(
+        padding: const EdgeInsets.only(top: 1),
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(color: foregroundColor),
+          ),
+        ),
+        child: Text(text, style: style),
+      );
+    }
+
+    Widget getAccentEnd(String text) {
+      return Container(
+        padding: const EdgeInsets.only(top: 1),
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(color: foregroundColor),
+            right: BorderSide(color: foregroundColor),
+          ),
+        ),
+        child: Text(text, style: style),
+      );
+    }
+
+    Widget getAccentNone(String text) {
+      return Container(
+        padding: const EdgeInsets.only(top: 1),
+        decoration: const BoxDecoration(
+          border: Border(
+            top: BorderSide(color: Colors.transparent),
+          ),
+        ),
+        child: Text(text, style: style),
+      );
+    }
+
+    List<String> moras = [];
+    for (int i = 0; i < reading.length; i++) {
+      String current = reading[i];
+      String? next;
+      if (i + 1 < reading.length) {
+        next = reading[i + 1];
+      }
+
+      if (next != null && 'ゃゅょぁぃぅぇぉャュョァィゥェォ'.contains(next)) {
+        moras.add(current + next);
+        i += 1;
+        continue;
+      } else {
+        moras.add(current);
+      }
+    }
+
+    if (downstep == 0) {
+      for (int i = 0; i < moras.length; i++) {
+        if (i == 0) {
+          listWidgets.add(getAccentNone(moras[i]));
+        } else {
+          listWidgets.add(getAccentTop(moras[i]));
+        }
+      }
+    } else {
+      for (int i = 0; i < moras.length; i++) {
+        if (i == 0 && i != downstep - 1) {
+          listWidgets.add(getAccentNone(moras[i]));
+        } else if (i < downstep - 1) {
+          listWidgets.add(getAccentTop(moras[i]));
+        } else if (i == downstep - 1) {
+          listWidgets.add(getAccentEnd(moras[i]));
+        } else {
+          listWidgets.add(getAccentNone(moras[i]));
+        }
+      }
+    }
+
+    listWidgets.add(Text(' [$downstep]  ', style: style));
+
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.end,
+      children: listWidgets,
+    );
+  }
 }
 
 /// Top-level function for use in compute. See [Language] for details.
-Future<List<DictionaryEntry>> prepareSearchResultsJapaneseLanguage(
+Future<List<List<DictionaryEntry>>> prepareSearchResultsJapaneseLanguage(
     DictionarySearchParams params) async {
   String searchTerm = params.searchTerm.trim();
   String fallbackTerm = params.fallbackTerm.trim();
-  int limit = 30;
+  int limit = params.maximumDictionaryEntrySearchMatch;
 
   if (searchTerm.isEmpty) {
     return [];
@@ -191,9 +296,10 @@ Future<List<DictionaryEntry>> prepareSearchResultsJapaneseLanguage(
   List<DictionaryEntry> fallbackReadingStartsWithMatches = [];
 
   wordExactMatches = database.dictionaryEntrys
-      .filter()
-      .repeat<String, QAfterFilterCondition>(
-          searchTermPrefixes, (q, prefix) => q.wordEqualTo(prefix))
+      .where()
+      .repeat<String, QWhereClause>(
+          searchTermPrefixes, (q, prefix) => q.wordEqualTo(prefix).or())
+      .wordEqualTo(searchTerm)
       .sortByWordLengthDesc()
       .thenByPopularityDesc()
       .limit(limit)
@@ -202,19 +308,21 @@ Future<List<DictionaryEntry>> prepareSearchResultsJapaneseLanguage(
   if (wordExactMatches.isNotEmpty &&
       wordExactMatches.first.wordLength == searchTerm.length) {
     wordStartsWithMatches = database.dictionaryEntrys
+        .where()
+        .anyWordReadingPopularity()
         .filter()
         .wordStartsWith(searchTerm)
-        .sortByWordLength()
+        .sortByWordLengthDesc()
         .thenByPopularityDesc()
-        .limit(limit)
         .findAllSync();
   }
 
   if (searchTermStartsWithKana) {
     readingExactMatches = database.dictionaryEntrys
-        .filter()
-        .repeat<String, QAfterFilterCondition>(
-            searchTermHiraganaPrefixes, (q, prefix) => q.readingEqualTo(prefix))
+        .where()
+        .repeat<String, QWhereClause>(searchTermHiraganaPrefixes,
+            (q, prefix) => q.readingEqualTo(prefix).or())
+        .wordEqualTo(searchTerm)
         .sortByReadingLengthDesc()
         .thenByPopularityDesc()
         .limit(limit)
@@ -223,6 +331,8 @@ Future<List<DictionaryEntry>> prepareSearchResultsJapaneseLanguage(
     if (readingExactMatches.isNotEmpty &&
         readingExactMatches.first.wordLength == searchTerm.length) {
       readingStartsWithMatches = database.dictionaryEntrys
+          .where()
+          .anyReading()
           .filter()
           .readingStartsWith(searchTerm)
           .sortByReadingLengthDesc()
@@ -244,7 +354,7 @@ Future<List<DictionaryEntry>> prepareSearchResultsJapaneseLanguage(
 
   if (fallbackTermLessDesperateThanLongestExactWordPrefix) {
     fallbackWordExactMatches = database.dictionaryEntrys
-        .filter()
+        .where()
         .wordEqualTo(fallbackTerm)
         .sortByWordLengthDesc()
         .thenByPopularityDesc()
@@ -255,6 +365,8 @@ Future<List<DictionaryEntry>> prepareSearchResultsJapaneseLanguage(
             fallbackWordExactMatches.first.wordLength == fallbackTerm.length ||
         fallbackWordExactMatches.isEmpty) {
       fallbackWordStartsWithMatches = database.dictionaryEntrys
+          .where()
+          .anyWordLengthPopularity()
           .filter()
           .wordStartsWith(fallbackTerm)
           .sortByWordLength()
@@ -266,7 +378,7 @@ Future<List<DictionaryEntry>> prepareSearchResultsJapaneseLanguage(
 
   if (fallbackTermLessDesperateThanLongestExactReadingPrefix) {
     fallbackReadingExactMatches = database.dictionaryEntrys
-        .filter()
+        .where()
         .readingEqualTo(fallbackTerm)
         .sortByPopularityDesc()
         .thenByReadingLengthDesc()
@@ -276,6 +388,8 @@ Future<List<DictionaryEntry>> prepareSearchResultsJapaneseLanguage(
     if (readingExactMatches.isNotEmpty &&
         readingExactMatches.first.readingLength == searchTerm.length) {
       fallbackReadingStartsWithMatches = database.dictionaryEntrys
+          .where()
+          .anyReading()
           .filter()
           .readingStartsWith(fallbackTerm)
           .sortByReadingLengthDesc()
@@ -366,6 +480,20 @@ Future<List<DictionaryEntry>> prepareSearchResultsJapaneseLanguage(
         fallbackReadingStartsWithMatches.map((e) => MapEntry(e.id, e)));
   }
 
+  Map<DictionaryPair, List<DictionaryEntry>> entriesByPair =
+      groupBy<DictionaryEntry, DictionaryPair>(
+    entries.values,
+    (entry) => DictionaryPair(word: entry.word, reading: entry.reading),
+  );
+
+  List<List<DictionaryEntry>> mapping = entriesByPair.values
+      .map((entries) => entries.map((entry) => entry).toList())
+      .toList();
+
+  if (mapping.length >= params.maximumDictionaryWordsInResult) {
+    mapping = mapping.sublist(0, params.maximumDictionaryWordsInResult);
+  }
+
   // For debugging search results.
   // debugPrint('-' * 50);
   // debugPrint('SEARCH TERM: $searchTerm');
@@ -392,5 +520,5 @@ Future<List<DictionaryEntry>> prepareSearchResultsJapaneseLanguage(
   //     'FALLBACK TERM LESS DESPERATE THAN LONGEST EXACT READING PREFIX: $fallbackTermLessDesperateThanLongestExactReadingPrefix');
   // debugPrint('-' * 50);
 
-  return entries.values.toList();
+  return mapping;
 }

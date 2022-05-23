@@ -19,6 +19,7 @@ abstract class DictionaryFormat {
     required this.prepareDirectory,
     required this.prepareName,
     required this.prepareEntries,
+    required this.prepareMetaEntries,
     required this.prepareTags,
     required this.prepareMetadata,
   });
@@ -83,12 +84,23 @@ abstract class DictionaryFormat {
   /// prepare a list of [DictionaryTag] that will be added to the database.
   ///
   /// For example, a dictionary format may make use of tags separate from the
-  /// entry. This will be preserved by the dictionary.
+  /// entry. This will be preserved.
   ///
   /// See [PrepareDictionaryParams] for how to work with the individual input
   /// parameters.
   Future<List<DictionaryTag>> Function(PrepareDictionaryParams params)
       prepareTags;
+
+  /// Given a [Directory] of files pertaining to this dictionary format,
+  /// prepare a list of [DictionaryMetaEntry] that will be added to the database.
+  ///
+  /// For example, a dictionary format may make use of data that may match a
+  /// certain word-reading combination. This will be preserved.
+  ///
+  /// See [PrepareDictionaryParams] for how to work with the individual input
+  /// parameters.
+  Future<List<DictionaryMetaEntry>> Function(PrepareDictionaryParams params)
+      prepareMetaEntries;
 
   /// Given a [Directory] of files pertaining to this dictionary format,
   /// prepare a [Map] of metadata that will be used for cleaning up and

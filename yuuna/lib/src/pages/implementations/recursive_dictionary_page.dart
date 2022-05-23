@@ -53,7 +53,7 @@ class _RecursiveDictionaryPageState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _controller.open();
 
-      Future.delayed(const Duration(milliseconds: 10), () {
+      Future.delayed(const Duration(milliseconds: 50), () {
         FocusScope.of(context).unfocus();
       });
 
