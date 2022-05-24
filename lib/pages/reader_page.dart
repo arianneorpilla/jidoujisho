@@ -208,9 +208,7 @@ class ReaderPageState extends State<ReaderPage> {
 
     return await showDialog(
           context: context,
-          builder: (context) => (source.getHorizontalHack(context))
-              ? RotatedBox(quarterTurns: 1, child: alertDialog)
-              : alertDialog,
+          builder: (context) => alertDialog,
         ) ??
         false;
   }

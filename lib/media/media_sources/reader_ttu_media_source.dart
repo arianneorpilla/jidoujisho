@@ -366,119 +366,28 @@ class ReaderTtuMediaSource extends ReaderMediaSource {
   ContextMenu getContextMenu(ReaderPageState state) {
     AppModel appModel = Provider.of<AppModel>(state.context, listen: false);
 
-    if (getHorizontalHack(state.context)) {
-      return ContextMenu(
-        options: ContextMenuOptions(hideDefaultSystemContextMenuItems: true),
+    return ContextMenu(
         menuItems: [
           ContextMenuItem(
-            androidId: 3,
-            iosId: "3",
-            title: "➡️",
-            action: () async {
-              SystemChrome.setPreferredOrientations([
-                DeviceOrientation.portraitUp,
-              ]);
-
-              state.setScrollX(await controller.getScrollX() ?? -1);
-
-              String searchTerm = await getWebViewTextSelection(controller);
-              state.setSearchTerm("");
-              unselectWebViewTextSelection(controller);
-              await state.openCardCreator(searchTerm);
-
-              SystemChrome.setPreferredOrientations([
-                DeviceOrientation.landscapeRight,
-              ]);
-            },
-          ),
-          ContextMenuItem(
-            androidId: 2,
-            iosId: "2",
-            title: "📚",
-            action: () async {
-              String searchTerm = await getWebViewTextSelection(controller);
-
-              state.setScrollX(await controller.getScrollX() ?? -1);
-              unselectWebViewTextSelection(controller);
-              await appModel.showDictionaryMenu(
-                state.context,
-                horizontalHack: true,
-                themeData: state.themeData,
-                onDictionaryChange: () {
-                  state.refreshDictionaryWidget();
-                },
-              );
-            },
-          ),
-          ContextMenuItem(
-            androidId: 1,
-            iosId: "1",
-            title: "🔎",
-            action: () async {
-              String searchTerm = await getWebViewTextSelection(controller);
-
-              state.setScrollX(await controller.getScrollX() ?? -1);
-              state.setSearchTerm(searchTerm);
-              unselectWebViewTextSelection(controller);
-            },
-          ),
+              androidId: 1,
+              iosId: "1",
+              title: "Special",
+              action: () async {
+                print("Menu item Special clicked!");
+                print(await controller.getSelectedText());
+                await controller.clearFocus();
+              })
         ],
-        onCreateContextMenu: (result) {
-          state.setSearchTerm("");
-        },
-      );
-    } else {
-      return ContextMenu(
         options: ContextMenuOptions(hideDefaultSystemContextMenuItems: true),
-        menuItems: [
-          ContextMenuItem(
-            androidId: 1,
-            iosId: "1",
-            title: appModel.translate("search"),
-            action: () async {
-              String searchTerm = await getWebViewTextSelection(controller);
-
-              state.setScrollX(await controller.getScrollX() ?? -1);
-              state.setSearchTerm(searchTerm);
-              unselectWebViewTextSelection(controller);
-            },
-          ),
-          ContextMenuItem(
-            androidId: 2,
-            iosId: "2",
-            title: appModel.translate("dictionaries"),
-            action: () async {
-              String searchTerm = await getWebViewTextSelection(controller);
-
-              state.setScrollX(await controller.getScrollX() ?? -1);
-              unselectWebViewTextSelection(controller);
-              await appModel.showDictionaryMenu(
-                state.context,
-                themeData: state.themeData,
-                onDictionaryChange: () {
-                  state.setSearchTerm(searchTerm);
-                },
-              );
-            },
-          ),
-          ContextMenuItem(
-            androidId: 3,
-            iosId: "3",
-            title: appModel.translate("creator"),
-            action: () async {
-              state.setScrollX(await controller.getScrollX() ?? -1);
-              String searchTerm = await getWebViewTextSelection(controller);
-              state.setSearchTerm(searchTerm);
-              unselectWebViewTextSelection(controller);
-              state.openCardCreator(searchTerm);
-            },
-          ),
-        ],
-        onCreateContextMenu: (result) {
-          state.setSearchTerm("");
+        onCreateContextMenu: (hitTestResult) async {
+          print("onCreateContextMenu");
+          print(hitTestResult.extra);
+          print(await controller.getSelectedText());
         },
-      );
-    }
+        onHideContextMenu: () {
+          print("onHideContextMenu");
+        },
+        onContextMenuActionItemClicked: (contextMenuItemClicked) async {});
   }
 
   String textClickJs = """
@@ -695,7 +604,7 @@ var observer = new MutationObserver(function(mutations, observer) {
       document.body.getElementsByClassName("fa-expand")[0].parentElement.remove();
     }
 
-    var reader = document.getElementsByTagName('app-book-reader');
+    var reader = document.getElementsByClassName('book-content')
     if (reader.length != 0) {
       reader[0].addEventListener('click', tapToSelect);
     }
@@ -715,8 +624,14 @@ if (document.body.getElementsByClassName('fa-bookmark').length != 0) {
   document.body.getElementsByClassName("fa-expand")[0].parentElement.remove();
 }
 
-document.querySelector('body').addEventListener('click', function(e) {
-  if (e.target.classList.contains('fa-bookmark') || e.target.firstChild.classList.contains('fa-bookmark')) {
+var reader = document.getElementsByClassName('book-content')
+if (reader.length != 0) {
+  document.querySelector('body').addEventListener('click', function(e) {
+  var reader = document.getElementsByClassName('book-content')
+    
+
+  var element = document.getElementsByClassName('svelte-fa')[0];
+  if (e.target === element && element.contains(e.target)) {
     var info = document.getElementsByClassName('bottom-2')[0];
     console.log(JSON.stringify({
               "bookmark": info.textContent,
@@ -724,6 +639,7 @@ document.querySelector('body').addEventListener('click', function(e) {
             }));
   }
 }, true);
+}
 """;
 
   bool getClearCache(BuildContext context) {

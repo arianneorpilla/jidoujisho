@@ -66,27 +66,6 @@ class DictionarySearchWidgetState extends State<DictionarySearchWidget> {
     );
   }
 
-  Widget buildSearchHistory() {
-    List<String> searchHistory = appModel.getSearchHistory().reversed.toList();
-    return ClipRRect(
-      borderRadius: BorderRadius.zero,
-      child: Material(
-        color: Colors.transparent,
-        child: ListView.builder(
-          physics: const AlwaysScrollableScrollPhysics(
-              parent: BouncingScrollPhysics()),
-          itemCount: searchHistory.length,
-          shrinkWrap: true,
-          itemExtent: 48,
-          itemBuilder: (context, i) {
-            String searchTerm = searchHistory[i];
-            return buildSearchHistoryItem(searchTerm);
-          },
-        ),
-      ),
-    );
-  }
-
   Widget buildBody() {
     if (appModel.getCurrentDictionary() == null) {
       return buildPlaceholderMessage(

@@ -8,8 +8,6 @@ import 'package:chisa/pages/creator_page.dart';
 import 'package:chisa/util/anki_export_field.dart';
 import 'package:chisa/util/reg_exp.dart';
 import 'package:flutter/material.dart';
-import 'package:html/parser.dart' as parser;
-import 'package:html/dom.dart' as dom;
 import 'package:http/http.dart' as http;
 
 class MassifResult {

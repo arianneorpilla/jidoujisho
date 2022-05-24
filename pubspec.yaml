@@ -42,10 +42,7 @@ dependencies:
   mecab_dart: ^0.1.3
   path: ^1.8.0
   mime: ^1.0.0
-  flutter_inappwebview:
-    git:
-      url: https://github.com/lrorpilla/flutter_inappwebview
-      ref: 1e4da7a5e5fa00903d981510a0b7c154ad3febe1
+  flutter_inappwebview: ^5.4.3+4
   flutter_archive: ^4.0.1
   path_provider: ^2.0.4
   objectbox: ^1.2.0
