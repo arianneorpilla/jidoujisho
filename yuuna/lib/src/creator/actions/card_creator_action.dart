@@ -32,14 +32,16 @@ class CardCreatorAction extends QuickAction {
     required String reading,
     required List<DictionaryEntry> entries,
   }) async {
-    String meaning = DictionaryUtils.flattenMeanings(entries);
+    String meaning = MeaningField.flattenMeanings(entries);
 
     if (appModel.isCreatorOpen) {
       creatorModel.copyContext(
-        CreatorContext(
-          term: term,
-          reading: reading,
-          meaning: meaning,
+        CreatorFieldValues(
+          textValues: {
+            TermField.instance: term,
+            ReadingField.instance: reading,
+            MeaningField.instance: meaning,
+          },
         ),
       );
       Navigator.of(context).popUntil(
@@ -49,10 +51,12 @@ class CardCreatorAction extends QuickAction {
       appModel.openCreator(
         ref: ref,
         killOnPop: false,
-        creatorContext: CreatorContext(
-          term: term,
-          reading: reading,
-          meaning: meaning,
+        creatorFieldValues: CreatorFieldValues(
+          textValues: {
+            TermField.instance: term,
+            ReadingField.instance: reading,
+            MeaningField.instance: meaning,
+          },
         ),
       );
     }

@@ -37,10 +37,32 @@ final List<CollectionSchema> globalSchemas = [
   DictionaryTagSchema,
   DictionaryResultSchema,
   MediaItemSchema,
-  CreatorContextSchema,
   AnkiMappingSchema,
   SearchHistoryItemSchema,
 ];
+
+/// A list of media types that the app will support at runtime.
+final List<FieldNua> globalFields = List<FieldNua>.unmodifiable(
+  [
+    TermField.instance,
+    SentenceField.instance,
+    ReadingField.instance,
+    MeaningField.instance,
+    NotesField.instance,
+    ImageField.instance,
+    AudioField.instance,
+    ContextField.instance,
+  ],
+);
+
+/// A list of media types that the app will support at runtime.
+final Map<String, FieldNua> fieldsByKey = Map.unmodifiable(
+  Map<String, FieldNua>.fromIterable(
+    globalFields.map(
+      (field) => MapEntry(field.uniqueKey, field),
+    ),
+  ),
+);
 
 /// A global [Provider] for app-wide configuration and state management.
 final appProvider = ChangeNotifierProvider<AppModel>((ref) {
@@ -124,9 +146,13 @@ class AppModel with ChangeNotifier {
   /// performance. Initialised with [populateMediaTypes] at startup.
   late final Map<String, MediaType> mediaTypes;
 
+  /// Used to fetch initialised fields by their unique key with constant
+  /// time performance. Initialised with [populateEnhancements] at startup.
+  late final Map<String, FieldNua> fields;
+
   /// Used to fetch initialised enhancements by their unique key with constant
   /// time performance. Initialised with [populateEnhancements] at startup.
-  late final Map<Field, Map<String, Enhancement>> enhancements;
+  late final Map<FieldNua, Map<String, Enhancement>> enhancements;
 
   /// Used to fetch initialised actions by their unique key with constant
   /// time performance. Initialised with [populateQuickActions] at startup.
@@ -182,7 +208,8 @@ class AppModel with ChangeNotifier {
   bool get isCreatorOpen => _isCreatorOpen;
   bool _isCreatorOpen = false;
 
-  /// Used to indicate that the
+  /// Change this once a field hide/show system is in place.
+  List<FieldNua> activeFields = globalFields;
 
   /// Update the user-defined order of a given dictionary in the database.
   /// See the dictionary dialog's [ReorderableListView] for usage.
@@ -308,42 +335,53 @@ class AppModel with ChangeNotifier {
     );
   }
 
+  /// Populate maps for fields at startup to optimise performance.
+  void populateFields() async {
+    fields = Map<String, FieldNua>.unmodifiable(
+      Map<String, FieldNua>.fromEntries(
+        globalFields.map(
+          (field) => MapEntry(field.uniqueKey, field),
+        ),
+      ),
+    );
+  }
+
   /// Populate maps for enhancements at startup to optimise performance.
   void populateEnhancements() async {
     /// A list of enhancements that the app will support at runtime.
-    final Map<Field, List<Enhancement>> availableEnhancements = {
-      Field.audio: [
-        ClearFieldEnhancement(field: Field.audio),
+    final Map<FieldNua, List<Enhancement>> availableEnhancements = {
+      AudioField.instance: [
+        ClearFieldEnhancement(field: AudioField.instance),
       ],
-      Field.extra: [
-        ClearFieldEnhancement(field: Field.extra),
+      NotesField.instance: [
+        ClearFieldEnhancement(field: NotesField.instance),
       ],
-      Field.image: [
-        ClearFieldEnhancement(field: Field.image),
+      ImageField.instance: [
+        ClearFieldEnhancement(field: ImageField.instance),
       ],
-      Field.meaning: [
-        ClearFieldEnhancement(field: Field.meaning),
-        TextSegmentationEnhancement(field: Field.meaning),
+      MeaningField.instance: [
+        ClearFieldEnhancement(field: MeaningField.instance),
+        TextSegmentationEnhancement(field: MeaningField.instance),
       ],
-      Field.reading: [
-        ClearFieldEnhancement(field: Field.reading),
+      ReadingField.instance: [
+        ClearFieldEnhancement(field: ReadingField.instance),
       ],
-      Field.sentence: [
-        ClearFieldEnhancement(field: Field.sentence),
-        TextSegmentationEnhancement(field: Field.sentence),
-        OpenStashEnhancement(field: Field.sentence),
-        PopFromStashEnhancement(field: Field.sentence),
+      SentenceField.instance: [
+        ClearFieldEnhancement(field: SentenceField.instance),
+        TextSegmentationEnhancement(field: SentenceField.instance),
+        OpenStashEnhancement(field: SentenceField.instance),
+        PopFromStashEnhancement(field: SentenceField.instance),
       ],
-      Field.term: [
-        ClearFieldEnhancement(field: Field.term),
+      TermField.instance: [
+        ClearFieldEnhancement(field: TermField.instance),
         SearchDictionaryEnhancement(),
         MassifExampleSentencesEnhancement(),
-        OpenStashEnhancement(field: Field.term),
-        PopFromStashEnhancement(field: Field.term),
+        OpenStashEnhancement(field: TermField.instance),
+        PopFromStashEnhancement(field: TermField.instance),
       ],
     };
 
-    enhancements = Map<Field, Map<String, Enhancement>>.unmodifiable(
+    enhancements = Map<FieldNua, Map<String, Enhancement>>.unmodifiable(
       availableEnhancements.map(
         (field, enhancements) => MapEntry(
           field,
@@ -1174,42 +1212,54 @@ class AppModel with ChangeNotifier {
     }
   }
 
-  /// Add a note with certain [details] and a [mapping] of fields to a model
-  /// to a given [deck].
+  /// Add a note with certain [creatorFieldValues] and a [mapping] of fields to
+  /// a model to a given [deck].
   Future<void> addNote({
-    required ExportDetails details,
+    required CreatorFieldValues creatorFieldValues,
     required AnkiMapping mapping,
     required String deck,
   }) async {
-    String timestamp =
-        intl.DateFormat('yyyyMMddTkkmmss').format(DateTime.now());
-    String preferredName = 'jidoujisho-$timestamp';
+    Map<FieldNua, String> exportedImages = {};
+    Map<FieldNua, String> exportedAudio = {};
 
-    String? imageFileName;
-    String? audioFileName;
+    for (MapEntry<FieldNua, File> entry
+        in creatorFieldValues.imagesToExport.entries) {
+      String timestamp =
+          intl.DateFormat('yyyyMMddTkkmmss').format(DateTime.now());
+      String preferredName = 'jidoujisho-$timestamp';
 
-    if (details.image != null) {
+      String? imageFileName;
       imageFileName = await addFileToMedia(
-        exportFile: details.image!,
+        exportFile: entry.value,
         preferredName: preferredName,
         mimeType: 'image',
       );
+
+      exportedImages[entry.key] = imageFileName;
     }
 
-    if (details.audio != null) {
-      audioFileName = await addFileToMedia(
-        exportFile: details.audio!,
+    for (MapEntry<FieldNua, File> entry
+        in creatorFieldValues.imagesToExport.entries) {
+      String timestamp =
+          intl.DateFormat('yyyyMMddTkkmmss').format(DateTime.now());
+      String preferredName = 'jidoujisho-$timestamp';
+
+      String? imageFileName;
+      imageFileName = await addFileToMedia(
+        exportFile: entry.value,
         preferredName: preferredName,
         mimeType: 'audio',
       );
+
+      exportedAudio[entry.key] = imageFileName;
     }
 
     String model = mapping.model;
     List<String> fields = getCardFields(
-      details: details,
+      creatorFieldValues: creatorFieldValues,
       mapping: mapping,
-      imageFileName: imageFileName,
-      audioFileName: audioFileName,
+      exportedImages: exportedImages,
+      exportedAudio: exportedAudio,
     );
 
     try {
@@ -1222,10 +1272,10 @@ class AppModel with ChangeNotifier {
         },
       );
     } on PlatformException {
-      debugPrint('Failed to add note for [$preferredName]');
+      debugPrint('Failed to add note');
       rethrow;
     } finally {
-      debugPrint('Added note for [$preferredName] to Anki media');
+      debugPrint('Added note to Anki media');
     }
   }
 
@@ -1272,38 +1322,25 @@ class AppModel with ChangeNotifier {
   /// Returns the list that will be passed to the Anki card creation API to
   /// fill a card's fields. The contents of the list will correspond to the
   /// order of the [mapping] provided, with each field in the list replaced
-  /// with the corresponding [details] or in the case of the image and audio
-  /// fields, the file names.
+  /// with the corresponding [creatorFieldValues] or in the case of the image
+  /// and audio fields, the file names.
   static List<String> getCardFields({
-    required ExportDetails details,
+    required CreatorFieldValues creatorFieldValues,
     required AnkiMapping mapping,
-    required String? imageFileName,
-    required String? audioFileName,
+    required Map<FieldNua, String> exportedImages,
+    required Map<FieldNua, String> exportedAudio,
   }) {
-    List<String> fields = mapping.fieldIndexes.map<String>((index) {
-      if (index == null) {
+    List<String> fields = mapping.getFields().map<String>((field) {
+      if (field == null) {
         return '';
-      }
-
-      Field field = Field.values.elementAt(index);
-
-      switch (field) {
-        case Field.sentence:
-          return details.sentence ?? '';
-        case Field.term:
-          return details.term ?? '';
-        case Field.reading:
-          return details.reading ?? '';
-        case Field.meaning:
-          return details.meaning ?? '';
-        case Field.extra:
-          return details.extra ?? '';
-        case Field.context:
-          return details.context ?? '';
-        case Field.image:
-          return imageFileName ?? '';
-        case Field.audio:
-          return audioFileName ?? '';
+      } else {
+        if (field is ImageExportField) {
+          return '<img src="${exportedImages[field]}" />';
+        } else if (field is AudioExportField) {
+          return '[sound:${exportedAudio[field]}';
+        } else {
+          return creatorFieldValues.textValues[field] ?? '';
+        }
       }
     }).toList();
 
@@ -1314,7 +1351,7 @@ class AppModel with ChangeNotifier {
   /// fields as the model it uses.
   Future<bool> profileFieldMatchesCardTypeCount(AnkiMapping mapping) async {
     List<String> fields = await getFieldList(mapping.model);
-    return mapping.fieldIndexes.length == fields.length;
+    return mapping.fieldKeys.length == fields.length;
   }
 
   /// Returns whether or not a given [AnkiMapping]'s model exists in Anki.
@@ -1334,9 +1371,9 @@ class AppModel with ChangeNotifier {
   /// fields, all empty.
   Future<void> resetProfileFields(AnkiMapping mapping) async {
     List<String> fields = await getFieldList(mapping.model);
-    List<int?> fieldIndexes = List.generate(fields.length, (index) => null);
+    List<String?> fieldKeys = List.generate(fields.length, (index) => null);
 
-    AnkiMapping resetMapping = mapping.copyWith(fieldIndexes: fieldIndexes);
+    AnkiMapping resetMapping = mapping.copyWith(fieldKeys: fieldKeys);
     _database.writeTxnSync((database) {
       if (mapping.id != null &&
           database.ankiMappings.getSync(resetMapping.id!) != null) {
@@ -1417,14 +1454,14 @@ class AppModel with ChangeNotifier {
   Future<void> openCreator({
     required WidgetRef ref,
     required bool killOnPop,
-    CreatorContext? creatorContext,
+    CreatorFieldValues? creatorFieldValues,
   }) async {
     List<String> decks = await getDecks();
 
     CreatorModel creatorModel = ref.read(creatorProvider);
     creatorModel.clearAll();
-    if (creatorContext != null) {
-      creatorModel.copyContext(creatorContext);
+    if (creatorFieldValues != null) {
+      creatorModel.copyContext(creatorFieldValues);
     }
 
     _isCreatorOpen = true;
@@ -1571,11 +1608,11 @@ class AppModel with ChangeNotifier {
   /// and [slotNumber].
   void setFieldEnhancement({
     required AnkiMapping mapping,
-    required Field field,
+    required FieldNua field,
     required int slotNumber,
     required Enhancement enhancement,
   }) async {
-    mapping.enhancements[field]![slotNumber] = enhancement.uniqueKey;
+    mapping.enhancements[field.uniqueKey]![slotNumber] = enhancement.uniqueKey;
 
     _database.writeTxnSync((isar) {
       isar.ankiMappings.putSync(mapping);
@@ -1586,10 +1623,10 @@ class AppModel with ChangeNotifier {
   /// and [slotNumber].
   void removeFieldEnhancement({
     required AnkiMapping mapping,
-    required Field field,
+    required FieldNua field,
     required int slotNumber,
   }) async {
-    mapping.enhancements[field]!.remove(slotNumber);
+    mapping.enhancements[field.uniqueKey]!.remove(slotNumber);
 
     _database.writeTxnSync((isar) {
       isar.ankiMappings.putSync(mapping);
@@ -1626,11 +1663,11 @@ class AppModel with ChangeNotifier {
   /// [field].
   void setAutoFieldEnhancement({
     required AnkiMapping mapping,
-    required Field field,
+    required FieldNua field,
     required Enhancement enhancement,
   }) async {
     /// -1 is reserved for the auto enhancement.
-    mapping.enhancements[field]![AnkiMapping.autoModeSlotNumber] =
+    mapping.enhancements[field.uniqueKey]![AnkiMapping.autoModeSlotNumber] =
         enhancement.uniqueKey;
 
     _database.writeTxnSync((isar) {
@@ -1642,10 +1679,11 @@ class AppModel with ChangeNotifier {
   /// [field].
   void removeAutoFieldEnhancement({
     required AnkiMapping mapping,
-    required Field field,
+    required FieldNua field,
   }) async {
     /// -1 is reserved for the auto enhancement.
-    mapping.enhancements[field]!.remove(AnkiMapping.autoModeSlotNumber);
+    mapping.enhancements[field.uniqueKey]!
+        .remove(AnkiMapping.autoModeSlotNumber);
 
     _database.writeTxnSync((isar) {
       isar.ankiMappings.putSync(mapping);

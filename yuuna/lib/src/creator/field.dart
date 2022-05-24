@@ -27,7 +27,7 @@ enum Field {
   /// Auditory supplements.
   audio,
 
-  /// Where this term was sourced from, i.e. a video or an image.
+  /// Where this word was sourced from, i.e. a video or an image.
   context,
 }
 

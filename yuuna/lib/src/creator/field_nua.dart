@@ -14,6 +14,7 @@ abstract class FieldNua {
     required this.label,
     required this.description,
     required this.icon,
+    this.multiline = true,
   });
 
   /// A unique name that allows distinguishing this type from others,
@@ -31,6 +32,12 @@ abstract class FieldNua {
   /// An icon that will show the enhancement if activated by the user in the
   /// quick menu.
   final IconData icon;
+
+  /// Controls whether this field is multiline or not.
+  final bool multiline;
+
+  /// Depends on whether this is [multiline] or not.
+  int? get maxLines => multiline ? null : 1;
 
   /// Localisations for this enhancement, where the key is a locale tag and
   /// the value is the [label] of the enhancement. If the value for the current

@@ -49,7 +49,7 @@ abstract class Enhancement {
   final IconData icon;
 
   /// Which field this enhancement is for.
-  final Field field;
+  final FieldNua field;
 
   /// Localisations for this enhancement, where the key is a locale tag and
   /// the value is the [label] of the enhancement. If the value for the current

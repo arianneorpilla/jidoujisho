@@ -16,7 +16,7 @@ class AnkiMapping {
   AnkiMapping({
     required this.label,
     required this.model,
-    required this.fieldIndexes,
+    required this.fieldKeys,
     required this.order,
     required this.tags,
     required this.enhancements,
@@ -30,15 +30,15 @@ class AnkiMapping {
     return AnkiMapping(
       label: standardProfileName,
       model: standardModelName,
-      fieldIndexes: [
-        Field.sentence.index,
-        Field.term.index,
-        Field.reading.index,
-        Field.meaning.index,
-        Field.extra.index,
-        Field.image.index,
-        Field.audio.index,
-        Field.context.index,
+      fieldKeys: [
+        SentenceField.key,
+        TermField.key,
+        ReadingField.key,
+        MeaningField.key,
+        NotesField.key,
+        ImageField.key,
+        AudioField.key,
+        ContextField.key,
       ],
       order: order,
       tags: [standardModelName],
@@ -48,14 +48,14 @@ class AnkiMapping {
   }
 
   /// A default map of enhancements to use for new mappings.
-  static const Map<Field, Map<int, String>> defaultEnhancements = {
-    Field.sentence: {0: ClearFieldEnhancement.key},
-    Field.term: {0: ClearFieldEnhancement.key},
-    Field.reading: {0: ClearFieldEnhancement.key},
-    Field.meaning: {0: ClearFieldEnhancement.key},
-    Field.extra: {0: ClearFieldEnhancement.key},
-    Field.image: {0: ClearFieldEnhancement.key},
-    Field.audio: {0: ClearFieldEnhancement.key},
+  static const Map<String, Map<int, String>> defaultEnhancements = {
+    SentenceField.key: {0: ClearFieldEnhancement.key},
+    TermField.key: {0: ClearFieldEnhancement.key},
+    ReadingField.key: {0: ClearFieldEnhancement.key},
+    MeaningField.key: {0: ClearFieldEnhancement.key},
+    NotesField.key: {0: ClearFieldEnhancement.key},
+    ImageField.key: {0: ClearFieldEnhancement.key},
+    AudioField.key: {0: ClearFieldEnhancement.key},
   };
 
   /// A default map of enhancements to use for new mappings.
@@ -78,9 +78,9 @@ class AnkiMapping {
   /// The name of the model to use when exporting with this mapping.
   final String model;
 
-  /// Returns the index equivalents of the [Field] in [getFields] that can be
-  /// stored in a database.
-  List<int?> fieldIndexes;
+  /// Returns the unique key equivalents of the field in [getFields] that can
+  /// be stored in a database.
+  List<String?> fieldKeys;
 
   /// A collection of tags to always include when exporting with this mapping.
   final List<String> tags;
@@ -91,7 +91,7 @@ class AnkiMapping {
 
   /// Used to keep track of enhancements used in the creator per field.
   @EnhancementsConverter()
-  final Map<Field, Map<int, String>> enhancements;
+  final Map<String, Map<int, String>> enhancements;
 
   /// Reserved index for the auto mode field in the map of enhancement names
   /// for a field.
@@ -105,14 +105,14 @@ class AnkiMapping {
   /// The ordering of the fields to use when exporting with this mapping. The
   /// length of this must be less or equal the length of the model being used
   /// for export to work correctly.
-  List<Field?> getFields() {
-    List<Field?> fields = [];
+  List<FieldNua?> getFields() {
+    List<FieldNua?> fields = [];
 
-    for (int? index in fieldIndexes) {
-      if (index == null) {
+    for (String? key in fieldKeys) {
+      if (key == null) {
         fields.add(null);
       } else {
-        Field field = Field.values.elementAt(index);
+        FieldNua field = fieldsByKey[key]!;
         fields.add(field);
       }
     }
@@ -125,17 +125,17 @@ class AnkiMapping {
   AnkiMapping copyWith({
     String? label,
     String? model,
-    List<int?>? fieldIndexes,
+    List<String?>? fieldKeys,
     List<String>? tags,
     int? order,
     int? id,
-    Map<Field, Map<int, String>>? enhancements,
+    Map<String, Map<int, String>>? enhancements,
     Map<int, String>? actions,
   }) {
     return AnkiMapping(
       label: label ?? this.label,
       model: model ?? this.model,
-      fieldIndexes: fieldIndexes ?? this.fieldIndexes,
+      fieldKeys: fieldKeys ?? this.fieldKeys,
       tags: tags ?? this.tags,
       order: order ?? this.order,
       id: id ?? this.id,
@@ -146,7 +146,7 @@ class AnkiMapping {
 
   /// Returns a list of enhancement names active for a certain field in the
   /// persisted enhancements map.
-  List<String> getManualFieldEnhancementNames({required Field field}) {
+  List<String> getManualFieldEnhancementNames({required FieldNua field}) {
     return enhancements[field]!
         .entries
         .where((entry) => entry.key != autoModeSlotNumber)
@@ -156,7 +156,7 @@ class AnkiMapping {
 
   /// Returns the enhancement names active for a certain field in the persisted
   /// enhancements map.
-  String? getAutoFieldEnhancementName({required Field field}) {
+  String? getAutoFieldEnhancementName({required FieldNua field}) {
     return enhancements[field]![autoModeSlotNumber];
   }
 
@@ -168,7 +168,7 @@ class AnkiMapping {
   /// Returns a list of enhancements active for a certain field in the
   /// persisted enhancements map.
   List<Enhancement> getManualFieldEnhancement(
-      {required AppModel appModel, required Field field}) {
+      {required AppModel appModel, required FieldNua field}) {
     List<String> enhancementNames =
         getManualFieldEnhancementNames(field: field);
     List<Enhancement> enhancements = enhancementNames
@@ -182,7 +182,7 @@ class AnkiMapping {
   /// Returns the enhancement active for a certain field in the persisted
   /// enhancements map.
   Enhancement? getAutoFieldEnhancement(
-      {required AppModel appModel, required Field field}) {
+      {required AppModel appModel, required FieldNua field}) {
     String? enhancementName = enhancements[field]![autoModeSlotNumber];
     if (enhancementName == null) {
       return null;

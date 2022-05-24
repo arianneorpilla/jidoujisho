@@ -4,24 +4,24 @@ import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/models.dart';
 
-/// Returns the word or phrase particular to a selected headword.
-class TermField extends FieldNua {
+/// Returns audio information from context.
+class AudioField extends AudioExportField {
   /// Initialise this field with the predetermined and hardset values.
-  TermField._privateConstructor()
+  AudioField._privateConstructor()
       : super(
           uniqueKey: key,
-          label: 'Term',
-          description: 'Dictionary word or phrase',
-          icon: Icons.speaker_notes_outlined,
+          label: 'Audio',
+          description: 'Enter audio search term',
+          icon: Icons.audiotrack,
         );
 
   /// Get the singleton instance of this field.
-  static TermField get instance => _instance;
+  static AudioField get instance => _instance;
 
-  static final TermField _instance = TermField._privateConstructor();
+  static final AudioField _instance = AudioField._privateConstructor();
 
   /// The unique key for this field.
-  static const String key = 'term';
+  static const String key = 'audio';
 
   @override
   String onCreatorOpenAction({
@@ -33,6 +33,8 @@ class TermField extends FieldNua {
     required String reading,
     required List<DictionaryEntry> entries,
   }) {
-    return term;
+    throw UnimplementedError(
+      'Field must generate a value upon opening creator',
+    );
   }
 }

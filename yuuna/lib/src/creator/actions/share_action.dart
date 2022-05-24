@@ -36,7 +36,7 @@ class ShareAction extends QuickAction {
       buffer.write(' ($reading)');
     }
     buffer.write('\n\n');
-    buffer.write(DictionaryUtils.flattenMeanings(entries));
+    buffer.write(MeaningField.flattenMeanings(entries));
 
     String shareText = buffer.toString();
 

@@ -18,7 +18,7 @@ class EnhancementsPickerDialogPage extends BasePage {
   final AnkiMapping mapping;
 
   /// What field's enhancements are being picked for in the dialog.
-  final Field field;
+  final FieldNua field;
 
   /// What slot number to fill the enhancement for.
   final int slotNumber;

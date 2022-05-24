@@ -77,7 +77,11 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
       /// For receiving shared text when the app is in the background.
       _sharedTextIntent = ReceiveSharingIntent.getTextStream().listen((text) {
         appModel.openCreator(
-          creatorContext: CreatorContext(sentence: text),
+          creatorFieldValues: CreatorFieldValues(
+            textValues: {
+              SentenceField.instance: text,
+            },
+          ),
           killOnPop: true,
           ref: ref,
         );
@@ -87,7 +91,11 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
       ReceiveSharingIntent.getInitialText().then((text) {
         if (text != null) {
           appModel.openCreator(
-            creatorContext: CreatorContext(sentence: text),
+            creatorFieldValues: CreatorFieldValues(
+              textValues: {
+                SentenceField.instance: text,
+              },
+            ),
             killOnPop: true,
             ref: ref,
           );

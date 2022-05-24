@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -27,7 +26,7 @@ final creatorImageProvider =
   }
 
   if (seed.fromEnhancement) {
-    Field field = Field.values.byName(seed.identifierType);
+    FieldNua field = fieldsByKey[seed.identifierType]!;
     Enhancement enhancement =
         appModel.enhancements[field]![seed.identifierKey]!;
     Future<NetworkToFileImage?> image =
@@ -57,7 +56,7 @@ final creatorAudioProvider =
   }
 
   if (seed.fromEnhancement) {
-    Field field = Field.values.byName(seed.identifierType);
+    FieldNua field = fieldsByKey[seed.identifierType]!;
     Enhancement enhancement =
         appModel.enhancements[field]![seed.identifierKey]!;
     Future<File?> audio =
@@ -80,15 +79,15 @@ final creatorAudioProvider =
 /// used for global state management across multiple layers, and is useful for
 /// showing the creator and sharing code across the entire application.
 class CreatorModel with ChangeNotifier {
-  /// A map of [TextEditingController] for every creator [Field].
-  Map<Field, TextEditingController> get controllersByField =>
+  /// A map of [TextEditingController] for every creator field.
+  Map<FieldNua, TextEditingController> get controllersByField =>
       _controllersByField;
-  late final Map<Field, TextEditingController> _controllersByField;
+  late final Map<FieldNua, TextEditingController> _controllersByField;
 
   /// Prepare the [CreatorModel]'s final variables for use.
   void initialise() {
     _controllersByField = Map.unmodifiable(
-      {for (Field field in Field.values) field: TextEditingController()},
+      {for (FieldNua field in globalFields) field: TextEditingController()},
     );
   }
 
@@ -101,18 +100,6 @@ class CreatorModel with ChangeNotifier {
   /// Set the current image seed.
   set currentImageSeed(MediaItem? seed) {
     _currentImageSeed = seed;
-    notifyListeners();
-  }
-
-  /// Indicates the media details from the last [CreatorContext]. Used to
-  /// allow return to context details to be included in card export or viewed
-  /// while editing.
-  MediaItem? get currentContext => _currentContext;
-  MediaItem? _currentContext;
-
-  /// Set the current context item.
-  set currentContext(MediaItem? context) {
-    _currentContext = context;
     notifyListeners();
   }
 
@@ -140,95 +127,44 @@ class CreatorModel with ChangeNotifier {
 
   /// Clear all fields and current context.
   void clearAll() {
-    for (Field field in Field.values) {
+    for (FieldNua field in fieldsByKey.values) {
       clearField(field, notify: false);
     }
-    currentContext = null;
+
     notifyListeners();
   }
 
   /// Get the [TextEditingController] for a particular field.
-  TextEditingController getFieldController(Field field) {
+  TextEditingController getFieldController(FieldNua field) {
     return _controllersByField[field]!;
   }
 
-  /// Clear a controller for a particular [Field].
-  void clearField(Field field, {bool notify = true}) {
-    switch (field) {
-      case Field.audio:
-        currentAudioSeed = null;
-        break;
-      case Field.image:
-        currentImageSeed = null;
-        currentImageSuggestionsSeeds = null;
-        break;
-      case Field.sentence:
-      case Field.term:
-      case Field.reading:
-      case Field.meaning:
-      case Field.extra:
-      case Field.context:
-        break;
-    }
-
+  /// Clear a controller for a particular field.
+  void clearField(FieldNua field, {bool notify = true}) {
+    /// Need to clear the audio/image seed when that's implemented as well.
     getFieldController(field).clear();
     if (notify) {
       notifyListeners();
     }
   }
 
-  /// Clone the [CreatorContext]'s contents into the model.
-  void copyContext(CreatorContext creatorContext) {
-    currentContext = creatorContext.context;
+  /// Clone the [CreatorFieldValues]'s contents into the model.
+  void copyContext(CreatorFieldValues creatorFieldValues) {
+    /// Also need to update the generated media using the seeds.
 
-    for (Field field in Field.values) {
-      TextEditingController controller = getFieldController(field);
-
-      switch (field) {
-        case Field.sentence:
-          controller.text = creatorContext.sentence ?? controller.text;
-          break;
-        case Field.term:
-          controller.text = creatorContext.term ?? controller.text;
-          break;
-        case Field.reading:
-          controller.text = creatorContext.reading ?? controller.text;
-          break;
-        case Field.meaning:
-          controller.text = creatorContext.meaning ?? controller.text;
-          break;
-        case Field.extra:
-          controller.text = creatorContext.extra ?? controller.text;
-          break;
-
-        case Field.image:
-          controller.text = creatorContext.imageSearch ?? controller.text;
-          currentImageSeed = creatorContext.imageSeed;
-          currentImageSuggestionsSeeds = creatorContext.imageSuggestions;
-          break;
-        case Field.audio:
-          controller.text = creatorContext.audioSearch ?? controller.text;
-          currentAudioSeed = creatorContext.audioSeed;
-          break;
-        case Field.context:
-          if (creatorContext.context != null) {
-            controller.text = jsonEncode(creatorContext.context?.toJson());
-          }
-      }
+    for (MapEntry<FieldNua, String> entry
+        in creatorFieldValues.textValues.entries) {
+      TextEditingController controller = getFieldController(entry.key);
+      controller.text = entry.value;
     }
   }
 
   /// Get a snapshot of the relevant parameters of the model for card export.
-  ExportDetails getExportDetails(WidgetRef ref) {
-    return ExportDetails(
-      sentence: getFieldController(Field.sentence).text,
-      term: getFieldController(Field.term).text,
-      reading: getFieldController(Field.reading).text,
-      meaning: getFieldController(Field.meaning).text,
-      extra: getFieldController(Field.extra).text,
-      context: getFieldController(Field.context).text,
-      image: ref.read(creatorImageProvider(currentImageSeed)).value?.file,
-      audio: ref.read(creatorAudioProvider(currentAudioSeed)).value,
+  CreatorFieldValues getExportDetails(WidgetRef ref) {
+    return CreatorFieldValues(
+      textValues: controllersByField.map(
+        (field, controller) => MapEntry(field, controller.text),
+      ),
     );
   }
 }

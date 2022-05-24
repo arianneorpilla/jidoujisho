@@ -8,12 +8,21 @@ import 'package:yuuna/models.dart';
 /// in the application.
 class SentenceField extends FieldNua {
   /// Initialise this field with the predetermined and hardset values.
-  SentenceField({
-    super.uniqueKey = 'sentence',
-    super.label = 'Sentence',
-    super.description = 'Example sentence or context',
-    super.icon = Icons.format_align_center,
-  });
+  SentenceField._privateConstructor()
+      : super(
+          uniqueKey: key,
+          label: 'Sentence',
+          description: 'Example sentence or context',
+          icon: Icons.format_align_center,
+        );
+
+  /// Get the singleton instance of this field.
+  static SentenceField get instance => _instance;
+
+  static final SentenceField _instance = SentenceField._privateConstructor();
+
+  /// The unique key for this field.
+  static const String key = 'sentence';
 
   @override
   String onCreatorOpenAction({

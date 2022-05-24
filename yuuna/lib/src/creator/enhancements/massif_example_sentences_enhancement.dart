@@ -35,7 +35,7 @@ class MassifExampleSentencesEnhancement extends Enhancement {
           label: 'Massif Example Sentences',
           description: 'Get curated example sentences via Massif.',
           icon: Icons.article,
-          field: Field.term,
+          field: SentenceField.instance,
         );
 
   /// Used to identify this enhancement and to allow a constant value for the
@@ -67,7 +67,8 @@ class MassifExampleSentencesEnhancement extends Enhancement {
     appModel.openMassifSentenceDialog(
       exampleSentences: exampleSentences,
       onSelect: (selection) {
-        creatorModel.getFieldController(Field.sentence).text = selection;
+        creatorModel.getFieldController(SentenceField.instance).text =
+            selection;
       },
     );
   }

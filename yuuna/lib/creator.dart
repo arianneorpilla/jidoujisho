@@ -1,12 +1,14 @@
-export 'src/creator/creator_context.dart';
+export 'src/creator/creator_field_values.dart';
 export 'src/creator/creator_generator_mixins.dart';
-export 'src/creator/export_details.dart';
 export 'src/creator/anki_mapping.dart';
 export 'src/creator/enhancement.dart';
 export 'src/creator/field.dart';
 export 'src/creator/field_nua.dart';
+export 'src/creator/media_field.dart';
 export 'src/creator/quick_action.dart';
 export 'src/creator/search_history_item.dart';
+export 'src/creator/image_export_field.dart';
+export 'src/creator/audio_export_field.dart';
 
 export 'src/creator/actions/card_creator_action.dart';
 export 'src/creator/actions/instant_export_action.dart';
@@ -19,3 +21,12 @@ export 'src/creator/enhancements/search_dictionary_enhancement.dart';
 export 'src/creator/enhancements/text_segmentation_enhancement.dart';
 export 'src/creator/enhancements/pick_from_stash_enhancement.dart';
 export 'src/creator/enhancements/pop_from_stash_enhancement.dart';
+
+export 'src/creator/fields/sentence_field.dart';
+export 'src/creator/fields/meaning_field.dart';
+export 'src/creator/fields/reading_field.dart';
+export 'src/creator/fields/term_field.dart';
+export 'src/creator/fields/context_field.dart';
+export 'src/creator/fields/image_field.dart';
+export 'src/creator/fields/audio_field.dart';
+export 'src/creator/fields/notes_field.dart';

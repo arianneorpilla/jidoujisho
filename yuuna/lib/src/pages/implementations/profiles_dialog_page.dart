@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:reorderables/reorderables.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
+import 'package:yuuna/models.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
 import 'package:collection/collection.dart';
@@ -88,13 +89,13 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
       onPressed: () async {
         String model = appModel.lastSelectedModel ?? widget.initialModel;
         List<String> modelFields = await appModel.getFieldList(model);
-        List<int?> fieldIndexes =
+        List<String?> fieldKeys =
             List.generate(modelFields.length, (index) => null);
 
         AnkiMapping newMapping = AnkiMapping(
           label: '',
           model: model,
-          fieldIndexes: fieldIndexes,
+          fieldKeys: fieldKeys,
           tags: [],
           order: 0,
           enhancements: AnkiMapping.defaultEnhancements,
@@ -394,7 +395,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
     required AnkiMapping mappingClone,
     required List<String> modelFields,
   }) {
-    List<Field?> fields = mappingClone.getFields();
+    List<FieldNua?> fields = mappingClone.getFields();
     ScrollController scrollController = ScrollController();
 
     return SingleChildScrollView(
@@ -417,21 +418,21 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
                   ),
                 ),
               ),
-              JidoujishoDropdown<Field?>(
-                options: FieldExtension.valuesWithNull,
+              JidoujishoDropdown<FieldNua?>(
+                options: globalFields,
                 initialOption: fields.elementAt(index),
                 generateLabel: (field) {
                   if (field == null) {
                     return emptyFieldLabel;
                   } else {
-                    return field.label(appModel);
+                    return field.label;
                   }
                 },
                 onChanged: (field) {
                   if (field == null) {
-                    mappingClone.fieldIndexes[index] = null;
+                    mappingClone.fieldKeys[index] = null;
                   } else {
-                    mappingClone.fieldIndexes[index] = field.index;
+                    mappingClone.fieldKeys[index] = field.uniqueKey;
                   }
                   setState(() {});
                 },

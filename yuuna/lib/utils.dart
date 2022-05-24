@@ -17,4 +17,3 @@ export 'src/utils/converters/quick_actions_converter.dart';
 export 'src/utils/converters/enhancements_converter.dart';
 export 'src/utils/converters/media_item_converter.dart';
 export 'src/utils/converters/pitch_data_converter.dart';
-export 'src/utils/converters/field_converter.dart';

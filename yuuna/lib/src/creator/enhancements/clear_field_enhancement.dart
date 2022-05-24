@@ -4,7 +4,7 @@ import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
 
 /// An enhancement used effectively as a shortcut for clearing the contents
-/// of a [CreatorModel] pertaining to a certain [Field].
+/// of a [CreatorModel] pertaining to a certain field.
 class ClearFieldEnhancement extends Enhancement {
   /// Initialise this enhancement with the hardset parameters.
   ClearFieldEnhancement({required super.field})

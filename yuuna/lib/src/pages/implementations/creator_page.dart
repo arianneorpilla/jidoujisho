@@ -48,7 +48,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
   String get stashLabel => appModel.translate('stash');
 
   /// Get the export details pertaining to the fields.
-  ExportDetails get exportDetails => creatorModel.getExportDetails(ref);
+  CreatorFieldValues get exportDetails => creatorModel.getExportDetails(ref);
 
   final ScrollController _scrollController = ScrollController();
 
@@ -267,9 +267,9 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: Field.values.length - 1,
+      itemCount: appModel.activeFields.length - 1,
       itemBuilder: (context, index) {
-        Field field = Field.values[index];
+        FieldNua field = appModel.activeFields[index];
         return buildTextField(
           mapping: mapping,
           field: field,
@@ -319,7 +319,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
   Widget buildAutoEnhancementEditButton({
     required AnkiMapping mapping,
-    required Field field,
+    required FieldNua field,
   }) {
     Enhancement? enhancement =
         mapping.getAutoFieldEnhancement(appModel: appModel, field: field);
@@ -357,7 +357,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
   }
 
   List<Widget> buildManualEnhancementEditButtons(
-      {required AnkiMapping mapping, required Field field}) {
+      {required AnkiMapping mapping, required FieldNua field}) {
     List<Widget> buttons = [];
 
     for (int i = 0; i < appModel.maximumFieldEnhancements; i++) {
@@ -374,7 +374,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
   }
 
   List<Widget> buildManualEnhancementButtons(
-      {required AnkiMapping mapping, required Field field}) {
+      {required AnkiMapping mapping, required FieldNua field}) {
     List<Widget> buttons = [];
 
     for (int i = 0; i < appModel.maximumFieldEnhancements; i++) {
@@ -392,10 +392,11 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
   Widget buildManualEnhancementButton({
     required AnkiMapping mapping,
-    required Field field,
+    required FieldNua field,
     required int slotNumber,
   }) {
-    String? enhancementName = mapping.enhancements[field]![slotNumber];
+    String? enhancementName =
+        mapping.enhancements[field.uniqueKey]![slotNumber];
     Enhancement? enhancement;
 
     if (enhancementName != null) {
@@ -428,10 +429,11 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
   Widget buildManualEnhancementEditButton({
     required AnkiMapping mapping,
-    required Field field,
+    required FieldNua field,
     required int slotNumber,
   }) {
-    String? enhancementName = mapping.enhancements[field]![slotNumber];
+    String? enhancementName =
+        mapping.enhancements[field.uniqueKey]![slotNumber];
     Enhancement? enhancement;
 
     if (enhancementName != null) {
@@ -499,7 +501,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
   Widget buildTextField({
     required AnkiMapping mapping,
-    required Field field,
+    required FieldNua field,
   }) {
     if (widget.editMode) {
       return TextFormField(
@@ -517,8 +519,8 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
               field: field,
             ),
           ),
-          labelText: field.label(appModel),
-          hintText: field.hint(appModel),
+          labelText: field.label,
+          hintText: field.description,
         ),
         selectionControls: selectionControls,
       );
@@ -527,12 +529,11 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
         onChanged: (value) {
           setState(() {});
         },
-        maxLines:
-            (field == Field.sentence || field == Field.meaning) ? null : 1,
+        maxLines: field.maxLines,
         controller: creatorModel.getFieldController(field),
         decoration: InputDecoration(
           prefixIcon: Icon(
-            field.icon(appModel),
+            field.icon,
             size: textTheme.titleLarge?.fontSize,
           ),
           suffixIcon: Row(
@@ -543,8 +544,8 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
               field: field,
             ),
           ),
-          labelText: field.label(appModel),
-          hintText: field.hint(appModel),
+          labelText: field.label,
+          hintText: field.description,
         ),
         selectionControls: selectionControls,
       );

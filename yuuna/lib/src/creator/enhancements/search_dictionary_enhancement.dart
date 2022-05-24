@@ -13,7 +13,7 @@ class SearchDictionaryEnhancement extends Enhancement {
           label: 'Search Dictionary',
           description: 'Search the dictionary with the content of a field.',
           icon: Icons.search,
-          field: Field.term,
+          field: TermField.instance,
         );
 
   /// Used to identify this enhancement and to allow a constant value for the
