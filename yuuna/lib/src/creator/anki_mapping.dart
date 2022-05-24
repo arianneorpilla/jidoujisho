@@ -105,14 +105,14 @@ class AnkiMapping {
   /// The ordering of the fields to use when exporting with this mapping. The
   /// length of this must be less or equal the length of the model being used
   /// for export to work correctly.
-  List<FieldNua?> getFields() {
-    List<FieldNua?> fields = [];
+  List<Field?> getFields() {
+    List<Field?> fields = [];
 
     for (String? key in fieldKeys) {
       if (key == null) {
         fields.add(null);
       } else {
-        FieldNua field = fieldsByKey[key]!;
+        Field field = fieldsByKey[key]!;
         fields.add(field);
       }
     }
@@ -146,7 +146,7 @@ class AnkiMapping {
 
   /// Returns a list of enhancement names active for a certain field in the
   /// persisted enhancements map.
-  List<String> getManualFieldEnhancementNames({required FieldNua field}) {
+  List<String> getManualFieldEnhancementNames({required Field field}) {
     return enhancements[field]!
         .entries
         .where((entry) => entry.key != autoModeSlotNumber)
@@ -156,7 +156,7 @@ class AnkiMapping {
 
   /// Returns the enhancement names active for a certain field in the persisted
   /// enhancements map.
-  String? getAutoFieldEnhancementName({required FieldNua field}) {
+  String? getAutoFieldEnhancementName({required Field field}) {
     return enhancements[field]![autoModeSlotNumber];
   }
 
@@ -168,7 +168,7 @@ class AnkiMapping {
   /// Returns a list of enhancements active for a certain field in the
   /// persisted enhancements map.
   List<Enhancement> getManualFieldEnhancement(
-      {required AppModel appModel, required FieldNua field}) {
+      {required AppModel appModel, required Field field}) {
     List<String> enhancementNames =
         getManualFieldEnhancementNames(field: field);
     List<Enhancement> enhancements = enhancementNames
@@ -182,7 +182,7 @@ class AnkiMapping {
   /// Returns the enhancement active for a certain field in the persisted
   /// enhancements map.
   Enhancement? getAutoFieldEnhancement(
-      {required AppModel appModel, required FieldNua field}) {
+      {required AppModel appModel, required Field field}) {
     String? enhancementName = enhancements[field]![autoModeSlotNumber];
     if (enhancementName == null) {
       return null;

@@ -1,76 +1,82 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/models.dart';
 
 /// An entity that represents a broad characteristic of an item being
 /// exported that is distinguishable enough to deserve its own core
 /// functionality and family of user extensions. For example, a field
 /// could handle exclusively images, or dictionary definitions.
-enum Field {
-  /// Written context depicting usage of a term.
-  sentence,
+abstract class Field {
+  /// Initialise this field with the predetermined and hardset values.
+  Field({
+    required this.uniqueKey,
+    required this.label,
+    required this.description,
+    required this.icon,
+    this.multiline = true,
+  });
 
-  /// The subject term of a card.
-  term,
+  /// A unique name that allows distinguishing this type from others,
+  /// particularly for the purposes of differentiating between persistent
+  /// settings keys.
+  final String uniqueKey;
 
-  /// The pronunciation of the term.
-  reading,
+  /// Name of the field that very shortly describes what it does.
+  final String label;
 
-  /// The definition of the term.
-  meaning,
+  /// A longer description of the field that will be used as its placeholder
+  /// message.
+  final String description;
 
-  /// Extra details for future-proofing.
-  extra,
+  /// An icon that will show the enhancement if activated by the user in the
+  /// quick menu.
+  final IconData icon;
 
-  /// Visual supplements.
-  image,
+  /// Controls whether this field is multiline or not.
+  final bool multiline;
 
-  /// Auditory supplements.
-  audio,
+  /// Depends on whether this is [multiline] or not.
+  int? get maxLines => multiline ? null : 1;
 
-  /// Where this word was sourced from, i.e. a video or an image.
-  context,
-}
+  /// Localisations for this enhancement, where the key is a locale tag and
+  /// the value is the [label] of the enhancement. If the value for the current
+  /// locale is non-null, it will be used instead of [label].
+  final Map<String, String> labelLocalisation = const {};
 
-/// Extra methods for [Field].
-extension FieldExtension on Field {
-  /// Get the localised name of the field.
-  String label(AppModel appModel) {
-    return appModel.translate('field_label_$name');
+  /// Localisations for this enhancement, where the key is a locale tag and
+  /// the value is the [description] of the enhancement. If the value for the
+  /// current locale is non-null, it will be used instead of [description].
+  final Map<String, String> descriptionLocalisation = const {};
+
+  /// Get the best localisation for the label of this enhancement. If there
+  /// is no localisation, the fallback is [label].
+  String getLocalisedLabel(AppModel appModel) {
+    return labelLocalisation[appModel.appLocale.toLanguageTag()] ?? label;
   }
 
-  /// Get the localised description hint of the field.
-  String hint(AppModel appModel) {
-    return appModel.translate('field_hint_$name');
+  /// Get the best localisation for the description of this enhancement. If
+  /// there is no localisation, the fallback is [description].
+  String getLocalisedDescription(AppModel appModel) {
+    return descriptionLocalisation[appModel.appLocale.toLanguageTag()] ??
+        description;
   }
 
-  /// Get the icon characteristic of this field.
-  IconData icon(AppModel appModel) {
-    switch (this) {
-      case Field.sentence:
-        return Icons.format_align_center;
-      case Field.term:
-        return Icons.speaker_notes_outlined;
-      case Field.reading:
-        return Icons.surround_sound_outlined;
-      case Field.meaning:
-        return Icons.translate_rounded;
-      case Field.extra:
-        return Icons.description;
-      case Field.image:
-        return Icons.image;
-      case Field.audio:
-        return Icons.audiotrack;
-      case Field.context:
-        return Icons.perm_media;
-    }
-  }
-
-  /// Get a list of all possible values in addition to null.
-  static List<Field?> get valuesWithNull {
-    List<Field?> valuesWithNull = [];
-    valuesWithNull.add(null);
-    valuesWithNull.addAll(Field.values);
-
-    return valuesWithNull;
+  /// Return the value that this field must have upon opening the Card Creator.
+  /// For example, the Sentence field must provide the current context or the
+  /// sentence that is stored in the app state, while the Image field may be
+  /// used to return a snapshot of the current app context.
+  String onCreatorOpenAction({
+    required BuildContext context,
+    required WidgetRef ref,
+    required AppModel appModel,
+    required CreatorModel creatorModel,
+    required String term,
+    required String reading,
+    required List<DictionaryEntry> entries,
+  }) {
+    throw UnimplementedError(
+      'Field must generate a value upon opening creator',
+    );
   }
 }

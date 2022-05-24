@@ -5,7 +5,7 @@ import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/models.dart';
 
 /// Supplies supplementary data that may be useful to include in a card.
-class NotesField extends FieldNua {
+class NotesField extends Field {
   /// Initialise this field with the predeAudioined and hardset values.
   NotesField._privateConstructor()
       : super(

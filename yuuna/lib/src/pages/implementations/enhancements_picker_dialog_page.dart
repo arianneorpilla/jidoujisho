@@ -18,7 +18,7 @@ class EnhancementsPickerDialogPage extends BasePage {
   final AnkiMapping mapping;
 
   /// What field's enhancements are being picked for in the dialog.
-  final FieldNua field;
+  final Field field;
 
   /// What slot number to fill the enhancement for.
   final int slotNumber;
@@ -134,10 +134,11 @@ class _EnhancementsPickerDialogPage
       ),
       onTap: () {
         appModel.setFieldEnhancement(
-            mapping: widget.mapping,
-            field: widget.field,
-            slotNumber: widget.slotNumber,
-            enhancement: enhancement);
+          mapping: widget.mapping,
+          field: widget.field,
+          slotNumber: widget.slotNumber,
+          enhancement: enhancement,
+        );
         Navigator.pop(context);
       },
     );

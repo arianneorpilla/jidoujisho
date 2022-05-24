@@ -5,7 +5,7 @@ import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/models.dart';
 
 /// Returns the word or phrase particular to a selected headword.
-class TermField extends FieldNua {
+class TermField extends Field {
   /// Initialise this field with the predetermined and hardset values.
   TermField._privateConstructor()
       : super(

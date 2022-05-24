@@ -42,7 +42,7 @@ final List<CollectionSchema> globalSchemas = [
 ];
 
 /// A list of media types that the app will support at runtime.
-final List<FieldNua> globalFields = List<FieldNua>.unmodifiable(
+final List<Field> globalFields = List<Field>.unmodifiable(
   [
     TermField.instance,
     SentenceField.instance,
@@ -56,8 +56,8 @@ final List<FieldNua> globalFields = List<FieldNua>.unmodifiable(
 );
 
 /// A list of media types that the app will support at runtime.
-final Map<String, FieldNua> fieldsByKey = Map.unmodifiable(
-  Map<String, FieldNua>.fromIterable(
+final Map<String, Field> fieldsByKey = Map.unmodifiable(
+  Map<String, Field>.fromIterable(
     globalFields.map(
       (field) => MapEntry(field.uniqueKey, field),
     ),
@@ -148,11 +148,11 @@ class AppModel with ChangeNotifier {
 
   /// Used to fetch initialised fields by their unique key with constant
   /// time performance. Initialised with [populateEnhancements] at startup.
-  late final Map<String, FieldNua> fields;
+  late final Map<String, Field> fields;
 
   /// Used to fetch initialised enhancements by their unique key with constant
   /// time performance. Initialised with [populateEnhancements] at startup.
-  late final Map<FieldNua, Map<String, Enhancement>> enhancements;
+  late final Map<Field, Map<String, Enhancement>> enhancements;
 
   /// Used to fetch initialised actions by their unique key with constant
   /// time performance. Initialised with [populateQuickActions] at startup.
@@ -209,7 +209,7 @@ class AppModel with ChangeNotifier {
   bool _isCreatorOpen = false;
 
   /// Change this once a field hide/show system is in place.
-  List<FieldNua> activeFields = globalFields;
+  List<Field> activeFields = globalFields;
 
   /// Update the user-defined order of a given dictionary in the database.
   /// See the dictionary dialog's [ReorderableListView] for usage.
@@ -337,8 +337,8 @@ class AppModel with ChangeNotifier {
 
   /// Populate maps for fields at startup to optimise performance.
   void populateFields() async {
-    fields = Map<String, FieldNua>.unmodifiable(
-      Map<String, FieldNua>.fromEntries(
+    fields = Map<String, Field>.unmodifiable(
+      Map<String, Field>.fromEntries(
         globalFields.map(
           (field) => MapEntry(field.uniqueKey, field),
         ),
@@ -349,7 +349,7 @@ class AppModel with ChangeNotifier {
   /// Populate maps for enhancements at startup to optimise performance.
   void populateEnhancements() async {
     /// A list of enhancements that the app will support at runtime.
-    final Map<FieldNua, List<Enhancement>> availableEnhancements = {
+    final Map<Field, List<Enhancement>> availableEnhancements = {
       AudioField.instance: [
         ClearFieldEnhancement(field: AudioField.instance),
       ],
@@ -381,7 +381,7 @@ class AppModel with ChangeNotifier {
       ],
     };
 
-    enhancements = Map<FieldNua, Map<String, Enhancement>>.unmodifiable(
+    enhancements = Map<Field, Map<String, Enhancement>>.unmodifiable(
       availableEnhancements.map(
         (field, enhancements) => MapEntry(
           field,
@@ -1219,10 +1219,10 @@ class AppModel with ChangeNotifier {
     required AnkiMapping mapping,
     required String deck,
   }) async {
-    Map<FieldNua, String> exportedImages = {};
-    Map<FieldNua, String> exportedAudio = {};
+    Map<Field, String> exportedImages = {};
+    Map<Field, String> exportedAudio = {};
 
-    for (MapEntry<FieldNua, File> entry
+    for (MapEntry<Field, File> entry
         in creatorFieldValues.imagesToExport.entries) {
       String timestamp =
           intl.DateFormat('yyyyMMddTkkmmss').format(DateTime.now());
@@ -1238,7 +1238,7 @@ class AppModel with ChangeNotifier {
       exportedImages[entry.key] = imageFileName;
     }
 
-    for (MapEntry<FieldNua, File> entry
+    for (MapEntry<Field, File> entry
         in creatorFieldValues.imagesToExport.entries) {
       String timestamp =
           intl.DateFormat('yyyyMMddTkkmmss').format(DateTime.now());
@@ -1327,8 +1327,8 @@ class AppModel with ChangeNotifier {
   static List<String> getCardFields({
     required CreatorFieldValues creatorFieldValues,
     required AnkiMapping mapping,
-    required Map<FieldNua, String> exportedImages,
-    required Map<FieldNua, String> exportedAudio,
+    required Map<Field, String> exportedImages,
+    required Map<Field, String> exportedAudio,
   }) {
     List<String> fields = mapping.getFields().map<String>((field) {
       if (field == null) {
@@ -1608,7 +1608,7 @@ class AppModel with ChangeNotifier {
   /// and [slotNumber].
   void setFieldEnhancement({
     required AnkiMapping mapping,
-    required FieldNua field,
+    required Field field,
     required int slotNumber,
     required Enhancement enhancement,
   }) async {
@@ -1623,7 +1623,7 @@ class AppModel with ChangeNotifier {
   /// and [slotNumber].
   void removeFieldEnhancement({
     required AnkiMapping mapping,
-    required FieldNua field,
+    required Field field,
     required int slotNumber,
   }) async {
     mapping.enhancements[field.uniqueKey]!.remove(slotNumber);
@@ -1663,7 +1663,7 @@ class AppModel with ChangeNotifier {
   /// [field].
   void setAutoFieldEnhancement({
     required AnkiMapping mapping,
-    required FieldNua field,
+    required Field field,
     required Enhancement enhancement,
   }) async {
     /// -1 is reserved for the auto enhancement.
@@ -1679,7 +1679,7 @@ class AppModel with ChangeNotifier {
   /// [field].
   void removeAutoFieldEnhancement({
     required AnkiMapping mapping,
-    required FieldNua field,
+    required Field field,
   }) async {
     /// -1 is reserved for the auto enhancement.
     mapping.enhancements[field.uniqueKey]!

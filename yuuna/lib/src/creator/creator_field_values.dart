@@ -17,9 +17,9 @@ class CreatorFieldValues {
   /// Creates a deep copy of this context but with the given fields replaced
   /// with the new values.
   CreatorFieldValues copyWith({
-    Map<FieldNua, String>? textValues,
+    Map<Field, String>? textValues,
   }) {
-    Map<FieldNua, String>? newTextValues;
+    Map<Field, String>? newTextValues;
     if (textValues != null) {
       newTextValues = {};
       newTextValues.addAll(textValues);
@@ -29,13 +29,13 @@ class CreatorFieldValues {
   }
 
   /// A map of text values to override for certain supplied key fields.
-  final Map<FieldNua, String> textValues;
+  final Map<Field, String> textValues;
 
   /// List of images to export to Anki.
-  Map<FieldNua, File> get imagesToExport => throw UnimplementedError();
+  Map<Field, File> get imagesToExport => throw UnimplementedError();
 
   /// List of audio to export to Anki.
-  Map<FieldNua, File> get audioToExport => throw UnimplementedError();
+  Map<Field, File> get audioToExport => throw UnimplementedError();
 
   /// Whether or not to allow the export button to be pressed.
   bool get isExportable {

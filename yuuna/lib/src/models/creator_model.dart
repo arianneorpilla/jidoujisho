@@ -26,7 +26,7 @@ final creatorImageProvider =
   }
 
   if (seed.fromEnhancement) {
-    FieldNua field = fieldsByKey[seed.identifierType]!;
+    Field field = fieldsByKey[seed.identifierType]!;
     Enhancement enhancement =
         appModel.enhancements[field]![seed.identifierKey]!;
     Future<NetworkToFileImage?> image =
@@ -56,7 +56,7 @@ final creatorAudioProvider =
   }
 
   if (seed.fromEnhancement) {
-    FieldNua field = fieldsByKey[seed.identifierType]!;
+    Field field = fieldsByKey[seed.identifierType]!;
     Enhancement enhancement =
         appModel.enhancements[field]![seed.identifierKey]!;
     Future<File?> audio =
@@ -80,14 +80,14 @@ final creatorAudioProvider =
 /// showing the creator and sharing code across the entire application.
 class CreatorModel with ChangeNotifier {
   /// A map of [TextEditingController] for every creator field.
-  Map<FieldNua, TextEditingController> get controllersByField =>
+  Map<Field, TextEditingController> get controllersByField =>
       _controllersByField;
-  late final Map<FieldNua, TextEditingController> _controllersByField;
+  late final Map<Field, TextEditingController> _controllersByField;
 
   /// Prepare the [CreatorModel]'s final variables for use.
   void initialise() {
     _controllersByField = Map.unmodifiable(
-      {for (FieldNua field in globalFields) field: TextEditingController()},
+      {for (Field field in globalFields) field: TextEditingController()},
     );
   }
 
@@ -127,7 +127,7 @@ class CreatorModel with ChangeNotifier {
 
   /// Clear all fields and current context.
   void clearAll() {
-    for (FieldNua field in fieldsByKey.values) {
+    for (Field field in fieldsByKey.values) {
       clearField(field, notify: false);
     }
 
@@ -135,12 +135,12 @@ class CreatorModel with ChangeNotifier {
   }
 
   /// Get the [TextEditingController] for a particular field.
-  TextEditingController getFieldController(FieldNua field) {
+  TextEditingController getFieldController(Field field) {
     return _controllersByField[field]!;
   }
 
   /// Clear a controller for a particular field.
-  void clearField(FieldNua field, {bool notify = true}) {
+  void clearField(Field field, {bool notify = true}) {
     /// Need to clear the audio/image seed when that's implemented as well.
     getFieldController(field).clear();
     if (notify) {
@@ -152,7 +152,7 @@ class CreatorModel with ChangeNotifier {
   void copyContext(CreatorFieldValues creatorFieldValues) {
     /// Also need to update the generated media using the seeds.
 
-    for (MapEntry<FieldNua, String> entry
+    for (MapEntry<Field, String> entry
         in creatorFieldValues.textValues.entries) {
       TextEditingController controller = getFieldController(entry.key);
       controller.text = entry.value;

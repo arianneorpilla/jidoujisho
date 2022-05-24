@@ -269,7 +269,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       physics: const NeverScrollableScrollPhysics(),
       itemCount: appModel.activeFields.length - 1,
       itemBuilder: (context, index) {
-        FieldNua field = appModel.activeFields[index];
+        Field field = appModel.activeFields[index];
         return buildTextField(
           mapping: mapping,
           field: field,
@@ -319,7 +319,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
   Widget buildAutoEnhancementEditButton({
     required AnkiMapping mapping,
-    required FieldNua field,
+    required Field field,
   }) {
     Enhancement? enhancement =
         mapping.getAutoFieldEnhancement(appModel: appModel, field: field);
@@ -357,7 +357,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
   }
 
   List<Widget> buildManualEnhancementEditButtons(
-      {required AnkiMapping mapping, required FieldNua field}) {
+      {required AnkiMapping mapping, required Field field}) {
     List<Widget> buttons = [];
 
     for (int i = 0; i < appModel.maximumFieldEnhancements; i++) {
@@ -374,7 +374,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
   }
 
   List<Widget> buildManualEnhancementButtons(
-      {required AnkiMapping mapping, required FieldNua field}) {
+      {required AnkiMapping mapping, required Field field}) {
     List<Widget> buttons = [];
 
     for (int i = 0; i < appModel.maximumFieldEnhancements; i++) {
@@ -392,7 +392,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
   Widget buildManualEnhancementButton({
     required AnkiMapping mapping,
-    required FieldNua field,
+    required Field field,
     required int slotNumber,
   }) {
     String? enhancementName =
@@ -429,7 +429,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
   Widget buildManualEnhancementEditButton({
     required AnkiMapping mapping,
-    required FieldNua field,
+    required Field field,
     required int slotNumber,
   }) {
     String? enhancementName =
@@ -501,7 +501,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
   Widget buildTextField({
     required AnkiMapping mapping,
-    required FieldNua field,
+    required Field field,
   }) {
     if (widget.editMode) {
       return TextFormField(

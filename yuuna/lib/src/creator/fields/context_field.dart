@@ -5,7 +5,7 @@ import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/models.dart';
 
 /// Returns information about the current context in human-readable format
-class ContextField extends FieldNua {
+class ContextField extends Field {
   /// Initialise this field with the predetermined and hardset values.
   ContextField._privateConstructor()
       : super(

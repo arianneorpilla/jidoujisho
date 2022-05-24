@@ -395,7 +395,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
     required AnkiMapping mappingClone,
     required List<String> modelFields,
   }) {
-    List<FieldNua?> fields = mappingClone.getFields();
+    List<Field?> fields = mappingClone.getFields();
     ScrollController scrollController = ScrollController();
 
     return SingleChildScrollView(
@@ -418,7 +418,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
                   ),
                 ),
               ),
-              JidoujishoDropdown<FieldNua?>(
+              JidoujishoDropdown<Field?>(
                 options: globalFields,
                 initialOption: fields.elementAt(index),
                 generateLabel: (field) {

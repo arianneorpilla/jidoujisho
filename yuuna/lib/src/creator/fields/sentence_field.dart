@@ -6,7 +6,7 @@ import 'package:yuuna/models.dart';
 
 /// Used to track the current sentence context from the current playing media
 /// in the application.
-class SentenceField extends FieldNua {
+class SentenceField extends Field {
   /// Initialise this field with the predetermined and hardset values.
   SentenceField._privateConstructor()
       : super(

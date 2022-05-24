@@ -6,7 +6,7 @@ import 'package:yuuna/models.dart';
 import 'package:collection/collection.dart';
 
 /// Used to return a formatted text from multiple dictionary entries.
-class MeaningField extends FieldNua {
+class MeaningField extends Field {
   /// Initialise this field with the predetermined and hardset values.
   MeaningField._privateConstructor()
       : super(
