@@ -28,7 +28,7 @@ class CardCreatorAction extends QuickAction {
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,
-    required String word,
+    required String term,
     required String reading,
     required List<DictionaryEntry> entries,
   }) async {
@@ -37,7 +37,7 @@ class CardCreatorAction extends QuickAction {
     if (appModel.isCreatorOpen) {
       creatorModel.copyContext(
         CreatorContext(
-          word: word,
+          term: term,
           reading: reading,
           meaning: meaning,
         ),
@@ -50,7 +50,7 @@ class CardCreatorAction extends QuickAction {
         ref: ref,
         killOnPop: false,
         creatorContext: CreatorContext(
-          word: word,
+          term: term,
           reading: reading,
           meaning: meaning,
         ),

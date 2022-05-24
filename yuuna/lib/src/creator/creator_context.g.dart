@@ -15,7 +15,7 @@ extension GetCreatorContextCollection on Isar {
 const CreatorContextSchema = CollectionSchema(
   name: 'CreatorContext',
   schema:
-      '{"name":"CreatorContext","idName":"id","properties":[{"name":"audioSearch","type":"String"},{"name":"audioSeed","type":"String"},{"name":"context","type":"String"},{"name":"extra","type":"String"},{"name":"imageSearch","type":"String"},{"name":"imageSeed","type":"String"},{"name":"meaning","type":"String"},{"name":"reading","type":"String"},{"name":"sentence","type":"String"},{"name":"word","type":"String"}],"indexes":[],"links":[]}',
+      '{"name":"CreatorContext","idName":"id","properties":[{"name":"audioSearch","type":"String"},{"name":"audioSeed","type":"String"},{"name":"context","type":"String"},{"name":"extra","type":"String"},{"name":"imageSearch","type":"String"},{"name":"imageSeed","type":"String"},{"name":"meaning","type":"String"},{"name":"reading","type":"String"},{"name":"sentence","type":"String"},{"name":"term","type":"String"}],"indexes":[],"links":[]}',
   idName: 'id',
   propertyIds: {
     'audioSearch': 0,
@@ -27,7 +27,7 @@ const CreatorContextSchema = CollectionSchema(
     'meaning': 6,
     'reading': 7,
     'sentence': 8,
-    'word': 9
+    'term': 9
   },
   listProperties: {},
   indexIds: {},
@@ -127,12 +127,12 @@ void _creatorContextSerializeNative(
     _sentence = IsarBinaryWriter.utf8Encoder.convert(value8);
   }
   dynamicSize += (_sentence?.length ?? 0) as int;
-  final value9 = object.word;
-  IsarUint8List? _word;
+  final value9 = object.term;
+  IsarUint8List? _term;
   if (value9 != null) {
-    _word = IsarBinaryWriter.utf8Encoder.convert(value9);
+    _term = IsarBinaryWriter.utf8Encoder.convert(value9);
   }
-  dynamicSize += (_word?.length ?? 0) as int;
+  dynamicSize += (_term?.length ?? 0) as int;
   final size = staticSize + dynamicSize;
 
   rawObj.buffer = alloc(size);
@@ -148,7 +148,7 @@ void _creatorContextSerializeNative(
   writer.writeBytes(offsets[6], _meaning);
   writer.writeBytes(offsets[7], _reading);
   writer.writeBytes(offsets[8], _sentence);
-  writer.writeBytes(offsets[9], _word);
+  writer.writeBytes(offsets[9], _term);
 }
 
 CreatorContext _creatorContextDeserializeNative(
@@ -170,7 +170,7 @@ CreatorContext _creatorContextDeserializeNative(
     meaning: reader.readStringOrNull(offsets[6]),
     reading: reader.readStringOrNull(offsets[7]),
     sentence: reader.readStringOrNull(offsets[8]),
-    word: reader.readStringOrNull(offsets[9]),
+    term: reader.readStringOrNull(offsets[9]),
   );
   return object;
 }
@@ -224,7 +224,7 @@ dynamic _creatorContextSerializeWeb(
   IsarNative.jsObjectSet(jsObj, 'meaning', object.meaning);
   IsarNative.jsObjectSet(jsObj, 'reading', object.reading);
   IsarNative.jsObjectSet(jsObj, 'sentence', object.sentence);
-  IsarNative.jsObjectSet(jsObj, 'word', object.word);
+  IsarNative.jsObjectSet(jsObj, 'term', object.term);
   return jsObj;
 }
 
@@ -244,7 +244,7 @@ CreatorContext _creatorContextDeserializeWeb(
     meaning: IsarNative.jsObjectGet(jsObj, 'meaning'),
     reading: IsarNative.jsObjectGet(jsObj, 'reading'),
     sentence: IsarNative.jsObjectGet(jsObj, 'sentence'),
-    word: IsarNative.jsObjectGet(jsObj, 'word'),
+    term: IsarNative.jsObjectGet(jsObj, 'term'),
   );
   return object;
 }
@@ -274,8 +274,8 @@ P _creatorContextDeserializePropWeb<P>(Object jsObj, String propertyName) {
       return (IsarNative.jsObjectGet(jsObj, 'reading')) as P;
     case 'sentence':
       return (IsarNative.jsObjectGet(jsObj, 'sentence')) as P;
-    case 'word':
-      return (IsarNative.jsObjectGet(jsObj, 'word')) as P;
+    case 'term':
+      return (IsarNative.jsObjectGet(jsObj, 'term')) as P;
     default:
       throw 'Illegal propertyName';
   }
@@ -1457,29 +1457,29 @@ extension CreatorContextQueryFilter
   }
 
   QueryBuilder<CreatorContext, CreatorContext, QAfterFilterCondition>
-      wordIsNull() {
+      termIsNull() {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.isNull,
-      property: 'word',
+      property: 'term',
       value: null,
     ));
   }
 
   QueryBuilder<CreatorContext, CreatorContext, QAfterFilterCondition>
-      wordEqualTo(
+      termEqualTo(
     String? value, {
     bool caseSensitive = true,
   }) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.eq,
-      property: 'word',
+      property: 'term',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<CreatorContext, CreatorContext, QAfterFilterCondition>
-      wordGreaterThan(
+      termGreaterThan(
     String? value, {
     bool caseSensitive = true,
     bool include = false,
@@ -1487,14 +1487,14 @@ extension CreatorContextQueryFilter
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.gt,
       include: include,
-      property: 'word',
+      property: 'term',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<CreatorContext, CreatorContext, QAfterFilterCondition>
-      wordLessThan(
+      termLessThan(
     String? value, {
     bool caseSensitive = true,
     bool include = false,
@@ -1502,14 +1502,14 @@ extension CreatorContextQueryFilter
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.lt,
       include: include,
-      property: 'word',
+      property: 'term',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<CreatorContext, CreatorContext, QAfterFilterCondition>
-      wordBetween(
+      termBetween(
     String? lower,
     String? upper, {
     bool caseSensitive = true,
@@ -1517,7 +1517,7 @@ extension CreatorContextQueryFilter
     bool includeUpper = true,
   }) {
     return addFilterConditionInternal(FilterCondition.between(
-      property: 'word',
+      property: 'term',
       lower: lower,
       includeLower: includeLower,
       upper: upper,
@@ -1527,46 +1527,46 @@ extension CreatorContextQueryFilter
   }
 
   QueryBuilder<CreatorContext, CreatorContext, QAfterFilterCondition>
-      wordStartsWith(
+      termStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.startsWith,
-      property: 'word',
+      property: 'term',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<CreatorContext, CreatorContext, QAfterFilterCondition>
-      wordEndsWith(
+      termEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.endsWith,
-      property: 'word',
+      property: 'term',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<CreatorContext, CreatorContext, QAfterFilterCondition>
-      wordContains(String value, {bool caseSensitive = true}) {
+      termContains(String value, {bool caseSensitive = true}) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.contains,
-      property: 'word',
+      property: 'term',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<CreatorContext, CreatorContext, QAfterFilterCondition>
-      wordMatches(String pattern, {bool caseSensitive = true}) {
+      termMatches(String pattern, {bool caseSensitive = true}) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.matches,
-      property: 'word',
+      property: 'term',
       value: pattern,
       caseSensitive: caseSensitive,
     ));
@@ -1668,12 +1668,12 @@ extension CreatorContextQueryWhereSortBy
     return addSortByInternal('sentence', Sort.desc);
   }
 
-  QueryBuilder<CreatorContext, CreatorContext, QAfterSortBy> sortByWord() {
-    return addSortByInternal('word', Sort.asc);
+  QueryBuilder<CreatorContext, CreatorContext, QAfterSortBy> sortByTerm() {
+    return addSortByInternal('term', Sort.asc);
   }
 
-  QueryBuilder<CreatorContext, CreatorContext, QAfterSortBy> sortByWordDesc() {
-    return addSortByInternal('word', Sort.desc);
+  QueryBuilder<CreatorContext, CreatorContext, QAfterSortBy> sortByTermDesc() {
+    return addSortByInternal('term', Sort.desc);
   }
 }
 
@@ -1769,12 +1769,12 @@ extension CreatorContextQueryWhereSortThenBy
     return addSortByInternal('sentence', Sort.desc);
   }
 
-  QueryBuilder<CreatorContext, CreatorContext, QAfterSortBy> thenByWord() {
-    return addSortByInternal('word', Sort.asc);
+  QueryBuilder<CreatorContext, CreatorContext, QAfterSortBy> thenByTerm() {
+    return addSortByInternal('term', Sort.asc);
   }
 
-  QueryBuilder<CreatorContext, CreatorContext, QAfterSortBy> thenByWordDesc() {
-    return addSortByInternal('word', Sort.desc);
+  QueryBuilder<CreatorContext, CreatorContext, QAfterSortBy> thenByTermDesc() {
+    return addSortByInternal('term', Sort.desc);
   }
 }
 
@@ -1829,9 +1829,9 @@ extension CreatorContextQueryWhereDistinct
     return addDistinctByInternal('sentence', caseSensitive: caseSensitive);
   }
 
-  QueryBuilder<CreatorContext, CreatorContext, QDistinct> distinctByWord(
+  QueryBuilder<CreatorContext, CreatorContext, QDistinct> distinctByTerm(
       {bool caseSensitive = true}) {
-    return addDistinctByInternal('word', caseSensitive: caseSensitive);
+    return addDistinctByInternal('term', caseSensitive: caseSensitive);
   }
 }
 
@@ -1881,8 +1881,8 @@ extension CreatorContextQueryProperty
     return addPropertyNameInternal('sentence');
   }
 
-  QueryBuilder<CreatorContext, String?, QQueryOperations> wordProperty() {
-    return addPropertyNameInternal('word');
+  QueryBuilder<CreatorContext, String?, QQueryOperations> termProperty() {
+    return addPropertyNameInternal('term');
   }
 }
 
@@ -1893,7 +1893,7 @@ extension CreatorContextQueryProperty
 CreatorContext _$CreatorContextFromJson(Map<String, dynamic> json) =>
     CreatorContext(
       sentence: json['sentence'] as String?,
-      word: json['word'] as String?,
+      term: json['term'] as String?,
       reading: json['reading'] as String?,
       meaning: json['meaning'] as String?,
       extra: json['extra'] as String?,
@@ -1917,7 +1917,7 @@ CreatorContext _$CreatorContextFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$CreatorContextToJson(CreatorContext instance) =>
     <String, dynamic>{
       'sentence': instance.sentence,
-      'word': instance.word,
+      'term': instance.term,
       'reading': instance.reading,
       'meaning': instance.meaning,
       'extra': instance.extra,

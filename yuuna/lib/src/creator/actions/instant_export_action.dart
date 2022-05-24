@@ -26,7 +26,7 @@ class InstantExportAction extends QuickAction {
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,
-    required String word,
+    required String term,
     required String reading,
     required List<DictionaryEntry> entries,
   }) async {

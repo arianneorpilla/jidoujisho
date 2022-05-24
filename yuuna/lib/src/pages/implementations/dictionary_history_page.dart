@@ -34,6 +34,7 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
   String get searchLabelMiddle => appModel.translate('search_label_middle');
   String get searchLabelFrom => appModel.translate('search_label_from');
   String get searchLabelAfter => appModel.translate('search_label_after');
+  String get seeMoreLabel => appModel.translate('see_more');
 
   MaterialTextSelectionControls get selectionControls =>
       JidoujishoTextSelectionControls(
@@ -110,7 +111,7 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
               dictionaryHiddens[dictionaryName] = dictionary.hidden;
             }
 
-            return DictionaryWordPage(
+            return DictionaryTermPage(
               entries: entries,
               onSearch: widget.onSearch,
               onStash: widget.onStash,
@@ -155,13 +156,16 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
   double get fontSize => (textTheme.labelMedium?.fontSize)! * 0.9;
 
   Widget buildFooterWidget(DictionaryResult result, int index) {
-    return InkWell(
-      onTap: () {
-        appModel.openResultFromHistory(result: result);
-      },
-      child: Padding(
-        padding: Spacing.of(context).insets.vertical.small,
-        child: buildFooterTextSpans(result, index),
+    return Tooltip(
+      message: seeMoreLabel,
+      child: InkWell(
+        onTap: () {
+          appModel.openResultFromHistory(result: result);
+        },
+        child: Padding(
+          padding: Spacing.of(context).insets.vertical.small,
+          child: buildFooterTextSpans(result, index),
+        ),
       ),
     );
   }
@@ -224,7 +228,7 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
             ),
           ),
           TextSpan(
-            text: '『',
+            text: ' ',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: fontSize,
@@ -238,17 +242,11 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
               fontSize: fontSize,
             ),
           ),
-          TextSpan(
-            text: '』',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: fontSize,
-              color: Theme.of(context).unselectedWidgetColor,
-            ),
-          ),
         ],
       ),
       textAlign: TextAlign.center,
+      maxLines: 3,
+      overflow: TextOverflow.ellipsis,
     );
   }
 }

@@ -210,7 +210,6 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       title: Text(clearDictionaryTitle),
       content: Text(
         clearDictionaryDescription,
-        textAlign: TextAlign.justify,
       ),
       actions: <Widget>[
         TextButton(

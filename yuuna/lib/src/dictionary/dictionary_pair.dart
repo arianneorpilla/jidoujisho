@@ -2,23 +2,23 @@
 class DictionaryPair {
   /// Make a word-reading pair for sorting purposes.
   const DictionaryPair({
-    required this.word,
+    required this.term,
     required this.reading,
   });
 
-  /// The word represented by this dictionary entry.
-  final String word;
+  /// The word or phrase represented by this dictionary entry.
+  final String term;
 
   /// The pronunciation of the word represented by this dictionary entry.
   final String reading;
 
   @override
   operator ==(Object other) =>
-      other is DictionaryPair && other.word == word && other.reading == reading;
+      other is DictionaryPair && other.term == term && other.reading == reading;
 
   @override
-  int get hashCode => word.hashCode * reading.hashCode;
+  int get hashCode => term.hashCode * reading.hashCode;
 
   @override
-  String toString() => 'DictionaryPair($word, $reading)';
+  String toString() => 'DictionaryPair($term, $reading)';
 }

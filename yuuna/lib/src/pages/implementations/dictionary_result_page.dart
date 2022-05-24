@@ -108,7 +108,7 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
           dictionaryHiddens[dictionaryName] = dictionary.hidden;
         }
 
-        return DictionaryWordPage(
+        return DictionaryTermPage(
           entries: entries,
           onSearch: widget.onSearch,
           onStash: widget.onStash,

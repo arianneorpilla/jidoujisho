@@ -24,17 +24,17 @@ class AddToStashAction extends QuickAction {
   Color getIconColor({
     required BuildContext context,
     required AppModel appModel,
-    required String word,
+    required String term,
     required String reading,
     required List<DictionaryEntry> entries,
   }) {
-    if (appModel.isTermInStash(word)) {
+    if (appModel.isTermInStash(term)) {
       return Theme.of(context).colorScheme.primary;
     } else {
       return super.getIconColor(
         context: context,
         appModel: appModel,
-        word: word,
+        term: term,
         reading: reading,
         entries: entries,
       );
@@ -47,14 +47,14 @@ class AddToStashAction extends QuickAction {
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,
-    required String word,
+    required String term,
     required String reading,
     required List<DictionaryEntry> entries,
   }) async {
-    if (!appModel.isTermInStash(word)) {
-      appModel.addToStash(terms: [word]);
+    if (!appModel.isTermInStash(term)) {
+      appModel.addToStash(terms: [term]);
     } else {
-      appModel.removeFromStash(term: word);
+      appModel.removeFromStash(term: term);
     }
   }
 }

@@ -32,7 +32,7 @@ class AnkiMapping {
       model: standardModelName,
       fieldIndexes: [
         Field.sentence.index,
-        Field.word.index,
+        Field.term.index,
         Field.reading.index,
         Field.meaning.index,
         Field.extra.index,
@@ -50,7 +50,7 @@ class AnkiMapping {
   /// A default map of enhancements to use for new mappings.
   static const Map<Field, Map<int, String>> defaultEnhancements = {
     Field.sentence: {0: ClearFieldEnhancement.key},
-    Field.word: {0: ClearFieldEnhancement.key},
+    Field.term: {0: ClearFieldEnhancement.key},
     Field.reading: {0: ClearFieldEnhancement.key},
     Field.meaning: {0: ClearFieldEnhancement.key},
     Field.extra: {0: ClearFieldEnhancement.key},

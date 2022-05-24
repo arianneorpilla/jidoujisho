@@ -198,7 +198,6 @@ class _OpenStashDialogPage extends BasePageState<OpenStashDialogPage> {
         title: Text(stashClearTitle),
         content: Text(
           stashClearDescription,
-          textAlign: TextAlign.justify,
         ),
         actions: [
           TextButton(

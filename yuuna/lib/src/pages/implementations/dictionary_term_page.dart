@@ -6,10 +6,10 @@ import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
 
-/// Returns the widget for a list of [DictionaryEntry] making up a word.
-class DictionaryWordPage extends BasePage {
+/// Returns the widget for a list of [DictionaryEntry] making up a term.
+class DictionaryTermPage extends BasePage {
   /// Create the widget for a dictionary word.
-  const DictionaryWordPage({
+  const DictionaryTermPage({
     required this.entries,
     required this.onSearch,
     required this.onStash,
@@ -46,14 +46,13 @@ class DictionaryWordPage extends BasePage {
   final Widget? footerWidget;
 
   @override
-  BasePageState<DictionaryWordPage> createState() => _DictionaryWordPageState();
+  BasePageState<DictionaryTermPage> createState() => _DictionaryTermPageState();
 }
 
-class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
+class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
   String get searchLabel => appModel.translate('search');
   String get stashLabel => appModel.translate('stash');
-  String get dictionaryNameNotes => appModel.translate('dictionary_name_notes');
-  String get dictionaryInfoNotes => appModel.translate('dictionary_info_notes');
+  String get dictionaryImportTag => appModel.translate('dictionary_import_tag');
 
   MaterialTextSelectionControls get selectionControls =>
       JidoujishoTextSelectionControls(
@@ -67,7 +66,7 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
         allowPaste: false,
       );
 
-  String get word => widget.entries.first.word;
+  String get term => widget.entries.first.term;
   String get reading => widget.entries.first.reading;
 
   @override
@@ -156,7 +155,7 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
           enabledColor: quickAction.getIconColor(
             context: context,
             appModel: appModel,
-            word: word,
+            term: term,
             reading: reading,
             entries: widget.entries,
           ),
@@ -172,7 +171,7 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
               ref: ref,
               appModel: appModel,
               creatorModel: creatorModel,
-              word: word,
+              term: term,
               reading: reading,
               entries: widget.entries,
             );
@@ -189,15 +188,15 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
       children: [
         Expanded(
           child: GestureDetector(
-            child: appModel.targetLanguage.getWordReadingOverrideWidget(
+            child: appModel.targetLanguage.getTermReadingOverrideWidget(
               context: context,
               appModel: appModel,
-              word: word,
+              term: term,
               reading: reading,
               meanings: widget.entries,
             ),
-            onTap: () => appModel.copyToClipboard(word),
-            onLongPress: () => appModel.copyToClipboard(word),
+            onTap: () => appModel.copyToClipboard(term),
+            onLongPress: () => appModel.copyToClipboard(term),
           ),
         ),
         Padding(
@@ -222,10 +221,10 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
     Set<DictionaryPair> pairs = {};
 
     for (DictionaryEntry entry in widget.entries) {
-      for (String tag in entry.wordTags) {
+      for (String tag in entry.termTags) {
         pairs.add(
           DictionaryPair(
-            word: entry.dictionaryName,
+            term: entry.dictionaryName,
             reading: tag,
           ),
         );
@@ -235,7 +234,7 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
     tags.addAll(pairs.map((pair) {
       if (pair.reading.isNotEmpty) {
         DictionaryTag tag = appModel.getDictionaryTag(
-          dictionaryName: pair.word,
+          dictionaryName: pair.term,
           tagName: pair.reading,
         );
 
@@ -254,7 +253,7 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
 
   Widget buildMetaWidgets() {
     List<DictionaryMetaEntry> metaEntries =
-        appModel.getMetaEntriesFromWord(word);
+        appModel.getMetaEntriesFromTerm(term);
 
     if (metaEntries.isEmpty) {
       return const SizedBox.shrink();
@@ -286,7 +285,7 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
             padding: Spacing.of(context).insets.onlyBottom.normal,
             child: JidoujishoTag(
               text: metaEntry.dictionaryName,
-              message: dictionaryInfoNotes.replaceAll(
+              message: dictionaryImportTag.replaceAll(
                 '%dictionaryName%',
                 metaEntry.dictionaryName,
               ),
@@ -303,7 +302,7 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
         padding: Spacing.of(context).insets.onlyRight.small,
         child: JidoujishoTag(
           text: metaEntry.dictionaryName,
-          message: dictionaryInfoNotes.replaceAll(
+          message: dictionaryImportTag.replaceAll(
             '%dictionaryName%',
             metaEntry.dictionaryName,
           ),
@@ -355,7 +354,7 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
                       padding: Spacing.of(context).insets.onlyBottom.semiSmall,
                       child: JidoujishoTag(
                         text: metaEntry.dictionaryName,
-                        message: dictionaryInfoNotes.replaceAll(
+                        message: dictionaryImportTag.replaceAll(
                           '%dictionaryName%',
                           metaEntry.dictionaryName,
                         ),

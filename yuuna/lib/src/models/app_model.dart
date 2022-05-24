@@ -150,7 +150,7 @@ class AppModel with ChangeNotifier {
 
   /// Maximum number of headwords in a returned dictionary result for
   /// performance purposes.
-  final int maximumDictionaryWordsInResult = 20;
+  final int maximumDictionaryTermsInResult = 20;
 
   /// Maximum number of dictionary entries that can be returned from a database
   /// dictionary search.
@@ -334,12 +334,12 @@ class AppModel with ChangeNotifier {
         OpenStashEnhancement(field: Field.sentence),
         PopFromStashEnhancement(field: Field.sentence),
       ],
-      Field.word: [
-        ClearFieldEnhancement(field: Field.word),
+      Field.term: [
+        ClearFieldEnhancement(field: Field.term),
         SearchDictionaryEnhancement(),
         MassifExampleSentencesEnhancement(),
-        OpenStashEnhancement(field: Field.word),
-        PopFromStashEnhancement(field: Field.word),
+        OpenStashEnhancement(field: Field.term),
+        PopFromStashEnhancement(field: Field.term),
       ],
     };
 
@@ -976,7 +976,7 @@ class AppModel with ChangeNotifier {
     DictionarySearchParams params = DictionarySearchParams(
       searchTerm: searchTerm,
       maximumDictionaryEntrySearchMatch: maximumDictionaryEntrySearchMatch,
-      maximumDictionaryWordsInResult: maximumDictionaryWordsInResult,
+      maximumDictionaryTermsInResult: maximumDictionaryTermsInResult,
       fallbackTerm: fallbackTerm,
       isarDirectoryPath: isarDirectory.path,
     );
@@ -1054,7 +1054,6 @@ class AppModel with ChangeNotifier {
         title: Text(errorAnkidroidApi),
         content: Text(
           errorAnkidroidApiContent,
-          textAlign: TextAlign.justify,
         ),
         actions: [
           TextButton(
@@ -1099,7 +1098,6 @@ class AppModel with ChangeNotifier {
           title: Text(infoStandardModel),
           content: Text(
             infoStandardModelContent,
-            textAlign: TextAlign.justify,
           ),
           actions: [
             TextButton(
@@ -1292,8 +1290,8 @@ class AppModel with ChangeNotifier {
       switch (field) {
         case Field.sentence:
           return details.sentence ?? '';
-        case Field.word:
-          return details.word ?? '';
+        case Field.term:
+          return details.term ?? '';
         case Field.reading:
           return details.reading ?? '';
         case Field.meaning:
@@ -1372,7 +1370,6 @@ class AppModel with ChangeNotifier {
           title: Text(errorModelMissing),
           content: Text(
             errorModelMissingContent,
-            textAlign: TextAlign.justify,
           ),
           actions: [
             TextButton(
@@ -1398,7 +1395,6 @@ class AppModel with ChangeNotifier {
           title: Text(errorModelChanged),
           content: Text(
             errorModelChangedContent,
-            textAlign: TextAlign.justify,
           ),
           actions: [
             TextButton(
@@ -1414,7 +1410,10 @@ class AppModel with ChangeNotifier {
   }
 
   /// A helper function for opening the creator from any page in the
-  /// application for card export purposes.
+  /// application for card export purposes. Normally, the fields are provided
+  /// by values in the app state. For example, the sentence field provides its
+  /// value upon opening the creator from current media, which if null is
+  /// empty.
   Future<void> openCreator({
     required WidgetRef ref,
     required bool killOnPop,
@@ -1884,11 +1883,11 @@ class AppModel with ChangeNotifier {
     dictionaryEntriesNotifier.notifyListeners();
   }
 
-  /// Return a list of [DictionaryMetaEntry] for a certain word.
-  List<DictionaryMetaEntry> getMetaEntriesFromWord(String word) {
+  /// Return a list of [DictionaryMetaEntry] for a certain term.
+  List<DictionaryMetaEntry> getMetaEntriesFromTerm(String term) {
     List<DictionaryMetaEntry> metaEntries = _database.dictionaryMetaEntrys
         .where()
-        .wordEqualTo(word)
+        .termEqualTo(term)
         .build()
         .findAllSync();
 

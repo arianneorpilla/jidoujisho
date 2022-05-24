@@ -175,7 +175,7 @@ abstract class Language {
   ///
   /// For example, for Japanese, 'しました' should be 'する'.
   /// For English, 'running' should be 'run'.
-  FutureOr<String> getRootForm(String word);
+  FutureOr<String> getRootForm(String term);
 
   /// Generate extra fallback terms for a word for use when searching a
   /// dictionary when the word fails to find results on its own.
@@ -194,10 +194,10 @@ abstract class Language {
   /// Some languages may want to display custom widgets rather than the built
   /// in word and reading text that is there by default. For example, Japanese
   /// may want to display a furigana widget instead.
-  Widget getWordReadingOverrideWidget({
+  Widget getTermReadingOverrideWidget({
     required BuildContext context,
     required AppModel appModel,
-    required String word,
+    required String term,
     required String reading,
     required List<DictionaryEntry> meanings,
   }) {
@@ -205,7 +205,7 @@ abstract class Language {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          word,
+          term,
           style: Theme.of(context)
               .textTheme
               .titleLarge!

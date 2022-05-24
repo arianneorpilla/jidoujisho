@@ -92,12 +92,12 @@ Future<List<DictionaryEntry>> prepareEntriesYomichanTermBankFormat(
       List<dynamic> items = jsonDecode(file.readAsStringSync());
 
       for (List<dynamic> item in items) {
-        String word = item[0] as String;
+        String term = item[0] as String;
         String reading = item[1] as String;
 
         double popularity = (item[4] as num).toDouble();
         List<String> meaningTags = (item[2] as String).split(' ');
-        List<String> wordTags = (item[7] as String).split(' ');
+        List<String> termTags = (item[7] as String).split(' ');
 
         List<String> meanings = [];
         int? sequence = item[6] as int?;
@@ -112,12 +112,12 @@ Future<List<DictionaryEntry>> prepareEntriesYomichanTermBankFormat(
         entries.add(
           DictionaryEntry(
             dictionaryName: params.dictionaryName,
-            word: word,
+            term: term,
             reading: reading,
             meanings: meanings,
             popularity: popularity,
             meaningTags: meaningTags,
-            wordTags: wordTags,
+            termTags: termTags,
             sequence: sequence,
           ),
         );
@@ -156,7 +156,7 @@ Future<List<DictionaryMetaEntry>> prepareMetaEntriesYomichanTermBankFormat(
       List<dynamic> items = jsonDecode(json);
 
       for (List<dynamic> item in items) {
-        String word = item[0] as String;
+        String term = item[0] as String;
         String type = item[1] as String;
 
         int? frequency;
@@ -186,7 +186,7 @@ Future<List<DictionaryMetaEntry>> prepareMetaEntriesYomichanTermBankFormat(
 
         DictionaryMetaEntry metaEntry = DictionaryMetaEntry(
           dictionaryName: params.dictionaryName,
-          word: word,
+          term: term,
           frequency: frequency,
           pitches: pitches,
         );

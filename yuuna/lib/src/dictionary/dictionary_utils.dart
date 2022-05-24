@@ -200,7 +200,7 @@ class DictionarySearchParams {
   DictionarySearchParams({
     required this.searchTerm,
     required this.maximumDictionaryEntrySearchMatch,
-    required this.maximumDictionaryWordsInResult,
+    required this.maximumDictionaryTermsInResult,
     required this.fallbackTerm,
     required this.isarDirectoryPath,
   });
@@ -220,7 +220,7 @@ class DictionarySearchParams {
 
   /// Maximum number of headwords in a returned dictionary result for
   /// performance purposes.
-  final int maximumDictionaryWordsInResult;
+  final int maximumDictionaryTermsInResult;
 }
 
 /// Bundles relevant localisation information for use in dictionary imports.

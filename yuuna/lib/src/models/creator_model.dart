@@ -163,7 +163,7 @@ class CreatorModel with ChangeNotifier {
         currentImageSuggestionsSeeds = null;
         break;
       case Field.sentence:
-      case Field.word:
+      case Field.term:
       case Field.reading:
       case Field.meaning:
       case Field.extra:
@@ -188,8 +188,8 @@ class CreatorModel with ChangeNotifier {
         case Field.sentence:
           controller.text = creatorContext.sentence ?? controller.text;
           break;
-        case Field.word:
-          controller.text = creatorContext.word ?? controller.text;
+        case Field.term:
+          controller.text = creatorContext.term ?? controller.text;
           break;
         case Field.reading:
           controller.text = creatorContext.reading ?? controller.text;
@@ -222,7 +222,7 @@ class CreatorModel with ChangeNotifier {
   ExportDetails getExportDetails(WidgetRef ref) {
     return ExportDetails(
       sentence: getFieldController(Field.sentence).text,
-      word: getFieldController(Field.word).text,
+      term: getFieldController(Field.term).text,
       reading: getFieldController(Field.reading).text,
       meaning: getFieldController(Field.meaning).text,
       extra: getFieldController(Field.extra).text,

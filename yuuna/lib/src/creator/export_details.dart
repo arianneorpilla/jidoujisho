@@ -9,7 +9,7 @@ class ExportDetails extends Equatable {
   /// Initialise an immutable context export with the final parameters.
   const ExportDetails({
     this.sentence = '',
-    this.word = '',
+    this.term = '',
     this.reading = '',
     this.meaning = '',
     this.extra = '',
@@ -22,9 +22,9 @@ class ExportDetails extends Equatable {
   /// scene dialogue.
   final String? sentence;
 
-  /// The word pertaining to the reading and meaning, the word
+  /// The word or phrase pertaining to the reading and meaning, the term
   /// to be memorised from the card.
-  final String? word;
+  final String? term;
 
   /// Pronunciation or reading. May be overriden with some characteristics such
   /// as pitch accent diagrams, by particular languages.
@@ -56,7 +56,7 @@ class ExportDetails extends Equatable {
   @override
   List<Object?> get props => [
         sentence,
-        word,
+        term,
         reading,
         meaning,
         extra,

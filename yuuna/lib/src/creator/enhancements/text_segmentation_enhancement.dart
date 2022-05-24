@@ -3,14 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
 
-/// An enhancement used to pick an appropriate word from a text field easily.
+/// An enhancement used to pick an appropriate term from a text field easily.
 class TextSegmentationEnhancement extends Enhancement {
   /// Initialise this enhancement with the hardset parameters.
   TextSegmentationEnhancement({required super.field})
       : super(
           uniqueKey: key,
           label: 'Text Segmentation',
-          description: 'Search or select a new word from segmented text.',
+          description: 'Search or select a new term from segmented text.',
           icon: Icons.account_tree,
         );
 
@@ -36,7 +36,7 @@ class TextSegmentationEnhancement extends Enhancement {
         );
       },
       onSelect: (selection) {
-        creatorModel.getFieldController(Field.word).text = selection;
+        creatorModel.getFieldController(Field.term).text = selection;
       },
     );
   }

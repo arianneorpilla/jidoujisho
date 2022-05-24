@@ -37,8 +37,8 @@ class DictionaryEntryPage extends BasePage {
 class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
   String get searchLabel => appModelNoUpdate.translate('search');
   String get stashLabel => appModelNoUpdate.translate('stash');
-  String get dictionaryNameNotes =>
-      appModelNoUpdate.translate('dictionary_name_notes');
+  String get dictionaryImportTag =>
+      appModelNoUpdate.translate('dictionary_import_tag');
 
   MaterialTextSelectionControls get selectionControls =>
       JidoujishoTextSelectionControls(
@@ -64,7 +64,7 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
     tags.add(
       JidoujishoTag(
         text: widget.entry.dictionaryName,
-        message: dictionaryNameNotes.replaceAll(
+        message: dictionaryImportTag.replaceAll(
           '%dictionaryName%',
           widget.entry.dictionaryName,
         ),
@@ -99,6 +99,7 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
           iconSize: Theme.of(context).textTheme.titleLarge?.fontSize,
           expandIcon: Icons.arrow_drop_down,
           collapseIcon: Icons.arrow_drop_down,
+          iconRotationAngle: 0,
           iconColor: Theme.of(context).unselectedWidgetColor,
           headerAlignment: ExpandablePanelHeaderAlignment.center,
         ),

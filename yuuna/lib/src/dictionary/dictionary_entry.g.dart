@@ -15,7 +15,7 @@ extension GetDictionaryEntryCollection on Isar {
 const DictionaryEntrySchema = CollectionSchema(
   name: 'DictionaryEntry',
   schema:
-      '{"name":"DictionaryEntry","idName":"id","properties":[{"name":"dictionaryName","type":"String"},{"name":"extra","type":"String"},{"name":"hashCode","type":"Long"},{"name":"meaningTags","type":"StringList"},{"name":"meanings","type":"StringList"},{"name":"popularity","type":"Double"},{"name":"reading","type":"String"},{"name":"readingFirstChar","type":"String"},{"name":"readingLength","type":"Long"},{"name":"readingSecondChar","type":"String"},{"name":"sequence","type":"Long"},{"name":"word","type":"String"},{"name":"wordFirstChar","type":"String"},{"name":"wordLength","type":"Long"},{"name":"wordSecondChar","type":"String"},{"name":"wordTags","type":"StringList"}],"indexes":[{"name":"dictionaryName","unique":false,"properties":[{"name":"dictionaryName","type":"Hash","caseSensitive":true}]},{"name":"popularity","unique":false,"properties":[{"name":"popularity","type":"Value","caseSensitive":false}]},{"name":"reading","unique":false,"properties":[{"name":"reading","type":"Hash","caseSensitive":true}]},{"name":"readingFirstChar_readingSecondChar_readingLength","unique":false,"properties":[{"name":"readingFirstChar","type":"Hash","caseSensitive":true},{"name":"readingSecondChar","type":"Hash","caseSensitive":true},{"name":"readingLength","type":"Value","caseSensitive":false}]},{"name":"readingLength","unique":false,"properties":[{"name":"readingLength","type":"Value","caseSensitive":false}]},{"name":"sequence","unique":false,"properties":[{"name":"sequence","type":"Value","caseSensitive":false}]},{"name":"wordFirstChar_wordSecondChar_wordLength","unique":false,"properties":[{"name":"wordFirstChar","type":"Hash","caseSensitive":true},{"name":"wordSecondChar","type":"Hash","caseSensitive":true},{"name":"wordLength","type":"Value","caseSensitive":false}]},{"name":"wordLength","unique":false,"properties":[{"name":"wordLength","type":"Value","caseSensitive":false}]},{"name":"word_reading_popularity","unique":false,"properties":[{"name":"word","type":"Hash","caseSensitive":true},{"name":"reading","type":"Hash","caseSensitive":true},{"name":"popularity","type":"Value","caseSensitive":false}]}],"links":[]}',
+      '{"name":"DictionaryEntry","idName":"id","properties":[{"name":"dictionaryName","type":"String"},{"name":"extra","type":"String"},{"name":"hashCode","type":"Long"},{"name":"meaningTags","type":"StringList"},{"name":"meanings","type":"StringList"},{"name":"popularity","type":"Double"},{"name":"reading","type":"String"},{"name":"readingFirstChar","type":"String"},{"name":"readingLength","type":"Long"},{"name":"readingSecondChar","type":"String"},{"name":"sequence","type":"Long"},{"name":"term","type":"String"},{"name":"termFirstChar","type":"String"},{"name":"termLength","type":"Long"},{"name":"termSecondChar","type":"String"},{"name":"termTags","type":"StringList"}],"indexes":[{"name":"dictionaryName","unique":false,"properties":[{"name":"dictionaryName","type":"Hash","caseSensitive":true}]},{"name":"popularity","unique":false,"properties":[{"name":"popularity","type":"Value","caseSensitive":false}]},{"name":"reading","unique":false,"properties":[{"name":"reading","type":"Hash","caseSensitive":true}]},{"name":"readingFirstChar_readingSecondChar_readingLength","unique":false,"properties":[{"name":"readingFirstChar","type":"Hash","caseSensitive":true},{"name":"readingSecondChar","type":"Hash","caseSensitive":true},{"name":"readingLength","type":"Value","caseSensitive":false}]},{"name":"readingLength","unique":false,"properties":[{"name":"readingLength","type":"Value","caseSensitive":false}]},{"name":"sequence","unique":false,"properties":[{"name":"sequence","type":"Value","caseSensitive":false}]},{"name":"termFirstChar_termSecondChar_termLength","unique":false,"properties":[{"name":"termFirstChar","type":"Hash","caseSensitive":true},{"name":"termSecondChar","type":"Hash","caseSensitive":true},{"name":"termLength","type":"Value","caseSensitive":false}]},{"name":"termLength","unique":false,"properties":[{"name":"termLength","type":"Value","caseSensitive":false}]},{"name":"term_reading_popularity","unique":false,"properties":[{"name":"term","type":"Hash","caseSensitive":true},{"name":"reading","type":"Hash","caseSensitive":true},{"name":"popularity","type":"Value","caseSensitive":false}]}],"links":[]}',
   idName: 'id',
   propertyIds: {
     'dictionaryName': 0,
@@ -29,13 +29,13 @@ const DictionaryEntrySchema = CollectionSchema(
     'readingLength': 8,
     'readingSecondChar': 9,
     'sequence': 10,
-    'word': 11,
-    'wordFirstChar': 12,
-    'wordLength': 13,
-    'wordSecondChar': 14,
-    'wordTags': 15
+    'term': 11,
+    'termFirstChar': 12,
+    'termLength': 13,
+    'termSecondChar': 14,
+    'termTags': 15
   },
-  listProperties: {'meaningTags', 'meanings', 'wordTags'},
+  listProperties: {'meaningTags', 'meanings', 'termTags'},
   indexIds: {
     'dictionaryName': 0,
     'popularity': 1,
@@ -43,9 +43,9 @@ const DictionaryEntrySchema = CollectionSchema(
     'readingFirstChar_readingSecondChar_readingLength': 3,
     'readingLength': 4,
     'sequence': 5,
-    'wordFirstChar_wordSecondChar_wordLength': 6,
-    'wordLength': 7,
-    'word_reading_popularity': 8
+    'termFirstChar_termSecondChar_termLength': 6,
+    'termLength': 7,
+    'term_reading_popularity': 8
   },
   indexValueTypes: {
     'dictionaryName': [
@@ -68,15 +68,15 @@ const DictionaryEntrySchema = CollectionSchema(
     'sequence': [
       IndexValueType.long,
     ],
-    'wordFirstChar_wordSecondChar_wordLength': [
+    'termFirstChar_termSecondChar_termLength': [
       IndexValueType.stringHash,
       IndexValueType.stringHash,
       IndexValueType.long,
     ],
-    'wordLength': [
+    'termLength': [
       IndexValueType.long,
     ],
-    'word_reading_popularity': [
+    'term_reading_popularity': [
       IndexValueType.stringHash,
       IndexValueType.stringHash,
       IndexValueType.double,
@@ -171,24 +171,24 @@ void _dictionaryEntrySerializeNative(
   dynamicSize += (_readingSecondChar?.length ?? 0) as int;
   final value10 = object.sequence;
   final _sequence = value10;
-  final value11 = object.word;
-  final _word = IsarBinaryWriter.utf8Encoder.convert(value11);
-  dynamicSize += (_word.length) as int;
-  final value12 = object.wordFirstChar;
-  IsarUint8List? _wordFirstChar;
+  final value11 = object.term;
+  final _term = IsarBinaryWriter.utf8Encoder.convert(value11);
+  dynamicSize += (_term.length) as int;
+  final value12 = object.termFirstChar;
+  IsarUint8List? _termFirstChar;
   if (value12 != null) {
-    _wordFirstChar = IsarBinaryWriter.utf8Encoder.convert(value12);
+    _termFirstChar = IsarBinaryWriter.utf8Encoder.convert(value12);
   }
-  dynamicSize += (_wordFirstChar?.length ?? 0) as int;
-  final value13 = object.wordLength;
-  final _wordLength = value13;
-  final value14 = object.wordSecondChar;
-  IsarUint8List? _wordSecondChar;
+  dynamicSize += (_termFirstChar?.length ?? 0) as int;
+  final value13 = object.termLength;
+  final _termLength = value13;
+  final value14 = object.termSecondChar;
+  IsarUint8List? _termSecondChar;
   if (value14 != null) {
-    _wordSecondChar = IsarBinaryWriter.utf8Encoder.convert(value14);
+    _termSecondChar = IsarBinaryWriter.utf8Encoder.convert(value14);
   }
-  dynamicSize += (_wordSecondChar?.length ?? 0) as int;
-  final value15 = object.wordTags;
+  dynamicSize += (_termSecondChar?.length ?? 0) as int;
+  final value15 = object.termTags;
   dynamicSize += (value15.length) * 8;
   final bytesList15 = <IsarUint8List>[];
   for (var str in value15) {
@@ -196,7 +196,7 @@ void _dictionaryEntrySerializeNative(
     bytesList15.add(bytes);
     dynamicSize += bytes.length as int;
   }
-  final _wordTags = bytesList15;
+  final _termTags = bytesList15;
   final size = staticSize + dynamicSize;
 
   rawObj.buffer = alloc(size);
@@ -214,11 +214,11 @@ void _dictionaryEntrySerializeNative(
   writer.writeLong(offsets[8], _readingLength);
   writer.writeBytes(offsets[9], _readingSecondChar);
   writer.writeLong(offsets[10], _sequence);
-  writer.writeBytes(offsets[11], _word);
-  writer.writeBytes(offsets[12], _wordFirstChar);
-  writer.writeLong(offsets[13], _wordLength);
-  writer.writeBytes(offsets[14], _wordSecondChar);
-  writer.writeStringList(offsets[15], _wordTags);
+  writer.writeBytes(offsets[11], _term);
+  writer.writeBytes(offsets[12], _termFirstChar);
+  writer.writeLong(offsets[13], _termLength);
+  writer.writeBytes(offsets[14], _termSecondChar);
+  writer.writeStringList(offsets[15], _termTags);
 }
 
 DictionaryEntry _dictionaryEntryDeserializeNative(
@@ -235,8 +235,8 @@ DictionaryEntry _dictionaryEntryDeserializeNative(
     popularity: reader.readDoubleOrNull(offsets[5]),
     reading: reader.readString(offsets[6]),
     sequence: reader.readLongOrNull(offsets[10]),
-    word: reader.readString(offsets[11]),
-    wordTags: reader.readStringList(offsets[15]) ?? [],
+    term: reader.readString(offsets[11]),
+    termTags: reader.readStringList(offsets[15]) ?? [],
   );
   return object;
 }
@@ -298,11 +298,11 @@ dynamic _dictionaryEntrySerializeWeb(
   IsarNative.jsObjectSet(jsObj, 'readingLength', object.readingLength);
   IsarNative.jsObjectSet(jsObj, 'readingSecondChar', object.readingSecondChar);
   IsarNative.jsObjectSet(jsObj, 'sequence', object.sequence);
-  IsarNative.jsObjectSet(jsObj, 'word', object.word);
-  IsarNative.jsObjectSet(jsObj, 'wordFirstChar', object.wordFirstChar);
-  IsarNative.jsObjectSet(jsObj, 'wordLength', object.wordLength);
-  IsarNative.jsObjectSet(jsObj, 'wordSecondChar', object.wordSecondChar);
-  IsarNative.jsObjectSet(jsObj, 'wordTags', object.wordTags);
+  IsarNative.jsObjectSet(jsObj, 'term', object.term);
+  IsarNative.jsObjectSet(jsObj, 'termFirstChar', object.termFirstChar);
+  IsarNative.jsObjectSet(jsObj, 'termLength', object.termLength);
+  IsarNative.jsObjectSet(jsObj, 'termSecondChar', object.termSecondChar);
+  IsarNative.jsObjectSet(jsObj, 'termTags', object.termTags);
   return jsObj;
 }
 
@@ -325,8 +325,8 @@ DictionaryEntry _dictionaryEntryDeserializeWeb(
     popularity: IsarNative.jsObjectGet(jsObj, 'popularity'),
     reading: IsarNative.jsObjectGet(jsObj, 'reading') ?? '',
     sequence: IsarNative.jsObjectGet(jsObj, 'sequence'),
-    word: IsarNative.jsObjectGet(jsObj, 'word') ?? '',
-    wordTags: (IsarNative.jsObjectGet(jsObj, 'wordTags') as List?)
+    term: IsarNative.jsObjectGet(jsObj, 'term') ?? '',
+    termTags: (IsarNative.jsObjectGet(jsObj, 'termTags') as List?)
             ?.map((e) => e ?? '')
             .toList()
             .cast<String>() ??
@@ -371,17 +371,17 @@ P _dictionaryEntryDeserializePropWeb<P>(Object jsObj, String propertyName) {
       return (IsarNative.jsObjectGet(jsObj, 'readingSecondChar')) as P;
     case 'sequence':
       return (IsarNative.jsObjectGet(jsObj, 'sequence')) as P;
-    case 'word':
-      return (IsarNative.jsObjectGet(jsObj, 'word') ?? '') as P;
-    case 'wordFirstChar':
-      return (IsarNative.jsObjectGet(jsObj, 'wordFirstChar')) as P;
-    case 'wordLength':
-      return (IsarNative.jsObjectGet(jsObj, 'wordLength') ??
+    case 'term':
+      return (IsarNative.jsObjectGet(jsObj, 'term') ?? '') as P;
+    case 'termFirstChar':
+      return (IsarNative.jsObjectGet(jsObj, 'termFirstChar')) as P;
+    case 'termLength':
+      return (IsarNative.jsObjectGet(jsObj, 'termLength') ??
           double.negativeInfinity) as P;
-    case 'wordSecondChar':
-      return (IsarNative.jsObjectGet(jsObj, 'wordSecondChar')) as P;
-    case 'wordTags':
-      return ((IsarNative.jsObjectGet(jsObj, 'wordTags') as List?)
+    case 'termSecondChar':
+      return (IsarNative.jsObjectGet(jsObj, 'termSecondChar')) as P;
+    case 'termTags':
+      return ((IsarNative.jsObjectGet(jsObj, 'termTags') as List?)
               ?.map((e) => e ?? '')
               .toList()
               .cast<String>() ??
@@ -434,20 +434,20 @@ extension DictionaryEntryQueryWhereSort
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere>
-      anyWordFirstCharWordSecondCharWordLength() {
+      anyTermFirstCharTermSecondCharTermLength() {
     return addWhereClauseInternal(const IndexWhereClause.any(
-        indexName: 'wordFirstChar_wordSecondChar_wordLength'));
+        indexName: 'termFirstChar_termSecondChar_termLength'));
   }
 
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere> anyWordLength() {
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere> anyTermLength() {
     return addWhereClauseInternal(
-        const IndexWhereClause.any(indexName: 'wordLength'));
+        const IndexWhereClause.any(indexName: 'termLength'));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere>
-      anyWordReadingPopularity() {
+      anyTermReadingPopularity() {
     return addWhereClauseInternal(
-        const IndexWhereClause.any(indexName: 'word_reading_popularity'));
+        const IndexWhereClause.any(indexName: 'term_reading_popularity'));
   }
 }
 
@@ -938,321 +938,321 @@ extension DictionaryEntryQueryWhere
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      wordFirstCharEqualTo(String? wordFirstChar) {
+      termFirstCharEqualTo(String? termFirstChar) {
     return addWhereClauseInternal(IndexWhereClause.equalTo(
-      indexName: 'wordFirstChar_wordSecondChar_wordLength',
-      value: [wordFirstChar],
+      indexName: 'termFirstChar_termSecondChar_termLength',
+      value: [termFirstChar],
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      wordFirstCharNotEqualTo(String? wordFirstChar) {
+      termFirstCharNotEqualTo(String? termFirstChar) {
     if (whereSortInternal == Sort.asc) {
       return addWhereClauseInternal(IndexWhereClause.lessThan(
-        indexName: 'wordFirstChar_wordSecondChar_wordLength',
-        upper: [wordFirstChar],
+        indexName: 'termFirstChar_termSecondChar_termLength',
+        upper: [termFirstChar],
         includeUpper: false,
       )).addWhereClauseInternal(IndexWhereClause.greaterThan(
-        indexName: 'wordFirstChar_wordSecondChar_wordLength',
-        lower: [wordFirstChar],
+        indexName: 'termFirstChar_termSecondChar_termLength',
+        lower: [termFirstChar],
         includeLower: false,
       ));
     } else {
       return addWhereClauseInternal(IndexWhereClause.greaterThan(
-        indexName: 'wordFirstChar_wordSecondChar_wordLength',
-        lower: [wordFirstChar],
+        indexName: 'termFirstChar_termSecondChar_termLength',
+        lower: [termFirstChar],
         includeLower: false,
       )).addWhereClauseInternal(IndexWhereClause.lessThan(
-        indexName: 'wordFirstChar_wordSecondChar_wordLength',
-        upper: [wordFirstChar],
+        indexName: 'termFirstChar_termSecondChar_termLength',
+        upper: [termFirstChar],
         includeUpper: false,
       ));
     }
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      wordFirstCharWordSecondCharEqualTo(
-          String? wordFirstChar, String? wordSecondChar) {
+      termFirstCharTermSecondCharEqualTo(
+          String? termFirstChar, String? termSecondChar) {
     return addWhereClauseInternal(IndexWhereClause.equalTo(
-      indexName: 'wordFirstChar_wordSecondChar_wordLength',
-      value: [wordFirstChar, wordSecondChar],
+      indexName: 'termFirstChar_termSecondChar_termLength',
+      value: [termFirstChar, termSecondChar],
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      wordFirstCharWordSecondCharNotEqualTo(
-          String? wordFirstChar, String? wordSecondChar) {
+      termFirstCharTermSecondCharNotEqualTo(
+          String? termFirstChar, String? termSecondChar) {
     if (whereSortInternal == Sort.asc) {
       return addWhereClauseInternal(IndexWhereClause.lessThan(
-        indexName: 'wordFirstChar_wordSecondChar_wordLength',
-        upper: [wordFirstChar, wordSecondChar],
+        indexName: 'termFirstChar_termSecondChar_termLength',
+        upper: [termFirstChar, termSecondChar],
         includeUpper: false,
       )).addWhereClauseInternal(IndexWhereClause.greaterThan(
-        indexName: 'wordFirstChar_wordSecondChar_wordLength',
-        lower: [wordFirstChar, wordSecondChar],
+        indexName: 'termFirstChar_termSecondChar_termLength',
+        lower: [termFirstChar, termSecondChar],
         includeLower: false,
       ));
     } else {
       return addWhereClauseInternal(IndexWhereClause.greaterThan(
-        indexName: 'wordFirstChar_wordSecondChar_wordLength',
-        lower: [wordFirstChar, wordSecondChar],
+        indexName: 'termFirstChar_termSecondChar_termLength',
+        lower: [termFirstChar, termSecondChar],
         includeLower: false,
       )).addWhereClauseInternal(IndexWhereClause.lessThan(
-        indexName: 'wordFirstChar_wordSecondChar_wordLength',
-        upper: [wordFirstChar, wordSecondChar],
+        indexName: 'termFirstChar_termSecondChar_termLength',
+        upper: [termFirstChar, termSecondChar],
         includeUpper: false,
       ));
     }
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      wordFirstCharWordSecondCharWordLengthEqualTo(
-          String? wordFirstChar, String? wordSecondChar, int wordLength) {
+      termFirstCharTermSecondCharTermLengthEqualTo(
+          String? termFirstChar, String? termSecondChar, int termLength) {
     return addWhereClauseInternal(IndexWhereClause.equalTo(
-      indexName: 'wordFirstChar_wordSecondChar_wordLength',
-      value: [wordFirstChar, wordSecondChar, wordLength],
+      indexName: 'termFirstChar_termSecondChar_termLength',
+      value: [termFirstChar, termSecondChar, termLength],
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      wordFirstCharWordSecondCharWordLengthNotEqualTo(
-          String? wordFirstChar, String? wordSecondChar, int wordLength) {
+      termFirstCharTermSecondCharTermLengthNotEqualTo(
+          String? termFirstChar, String? termSecondChar, int termLength) {
     if (whereSortInternal == Sort.asc) {
       return addWhereClauseInternal(IndexWhereClause.lessThan(
-        indexName: 'wordFirstChar_wordSecondChar_wordLength',
-        upper: [wordFirstChar, wordSecondChar, wordLength],
+        indexName: 'termFirstChar_termSecondChar_termLength',
+        upper: [termFirstChar, termSecondChar, termLength],
         includeUpper: false,
       )).addWhereClauseInternal(IndexWhereClause.greaterThan(
-        indexName: 'wordFirstChar_wordSecondChar_wordLength',
-        lower: [wordFirstChar, wordSecondChar, wordLength],
+        indexName: 'termFirstChar_termSecondChar_termLength',
+        lower: [termFirstChar, termSecondChar, termLength],
         includeLower: false,
       ));
     } else {
       return addWhereClauseInternal(IndexWhereClause.greaterThan(
-        indexName: 'wordFirstChar_wordSecondChar_wordLength',
-        lower: [wordFirstChar, wordSecondChar, wordLength],
+        indexName: 'termFirstChar_termSecondChar_termLength',
+        lower: [termFirstChar, termSecondChar, termLength],
         includeLower: false,
       )).addWhereClauseInternal(IndexWhereClause.lessThan(
-        indexName: 'wordFirstChar_wordSecondChar_wordLength',
-        upper: [wordFirstChar, wordSecondChar, wordLength],
+        indexName: 'termFirstChar_termSecondChar_termLength',
+        upper: [termFirstChar, termSecondChar, termLength],
         includeUpper: false,
       ));
     }
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      wordFirstCharWordSecondCharEqualToWordLengthGreaterThan(
-    String? wordFirstChar,
-    String? wordSecondChar,
-    int wordLength, {
+      termFirstCharTermSecondCharEqualToTermLengthGreaterThan(
+    String? termFirstChar,
+    String? termSecondChar,
+    int termLength, {
     bool include = false,
   }) {
     return addWhereClauseInternal(IndexWhereClause.greaterThan(
-      indexName: 'wordFirstChar_wordSecondChar_wordLength',
-      lower: [wordFirstChar, wordSecondChar, wordLength],
+      indexName: 'termFirstChar_termSecondChar_termLength',
+      lower: [termFirstChar, termSecondChar, termLength],
       includeLower: include,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      wordFirstCharWordSecondCharEqualToWordLengthLessThan(
-    String? wordFirstChar,
-    String? wordSecondChar,
-    int wordLength, {
+      termFirstCharTermSecondCharEqualToTermLengthLessThan(
+    String? termFirstChar,
+    String? termSecondChar,
+    int termLength, {
     bool include = false,
   }) {
     return addWhereClauseInternal(IndexWhereClause.lessThan(
-      indexName: 'wordFirstChar_wordSecondChar_wordLength',
-      upper: [wordFirstChar, wordSecondChar, wordLength],
+      indexName: 'termFirstChar_termSecondChar_termLength',
+      upper: [termFirstChar, termSecondChar, termLength],
       includeUpper: include,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      wordFirstCharWordSecondCharEqualToWordLengthBetween(
-    String? wordFirstChar,
-    String? wordSecondChar,
-    int lowerWordLength,
-    int upperWordLength, {
+      termFirstCharTermSecondCharEqualToTermLengthBetween(
+    String? termFirstChar,
+    String? termSecondChar,
+    int lowerTermLength,
+    int upperTermLength, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return addWhereClauseInternal(IndexWhereClause.between(
-      indexName: 'wordFirstChar_wordSecondChar_wordLength',
-      lower: [wordFirstChar, wordSecondChar, lowerWordLength],
+      indexName: 'termFirstChar_termSecondChar_termLength',
+      lower: [termFirstChar, termSecondChar, lowerTermLength],
       includeLower: includeLower,
-      upper: [wordFirstChar, wordSecondChar, upperWordLength],
+      upper: [termFirstChar, termSecondChar, upperTermLength],
       includeUpper: includeUpper,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      wordLengthEqualTo(int wordLength) {
+      termLengthEqualTo(int termLength) {
     return addWhereClauseInternal(IndexWhereClause.equalTo(
-      indexName: 'wordLength',
-      value: [wordLength],
+      indexName: 'termLength',
+      value: [termLength],
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      wordLengthNotEqualTo(int wordLength) {
+      termLengthNotEqualTo(int termLength) {
     if (whereSortInternal == Sort.asc) {
       return addWhereClauseInternal(IndexWhereClause.lessThan(
-        indexName: 'wordLength',
-        upper: [wordLength],
+        indexName: 'termLength',
+        upper: [termLength],
         includeUpper: false,
       )).addWhereClauseInternal(IndexWhereClause.greaterThan(
-        indexName: 'wordLength',
-        lower: [wordLength],
+        indexName: 'termLength',
+        lower: [termLength],
         includeLower: false,
       ));
     } else {
       return addWhereClauseInternal(IndexWhereClause.greaterThan(
-        indexName: 'wordLength',
-        lower: [wordLength],
+        indexName: 'termLength',
+        lower: [termLength],
         includeLower: false,
       )).addWhereClauseInternal(IndexWhereClause.lessThan(
-        indexName: 'wordLength',
-        upper: [wordLength],
+        indexName: 'termLength',
+        upper: [termLength],
         includeUpper: false,
       ));
     }
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      wordLengthGreaterThan(
-    int wordLength, {
+      termLengthGreaterThan(
+    int termLength, {
     bool include = false,
   }) {
     return addWhereClauseInternal(IndexWhereClause.greaterThan(
-      indexName: 'wordLength',
-      lower: [wordLength],
+      indexName: 'termLength',
+      lower: [termLength],
       includeLower: include,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      wordLengthLessThan(
-    int wordLength, {
+      termLengthLessThan(
+    int termLength, {
     bool include = false,
   }) {
     return addWhereClauseInternal(IndexWhereClause.lessThan(
-      indexName: 'wordLength',
-      upper: [wordLength],
+      indexName: 'termLength',
+      upper: [termLength],
       includeUpper: include,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      wordLengthBetween(
-    int lowerWordLength,
-    int upperWordLength, {
+      termLengthBetween(
+    int lowerTermLength,
+    int upperTermLength, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return addWhereClauseInternal(IndexWhereClause.between(
-      indexName: 'wordLength',
-      lower: [lowerWordLength],
+      indexName: 'termLength',
+      lower: [lowerTermLength],
       includeLower: includeLower,
-      upper: [upperWordLength],
+      upper: [upperTermLength],
       includeUpper: includeUpper,
     ));
   }
 
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause> wordEqualTo(
-      String word) {
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause> termEqualTo(
+      String term) {
     return addWhereClauseInternal(IndexWhereClause.equalTo(
-      indexName: 'word_reading_popularity',
-      value: [word],
+      indexName: 'term_reading_popularity',
+      value: [term],
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      wordNotEqualTo(String word) {
+      termNotEqualTo(String term) {
     if (whereSortInternal == Sort.asc) {
       return addWhereClauseInternal(IndexWhereClause.lessThan(
-        indexName: 'word_reading_popularity',
-        upper: [word],
+        indexName: 'term_reading_popularity',
+        upper: [term],
         includeUpper: false,
       )).addWhereClauseInternal(IndexWhereClause.greaterThan(
-        indexName: 'word_reading_popularity',
-        lower: [word],
+        indexName: 'term_reading_popularity',
+        lower: [term],
         includeLower: false,
       ));
     } else {
       return addWhereClauseInternal(IndexWhereClause.greaterThan(
-        indexName: 'word_reading_popularity',
-        lower: [word],
+        indexName: 'term_reading_popularity',
+        lower: [term],
         includeLower: false,
       )).addWhereClauseInternal(IndexWhereClause.lessThan(
-        indexName: 'word_reading_popularity',
-        upper: [word],
+        indexName: 'term_reading_popularity',
+        upper: [term],
         includeUpper: false,
       ));
     }
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      wordReadingEqualTo(String word, String reading) {
+      termReadingEqualTo(String term, String reading) {
     return addWhereClauseInternal(IndexWhereClause.equalTo(
-      indexName: 'word_reading_popularity',
-      value: [word, reading],
+      indexName: 'term_reading_popularity',
+      value: [term, reading],
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      wordReadingNotEqualTo(String word, String reading) {
+      termReadingNotEqualTo(String term, String reading) {
     if (whereSortInternal == Sort.asc) {
       return addWhereClauseInternal(IndexWhereClause.lessThan(
-        indexName: 'word_reading_popularity',
-        upper: [word, reading],
+        indexName: 'term_reading_popularity',
+        upper: [term, reading],
         includeUpper: false,
       )).addWhereClauseInternal(IndexWhereClause.greaterThan(
-        indexName: 'word_reading_popularity',
-        lower: [word, reading],
+        indexName: 'term_reading_popularity',
+        lower: [term, reading],
         includeLower: false,
       ));
     } else {
       return addWhereClauseInternal(IndexWhereClause.greaterThan(
-        indexName: 'word_reading_popularity',
-        lower: [word, reading],
+        indexName: 'term_reading_popularity',
+        lower: [term, reading],
         includeLower: false,
       )).addWhereClauseInternal(IndexWhereClause.lessThan(
-        indexName: 'word_reading_popularity',
-        upper: [word, reading],
+        indexName: 'term_reading_popularity',
+        upper: [term, reading],
         includeUpper: false,
       ));
     }
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      wordReadingEqualToPopularityGreaterThan(
-          String word, String reading, double? popularity) {
+      termReadingEqualToPopularityGreaterThan(
+          String term, String reading, double? popularity) {
     return addWhereClauseInternal(IndexWhereClause.greaterThan(
-      indexName: 'word_reading_popularity',
-      lower: [word, reading, popularity],
+      indexName: 'term_reading_popularity',
+      lower: [term, reading, popularity],
       includeLower: false,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      wordReadingEqualToPopularityLessThan(
-          String word, String reading, double? popularity) {
+      termReadingEqualToPopularityLessThan(
+          String term, String reading, double? popularity) {
     return addWhereClauseInternal(IndexWhereClause.lessThan(
-      indexName: 'word_reading_popularity',
-      upper: [word, reading, popularity],
+      indexName: 'term_reading_popularity',
+      upper: [term, reading, popularity],
       includeUpper: false,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      wordReadingEqualToPopularityBetween(String word, String reading,
+      termReadingEqualToPopularityBetween(String term, String reading,
           double? lowerPopularity, double? upperPopularity) {
     return addWhereClauseInternal(IndexWhereClause.between(
-      indexName: 'word_reading_popularity',
-      lower: [word, reading, lowerPopularity],
+      indexName: 'term_reading_popularity',
+      lower: [term, reading, lowerPopularity],
       includeLower: false,
-      upper: [word, reading, upperPopularity],
+      upper: [term, reading, upperPopularity],
       includeUpper: false,
     ));
   }
@@ -2299,20 +2299,20 @@ extension DictionaryEntryQueryFilter
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordEqualTo(
+      termEqualTo(
     String value, {
     bool caseSensitive = true,
   }) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.eq,
-      property: 'word',
+      property: 'term',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordGreaterThan(
+      termGreaterThan(
     String value, {
     bool caseSensitive = true,
     bool include = false,
@@ -2320,14 +2320,14 @@ extension DictionaryEntryQueryFilter
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.gt,
       include: include,
-      property: 'word',
+      property: 'term',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordLessThan(
+      termLessThan(
     String value, {
     bool caseSensitive = true,
     bool include = false,
@@ -2335,14 +2335,14 @@ extension DictionaryEntryQueryFilter
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.lt,
       include: include,
-      property: 'word',
+      property: 'term',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordBetween(
+      termBetween(
     String lower,
     String upper, {
     bool caseSensitive = true,
@@ -2350,7 +2350,7 @@ extension DictionaryEntryQueryFilter
     bool includeUpper = true,
   }) {
     return addFilterConditionInternal(FilterCondition.between(
-      property: 'word',
+      property: 'term',
       lower: lower,
       includeLower: includeLower,
       upper: upper,
@@ -2360,75 +2360,75 @@ extension DictionaryEntryQueryFilter
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordStartsWith(
+      termStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.startsWith,
-      property: 'word',
+      property: 'term',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordEndsWith(
+      termEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.endsWith,
-      property: 'word',
+      property: 'term',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordContains(String value, {bool caseSensitive = true}) {
+      termContains(String value, {bool caseSensitive = true}) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.contains,
-      property: 'word',
+      property: 'term',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordMatches(String pattern, {bool caseSensitive = true}) {
+      termMatches(String pattern, {bool caseSensitive = true}) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.matches,
-      property: 'word',
+      property: 'term',
       value: pattern,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordFirstCharIsNull() {
+      termFirstCharIsNull() {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.isNull,
-      property: 'wordFirstChar',
+      property: 'termFirstChar',
       value: null,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordFirstCharEqualTo(
+      termFirstCharEqualTo(
     String? value, {
     bool caseSensitive = true,
   }) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.eq,
-      property: 'wordFirstChar',
+      property: 'termFirstChar',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordFirstCharGreaterThan(
+      termFirstCharGreaterThan(
     String? value, {
     bool caseSensitive = true,
     bool include = false,
@@ -2436,14 +2436,14 @@ extension DictionaryEntryQueryFilter
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.gt,
       include: include,
-      property: 'wordFirstChar',
+      property: 'termFirstChar',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordFirstCharLessThan(
+      termFirstCharLessThan(
     String? value, {
     bool caseSensitive = true,
     bool include = false,
@@ -2451,14 +2451,14 @@ extension DictionaryEntryQueryFilter
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.lt,
       include: include,
-      property: 'wordFirstChar',
+      property: 'termFirstChar',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordFirstCharBetween(
+      termFirstCharBetween(
     String? lower,
     String? upper, {
     bool caseSensitive = true,
@@ -2466,7 +2466,7 @@ extension DictionaryEntryQueryFilter
     bool includeUpper = true,
   }) {
     return addFilterConditionInternal(FilterCondition.between(
-      property: 'wordFirstChar',
+      property: 'termFirstChar',
       lower: lower,
       includeLower: includeLower,
       upper: upper,
@@ -2476,95 +2476,95 @@ extension DictionaryEntryQueryFilter
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordFirstCharStartsWith(
+      termFirstCharStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.startsWith,
-      property: 'wordFirstChar',
+      property: 'termFirstChar',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordFirstCharEndsWith(
+      termFirstCharEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.endsWith,
-      property: 'wordFirstChar',
+      property: 'termFirstChar',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordFirstCharContains(String value, {bool caseSensitive = true}) {
+      termFirstCharContains(String value, {bool caseSensitive = true}) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.contains,
-      property: 'wordFirstChar',
+      property: 'termFirstChar',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordFirstCharMatches(String pattern, {bool caseSensitive = true}) {
+      termFirstCharMatches(String pattern, {bool caseSensitive = true}) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.matches,
-      property: 'wordFirstChar',
+      property: 'termFirstChar',
       value: pattern,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordLengthEqualTo(int value) {
+      termLengthEqualTo(int value) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.eq,
-      property: 'wordLength',
+      property: 'termLength',
       value: value,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordLengthGreaterThan(
+      termLengthGreaterThan(
     int value, {
     bool include = false,
   }) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.gt,
       include: include,
-      property: 'wordLength',
+      property: 'termLength',
       value: value,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordLengthLessThan(
+      termLengthLessThan(
     int value, {
     bool include = false,
   }) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.lt,
       include: include,
-      property: 'wordLength',
+      property: 'termLength',
       value: value,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordLengthBetween(
+      termLengthBetween(
     int lower,
     int upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return addFilterConditionInternal(FilterCondition.between(
-      property: 'wordLength',
+      property: 'termLength',
       lower: lower,
       includeLower: includeLower,
       upper: upper,
@@ -2573,29 +2573,29 @@ extension DictionaryEntryQueryFilter
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordSecondCharIsNull() {
+      termSecondCharIsNull() {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.isNull,
-      property: 'wordSecondChar',
+      property: 'termSecondChar',
       value: null,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordSecondCharEqualTo(
+      termSecondCharEqualTo(
     String? value, {
     bool caseSensitive = true,
   }) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.eq,
-      property: 'wordSecondChar',
+      property: 'termSecondChar',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordSecondCharGreaterThan(
+      termSecondCharGreaterThan(
     String? value, {
     bool caseSensitive = true,
     bool include = false,
@@ -2603,14 +2603,14 @@ extension DictionaryEntryQueryFilter
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.gt,
       include: include,
-      property: 'wordSecondChar',
+      property: 'termSecondChar',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordSecondCharLessThan(
+      termSecondCharLessThan(
     String? value, {
     bool caseSensitive = true,
     bool include = false,
@@ -2618,14 +2618,14 @@ extension DictionaryEntryQueryFilter
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.lt,
       include: include,
-      property: 'wordSecondChar',
+      property: 'termSecondChar',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordSecondCharBetween(
+      termSecondCharBetween(
     String? lower,
     String? upper, {
     bool caseSensitive = true,
@@ -2633,7 +2633,7 @@ extension DictionaryEntryQueryFilter
     bool includeUpper = true,
   }) {
     return addFilterConditionInternal(FilterCondition.between(
-      property: 'wordSecondChar',
+      property: 'termSecondChar',
       lower: lower,
       includeLower: includeLower,
       upper: upper,
@@ -2643,66 +2643,66 @@ extension DictionaryEntryQueryFilter
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordSecondCharStartsWith(
+      termSecondCharStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.startsWith,
-      property: 'wordSecondChar',
+      property: 'termSecondChar',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordSecondCharEndsWith(
+      termSecondCharEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.endsWith,
-      property: 'wordSecondChar',
+      property: 'termSecondChar',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordSecondCharContains(String value, {bool caseSensitive = true}) {
+      termSecondCharContains(String value, {bool caseSensitive = true}) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.contains,
-      property: 'wordSecondChar',
+      property: 'termSecondChar',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordSecondCharMatches(String pattern, {bool caseSensitive = true}) {
+      termSecondCharMatches(String pattern, {bool caseSensitive = true}) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.matches,
-      property: 'wordSecondChar',
+      property: 'termSecondChar',
       value: pattern,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordTagsAnyEqualTo(
+      termTagsAnyEqualTo(
     String value, {
     bool caseSensitive = true,
   }) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.eq,
-      property: 'wordTags',
+      property: 'termTags',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordTagsAnyGreaterThan(
+      termTagsAnyGreaterThan(
     String value, {
     bool caseSensitive = true,
     bool include = false,
@@ -2710,14 +2710,14 @@ extension DictionaryEntryQueryFilter
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.gt,
       include: include,
-      property: 'wordTags',
+      property: 'termTags',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordTagsAnyLessThan(
+      termTagsAnyLessThan(
     String value, {
     bool caseSensitive = true,
     bool include = false,
@@ -2725,14 +2725,14 @@ extension DictionaryEntryQueryFilter
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.lt,
       include: include,
-      property: 'wordTags',
+      property: 'termTags',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordTagsAnyBetween(
+      termTagsAnyBetween(
     String lower,
     String upper, {
     bool caseSensitive = true,
@@ -2740,7 +2740,7 @@ extension DictionaryEntryQueryFilter
     bool includeUpper = true,
   }) {
     return addFilterConditionInternal(FilterCondition.between(
-      property: 'wordTags',
+      property: 'termTags',
       lower: lower,
       includeLower: includeLower,
       upper: upper,
@@ -2750,46 +2750,46 @@ extension DictionaryEntryQueryFilter
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordTagsAnyStartsWith(
+      termTagsAnyStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.startsWith,
-      property: 'wordTags',
+      property: 'termTags',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordTagsAnyEndsWith(
+      termTagsAnyEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.endsWith,
-      property: 'wordTags',
+      property: 'termTags',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordTagsAnyContains(String value, {bool caseSensitive = true}) {
+      termTagsAnyContains(String value, {bool caseSensitive = true}) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.contains,
-      property: 'wordTags',
+      property: 'termTags',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      wordTagsAnyMatches(String pattern, {bool caseSensitive = true}) {
+      termTagsAnyMatches(String pattern, {bool caseSensitive = true}) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.matches,
-      property: 'wordTags',
+      property: 'termTags',
       value: pattern,
       caseSensitive: caseSensitive,
     ));
@@ -2897,43 +2897,43 @@ extension DictionaryEntryQueryWhereSortBy
     return addSortByInternal('sequence', Sort.desc);
   }
 
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy> sortByWord() {
-    return addSortByInternal('word', Sort.asc);
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy> sortByTerm() {
+    return addSortByInternal('term', Sort.asc);
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      sortByWordDesc() {
-    return addSortByInternal('word', Sort.desc);
+      sortByTermDesc() {
+    return addSortByInternal('term', Sort.desc);
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      sortByWordFirstChar() {
-    return addSortByInternal('wordFirstChar', Sort.asc);
+      sortByTermFirstChar() {
+    return addSortByInternal('termFirstChar', Sort.asc);
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      sortByWordFirstCharDesc() {
-    return addSortByInternal('wordFirstChar', Sort.desc);
+      sortByTermFirstCharDesc() {
+    return addSortByInternal('termFirstChar', Sort.desc);
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      sortByWordLength() {
-    return addSortByInternal('wordLength', Sort.asc);
+      sortByTermLength() {
+    return addSortByInternal('termLength', Sort.asc);
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      sortByWordLengthDesc() {
-    return addSortByInternal('wordLength', Sort.desc);
+      sortByTermLengthDesc() {
+    return addSortByInternal('termLength', Sort.desc);
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      sortByWordSecondChar() {
-    return addSortByInternal('wordSecondChar', Sort.asc);
+      sortByTermSecondChar() {
+    return addSortByInternal('termSecondChar', Sort.asc);
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      sortByWordSecondCharDesc() {
-    return addSortByInternal('wordSecondChar', Sort.desc);
+      sortByTermSecondCharDesc() {
+    return addSortByInternal('termSecondChar', Sort.desc);
   }
 }
 
@@ -3035,43 +3035,43 @@ extension DictionaryEntryQueryWhereSortThenBy
     return addSortByInternal('sequence', Sort.desc);
   }
 
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy> thenByWord() {
-    return addSortByInternal('word', Sort.asc);
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy> thenByTerm() {
+    return addSortByInternal('term', Sort.asc);
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      thenByWordDesc() {
-    return addSortByInternal('word', Sort.desc);
+      thenByTermDesc() {
+    return addSortByInternal('term', Sort.desc);
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      thenByWordFirstChar() {
-    return addSortByInternal('wordFirstChar', Sort.asc);
+      thenByTermFirstChar() {
+    return addSortByInternal('termFirstChar', Sort.asc);
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      thenByWordFirstCharDesc() {
-    return addSortByInternal('wordFirstChar', Sort.desc);
+      thenByTermFirstCharDesc() {
+    return addSortByInternal('termFirstChar', Sort.desc);
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      thenByWordLength() {
-    return addSortByInternal('wordLength', Sort.asc);
+      thenByTermLength() {
+    return addSortByInternal('termLength', Sort.asc);
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      thenByWordLengthDesc() {
-    return addSortByInternal('wordLength', Sort.desc);
+      thenByTermLengthDesc() {
+    return addSortByInternal('termLength', Sort.desc);
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      thenByWordSecondChar() {
-    return addSortByInternal('wordSecondChar', Sort.asc);
+      thenByTermSecondChar() {
+    return addSortByInternal('termSecondChar', Sort.asc);
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      thenByWordSecondCharDesc() {
-    return addSortByInternal('wordSecondChar', Sort.desc);
+      thenByTermSecondCharDesc() {
+    return addSortByInternal('termSecondChar', Sort.desc);
   }
 }
 
@@ -3129,24 +3129,24 @@ extension DictionaryEntryQueryWhereDistinct
     return addDistinctByInternal('sequence');
   }
 
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QDistinct> distinctByWord(
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QDistinct> distinctByTerm(
       {bool caseSensitive = true}) {
-    return addDistinctByInternal('word', caseSensitive: caseSensitive);
+    return addDistinctByInternal('term', caseSensitive: caseSensitive);
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QDistinct>
-      distinctByWordFirstChar({bool caseSensitive = true}) {
-    return addDistinctByInternal('wordFirstChar', caseSensitive: caseSensitive);
+      distinctByTermFirstChar({bool caseSensitive = true}) {
+    return addDistinctByInternal('termFirstChar', caseSensitive: caseSensitive);
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QDistinct>
-      distinctByWordLength() {
-    return addDistinctByInternal('wordLength');
+      distinctByTermLength() {
+    return addDistinctByInternal('termLength');
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QDistinct>
-      distinctByWordSecondChar({bool caseSensitive = true}) {
-    return addDistinctByInternal('wordSecondChar',
+      distinctByTermSecondChar({bool caseSensitive = true}) {
+    return addDistinctByInternal('termSecondChar',
         caseSensitive: caseSensitive);
   }
 }
@@ -3207,27 +3207,27 @@ extension DictionaryEntryQueryProperty
     return addPropertyNameInternal('sequence');
   }
 
-  QueryBuilder<DictionaryEntry, String, QQueryOperations> wordProperty() {
-    return addPropertyNameInternal('word');
+  QueryBuilder<DictionaryEntry, String, QQueryOperations> termProperty() {
+    return addPropertyNameInternal('term');
   }
 
   QueryBuilder<DictionaryEntry, String?, QQueryOperations>
-      wordFirstCharProperty() {
-    return addPropertyNameInternal('wordFirstChar');
+      termFirstCharProperty() {
+    return addPropertyNameInternal('termFirstChar');
   }
 
-  QueryBuilder<DictionaryEntry, int, QQueryOperations> wordLengthProperty() {
-    return addPropertyNameInternal('wordLength');
+  QueryBuilder<DictionaryEntry, int, QQueryOperations> termLengthProperty() {
+    return addPropertyNameInternal('termLength');
   }
 
   QueryBuilder<DictionaryEntry, String?, QQueryOperations>
-      wordSecondCharProperty() {
-    return addPropertyNameInternal('wordSecondChar');
+      termSecondCharProperty() {
+    return addPropertyNameInternal('termSecondChar');
   }
 
   QueryBuilder<DictionaryEntry, List<String>, QQueryOperations>
-      wordTagsProperty() {
-    return addPropertyNameInternal('wordTags');
+      termTagsProperty() {
+    return addPropertyNameInternal('termTags');
   }
 }
 
@@ -3237,7 +3237,7 @@ extension DictionaryEntryQueryProperty
 
 DictionaryEntry _$DictionaryEntryFromJson(Map<String, dynamic> json) =>
     DictionaryEntry(
-      word: json['word'] as String,
+      term: json['term'] as String,
       dictionaryName: json['dictionaryName'] as String,
       meanings:
           (json['meanings'] as List<dynamic>).map((e) => e as String).toList(),
@@ -3248,7 +3248,7 @@ DictionaryEntry _$DictionaryEntryFromJson(Map<String, dynamic> json) =>
               ?.map((e) => e as String)
               .toList() ??
           const [],
-      wordTags: (json['wordTags'] as List<dynamic>?)
+      termTags: (json['termTags'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           const [],
@@ -3259,13 +3259,13 @@ DictionaryEntry _$DictionaryEntryFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$DictionaryEntryToJson(DictionaryEntry instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'word': instance.word,
+      'term': instance.term,
       'dictionaryName': instance.dictionaryName,
       'reading': instance.reading,
       'meanings': instance.meanings,
       'extra': instance.extra,
       'meaningTags': instance.meaningTags,
-      'wordTags': instance.wordTags,
+      'termTags': instance.termTags,
       'popularity': instance.popularity,
       'sequence': instance.sequence,
     };

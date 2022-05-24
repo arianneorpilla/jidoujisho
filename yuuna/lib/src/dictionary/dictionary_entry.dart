@@ -12,16 +12,16 @@ part 'dictionary_entry.g.dart';
 @JsonSerializable()
 @Collection()
 class DictionaryEntry {
-  /// Initialise a dictionary entry with given details of a certain word.
+  /// Initialise a dictionary entry with given details of a certain term.
   DictionaryEntry({
-    required this.word,
+    required this.term,
     required this.dictionaryName,
     required this.meanings,
     this.reading = '',
     this.id,
     this.extra,
     this.meaningTags = const [],
-    this.wordTags = const [],
+    this.termTags = const [],
     this.popularity,
     this.sequence,
   });
@@ -37,20 +37,20 @@ class DictionaryEntry {
   @Id()
   int? id;
 
-  /// The word represented by this dictionary entry.
+  /// The term represented by this dictionary entry.
   @Index(composite: [CompositeIndex('reading'), CompositeIndex('popularity')])
-  final String word;
+  final String term;
 
   /// The dictionary from which this entry was imported from. This is used for
   /// database query purposes.
   @Index()
   final String dictionaryName;
 
-  /// The pronunciation of the word represented by this dictionary entry.
+  /// The pronunciation of the term represented by this dictionary entry.
   @Index()
   final String reading;
 
-  /// A list of definitions for a word. If there is only a single [String] item,
+  /// A list of definitions for a term. If there is only a single [String] item,
   /// this should be a single item list.
   final List<String> meanings;
 
@@ -59,11 +59,11 @@ class DictionaryEntry {
   final String? extra;
 
   /// Tags that are used to indicate a certain trait to the definitions of
-  /// this word.
+  /// this term.
   final List<String> meaningTags;
 
-  /// Tags that are used to indicate a certain trait to this particular word.
-  final List<String> wordTags;
+  /// Tags that are used to indicate a certain trait to this particular term.
+  final List<String> termTags;
 
   /// A value that can be used to sort entries when performing a database
   /// search.
@@ -75,37 +75,37 @@ class DictionaryEntry {
   @Index()
   final int? sequence;
 
-  /// The length of word is used as an index.
+  /// The length of term is used as an index.
   @Index()
-  int get wordLength => word.length;
+  int get termLength => term.length;
 
   /// The length of reading is used as an index.
   @Index()
   int get readingLength => reading.length;
 
-  /// Index for the first character of this word.
+  /// Index for the first character of this term.
   @Index(composite: [
-    CompositeIndex('wordSecondChar'),
-    CompositeIndex('wordLength'),
+    CompositeIndex('termSecondChar'),
+    CompositeIndex('termLength'),
   ])
-  String? get wordFirstChar {
-    if (word.isEmpty) {
+  String? get termFirstChar {
+    if (term.isEmpty) {
       return null;
     } else {
-      return word[0];
+      return term[0];
     }
   }
 
-  /// Index for the second character of this word.
-  String? get wordSecondChar {
-    if (word.length < 2) {
+  /// Index for the second character of this term.
+  String? get termSecondChar {
+    if (term.length < 2) {
       return null;
     } else {
-      return word[1];
+      return term[1];
     }
   }
 
-  /// Index for the first character of this word.
+  /// Index for the first character of this term.
   @Index(composite: [
     CompositeIndex('readingSecondChar'),
     CompositeIndex('readingLength'),
@@ -118,7 +118,7 @@ class DictionaryEntry {
     }
   }
 
-  /// Index for the second character of this word.
+  /// Index for the second character of this term.
   String? get readingSecondChar {
     if (reading.length < 2) {
       return null;

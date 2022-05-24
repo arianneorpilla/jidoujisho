@@ -4,6 +4,7 @@ export 'src/creator/export_details.dart';
 export 'src/creator/anki_mapping.dart';
 export 'src/creator/enhancement.dart';
 export 'src/creator/field.dart';
+export 'src/creator/field_nua.dart';
 export 'src/creator/quick_action.dart';
 export 'src/creator/search_history_item.dart';
 

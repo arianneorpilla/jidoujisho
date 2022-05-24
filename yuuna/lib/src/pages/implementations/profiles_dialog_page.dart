@@ -303,7 +303,6 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
       title: Text(mapping.label),
       content: Text(
         mappingsDeleteConfirmationLabel,
-        textAlign: TextAlign.justify,
       ),
       actions: <Widget>[
         TextButton(
@@ -518,7 +517,6 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
           title: Text(errorStandardProfileName),
           content: Text(
             errorStandardProfileNameContent,
-            textAlign: TextAlign.justify,
           ),
           actions: [
             TextButton(
@@ -550,7 +548,6 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
             title: Text(errorMappingName),
             content: Text(
               errorMappingNameContent,
-              textAlign: TextAlign.justify,
             ),
             actions: [
               TextButton(

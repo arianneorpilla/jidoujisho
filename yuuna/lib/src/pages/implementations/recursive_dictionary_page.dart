@@ -63,7 +63,6 @@ class _RecursiveDictionaryPageState
 
   @override
   void dispose() {
-    appModel.dictionaryNotifier.removeListener(searchAgain);
     super.dispose();
   }
 

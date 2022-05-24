@@ -34,30 +34,30 @@ abstract class QuickAction {
   /// quick menu.
   final IconData icon;
 
-  /// Localisations for this enhancement, where the key is a locale tag and
-  /// the value is the [label] of the enhancement. If the value for the current
+  /// Localisations for this action, where the key is a locale tag and
+  /// the value is the [label] of the action. If the value for the current
   /// locale is non-null, it will be used instead of [label].
   final Map<String, String> labelLocalisation = const {};
 
-  /// Localisations for this enhancement, where the key is a locale tag and
-  /// the value is the [description] of the enhancement. If the value for the
+  /// Localisations for this action, where the key is a locale tag and
+  /// the value is the [description] of the action. If the value for the
   /// current locale is non-null, it will be used instead of [description].
   final Map<String, String> descriptionLocalisation = const {};
 
-  /// Get the best localisation for the label of this enhancement. If there
+  /// Get the best localisation for the label of this action. If there
   /// is no localisation, the fallback is [label].
   String getLocalisedLabel(AppModel appModel) {
     return labelLocalisation[appModel.appLocale.toLanguageTag()] ?? label;
   }
 
-  /// Get the best localisation for the description of this enhancement. If
+  /// Get the best localisation for the description of this action. If
   /// there is no localisation, the fallback is [description].
   String getLocalisedDescription(AppModel appModel) {
     return descriptionLocalisation[appModel.appLocale.toLanguageTag()] ??
         description;
   }
 
-  /// Whether or not [initialise] has been called for this enhancement.
+  /// Whether or not [initialise] has been called for this action.
   bool _initialised = false;
 
   /// This function is run at startup or when changing languages. It is not
@@ -76,12 +76,12 @@ abstract class QuickAction {
   /// initialisation step.
   Future<void> prepareResources() async {}
 
-  /// Get a custom enabled  color that this action should have for a certain
-  /// condition in the application. By default, this is
+  /// Get a custom enabled color that this action should have for a certain
+  /// condition in the application. By default, this is the foreground color.
   Color getIconColor({
     required BuildContext context,
     required AppModel appModel,
-    required String word,
+    required String term,
     required String reading,
     required List<DictionaryEntry> entries,
   }) {
@@ -94,7 +94,7 @@ abstract class QuickAction {
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,
-    required String word,
+    required String term,
     required String reading,
     required List<DictionaryEntry> entries,
   });

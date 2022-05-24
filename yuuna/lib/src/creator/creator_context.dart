@@ -13,7 +13,7 @@ class CreatorContext {
   /// Initialise an immutable context context with the final parameters.
   CreatorContext({
     this.sentence,
-    this.word,
+    this.term,
     this.reading,
     this.meaning,
     this.extra,
@@ -37,7 +37,7 @@ class CreatorContext {
   /// with the new values.
   CreatorContext copyWith({
     String? sentence,
-    String? word,
+    String? term,
     String? reading,
     String? meaning,
     String? extra,
@@ -50,7 +50,7 @@ class CreatorContext {
   }) {
     return CreatorContext(
       sentence: sentence ?? this.sentence,
-      word: word ?? this.word,
+      term: term ?? this.term,
       reading: reading ?? this.reading,
       meaning: meaning ?? this.meaning,
       extra: extra ?? this.extra,
@@ -67,9 +67,9 @@ class CreatorContext {
   /// scene dialogue.
   final String? sentence;
 
-  /// The word pertaining to the reading and meaning, the word
+  /// The word or phrase pertaining to the reading and meaning, the word
   /// to be memorised from the card.
-  final String? word;
+  final String? term;
 
   /// Pronunciation or reading. May be overriden with some characteristics such
   /// as pitch accent diagrams, by particular languages.

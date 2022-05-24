@@ -16,11 +16,11 @@ extension GetDictionaryMetaEntryCollection on Isar {
 const DictionaryMetaEntrySchema = CollectionSchema(
   name: 'DictionaryMetaEntry',
   schema:
-      '{"name":"DictionaryMetaEntry","idName":"id","properties":[{"name":"dictionaryName","type":"String"},{"name":"frequency","type":"Long"},{"name":"pitches","type":"String"},{"name":"word","type":"String"}],"indexes":[{"name":"dictionaryName","unique":false,"properties":[{"name":"dictionaryName","type":"Hash","caseSensitive":true}]},{"name":"frequency","unique":false,"properties":[{"name":"frequency","type":"Value","caseSensitive":false}]},{"name":"word","unique":false,"properties":[{"name":"word","type":"Hash","caseSensitive":true}]}],"links":[]}',
+      '{"name":"DictionaryMetaEntry","idName":"id","properties":[{"name":"dictionaryName","type":"String"},{"name":"frequency","type":"Long"},{"name":"pitches","type":"String"},{"name":"term","type":"String"}],"indexes":[{"name":"dictionaryName","unique":false,"properties":[{"name":"dictionaryName","type":"Hash","caseSensitive":true}]},{"name":"frequency","unique":false,"properties":[{"name":"frequency","type":"Value","caseSensitive":false}]},{"name":"term","unique":false,"properties":[{"name":"term","type":"Hash","caseSensitive":true}]}],"links":[]}',
   idName: 'id',
-  propertyIds: {'dictionaryName': 0, 'frequency': 1, 'pitches': 2, 'word': 3},
+  propertyIds: {'dictionaryName': 0, 'frequency': 1, 'pitches': 2, 'term': 3},
   listProperties: {},
-  indexIds: {'dictionaryName': 0, 'frequency': 1, 'word': 2},
+  indexIds: {'dictionaryName': 0, 'frequency': 1, 'term': 2},
   indexValueTypes: {
     'dictionaryName': [
       IndexValueType.stringHash,
@@ -28,7 +28,7 @@ const DictionaryMetaEntrySchema = CollectionSchema(
     'frequency': [
       IndexValueType.long,
     ],
-    'word': [
+    'term': [
       IndexValueType.stringHash,
     ]
   },
@@ -84,9 +84,9 @@ void _dictionaryMetaEntrySerializeNative(
     _pitches = IsarBinaryWriter.utf8Encoder.convert(value2);
   }
   dynamicSize += (_pitches?.length ?? 0) as int;
-  final value3 = object.word;
-  final _word = IsarBinaryWriter.utf8Encoder.convert(value3);
-  dynamicSize += (_word.length) as int;
+  final value3 = object.term;
+  final _term = IsarBinaryWriter.utf8Encoder.convert(value3);
+  dynamicSize += (_term.length) as int;
   final size = staticSize + dynamicSize;
 
   rawObj.buffer = alloc(size);
@@ -96,7 +96,7 @@ void _dictionaryMetaEntrySerializeNative(
   writer.writeBytes(offsets[0], _dictionaryName);
   writer.writeLong(offsets[1], _frequency);
   writer.writeBytes(offsets[2], _pitches);
-  writer.writeBytes(offsets[3], _word);
+  writer.writeBytes(offsets[3], _term);
 }
 
 DictionaryMetaEntry _dictionaryMetaEntryDeserializeNative(
@@ -110,7 +110,7 @@ DictionaryMetaEntry _dictionaryMetaEntryDeserializeNative(
     id: id,
     pitches: _dictionaryMetaEntryPitchDataConverter
         .fromIsar(reader.readStringOrNull(offsets[2])),
-    word: reader.readString(offsets[3]),
+    term: reader.readString(offsets[3]),
   );
   return object;
 }
@@ -143,7 +143,7 @@ dynamic _dictionaryMetaEntrySerializeWeb(
   IsarNative.jsObjectSet(jsObj, 'id', object.id);
   IsarNative.jsObjectSet(jsObj, 'pitches',
       _dictionaryMetaEntryPitchDataConverter.toIsar(object.pitches));
-  IsarNative.jsObjectSet(jsObj, 'word', object.word);
+  IsarNative.jsObjectSet(jsObj, 'term', object.term);
   return jsObj;
 }
 
@@ -155,7 +155,7 @@ DictionaryMetaEntry _dictionaryMetaEntryDeserializeWeb(
     id: IsarNative.jsObjectGet(jsObj, 'id'),
     pitches: _dictionaryMetaEntryPitchDataConverter
         .fromIsar(IsarNative.jsObjectGet(jsObj, 'pitches')),
-    word: IsarNative.jsObjectGet(jsObj, 'word') ?? '',
+    term: IsarNative.jsObjectGet(jsObj, 'term') ?? '',
   );
   return object;
 }
@@ -171,8 +171,8 @@ P _dictionaryMetaEntryDeserializePropWeb<P>(Object jsObj, String propertyName) {
     case 'pitches':
       return (_dictionaryMetaEntryPitchDataConverter
           .fromIsar(IsarNative.jsObjectGet(jsObj, 'pitches'))) as P;
-    case 'word':
-      return (IsarNative.jsObjectGet(jsObj, 'word') ?? '') as P;
+    case 'term':
+      return (IsarNative.jsObjectGet(jsObj, 'term') ?? '') as P;
     default:
       throw 'Illegal propertyName';
   }
@@ -200,9 +200,9 @@ extension DictionaryMetaEntryQueryWhereSort
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterWhere>
-      anyWord() {
+      anyTerm() {
     return addWhereClauseInternal(
-        const IndexWhereClause.any(indexName: 'word'));
+        const IndexWhereClause.any(indexName: 'term'));
   }
 }
 
@@ -388,33 +388,33 @@ extension DictionaryMetaEntryQueryWhere
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterWhereClause>
-      wordEqualTo(String word) {
+      termEqualTo(String term) {
     return addWhereClauseInternal(IndexWhereClause.equalTo(
-      indexName: 'word',
-      value: [word],
+      indexName: 'term',
+      value: [term],
     ));
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterWhereClause>
-      wordNotEqualTo(String word) {
+      termNotEqualTo(String term) {
     if (whereSortInternal == Sort.asc) {
       return addWhereClauseInternal(IndexWhereClause.lessThan(
-        indexName: 'word',
-        upper: [word],
+        indexName: 'term',
+        upper: [term],
         includeUpper: false,
       )).addWhereClauseInternal(IndexWhereClause.greaterThan(
-        indexName: 'word',
-        lower: [word],
+        indexName: 'term',
+        lower: [term],
         includeLower: false,
       ));
     } else {
       return addWhereClauseInternal(IndexWhereClause.greaterThan(
-        indexName: 'word',
-        lower: [word],
+        indexName: 'term',
+        lower: [term],
         includeLower: false,
       )).addWhereClauseInternal(IndexWhereClause.lessThan(
-        indexName: 'word',
-        upper: [word],
+        indexName: 'term',
+        upper: [term],
         includeUpper: false,
       ));
     }
@@ -767,20 +767,20 @@ extension DictionaryMetaEntryQueryFilter on QueryBuilder<DictionaryMetaEntry,
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterFilterCondition>
-      wordEqualTo(
+      termEqualTo(
     String value, {
     bool caseSensitive = true,
   }) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.eq,
-      property: 'word',
+      property: 'term',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterFilterCondition>
-      wordGreaterThan(
+      termGreaterThan(
     String value, {
     bool caseSensitive = true,
     bool include = false,
@@ -788,14 +788,14 @@ extension DictionaryMetaEntryQueryFilter on QueryBuilder<DictionaryMetaEntry,
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.gt,
       include: include,
-      property: 'word',
+      property: 'term',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterFilterCondition>
-      wordLessThan(
+      termLessThan(
     String value, {
     bool caseSensitive = true,
     bool include = false,
@@ -803,14 +803,14 @@ extension DictionaryMetaEntryQueryFilter on QueryBuilder<DictionaryMetaEntry,
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.lt,
       include: include,
-      property: 'word',
+      property: 'term',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterFilterCondition>
-      wordBetween(
+      termBetween(
     String lower,
     String upper, {
     bool caseSensitive = true,
@@ -818,7 +818,7 @@ extension DictionaryMetaEntryQueryFilter on QueryBuilder<DictionaryMetaEntry,
     bool includeUpper = true,
   }) {
     return addFilterConditionInternal(FilterCondition.between(
-      property: 'word',
+      property: 'term',
       lower: lower,
       includeLower: includeLower,
       upper: upper,
@@ -828,46 +828,46 @@ extension DictionaryMetaEntryQueryFilter on QueryBuilder<DictionaryMetaEntry,
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterFilterCondition>
-      wordStartsWith(
+      termStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.startsWith,
-      property: 'word',
+      property: 'term',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterFilterCondition>
-      wordEndsWith(
+      termEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.endsWith,
-      property: 'word',
+      property: 'term',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterFilterCondition>
-      wordContains(String value, {bool caseSensitive = true}) {
+      termContains(String value, {bool caseSensitive = true}) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.contains,
-      property: 'word',
+      property: 'term',
       value: value,
       caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterFilterCondition>
-      wordMatches(String pattern, {bool caseSensitive = true}) {
+      termMatches(String pattern, {bool caseSensitive = true}) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.matches,
-      property: 'word',
+      property: 'term',
       value: pattern,
       caseSensitive: caseSensitive,
     ));
@@ -920,13 +920,13 @@ extension DictionaryMetaEntryQueryWhereSortBy
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterSortBy>
-      sortByWord() {
-    return addSortByInternal('word', Sort.asc);
+      sortByTerm() {
+    return addSortByInternal('term', Sort.asc);
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterSortBy>
-      sortByWordDesc() {
-    return addSortByInternal('word', Sort.desc);
+      sortByTermDesc() {
+    return addSortByInternal('term', Sort.desc);
   }
 }
 
@@ -973,13 +973,13 @@ extension DictionaryMetaEntryQueryWhereSortThenBy
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterSortBy>
-      thenByWord() {
-    return addSortByInternal('word', Sort.asc);
+      thenByTerm() {
+    return addSortByInternal('term', Sort.asc);
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterSortBy>
-      thenByWordDesc() {
-    return addSortByInternal('word', Sort.desc);
+      thenByTermDesc() {
+    return addSortByInternal('term', Sort.desc);
   }
 }
 
@@ -1007,8 +1007,8 @@ extension DictionaryMetaEntryQueryWhereDistinct
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QDistinct>
-      distinctByWord({bool caseSensitive = true}) {
-    return addDistinctByInternal('word', caseSensitive: caseSensitive);
+      distinctByTerm({bool caseSensitive = true}) {
+    return addDistinctByInternal('term', caseSensitive: caseSensitive);
   }
 }
 
@@ -1033,8 +1033,8 @@ extension DictionaryMetaEntryQueryProperty
     return addPropertyNameInternal('pitches');
   }
 
-  QueryBuilder<DictionaryMetaEntry, String, QQueryOperations> wordProperty() {
-    return addPropertyNameInternal('word');
+  QueryBuilder<DictionaryMetaEntry, String, QQueryOperations> termProperty() {
+    return addPropertyNameInternal('term');
   }
 }
 
@@ -1045,7 +1045,7 @@ extension DictionaryMetaEntryQueryProperty
 DictionaryMetaEntry _$DictionaryMetaEntryFromJson(Map<String, dynamic> json) =>
     DictionaryMetaEntry(
       dictionaryName: json['dictionaryName'] as String,
-      word: json['word'] as String,
+      term: json['term'] as String,
       pitches: (json['pitches'] as List<dynamic>?)
           ?.map((e) => PitchData.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -1057,7 +1057,7 @@ Map<String, dynamic> _$DictionaryMetaEntryToJson(
         DictionaryMetaEntry instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'word': instance.word,
+      'term': instance.term,
       'dictionaryName': instance.dictionaryName,
       'frequency': instance.frequency,
       'pitches': instance.pitches,

@@ -6,16 +6,16 @@ import 'package:yuuna/models.dart';
 /// functionality and family of user extensions. For example, a field
 /// could handle exclusively images, or dictionary definitions.
 enum Field {
-  /// Written context depicting usage of a word.
+  /// Written context depicting usage of a term.
   sentence,
 
   /// The subject term of a card.
-  word,
+  term,
 
-  /// The pronunciation of the word.
+  /// The pronunciation of the term.
   reading,
 
-  /// The definition of the word.
+  /// The definition of the term.
   meaning,
 
   /// Extra details for future-proofing.
@@ -27,7 +27,7 @@ enum Field {
   /// Auditory supplements.
   audio,
 
-  /// Where this word was sourced from, i.e. a video or an image.
+  /// Where this term was sourced from, i.e. a video or an image.
   context,
 }
 
@@ -48,7 +48,7 @@ extension FieldExtension on Field {
     switch (this) {
       case Field.sentence:
         return Icons.format_align_center;
-      case Field.word:
+      case Field.term:
         return Icons.speaker_notes_outlined;
       case Field.reading:
         return Icons.surround_sound_outlined;

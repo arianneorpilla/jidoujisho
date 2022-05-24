@@ -86,7 +86,7 @@ public class MainActivity extends FlutterActivity {
             modelId = api.addNewCustomModel("jidoujisho Yuuna",
                 new String[] {
                     "Sentence",
-                    "Word",
+                    "Term",
                     "Reading",
                     "Meaning",
                     "Extra",
@@ -97,8 +97,8 @@ public class MainActivity extends FlutterActivity {
                 new String[] {
                     "jidoujisho Yuuna"
                 },
-                new String[] {"<p id=\"sentence\">{{Sentence}}</p><div id=\"word\">{{Word}}</div>"},
-                    new String[] {"<p id=\"sentence\">{{Sentence}}</p><div id=\"word\">{{Word}}</div><br>{{Audio}}<div class=\"image\">{{Image}}</div><hr id=reading><p id=\"reading\">{{Reading}}</p><h2 id=\"word\">{{Word}}</h2><br><p><small id=\"meaning\">{{Meaning}}</small></p><br>{{#Context}}<a style=\"text-decoration:none;color:red;\" href=\"{{Context}}\">↩</a>{{/Context}}"},
+                new String[] {"<p id=\"sentence\">{{Sentence}}</p><div id=\"term\">{{Term}}</div>"},
+                    new String[] {"<p id=\"sentence\">{{Sentence}}</p><div id=\"term\">{{Term}}</div><br>{{Audio}}<div class=\"image\">{{Image}}</div><hr id=reading><p id=\"reading\">{{Reading}}</p><h2 id=\"term\">{{Term}}</h2><br><p><small id=\"meaning\">{{Meaning}}</small></p><br>{{#Context}}<a style=\"text-decoration:none;color:red;\" href=\"{{Context}}\">↩</a>{{/Context}}"},
                             "p {\n" +
                             "    margin: 0px\n" +
                             "}\n" +

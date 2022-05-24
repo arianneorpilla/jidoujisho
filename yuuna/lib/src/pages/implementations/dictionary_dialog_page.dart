@@ -306,7 +306,6 @@ class _DictionaryDialogPageState extends BasePageState {
       title: Text(dictionary.dictionaryName),
       content: Text(
         dictionaryDeleteConfirmationLabel,
-        textAlign: TextAlign.justify,
       ),
       actions: <Widget>[
         TextButton(

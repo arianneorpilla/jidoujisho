@@ -35,7 +35,7 @@ class MassifExampleSentencesEnhancement extends Enhancement {
           label: 'Massif Example Sentences',
           description: 'Get curated example sentences via Massif.',
           icon: Icons.article,
-          field: Field.word,
+          field: Field.term,
         );
 
   /// Used to identify this enhancement and to allow a constant value for the

@@ -48,36 +48,36 @@ class JapaneseLanguage extends Language {
   }
 
   @override
-  FutureOr<String> getRootForm(String word) {
+  FutureOr<String> getRootForm(String term) {
     try {
-      if (kanaKit.isRomaji(word)) {
-        return kanaKit.toHiragana(word);
+      if (kanaKit.isRomaji(term)) {
+        return kanaKit.toHiragana(term);
       }
 
-      List<Word> wordTokens = parseVe(mecab, word);
+      List<Word> termTokens = parseVe(mecab, term);
 
-      if (word.startsWith('気に') && wordTokens.length >= 2) {
-        return '気に${wordTokens[1].lemma}';
+      if (term.startsWith('気に') && termTokens.length >= 2) {
+        return '気に${termTokens[1].lemma}';
       }
 
-      if (wordTokens.length >= 3 &&
-          (wordTokens[0].word == wordTokens[0].lemma ||
-              kanaKit.isKana(wordTokens[0].word!)) &&
-          wordTokens[1].partOfSpeech == Pos.Postposition &&
-          wordTokens[2].partOfSpeech == Pos.Verb) {
-        return '${wordTokens[0]}${wordTokens[1].word}${wordTokens[2].lemma}';
+      if (termTokens.length >= 3 &&
+          (termTokens[0].word == termTokens[0].lemma ||
+              kanaKit.isKana(termTokens[0].word!)) &&
+          termTokens[1].partOfSpeech == Pos.Postposition &&
+          termTokens[2].partOfSpeech == Pos.Verb) {
+        return '${termTokens[0]}${termTokens[1].word}${termTokens[2].lemma}';
       }
 
-      if (wordTokens.first.word!.length == 1) {
-        return word;
+      if (termTokens.first.word!.length == 1) {
+        return term;
       }
 
-      if (wordTokens.first.lemma == '*') {
-        return word[0];
+      if (termTokens.first.lemma == '*') {
+        return term[0];
       }
-      return wordTokens.first.lemma ?? '';
+      return termTokens.first.lemma ?? '';
     } catch (e) {
-      return word[0];
+      return term[0];
     }
   }
 
@@ -91,7 +91,7 @@ class JapaneseLanguage extends Language {
 
     List<Word> tokens = parseVe(mecab, delimiterSanitisedText);
 
-    List<String> words = [];
+    List<String> terms = [];
 
     for (Word token in tokens) {
       final buffer = StringBuffer();
@@ -99,38 +99,38 @@ class JapaneseLanguage extends Language {
         buffer.write(token.surface);
       }
 
-      String word = buffer.toString();
-      word = word.replaceAll('␜', '\n').replaceAll('␝', ' ');
-      words.add(word);
+      String term = buffer.toString();
+      term = term.replaceAll('␜', '\n').replaceAll('␝', ' ');
+      terms.add(term);
     }
 
-    return words;
+    return terms;
   }
 
   /// Some languages may want to display custom widgets rather than the built
-  /// in word and reading text that is there by default. For example, Japanese
+  /// in term and reading text that is there by default. For example, Japanese
   /// may want to display a furigana widget instead.
   @override
-  Widget getWordReadingOverrideWidget({
+  Widget getTermReadingOverrideWidget({
     required BuildContext context,
     required AppModel appModel,
-    required String word,
+    required String term,
     required String reading,
     required List<DictionaryEntry> meanings,
   }) {
     if (reading.isEmpty) {
-      return super.getWordReadingOverrideWidget(
+      return super.getTermReadingOverrideWidget(
         context: context,
         appModel: appModel,
-        word: word,
+        term: term,
         reading: reading,
         meanings: meanings,
       );
     }
 
-    List<RubyTextData>? segments = fetchFurigana(word: word, reading: reading);
+    List<RubyTextData>? segments = fetchFurigana(term: term, reading: reading);
     return RubyText(
-      segments ?? [RubyTextData(word, ruby: reading)],
+      segments ?? [RubyTextData(term, ruby: reading)],
       style: Theme.of(context)
           .textTheme
           .titleLarge!
@@ -139,18 +139,18 @@ class JapaneseLanguage extends Language {
     );
   }
 
-  /// Fetch furigana for a certain word and reading. If already obtained,
+  /// Fetch furigana for a certain term and reading. If already obtained,
   /// use the cache.
   List<RubyTextData>? fetchFurigana({
-    required String word,
+    required String term,
     required String reading,
   }) {
-    DictionaryPair pair = DictionaryPair(word: word, reading: reading);
+    DictionaryPair pair = DictionaryPair(term: term, reading: reading);
     if (segmentsCache.containsKey(pair)) {
       return segmentsCache[pair];
     }
 
-    return LanguageUtils.distributeFurigana(term: word, reading: reading);
+    return LanguageUtils.distributeFurigana(term: term, reading: reading);
   }
 
   @override
@@ -285,17 +285,17 @@ Future<List<List<DictionaryEntry>>> prepareSearchResultsJapaneseLanguage(
 
   Map<int?, DictionaryEntry> entries = {};
 
-  List<DictionaryEntry> wordExactMatches = [];
-  List<DictionaryEntry> wordStartsWithMatches = [];
+  List<DictionaryEntry> termExactMatches = [];
+  List<DictionaryEntry> termStartsWithMatches = [];
   List<DictionaryEntry> readingExactMatches = [];
   List<DictionaryEntry> readingStartsWithMatches = [];
 
-  List<DictionaryEntry> fallbackWordExactMatches = [];
-  List<DictionaryEntry> fallbackWordStartsWithMatches = [];
+  List<DictionaryEntry> fallbackTermExactMatches = [];
+  List<DictionaryEntry> fallbackTermStartsWithMatches = [];
   List<DictionaryEntry> fallbackReadingExactMatches = [];
   List<DictionaryEntry> fallbackReadingStartsWithMatches = [];
 
-  /// Index for the first character of this word.
+  /// Index for the first character of this term.
   String? searchTermFirstChar;
   String? searchTermSecondChar;
   String? fallbackFirstChar;
@@ -322,27 +322,27 @@ Future<List<List<DictionaryEntry>>> prepareSearchResultsJapaneseLanguage(
     fallbackSecondChar = fallbackTerm[1];
   }
 
-  wordExactMatches = database.dictionaryEntrys
+  termExactMatches = database.dictionaryEntrys
       .filter()
       .repeat<String, QAfterFilterCondition>(
-          searchTermPrefixes, (q, prefix) => q.wordEqualTo(prefix))
-      .sortByWordLengthDesc()
+          searchTermPrefixes, (q, prefix) => q.termEqualTo(prefix))
+      .sortByTermLengthDesc()
       .thenByPopularityDesc()
       .limit(limit)
       .findAllSync();
 
-  if (wordExactMatches.isNotEmpty &&
-      wordExactMatches.first.wordLength == searchTerm.length) {
-    wordStartsWithMatches = database.dictionaryEntrys
+  if (termExactMatches.isNotEmpty &&
+      termExactMatches.first.termLength == searchTerm.length) {
+    termStartsWithMatches = database.dictionaryEntrys
         .where()
-        .wordFirstCharWordSecondCharEqualToWordLengthGreaterThan(
+        .termFirstCharTermSecondCharEqualToTermLengthGreaterThan(
           searchTermFirstChar,
           searchTermSecondChar,
           searchTerm.length - 1,
         )
         .filter()
-        .wordStartsWith(searchTerm)
-        .sortByWordLengthDesc()
+        .termStartsWith(searchTerm)
+        .sortByTermLengthDesc()
         .thenByPopularityDesc()
         .limit(limit)
         .findAllSync();
@@ -359,7 +359,7 @@ Future<List<List<DictionaryEntry>>> prepareSearchResultsJapaneseLanguage(
         .findAllSync();
 
     if (readingExactMatches.isNotEmpty &&
-        readingExactMatches.first.wordLength == searchTerm.length) {
+        readingExactMatches.first.termLength == searchTerm.length) {
       readingStartsWithMatches = database.dictionaryEntrys
           .where()
           .readingFirstCharReadingSecondCharEqualToReadingLengthGreaterThan(
@@ -376,37 +376,37 @@ Future<List<List<DictionaryEntry>>> prepareSearchResultsJapaneseLanguage(
     }
   }
 
-  bool fallbackTermLessDesperateThanLongestExactWordPrefix =
-      wordExactMatches.isEmpty ||
-          (wordExactMatches.isNotEmpty &&
-              wordExactMatches.first.wordLength <= fallbackTerm.length);
+  bool fallbackTermLessDesperateThanLongestExactTermPrefix =
+      termExactMatches.isEmpty ||
+          (termExactMatches.isNotEmpty &&
+              termExactMatches.first.termLength <= fallbackTerm.length);
   bool fallbackTermLessDesperateThanLongestExactReadingPrefix =
       readingExactMatches.isEmpty ||
           (fallbackStartsWithKana &&
               readingExactMatches.isNotEmpty &&
-              readingExactMatches.first.wordLength <= fallbackTerm.length);
+              readingExactMatches.first.termLength <= fallbackTerm.length);
 
-  if (fallbackTermLessDesperateThanLongestExactWordPrefix) {
-    fallbackWordExactMatches = database.dictionaryEntrys
+  if (fallbackTermLessDesperateThanLongestExactTermPrefix) {
+    fallbackTermExactMatches = database.dictionaryEntrys
         .filter()
-        .wordEqualTo(fallbackTerm)
-        .sortByWordLengthDesc()
+        .termEqualTo(fallbackTerm)
+        .sortByTermLengthDesc()
         .thenByPopularityDesc()
         .limit(limit)
         .findAllSync();
 
-    if (fallbackWordExactMatches.isNotEmpty &&
-        fallbackWordExactMatches.first.wordLength == fallbackTerm.length) {
-      fallbackWordStartsWithMatches = database.dictionaryEntrys
+    if (fallbackTermExactMatches.isNotEmpty &&
+        fallbackTermExactMatches.first.termLength == fallbackTerm.length) {
+      fallbackTermStartsWithMatches = database.dictionaryEntrys
           .where()
-          .wordFirstCharWordSecondCharEqualToWordLengthGreaterThan(
+          .termFirstCharTermSecondCharEqualToTermLengthGreaterThan(
             fallbackFirstChar,
             fallbackSecondChar,
             fallbackTerm.length - 1,
           )
           .filter()
-          .wordStartsWith(fallbackTerm)
-          .sortByWordLength()
+          .termStartsWith(fallbackTerm)
+          .sortByTermLength()
           .thenByPopularityDesc()
           .limit(limit)
           .findAllSync();
@@ -440,11 +440,11 @@ Future<List<List<DictionaryEntry>>> prepareSearchResultsJapaneseLanguage(
     }
   }
 
-  if (wordExactMatches.isNotEmpty &&
-      wordExactMatches.first.word == searchTerm) {
-    entries.addEntries(wordExactMatches
+  if (termExactMatches.isNotEmpty &&
+      termExactMatches.first.term == searchTerm) {
+    entries.addEntries(termExactMatches
         .map((e) => MapEntry(e.id, e))
-        .where((e) => e.value.word == searchTerm));
+        .where((e) => e.value.term == searchTerm));
   }
 
   if (readingExactMatches.isNotEmpty &&
@@ -454,13 +454,13 @@ Future<List<List<DictionaryEntry>>> prepareSearchResultsJapaneseLanguage(
         .where((e) => e.value.reading == searchTerm));
   }
 
-  if (fallbackWordExactMatches.isNotEmpty &&
-      fallbackWordExactMatches.first.word == fallbackTerm) {
-    entries.addEntries(fallbackWordExactMatches
+  if (fallbackTermExactMatches.isNotEmpty &&
+      fallbackTermExactMatches.first.term == fallbackTerm) {
+    entries.addEntries(fallbackTermExactMatches
         .map((e) => MapEntry(e.id, e))
-        .where((e) => e.value.word == fallbackTerm));
+        .where((e) => e.value.term == fallbackTerm));
     entries.addEntries(
-        fallbackWordStartsWithMatches.map((e) => MapEntry(e.id, e)));
+        fallbackTermStartsWithMatches.map((e) => MapEntry(e.id, e)));
   }
 
   if (searchTermStartsWithKana) {
@@ -472,8 +472,8 @@ Future<List<List<DictionaryEntry>>> prepareSearchResultsJapaneseLanguage(
     }
     if (readingExactMatches.isNotEmpty &&
         (readingExactMatches.first.reading == searchTerm ||
-            (wordExactMatches.isNotEmpty &&
-                wordExactMatches.first.word.length <
+            (termExactMatches.isNotEmpty &&
+                termExactMatches.first.term.length <
                     readingExactMatches.first.reading.length))) {
       entries.addEntries(readingExactMatches.map((e) => MapEntry(e.id, e)));
       entries
@@ -481,28 +481,28 @@ Future<List<List<DictionaryEntry>>> prepareSearchResultsJapaneseLanguage(
     }
   }
   if (searchTermStartsWithKana &&
-      wordExactMatches.isNotEmpty &&
-      wordExactMatches.first.word != searchTerm) {
-    if (fallbackTermLessDesperateThanLongestExactWordPrefix) {
+      termExactMatches.isNotEmpty &&
+      termExactMatches.first.term != searchTerm) {
+    if (fallbackTermLessDesperateThanLongestExactTermPrefix) {
       entries
-          .addEntries(fallbackWordExactMatches.map((e) => MapEntry(e.id, e)));
+          .addEntries(fallbackTermExactMatches.map((e) => MapEntry(e.id, e)));
       entries.addEntries(
-          fallbackWordStartsWithMatches.map((e) => MapEntry(e.id, e)));
+          fallbackTermStartsWithMatches.map((e) => MapEntry(e.id, e)));
     }
   }
 
-  if (fallbackTermLessDesperateThanLongestExactWordPrefix) {
-    entries.addEntries(fallbackWordExactMatches.map((e) => MapEntry(e.id, e)));
+  if (fallbackTermLessDesperateThanLongestExactTermPrefix) {
+    entries.addEntries(fallbackTermExactMatches.map((e) => MapEntry(e.id, e)));
     entries.addEntries(
-        fallbackWordStartsWithMatches.map((e) => MapEntry(e.id, e)));
-    entries.addEntries(wordExactMatches.map((e) => MapEntry(e.id, e)));
-    entries.addEntries(wordStartsWithMatches.map((e) => MapEntry(e.id, e)));
+        fallbackTermStartsWithMatches.map((e) => MapEntry(e.id, e)));
+    entries.addEntries(termExactMatches.map((e) => MapEntry(e.id, e)));
+    entries.addEntries(termStartsWithMatches.map((e) => MapEntry(e.id, e)));
   } else {
-    entries.addEntries(wordExactMatches.map((e) => MapEntry(e.id, e)));
-    entries.addEntries(wordStartsWithMatches.map((e) => MapEntry(e.id, e)));
-    entries.addEntries(fallbackWordExactMatches.map((e) => MapEntry(e.id, e)));
+    entries.addEntries(termExactMatches.map((e) => MapEntry(e.id, e)));
+    entries.addEntries(termStartsWithMatches.map((e) => MapEntry(e.id, e)));
+    entries.addEntries(fallbackTermExactMatches.map((e) => MapEntry(e.id, e)));
     entries.addEntries(
-        fallbackWordStartsWithMatches.map((e) => MapEntry(e.id, e)));
+        fallbackTermStartsWithMatches.map((e) => MapEntry(e.id, e)));
   }
 
   if (fallbackTermLessDesperateThanLongestExactReadingPrefix) {
@@ -524,15 +524,15 @@ Future<List<List<DictionaryEntry>>> prepareSearchResultsJapaneseLanguage(
   Map<DictionaryPair, List<DictionaryEntry>> entriesByPair =
       groupBy<DictionaryEntry, DictionaryPair>(
     entries.values,
-    (entry) => DictionaryPair(word: entry.word, reading: entry.reading),
+    (entry) => DictionaryPair(term: entry.term, reading: entry.reading),
   );
 
   List<List<DictionaryEntry>> mapping = entriesByPair.values
       .map((entries) => entries.map((entry) => entry).toList())
       .toList();
 
-  if (mapping.length >= params.maximumDictionaryWordsInResult) {
-    mapping = mapping.sublist(0, params.maximumDictionaryWordsInResult);
+  if (mapping.length >= params.maximumDictionaryTermsInResult) {
+    mapping = mapping.sublist(0, params.maximumDictionaryTermsInResult);
   }
 
   // For debugging search results.
@@ -540,23 +540,23 @@ Future<List<List<DictionaryEntry>>> prepareSearchResultsJapaneseLanguage(
   // debugPrint('SEARCH TERM: $searchTerm');
   // debugPrint('FALLBACK TERM: $fallbackTerm');
   // debugPrint(
-  //     'WORD EXACT MATCH: ${wordExactMatches.map((e) => e.word).toList()}');
+  //     'TERM EXACT MATCH: ${termExactMatches.map((e) => e.term).toList()}');
   // debugPrint(
-  //     'WORD STARTS WITH MATCH:  ${wordStartsWithMatches.map((e) => e.word).toList()}');
+  //     'TERM STARTS WITH MATCH:  ${termStartsWithMatches.map((e) => e.term).toList()}');
   // debugPrint(
-  //     'READING EXACT MATCH: ${readingExactMatches.map((e) => e.word).toList()}');
+  //     'READING EXACT MATCH: ${readingExactMatches.map((e) => e.term).toList()}');
   // debugPrint(
-  //     'READING STARTS WITH MATCH: ${readingStartsWithMatches.map((e) => e.word).toList()}');
+  //     'READING STARTS WITH MATCH: ${readingStartsWithMatches.map((e) => e.term).toList()}');
   // debugPrint(
-  //     'FALLBACK WORD EXACT MATCH: ${fallbackWordExactMatches.map((e) => e.word).toList()}');
+  //     'FALLBACK TERM EXACT MATCH: ${fallbackTermExactMatches.map((e) => e.term).toList()}');
   // debugPrint(
-  //     'FALLBACK WORD STARTS WITH MATCH: ${fallbackWordStartsWithMatches.map((e) => e.word).toList()}');
+  //     'FALLBACK TERM STARTS WITH MATCH: ${fallbackTermStartsWithMatches.map((e) => e.term).toList()}');
   // debugPrint(
-  //     'FALLBACK READING EXACT MATCH: ${fallbackReadingExactMatches.map((e) => e.word).toList()}');
+  //     'FALLBACK READING EXACT MATCH: ${fallbackReadingExactMatches.map((e) => e.term).toList()}');
   // debugPrint(
-  //     'FALLBACK READING STARTS WITH MATCH: ${fallbackReadingStartsWithMatches.map((e) => e.word).toList()}');
+  //     'FALLBACK READING STARTS WITH MATCH: ${fallbackReadingStartsWithMatches.map((e) => e.term).toList()}');
   // debugPrint(
-  //     'FALLBACK TERM LESS DESPERATE THAN LONGEST EXACT WORD PREFIX: $fallbackTermLessDesperateThanLongestExactWordPrefix');
+  //     'FALLBACK TERM LESS DESPERATE THAN LONGEST EXACT TERM PREFIX: $fallbackTermLessDesperateThanLongestExactTermPrefix');
   // debugPrint(
   //     'FALLBACK TERM LESS DESPERATE THAN LONGEST EXACT READING PREFIX: $fallbackTermLessDesperateThanLongestExactReadingPrefix');
   // debugPrint('-' * 50);

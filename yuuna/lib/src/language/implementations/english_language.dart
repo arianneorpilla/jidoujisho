@@ -26,10 +26,10 @@ class EnglishLanguage extends Language {
   Future<void> prepareResources() async {}
 
   @override
-  FutureOr<String> getRootForm(String word) {
+  FutureOr<String> getRootForm(String term) {
     /// Implement an actual lemmatiser here... Could use NLTK, but it should
     /// really be light to use...
-    return word;
+    return term;
   }
 
   @override

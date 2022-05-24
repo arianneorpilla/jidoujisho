@@ -16,7 +16,7 @@ class DictionaryMetaEntry {
   /// Initialise a dictionary entry with given details of a certain word.
   DictionaryMetaEntry({
     required this.dictionaryName,
-    required this.word,
+    required this.term,
     this.pitches,
     this.frequency,
     this.id,
@@ -26,9 +26,9 @@ class DictionaryMetaEntry {
   @Id()
   int? id;
 
-  /// The word represented by this dictionary entry.
+  /// The word or phrase represented by this dictionary entry.
   @Index()
-  final String word;
+  final String term;
 
   /// The dictionary from which this entry was imported from. This is used for
   /// database query purposes.

@@ -1391,7 +1391,7 @@ Map<String, dynamic> _$AnkiMappingToJson(AnkiMapping instance) =>
 
 const _$FieldEnumMap = {
   Field.sentence: 'sentence',
-  Field.word: 'word',
+  Field.term: 'term',
   Field.reading: 'reading',
   Field.meaning: 'meaning',
   Field.extra: 'extra',

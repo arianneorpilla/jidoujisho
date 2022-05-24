@@ -3,7 +3,7 @@ export 'src/pages/implementations/creator_quick_actions_page.dart';
 export 'src/pages/implementations/enhancements_picker_dialog_page.dart';
 export 'src/pages/implementations/example_sentences_dialog_page.dart';
 export 'src/pages/implementations/quick_actions_picker_dialog_page.dart';
-export 'src/pages/implementations/dictionary_word_page.dart';
+export 'src/pages/implementations/dictionary_term_page.dart';
 export 'src/pages/implementations/dictionary_entry_page.dart';
 export 'src/pages/implementations/dictionary_result_page.dart';
 export 'src/pages/implementations/dictionary_history_page.dart';
