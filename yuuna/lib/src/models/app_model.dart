@@ -147,11 +147,11 @@ class AppModel with ChangeNotifier {
 
   /// Maximum number of headwords in a returned dictionary result for
   /// performance purposes.
-  final int maximumDictionaryWordsInResult = 10;
+  final int maximumDictionaryWordsInResult = 20;
 
   /// Maximum number of dictionary entries that can be returned from a database
   /// dictionary search.
-  final int maximumDictionaryEntrySearchMatch = 5;
+  final int maximumDictionaryEntrySearchMatch = 50;
 
   /// Used as the history key used for the Stash.
   final String stashKey = 'stash';
@@ -437,7 +437,7 @@ class AppModel with ChangeNotifier {
     _isarDirectory = Directory(path.join(appDirectory.path, 'isar'));
     _dictionaryImportWorkingDirectory = Directory(
         path.join(appDirectory.path, 'dictionaryImportWorkingDirectory'));
-    _exportDirectory = await prepareJidoujishoDirectory();
+    //  _exportDirectory = await prepareJidoujishoDirectory();
 
     hiveDirectory.createSync();
     isarDirectory.createSync();
@@ -1891,7 +1891,7 @@ class AppModel with ChangeNotifier {
   /// Return a list of [DictionaryMetaEntry] for a certain word.
   List<DictionaryMetaEntry> getMetaEntriesFromWord(String word) {
     List<DictionaryMetaEntry> metaEntries = _database.dictionaryMetaEntrys
-        .filter()
+        .where()
         .wordEqualTo(word)
         .build()
         .findAllSync();

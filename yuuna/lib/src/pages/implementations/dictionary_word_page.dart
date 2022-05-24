@@ -70,8 +70,6 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
   String get word => widget.entries.first.word;
   String get reading => widget.entries.first.reading;
 
-  List<Widget>? tags;
-
   @override
   Widget build(BuildContext context) {
     List<Widget> children = [
@@ -219,41 +217,39 @@ class _DictionaryWordPageState extends BasePageState<DictionaryWordPage> {
   }
 
   Widget buildTags() {
-    if (tags == null) {
-      tags = [];
+    List<Widget> tags = [];
 
-      Set<DictionaryPair> pairs = {};
+    Set<DictionaryPair> pairs = {};
 
-      for (DictionaryEntry entry in widget.entries) {
-        for (String tag in entry.wordTags) {
-          pairs.add(
-            DictionaryPair(
-              word: entry.dictionaryName,
-              reading: tag,
-            ),
-          );
-        }
+    for (DictionaryEntry entry in widget.entries) {
+      for (String tag in entry.wordTags) {
+        pairs.add(
+          DictionaryPair(
+            word: entry.dictionaryName,
+            reading: tag,
+          ),
+        );
       }
-
-      tags!.addAll(pairs.map((pair) {
-        if (pair.reading.isNotEmpty) {
-          DictionaryTag tag = appModel.getDictionaryTag(
-            dictionaryName: pair.word,
-            tagName: pair.reading,
-          );
-
-          return JidoujishoTag(
-            text: tag.name,
-            message: tag.notes,
-            backgroundColor: tag.color,
-          );
-        } else {
-          return const SizedBox.shrink();
-        }
-      }).toList());
     }
 
-    return Wrap(children: tags!);
+    tags.addAll(pairs.map((pair) {
+      if (pair.reading.isNotEmpty) {
+        DictionaryTag tag = appModel.getDictionaryTag(
+          dictionaryName: pair.word,
+          tagName: pair.reading,
+        );
+
+        return JidoujishoTag(
+          text: tag.name,
+          message: tag.notes,
+          backgroundColor: tag.color,
+        );
+      } else {
+        return const SizedBox.shrink();
+      }
+    }).toList());
+
+    return Wrap(children: tags);
   }
 
   Widget buildMetaWidgets() {

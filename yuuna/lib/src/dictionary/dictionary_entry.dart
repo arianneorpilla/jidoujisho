@@ -76,12 +76,56 @@ class DictionaryEntry {
   final int? sequence;
 
   /// The length of word is used as an index.
-  @Index(composite: [CompositeIndex('popularity')])
+  @Index()
   int get wordLength => word.length;
 
   /// The length of reading is used as an index.
-  @Index(composite: [CompositeIndex('popularity')])
+  @Index()
   int get readingLength => reading.length;
+
+  /// Index for the first character of this word.
+  @Index(composite: [
+    CompositeIndex('wordSecondChar'),
+    CompositeIndex('wordLength'),
+  ])
+  String? get wordFirstChar {
+    if (word.isEmpty) {
+      return null;
+    } else {
+      return word[0];
+    }
+  }
+
+  /// Index for the second character of this word.
+  String? get wordSecondChar {
+    if (word.length < 2) {
+      return null;
+    } else {
+      return word[1];
+    }
+  }
+
+  /// Index for the first character of this word.
+  @Index(composite: [
+    CompositeIndex('readingSecondChar'),
+    CompositeIndex('readingLength'),
+  ])
+  String? get readingFirstChar {
+    if (reading.isEmpty) {
+      return null;
+    } else {
+      return reading[0];
+    }
+  }
+
+  /// Index for the second character of this word.
+  String? get readingSecondChar {
+    if (reading.length < 2) {
+      return null;
+    } else {
+      return reading[1];
+    }
+  }
 
   @override
   operator ==(Object other) =>

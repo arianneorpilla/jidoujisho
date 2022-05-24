@@ -122,7 +122,7 @@ class JidoujishoLocalisations {
     'error_standard_profile_name': 'Invalid profile name',
     'error_standard_profile_name_content':
         'Cannot rename the standard profile.',
-    'error_ankidroid_api': '',
+    'error_ankidroid_api': 'AnkiDroid error',
     'error_ankidroid_api_content':
         'There was an issue communicating with AnkiDroid.\n\nEnsure that the'
             ' AnkiDroid background service is active and all relevant app'

@@ -55,7 +55,9 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       appModel.dictionaryWatcher.listen((_) {
-        setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
       });
     });
   }
