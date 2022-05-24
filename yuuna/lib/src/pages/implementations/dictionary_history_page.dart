@@ -54,12 +54,17 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      appModel.dictionaryWatcher.listen((_) {
-        if (mounted) {
-          setState(() {});
-        }
-      });
+      appModel.dictionaryEntriesNotifier.addListener(refresh);
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  void refresh() {
+    setState(() {});
   }
 
   @override
@@ -79,56 +84,69 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
       itemCount: historyResults.length,
       itemBuilder: (context, index) {
         DictionaryResult result = historyResults[index];
-        List<DictionaryEntry> entries = result.mapping[result.scrollIndex];
 
-        entries.sort((a, b) => (dictionaryOrderCache![a.dictionaryName]!)
-            .compareTo(dictionaryOrderCache![b.dictionaryName]!));
-        Set<String> dictionaryNames =
-            entries.map((entry) => entry.dictionaryName).toSet();
+        ValueNotifier<int> indexNotifier =
+            ValueNotifier<int>(result.scrollIndex);
 
-        final Map<String, ExpandableController> expandableControllers = {};
-        final Map<String, bool> dictionaryHiddens = {};
+        return ValueListenableBuilder<int>(
+          valueListenable: indexNotifier,
+          builder: (context, value, child) {
+            List<DictionaryEntry> entries = result.mapping[indexNotifier.value];
 
-        for (String dictionaryName in dictionaryNames) {
-          Dictionary dictionary =
-              appModelNoUpdate.getDictionary(dictionaryName);
-          expandableControllers[dictionaryName] = ExpandableController(
-            initialExpanded: !dictionary.collapsed,
-          );
-          dictionaryHiddens[dictionaryName] = dictionary.hidden;
-        }
+            entries.sort((a, b) => (dictionaryOrderCache![a.dictionaryName]!)
+                .compareTo(dictionaryOrderCache![b.dictionaryName]!));
+            Set<String> dictionaryNames =
+                entries.map((entry) => entry.dictionaryName).toSet();
 
-        return DictionaryWordPage(
-          entries: entries,
-          onSearch: widget.onSearch,
-          onStash: widget.onStash,
-          expandableControllers: expandableControllers,
-          dictionaryHiddens: dictionaryHiddens,
-          onScrollRight: () async {
-            if (result.scrollIndex == result.mapping.length - 1) {
-              result.scrollIndex = 0;
-            } else {
-              result.scrollIndex += 1;
+            final Map<String, ExpandableController> expandableControllers = {};
+            final Map<String, bool> dictionaryHiddens = {};
+
+            for (String dictionaryName in dictionaryNames) {
+              Dictionary dictionary =
+                  appModelNoUpdate.getDictionary(dictionaryName);
+              expandableControllers[dictionaryName] = ExpandableController(
+                initialExpanded: !dictionary.collapsed,
+              );
+              dictionaryHiddens[dictionaryName] = dictionary.hidden;
             }
 
-            await appModel.updateDictionaryResultScrollIndex(
-              result: result,
-              newIndex: result.scrollIndex,
-            );
-          },
-          onScrollLeft: () async {
-            if (result.scrollIndex == 0) {
-              result.scrollIndex = result.mapping.length - 1;
-            } else {
-              result.scrollIndex -= 1;
-            }
+            return DictionaryWordPage(
+              entries: entries,
+              onSearch: widget.onSearch,
+              onStash: widget.onStash,
+              expandableControllers: expandableControllers,
+              dictionaryHiddens: dictionaryHiddens,
+              onScrollRight: () async {
+                if (result.scrollIndex == result.mapping.length - 1) {
+                  result.scrollIndex = 0;
+                } else {
+                  result.scrollIndex += 1;
+                }
 
-            await appModel.updateDictionaryResultScrollIndex(
-              result: result,
-              newIndex: result.scrollIndex,
+                await appModel.updateDictionaryResultScrollIndex(
+                  result: result,
+                  newIndex: result.scrollIndex,
+                );
+
+                indexNotifier.value = result.scrollIndex;
+              },
+              onScrollLeft: () async {
+                if (result.scrollIndex == 0) {
+                  result.scrollIndex = result.mapping.length - 1;
+                } else {
+                  result.scrollIndex -= 1;
+                }
+
+                await appModel.updateDictionaryResultScrollIndex(
+                  result: result,
+                  newIndex: result.scrollIndex,
+                );
+
+                indexNotifier.value = result.scrollIndex;
+              },
+              footerWidget: buildFooterWidget(result, indexNotifier.value),
             );
           },
-          footerWidget: buildFooterWidget(result),
         );
       },
     );
@@ -136,20 +154,21 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
 
   double get fontSize => (textTheme.labelMedium?.fontSize)! * 0.9;
 
-  Widget buildFooterWidget(DictionaryResult result) {
+  Widget buildFooterWidget(DictionaryResult result, int index) {
     return InkWell(
       onTap: () {
         appModel.openResultFromHistory(result: result);
       },
       child: Padding(
         padding: Spacing.of(context).insets.vertical.small,
-        child: buildFooterTextSpans(result),
+        child: buildFooterTextSpans(result, index),
       ),
     );
   }
 
   Widget buildFooterTextSpans(
     DictionaryResult result,
+    int index,
   ) {
     return Text.rich(
       TextSpan(
@@ -177,7 +196,7 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
             ),
           ),
           TextSpan(
-            text: '${result.scrollIndex + 1} ',
+            text: '${index + 1} ',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: fontSize,

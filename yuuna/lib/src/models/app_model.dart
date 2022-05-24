@@ -71,6 +71,9 @@ class AppModel with ChangeNotifier {
   final _cacheManager = DefaultCacheManager();
 
   /// Used to notify dictionary widgets to dictionary changes.
+  final ChangeNotifier dictionaryEntriesNotifier = ChangeNotifier();
+
+  /// Used to notify dictionary widgets to dictionary changes.
   final ChangeNotifier dictionaryNotifier = ChangeNotifier();
 
   /// Used to notify toggling incognito. Updates the app logo to and from
@@ -171,7 +174,8 @@ class AppModel with ChangeNotifier {
       _database.dictionaryResults.where().findAllSync();
 
   /// For watching the dictionary history collection.
-  Stream<void> get dictionaryWatcher => _database.dictionaryResults.watchLazy();
+  Stream<void> Function(int) get watchDictionaryItem =>
+      _database.dictionaryResults.watchObjectLazy;
 
   /// Used to check whether or not the creator is currently in the navigation
   /// stack.
@@ -182,31 +186,19 @@ class AppModel with ChangeNotifier {
 
   /// Update the user-defined order of a given dictionary in the database.
   /// See the dictionary dialog's [ReorderableListView] for usage.
-  void updateDictionaryOrder(int oldIndex, int newIndex) async {
+  void updateDictionaryOrder(List<Dictionary> newDictionaries) async {
     _database.writeTxnSync((isar) {
-      Dictionary dictionaryPick = dictionaries[oldIndex];
-      Dictionary dictionarySwap = dictionaries[newIndex];
-
-      _database.dictionarys.deleteAllByOrderSync([oldIndex, newIndex]);
-      dictionaryPick.order = newIndex;
-      dictionarySwap.order = oldIndex;
-
-      _database.dictionarys.putAllSync([dictionaryPick, dictionarySwap]);
+      _database.dictionarys.clearSync();
+      _database.dictionarys.putAllSync(newDictionaries);
     });
   }
 
   /// Update the user-defined order of a given dictionary in the database.
   /// See the dictionary dialog's [ReorderableListView] for usage.
-  void updateMappingsOrder(int oldIndex, int newIndex) async {
+  void updateMappingsOrder(List<AnkiMapping> newMappings) async {
     _database.writeTxnSync((isar) {
-      AnkiMapping mappingPick = mappings[oldIndex];
-      AnkiMapping mappingSwap = mappings[newIndex];
-
-      _database.ankiMappings.deleteAllByOrderSync([oldIndex, newIndex]);
-      mappingPick.order = newIndex;
-      mappingSwap.order = oldIndex;
-
-      _database.ankiMappings.putAllSync([mappingPick, mappingSwap]);
+      _database.ankiMappings.clearSync();
+      _database.ankiMappings.putAllSync(newMappings);
     });
   }
 
@@ -1862,6 +1854,8 @@ class AppModel with ChangeNotifier {
       isarDirectoryPath: isarDirectory.path,
     );
     await compute(addToDictionaryHistoryHelper, params);
+
+    dictionaryEntriesNotifier.notifyListeners();
   }
 
   /// Update the scroll index of a given [DictionaryResult] in the database.
@@ -1886,6 +1880,8 @@ class AppModel with ChangeNotifier {
     _database.writeTxnSync((isar) {
       isar.dictionaryResults.clearSync();
     });
+
+    dictionaryEntriesNotifier.notifyListeners();
   }
 
   /// Return a list of [DictionaryMetaEntry] for a certain word.

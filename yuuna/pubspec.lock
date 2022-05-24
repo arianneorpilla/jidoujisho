@@ -365,6 +365,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.2"
+  flutter_reorderable_list:
+    dependency: "direct main"
+    description:
+      name: flutter_reorderable_list
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.2.0"
   flutter_riverpod:
     dependency: "direct main"
     description:
@@ -845,7 +852,7 @@ packages:
       name: reorderables
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.4"
+    version: "0.5.0"
   restart_app:
     dependency: "direct main"
     description:

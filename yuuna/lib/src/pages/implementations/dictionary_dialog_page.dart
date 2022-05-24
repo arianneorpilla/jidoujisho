@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:reorderables/reorderables.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
+import 'package:collection/collection.dart';
 
 /// The content of the dialog used for managing dictionaries.
 class DictionaryDialogPage extends BasePage {
@@ -119,21 +121,27 @@ class _DictionaryDialogPageState extends BasePageState {
   Widget buildDictionaryList(List<Dictionary> dictionaries) {
     return RawScrollbar(
       controller: _scrollController,
-      child: ReorderableListView.builder(
+      child: ReorderableColumn(
         scrollController: _scrollController,
-        shrinkWrap: true,
-        itemCount: dictionaries.length,
-        itemBuilder: (context, index) =>
-            buildDictionaryTile(dictionaries[index]),
+        children: List.generate(
+          dictionaries.length,
+          (index) => buildDictionaryTile(dictionaries[index]),
+        ),
         onReorder: (oldIndex, newIndex) {
-          /// Moving a dictionary to the last entry results in an index equal
-          /// to the length of dictionaries, so this has to be readjusted.
-          if (newIndex == dictionaries.length) {
-            newIndex = dictionaries.length - 1;
-          }
+          List<Dictionary> cloneDictionaries = [];
+          cloneDictionaries.addAll(dictionaries);
+
+          Dictionary item = cloneDictionaries[oldIndex];
+          cloneDictionaries.remove(item);
+          cloneDictionaries.insert(newIndex, item);
+
+          cloneDictionaries.forEachIndexed((index, dictionary) {
+            dictionary.order = index;
+          });
 
           updateSelectedOrder(newIndex);
-          appModel.updateDictionaryOrder(oldIndex, newIndex);
+
+          appModel.updateDictionaryOrder(cloneDictionaries);
           setState(() {});
         },
       ),

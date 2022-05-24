@@ -52,7 +52,7 @@ class JidoujishoLocalisations {
     'dictionaries_delete_confirmation':
         'Deleting a dictionary will also clear the dictionary search history.'
             ' Are you sure you want to do this?',
-    'mappings_delete_confirmation': 'This mapping will be deleted. Are you '
+    'mappings_delete_confirmation': 'This profile will be deleted. Are you '
         'sure you want to do this?',
     'dictionaries_deleting_entries': 'Deleting dictionary entries...',
     'dictionaries_menu_empty': 'Import a dictionary for use',

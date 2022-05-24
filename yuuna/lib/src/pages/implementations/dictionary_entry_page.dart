@@ -98,7 +98,7 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
           iconPadding: EdgeInsets.zero,
           iconSize: Theme.of(context).textTheme.titleLarge?.fontSize,
           expandIcon: Icons.arrow_drop_down,
-          collapseIcon: Icons.arrow_drop_up,
+          collapseIcon: Icons.arrow_drop_down,
           iconColor: Theme.of(context).unselectedWidgetColor,
           headerAlignment: ExpandablePanelHeaderAlignment.center,
         ),

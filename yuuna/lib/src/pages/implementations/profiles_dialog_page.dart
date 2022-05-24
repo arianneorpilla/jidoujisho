@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:reorderables/reorderables.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
+import 'package:collection/collection.dart';
 
 /// The content of the dialog used for managing profiles.
 class ProfilesDialogPage extends BasePage {
@@ -139,28 +141,33 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
 
     return RawScrollbar(
       controller: _scrollController,
-      child: ReorderableListView.builder(
+      child: ReorderableColumn(
         scrollController: _scrollController,
-        shrinkWrap: true,
-        itemCount: mappings.length,
-        itemBuilder: (context, index) => buildMappingTile(mappings[index]),
+        children: List.generate(
+          mappings.length,
+          (index) => buildMappingTile(mappings[index]),
+        ),
         onReorder: (oldIndex, newIndex) async {
-          /// Moving a mapping to the last entry results in an index equal
-          /// to the length of mappings, so this has to be readjusted.
-          if (newIndex == mappings.length) {
-            newIndex = mappings.length - 1;
-          }
+          List<AnkiMapping> cloneMappings = [];
+          cloneMappings.addAll(mappings);
 
-          AnkiMapping newSelectedMapping = mappings[newIndex];
-          appModel.setLastSelectedMapping(newSelectedMapping);
-          updateSelectedOrder(newSelectedMapping.order);
+          AnkiMapping item = cloneMappings[oldIndex];
+          cloneMappings.remove(item);
+          cloneMappings.insert(newIndex, item);
 
-          appModel.updateMappingsOrder(oldIndex, newIndex);
+          cloneMappings.forEachIndexed((index, mapping) {
+            mapping.order = index;
+          });
+
+          appModel.setLastSelectedMapping(item);
+          updateSelectedOrder(newIndex);
+
+          appModel.updateMappingsOrder(cloneMappings);
           setState(() {});
 
           await appModel.validateSelectedMapping(
             context: context,
-            mapping: newSelectedMapping,
+            mapping: item,
           );
         },
       ),
