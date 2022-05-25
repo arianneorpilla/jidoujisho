@@ -143,7 +143,9 @@ class JidoujishoLocalisations {
             ' profile has changed.\n\nThe fields of the currently selected'
             ' profile have been reset and will require reconfiguration.',
     'creator_exporting_as': 'Creating card with profile',
-    'creator_exporting_as_editing': 'Editing enhancements for profile',
+    'creator_exporting_as_fields_editing': 'Editing fields for profile',
+    'creator_exporting_as_enhancements_editing':
+        'Editing enhancements for profile',
     'creator_export_card': 'Create Card',
     'info_enhancements':
         'Enhancements enable the automation of field editing prior to card'
@@ -182,9 +184,38 @@ class JidoujishoLocalisations {
     'search_label_before': 'Search result ',
     'search_label_middle': 'out of ',
     'search_label_after': 'found for',
-    'clear_dictionary_title': 'Clear Dictionary History',
+    'clear_dictionary_title': 'Clear Dictionary Result History',
     'clear_dictionary_description':
-        'This will clear all dictionary search history. Are you sure?',
+        'This will clear all dictionary results from history. Are you sure?',
+    'clear_search_title': 'Clear Search History',
+    'clear_search_description':
+        'This will clear all search terms for this history. Are you sure?',
+    'clear_creator_title': 'Clear Creator',
+    'clear_creator_description': 'This will clear all fields. Are you sure?',
     'copied_to_clipboard': 'Copied to clipboard.',
+    'no_text_to_segment': 'No text to segment.',
+    'info_fields': 'Fields are pre-filled based on the term selected on instant'
+        ' export or prior to opening the Card Creator. In order to include a'
+        ' field for card export, it must be enabled below as well as mapped in'
+        ' the current selected export profile. Enabled fields may also be'
+        ' collapsed below in order to reduce clutter during editing. Use the'
+        ' Clear button on the top-right of the Card Creator in order to wipe'
+        ' these hidden fields quickly when manually editing a card.',
+    'edit_fields': 'Edit and Reorder Fields',
+    'remove_field': 'Remove Field',
+    'add_field': 'Assign Field',
+    'add_field_hint': 'Assign a field to this row',
+    'no_more_available_fields': 'No more available fields',
+    'hidden_fields': 'Additional fields',
+    'field_fallback_used':
+        'The %field% field used %secondField% as its fallback search term.',
+    'no_text_to_search': 'No text to search.',
+    'image_search_label_before': 'Selecting search result ',
+    'image_search_label_middle': 'out of ',
+    'image_search_label_after': 'found for',
+    'searching_in_progress': 'Searching for ',
+    'audio_unavailable': 'No audio could be found.',
+    'no_audio_enhancements': 'No audio enhancements are assigned.',
+    'card_exported': 'Card exported to 『%deck%』.',
   };
 }

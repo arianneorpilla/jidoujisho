@@ -12,7 +12,7 @@ class ReadingField extends Field {
       : super(
           uniqueKey: key,
           label: 'Reading',
-          description: 'Pronunciation or speech pattern',
+          description: 'Pronunciation or speech pattern.',
           icon: Icons.surround_sound_outlined,
         );
 
@@ -25,15 +25,15 @@ class ReadingField extends Field {
   static const String key = 'reading';
 
   @override
-  String onCreatorOpenAction({
+  String? onCreatorOpenAction({
     required BuildContext context,
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,
-    required String term,
-    required String reading,
-    required List<DictionaryEntry> entries,
+    required DictionaryTerm dictionaryTerm,
+    required List<DictionaryMetaEntry> metaEntries,
+    required bool creatorJustLaunched,
   }) {
-    return reading;
+    return dictionaryTerm.reading;
   }
 }

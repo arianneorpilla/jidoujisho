@@ -10,8 +10,8 @@ class ContextField extends Field {
   ContextField._privateConstructor()
       : super(
           uniqueKey: key,
-          label: 'Term',
-          description: 'Information on source media',
+          label: 'Context',
+          description: 'Additional information on source media.',
           icon: Icons.perm_media,
         );
 
@@ -24,17 +24,15 @@ class ContextField extends Field {
   static const String key = 'context';
 
   @override
-  String onCreatorOpenAction({
+  String? onCreatorOpenAction({
     required BuildContext context,
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,
-    required String term,
-    required String reading,
-    required List<DictionaryEntry> entries,
+    required DictionaryTerm dictionaryTerm,
+    required List<DictionaryMetaEntry> metaEntries,
+    required bool creatorJustLaunched,
   }) {
-    throw UnimplementedError(
-      'Field must generate a value upon opening creator',
-    );
+    return '';
   }
 }

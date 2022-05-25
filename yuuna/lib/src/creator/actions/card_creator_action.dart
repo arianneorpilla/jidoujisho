@@ -28,36 +28,71 @@ class CardCreatorAction extends QuickAction {
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,
-    required String term,
-    required String reading,
-    required List<DictionaryEntry> entries,
+    required DictionaryTerm dictionaryTerm,
+    required List<DictionaryMetaEntry> metaEntries,
   }) async {
-    String meaning = MeaningField.flattenMeanings(entries);
-
     if (appModel.isCreatorOpen) {
+      Map<Field, String> newTextFields = {};
+      for (Field field in appModel.activeFields) {
+        String? newTextField = field.onCreatorOpenAction(
+          context: context,
+          ref: ref,
+          appModel: appModel,
+          creatorModel: creatorModel,
+          dictionaryTerm: dictionaryTerm,
+          metaEntries: metaEntries,
+          creatorJustLaunched: false,
+        );
+
+        if (newTextField != null) {
+          newTextFields[field] = newTextField;
+        }
+      }
+
       creatorModel.copyContext(
-        CreatorFieldValues(
-          textValues: {
-            TermField.instance: term,
-            ReadingField.instance: reading,
-            MeaningField.instance: meaning,
-          },
-        ),
+        CreatorFieldValues(textValues: newTextFields),
       );
+
+      for (Field field in appModel.activeFields) {
+        Enhancement? enhancement = appModel.lastSelectedMapping
+            .getAutoFieldEnhancement(appModel: appModel, field: field);
+
+        if (enhancement != null) {
+          enhancement.enhanceCreatorParams(
+            context: context,
+            ref: ref,
+            appModel: appModel,
+            creatorModel: creatorModel,
+            cause: EnhancementTriggerCause.auto,
+          );
+        }
+      }
+
       Navigator.of(context).popUntil(
         (route) => route.settings.name == (CreatorPage).toString(),
       );
     } else {
+      Map<Field, String> newTextFields = {};
+      for (Field field in appModel.activeFields) {
+        String? newTextField = field.onCreatorOpenAction(
+          context: context,
+          ref: ref,
+          appModel: appModel,
+          creatorModel: creatorModel,
+          dictionaryTerm: dictionaryTerm,
+          metaEntries: metaEntries,
+          creatorJustLaunched: true,
+        );
+
+        if (newTextField != null) {
+          newTextFields[field] = newTextField;
+        }
+      }
+
       appModel.openCreator(
         ref: ref,
         killOnPop: false,
-        creatorFieldValues: CreatorFieldValues(
-          textValues: {
-            TermField.instance: term,
-            ReadingField.instance: reading,
-            MeaningField.instance: meaning,
-          },
-        ),
+        creatorFieldValues: CreatorFieldValues(textValues: newTextFields),
       );
     }
   }

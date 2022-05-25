@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
 
@@ -28,7 +29,18 @@ class SearchDictionaryEnhancement extends Enhancement {
     required CreatorModel creatorModel,
     required EnhancementTriggerCause cause,
   }) async {
-    String searchTerm = creatorModel.getFieldController(field).text;
+    String searchTerm = creatorModel.getFieldController(field).text.trim();
+
+    if (searchTerm.isEmpty) {
+      String noTextToSearch = appModel.translate('no_text_to_search');
+      Fluttertoast.showToast(
+        msg: noTextToSearch,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+      );
+      return;
+    }
+
     appModel.openRecursiveDictionarySearch(
       searchTerm: searchTerm,
       killOnPop: false,

@@ -57,8 +57,8 @@ abstract class Language {
 
   /// Overrides the base search function and implements search specific to
   /// a language.
-  final Future<List<List<DictionaryEntry>>> Function(
-      DictionarySearchParams params)? prepareSearchResults;
+  final Future<List<DictionaryTerm>> Function(DictionarySearchParams params)?
+      prepareSearchResults;
 
   /// Whether or not [initialise] has been called for the language.
   bool _initialised = false;
@@ -197,22 +197,20 @@ abstract class Language {
   Widget getTermReadingOverrideWidget({
     required BuildContext context,
     required AppModel appModel,
-    required String term,
-    required String reading,
-    required List<DictionaryEntry> meanings,
+    required DictionaryTerm dictionaryTerm,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          term,
+          dictionaryTerm.term,
           style: Theme.of(context)
               .textTheme
               .titleLarge!
               .copyWith(fontWeight: FontWeight.bold),
         ),
         Text(
-          reading,
+          dictionaryTerm.reading,
           style: Theme.of(context).textTheme.titleMedium,
         ),
       ],
@@ -231,7 +229,7 @@ abstract class Language {
 }
 
 /// Top-level function for use in compute. See [Language] for details.
-Future<List<List<DictionaryEntry>>> prepareSearchResultsStandard(
+Future<List<DictionaryTerm>> prepareSearchResultsStandard(
     DictionarySearchParams params) {
   throw UnimplementedError();
 }

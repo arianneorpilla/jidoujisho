@@ -34,14 +34,13 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       appModel.translate('clear_dictionary_title');
   String get clearDictionaryDescription =>
       appModel.translate('clear_dictionary_description');
-
-  final FloatingSearchBarController _controller = FloatingSearchBarController();
+  String get clearSearchTitle => appModel.translate('clear_search_title');
+  String get clearSearchDescription =>
+      appModel.translate('clear_search_description');
 
   DictionaryResult? _result;
 
   bool _isSearching = false;
-
-  bool? _lastDarkMode;
 
   @override
   void initState() {
@@ -63,12 +62,6 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
 
   @override
   Widget build(BuildContext context) {
-    if (_lastDarkMode != null) {
-      if (appModel.isDarkMode != _lastDarkMode) {
-        _controller.close();
-      }
-    }
-    _lastDarkMode = appModel.isDarkMode;
     return Stack(children: [
       if (shouldPlaceholderBeShown)
         buildPlaceholder()
@@ -79,24 +72,30 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
   }
 
   Widget buildDictionaryHistory() {
-    return ListView(
-      physics:
-          const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-      children: [
-        const SizedBox(
-          height: 60,
-        ),
-        Padding(
-          padding: EdgeInsets.only(
-            left: Spacing.of(context).spaces.small,
-            right: Spacing.of(context).spaces.small,
+    return RawScrollbar(
+      thickness: 3,
+      thumbVisibility: true,
+      controller: DictionaryMediaType.instance.scrollController,
+      child: ListView(
+        controller: DictionaryMediaType.instance.scrollController,
+        physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics()),
+        children: [
+          const SizedBox(
+            height: 60,
           ),
-          child: DictionaryHistoryPage(
-            onSearch: onSearch,
-            onStash: onStash,
+          Padding(
+            padding: EdgeInsets.only(
+              left: Spacing.of(context).spaces.normal,
+              right: Spacing.of(context).spaces.normal,
+            ),
+            child: DictionaryHistoryPage(
+              onSearch: onSearch,
+              onStash: onStash,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -109,7 +108,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       physics:
           const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
       hint: searchEllipsisLabel,
-      controller: _controller,
+      controller: floatingSearchBarController,
       builder: buildFloatingSearchBody,
       borderRadius: BorderRadius.zero,
       elevation: 0,
@@ -133,6 +132,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       ],
       actions: [
         buildClearButton(),
+        buildSearchClearButton(),
         buildSearchButton(),
       ],
       onQueryChanged: onQueryChanged,
@@ -141,7 +141,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
 
   void searchAgain() {
     _result = null;
-    onQueryChanged(_controller.query);
+    onQueryChanged(floatingSearchBarController.query);
   }
 
   void onQueryChanged(String query) async {
@@ -177,7 +177,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
         size: textTheme.titleLarge?.fontSize,
         tooltip: backLabel,
         icon: Icons.arrow_back,
-        onTap: _controller.close,
+        onTap: floatingSearchBarController.close,
       ),
     );
   }
@@ -186,9 +186,9 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     return FloatingSearchBarAction(
       child: JidoujishoIconButton(
         size: textTheme.titleLarge?.fontSize,
-        tooltip: clearLabel,
-        icon: Icons.clear_all,
-        onTap: showDeleteDictionaryPrompt,
+        tooltip: clearDictionaryTitle,
+        icon: Icons.delete_sweep,
+        onTap: showDeleteDictionaryHistoryPrompt,
       ),
     );
   }
@@ -202,7 +202,58 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     );
   }
 
-  void showDeleteDictionaryPrompt() async {
+  Widget buildSearchClearButton() {
+    return FloatingSearchBarAction(
+      showIfOpened: true,
+      showIfClosed: false,
+      child: JidoujishoIconButton(
+        size: textTheme.titleLarge?.fontSize,
+        tooltip: clearSearchTitle,
+        icon: Icons.delete_sweep,
+        onTap: showDeleteSearchHistoryPrompt,
+      ),
+    );
+  }
+
+  void showDeleteSearchHistoryPrompt() async {
+    Widget alertDialog = AlertDialog(
+      contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
+          ? Spacing.of(context).insets.exceptBottom.big
+          : Spacing.of(context).insets.exceptBottom.normal,
+      title: Text(clearSearchTitle),
+      content: Text(
+        clearSearchDescription,
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text(
+            dialogClearLabel,
+            style: TextStyle(
+              color: theme.colorScheme.primary,
+            ),
+          ),
+          onPressed: () async {
+            appModel.clearSearchHistory(
+                historyKey: DictionaryMediaType.instance.uniqueKey);
+
+            setState(() {});
+            Navigator.pop(context);
+          },
+        ),
+        TextButton(
+          child: Text(dialogCancelLabel),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ],
+    );
+
+    await showDialog(
+      context: context,
+      builder: (context) => alertDialog,
+    );
+  }
+
+  void showDeleteDictionaryHistoryPrompt() async {
     Widget alertDialog = AlertDialog(
       contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
           ? Spacing.of(context).insets.exceptBottom.big
@@ -246,7 +297,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     if (appModel.dictionaries.isEmpty) {
       return buildImportDictionariesPlaceholderMessage();
     }
-    if (_controller.query.isEmpty) {
+    if (floatingSearchBarController.query.isEmpty) {
       if (appModel.getSearchHistory(historyKey: mediaType.uniqueKey).isEmpty) {
         return buildEnterSearchTermPlaceholderMessage();
       } else {
@@ -254,7 +305,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
           uniqueKey: mediaType.uniqueKey,
           onSearchTermSelect: (searchTerm) {
             setState(() {
-              _controller.query = searchTerm;
+              floatingSearchBarController.query = searchTerm;
             });
           },
           onUpdate: () {
@@ -263,14 +314,15 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
         );
       }
     }
-    if (_isSearching || _result?.searchTerm != _controller.query) {
+    if (_isSearching ||
+        _result?.searchTerm != floatingSearchBarController.query) {
       if (_result != null) {
         return buildSearchResult();
       } else {
         return const SizedBox.shrink();
       }
     }
-    if (_result == null || _result!.mapping.isEmpty) {
+    if (_result == null || _result!.terms.isEmpty) {
       return buildNoSearchResultsPlaceholderMessage();
     }
 
@@ -294,7 +346,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
         onSearch: onSearch,
         onStash: onStash,
         result: _result!,
-        getCurrentSearchTerm: () => _controller.query,
+        getCurrentSearchTerm: () => floatingSearchBarController.query,
       ),
     );
   }
@@ -331,7 +383,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
           icon: Icons.search_off,
           message: noSearchResultsLabel.replaceAll(
             '%searchTerm%',
-            _controller.query,
+            floatingSearchBarController.query,
           ),
         ),
       ),

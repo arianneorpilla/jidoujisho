@@ -159,6 +159,27 @@ public class MainActivity extends FlutterActivity {
         }
     }
 
+    private void addNote(String model, String deck, ArrayList<String> fields) {
+        final AddContentApi api = new AddContentApi(context);
+
+        long deckId;
+        if (deckExists(deck)) {
+            deckId = mAnkiDroid.findDeckIdByName(deck);
+        } else {
+            deckId = api.addNewDeck(deck);
+        }
+
+        long modelId = mAnkiDroid.findModelIdByName(model, fields.size());
+       
+        Set<String> tags = new HashSet<>(Arrays.asList("Chisa"));
+
+        api.addNote(modelId, deckId, fields.toArray(new String[fields.size()]), tags);
+
+        System.out.println("Added note via flutter_ankidroid_api");
+        System.out.println("Model: " + modelId);
+        System.out.println("Deck: " + deckId);
+    }
+
     @Override
     public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
 
@@ -167,9 +188,20 @@ public class MainActivity extends FlutterActivity {
             .setMethodCallHandler(
                 (call, result) -> {
                     final String model = call.argument("model");
+                    final String deck = call.argument("deck");
+                    final ArrayList<String> fields = call.argument("fields"); 
+
+                    final String uriPath = call.argument("uriPath");
+                    final String preferredName = call.argument("preferredName");
+                    final String mimeType = call.argument("mimeType");
+
                     final AddContentApi api = new AddContentApi(context);
 
                     switch (call.method) {
+                        case "addNote":
+                            addNote(model, deck, fields);
+                            result.success("Added note");
+                            break;
                         case "getDecks":
                             result.success(api.getDeckList());
                             break;
@@ -188,6 +220,22 @@ public class MainActivity extends FlutterActivity {
                                 mAnkiDroid.requestPermission(MainActivity.this, AD_PERM_REQUEST);
                             }
                             result.success(true);
+                            break;
+                        case "addFileToMedia":
+                            System.out.println(uriPath);
+                            System.out.println(preferredName);
+                            System.out.println(mimeType);
+                            Uri fileUri = Uri.parse(uriPath);
+
+                            try {
+                                String addedFileName = api.addMediaFromUri(fileUri, preferredName, mimeType);
+                                result.success(addedFileName);
+                                System.out.println("Added media from URI");
+                            } catch (Exception e) {
+                                System.out.println(e);
+                            }
+
+
                             break;
                         default:
                             result.notImplemented();

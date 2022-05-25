@@ -15,9 +15,9 @@ extension GetDictionaryResultCollection on Isar {
 const DictionaryResultSchema = CollectionSchema(
   name: 'DictionaryResult',
   schema:
-      '{"name":"DictionaryResult","idName":"id","properties":[{"name":"mapping","type":"String"},{"name":"scrollIndex","type":"Long"},{"name":"searchTerm","type":"String"}],"indexes":[{"name":"searchTerm","unique":true,"properties":[{"name":"searchTerm","type":"Hash","caseSensitive":true}]}],"links":[]}',
+      '{"name":"DictionaryResult","idName":"id","properties":[{"name":"scrollIndex","type":"Long"},{"name":"searchTerm","type":"String"},{"name":"terms","type":"String"}],"indexes":[{"name":"searchTerm","unique":true,"properties":[{"name":"searchTerm","type":"Hash","caseSensitive":true}]}],"links":[]}',
   idName: 'id',
-  propertyIds: {'mapping': 0, 'scrollIndex': 1, 'searchTerm': 2},
+  propertyIds: {'scrollIndex': 0, 'searchTerm': 1, 'terms': 2},
   listProperties: {},
   indexIds: {'searchTerm': 0},
   indexValueTypes: {
@@ -51,8 +51,7 @@ List<IsarLinkBase> _dictionaryResultGetLinks(DictionaryResult object) {
   return [];
 }
 
-const _dictionaryResultDictionaryEntriesConverter =
-    DictionaryEntriesConverter();
+const _dictionaryResultDictionaryTermsConverter = DictionaryTermsConverter();
 
 void _dictionaryResultSerializeNative(
     IsarCollection<DictionaryResult> collection,
@@ -62,24 +61,23 @@ void _dictionaryResultSerializeNative(
     List<int> offsets,
     AdapterAlloc alloc) {
   var dynamicSize = 0;
-  final value0 =
-      _dictionaryResultDictionaryEntriesConverter.toIsar(object.mapping);
-  final _mapping = IsarBinaryWriter.utf8Encoder.convert(value0);
-  dynamicSize += (_mapping.length) as int;
-  final value1 = object.scrollIndex;
-  final _scrollIndex = value1;
-  final value2 = object.searchTerm;
-  final _searchTerm = IsarBinaryWriter.utf8Encoder.convert(value2);
+  final value0 = object.scrollIndex;
+  final _scrollIndex = value0;
+  final value1 = object.searchTerm;
+  final _searchTerm = IsarBinaryWriter.utf8Encoder.convert(value1);
   dynamicSize += (_searchTerm.length) as int;
+  final value2 = _dictionaryResultDictionaryTermsConverter.toIsar(object.terms);
+  final _terms = IsarBinaryWriter.utf8Encoder.convert(value2);
+  dynamicSize += (_terms.length) as int;
   final size = staticSize + dynamicSize;
 
   rawObj.buffer = alloc(size);
   rawObj.buffer_length = size;
   final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
   final writer = IsarBinaryWriter(buffer, staticSize);
-  writer.writeBytes(offsets[0], _mapping);
-  writer.writeLong(offsets[1], _scrollIndex);
-  writer.writeBytes(offsets[2], _searchTerm);
+  writer.writeLong(offsets[0], _scrollIndex);
+  writer.writeBytes(offsets[1], _searchTerm);
+  writer.writeBytes(offsets[2], _terms);
 }
 
 DictionaryResult _dictionaryResultDeserializeNative(
@@ -89,10 +87,10 @@ DictionaryResult _dictionaryResultDeserializeNative(
     List<int> offsets) {
   final object = DictionaryResult(
     id: id,
-    mapping: _dictionaryResultDictionaryEntriesConverter
-        .fromIsar(reader.readString(offsets[0])),
-    scrollIndex: reader.readLong(offsets[1]),
-    searchTerm: reader.readString(offsets[2]),
+    scrollIndex: reader.readLong(offsets[0]),
+    searchTerm: reader.readString(offsets[1]),
+    terms: _dictionaryResultDictionaryTermsConverter
+        .fromIsar(reader.readString(offsets[2])),
   );
   return object;
 }
@@ -103,12 +101,12 @@ P _dictionaryResultDeserializePropNative<P>(
     case -1:
       return id as P;
     case 0:
-      return (_dictionaryResultDictionaryEntriesConverter
-          .fromIsar(reader.readString(offset))) as P;
-    case 1:
       return (reader.readLong(offset)) as P;
-    case 2:
+    case 1:
       return (reader.readString(offset)) as P;
+    case 2:
+      return (_dictionaryResultDictionaryTermsConverter
+          .fromIsar(reader.readString(offset))) as P;
     default:
       throw 'Illegal propertyIndex';
   }
@@ -118,10 +116,10 @@ dynamic _dictionaryResultSerializeWeb(
     IsarCollection<DictionaryResult> collection, DictionaryResult object) {
   final jsObj = IsarNative.newJsObject();
   IsarNative.jsObjectSet(jsObj, 'id', object.id);
-  IsarNative.jsObjectSet(jsObj, 'mapping',
-      _dictionaryResultDictionaryEntriesConverter.toIsar(object.mapping));
   IsarNative.jsObjectSet(jsObj, 'scrollIndex', object.scrollIndex);
   IsarNative.jsObjectSet(jsObj, 'searchTerm', object.searchTerm);
+  IsarNative.jsObjectSet(jsObj, 'terms',
+      _dictionaryResultDictionaryTermsConverter.toIsar(object.terms));
   return jsObj;
 }
 
@@ -129,11 +127,11 @@ DictionaryResult _dictionaryResultDeserializeWeb(
     IsarCollection<DictionaryResult> collection, dynamic jsObj) {
   final object = DictionaryResult(
     id: IsarNative.jsObjectGet(jsObj, 'id'),
-    mapping: _dictionaryResultDictionaryEntriesConverter
-        .fromIsar(IsarNative.jsObjectGet(jsObj, 'mapping') ?? ''),
     scrollIndex:
         IsarNative.jsObjectGet(jsObj, 'scrollIndex') ?? double.negativeInfinity,
     searchTerm: IsarNative.jsObjectGet(jsObj, 'searchTerm') ?? '',
+    terms: _dictionaryResultDictionaryTermsConverter
+        .fromIsar(IsarNative.jsObjectGet(jsObj, 'terms') ?? ''),
   );
   return object;
 }
@@ -142,14 +140,14 @@ P _dictionaryResultDeserializePropWeb<P>(Object jsObj, String propertyName) {
   switch (propertyName) {
     case 'id':
       return (IsarNative.jsObjectGet(jsObj, 'id')) as P;
-    case 'mapping':
-      return (_dictionaryResultDictionaryEntriesConverter
-          .fromIsar(IsarNative.jsObjectGet(jsObj, 'mapping') ?? '')) as P;
     case 'scrollIndex':
       return (IsarNative.jsObjectGet(jsObj, 'scrollIndex') ??
           double.negativeInfinity) as P;
     case 'searchTerm':
       return (IsarNative.jsObjectGet(jsObj, 'searchTerm') ?? '') as P;
+    case 'terms':
+      return (_dictionaryResultDictionaryTermsConverter
+          .fromIsar(IsarNative.jsObjectGet(jsObj, 'terms') ?? '')) as P;
     default:
       throw 'Illegal propertyName';
   }
@@ -365,114 +363,6 @@ extension DictionaryResultQueryFilter
   }
 
   QueryBuilder<DictionaryResult, DictionaryResult, QAfterFilterCondition>
-      mappingEqualTo(
-    List<List<DictionaryEntry>> value, {
-    bool caseSensitive = true,
-  }) {
-    return addFilterConditionInternal(FilterCondition(
-      type: ConditionType.eq,
-      property: 'mapping',
-      value: _dictionaryResultDictionaryEntriesConverter.toIsar(value),
-      caseSensitive: caseSensitive,
-    ));
-  }
-
-  QueryBuilder<DictionaryResult, DictionaryResult, QAfterFilterCondition>
-      mappingGreaterThan(
-    List<List<DictionaryEntry>> value, {
-    bool caseSensitive = true,
-    bool include = false,
-  }) {
-    return addFilterConditionInternal(FilterCondition(
-      type: ConditionType.gt,
-      include: include,
-      property: 'mapping',
-      value: _dictionaryResultDictionaryEntriesConverter.toIsar(value),
-      caseSensitive: caseSensitive,
-    ));
-  }
-
-  QueryBuilder<DictionaryResult, DictionaryResult, QAfterFilterCondition>
-      mappingLessThan(
-    List<List<DictionaryEntry>> value, {
-    bool caseSensitive = true,
-    bool include = false,
-  }) {
-    return addFilterConditionInternal(FilterCondition(
-      type: ConditionType.lt,
-      include: include,
-      property: 'mapping',
-      value: _dictionaryResultDictionaryEntriesConverter.toIsar(value),
-      caseSensitive: caseSensitive,
-    ));
-  }
-
-  QueryBuilder<DictionaryResult, DictionaryResult, QAfterFilterCondition>
-      mappingBetween(
-    List<List<DictionaryEntry>> lower,
-    List<List<DictionaryEntry>> upper, {
-    bool caseSensitive = true,
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return addFilterConditionInternal(FilterCondition.between(
-      property: 'mapping',
-      lower: _dictionaryResultDictionaryEntriesConverter.toIsar(lower),
-      includeLower: includeLower,
-      upper: _dictionaryResultDictionaryEntriesConverter.toIsar(upper),
-      includeUpper: includeUpper,
-      caseSensitive: caseSensitive,
-    ));
-  }
-
-  QueryBuilder<DictionaryResult, DictionaryResult, QAfterFilterCondition>
-      mappingStartsWith(
-    List<List<DictionaryEntry>> value, {
-    bool caseSensitive = true,
-  }) {
-    return addFilterConditionInternal(FilterCondition(
-      type: ConditionType.startsWith,
-      property: 'mapping',
-      value: _dictionaryResultDictionaryEntriesConverter.toIsar(value),
-      caseSensitive: caseSensitive,
-    ));
-  }
-
-  QueryBuilder<DictionaryResult, DictionaryResult, QAfterFilterCondition>
-      mappingEndsWith(
-    List<List<DictionaryEntry>> value, {
-    bool caseSensitive = true,
-  }) {
-    return addFilterConditionInternal(FilterCondition(
-      type: ConditionType.endsWith,
-      property: 'mapping',
-      value: _dictionaryResultDictionaryEntriesConverter.toIsar(value),
-      caseSensitive: caseSensitive,
-    ));
-  }
-
-  QueryBuilder<DictionaryResult, DictionaryResult, QAfterFilterCondition>
-      mappingContains(List<List<DictionaryEntry>> value,
-          {bool caseSensitive = true}) {
-    return addFilterConditionInternal(FilterCondition(
-      type: ConditionType.contains,
-      property: 'mapping',
-      value: _dictionaryResultDictionaryEntriesConverter.toIsar(value),
-      caseSensitive: caseSensitive,
-    ));
-  }
-
-  QueryBuilder<DictionaryResult, DictionaryResult, QAfterFilterCondition>
-      mappingMatches(String pattern, {bool caseSensitive = true}) {
-    return addFilterConditionInternal(FilterCondition(
-      type: ConditionType.matches,
-      property: 'mapping',
-      value: pattern,
-      caseSensitive: caseSensitive,
-    ));
-  }
-
-  QueryBuilder<DictionaryResult, DictionaryResult, QAfterFilterCondition>
       scrollIndexEqualTo(int value) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.eq,
@@ -629,6 +519,113 @@ extension DictionaryResultQueryFilter
       caseSensitive: caseSensitive,
     ));
   }
+
+  QueryBuilder<DictionaryResult, DictionaryResult, QAfterFilterCondition>
+      termsEqualTo(
+    List<DictionaryTerm> value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.eq,
+      property: 'terms',
+      value: _dictionaryResultDictionaryTermsConverter.toIsar(value),
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<DictionaryResult, DictionaryResult, QAfterFilterCondition>
+      termsGreaterThan(
+    List<DictionaryTerm> value, {
+    bool caseSensitive = true,
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.gt,
+      include: include,
+      property: 'terms',
+      value: _dictionaryResultDictionaryTermsConverter.toIsar(value),
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<DictionaryResult, DictionaryResult, QAfterFilterCondition>
+      termsLessThan(
+    List<DictionaryTerm> value, {
+    bool caseSensitive = true,
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.lt,
+      include: include,
+      property: 'terms',
+      value: _dictionaryResultDictionaryTermsConverter.toIsar(value),
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<DictionaryResult, DictionaryResult, QAfterFilterCondition>
+      termsBetween(
+    List<DictionaryTerm> lower,
+    List<DictionaryTerm> upper, {
+    bool caseSensitive = true,
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition.between(
+      property: 'terms',
+      lower: _dictionaryResultDictionaryTermsConverter.toIsar(lower),
+      includeLower: includeLower,
+      upper: _dictionaryResultDictionaryTermsConverter.toIsar(upper),
+      includeUpper: includeUpper,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<DictionaryResult, DictionaryResult, QAfterFilterCondition>
+      termsStartsWith(
+    List<DictionaryTerm> value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.startsWith,
+      property: 'terms',
+      value: _dictionaryResultDictionaryTermsConverter.toIsar(value),
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<DictionaryResult, DictionaryResult, QAfterFilterCondition>
+      termsEndsWith(
+    List<DictionaryTerm> value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.endsWith,
+      property: 'terms',
+      value: _dictionaryResultDictionaryTermsConverter.toIsar(value),
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<DictionaryResult, DictionaryResult, QAfterFilterCondition>
+      termsContains(List<DictionaryTerm> value, {bool caseSensitive = true}) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.contains,
+      property: 'terms',
+      value: _dictionaryResultDictionaryTermsConverter.toIsar(value),
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<DictionaryResult, DictionaryResult, QAfterFilterCondition>
+      termsMatches(String pattern, {bool caseSensitive = true}) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.matches,
+      property: 'terms',
+      value: pattern,
+      caseSensitive: caseSensitive,
+    ));
+  }
 }
 
 extension DictionaryResultQueryLinks
@@ -643,16 +640,6 @@ extension DictionaryResultQueryWhereSortBy
   QueryBuilder<DictionaryResult, DictionaryResult, QAfterSortBy>
       sortByIdDesc() {
     return addSortByInternal('id', Sort.desc);
-  }
-
-  QueryBuilder<DictionaryResult, DictionaryResult, QAfterSortBy>
-      sortByMapping() {
-    return addSortByInternal('mapping', Sort.asc);
-  }
-
-  QueryBuilder<DictionaryResult, DictionaryResult, QAfterSortBy>
-      sortByMappingDesc() {
-    return addSortByInternal('mapping', Sort.desc);
   }
 
   QueryBuilder<DictionaryResult, DictionaryResult, QAfterSortBy>
@@ -674,6 +661,15 @@ extension DictionaryResultQueryWhereSortBy
       sortBySearchTermDesc() {
     return addSortByInternal('searchTerm', Sort.desc);
   }
+
+  QueryBuilder<DictionaryResult, DictionaryResult, QAfterSortBy> sortByTerms() {
+    return addSortByInternal('terms', Sort.asc);
+  }
+
+  QueryBuilder<DictionaryResult, DictionaryResult, QAfterSortBy>
+      sortByTermsDesc() {
+    return addSortByInternal('terms', Sort.desc);
+  }
 }
 
 extension DictionaryResultQueryWhereSortThenBy
@@ -685,16 +681,6 @@ extension DictionaryResultQueryWhereSortThenBy
   QueryBuilder<DictionaryResult, DictionaryResult, QAfterSortBy>
       thenByIdDesc() {
     return addSortByInternal('id', Sort.desc);
-  }
-
-  QueryBuilder<DictionaryResult, DictionaryResult, QAfterSortBy>
-      thenByMapping() {
-    return addSortByInternal('mapping', Sort.asc);
-  }
-
-  QueryBuilder<DictionaryResult, DictionaryResult, QAfterSortBy>
-      thenByMappingDesc() {
-    return addSortByInternal('mapping', Sort.desc);
   }
 
   QueryBuilder<DictionaryResult, DictionaryResult, QAfterSortBy>
@@ -716,17 +702,21 @@ extension DictionaryResultQueryWhereSortThenBy
       thenBySearchTermDesc() {
     return addSortByInternal('searchTerm', Sort.desc);
   }
+
+  QueryBuilder<DictionaryResult, DictionaryResult, QAfterSortBy> thenByTerms() {
+    return addSortByInternal('terms', Sort.asc);
+  }
+
+  QueryBuilder<DictionaryResult, DictionaryResult, QAfterSortBy>
+      thenByTermsDesc() {
+    return addSortByInternal('terms', Sort.desc);
+  }
 }
 
 extension DictionaryResultQueryWhereDistinct
     on QueryBuilder<DictionaryResult, DictionaryResult, QDistinct> {
   QueryBuilder<DictionaryResult, DictionaryResult, QDistinct> distinctById() {
     return addDistinctByInternal('id');
-  }
-
-  QueryBuilder<DictionaryResult, DictionaryResult, QDistinct> distinctByMapping(
-      {bool caseSensitive = true}) {
-    return addDistinctByInternal('mapping', caseSensitive: caseSensitive);
   }
 
   QueryBuilder<DictionaryResult, DictionaryResult, QDistinct>
@@ -738,17 +728,17 @@ extension DictionaryResultQueryWhereDistinct
       distinctBySearchTerm({bool caseSensitive = true}) {
     return addDistinctByInternal('searchTerm', caseSensitive: caseSensitive);
   }
+
+  QueryBuilder<DictionaryResult, DictionaryResult, QDistinct> distinctByTerms(
+      {bool caseSensitive = true}) {
+    return addDistinctByInternal('terms', caseSensitive: caseSensitive);
+  }
 }
 
 extension DictionaryResultQueryProperty
     on QueryBuilder<DictionaryResult, DictionaryResult, QQueryProperty> {
   QueryBuilder<DictionaryResult, int?, QQueryOperations> idProperty() {
     return addPropertyNameInternal('id');
-  }
-
-  QueryBuilder<DictionaryResult, List<List<DictionaryEntry>>, QQueryOperations>
-      mappingProperty() {
-    return addPropertyNameInternal('mapping');
   }
 
   QueryBuilder<DictionaryResult, int, QQueryOperations> scrollIndexProperty() {
@@ -759,6 +749,11 @@ extension DictionaryResultQueryProperty
       searchTermProperty() {
     return addPropertyNameInternal('searchTerm');
   }
+
+  QueryBuilder<DictionaryResult, List<DictionaryTerm>, QQueryOperations>
+      termsProperty() {
+    return addPropertyNameInternal('terms');
+  }
 }
 
 // **************************************************************************
@@ -768,11 +763,8 @@ extension DictionaryResultQueryProperty
 DictionaryResult _$DictionaryResultFromJson(Map<String, dynamic> json) =>
     DictionaryResult(
       searchTerm: json['searchTerm'] as String,
-      mapping: (json['mapping'] as List<dynamic>?)
-              ?.map((e) => (e as List<dynamic>)
-                  .map((e) =>
-                      DictionaryEntry.fromJson(e as Map<String, dynamic>))
-                  .toList())
+      terms: (json['terms'] as List<dynamic>?)
+              ?.map((e) => DictionaryTerm.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
       scrollIndex: json['scrollIndex'] as int? ?? 0,
@@ -784,5 +776,5 @@ Map<String, dynamic> _$DictionaryResultToJson(DictionaryResult instance) =>
       'id': instance.id,
       'scrollIndex': instance.scrollIndex,
       'searchTerm': instance.searchTerm,
-      'mapping': instance.mapping,
+      'terms': instance.terms,
     };

@@ -91,6 +91,11 @@ class CreatorModel with ChangeNotifier {
     );
   }
 
+  /// Refresh state for the Card Creator.
+  void refresh() {
+    notifyListeners();
+  }
+
   /// The current context at the top of the creator being highlighted for export.
   /// The seed of the current image at the top of the creator being highlighted
   /// for export.
@@ -141,6 +146,12 @@ class CreatorModel with ChangeNotifier {
 
   /// Clear a controller for a particular field.
   void clearField(Field field, {bool notify = true}) {
+    if (field is ImageExportField) {
+      field.clearFieldState(creatorModel: this);
+    } else if (field is AudioExportField) {
+      field.clearFieldState(creatorModel: this);
+    }
+
     /// Need to clear the audio/image seed when that's implemented as well.
     getFieldController(field).clear();
     if (notify) {

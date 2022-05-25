@@ -2,6 +2,7 @@ import 'package:change_notifier_builder/change_notifier_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
 
@@ -112,8 +113,24 @@ class _HomePageState extends BasePageState<HomePage> {
   }
 
   void switchTab(int index) async {
-    await appModel.setCurrentHomeTabIndex(index);
-    setState(() {});
+    if (index == currentHomeTabIndex) {
+      MediaType mediaType = appModelNoUpdate.mediaTypes.values.toList()[index];
+
+      if (mediaType.scrollController.hasClients) {
+        if (mediaType.scrollController.offset > 5000) {
+          mediaType.scrollController.jumpTo(0);
+        } else {
+          mediaType.scrollController.animateTo(
+            0,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+          );
+        }
+      }
+    } else {
+      await appModel.setCurrentHomeTabIndex(index);
+      setState(() {});
+    }
   }
 
   Widget? buildLeading() {

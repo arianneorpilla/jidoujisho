@@ -30,6 +30,9 @@ abstract class MediaType {
   /// enough media items to display that require the tab to be scrollable.
   ScrollController scrollController = ScrollController();
 
+  /// Closes the search bar if on when the tab is tapped on.
+  ChangeNotifier tabTappedNotifier = ChangeNotifier();
+
   /// Used to open database instances for storing progress and duration
   /// respectively.
   /// String get _historyKey => '$uniqueKey-history';

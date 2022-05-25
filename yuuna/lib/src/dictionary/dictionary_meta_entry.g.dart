@@ -16,11 +16,11 @@ extension GetDictionaryMetaEntryCollection on Isar {
 const DictionaryMetaEntrySchema = CollectionSchema(
   name: 'DictionaryMetaEntry',
   schema:
-      '{"name":"DictionaryMetaEntry","idName":"id","properties":[{"name":"dictionaryName","type":"String"},{"name":"frequency","type":"Long"},{"name":"pitches","type":"String"},{"name":"term","type":"String"}],"indexes":[{"name":"dictionaryName","unique":false,"properties":[{"name":"dictionaryName","type":"Hash","caseSensitive":true}]},{"name":"frequency","unique":false,"properties":[{"name":"frequency","type":"Value","caseSensitive":false}]},{"name":"term","unique":false,"properties":[{"name":"term","type":"Hash","caseSensitive":true}]}],"links":[]}',
+      '{"name":"DictionaryMetaEntry","idName":"id","properties":[{"name":"dictionaryName","type":"String"},{"name":"frequency","type":"Long"},{"name":"pitches","type":"String"},{"name":"term","type":"String"}],"indexes":[{"name":"dictionaryName","unique":false,"properties":[{"name":"dictionaryName","type":"Hash","caseSensitive":true}]},{"name":"frequency","unique":false,"properties":[{"name":"frequency","type":"Value","caseSensitive":false}]},{"name":"term_dictionaryName","unique":false,"properties":[{"name":"term","type":"Hash","caseSensitive":true},{"name":"dictionaryName","type":"Hash","caseSensitive":true}]}],"links":[]}',
   idName: 'id',
   propertyIds: {'dictionaryName': 0, 'frequency': 1, 'pitches': 2, 'term': 3},
   listProperties: {},
-  indexIds: {'dictionaryName': 0, 'frequency': 1, 'term': 2},
+  indexIds: {'dictionaryName': 0, 'frequency': 1, 'term_dictionaryName': 2},
   indexValueTypes: {
     'dictionaryName': [
       IndexValueType.stringHash,
@@ -28,7 +28,8 @@ const DictionaryMetaEntrySchema = CollectionSchema(
     'frequency': [
       IndexValueType.long,
     ],
-    'term': [
+    'term_dictionaryName': [
+      IndexValueType.stringHash,
       IndexValueType.stringHash,
     ]
   },
@@ -200,9 +201,9 @@ extension DictionaryMetaEntryQueryWhereSort
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterWhere>
-      anyTerm() {
+      anyTermDictionaryName() {
     return addWhereClauseInternal(
-        const IndexWhereClause.any(indexName: 'term'));
+        const IndexWhereClause.any(indexName: 'term_dictionaryName'));
   }
 }
 
@@ -390,7 +391,7 @@ extension DictionaryMetaEntryQueryWhere
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterWhereClause>
       termEqualTo(String term) {
     return addWhereClauseInternal(IndexWhereClause.equalTo(
-      indexName: 'term',
+      indexName: 'term_dictionaryName',
       value: [term],
     ));
   }
@@ -399,22 +400,55 @@ extension DictionaryMetaEntryQueryWhere
       termNotEqualTo(String term) {
     if (whereSortInternal == Sort.asc) {
       return addWhereClauseInternal(IndexWhereClause.lessThan(
-        indexName: 'term',
+        indexName: 'term_dictionaryName',
         upper: [term],
         includeUpper: false,
       )).addWhereClauseInternal(IndexWhereClause.greaterThan(
-        indexName: 'term',
+        indexName: 'term_dictionaryName',
         lower: [term],
         includeLower: false,
       ));
     } else {
       return addWhereClauseInternal(IndexWhereClause.greaterThan(
-        indexName: 'term',
+        indexName: 'term_dictionaryName',
         lower: [term],
         includeLower: false,
       )).addWhereClauseInternal(IndexWhereClause.lessThan(
-        indexName: 'term',
+        indexName: 'term_dictionaryName',
         upper: [term],
+        includeUpper: false,
+      ));
+    }
+  }
+
+  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterWhereClause>
+      termDictionaryNameEqualTo(String term, String dictionaryName) {
+    return addWhereClauseInternal(IndexWhereClause.equalTo(
+      indexName: 'term_dictionaryName',
+      value: [term, dictionaryName],
+    ));
+  }
+
+  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterWhereClause>
+      termDictionaryNameNotEqualTo(String term, String dictionaryName) {
+    if (whereSortInternal == Sort.asc) {
+      return addWhereClauseInternal(IndexWhereClause.lessThan(
+        indexName: 'term_dictionaryName',
+        upper: [term, dictionaryName],
+        includeUpper: false,
+      )).addWhereClauseInternal(IndexWhereClause.greaterThan(
+        indexName: 'term_dictionaryName',
+        lower: [term, dictionaryName],
+        includeLower: false,
+      ));
+    } else {
+      return addWhereClauseInternal(IndexWhereClause.greaterThan(
+        indexName: 'term_dictionaryName',
+        lower: [term, dictionaryName],
+        includeLower: false,
+      )).addWhereClauseInternal(IndexWhereClause.lessThan(
+        indexName: 'term_dictionaryName',
+        upper: [term, dictionaryName],
         includeUpper: false,
       ));
     }

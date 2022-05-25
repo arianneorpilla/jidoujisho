@@ -22,6 +22,7 @@ dependencies:
     sdk: flutter
   flutter_archive: ^5.0.0
   flutter_cache_manager: ^3.3.0
+  flutter_inappwebview: ^5.4.3+7
   flutter_launcher_icons: ^0.9.2
   flutter_native_splash: ^2.1.1
   flutter_process_text: ^1.1.2
@@ -31,6 +32,7 @@ dependencies:
   fluttertoast: ^8.0.9
   hive: ^2.0.6
   hive_flutter: ^1.1.0
+  html: ^0.15.0
   http: ^0.13.4
   infinite_scroll_pagination: ^3.1.0
   intl: ^0.17.0
@@ -38,6 +40,7 @@ dependencies:
   isar_flutter_libs: ^2.2.1
   json_annotation: ^4.5.0
   json_serializable: ^6.1.5
+  just_audio: ^0.9.21
   kana_kit: ^2.0.0
   marquee: ^2.2.2
   material_floating_search_bar: 
@@ -45,12 +48,14 @@ dependencies:
       url: https://github.com/lrorpilla/material_floating_search_bar
       ref: main
   mecab_dart: ^0.1.3
+  multi_value_listenable_builder: ^0.0.2
   network_to_file_image: ^4.0.1
   package_info_plus: ^1.4.0
   path: ^1.8.0
   path_provider: ^2.0.9
   permission_handler: ^9.2.0
   pretty_json: ^2.0.0
+  progress_indicators: ^1.0.0
   receive_sharing_intent: ^1.4.5
   reorderables: ^0.5.0
   restart_app: ^1.1.0+1
@@ -62,6 +67,7 @@ dependencies:
       url: https://github.com/triskell/spaces
       ref: master
   tabbed_view: ^1.12.0
+  transparent_image: ^2.0.0
   url_launcher: ^6.0.20
   ve_dart:
     git:

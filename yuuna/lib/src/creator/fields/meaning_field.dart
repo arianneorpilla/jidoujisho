@@ -12,7 +12,7 @@ class MeaningField extends Field {
       : super(
           uniqueKey: key,
           label: 'Meaning',
-          description: 'Dictionary definition of term',
+          description: 'All dictionary definitions of a term.',
           icon: Icons.translate_rounded,
         );
 
@@ -79,15 +79,15 @@ class MeaningField extends Field {
   }
 
   @override
-  String onCreatorOpenAction({
+  String? onCreatorOpenAction({
     required BuildContext context,
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,
-    required String term,
-    required String reading,
-    required List<DictionaryEntry> entries,
+    required DictionaryTerm dictionaryTerm,
+    required List<DictionaryMetaEntry> metaEntries,
+    required bool creatorJustLaunched,
   }) {
-    return flattenMeanings(entries);
+    return flattenMeanings(dictionaryTerm.entries);
   }
 }

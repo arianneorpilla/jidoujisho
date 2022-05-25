@@ -1,18 +1,22 @@
 import 'dart:io';
 
-import 'package:isar/isar.dart';
-import 'package:json_annotation/json_annotation.dart';
 import 'package:yuuna/creator.dart';
+import 'package:yuuna/src/models/app_model.dart';
 
 /// A collection of values that can be used to mutate the current context of
 /// the creator.
-@JsonSerializable()
-@Collection()
 class CreatorFieldValues {
   /// Initialise an immutable collection of the final parameters.
   CreatorFieldValues({
     this.textValues = const {},
   });
+
+  // factory CreatorFieldValues.fromDictionary({
+  //   required String term,
+  //   required String reading,
+  //   required List<DictionaryEntry> entries,
+  //   required List<DictionaryMetaEntry> metaEntries,
+  // }) {}
 
   /// Creates a deep copy of this context but with the given fields replaced
   /// with the new values.
@@ -32,13 +36,44 @@ class CreatorFieldValues {
   final Map<Field, String> textValues;
 
   /// List of images to export to Anki.
-  Map<Field, File> get imagesToExport => throw UnimplementedError();
+  Map<Field, File> get imagesToExport {
+    Map<Field, File> exportFiles = {};
+
+    for (Field field in globalFields) {
+      if (field is ImageExportField) {
+        if (field.exportFile?.file != null) {
+          exportFiles[field] = field.exportFile!.file!;
+        }
+      }
+    }
+
+    return exportFiles;
+  }
 
   /// List of audio to export to Anki.
-  Map<Field, File> get audioToExport => throw UnimplementedError();
+  Map<Field, File> get audioToExport {
+    Map<Field, File> exportFiles = {};
+
+    for (Field field in globalFields) {
+      if (field is AudioExportField) {
+        print(field.exportFile);
+        if (field.exportFile != null) {
+          exportFiles[field] = field.exportFile!;
+        }
+      }
+    }
+
+    return exportFiles;
+  }
 
   /// Whether or not to allow the export button to be pressed.
   bool get isExportable {
-    return textValues.isNotEmpty;
+    for (String value in textValues.values) {
+      if (value.isNotEmpty) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }

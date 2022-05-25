@@ -15,18 +15,25 @@ extension GetAnkiMappingCollection on Isar {
 const AnkiMappingSchema = CollectionSchema(
   name: 'AnkiMapping',
   schema:
-      '{"name":"AnkiMapping","idName":"id","properties":[{"name":"actions","type":"String"},{"name":"enhancements","type":"String"},{"name":"fieldIndexes","type":"LongList"},{"name":"label","type":"String"},{"name":"model","type":"String"},{"name":"order","type":"Long"},{"name":"tags","type":"StringList"}],"indexes":[{"name":"label","unique":true,"properties":[{"name":"label","type":"Hash","caseSensitive":true}]},{"name":"order","unique":true,"properties":[{"name":"order","type":"Value","caseSensitive":false}]}],"links":[]}',
+      '{"name":"AnkiMapping","idName":"id","properties":[{"name":"actions","type":"String"},{"name":"creatorCollapsedFieldKeys","type":"StringList"},{"name":"creatorFieldKeys","type":"StringList"},{"name":"enhancements","type":"String"},{"name":"exportFieldKeys","type":"StringList"},{"name":"label","type":"String"},{"name":"model","type":"String"},{"name":"order","type":"Long"},{"name":"tags","type":"StringList"}],"indexes":[{"name":"label","unique":true,"properties":[{"name":"label","type":"Hash","caseSensitive":true}]},{"name":"order","unique":true,"properties":[{"name":"order","type":"Value","caseSensitive":false}]}],"links":[]}',
   idName: 'id',
   propertyIds: {
     'actions': 0,
-    'enhancements': 1,
-    'fieldIndexes': 2,
-    'label': 3,
-    'model': 4,
-    'order': 5,
-    'tags': 6
+    'creatorCollapsedFieldKeys': 1,
+    'creatorFieldKeys': 2,
+    'enhancements': 3,
+    'exportFieldKeys': 4,
+    'label': 5,
+    'model': 6,
+    'order': 7,
+    'tags': 8
   },
-  listProperties: {'fieldIndexes', 'tags'},
+  listProperties: {
+    'creatorCollapsedFieldKeys',
+    'creatorFieldKeys',
+    'exportFieldKeys',
+    'tags'
+  },
   indexIds: {'label': 0, 'order': 1},
   indexValueTypes: {
     'label': [
@@ -81,29 +88,57 @@ void _ankiMappingSerializeNative(
   final value0 = _ankiMappingQuickActionsConverter.toIsar(object.actions);
   final _actions = IsarBinaryWriter.utf8Encoder.convert(value0);
   dynamicSize += (_actions.length) as int;
-  final value1 = _ankiMappingEnhancementsConverter.toIsar(object.enhancements);
-  final _enhancements = IsarBinaryWriter.utf8Encoder.convert(value1);
-  dynamicSize += (_enhancements.length) as int;
-  final value2 = object.fieldIndexes;
-  dynamicSize += (value2.length) * 8;
-  final _fieldIndexes = value2;
-  final value3 = object.label;
-  final _label = IsarBinaryWriter.utf8Encoder.convert(value3);
-  dynamicSize += (_label.length) as int;
-  final value4 = object.model;
-  final _model = IsarBinaryWriter.utf8Encoder.convert(value4);
-  dynamicSize += (_model.length) as int;
-  final value5 = object.order;
-  final _order = value5;
-  final value6 = object.tags;
-  dynamicSize += (value6.length) * 8;
-  final bytesList6 = <IsarUint8List>[];
-  for (var str in value6) {
+  final value1 = object.creatorCollapsedFieldKeys;
+  dynamicSize += (value1.length) * 8;
+  final bytesList1 = <IsarUint8List>[];
+  for (var str in value1) {
     final bytes = IsarBinaryWriter.utf8Encoder.convert(str);
-    bytesList6.add(bytes);
+    bytesList1.add(bytes);
     dynamicSize += bytes.length as int;
   }
-  final _tags = bytesList6;
+  final _creatorCollapsedFieldKeys = bytesList1;
+  final value2 = object.creatorFieldKeys;
+  dynamicSize += (value2.length) * 8;
+  final bytesList2 = <IsarUint8List>[];
+  for (var str in value2) {
+    final bytes = IsarBinaryWriter.utf8Encoder.convert(str);
+    bytesList2.add(bytes);
+    dynamicSize += bytes.length as int;
+  }
+  final _creatorFieldKeys = bytesList2;
+  final value3 = _ankiMappingEnhancementsConverter.toIsar(object.enhancements);
+  final _enhancements = IsarBinaryWriter.utf8Encoder.convert(value3);
+  dynamicSize += (_enhancements.length) as int;
+  final value4 = object.exportFieldKeys;
+  dynamicSize += (value4.length) * 8;
+  final bytesList4 = <IsarUint8List?>[];
+  for (var str in value4) {
+    if (str != null) {
+      final bytes = IsarBinaryWriter.utf8Encoder.convert(str);
+      bytesList4.add(bytes);
+      dynamicSize += bytes.length as int;
+    } else {
+      bytesList4.add(null);
+    }
+  }
+  final _exportFieldKeys = bytesList4;
+  final value5 = object.label;
+  final _label = IsarBinaryWriter.utf8Encoder.convert(value5);
+  dynamicSize += (_label.length) as int;
+  final value6 = object.model;
+  final _model = IsarBinaryWriter.utf8Encoder.convert(value6);
+  dynamicSize += (_model.length) as int;
+  final value7 = object.order;
+  final _order = value7;
+  final value8 = object.tags;
+  dynamicSize += (value8.length) * 8;
+  final bytesList8 = <IsarUint8List>[];
+  for (var str in value8) {
+    final bytes = IsarBinaryWriter.utf8Encoder.convert(str);
+    bytesList8.add(bytes);
+    dynamicSize += bytes.length as int;
+  }
+  final _tags = bytesList8;
   final size = staticSize + dynamicSize;
 
   rawObj.buffer = alloc(size);
@@ -111,12 +146,14 @@ void _ankiMappingSerializeNative(
   final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
   final writer = IsarBinaryWriter(buffer, staticSize);
   writer.writeBytes(offsets[0], _actions);
-  writer.writeBytes(offsets[1], _enhancements);
-  writer.writeLongList(offsets[2], _fieldIndexes);
-  writer.writeBytes(offsets[3], _label);
-  writer.writeBytes(offsets[4], _model);
-  writer.writeLong(offsets[5], _order);
-  writer.writeStringList(offsets[6], _tags);
+  writer.writeStringList(offsets[1], _creatorCollapsedFieldKeys);
+  writer.writeStringList(offsets[2], _creatorFieldKeys);
+  writer.writeBytes(offsets[3], _enhancements);
+  writer.writeStringList(offsets[4], _exportFieldKeys);
+  writer.writeBytes(offsets[5], _label);
+  writer.writeBytes(offsets[6], _model);
+  writer.writeLong(offsets[7], _order);
+  writer.writeStringList(offsets[8], _tags);
 }
 
 AnkiMapping _ankiMappingDeserializeNative(
@@ -127,14 +164,16 @@ AnkiMapping _ankiMappingDeserializeNative(
   final object = AnkiMapping(
     actions: _ankiMappingQuickActionsConverter
         .fromIsar(reader.readString(offsets[0])),
+    creatorCollapsedFieldKeys: reader.readStringList(offsets[1]) ?? [],
+    creatorFieldKeys: reader.readStringList(offsets[2]) ?? [],
     enhancements: _ankiMappingEnhancementsConverter
-        .fromIsar(reader.readString(offsets[1])),
-    fieldIndexes: reader.readLongOrNullList(offsets[2]) ?? [],
+        .fromIsar(reader.readString(offsets[3])),
+    exportFieldKeys: reader.readStringOrNullList(offsets[4]) ?? [],
     id: id,
-    label: reader.readString(offsets[3]),
-    model: reader.readString(offsets[4]),
-    order: reader.readLong(offsets[5]),
-    tags: reader.readStringList(offsets[6]) ?? [],
+    label: reader.readString(offsets[5]),
+    model: reader.readString(offsets[6]),
+    order: reader.readLong(offsets[7]),
+    tags: reader.readStringList(offsets[8]) ?? [],
   );
   return object;
 }
@@ -148,17 +187,21 @@ P _ankiMappingDeserializePropNative<P>(
       return (_ankiMappingQuickActionsConverter
           .fromIsar(reader.readString(offset))) as P;
     case 1:
+      return (reader.readStringList(offset) ?? []) as P;
+    case 2:
+      return (reader.readStringList(offset) ?? []) as P;
+    case 3:
       return (_ankiMappingEnhancementsConverter
           .fromIsar(reader.readString(offset))) as P;
-    case 2:
-      return (reader.readLongOrNullList(offset) ?? []) as P;
-    case 3:
-      return (reader.readString(offset)) as P;
     case 4:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNullList(offset) ?? []) as P;
     case 5:
-      return (reader.readLong(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 6:
+      return (reader.readString(offset)) as P;
+    case 7:
+      return (reader.readLong(offset)) as P;
+    case 8:
       return (reader.readStringList(offset) ?? []) as P;
     default:
       throw 'Illegal propertyIndex';
@@ -170,9 +213,12 @@ dynamic _ankiMappingSerializeWeb(
   final jsObj = IsarNative.newJsObject();
   IsarNative.jsObjectSet(jsObj, 'actions',
       _ankiMappingQuickActionsConverter.toIsar(object.actions));
+  IsarNative.jsObjectSet(
+      jsObj, 'creatorCollapsedFieldKeys', object.creatorCollapsedFieldKeys);
+  IsarNative.jsObjectSet(jsObj, 'creatorFieldKeys', object.creatorFieldKeys);
   IsarNative.jsObjectSet(jsObj, 'enhancements',
       _ankiMappingEnhancementsConverter.toIsar(object.enhancements));
-  IsarNative.jsObjectSet(jsObj, 'fieldIndexes', object.fieldIndexes);
+  IsarNative.jsObjectSet(jsObj, 'exportFieldKeys', object.exportFieldKeys);
   IsarNative.jsObjectSet(jsObj, 'id', object.id);
   IsarNative.jsObjectSet(jsObj, 'label', object.label);
   IsarNative.jsObjectSet(jsObj, 'model', object.model);
@@ -186,10 +232,22 @@ AnkiMapping _ankiMappingDeserializeWeb(
   final object = AnkiMapping(
     actions: _ankiMappingQuickActionsConverter
         .fromIsar(IsarNative.jsObjectGet(jsObj, 'actions') ?? ''),
+    creatorCollapsedFieldKeys:
+        (IsarNative.jsObjectGet(jsObj, 'creatorCollapsedFieldKeys') as List?)
+                ?.map((e) => e ?? '')
+                .toList()
+                .cast<String>() ??
+            [],
+    creatorFieldKeys:
+        (IsarNative.jsObjectGet(jsObj, 'creatorFieldKeys') as List?)
+                ?.map((e) => e ?? '')
+                .toList()
+                .cast<String>() ??
+            [],
     enhancements: _ankiMappingEnhancementsConverter
         .fromIsar(IsarNative.jsObjectGet(jsObj, 'enhancements') ?? ''),
-    fieldIndexes: (IsarNative.jsObjectGet(jsObj, 'fieldIndexes') as List?)
-            ?.cast<int?>() ??
+    exportFieldKeys: (IsarNative.jsObjectGet(jsObj, 'exportFieldKeys') as List?)
+            ?.cast<String?>() ??
         [],
     id: IsarNative.jsObjectGet(jsObj, 'id'),
     label: IsarNative.jsObjectGet(jsObj, 'label') ?? '',
@@ -209,12 +267,25 @@ P _ankiMappingDeserializePropWeb<P>(Object jsObj, String propertyName) {
     case 'actions':
       return (_ankiMappingQuickActionsConverter
           .fromIsar(IsarNative.jsObjectGet(jsObj, 'actions') ?? '')) as P;
+    case 'creatorCollapsedFieldKeys':
+      return ((IsarNative.jsObjectGet(jsObj, 'creatorCollapsedFieldKeys')
+                  as List?)
+              ?.map((e) => e ?? '')
+              .toList()
+              .cast<String>() ??
+          []) as P;
+    case 'creatorFieldKeys':
+      return ((IsarNative.jsObjectGet(jsObj, 'creatorFieldKeys') as List?)
+              ?.map((e) => e ?? '')
+              .toList()
+              .cast<String>() ??
+          []) as P;
     case 'enhancements':
       return (_ankiMappingEnhancementsConverter
           .fromIsar(IsarNative.jsObjectGet(jsObj, 'enhancements') ?? '')) as P;
-    case 'fieldIndexes':
-      return ((IsarNative.jsObjectGet(jsObj, 'fieldIndexes') as List?)
-              ?.cast<int?>() ??
+    case 'exportFieldKeys':
+      return ((IsarNative.jsObjectGet(jsObj, 'exportFieldKeys') as List?)
+              ?.cast<String?>() ??
           []) as P;
     case 'id':
       return (IsarNative.jsObjectGet(jsObj, 'id')) as P;
@@ -598,8 +669,224 @@ extension AnkiMappingQueryFilter
   }
 
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      creatorCollapsedFieldKeysAnyEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.eq,
+      property: 'creatorCollapsedFieldKeys',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      creatorCollapsedFieldKeysAnyGreaterThan(
+    String value, {
+    bool caseSensitive = true,
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.gt,
+      include: include,
+      property: 'creatorCollapsedFieldKeys',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      creatorCollapsedFieldKeysAnyLessThan(
+    String value, {
+    bool caseSensitive = true,
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.lt,
+      include: include,
+      property: 'creatorCollapsedFieldKeys',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      creatorCollapsedFieldKeysAnyBetween(
+    String lower,
+    String upper, {
+    bool caseSensitive = true,
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition.between(
+      property: 'creatorCollapsedFieldKeys',
+      lower: lower,
+      includeLower: includeLower,
+      upper: upper,
+      includeUpper: includeUpper,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      creatorCollapsedFieldKeysAnyStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.startsWith,
+      property: 'creatorCollapsedFieldKeys',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      creatorCollapsedFieldKeysAnyEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.endsWith,
+      property: 'creatorCollapsedFieldKeys',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      creatorCollapsedFieldKeysAnyContains(String value,
+          {bool caseSensitive = true}) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.contains,
+      property: 'creatorCollapsedFieldKeys',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      creatorCollapsedFieldKeysAnyMatches(String pattern,
+          {bool caseSensitive = true}) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.matches,
+      property: 'creatorCollapsedFieldKeys',
+      value: pattern,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      creatorFieldKeysAnyEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.eq,
+      property: 'creatorFieldKeys',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      creatorFieldKeysAnyGreaterThan(
+    String value, {
+    bool caseSensitive = true,
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.gt,
+      include: include,
+      property: 'creatorFieldKeys',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      creatorFieldKeysAnyLessThan(
+    String value, {
+    bool caseSensitive = true,
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.lt,
+      include: include,
+      property: 'creatorFieldKeys',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      creatorFieldKeysAnyBetween(
+    String lower,
+    String upper, {
+    bool caseSensitive = true,
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition.between(
+      property: 'creatorFieldKeys',
+      lower: lower,
+      includeLower: includeLower,
+      upper: upper,
+      includeUpper: includeUpper,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      creatorFieldKeysAnyStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.startsWith,
+      property: 'creatorFieldKeys',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      creatorFieldKeysAnyEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.endsWith,
+      property: 'creatorFieldKeys',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      creatorFieldKeysAnyContains(String value, {bool caseSensitive = true}) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.contains,
+      property: 'creatorFieldKeys',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      creatorFieldKeysAnyMatches(String pattern, {bool caseSensitive = true}) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.matches,
+      property: 'creatorFieldKeys',
+      value: pattern,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
       enhancementsEqualTo(
-    Map<Field, Map<int, String>> value, {
+    Map<String, Map<int, String>> value, {
     bool caseSensitive = true,
   }) {
     return addFilterConditionInternal(FilterCondition(
@@ -612,7 +899,7 @@ extension AnkiMappingQueryFilter
 
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
       enhancementsGreaterThan(
-    Map<Field, Map<int, String>> value, {
+    Map<String, Map<int, String>> value, {
     bool caseSensitive = true,
     bool include = false,
   }) {
@@ -627,7 +914,7 @@ extension AnkiMappingQueryFilter
 
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
       enhancementsLessThan(
-    Map<Field, Map<int, String>> value, {
+    Map<String, Map<int, String>> value, {
     bool caseSensitive = true,
     bool include = false,
   }) {
@@ -642,8 +929,8 @@ extension AnkiMappingQueryFilter
 
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
       enhancementsBetween(
-    Map<Field, Map<int, String>> lower,
-    Map<Field, Map<int, String>> upper, {
+    Map<String, Map<int, String>> lower,
+    Map<String, Map<int, String>> upper, {
     bool caseSensitive = true,
     bool includeLower = true,
     bool includeUpper = true,
@@ -660,7 +947,7 @@ extension AnkiMappingQueryFilter
 
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
       enhancementsStartsWith(
-    Map<Field, Map<int, String>> value, {
+    Map<String, Map<int, String>> value, {
     bool caseSensitive = true,
   }) {
     return addFilterConditionInternal(FilterCondition(
@@ -673,7 +960,7 @@ extension AnkiMappingQueryFilter
 
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
       enhancementsEndsWith(
-    Map<Field, Map<int, String>> value, {
+    Map<String, Map<int, String>> value, {
     bool caseSensitive = true,
   }) {
     return addFilterConditionInternal(FilterCondition(
@@ -685,7 +972,7 @@ extension AnkiMappingQueryFilter
   }
 
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
-      enhancementsContains(Map<Field, Map<int, String>> value,
+      enhancementsContains(Map<String, Map<int, String>> value,
           {bool caseSensitive = true}) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.contains,
@@ -706,53 +993,109 @@ extension AnkiMappingQueryFilter
   }
 
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
-      fieldIndexesAnyEqualTo(int value) {
+      exportFieldKeysAnyEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.eq,
-      property: 'fieldIndexes',
+      property: 'exportFieldKeys',
       value: value,
+      caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
-      fieldIndexesAnyGreaterThan(
-    int value, {
+      exportFieldKeysAnyGreaterThan(
+    String value, {
+    bool caseSensitive = true,
     bool include = false,
   }) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.gt,
       include: include,
-      property: 'fieldIndexes',
+      property: 'exportFieldKeys',
       value: value,
+      caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
-      fieldIndexesAnyLessThan(
-    int value, {
+      exportFieldKeysAnyLessThan(
+    String value, {
+    bool caseSensitive = true,
     bool include = false,
   }) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.lt,
       include: include,
-      property: 'fieldIndexes',
+      property: 'exportFieldKeys',
       value: value,
+      caseSensitive: caseSensitive,
     ));
   }
 
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
-      fieldIndexesAnyBetween(
-    int lower,
-    int upper, {
+      exportFieldKeysAnyBetween(
+    String lower,
+    String upper, {
+    bool caseSensitive = true,
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return addFilterConditionInternal(FilterCondition.between(
-      property: 'fieldIndexes',
+      property: 'exportFieldKeys',
       lower: lower,
       includeLower: includeLower,
       upper: upper,
       includeUpper: includeUpper,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      exportFieldKeysAnyStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.startsWith,
+      property: 'exportFieldKeys',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      exportFieldKeysAnyEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.endsWith,
+      property: 'exportFieldKeys',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      exportFieldKeysAnyContains(String value, {bool caseSensitive = true}) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.contains,
+      property: 'exportFieldKeys',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      exportFieldKeysAnyMatches(String pattern, {bool caseSensitive = true}) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.matches,
+      property: 'exportFieldKeys',
+      value: pattern,
+      caseSensitive: caseSensitive,
     ));
   }
 
@@ -1320,14 +1663,24 @@ extension AnkiMappingQueryProperty
     return addPropertyNameInternal('actions');
   }
 
-  QueryBuilder<AnkiMapping, Map<Field, Map<int, String>>, QQueryOperations>
+  QueryBuilder<AnkiMapping, List<String>, QQueryOperations>
+      creatorCollapsedFieldKeysProperty() {
+    return addPropertyNameInternal('creatorCollapsedFieldKeys');
+  }
+
+  QueryBuilder<AnkiMapping, List<String>, QQueryOperations>
+      creatorFieldKeysProperty() {
+    return addPropertyNameInternal('creatorFieldKeys');
+  }
+
+  QueryBuilder<AnkiMapping, Map<String, Map<int, String>>, QQueryOperations>
       enhancementsProperty() {
     return addPropertyNameInternal('enhancements');
   }
 
-  QueryBuilder<AnkiMapping, List<int?>, QQueryOperations>
-      fieldIndexesProperty() {
-    return addPropertyNameInternal('fieldIndexes');
+  QueryBuilder<AnkiMapping, List<String?>, QQueryOperations>
+      exportFieldKeysProperty() {
+    return addPropertyNameInternal('exportFieldKeys');
   }
 
   QueryBuilder<AnkiMapping, int?, QQueryOperations> idProperty() {
@@ -1358,14 +1711,21 @@ extension AnkiMappingQueryProperty
 AnkiMapping _$AnkiMappingFromJson(Map<String, dynamic> json) => AnkiMapping(
       label: json['label'] as String,
       model: json['model'] as String,
-      fieldIndexes: (json['fieldIndexes'] as List<dynamic>)
-          .map((e) => e as int?)
+      exportFieldKeys: (json['exportFieldKeys'] as List<dynamic>)
+          .map((e) => e as String?)
           .toList(),
+      creatorFieldKeys: (json['creatorFieldKeys'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList(),
+      creatorCollapsedFieldKeys:
+          (json['creatorCollapsedFieldKeys'] as List<dynamic>)
+              .map((e) => e as String)
+              .toList(),
       order: json['order'] as int,
       tags: (json['tags'] as List<dynamic>).map((e) => e as String).toList(),
       enhancements: (json['enhancements'] as Map<String, dynamic>).map(
         (k, e) => MapEntry(
-            $enumDecode(_$FieldEnumMap, k),
+            k,
             (e as Map<String, dynamic>).map(
               (k, e) => MapEntry(int.parse(k), e as String),
             )),
@@ -1381,21 +1741,12 @@ Map<String, dynamic> _$AnkiMappingToJson(AnkiMapping instance) =>
       'id': instance.id,
       'label': instance.label,
       'model': instance.model,
-      'fieldIndexes': instance.fieldIndexes,
+      'exportFieldKeys': instance.exportFieldKeys,
+      'creatorFieldKeys': instance.creatorFieldKeys,
+      'creatorCollapsedFieldKeys': instance.creatorCollapsedFieldKeys,
       'tags': instance.tags,
       'actions': instance.actions.map((k, e) => MapEntry(k.toString(), e)),
-      'enhancements': instance.enhancements.map((k, e) => MapEntry(
-          _$FieldEnumMap[k], e.map((k, e) => MapEntry(k.toString(), e)))),
+      'enhancements': instance.enhancements.map(
+          (k, e) => MapEntry(k, e.map((k, e) => MapEntry(k.toString(), e)))),
       'order': instance.order,
     };
-
-const _$FieldEnumMap = {
-  Field.sentence: 'sentence',
-  Field.term: 'term',
-  Field.reading: 'reading',
-  Field.meaning: 'meaning',
-  Field.extra: 'extra',
-  Field.image: 'image',
-  Field.audio: 'audio',
-  Field.context: 'context',
-};

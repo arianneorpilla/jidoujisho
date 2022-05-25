@@ -26,17 +26,16 @@ class ShareAction extends QuickAction {
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,
-    required String term,
-    required String reading,
-    required List<DictionaryEntry> entries,
+    required DictionaryTerm dictionaryTerm,
+    required List<DictionaryMetaEntry> metaEntries,
   }) async {
     StringBuffer buffer = StringBuffer();
-    buffer.write(term);
-    if (reading.isNotEmpty) {
-      buffer.write(' ($reading)');
+    buffer.write(dictionaryTerm);
+    if (dictionaryTerm.reading.isNotEmpty) {
+      buffer.write(' (${dictionaryTerm.reading})');
     }
     buffer.write('\n\n');
-    buffer.write(MeaningField.flattenMeanings(entries));
+    buffer.write(MeaningField.flattenMeanings(dictionaryTerm.entries));
 
     String shareText = buffer.toString();
 

@@ -114,23 +114,21 @@ class JapaneseLanguage extends Language {
   Widget getTermReadingOverrideWidget({
     required BuildContext context,
     required AppModel appModel,
-    required String term,
-    required String reading,
-    required List<DictionaryEntry> meanings,
+    required DictionaryTerm dictionaryTerm,
   }) {
-    if (reading.isEmpty) {
+    if (dictionaryTerm.reading.isEmpty) {
       return super.getTermReadingOverrideWidget(
         context: context,
         appModel: appModel,
-        term: term,
-        reading: reading,
-        meanings: meanings,
+        dictionaryTerm: dictionaryTerm,
       );
     }
 
-    List<RubyTextData>? segments = fetchFurigana(term: term, reading: reading);
+    List<RubyTextData>? segments = fetchFurigana(
+        term: dictionaryTerm.term, reading: dictionaryTerm.reading);
     return RubyText(
-      segments ?? [RubyTextData(term, ruby: reading)],
+      segments ??
+          [RubyTextData(dictionaryTerm.term, ruby: dictionaryTerm.reading)],
       style: Theme.of(context)
           .textTheme
           .titleLarge!
@@ -252,7 +250,7 @@ class JapaneseLanguage extends Language {
 }
 
 /// Top-level function for use in compute. See [Language] for details.
-Future<List<List<DictionaryEntry>>> prepareSearchResultsJapaneseLanguage(
+Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
     DictionarySearchParams params) async {
   String searchTerm = params.searchTerm.trim();
   String fallbackTerm = params.fallbackTerm.trim();
@@ -527,12 +525,16 @@ Future<List<List<DictionaryEntry>>> prepareSearchResultsJapaneseLanguage(
     (entry) => DictionaryPair(term: entry.term, reading: entry.reading),
   );
 
-  List<List<DictionaryEntry>> mapping = entriesByPair.values
-      .map((entries) => entries.map((entry) => entry).toList())
+  List<DictionaryTerm> terms = entriesByPair.entries
+      .map((entry) => DictionaryTerm(
+            term: entry.key.term,
+            reading: entry.key.reading,
+            entries: entry.value,
+          ))
       .toList();
 
-  if (mapping.length >= params.maximumDictionaryTermsInResult) {
-    mapping = mapping.sublist(0, params.maximumDictionaryTermsInResult);
+  if (terms.length >= params.maximumDictionaryTermsInResult) {
+    terms = terms.sublist(0, params.maximumDictionaryTermsInResult);
   }
 
   // For debugging search results.
@@ -561,5 +563,5 @@ Future<List<List<DictionaryEntry>>> prepareSearchResultsJapaneseLanguage(
   //     'FALLBACK TERM LESS DESPERATE THAN LONGEST EXACT READING PREFIX: $fallbackTermLessDesperateThanLongestExactReadingPrefix');
   // debugPrint('-' * 50);
 
-  return mapping;
+  return terms;
 }

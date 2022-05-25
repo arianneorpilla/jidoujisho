@@ -21,6 +21,12 @@ abstract class BaseTabPage extends BasePage {
 /// was implemented to define shortcuts for common lengthy methods across UI
 /// code.
 abstract class BaseTabPageState<T extends BaseTabPage> extends BasePageState {
+  @override
+  void initState() {
+    super.initState();
+    mediaType.tabTappedNotifier.addListener(floatingSearchBarController.close);
+  }
+
   /// The message to be shown in the placeholder that displays when
   /// [shouldPlaceholderBeShown] is true. This should be a localised message.
   String get placeholderMessage => appModel.translate('info_empty_home_tab');
@@ -32,6 +38,10 @@ abstract class BaseTabPageState<T extends BaseTabPage> extends BasePageState {
       if (shouldPlaceholderBeShown) buildPlaceholder() else Container()
     ]);
   }
+
+  /// For controlling the [FloatingSearchBar].
+  final FloatingSearchBarController floatingSearchBarController =
+      FloatingSearchBarController();
 
   /// Each tab in the home page represents a media type.
   MediaType get mediaType;

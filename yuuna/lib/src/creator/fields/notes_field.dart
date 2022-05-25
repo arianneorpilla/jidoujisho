@@ -11,7 +11,7 @@ class NotesField extends Field {
       : super(
           uniqueKey: key,
           label: 'Notes',
-          description: 'Any supplementary information',
+          description: 'Supplementary information or personal observations.',
           icon: Icons.description,
         );
 
@@ -24,17 +24,15 @@ class NotesField extends Field {
   static const String key = 'notes';
 
   @override
-  String onCreatorOpenAction({
+  String? onCreatorOpenAction({
     required BuildContext context,
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,
-    required String term,
-    required String reading,
-    required List<DictionaryEntry> entries,
+    required DictionaryTerm dictionaryTerm,
+    required List<DictionaryMetaEntry> metaEntries,
+    required bool creatorJustLaunched,
   }) {
-    throw UnimplementedError(
-      'Field must generate a value upon opening creator',
-    );
+    return null;
   }
 }

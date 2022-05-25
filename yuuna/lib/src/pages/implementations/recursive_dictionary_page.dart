@@ -38,6 +38,11 @@ class _RecursiveDictionaryPageState
   String get noSearchResultsLabel => appModel.translate('no_search_results');
   String get enterSearchTermLabel => appModel.translate('enter_search_term');
   String get clearLabel => appModel.translate('clear');
+  String get clearSearchTitle => appModel.translate('clear_search_title');
+  String get clearSearchDescription =>
+      appModel.translate('clear_search_description');
+  String get dialogClearLabel => appModel.translate('dialog_clear');
+  String get dialogCancelLabel => appModel.translate('dialog_cancel');
 
   final FloatingSearchBarController _controller = FloatingSearchBarController();
 
@@ -156,7 +161,6 @@ class _RecursiveDictionaryPageState
       showIfOpened: true,
       showIfClosed: false,
       child: JidoujishoIconButton(
-        size: textTheme.titleLarge?.fontSize,
         tooltip: backLabel,
         icon: Icons.arrow_back,
         onTap: () {
@@ -176,6 +180,57 @@ class _RecursiveDictionaryPageState
       size: textTheme.titleLarge!.fontSize!,
       searchButtonSemanticLabel: searchLabel,
       clearButtonSemanticLabel: clearLabel,
+    );
+  }
+
+  Widget buildSearchClearButton() {
+    return FloatingSearchBarAction(
+      showIfOpened: true,
+      showIfClosed: false,
+      child: JidoujishoIconButton(
+        size: textTheme.titleLarge?.fontSize,
+        tooltip: clearLabel,
+        icon: Icons.delete_sweep,
+        onTap: showDeleteSearchHistoryPrompt,
+      ),
+    );
+  }
+
+  void showDeleteSearchHistoryPrompt() async {
+    Widget alertDialog = AlertDialog(
+      contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
+          ? Spacing.of(context).insets.exceptBottom.big
+          : Spacing.of(context).insets.exceptBottom.normal,
+      title: Text(clearSearchTitle),
+      content: Text(
+        clearSearchDescription,
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text(
+            dialogClearLabel,
+            style: TextStyle(
+              color: theme.colorScheme.primary,
+            ),
+          ),
+          onPressed: () async {
+            appModel.clearSearchHistory(
+                historyKey: DictionaryMediaType.instance.uniqueKey);
+
+            setState(() {});
+            Navigator.pop(context);
+          },
+        ),
+        TextButton(
+          child: Text(dialogCancelLabel),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ],
+    );
+
+    await showDialog(
+      context: context,
+      builder: (context) => alertDialog,
     );
   }
 
@@ -212,7 +267,7 @@ class _RecursiveDictionaryPageState
         return const SizedBox.shrink();
       }
     }
-    if (_result == null || _result!.mapping.isEmpty) {
+    if (_result == null || _result!.terms.isEmpty) {
       return buildNoSearchResultsPlaceholderMessage();
     }
 

@@ -8,7 +8,7 @@ part 'anki_mapping.g.dart';
 
 /// A user-generated mapping to allow customisation of the fields exported from
 /// the application. A mapping is bound to a [model], which must have a length
-/// of fields equal or more than the length of [getFields].
+/// of fields equal or more than the length of [getExportFields].
 @JsonSerializable()
 @Collection()
 class AnkiMapping {
@@ -16,7 +16,9 @@ class AnkiMapping {
   AnkiMapping({
     required this.label,
     required this.model,
-    required this.fieldKeys,
+    required this.exportFieldKeys,
+    required this.creatorFieldKeys,
+    required this.creatorCollapsedFieldKeys,
     required this.order,
     required this.tags,
     required this.enhancements,
@@ -30,7 +32,7 @@ class AnkiMapping {
     return AnkiMapping(
       label: standardProfileName,
       model: standardModelName,
-      fieldKeys: [
+      exportFieldKeys: [
         SentenceField.key,
         TermField.key,
         ReadingField.key,
@@ -40,6 +42,8 @@ class AnkiMapping {
         AudioField.key,
         ContextField.key,
       ],
+      creatorFieldKeys: defaultCreatorFieldKeys,
+      creatorCollapsedFieldKeys: defaultCreatorCollapsedFieldKeys,
       order: order,
       tags: [standardModelName],
       enhancements: defaultEnhancements,
@@ -56,7 +60,27 @@ class AnkiMapping {
     NotesField.key: {0: ClearFieldEnhancement.key},
     ImageField.key: {0: ClearFieldEnhancement.key},
     AudioField.key: {0: ClearFieldEnhancement.key},
+    ContextField.key: {0: ClearFieldEnhancement.key},
+    PitchAccentField.key: {0: ClearFieldEnhancement.key},
+    FuriganaField.key: {0: ClearFieldEnhancement.key},
+    CollapsedMeaningField.key: {0: ClearFieldEnhancement.key},
+    ExpandedMeaningField.key: {0: ClearFieldEnhancement.key},
+    HiddenMeaningField.key: {0: ClearFieldEnhancement.key},
   };
+
+  /// Default fields to show upon opening the Card Creator.
+  static const List<String> defaultCreatorFieldKeys = [
+    SentenceField.key,
+    TermField.key,
+    ReadingField.key,
+    MeaningField.key,
+    NotesField.key,
+    ImageField.key,
+    AudioField.key,
+  ];
+
+  /// Default fields to show upon opening the Card Creator.
+  static const List<String> defaultCreatorCollapsedFieldKeys = [];
 
   /// A default map of enhancements to use for new mappings.
   static const Map<int, String> defaultActions = {0: CardCreatorAction.key};
@@ -78,9 +102,17 @@ class AnkiMapping {
   /// The name of the model to use when exporting with this mapping.
   final String model;
 
-  /// Returns the unique key equivalents of the field in [getFields] that can
-  /// be stored in a database.
-  List<String?> fieldKeys;
+  /// Returns the unique key equivalents of the field in [getExportFields] that
+  /// can be stored in a database.
+  List<String?> exportFieldKeys;
+
+  /// Returns the unique key equivalents of the field in [getCreatorFields]
+  /// that can be stored in a database.
+  List<String> creatorFieldKeys;
+
+  /// Returns the unique key equivalents of the field in
+  /// [getCreatorCollapsedFields] that can be stored in a database.
+  List<String> creatorCollapsedFieldKeys;
 
   /// A collection of tags to always include when exporting with this mapping.
   final List<String> tags;
@@ -102,13 +134,11 @@ class AnkiMapping {
   @Index(unique: true)
   int order;
 
-  /// The ordering of the fields to use when exporting with this mapping. The
-  /// length of this must be less or equal the length of the model being used
-  /// for export to work correctly.
-  List<Field?> getFields() {
+  /// Convert unique keys to fields.
+  List<Field?> keysToFieldsNullable(List<String?> keys) {
     List<Field?> fields = [];
 
-    for (String? key in fieldKeys) {
+    for (String? key in keys) {
       if (key == null) {
         fields.add(null);
       } else {
@@ -120,12 +150,38 @@ class AnkiMapping {
     return fields;
   }
 
+  /// Convert unique keys to fields.
+  List<Field> keysToFields(List<String> keys) {
+    List<Field> fields = [];
+
+    for (String key in keys) {
+      Field field = fieldsByKey[key]!;
+      fields.add(field);
+    }
+
+    return fields;
+  }
+
+  /// The ordering of the fields to use when exporting with this mapping. The
+  /// length of this must be less or equal the length of the model being used
+  /// for export to work correctly.
+  List<Field?> getExportFields() => keysToFieldsNullable(exportFieldKeys);
+
+  /// The ordering of the fields to show in the Creator.
+  List<Field> getCreatorFields() => keysToFields(creatorFieldKeys);
+
+  /// The ordering of the fields to hide in the Creator.
+  List<Field> getCreatorCollapsedFields() =>
+      keysToFields(creatorCollapsedFieldKeys);
+
   /// Creates a deep copy of this mapping but with the given variables replaced
   /// with the new values.
   AnkiMapping copyWith({
     String? label,
     String? model,
-    List<String?>? fieldKeys,
+    List<String?>? exportFieldKeys,
+    List<String>? creatorFieldKeys,
+    List<String>? creatorCollapsedFieldKeys,
     List<String>? tags,
     int? order,
     int? id,
@@ -135,7 +191,10 @@ class AnkiMapping {
     return AnkiMapping(
       label: label ?? this.label,
       model: model ?? this.model,
-      fieldKeys: fieldKeys ?? this.fieldKeys,
+      exportFieldKeys: exportFieldKeys ?? this.exportFieldKeys,
+      creatorFieldKeys: creatorFieldKeys ?? this.creatorFieldKeys,
+      creatorCollapsedFieldKeys:
+          creatorCollapsedFieldKeys ?? this.creatorCollapsedFieldKeys,
       tags: tags ?? this.tags,
       order: order ?? this.order,
       id: id ?? this.id,
@@ -147,7 +206,7 @@ class AnkiMapping {
   /// Returns a list of enhancement names active for a certain field in the
   /// persisted enhancements map.
   List<String> getManualFieldEnhancementNames({required Field field}) {
-    return enhancements[field]!
+    return (enhancements[field.uniqueKey] ?? {})
         .entries
         .where((entry) => entry.key != autoModeSlotNumber)
         .map((entry) => entry.value)
@@ -157,7 +216,7 @@ class AnkiMapping {
   /// Returns the enhancement names active for a certain field in the persisted
   /// enhancements map.
   String? getAutoFieldEnhancementName({required Field field}) {
-    return enhancements[field]![autoModeSlotNumber];
+    return (enhancements[field.uniqueKey] ?? {})[autoModeSlotNumber];
   }
 
   /// Returns a list of action names active in the persisted actions map.
@@ -183,7 +242,7 @@ class AnkiMapping {
   /// enhancements map.
   Enhancement? getAutoFieldEnhancement(
       {required AppModel appModel, required Field field}) {
-    String? enhancementName = enhancements[field]![autoModeSlotNumber];
+    String? enhancementName = getAutoFieldEnhancementName(field: field);
     if (enhancementName == null) {
       return null;
     }

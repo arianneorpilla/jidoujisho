@@ -51,7 +51,7 @@ class _EnhancementsPickerDialogPage
     List<String> activeEnhancements = appModel.lastSelectedMapping
         .getManualFieldEnhancementNames(field: widget.field);
     List<Enhancement> enhancements =
-        appModel.enhancements[widget.field]!.values.toList();
+        (appModel.enhancements[widget.field] ?? {}).values.toList();
     if (!widget.autoMode) {
       enhancements.removeWhere(
           (enhancement) => activeEnhancements.contains(enhancement.uniqueKey));
@@ -62,6 +62,8 @@ class _EnhancementsPickerDialogPage
     return SizedBox(
       width: double.maxFinite,
       child: RawScrollbar(
+        thickness: 3,
+        thumbVisibility: true,
         controller: contentController,
         child: SingleChildScrollView(
           controller: contentController,
@@ -95,6 +97,8 @@ class _EnhancementsPickerDialogPage
 
   Widget buildEnhancementTiles(List<Enhancement> enhancements) {
     return RawScrollbar(
+      thickness: 3,
+      thumbVisibility: true,
       controller: _scrollController,
       child: ListView.builder(
         controller: _scrollController,

@@ -22,12 +22,19 @@ class DictionaryMetaEntry {
     this.id,
   });
 
+  /// Create an instance of this class from a serialized format.
+  factory DictionaryMetaEntry.fromJson(Map<String, dynamic> json) =>
+      _$DictionaryMetaEntryFromJson(json);
+
+  /// Convert this into a serialized format.
+  Map<String, dynamic> toJson() => _$DictionaryMetaEntryToJson(this);
+
   /// A unique identifier for the purposes of database storage.
   @Id()
   int? id;
 
   /// The word or phrase represented by this dictionary entry.
-  @Index()
+  @Index(composite: [CompositeIndex('dictionaryName')])
   final String term;
 
   /// The dictionary from which this entry was imported from. This is used for

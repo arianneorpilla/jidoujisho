@@ -92,7 +92,8 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
         return ValueListenableBuilder<int>(
           valueListenable: indexNotifier,
           builder: (context, value, child) {
-            List<DictionaryEntry> entries = result.mapping[indexNotifier.value];
+            DictionaryTerm dictionaryTerm = result.terms[indexNotifier.value];
+            List<DictionaryEntry> entries = dictionaryTerm.entries;
 
             entries.sort((a, b) => (dictionaryOrderCache![a.dictionaryName]!)
                 .compareTo(dictionaryOrderCache![b.dictionaryName]!));
@@ -112,13 +113,13 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
             }
 
             return DictionaryTermPage(
-              entries: entries,
+              dictionaryTerm: dictionaryTerm,
               onSearch: widget.onSearch,
               onStash: widget.onStash,
               expandableControllers: expandableControllers,
               dictionaryHiddens: dictionaryHiddens,
               onScrollRight: () async {
-                if (result.scrollIndex == result.mapping.length - 1) {
+                if (result.scrollIndex == result.terms.length - 1) {
                   result.scrollIndex = 0;
                 } else {
                   result.scrollIndex += 1;
@@ -133,7 +134,7 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
               },
               onScrollLeft: () async {
                 if (result.scrollIndex == 0) {
-                  result.scrollIndex = result.mapping.length - 1;
+                  result.scrollIndex = result.terms.length - 1;
                 } else {
                   result.scrollIndex -= 1;
                 }
@@ -214,7 +215,7 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
             ),
           ),
           TextSpan(
-            text: '${result.mapping.length} ',
+            text: '${result.terms.length} ',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: fontSize,

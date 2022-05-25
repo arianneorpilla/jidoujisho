@@ -12,7 +12,8 @@ class SentenceField extends Field {
       : super(
           uniqueKey: key,
           label: 'Sentence',
-          description: 'Example sentence or context',
+          description:
+              'Subtitles, book excerpts and other contextual information.',
           icon: Icons.format_align_center,
         );
 
@@ -25,17 +26,15 @@ class SentenceField extends Field {
   static const String key = 'sentence';
 
   @override
-  String onCreatorOpenAction({
+  String? onCreatorOpenAction({
     required BuildContext context,
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,
-    required String term,
-    required String reading,
-    required List<DictionaryEntry> entries,
+    required DictionaryTerm dictionaryTerm,
+    required List<DictionaryMetaEntry> metaEntries,
+    required bool creatorJustLaunched,
   }) {
-    throw UnimplementedError(
-      'Field must generate a value upon opening creator',
-    );
+    return null;
   }
 }

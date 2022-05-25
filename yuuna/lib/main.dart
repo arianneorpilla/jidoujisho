@@ -247,6 +247,14 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
         scrollbarTheme: ScrollbarThemeData(
           thumbVisibility: MaterialStateProperty.all(true),
         ),
+        sliderTheme: const SliderThemeData(
+          thumbColor: Colors.red,
+          activeTrackColor: Colors.red,
+          inactiveTrackColor: Colors.grey,
+          trackShape: RectangularSliderTrackShape(),
+          trackHeight: 2,
+          thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6),
+        ),
       );
 
   /// Shows when the current [themeMode] is a dark theme.
@@ -316,6 +324,14 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
         ),
         scrollbarTheme: ScrollbarThemeData(
           thumbVisibility: MaterialStateProperty.all(true),
+        ),
+        sliderTheme: const SliderThemeData(
+          thumbColor: Colors.red,
+          activeTrackColor: Colors.red,
+          inactiveTrackColor: Colors.grey,
+          trackShape: RectangularSliderTrackShape(),
+          trackHeight: 2,
+          thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6),
         ),
       );
 }

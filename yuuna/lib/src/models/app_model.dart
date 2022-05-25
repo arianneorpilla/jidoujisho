@@ -44,20 +44,25 @@ final List<CollectionSchema> globalSchemas = [
 /// A list of media types that the app will support at runtime.
 final List<Field> globalFields = List<Field>.unmodifiable(
   [
-    TermField.instance,
     SentenceField.instance,
+    TermField.instance,
     ReadingField.instance,
     MeaningField.instance,
     NotesField.instance,
     ImageField.instance,
     AudioField.instance,
+    PitchAccentField.instance,
+    FuriganaField.instance,
     ContextField.instance,
+    ExpandedMeaningField.instance,
+    CollapsedMeaningField.instance,
+    HiddenMeaningField.instance,
   ],
 );
 
 /// A list of media types that the app will support at runtime.
 final Map<String, Field> fieldsByKey = Map.unmodifiable(
-  Map<String, Field>.fromIterable(
+  Map<String, Field>.fromEntries(
     globalFields.map(
       (field) => MapEntry(field.uniqueKey, field),
     ),
@@ -209,7 +214,10 @@ class AppModel with ChangeNotifier {
   bool _isCreatorOpen = false;
 
   /// Change this once a field hide/show system is in place.
-  List<Field> activeFields = globalFields;
+  List<Field> get activeFields => [
+        ...lastSelectedMapping.getCreatorFields(),
+        ...lastSelectedMapping.getCreatorCollapsedFields()
+      ];
 
   /// Update the user-defined order of a given dictionary in the database.
   /// See the dictionary dialog's [ReorderableListView] for usage.
@@ -352,12 +360,14 @@ class AppModel with ChangeNotifier {
     final Map<Field, List<Enhancement>> availableEnhancements = {
       AudioField.instance: [
         ClearFieldEnhancement(field: AudioField.instance),
+        JapanesePod101AudioEnhancement()
       ],
       NotesField.instance: [
         ClearFieldEnhancement(field: NotesField.instance),
       ],
       ImageField.instance: [
         ClearFieldEnhancement(field: ImageField.instance),
+        BingImagesSearchEnhancement(),
       ],
       MeaningField.instance: [
         ClearFieldEnhancement(field: MeaningField.instance),
@@ -378,6 +388,27 @@ class AppModel with ChangeNotifier {
         MassifExampleSentencesEnhancement(),
         OpenStashEnhancement(field: TermField.instance),
         PopFromStashEnhancement(field: TermField.instance),
+      ],
+      ContextField.instance: [
+        ClearFieldEnhancement(field: ContextField.instance),
+      ],
+      PitchAccentField.instance: [
+        ClearFieldEnhancement(field: PitchAccentField.instance),
+      ],
+      FuriganaField.instance: [
+        ClearFieldEnhancement(field: FuriganaField.instance),
+      ],
+      CollapsedMeaningField.instance: [
+        ClearFieldEnhancement(field: CollapsedMeaningField.instance),
+        TextSegmentationEnhancement(field: CollapsedMeaningField.instance),
+      ],
+      ExpandedMeaningField.instance: [
+        ClearFieldEnhancement(field: ExpandedMeaningField.instance),
+        TextSegmentationEnhancement(field: ExpandedMeaningField.instance),
+      ],
+      HiddenMeaningField.instance: [
+        ClearFieldEnhancement(field: HiddenMeaningField.instance),
+        TextSegmentationEnhancement(field: HiddenMeaningField.instance),
       ],
     };
 
@@ -405,6 +436,7 @@ class AppModel with ChangeNotifier {
       InstantExportAction(),
       AddToStashAction(),
       ShareAction(),
+      PlayAudioAction(),
     ];
 
     quickActions = Map<String, QuickAction>.unmodifiable(
@@ -467,7 +499,7 @@ class AppModel with ChangeNotifier {
     _isarDirectory = Directory(path.join(appDirectory.path, 'isar'));
     _dictionaryImportWorkingDirectory = Directory(
         path.join(appDirectory.path, 'dictionaryImportWorkingDirectory'));
-    //  _exportDirectory = await prepareJidoujishoDirectory();
+    _exportDirectory = await prepareJidoujishoDirectory();
 
     hiveDirectory.createSync();
     isarDirectory.createSync();
@@ -1006,7 +1038,7 @@ class AppModel with ChangeNotifier {
     if (searchTerm.trim().isEmpty) {
       return DictionaryResult(
         searchTerm: searchTerm,
-        mapping: [],
+        terms: [],
       );
     }
 
@@ -1019,12 +1051,12 @@ class AppModel with ChangeNotifier {
       isarDirectoryPath: isarDirectory.path,
     );
 
-    List<List<DictionaryEntry>> mapping =
+    List<DictionaryTerm> terms =
         await compute(targetLanguage.prepareSearchResults!, params);
 
     DictionaryResult result = DictionaryResult(
       searchTerm: searchTerm,
-      mapping: mapping,
+      terms: terms,
     );
 
     return result;
@@ -1239,19 +1271,19 @@ class AppModel with ChangeNotifier {
     }
 
     for (MapEntry<Field, File> entry
-        in creatorFieldValues.imagesToExport.entries) {
+        in creatorFieldValues.audioToExport.entries) {
       String timestamp =
           intl.DateFormat('yyyyMMddTkkmmss').format(DateTime.now());
       String preferredName = 'jidoujisho-$timestamp';
 
-      String? imageFileName;
-      imageFileName = await addFileToMedia(
+      String? audioFileName;
+      audioFileName = await addFileToMedia(
         exportFile: entry.value,
         preferredName: preferredName,
         mimeType: 'audio',
       );
 
-      exportedAudio[entry.key] = imageFileName;
+      exportedAudio[entry.key] = audioFileName;
     }
 
     String model = mapping.model;
@@ -1263,13 +1295,20 @@ class AppModel with ChangeNotifier {
     );
 
     try {
-      return await methodChannel.invokeMethod(
+      await methodChannel.invokeMethod(
         'addNote',
         <String, dynamic>{
           'deck': deck,
           'model': model,
           'fields': fields,
         },
+      );
+
+      String exportedMessage = translate('card_exported');
+      Fluttertoast.showToast(
+        msg: exportedMessage.replaceAll('%deck%', deck),
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
       );
     } on PlatformException {
       debugPrint('Failed to add note');
@@ -1300,7 +1339,7 @@ class AppModel with ChangeNotifier {
     String destinationPath = destinationFile.path;
     exportFile.copySync(destinationPath);
 
-    String uriPath = 'file:///${destinationFile.uri}';
+    String uriPath = '${destinationFile.uri}';
 
     try {
       return await methodChannel.invokeMethod(
@@ -1330,14 +1369,14 @@ class AppModel with ChangeNotifier {
     required Map<Field, String> exportedImages,
     required Map<Field, String> exportedAudio,
   }) {
-    List<String> fields = mapping.getFields().map<String>((field) {
+    List<String> fields = mapping.getExportFields().map<String>((field) {
       if (field == null) {
         return '';
       } else {
         if (field is ImageExportField) {
-          return '<img src="${exportedImages[field]}" />';
+          return '${exportedImages[field]}';
         } else if (field is AudioExportField) {
-          return '[sound:${exportedAudio[field]}';
+          return '${exportedAudio[field]}';
         } else {
           return creatorFieldValues.textValues[field] ?? '';
         }
@@ -1351,7 +1390,7 @@ class AppModel with ChangeNotifier {
   /// fields as the model it uses.
   Future<bool> profileFieldMatchesCardTypeCount(AnkiMapping mapping) async {
     List<String> fields = await getFieldList(mapping.model);
-    return mapping.fieldKeys.length == fields.length;
+    return mapping.exportFieldKeys.length == fields.length;
   }
 
   /// Returns whether or not a given [AnkiMapping]'s model exists in Anki.
@@ -1371,9 +1410,11 @@ class AppModel with ChangeNotifier {
   /// fields, all empty.
   Future<void> resetProfileFields(AnkiMapping mapping) async {
     List<String> fields = await getFieldList(mapping.model);
-    List<String?> fieldKeys = List.generate(fields.length, (index) => null);
+    List<String?> exportFieldKeys =
+        List.generate(fields.length, (index) => null);
 
-    AnkiMapping resetMapping = mapping.copyWith(fieldKeys: fieldKeys);
+    AnkiMapping resetMapping =
+        mapping.copyWith(exportFieldKeys: exportFieldKeys);
     _database.writeTxnSync((database) {
       if (mapping.id != null &&
           database.ankiMappings.getSync(resetMapping.id!) != null) {
@@ -1470,7 +1511,8 @@ class AppModel with ChangeNotifier {
       PageRouteBuilder(
         pageBuilder: (context, animation1, animation2) => CreatorPage(
           decks: decks,
-          editMode: false,
+          editEnhancements: false,
+          editFields: false,
           killOnPop: killOnPop,
         ),
         transitionDuration: Duration.zero,
@@ -1482,7 +1524,7 @@ class AppModel with ChangeNotifier {
   }
 
   /// A helper function for opening the creator from any page in the
-  /// application for editing purposes.
+  /// application for editing enhancements.
   Future<void> openCreatorEnhancementsEditor() async {
     List<String> decks = await getDecks();
 
@@ -1491,7 +1533,28 @@ class AppModel with ChangeNotifier {
       PageRouteBuilder(
         pageBuilder: (context, animation1, animation2) => CreatorPage(
           decks: decks,
-          editMode: true,
+          editEnhancements: true,
+          editFields: false,
+          killOnPop: false,
+        ),
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+      ),
+    );
+  }
+
+  // A helper function for opening the creator from any page in the
+  /// application for editing fields.
+  Future<void> openCreatorFieldsEditor() async {
+    List<String> decks = await getDecks();
+
+    await Navigator.push(
+      _navigatorKey.currentContext!,
+      PageRouteBuilder(
+        pageBuilder: (context, animation1, animation2) => CreatorPage(
+          decks: decks,
+          editEnhancements: false,
+          editFields: true,
           killOnPop: false,
         ),
         transitionDuration: Duration.zero,
@@ -1612,7 +1675,42 @@ class AppModel with ChangeNotifier {
     required int slotNumber,
     required Enhancement enhancement,
   }) async {
+    mapping.enhancements[field.uniqueKey] ??= {};
     mapping.enhancements[field.uniqueKey]![slotNumber] = enhancement.uniqueKey;
+
+    _database.writeTxnSync((isar) {
+      isar.ankiMappings.putSync(mapping);
+    });
+  }
+
+  /// Updates a given [mapping] to remove a [Field].
+  void removeField({
+    required AnkiMapping mapping,
+    required Field field,
+    required bool isCollapsed,
+  }) async {
+    if (isCollapsed) {
+      mapping.creatorCollapsedFieldKeys.remove(field.uniqueKey);
+    } else {
+      mapping.creatorFieldKeys.remove(field.uniqueKey);
+    }
+
+    _database.writeTxnSync((isar) {
+      isar.ankiMappings.putSync(mapping);
+    });
+  }
+
+  /// Updates a given [mapping] to include a [Field].
+  void setField({
+    required AnkiMapping mapping,
+    required Field field,
+    required bool isCollapsed,
+  }) async {
+    if (isCollapsed) {
+      mapping.creatorCollapsedFieldKeys.add(field.uniqueKey);
+    } else {
+      mapping.creatorFieldKeys.add(field.uniqueKey);
+    }
 
     _database.writeTxnSync((isar) {
       isar.ankiMappings.putSync(mapping);
@@ -1795,6 +1893,16 @@ class AppModel with ChangeNotifier {
       return;
     }
 
+    bool hasNonEmpty = false;
+    for (String term in terms) {
+      if (term.trim().isNotEmpty) {
+        hasNonEmpty = true;
+      }
+    }
+    if (!hasNonEmpty) {
+      return;
+    }
+
     for (String term in terms) {
       addToSearchHistory(
         historyKey: stashKey,
@@ -1913,7 +2021,6 @@ class AppModel with ChangeNotifier {
   /// dictionary is deleted, otherwise history data cannot be viewed without
   /// the necessary dictionary metadata.
   void clearDictionaryHistory() async {
-    clearSearchHistory(historyKey: DictionaryMediaType.instance.uniqueKey);
     _database.writeTxnSync((isar) {
       isar.dictionaryResults.clearSync();
     });
@@ -1923,11 +2030,8 @@ class AppModel with ChangeNotifier {
 
   /// Return a list of [DictionaryMetaEntry] for a certain term.
   List<DictionaryMetaEntry> getMetaEntriesFromTerm(String term) {
-    List<DictionaryMetaEntry> metaEntries = _database.dictionaryMetaEntrys
-        .where()
-        .termEqualTo(term)
-        .build()
-        .findAllSync();
+    List<DictionaryMetaEntry> metaEntries =
+        _database.dictionaryMetaEntrys.filter().termEqualTo(term).findAllSync();
 
     return metaEntries;
   }

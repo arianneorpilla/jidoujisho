@@ -14,7 +14,7 @@ class DictionaryResult {
   /// items.
   DictionaryResult({
     required this.searchTerm,
-    this.mapping = const [],
+    this.terms = const [],
     this.scrollIndex = 0,
     this.id,
   });
@@ -33,6 +33,6 @@ class DictionaryResult {
   late String searchTerm;
 
   /// A list of list of [DictionaryEntry] indexes sorted by [DictionaryPair].
-  @DictionaryEntriesConverter()
-  final List<List<DictionaryEntry>> mapping;
+  @DictionaryTermsConverter()
+  final List<DictionaryTerm> terms;
 }

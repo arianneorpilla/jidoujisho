@@ -89,13 +89,16 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
       onPressed: () async {
         String model = appModel.lastSelectedModel ?? widget.initialModel;
         List<String> modelFields = await appModel.getFieldList(model);
-        List<String?> fieldKeys =
+        List<String?> exportFieldKeys =
             List.generate(modelFields.length, (index) => null);
 
         AnkiMapping newMapping = AnkiMapping(
           label: '',
           model: model,
-          fieldKeys: fieldKeys,
+          exportFieldKeys: exportFieldKeys,
+          creatorFieldKeys: AnkiMapping.defaultCreatorFieldKeys,
+          creatorCollapsedFieldKeys:
+              AnkiMapping.defaultCreatorCollapsedFieldKeys,
           tags: [],
           order: 0,
           enhancements: AnkiMapping.defaultEnhancements,
@@ -141,6 +144,8 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
     List<AnkiMapping> mappings = appModel.mappings;
 
     return RawScrollbar(
+      thickness: 3,
+      thumbVisibility: true,
       controller: _scrollController,
       child: ReorderableColumn(
         scrollController: _scrollController,
@@ -395,7 +400,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
     required AnkiMapping mappingClone,
     required List<String> modelFields,
   }) {
-    List<Field?> fields = mappingClone.getFields();
+    List<Field?> fields = mappingClone.getExportFields();
     ScrollController scrollController = ScrollController();
 
     return SingleChildScrollView(
@@ -419,7 +424,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
                 ),
               ),
               JidoujishoDropdown<Field?>(
-                options: globalFields,
+                options: [null, ...globalFields],
                 initialOption: fields.elementAt(index),
                 generateLabel: (field) {
                   if (field == null) {
@@ -430,9 +435,9 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
                 },
                 onChanged: (field) {
                   if (field == null) {
-                    mappingClone.fieldKeys[index] = null;
+                    mappingClone.exportFieldKeys[index] = null;
                   } else {
-                    mappingClone.fieldKeys[index] = field.uniqueKey;
+                    mappingClone.exportFieldKeys[index] = field.uniqueKey;
                   }
                   setState(() {});
                 },

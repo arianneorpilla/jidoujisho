@@ -78,7 +78,6 @@ class _RecursiveDictionaryHistoryPageState
 
   Widget buildBackButton() {
     return JidoujishoIconButton(
-      size: textTheme.titleLarge?.fontSize,
       tooltip: backLabel,
       icon: Icons.arrow_back,
       onTap: () {

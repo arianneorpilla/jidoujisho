@@ -11,7 +11,7 @@ class TermField extends Field {
       : super(
           uniqueKey: key,
           label: 'Term',
-          description: 'Dictionary word or phrase',
+          description: 'Dictionary headword or phrase.',
           icon: Icons.speaker_notes_outlined,
         );
 
@@ -24,15 +24,15 @@ class TermField extends Field {
   static const String key = 'term';
 
   @override
-  String onCreatorOpenAction({
+  String? onCreatorOpenAction({
     required BuildContext context,
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,
-    required String term,
-    required String reading,
-    required List<DictionaryEntry> entries,
+    required DictionaryTerm dictionaryTerm,
+    required List<DictionaryMetaEntry> metaEntries,
+    required bool creatorJustLaunched,
   }) {
-    return term;
+    return dictionaryTerm.term;
   }
 }

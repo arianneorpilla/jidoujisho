@@ -22,6 +22,7 @@ export 'src/pages/implementations/home_page.dart';
 export 'src/pages/implementations/recursive_dictionary_page.dart';
 export 'src/pages/implementations/recursive_dictionary_history_page.dart';
 export 'src/pages/implementations/text_segmentation_dialog_page.dart';
+export 'src/pages/implementations/field_picker_dialog_page.dart';
 
 export 'src/pages/base_page.dart';
 export 'src/pages/base_tab_page.dart';

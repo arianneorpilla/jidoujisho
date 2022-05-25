@@ -66,8 +66,8 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
       ),
     );
 
-    for (List<DictionaryEntry> entriesGroup in widget.result.mapping) {
-      entriesGroup.sort((a, b) => (dictionaryOrderCache![a.dictionaryName]!)
+    for (DictionaryTerm term in widget.result.terms) {
+      term.entries.sort((a, b) => (dictionaryOrderCache![a.dictionaryName]!)
           .compareTo(dictionaryOrderCache![b.dictionaryName]!));
     }
 
@@ -90,9 +90,10 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
     return ListView.builder(
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
-      itemCount: widget.result.mapping.length,
+      itemCount: widget.result.terms.length,
       itemBuilder: (context, index) {
-        List<DictionaryEntry> entries = widget.result.mapping[index];
+        DictionaryTerm dictionaryTerm = widget.result.terms[index];
+        List<DictionaryEntry> entries = dictionaryTerm.entries;
         Set<String> dictionaryNames =
             entries.map((entry) => entry.dictionaryName).toSet();
 
@@ -109,7 +110,7 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
         }
 
         return DictionaryTermPage(
-          entries: entries,
+          dictionaryTerm: dictionaryTerm,
           onSearch: widget.onSearch,
           onStash: widget.onStash,
           expandableControllers: expandableControllers,

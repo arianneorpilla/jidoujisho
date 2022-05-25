@@ -10,7 +10,7 @@ import 'package:yuuna/utils.dart';
 class DictionaryTermPage extends BasePage {
   /// Create the widget for a dictionary word.
   const DictionaryTermPage({
-    required this.entries,
+    required this.dictionaryTerm,
     required this.onSearch,
     required this.onStash,
     required this.expandableControllers,
@@ -22,7 +22,7 @@ class DictionaryTermPage extends BasePage {
   });
 
   /// The result made from a dictionary database search.
-  final List<DictionaryEntry> entries;
+  final DictionaryTerm dictionaryTerm;
 
   /// Action to be done upon selecting the search option.
   final Function(String) onSearch;
@@ -66,17 +66,17 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
         allowPaste: false,
       );
 
-  String get term => widget.entries.first.term;
-  String get reading => widget.entries.first.reading;
-
   @override
   Widget build(BuildContext context) {
+    List<DictionaryMetaEntry> metaEntries =
+        appModel.getMetaEntriesFromTerm(widget.dictionaryTerm.term);
+
     List<Widget> children = [
-      buildTopRow(),
+      buildTopRow(metaEntries: metaEntries),
       const Space.normal(),
       buildTags(),
       const Space.normal(),
-      buildMetaWidgets(),
+      buildMetaWidgets(metaEntries: metaEntries),
       const Space.normal(),
       buildEntries(),
       if (widget.footerWidget != null) widget.footerWidget!
@@ -118,7 +118,9 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
     );
   }
 
-  List<Widget> buildQuickActions() {
+  List<Widget> buildQuickActions({
+    required List<DictionaryMetaEntry> metaEntries,
+  }) {
     AnkiMapping mapping = appModel.lastSelectedMapping;
     List<Widget> buttons = [];
 
@@ -126,6 +128,7 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
       Widget button = buildQuickAction(
         mapping: mapping,
         slotNumber: i,
+        metaEntries: metaEntries,
       );
 
       buttons.add(button);
@@ -137,6 +140,7 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
   Widget buildQuickAction({
     required AnkiMapping mapping,
     required int slotNumber,
+    required List<DictionaryMetaEntry> metaEntries,
   }) {
     String? actionName = mapping.actions[slotNumber];
     QuickAction? quickAction;
@@ -155,9 +159,7 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
           enabledColor: quickAction.getIconColor(
             context: context,
             appModel: appModel,
-            term: term,
-            reading: reading,
-            entries: widget.entries,
+            dictionaryTerm: widget.dictionaryTerm,
           ),
           shapeBorder: const RoundedRectangleBorder(),
           backgroundColor:
@@ -171,9 +173,8 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
               ref: ref,
               appModel: appModel,
               creatorModel: creatorModel,
-              term: term,
-              reading: reading,
-              entries: widget.entries,
+              dictionaryTerm: widget.dictionaryTerm,
+              metaEntries: metaEntries,
             );
             setState(() {});
           },
@@ -182,7 +183,9 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
     }
   }
 
-  Widget buildTopRow() {
+  Widget buildTopRow({
+    required List<DictionaryMetaEntry> metaEntries,
+  }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -191,12 +194,11 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
             child: appModel.targetLanguage.getTermReadingOverrideWidget(
               context: context,
               appModel: appModel,
-              term: term,
-              reading: reading,
-              meanings: widget.entries,
+              dictionaryTerm: widget.dictionaryTerm,
             ),
-            onTap: () => appModel.copyToClipboard(term),
-            onLongPress: () => appModel.copyToClipboard(term),
+            onTap: () => appModel.copyToClipboard(widget.dictionaryTerm.term),
+            onLongPress: () =>
+                appModel.copyToClipboard(widget.dictionaryTerm.term),
           ),
         ),
         Padding(
@@ -208,7 +210,7 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.min,
-            children: buildQuickActions(),
+            children: buildQuickActions(metaEntries: metaEntries),
           ),
         ),
       ],
@@ -220,7 +222,7 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
 
     Set<DictionaryPair> pairs = {};
 
-    for (DictionaryEntry entry in widget.entries) {
+    for (DictionaryEntry entry in widget.dictionaryTerm.entries) {
       for (String tag in entry.termTags) {
         pairs.add(
           DictionaryPair(
@@ -251,10 +253,7 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
     return Wrap(children: tags);
   }
 
-  Widget buildMetaWidgets() {
-    List<DictionaryMetaEntry> metaEntries =
-        appModel.getMetaEntriesFromTerm(term);
-
+  Widget buildMetaWidgets({required List<DictionaryMetaEntry> metaEntries}) {
     if (metaEntries.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -311,7 +310,7 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
       );
 
       List<PitchData> pitches = metaEntry.pitches!
-          .where((pitch) => pitch.reading == reading)
+          .where((pitch) => pitch.reading == widget.dictionaryTerm.reading)
           .toList();
 
       if (pitches.isEmpty) {
@@ -394,9 +393,9 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
       child: ListView.builder(
         physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
-        itemCount: widget.entries.length,
+        itemCount: widget.dictionaryTerm.entries.length,
         itemBuilder: (context, index) {
-          DictionaryEntry entry = widget.entries[index];
+          DictionaryEntry entry = widget.dictionaryTerm.entries[index];
 
           if (widget.dictionaryHiddens[entry.dictionaryName]!) {
             return const SizedBox.shrink();
