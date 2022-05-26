@@ -56,7 +56,6 @@ class CreatorFieldValues {
 
     for (Field field in globalFields) {
       if (field is AudioExportField) {
-        print(field.exportFile);
         if (field.exportFile != null) {
           exportFiles[field] = field.exportFile!;
         }

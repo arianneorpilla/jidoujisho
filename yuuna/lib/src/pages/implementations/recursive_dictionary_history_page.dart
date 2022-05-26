@@ -1,3 +1,4 @@
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/pages.dart';
@@ -31,22 +32,25 @@ class _RecursiveDictionaryHistoryPageState
   String get enterSearchTermLabel => appModel.translate('enter_search_term');
   String get clearLabel => appModel.translate('clear');
 
+  String get stashLabel => appModel.translate('stash');
+
+  Map<String, Dictionary>? dictionaryMap;
+  Map<int, List<DictionaryMetaEntry>> metaEntriesCache = {};
+  Map<int, Map<String, ExpandableController>> expandedControllers = {};
+  Map<int, Map<String, bool>> dictionaryHiddens = {};
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: Theme.of(context).backgroundColor,
       appBar: buildAppBar(),
-      body: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(
-            parent: BouncingScrollPhysics()),
-        child: DictionaryResultPage(
-          result: widget.result,
-          onSearch: onSearch,
-          onStash: onStash,
-          getCurrentSearchTerm: () => widget.result.searchTerm,
-          updateHistory: false,
-        ),
+      body: DictionaryResultPage(
+        result: widget.result,
+        onSearch: onSearch,
+        onStash: onStash,
+        getCurrentSearchTerm: () => widget.result.searchTerm,
+        updateHistory: false,
       ),
     );
   }

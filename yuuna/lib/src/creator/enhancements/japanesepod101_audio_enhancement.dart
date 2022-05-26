@@ -56,42 +56,30 @@ class JapanesePod101AudioEnhancement extends AudioEnhancement {
       }
     }
 
-    /// Show loading state.
-    audioField.setSearching(
-        appModel: appModel,
-        creatorModel: creatorModel,
-        isSearching: true,
-        searchTerm: searchTerm!);
-    try {
-      String reading =
-          creatorModel.getFieldController(ReadingField.instance).text;
-      File? file = await fetchAudio(
-        term: searchTerm,
-        reading: reading,
-      );
-
-      if (file != null) {
-        audioField.setAudioFile(
-          appModel: appModel,
-          creatorModel: creatorModel,
-          file: file,
-          searchTermUsed: searchTerm,
+    audioField.performSearch(
+      appModel: appModel,
+      creatorModel: creatorModel,
+      searchTerm: searchTerm!,
+      generateAudio: () async {
+        String reading =
+            creatorModel.getFieldController(ReadingField.instance).text;
+        File? file = await fetchAudio(
+          context: context,
+          term: searchTerm!,
+          reading: reading,
         );
-      }
-    } finally {
-      /// Finish loading state.
-      audioField.setSearching(
-        appModel: appModel,
-        creatorModel: creatorModel,
-        isSearching: false,
-        searchTerm: searchTerm,
-      );
-    }
+
+        return file;
+      },
+    );
   }
 
   @override
-  Future<File?> fetchAudio(
-      {required String term, required String reading}) async {
+  Future<File?> fetchAudio({
+    required BuildContext context,
+    required String term,
+    required String reading,
+  }) async {
     Directory appDirDoc = await getApplicationSupportDirectory();
     String jpdAudioPath = '${appDirDoc.path}/japanesePod101';
     Directory jpdAudioDir = Directory(jpdAudioPath);

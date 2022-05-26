@@ -1,9 +1,8 @@
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
+import 'package:spaces/spaces.dart';
 import 'package:yuuna/dictionary.dart';
-import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
-import 'package:yuuna/utils.dart';
 
 /// Returns the widget for a [DictionaryResult] which returns a scrollable list
 /// of each [DictionaryEntry] in its mappings.
@@ -44,77 +43,90 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
   String get searchLabel => appModel.translate('search');
   String get stashLabel => appModel.translate('stash');
 
-  MaterialTextSelectionControls get selectionControls =>
-      JidoujishoTextSelectionControls(
-        searchAction: widget.onSearch,
-        searchActionLabel: searchLabel,
-        stashAction: widget.onStash,
-        stashActionLabel: stashLabel,
-        allowCopy: true,
-        allowSelectAll: true,
-        allowCut: false,
-        allowPaste: false,
-      );
+  Map<String, Dictionary>? dictionaryMap;
+  Map<int, List<DictionaryMetaEntry>> metaEntriesCache = {};
+  Map<int, Map<String, ExpandableController>> expandedControllers = {};
+  Map<int, Map<String, bool>> dictionaryHiddens = {};
 
-  Map<String, int>? dictionaryOrderCache;
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      appModel.dictionaryMenuNotifier.addListener(dumpCache);
+    });
+  }
+
+  void dumpCache() {
+    metaEntriesCache.clear();
+    expandedControllers.clear();
+    dictionaryHiddens.clear();
+    if (mounted) {
+      setState(() {});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    dictionaryOrderCache = Map<String, int>.fromEntries(
+    dictionaryMap = Map<String, Dictionary>.fromEntries(
       appModel.dictionaries.map(
-        (dictionary) => MapEntry(dictionary.dictionaryName, dictionary.order),
+        (dictionary) => MapEntry(dictionary.dictionaryName, dictionary),
       ),
     );
 
     for (DictionaryTerm term in widget.result.terms) {
-      term.entries.sort((a, b) => (dictionaryOrderCache![a.dictionaryName]!)
-          .compareTo(dictionaryOrderCache![b.dictionaryName]!));
-    }
-
-    if (widget.updateHistory) {
-      Future.delayed(const Duration(milliseconds: 1000), () async {
-        if (mounted) {
-          if (widget.getCurrentSearchTerm() == widget.result.searchTerm) {
-            if (!appModel.isIncognitoMode) {
-              appModel.addToSearchHistory(
-                historyKey: DictionaryMediaType.instance.uniqueKey,
-                searchTerm: widget.result.searchTerm,
-              );
-              appModel.addToDictionaryHistory(result: widget.result);
-            }
-          }
-        }
-      });
+      term.entries.sort(
+        (a, b) => dictionaryMap![a.dictionaryName]!.order.compareTo(
+              dictionaryMap![b.dictionaryName]!.order,
+            ),
+      );
     }
 
     return ListView.builder(
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      itemCount: widget.result.terms.length,
+      physics: const AlwaysScrollableScrollPhysics(
+        parent: BouncingScrollPhysics(),
+      ),
+      itemCount: widget.result.terms.length + 1,
       itemBuilder: (context, index) {
-        DictionaryTerm dictionaryTerm = widget.result.terms[index];
-        List<DictionaryEntry> entries = dictionaryTerm.entries;
-        Set<String> dictionaryNames =
-            entries.map((entry) => entry.dictionaryName).toSet();
+        if (index == 0) {
+          return const Space.normal();
+        }
 
-        final Map<String, ExpandableController> expandableControllers = {};
-        final Map<String, bool> dictionaryHiddens = {};
+        DictionaryTerm dictionaryTerm = widget.result.terms[index - 1];
 
-        for (String dictionaryName in dictionaryNames) {
-          Dictionary dictionary =
-              appModelNoUpdate.getDictionary(dictionaryName);
-          expandableControllers[dictionaryName] = ExpandableController(
-            initialExpanded: !dictionary.collapsed,
+        if (metaEntriesCache[index - 1] == null) {
+          final Map<String, ExpandableController> controllers = {};
+          final Map<String, bool> hiddens = {};
+
+          for (String dictionaryName in dictionaryMap!.keys.toList()) {
+            controllers[dictionaryName] = ExpandableController(
+              initialExpanded: !dictionaryMap![dictionaryName]!.collapsed,
+            );
+            hiddens[dictionaryName] = dictionaryMap![dictionaryName]!.hidden;
+          }
+
+          List<DictionaryMetaEntry> metaEntries =
+              appModel.getMetaEntriesFromTerm(dictionaryTerm.term);
+          metaEntries.sort(
+            (a, b) => dictionaryMap![a.dictionaryName]!.order.compareTo(
+                  dictionaryMap![b.dictionaryName]!.order,
+                ),
           );
-          dictionaryHiddens[dictionaryName] = dictionary.hidden;
+
+          metaEntriesCache[index - 1] ??= metaEntries;
+
+          expandedControllers[index - 1] ??= controllers;
+          dictionaryHiddens[index - 1] ??= hiddens;
         }
 
         return DictionaryTermPage(
+          dictionaryMap: dictionaryMap!,
           dictionaryTerm: dictionaryTerm,
+          dictionaryMetaEntries: metaEntriesCache[index - 1]!,
           onSearch: widget.onSearch,
           onStash: widget.onStash,
-          expandableControllers: expandableControllers,
-          dictionaryHiddens: dictionaryHiddens,
+          expandableControllers: expandedControllers[index - 1]!,
+          dictionaryHiddens: dictionaryHiddens[index - 1]!,
         );
       },
     );

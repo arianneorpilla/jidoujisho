@@ -4,7 +4,6 @@ import 'dart:isolate';
 import 'package:clipboard/clipboard.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
-import 'package:external_path/external_path.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -97,11 +96,14 @@ class AppModel with ChangeNotifier {
   DefaultCacheManager get cacheManager => _cacheManager;
   final _cacheManager = DefaultCacheManager();
 
-  /// Used to notify dictionary widgets to dictionary changes.
+  /// Used to notify dictionary widgets to dictionary history additions.
   final ChangeNotifier dictionaryEntriesNotifier = ChangeNotifier();
 
-  /// Used to notify dictionary widgets to dictionary changes.
-  final ChangeNotifier dictionaryNotifier = ChangeNotifier();
+  /// Used to notify dictionary widgets to dictionary import additions.
+  final ChangeNotifier dictionarySearchAgainNotifier = ChangeNotifier();
+
+  /// Used to notify dictionary widgets to dictionary menu changes.
+  final ChangeNotifier dictionaryMenuNotifier = ChangeNotifier();
 
   /// Used to notify toggling incognito. Updates the app logo to and from
   /// grayscale.
@@ -279,9 +281,6 @@ class AppModel with ChangeNotifier {
     /// A list of media types that the app will support at runtime.
     final List<MediaType> availableMediaTypes = List<MediaType>.unmodifiable(
       [
-        PlayerMediaType.instance,
-        ReaderMediaType.instance,
-        ViewerMediaType.instance,
         DictionaryMediaType.instance,
       ],
     );
@@ -364,6 +363,10 @@ class AppModel with ChangeNotifier {
       ],
       NotesField.instance: [
         ClearFieldEnhancement(field: NotesField.instance),
+        TextSegmentationEnhancement(field: NotesField.instance),
+        OpenStashEnhancement(field: NotesField.instance),
+        PopFromStashEnhancement(field: NotesField.instance),
+        ImageSearchTermPicker(field: NotesField.instance),
       ],
       ImageField.instance: [
         ClearFieldEnhancement(field: ImageField.instance),
@@ -372,6 +375,7 @@ class AppModel with ChangeNotifier {
       MeaningField.instance: [
         ClearFieldEnhancement(field: MeaningField.instance),
         TextSegmentationEnhancement(field: MeaningField.instance),
+        ImageSearchTermPicker(field: MeaningField.instance),
       ],
       ReadingField.instance: [
         ClearFieldEnhancement(field: ReadingField.instance),
@@ -381,6 +385,7 @@ class AppModel with ChangeNotifier {
         TextSegmentationEnhancement(field: SentenceField.instance),
         OpenStashEnhancement(field: SentenceField.instance),
         PopFromStashEnhancement(field: SentenceField.instance),
+        ImageSearchTermPicker(field: SentenceField.instance),
       ],
       TermField.instance: [
         ClearFieldEnhancement(field: TermField.instance),
@@ -391,6 +396,10 @@ class AppModel with ChangeNotifier {
       ],
       ContextField.instance: [
         ClearFieldEnhancement(field: ContextField.instance),
+        TextSegmentationEnhancement(field: ContextField.instance),
+        OpenStashEnhancement(field: ContextField.instance),
+        PopFromStashEnhancement(field: ContextField.instance),
+        ImageSearchTermPicker(field: ContextField.instance),
       ],
       PitchAccentField.instance: [
         ClearFieldEnhancement(field: PitchAccentField.instance),
@@ -401,14 +410,17 @@ class AppModel with ChangeNotifier {
       CollapsedMeaningField.instance: [
         ClearFieldEnhancement(field: CollapsedMeaningField.instance),
         TextSegmentationEnhancement(field: CollapsedMeaningField.instance),
+        ImageSearchTermPicker(field: CollapsedMeaningField.instance),
       ],
       ExpandedMeaningField.instance: [
         ClearFieldEnhancement(field: ExpandedMeaningField.instance),
         TextSegmentationEnhancement(field: ExpandedMeaningField.instance),
+        ImageSearchTermPicker(field: ExpandedMeaningField.instance),
       ],
       HiddenMeaningField.instance: [
         ClearFieldEnhancement(field: HiddenMeaningField.instance),
         TextSegmentationEnhancement(field: HiddenMeaningField.instance),
+        ImageSearchTermPicker(field: HiddenMeaningField.instance),
       ],
     };
 
@@ -461,12 +473,9 @@ class AppModel with ChangeNotifier {
   /// This path also initialises the folder if it does not exist, and includes
   /// a .nomedia file within the folder.
   Future<Directory> prepareJidoujishoDirectory() async {
-    String dcimDirectory = await ExternalPath.getExternalStoragePublicDirectory(
-      ExternalPath.DIRECTORY_DCIM,
-    );
-
-    String directoryPath = path.join(dcimDirectory, 'jidoujisho');
-    String noMediaFilePath = path.join(dcimDirectory, 'jidoujisho', '.nomedia');
+    String directoryPath = path.join(appDirectory.path, 'jidoujishoExport');
+    String noMediaFilePath =
+        path.join(appDirectory.path, 'jidoujishoExport', '.nomedia');
 
     Directory jidoujishoDirectory = Directory(directoryPath);
     File noMediaFile = File(noMediaFilePath);
@@ -615,15 +624,17 @@ class AppModel with ChangeNotifier {
   /// always be guaranteed to have a result, as it is impossible to delete the
   /// default mapping.
   AnkiMapping get lastSelectedMapping {
-    String mappingName = _preferences.get('last_selected_mapping',
-        defaultValue: mappings.first.label);
+    String mappingName = _preferences.get(
+      'last_selected_mapping',
+      defaultValue: mappings.first.label,
+    );
 
     AnkiMapping mapping = _database.ankiMappings
-            .filter()
+            .where()
             .labelEqualTo(mappingName)
             .findFirstSync() ??
         _database.ankiMappings
-            .filter()
+            .where()
             .labelEqualTo(mappings.first.label)
             .findFirstSync()!;
 
@@ -704,15 +715,14 @@ class AppModel with ChangeNotifier {
   /// Show the dictionary menu. This should be callable from many parts of the
   /// app, so it is appropriately handled by the model.
   Future<void> showDictionaryMenu() async {
-    await showGeneralDialog(
+    await showDialog(
       barrierDismissible: true,
-      barrierLabel: '',
       context: navigatorKey.currentContext!,
-      pageBuilder: (context, animation1, animation2) =>
-          const DictionaryDialogPage(),
-      transitionDuration: Duration.zero,
+      builder: (context) => const DictionaryDialogPage(),
     );
+
     notifyListeners();
+    dictionaryMenuNotifier.notifyListeners();
   }
 
   /// Show the language menu. This should be callable from many parts of the
@@ -885,7 +895,7 @@ class AppModel with ChangeNotifier {
           localisation.importMessageNameWithVar(dictionaryName);
 
       Dictionary? duplicateDictionary = _database.dictionarys
-          .filter()
+          .where()
           .dictionaryNameEqualTo(dictionaryName)
           .findFirstSync();
 
@@ -1007,7 +1017,7 @@ class AppModel with ChangeNotifier {
     await compute(deleteDictionaryDataHelper, params);
 
     Navigator.pop(navigatorKey.currentContext!);
-    dictionaryNotifier.notifyListeners();
+    dictionarySearchAgainNotifier.notifyListeners();
   }
 
   /// Delete a selected mapping from the database.
@@ -1071,9 +1081,9 @@ class AppModel with ChangeNotifier {
   /// exists.
   bool mappingNameHasDuplicate(AnkiMapping mapping) {
     return _database.ankiMappings
-            .filter()
+            .where()
             .labelEqualTo(mapping.label)
-            .and()
+            .filter()
             .not()
             .orderEqualTo(mapping.order)
             .findFirstSync() !=
@@ -1199,6 +1209,9 @@ class AppModel with ChangeNotifier {
       Map<dynamic, dynamic> result =
           await methodChannel.invokeMethod('getDecks');
       List<String> decks = result.values.toList().cast<String>();
+
+      /// Don't include any filtered decks.
+      decks.remove('Custom study session');
 
       decks.sort((a, b) => a.compareTo(b));
       return decks;
@@ -1339,22 +1352,20 @@ class AppModel with ChangeNotifier {
     String destinationPath = destinationFile.path;
     exportFile.copySync(destinationPath);
 
-    String uriPath = '${destinationFile.uri}';
-
     try {
-      return await methodChannel.invokeMethod(
+      String response = await methodChannel.invokeMethod(
         'addFileToMedia',
         <String, String>{
-          'uriPath': uriPath,
+          'filename': exportFile.path,
           'preferredName': preferredName,
           'mimeType': mimeType,
         },
       );
+      debugPrint('Added $mimeType for [$preferredName] to Anki media');
+      return response;
     } on PlatformException {
       debugPrint('Failed to add [$mimeType] to Anki media');
       rethrow;
-    } finally {
-      debugPrint('Added $mimeType for [$preferredName] to Anki media');
     }
   }
 
@@ -1374,9 +1385,9 @@ class AppModel with ChangeNotifier {
         return '';
       } else {
         if (field is ImageExportField) {
-          return '${exportedImages[field]}';
+          return '<img src="${exportedImages[field]}></img>"' ?? '';
         } else if (field is AudioExportField) {
-          return '${exportedAudio[field]}';
+          return exportedAudio[field] ?? '';
         } else {
           return creatorFieldValues.textValues[field] ?? '';
         }
@@ -1618,8 +1629,8 @@ class AppModel with ChangeNotifier {
   /// A helper function for opening a text segmentation dialog.
   Future<void> openTextSegmentationDialog({
     required String sourceText,
-    required Function(String) onSelect,
-    required Function(String) onSearch,
+    required Function(String, List<String>) onSelect,
+    required Function(String, List<String>) onSearch,
   }) async {
     if (sourceText.trim().isEmpty) {
       return;
@@ -1811,14 +1822,14 @@ class AppModel with ChangeNotifier {
       isar.searchHistoryItems.putSync(searchHistoryItem);
 
       int countInSameHistory = isar.searchHistoryItems
-          .filter()
+          .where()
           .historyKeyEqualTo(historyKey)
           .countSync();
 
       if (maximumSearchHistoryItems < countInSameHistory) {
         int surplus = countInSameHistory - maximumSearchHistoryItems;
         isar.searchHistoryItems
-            .filter()
+            .where()
             .historyKeyEqualTo(historyKey)
             .limit(surplus)
             .build()
@@ -1849,7 +1860,7 @@ class AppModel with ChangeNotifier {
   }) {
     _database.writeTxnSync((isar) {
       isar.searchHistoryItems
-          .filter()
+          .where()
           .historyKeyEqualTo(historyKey)
           .build()
           .deleteAllSync();
@@ -1859,7 +1870,7 @@ class AppModel with ChangeNotifier {
   /// Get the search history for a given collection named [historyKey].
   List<String> getSearchHistory({required String historyKey}) {
     List<SearchHistoryItem> items = _database.searchHistoryItems
-        .filter()
+        .where()
         .historyKeyEqualTo(historyKey)
         .build()
         .findAllSync();
@@ -1970,13 +1981,6 @@ class AppModel with ChangeNotifier {
     return tag!;
   }
 
-  /// Get the [DictionaryTag] given details from a [DictionaryEntry].
-  Dictionary getDictionary(String dictionaryName) {
-    Dictionary? dictionary =
-        _database.dictionarys.getByDictionaryNameSync(dictionaryName);
-    return dictionary!;
-  }
-
   /// Shown when a query fails to be made to an online service. For example,
   /// when there is no internet connection.
   void showFailedToCommunicateMessage() {
@@ -2031,7 +2035,7 @@ class AppModel with ChangeNotifier {
   /// Return a list of [DictionaryMetaEntry] for a certain term.
   List<DictionaryMetaEntry> getMetaEntriesFromTerm(String term) {
     List<DictionaryMetaEntry> metaEntries =
-        _database.dictionaryMetaEntrys.filter().termEqualTo(term).findAllSync();
+        _database.dictionaryMetaEntrys.where().termEqualTo(term).findAllSync();
 
     return metaEntries;
   }

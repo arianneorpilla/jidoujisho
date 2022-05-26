@@ -57,6 +57,40 @@ abstract class ImageExportField extends Field {
     creatorModel.refresh();
   }
 
+  /// Perform a function that generates a list of images and attempt a search
+  /// with a given search term.
+  void performSearch({
+    required AppModel appModel,
+    required CreatorModel creatorModel,
+    required String searchTerm,
+    required Future<List<NetworkToFileImage>> Function() generateImages,
+  }) async {
+    /// Show loading state.
+    setSearching(
+        appModel: appModel,
+        creatorModel: creatorModel,
+        isSearching: true,
+        searchTerm: searchTerm);
+    try {
+      List<NetworkToFileImage> images = await generateImages();
+
+      setSearchSuggestions(
+        appModel: appModel,
+        creatorModel: creatorModel,
+        images: images,
+        searchTermUsed: searchTerm,
+      );
+    } finally {
+      /// Finish loading state.
+      setSearching(
+        appModel: appModel,
+        creatorModel: creatorModel,
+        isSearching: false,
+        searchTerm: searchTerm,
+      );
+    }
+  }
+
   /// Flag for showing the loading state of the picker.
   void setSearching({
     required AppModel appModel,

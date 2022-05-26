@@ -30,7 +30,7 @@ class ShareAction extends QuickAction {
     required List<DictionaryMetaEntry> metaEntries,
   }) async {
     StringBuffer buffer = StringBuffer();
-    buffer.write(dictionaryTerm);
+    buffer.write(dictionaryTerm.term);
     if (dictionaryTerm.reading.isNotEmpty) {
       buffer.write(' (${dictionaryTerm.reading})');
     }

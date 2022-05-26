@@ -52,41 +52,55 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
         allowPaste: false,
       );
 
+  List<Widget>? tags;
+
   @override
   void initState() {
     super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      appModel.dictionaryMenuNotifier.addListener(dumpCache);
+    });
+  }
+
+  void dumpCache() {
+    tags = null;
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> tags = [];
-
-    tags.add(
-      JidoujishoTag(
-        text: widget.entry.dictionaryName,
-        message: dictionaryImportTag.replaceAll(
-          '%dictionaryName%',
-          widget.entry.dictionaryName,
+    if (tags == null) {
+      tags = [];
+      tags!.add(
+        JidoujishoTag(
+          text: widget.entry.dictionaryName,
+          message: dictionaryImportTag.replaceAll(
+            '%dictionaryName%',
+            widget.entry.dictionaryName,
+          ),
+          backgroundColor: Colors.red.shade900,
         ),
-        backgroundColor: Colors.red.shade900,
-      ),
-    );
-    tags.addAll(widget.entry.meaningTags.map((tagName) {
-      if (tagName.isNotEmpty) {
-        DictionaryTag tag = appModel.getDictionaryTag(
-          dictionaryName: widget.entry.dictionaryName,
-          tagName: tagName,
-        );
+      );
+      tags!.addAll(widget.entry.meaningTags.map((tagName) {
+        if (tagName.isNotEmpty) {
+          DictionaryTag tag = appModel.getDictionaryTag(
+            dictionaryName: widget.entry.dictionaryName,
+            tagName: tagName,
+          );
 
-        return JidoujishoTag(
-          text: tag.name,
-          message: tag.notes,
-          backgroundColor: tag.color,
-        );
-      } else {
-        return const SizedBox.shrink();
-      }
-    }).toList());
+          return JidoujishoTag(
+            text: tag.name,
+            message: tag.notes,
+            backgroundColor: tag.color,
+          );
+        } else {
+          return const SizedBox.shrink();
+        }
+      }).toList());
+    }
 
     return Padding(
       padding: EdgeInsets.only(
@@ -103,7 +117,7 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
           headerAlignment: ExpandablePanelHeaderAlignment.center,
         ),
         controller: widget.expandableController,
-        header: Wrap(children: tags),
+        header: Wrap(children: tags!),
         collapsed: const SizedBox.shrink(),
         expanded: ListView(
           physics: const NeverScrollableScrollPhysics(),

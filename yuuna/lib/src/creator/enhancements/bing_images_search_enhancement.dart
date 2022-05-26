@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:network_to_file_image/network_to_file_image.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:yuuna/creator.dart';
@@ -13,7 +14,7 @@ import 'package:html/dom.dart' as dom;
 
 /// An enhancement used effectively as a shortcut for clearing the contents
 /// of a [CreatorModel] pertaining to a certain field.
-class BingImagesSearchEnhancement extends Enhancement {
+class BingImagesSearchEnhancement extends ImageEnhancement {
   /// Initialise this enhancement with the hardset parameters.
   BingImagesSearchEnhancement()
       : super(
@@ -24,8 +25,6 @@ class BingImagesSearchEnhancement extends Enhancement {
           icon: Icons.image_search,
           field: ImageField.instance,
         );
-
-  final Map<String, List<NetworkToFileImage>> _bingCache = {};
 
   /// Used to identify this enhancement and to allow a constant value for the
   /// default mappings value of [AnkiMapping].
@@ -56,42 +55,24 @@ class BingImagesSearchEnhancement extends Enhancement {
       }
     }
 
-    /// Show loading state.
-    imageField.setSearching(
-        appModel: appModel,
-        creatorModel: creatorModel,
-        isSearching: true,
-        searchTerm: searchTerm!);
-    try {
-      List<NetworkToFileImage> images =
-          await scrapeBingImages(context: context, searchTerm: searchTerm);
-
-      imageField.setSearchSuggestions(
-        appModel: appModel,
-        creatorModel: creatorModel,
-        images: images,
-        searchTermUsed: searchTerm,
-      );
-    } finally {
-      /// Finish loading state.
-      imageField.setSearching(
-        appModel: appModel,
-        creatorModel: creatorModel,
-        isSearching: false,
-        searchTerm: searchTerm,
-      );
-    }
+    imageField.performSearch(
+      appModel: appModel,
+      creatorModel: creatorModel,
+      searchTerm: searchTerm!,
+      generateImages: () async {
+        return fetchImages(
+          context: context,
+          searchTerm: searchTerm!,
+        );
+      },
+    );
   }
 
-  /// Fetch images from Bing Images.
-  Future<List<NetworkToFileImage>> scrapeBingImages({
+  @override
+  Future<List<NetworkToFileImage>> fetchImages({
     required BuildContext context,
     required String searchTerm,
   }) async {
-    if (_bingCache[searchTerm] != null) {
-      return _bingCache[searchTerm]!;
-    }
-
     List<NetworkToFileImage> images = [];
 
     bool webViewBusy = true;
@@ -101,6 +82,14 @@ class BingImagesSearchEnhancement extends Enhancement {
           url: Uri.parse("https://www.bing.com/images/search?q=$searchTerm')"),
         ),
         onLoadStop: (controller, uri) async {
+          Directory appDirDoc = await getApplicationSupportDirectory();
+          String bingImagesPath = '${appDirDoc.path}/bingImages';
+          Directory bingImagesDir = Directory(bingImagesPath);
+          if (bingImagesDir.existsSync()) {
+            bingImagesDir.deleteSync(recursive: true);
+          }
+          bingImagesDir.createSync();
+
           await Future.delayed(const Duration(milliseconds: 1000), () {});
 
           dom.Document document = parser.parse(await controller.getHtml());
@@ -108,31 +97,23 @@ class BingImagesSearchEnhancement extends Enhancement {
           List<dom.Element> imgElements =
               document.getElementsByClassName('iusc');
 
+          String timestamp =
+              DateFormat('yyyyMMddTkkmmss').format(DateTime.now());
+          Directory imageDir = Directory('$bingImagesPath/$timestamp');
+          imageDir.createSync();
           for (int i = 0; i < imgElements.length; i++) {
             Map<dynamic, dynamic> imgMap =
                 jsonDecode(imgElements[i].attributes['m']!);
             String imageURL = imgMap['turl'];
 
-            Directory appDirDoc = await getApplicationSupportDirectory();
-            String bingImagesPath = '${appDirDoc.path}/bingImages';
-            Directory bingImagesDir = Directory(bingImagesPath);
-            if (!bingImagesDir.existsSync()) {
-              bingImagesDir.createSync();
-            }
-
-            String imagePath = '$bingImagesPath/$i';
+            String imagePath = '${imageDir.path}/$i';
             File imageFile = File(imagePath);
-            if (imageFile.existsSync()) {
-              imageFile.deleteSync();
-            }
 
-            NetworkToFileImage image =
-                NetworkToFileImage(url: imageURL, file: imageFile);
-            if (i == 0) {
-              await precacheImage(image, context);
-            } else {
-              precacheImage(image, context);
-            }
+            NetworkToFileImage image = NetworkToFileImage(
+              url: imageURL,
+              file: imageFile,
+            );
+
             images.add(image);
           }
 
@@ -143,10 +124,6 @@ class BingImagesSearchEnhancement extends Enhancement {
 
     while (webViewBusy) {
       await Future.delayed(const Duration(milliseconds: 100), () {});
-    }
-
-    if (images.isNotEmpty) {
-      _bingCache[searchTerm] = images;
     }
 
     return images;

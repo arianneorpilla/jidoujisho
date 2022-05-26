@@ -71,7 +71,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
   CreatorFieldValues get exportDetails => creatorModel.getExportDetails(ref);
 
   Future<bool> onWillPop() async {
-    if (!widget.editEnhancements) {
+    if (isCardEditing) {
       creatorModel.clearAll();
     }
 
@@ -367,8 +367,8 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
     return Padding(
       padding: Spacing.of(context).insets.horizontal.small,
       child: RawScrollbar(
-        thickness: 3,
         thumbVisibility: true,
+        thickness: 3,
         controller: _scrollController,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(

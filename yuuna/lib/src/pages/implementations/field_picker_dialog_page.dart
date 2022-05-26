@@ -54,8 +54,8 @@ class _FieldPickerDialogPageState extends BasePageState<FieldPickerDialogPage> {
     return SizedBox(
       width: double.maxFinite,
       child: RawScrollbar(
-        thickness: 3,
         thumbVisibility: true,
+        thickness: 3,
         controller: contentController,
         child: SingleChildScrollView(
           controller: contentController,
@@ -89,8 +89,8 @@ class _FieldPickerDialogPageState extends BasePageState<FieldPickerDialogPage> {
 
   Widget buildFieldTiles(List<Field> fields) {
     return RawScrollbar(
-      thickness: 3,
       thumbVisibility: true,
+      thickness: 3,
       controller: _scrollController,
       child: ListView.builder(
         controller: _scrollController,

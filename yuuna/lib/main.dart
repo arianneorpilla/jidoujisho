@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_process_text/flutter_process_text.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,6 +25,9 @@ void main() {
     final container = ProviderContainer();
     final appModel = container.read(appProvider);
     await appModel.initialise();
+
+    /// For higher refresh rates.
+    GestureBinding.instance.resamplingEnabled = true;
 
     /// Start the application, specifying the [ProviderContainer] with the
     /// already initialised [AppModel].

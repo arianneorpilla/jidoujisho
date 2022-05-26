@@ -33,7 +33,11 @@ import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.MethodChannel;
 
+import com.ichi2.anki.FlashCardsContract;
 import com.ichi2.anki.api.AddContentApi;
+import android.content.ContentValues;
+import androidx.core.content.FileProvider;
+import android.content.ContentResolver;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,6 +46,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class MainActivity extends FlutterActivity {
     private static final String ANKIDROID_CHANNEL = "app.lrorpilla.yuuna/anki";
@@ -191,7 +199,7 @@ public class MainActivity extends FlutterActivity {
                     final String deck = call.argument("deck");
                     final ArrayList<String> fields = call.argument("fields"); 
 
-                    final String uriPath = call.argument("uriPath");
+                    final String filename = call.argument("filename");
                     final String preferredName = call.argument("preferredName");
                     final String mimeType = call.argument("mimeType");
 
@@ -222,19 +230,26 @@ public class MainActivity extends FlutterActivity {
                             result.success(true);
                             break;
                         case "addFileToMedia":
-                            System.out.println(uriPath);
+                            System.out.println(filename);
                             System.out.println(preferredName);
                             System.out.println(mimeType);
-                            Uri fileUri = Uri.parse(uriPath);
 
-                            try {
-                                String addedFileName = api.addMediaFromUri(fileUri, preferredName, mimeType);
-                                result.success(addedFileName);
-                                System.out.println("Added media from URI");
-                            } catch (Exception e) {
-                                System.out.println(e);
-                            }
+                            // Workaround from KamWithK
+                            // https://github.com/ankidroid/Anki-Android/issues/10335
+  
+                            File file = new File(filename);
 
+                            Uri file_uri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file);
+                            context.grantUriPermission("com.ichi2.anki", file_uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                            ContentValues contentValues = new ContentValues();
+                            contentValues.put(FlashCardsContract.AnkiMedia.FILE_URI, file_uri.toString());
+                            contentValues.put(FlashCardsContract.AnkiMedia.PREFERRED_NAME, preferredName);
+
+                            ContentResolver contentResolver = context.getContentResolver();
+                            Uri returnUri = contentResolver.insert(FlashCardsContract.AnkiMedia.CONTENT_URI, contentValues);
+
+                            result.success(new File(returnUri.getPath()).toString().substring(1));
 
                             break;
                         default:

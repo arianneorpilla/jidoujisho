@@ -53,8 +53,8 @@ class _QuickActionsPickerDialogPageState
     return SizedBox(
       width: double.maxFinite,
       child: RawScrollbar(
-        thickness: 3,
         thumbVisibility: true,
+        thickness: 3,
         controller: contentController,
         child: SingleChildScrollView(
           controller: contentController,

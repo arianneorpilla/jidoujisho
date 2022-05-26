@@ -23,10 +23,10 @@ class TextSegmentationDialogPage extends BasePage {
   final List<String> segmentedText;
 
   /// The callback to be called for a selection to extract from the text.
-  final Function(String)? onSelect;
+  final Function(String, List<String>)? onSelect;
 
   /// The callback to be called for a selection to perform a search on.
-  final Function(String)? onSearch;
+  final Function(String, List<String>)? onSearch;
 
   @override
   BasePageState createState() => _TextSegmentationDialogPage();
@@ -66,8 +66,8 @@ class _TextSegmentationDialogPage
     return SizedBox(
       width: double.maxFinite,
       child: RawScrollbar(
-        thickness: 3,
         thumbVisibility: true,
+        thickness: 3,
         controller: _scrollController,
         child: SingleChildScrollView(
           controller: _scrollController,
@@ -164,6 +164,18 @@ class _TextSegmentationDialogPage
     return buffer.toString().trim();
   }
 
+  List<String> get selectedItems {
+    List<String> items = [];
+
+    widget.segmentedText.forEachIndexed((index, segment) {
+      if (_valuesSelected[index]!.value) {
+        items.add(segment);
+      }
+    });
+
+    return items;
+  }
+
   void executeStash() {
     List<String> terms = [];
     widget.segmentedText.forEachIndexed((index, segment) {
@@ -177,18 +189,18 @@ class _TextSegmentationDialogPage
 
   void executeSearch() {
     if (selection.isEmpty) {
-      widget.onSearch?.call(widget.sourceText);
+      widget.onSearch?.call(widget.sourceText, selectedItems);
     } else {
-      widget.onSearch?.call(selection);
+      widget.onSearch?.call(selection, selectedItems);
     }
   }
 
   void executeSelect() {
     Navigator.pop(context);
     if (selection.isEmpty) {
-      widget.onSelect?.call(widget.sourceText);
+      widget.onSelect?.call(widget.sourceText, selectedItems);
     } else {
-      widget.onSelect?.call(selection);
+      widget.onSelect?.call(selection, selectedItems);
     }
   }
 }

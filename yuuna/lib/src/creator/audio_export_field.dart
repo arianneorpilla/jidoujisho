@@ -121,4 +121,40 @@ abstract class AudioExportField extends Field {
     required AppModel appModel,
     required CreatorModel creatorModel,
   });
+
+  /// Perform a function that generates a list of images and attempt a search
+  /// with a given search term.
+  void performSearch({
+    required AppModel appModel,
+    required CreatorModel creatorModel,
+    required String searchTerm,
+    required Future<File?> Function() generateAudio,
+  }) async {
+    /// Show loading state.
+    setSearching(
+        appModel: appModel,
+        creatorModel: creatorModel,
+        isSearching: true,
+        searchTerm: searchTerm);
+    try {
+      File? file = await generateAudio();
+
+      if (file != null) {
+        setAudioFile(
+          appModel: appModel,
+          creatorModel: creatorModel,
+          file: file,
+          searchTermUsed: searchTerm,
+        );
+      }
+    } finally {
+      /// Finish loading state.
+      setSearching(
+        appModel: appModel,
+        creatorModel: creatorModel,
+        isSearching: false,
+        searchTerm: searchTerm,
+      );
+    }
+  }
 }

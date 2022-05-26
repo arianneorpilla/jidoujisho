@@ -42,6 +42,10 @@ class JapaneseLanguage extends Language {
   /// items.
   final Map<DictionaryPair, List<RubyTextData>?> segmentsCache = {};
 
+  /// Used to cache furigana segments for already generated [PitchData]
+  /// items.
+  final Map<String, Map<int, Widget>?> pitchCache = {};
+
   @override
   Future<void> prepareResources() async {
     await mecab.init('assets/language/japanese/ipadic', true);
@@ -147,8 +151,12 @@ class JapaneseLanguage extends Language {
     if (segmentsCache.containsKey(pair)) {
       return segmentsCache[pair];
     }
+    List<RubyTextData> furigana =
+        LanguageUtils.distributeFurigana(term: term, reading: reading);
 
-    return LanguageUtils.distributeFurigana(term: term, reading: reading);
+    segmentsCache[pair] = furigana;
+
+    return furigana;
   }
 
   @override
@@ -157,6 +165,11 @@ class JapaneseLanguage extends Language {
     required String reading,
     required int downstep,
   }) {
+    pitchCache[reading] ??= {};
+    if (pitchCache[reading]![downstep] != null) {
+      return pitchCache[reading]![downstep]!;
+    }
+
     List<Widget> listWidgets = [];
 
     Color foregroundColor = Theme.of(context).appBarTheme.foregroundColor!;
@@ -242,10 +255,13 @@ class JapaneseLanguage extends Language {
 
     listWidgets.add(Text(' [$downstep]  ', style: style));
 
-    return Wrap(
+    Widget widget = Wrap(
       crossAxisAlignment: WrapCrossAlignment.end,
       children: listWidgets,
     );
+
+    pitchCache[reading]![downstep] = widget;
+    return widget;
   }
 }
 
@@ -321,12 +337,13 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
   }
 
   termExactMatches = database.dictionaryEntrys
-      .filter()
-      .repeat<String, QAfterFilterCondition>(
-          searchTermPrefixes, (q, prefix) => q.termEqualTo(prefix))
+      .where(sort: Sort.desc)
+      .repeat<String, QWhereClause>(
+          searchTermPrefixes, (q, prefix) => q.termEqualTo(prefix).or())
+      .termEqualTo(searchTerm)
       .sortByTermLengthDesc()
       .thenByPopularityDesc()
-      .limit(limit)
+      .limit(searchTerm.length)
       .findAllSync();
 
   if (termExactMatches.isNotEmpty &&
@@ -348,12 +365,13 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
 
   if (searchTermStartsWithKana) {
     readingExactMatches = database.dictionaryEntrys
-        .filter()
-        .repeat<String, QAfterFilterCondition>(
-            searchTermHiraganaPrefixes, (q, prefix) => q.readingEqualTo(prefix))
+        .where()
+        .repeat<String, QWhereClause>(searchTermHiraganaPrefixes,
+            (q, prefix) => q.readingEqualTo(prefix).or())
+        .readingEqualTo(searchTerm)
         .sortByReadingLengthDesc()
         .thenByPopularityDesc()
-        .limit(limit)
+        .limit(searchTerm.length)
         .findAllSync();
 
     if (readingExactMatches.isNotEmpty &&
@@ -386,11 +404,11 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
 
   if (fallbackTermLessDesperateThanLongestExactTermPrefix) {
     fallbackTermExactMatches = database.dictionaryEntrys
-        .filter()
+        .where()
         .termEqualTo(fallbackTerm)
         .sortByTermLengthDesc()
         .thenByPopularityDesc()
-        .limit(limit)
+        .limit(fallbackTerm.length)
         .findAllSync();
 
     if (fallbackTermExactMatches.isNotEmpty &&
@@ -413,11 +431,11 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
 
   if (fallbackTermLessDesperateThanLongestExactReadingPrefix) {
     fallbackReadingExactMatches = database.dictionaryEntrys
-        .filter()
+        .where()
         .readingEqualTo(fallbackTerm)
         .sortByPopularityDesc()
         .thenByReadingLengthDesc()
-        .limit(limit)
+        .limit(fallbackTerm.length)
         .findAllSync();
 
     if (readingExactMatches.isNotEmpty &&

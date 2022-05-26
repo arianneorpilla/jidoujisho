@@ -47,13 +47,13 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      appModel.dictionaryNotifier.addListener(searchAgain);
+      appModel.dictionarySearchAgainNotifier.addListener(searchAgain);
     });
   }
 
   @override
   void dispose() {
-    appModel.dictionaryNotifier.removeListener(searchAgain);
+    appModel.dictionarySearchAgainNotifier.removeListener(searchAgain);
     super.dispose();
   }
 
@@ -73,28 +73,17 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
 
   Widget buildDictionaryHistory() {
     return RawScrollbar(
-      thickness: 3,
       thumbVisibility: true,
+      thickness: 3,
       controller: DictionaryMediaType.instance.scrollController,
-      child: ListView(
-        controller: DictionaryMediaType.instance.scrollController,
-        physics: const AlwaysScrollableScrollPhysics(
-            parent: BouncingScrollPhysics()),
-        children: [
-          const SizedBox(
-            height: 60,
-          ),
-          Padding(
-            padding: EdgeInsets.only(
-              left: Spacing.of(context).spaces.normal,
-              right: Spacing.of(context).spaces.normal,
-            ),
-            child: DictionaryHistoryPage(
-              onSearch: onSearch,
-              onStash: onStash,
-            ),
-          ),
-        ],
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: Spacing.of(context).spaces.normal,
+        ),
+        child: DictionaryHistoryPage(
+          onSearch: onSearch,
+          onStash: onStash,
+        ),
       ),
     );
   }
@@ -105,6 +94,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
   @override
   Widget buildFloatingSearchBar() {
     return FloatingSearchBar(
+      isScrollControlled: true,
       physics:
           const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
       hint: searchEllipsisLabel,
@@ -123,7 +113,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       margins: const EdgeInsets.symmetric(horizontal: 6),
       width: double.maxFinite,
       transition: SlideFadeFloatingSearchBarTransition(),
-      debounceDelay: const Duration(milliseconds: 500),
+      debounceDelay: const Duration(milliseconds: 200),
       automaticallyImplyBackButton: false,
       progress: _isSearching,
       leadingActions: [
@@ -152,9 +142,27 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     try {
       _result = await appModel.searchDictionary(query);
     } finally {
-      setState(() {
-        _isSearching = false;
-      });
+      if (_result != null) {
+        if (_result!.searchTerm == floatingSearchBarController.query) {
+          if (!appModel.isIncognitoMode) {
+            appModel.addToSearchHistory(
+              historyKey: DictionaryMediaType.instance.uniqueKey,
+              searchTerm: query,
+            );
+            if (_result!.terms.isNotEmpty) {
+              appModel.addToDictionaryHistory(result: _result!);
+            }
+          }
+
+          setState(() {
+            _isSearching = false;
+          });
+        }
+      } else {
+        setState(() {
+          _isSearching = false;
+        });
+      }
     }
   }
 
@@ -174,11 +182,13 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       showIfOpened: true,
       showIfClosed: false,
       child: JidoujishoIconButton(
-        size: textTheme.titleLarge?.fontSize,
-        tooltip: backLabel,
-        icon: Icons.arrow_back,
-        onTap: floatingSearchBarController.close,
-      ),
+          size: textTheme.titleLarge?.fontSize,
+          tooltip: backLabel,
+          icon: Icons.arrow_back,
+          onTap: () {
+            floatingSearchBarController.close();
+            setState(() {});
+          }),
     );
   }
 

@@ -82,11 +82,12 @@ abstract class BaseTabPageState<T extends BaseTabPage> extends BasePageState {
           : Colors.white.withOpacity(0.95),
       physics:
           const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+      isScrollControlled: true,
       scrollPadding: const EdgeInsets.only(top: 16, bottom: 56),
       transitionDuration: Duration.zero,
       margins: const EdgeInsets.symmetric(horizontal: 6),
       width: double.maxFinite,
-      debounceDelay: const Duration(milliseconds: 500),
+      debounceDelay: const Duration(milliseconds: 200),
       accentColor: theme.focusColor,
       automaticallyImplyBackButton: false,
     );

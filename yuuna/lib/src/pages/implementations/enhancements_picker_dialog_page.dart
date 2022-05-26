@@ -62,8 +62,8 @@ class _EnhancementsPickerDialogPage
     return SizedBox(
       width: double.maxFinite,
       child: RawScrollbar(
-        thickness: 3,
         thumbVisibility: true,
+        thickness: 3,
         controller: contentController,
         child: SingleChildScrollView(
           controller: contentController,
@@ -97,8 +97,8 @@ class _EnhancementsPickerDialogPage
 
   Widget buildEnhancementTiles(List<Enhancement> enhancements) {
     return RawScrollbar(
-      thickness: 3,
       thumbVisibility: true,
+      thickness: 3,
       controller: _scrollController,
       child: ListView.builder(
         controller: _scrollController,

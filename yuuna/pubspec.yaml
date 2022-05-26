@@ -9,6 +9,7 @@ environment:
   sdk: ">=2.17.0 <3.0.0"
 
 dependencies:
+  audio_session: ^0.1.6+1
   carousel_slider: ^4.1.1
   change_notifier_builder: ^1.1.2
   characters: ^1.2.0

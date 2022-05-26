@@ -48,15 +48,28 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
         allowPaste: false,
       );
 
-  Map<String, int>? dictionaryOrderCache;
+  late Map<String, Dictionary>? dictionaryMap;
+  Map<int, Map<int, List<DictionaryMetaEntry>>> metaEntriesCache = {};
+  Map<int, Map<int, Map<String, ExpandableController>>> expandedControllers =
+      {};
+  Map<int, Map<int, Map<String, bool>>> dictionaryHiddens = {};
 
   @override
   void initState() {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      appModel.dictionaryEntriesNotifier.addListener(refresh);
+      appModel.dictionaryMenuNotifier.addListener(dumpCache);
     });
+  }
+
+  void dumpCache() {
+    metaEntriesCache.clear();
+    expandedControllers.clear();
+    dictionaryHiddens.clear();
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -64,27 +77,38 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
     super.dispose();
   }
 
-  void refresh() {
-    setState(() {});
-  }
-
   @override
   Widget build(BuildContext context) {
-    dictionaryOrderCache = Map<String, int>.fromEntries(
+    dictionaryMap = Map<String, Dictionary>.fromEntries(
       appModel.dictionaries.map(
-        (dictionary) => MapEntry(dictionary.dictionaryName, dictionary.order),
+        (dictionary) => MapEntry(dictionary.dictionaryName, dictionary),
       ),
     );
 
     List<DictionaryResult> historyResults =
         appModel.dictionaryHistory.reversed.toList();
 
+    for (DictionaryResult result in historyResults) {
+      for (DictionaryTerm term in result.terms) {
+        term.entries.sort(
+          (a, b) => dictionaryMap![a.dictionaryName]!.order.compareTo(
+                dictionaryMap![b.dictionaryName]!.order,
+              ),
+        );
+      }
+    }
+
     return ListView.builder(
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
+      controller: DictionaryMediaType.instance.scrollController,
+      physics:
+          const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
       itemCount: historyResults.length,
       itemBuilder: (context, index) {
-        DictionaryResult result = historyResults[index];
+        if (index == 0) {
+          return const SizedBox(height: 60);
+        }
+
+        DictionaryResult result = historyResults[index - 1];
 
         ValueNotifier<int> indexNotifier =
             ValueNotifier<int>(result.scrollIndex);
@@ -93,31 +117,48 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
           valueListenable: indexNotifier,
           builder: (context, value, child) {
             DictionaryTerm dictionaryTerm = result.terms[indexNotifier.value];
-            List<DictionaryEntry> entries = dictionaryTerm.entries;
 
-            entries.sort((a, b) => (dictionaryOrderCache![a.dictionaryName]!)
-                .compareTo(dictionaryOrderCache![b.dictionaryName]!));
-            Set<String> dictionaryNames =
-                entries.map((entry) => entry.dictionaryName).toSet();
+            metaEntriesCache[index - 1] ??= {};
+            expandedControllers[index - 1] ??= {};
+            dictionaryHiddens[index - 1] ??= {};
 
-            final Map<String, ExpandableController> expandableControllers = {};
-            final Map<String, bool> dictionaryHiddens = {};
+            if (metaEntriesCache[index - 1]![result.scrollIndex] == null) {
+              final Map<String, ExpandableController> controllers = {};
+              final Map<String, bool> hiddens = {};
 
-            for (String dictionaryName in dictionaryNames) {
-              Dictionary dictionary =
-                  appModelNoUpdate.getDictionary(dictionaryName);
-              expandableControllers[dictionaryName] = ExpandableController(
-                initialExpanded: !dictionary.collapsed,
+              for (String dictionaryName in dictionaryMap!.keys.toList()) {
+                controllers[dictionaryName] = ExpandableController(
+                  initialExpanded: !dictionaryMap![dictionaryName]!.collapsed,
+                );
+                hiddens[dictionaryName] =
+                    dictionaryMap![dictionaryName]!.hidden;
+              }
+
+              List<DictionaryMetaEntry> metaEntries =
+                  appModel.getMetaEntriesFromTerm(dictionaryTerm.term);
+              metaEntries.sort(
+                (a, b) => dictionaryMap![a.dictionaryName]!.order.compareTo(
+                      dictionaryMap![b.dictionaryName]!.order,
+                    ),
               );
-              dictionaryHiddens[dictionaryName] = dictionary.hidden;
+
+              metaEntriesCache[index - 1]![result.scrollIndex] ??= metaEntries;
+              expandedControllers[index - 1]![result.scrollIndex] ??=
+                  controllers;
+              dictionaryHiddens[index - 1]![result.scrollIndex] ??= hiddens;
             }
 
             return DictionaryTermPage(
+              dictionaryMap: dictionaryMap!,
               dictionaryTerm: dictionaryTerm,
+              dictionaryMetaEntries:
+                  metaEntriesCache[index - 1]![result.scrollIndex]!,
               onSearch: widget.onSearch,
               onStash: widget.onStash,
-              expandableControllers: expandableControllers,
-              dictionaryHiddens: dictionaryHiddens,
+              expandableControllers:
+                  expandedControllers[index - 1]![result.scrollIndex]!,
+              dictionaryHiddens:
+                  dictionaryHiddens[index - 1]![result.scrollIndex]!,
               onScrollRight: () async {
                 if (result.scrollIndex == result.terms.length - 1) {
                   result.scrollIndex = 0;

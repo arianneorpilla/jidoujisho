@@ -16,11 +16,23 @@ extension GetDictionaryMetaEntryCollection on Isar {
 const DictionaryMetaEntrySchema = CollectionSchema(
   name: 'DictionaryMetaEntry',
   schema:
-      '{"name":"DictionaryMetaEntry","idName":"id","properties":[{"name":"dictionaryName","type":"String"},{"name":"frequency","type":"Long"},{"name":"pitches","type":"String"},{"name":"term","type":"String"}],"indexes":[{"name":"dictionaryName","unique":false,"properties":[{"name":"dictionaryName","type":"Hash","caseSensitive":true}]},{"name":"frequency","unique":false,"properties":[{"name":"frequency","type":"Value","caseSensitive":false}]},{"name":"term_dictionaryName","unique":false,"properties":[{"name":"term","type":"Hash","caseSensitive":true},{"name":"dictionaryName","type":"Hash","caseSensitive":true}]}],"links":[]}',
+      '{"name":"DictionaryMetaEntry","idName":"id","properties":[{"name":"dictionaryName","type":"String"},{"name":"frequency","type":"Long"},{"name":"pitches","type":"String"},{"name":"term","type":"String"},{"name":"termLength","type":"Long"}],"indexes":[{"name":"dictionaryName","unique":false,"properties":[{"name":"dictionaryName","type":"Hash","caseSensitive":true}]},{"name":"frequency","unique":false,"properties":[{"name":"frequency","type":"Value","caseSensitive":false}]},{"name":"term","unique":false,"properties":[{"name":"term","type":"Hash","caseSensitive":true}]},{"name":"termLength","unique":false,"properties":[{"name":"termLength","type":"Value","caseSensitive":false}]},{"name":"termLength_term","unique":false,"properties":[{"name":"termLength","type":"Value","caseSensitive":false},{"name":"term","type":"Hash","caseSensitive":true}]}],"links":[]}',
   idName: 'id',
-  propertyIds: {'dictionaryName': 0, 'frequency': 1, 'pitches': 2, 'term': 3},
+  propertyIds: {
+    'dictionaryName': 0,
+    'frequency': 1,
+    'pitches': 2,
+    'term': 3,
+    'termLength': 4
+  },
   listProperties: {},
-  indexIds: {'dictionaryName': 0, 'frequency': 1, 'term_dictionaryName': 2},
+  indexIds: {
+    'dictionaryName': 0,
+    'frequency': 1,
+    'term': 2,
+    'termLength': 3,
+    'termLength_term': 4
+  },
   indexValueTypes: {
     'dictionaryName': [
       IndexValueType.stringHash,
@@ -28,8 +40,14 @@ const DictionaryMetaEntrySchema = CollectionSchema(
     'frequency': [
       IndexValueType.long,
     ],
-    'term_dictionaryName': [
+    'term': [
       IndexValueType.stringHash,
+    ],
+    'termLength': [
+      IndexValueType.long,
+    ],
+    'termLength_term': [
+      IndexValueType.long,
       IndexValueType.stringHash,
     ]
   },
@@ -88,6 +106,8 @@ void _dictionaryMetaEntrySerializeNative(
   final value3 = object.term;
   final _term = IsarBinaryWriter.utf8Encoder.convert(value3);
   dynamicSize += (_term.length) as int;
+  final value4 = object.termLength;
+  final _termLength = value4;
   final size = staticSize + dynamicSize;
 
   rawObj.buffer = alloc(size);
@@ -98,6 +118,7 @@ void _dictionaryMetaEntrySerializeNative(
   writer.writeLong(offsets[1], _frequency);
   writer.writeBytes(offsets[2], _pitches);
   writer.writeBytes(offsets[3], _term);
+  writer.writeLong(offsets[4], _termLength);
 }
 
 DictionaryMetaEntry _dictionaryMetaEntryDeserializeNative(
@@ -130,6 +151,8 @@ P _dictionaryMetaEntryDeserializePropNative<P>(
           .fromIsar(reader.readStringOrNull(offset))) as P;
     case 3:
       return (reader.readString(offset)) as P;
+    case 4:
+      return (reader.readLong(offset)) as P;
     default:
       throw 'Illegal propertyIndex';
   }
@@ -145,6 +168,7 @@ dynamic _dictionaryMetaEntrySerializeWeb(
   IsarNative.jsObjectSet(jsObj, 'pitches',
       _dictionaryMetaEntryPitchDataConverter.toIsar(object.pitches));
   IsarNative.jsObjectSet(jsObj, 'term', object.term);
+  IsarNative.jsObjectSet(jsObj, 'termLength', object.termLength);
   return jsObj;
 }
 
@@ -174,6 +198,9 @@ P _dictionaryMetaEntryDeserializePropWeb<P>(Object jsObj, String propertyName) {
           .fromIsar(IsarNative.jsObjectGet(jsObj, 'pitches'))) as P;
     case 'term':
       return (IsarNative.jsObjectGet(jsObj, 'term') ?? '') as P;
+    case 'termLength':
+      return (IsarNative.jsObjectGet(jsObj, 'termLength') ??
+          double.negativeInfinity) as P;
     default:
       throw 'Illegal propertyName';
   }
@@ -201,9 +228,21 @@ extension DictionaryMetaEntryQueryWhereSort
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterWhere>
-      anyTermDictionaryName() {
+      anyTerm() {
     return addWhereClauseInternal(
-        const IndexWhereClause.any(indexName: 'term_dictionaryName'));
+        const IndexWhereClause.any(indexName: 'term'));
+  }
+
+  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterWhere>
+      anyTermLength() {
+    return addWhereClauseInternal(
+        const IndexWhereClause.any(indexName: 'termLength'));
+  }
+
+  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterWhere>
+      anyTermLengthTerm() {
+    return addWhereClauseInternal(
+        const IndexWhereClause.any(indexName: 'termLength_term'));
   }
 }
 
@@ -391,7 +430,7 @@ extension DictionaryMetaEntryQueryWhere
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterWhereClause>
       termEqualTo(String term) {
     return addWhereClauseInternal(IndexWhereClause.equalTo(
-      indexName: 'term_dictionaryName',
+      indexName: 'term',
       value: [term],
     ));
   }
@@ -400,21 +439,21 @@ extension DictionaryMetaEntryQueryWhere
       termNotEqualTo(String term) {
     if (whereSortInternal == Sort.asc) {
       return addWhereClauseInternal(IndexWhereClause.lessThan(
-        indexName: 'term_dictionaryName',
+        indexName: 'term',
         upper: [term],
         includeUpper: false,
       )).addWhereClauseInternal(IndexWhereClause.greaterThan(
-        indexName: 'term_dictionaryName',
+        indexName: 'term',
         lower: [term],
         includeLower: false,
       ));
     } else {
       return addWhereClauseInternal(IndexWhereClause.greaterThan(
-        indexName: 'term_dictionaryName',
+        indexName: 'term',
         lower: [term],
         includeLower: false,
       )).addWhereClauseInternal(IndexWhereClause.lessThan(
-        indexName: 'term_dictionaryName',
+        indexName: 'term',
         upper: [term],
         includeUpper: false,
       ));
@@ -422,33 +461,106 @@ extension DictionaryMetaEntryQueryWhere
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterWhereClause>
-      termDictionaryNameEqualTo(String term, String dictionaryName) {
+      termLengthEqualTo(int termLength) {
     return addWhereClauseInternal(IndexWhereClause.equalTo(
-      indexName: 'term_dictionaryName',
-      value: [term, dictionaryName],
+      indexName: 'termLength',
+      value: [termLength],
     ));
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterWhereClause>
-      termDictionaryNameNotEqualTo(String term, String dictionaryName) {
+      termLengthNotEqualTo(int termLength) {
     if (whereSortInternal == Sort.asc) {
       return addWhereClauseInternal(IndexWhereClause.lessThan(
-        indexName: 'term_dictionaryName',
-        upper: [term, dictionaryName],
+        indexName: 'termLength',
+        upper: [termLength],
         includeUpper: false,
       )).addWhereClauseInternal(IndexWhereClause.greaterThan(
-        indexName: 'term_dictionaryName',
-        lower: [term, dictionaryName],
+        indexName: 'termLength',
+        lower: [termLength],
         includeLower: false,
       ));
     } else {
       return addWhereClauseInternal(IndexWhereClause.greaterThan(
-        indexName: 'term_dictionaryName',
-        lower: [term, dictionaryName],
+        indexName: 'termLength',
+        lower: [termLength],
         includeLower: false,
       )).addWhereClauseInternal(IndexWhereClause.lessThan(
-        indexName: 'term_dictionaryName',
-        upper: [term, dictionaryName],
+        indexName: 'termLength',
+        upper: [termLength],
+        includeUpper: false,
+      ));
+    }
+  }
+
+  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterWhereClause>
+      termLengthGreaterThan(
+    int termLength, {
+    bool include = false,
+  }) {
+    return addWhereClauseInternal(IndexWhereClause.greaterThan(
+      indexName: 'termLength',
+      lower: [termLength],
+      includeLower: include,
+    ));
+  }
+
+  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterWhereClause>
+      termLengthLessThan(
+    int termLength, {
+    bool include = false,
+  }) {
+    return addWhereClauseInternal(IndexWhereClause.lessThan(
+      indexName: 'termLength',
+      upper: [termLength],
+      includeUpper: include,
+    ));
+  }
+
+  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterWhereClause>
+      termLengthBetween(
+    int lowerTermLength,
+    int upperTermLength, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return addWhereClauseInternal(IndexWhereClause.between(
+      indexName: 'termLength',
+      lower: [lowerTermLength],
+      includeLower: includeLower,
+      upper: [upperTermLength],
+      includeUpper: includeUpper,
+    ));
+  }
+
+  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterWhereClause>
+      termLengthTermEqualTo(int termLength, String term) {
+    return addWhereClauseInternal(IndexWhereClause.equalTo(
+      indexName: 'termLength_term',
+      value: [termLength, term],
+    ));
+  }
+
+  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterWhereClause>
+      termLengthTermNotEqualTo(int termLength, String term) {
+    if (whereSortInternal == Sort.asc) {
+      return addWhereClauseInternal(IndexWhereClause.lessThan(
+        indexName: 'termLength_term',
+        upper: [termLength, term],
+        includeUpper: false,
+      )).addWhereClauseInternal(IndexWhereClause.greaterThan(
+        indexName: 'termLength_term',
+        lower: [termLength, term],
+        includeLower: false,
+      ));
+    } else {
+      return addWhereClauseInternal(IndexWhereClause.greaterThan(
+        indexName: 'termLength_term',
+        lower: [termLength, term],
+        includeLower: false,
+      )).addWhereClauseInternal(IndexWhereClause.lessThan(
+        indexName: 'termLength_term',
+        upper: [termLength, term],
         includeUpper: false,
       ));
     }
@@ -906,6 +1018,57 @@ extension DictionaryMetaEntryQueryFilter on QueryBuilder<DictionaryMetaEntry,
       caseSensitive: caseSensitive,
     ));
   }
+
+  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterFilterCondition>
+      termLengthEqualTo(int value) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.eq,
+      property: 'termLength',
+      value: value,
+    ));
+  }
+
+  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterFilterCondition>
+      termLengthGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.gt,
+      include: include,
+      property: 'termLength',
+      value: value,
+    ));
+  }
+
+  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterFilterCondition>
+      termLengthLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.lt,
+      include: include,
+      property: 'termLength',
+      value: value,
+    ));
+  }
+
+  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterFilterCondition>
+      termLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition.between(
+      property: 'termLength',
+      lower: lower,
+      includeLower: includeLower,
+      upper: upper,
+      includeUpper: includeUpper,
+    ));
+  }
 }
 
 extension DictionaryMetaEntryQueryLinks on QueryBuilder<DictionaryMetaEntry,
@@ -962,6 +1125,16 @@ extension DictionaryMetaEntryQueryWhereSortBy
       sortByTermDesc() {
     return addSortByInternal('term', Sort.desc);
   }
+
+  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterSortBy>
+      sortByTermLength() {
+    return addSortByInternal('termLength', Sort.asc);
+  }
+
+  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterSortBy>
+      sortByTermLengthDesc() {
+    return addSortByInternal('termLength', Sort.desc);
+  }
 }
 
 extension DictionaryMetaEntryQueryWhereSortThenBy
@@ -1015,6 +1188,16 @@ extension DictionaryMetaEntryQueryWhereSortThenBy
       thenByTermDesc() {
     return addSortByInternal('term', Sort.desc);
   }
+
+  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterSortBy>
+      thenByTermLength() {
+    return addSortByInternal('termLength', Sort.asc);
+  }
+
+  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterSortBy>
+      thenByTermLengthDesc() {
+    return addSortByInternal('termLength', Sort.desc);
+  }
 }
 
 extension DictionaryMetaEntryQueryWhereDistinct
@@ -1044,6 +1227,11 @@ extension DictionaryMetaEntryQueryWhereDistinct
       distinctByTerm({bool caseSensitive = true}) {
     return addDistinctByInternal('term', caseSensitive: caseSensitive);
   }
+
+  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QDistinct>
+      distinctByTermLength() {
+    return addDistinctByInternal('termLength');
+  }
 }
 
 extension DictionaryMetaEntryQueryProperty
@@ -1069,6 +1257,11 @@ extension DictionaryMetaEntryQueryProperty
 
   QueryBuilder<DictionaryMetaEntry, String, QQueryOperations> termProperty() {
     return addPropertyNameInternal('term');
+  }
+
+  QueryBuilder<DictionaryMetaEntry, int, QQueryOperations>
+      termLengthProperty() {
+    return addPropertyNameInternal('termLength');
   }
 }
 

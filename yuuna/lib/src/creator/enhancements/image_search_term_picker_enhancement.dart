@@ -5,19 +5,20 @@ import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
 
 /// An enhancement used to pick an appropriate term from a text field easily.
-class TextSegmentationEnhancement extends Enhancement {
+class ImageSearchTermPicker extends Enhancement {
   /// Initialise this enhancement with the hardset parameters.
-  TextSegmentationEnhancement({required super.field})
+  ImageSearchTermPicker({required super.field})
       : super(
           uniqueKey: key,
-          label: 'Text Segmentation',
-          description: 'Search or select a new term from segmented text.',
-          icon: Icons.account_tree,
+          label: 'Image Search Term Picker',
+          description: 'Select text segmented terms of a field, then use it as'
+              ' an image search term with the active auto image enhancement.',
+          icon: Icons.manage_search,
         );
 
   /// Used to identify this enhancement and to allow a constant value for the
   /// default mappings value of [AnkiMapping].
-  static const String key = 'text_segmentation';
+  static const String key = 'image_search_term_picker';
 
   @override
   Future<void> enhanceCreatorParams({
@@ -42,13 +43,31 @@ class TextSegmentationEnhancement extends Enhancement {
     appModel.openTextSegmentationDialog(
       sourceText: sourceText,
       onSearch: (selection, items) {
-        appModel.openRecursiveDictionarySearch(
-          searchTerm: selection,
-          killOnPop: false,
-        );
+        if (appModel.activeFields.contains(ImageField.instance)) {
+          ImageEnhancement? enhancement =
+              appModel.lastSelectedMapping.getAutoFieldEnhancement(
+            appModel: appModel,
+            field: ImageField.instance,
+          )! as ImageEnhancement;
+
+          ImageField.instance.performSearch(
+            appModel: appModel,
+            creatorModel: creatorModel,
+            searchTerm: items.join(' '),
+            generateImages: () => enhancement.fetchImages(
+              context: context,
+              searchTerm: items.join(' '),
+            ),
+          );
+
+          Navigator.pop(context);
+        }
       },
       onSelect: (selection, items) {
-        creatorModel.getFieldController(TermField.instance).text = selection;
+        creatorModel.getFieldController(ImageField.instance).text =
+            items.join(' ');
+
+        Navigator.pop(context);
       },
     );
   }

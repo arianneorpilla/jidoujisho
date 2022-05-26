@@ -43,14 +43,21 @@ class _JidoujishoSearchHistoryState
       child: Material(
         color: Colors.transparent,
         child: ListView.builder(
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: searchHistory.length,
-          shrinkWrap: true,
-          itemBuilder: (context, i) => buildSearchHistoryItem(
-            uniqueKey: widget.uniqueKey,
-            searchTerm: searchHistory[i],
-            onSearchTermSelect: widget.onSearchTermSelect,
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
           ),
+          itemCount: searchHistory.length,
+          itemBuilder: (context, index) {
+            if (index == 0) {
+              return const Space.normal();
+            }
+
+            return buildSearchHistoryItem(
+              uniqueKey: widget.uniqueKey,
+              searchTerm: searchHistory[index - 1],
+              onSearchTermSelect: widget.onSearchTermSelect,
+            );
+          },
         ),
       ),
     );

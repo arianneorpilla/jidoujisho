@@ -10,7 +10,9 @@ import 'package:yuuna/utils.dart';
 class DictionaryTermPage extends BasePage {
   /// Create the widget for a dictionary word.
   const DictionaryTermPage({
+    required this.dictionaryMap,
     required this.dictionaryTerm,
+    required this.dictionaryMetaEntries,
     required this.onSearch,
     required this.onStash,
     required this.expandableControllers,
@@ -21,8 +23,14 @@ class DictionaryTermPage extends BasePage {
     super.key,
   });
 
+  /// Used for optimisations.
+  final Map<String, Dictionary> dictionaryMap;
+
   /// The result made from a dictionary database search.
   final DictionaryTerm dictionaryTerm;
+
+  /// Meta entries for this term.
+  final List<DictionaryMetaEntry> dictionaryMetaEntries;
 
   /// Action to be done upon selecting the search option.
   final Function(String) onSearch;
@@ -66,17 +74,65 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
         allowPaste: false,
       );
 
+  List<Widget>? tags;
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      appModel.dictionaryMenuNotifier.addListener(dumpCache);
+    });
+  }
+
+  void dumpCache() {
+    tags = null;
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    List<DictionaryMetaEntry> metaEntries =
-        appModel.getMetaEntriesFromTerm(widget.dictionaryTerm.term);
+    if (tags == null) {
+      tags = [];
+      Set<DictionaryPair> pairs = {};
+
+      for (DictionaryEntry entry in widget.dictionaryTerm.entries) {
+        for (String tag in entry.termTags) {
+          pairs.add(
+            DictionaryPair(
+              term: entry.dictionaryName,
+              reading: tag,
+            ),
+          );
+        }
+      }
+
+      tags!.addAll(pairs.map((pair) {
+        if (pair.reading.isNotEmpty) {
+          DictionaryTag tag = appModel.getDictionaryTag(
+            dictionaryName: pair.term,
+            tagName: pair.reading,
+          );
+
+          return JidoujishoTag(
+            text: tag.name,
+            message: tag.notes,
+            backgroundColor: tag.color,
+          );
+        } else {
+          return const SizedBox.shrink();
+        }
+      }).toList());
+    }
 
     List<Widget> children = [
-      buildTopRow(metaEntries: metaEntries),
+      buildTopRow(metaEntries: widget.dictionaryMetaEntries),
       const Space.normal(),
-      buildTags(),
+      Wrap(children: tags!),
       const Space.normal(),
-      buildMetaWidgets(metaEntries: metaEntries),
+      buildMetaWidgets(metaEntries: widget.dictionaryMetaEntries),
       const Space.normal(),
       buildEntries(),
       if (widget.footerWidget != null) widget.footerWidget!
@@ -217,42 +273,6 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
     );
   }
 
-  Widget buildTags() {
-    List<Widget> tags = [];
-
-    Set<DictionaryPair> pairs = {};
-
-    for (DictionaryEntry entry in widget.dictionaryTerm.entries) {
-      for (String tag in entry.termTags) {
-        pairs.add(
-          DictionaryPair(
-            term: entry.dictionaryName,
-            reading: tag,
-          ),
-        );
-      }
-    }
-
-    tags.addAll(pairs.map((pair) {
-      if (pair.reading.isNotEmpty) {
-        DictionaryTag tag = appModel.getDictionaryTag(
-          dictionaryName: pair.term,
-          tagName: pair.reading,
-        );
-
-        return JidoujishoTag(
-          text: tag.name,
-          message: tag.notes,
-          backgroundColor: tag.color,
-        );
-      } else {
-        return const SizedBox.shrink();
-      }
-    }).toList());
-
-    return Wrap(children: tags);
-  }
-
   Widget buildMetaWidgets({required List<DictionaryMetaEntry> metaEntries}) {
     if (metaEntries.isEmpty) {
       return const SizedBox.shrink();
@@ -264,7 +284,7 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
       itemCount: metaEntries.length,
       itemBuilder: (context, index) {
         DictionaryMetaEntry metaEntry = metaEntries[index];
-        if (appModel.getDictionary(metaEntry.dictionaryName).hidden) {
+        if (widget.dictionaryMap[metaEntry.dictionaryName]!.hidden) {
           return const SizedBox.shrink();
         }
 

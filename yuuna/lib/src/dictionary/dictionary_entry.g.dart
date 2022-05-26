@@ -15,7 +15,7 @@ extension GetDictionaryEntryCollection on Isar {
 const DictionaryEntrySchema = CollectionSchema(
   name: 'DictionaryEntry',
   schema:
-      '{"name":"DictionaryEntry","idName":"id","properties":[{"name":"dictionaryName","type":"String"},{"name":"extra","type":"String"},{"name":"hashCode","type":"Long"},{"name":"meaningTags","type":"StringList"},{"name":"meanings","type":"StringList"},{"name":"popularity","type":"Double"},{"name":"reading","type":"String"},{"name":"readingFirstChar","type":"String"},{"name":"readingLength","type":"Long"},{"name":"readingSecondChar","type":"String"},{"name":"sequence","type":"Long"},{"name":"term","type":"String"},{"name":"termFirstChar","type":"String"},{"name":"termLength","type":"Long"},{"name":"termSecondChar","type":"String"},{"name":"termTags","type":"StringList"}],"indexes":[{"name":"dictionaryName","unique":false,"properties":[{"name":"dictionaryName","type":"Hash","caseSensitive":true}]},{"name":"popularity","unique":false,"properties":[{"name":"popularity","type":"Value","caseSensitive":false}]},{"name":"reading","unique":false,"properties":[{"name":"reading","type":"Hash","caseSensitive":true}]},{"name":"readingFirstChar_readingSecondChar_readingLength","unique":false,"properties":[{"name":"readingFirstChar","type":"Hash","caseSensitive":true},{"name":"readingSecondChar","type":"Hash","caseSensitive":true},{"name":"readingLength","type":"Value","caseSensitive":false}]},{"name":"readingLength","unique":false,"properties":[{"name":"readingLength","type":"Value","caseSensitive":false}]},{"name":"sequence","unique":false,"properties":[{"name":"sequence","type":"Value","caseSensitive":false}]},{"name":"termFirstChar_termSecondChar_termLength","unique":false,"properties":[{"name":"termFirstChar","type":"Hash","caseSensitive":true},{"name":"termSecondChar","type":"Hash","caseSensitive":true},{"name":"termLength","type":"Value","caseSensitive":false}]},{"name":"termLength","unique":false,"properties":[{"name":"termLength","type":"Value","caseSensitive":false}]},{"name":"term_reading_popularity","unique":false,"properties":[{"name":"term","type":"Hash","caseSensitive":true},{"name":"reading","type":"Hash","caseSensitive":true},{"name":"popularity","type":"Value","caseSensitive":false}]}],"links":[]}',
+      '{"name":"DictionaryEntry","idName":"id","properties":[{"name":"dictionaryName","type":"String"},{"name":"extra","type":"String"},{"name":"hashCode","type":"Long"},{"name":"meaningTags","type":"StringList"},{"name":"meanings","type":"StringList"},{"name":"popularity","type":"Double"},{"name":"reading","type":"String"},{"name":"readingFirstChar","type":"String"},{"name":"readingLength","type":"Long"},{"name":"readingSecondChar","type":"String"},{"name":"sequence","type":"Long"},{"name":"term","type":"String"},{"name":"termFirstChar","type":"String"},{"name":"termLength","type":"Long"},{"name":"termSecondChar","type":"String"},{"name":"termTags","type":"StringList"}],"indexes":[{"name":"dictionaryName","unique":false,"properties":[{"name":"dictionaryName","type":"Hash","caseSensitive":true}]},{"name":"popularity","unique":false,"properties":[{"name":"popularity","type":"Value","caseSensitive":false}]},{"name":"reading","unique":false,"properties":[{"name":"reading","type":"Hash","caseSensitive":true}]},{"name":"readingFirstChar_readingSecondChar_readingLength","unique":false,"properties":[{"name":"readingFirstChar","type":"Hash","caseSensitive":true},{"name":"readingSecondChar","type":"Hash","caseSensitive":true},{"name":"readingLength","type":"Value","caseSensitive":false}]},{"name":"readingLength","unique":false,"properties":[{"name":"readingLength","type":"Value","caseSensitive":false}]},{"name":"sequence","unique":false,"properties":[{"name":"sequence","type":"Value","caseSensitive":false}]},{"name":"term","unique":false,"properties":[{"name":"term","type":"Hash","caseSensitive":true}]},{"name":"termFirstChar_termSecondChar_termLength","unique":false,"properties":[{"name":"termFirstChar","type":"Hash","caseSensitive":true},{"name":"termSecondChar","type":"Hash","caseSensitive":true},{"name":"termLength","type":"Value","caseSensitive":false}]},{"name":"termLength","unique":false,"properties":[{"name":"termLength","type":"Value","caseSensitive":false}]}],"links":[]}',
   idName: 'id',
   propertyIds: {
     'dictionaryName': 0,
@@ -43,9 +43,9 @@ const DictionaryEntrySchema = CollectionSchema(
     'readingFirstChar_readingSecondChar_readingLength': 3,
     'readingLength': 4,
     'sequence': 5,
-    'termFirstChar_termSecondChar_termLength': 6,
-    'termLength': 7,
-    'term_reading_popularity': 8
+    'term': 6,
+    'termFirstChar_termSecondChar_termLength': 7,
+    'termLength': 8
   },
   indexValueTypes: {
     'dictionaryName': [
@@ -68,6 +68,9 @@ const DictionaryEntrySchema = CollectionSchema(
     'sequence': [
       IndexValueType.long,
     ],
+    'term': [
+      IndexValueType.stringHash,
+    ],
     'termFirstChar_termSecondChar_termLength': [
       IndexValueType.stringHash,
       IndexValueType.stringHash,
@@ -75,11 +78,6 @@ const DictionaryEntrySchema = CollectionSchema(
     ],
     'termLength': [
       IndexValueType.long,
-    ],
-    'term_reading_popularity': [
-      IndexValueType.stringHash,
-      IndexValueType.stringHash,
-      IndexValueType.double,
     ]
   },
   linkIds: {},
@@ -433,6 +431,11 @@ extension DictionaryEntryQueryWhereSort
         const IndexWhereClause.any(indexName: 'sequence'));
   }
 
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere> anyTerm() {
+    return addWhereClauseInternal(
+        const IndexWhereClause.any(indexName: 'term'));
+  }
+
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere>
       anyTermFirstCharTermSecondCharTermLength() {
     return addWhereClauseInternal(const IndexWhereClause.any(
@@ -442,12 +445,6 @@ extension DictionaryEntryQueryWhereSort
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere> anyTermLength() {
     return addWhereClauseInternal(
         const IndexWhereClause.any(indexName: 'termLength'));
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere>
-      anyTermReadingPopularity() {
-    return addWhereClauseInternal(
-        const IndexWhereClause.any(indexName: 'term_reading_popularity'));
   }
 }
 
@@ -937,6 +934,39 @@ extension DictionaryEntryQueryWhere
     ));
   }
 
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause> termEqualTo(
+      String term) {
+    return addWhereClauseInternal(IndexWhereClause.equalTo(
+      indexName: 'term',
+      value: [term],
+    ));
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      termNotEqualTo(String term) {
+    if (whereSortInternal == Sort.asc) {
+      return addWhereClauseInternal(IndexWhereClause.lessThan(
+        indexName: 'term',
+        upper: [term],
+        includeUpper: false,
+      )).addWhereClauseInternal(IndexWhereClause.greaterThan(
+        indexName: 'term',
+        lower: [term],
+        includeLower: false,
+      ));
+    } else {
+      return addWhereClauseInternal(IndexWhereClause.greaterThan(
+        indexName: 'term',
+        lower: [term],
+        includeLower: false,
+      )).addWhereClauseInternal(IndexWhereClause.lessThan(
+        indexName: 'term',
+        upper: [term],
+        includeUpper: false,
+      ));
+    }
+  }
+
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       termFirstCharEqualTo(String? termFirstChar) {
     return addWhereClauseInternal(IndexWhereClause.equalTo(
@@ -1156,104 +1186,6 @@ extension DictionaryEntryQueryWhere
       includeLower: includeLower,
       upper: [upperTermLength],
       includeUpper: includeUpper,
-    ));
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause> termEqualTo(
-      String term) {
-    return addWhereClauseInternal(IndexWhereClause.equalTo(
-      indexName: 'term_reading_popularity',
-      value: [term],
-    ));
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      termNotEqualTo(String term) {
-    if (whereSortInternal == Sort.asc) {
-      return addWhereClauseInternal(IndexWhereClause.lessThan(
-        indexName: 'term_reading_popularity',
-        upper: [term],
-        includeUpper: false,
-      )).addWhereClauseInternal(IndexWhereClause.greaterThan(
-        indexName: 'term_reading_popularity',
-        lower: [term],
-        includeLower: false,
-      ));
-    } else {
-      return addWhereClauseInternal(IndexWhereClause.greaterThan(
-        indexName: 'term_reading_popularity',
-        lower: [term],
-        includeLower: false,
-      )).addWhereClauseInternal(IndexWhereClause.lessThan(
-        indexName: 'term_reading_popularity',
-        upper: [term],
-        includeUpper: false,
-      ));
-    }
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      termReadingEqualTo(String term, String reading) {
-    return addWhereClauseInternal(IndexWhereClause.equalTo(
-      indexName: 'term_reading_popularity',
-      value: [term, reading],
-    ));
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      termReadingNotEqualTo(String term, String reading) {
-    if (whereSortInternal == Sort.asc) {
-      return addWhereClauseInternal(IndexWhereClause.lessThan(
-        indexName: 'term_reading_popularity',
-        upper: [term, reading],
-        includeUpper: false,
-      )).addWhereClauseInternal(IndexWhereClause.greaterThan(
-        indexName: 'term_reading_popularity',
-        lower: [term, reading],
-        includeLower: false,
-      ));
-    } else {
-      return addWhereClauseInternal(IndexWhereClause.greaterThan(
-        indexName: 'term_reading_popularity',
-        lower: [term, reading],
-        includeLower: false,
-      )).addWhereClauseInternal(IndexWhereClause.lessThan(
-        indexName: 'term_reading_popularity',
-        upper: [term, reading],
-        includeUpper: false,
-      ));
-    }
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      termReadingEqualToPopularityGreaterThan(
-          String term, String reading, double? popularity) {
-    return addWhereClauseInternal(IndexWhereClause.greaterThan(
-      indexName: 'term_reading_popularity',
-      lower: [term, reading, popularity],
-      includeLower: false,
-    ));
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      termReadingEqualToPopularityLessThan(
-          String term, String reading, double? popularity) {
-    return addWhereClauseInternal(IndexWhereClause.lessThan(
-      indexName: 'term_reading_popularity',
-      upper: [term, reading, popularity],
-      includeUpper: false,
-    ));
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      termReadingEqualToPopularityBetween(String term, String reading,
-          double? lowerPopularity, double? upperPopularity) {
-    return addWhereClauseInternal(IndexWhereClause.between(
-      indexName: 'term_reading_popularity',
-      lower: [term, reading, lowerPopularity],
-      includeLower: false,
-      upper: [term, reading, upperPopularity],
-      includeUpper: false,
     ));
   }
 }

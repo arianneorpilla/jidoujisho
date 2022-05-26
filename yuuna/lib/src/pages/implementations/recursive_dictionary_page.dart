@@ -62,7 +62,7 @@ class _RecursiveDictionaryPageState
         FocusScope.of(context).unfocus();
       });
 
-      appModel.dictionaryNotifier.addListener(searchAgain);
+      appModel.dictionarySearchAgainNotifier.addListener(searchAgain);
     });
   }
 
@@ -102,9 +102,10 @@ class _RecursiveDictionaryPageState
       transitionDuration: Duration.zero,
       margins: const EdgeInsets.symmetric(horizontal: 6),
       width: double.maxFinite,
-      debounceDelay: const Duration(milliseconds: 500),
+      debounceDelay: const Duration(milliseconds: 200),
       transition: SlideFadeFloatingSearchBarTransition(),
       automaticallyImplyBackButton: false,
+      isScrollControlled: true,
       onFocusChanged: (focused) {
         if (!focused) {
           if (widget.killOnPop) {

@@ -26,15 +26,15 @@ Future<void> depositDictionaryDataHelper(PrepareDictionaryParams params) async {
 
   database.writeTxnSync((database) {
     database.dictionaryTags
-        .filter()
+        .where()
         .dictionaryNameEqualTo(params.dictionaryName)
         .deleteAllSync();
     database.dictionaryMetaEntrys
-        .filter()
+        .where()
         .dictionaryNameEqualTo(params.dictionaryName)
         .deleteAllSync();
     database.dictionaryEntrys
-        .filter()
+        .where()
         .dictionaryNameEqualTo(params.dictionaryName)
         .deleteAllSync();
 
@@ -54,15 +54,15 @@ Future<void> deleteDictionaryDataHelper(DeleteDictionaryParams params) async {
   database.writeTxnSync((database) {
     database.dictionarys.deleteByDictionaryNameSync(params.dictionaryName);
     database.dictionaryTags
-        .filter()
+        .where()
         .dictionaryNameEqualTo(params.dictionaryName)
         .deleteAllSync();
     database.dictionaryMetaEntrys
-        .filter()
+        .where()
         .dictionaryNameEqualTo(params.dictionaryName)
         .deleteAllSync();
     database.dictionaryEntrys
-        .filter()
+        .where()
         .dictionaryNameEqualTo(params.dictionaryName)
         .deleteAllSync();
 

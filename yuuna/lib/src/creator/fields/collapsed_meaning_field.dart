@@ -37,7 +37,7 @@ class CollapsedMeaningField extends Field {
     required bool creatorJustLaunched,
   }) {
     List<String> collapsedDictionaries = appModel.dictionaries
-        .where((dictionary) => dictionary.collapsed)
+        .where((dictionary) => dictionary.collapsed && !dictionary.hidden)
         .map((dictionary) => dictionary.dictionaryName)
         .toList();
 

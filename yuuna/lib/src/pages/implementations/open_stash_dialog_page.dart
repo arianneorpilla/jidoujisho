@@ -74,8 +74,8 @@ class _OpenStashDialogPage extends BasePageState<OpenStashDialogPage> {
     return SizedBox(
       width: double.maxFinite,
       child: RawScrollbar(
-        thickness: 3,
         thumbVisibility: true,
+        thickness: 3,
         controller: _scrollController,
         child: SingleChildScrollView(
           controller: _scrollController,

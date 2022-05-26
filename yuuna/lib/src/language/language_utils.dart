@@ -1,5 +1,6 @@
 import 'package:kana_kit/kana_kit.dart';
 import 'package:ruby_text/ruby_text.dart';
+import 'package:yuuna/dictionary.dart';
 
 /// Extra methods for [RegExp].
 
@@ -55,6 +56,8 @@ class LanguageUtils {
 
   static const KanaKit _kanaKit = KanaKit();
 
+  static const Map<DictionaryPair, List<RubyTextData>> _furiganaCache = {};
+
   /// Get whether or not a code point is within the ranges. Assumes [ranges]
   /// is a two element list of integers.
   static bool isCodePointInRange(int codePoint, List<int> ranges) {
@@ -82,6 +85,11 @@ class LanguageUtils {
   /// Generate Furigana for a [term] given its [reading].
   static List<RubyTextData> distributeFurigana(
       {required String term, required String reading}) {
+    DictionaryPair pair = DictionaryPair(term: term, reading: reading);
+    if (_furiganaCache[pair] != null) {
+      return _furiganaCache[pair]!;
+    }
+
     if (reading == term) {
       // The term and reading are the same. No Furigana required.
       return [RubyTextData(term)];

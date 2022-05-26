@@ -144,8 +144,8 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
     List<AnkiMapping> mappings = appModel.mappings;
 
     return RawScrollbar(
-      thickness: 3,
       thumbVisibility: true,
+      thickness: 3,
       controller: _scrollController,
       child: ReorderableColumn(
         scrollController: _scrollController,

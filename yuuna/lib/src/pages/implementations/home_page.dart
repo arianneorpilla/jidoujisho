@@ -81,7 +81,6 @@ class _HomePageState extends BasePageState<HomePage> {
         resizeToAvoidBottomInset: true,
         appBar: buildAppBar(),
         body: buildBody(),
-        bottomNavigationBar: buildBottomNavigationBar(),
       ),
     );
   }
@@ -160,7 +159,7 @@ class _HomePageState extends BasePageState<HomePage> {
         ),
         const Space.extraSmall(),
         Text(
-          appVersion,
+          '$appVersion preview',
           style: textTheme.labelSmall!.copyWith(
             letterSpacing: 0,
             fontWeight: FontWeight.bold,
@@ -172,8 +171,6 @@ class _HomePageState extends BasePageState<HomePage> {
 
   List<Widget> buildActions() {
     return [
-      buildResumeButton(),
-      const Space.small(),
       buildCreatorButton(),
       const Space.small(),
       buildShowMenuButton(),

@@ -34,8 +34,14 @@ class DictionaryMetaEntry {
   int? id;
 
   /// The word or phrase represented by this dictionary entry.
-  @Index(composite: [CompositeIndex('dictionaryName')])
+  @Index()
   final String term;
+
+  @Index()
+
+  /// Length of the term.
+  @Index(composite: [CompositeIndex('term')])
+  int get termLength => term.length;
 
   /// The dictionary from which this entry was imported from. This is used for
   /// database query purposes.

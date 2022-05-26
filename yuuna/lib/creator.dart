@@ -4,6 +4,7 @@ export 'src/creator/anki_mapping.dart';
 export 'src/creator/enhancement.dart';
 export 'src/creator/field.dart';
 export 'src/creator/audio_enhancement.dart';
+export 'src/creator/image_enhancement.dart';
 export 'src/creator/media_field.dart';
 export 'src/creator/quick_action.dart';
 export 'src/creator/search_history_item.dart';
@@ -22,6 +23,7 @@ export 'src/creator/enhancements/search_dictionary_enhancement.dart';
 export 'src/creator/enhancements/text_segmentation_enhancement.dart';
 export 'src/creator/enhancements/pick_from_stash_enhancement.dart';
 export 'src/creator/enhancements/pop_from_stash_enhancement.dart';
+export 'src/creator/enhancements/image_search_term_picker_enhancement.dart';
 
 export 'src/creator/fields/sentence_field.dart';
 export 'src/creator/fields/meaning_field.dart';

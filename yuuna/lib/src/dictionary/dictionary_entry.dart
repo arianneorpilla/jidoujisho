@@ -38,7 +38,7 @@ class DictionaryEntry {
   int? id;
 
   /// The term represented by this dictionary entry.
-  @Index(composite: [CompositeIndex('reading'), CompositeIndex('popularity')])
+  @Index()
   final String term;
 
   /// The dictionary from which this entry was imported from. This is used for
