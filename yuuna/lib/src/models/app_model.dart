@@ -1385,7 +1385,7 @@ class AppModel with ChangeNotifier {
         return '';
       } else {
         if (field is ImageExportField) {
-          return '<img src="${exportedImages[field]}></img>"' ?? '';
+          return exportedImages[field] ?? '';
         } else if (field is AudioExportField) {
           return exportedAudio[field] ?? '';
         } else {
