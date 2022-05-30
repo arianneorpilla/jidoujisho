@@ -4,7 +4,9 @@ import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/pages.dart';
+import 'package:yuuna/src/models/app_model.dart';
 import 'package:yuuna/utils.dart';
+import 'package:collection/collection.dart';
 
 /// Returns the widget for a list of [DictionaryEntry] making up a term.
 class DictionaryTermPage extends BasePage {
@@ -74,75 +76,15 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
         allowPaste: false,
       );
 
-  List<Widget>? tags;
-
-  @override
-  void initState() {
-    super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      appModel.dictionaryMenuNotifier.addListener(dumpCache);
-    });
-  }
-
-  void dumpCache() {
-    tags = null;
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    if (tags == null) {
-      tags = [];
-      Set<DictionaryPair> pairs = {};
-
-      for (DictionaryEntry entry in widget.dictionaryTerm.entries) {
-        for (String tag in entry.termTags) {
-          pairs.add(
-            DictionaryPair(
-              term: entry.dictionaryName,
-              reading: tag,
-            ),
-          );
-        }
-      }
-
-      tags!.addAll(pairs.map((pair) {
-        if (pair.reading.isNotEmpty) {
-          DictionaryTag tag = appModel.getDictionaryTag(
-            dictionaryName: pair.term,
-            tagName: pair.reading,
-          );
-
-          return JidoujishoTag(
-            text: tag.name,
-            message: tag.notes,
-            backgroundColor: tag.color,
-          );
-        } else {
-          return const SizedBox.shrink();
-        }
-      }).toList());
-    }
-
-    List<Widget> children = [
-      buildTopRow(metaEntries: widget.dictionaryMetaEntries),
-      const Space.normal(),
-      Wrap(children: tags!),
-      const Space.normal(),
-      buildMetaWidgets(metaEntries: widget.dictionaryMetaEntries),
-      const Space.normal(),
-      buildEntries(),
-      if (widget.footerWidget != null) widget.footerWidget!
-    ];
+    List<Widget> tags = ref.watch(termTagsProvider(widget.dictionaryTerm));
 
     return GestureDetector(
       child: Card(
         color: appModel.isDarkMode
-            ? const Color(0xff313131)
-            : const Color(0xfff6f6f6),
+            ? const Color.fromARGB(255, 15, 15, 15)
+            : const Color.fromARGB(255, 246, 246, 246),
         elevation: 0,
         shape: const RoundedRectangleBorder(),
         child: Padding(
@@ -152,11 +94,18 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
             right: Spacing.of(context).spaces.normal,
             bottom: Spacing.of(context).spaces.normal,
           ),
-          child: ListView.builder(
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            itemBuilder: (context, index) => children[index],
-            itemCount: children.length,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              buildTopRow(metaEntries: widget.dictionaryMetaEntries),
+              const Space.normal(),
+              Wrap(children: tags),
+              const Space.normal(),
+              buildMetaWidgets(metaEntries: widget.dictionaryMetaEntries),
+              const Space.normal(),
+              buildEntries(),
+              if (widget.footerWidget != null) widget.footerWidget!
+            ],
           ),
         ),
       ),
@@ -278,21 +227,21 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
       return const SizedBox.shrink();
     }
 
-    return ListView.builder(
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      itemCount: metaEntries.length,
-      itemBuilder: (context, index) {
-        DictionaryMetaEntry metaEntry = metaEntries[index];
-        if (widget.dictionaryMap[metaEntry.dictionaryName]!.hidden) {
-          return const SizedBox.shrink();
-        }
+    List<Widget> children = metaEntries.mapIndexed((index, element) {
+      DictionaryMetaEntry metaEntry = metaEntries[index];
+      if (widget.dictionaryMap[metaEntry.dictionaryName]!.hidden) {
+        return const SizedBox.shrink();
+      }
 
-        return Padding(
-          padding: Spacing.of(context).insets.horizontal.small,
-          child: buildMetaWidget(metaEntry),
-        );
-      },
+      return Padding(
+        padding: Spacing.of(context).insets.horizontal.small,
+        child: buildMetaWidget(metaEntry),
+      );
+    }).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: children,
     );
   }
 
@@ -308,7 +257,7 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
                 '%dictionaryName%',
                 metaEntry.dictionaryName,
               ),
-              trailingText: metaEntry.frequency.toString(),
+              trailingText: metaEntry.frequency,
               backgroundColor: Colors.red.shade900,
             ),
           ),
@@ -360,45 +309,46 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
 
         return Wrap(children: children);
       } else {
+        List<Widget> pitchChildren = [];
+        children.add(Row(
+          children: [
+            Padding(
+              padding: Spacing.of(context).insets.onlyBottom.semiSmall,
+              child: JidoujishoTag(
+                text: metaEntry.dictionaryName,
+                message: dictionaryImportTag.replaceAll(
+                  '%dictionaryName%',
+                  metaEntry.dictionaryName,
+                ),
+                backgroundColor: Colors.red.shade900,
+              ),
+            ),
+            const Spacer(),
+          ],
+        ));
+
+        children.addAll(
+          pitches.mapIndexed((index, element) {
+            PitchData data = pitches[index];
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: Spacing.of(context).spaces.small,
+                left: Spacing.of(context).spaces.small,
+              ),
+              child: appModel.targetLanguage.getPitchWidget(
+                context: context,
+                reading: data.reading,
+                downstep: data.downstep,
+              ),
+            );
+          }).toList(),
+        );
+
         return Padding(
           padding: Spacing.of(context).insets.onlyBottom.small,
-          child: ListView.builder(
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                return Row(
-                  children: [
-                    Padding(
-                      padding: Spacing.of(context).insets.onlyBottom.semiSmall,
-                      child: JidoujishoTag(
-                        text: metaEntry.dictionaryName,
-                        message: dictionaryImportTag.replaceAll(
-                          '%dictionaryName%',
-                          metaEntry.dictionaryName,
-                        ),
-                        backgroundColor: Colors.red.shade900,
-                      ),
-                    ),
-                    const Spacer(),
-                  ],
-                );
-              } else {
-                PitchData data = pitches[index - 1];
-                return Padding(
-                  padding: EdgeInsets.only(
-                    bottom: Spacing.of(context).spaces.small,
-                    left: Spacing.of(context).spaces.small,
-                  ),
-                  child: appModel.targetLanguage.getPitchWidget(
-                    context: context,
-                    reading: data.reading,
-                    downstep: data.downstep,
-                  ),
-                );
-              }
-            },
-            itemCount: pitches.length + 1,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: pitchChildren,
           ),
         );
       }
@@ -408,27 +358,28 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
   }
 
   Widget buildEntries() {
+    List<Widget> children =
+        widget.dictionaryTerm.entries.mapIndexed((index, meaning) {
+      DictionaryEntry entry = widget.dictionaryTerm.entries[index];
+
+      if (widget.dictionaryHiddens[entry.dictionaryName]!) {
+        return const SizedBox.shrink();
+      }
+
+      return DictionaryEntryPage(
+        expandableController:
+            widget.expandableControllers[entry.dictionaryName]!,
+        entry: entry,
+        onSearch: widget.onSearch,
+        onStash: widget.onStash,
+      );
+    }).toList();
+
     return Padding(
       padding: Spacing.of(context).insets.horizontal.small,
-      child: ListView.builder(
-        physics: const NeverScrollableScrollPhysics(),
-        shrinkWrap: true,
-        itemCount: widget.dictionaryTerm.entries.length,
-        itemBuilder: (context, index) {
-          DictionaryEntry entry = widget.dictionaryTerm.entries[index];
-
-          if (widget.dictionaryHiddens[entry.dictionaryName]!) {
-            return const SizedBox.shrink();
-          }
-
-          return DictionaryEntryPage(
-            expandableController:
-                widget.expandableControllers[entry.dictionaryName]!,
-            entry: entry,
-            onSearch: widget.onSearch,
-            onStash: widget.onStash,
-          );
-        },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: children,
       ),
     );
   }

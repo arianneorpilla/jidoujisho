@@ -46,7 +46,7 @@ class _JidoujishoSearchHistoryState
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
           ),
-          itemCount: searchHistory.length,
+          itemCount: searchHistory.length + 1,
           itemBuilder: (context, index) {
             if (index == 0) {
               return const Space.normal();

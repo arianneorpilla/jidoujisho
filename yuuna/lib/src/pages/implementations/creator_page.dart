@@ -364,12 +364,12 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
   final ScrollController _scrollController = ScrollController();
 
   Widget buildPortraitFields() {
-    return Padding(
-      padding: Spacing.of(context).insets.horizontal.small,
-      child: RawScrollbar(
-        thumbVisibility: true,
-        thickness: 3,
-        controller: _scrollController,
+    return RawScrollbar(
+      thumbVisibility: true,
+      thickness: 3,
+      controller: _scrollController,
+      child: Padding(
+        padding: Spacing.of(context).insets.horizontal.small,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(
               parent: BouncingScrollPhysics()),
@@ -567,6 +567,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
     required bool isCollapsed,
   }) {
     return JidoujishoIconButton(
+      isWideTapArea: true,
       size: textTheme.titleLarge?.fontSize,
       tooltip: removeField,
       enabledColor: theme.colorScheme.primary,
@@ -587,6 +588,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
     required bool isCollapsed,
   }) {
     return JidoujishoIconButton(
+      isWideTapArea: true,
       size: textTheme.titleLarge?.fontSize,
       tooltip: addField,
       icon: Icons.add_circle,
@@ -613,6 +615,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
     if (enhancement == null) {
       return JidoujishoIconButton(
+        isWideTapArea: true,
         size: textTheme.titleLarge?.fontSize,
         tooltip: assignAutoEnhancementLabel,
         icon: Icons.add_circle,
@@ -631,6 +634,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       );
     } else {
       return JidoujishoIconButton(
+        isWideTapArea: true,
         size: textTheme.titleLarge?.fontSize,
         tooltip: removeEnhancementLabel,
         enabledColor: theme.colorScheme.primary,
@@ -693,23 +697,21 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
     if (enhancement == null) {
       return const SizedBox.shrink();
     } else {
-      return Padding(
-        padding: Spacing.of(context).insets.onlyLeft.small,
-        child: JidoujishoIconButton(
-          busy: true,
-          size: textTheme.titleLarge?.fontSize,
-          tooltip: enhancement.getLocalisedLabel(appModel),
-          icon: enhancement.icon,
-          onTap: () async {
-            await enhancement!.enhanceCreatorParams(
-              context: context,
-              ref: ref,
-              appModel: appModel,
-              creatorModel: creatorModel,
-              cause: EnhancementTriggerCause.manual,
-            );
-          },
-        ),
+      return JidoujishoIconButton(
+        isWideTapArea: true,
+        busy: true,
+        size: textTheme.titleLarge?.fontSize,
+        tooltip: enhancement.getLocalisedLabel(appModel),
+        icon: enhancement.icon,
+        onTap: () async {
+          await enhancement!.enhanceCreatorParams(
+            context: context,
+            ref: ref,
+            appModel: appModel,
+            creatorModel: creatorModel,
+            cause: EnhancementTriggerCause.manual,
+          );
+        },
       );
     }
   }
@@ -728,43 +730,39 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
     }
 
     if (enhancement == null) {
-      return Padding(
-        padding: Spacing.of(context).insets.onlyLeft.small,
-        child: JidoujishoIconButton(
-          size: textTheme.titleLarge?.fontSize,
-          tooltip: assignManualEnhancementLabel,
-          icon: Icons.add_circle,
-          onTap: () async {
-            await showDialog(
-              barrierDismissible: true,
-              context: context,
-              builder: (context) => EnhancementsPickerDialogPage(
-                mapping: mapping,
-                slotNumber: slotNumber,
-                field: field,
-              ),
-            );
-            setState(() {});
-          },
-        ),
+      return JidoujishoIconButton(
+        isWideTapArea: true,
+        size: textTheme.titleLarge?.fontSize,
+        tooltip: assignManualEnhancementLabel,
+        icon: Icons.add_circle,
+        onTap: () async {
+          await showDialog(
+            barrierDismissible: true,
+            context: context,
+            builder: (context) => EnhancementsPickerDialogPage(
+              mapping: mapping,
+              slotNumber: slotNumber,
+              field: field,
+            ),
+          );
+          setState(() {});
+        },
       );
     } else {
-      return Padding(
-        padding: Spacing.of(context).insets.onlyLeft.small,
-        child: JidoujishoIconButton(
-          size: textTheme.titleLarge?.fontSize,
-          tooltip: removeEnhancementLabel,
-          enabledColor: theme.colorScheme.primary,
-          icon: enhancement.icon,
-          onTap: () async {
-            appModel.removeFieldEnhancement(
-              mapping: mapping,
-              field: field,
-              slotNumber: slotNumber,
-            );
-            setState(() {});
-          },
-        ),
+      return JidoujishoIconButton(
+        isWideTapArea: true,
+        size: textTheme.titleLarge?.fontSize,
+        tooltip: removeEnhancementLabel,
+        enabledColor: theme.colorScheme.primary,
+        icon: enhancement.icon,
+        onTap: () async {
+          appModel.removeFieldEnhancement(
+            mapping: mapping,
+            field: field,
+            slotNumber: slotNumber,
+          );
+          setState(() {});
+        },
       );
     }
   }
@@ -810,12 +808,15 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
                   isCollapsed: isCollapsed,
                 ),
           suffixIcon: widget.editEnhancements
-              ? Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.min,
-                  children: buildManualEnhancementEditButtons(
-                    mapping: mapping,
-                    field: field,
+              ? Padding(
+                  padding: Spacing.of(context).insets.onlyRight.small,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisSize: MainAxisSize.min,
+                    children: buildManualEnhancementEditButtons(
+                      mapping: mapping,
+                      field: field,
+                    ),
                   ),
                 )
               : null,
@@ -837,12 +838,15 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
             size: textTheme.titleLarge?.fontSize,
           ),
           suffixIcon: (mapping.enhancements[field.uniqueKey] ?? {}).isNotEmpty
-              ? Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.min,
-                  children: buildManualEnhancementButtons(
-                    mapping: mapping,
-                    field: field,
+              ? Padding(
+                  padding: Spacing.of(context).insets.onlyRight.small,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisSize: MainAxisSize.min,
+                    children: buildManualEnhancementButtons(
+                      mapping: mapping,
+                      field: field,
+                    ),
                   ),
                 )
               : null,

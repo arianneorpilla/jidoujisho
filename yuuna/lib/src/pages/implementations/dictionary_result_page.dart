@@ -51,10 +51,7 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
   @override
   void initState() {
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      appModel.dictionaryMenuNotifier.addListener(dumpCache);
-    });
+    appModelNoUpdate.dictionaryMenuNotifier.addListener(dumpCache);
   }
 
   void dumpCache() {

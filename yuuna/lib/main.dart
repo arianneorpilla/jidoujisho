@@ -222,11 +222,14 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
           backgroundColor: Colors.white,
         ),
         popupMenuTheme: const PopupMenuThemeData(
+          color: Colors.white,
           shape: RoundedRectangleBorder(),
         ),
         dialogTheme: const DialogTheme(
+          backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(),
         ),
+        cardColor: Colors.white,
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
             primary: Colors.black,
@@ -300,11 +303,14 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
           backgroundColor: Colors.black,
         ),
         popupMenuTheme: const PopupMenuThemeData(
+          color: Color.fromARGB(255, 30, 30, 30),
           shape: RoundedRectangleBorder(),
         ),
         dialogTheme: const DialogTheme(
+          backgroundColor: Color.fromARGB(255, 30, 30, 30),
           shape: RoundedRectangleBorder(),
         ),
+        cardColor: const Color.fromARGB(255, 30, 30, 30),
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
             primary: Colors.white,

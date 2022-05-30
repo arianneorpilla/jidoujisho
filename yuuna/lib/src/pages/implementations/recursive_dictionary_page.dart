@@ -5,6 +5,7 @@ import 'package:spaces/spaces.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
+import 'package:yuuna/src/media/types/dictionary_media_type.dart';
 import 'package:yuuna/utils.dart';
 
 /// The page shown after performing a recursive dictionary lookup.
@@ -62,7 +63,11 @@ class _RecursiveDictionaryPageState
         FocusScope.of(context).unfocus();
       });
 
-      appModel.dictionarySearchAgainNotifier.addListener(searchAgain);
+      appModel.addToSearchHistory(
+        historyKey: DictionaryMediaType.instance.uniqueKey,
+        searchTerm: widget.searchTerm,
+      );
+      appModelNoUpdate.dictionarySearchAgainNotifier.addListener(searchAgain);
     });
   }
 
@@ -94,15 +99,15 @@ class _RecursiveDictionaryPageState
       builder: buildFloatingSearchBody,
       borderRadius: BorderRadius.zero,
       elevation: 0,
-      backgroundColor:
-          appModel.isDarkMode ? theme.cardColor : const Color(0xFFE5E5E5),
+      backgroundColor: appModel.isDarkMode
+          ? const Color.fromARGB(255, 30, 30, 30)
+          : const Color.fromARGB(255, 229, 229, 229),
       backdropColor: Colors.transparent,
       accentColor: theme.colorScheme.primary,
       scrollPadding: const EdgeInsets.only(top: 6, bottom: 56),
       transitionDuration: Duration.zero,
       margins: const EdgeInsets.symmetric(horizontal: 6),
       width: double.maxFinite,
-      debounceDelay: const Duration(milliseconds: 200),
       transition: SlideFadeFloatingSearchBarTransition(),
       automaticallyImplyBackButton: false,
       isScrollControlled: true,
@@ -132,7 +137,17 @@ class _RecursiveDictionaryPageState
     onQueryChanged(_controller.query);
   }
 
+  Duration get searchDelay => const Duration(milliseconds: 200);
+
   void onQueryChanged(String query) async {
+    Future.delayed(searchDelay, () {
+      if (_controller.query == query) {
+        search(query);
+      }
+    });
+  }
+
+  void search(String query) async {
     setState(() {
       _isSearching = true;
     });
@@ -140,9 +155,27 @@ class _RecursiveDictionaryPageState
     try {
       _result = await appModel.searchDictionary(query);
     } finally {
-      setState(() {
-        _isSearching = false;
-      });
+      if (_result != null) {
+        if (_result!.searchTerm == _controller.query) {
+          if (!appModel.isIncognitoMode) {
+            appModel.addToSearchHistory(
+              historyKey: DictionaryMediaType.instance.uniqueKey,
+              searchTerm: _controller.query,
+            );
+            if (_result!.terms.isNotEmpty) {
+              await appModel.addToDictionaryHistory(result: _result!);
+            }
+          }
+
+          setState(() {
+            _isSearching = false;
+          });
+        }
+      } else {
+        setState(() {
+          _isSearching = false;
+        });
+      }
     }
   }
 
@@ -304,39 +337,30 @@ class _RecursiveDictionaryPageState
       );
 
   Widget buildEnterSearchTermPlaceholderMessage() {
-    return Padding(
-      padding: floatingBodyPadding,
-      child: Center(
-        child: JidoujishoPlaceholderMessage(
-          icon: Icons.search,
-          message: enterSearchTermLabel,
-        ),
+    return Center(
+      child: JidoujishoPlaceholderMessage(
+        icon: Icons.search,
+        message: enterSearchTermLabel,
       ),
     );
   }
 
   Widget buildImportDictionariesPlaceholderMessage() {
-    return Padding(
-      padding: floatingBodyPadding,
-      child: Center(
-        child: JidoujishoPlaceholderMessage(
-          icon: Icons.auto_stories,
-          message: noDictionariesLabel,
-        ),
+    return Center(
+      child: JidoujishoPlaceholderMessage(
+        icon: Icons.auto_stories,
+        message: noDictionariesLabel,
       ),
     );
   }
 
   Widget buildNoSearchResultsPlaceholderMessage() {
-    return Padding(
-      padding: floatingBodyPadding,
-      child: Center(
-        child: JidoujishoPlaceholderMessage(
-          icon: Icons.search_off,
-          message: noSearchResultsLabel.replaceAll(
-            '%searchTerm%',
-            _controller.query,
-          ),
+    return Center(
+      child: JidoujishoPlaceholderMessage(
+        icon: Icons.search_off,
+        message: noSearchResultsLabel.replaceAll(
+          '%searchTerm%',
+          _controller.query,
         ),
       ),
     );

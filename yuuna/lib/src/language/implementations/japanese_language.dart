@@ -337,17 +337,20 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
   }
 
   termExactMatches = database.dictionaryEntrys
-      .where(sort: Sort.desc)
+      .where()
       .repeat<String, QWhereClause>(
           searchTermPrefixes, (q, prefix) => q.termEqualTo(prefix).or())
       .termEqualTo(searchTerm)
+      .filter()
+      .termStartsWith('')
       .sortByTermLengthDesc()
       .thenByPopularityDesc()
-      .limit(searchTerm.length)
+      .limit(limit)
       .findAllSync();
 
   if (termExactMatches.isNotEmpty &&
-      termExactMatches.first.termLength == searchTerm.length) {
+      termExactMatches.first.termLength == searchTerm.length &&
+      searchTerm.length > 1) {
     termStartsWithMatches = database.dictionaryEntrys
         .where()
         .termFirstCharTermSecondCharEqualToTermLengthGreaterThan(
@@ -357,8 +360,7 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
         )
         .filter()
         .termStartsWith(searchTerm)
-        .sortByTermLengthDesc()
-        .thenByPopularityDesc()
+        .sortByPopularityDesc()
         .limit(limit)
         .findAllSync();
   }
@@ -369,13 +371,16 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
         .repeat<String, QWhereClause>(searchTermHiraganaPrefixes,
             (q, prefix) => q.readingEqualTo(prefix).or())
         .readingEqualTo(searchTerm)
+        .filter()
+        .readingStartsWith('')
         .sortByReadingLengthDesc()
         .thenByPopularityDesc()
-        .limit(searchTerm.length)
+        .limit(limit)
         .findAllSync();
 
     if (readingExactMatches.isNotEmpty &&
-        readingExactMatches.first.termLength == searchTerm.length) {
+        readingExactMatches.first.termLength == searchTerm.length &&
+        searchTerm.length > 1) {
       readingStartsWithMatches = database.dictionaryEntrys
           .where()
           .readingFirstCharReadingSecondCharEqualToReadingLengthGreaterThan(
@@ -385,8 +390,7 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
           )
           .filter()
           .readingStartsWith(searchTerm)
-          .sortByReadingLengthDesc()
-          .thenByPopularityDesc()
+          .sortByPopularityDesc()
           .limit(limit)
           .findAllSync();
     }
@@ -406,13 +410,16 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
     fallbackTermExactMatches = database.dictionaryEntrys
         .where()
         .termEqualTo(fallbackTerm)
+        .filter()
+        .termEqualTo(fallbackTerm)
         .sortByTermLengthDesc()
         .thenByPopularityDesc()
-        .limit(fallbackTerm.length)
+        .limit(limit)
         .findAllSync();
 
     if (fallbackTermExactMatches.isNotEmpty &&
-        fallbackTermExactMatches.first.termLength == fallbackTerm.length) {
+        fallbackTermExactMatches.first.termLength == fallbackTerm.length &&
+        fallbackTerm.length > 1) {
       fallbackTermStartsWithMatches = database.dictionaryEntrys
           .where()
           .termFirstCharTermSecondCharEqualToTermLengthGreaterThan(
@@ -422,8 +429,7 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
           )
           .filter()
           .termStartsWith(fallbackTerm)
-          .sortByTermLength()
-          .thenByPopularityDesc()
+          .sortByPopularityDesc()
           .limit(limit)
           .findAllSync();
     }
@@ -433,13 +439,16 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
     fallbackReadingExactMatches = database.dictionaryEntrys
         .where()
         .readingEqualTo(fallbackTerm)
+        .filter()
+        .readingEqualTo(fallbackTerm)
         .sortByPopularityDesc()
         .thenByReadingLengthDesc()
-        .limit(fallbackTerm.length)
+        .limit(limit)
         .findAllSync();
 
     if (readingExactMatches.isNotEmpty &&
-        readingExactMatches.first.readingLength == searchTerm.length) {
+        readingExactMatches.first.readingLength == fallbackTerm.length &&
+        fallbackTerm.length > 1) {
       fallbackReadingStartsWithMatches = database.dictionaryEntrys
           .where()
           .readingFirstCharReadingSecondCharEqualToReadingLengthGreaterThan(
@@ -449,8 +458,7 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
           )
           .filter()
           .readingStartsWith(fallbackTerm)
-          .sortByReadingLengthDesc()
-          .thenByPopularityDesc()
+          .sortByPopularityDesc()
           .limit(limit)
           .findAllSync();
     }

@@ -50,7 +50,7 @@ class DictionaryMetaEntry {
 
   /// The frequency of this term.
   @Index()
-  final int? frequency;
+  final String? frequency;
 
   /// List of pitch accent downsteps for this term's reading.
   @PitchDataConverter()

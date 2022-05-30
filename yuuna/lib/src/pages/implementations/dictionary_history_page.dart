@@ -57,10 +57,12 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
   @override
   void initState() {
     super.initState();
+    appModelNoUpdate.dictionaryMenuNotifier.addListener(dumpCache);
+  }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      appModel.dictionaryMenuNotifier.addListener(dumpCache);
-    });
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   void dumpCache() {
@@ -70,11 +72,6 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
     if (mounted) {
       setState(() {});
     }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   @override
@@ -102,7 +99,7 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
       controller: DictionaryMediaType.instance.scrollController,
       physics:
           const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-      itemCount: historyResults.length,
+      itemCount: historyResults.length + 1,
       itemBuilder: (context, index) {
         if (index == 0) {
           return const SizedBox(height: 60);
@@ -201,8 +198,9 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
     return Tooltip(
       message: seeMoreLabel,
       child: InkWell(
-        onTap: () {
-          appModel.openResultFromHistory(result: result);
+        onTap: () async {
+          await appModel.openResultFromHistory(result: result);
+          appModel.refreshDictionaryHistory();
         },
         child: Padding(
           padding: Spacing.of(context).insets.vertical.small,

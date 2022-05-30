@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:spaces/spaces.dart';
 
 /// A button that can be set as busy. When busy, the icon is faded out when its
 /// [onTap] action is on-going and processing, which can be used to
@@ -22,6 +23,7 @@ class JidoujishoIconButton extends StatefulWidget {
     this.disabledColor,
     this.constraints,
     this.padding,
+    this.isWideTapArea = false,
     super.key,
   });
 
@@ -69,6 +71,9 @@ class JidoujishoIconButton extends StatefulWidget {
   /// Allows overriding of the standard size of the [IconButton] padding.
   final EdgeInsets? padding;
 
+  /// If this button needs to act like an [IconButton] with a wide area.
+  final bool isWideTapArea;
+
   @override
   State<StatefulWidget> createState() => _JidoujishoIconButtonState();
 }
@@ -95,6 +100,41 @@ class _JidoujishoIconButtonState extends State<JidoujishoIconButton> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.isWideTapArea) {
+      return IconButton(
+        constraints: BoxConstraints(
+          maxWidth: Spacing.of(context).spaces.extraBig,
+          maxHeight: Spacing.of(context).spaces.extraBig,
+        ),
+        tooltip: widget.tooltip,
+        icon: Icon(
+          widget.icon,
+          color: enabled ? enabledColor : disabledColor,
+          size: widget.size,
+        ),
+        onPressed: enabled
+            ? () async {
+                if (widget.busy) {
+                  if (enabled) {
+                    setState(() {
+                      enabled = false;
+                    });
+                    try {
+                      await widget.onTap?.call();
+                    } finally {
+                      setState(() {
+                        enabled = true;
+                      });
+                    }
+                  }
+                } else {
+                  await widget.onTap?.call();
+                }
+              }
+            : null,
+      );
+    }
+
     return Tooltip(
       message: widget.tooltip,
       child: InkWell(

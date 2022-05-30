@@ -42,18 +42,17 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
 
   bool _isSearching = false;
 
+  bool _lastOpenedState = false;
+
   @override
   void initState() {
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      appModel.dictionarySearchAgainNotifier.addListener(searchAgain);
-    });
+    appModelNoUpdate.dictionarySearchAgainNotifier.addListener(searchAgain);
+    appModelNoUpdate.dictionaryEntriesNotifier.addListener(refresh);
   }
 
   @override
   void dispose() {
-    appModel.dictionarySearchAgainNotifier.removeListener(searchAgain);
     super.dispose();
   }
 
@@ -95,15 +94,14 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
   Widget buildFloatingSearchBar() {
     return FloatingSearchBar(
       isScrollControlled: true,
-      physics:
-          const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
       hint: searchEllipsisLabel,
       controller: floatingSearchBarController,
       builder: buildFloatingSearchBody,
       borderRadius: BorderRadius.zero,
       elevation: 0,
-      backgroundColor:
-          appModel.isDarkMode ? theme.cardColor : const Color(0xFFE5E5E5),
+      backgroundColor: appModel.isDarkMode
+          ? const Color.fromARGB(255, 30, 30, 30)
+          : const Color.fromARGB(255, 229, 229, 229),
       backdropColor: appModel.isDarkMode
           ? Colors.black.withOpacity(0.95)
           : Colors.white.withOpacity(0.95),
@@ -113,7 +111,6 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       margins: const EdgeInsets.symmetric(horizontal: 6),
       width: double.maxFinite,
       transition: SlideFadeFloatingSearchBarTransition(),
-      debounceDelay: const Duration(milliseconds: 200),
       automaticallyImplyBackButton: false,
       progress: _isSearching,
       leadingActions: [
@@ -125,8 +122,18 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
         buildSearchClearButton(),
         buildSearchButton(),
       ],
+      onFocusChanged: (focus) => onFocusChanged(focus: focus),
       onQueryChanged: onQueryChanged,
     );
+  }
+
+  void onFocusChanged({required bool focus}) {
+    if (floatingSearchBarController.isOpen != _lastOpenedState) {
+      _lastOpenedState = floatingSearchBarController.isOpen;
+      if (!_lastOpenedState) {
+        appModel.refreshDictionaryHistory();
+      }
+    }
   }
 
   void searchAgain() {
@@ -134,7 +141,21 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     onQueryChanged(floatingSearchBarController.query);
   }
 
+  void refresh() {
+    setState(() {});
+  }
+
+  Duration get searchDelay => const Duration(milliseconds: 200);
+
   void onQueryChanged(String query) async {
+    Future.delayed(searchDelay, () {
+      if (floatingSearchBarController.query == query) {
+        search(query);
+      }
+    });
+  }
+
+  void search(String query) async {
     setState(() {
       _isSearching = true;
     });
@@ -147,10 +168,10 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
           if (!appModel.isIncognitoMode) {
             appModel.addToSearchHistory(
               historyKey: DictionaryMediaType.instance.uniqueKey,
-              searchTerm: query,
+              searchTerm: floatingSearchBarController.query,
             );
             if (_result!.terms.isNotEmpty) {
-              appModel.addToDictionaryHistory(result: _result!);
+              await appModel.addToDictionaryHistory(result: _result!);
             }
           }
 
@@ -187,7 +208,6 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
           icon: Icons.arrow_back,
           onTap: () {
             floatingSearchBarController.close();
-            setState(() {});
           }),
     );
   }
@@ -339,11 +359,12 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     return buildSearchResult();
   }
 
-  void onSearch(String searchTerm) {
-    appModel.openRecursiveDictionarySearch(
+  void onSearch(String searchTerm) async {
+    await appModel.openRecursiveDictionarySearch(
       searchTerm: searchTerm,
       killOnPop: false,
     );
+    appModel.refreshDictionaryHistory();
   }
 
   void onStash(String searchTerm) {
@@ -362,39 +383,30 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
   }
 
   Widget buildEnterSearchTermPlaceholderMessage() {
-    return Padding(
-      padding: floatingBodyPadding,
-      child: Center(
-        child: JidoujishoPlaceholderMessage(
-          icon: Icons.search,
-          message: enterSearchTermLabel,
-        ),
+    return Center(
+      child: JidoujishoPlaceholderMessage(
+        icon: Icons.search,
+        message: enterSearchTermLabel,
       ),
     );
   }
 
   Widget buildImportDictionariesPlaceholderMessage() {
-    return Padding(
-      padding: floatingBodyPadding,
-      child: Center(
-        child: JidoujishoPlaceholderMessage(
-          icon: mediaType.outlinedIcon,
-          message: noDictionariesLabel,
-        ),
+    return Center(
+      child: JidoujishoPlaceholderMessage(
+        icon: mediaType.outlinedIcon,
+        message: noDictionariesLabel,
       ),
     );
   }
 
   Widget buildNoSearchResultsPlaceholderMessage() {
-    return Padding(
-      padding: floatingBodyPadding,
-      child: Center(
-        child: JidoujishoPlaceholderMessage(
-          icon: Icons.search_off,
-          message: noSearchResultsLabel.replaceAll(
-            '%searchTerm%',
-            floatingSearchBarController.query,
-          ),
+    return Center(
+      child: JidoujishoPlaceholderMessage(
+        icon: Icons.search_off,
+        message: noSearchResultsLabel.replaceAll(
+          '%searchTerm%',
+          floatingSearchBarController.query,
         ),
       ),
     );

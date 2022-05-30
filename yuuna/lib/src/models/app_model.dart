@@ -73,6 +73,95 @@ final appProvider = ChangeNotifierProvider<AppModel>((ref) {
   return AppModel();
 });
 
+/// A global [Provider] for getting tags for a [DictionaryTerm].
+final termTagsProvider =
+    Provider.family<List<Widget>, DictionaryTerm>((ref, term) {
+  AppModel appModel = ref.watch(appProvider);
+  if (appModel.termTagsCache.containsKey(term)) {
+    return appModel.termTagsCache[term]!;
+  }
+
+  List<Widget> tags = [];
+  tags = [];
+  Set<DictionaryPair> pairs = {};
+
+  for (DictionaryEntry entry in term.entries) {
+    for (String tag in entry.termTags) {
+      pairs.add(
+        DictionaryPair(
+          term: entry.dictionaryName,
+          reading: tag,
+        ),
+      );
+    }
+  }
+
+  tags.addAll(pairs.map((pair) {
+    if (pair.reading.isNotEmpty) {
+      DictionaryTag tag = appModel.getDictionaryTag(
+        dictionaryName: pair.term,
+        tagName: pair.reading,
+      );
+
+      return JidoujishoTag(
+        text: tag.name,
+        message: tag.notes,
+        backgroundColor: tag.color,
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
+  }).toList());
+
+  appModel.termTagsCache[term] = tags;
+
+  return tags;
+});
+
+/// A global [Provider] for getting tags for a [DictionaryEntry].
+final entryTagsProvider =
+    Provider.family<List<Widget>, DictionaryEntry>((ref, entry) {
+  AppModel appModel = ref.watch(appProvider);
+  if (appModel.entryTagsCache.containsKey(entry)) {
+    return appModel.termTagsCache[entry]!;
+  }
+
+  String dictionaryImportTag = appModel.translate('dictionary_import_tag');
+
+  List<Widget> tags = [];
+  tags = [];
+  tags.add(
+    JidoujishoTag(
+      text: entry.dictionaryName,
+      message: dictionaryImportTag.replaceAll(
+        '%dictionaryName%',
+        entry.dictionaryName,
+      ),
+      backgroundColor: Colors.red.shade900,
+    ),
+  );
+  tags.addAll(entry.meaningTags.map((tagName) {
+    if (tagName.isNotEmpty) {
+      DictionaryTag tag = appModel.getDictionaryTag(
+        dictionaryName: entry.dictionaryName,
+        tagName: tagName,
+      );
+
+      return JidoujishoTag(
+        text: tag.name,
+        message: tag.notes,
+        backgroundColor: tag.color,
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
+  }).toList());
+
+  appModel.entryTagsCache[entry] = tags;
+
+  return tags;
+});
+
 /// A scoped model for parameters that affect the entire application.
 /// RiverPod is used for global state management across multiple layers,
 /// especially for preferences that persist across application restarts.
@@ -104,6 +193,21 @@ class AppModel with ChangeNotifier {
 
   /// Used to notify dictionary widgets to dictionary menu changes.
   final ChangeNotifier dictionaryMenuNotifier = ChangeNotifier();
+
+  /// Used to memoize the list of widgets used to display a [DictionaryEntry]'s
+  /// tags.
+  final Map<DictionaryEntry, List<Widget>> entryTagsCache = {};
+
+  /// Used to memoize the list of widgets used to display a [DictionaryTerm]'s
+  /// tags.
+  final Map<DictionaryTerm, List<Widget>> termTagsCache = {};
+
+  /// For refreshing on dictionary result additions.
+  void refreshDictionaryHistory() {
+    dictionaryMenuNotifier.notifyListeners();
+    entryTagsCache.clear();
+    termTagsCache.clear();
+  }
 
   /// Used to notify toggling incognito. Updates the app logo to and from
   /// grayscale.
@@ -176,10 +280,10 @@ class AppModel with ChangeNotifier {
   final int maximumQuickActions = 6;
 
   /// Maximum number of search history items.
-  final int maximumSearchHistoryItems = 250;
+  final int maximumSearchHistoryItems = 50;
 
   /// Maximum number of dictionary history items.
-  final int maximumDictionaryHistoryItems = 50;
+  final int maximumDictionaryHistoryItems = 20;
 
   /// Maximum number of headwords in a returned dictionary result for
   /// performance purposes.
@@ -187,7 +291,7 @@ class AppModel with ChangeNotifier {
 
   /// Maximum number of dictionary entries that can be returned from a database
   /// dictionary search.
-  final int maximumDictionaryEntrySearchMatch = 50;
+  final int maximumDictionaryEntrySearchMatch = 25;
 
   /// Used as the history key used for the Stash.
   final String stashKey = 'stash';
@@ -1822,14 +1926,14 @@ class AppModel with ChangeNotifier {
       isar.searchHistoryItems.putSync(searchHistoryItem);
 
       int countInSameHistory = isar.searchHistoryItems
-          .where()
+          .filter()
           .historyKeyEqualTo(historyKey)
           .countSync();
 
       if (maximumSearchHistoryItems < countInSameHistory) {
         int surplus = countInSameHistory - maximumSearchHistoryItems;
         isar.searchHistoryItems
-            .where()
+            .filter()
             .historyKeyEqualTo(historyKey)
             .limit(surplus)
             .build()
@@ -1870,7 +1974,7 @@ class AppModel with ChangeNotifier {
   /// Get the search history for a given collection named [historyKey].
   List<String> getSearchHistory({required String historyKey}) {
     List<SearchHistoryItem> items = _database.searchHistoryItems
-        .where()
+        .filter()
         .historyKeyEqualTo(historyKey)
         .build()
         .findAllSync();

@@ -34,6 +34,13 @@ class DictionaryTerm {
   @DictionaryEntriesConverter()
   final List<DictionaryEntry> entries;
 
+  @override
+  operator ==(Object other) =>
+      other is DictionaryTerm && other.toJson() == toJson();
+
+  @override
+  int get hashCode => toJson().hashCode;
+
   /// A unique identifier for the purposes of database storage.
   @Id()
   int? id;

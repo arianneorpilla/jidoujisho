@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/pages.dart';
+import 'package:yuuna/src/models/app_model.dart';
 import 'package:yuuna/utils.dart';
+import 'package:collection/collection.dart';
 
 /// Returns the widget for a [DictionaryEntry] making up a collection of
 /// meanings.
@@ -52,55 +54,23 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
         allowPaste: false,
       );
 
-  List<Widget>? tags;
-
-  @override
-  void initState() {
-    super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      appModel.dictionaryMenuNotifier.addListener(dumpCache);
-    });
-  }
-
-  void dumpCache() {
-    tags = null;
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    if (tags == null) {
-      tags = [];
-      tags!.add(
-        JidoujishoTag(
-          text: widget.entry.dictionaryName,
-          message: dictionaryImportTag.replaceAll(
-            '%dictionaryName%',
-            widget.entry.dictionaryName,
-          ),
-          backgroundColor: Colors.red.shade900,
-        ),
-      );
-      tags!.addAll(widget.entry.meaningTags.map((tagName) {
-        if (tagName.isNotEmpty) {
-          DictionaryTag tag = appModel.getDictionaryTag(
-            dictionaryName: widget.entry.dictionaryName,
-            tagName: tagName,
-          );
+    List<Widget> tags = ref.watch(entryTagsProvider(widget.entry));
 
-          return JidoujishoTag(
-            text: tag.name,
-            message: tag.notes,
-            backgroundColor: tag.color,
-          );
-        } else {
-          return const SizedBox.shrink();
-        }
-      }).toList());
-    }
+    List<Widget> children = widget.entry.meanings.mapIndexed((index, meaning) {
+      if (widget.entry.meanings.length != 1) {
+        return SelectableText(
+          '• ${widget.entry.meanings[index].trim()}',
+          selectionControls: selectionControls,
+        );
+      } else {
+        return SelectableText(
+          widget.entry.meanings.first.trim(),
+          selectionControls: selectionControls,
+        );
+      }
+    }).toList();
 
     return Padding(
       padding: EdgeInsets.only(
@@ -117,37 +87,17 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
           headerAlignment: ExpandablePanelHeaderAlignment.center,
         ),
         controller: widget.expandableController,
-        header: Wrap(children: tags!),
+        header: Wrap(children: tags),
         collapsed: const SizedBox.shrink(),
-        expanded: ListView(
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          children: [
-            Padding(
-              padding: EdgeInsets.only(
-                top: Spacing.of(context).spaces.small,
-                left: Spacing.of(context).spaces.normal,
-              ),
-              child: ListView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: widget.entry.meanings.length,
-                itemBuilder: (context, index) {
-                  if (widget.entry.meanings.length != 1) {
-                    return SelectableText(
-                      '• ${widget.entry.meanings[index].trim()}',
-                      selectionControls: selectionControls,
-                    );
-                  } else {
-                    return SelectableText(
-                      widget.entry.meanings.first.trim(),
-                      selectionControls: selectionControls,
-                    );
-                  }
-                },
-              ),
-            ),
-          ],
+        expanded: Padding(
+          padding: EdgeInsets.only(
+            top: Spacing.of(context).spaces.small,
+            left: Spacing.of(context).spaces.normal,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: children,
+          ),
         ),
       ),
     );

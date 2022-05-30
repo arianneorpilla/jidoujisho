@@ -130,6 +130,7 @@ class _CreatorQuickActionsPageState extends BasePageState {
 
     if (action == null) {
       return JidoujishoIconButton(
+        isWideTapArea: true,
         size: textTheme.titleLarge?.fontSize,
         tooltip: assignActionLabel,
         icon: Icons.add_circle,
@@ -147,6 +148,7 @@ class _CreatorQuickActionsPageState extends BasePageState {
       );
     } else {
       return JidoujishoIconButton(
+        isWideTapArea: true,
         size: textTheme.titleLarge?.fontSize,
         tooltip: removeActionLabel,
         enabledColor: theme.colorScheme.primary,

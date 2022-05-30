@@ -159,7 +159,7 @@ Future<List<DictionaryMetaEntry>> prepareMetaEntriesYomichanTermBankFormat(
         String term = item[0] as String;
         String type = item[1] as String;
 
-        int? frequency;
+        String? frequency;
         List<PitchData>? pitches;
 
         if (type == 'pitch') {
@@ -179,7 +179,19 @@ Future<List<DictionaryMetaEntry>> prepareMetaEntriesYomichanTermBankFormat(
             pitches.add(pitch);
           }
         } else if (type == 'freq') {
-          frequency = item[2] as int;
+          if (item[2] is double) {
+            double number = item[2] as double;
+            if (number % 1 == 0) {
+              frequency = '${number.toInt()}';
+            } else {
+              frequency = '$number';
+            }
+          } else if (item[2] is int) {
+            int number = item[2] as int;
+            frequency = '$number';
+          } else {
+            frequency = item[2].toString();
+          }
         } else {
           continue;
         }

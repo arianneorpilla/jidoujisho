@@ -75,8 +75,9 @@ abstract class BaseTabPageState<T extends BaseTabPage> extends BasePageState {
       builder: buildSearchBarBody,
       borderRadius: BorderRadius.zero,
       elevation: 0,
-      backgroundColor:
-          appModel.isDarkMode ? theme.cardColor : const Color(0xFFE5E5E5),
+      backgroundColor: appModel.isDarkMode
+          ? const Color.fromARGB(255, 30, 30, 30)
+          : const Color.fromARGB(255, 229, 229, 229),
       backdropColor: appModel.isDarkMode
           ? Colors.black.withOpacity(0.95)
           : Colors.white.withOpacity(0.95),
