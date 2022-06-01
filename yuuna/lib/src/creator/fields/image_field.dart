@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:infinite_carousel/infinite_carousel.dart';
 import 'package:network_to_file_image/network_to_file_image.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:spaces/spaces.dart';
@@ -7,7 +8,6 @@ import 'package:transparent_image/transparent_image.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/models.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 
 /// Returns audio information from context.
 class ImageField extends ImageExportField {
@@ -52,7 +52,7 @@ class ImageField extends ImageExportField {
     if (isSearching) {
       return Column(
         children: [
-          SizedBox(height: MediaQuery.of(context).size.height / 5),
+          SizedBox(height: MediaQuery.of(context).size.height / 4.5),
           const Space.normal(),
           buildFooterLoading(
             appModel: appModel,
@@ -74,37 +74,46 @@ class ImageField extends ImageExportField {
       ),
     );
 
+    InfiniteScrollController controller =
+        InfiniteScrollController(initialItem: selectedIndex!);
+
     return Column(
       children: [
-        CarouselSlider.builder(
-          options: CarouselOptions(
-              height: MediaQuery.of(context).size.height / 5,
-              initialPage: selectedIndex!,
-              onPageChanged: (index, reason) {
-                indexNotifier.value = index;
-                setSelectedSearchSuggestion(index: index);
-              }),
-          itemCount: currentImageSuggestions!.length,
-          itemBuilder: (context, index, _) {
-            late OverlayEntry popup;
-            NetworkToFileImage image = currentImageSuggestions![index];
+        SizedBox(
+          height: MediaQuery.of(context).size.height / 4.5,
+          child: InfiniteCarousel.builder(
+            itemCount: currentImageSuggestions!.length,
+            itemExtent: MediaQuery.of(context).size.width / 1.2,
+            velocityFactor: 0.7,
+            onIndexChanged: (index) {
+              indexNotifier.value = index;
+              setSelectedSearchSuggestion(index: index);
+            },
+            controller: controller,
+            itemBuilder: (context, index, _) {
+              late OverlayEntry popup;
+              NetworkToFileImage image = currentImageSuggestions![index];
 
-            return GestureDetector(
-              onLongPress: () {
-                popup = OverlayEntry(
-                  builder: (context) => ColoredBox(
-                    color: Colors.black.withOpacity(0.5),
-                    child: buildImage(image),
-                  ),
-                );
-                Overlay.of(context)?.insert(popup);
-              },
-              onLongPressEnd: (details) {
-                popup.remove();
-              },
-              child: buildImage(currentImageSuggestions![index]),
-            );
-          },
+              return GestureDetector(
+                onLongPress: () {
+                  popup = OverlayEntry(
+                    builder: (context) => ColoredBox(
+                      color: Colors.black.withOpacity(0.5),
+                      child: buildImage(image),
+                    ),
+                  );
+                  Overlay.of(context)?.insert(popup);
+                },
+                onLongPressEnd: (details) {
+                  popup.remove();
+                },
+                child: Padding(
+                  padding: Spacing.of(context).insets.horizontal.small,
+                  child: buildImage(currentImageSuggestions![index]),
+                ),
+              );
+            },
+          ),
         ),
         const Space.normal(),
         ValueListenableBuilder<int?>(

@@ -1,10 +1,10 @@
 import 'package:expandable/expandable.dart';
+import 'package:float_column/float_column.dart';
 import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/pages.dart';
-import 'package:yuuna/src/models/app_model.dart';
 import 'package:yuuna/utils.dart';
 import 'package:collection/collection.dart';
 
@@ -78,7 +78,7 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> tags = ref.watch(termTagsProvider(widget.dictionaryTerm));
+    List<Widget> tags = appModel.getTagsForTerm(widget.dictionaryTerm);
 
     return GestureDetector(
       child: Card(
@@ -129,7 +129,7 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
     AnkiMapping mapping = appModel.lastSelectedMapping;
     List<Widget> buttons = [];
 
-    for (int i = 0; i < appModel.maximumFieldEnhancements; i++) {
+    for (int i = 0; i < appModel.maximumQuickActions; i++) {
       Widget button = buildQuickAction(
         mapping: mapping,
         slotNumber: i,
@@ -191,22 +191,10 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
   Widget buildTopRow({
     required List<DictionaryMetaEntry> metaEntries,
   }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return FloatColumn(
       children: [
-        Expanded(
-          child: GestureDetector(
-            child: appModel.targetLanguage.getTermReadingOverrideWidget(
-              context: context,
-              appModel: appModel,
-              dictionaryTerm: widget.dictionaryTerm,
-            ),
-            onTap: () => appModel.copyToClipboard(widget.dictionaryTerm.term),
-            onLongPress: () =>
-                appModel.copyToClipboard(widget.dictionaryTerm.term),
-          ),
-        ),
-        Padding(
+        Floatable(
+          float: FCFloat.end,
           padding: EdgeInsets.only(
             top: Spacing.of(context).spaces.small,
             right: Spacing.of(context).spaces.small,
@@ -218,24 +206,42 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
             children: buildQuickActions(metaEntries: metaEntries),
           ),
         ),
+        Floatable(
+          float: FCFloat.start,
+          child: GestureDetector(
+            child: appModel.targetLanguage.getTermReadingOverrideWidget(
+              context: context,
+              appModel: appModel,
+              dictionaryTerm: widget.dictionaryTerm,
+            ),
+            onTap: () => appModel.copyToClipboard(widget.dictionaryTerm.term),
+            onLongPress: () =>
+                appModel.copyToClipboard(widget.dictionaryTerm.term),
+          ),
+        ),
       ],
     );
   }
 
-  Widget buildMetaWidgets({required List<DictionaryMetaEntry> metaEntries}) {
+  Widget buildMetaWidgets({
+    required List<DictionaryMetaEntry> metaEntries,
+  }) {
     if (metaEntries.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    List<Widget> children = metaEntries.mapIndexed((index, element) {
-      DictionaryMetaEntry metaEntry = metaEntries[index];
+    List<Widget> children = metaEntries.map((metaEntry) {
       if (widget.dictionaryMap[metaEntry.dictionaryName]!.hidden) {
         return const SizedBox.shrink();
       }
 
       return Padding(
         padding: Spacing.of(context).insets.horizontal.small,
-        child: buildMetaWidget(metaEntry),
+        child: appModel.getTagsForMetaEntry(
+          context: context,
+          dictionaryTerm: widget.dictionaryTerm,
+          metaEntry: metaEntry,
+        ),
       );
     }).toList();
 
@@ -243,118 +249,6 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: children,
     );
-  }
-
-  Widget buildMetaWidget(DictionaryMetaEntry metaEntry) {
-    if (metaEntry.frequency != null) {
-      return Row(
-        children: [
-          Padding(
-            padding: Spacing.of(context).insets.onlyBottom.normal,
-            child: JidoujishoTag(
-              text: metaEntry.dictionaryName,
-              message: dictionaryImportTag.replaceAll(
-                '%dictionaryName%',
-                metaEntry.dictionaryName,
-              ),
-              trailingText: metaEntry.frequency,
-              backgroundColor: Colors.red.shade900,
-            ),
-          ),
-          const Spacer(),
-        ],
-      );
-    } else if (metaEntry.pitches != null) {
-      List<Widget> children = [];
-      Widget tag = Padding(
-        padding: Spacing.of(context).insets.onlyRight.small,
-        child: JidoujishoTag(
-          text: metaEntry.dictionaryName,
-          message: dictionaryImportTag.replaceAll(
-            '%dictionaryName%',
-            metaEntry.dictionaryName,
-          ),
-          backgroundColor: Colors.red.shade900,
-        ),
-      );
-
-      List<PitchData> pitches = metaEntry.pitches!
-          .where((pitch) => pitch.reading == widget.dictionaryTerm.reading)
-          .toList();
-
-      if (pitches.isEmpty) {
-        return const SizedBox.shrink();
-      }
-
-      if (pitches.length == 1) {
-        for (PitchData data in metaEntry.pitches!) {
-          children.add(
-            appModel.targetLanguage.getPitchWidget(
-              context: context,
-              reading: data.reading,
-              downstep: data.downstep,
-            ),
-          );
-
-          children.add(const Space.small());
-        }
-
-        children.insert(
-          0,
-          Padding(
-            padding: Spacing.of(context).insets.onlyBottom.normal,
-            child: tag,
-          ),
-        );
-
-        return Wrap(children: children);
-      } else {
-        List<Widget> pitchChildren = [];
-        children.add(Row(
-          children: [
-            Padding(
-              padding: Spacing.of(context).insets.onlyBottom.semiSmall,
-              child: JidoujishoTag(
-                text: metaEntry.dictionaryName,
-                message: dictionaryImportTag.replaceAll(
-                  '%dictionaryName%',
-                  metaEntry.dictionaryName,
-                ),
-                backgroundColor: Colors.red.shade900,
-              ),
-            ),
-            const Spacer(),
-          ],
-        ));
-
-        children.addAll(
-          pitches.mapIndexed((index, element) {
-            PitchData data = pitches[index];
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: Spacing.of(context).spaces.small,
-                left: Spacing.of(context).spaces.small,
-              ),
-              child: appModel.targetLanguage.getPitchWidget(
-                context: context,
-                reading: data.reading,
-                downstep: data.downstep,
-              ),
-            );
-          }).toList(),
-        );
-
-        return Padding(
-          padding: Spacing.of(context).insets.onlyBottom.small,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: pitchChildren,
-          ),
-        );
-      }
-    } else {
-      return const SizedBox.shrink();
-    }
   }
 
   Widget buildEntries() {

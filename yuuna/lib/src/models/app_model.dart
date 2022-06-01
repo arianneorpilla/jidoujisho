@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:collection/collection.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
@@ -20,6 +21,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:restart_app/restart_app.dart';
+import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/language.dart';
@@ -73,95 +75,6 @@ final appProvider = ChangeNotifierProvider<AppModel>((ref) {
   return AppModel();
 });
 
-/// A global [Provider] for getting tags for a [DictionaryTerm].
-final termTagsProvider =
-    Provider.family<List<Widget>, DictionaryTerm>((ref, term) {
-  AppModel appModel = ref.watch(appProvider);
-  if (appModel.termTagsCache.containsKey(term)) {
-    return appModel.termTagsCache[term]!;
-  }
-
-  List<Widget> tags = [];
-  tags = [];
-  Set<DictionaryPair> pairs = {};
-
-  for (DictionaryEntry entry in term.entries) {
-    for (String tag in entry.termTags) {
-      pairs.add(
-        DictionaryPair(
-          term: entry.dictionaryName,
-          reading: tag,
-        ),
-      );
-    }
-  }
-
-  tags.addAll(pairs.map((pair) {
-    if (pair.reading.isNotEmpty) {
-      DictionaryTag tag = appModel.getDictionaryTag(
-        dictionaryName: pair.term,
-        tagName: pair.reading,
-      );
-
-      return JidoujishoTag(
-        text: tag.name,
-        message: tag.notes,
-        backgroundColor: tag.color,
-      );
-    } else {
-      return const SizedBox.shrink();
-    }
-  }).toList());
-
-  appModel.termTagsCache[term] = tags;
-
-  return tags;
-});
-
-/// A global [Provider] for getting tags for a [DictionaryEntry].
-final entryTagsProvider =
-    Provider.family<List<Widget>, DictionaryEntry>((ref, entry) {
-  AppModel appModel = ref.watch(appProvider);
-  if (appModel.entryTagsCache.containsKey(entry)) {
-    return appModel.termTagsCache[entry]!;
-  }
-
-  String dictionaryImportTag = appModel.translate('dictionary_import_tag');
-
-  List<Widget> tags = [];
-  tags = [];
-  tags.add(
-    JidoujishoTag(
-      text: entry.dictionaryName,
-      message: dictionaryImportTag.replaceAll(
-        '%dictionaryName%',
-        entry.dictionaryName,
-      ),
-      backgroundColor: Colors.red.shade900,
-    ),
-  );
-  tags.addAll(entry.meaningTags.map((tagName) {
-    if (tagName.isNotEmpty) {
-      DictionaryTag tag = appModel.getDictionaryTag(
-        dictionaryName: entry.dictionaryName,
-        tagName: tagName,
-      );
-
-      return JidoujishoTag(
-        text: tag.name,
-        message: tag.notes,
-        backgroundColor: tag.color,
-      );
-    } else {
-      return const SizedBox.shrink();
-    }
-  }).toList());
-
-  appModel.entryTagsCache[entry] = tags;
-
-  return tags;
-});
-
 /// A scoped model for parameters that affect the entire application.
 /// RiverPod is used for global state management across multiple layers,
 /// especially for preferences that persist across application restarts.
@@ -196,17 +109,23 @@ class AppModel with ChangeNotifier {
 
   /// Used to memoize the list of widgets used to display a [DictionaryEntry]'s
   /// tags.
-  final Map<DictionaryEntry, List<Widget>> entryTagsCache = {};
+  final Map<DictionaryEntry, List<Widget>> _entryTagsCache = {};
 
   /// Used to memoize the list of widgets used to display a [DictionaryTerm]'s
   /// tags.
-  final Map<DictionaryTerm, List<Widget>> termTagsCache = {};
+  final Map<DictionaryTerm, List<Widget>> _termTagsCache = {};
+
+  /// Used to memoize the list of widgets used to display a
+  /// [DictionaryTerm]'s [DictionaryMetaEntry] tags.
+  final Map<DictionaryTerm, Map<DictionaryMetaEntry, Widget>> _metaTagsCache =
+      {};
 
   /// For refreshing on dictionary result additions.
   void refreshDictionaryHistory() {
+    _entryTagsCache.clear();
+    _termTagsCache.clear();
+    _metaTagsCache.clear();
     dictionaryMenuNotifier.notifyListeners();
-    entryTagsCache.clear();
-    termTagsCache.clear();
   }
 
   /// Used to notify toggling incognito. Updates the app logo to and from
@@ -2076,13 +1995,13 @@ class AppModel with ChangeNotifier {
   }
 
   /// Get the [DictionaryTag] given details from a [DictionaryEntry].
-  DictionaryTag getDictionaryTag({
+  DictionaryTag? getDictionaryTag({
     required String dictionaryName,
     required String tagName,
   }) {
     DictionaryTag? tag =
         _database.dictionaryTags.getByUniqueKeySync('$dictionaryName/$tagName');
-    return tag!;
+    return tag;
   }
 
   /// Shown when a query fails to be made to an online service. For example,
@@ -2154,5 +2073,218 @@ class AppModel with ChangeNotifier {
       toastLength: Toast.LENGTH_SHORT,
       gravity: ToastGravity.BOTTOM,
     );
+  }
+
+  /// Fetches the tag widgets for a [DictionaryTerm].
+  List<Widget> getTagsForTerm(DictionaryTerm dictionaryTerm) {
+    if (_termTagsCache.containsKey(dictionaryTerm)) {
+      return _termTagsCache[dictionaryTerm]!;
+    }
+
+    List<Widget> tags = [];
+    tags = [];
+    Set<DictionaryPair> pairs = {};
+
+    for (DictionaryEntry entry in dictionaryTerm.entries) {
+      for (String tag in entry.termTags) {
+        pairs.add(
+          DictionaryPair(
+            term: entry.dictionaryName,
+            reading: tag,
+          ),
+        );
+      }
+    }
+
+    tags.addAll(pairs.map((pair) {
+      DictionaryTag? tag = getDictionaryTag(
+        dictionaryName: pair.term,
+        tagName: pair.reading,
+      );
+
+      if (pair.reading.isNotEmpty && tag != null) {
+        return JidoujishoTag(
+          text: tag.name,
+          message: tag.notes,
+          backgroundColor: tag.color,
+        );
+      } else {
+        return const SizedBox.shrink();
+      }
+    }).toList());
+
+    _termTagsCache[dictionaryTerm] = tags;
+
+    return tags;
+  }
+
+  /// Fetches the tag widgets for a [DictionaryEntry].
+  List<Widget> getTagsForEntry(DictionaryEntry entry) {
+    if (_entryTagsCache.containsKey(entry)) {
+      return _entryTagsCache[entry]!;
+    }
+
+    String dictionaryImportTag = translate('dictionary_import_tag');
+
+    List<Widget> tags = [];
+    tags = [];
+    tags.add(
+      JidoujishoTag(
+        text: entry.dictionaryName,
+        message: dictionaryImportTag.replaceAll(
+          '%dictionaryName%',
+          entry.dictionaryName,
+        ),
+        backgroundColor: Colors.red.shade900,
+      ),
+    );
+    tags.addAll(entry.meaningTags.map((tagName) {
+      DictionaryTag? tag = getDictionaryTag(
+        dictionaryName: entry.dictionaryName,
+        tagName: tagName,
+      );
+
+      if (tagName.isNotEmpty && tag != null) {
+        return JidoujishoTag(
+          text: tag.name,
+          message: tag.notes,
+          backgroundColor: tag.color,
+        );
+      } else {
+        return const SizedBox.shrink();
+      }
+    }).toList());
+
+    _entryTagsCache[entry] = tags;
+
+    return tags;
+  }
+
+  /// Fetches the tag widgets for a [DictionaryEntry].
+  Widget getTagsForMetaEntry({
+    required BuildContext context,
+    required DictionaryTerm dictionaryTerm,
+    required DictionaryMetaEntry metaEntry,
+  }) {
+    _metaTagsCache[dictionaryTerm] ??= {};
+    if (_metaTagsCache[dictionaryTerm]![metaEntry] != null) {
+      return _metaTagsCache[dictionaryTerm]![metaEntry]!;
+    }
+
+    String dictionaryImportTag = translate('dictionary_import_tag');
+    late Widget widget;
+
+    if (metaEntry.frequency != null) {
+      return Row(
+        children: [
+          Padding(
+            padding: Spacing.of(context).insets.onlyBottom.normal,
+            child: JidoujishoTag(
+              text: metaEntry.dictionaryName,
+              message: dictionaryImportTag.replaceAll(
+                '%dictionaryName%',
+                metaEntry.dictionaryName,
+              ),
+              trailingText: metaEntry.frequency,
+              backgroundColor: Colors.red.shade900,
+            ),
+          ),
+          const Spacer(),
+        ],
+      );
+    } else if (metaEntry.pitches != null) {
+      List<Widget> children = [];
+      Widget tag = Padding(
+        padding: Spacing.of(context).insets.onlyRight.small,
+        child: JidoujishoTag(
+          text: metaEntry.dictionaryName,
+          message: dictionaryImportTag.replaceAll(
+            '%dictionaryName%',
+            metaEntry.dictionaryName,
+          ),
+          backgroundColor: Colors.red.shade900,
+        ),
+      );
+
+      List<PitchData> pitches = metaEntry.pitches!
+          .where((pitch) => pitch.reading == dictionaryTerm.reading)
+          .toList();
+
+      if (pitches.isEmpty) {
+        return const SizedBox.shrink();
+      }
+
+      if (pitches.length == 1) {
+        for (PitchData data in metaEntry.pitches!) {
+          children.add(
+            targetLanguage.getPitchWidget(
+              context: context,
+              reading: data.reading,
+              downstep: data.downstep,
+            ),
+          );
+
+          children.add(const Space.small());
+        }
+
+        children.insert(
+          0,
+          Padding(
+            padding: Spacing.of(context).insets.onlyBottom.normal,
+            child: tag,
+          ),
+        );
+
+        widget = Wrap(children: children);
+      } else {
+        List<Widget> children = [];
+        children.add(Row(
+          children: [
+            Padding(
+              padding: Spacing.of(context).insets.onlyBottom.semiSmall,
+              child: JidoujishoTag(
+                text: metaEntry.dictionaryName,
+                message: dictionaryImportTag.replaceAll(
+                  '%dictionaryName%',
+                  metaEntry.dictionaryName,
+                ),
+                backgroundColor: Colors.red.shade900,
+              ),
+            ),
+            const Spacer(),
+          ],
+        ));
+
+        children.addAll(
+          pitches.mapIndexed((index, element) {
+            PitchData data = pitches[index];
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: Spacing.of(context).spaces.small,
+                left: Spacing.of(context).spaces.small,
+              ),
+              child: targetLanguage.getPitchWidget(
+                context: context,
+                reading: data.reading,
+                downstep: data.downstep,
+              ),
+            );
+          }).toList(),
+        );
+
+        widget = Padding(
+          padding: Spacing.of(context).insets.onlyBottom.small,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: children,
+          ),
+        );
+      }
+    } else {
+      widget = const SizedBox.shrink();
+    }
+
+    _metaTagsCache[dictionaryTerm]![metaEntry] = widget;
+    return widget;
   }
 }

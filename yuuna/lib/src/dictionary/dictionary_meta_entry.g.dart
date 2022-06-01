@@ -16,22 +16,22 @@ extension GetDictionaryMetaEntryCollection on Isar {
 const DictionaryMetaEntrySchema = CollectionSchema(
   name: 'DictionaryMetaEntry',
   schema:
-      '{"name":"DictionaryMetaEntry","idName":"id","properties":[{"name":"dictionaryName","type":"String"},{"name":"frequency","type":"String"},{"name":"pitches","type":"String"},{"name":"term","type":"String"},{"name":"termLength","type":"Long"}],"indexes":[{"name":"dictionaryName","unique":false,"properties":[{"name":"dictionaryName","type":"Hash","caseSensitive":true}]},{"name":"frequency","unique":false,"properties":[{"name":"frequency","type":"Hash","caseSensitive":true}]},{"name":"term","unique":false,"properties":[{"name":"term","type":"Hash","caseSensitive":true}]},{"name":"termLength","unique":false,"properties":[{"name":"termLength","type":"Value","caseSensitive":false}]},{"name":"termLength_term","unique":false,"properties":[{"name":"termLength","type":"Value","caseSensitive":false},{"name":"term","type":"Hash","caseSensitive":true}]}],"links":[]}',
+      '{"name":"DictionaryMetaEntry","idName":"id","properties":[{"name":"dictionaryName","type":"String"},{"name":"frequency","type":"String"},{"name":"hashCode","type":"Long"},{"name":"pitches","type":"String"},{"name":"term","type":"String"},{"name":"termLength","type":"Long"}],"indexes":[{"name":"dictionaryName","unique":false,"properties":[{"name":"dictionaryName","type":"Hash","caseSensitive":true}]},{"name":"frequency","unique":false,"properties":[{"name":"frequency","type":"Hash","caseSensitive":true}]},{"name":"term","unique":false,"properties":[{"name":"term","type":"Hash","caseSensitive":true}]},{"name":"termLength_term","unique":false,"properties":[{"name":"termLength","type":"Value","caseSensitive":false},{"name":"term","type":"Hash","caseSensitive":true}]}],"links":[]}',
   idName: 'id',
   propertyIds: {
     'dictionaryName': 0,
     'frequency': 1,
-    'pitches': 2,
-    'term': 3,
-    'termLength': 4
+    'hashCode': 2,
+    'pitches': 3,
+    'term': 4,
+    'termLength': 5
   },
   listProperties: {},
   indexIds: {
     'dictionaryName': 0,
     'frequency': 1,
     'term': 2,
-    'termLength': 3,
-    'termLength_term': 4
+    'termLength_term': 3
   },
   indexValueTypes: {
     'dictionaryName': [
@@ -42,9 +42,6 @@ const DictionaryMetaEntrySchema = CollectionSchema(
     ],
     'term': [
       IndexValueType.stringHash,
-    ],
-    'termLength': [
-      IndexValueType.long,
     ],
     'termLength_term': [
       IndexValueType.long,
@@ -101,17 +98,19 @@ void _dictionaryMetaEntrySerializeNative(
     _frequency = IsarBinaryWriter.utf8Encoder.convert(value1);
   }
   dynamicSize += (_frequency?.length ?? 0) as int;
-  final value2 = _dictionaryMetaEntryPitchDataConverter.toIsar(object.pitches);
+  final value2 = object.hashCode;
+  final _hashCode = value2;
+  final value3 = _dictionaryMetaEntryPitchDataConverter.toIsar(object.pitches);
   IsarUint8List? _pitches;
-  if (value2 != null) {
-    _pitches = IsarBinaryWriter.utf8Encoder.convert(value2);
+  if (value3 != null) {
+    _pitches = IsarBinaryWriter.utf8Encoder.convert(value3);
   }
   dynamicSize += (_pitches?.length ?? 0) as int;
-  final value3 = object.term;
-  final _term = IsarBinaryWriter.utf8Encoder.convert(value3);
+  final value4 = object.term;
+  final _term = IsarBinaryWriter.utf8Encoder.convert(value4);
   dynamicSize += (_term.length) as int;
-  final value4 = object.termLength;
-  final _termLength = value4;
+  final value5 = object.termLength;
+  final _termLength = value5;
   final size = staticSize + dynamicSize;
 
   rawObj.buffer = alloc(size);
@@ -120,9 +119,10 @@ void _dictionaryMetaEntrySerializeNative(
   final writer = IsarBinaryWriter(buffer, staticSize);
   writer.writeBytes(offsets[0], _dictionaryName);
   writer.writeBytes(offsets[1], _frequency);
-  writer.writeBytes(offsets[2], _pitches);
-  writer.writeBytes(offsets[3], _term);
-  writer.writeLong(offsets[4], _termLength);
+  writer.writeLong(offsets[2], _hashCode);
+  writer.writeBytes(offsets[3], _pitches);
+  writer.writeBytes(offsets[4], _term);
+  writer.writeLong(offsets[5], _termLength);
 }
 
 DictionaryMetaEntry _dictionaryMetaEntryDeserializeNative(
@@ -135,8 +135,8 @@ DictionaryMetaEntry _dictionaryMetaEntryDeserializeNative(
     frequency: reader.readStringOrNull(offsets[1]),
     id: id,
     pitches: _dictionaryMetaEntryPitchDataConverter
-        .fromIsar(reader.readStringOrNull(offsets[2])),
-    term: reader.readString(offsets[3]),
+        .fromIsar(reader.readStringOrNull(offsets[3])),
+    term: reader.readString(offsets[4]),
   );
   return object;
 }
@@ -151,11 +151,13 @@ P _dictionaryMetaEntryDeserializePropNative<P>(
     case 1:
       return (reader.readStringOrNull(offset)) as P;
     case 2:
+      return (reader.readLong(offset)) as P;
+    case 3:
       return (_dictionaryMetaEntryPitchDataConverter
           .fromIsar(reader.readStringOrNull(offset))) as P;
-    case 3:
-      return (reader.readString(offset)) as P;
     case 4:
+      return (reader.readString(offset)) as P;
+    case 5:
       return (reader.readLong(offset)) as P;
     default:
       throw 'Illegal propertyIndex';
@@ -168,6 +170,7 @@ dynamic _dictionaryMetaEntrySerializeWeb(
   final jsObj = IsarNative.newJsObject();
   IsarNative.jsObjectSet(jsObj, 'dictionaryName', object.dictionaryName);
   IsarNative.jsObjectSet(jsObj, 'frequency', object.frequency);
+  IsarNative.jsObjectSet(jsObj, 'hashCode', object.hashCode);
   IsarNative.jsObjectSet(jsObj, 'id', object.id);
   IsarNative.jsObjectSet(jsObj, 'pitches',
       _dictionaryMetaEntryPitchDataConverter.toIsar(object.pitches));
@@ -195,6 +198,9 @@ P _dictionaryMetaEntryDeserializePropWeb<P>(Object jsObj, String propertyName) {
       return (IsarNative.jsObjectGet(jsObj, 'dictionaryName') ?? '') as P;
     case 'frequency':
       return (IsarNative.jsObjectGet(jsObj, 'frequency')) as P;
+    case 'hashCode':
+      return (IsarNative.jsObjectGet(jsObj, 'hashCode') ??
+          double.negativeInfinity) as P;
     case 'id':
       return (IsarNative.jsObjectGet(jsObj, 'id')) as P;
     case 'pitches':
@@ -235,12 +241,6 @@ extension DictionaryMetaEntryQueryWhereSort
       anyTerm() {
     return addWhereClauseInternal(
         const IndexWhereClause.any(indexName: 'term'));
-  }
-
-  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterWhere>
-      anyTermLength() {
-    return addWhereClauseInternal(
-        const IndexWhereClause.any(indexName: 'termLength'));
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterWhere>
@@ -427,7 +427,7 @@ extension DictionaryMetaEntryQueryWhere
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterWhereClause>
       termLengthEqualTo(int termLength) {
     return addWhereClauseInternal(IndexWhereClause.equalTo(
-      indexName: 'termLength',
+      indexName: 'termLength_term',
       value: [termLength],
     ));
   }
@@ -436,21 +436,21 @@ extension DictionaryMetaEntryQueryWhere
       termLengthNotEqualTo(int termLength) {
     if (whereSortInternal == Sort.asc) {
       return addWhereClauseInternal(IndexWhereClause.lessThan(
-        indexName: 'termLength',
+        indexName: 'termLength_term',
         upper: [termLength],
         includeUpper: false,
       )).addWhereClauseInternal(IndexWhereClause.greaterThan(
-        indexName: 'termLength',
+        indexName: 'termLength_term',
         lower: [termLength],
         includeLower: false,
       ));
     } else {
       return addWhereClauseInternal(IndexWhereClause.greaterThan(
-        indexName: 'termLength',
+        indexName: 'termLength_term',
         lower: [termLength],
         includeLower: false,
       )).addWhereClauseInternal(IndexWhereClause.lessThan(
-        indexName: 'termLength',
+        indexName: 'termLength_term',
         upper: [termLength],
         includeUpper: false,
       ));
@@ -463,7 +463,7 @@ extension DictionaryMetaEntryQueryWhere
     bool include = false,
   }) {
     return addWhereClauseInternal(IndexWhereClause.greaterThan(
-      indexName: 'termLength',
+      indexName: 'termLength_term',
       lower: [termLength],
       includeLower: include,
     ));
@@ -475,7 +475,7 @@ extension DictionaryMetaEntryQueryWhere
     bool include = false,
   }) {
     return addWhereClauseInternal(IndexWhereClause.lessThan(
-      indexName: 'termLength',
+      indexName: 'termLength_term',
       upper: [termLength],
       includeUpper: include,
     ));
@@ -489,7 +489,7 @@ extension DictionaryMetaEntryQueryWhere
     bool includeUpper = true,
   }) {
     return addWhereClauseInternal(IndexWhereClause.between(
-      indexName: 'termLength',
+      indexName: 'termLength_term',
       lower: [lowerTermLength],
       includeLower: includeLower,
       upper: [upperTermLength],
@@ -753,6 +753,57 @@ extension DictionaryMetaEntryQueryFilter on QueryBuilder<DictionaryMetaEntry,
       property: 'frequency',
       value: pattern,
       caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterFilterCondition>
+      hashCodeEqualTo(int value) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.eq,
+      property: 'hashCode',
+      value: value,
+    ));
+  }
+
+  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterFilterCondition>
+      hashCodeGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.gt,
+      include: include,
+      property: 'hashCode',
+      value: value,
+    ));
+  }
+
+  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterFilterCondition>
+      hashCodeLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.lt,
+      include: include,
+      property: 'hashCode',
+      value: value,
+    ));
+  }
+
+  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterFilterCondition>
+      hashCodeBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition.between(
+      property: 'hashCode',
+      lower: lower,
+      includeLower: includeLower,
+      upper: upper,
+      includeUpper: includeUpper,
     ));
   }
 
@@ -1117,6 +1168,16 @@ extension DictionaryMetaEntryQueryWhereSortBy
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterSortBy>
+      sortByHashCode() {
+    return addSortByInternal('hashCode', Sort.asc);
+  }
+
+  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterSortBy>
+      sortByHashCodeDesc() {
+    return addSortByInternal('hashCode', Sort.desc);
+  }
+
+  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterSortBy>
       sortById() {
     return addSortByInternal('id', Sort.asc);
   }
@@ -1180,6 +1241,16 @@ extension DictionaryMetaEntryQueryWhereSortThenBy
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterSortBy>
+      thenByHashCode() {
+    return addSortByInternal('hashCode', Sort.asc);
+  }
+
+  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterSortBy>
+      thenByHashCodeDesc() {
+    return addSortByInternal('hashCode', Sort.desc);
+  }
+
+  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterSortBy>
       thenById() {
     return addSortByInternal('id', Sort.asc);
   }
@@ -1234,6 +1305,11 @@ extension DictionaryMetaEntryQueryWhereDistinct
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QDistinct>
+      distinctByHashCode() {
+    return addDistinctByInternal('hashCode');
+  }
+
+  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QDistinct>
       distinctById() {
     return addDistinctByInternal('id');
   }
@@ -1264,6 +1340,10 @@ extension DictionaryMetaEntryQueryProperty
   QueryBuilder<DictionaryMetaEntry, String?, QQueryOperations>
       frequencyProperty() {
     return addPropertyNameInternal('frequency');
+  }
+
+  QueryBuilder<DictionaryMetaEntry, int, QQueryOperations> hashCodeProperty() {
+    return addPropertyNameInternal('hashCode');
   }
 
   QueryBuilder<DictionaryMetaEntry, int?, QQueryOperations> idProperty() {

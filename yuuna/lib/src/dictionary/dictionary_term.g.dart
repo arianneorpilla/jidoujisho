@@ -15,9 +15,9 @@ extension GetDictionaryTermCollection on Isar {
 const DictionaryTermSchema = CollectionSchema(
   name: 'DictionaryTerm',
   schema:
-      '{"name":"DictionaryTerm","idName":"id","properties":[{"name":"entries","type":"String"},{"name":"reading","type":"String"},{"name":"term","type":"String"}],"indexes":[],"links":[]}',
+      '{"name":"DictionaryTerm","idName":"id","properties":[{"name":"entries","type":"String"},{"name":"hashCode","type":"Long"},{"name":"reading","type":"String"},{"name":"term","type":"String"}],"indexes":[],"links":[]}',
   idName: 'id',
-  propertyIds: {'entries': 0, 'reading': 1, 'term': 2},
+  propertyIds: {'entries': 0, 'hashCode': 1, 'reading': 2, 'term': 3},
   listProperties: {},
   indexIds: {},
   indexValueTypes: {},
@@ -66,11 +66,13 @@ void _dictionaryTermSerializeNative(
       _dictionaryTermDictionaryEntriesConverter.toIsar(object.entries);
   final _entries = IsarBinaryWriter.utf8Encoder.convert(value0);
   dynamicSize += (_entries.length) as int;
-  final value1 = object.reading;
-  final _reading = IsarBinaryWriter.utf8Encoder.convert(value1);
+  final value1 = object.hashCode;
+  final _hashCode = value1;
+  final value2 = object.reading;
+  final _reading = IsarBinaryWriter.utf8Encoder.convert(value2);
   dynamicSize += (_reading.length) as int;
-  final value2 = object.term;
-  final _term = IsarBinaryWriter.utf8Encoder.convert(value2);
+  final value3 = object.term;
+  final _term = IsarBinaryWriter.utf8Encoder.convert(value3);
   dynamicSize += (_term.length) as int;
   final size = staticSize + dynamicSize;
 
@@ -79,8 +81,9 @@ void _dictionaryTermSerializeNative(
   final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
   final writer = IsarBinaryWriter(buffer, staticSize);
   writer.writeBytes(offsets[0], _entries);
-  writer.writeBytes(offsets[1], _reading);
-  writer.writeBytes(offsets[2], _term);
+  writer.writeLong(offsets[1], _hashCode);
+  writer.writeBytes(offsets[2], _reading);
+  writer.writeBytes(offsets[3], _term);
 }
 
 DictionaryTerm _dictionaryTermDeserializeNative(
@@ -91,8 +94,8 @@ DictionaryTerm _dictionaryTermDeserializeNative(
   final object = DictionaryTerm(
     entries: _dictionaryTermDictionaryEntriesConverter
         .fromIsar(reader.readString(offsets[0])),
-    reading: reader.readString(offsets[1]),
-    term: reader.readString(offsets[2]),
+    reading: reader.readString(offsets[2]),
+    term: reader.readString(offsets[3]),
   );
   object.id = id;
   return object;
@@ -107,8 +110,10 @@ P _dictionaryTermDeserializePropNative<P>(
       return (_dictionaryTermDictionaryEntriesConverter
           .fromIsar(reader.readString(offset))) as P;
     case 1:
-      return (reader.readString(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 2:
+      return (reader.readString(offset)) as P;
+    case 3:
       return (reader.readString(offset)) as P;
     default:
       throw 'Illegal propertyIndex';
@@ -120,6 +125,7 @@ dynamic _dictionaryTermSerializeWeb(
   final jsObj = IsarNative.newJsObject();
   IsarNative.jsObjectSet(jsObj, 'entries',
       _dictionaryTermDictionaryEntriesConverter.toIsar(object.entries));
+  IsarNative.jsObjectSet(jsObj, 'hashCode', object.hashCode);
   IsarNative.jsObjectSet(jsObj, 'id', object.id);
   IsarNative.jsObjectSet(jsObj, 'reading', object.reading);
   IsarNative.jsObjectSet(jsObj, 'term', object.term);
@@ -143,6 +149,9 @@ P _dictionaryTermDeserializePropWeb<P>(Object jsObj, String propertyName) {
     case 'entries':
       return (_dictionaryTermDictionaryEntriesConverter
           .fromIsar(IsarNative.jsObjectGet(jsObj, 'entries') ?? '')) as P;
+    case 'hashCode':
+      return (IsarNative.jsObjectGet(jsObj, 'hashCode') ??
+          double.negativeInfinity) as P;
     case 'id':
       return (IsarNative.jsObjectGet(jsObj, 'id')) as P;
     case 'reading':
@@ -331,6 +340,57 @@ extension DictionaryTermQueryFilter
       property: 'entries',
       value: pattern,
       caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      hashCodeEqualTo(int value) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.eq,
+      property: 'hashCode',
+      value: value,
+    ));
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      hashCodeGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.gt,
+      include: include,
+      property: 'hashCode',
+      value: value,
+    ));
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      hashCodeLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.lt,
+      include: include,
+      property: 'hashCode',
+      value: value,
+    ));
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      hashCodeBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition.between(
+      property: 'hashCode',
+      lower: lower,
+      includeLower: includeLower,
+      upper: upper,
+      includeUpper: includeUpper,
     ));
   }
 
@@ -622,6 +682,15 @@ extension DictionaryTermQueryWhereSortBy
     return addSortByInternal('entries', Sort.desc);
   }
 
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterSortBy> sortByHashCode() {
+    return addSortByInternal('hashCode', Sort.asc);
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterSortBy>
+      sortByHashCodeDesc() {
+    return addSortByInternal('hashCode', Sort.desc);
+  }
+
   QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterSortBy> sortById() {
     return addSortByInternal('id', Sort.asc);
   }
@@ -659,6 +728,15 @@ extension DictionaryTermQueryWhereSortThenBy
     return addSortByInternal('entries', Sort.desc);
   }
 
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterSortBy> thenByHashCode() {
+    return addSortByInternal('hashCode', Sort.asc);
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterSortBy>
+      thenByHashCodeDesc() {
+    return addSortByInternal('hashCode', Sort.desc);
+  }
+
   QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterSortBy> thenById() {
     return addSortByInternal('id', Sort.asc);
   }
@@ -692,6 +770,10 @@ extension DictionaryTermQueryWhereDistinct
     return addDistinctByInternal('entries', caseSensitive: caseSensitive);
   }
 
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QDistinct> distinctByHashCode() {
+    return addDistinctByInternal('hashCode');
+  }
+
   QueryBuilder<DictionaryTerm, DictionaryTerm, QDistinct> distinctById() {
     return addDistinctByInternal('id');
   }
@@ -712,6 +794,10 @@ extension DictionaryTermQueryProperty
   QueryBuilder<DictionaryTerm, List<DictionaryEntry>, QQueryOperations>
       entriesProperty() {
     return addPropertyNameInternal('entries');
+  }
+
+  QueryBuilder<DictionaryTerm, int, QQueryOperations> hashCodeProperty() {
+    return addPropertyNameInternal('hashCode');
   }
 
   QueryBuilder<DictionaryTerm, int?, QQueryOperations> idProperty() {

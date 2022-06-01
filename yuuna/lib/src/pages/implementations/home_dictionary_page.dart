@@ -145,7 +145,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     setState(() {});
   }
 
-  Duration get searchDelay => const Duration(milliseconds: 200);
+  Duration get searchDelay => const Duration(milliseconds: 50);
 
   void onQueryChanged(String query) async {
     Future.delayed(searchDelay, () {
@@ -239,7 +239,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       child: JidoujishoIconButton(
         size: textTheme.titleLarge?.fontSize,
         tooltip: clearSearchTitle,
-        icon: Icons.delete_sweep,
+        icon: Icons.manage_search,
         onTap: showDeleteSearchHistoryPrompt,
       ),
     );
@@ -265,6 +265,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
           onPressed: () async {
             appModel.clearSearchHistory(
                 historyKey: DictionaryMediaType.instance.uniqueKey);
+            floatingSearchBarController.clear();
 
             setState(() {});
             Navigator.pop(context);

@@ -111,7 +111,6 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
           );
 
           metaEntriesCache[index - 1] ??= metaEntries;
-
           expandedControllers[index - 1] ??= controllers;
           dictionaryHiddens[index - 1] ??= hiddens;
         }
@@ -119,9 +118,9 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
         return DictionaryTermPage(
           dictionaryMap: dictionaryMap!,
           dictionaryTerm: dictionaryTerm,
-          dictionaryMetaEntries: metaEntriesCache[index - 1]!,
           onSearch: widget.onSearch,
           onStash: widget.onStash,
+          dictionaryMetaEntries: metaEntriesCache[index - 1]!,
           expandableControllers: expandedControllers[index - 1]!,
           dictionaryHiddens: dictionaryHiddens[index - 1]!,
         );

@@ -195,16 +195,18 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
   double get fontSize => (textTheme.labelMedium?.fontSize)! * 0.9;
 
   Widget buildFooterWidget(DictionaryResult result, int index) {
-    return Tooltip(
-      message: seeMoreLabel,
-      child: InkWell(
-        onTap: () async {
-          await appModel.openResultFromHistory(result: result);
-          appModel.refreshDictionaryHistory();
-        },
-        child: Padding(
-          padding: Spacing.of(context).insets.vertical.small,
-          child: buildFooterTextSpans(result, index),
+    return Center(
+      child: Tooltip(
+        message: seeMoreLabel,
+        child: InkWell(
+          onTap: () async {
+            await appModel.openResultFromHistory(result: result);
+            appModel.refreshDictionaryHistory();
+          },
+          child: Padding(
+            padding: Spacing.of(context).insets.all.small,
+            child: buildFooterTextSpans(result, index),
+          ),
         ),
       ),
     );

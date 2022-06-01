@@ -36,10 +36,10 @@ class DictionaryTerm {
 
   @override
   operator ==(Object other) =>
-      other is DictionaryTerm && other.toJson() == toJson();
+      other is DictionaryTerm && reading == other.reading && term == other.term;
 
   @override
-  int get hashCode => toJson().hashCode;
+  int get hashCode => term.hashCode * reading.hashCode;
 
   /// A unique identifier for the purposes of database storage.
   @Id()

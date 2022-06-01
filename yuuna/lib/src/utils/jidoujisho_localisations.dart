@@ -51,8 +51,8 @@ class JidoujishoLocalisations {
     'dialog_save': 'SAVE',
     'dialog_launch_ankidroid': 'LAUNCH ANKIDROID',
     'dictionaries_delete_confirmation':
-        'Deleting a dictionary will also clear the dictionary search history.'
-            ' Are you sure you want to do this?',
+        'Deleting a dictionary will also clear all dictionary results from'
+            ' history. Are you sure you want to do this?',
     'mappings_delete_confirmation': 'This profile will be deleted. Are you '
         'sure you want to do this?',
     'dictionaries_deleting_entries': 'Deleting dictionary entries...',

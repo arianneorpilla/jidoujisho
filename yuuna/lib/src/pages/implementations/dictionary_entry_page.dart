@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/pages.dart';
-import 'package:yuuna/src/models/app_model.dart';
 import 'package:yuuna/utils.dart';
 import 'package:collection/collection.dart';
 
@@ -56,7 +55,7 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> tags = ref.watch(entryTagsProvider(widget.entry));
+    List<Widget> tags = appModel.getTagsForEntry(widget.entry);
 
     List<Widget> children = widget.entry.meanings.mapIndexed((index, meaning) {
       if (widget.entry.meanings.length != 1) {

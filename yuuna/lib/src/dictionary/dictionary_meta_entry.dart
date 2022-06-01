@@ -5,9 +5,9 @@ import 'package:yuuna/utils.dart';
 
 part 'dictionary_meta_entry.g.dart';
 
-/// A base class representing a generic implementation of a dictionary entry.
-/// Not all variables need to be defined in an entry. This class is heavily
-/// based on the Yomichan's term meta bank schema, though it does not
+/// A base class representing a generic implementation of a dictionary meta
+/// entry. Not all variables need to be defined in an entry. This class is
+/// heavily based on the Yomichan's term meta bank schema, though it does not
 /// completely parallel its feature set. The intent is to allow compatibility
 /// for most cases when importing data using that schema.
 @JsonSerializable()
@@ -37,8 +37,6 @@ class DictionaryMetaEntry {
   @Index()
   final String term;
 
-  @Index()
-
   /// Length of the term.
   @Index(composite: [CompositeIndex('term')])
   int get termLength => term.length;
@@ -55,4 +53,10 @@ class DictionaryMetaEntry {
   /// List of pitch accent downsteps for this term's reading.
   @PitchDataConverter()
   final List<PitchData>? pitches;
+
+  @override
+  operator ==(Object other) => other is DictionaryMetaEntry && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
 }

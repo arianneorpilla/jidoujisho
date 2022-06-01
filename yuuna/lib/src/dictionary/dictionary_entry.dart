@@ -38,7 +38,7 @@ class DictionaryEntry {
   int? id;
 
   /// The term represented by this dictionary entry.
-  @Index()
+  @Index(type: IndexType.value)
   final String term;
 
   /// The dictionary from which this entry was imported from. This is used for
@@ -47,7 +47,7 @@ class DictionaryEntry {
   final String dictionaryName;
 
   /// The pronunciation of the term represented by this dictionary entry.
-  @Index()
+  @Index(type: IndexType.value)
   final String reading;
 
   /// A list of definitions for a term. If there is only a single [String] item,
@@ -76,63 +76,16 @@ class DictionaryEntry {
   final int? sequence;
 
   /// The length of term is used as an index.
-  @Index()
   int get termLength => term.length;
 
   /// The length of reading is used as an index.
-  @Index()
   int get readingLength => reading.length;
 
-  /// Index for the first character of this term.
-  @Index(composite: [
-    CompositeIndex('termSecondChar'),
-    CompositeIndex('termLength'),
-  ])
-  String? get termFirstChar {
-    if (term.isEmpty) {
-      return null;
-    } else {
-      return term[0];
-    }
-  }
-
-  /// Index for the second character of this term.
-  String? get termSecondChar {
-    if (term.length < 2) {
-      return null;
-    } else {
-      return term[1];
-    }
-  }
-
-  /// Index for the first character of this term.
-  @Index(composite: [
-    CompositeIndex('readingSecondChar'),
-    CompositeIndex('readingLength'),
-  ])
-  String? get readingFirstChar {
-    if (reading.isEmpty) {
-      return null;
-    } else {
-      return reading[0];
-    }
-  }
-
-  /// Index for the second character of this term.
-  String? get readingSecondChar {
-    if (reading.length < 2) {
-      return null;
-    } else {
-      return reading[1];
-    }
-  }
+  @override
+  operator ==(Object other) => other is DictionaryEntry && id == other.id;
 
   @override
-  operator ==(Object other) =>
-      other is DictionaryEntry && other.toJson() == toJson();
-
-  @override
-  int get hashCode => toJson().hashCode;
+  int get hashCode => id.hashCode;
 
   @override
   String toString() => prettyJson(toJson());

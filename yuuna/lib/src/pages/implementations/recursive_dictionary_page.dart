@@ -137,7 +137,7 @@ class _RecursiveDictionaryPageState
     onQueryChanged(_controller.query);
   }
 
-  Duration get searchDelay => const Duration(milliseconds: 200);
+  Duration get searchDelay => const Duration(milliseconds: 50);
 
   void onQueryChanged(String query) async {
     Future.delayed(searchDelay, () {
@@ -250,6 +250,7 @@ class _RecursiveDictionaryPageState
           onPressed: () async {
             appModel.clearSearchHistory(
                 historyKey: DictionaryMediaType.instance.uniqueKey);
+            _controller.clear();
 
             setState(() {});
             Navigator.pop(context);
