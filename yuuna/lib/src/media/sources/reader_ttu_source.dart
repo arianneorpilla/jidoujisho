@@ -40,7 +40,7 @@ class ReaderTtuSource extends ReaderMediaSource {
 
   /// This port should ideally not conflict but should remain the same for
   /// caching purposes.
-  static int get port => 52055;
+  static int get port => 52059;
 
   static final ReaderTtuSource _instance =
       ReaderTtuSource._privateConstructor();
@@ -94,6 +94,11 @@ class ReaderTtuSource extends ReaderMediaSource {
 
   /// Fetch JSON for all books in IndexedDB.
   Future<List<MediaItem>> getBooksHistory() async {
+    if (getPreference(key: 'firstTime', defaultValue: true)) {
+      await setPreference(key: 'firstTime', value: false);
+      return [];
+    }
+
     List<MediaItem>? items;
     HeadlessInAppWebView webView = HeadlessInAppWebView(
       initialUrlRequest: URLRequest(url: Uri.parse('http://localhost:$port/')),
@@ -118,11 +123,14 @@ class ReaderTtuSource extends ReaderMediaSource {
       },
     );
 
-    await webView.run();
-    while (items == null) {
-      await Future.delayed(const Duration(milliseconds: 500));
+    try {
+      await webView.run();
+      while (items == null) {
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+    } finally {
+      await webView.dispose();
     }
-    await webView.dispose();
 
     return items!;
   }
@@ -198,7 +206,7 @@ function getAllFromIDBStore(storeName) {
         var database = event.target.result;
 
         try {
-          var transaction = database.transaction([storeName]);
+          var transaction = database.transaction([storeName], 'readwrite');
           var objectStore;
           try {
             objectStore = transaction.objectStore(storeName);

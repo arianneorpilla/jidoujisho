@@ -70,6 +70,7 @@ class HistoryReaderPageState<T extends BaseHistoryPage>
             maxCrossAxisExtent: 150,
             childAspectRatio: 176 / 250,
           ),
+          physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           itemCount: items.length,
           itemBuilder: (context, index) => buildMediaItem(items[index]),
