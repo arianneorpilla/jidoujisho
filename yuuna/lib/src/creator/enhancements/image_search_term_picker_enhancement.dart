@@ -50,13 +50,18 @@ class ImageSearchTermPicker extends Enhancement {
             field: ImageField.instance,
           )! as ImageEnhancement;
 
+          String searchTerm = items.join(' ').trim();
+          if (searchTerm.isEmpty) {
+            searchTerm = sourceText;
+          }
+
           ImageField.instance.performSearch(
             appModel: appModel,
             creatorModel: creatorModel,
-            searchTerm: items.join(' '),
+            searchTerm: searchTerm,
             generateImages: () => enhancement.fetchImages(
               context: context,
-              searchTerm: items.join(' '),
+              searchTerm: searchTerm,
             ),
           );
 
@@ -66,7 +71,6 @@ class ImageSearchTermPicker extends Enhancement {
       onSelect: (selection, items) {
         creatorModel.getFieldController(ImageField.instance).text =
             items.join(' ');
-
         Navigator.pop(context);
       },
     );

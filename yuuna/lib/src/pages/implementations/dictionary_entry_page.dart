@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/pages.dart';
-import 'package:yuuna/utils.dart';
 import 'package:collection/collection.dart';
 
 /// Returns the widget for a [DictionaryEntry] making up a collection of
@@ -36,22 +35,8 @@ class DictionaryEntryPage extends BasePage {
 }
 
 class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
-  String get searchLabel => appModelNoUpdate.translate('search');
-  String get stashLabel => appModelNoUpdate.translate('stash');
   String get dictionaryImportTag =>
       appModelNoUpdate.translate('dictionary_import_tag');
-
-  MaterialTextSelectionControls get selectionControls =>
-      JidoujishoTextSelectionControls(
-        searchAction: widget.onSearch,
-        searchActionLabel: searchLabel,
-        stashAction: widget.onStash,
-        stashActionLabel: stashLabel,
-        allowCopy: true,
-        allowSelectAll: true,
-        allowCut: false,
-        allowPaste: false,
-      );
 
   @override
   Widget build(BuildContext context) {
@@ -59,13 +44,15 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
 
     List<Widget> children = widget.entry.meanings.mapIndexed((index, meaning) {
       if (widget.entry.meanings.length != 1) {
+        String sourceText = '• ${widget.entry.meanings[index].trim()}';
         return SelectableText(
-          '• ${widget.entry.meanings[index].trim()}',
+          sourceText,
           selectionControls: selectionControls,
         );
       } else {
+        String sourceText = widget.entry.meanings.first.trim();
         return SelectableText(
-          widget.entry.meanings.first.trim(),
+          sourceText,
           selectionControls: selectionControls,
         );
       }

@@ -12,8 +12,8 @@ class DictionaryResultPage extends BasePage {
     required this.result,
     required this.onSearch,
     required this.onStash,
-    required this.getCurrentSearchTerm,
     this.updateHistory = true,
+    this.spaceBeforeFirstResult = true,
     super.key,
   });
 
@@ -29,10 +29,8 @@ class DictionaryResultPage extends BasePage {
   /// Whether or not to update dictionary history upon viewing this result.
   final bool updateHistory;
 
-  /// Used to check if the current search term is still the same. Used to
-  /// add to search history without adding too many duplicate partial search
-  /// terms.
-  final String? Function() getCurrentSearchTerm;
+  /// Whether or not to put a space before the first result.
+  final bool spaceBeforeFirstResult;
 
   @override
   BasePageState<DictionaryResultPage> createState() =>
@@ -40,9 +38,6 @@ class DictionaryResultPage extends BasePage {
 }
 
 class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
-  String get searchLabel => appModel.translate('search');
-  String get stashLabel => appModel.translate('stash');
-
   Map<String, Dictionary>? dictionaryMap;
   Map<int, List<DictionaryMetaEntry>> metaEntriesCache = {};
   Map<int, Map<String, ExpandableController>> expandedControllers = {};
@@ -86,7 +81,9 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
       itemCount: widget.result.terms.length + 1,
       itemBuilder: (context, index) {
         if (index == 0) {
-          return const Space.normal();
+          return widget.spaceBeforeFirstResult
+              ? const Space.normal()
+              : const SizedBox.shrink();
         }
 
         DictionaryTerm dictionaryTerm = widget.result.terms[index - 1];

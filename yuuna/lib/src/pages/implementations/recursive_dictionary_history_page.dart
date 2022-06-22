@@ -24,15 +24,12 @@ class _RecursiveDictionaryHistoryPageState
     extends BasePageState<RecursiveDictionaryHistoryPage> {
   String get backLabel => appModel.translate('back');
   String get dictionariesLabel => appModel.translate('dictionaries');
-  String get searchLabel => appModel.translate('search');
   String get searchEllipsisLabel => appModel.translate('search_ellipsis');
   String get noDictionariesLabel =>
       appModel.translate('dictionaries_menu_empty');
   String get noSearchResultsLabel => appModel.translate('no_search_results');
   String get enterSearchTermLabel => appModel.translate('enter_search_term');
   String get clearLabel => appModel.translate('clear');
-
-  String get stashLabel => appModel.translate('stash');
 
   Map<String, Dictionary>? dictionaryMap;
   Map<int, List<DictionaryMetaEntry>> metaEntriesCache = {};
@@ -49,7 +46,6 @@ class _RecursiveDictionaryHistoryPageState
         result: widget.result,
         onSearch: onSearch,
         onStash: onStash,
-        getCurrentSearchTerm: () => widget.result.searchTerm,
         updateHistory: false,
       ),
     );

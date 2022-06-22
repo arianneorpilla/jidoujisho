@@ -124,7 +124,7 @@ abstract class AudioExportField extends Field {
 
   /// Perform a function that generates a list of images and attempt a search
   /// with a given search term.
-  void performSearch({
+  Future<void> performSearch({
     required AppModel appModel,
     required CreatorModel creatorModel,
     required String searchTerm,

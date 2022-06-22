@@ -60,55 +60,16 @@ class DictionaryTermPage extends BasePage {
 }
 
 class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
-  String get searchLabel => appModel.translate('search');
-  String get stashLabel => appModel.translate('stash');
   String get dictionaryImportTag => appModel.translate('dictionary_import_tag');
-
-  MaterialTextSelectionControls get selectionControls =>
-      JidoujishoTextSelectionControls(
-        searchAction: widget.onSearch,
-        searchActionLabel: searchLabel,
-        stashAction: widget.onStash,
-        stashActionLabel: stashLabel,
-        allowCopy: true,
-        allowSelectAll: true,
-        allowCut: false,
-        allowPaste: false,
-      );
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> tags = appModel.getTagsForTerm(widget.dictionaryTerm);
+    if (widget.onScrollLeft == null && widget.onScrollRight == null) {
+      return buildCard();
+    }
 
     return GestureDetector(
-      child: Card(
-        color: appModel.isDarkMode
-            ? const Color.fromARGB(255, 15, 15, 15)
-            : const Color.fromARGB(255, 246, 246, 246),
-        elevation: 0,
-        shape: const RoundedRectangleBorder(),
-        child: Padding(
-          padding: EdgeInsets.only(
-            left: Spacing.of(context).spaces.semiBig,
-            top: Spacing.of(context).spaces.normal,
-            right: Spacing.of(context).spaces.normal,
-            bottom: Spacing.of(context).spaces.normal,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              buildTopRow(metaEntries: widget.dictionaryMetaEntries),
-              const Space.normal(),
-              Wrap(children: tags),
-              const Space.normal(),
-              buildMetaWidgets(metaEntries: widget.dictionaryMetaEntries),
-              const Space.normal(),
-              buildEntries(),
-              if (widget.footerWidget != null) widget.footerWidget!
-            ],
-          ),
-        ),
-      ),
+      child: buildCard(),
       onHorizontalDragEnd: (details) async {
         if (details.primaryVelocity == 0) {
           return;
@@ -120,6 +81,38 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
           widget.onScrollLeft?.call();
         }
       },
+    );
+  }
+
+  Widget buildCard() {
+    List<Widget> tags = appModel.getTagsForTerm(widget.dictionaryTerm);
+    return Card(
+      color: appModel.isDarkMode
+          ? const Color.fromARGB(255, 15, 15, 15)
+          : const Color.fromARGB(255, 246, 246, 246),
+      elevation: 0,
+      shape: const RoundedRectangleBorder(),
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: Spacing.of(context).spaces.semiBig,
+          top: Spacing.of(context).spaces.normal,
+          right: Spacing.of(context).spaces.normal,
+          bottom: Spacing.of(context).spaces.normal,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            buildTopRow(metaEntries: widget.dictionaryMetaEntries),
+            const Space.normal(),
+            Wrap(children: tags),
+            const Space.normal(),
+            buildMetaWidgets(metaEntries: widget.dictionaryMetaEntries),
+            const Space.normal(),
+            buildEntries(),
+            if (widget.footerWidget != null) widget.footerWidget!
+          ],
+        ),
+      ),
     );
   }
 

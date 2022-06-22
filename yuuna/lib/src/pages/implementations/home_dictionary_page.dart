@@ -19,9 +19,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
   @override
   MediaType get mediaType => DictionaryMediaType.instance;
 
-  String get backLabel => appModel.translate('back');
   String get dictionariesLabel => appModel.translate('dictionaries');
-  String get searchLabel => appModel.translate('search');
   String get searchEllipsisLabel => appModel.translate('search_ellipsis');
   String get noDictionariesLabel =>
       appModel.translate('dictionaries_menu_empty');
@@ -38,10 +36,13 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
   String get clearSearchDescription =>
       appModel.translate('clear_search_description');
 
+  /// The message to be shown in the placeholder that displays when
+  /// [shouldPlaceholderBeShown] is true. This should be a localised message.
+  String get placeholderMessage => appModel.translate('info_empty_home_tab');
+
   DictionaryResult? _result;
 
   bool _isSearching = false;
-
   bool _lastOpenedState = false;
 
   @override
@@ -56,7 +57,6 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     super.dispose();
   }
 
-  @override
   bool get shouldPlaceholderBeShown => appModel.dictionaryHistory.isEmpty;
 
   @override
@@ -68,6 +68,16 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
         buildDictionaryHistory(),
       buildFloatingSearchBar(),
     ]);
+  }
+
+  /// This is shown as the body when [shouldPlaceholderBeShown] is true.
+  Widget buildPlaceholder() {
+    return Center(
+      child: JidoujishoPlaceholderMessage(
+        icon: mediaType.outlinedIcon,
+        message: placeholderMessage,
+      ),
+    );
   }
 
   Widget buildDictionaryHistory() {
@@ -95,7 +105,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     return FloatingSearchBar(
       isScrollControlled: true,
       hint: searchEllipsisLabel,
-      controller: floatingSearchBarController,
+      controller: mediaType.floatingSearchBarController,
       builder: buildFloatingSearchBody,
       borderRadius: BorderRadius.zero,
       elevation: 0,
@@ -113,6 +123,8 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       transition: SlideFadeFloatingSearchBarTransition(),
       automaticallyImplyBackButton: false,
       progress: _isSearching,
+      onFocusChanged: (focused) => onFocusChanged(focused: focused),
+      onQueryChanged: onQueryChanged,
       leadingActions: [
         buildDictionaryButton(),
         buildBackButton(),
@@ -122,14 +134,13 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
         buildSearchClearButton(),
         buildSearchButton(),
       ],
-      onFocusChanged: (focus) => onFocusChanged(focus: focus),
-      onQueryChanged: onQueryChanged,
     );
   }
 
-  void onFocusChanged({required bool focus}) {
-    if (floatingSearchBarController.isOpen != _lastOpenedState) {
-      _lastOpenedState = floatingSearchBarController.isOpen;
+  @override
+  void onFocusChanged({required bool focused}) async {
+    if (mediaType.floatingSearchBarController.isOpen != _lastOpenedState) {
+      _lastOpenedState = mediaType.floatingSearchBarController.isOpen;
       if (!_lastOpenedState) {
         appModel.refreshDictionaryHistory();
       }
@@ -138,18 +149,15 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
 
   void searchAgain() {
     _result = null;
-    onQueryChanged(floatingSearchBarController.query);
-  }
-
-  void refresh() {
-    setState(() {});
+    onQueryChanged(mediaType.floatingSearchBarController.query);
   }
 
   Duration get searchDelay => const Duration(milliseconds: 50);
+  Duration get historyDelay => const Duration(milliseconds: 1000);
 
   void onQueryChanged(String query) async {
     Future.delayed(searchDelay, () {
-      if (floatingSearchBarController.query == query) {
+      if (mediaType.floatingSearchBarController.query == query) {
         search(query);
       }
     });
@@ -164,15 +172,21 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       _result = await appModel.searchDictionary(query);
     } finally {
       if (_result != null) {
-        if (_result!.searchTerm == floatingSearchBarController.query) {
+        if (_result!.searchTerm ==
+            mediaType.floatingSearchBarController.query) {
           if (!appModel.isIncognitoMode) {
-            appModel.addToSearchHistory(
-              historyKey: DictionaryMediaType.instance.uniqueKey,
-              searchTerm: floatingSearchBarController.query,
-            );
-            if (_result!.terms.isNotEmpty) {
-              await appModel.addToDictionaryHistory(result: _result!);
-            }
+            Future.delayed(historyDelay, () async {
+              if (_result!.searchTerm ==
+                  mediaType.floatingSearchBarController.query) {
+                appModel.addToSearchHistory(
+                  historyKey: mediaType.uniqueKey,
+                  searchTerm: mediaType.floatingSearchBarController.query,
+                );
+                if (_result!.terms.isNotEmpty) {
+                  await appModel.addToDictionaryHistory(result: _result!);
+                }
+              }
+            });
           }
 
           setState(() {
@@ -195,20 +209,6 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
         icon: Icons.auto_stories,
         onTap: appModel.showDictionaryMenu,
       ),
-    );
-  }
-
-  Widget buildBackButton() {
-    return FloatingSearchBarAction(
-      showIfOpened: true,
-      showIfClosed: false,
-      child: JidoujishoIconButton(
-          size: textTheme.titleLarge?.fontSize,
-          tooltip: backLabel,
-          icon: Icons.arrow_back,
-          onTap: () {
-            floatingSearchBarController.close();
-          }),
     );
   }
 
@@ -265,7 +265,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
           onPressed: () async {
             appModel.clearSearchHistory(
                 historyKey: DictionaryMediaType.instance.uniqueKey);
-            floatingSearchBarController.clear();
+            mediaType.floatingSearchBarController.clear();
 
             setState(() {});
             Navigator.pop(context);
@@ -328,7 +328,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     if (appModel.dictionaries.isEmpty) {
       return buildImportDictionariesPlaceholderMessage();
     }
-    if (floatingSearchBarController.query.isEmpty) {
+    if (mediaType.floatingSearchBarController.query.isEmpty) {
       if (appModel.getSearchHistory(historyKey: mediaType.uniqueKey).isEmpty) {
         return buildEnterSearchTermPlaceholderMessage();
       } else {
@@ -336,7 +336,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
           uniqueKey: mediaType.uniqueKey,
           onSearchTermSelect: (searchTerm) {
             setState(() {
-              floatingSearchBarController.query = searchTerm;
+              mediaType.floatingSearchBarController.query = searchTerm;
             });
           },
           onUpdate: () {
@@ -346,7 +346,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       }
     }
     if (_isSearching ||
-        _result?.searchTerm != floatingSearchBarController.query) {
+        _result?.searchTerm != mediaType.floatingSearchBarController.query) {
       if (_result != null) {
         return buildSearchResult();
       } else {
@@ -378,7 +378,6 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
         onSearch: onSearch,
         onStash: onStash,
         result: _result!,
-        getCurrentSearchTerm: () => floatingSearchBarController.query,
       ),
     );
   }
@@ -407,7 +406,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
         icon: Icons.search_off,
         message: noSearchResultsLabel.replaceAll(
           '%searchTerm%',
-          floatingSearchBarController.query,
+          mediaType.floatingSearchBarController.query,
         ),
       ),
     );

@@ -1,14 +1,21 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_process_text/flutter_process_text.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:spaces/spaces.dart';
+import 'package:wakelock/wakelock.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/pages.dart';
+import 'package:yuuna/utils.dart';
 
 /// Application execution starts here.
 void main() {
@@ -19,6 +26,21 @@ void main() {
     /// Necessary to initialise Flutter when running native code before
     /// starting the application.
     WidgetsFlutterBinding.ensureInitialized();
+
+    /// Allow debugging [InAppWebView] in the app.
+    if (Platform.isAndroid) {
+      await AndroidInAppWebViewController.setWebContentsDebuggingEnabled(true);
+    }
+
+    /// Ensure the top and bottom bars are shown at launch and wake prevention
+    /// is disabled if not reverted from entering a media source.
+    await Wakelock.disable();
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
+    /// Initialise Firebase to allow for Crashlytics error reporting.
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
 
     /// Used in order to access and initialise an [AppModel] without requiring
     /// a [WidgetRef].
@@ -41,6 +63,9 @@ void main() {
     /// Print error details to the console.
     final details = FlutterErrorDetails(exception: exception, stack: stack);
     FlutterError.dumpErrorToConsole(details);
+
+    /// Send error details to Crashlytics for developer debugging purposes.
+    FirebaseCrashlytics.instance.recordError(exception, stack);
   });
 }
 
@@ -70,10 +95,10 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       /// For processing text received via the global context menu option.
-      String? searchTerm = await FlutterProcessText.refreshProcessText;
-      if (searchTerm != null) {
+      String? text = await FlutterProcessText.refreshProcessText;
+      if (text != null) {
         appModel.openRecursiveDictionarySearch(
-          searchTerm: searchTerm,
+          searchTerm: text,
           killOnPop: true,
         );
       }
@@ -232,7 +257,7 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
         cardColor: Colors.white,
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
-            primary: Colors.black,
+            foregroundColor: Colors.black,
           ),
         ),
         listTileTheme: ListTileThemeData(
@@ -252,6 +277,7 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
           ),
         ),
         scrollbarTheme: ScrollbarThemeData(
+          thickness: MaterialStateProperty.all(3),
           thumbVisibility: MaterialStateProperty.all(true),
         ),
         sliderTheme: const SliderThemeData(
@@ -313,7 +339,7 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
         cardColor: const Color.fromARGB(255, 30, 30, 30),
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
-            primary: Colors.white,
+            foregroundColor: Colors.white,
           ),
         ),
         listTileTheme: ListTileThemeData(

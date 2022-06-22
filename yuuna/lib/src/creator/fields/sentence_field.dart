@@ -35,6 +35,6 @@ class SentenceField extends Field {
     required List<DictionaryMetaEntry> metaEntries,
     required bool creatorJustLaunched,
   }) {
-    return null;
+    return appModel.getCurrentSentence();
   }
 }

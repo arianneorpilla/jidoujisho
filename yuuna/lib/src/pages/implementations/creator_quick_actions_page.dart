@@ -47,8 +47,8 @@ class _CreatorQuickActionsPageState extends BasePageState {
     return SizedBox(
       width: double.maxFinite,
       child: RawScrollbar(
-        thumbVisibility: true,
         thickness: 3,
+        thumbVisibility: true,
         controller: contentController,
         child: SingleChildScrollView(
           controller: contentController,

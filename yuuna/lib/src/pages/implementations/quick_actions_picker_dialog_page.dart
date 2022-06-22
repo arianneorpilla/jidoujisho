@@ -53,8 +53,8 @@ class _QuickActionsPickerDialogPageState
     return SizedBox(
       width: double.maxFinite,
       child: RawScrollbar(
-        thumbVisibility: true,
         thickness: 3,
+        thumbVisibility: true,
         controller: contentController,
         child: SingleChildScrollView(
           controller: contentController,
@@ -88,6 +88,8 @@ class _QuickActionsPickerDialogPageState
 
   Widget buildQuickActionTiles(List<QuickAction> quickActions) {
     return RawScrollbar(
+      thickness: 3,
+      thumbVisibility: true,
       controller: _scrollController,
       child: ListView.builder(
         controller: _scrollController,
@@ -100,40 +102,43 @@ class _QuickActionsPickerDialogPageState
   }
 
   Widget buildQuickActionTile(QuickAction quickAction) {
-    return ListTile(
+    return Material(
+      type: MaterialType.transparency,
       key: ValueKey(quickAction.uniqueKey),
-      leading: Icon(
-        quickAction.icon,
-        size: textTheme.titleLarge?.fontSize,
-        color: theme.appBarTheme.foregroundColor,
-      ),
-      title: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  quickAction.getLocalisedLabel(appModel),
-                  style: TextStyle(fontSize: textTheme.bodyMedium?.fontSize),
-                ),
-                Text(
-                  quickAction.getLocalisedDescription(appModel),
-                  style: TextStyle(fontSize: textTheme.bodySmall?.fontSize),
-                ),
-              ],
+      child: ListTile(
+        leading: Icon(
+          quickAction.icon,
+          size: textTheme.titleLarge?.fontSize,
+          color: theme.appBarTheme.foregroundColor,
+        ),
+        title: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    quickAction.getLocalisedLabel(appModel),
+                    style: TextStyle(fontSize: textTheme.bodyMedium?.fontSize),
+                  ),
+                  Text(
+                    quickAction.getLocalisedDescription(appModel),
+                    style: TextStyle(fontSize: textTheme.bodySmall?.fontSize),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
+        onTap: () {
+          appModel.setQuickAction(
+            mapping: widget.mapping,
+            slotNumber: widget.slotNumber,
+            quickAction: quickAction,
+          );
+          Navigator.pop(context);
+        },
       ),
-      onTap: () {
-        appModel.setQuickAction(
-          mapping: widget.mapping,
-          slotNumber: widget.slotNumber,
-          quickAction: quickAction,
-        );
-        Navigator.pop(context);
-      },
     );
   }
 }

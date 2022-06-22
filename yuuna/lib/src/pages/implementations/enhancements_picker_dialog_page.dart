@@ -111,40 +111,43 @@ class _EnhancementsPickerDialogPage
   }
 
   Widget buildEnhancementTile(Enhancement enhancement) {
-    return ListTile(
+    return Material(
+      type: MaterialType.transparency,
       key: ValueKey(enhancement.uniqueKey),
-      leading: Icon(
-        enhancement.icon,
-        color: theme.appBarTheme.foregroundColor,
-      ),
-      title: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  enhancement.getLocalisedLabel(appModel),
-                  style: TextStyle(fontSize: textTheme.bodyMedium?.fontSize),
-                ),
-                Text(
-                  enhancement.getLocalisedDescription(appModel),
-                  style: TextStyle(fontSize: textTheme.bodySmall?.fontSize),
-                ),
-              ],
+      child: ListTile(
+        leading: Icon(
+          enhancement.icon,
+          color: theme.appBarTheme.foregroundColor,
+        ),
+        title: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    enhancement.getLocalisedLabel(appModel),
+                    style: TextStyle(fontSize: textTheme.bodyMedium?.fontSize),
+                  ),
+                  Text(
+                    enhancement.getLocalisedDescription(appModel),
+                    style: TextStyle(fontSize: textTheme.bodySmall?.fontSize),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
+        onTap: () {
+          appModel.setFieldEnhancement(
+            mapping: widget.mapping,
+            field: widget.field,
+            slotNumber: widget.slotNumber,
+            enhancement: enhancement,
+          );
+          Navigator.pop(context);
+        },
       ),
-      onTap: () {
-        appModel.setFieldEnhancement(
-          mapping: widget.mapping,
-          field: widget.field,
-          slotNumber: widget.slotNumber,
-          enhancement: enhancement,
-        );
-        Navigator.pop(context);
-      },
     );
   }
 }

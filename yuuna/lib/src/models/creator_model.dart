@@ -1,10 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:network_to_file_image/network_to_file_image.dart';
 import 'package:yuuna/creator.dart';
-import 'package:yuuna/media.dart';
 import 'package:yuuna/models.dart';
 
 /// A global [Provider] for the card creator.
@@ -15,64 +11,12 @@ final creatorProvider = ChangeNotifierProvider<CreatorModel>((ref) {
   return creatorModel;
 });
 
-/// A global [Provider] for state management of getting images for the
-/// card creator.
-final creatorImageProvider =
-    FutureProvider.family<NetworkToFileImage?, MediaItem?>((ref, seed) {
-  AppModel appModel = ref.read(appProvider);
+/// A global [Provider] for separately handling instant export.
+final instantExportProvider = ChangeNotifierProvider<CreatorModel>((ref) {
+  CreatorModel creatorModel = CreatorModel();
+  creatorModel.initialise();
 
-  if (seed == null) {
-    return null;
-  }
-
-  if (seed.fromEnhancement) {
-    Field field = fieldsByKey[seed.identifierType]!;
-    Enhancement enhancement =
-        appModel.enhancements[field]![seed.identifierKey]!;
-    Future<NetworkToFileImage?> image =
-        (enhancement as ImageGeneratorMixin).getImageFromSeed(seed);
-
-    return image;
-  } else if (seed.fromMedia) {
-    MediaType type = appModel.mediaTypes[seed.identifierType]!;
-    MediaSource source = appModel.mediaSources[type]![seed.identifierKey]!;
-    Future<NetworkToFileImage?> image =
-        (source as ImageGeneratorMixin).getImageFromSeed(seed);
-
-    return image;
-  } else {
-    throw Exception('Invalid media item category found');
-  }
-});
-
-/// A global [Provider] for state management of getting audio for the
-/// card creator.
-final creatorAudioProvider =
-    FutureProvider.family<File?, MediaItem?>((ref, seed) {
-  AppModel appModel = ref.read(appProvider);
-
-  if (seed == null) {
-    return null;
-  }
-
-  if (seed.fromEnhancement) {
-    Field field = fieldsByKey[seed.identifierType]!;
-    Enhancement enhancement =
-        appModel.enhancements[field]![seed.identifierKey]!;
-    Future<File?> audio =
-        (enhancement as AudioGeneratorMixin).getAudioFileFromSeed(seed);
-
-    return audio;
-  } else if (seed.fromMedia) {
-    MediaType type = appModel.mediaTypes[seed.identifierType]!;
-    MediaSource source = appModel.mediaSources[type]![seed.identifierKey]!;
-    Future<File?> audio =
-        (source as AudioGeneratorMixin).getAudioFileFromSeed(seed);
-
-    return audio;
-  } else {
-    throw Exception('Invalid media item category found');
-  }
+  return creatorModel;
 });
 
 /// A scoped model for parameters that affect the card creator. RiverPod is
@@ -93,40 +37,6 @@ class CreatorModel with ChangeNotifier {
 
   /// Refresh state for the Card Creator.
   void refresh() {
-    notifyListeners();
-  }
-
-  /// The current context at the top of the creator being highlighted for export.
-  /// The seed of the current image at the top of the creator being highlighted
-  /// for export.
-  MediaItem? get currentImageSeed => _currentImageSeed;
-  MediaItem? _currentImageSeed;
-
-  /// Set the current image seed.
-  set currentImageSeed(MediaItem? seed) {
-    _currentImageSeed = seed;
-    notifyListeners();
-  }
-
-  /// Seeds for images that may be selected to easily replace the
-  /// [currentImageSeed] that is currently highlighted for export.
-  List<MediaItem>? get currentImageSuggestionsSeeds =>
-      _currentImageSuggestionsSeeds;
-  List<MediaItem>? _currentImageSuggestionsSeeds;
-
-  /// Set the current image suggestions.
-  set currentImageSuggestionsSeeds(List<MediaItem>? seeds) {
-    _currentImageSuggestionsSeeds = seeds;
-    notifyListeners();
-  }
-
-  /// The current audio at the top of the creator being highlighted for export.
-  MediaItem? get currentAudioSeed => _currentAudioSeed;
-  MediaItem? _currentAudioSeed;
-
-  /// Set the current audio seed.
-  set currentAudioSeed(MediaItem? seed) {
-    _currentAudioSeed = seed;
     notifyListeners();
   }
 

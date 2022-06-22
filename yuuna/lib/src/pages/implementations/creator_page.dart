@@ -56,8 +56,6 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
   String get removeEnhancementLabel => appModel.translate('remove_enhancement');
   String get editActionsLabel => appModel.translate('edit_actions');
   String get backLabel => appModel.translate('back');
-  String get searchLabel => appModel.translate('search');
-  String get stashLabel => appModel.translate('stash');
   String get clearCreatorTitle => appModel.translate('clear_creator_title');
   String get clearCreatorDescription =>
       appModel.translate('clear_creator_description');
@@ -127,14 +125,15 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: onWillPop,
-      child: GestureDetector(
-        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-        child: Scaffold(
-          resizeToAvoidBottomInset: true,
-          appBar: buildAppBar(),
-          body: buildBody(),
-        ),
+        onWillPop: onWillPop,
+        child: GestureDetector(
+          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+          child: Scaffold(
+            resizeToAvoidBottomInset: true,
+            appBar: buildAppBar(),
+            body: buildBody(),
+          ),
+        
       ),
     );
   }
@@ -351,22 +350,22 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
   }
 
   Widget? buildBody() {
-    return Column(
+    return SafeArea(child:Column(
       children: [
         Expanded(child: buildPortraitFields()),
         if (widget.editEnhancements) buildEditFieldsButton(),
         if (widget.editEnhancements) buildEditActionsButton(),
         if (isCardEditing) buildExportButton(),
       ],
-    );
+    ),);
   }
 
   final ScrollController _scrollController = ScrollController();
 
   Widget buildPortraitFields() {
     return RawScrollbar(
-      thumbVisibility: true,
       thickness: 3,
+      thumbVisibility: true,
       controller: _scrollController,
       child: Padding(
         padding: Spacing.of(context).insets.horizontal.small,
@@ -766,23 +765,6 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       );
     }
   }
-
-  MaterialTextSelectionControls get selectionControls =>
-      JidoujishoTextSelectionControls(
-        searchAction: (searchTerm) => appModel.openRecursiveDictionarySearch(
-          searchTerm: searchTerm,
-          killOnPop: false,
-        ),
-        searchActionLabel: searchLabel,
-        stashAction: (searchTerm) {
-          appModel.addToStash(terms: [searchTerm]);
-        },
-        stashActionLabel: stashLabel,
-        allowCopy: true,
-        allowSelectAll: true,
-        allowCut: true,
-        allowPaste: true,
-      );
 
   Widget buildTextField({
     required AnkiMapping mapping,

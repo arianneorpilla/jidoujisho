@@ -81,6 +81,7 @@ class _HomePageState extends BasePageState<HomePage> {
         resizeToAvoidBottomInset: true,
         appBar: buildAppBar(),
         body: buildBody(),
+        bottomNavigationBar: buildBottomNavigationBar(),
       ),
     );
   }
@@ -114,6 +115,7 @@ class _HomePageState extends BasePageState<HomePage> {
   void switchTab(int index) async {
     if (index == currentHomeTabIndex) {
       MediaType mediaType = appModelNoUpdate.mediaTypes.values.toList()[index];
+      mediaType.floatingSearchBarController.close();
 
       if (mediaType.scrollController.hasClients) {
         if (mediaType.scrollController.offset > 5000) {

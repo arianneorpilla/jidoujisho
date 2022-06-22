@@ -56,7 +56,7 @@ class JapanesePod101AudioEnhancement extends AudioEnhancement {
       }
     }
 
-    audioField.performSearch(
+    await audioField.performSearch(
       appModel: appModel,
       creatorModel: creatorModel,
       searchTerm: searchTerm!,

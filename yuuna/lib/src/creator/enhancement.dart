@@ -77,8 +77,7 @@ abstract class Enhancement {
   /// Whether or not [initialise] has been called for this enhancement.
   bool _initialised = false;
 
-  /// This function is run at startup or when changing languages. It is not
-  /// called again if already run.
+  /// This function is run at startup. It is not called again if already run.
   Future<void> initialise() async {
     if (_initialised) {
       return;

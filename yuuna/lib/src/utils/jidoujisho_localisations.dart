@@ -24,8 +24,11 @@ class JidoujishoLocalisations {
     'see_more': 'See More',
     'show_menu': 'Show Menu',
     'stash': 'Stash',
+    'copy': 'Copy',
     'clear': 'Clear',
     'resume_last_media': 'Resume Last Media',
+    'change_source': 'Change Source',
+    'launch_source': 'Launch Source',
     'card_creator': 'Card Creator',
     'target_language': 'Target language',
     'show_options': 'Show Options',
@@ -46,6 +49,7 @@ class JidoujishoLocalisations {
     'dialog_select': 'SELECT',
     'dialog_stash': 'STASH',
     'dialog_search': 'SEARCH',
+    'dialog_exit': 'EXIT',
     'dialog_share': 'SHARE',
     'dialog_pop': 'POP',
     'dialog_save': 'SAVE',
@@ -217,5 +221,19 @@ class JidoujishoLocalisations {
     'audio_unavailable': 'No audio could be found.',
     'no_audio_enhancements': 'No audio enhancements are assigned.',
     'card_exported': 'Card exported to 『%deck%』.',
+    'info_incognito_on':
+        'Incognito mode on. Dictionary, media and search history will not be'
+            ' tracked.',
+    'info_incognito_off':
+        'Incognito mode off. Dictionary, media and search history will be'
+            ' tracked.',
+    'exit_media_title': 'Exit Media',
+    'exit_media_description':
+        'This will return you to the main menu. Are you sure?',
+    'unimplemented_source': 'Unimplemented source',
+    'clear_browser_title': 'Clear Browser Data',
+    'clear_browser_description':
+        'This will clear all browsing data used in media sources that use web'
+            ' content. Are you sure?'
   };
 }

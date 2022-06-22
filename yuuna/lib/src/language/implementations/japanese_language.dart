@@ -23,6 +23,7 @@ class JapaneseLanguage extends Language {
           isSpaceDelimited: false,
           textBaseline: TextBaseline.ideographic,
           prepareSearchResults: prepareSearchResultsJapaneseLanguage,
+          helloWorld: 'こんにちは世界',
         );
 
   /// Get the singleton instance of this language.
@@ -52,6 +53,10 @@ class JapaneseLanguage extends Language {
 
   @override
   FutureOr<String> getRootForm(String term) {
+    /// This function is supposed to just return the lemma for the starting
+    /// word of a sentence but it also attempts to repair some problems with
+    /// some search results.
+
     try {
       if (kanaKit.isRomaji(term)) {
         return kanaKit.toHiragana(term);
@@ -69,6 +74,10 @@ class JapaneseLanguage extends Language {
           termTokens[1].partOfSpeech == Pos.Postposition &&
           termTokens[2].partOfSpeech == Pos.Verb) {
         return '${termTokens[0]}${termTokens[1].word}${termTokens[2].lemma}';
+      }
+
+      if (termTokens.first.word!.length < termTokens.first.lemma!.length) {
+        return termTokens.first.lemma ?? termTokens.first.word!;
       }
 
       if (termTokens.first.word!.length == 1) {
@@ -269,6 +278,7 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
     DictionarySearchParams params) async {
   String searchTerm = params.searchTerm.trim();
   String fallbackTerm = params.fallbackTerm.trim();
+
   int maxEntries = 100;
   int limit = params.maximumDictionaryEntrySearchMatch;
 
@@ -501,6 +511,42 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
         maxExactMatchFallbackLength > maxExactMatchReadingLength;
   }
 
+  startsWithTermResults = database.dictionaryEntrys
+      .where()
+      .termStartsWith(searchTerm)
+      .sortByTermLength()
+      .thenByPopularityDesc()
+      .limit(limit)
+      .findAllSync();
+
+  if (searchTermStartsWithKana) {
+    startsWithReadingResults = database.dictionaryEntrys
+        .where()
+        .readingStartsWith(searchTerm)
+        .sortByTermLength()
+        .thenByPopularityDesc()
+        .limit(limit)
+        .findAllSync();
+  }
+
+  startsWithFallbackTermResults = database.dictionaryEntrys
+      .where()
+      .termStartsWith(fallbackTerm)
+      .sortByTermLength()
+      .thenByPopularityDesc()
+      .limit(limit)
+      .findAllSync();
+
+  if (fallbackTermStartsWithKana) {
+    startsWithFallbackReadingResults = database.dictionaryEntrys
+        .where()
+        .readingStartsWith(fallbackTerm)
+        .sortByTermLength()
+        .thenByPopularityDesc()
+        .limit(limit)
+        .findAllSync();
+  }
+
   if (exactTermResults.isNotEmpty &&
       (exactTermResults.first.term == searchTerm ||
           (kanaKit.isHiragana(searchTerm) &&
@@ -521,6 +567,8 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
             e.value.reading == searchTerm ||
             e.value.reading == kanaKit.toKatakana(searchTerm)));
   }
+
+  entries.addEntries(startsWithTermResults.map((e) => MapEntry(e.id, e)));
 
   if (fallbackTermResults.isNotEmpty &&
       (fallbackTermResults.first.term == fallbackTerm ||
@@ -553,72 +601,15 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
     }
   }
 
-  Map<DictionaryPair, List<DictionaryEntry>> beforeStartsWithEntries =
-      groupBy<DictionaryEntry, DictionaryPair>(
-    entries.values,
-    (entry) => DictionaryPair(term: entry.term, reading: entry.reading),
-  );
-
-  if (beforeStartsWithEntries.length <= params.maximumDictionaryTermsInResult) {
-    if (exactTermResults.isNotEmpty &&
-        exactTermResults.first.termLength == searchTerm.length &&
-        searchTerm.length > 1) {
-      startsWithTermResults = database.dictionaryEntrys
-          .where()
-          .termStartsWith(searchTerm)
-          .limit(limit)
-          .findAllSync();
-    }
-
-    if (searchTermStartsWithKana) {
-      if (exactReadingResults.isNotEmpty &&
-          exactReadingResults.first.readingLength == searchTerm.length &&
-          searchTerm.length > 1) {
-        startsWithReadingResults = database.dictionaryEntrys
-            .where()
-            .readingStartsWith(searchTerm)
-            .limit(limit)
-            .findAllSync();
-      }
-    }
-  }
-
-  if (beforeStartsWithEntries.length <= params.maximumDictionaryTermsInResult) {
-    if (exactTermResults.isNotEmpty &&
-        exactTermResults.first.termLength == fallbackTerm.length &&
-        fallbackTerm.length > 1) {
-      startsWithFallbackTermResults = database.dictionaryEntrys
-          .where()
-          .termStartsWith(fallbackTerm)
-          .limit(limit)
-          .findAllSync();
-    }
-
-    if (fallbackTermStartsWithKana) {
-      if (exactReadingResults.isNotEmpty &&
-          exactReadingResults.first.readingLength == fallbackTerm.length &&
-          fallbackTerm.length > 1) {
-        startsWithFallbackReadingResults = database.dictionaryEntrys
-            .where()
-            .readingStartsWith(fallbackTerm)
-            .limit(limit)
-            .findAllSync();
-      }
-    }
-  }
-
   if (fallbackTermLessDesperateThanLongestExactTermPrefix) {
-    entries.addEntries(fallbackTermResults.map((e) => MapEntry(e.id, e)));
     entries.addEntries(
         startsWithFallbackTermResults.map((e) => MapEntry(e.id, e)));
+    entries.addEntries(fallbackTermResults.map((e) => MapEntry(e.id, e)));
     entries.addEntries(exactTermResults.map((e) => MapEntry(e.id, e)));
-    entries.addEntries(startsWithTermResults.map((e) => MapEntry(e.id, e)));
   } else {
     entries.addEntries(exactTermResults.map((e) => MapEntry(e.id, e)));
     entries.addEntries(startsWithTermResults.map((e) => MapEntry(e.id, e)));
     entries.addEntries(fallbackTermResults.map((e) => MapEntry(e.id, e)));
-    entries.addEntries(
-        startsWithFallbackTermResults.map((e) => MapEntry(e.id, e)));
   }
 
   if (fallbackTermLessDesperateThanLongestExactReadingPrefix) {

@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -22,6 +23,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:restart_app/restart_app.dart';
 import 'package:spaces/spaces.dart';
+import 'package:wakelock/wakelock.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/language.dart';
@@ -238,6 +240,32 @@ class AppModel with ChangeNotifier {
   bool get isCreatorOpen => _isCreatorOpen;
   bool _isCreatorOpen = false;
 
+  /// Used to check whether or not the app is currently using a media source.
+  bool get isMediaOpen => _currentMediaSource != null;
+
+  /// Current active media source.
+  MediaSource? get currentMediaSource => _currentMediaSource;
+  MediaSource? _currentMediaSource;
+
+  /// Get the sentence to be used by the [SentenceField] upon card creation.
+  String getCurrentSentence() {
+    if (_currentMediaSource == null) {
+      return '';
+    } else {
+      return _currentMediaSource!.currentSentence;
+    }
+  }
+
+  /// Get the current media item for use in tracking history and generating
+  /// media for card creation based on media progress.
+  MediaItem? getCurrentMediaItem() {
+    if (_currentMediaSource == null) {
+      return null;
+    } else {
+      return _currentMediaSource!.currentMediaItem;
+    }
+  }
+
   /// Change this once a field hide/show system is in place.
   List<Field> get activeFields => [
         ...lastSelectedMapping.getCreatorFields(),
@@ -304,6 +332,9 @@ class AppModel with ChangeNotifier {
     /// A list of media types that the app will support at runtime.
     final List<MediaType> availableMediaTypes = List<MediaType>.unmodifiable(
       [
+        PlayerMediaType.instance,
+        ReaderMediaType.instance,
+        ViewerMediaType.instance,
         DictionaryMediaType.instance,
       ],
     );
@@ -321,9 +352,18 @@ class AppModel with ChangeNotifier {
   void populateMediaSources() async {
     /// A list of media sources that the app will support at runtime.
     final Map<MediaType, List<MediaSource>> availableMediaSources = {
-      PlayerMediaType.instance: [],
-      ReaderMediaType.instance: [],
-      ViewerMediaType.instance: [],
+      PlayerMediaType.instance: [
+        PlayerLocalMediaSource.instance,
+        PlayerYoutubeSource.instance,
+        PlayerNetworkStreamSource.instance
+      ],
+      ReaderMediaType.instance: [
+        ReaderTtuSource.instance,
+      ],
+      ViewerMediaType.instance: [
+        ViewerMangaReaderSource.instance,
+        ViewerCameraSource.instance,
+      ],
       DictionaryMediaType.instance: [],
     };
 
@@ -565,11 +605,27 @@ class AppModel with ChangeNotifier {
     /// [Language.initialise] for more details.
     await targetLanguage.initialise();
 
-    /// Ready the progress and duration persistent stores of all [MediaType]
-    /// histories at startup.
-    for (MediaType mediaType in mediaTypes.values) {
-      await mediaType.initialise();
+    /// Ready all enhancements sources for use.
+    for (Field field in globalFields) {
+      for (Enhancement enhancement in enhancements[field]!.values) {
+        await enhancement.initialise();
+      }
     }
+
+    /// Ready all quick actions for use.
+    for (QuickAction action in quickActions.values) {
+      await action.initialise();
+    }
+
+    /// Ready all media sources for use.
+    for (MediaType type in mediaTypes.values) {
+      for (MediaSource source in mediaSources[type]!.values) {
+        await source.initialise();
+      }
+    }
+
+    /// Attempt a search and pre-load the database.
+    searchDictionary(targetLanguage.helloWorld);
   }
 
   /// Get whether or not the current theme is dark mode.
@@ -598,6 +654,14 @@ class AppModel with ChangeNotifier {
   void toggleIncognitoMode() async {
     await _preferences.put('is_incognito_mode', !isIncognitoMode);
     incognitoNotifier.notifyListeners();
+
+    String toastMessage =
+        translate(isIncognitoMode ? 'info_incognito_on' : 'info_incognito_off');
+    Fluttertoast.showToast(
+      msg: toastMessage,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+    );
   }
 
   /// Get the target language from persisted preferences.
@@ -1233,9 +1297,6 @@ class AppModel with ChangeNotifier {
           await methodChannel.invokeMethod('getDecks');
       List<String> decks = result.values.toList().cast<String>();
 
-      /// Don't include any filtered decks.
-      decks.remove('Custom study session');
-
       decks.sort((a, b) => a.compareTo(b));
       return decks;
     } catch (e) {
@@ -1557,6 +1618,30 @@ class AppModel with ChangeNotifier {
     _isCreatorOpen = false;
   }
 
+  /// A helper function for launching a media source.
+  Future<void> openMedia({
+    required WidgetRef ref,
+    required MediaSource mediaSource,
+    MediaItem? item,
+  }) async {
+    _currentMediaSource = mediaSource;
+    await Wakelock.enable();
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
+    await Navigator.push(
+      _navigatorKey.currentContext!,
+      MaterialPageRoute(
+        builder: (context) => mediaSource.buildLaunchWidget(item: item),
+      ),
+    );
+
+    mediaSource.clearCurrentMediaValues();
+
+    _currentMediaSource = null;
+    await Wakelock.disable();
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  }
+
   /// A helper function for opening the creator from any page in the
   /// application for editing enhancements.
   Future<void> openCreatorEnhancementsEditor() async {
@@ -1652,8 +1737,8 @@ class AppModel with ChangeNotifier {
   /// A helper function for opening a text segmentation dialog.
   Future<void> openTextSegmentationDialog({
     required String sourceText,
-    required Function(String, List<String>) onSelect,
-    required Function(String, List<String>) onSearch,
+    Function(String, List<String>)? onSelect,
+    Function(String, List<String>)? onSearch,
   }) async {
     if (sourceText.trim().isEmpty) {
       return;
@@ -2020,6 +2105,10 @@ class AppModel with ChangeNotifier {
   Future<void> addToDictionaryHistory({
     required DictionaryResult result,
   }) async {
+    if (result.terms.isEmpty || result.searchTerm.isEmpty) {
+      return;
+    }
+
     UpdateDictionaryHistoryParams params = UpdateDictionaryHistoryParams(
       result: result,
       maximumDictionaryHistoryItems: maximumDictionaryHistoryItems,
@@ -2286,5 +2375,40 @@ class AppModel with ChangeNotifier {
 
     _metaTagsCache[dictionaryTerm]![metaEntry] = widget;
     return widget;
+  }
+
+  /// For a given [MediaType], return the selected media source. If there is
+  /// no persisted media source, use the first source in the list.
+  MediaSource getCurrentSourceForMediaType({
+    required MediaType mediaType,
+  }) {
+    MediaSource fallbackSource = mediaSources[mediaType]!.values.first;
+    String uniqueKey = _preferences.get('current_source/${mediaType.uniqueKey}',
+        defaultValue: fallbackSource.uniqueKey);
+
+    return mediaSources[mediaType]![uniqueKey] ?? fallbackSource;
+  }
+
+  /// For a given [MediaType], set the selected media source.
+  void setCurrentSourceForMediaType({
+    required MediaType mediaType,
+    required MediaSource mediaSource,
+  }) {
+    _preferences.put(
+        'current_source/${mediaType.uniqueKey}', mediaSource.uniqueKey);
+  }
+
+  /// Clear browsing data used in WebViews.
+  Future<void> clearBrowserData() async {
+    HeadlessInAppWebView webView = HeadlessInAppWebView(
+      initialUrlRequest: URLRequest(
+        url: Uri.parse('https://github.com/lrorpilla/jidoujisho'),
+      ),
+      initialOptions: InAppWebViewGroupOptions(
+        crossPlatform: InAppWebViewOptions(clearCache: true),
+      ),
+    );
+
+    await webView.run();
   }
 }

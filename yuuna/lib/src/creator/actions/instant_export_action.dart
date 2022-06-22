@@ -29,6 +29,49 @@ class InstantExportAction extends QuickAction {
     required DictionaryTerm dictionaryTerm,
     required List<DictionaryMetaEntry> metaEntries,
   }) async {
-    debugPrint('todo');
+    CreatorModel creatorModel = ref.read(instantExportProvider);
+
+    Map<Field, String> newTextFields = {};
+    for (Field field in appModel.activeFields) {
+      String? newTextField = field.onCreatorOpenAction(
+        context: context,
+        ref: ref,
+        appModel: appModel,
+        creatorModel: creatorModel,
+        dictionaryTerm: dictionaryTerm,
+        metaEntries: metaEntries,
+        creatorJustLaunched: false,
+      );
+
+      if (newTextField != null) {
+        newTextFields[field] = newTextField;
+      }
+    }
+
+    creatorModel.copyContext(
+      CreatorFieldValues(textValues: newTextFields),
+    );
+
+    for (Field field in appModel.activeFields) {
+      Enhancement? enhancement = appModel.lastSelectedMapping
+          .getAutoFieldEnhancement(appModel: appModel, field: field);
+
+      if (enhancement != null) {
+        await enhancement.enhanceCreatorParams(
+          context: context,
+          ref: ref,
+          appModel: appModel,
+          creatorModel: creatorModel,
+          cause: EnhancementTriggerCause.auto,
+        );
+      }
+    }
+
+    await appModel.addNote(
+      creatorFieldValues: creatorModel.getExportDetails(ref),
+      mapping: appModel.lastSelectedMapping,
+      deck: appModel.lastSelectedDeckName,
+    );
+    creatorModel.clearAll();
   }
 }

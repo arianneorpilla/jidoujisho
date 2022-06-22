@@ -66,8 +66,8 @@ class _TextSegmentationDialogPage
     return SizedBox(
       width: double.maxFinite,
       child: RawScrollbar(
-        thumbVisibility: true,
         thickness: 3,
+        thumbVisibility: true,
         controller: _scrollController,
         child: SingleChildScrollView(
           controller: _scrollController,
@@ -196,7 +196,6 @@ class _TextSegmentationDialogPage
   }
 
   void executeSelect() {
-    Navigator.pop(context);
     if (selection.isEmpty) {
       widget.onSelect?.call(widget.sourceText, selectedItems);
     } else {

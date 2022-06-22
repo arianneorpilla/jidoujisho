@@ -32,7 +32,6 @@ class _RecursiveDictionaryPageState
     extends BasePageState<RecursiveDictionaryPage> {
   String get backLabel => appModel.translate('back');
   String get dictionariesLabel => appModel.translate('dictionaries');
-  String get searchLabel => appModel.translate('search');
   String get searchEllipsisLabel => appModel.translate('search_ellipsis');
   String get noDictionariesLabel =>
       appModel.translate('dictionaries_menu_empty');
@@ -138,6 +137,7 @@ class _RecursiveDictionaryPageState
   }
 
   Duration get searchDelay => const Duration(milliseconds: 50);
+  Duration get historyDelay => const Duration(milliseconds: 1000);
 
   void onQueryChanged(String query) async {
     Future.delayed(searchDelay, () {
@@ -158,13 +158,17 @@ class _RecursiveDictionaryPageState
       if (_result != null) {
         if (_result!.searchTerm == _controller.query) {
           if (!appModel.isIncognitoMode) {
-            appModel.addToSearchHistory(
-              historyKey: DictionaryMediaType.instance.uniqueKey,
-              searchTerm: _controller.query,
-            );
-            if (_result!.terms.isNotEmpty) {
-              await appModel.addToDictionaryHistory(result: _result!);
-            }
+            Future.delayed(historyDelay, () async {
+              if (_result!.searchTerm == _controller.query) {
+                appModel.addToSearchHistory(
+                  historyKey: DictionaryMediaType.instance.uniqueKey,
+                  searchTerm: _controller.query,
+                );
+                if (_result!.terms.isNotEmpty) {
+                  await appModel.addToDictionaryHistory(result: _result!);
+                }
+              }
+            });
           }
 
           setState(() {
@@ -224,7 +228,7 @@ class _RecursiveDictionaryPageState
       child: JidoujishoIconButton(
         size: textTheme.titleLarge?.fontSize,
         tooltip: clearLabel,
-        icon: Icons.delete_sweep,
+        icon: Icons.manage_search,
         onTap: showDeleteSearchHistoryPrompt,
       ),
     );
@@ -326,7 +330,6 @@ class _RecursiveDictionaryPageState
         onSearch: onSearch,
         onStash: onStash,
         result: _result!,
-        getCurrentSearchTerm: () => _controller.query,
       ),
     );
   }

@@ -18,7 +18,7 @@ class ShareAction extends QuickAction {
 
   /// Used to identify this enhancement and to allow a constant value for the
   /// default mappings value of [AnkiMapping].
-  static const String key = 'instant_export';
+  static const String key = 'share';
 
   @override
   Future<void> executeAction({

@@ -14,6 +14,7 @@ class EnglishLanguage extends Language {
           textDirection: TextDirection.ltr,
           isSpaceDelimited: true,
           textBaseline: TextBaseline.alphabetic,
+          helloWorld: 'Hello world',
         );
 
   /// Get the singleton instance of this media type.

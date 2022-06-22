@@ -4,7 +4,6 @@ import 'package:spaces/spaces.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
-import 'package:yuuna/utils.dart';
 
 /// Returns the main body of the [HomeDictionaryPage] before the search bar
 /// is opened.
@@ -28,25 +27,11 @@ class DictionaryHistoryPage extends BasePage {
 }
 
 class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
-  String get searchLabel => appModel.translate('search');
-  String get stashLabel => appModel.translate('stash');
   String get searchLabelBefore => appModel.translate('search_label_before');
   String get searchLabelMiddle => appModel.translate('search_label_middle');
   String get searchLabelFrom => appModel.translate('search_label_from');
   String get searchLabelAfter => appModel.translate('search_label_after');
   String get seeMoreLabel => appModel.translate('see_more');
-
-  MaterialTextSelectionControls get selectionControls =>
-      JidoujishoTextSelectionControls(
-        searchAction: widget.onSearch,
-        searchActionLabel: searchLabel,
-        stashAction: widget.onStash,
-        stashActionLabel: stashLabel,
-        allowCopy: true,
-        allowSelectAll: true,
-        allowCut: false,
-        allowPaste: false,
-      );
 
   late Map<String, Dictionary>? dictionaryMap;
   Map<int, Map<int, List<DictionaryMetaEntry>>> metaEntriesCache = {};

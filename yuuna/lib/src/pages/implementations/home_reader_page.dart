@@ -13,7 +13,4 @@ class HomeReaderPage extends BaseTabPage {
 class _HomeReaderPageState<T extends BaseTabPage> extends BaseTabPageState {
   @override
   MediaType get mediaType => ReaderMediaType.instance;
-
-  @override
-  bool get shouldPlaceholderBeShown => true;
 }

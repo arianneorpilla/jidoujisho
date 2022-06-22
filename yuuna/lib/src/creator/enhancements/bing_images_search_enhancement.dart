@@ -11,6 +11,7 @@ import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
 import 'package:html/parser.dart' as parser;
 import 'package:html/dom.dart' as dom;
+import 'package:http/http.dart' as http;
 
 /// An enhancement used effectively as a shortcut for clearing the contents
 /// of a [CreatorModel] pertaining to a certain field.
@@ -55,7 +56,7 @@ class BingImagesSearchEnhancement extends ImageEnhancement {
       }
     }
 
-    imageField.performSearch(
+    await imageField.performSearch(
       appModel: appModel,
       creatorModel: creatorModel,
       searchTerm: searchTerm!,
@@ -109,6 +110,12 @@ class BingImagesSearchEnhancement extends ImageEnhancement {
             String imagePath = '${imageDir.path}/$i';
             File imageFile = File(imagePath);
 
+            /// Instant export requires a file to already be written to the
+            /// file system.
+            if (i == 0) {
+              http.Response response = await http.get(Uri.parse(imageURL));
+              File(imagePath).writeAsBytesSync(response.bodyBytes);
+            }
             NetworkToFileImage image = NetworkToFileImage(
               url: imageURL,
               file: imageFile,

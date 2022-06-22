@@ -13,7 +13,4 @@ class HomeViewerPage extends BaseTabPage {
 class _HomeViewerPageState<T extends BaseTabPage> extends BaseTabPageState {
   @override
   MediaType get mediaType => ViewerMediaType.instance;
-
-  @override
-  bool get shouldPlaceholderBeShown => true;
 }

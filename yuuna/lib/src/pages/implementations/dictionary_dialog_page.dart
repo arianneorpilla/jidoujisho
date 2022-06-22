@@ -85,8 +85,8 @@ class _DictionaryDialogPageState extends BasePageState {
     return SizedBox(
       width: double.maxFinite,
       child: RawScrollbar(
-        thumbVisibility: true,
         thickness: 3,
+        thumbVisibility: true,
         controller: contentController,
         child: SingleChildScrollView(
           controller: contentController,
@@ -122,6 +122,8 @@ class _DictionaryDialogPageState extends BasePageState {
 
   Widget buildDictionaryList(List<Dictionary> dictionaries) {
     return RawScrollbar(
+      thickness: 3,
+      thumbVisibility: true,
       controller: _scrollController,
       child: ReorderableColumn(
         scrollController: _scrollController,
@@ -178,8 +180,10 @@ class _DictionaryDialogPageState extends BasePageState {
     DictionaryFormat dictionaryFormat =
         appModel.dictionaryFormats[dictionary.formatName]!;
 
-    return ListTile(
-        key: ValueKey(dictionary.dictionaryName),
+    return Material(
+      type: MaterialType.transparency,
+      key: ValueKey(dictionary.dictionaryName),
+      child: ListTile(
         selected: _selectedOrder == dictionary.order,
         leading: getIcon(
           dictionary: dictionary,
@@ -218,7 +222,9 @@ class _DictionaryDialogPageState extends BasePageState {
         ),
         onTap: () {
           updateSelectedOrder(dictionary.order);
-        });
+        },
+      ),
+    );
   }
 
   Widget buildDictionaryTileTrailing(Dictionary dictionary) {

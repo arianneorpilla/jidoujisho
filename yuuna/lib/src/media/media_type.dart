@@ -1,9 +1,10 @@
 import 'package:flutter/widgets.dart';
+import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 
 /// A type of media that is significantly distinguishable from other media such
 /// that it is deserving of its own core functionality when viewing media items.
 /// A [MediaType] has its own history and home tab.
-abstract class MediaType {
+abstract class MediaType with ChangeNotifier {
   /// Initialise this media type with the predetermined and hardset values.
   MediaType({
     required this.uniqueKey,
@@ -30,23 +31,16 @@ abstract class MediaType {
   /// enough media items to display that require the tab to be scrollable.
   ScrollController scrollController = ScrollController();
 
-  /// Closes the search bar if on when the tab is tapped on.
-  ChangeNotifier tabTappedNotifier = ChangeNotifier();
+  /// The floating search bar controller for this media type's tab page.
+  final FloatingSearchBarController floatingSearchBarController =
+      FloatingSearchBarController();
 
-  /// Used to open database instances for storing progress and duration
-  /// respectively.
-  /// String get _historyKey => '$uniqueKey-history';
+  /// Used to notify the media type tab to refresh.
+  final ChangeNotifier tabRefreshNotifier = ChangeNotifier();
 
-  /// Whether or not [initialise] has been called for the media  type.
-  bool _initialised = false;
-
-  /// This function is run at startup. It is not called again if already run.
-  Future<void> initialise() async {
-    if (_initialised) {
-      return;
-    } else {
-      _initialised = true;
-    }
+  /// Use this to refresh a media type's tab page on the main menu.
+  void refreshTab() {
+    tabRefreshNotifier.notifyListeners();
   }
 
   @override

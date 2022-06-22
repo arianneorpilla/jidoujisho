@@ -144,8 +144,8 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
     List<AnkiMapping> mappings = appModel.mappings;
 
     return RawScrollbar(
-      thumbVisibility: true,
       thickness: 3,
+      thumbVisibility: true,
       controller: _scrollController,
       child: ReorderableColumn(
         scrollController: _scrollController,
@@ -181,39 +181,43 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
   }
 
   Widget buildMappingTile(AnkiMapping mapping) {
-    return ListTile(
+    return Material(
+      type: MaterialType.transparency,
       key: ValueKey(mapping.label),
-      selected: appModel.lastSelectedMapping.label == mapping.label,
-      leading: const Icon(Icons.account_box),
-      title: Row(
-        children: [
-          Expanded(
-            child: Column(
-              children: [
-                JidoujishoMarquee(
-                  text: mapping.label,
-                  style: TextStyle(fontSize: textTheme.bodyMedium?.fontSize),
-                ),
-                JidoujishoMarquee(
-                  text: mapping.model,
-                  style: TextStyle(fontSize: textTheme.bodySmall?.fontSize),
-                ),
-              ],
+      child: ListTile(
+        selected: appModel.lastSelectedMapping.label == mapping.label,
+        leading: const Icon(Icons.account_box),
+        title: Row(
+          children: [
+            Expanded(
+              child: Column(
+                children: [
+                  JidoujishoMarquee(
+                    text: mapping.label,
+                    style: TextStyle(fontSize: textTheme.bodyMedium?.fontSize),
+                  ),
+                  JidoujishoMarquee(
+                    text: mapping.model,
+                    style: TextStyle(fontSize: textTheme.bodySmall?.fontSize),
+                  ),
+                ],
+              ),
             ),
-          ),
-          if (_selectedOrder == mapping.order) const Space.normal(),
-          if (_selectedOrder == mapping.order) buildMappingTileTrailing(mapping)
-        ],
-      ),
-      onTap: () async {
-        appModel.setLastSelectedMapping(mapping);
-        updateSelectedOrder(mapping.order);
+            if (_selectedOrder == mapping.order) const Space.normal(),
+            if (_selectedOrder == mapping.order)
+              buildMappingTileTrailing(mapping)
+          ],
+        ),
+        onTap: () async {
+          appModel.setLastSelectedMapping(mapping);
+          updateSelectedOrder(mapping.order);
 
-        await appModel.validateSelectedMapping(
-          context: context,
-          mapping: mapping,
-        );
-      },
+          await appModel.validateSelectedMapping(
+            context: context,
+            mapping: mapping,
+          );
+        },
+      ),
     );
   }
 
@@ -374,6 +378,8 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
     return SizedBox(
       width: double.maxFinite,
       child: RawScrollbar(
+        thickness: 3,
+        thumbVisibility: true,
         controller: contentController,
         child: SingleChildScrollView(
           controller: contentController,

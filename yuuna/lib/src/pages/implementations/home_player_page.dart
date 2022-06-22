@@ -13,7 +13,4 @@ class HomePlayerPage extends BaseTabPage {
 class _HomePlayerPageState<T extends BaseTabPage> extends BaseTabPageState {
   @override
   MediaType get mediaType => PlayerMediaType.instance;
-
-  @override
-  bool get shouldPlaceholderBeShown => true;
 }

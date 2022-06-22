@@ -49,6 +49,7 @@ class TextSegmentationEnhancement extends Enhancement {
       },
       onSelect: (selection, items) {
         creatorModel.getFieldController(TermField.instance).text = selection;
+        Navigator.pop(context);
       },
     );
   }

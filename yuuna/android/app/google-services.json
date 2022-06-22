@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "63545661380",
+    "project_id": "jidoujisho",
+    "storage_bucket": "jidoujisho.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:63545661380:android:605d73f01b5d7a8df9f691",
+        "android_client_info": {
+          "package_name": "app.lrorpilla.jidoujisho"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "63545661380-ln7em14k3jfkalhh7rtndrff4hap65co.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBaVvWVIynV1bA6KLCEnch2Vwrg7kfGGfA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "63545661380-ln7em14k3jfkalhh7rtndrff4hap65co.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:63545661380:android:0ba37ef6a2ffb903f9f691",
+        "android_client_info": {
+          "package_name": "app.lrorpilla.yuuna"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "63545661380-ln7em14k3jfkalhh7rtndrff4hap65co.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBaVvWVIynV1bA6KLCEnch2Vwrg7kfGGfA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "63545661380-ln7em14k3jfkalhh7rtndrff4hap65co.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

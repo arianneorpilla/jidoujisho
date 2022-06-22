@@ -10,6 +10,7 @@ environment:
 
 dependencies:
   audio_session: ^0.1.6+1
+  cached_network_image: ^3.2.1
   change_notifier_builder: ^1.1.2
   characters: ^1.2.0
   clipboard: ^0.1.3
@@ -18,6 +19,7 @@ dependencies:
   external_app_launcher: ^2.0.2
   external_path: ^1.0.1
   file_picker: ^4.5.1
+  firebase_crashlytics: ^2.8.1
   float_column: ^1.2.1
   flutter:
     sdk: flutter
@@ -31,6 +33,7 @@ dependencies:
   flutter_riverpod: ^1.0.4
   flutter_screenutil: ^5.3.1
   fluttertoast: ^8.0.9
+  font_awesome_flutter: ^10.1.0
   hive: ^2.0.6
   hive_flutter: ^1.1.0
   html: ^0.15.0
@@ -44,6 +47,7 @@ dependencies:
   json_serializable: ^6.1.5
   just_audio: ^0.9.21
   kana_kit: ^2.0.0
+  local_assets_server: ^2.0.2+12
   marquee: ^2.2.2
   material_floating_search_bar: 
     git:
@@ -70,11 +74,14 @@ dependencies:
       ref: master
   tabbed_view: ^1.12.0
   transparent_image: ^2.0.0
+  twitter_api_v2: ^2.4.2
+  twitter_login: ^4.2.3
   url_launcher: ^6.0.20
   ve_dart:
     git:
       url: https://github.com/lrorpilla/ve_dart
       ref: c366bb1ae24f6fad4f5c7e3a1efad5f2b8122e58
+  wakelock: ^0.6.1+2
 
 dependency_overrides:
   fading_edge_scrollview:
@@ -104,3 +111,15 @@ flutter:
   assets:
     - assets/meta/
     - assets/language/japanese/ipadic/
+    - assets/ttu-ebook-reader/
+    - assets/ttu-ebook-reader/_app/
+    - assets/ttu-ebook-reader/_app/immutable/
+    - assets/ttu-ebook-reader/_app/immutable/assets/
+    - assets/ttu-ebook-reader/_app/immutable/assets/pages/
+    - assets/ttu-ebook-reader/_app/immutable/assets/pages/b/
+    - assets/ttu-ebook-reader/_app/immutable/chunks/
+    - assets/ttu-ebook-reader/_app/immutable/pages/
+    - assets/ttu-ebook-reader/_app/immutable/pages/b/
+    - assets/ttu-ebook-reader/_app/immutable/pages/manage/
+    - assets/ttu-ebook-reader/_app/immutable/pages/settings/
+    - assets/ttu-ebook-reader/icons/

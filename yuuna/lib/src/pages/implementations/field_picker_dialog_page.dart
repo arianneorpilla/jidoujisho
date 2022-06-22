@@ -102,39 +102,42 @@ class _FieldPickerDialogPageState extends BasePageState<FieldPickerDialogPage> {
   }
 
   Widget buildFieldTile(Field field) {
-    return ListTile(
+    return Material(
+      type: MaterialType.transparency,
       key: ValueKey(field.uniqueKey),
-      leading: Icon(
-        field.icon,
-        color: theme.appBarTheme.foregroundColor,
-      ),
-      title: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  field.getLocalisedLabel(appModel),
-                  style: TextStyle(fontSize: textTheme.bodyMedium?.fontSize),
-                ),
-                Text(
-                  field.getLocalisedDescription(appModel),
-                  style: TextStyle(fontSize: textTheme.bodySmall?.fontSize),
-                ),
-              ],
+      child: ListTile(
+        leading: Icon(
+          field.icon,
+          color: theme.appBarTheme.foregroundColor,
+        ),
+        title: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    field.getLocalisedLabel(appModel),
+                    style: TextStyle(fontSize: textTheme.bodyMedium?.fontSize),
+                  ),
+                  Text(
+                    field.getLocalisedDescription(appModel),
+                    style: TextStyle(fontSize: textTheme.bodySmall?.fontSize),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
+        onTap: () {
+          appModel.setField(
+            mapping: widget.mapping,
+            field: field,
+            isCollapsed: widget.isCollapsed,
+          );
+          Navigator.pop(context);
+        },
       ),
-      onTap: () {
-        appModel.setField(
-          mapping: widget.mapping,
-          field: field,
-          isCollapsed: widget.isCollapsed,
-        );
-        Navigator.pop(context);
-      },
     );
   }
 }

@@ -19,6 +19,7 @@ abstract class Language {
     required this.preferVerticalReading,
     required this.isSpaceDelimited,
     required this.textBaseline,
+    required this.helloWorld,
     this.prepareSearchResults = prepareSearchResultsStandard,
   });
 
@@ -55,6 +56,10 @@ abstract class Language {
   /// If this language uses an alphabetic or ideographic text baseline.
   final TextBaseline textBaseline;
 
+  /// Testing text for the language's basic use. This is useful for testing
+  /// and pre-loading the database for use.
+  final String helloWorld;
+
   /// Overrides the base search function and implements search specific to
   /// a language.
   final Future<List<DictionaryTerm>> Function(DictionarySearchParams params)?
@@ -87,6 +92,31 @@ abstract class Language {
   /// Prepare text segmentation tools and other dependencies necessary for this
   /// langauge to function.
   Future<void> prepareResources();
+
+  /// Given paragraph text and an index, yield the part of the text such that
+  /// the result is a sentence. Different languages may decide to use different
+  /// delimiters.
+  String getSentenceFromParagraph({
+    required String paragraph,
+    required int index,
+  }) {
+    RegExp regex = RegExp(r'.{1,}?([。.」?？!！]+|\n)');
+
+    Iterable<Match> matches = regex.allMatches(paragraph);
+    int currentIndex = 0;
+    late String sentenceToReturn;
+
+    for (Match match in matches) {
+      sentenceToReturn = match.group(0) ?? '';
+
+      currentIndex += sentenceToReturn.length;
+      if (currentIndex > index) {
+        break;
+      }
+    }
+
+    return sentenceToReturn.trim();
+  }
 
   /// Given unsegmented [text], perform text segmentation particular to the
   /// language and return a list of parsed words.
