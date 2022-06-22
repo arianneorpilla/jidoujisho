@@ -12,17 +12,27 @@ class HistoryPlayerPage extends BaseHistoryPage {
 
   @override
   BaseHistoryPageState<BaseHistoryPage> createState() =>
-      _HistoryPlayerPageState();
+      HistoryPlayerPageState();
 }
 
 /// A base class for providing all tabs in the main menu. In large part, this
 /// was implemented to define shortcuts for common lengthy methods across UI
 /// code.
-class _HistoryPlayerPageState<T extends BaseHistoryPage>
+class HistoryPlayerPageState<T extends BaseHistoryPage>
     extends BaseHistoryPageState {
   /// This variable is true when the [buildPlaceholder] should be shown.
   /// For example, if a certain media type does not have any media items to
   /// show in its history.
+
+  /// Each tab in the home page represents a media type.
+  @override
+  MediaType get mediaType => PlayerMediaType.instance;
+
+  /// Get the active media source for the current media type.
+  @override
+  MediaSource get mediaSource =>
+      appModel.getCurrentSourceForMediaType(mediaType: mediaType);
+
   @override
   bool get shouldPlaceholderBeShown => true;
 
@@ -33,16 +43,18 @@ class _HistoryPlayerPageState<T extends BaseHistoryPage>
 
   @override
   Widget build(BuildContext context) {
+    List<MediaItem> items = appModel.getMediaTypeHistory(mediaType: mediaType);
+
     if (shouldPlaceholderBeShown) {
       return buildPlaceholder();
     } else {
-      return buildHistory();
+      return buildHistory(items);
     }
   }
 
   /// This is shown as the body when [shouldPlaceholderBeShown] is false.
   @override
-  Widget buildHistory() {
+  Widget buildHistory(List<MediaItem> items) {
     return Container();
   }
 }

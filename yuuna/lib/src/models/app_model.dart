@@ -1620,6 +1620,7 @@ class AppModel with ChangeNotifier {
 
   /// A helper function for launching a media source.
   Future<void> openMedia({
+    required BuildContext context,
     required WidgetRef ref,
     required MediaSource mediaSource,
     MediaItem? item,
@@ -1631,7 +1632,7 @@ class AppModel with ChangeNotifier {
     await Navigator.push(
       _navigatorKey.currentContext!,
       MaterialPageRoute(
-        builder: (context) => mediaSource.buildLaunchWidget(item: item),
+        builder: (context) => mediaSource.buildLaunchPage(item: item),
       ),
     );
 
@@ -1640,6 +1641,9 @@ class AppModel with ChangeNotifier {
     _currentMediaSource = null;
     await Wakelock.disable();
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
+    mediaSource.mediaType.refreshTab();
+    mediaSource.onSourceExit(context: context, ref: ref);
   }
 
   /// A helper function for opening the creator from any page in the
@@ -2410,5 +2414,22 @@ class AppModel with ChangeNotifier {
     );
 
     await webView.run();
+    await webView.dispose();
+  }
+
+  /// Get the history of [MediaItem] for a particular [MediaType].
+  List<MediaItem> getMediaTypeHistory({required MediaType mediaType}) {
+    return _database.mediaItems
+        .where()
+        .mediaTypeIdentifierEqualTo(mediaType.uniqueKey)
+        .findAllSync();
+  }
+
+  /// Get the history of [MediaItem] for a particular [MediaSource].
+  List<MediaItem> getMediaSourceHistory({required MediaSource mediaSource}) {
+    return _database.mediaItems
+        .where()
+        .mediaSourceIdentifierEqualTo(mediaSource.uniqueKey)
+        .findAllSync();
   }
 }

@@ -61,7 +61,7 @@ class _ReaderTtuSourcePageState
   }
 
   Widget buildBody() {
-    AsyncValue<LocalAssetsServer> tweets = ref.watch(ttuProvider);
+    AsyncValue<LocalAssetsServer> tweets = ref.watch(ttuServerProvider);
 
     return tweets.when(
       data: buildReaderArea,
@@ -70,7 +70,7 @@ class _ReaderTtuSourcePageState
         error: error,
         stack: stack,
         refresh: () {
-          ref.refresh(ttuProvider);
+          ref.refresh(ttuServerProvider);
         },
       ),
     );
@@ -95,7 +95,8 @@ class _ReaderTtuSourcePageState
 
   Widget buildReaderArea(LocalAssetsServer server) {
     return InAppWebView(
-      initialUrlRequest: URLRequest(url: getInitialUrl(server: server)),
+      initialUrlRequest:
+          URLRequest(url: Uri.parse('http://localhost:${server.boundPort}')),
       contextMenu: ContextMenu(
         options: ContextMenuOptions(
           hideDefaultSystemContextMenuItems: true,
@@ -128,7 +129,7 @@ class _ReaderTtuSourcePageState
 
     lastMessageTime = now;
 
-    Map<String, dynamic> messageJson;
+    late Map<String, dynamic> messageJson;
     try {
       messageJson = jsonDecode(message.message);
     } catch (e) {
@@ -191,13 +192,6 @@ class _ReaderTtuSourcePageState
     await webViewController.evaluateJavascript(source: source);
   }
 
-  Uri getInitialUrl({required LocalAssetsServer server}) {
-    String address = server.address.address;
-    int port = server.boundPort!;
-
-    return Uri.parse('http://$address:$port');
-  }
-
   InAppWebViewGroupOptions getInitialOptions() {
     return InAppWebViewGroupOptions(
       crossPlatform: InAppWebViewOptions(
@@ -220,32 +214,6 @@ class _ReaderTtuSourcePageState
   /// This is executed upon page load and change.
   String javascriptToExecute = """
 /*jshint esversion: 6 */
-var getImageBlob = function(url) {
-	return new Promise(async resolve => {
-		let response = await fetch(url);
-		let blob = response.blob();
-		resolve(blob);
-	});
-};
-var blobToBase64 = function(blob) {
-	return new Promise(resolve => {
-		let reader = new FileReader();
-		reader.onload = function() {
-			let dataUrl = reader.result;
-			resolve(dataUrl);
-		};
-		reader.readAsDataURL(blob);
-	});
-}
-var getBase64Image = async function(url) {
-	let blob = await getImageBlob(url);
-	let base64 = await blobToBase64(blob);
-	return base64;
-}
-var touchmoved;
-var touchevent;
-var reader = document.getElementsByTagName('app-book-reader');
-
 function tapToSelect(e) {
   if (getSelectionText()) {
     console.log(JSON.stringify({
@@ -390,69 +358,9 @@ function getSelectionText() {
     return txt;
 };
 
+var reader = document.getElementsByClassName('book-content');
 if (reader.length != 0) {
   reader[0].addEventListener('click', tapToSelect);
-}
-
-var firstImage = document.getElementsByTagName("image")[0];
-var firstImg = document.getElementsByTagName("img")[0];
-var input = document.body.getElementsByTagName("input");
-
-var blob;
-if (firstImage != null) {
-  blob = firstImage.attributes.href.textContent;
-} else if (firstImg != null) {
-  blob = firstImg.src;
-} else {
-  blob = "";
-}
-if (blob != null) {
-  var info = document.getElementsByClassName('bottom-2')[0];
-  getBase64Image(blob).then(base64Image => console.log(JSON.stringify({
-				"base64Image": base64Image,
-        "bookmark": info.textContent,
-				"jidoujisho-message-type": "metadata"
-			})));
-}
-
-MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
-
-var observer = new MutationObserver(function(mutations, observer) {
-    var reader = document.getElementsByClassName('book-content')
-    if (reader.length != 0) {
-      reader[0].addEventListener('click', tapToSelect);
-    }
-    
-});
-
-observer.observe(document, {
-  subtree: true,
-  attributes: true
-});
-
-if (input.length == 2) {
-  input[1].parentElement.remove();
-}
-if (document.body.getElementsByClassName('fa-bookmark').length != 0) {
-  document.body.getElementsByClassName("flex items-center text-xl xl:text-lg px-4 xl:px-3")[0].remove();
-  document.body.getElementsByClassName("fa-expand")[0].parentElement.remove();
-}
-
-var reader = document.getElementsByClassName('book-content')
-if (reader.length != 0) {
-  document.querySelector('body').addEventListener('click', function(e) {
-  var reader = document.getElementsByClassName('book-content')
-    
-
-  var element = document.getElementsByClassName('svelte-fa')[0];
-  if (e.target === element && element.contains(e.target)) {
-    var info = document.getElementsByClassName('bottom-2')[0];
-    console.log(JSON.stringify({
-              "bookmark": info.textContent,
-              "jidoujisho-message-type": "bookmark"
-            }));
-  }
-}, true);
 }
 """;
 }

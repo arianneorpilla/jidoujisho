@@ -96,7 +96,7 @@ class ReaderTwitterSource extends ReaderMediaSource {
   }
 
   @override
-  BaseSourcePage buildLaunchWidget({MediaItem? item}) {
+  BaseSourcePage buildLaunchPage({MediaItem? item}) {
     return const ReaderTwitterSourcePage();
   }
 }

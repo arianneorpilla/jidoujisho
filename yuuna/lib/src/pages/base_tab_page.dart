@@ -41,8 +41,8 @@ abstract class BaseTabPageState<T extends BaseTabPage> extends BasePageState {
   @override
   Widget build(BuildContext context) {
     return Stack(children: [
+      mediaSource.buildHistoryPage(),
       buildFloatingSearchBar(),
-      mediaSource.buildHistoryWidget(),
     ]);
   }
 

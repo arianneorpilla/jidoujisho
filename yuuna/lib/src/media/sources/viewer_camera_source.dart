@@ -23,7 +23,7 @@ class ViewerCameraSource extends ViewerMediaSource {
       ViewerCameraSource._privateConstructor();
 
   @override
-  BaseSourcePage buildLaunchWidget({MediaItem? item}) {
+  BaseSourcePage buildLaunchPage({MediaItem? item}) {
     return const PlaceholderSourcePage();
   }
 }

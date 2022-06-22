@@ -107,6 +107,13 @@ abstract class MediaSource {
   /// initialisation step.
   Future<void> prepareResources() async {}
 
+  /// Executed when this media source is closed. Perform this step to clean up
+  /// resources or refresh media history.
+  Future<void> onSourceExit({
+    required BuildContext context,
+    required WidgetRef ref,
+  }) async {}
+
   /// Get the floating search bar actions of this source when it is the active
   /// source being displayed on its respective media type tab.
   List<Widget> getActions({
@@ -140,6 +147,7 @@ abstract class MediaSource {
         icon: Icons.launch,
         onTap: () {
           appModel.openMedia(
+            context: context,
             ref: ref,
             mediaSource: this,
           );
@@ -150,7 +158,7 @@ abstract class MediaSource {
 
   /// The widget to show when this source is launched. An optional [MediaItem]
   /// can be supplied as a launch parameter.
-  BaseSourcePage buildLaunchWidget({MediaItem? item});
+  BaseSourcePage buildLaunchPage({MediaItem? item});
 
   /// If this is not null, this action is executed when the user taps on the
   /// search bar. Sources that do not have a search action should have this
@@ -161,6 +169,7 @@ abstract class MediaSource {
     required AppModel appModel,
   }) async {
     appModel.openMedia(
+      context: context,
       ref: ref,
       mediaSource: this,
     );
@@ -196,5 +205,5 @@ abstract class MediaSource {
 
   /// The body widget to show in the tab when this source's media type and this
   /// source is selected.
-  BaseHistoryPage buildHistoryWidget();
+  BaseHistoryPage buildHistoryPage();
 }

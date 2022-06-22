@@ -234,6 +234,7 @@ class JidoujishoLocalisations {
     'clear_browser_title': 'Clear Browser Data',
     'clear_browser_description':
         'This will clear all browsing data used in media sources that use web'
-            ' content. Are you sure?'
+            ' content. Are you sure?',
+    'ttu_no_books_added': 'No books added to ッツ Ebook Reader',
   };
 }

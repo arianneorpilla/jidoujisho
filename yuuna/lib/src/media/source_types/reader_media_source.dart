@@ -18,7 +18,7 @@ abstract class ReaderMediaSource extends MediaSource {
   /// The body widget to show in the tab when this source's media type and this
   /// source is selected.
   @override
-  BaseHistoryPage buildHistoryWidget({MediaItem? item}) {
+  BaseHistoryPage buildHistoryPage({MediaItem? item}) {
     return const HistoryReaderPage();
   }
 }

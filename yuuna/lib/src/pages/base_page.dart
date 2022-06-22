@@ -94,8 +94,8 @@ class BasePageState<T extends BasePage> extends ConsumerState<T> {
   Widget buildLoading() {
     return Center(
       child: SizedBox(
-        height: Spacing.of(context).spaces.extraBig,
-        width: Spacing.of(context).spaces.extraBig,
+        height: Spacing.of(context).spaces.big,
+        width: Spacing.of(context).spaces.big,
         child: CircularProgressIndicator(
           valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
         ),

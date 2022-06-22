@@ -21,7 +21,7 @@ class PlayerNetworkStreamSource extends PlayerMediaSource {
       PlayerNetworkStreamSource._privateConstructor();
 
   @override
-  BaseSourcePage buildLaunchWidget({MediaItem? item}) {
+  BaseSourcePage buildLaunchPage({MediaItem? item}) {
     return const PlaceholderSourcePage();
   }
 }

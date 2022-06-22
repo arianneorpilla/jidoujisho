@@ -1,6 +1,7 @@
 export 'src/utils/jidoujisho_localisations.dart';
 export 'src/utils/jidoujisho_common.dart';
 
+export 'src/utils/components/cache_image_provider.dart';
 export 'src/utils/components/jidoujisho_icon_button.dart';
 export 'src/utils/components/jidoujisho_divider.dart';
 export 'src/utils/components/jidoujisho_dropdown.dart';

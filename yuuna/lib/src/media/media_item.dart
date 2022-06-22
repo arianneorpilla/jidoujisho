@@ -1,6 +1,8 @@
 import 'package:isar/isar.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:pretty_json/pretty_json.dart';
+import 'package:yuuna/media.dart';
+import 'package:yuuna/models.dart';
 part 'media_item.g.dart';
 
 /// An item representable in media history from which a media source may
@@ -17,12 +19,14 @@ class MediaItem {
   MediaItem({
     required this.uniqueKey,
     required this.title,
-    required this.sourceIdentifier,
+    required this.mediaTypeIdentifier,
+    required this.mediaSourceIdentifier,
+    required this.position,
+    required this.duration,
     this.id,
+    this.base64Image,
     this.author,
     this.sourceMetadata,
-    this.position,
-    this.duration,
   });
 
   /// Create an instance of this class from a serialized format.
@@ -41,14 +45,23 @@ class MediaItem {
   /// If the same item exists in history, then the item is replaced with a
   /// newer item in the addition operation. This key is also used to identify
   /// resources such as thumbnails in the cache.
+  @Index()
   String uniqueKey;
 
   /// The name of this item. Typically, this could be the name of a video
   /// or a book.
   String title;
 
+  /// The media type where this item is from.
+  @Index()
+  String mediaTypeIdentifier;
+
   /// The media source where this item is from.
-  String sourceIdentifier;
+  @Index()
+  String mediaSourceIdentifier;
+
+  /// If this item is not null, this will be used as the preview image.
+  String? base64Image;
 
   /// This field is a convenience field as it may be common to store this
   /// detail. For a web video, this could be the channel where the video is
@@ -62,11 +75,11 @@ class MediaItem {
   /// The current progress of the media in the time this context was made.
   /// This could be the seconds of a playing video or the page number of a
   /// book or comic.
-  final int? position;
+  final int position;
 
   /// The media's full duration, used to be able to tell the completion of
   /// this media context relative to the position.
-  final int? duration;
+  final int duration;
 
   @override
   operator ==(Object other) =>
@@ -77,4 +90,15 @@ class MediaItem {
 
   @override
   String toString() => prettyJson(toJson());
+
+  /// Get the [MediaType] from a [MediaItem] from its serialised identifier.
+  MediaType getMediaType({required AppModel appModel}) {
+    return appModel.mediaTypes[mediaTypeIdentifier]!;
+  }
+
+  /// Get the [MediaSource] from a [MediaItem] from its serialised identifier.
+  MediaSource getMediaSource({required AppModel appModel}) {
+    MediaType mediaType = getMediaType(appModel: appModel);
+    return appModel.mediaSources[mediaType]![mediaSourceIdentifier]!;
+  }
 }

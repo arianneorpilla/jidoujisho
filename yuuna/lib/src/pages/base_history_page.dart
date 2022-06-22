@@ -24,17 +24,16 @@ abstract class BaseHistoryPageState<T extends BaseHistoryPage>
   /// [shouldPlaceholderBeShown] is true. This should be a localised message.
   String get placeholderMessage => appModel.translate('info_empty_home_tab');
 
+  /// Each tab in the home page represents a media type.
+  MediaType get mediaType;
+
+  /// Get the active media source for the current media type.
+  MediaSource get mediaSource;
+
   /// This variable is true when the [buildPlaceholder] should be shown.
   /// For example, if a certain media type does not have any media items to
   /// show in its history.
   bool get shouldPlaceholderBeShown => true;
-
-  /// Each tab in the home page represents a media type.
-  MediaType get mediaType => mediaSource.mediaType;
-
-  /// Get the active media source for the current media type.
-  MediaSource get mediaSource =>
-      appModel.getCurrentSourceForMediaType(mediaType: mediaType);
 
   @override
   void initState() {
@@ -42,13 +41,7 @@ abstract class BaseHistoryPageState<T extends BaseHistoryPage>
   }
 
   @override
-  Widget build(BuildContext context) {
-    if (shouldPlaceholderBeShown) {
-      return buildPlaceholder();
-    } else {
-      return buildHistory();
-    }
-  }
+  Widget build(BuildContext context);
 
   /// This is shown as the body when [shouldPlaceholderBeShown] is true.
   Widget buildPlaceholder() {
@@ -61,7 +54,7 @@ abstract class BaseHistoryPageState<T extends BaseHistoryPage>
   }
 
   /// This is shown as the body when [shouldPlaceholderBeShown] is false.
-  Widget buildHistory() {
+  Widget buildHistory(List<MediaItem> books) {
     return Container();
   }
 }
