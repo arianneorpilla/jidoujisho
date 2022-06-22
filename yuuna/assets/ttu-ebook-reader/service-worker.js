@@ -40,10 +40,10 @@ const files = [
   "/safari-pinned-tab.svg"
 ];
 const prerendered = [
-  "/",
-  "/b",
-  "/manage",
-  "/settings"
+  "/index.html",
+  "/b.html",
+  "/manage.html",
+  "/settings.html"
 ];
 const version = "1655249682406";
 /**

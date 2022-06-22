@@ -19,8 +19,7 @@ final ttuServerProvider = FutureProvider<LocalAssetsServer>((ref) {
 
 /// A global [Provider] for getting ッツ Ebook Reader books from IndexedDB.
 final ttuBooksProvider = FutureProvider<List<MediaItem>>((ref) {
-  LocalAssetsServer server = ref.watch(ttuServerProvider).value!;
-  return ReaderTtuSource.instance.getBooksHistory(server: server);
+  return ReaderTtuSource.instance.getBooksHistory();
 });
 
 /// A media source that allows the user to read from ッツ Ebook Reader.
@@ -41,7 +40,7 @@ class ReaderTtuSource extends ReaderMediaSource {
 
   /// This port should ideally not conflict but should remain the same for
   /// caching purposes.
-  static int get port => 55635;
+  static int get port => 52055;
 
   static final ReaderTtuSource _instance =
       ReaderTtuSource._privateConstructor();
@@ -52,14 +51,6 @@ class ReaderTtuSource extends ReaderMediaSource {
     required WidgetRef ref,
   }) async {
     ref.refresh(ttuBooksProvider);
-  }
-
-  /// Get the URL for a running server.
-  Uri getInitialUrl({required LocalAssetsServer server}) {
-    String address = server.address.address;
-    int port = server.boundPort!;
-
-    return Uri.parse('http://$address:$port');
   }
 
   /// For serving the reader assets locally.
@@ -78,7 +69,7 @@ class ReaderTtuSource extends ReaderMediaSource {
 
   @override
   BaseSourcePage buildLaunchPage({MediaItem? item}) {
-    return const ReaderTtuSourcePage();
+    return ReaderTtuSourcePage(item: item);
   }
 
   @override
@@ -88,11 +79,6 @@ class ReaderTtuSource extends ReaderMediaSource {
     required AppModel appModel,
   }) {
     return [
-      buildClearButton(
-        context: context,
-        ref: ref,
-        appModel: appModel,
-      ),
       buildLaunchButton(
         context: context,
         ref: ref,
@@ -101,105 +87,42 @@ class ReaderTtuSource extends ReaderMediaSource {
     ];
   }
 
-  /// Allows user to clear all the browser data used for TTU.
-  Widget buildClearButton({
-    required BuildContext context,
-    required WidgetRef ref,
-    required AppModel appModel,
-  }) {
-    String tooltip = appModel.translate('clear_browser_title');
-
-    return FloatingSearchBarAction(
-      showIfOpened: true,
-      child: JidoujishoIconButton(
-        size: Theme.of(context).textTheme.titleLarge?.fontSize,
-        tooltip: tooltip,
-        icon: Icons.delete_sweep,
-        onTap: () {
-          showClearDataDialog(context: context, ref: ref, appModel: appModel);
-        },
-      ),
-    );
-  }
-
-  /// Allows user to clear all the browser data used for TTU.
-  Future<void> showClearDataDialog({
-    required BuildContext context,
-    required WidgetRef ref,
-    required AppModel appModel,
-  }) async {
-    String title = appModel.translate('clear_browser_title');
-    String description = appModel.translate('clear_browser_description');
-    String dialogClearLabel = appModel.translate('dialog_clear');
-    String dialogCloseLabel = appModel.translate('dialog_close');
-
-    Widget alertDialog = AlertDialog(
-      title: Text(title),
-      content: Text(description),
-      actions: <Widget>[
-        TextButton(
-          child: Text(
-            dialogClearLabel,
-            style: TextStyle(color: Theme.of(context).colorScheme.primary),
-          ),
-          onPressed: () async {
-            await appModel.clearBrowserData();
-
-            Navigator.pop(context);
-            mediaType.refreshTab();
-            ref.refresh(ttuBooksProvider);
-          },
-        ),
-        TextButton(
-          child: Text(dialogCloseLabel),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ],
-    );
-
-    showDialog(
-      context: context,
-      builder: (context) => alertDialog,
-    );
-  }
-
   @override
   BaseHistoryPage buildHistoryPage({MediaItem? item}) {
     return const ReaderTtuSourceHistoryPage();
   }
 
   /// Fetch JSON for all books in IndexedDB.
-  Future<List<MediaItem>> getBooksHistory({
-    required LocalAssetsServer server,
-  }) async {
+  Future<List<MediaItem>> getBooksHistory() async {
     List<MediaItem>? items;
     HeadlessInAppWebView webView = HeadlessInAppWebView(
-        initialUrlRequest:
-            URLRequest(url: Uri.parse('http://localhost:${server.boundPort}/')),
-        onLoadStop: (controller, url) async {
-          controller.evaluateJavascript(source: getHistoryJs);
-        },
-        onConsoleMessage: (controller, message) {
-          late Map<String, dynamic> messageJson;
-          messageJson = jsonDecode(message.message);
+      initialUrlRequest: URLRequest(url: Uri.parse('http://localhost:$port/')),
+      onLoadStop: (controller, url) async {
+        controller.evaluateJavascript(source: getHistoryJs);
+      },
+      onConsoleMessage: (controller, message) {
+        late Map<String, dynamic> messageJson;
+        messageJson = jsonDecode(message.message);
 
-          if (messageJson['messageType'] != null) {
-            try {
-              items = getItemsFromJson(messageJson);
-            } catch (error, stack) {
-              items = [];
-              debugPrint('$error');
-              debugPrint('$stack');
-            }
-          } else {
-            debugPrint(message.message);
+        if (messageJson['messageType'] != null) {
+          try {
+            items = getItemsFromJson(messageJson);
+          } catch (error, stack) {
+            items = [];
+            debugPrint('$error');
+            debugPrint('$stack');
           }
-        });
+        } else {
+          debugPrint(message.message);
+        }
+      },
+    );
 
     await webView.run();
     while (items == null) {
-      await Future.delayed(const Duration(milliseconds: 100));
+      await Future.delayed(const Duration(milliseconds: 500));
     }
+    await webView.dispose();
 
     return items!;
   }
@@ -225,8 +148,10 @@ class ReaderTtuSource extends ReaderMediaSource {
         }
       }
 
+      String id = datum['id'].toString();
+
       return MediaItem(
-        uniqueKey: datum['id'].toString(),
+        uniqueKey: 'http://localhost:$port/b.html?id=$id',
         title: datum['title'] as String? ?? '',
         base64Image: datum['coverImage'],
         mediaTypeIdentifier: ReaderTtuSource.instance.mediaType.uniqueKey,
@@ -278,14 +203,10 @@ function getAllFromIDBStore(storeName) {
           try {
             objectStore = transaction.objectStore(storeName);
           } catch (e) {
-            objectStore = database.createObjectStore(storeName);
+            reject(Error('Error getting objects'));
           }
 
           var objectRequest = objectStore.getAll();
-
-          objectRequest.onerror = function(event) {
-            reject(Error('Error getting objects'));
-          };
 
           objectRequest.onerror = function(event) {
             reject(Error('Error getting objects'));

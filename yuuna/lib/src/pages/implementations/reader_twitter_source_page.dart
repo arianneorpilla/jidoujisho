@@ -13,6 +13,7 @@ import 'package:yuuna/utils.dart';
 class ReaderTwitterSourcePage extends BaseSourcePage {
   /// Create an instance of this page.
   const ReaderTwitterSourcePage({
+    super.item,
     super.key,
   });
 

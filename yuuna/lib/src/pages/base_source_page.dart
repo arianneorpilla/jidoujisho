@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/dictionary.dart';
+import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
 
@@ -10,8 +11,12 @@ import 'package:yuuna/utils.dart';
 abstract class BaseSourcePage extends BasePage {
   /// Create an instance of this tab page.
   const BaseSourcePage({
+    required this.item,
     super.key,
   });
+
+  /// The media item pertaining to this usage instance of the source.
+  final MediaItem? item;
 
   @override
   BaseSourcePageState<BaseSourcePage> createState();

@@ -2402,21 +2402,6 @@ class AppModel with ChangeNotifier {
         'current_source/${mediaType.uniqueKey}', mediaSource.uniqueKey);
   }
 
-  /// Clear browsing data used in WebViews.
-  Future<void> clearBrowserData() async {
-    HeadlessInAppWebView webView = HeadlessInAppWebView(
-      initialUrlRequest: URLRequest(
-        url: Uri.parse('https://github.com/lrorpilla/jidoujisho'),
-      ),
-      initialOptions: InAppWebViewGroupOptions(
-        crossPlatform: InAppWebViewOptions(clearCache: true),
-      ),
-    );
-
-    await webView.run();
-    await webView.dispose();
-  }
-
   /// Get the history of [MediaItem] for a particular [MediaType].
   List<MediaItem> getMediaTypeHistory({required MediaType mediaType}) {
     return _database.mediaItems

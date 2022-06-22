@@ -6,6 +6,7 @@ import 'package:yuuna/utils.dart';
 class PlaceholderSourcePage extends BaseSourcePage {
   /// Create an instance of this page.
   const PlaceholderSourcePage({
+    super.item,
     super.key,
   });
 

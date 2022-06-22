@@ -13,6 +13,7 @@ import 'package:yuuna/utils.dart';
 class ReaderTtuSourcePage extends BaseSourcePage {
   /// Create an instance of this page.
   const ReaderTtuSourcePage({
+    super.item,
     super.key,
   });
 
@@ -95,8 +96,12 @@ class _ReaderTtuSourcePageState
 
   Widget buildReaderArea(LocalAssetsServer server) {
     return InAppWebView(
-      initialUrlRequest:
-          URLRequest(url: Uri.parse('http://localhost:${server.boundPort}')),
+      initialUrlRequest: URLRequest(
+        url: Uri.parse(
+          widget.item?.uniqueKey ?? 'http://localhost:${server.boundPort}/',
+        ),
+      ),
+      initialOptions: getInitialOptions(),
       contextMenu: ContextMenu(
         options: ContextMenuOptions(
           hideDefaultSystemContextMenuItems: true,
@@ -196,7 +201,6 @@ class _ReaderTtuSourcePageState
     return InAppWebViewGroupOptions(
       crossPlatform: InAppWebViewOptions(
         disableContextMenu: true,
-        useShouldOverrideUrlLoading: true,
         mediaPlaybackRequiresUserGesture: false,
         verticalScrollBarEnabled: false,
         horizontalScrollBarEnabled: false,
