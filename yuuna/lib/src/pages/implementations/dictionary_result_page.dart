@@ -75,6 +75,7 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
     }
 
     return ListView.builder(
+      cacheExtent: 10000,
       physics: const AlwaysScrollableScrollPhysics(
         parent: BouncingScrollPhysics(),
       ),

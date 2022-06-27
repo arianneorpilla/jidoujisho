@@ -91,8 +91,9 @@ class _RecursiveDictionaryPageState
 
   Widget buildFloatingSearchBar() {
     return FloatingSearchBar(
-      physics:
-          const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+      physics: const AlwaysScrollableScrollPhysics(
+        parent: BouncingScrollPhysics(),
+      ),
       hint: searchEllipsisLabel,
       controller: _controller,
       builder: buildFloatingSearchBody,
@@ -137,7 +138,7 @@ class _RecursiveDictionaryPageState
   }
 
   Duration get searchDelay => const Duration(milliseconds: 50);
-  Duration get historyDelay => const Duration(milliseconds: 1000);
+  Duration get historyDelay => Duration.zero;
 
   void onQueryChanged(String query) async {
     Future.delayed(searchDelay, () {

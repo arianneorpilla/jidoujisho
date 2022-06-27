@@ -1,11 +1,14 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_assets_server/local_assets_server.dart';
 import 'package:pretty_json/pretty_json.dart';
 import 'package:yuuna/media.dart';
+import 'package:yuuna/src/creator/creator_field_values.dart';
+import 'package:yuuna/src/creator/fields/sentence_field.dart';
 import 'package:yuuna/src/pages/base_source_page.dart';
 import 'package:yuuna/utils.dart';
 
@@ -25,6 +28,7 @@ class _ReaderTtuSourcePageState
     extends BaseSourcePageState<ReaderTtuSourcePage> {
   /// The media source pertaining to this page.
   ReaderTtuSource get mediaSource => ReaderTtuSource.instance;
+  late InAppWebViewController _controller;
 
   DateTime? lastMessageTime;
   Orientation? lastOrientation;
@@ -100,12 +104,11 @@ class _ReaderTtuSourcePageState
         ),
       ),
       initialOptions: getInitialOptions(),
-      contextMenu: ContextMenu(
-        options: ContextMenuOptions(
-          hideDefaultSystemContextMenuItems: true,
-        ),
-      ),
+      contextMenu: getContextMenu(),
       onConsoleMessage: onConsoleMessage,
+      onWebViewCreated: (controller) {
+        _controller = controller;
+      },
       onReceivedServerTrustAuthRequest: (controller, challenge) async {
         return ServerTrustAuthResponse(
           action: ServerTrustAuthResponseAction.PROCEED,
@@ -201,7 +204,6 @@ class _ReaderTtuSourcePageState
       crossPlatform: InAppWebViewOptions(
         allowFileAccessFromFileURLs: true,
         allowUniversalAccessFromFileURLs: true,
-        disableContextMenu: true,
         mediaPlaybackRequiresUserGesture: false,
         verticalScrollBarEnabled: false,
         horizontalScrollBarEnabled: false,
@@ -214,6 +216,97 @@ class _ReaderTtuSourcePageState
         scrollbarFadingEnabled: false,
       ),
     );
+  }
+
+  /// Get the default context menu for sources that make use of embedded web
+  /// views.
+  ContextMenu getContextMenu() {
+    return ContextMenu(
+      options: ContextMenuOptions(
+        hideDefaultSystemContextMenuItems: true,
+      ),
+      menuItems: [
+        searchMenuItem(),
+        stashMenuItem(),
+        creatorMenuItem(),
+        copyMenuItem(),
+      ],
+    );
+  }
+
+  ContextMenuItem searchMenuItem() {
+    return ContextMenuItem(
+      androidId: 1,
+      iosId: '1',
+      title: searchLabel,
+      action: searchMenuAction,
+    );
+  }
+
+  ContextMenuItem stashMenuItem() {
+    return ContextMenuItem(
+      androidId: 2,
+      iosId: '2',
+      title: stashLabel,
+      action: stashMenuAction,
+    );
+  }
+
+  ContextMenuItem creatorMenuItem() {
+    return ContextMenuItem(
+      androidId: 3,
+      iosId: '3',
+      title: creatorLabel,
+      action: creatorMenuAction,
+    );
+  }
+
+  ContextMenuItem copyMenuItem() {
+    return ContextMenuItem(
+      androidId: 4,
+      iosId: '4',
+      title: copyLabel,
+      action: copyMenuAction,
+    );
+  }
+
+  void searchMenuAction() async {
+    String searchTerm = await getSelectedText();
+
+    appModel.openRecursiveDictionarySearch(
+      searchTerm: searchTerm,
+      killOnPop: false,
+    );
+  }
+
+  void stashMenuAction() async {
+    String searchTerm = await getSelectedText();
+
+    appModel.addToStash(terms: [searchTerm]);
+  }
+
+  void creatorMenuAction() async {
+    String searchTerm = await getSelectedText();
+
+    appModel.openCreator(
+      ref: ref,
+      killOnPop: false,
+      creatorFieldValues: CreatorFieldValues(
+        textValues: {
+          SentenceField.instance: searchTerm,
+        },
+      ),
+    );
+  }
+
+  void copyMenuAction() async {
+    String searchTerm = await getSelectedText();
+    Clipboard.setData(ClipboardData(text: searchTerm));
+  }
+
+  Future<String> getSelectedText() async {
+    return await _controller.getSelectedText() ??
+        ''.replaceAll('\\n', '\n').trim();
   }
 
   /// This is executed upon page load and change.

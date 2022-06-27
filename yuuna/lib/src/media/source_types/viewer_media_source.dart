@@ -11,8 +11,6 @@ abstract class ViewerMediaSource extends MediaSource {
     required super.description,
     required super.icon,
     required super.implementsSearch,
-    required super.canDeleteHistory,
-    required super.canOverrideDisplayValues,
   }) : super(
           mediaType: ViewerMediaType.instance,
         );

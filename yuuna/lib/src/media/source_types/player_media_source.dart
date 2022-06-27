@@ -11,8 +11,6 @@ abstract class PlayerMediaSource extends MediaSource {
     required super.description,
     required super.icon,
     required super.implementsSearch,
-    required super.canDeleteHistory,
-    required super.canOverrideDisplayValues,
   }) : super(
           mediaType: PlayerMediaType.instance,
         );

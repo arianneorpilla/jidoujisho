@@ -23,6 +23,8 @@ class MediaItem {
     required this.mediaSourceIdentifier,
     required this.position,
     required this.duration,
+    required this.canDelete,
+    required this.canEdit,
     this.id,
     this.base64Image,
     this.imageUrl,
@@ -86,6 +88,13 @@ class MediaItem {
   /// The media's full duration, used to be able to tell the completion of
   /// this media context relative to the position.
   final int duration;
+
+  /// Whether or not this [MediaItem] can be deleted.
+  final bool canDelete;
+
+  /// Whether or not this [MediaItem] allows overriding the display title and
+  /// thumbnail.
+  final bool canEdit;
 
   @override
   operator ==(Object other) =>

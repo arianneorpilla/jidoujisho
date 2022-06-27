@@ -42,6 +42,12 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
   /// Localisation for the Cancel alert dialog option for closing the source.
   String get dialogCancel => appModel.translate('dialog_cancel');
 
+  /// Localisation for context menu option.
+  String get creatorLabel => appModel.translate('creator');
+
+  /// Localisation for context menu option.
+  String get copyLabel => appModel.translate('copy');
+
   /// The result from the last dictionary search performed with
   /// [searchDictionaryResult].
   final ValueNotifier<DictionaryResult?> _dictionaryResultNotifier =

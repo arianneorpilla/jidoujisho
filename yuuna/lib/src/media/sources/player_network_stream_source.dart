@@ -12,8 +12,6 @@ class PlayerNetworkStreamSource extends PlayerMediaSource {
           description: 'Stream videos from a direct URL.',
           icon: Icons.podcasts,
           implementsSearch: false,
-          canDeleteHistory: true,
-          canOverrideDisplayValues: false,
         );
 
   /// Get the singleton instance of this media type.

@@ -49,7 +49,10 @@ class _MediaItemDialogPageState extends BasePageState<MediaItemDialogPage> {
   }
 
   Widget buildTitle() {
-    return Text(mediaSource.getDisplayTitleFromMediaItem(widget.item));
+    return SelectableText(
+      mediaSource.getDisplayTitleFromMediaItem(widget.item),
+      selectionControls: selectionControls,
+    );
   }
 
   Widget buildContent() {
@@ -91,8 +94,8 @@ class _MediaItemDialogPageState extends BasePageState<MediaItemDialogPage> {
   }
 
   List<Widget> get actions => [
-        if (mediaSource.canDeleteHistory) buildClearButton(),
-        if (mediaSource.canOverrideDisplayValues) buildEditButton(),
+        if (widget.item.canDelete) buildClearButton(),
+        if (widget.item.canEdit) buildEditButton(),
         buildLaunchButton(),
       ];
 

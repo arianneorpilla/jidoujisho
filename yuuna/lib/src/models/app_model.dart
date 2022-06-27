@@ -1608,9 +1608,6 @@ class AppModel with ChangeNotifier {
 
     _isCreatorOpen = true;
 
-    if (isMediaOpen) {
-      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    }
     await Navigator.push(
       _navigatorKey.currentContext!,
       PageRouteBuilder(
@@ -1625,9 +1622,6 @@ class AppModel with ChangeNotifier {
         settings: RouteSettings(name: (CreatorPage).toString()),
       ),
     );
-    if (isMediaOpen) {
-      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    }
 
     _isCreatorOpen = false;
   }
@@ -1736,6 +1730,7 @@ class AppModel with ChangeNotifier {
         reverseTransitionDuration: Duration.zero,
       ),
     );
+    refreshDictionaryHistory();
   }
 
   /// A helper function for showing a result already in dictionary history.

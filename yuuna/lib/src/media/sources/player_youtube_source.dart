@@ -12,8 +12,6 @@ class PlayerYoutubeSource extends PlayerMediaSource {
           description: 'Select and watch videos from YouTube.',
           icon: Icons.smart_display,
           implementsSearch: false,
-          canDeleteHistory: true,
-          canOverrideDisplayValues: false,
         );
 
   /// Get the singleton instance of this media type.

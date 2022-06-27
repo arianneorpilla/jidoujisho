@@ -25,8 +25,6 @@ abstract class MediaSource {
     required this.mediaType,
     required this.icon,
     required this.implementsSearch,
-    required this.canDeleteHistory,
-    required this.canOverrideDisplayValues,
   });
 
   /// A unique name that allows distinguishing this type from others,
@@ -61,13 +59,6 @@ abstract class MediaSource {
   /// Whether or not this media source has a search function. If false, this
   /// media source will have an action executed by [onSearchBarTap].
   final bool implementsSearch;
-
-  /// Whether or not this media source's produced [MediaItem] can be deleted.
-  final bool canDeleteHistory;
-
-  /// Whether or not this media source allows overriding a [MediaItem]'s
-  /// display title and thumbnail.
-  final bool canOverrideDisplayValues;
 
   /// Used for accessing persistent key-value data specific to this source.
   /// See [initialise].
@@ -286,7 +277,7 @@ abstract class MediaSource {
 
   /// Given a [MediaItem], return its override display title.
   String? getOverrideTitleFromMediaItem(MediaItem item) {
-    if (!canOverrideDisplayValues) {
+    if (!item.canEdit) {
       return null;
     }
 
@@ -301,7 +292,7 @@ abstract class MediaSource {
     required AppModel appModel,
     required MediaItem item,
   }) {
-    if (!canOverrideDisplayValues) {
+    if (!item.canEdit) {
       return null;
     }
 
@@ -348,12 +339,10 @@ abstract class MediaSource {
     );
 
     File thumbnailFile = File(filename);
+    thumbnailFile.createSync();
     if (file == null) {
-      if (thumbnailFile.existsSync()) {
-        thumbnailFile.deleteSync();
-      }
+      thumbnailFile.deleteSync();
     } else {
-      thumbnailFile.createSync();
       file.copySync(filename);
     }
   }

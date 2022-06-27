@@ -27,12 +27,10 @@ class ReaderTtuSource extends ReaderMediaSource {
       : super(
           uniqueKey: 'reader_ttu',
           sourceName: 'ッツ Ebook Reader',
-          description: 'Read EPUBs and mine sentences via an embedded web '
+          description: 'Read EPUBs and mine sentences via an embedded web'
               ' reader.',
           icon: Icons.chrome_reader_mode_outlined,
           implementsSearch: false,
-          canDeleteHistory: false,
-          canOverrideDisplayValues: true,
         );
 
   /// Get the singleton instance of this media type.
@@ -179,6 +177,8 @@ class ReaderTtuSource extends ReaderMediaSource {
         mediaSourceIdentifier: ReaderTtuSource.instance.uniqueKey,
         position: position,
         duration: duration,
+        canDelete: false,
+        canEdit: true,
       );
     }).toList();
 
@@ -249,7 +249,9 @@ async function getTtuData() {
   try {
     items = await getAllFromIDBStore("data");
     await Promise.all(items.map(async (item) => {
-      item["coverImage"] = await blobToBase64(item["coverImage"]);
+      try {
+        item["coverImage"] = await blobToBase64(item["coverImage"]);
+      } catch (e) {}
     }));
     
     dataJson = JSON.stringify(items);

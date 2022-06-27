@@ -28,6 +28,7 @@ class JidoujishoLocalisations {
     'undo': 'Undo',
     'copy': 'Copy',
     'clear': 'Clear',
+    'creator': 'Creator',
     'resume_last_media': 'Resume Last Media',
     'change_source': 'Change Source',
     'launch_source': 'Launch Source',

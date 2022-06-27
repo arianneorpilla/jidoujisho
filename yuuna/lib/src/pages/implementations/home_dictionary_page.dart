@@ -365,7 +365,6 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       searchTerm: searchTerm,
       killOnPop: false,
     );
-    appModel.refreshDictionaryHistory();
   }
 
   void onStash(String searchTerm) {
