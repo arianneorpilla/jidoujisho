@@ -6,11 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_assets_server/local_assets_server.dart';
-import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/pages.dart';
-import 'package:yuuna/utils.dart';
 
 /// A global [Provider] for serving a local ッツ Ebook Reader.
 final ttuServerProvider = FutureProvider<LocalAssetsServer>((ref) {
@@ -33,6 +31,8 @@ class ReaderTtuSource extends ReaderMediaSource {
               ' reader.',
           icon: Icons.chrome_reader_mode_outlined,
           implementsSearch: false,
+          canDeleteHistory: false,
+          canOverrideDisplayValues: true,
         );
 
   /// Get the singleton instance of this media type.
@@ -135,20 +135,25 @@ class ReaderTtuSource extends ReaderMediaSource {
     return items!;
   }
 
+  /// Fetch the list of history items given JSON from IndexedDB.
   List<MediaItem> getItemsFromJson(Map<String, dynamic> json) {
-    List<dynamic> bookmark = jsonDecode(json['bookmark']);
-    List<dynamic> data = jsonDecode(json['data']);
+    List<Map<String, dynamic>> bookmarks =
+        List<Map<String, dynamic>>.from(jsonDecode(json['bookmark']));
+    List<Map<String, dynamic>> datas =
+        List<Map<String, dynamic>>.from(jsonDecode(json['data']));
+    Map<int, Map<String, dynamic>> bookmarksById =
+        Map<int, Map<String, dynamic>>.fromEntries(
+            bookmarks.map((e) => MapEntry(e['dataId'] as int, e)));
 
-    List<MediaItem> items = data.mapIndexed((index, datum) {
+    List<MediaItem> items = datas.mapIndexed((index, data) {
       int position = 0;
       int duration = 1;
 
-      Map<String, dynamic>? bookmarkDatum =
-          bookmark.firstWhereOrNull((e) => e['dataId'] == datum['id']);
+      Map<String, dynamic>? bookmark = bookmarksById[data['id']];
 
-      if (bookmarkDatum != null) {
-        position = bookmarkDatum['exploredCharCount'] as int;
-        double progress = double.parse(bookmarkDatum['progress'].toString());
+      if (bookmark != null) {
+        position = bookmark['exploredCharCount'] as int;
+        double progress = double.parse(bookmark['progress'].toString());
         if (progress == 0) {
           duration = 1;
         } else {
@@ -156,12 +161,20 @@ class ReaderTtuSource extends ReaderMediaSource {
         }
       }
 
-      String id = datum['id'].toString();
+      String id = data['id'].toString();
+      String title = data['title'] as String? ?? ' ';
+      String? base64Image;
+      try {
+        Uri.parse(data['coverImage']);
+        base64Image = data['coverImage'];
+      } catch (e) {
+        base64Image = null;
+      }
 
       return MediaItem(
-        uniqueKey: 'http://localhost:$port/b.html?id=$id',
-        title: datum['title'] as String? ?? '',
-        base64Image: datum['coverImage'],
+        uniqueKey: 'http://localhost:$port/b.html?id=$id&?title=$title',
+        title: title,
+        base64Image: base64Image,
         mediaTypeIdentifier: ReaderTtuSource.instance.mediaType.uniqueKey,
         mediaSourceIdentifier: ReaderTtuSource.instance.uniqueKey,
         position: position,

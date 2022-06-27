@@ -25,6 +25,8 @@ class ReaderTwitterSource extends ReaderMediaSource {
               ' Twitter timeline.',
           icon: FontAwesomeIcons.twitter,
           implementsSearch: false,
+          canDeleteHistory: false,
+          canOverrideDisplayValues: false,
         );
 
   /// Get the singleton instance of this media type.

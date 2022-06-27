@@ -11,6 +11,8 @@ abstract class ReaderMediaSource extends MediaSource {
     required super.description,
     required super.icon,
     required super.implementsSearch,
+    required super.canDeleteHistory,
+    required super.canOverrideDisplayValues,
   }) : super(
           mediaType: ReaderMediaType.instance,
         );

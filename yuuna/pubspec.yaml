@@ -38,6 +38,7 @@ dependencies:
   hive_flutter: ^1.1.0
   html: ^0.15.0
   http: ^0.13.4
+  image_picker: ^0.8.5+3
   infinite_carousel: ^1.0.2
   infinite_scroll_pagination: ^3.1.0
   intl: ^0.17.0

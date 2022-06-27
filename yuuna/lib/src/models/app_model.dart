@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -143,6 +142,10 @@ class AppModel with ChangeNotifier {
   /// Directory where data may be persisted.
   Directory get appDirectory => _appDirectory;
   late final Directory _appDirectory;
+
+  /// Directory where media source thumbnails may be persisted.
+  Directory get thumbnailsDirectory => _thumbnailsDirectory;
+  late final Directory _thumbnailsDirectory;
 
   /// Directory where Hive key-value data is stored.
   Directory get hiveDirectory => _hiveDirectory;
@@ -567,12 +570,15 @@ class AppModel with ChangeNotifier {
     /// These directories will commonly be accessed.
     _temporaryDirectory = await getTemporaryDirectory();
     _appDirectory = await getApplicationDocumentsDirectory();
+    _thumbnailsDirectory =
+        Directory(path.join(appDirectory.path, 'thumbnails'));
     _hiveDirectory = Directory(path.join(appDirectory.path, 'hive'));
     _isarDirectory = Directory(path.join(appDirectory.path, 'isar'));
     _dictionaryImportWorkingDirectory = Directory(
         path.join(appDirectory.path, 'dictionaryImportWorkingDirectory'));
     _exportDirectory = await prepareJidoujishoDirectory();
 
+    thumbnailsDirectory.createSync();
     hiveDirectory.createSync();
     isarDirectory.createSync();
     dictionaryImportWorkingDirectory.createSync();
@@ -1601,6 +1607,10 @@ class AppModel with ChangeNotifier {
     }
 
     _isCreatorOpen = true;
+
+    if (isMediaOpen) {
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    }
     await Navigator.push(
       _navigatorKey.currentContext!,
       PageRouteBuilder(
@@ -1615,6 +1625,10 @@ class AppModel with ChangeNotifier {
         settings: RouteSettings(name: (CreatorPage).toString()),
       ),
     );
+    if (isMediaOpen) {
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    }
+
     _isCreatorOpen = false;
   }
 
@@ -2154,6 +2168,16 @@ class AppModel with ChangeNotifier {
         _database.dictionaryMetaEntrys.where().termEqualTo(term).findAllSync();
 
     return metaEntries;
+  }
+
+  /// Deletes a [MediaItem] from history and also rids of override values.
+  Future<void> deleteMediaItem(MediaItem item) async {
+    MediaSource mediaSource = item.getMediaSource(appModel: this);
+    await mediaSource.clearOverrideValues(appModel: this, item: item);
+
+    _database.writeTxnSync((isar) {
+      isar.mediaItems.deleteSync(item.id!);
+    });
   }
 
   /// Copies a [term] to clipboard and shows an appropriate toast.

@@ -57,4 +57,9 @@ class HistoryPlayerPageState<T extends BaseHistoryPage>
   Widget buildHistory(List<MediaItem> items) {
     return Container();
   }
+
+  @override
+  Widget buildMediaItemContent(MediaItem item) {
+    throw UnimplementedError();
+  }
 }

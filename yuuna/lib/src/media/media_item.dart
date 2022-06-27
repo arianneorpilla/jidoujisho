@@ -25,6 +25,7 @@ class MediaItem {
     required this.duration,
     this.id,
     this.base64Image,
+    this.imageUrl,
     this.author,
     this.sourceMetadata,
   });
@@ -60,8 +61,13 @@ class MediaItem {
   @Index()
   String mediaSourceIdentifier;
 
-  /// If this item is not null, this will be used as the preview image.
+  /// If [imageUrl] is null and this is not null, this will be used as the
+  /// preview image.
   String? base64Image;
+
+  /// This will be attempted for use as the preview image if not null,
+  /// otherwise [base64Image] will be attempted.
+  String? imageUrl;
 
   /// This field is a convenience field as it may be common to store this
   /// detail. For a web video, this could be the channel where the video is

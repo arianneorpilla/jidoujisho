@@ -46,16 +46,14 @@ class _ReaderTtuSourcePageState
 
     return WillPopScope(
       onWillPop: onWillPop,
-      child: SafeArea(
-        child: Scaffold(
-          body: Stack(
-            fit: StackFit.expand,
-            alignment: Alignment.center,
-            children: <Widget>[
-              buildBody(),
-              buildDictionary(),
-            ],
-          ),
+      child: Scaffold(
+        body: Stack(
+          fit: StackFit.expand,
+          alignment: Alignment.center,
+          children: <Widget>[
+            buildBody(),
+            buildDictionary(),
+          ],
         ),
       ),
     );
@@ -139,6 +137,7 @@ class _ReaderTtuSourcePageState
       messageJson = jsonDecode(message.message);
     } catch (e) {
       debugPrint(prettyJson(message.toJson()));
+
       return;
     }
 
@@ -200,6 +199,8 @@ class _ReaderTtuSourcePageState
   InAppWebViewGroupOptions getInitialOptions() {
     return InAppWebViewGroupOptions(
       crossPlatform: InAppWebViewOptions(
+        allowFileAccessFromFileURLs: true,
+        allowUniversalAccessFromFileURLs: true,
         disableContextMenu: true,
         mediaPlaybackRequiresUserGesture: false,
         verticalScrollBarEnabled: false,

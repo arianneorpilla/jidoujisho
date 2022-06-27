@@ -57,4 +57,32 @@ abstract class BaseHistoryPageState<T extends BaseHistoryPage>
   Widget buildHistory(List<MediaItem> books) {
     return Container();
   }
+
+  /// Wraps the [MediaItem] and adds interaction functionality for tapping
+  /// and long pressing.
+  Widget buildMediaItem(MediaItem item) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () async {
+          await appModel.openMedia(
+            context: context,
+            ref: ref,
+            mediaSource: mediaSource,
+            item: item,
+          );
+        },
+        onLongPress: () async {
+          await showDialog(
+            context: context,
+            builder: (context) => MediaItemDialogPage(item: item),
+          );
+        },
+        child: buildMediaItemContent(item),
+      ),
+    );
+  }
+
+  /// Build the widget visually representing the [MediaItem]'s history tile.
+  Widget buildMediaItemContent(MediaItem item);
 }

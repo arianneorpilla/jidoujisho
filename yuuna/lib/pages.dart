@@ -13,6 +13,7 @@ export 'src/pages/implementations/dictionary_dialog_import_page.dart';
 export 'src/pages/implementations/language_dialog_page.dart';
 export 'src/pages/implementations/massif_sentences_dialog_page.dart';
 export 'src/pages/implementations/media_source_picker_dialog_page.dart';
+export 'src/pages/implementations/media_item_dialog_page.dart';
 export 'src/pages/implementations/reader_twitter_source_page.dart';
 export 'src/pages/implementations/open_stash_dialog_page.dart';
 export 'src/pages/implementations/profiles_dialog_page.dart';

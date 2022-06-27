@@ -1,11 +1,17 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
+import 'package:transparent_image/transparent_image.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
+import 'package:path/path.dart' as path;
 
 /// A source for a [MediaType] that will appear on the list of sources when
 /// set as active. Handles sourcing and delivery of arguments such that the
@@ -19,6 +25,8 @@ abstract class MediaSource {
     required this.mediaType,
     required this.icon,
     required this.implementsSearch,
+    required this.canDeleteHistory,
+    required this.canOverrideDisplayValues,
   });
 
   /// A unique name that allows distinguishing this type from others,
@@ -53,6 +61,13 @@ abstract class MediaSource {
   /// Whether or not this media source has a search function. If false, this
   /// media source will have an action executed by [onSearchBarTap].
   final bool implementsSearch;
+
+  /// Whether or not this media source's produced [MediaItem] can be deleted.
+  final bool canDeleteHistory;
+
+  /// Whether or not this media source allows overriding a [MediaItem]'s
+  /// display title and thumbnail.
+  final bool canOverrideDisplayValues;
 
   /// Used for accessing persistent key-value data specific to this source.
   /// See [initialise].
@@ -206,4 +221,150 @@ abstract class MediaSource {
   /// The body widget to show in the tab when this source's media type and this
   /// source is selected.
   BaseHistoryPage buildHistoryPage();
+
+  /// Given a [MediaItem], return its title. Some media items may allow
+  /// overriding of values for display purposes. If a source does this,
+  /// override this function.
+  String getDisplayTitleFromMediaItem(MediaItem item) {
+    String? overrideTitle = getOverrideTitleFromMediaItem(item);
+    if (overrideTitle != null) {
+      return overrideTitle;
+    }
+
+    return item.title;
+  }
+
+  /// Given a [MediaItem], return its thumbnail. Some media items may allow
+  /// overriding of values for display purposes.
+  ImageProvider<Object> getDisplayThumbnailFromMediaItem({
+    required AppModel appModel,
+    required MediaItem item,
+    bool noOverride = false,
+  }) {
+    ImageProvider<Object>? overrideThumbnail =
+        getOverrideThumbnailFromMediaItem(
+      appModel: appModel,
+      item: item,
+    );
+    if (!noOverride && overrideThumbnail != null) {
+      return overrideThumbnail;
+    }
+
+    if (item.imageUrl != null) {
+      return CachedNetworkImageProvider(item.imageUrl!);
+    }
+
+    if (item.base64Image == null) {
+      return MemoryImage(kTransparentImage);
+    }
+
+    UriData data = Uri.parse(item.base64Image!).data!;
+
+    /// A cached version of [MemoryImage] so that the image does not reload
+    /// on every revisit
+    return CacheImageProvider(item.uniqueKey, data.contentAsBytes());
+  }
+
+  /// The map key used to store the override title of an item.
+  String getOverrideTitleKey(MediaItem item) {
+    return 'override_title://${item.mediaSourceIdentifier}/${item.uniqueKey}';
+  }
+
+  /// The map value used to store the override thumbnail of an item.
+  String getOverrideThumbnailFilename({
+    required AppModel appModel,
+    required MediaItem item,
+  }) {
+    String key =
+        'override_thumbnail://${item.mediaSourceIdentifier}/${item.uniqueKey}';
+    List<int> bytes = utf8.encode(key);
+    String basename = base64Url.encode(bytes);
+    String filename = path.join(appModel.thumbnailsDirectory.path, basename);
+
+    return filename;
+  }
+
+  /// Given a [MediaItem], return its override display title.
+  String? getOverrideTitleFromMediaItem(MediaItem item) {
+    if (!canOverrideDisplayValues) {
+      return null;
+    }
+
+    String key = getOverrideTitleKey(item);
+    String? overrideTitle =
+        getPreference<String?>(key: key, defaultValue: null);
+    return overrideTitle;
+  }
+
+  /// Given a [MediaItem], return its override display thumbnail.
+  ImageProvider<Object>? getOverrideThumbnailFromMediaItem({
+    required AppModel appModel,
+    required MediaItem item,
+  }) {
+    if (!canOverrideDisplayValues) {
+      return null;
+    }
+
+    String filename = getOverrideThumbnailFilename(
+      appModel: appModel,
+      item: item,
+    );
+    File file = File(filename);
+    if (!file.existsSync()) {
+      return null;
+    }
+
+    return FileImage(file);
+  }
+
+  /// Given a [MediaItem], set its override display title. If the title is
+  /// blank, the override title is cleared.
+  Future<void> setOverrideTitleFromMediaItem({
+    required MediaItem item,
+    required String? title,
+  }) async {
+    String key = getOverrideTitleKey(item);
+    String? value;
+    if (title != null) {
+      String trimmedTitle = title.trim();
+      if (trimmedTitle.isNotEmpty) {
+        value = trimmedTitle;
+      }
+    }
+
+    await setPreference<String?>(key: key, value: value);
+  }
+
+  /// Given a [MediaItem], set its override display thumbnail. If null, this
+  /// deletes the override thumbnail.
+  Future<void> setOverrideThumbnailFromMediaItem({
+    required AppModel appModel,
+    required MediaItem item,
+    required File? file,
+  }) async {
+    String filename = getOverrideThumbnailFilename(
+      appModel: appModel,
+      item: item,
+    );
+
+    File thumbnailFile = File(filename);
+    if (file == null) {
+      if (thumbnailFile.existsSync()) {
+        thumbnailFile.deleteSync();
+      }
+    } else {
+      thumbnailFile.createSync();
+      file.copySync(filename);
+    }
+  }
+
+  /// Used to clear override values of a [MediaItem] upon deletion.
+  Future<void> clearOverrideValues({
+    required AppModel appModel,
+    required MediaItem item,
+  }) async {
+    await deletePreference(key: getOverrideTitleKey(item));
+    await setOverrideThumbnailFromMediaItem(
+        appModel: appModel, item: item, file: null);
+  }
 }

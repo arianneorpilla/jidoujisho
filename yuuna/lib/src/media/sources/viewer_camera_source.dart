@@ -14,6 +14,8 @@ class ViewerCameraSource extends ViewerMediaSource {
               'View images taken with the camera or picked from media.',
           icon: Icons.camera,
           implementsSearch: false,
+          canDeleteHistory: false,
+          canOverrideDisplayValues: false,
         );
 
   /// Get the singleton instance of this media type.

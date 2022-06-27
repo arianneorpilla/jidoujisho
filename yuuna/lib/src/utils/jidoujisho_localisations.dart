@@ -24,6 +24,8 @@ class JidoujishoLocalisations {
     'see_more': 'See More',
     'show_menu': 'Show Menu',
     'stash': 'Stash',
+    'pick_image': 'Pick Image',
+    'undo': 'Undo',
     'copy': 'Copy',
     'clear': 'Clear',
     'resume_last_media': 'Resume Last Media',
@@ -39,6 +41,10 @@ class JidoujishoLocalisations {
     'app_locale_warning': 'Community addons and enhancements are managed '
         'by their respective developers, and these may appear in their '
         'original language.',
+    'dialog_play': 'PLAY',
+    'dialog_read': 'READ',
+    'dialog_view': 'VIEW',
+    'dialog_edit': 'EDIT',
     'dialog_export': 'EXPORT',
     'dialog_import': 'IMPORT',
     'dialog_close': 'CLOSE',
@@ -54,6 +60,9 @@ class JidoujishoLocalisations {
     'dialog_pop': 'POP',
     'dialog_save': 'SAVE',
     'dialog_launch_ankidroid': 'LAUNCH ANKIDROID',
+    'media_item_delete_confirmation':
+        'This will remove this item from history. Are you sure you want to do'
+            ' this?',
     'dictionaries_delete_confirmation':
         'Deleting a dictionary will also clear all dictionary results from'
             ' history. Are you sure you want to do this?',

@@ -3,7 +3,6 @@ import 'package:spaces/spaces.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
-import 'package:yuuna/utils.dart';
 
 /// A default page for a [ReaderMediaSource]'s tab body content when selected
 /// as a source in the main menu.
@@ -79,77 +78,55 @@ class HistoryReaderPageState<T extends BaseHistoryPage>
     );
   }
 
-  /// Build the image representing a cover or a thumbnail of a [MediaItem].
-  ImageProvider<Object> buildThumbnail(MediaItem item) {
-    if (item.base64Image == null) {
-      return MemoryImage(kTransparentImage);
-    }
-
-    UriData data = Uri.parse(item.base64Image!).data!;
-
-    /// A cached version of [MemoryImage] so that the image does not reload
-    /// on every revisit
-    return CacheImageProvider(item.uniqueKey, data.contentAsBytes());
-  }
-
-  /// Build the widget representing the [MediaItem]'s history tile.
-  Widget buildMediaItem(MediaItem item) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () async {
-          await appModel.openMedia(
-            context: context,
-            ref: ref,
-            mediaSource: mediaSource,
-            item: item,
-          );
-        },
-        child: Container(
-          padding: Spacing.of(context).insets.all.normal,
-          child: Stack(
-            alignment: Alignment.bottomLeft,
-            children: [
-              ColoredBox(
-                color: Colors.grey.shade800.withOpacity(0.3),
-                child: AspectRatio(
-                  aspectRatio: 176 / 250,
-                  child: FadeInImage(
-                    placeholder: MemoryImage(kTransparentImage),
-                    image: buildThumbnail(item),
-                    alignment: Alignment.topCenter,
-                    fit: BoxFit.fitWidth,
-                  ),
+  /// Build the widget visually representing the [MediaItem]'s history tile.
+  @override
+  Widget buildMediaItemContent(MediaItem item) {
+    return Container(
+      padding: Spacing.of(context).insets.all.normal,
+      child: Stack(
+        alignment: Alignment.bottomLeft,
+        children: [
+          ColoredBox(
+            color: Colors.grey.shade800.withOpacity(0.3),
+            child: AspectRatio(
+              aspectRatio: 176 / 250,
+              child: FadeInImage(
+                placeholder: MemoryImage(kTransparentImage),
+                image: mediaSource.getDisplayThumbnailFromMediaItem(
+                  appModel: appModel,
+                  item: item,
                 ),
+                alignment: Alignment.topCenter,
+                fit: BoxFit.fitWidth,
               ),
-              LayoutBuilder(builder: (context, constraints) {
-                return Container(
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.fromLTRB(2, 2, 2, 4),
-                  height: constraints.maxHeight * 0.25,
-                  width: double.maxFinite,
-                  color: Colors.black.withOpacity(0.6),
-                  child: Text(
-                    item.title,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 2,
-                    textAlign: TextAlign.center,
-                    softWrap: true,
-                    style: textTheme.bodySmall!.copyWith(
-                        color: Colors.white,
-                        fontSize: textTheme.bodySmall!.fontSize! * 0.9),
-                  ),
-                );
-              }),
-              LinearProgressIndicator(
-                value: item.position / item.duration,
-                backgroundColor: Colors.white.withOpacity(0.6),
-                valueColor: const AlwaysStoppedAnimation<Color>(Colors.red),
-                minHeight: 2,
-              ),
-            ],
+            ),
           ),
-        ),
+          LayoutBuilder(builder: (context, constraints) {
+            return Container(
+              alignment: Alignment.center,
+              padding: const EdgeInsets.fromLTRB(2, 2, 2, 4),
+              height: constraints.maxHeight * 0.25,
+              width: double.maxFinite,
+              color: Colors.black.withOpacity(0.6),
+              child: Text(
+                mediaSource.getDisplayTitleFromMediaItem(item),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+                textAlign: TextAlign.center,
+                softWrap: true,
+                style: textTheme.bodySmall!.copyWith(
+                    color: Colors.white,
+                    fontSize: textTheme.bodySmall!.fontSize! * 0.9),
+              ),
+            );
+          }),
+          LinearProgressIndicator(
+            value: item.position / item.duration,
+            backgroundColor: Colors.white.withOpacity(0.6),
+            valueColor: const AlwaysStoppedAnimation<Color>(Colors.red),
+            minHeight: 2,
+          ),
+        ],
       ),
     );
   }

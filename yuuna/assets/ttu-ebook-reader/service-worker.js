@@ -1,27 +1,28 @@
 const build = [
-  "/_app/immutable/start-f238dd08.js",
-  "/_app/immutable/pages/__layout.svelte-aa532cad.js",
+  "/_app/immutable/start-01763cb6.js",
+  "/_app/immutable/pages/__layout.svelte-ea47fccd.js",
   "/_app/immutable/assets/pages/__layout.svelte-cb4f023e.css",
   "/_app/immutable/pages/__error.svelte-1e1e37dd.js",
   "/_app/immutable/pages/b/_id_integer_.svelte-66334dc6.js",
-  "/_app/immutable/pages/b/index.svelte-a7997b8d.js",
+  "/_app/immutable/pages/b/index.svelte-e10bf996.js",
   "/_app/immutable/assets/pages/b/index.svelte-aa463c1e.css",
   "/_app/immutable/pages/index.svelte-84ceeaee.js",
-  "/_app/immutable/pages/manage/index.svelte-275a2bf7.js",
-  "/_app/immutable/pages/settings/index.svelte-519e4f73.js",
+  "/_app/immutable/pages/manage/index.svelte-70fb421a.js",
+  "/_app/immutable/pages/settings/index.svelte-f6a4f2bb.js",
   "/_app/immutable/chunks/index-51808792.js",
   "/_app/immutable/chunks/index-395b34f6.js",
   "/_app/immutable/chunks/singletons-d1fb5791.js",
   "/_app/immutable/chunks/stores-ac37e759.js",
   "/_app/immutable/chunks/dialog-manager-2d1393e2.js",
+  "/_app/immutable/chunks/_commonjsHelpers-850449cf.js",
   "/_app/immutable/chunks/store-afb7c6c1.js",
-  "/_app/immutable/chunks/css-classes-742799c9.js",
+  "/_app/immutable/chunks/css-classes-4a8847d3.js",
   "/_app/immutable/assets/css-classes-90564669.css",
   "/_app/immutable/chunks/format-page-title-d2ff14dd.js",
   "/_app/immutable/chunks/use-click-outside-ebc7d6ba.js",
   "/_app/immutable/chunks/tap-495987ce.js",
   "/_app/immutable/chunks/index.es-98a5a7c8.js",
-  "/_app/immutable/chunks/storage-1bf8dbe8.js"
+  "/_app/immutable/chunks/storage-ec98506e.js"
 ];
 const files = [
   "/apple-touch-icon.png",
@@ -45,7 +46,7 @@ const prerendered = [
   "/manage.html",
   "/settings.html"
 ];
-const version = "1655249682406";
+const version = "1655939456538";
 /**
  * @license BSD-3-Clause
  * Copyright (c) 2022, ッツ Reader Authors
