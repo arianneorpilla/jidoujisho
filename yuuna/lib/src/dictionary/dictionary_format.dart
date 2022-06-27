@@ -14,7 +14,6 @@ abstract class DictionaryFormat {
   DictionaryFormat({
     required this.formatName,
     required this.formatIcon,
-    required this.requiresFile,
     required this.compatibleFileExtensions,
     required this.prepareDirectory,
     required this.prepareName,
@@ -31,14 +30,8 @@ abstract class DictionaryFormat {
   /// An appropriate icon for this dictionary format.
   late IconData formatIcon;
 
-  /// Whether or not this dictionary requires a file in order to install the
-  /// format. If so, a file will not be required for installing a dictionary
-  /// of the matching format.
-  late bool requiresFile;
-
   /// This will be used to notify the user about the required extension if they
-  /// select a file with the wrong extension. Leave blank if [requiresFile] is
-  /// false. Include the leading dot and lowercase. This will be lowercased.
+  /// select a file with the wrong extension.
   late List<String> compatibleFileExtensions;
 
   /// [IMPORTANT]: The following parameters below point to functions defined in

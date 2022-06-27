@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:reorderables/reorderables.dart';
 import 'package:spaces/spaces.dart';
@@ -56,10 +59,23 @@ class _DictionaryDialogPageState extends BasePageState {
     return TextButton(
       child: Text(dialogImportLabel),
       onPressed: () async {
-        await appModel.importDictionary(onImportSuccess: () {
-          _selectedOrder = appModel.dictionaries.length - 1;
-          setState(() {});
-        });
+        FilePickerResult? result = await FilePicker.platform.pickFiles(
+          allowMultiple: true,
+        );
+        if (result == null) {
+          return;
+        }
+
+        for (PlatformFile platformFile in result.files) {
+          File file = File(platformFile.path!);
+          await appModel.importDictionary(
+            file: file,
+            onImportSuccess: () {
+              _selectedOrder = appModel.dictionaries.length - 1;
+              setState(() {});
+            },
+          );
+        }
       },
     );
   }

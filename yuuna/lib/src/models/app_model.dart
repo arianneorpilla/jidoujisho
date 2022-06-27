@@ -5,7 +5,6 @@ import 'package:collection/collection.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -847,7 +846,10 @@ class AppModel with ChangeNotifier {
   /// Start the process of importing a dictionary. This is called from the
   /// dictionary menu, and starts the process of importing for the
   /// [lastSelectedDictionaryFormat].
-  Future<void> importDictionary({required Function() onImportSuccess}) async {
+  Future<void> importDictionary({
+    required File file,
+    required Function() onImportSuccess,
+  }) async {
     /// The last selected dictionary format in the dictionary menu is used for
     /// dictionary import.
     DictionaryFormat dictionaryFormat = lastSelectedDictionaryFormat;
@@ -904,16 +906,6 @@ class AppModel with ChangeNotifier {
     /// shown below. A dialog is shown to show the progress of the dictionary
     /// file import, with messages pertaining to the above [ValueNotifier].
     try {
-      File? file;
-      if (lastSelectedDictionaryFormat.requiresFile) {
-        FilePickerResult? result = await FilePicker.platform.pickFiles();
-        if (result == null) {
-          return;
-        }
-
-        file = File(result.files.single.path!);
-      }
-
       showDialog(
         barrierDismissible: false,
         context: navigatorKey.currentContext!,
@@ -939,36 +931,28 @@ class AppModel with ChangeNotifier {
       /// Show the file picker if the [lastSelectedDictionaryFormat] requires a
       /// file for dictionary import.
       late final PrepareDirectoryParams prepareDirectoryParams;
-      if (lastSelectedDictionaryFormat.requiresFile) {
-        if (!dictionaryFormat.compatibleFileExtensions
-            .contains(path.extension(file!.path).toLowerCase())) {
-          throw Exception(extensionErrorMessage);
-        }
 
-        prepareDirectoryParams = PrepareDirectoryParams(
-          file: file,
-          workingDirectory: workingDirectory,
-          sendPort: sendPort,
-          localisation: localisation,
-        );
-
-        /// Many formats require ZIP extraction, while others have their own
-        /// particular cases.
-        ///
-        /// The purpose of this function is to make it such that it can be
-        /// assumed that the remaining operations after this can be performed
-        /// from the working directory, and allow different formats to
-        /// gracefully follow the remaining generic steps.
-        progressNotifier.value = localisation.importMessageExtraction;
-        await dictionaryFormat.prepareDirectory(prepareDirectoryParams);
-      } else {
-        prepareDirectoryParams = PrepareDirectoryParams(
-          file: null,
-          workingDirectory: workingDirectory,
-          sendPort: sendPort,
-          localisation: localisation,
-        );
+      if (!dictionaryFormat.compatibleFileExtensions
+          .contains(path.extension(file.path).toLowerCase())) {
+        throw Exception(extensionErrorMessage);
       }
+
+      prepareDirectoryParams = PrepareDirectoryParams(
+        file: file,
+        workingDirectory: workingDirectory,
+        sendPort: sendPort,
+        localisation: localisation,
+      );
+
+      /// Many formats require ZIP extraction, while others have their own
+      /// particular cases.
+      ///
+      /// The purpose of this function is to make it such that it can be
+      /// assumed that the remaining operations after this can be performed
+      /// from the working directory, and allow different formats to
+      /// gracefully follow the remaining generic steps.
+      progressNotifier.value = localisation.importMessageExtraction;
+      await dictionaryFormat.prepareDirectory(prepareDirectoryParams);
 
       /// It is now assumed that the rest of the operations can be performed
       /// from the working area. A dictionary name is required for import, and

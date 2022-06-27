@@ -20,7 +20,6 @@ class YomichanDictionaryFormat extends DictionaryFormat {
       : super(
           formatName: 'Yomichan Dictionary',
           formatIcon: Icons.auto_stories,
-          requiresFile: true,
           compatibleFileExtensions: const ['.zip'],
           prepareDirectory: prepareDirectoryYomichanTermBankFormat,
           prepareName: prepareNameYomichanTermBankFormat,

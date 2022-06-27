@@ -191,6 +191,7 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
           padding: EdgeInsets.only(
             top: Spacing.of(context).spaces.small,
             right: Spacing.of(context).spaces.small,
+            bottom: Spacing.of(context).spaces.small,
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,

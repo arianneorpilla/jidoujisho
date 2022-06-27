@@ -36,7 +36,7 @@ abstract class BaseTabPageState<T extends BaseTabPage> extends BasePageState {
   /// Refresh this tab.
   void refresh() {
     mediaSource.onSourceExit(context: context, ref: ref);
-    setState(() {});
+    appModel.refreshDictionaryHistory();
   }
 
   @override
