@@ -257,7 +257,7 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
         cardColor: Colors.white,
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
-            foregroundColor: Colors.black,
+            primary: Colors.black,
           ),
         ),
         listTileTheme: ListTileThemeData(
@@ -339,7 +339,7 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
         cardColor: const Color.fromARGB(255, 30, 30, 30),
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
-            foregroundColor: Colors.white,
+            primary: Colors.white,
           ),
         ),
         listTileTheme: ListTileThemeData(
