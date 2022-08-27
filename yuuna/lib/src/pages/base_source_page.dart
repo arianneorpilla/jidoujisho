@@ -48,6 +48,12 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
   /// Localisation for context menu option.
   String get copyLabel => appModel.translate('copy');
 
+  /// Allows customisation of dictionary background.
+  double get dictionaryBackgroundOpacity => 0.95;
+
+  /// Allows customisation of opacity of dictionary entries.
+  double get dictionaryEntryOpacity => 1;
+
   /// The result from the last dictionary search performed with
   /// [searchDictionaryResult].
   final ValueNotifier<DictionaryResult?> _dictionaryResultNotifier =
@@ -132,6 +138,9 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
 
           case JidoujishoPopupPosition.rightHalf:
             return buildRightHalfDictionary();
+
+               case JidoujishoPopupPosition.topTwoThirds:
+            return buildTopTwoThirdsDictionary();
         }
       },
     );
@@ -197,6 +206,22 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
     );
   }
 
+    /// The dictionary in the case of [JidoujishoPopupPosition.topTwoThirds].
+  Widget buildTopTwoThirdsDictionary() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Flexible(
+          flex: 2,
+          child: buildDictionaryResult(),
+        ),
+        const Flexible(
+          child: SizedBox.shrink(),
+        ),
+      ],
+    );
+  }
+
   /// The dictionary result unpositioned. See [buildDictionary] for the
   /// positioned version.
   Widget buildDictionaryResult() {
@@ -208,7 +233,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
       child: Container(
         padding: Spacing.of(context).insets.all.semiSmall,
         margin: Spacing.of(context).insets.all.normal,
-        color: theme.cardColor.withOpacity(0.95),
+        color: theme.cardColor.withOpacity(dictionaryBackgroundOpacity),
         child: buildSearchResult(),
       ),
     );
@@ -222,6 +247,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
 
     return ClipRect(
       child: DictionaryResultPage(
+        entryOpacity: dictionaryEntryOpacity,
         key: ValueKey(_dictionaryResultNotifier.value),
         onSearch: onSearch,
         onStash: onStash,

@@ -54,7 +54,7 @@ abstract class BaseHistoryPageState<T extends BaseHistoryPage>
   }
 
   /// This is shown as the body when [shouldPlaceholderBeShown] is false.
-  Widget buildHistory(List<MediaItem> books) {
+  Widget buildHistory(List<MediaItem> items) {
     return Container();
   }
 

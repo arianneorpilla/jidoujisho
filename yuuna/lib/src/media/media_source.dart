@@ -113,6 +113,8 @@ abstract class MediaSource {
   /// initialisation step.
   Future<void> prepareResources() async {}
 
+
+
   /// Executed when this media source is closed. Perform this step to clean up
   /// resources or refresh media history.
   Future<void> onSourceExit({
@@ -354,6 +356,6 @@ abstract class MediaSource {
   }) async {
     await deletePreference(key: getOverrideTitleKey(item));
     await setOverrideThumbnailFromMediaItem(
-        appModel: appModel, item: item, file: null);
+        appModel: appModel, item: item, file: null,);
   }
 }

@@ -43,6 +43,15 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.1.6+1"
+  blurrycontainer:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: fb26dd1fa81edeb048b14703f1c1f28e93ee43d0
+      resolved-ref: fb26dd1fa81edeb048b14703f1c1f28e93ee43d0
+      url: "https://github.com/Krish-Ideausher/blurry_container/"
+    source: git
+    version: "0.0.2"
   boolean_selector:
     dependency: transitive
     description:
@@ -332,6 +341,15 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.5.1"
+  filesystem_picker:
+    dependency: "direct main"
+    description:
+      path: package
+      ref: "968a4b3e04c4b19de5f3ae8e9c922a220ec67c62"
+      resolved-ref: "968a4b3e04c4b19de5f3ae8e9c922a220ec67c62"
+      url: "https://github.com/lrorpilla/filesystem_picker"
+    source: git
+    version: "2.0.0-nullsafety.0"
   firebase_core:
     dependency: transitive
     description:
@@ -407,6 +425,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.3.0"
+  flutter_ffmpeg:
+    dependency: "direct main"
+    description:
+      name: flutter_ffmpeg
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.4.2"
   flutter_hooks:
     dependency: transitive
     description:
@@ -482,6 +507,20 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_vlc_player:
+    dependency: "direct main"
+    description:
+      name: flutter_vlc_player
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "7.1.5"
+  flutter_vlc_player_platform_interface:
+    dependency: transitive
+    description:
+      name: flutter_vlc_player_platform_interface
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.1"
   flutter_web_plugins:
     dependency: transitive
     description: flutter
@@ -529,6 +568,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.2"
+  google_fonts:
+    dependency: "direct main"
+    description:
+      name: google_fonts
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.1"
   graphs:
     dependency: transitive
     description:
@@ -1238,6 +1284,15 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.0"
+  subtitle:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: "9c5307d1cbe3a9ca84c387e2023251896c9ff47f"
+      resolved-ref: "9c5307d1cbe3a9ca84c387e2023251896c9ff47f"
+      url: "https://github.com/lrorpilla/subtitle"
+    source: git
+    version: "0.1.0-beta.2"
   synchronized:
     dependency: transitive
     description:

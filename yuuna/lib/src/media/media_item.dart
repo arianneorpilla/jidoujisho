@@ -17,7 +17,7 @@ part 'media_item.g.dart';
 class MediaItem {
   /// Initialise a media item with certain details.
   MediaItem({
-    required this.uniqueKey,
+    required this.mediaIdentifier,
     required this.title,
     required this.mediaTypeIdentifier,
     required this.mediaSourceIdentifier,
@@ -43,13 +43,17 @@ class MediaItem {
   @Id()
   int? id;
 
-  /// The unique identifier of this item. Using this variable alone, a media
+  /// A unique identifier for the purposes of database storage.
+  @Index(unique: true)
+  String get uniqueKey => '$mediaSourceIdentifier/$mediaIdentifier';
+
+  /// The media identifier of this item. Using this variable alone, a media
   /// source must be able to functionally process how to display the media.
   /// If the same item exists in history, then the item is replaced with a
   /// newer item in the addition operation. This key is also used to identify
   /// resources such as thumbnails in the cache.
   @Index()
-  String uniqueKey;
+  String mediaIdentifier;
 
   /// The name of this item. Typically, this could be the name of a video
   /// or a book.
@@ -83,11 +87,11 @@ class MediaItem {
   /// The current progress of the media in the time this context was made.
   /// This could be the seconds of a playing video or the page number of a
   /// book or comic.
-  final int position;
+  int position;
 
   /// The media's full duration, used to be able to tell the completion of
   /// this media context relative to the position.
-  final int duration;
+  int duration;
 
   /// Whether or not this [MediaItem] can be deleted.
   final bool canDelete;

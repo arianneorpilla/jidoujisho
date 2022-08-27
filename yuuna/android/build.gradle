@@ -32,3 +32,7 @@ subprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+ext {
+    flutterFFmpegPackage = "full-gpl-lts"
+}

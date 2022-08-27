@@ -19,6 +19,7 @@ class DictionaryTermPage extends BasePage {
     required this.onStash,
     required this.expandableControllers,
     required this.dictionaryHiddens,
+    this.entryOpacity = 1,
     this.onScrollLeft,
     this.onScrollRight,
     this.footerWidget,
@@ -55,6 +56,9 @@ class DictionaryTermPage extends BasePage {
   /// Optional footer foor use in [DictionaryHistoryPage].
   final Widget? footerWidget;
 
+  /// Opacity for entries.
+  final double entryOpacity;
+
   @override
   BasePageState<DictionaryTermPage> createState() => _DictionaryTermPageState();
 }
@@ -88,8 +92,8 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
     List<Widget> tags = appModel.getTagsForTerm(widget.dictionaryTerm);
     return Card(
       color: appModel.isDarkMode
-          ? const Color.fromARGB(255, 15, 15, 15)
-          : const Color.fromARGB(255, 246, 246, 246),
+          ?  Color.fromRGBO(15, 15, 15, widget.entryOpacity)
+          :  Color.fromRGBO(246, 246, 246, widget.entryOpacity),
       elevation: 0,
       shape: const RoundedRectangleBorder(),
       child: Padding(

@@ -23,7 +23,6 @@ export 'src/creator/enhancements/search_dictionary_enhancement.dart';
 export 'src/creator/enhancements/text_segmentation_enhancement.dart';
 export 'src/creator/enhancements/pick_from_stash_enhancement.dart';
 export 'src/creator/enhancements/pop_from_stash_enhancement.dart';
-export 'src/creator/enhancements/image_search_term_picker_enhancement.dart';
 
 export 'src/creator/fields/sentence_field.dart';
 export 'src/creator/fields/meaning_field.dart';

@@ -93,7 +93,6 @@ class ReaderTtuSource extends ReaderMediaSource {
   /// Fetch JSON for all books in IndexedDB.
   Future<List<MediaItem>> getBooksHistory() async {
     if (getPreference(key: 'firstTime', defaultValue: true)) {
-      await setPreference(key: 'firstTime', value: false);
       return [];
     }
 
@@ -170,7 +169,7 @@ class ReaderTtuSource extends ReaderMediaSource {
       }
 
       return MediaItem(
-        uniqueKey: 'http://localhost:$port/b.html?id=$id&?title=$title',
+        mediaIdentifier: 'http://localhost:$port/b.html?id=$id&?title=$title',
         title: title,
         base64Image: base64Image,
         mediaTypeIdentifier: ReaderTtuSource.instance.mediaType.uniqueKey,

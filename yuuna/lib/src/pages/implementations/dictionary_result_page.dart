@@ -12,6 +12,7 @@ class DictionaryResultPage extends BasePage {
     required this.result,
     required this.onSearch,
     required this.onStash,
+   this.entryOpacity = 1,
     this.updateHistory = true,
     this.spaceBeforeFirstResult = true,
     super.key,
@@ -31,6 +32,10 @@ class DictionaryResultPage extends BasePage {
 
   /// Whether or not to put a space before the first result.
   final bool spaceBeforeFirstResult;
+
+    /// Opacity for entries.
+  final double entryOpacity;
+
 
   @override
   BasePageState<DictionaryResultPage> createState() =>
@@ -113,6 +118,7 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
         }
 
         return DictionaryTermPage(
+          entryOpacity: widget.entryOpacity,
           dictionaryMap: dictionaryMap!,
           dictionaryTerm: dictionaryTerm,
           onSearch: widget.onSearch,

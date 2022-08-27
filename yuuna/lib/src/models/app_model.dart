@@ -5,6 +5,7 @@ import 'package:collection/collection.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
+import 'package:external_path/external_path.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -12,6 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:isar/isar.dart';
 import 'package:intl/intl.dart' as intl;
@@ -204,6 +206,9 @@ class AppModel with ChangeNotifier {
 
   /// Maximum number of search history items.
   final int maximumSearchHistoryItems = 50;
+
+  /// Maximum number of media history items.
+  final int maximumMediaHistoryItems = 50;
 
   /// Maximum number of dictionary history items.
   final int maximumDictionaryHistoryItems = 20;
@@ -431,7 +436,6 @@ class AppModel with ChangeNotifier {
         TextSegmentationEnhancement(field: NotesField.instance),
         OpenStashEnhancement(field: NotesField.instance),
         PopFromStashEnhancement(field: NotesField.instance),
-        ImageSearchTermPicker(field: NotesField.instance),
       ],
       ImageField.instance: [
         ClearFieldEnhancement(field: ImageField.instance),
@@ -440,7 +444,6 @@ class AppModel with ChangeNotifier {
       MeaningField.instance: [
         ClearFieldEnhancement(field: MeaningField.instance),
         TextSegmentationEnhancement(field: MeaningField.instance),
-        ImageSearchTermPicker(field: MeaningField.instance),
       ],
       ReadingField.instance: [
         ClearFieldEnhancement(field: ReadingField.instance),
@@ -450,7 +453,6 @@ class AppModel with ChangeNotifier {
         TextSegmentationEnhancement(field: SentenceField.instance),
         OpenStashEnhancement(field: SentenceField.instance),
         PopFromStashEnhancement(field: SentenceField.instance),
-        ImageSearchTermPicker(field: SentenceField.instance),
       ],
       TermField.instance: [
         ClearFieldEnhancement(field: TermField.instance),
@@ -464,7 +466,6 @@ class AppModel with ChangeNotifier {
         TextSegmentationEnhancement(field: ContextField.instance),
         OpenStashEnhancement(field: ContextField.instance),
         PopFromStashEnhancement(field: ContextField.instance),
-        ImageSearchTermPicker(field: ContextField.instance),
       ],
       PitchAccentField.instance: [
         ClearFieldEnhancement(field: PitchAccentField.instance),
@@ -475,17 +476,14 @@ class AppModel with ChangeNotifier {
       CollapsedMeaningField.instance: [
         ClearFieldEnhancement(field: CollapsedMeaningField.instance),
         TextSegmentationEnhancement(field: CollapsedMeaningField.instance),
-        ImageSearchTermPicker(field: CollapsedMeaningField.instance),
       ],
       ExpandedMeaningField.instance: [
         ClearFieldEnhancement(field: ExpandedMeaningField.instance),
         TextSegmentationEnhancement(field: ExpandedMeaningField.instance),
-        ImageSearchTermPicker(field: ExpandedMeaningField.instance),
       ],
       HiddenMeaningField.instance: [
         ClearFieldEnhancement(field: HiddenMeaningField.instance),
         TextSegmentationEnhancement(field: HiddenMeaningField.instance),
-        ImageSearchTermPicker(field: HiddenMeaningField.instance),
       ],
     };
 
@@ -2149,6 +2147,30 @@ class AppModel with ChangeNotifier {
     return metaEntries;
   }
 
+  /// Add a [MediaItem] to history.
+  void addMediaItem(MediaItem item) {
+    _database.writeTxnSync((isar) {
+      isar.mediaItems.deleteByUniqueKeySync(item.uniqueKey);
+
+      isar.mediaItems.putSync(item);
+
+      int countInSameHistory = isar.mediaItems
+          .filter()
+          .mediaTypeIdentifierEqualTo(item.mediaTypeIdentifier)
+          .countSync();
+
+      if (maximumMediaHistoryItems < countInSameHistory) {
+        int surplus = countInSameHistory - maximumSearchHistoryItems;
+        isar.mediaItems
+            .filter()
+            .mediaTypeIdentifierEqualTo(item.mediaTypeIdentifier)
+            .limit(surplus)
+            .build()
+            .deleteAllSync();
+      }
+    });
+  }
+
   /// Deletes a [MediaItem] from history and also rids of override values.
   Future<void> deleteMediaItem(MediaItem item) async {
     MediaSource mediaSource = item.getMediaSource(appModel: this);
@@ -2419,5 +2441,182 @@ class AppModel with ChangeNotifier {
         .where()
         .mediaSourceIdentifierEqualTo(mediaSource.uniqueKey)
         .findAllSync();
+  }
+
+  /// Returns the last navigated directory the user used for picking a file for a
+  /// certain media type.
+  Directory? getLastPickedDirectory(MediaType type) {
+    String path = _preferences.get('${type.uniqueKey}/last_picked_file',
+        defaultValue: '');
+    if (path.isEmpty) {
+      return null;
+    }
+
+    Directory directory = Directory(path);
+    if (!directory.existsSync()) {
+      return null;
+    }
+    return directory;
+  }
+
+
+  /// Returns the last navigated directory the user used for picking a file for a
+  /// certain media type.
+  void setLastPickedDirectory({required MediaType type, required Directory directory,}) {
+    _preferences.put('${type.uniqueKey}/last_picked_file', directory.path);
+  }
+
+  /// Returns valid file picker directories. If there is a last picked directory for
+  /// a media type, this will be included as first on the list. Otherwise, external
+  /// root directories will be included.
+  Future<List<Directory>> getFilePickerDirectoriesForMediaType(
+      MediaType type) async {
+    List<Directory> directories = [];
+    Directory? lastPickedDirectory = getLastPickedDirectory(type);
+    if (lastPickedDirectory != null) {
+      directories.add(lastPickedDirectory);
+    }
+
+    List<String> paths = await ExternalPath.getExternalStorageDirectories();
+    for (String path in paths) {
+      Directory directory = Directory(path);
+      if (!directories.contains(directory)) {
+        directories.add(directory);
+      }
+    }
+
+    return directories;
+  }
+
+  /// Get the blur options used in the player.
+  BlurOptions get blurOptions {
+    double width = _preferences.get('blur_width', defaultValue: 200.0);
+    double height = _preferences.get('blur_height', defaultValue: 200.0);
+    double left = _preferences.get('blur_left', defaultValue: -1.0);
+    double top = _preferences.get('blur_top', defaultValue: -1.0);
+
+    int red = _preferences.get('blur_red',
+        defaultValue: Colors.black.withOpacity(0.5).red);
+    int green = _preferences.get('blur_green',
+        defaultValue: Colors.black.withOpacity(0.5).green);
+    int blue = _preferences.get('blur_blue',
+        defaultValue: Colors.black.withOpacity(0.5).blue);
+    double opacity = _preferences.get('blur_opacity',
+        defaultValue: Colors.black.withOpacity(0.5).opacity);
+
+    Color color = Color.fromRGBO(red, green, blue, opacity);
+
+    double blurRadius = _preferences.get('blur_radius', defaultValue: 5.0);
+    bool visible = _preferences.get('blur_visible', defaultValue: false);
+
+    return BlurOptions(
+      width: width,
+      height: height,
+      left: left,
+      top: top,
+      color: color,
+      blurRadius: blurRadius,
+      visible: visible,
+    );
+  }
+
+  /// Set the blur options used in the player.
+  void setBlurOptions(BlurOptions options) {
+    _preferences.put('blur_width', options.width);
+    _preferences.put('blur_height', options.height);
+    _preferences.put('blur_left', options.left);
+    _preferences.put('blur_right', options.top);
+
+    _preferences.put('blur_red', options.color.red);
+    _preferences.put('blur_green', options.color.green);
+    _preferences.put('blur_blue', options.color.blue);
+    _preferences.put('blur_opacity', options.color.opacity);
+
+    _preferences.put('blur_radius', options.blurRadius);
+    _preferences.put('blur_visible', options.visible);
+  }
+
+  /// Get the subtitle options used in the player.
+  SubtitleOptions get subtitleOptions {
+    int audioAllowance = _preferences.get('audio_allowance', defaultValue: 0);
+    int subtitleDelay = _preferences.get('subtitle_delay', defaultValue: 0);
+    double fontSize = _preferences.get('font_size', defaultValue: 24.0);
+    String fontName = _preferences.get(
+        'font_name/${targetLanguage.languageCode}',
+        defaultValue: 'Roboto');
+    String regexFilter = _preferences.get('regex_filter', defaultValue: '');
+
+    return SubtitleOptions(
+      audioAllowance: audioAllowance,
+      subtitleDelay: subtitleDelay,
+      fontSize: fontSize,
+      fontName: fontName,
+      regexFilter: regexFilter,
+    );
+  }
+
+  /// Get fonts that are available to be chosen for the current target language.
+  List<String> getAvailableFonts() {
+    if (targetLanguage is JapaneseLanguage) {
+      return [
+        'Hachi Maru Pop',
+        'Kosugi',
+        'Kosugi Maru',
+        'M PLUS 1p',
+        'M PLUS Rounded 1c',
+        'Potta One',
+        'Roboto',
+        'Sawarabi Gothic',
+        'Sawarabi Mincho',
+        'Yusei Magic',
+      ];
+    }
+
+    return GoogleFonts.asMap().keys.toList();
+  }
+
+  /// Set the subtitle options used in the player.
+  void setSubtitleOptions(SubtitleOptions options) {
+    _preferences.put('audio_allowance', options.audioAllowance);
+    _preferences.put('subtitle_delay', options.subtitleDelay);
+    _preferences.put('font_size', options.fontSize);
+    _preferences.put(
+        'font_name/${targetLanguage.languageCode}', options.fontName);
+    _preferences.put('regex_filter', options.regexFilter);
+  }
+
+  /// Get definition focus mode for player.
+  bool get isPlayerDefinitionFocusMode {
+    return _preferences.get('player_definition_focus_mode',
+        defaultValue: false);
+  }
+
+  /// Toggle definition focus mode for player.
+  void togglePlayerDefinitionFocusMode() async {
+    await _preferences.put(
+        'player_definition_focus_mode', !isPlayerDefinitionFocusMode);
+  }
+
+  /// Get definition focus mode for player.
+  bool get isPlayerListeningComprehensionMode {
+    return _preferences.get('player_listening_comprehension_mode',
+        defaultValue: false);
+  }
+
+  /// Toggle definition focus mode for player.
+  void togglePlayerListeningComprehensionMode() async {
+    await _preferences.put('player_listening_comprehension_mode',
+        !isPlayerListeningComprehensionMode);
+  }
+
+  /// Get orientation for player.
+  bool get isPlayerOrientationPortrait {
+    return _preferences.get('player_orientation_portrait', defaultValue: false);
+  }
+
+  /// Toggle orientation for player.
+  void togglePlayerOrientationPortrait() async {
+    await _preferences.put(
+        'player_orientation_portrait', !isPlayerOrientationPortrait);
   }
 }

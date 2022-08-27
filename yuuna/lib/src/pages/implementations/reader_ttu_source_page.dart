@@ -115,6 +115,7 @@ class _ReaderTtuSourcePageState
         );
       },
       onLoadStop: (controller, uri) async {
+         await mediaSource.setPreference(key: 'firstTime', value: false);
         await controller.evaluateJavascript(source: javascriptToExecute);
       },
       onTitleChanged: (controller, title) async {

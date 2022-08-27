@@ -15,7 +15,7 @@ extension GetMediaItemCollection on Isar {
 const MediaItemSchema = CollectionSchema(
   name: 'MediaItem',
   schema:
-      '{"name":"MediaItem","idName":"id","properties":[{"name":"author","type":"String"},{"name":"base64Image","type":"String"},{"name":"canDelete","type":"Bool"},{"name":"canEdit","type":"Bool"},{"name":"duration","type":"Long"},{"name":"hashCode","type":"Long"},{"name":"imageUrl","type":"String"},{"name":"mediaSourceIdentifier","type":"String"},{"name":"mediaTypeIdentifier","type":"String"},{"name":"position","type":"Long"},{"name":"sourceMetadata","type":"String"},{"name":"title","type":"String"},{"name":"uniqueKey","type":"String"}],"indexes":[{"name":"mediaSourceIdentifier","unique":false,"properties":[{"name":"mediaSourceIdentifier","type":"Hash","caseSensitive":true}]},{"name":"mediaTypeIdentifier","unique":false,"properties":[{"name":"mediaTypeIdentifier","type":"Hash","caseSensitive":true}]},{"name":"uniqueKey","unique":false,"properties":[{"name":"uniqueKey","type":"Hash","caseSensitive":true}]}],"links":[]}',
+      '{"name":"MediaItem","idName":"id","properties":[{"name":"author","type":"String"},{"name":"base64Image","type":"String"},{"name":"canDelete","type":"Bool"},{"name":"canEdit","type":"Bool"},{"name":"duration","type":"Long"},{"name":"hashCode","type":"Long"},{"name":"imageUrl","type":"String"},{"name":"mediaIdentifier","type":"String"},{"name":"mediaSourceIdentifier","type":"String"},{"name":"mediaTypeIdentifier","type":"String"},{"name":"position","type":"Long"},{"name":"sourceMetadata","type":"String"},{"name":"title","type":"String"},{"name":"uniqueKey","type":"String"}],"indexes":[{"name":"mediaIdentifier","unique":false,"properties":[{"name":"mediaIdentifier","type":"Hash","caseSensitive":true}]},{"name":"mediaSourceIdentifier","unique":false,"properties":[{"name":"mediaSourceIdentifier","type":"Hash","caseSensitive":true}]},{"name":"mediaTypeIdentifier","unique":false,"properties":[{"name":"mediaTypeIdentifier","type":"Hash","caseSensitive":true}]},{"name":"uniqueKey","unique":true,"properties":[{"name":"uniqueKey","type":"Hash","caseSensitive":true}]}],"links":[]}',
   idName: 'id',
   propertyIds: {
     'author': 0,
@@ -25,20 +25,25 @@ const MediaItemSchema = CollectionSchema(
     'duration': 4,
     'hashCode': 5,
     'imageUrl': 6,
-    'mediaSourceIdentifier': 7,
-    'mediaTypeIdentifier': 8,
-    'position': 9,
-    'sourceMetadata': 10,
-    'title': 11,
-    'uniqueKey': 12
+    'mediaIdentifier': 7,
+    'mediaSourceIdentifier': 8,
+    'mediaTypeIdentifier': 9,
+    'position': 10,
+    'sourceMetadata': 11,
+    'title': 12,
+    'uniqueKey': 13
   },
   listProperties: {},
   indexIds: {
-    'mediaSourceIdentifier': 0,
-    'mediaTypeIdentifier': 1,
-    'uniqueKey': 2
+    'mediaIdentifier': 0,
+    'mediaSourceIdentifier': 1,
+    'mediaTypeIdentifier': 2,
+    'uniqueKey': 3
   },
   indexValueTypes: {
+    'mediaIdentifier': [
+      IndexValueType.stringHash,
+    ],
     'mediaSourceIdentifier': [
       IndexValueType.stringHash,
     ],
@@ -114,25 +119,28 @@ void _mediaItemSerializeNative(
     _imageUrl = IsarBinaryWriter.utf8Encoder.convert(value6);
   }
   dynamicSize += (_imageUrl?.length ?? 0) as int;
-  final value7 = object.mediaSourceIdentifier;
-  final _mediaSourceIdentifier = IsarBinaryWriter.utf8Encoder.convert(value7);
+  final value7 = object.mediaIdentifier;
+  final _mediaIdentifier = IsarBinaryWriter.utf8Encoder.convert(value7);
+  dynamicSize += (_mediaIdentifier.length) as int;
+  final value8 = object.mediaSourceIdentifier;
+  final _mediaSourceIdentifier = IsarBinaryWriter.utf8Encoder.convert(value8);
   dynamicSize += (_mediaSourceIdentifier.length) as int;
-  final value8 = object.mediaTypeIdentifier;
-  final _mediaTypeIdentifier = IsarBinaryWriter.utf8Encoder.convert(value8);
+  final value9 = object.mediaTypeIdentifier;
+  final _mediaTypeIdentifier = IsarBinaryWriter.utf8Encoder.convert(value9);
   dynamicSize += (_mediaTypeIdentifier.length) as int;
-  final value9 = object.position;
-  final _position = value9;
-  final value10 = object.sourceMetadata;
+  final value10 = object.position;
+  final _position = value10;
+  final value11 = object.sourceMetadata;
   IsarUint8List? _sourceMetadata;
-  if (value10 != null) {
-    _sourceMetadata = IsarBinaryWriter.utf8Encoder.convert(value10);
+  if (value11 != null) {
+    _sourceMetadata = IsarBinaryWriter.utf8Encoder.convert(value11);
   }
   dynamicSize += (_sourceMetadata?.length ?? 0) as int;
-  final value11 = object.title;
-  final _title = IsarBinaryWriter.utf8Encoder.convert(value11);
+  final value12 = object.title;
+  final _title = IsarBinaryWriter.utf8Encoder.convert(value12);
   dynamicSize += (_title.length) as int;
-  final value12 = object.uniqueKey;
-  final _uniqueKey = IsarBinaryWriter.utf8Encoder.convert(value12);
+  final value13 = object.uniqueKey;
+  final _uniqueKey = IsarBinaryWriter.utf8Encoder.convert(value13);
   dynamicSize += (_uniqueKey.length) as int;
   final size = staticSize + dynamicSize;
 
@@ -147,12 +155,13 @@ void _mediaItemSerializeNative(
   writer.writeLong(offsets[4], _duration);
   writer.writeLong(offsets[5], _hashCode);
   writer.writeBytes(offsets[6], _imageUrl);
-  writer.writeBytes(offsets[7], _mediaSourceIdentifier);
-  writer.writeBytes(offsets[8], _mediaTypeIdentifier);
-  writer.writeLong(offsets[9], _position);
-  writer.writeBytes(offsets[10], _sourceMetadata);
-  writer.writeBytes(offsets[11], _title);
-  writer.writeBytes(offsets[12], _uniqueKey);
+  writer.writeBytes(offsets[7], _mediaIdentifier);
+  writer.writeBytes(offsets[8], _mediaSourceIdentifier);
+  writer.writeBytes(offsets[9], _mediaTypeIdentifier);
+  writer.writeLong(offsets[10], _position);
+  writer.writeBytes(offsets[11], _sourceMetadata);
+  writer.writeBytes(offsets[12], _title);
+  writer.writeBytes(offsets[13], _uniqueKey);
 }
 
 MediaItem _mediaItemDeserializeNative(IsarCollection<MediaItem> collection,
@@ -165,12 +174,12 @@ MediaItem _mediaItemDeserializeNative(IsarCollection<MediaItem> collection,
     duration: reader.readLong(offsets[4]),
     id: id,
     imageUrl: reader.readStringOrNull(offsets[6]),
-    mediaSourceIdentifier: reader.readString(offsets[7]),
-    mediaTypeIdentifier: reader.readString(offsets[8]),
-    position: reader.readLong(offsets[9]),
-    sourceMetadata: reader.readStringOrNull(offsets[10]),
-    title: reader.readString(offsets[11]),
-    uniqueKey: reader.readString(offsets[12]),
+    mediaIdentifier: reader.readString(offsets[7]),
+    mediaSourceIdentifier: reader.readString(offsets[8]),
+    mediaTypeIdentifier: reader.readString(offsets[9]),
+    position: reader.readLong(offsets[10]),
+    sourceMetadata: reader.readStringOrNull(offsets[11]),
+    title: reader.readString(offsets[12]),
   );
   return object;
 }
@@ -199,12 +208,14 @@ P _mediaItemDeserializePropNative<P>(
     case 8:
       return (reader.readString(offset)) as P;
     case 9:
-      return (reader.readLong(offset)) as P;
-    case 10:
-      return (reader.readStringOrNull(offset)) as P;
-    case 11:
       return (reader.readString(offset)) as P;
+    case 10:
+      return (reader.readLong(offset)) as P;
+    case 11:
+      return (reader.readStringOrNull(offset)) as P;
     case 12:
+      return (reader.readString(offset)) as P;
+    case 13:
       return (reader.readString(offset)) as P;
     default:
       throw 'Illegal propertyIndex';
@@ -222,6 +233,7 @@ dynamic _mediaItemSerializeWeb(
   IsarNative.jsObjectSet(jsObj, 'hashCode', object.hashCode);
   IsarNative.jsObjectSet(jsObj, 'id', object.id);
   IsarNative.jsObjectSet(jsObj, 'imageUrl', object.imageUrl);
+  IsarNative.jsObjectSet(jsObj, 'mediaIdentifier', object.mediaIdentifier);
   IsarNative.jsObjectSet(
       jsObj, 'mediaSourceIdentifier', object.mediaSourceIdentifier);
   IsarNative.jsObjectSet(
@@ -244,6 +256,7 @@ MediaItem _mediaItemDeserializeWeb(
         IsarNative.jsObjectGet(jsObj, 'duration') ?? double.negativeInfinity,
     id: IsarNative.jsObjectGet(jsObj, 'id'),
     imageUrl: IsarNative.jsObjectGet(jsObj, 'imageUrl'),
+    mediaIdentifier: IsarNative.jsObjectGet(jsObj, 'mediaIdentifier') ?? '',
     mediaSourceIdentifier:
         IsarNative.jsObjectGet(jsObj, 'mediaSourceIdentifier') ?? '',
     mediaTypeIdentifier:
@@ -252,7 +265,6 @@ MediaItem _mediaItemDeserializeWeb(
         IsarNative.jsObjectGet(jsObj, 'position') ?? double.negativeInfinity,
     sourceMetadata: IsarNative.jsObjectGet(jsObj, 'sourceMetadata'),
     title: IsarNative.jsObjectGet(jsObj, 'title') ?? '',
-    uniqueKey: IsarNative.jsObjectGet(jsObj, 'uniqueKey') ?? '',
   );
   return object;
 }
@@ -277,6 +289,8 @@ P _mediaItemDeserializePropWeb<P>(Object jsObj, String propertyName) {
       return (IsarNative.jsObjectGet(jsObj, 'id')) as P;
     case 'imageUrl':
       return (IsarNative.jsObjectGet(jsObj, 'imageUrl')) as P;
+    case 'mediaIdentifier':
+      return (IsarNative.jsObjectGet(jsObj, 'mediaIdentifier') ?? '') as P;
     case 'mediaSourceIdentifier':
       return (IsarNative.jsObjectGet(jsObj, 'mediaSourceIdentifier') ?? '')
           as P;
@@ -298,10 +312,53 @@ P _mediaItemDeserializePropWeb<P>(Object jsObj, String propertyName) {
 
 void _mediaItemAttachLinks(IsarCollection col, int id, MediaItem object) {}
 
+extension MediaItemByIndex on IsarCollection<MediaItem> {
+  Future<MediaItem?> getByUniqueKey(String uniqueKey) {
+    return getByIndex('uniqueKey', [uniqueKey]);
+  }
+
+  MediaItem? getByUniqueKeySync(String uniqueKey) {
+    return getByIndexSync('uniqueKey', [uniqueKey]);
+  }
+
+  Future<bool> deleteByUniqueKey(String uniqueKey) {
+    return deleteByIndex('uniqueKey', [uniqueKey]);
+  }
+
+  bool deleteByUniqueKeySync(String uniqueKey) {
+    return deleteByIndexSync('uniqueKey', [uniqueKey]);
+  }
+
+  Future<List<MediaItem?>> getAllByUniqueKey(List<String> uniqueKeyValues) {
+    final values = uniqueKeyValues.map((e) => [e]).toList();
+    return getAllByIndex('uniqueKey', values);
+  }
+
+  List<MediaItem?> getAllByUniqueKeySync(List<String> uniqueKeyValues) {
+    final values = uniqueKeyValues.map((e) => [e]).toList();
+    return getAllByIndexSync('uniqueKey', values);
+  }
+
+  Future<int> deleteAllByUniqueKey(List<String> uniqueKeyValues) {
+    final values = uniqueKeyValues.map((e) => [e]).toList();
+    return deleteAllByIndex('uniqueKey', values);
+  }
+
+  int deleteAllByUniqueKeySync(List<String> uniqueKeyValues) {
+    final values = uniqueKeyValues.map((e) => [e]).toList();
+    return deleteAllByIndexSync('uniqueKey', values);
+  }
+}
+
 extension MediaItemQueryWhereSort
     on QueryBuilder<MediaItem, MediaItem, QWhere> {
   QueryBuilder<MediaItem, MediaItem, QAfterWhere> anyId() {
     return addWhereClauseInternal(const IdWhereClause.any());
+  }
+
+  QueryBuilder<MediaItem, MediaItem, QAfterWhere> anyMediaIdentifier() {
+    return addWhereClauseInternal(
+        const IndexWhereClause.any(indexName: 'mediaIdentifier'));
   }
 
   QueryBuilder<MediaItem, MediaItem, QAfterWhere> anyMediaSourceIdentifier() {
@@ -373,6 +430,39 @@ extension MediaItemQueryWhere
       upper: upperId,
       includeUpper: includeUpper,
     ));
+  }
+
+  QueryBuilder<MediaItem, MediaItem, QAfterWhereClause> mediaIdentifierEqualTo(
+      String mediaIdentifier) {
+    return addWhereClauseInternal(IndexWhereClause.equalTo(
+      indexName: 'mediaIdentifier',
+      value: [mediaIdentifier],
+    ));
+  }
+
+  QueryBuilder<MediaItem, MediaItem, QAfterWhereClause>
+      mediaIdentifierNotEqualTo(String mediaIdentifier) {
+    if (whereSortInternal == Sort.asc) {
+      return addWhereClauseInternal(IndexWhereClause.lessThan(
+        indexName: 'mediaIdentifier',
+        upper: [mediaIdentifier],
+        includeUpper: false,
+      )).addWhereClauseInternal(IndexWhereClause.greaterThan(
+        indexName: 'mediaIdentifier',
+        lower: [mediaIdentifier],
+        includeLower: false,
+      ));
+    } else {
+      return addWhereClauseInternal(IndexWhereClause.greaterThan(
+        indexName: 'mediaIdentifier',
+        lower: [mediaIdentifier],
+        includeLower: false,
+      )).addWhereClauseInternal(IndexWhereClause.lessThan(
+        indexName: 'mediaIdentifier',
+        upper: [mediaIdentifier],
+        includeUpper: false,
+      ));
+    }
   }
 
   QueryBuilder<MediaItem, MediaItem, QAfterWhereClause>
@@ -978,6 +1068,113 @@ extension MediaItemQueryFilter
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.matches,
       property: 'imageUrl',
+      value: pattern,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<MediaItem, MediaItem, QAfterFilterCondition>
+      mediaIdentifierEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.eq,
+      property: 'mediaIdentifier',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<MediaItem, MediaItem, QAfterFilterCondition>
+      mediaIdentifierGreaterThan(
+    String value, {
+    bool caseSensitive = true,
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.gt,
+      include: include,
+      property: 'mediaIdentifier',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<MediaItem, MediaItem, QAfterFilterCondition>
+      mediaIdentifierLessThan(
+    String value, {
+    bool caseSensitive = true,
+    bool include = false,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.lt,
+      include: include,
+      property: 'mediaIdentifier',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<MediaItem, MediaItem, QAfterFilterCondition>
+      mediaIdentifierBetween(
+    String lower,
+    String upper, {
+    bool caseSensitive = true,
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition.between(
+      property: 'mediaIdentifier',
+      lower: lower,
+      includeLower: includeLower,
+      upper: upper,
+      includeUpper: includeUpper,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<MediaItem, MediaItem, QAfterFilterCondition>
+      mediaIdentifierStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.startsWith,
+      property: 'mediaIdentifier',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<MediaItem, MediaItem, QAfterFilterCondition>
+      mediaIdentifierEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.endsWith,
+      property: 'mediaIdentifier',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<MediaItem, MediaItem, QAfterFilterCondition>
+      mediaIdentifierContains(String value, {bool caseSensitive = true}) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.contains,
+      property: 'mediaIdentifier',
+      value: value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+
+  QueryBuilder<MediaItem, MediaItem, QAfterFilterCondition>
+      mediaIdentifierMatches(String pattern, {bool caseSensitive = true}) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.matches,
+      property: 'mediaIdentifier',
       value: pattern,
       caseSensitive: caseSensitive,
     ));
@@ -1639,6 +1836,14 @@ extension MediaItemQueryWhereSortBy
     return addSortByInternal('imageUrl', Sort.desc);
   }
 
+  QueryBuilder<MediaItem, MediaItem, QAfterSortBy> sortByMediaIdentifier() {
+    return addSortByInternal('mediaIdentifier', Sort.asc);
+  }
+
+  QueryBuilder<MediaItem, MediaItem, QAfterSortBy> sortByMediaIdentifierDesc() {
+    return addSortByInternal('mediaIdentifier', Sort.desc);
+  }
+
   QueryBuilder<MediaItem, MediaItem, QAfterSortBy>
       sortByMediaSourceIdentifier() {
     return addSortByInternal('mediaSourceIdentifier', Sort.asc);
@@ -1757,6 +1962,14 @@ extension MediaItemQueryWhereSortThenBy
     return addSortByInternal('imageUrl', Sort.desc);
   }
 
+  QueryBuilder<MediaItem, MediaItem, QAfterSortBy> thenByMediaIdentifier() {
+    return addSortByInternal('mediaIdentifier', Sort.asc);
+  }
+
+  QueryBuilder<MediaItem, MediaItem, QAfterSortBy> thenByMediaIdentifierDesc() {
+    return addSortByInternal('mediaIdentifier', Sort.desc);
+  }
+
   QueryBuilder<MediaItem, MediaItem, QAfterSortBy>
       thenByMediaSourceIdentifier() {
     return addSortByInternal('mediaSourceIdentifier', Sort.asc);
@@ -1846,6 +2059,12 @@ extension MediaItemQueryWhereDistinct
     return addDistinctByInternal('imageUrl', caseSensitive: caseSensitive);
   }
 
+  QueryBuilder<MediaItem, MediaItem, QDistinct> distinctByMediaIdentifier(
+      {bool caseSensitive = true}) {
+    return addDistinctByInternal('mediaIdentifier',
+        caseSensitive: caseSensitive);
+  }
+
   QueryBuilder<MediaItem, MediaItem, QDistinct> distinctByMediaSourceIdentifier(
       {bool caseSensitive = true}) {
     return addDistinctByInternal('mediaSourceIdentifier',
@@ -1913,6 +2132,10 @@ extension MediaItemQueryProperty
     return addPropertyNameInternal('imageUrl');
   }
 
+  QueryBuilder<MediaItem, String, QQueryOperations> mediaIdentifierProperty() {
+    return addPropertyNameInternal('mediaIdentifier');
+  }
+
   QueryBuilder<MediaItem, String, QQueryOperations>
       mediaSourceIdentifierProperty() {
     return addPropertyNameInternal('mediaSourceIdentifier');
@@ -1945,7 +2168,7 @@ extension MediaItemQueryProperty
 // **************************************************************************
 
 MediaItem _$MediaItemFromJson(Map<String, dynamic> json) => MediaItem(
-      uniqueKey: json['uniqueKey'] as String,
+      mediaIdentifier: json['mediaIdentifier'] as String,
       title: json['title'] as String,
       mediaTypeIdentifier: json['mediaTypeIdentifier'] as String,
       mediaSourceIdentifier: json['mediaSourceIdentifier'] as String,
@@ -1962,7 +2185,7 @@ MediaItem _$MediaItemFromJson(Map<String, dynamic> json) => MediaItem(
 
 Map<String, dynamic> _$MediaItemToJson(MediaItem instance) => <String, dynamic>{
       'id': instance.id,
-      'uniqueKey': instance.uniqueKey,
+      'mediaIdentifier': instance.mediaIdentifier,
       'title': instance.title,
       'mediaTypeIdentifier': instance.mediaTypeIdentifier,
       'mediaSourceIdentifier': instance.mediaSourceIdentifier,

@@ -36,6 +36,11 @@ void main() {
     /// is disabled if not reverted from entering a media source.
     await Wakelock.disable();
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
 
     /// Initialise Firebase to allow for Crashlytics error reporting.
     await Firebase.initializeApp(
