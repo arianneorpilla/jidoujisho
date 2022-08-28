@@ -10,12 +10,12 @@ import 'package:yuuna/utils.dart';
 class SubtitleOptionsDialogPage extends BasePage {
   /// Create an instance of this page.
   const SubtitleOptionsDialogPage({
-    required this.onApplyChanges,
+    required this.notifier,
     super.key,
   });
 
-  /// Used to apply options after setting them.
-  final void Function(SubtitleOptions) onApplyChanges;
+  /// Notifier for the subtitle options.
+  final ValueNotifier<SubtitleOptions> notifier;
 
   @override
   BasePageState createState() => _SubtitleOptionsDialogPage();
@@ -49,7 +49,7 @@ class _SubtitleOptionsDialogPage
   @override
   void initState() {
     super.initState();
-    _options = appModelNoUpdate.subtitleOptions;
+    _options = widget.notifier.value;
 
     _allowanceController =
         TextEditingController(text: _options.audioAllowance.toString());
@@ -221,7 +221,7 @@ class _SubtitleOptionsDialogPage
         subtitleOptions.fontName = newFontName;
         subtitleOptions.fontSize = newFontSize;
 
-        widget.onApplyChanges(subtitleOptions);
+        widget.notifier.value = subtitleOptions;
 
         if (saveOptions) {
           appModel.setSubtitleOptions(subtitleOptions);

@@ -38,6 +38,7 @@ class _BlurOptionsDialogPageState extends BasePageState<BlurOptionsDialogPage> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      scrollable: true,
       contentPadding:  Spacing.of(context).insets.all.big,
       content: buildContent(),
       actions: actions,

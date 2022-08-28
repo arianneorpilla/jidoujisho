@@ -1191,7 +1191,7 @@ class AppModel with ChangeNotifier {
   static Future<void> requestExternalStoragePermissions() async {
     AndroidDeviceInfo androidDeviceInfo = await DeviceInfoPlugin().androidInfo;
     await Permission.storage.request();
-
+int _currentAudioTrack = 0;
     if (androidDeviceInfo.version.sdkInt! >= 30) {
       await Permission.manageExternalStorage.request();
     }
@@ -2572,6 +2572,16 @@ class AppModel with ChangeNotifier {
       fontName: fontName,
       regexFilter: regexFilter,
     );
+  }
+
+  /// Gets the last used audio index of a given media item.
+  int getMediaItemPreferredAudioIndex(MediaItem item) {
+    return _preferences.get('audio_index/${item.uniqueKey}', defaultValue: 0);
+  }
+
+  /// Sets the last used audio index of a given media item.
+  void setMediaItemPreferredAudioIndex(MediaItem item, int index) {
+    _preferences.put('audio_index/${item.uniqueKey}', index);
   }
 
   /// Get fonts that are available to be chosen for the current target language.

@@ -65,6 +65,8 @@ abstract class BaseHistoryPageState<T extends BaseHistoryPage>
       color: Colors.transparent,
       child: InkWell(
         onTap: () async {
+          MediaSource mediaSource = item.getMediaSource(appModel: appModel);
+          
           await appModel.openMedia(
             context: context,
             ref: ref,

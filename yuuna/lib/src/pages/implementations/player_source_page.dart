@@ -127,8 +127,6 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
 
   bool unhideDuringInitFlag = false;
 
-  int _currentAudioTrack = 0;
-
   bool _dialogSmartPaused = false;
   bool _dialogSmartFocusFlag = false;
 
@@ -213,8 +211,10 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
       reverseDuration: const Duration(milliseconds: 400),
     );
 
-    _playerController = await (widget.source as PlayerMediaSource)
-        .preparePlayerController(widget.item!);
+    _playerController =
+        await (widget.source as PlayerMediaSource).preparePlayerController(
+      item: widget.item!,
+    );
     _subtitleItems = await (widget.source as PlayerMediaSource)
         .prepareSubtitles(widget.item!);
 
@@ -227,7 +227,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     _subtitleOptionsNotifier =
         ValueNotifier<SubtitleOptions>(appModel.subtitleOptions);
 
-    _playerController.addOnInitListener(() {
+    _playerController.addOnInitListener(() async {
       initialiseEmbeddedSubtitles(_playerController);
     });
 
@@ -332,7 +332,6 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     await Future.delayed(const Duration(seconds: 2), () {});
 
     int embeddedTrackCount = await _playerController.getSpuTracksCount() ?? 0;
-    _currentAudioTrack = await _playerController.getAudioTrack() ?? 0;
 
     List<SubtitleItem> embeddedItems = await SubtitleUtils.subtitlesFromVideo(
         File(controller.dataSource), embeddedTrackCount);
@@ -451,6 +450,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
             PageRouteBuilder(
               opaque: false,
               pageBuilder: (context, _, __) => PlayerTranscriptPage(
+                title: widget.item!.title,
                 subtitles: _subtitleItem.controller.subtitles,
                 currentSubtitle: getNearestSubtitle(),
                 subtitleOptions: _subtitleOptionsNotifier.value,
@@ -839,6 +839,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
             PageRouteBuilder(
               opaque: false,
               pageBuilder: (context, _, __) => PlayerTranscriptPage(
+                 title: widget.item!.title,
                 subtitles: _subtitleItem.controller.subtitles,
                 currentSubtitle: getNearestSubtitle(),
                 subtitleOptions: _subtitleOptionsNotifier.value,
@@ -846,7 +847,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
                   Subtitle subtitle = _subtitleItem.controller.subtitles[index];
 
                   _subtitleOptionsNotifier.value.subtitleDelay =
-                      subtitle.end.inMilliseconds -
+                      subtitle.start.inMilliseconds -
                           _positionNotifier.value.inMilliseconds;
 
                   refreshSubtitleWidget();
@@ -855,13 +856,8 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
                   Subtitle subtitle = _subtitleItem.controller.subtitles[index];
 
                   _subtitleOptionsNotifier.value.subtitleDelay =
-                      subtitle.end.inMilliseconds -
+                      subtitle.start.inMilliseconds -
                           _positionNotifier.value.inMilliseconds;
-
-                  SubtitleOptions subtitleOptions = appModel.subtitleOptions;
-                  subtitleOptions.subtitleDelay = subtitle.end.inMilliseconds -
-                      _positionNotifier.value.inMilliseconds;
-                  appModel.setSubtitleOptions(subtitleOptions);
 
                   refreshSubtitleWidget();
                 },
@@ -877,14 +873,10 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
         icon: Icons.text_fields,
         action: () async {
           await dialogSmartPause();
-          await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => SubtitleOptionsDialogPage(
-                onApplyChanges: (options) {
-                  _subtitleOptionsNotifier.value = options;
-                },
-              ),
+          await showDialog(
+            context: context,
+            builder: (context) => SubtitleOptionsDialogPage(
+              notifier: _subtitleOptionsNotifier,
             ),
           );
           await dialogSmartResume();
@@ -959,11 +951,9 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
         icon: Icons.blur_circular_sharp,
         action: () async {
           await dialogSmartPause();
-          await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const BlurOptionsDialogPage(),
-            ),
+          await showDialog(
+            context: context,
+            builder: (context) => const BlurOptionsDialogPage(),
           );
           _blurOptionsNotifier.value = appModel.blurOptions;
           await dialogSmartResume();
@@ -1159,7 +1149,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
           alignment: Alignment.bottomCenter,
           child: Padding(
             padding: _isMenuHidden.value
-                ? const EdgeInsets.only(bottom: 24)
+                ? const EdgeInsets.only(bottom: 20)
                 : const EdgeInsets.only(bottom: menuHeight + 8),
             child: buildSubtitle(),
           ),

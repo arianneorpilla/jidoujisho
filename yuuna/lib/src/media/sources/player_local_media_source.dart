@@ -151,7 +151,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
       mediaIdentifier: filePath,
       position: 0,
       duration: 0,
-      title: path.basename(filePath),
+      title: path.basenameWithoutExtension(filePath),
     );
 
     String thumbnailPath = appModel.getThumbnailFile().path;
@@ -225,11 +225,15 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
   ];
 
   @override
-  Future<VlcPlayerController> preparePlayerController(MediaItem item) async {
+  Future<VlcPlayerController> preparePlayerController({
+    required MediaItem item,
+     int audioTrack = 0,
+     String? audioUrl,
+  }) async {
     int startTime = item.position;
 
     List<String> advancedParams = ['--start-time=$startTime'];
-    List<String> audioParams = ['--audio-track=0', '--sub-track=99999'];
+    List<String> audioParams = ['--audio-track=$audioTrack', '--sub-track=99999'];
 
     return VlcPlayerController.file(
       File(item.mediaIdentifier),

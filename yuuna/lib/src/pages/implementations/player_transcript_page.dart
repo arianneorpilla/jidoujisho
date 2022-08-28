@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:spaces/spaces.dart';
@@ -12,6 +13,7 @@ import 'package:yuuna/utils.dart';
 class PlayerTranscriptPage extends BasePage {
   /// Create an instance of this page.
   const PlayerTranscriptPage({
+    required this.title,
     required this.subtitles,
     required this.currentSubtitle,
     required this.subtitleOptions,
@@ -19,6 +21,9 @@ class PlayerTranscriptPage extends BasePage {
     required this.onLongPress,
     super.key,
   });
+
+  /// Title of video.
+  final String title;
 
   /// All subtitles in the current video.
   final List<Subtitle> subtitles;
@@ -40,6 +45,7 @@ class PlayerTranscriptPage extends BasePage {
 }
 
 class _PlayerTranscriptPageState extends BasePageState<PlayerTranscriptPage> {
+  String get backLabel => appModel.translate('back');
   String get playerSubtitlesTranscriptEmpty =>
       appModel.translate('player_subtitles_transcript_empty');
 
@@ -59,10 +65,47 @@ class _PlayerTranscriptPageState extends BasePageState<PlayerTranscriptPage> {
 
   @override
   Widget build(BuildContext context) {
-  return  Scaffold(
+    return Scaffold(
+      appBar: buildAppBar(),
       backgroundColor: Theme.of(context).cardColor.withOpacity(0.85),
       resizeToAvoidBottomInset: false,
       body: buildBody(),
+    );
+  }
+
+  PreferredSizeWidget? buildAppBar() {
+    return AppBar(
+      backgroundColor: Colors.transparent,
+      leading: buildBackButton(),
+      title: buildTitle(),
+      titleSpacing: 8,
+    );
+  }
+
+  Widget buildBackButton() {
+    return JidoujishoIconButton(
+      tooltip: backLabel,
+      icon: Icons.arrow_back,
+      onTap: () {
+        Navigator.pop(context);
+      },
+    );
+  }
+
+  Widget buildTitle() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: JidoujishoMarquee(
+            text: widget.title,
+            style: TextStyle(
+              fontSize: textTheme.titleMedium?.fontSize,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -173,12 +216,20 @@ class _PlayerTranscriptPageState extends BasePageState<PlayerTranscriptPage> {
             onTap: () async {
               if (widget.onTap != null) {
                 widget.onTap?.call(index);
+
+                await SystemChrome.setEnabledSystemUIMode(
+                  SystemUiMode.immersiveSticky,
+                );
                 Navigator.pop(context);
               }
             },
             onLongPress: () async {
               if (widget.onLongPress != null) {
                 widget.onLongPress?.call(index);
+
+                await SystemChrome.setEnabledSystemUIMode(
+                  SystemUiMode.immersiveSticky,
+                );
                 Navigator.pop(context);
               }
             },

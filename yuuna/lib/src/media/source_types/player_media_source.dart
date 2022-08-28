@@ -27,23 +27,16 @@ abstract class PlayerMediaSource extends MediaSource {
   }
 
   /// Get the player controller to be used when a media item is loaded up,
-  Future<VlcPlayerController> preparePlayerController(MediaItem item) async {
+  Future<VlcPlayerController> preparePlayerController({
+    required MediaItem item,
+     int audioTrack = 0,
+     String? audioUrl,
+  }) async {
     throw UnimplementedError();
   }
 
   /// Get the player controller to be used when a media item is loaded up,
   Future<List<SubtitleItem>> prepareSubtitles(MediaItem item) async {
     throw UnimplementedError();
-  }
-
-  /// Prepare a payload including a controller and subtitles.
-  Future<PlayerPayload> preparePayload(MediaItem item) async {
-    VlcPlayerController controller = await preparePlayerController(item);
-    List<SubtitleItem> subtitleItems = await prepareSubtitles(item);
-
-    return PlayerPayload(
-      controller: controller,
-      subtitleItems: subtitleItems,
-    );
   }
 }
