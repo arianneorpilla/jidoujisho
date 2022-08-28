@@ -13,23 +13,31 @@ import 'package:share_plus/share_plus.dart';
 import 'package:spaces/spaces.dart';
 import 'package:subtitle/subtitle.dart';
 import 'package:yuuna/media.dart';
-import 'package:yuuna/src/pages/base_source_page.dart';
+import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
 import 'package:path/path.dart' as path;
 
-/// The media page used for unimplemented sources.
-class PlayerLocalMediaSourcePage extends BaseSourcePage {
+/// The media page used for the [PlayerMediaSource].
+class PlayerSourcePage extends BaseSourcePage {
   /// Create an instance of this page.
-  const PlayerLocalMediaSourcePage({
+  const PlayerSourcePage({
+    required this.source,
+    required this.useHistory,
     super.item,
     super.key,
   });
 
+  /// The media source used for this page.
+  final MediaSource source;
+
+  /// Whether or not to add media items to history.
+  final bool useHistory;
+
   @override
-  BaseSourcePageState createState() => _PlayerLocalMediaSourcePage();
+  BaseSourcePageState createState() => _PlayerSourcePage();
 }
 
-class _PlayerLocalMediaSourcePage extends BaseSourcePageState
+class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     with TickerProviderStateMixin {
   String get playLabel => appModel.translate('player_play');
   String get pauseLabel => appModel.translate('player_pause');
@@ -119,8 +127,6 @@ class _PlayerLocalMediaSourcePage extends BaseSourcePageState
 
   bool unhideDuringInitFlag = false;
 
-  double subtitleFontSize = 24;
-  int subtitlesDelay = 0;
   int _currentAudioTrack = 0;
 
   bool _dialogSmartPaused = false;
@@ -139,13 +145,39 @@ class _PlayerLocalMediaSourcePage extends BaseSourcePageState
 
   bool _playerInitialised = false;
 
-  void initialisePlayer(PlayerPayload payload) async {
+  StreamSubscription<void>? _playSubscription;
+  StreamSubscription<void>? _pauseSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _playSubscription?.cancel();
+    _pauseSubscription?.cancel();
+    super.dispose();
+  }
+
+  /// Hide the dictionary and dispose of the current result.
+  @override
+  void clearDictionaryResult() {
+    if (appModel.isPlayerDefinitionFocusMode) {
+      dialogSmartResume(isSmartFocus: true);
+    }
+
+    super.clearDictionaryResult();
+  }
+
+  void initialisePlayer() async {
     if (_playerInitialised) {
       return;
     }
 
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    if (appModel.isPlayerOrientationPortrait) {
+
+    if (appModelNoUpdate.isPlayerOrientationPortrait) {
       await SystemChrome.setPreferredOrientations([
         DeviceOrientation.portraitUp,
       ]);
@@ -155,6 +187,12 @@ class _PlayerLocalMediaSourcePage extends BaseSourcePageState
         DeviceOrientation.landscapeRight,
       ]);
     }
+
+    await Future.delayed(const Duration(seconds: 1), () {});
+
+    appModel.currentMediaPauseStream.listen((event) {
+      dialogSmartPause();
+    });
 
     _playerInitialised = true;
 
@@ -175,8 +213,10 @@ class _PlayerLocalMediaSourcePage extends BaseSourcePageState
       reverseDuration: const Duration(milliseconds: 400),
     );
 
-    _playerController = payload.controller;
-    _subtitleItems = payload.subtitleItems;
+    _playerController = await (widget.source as PlayerMediaSource)
+        .preparePlayerController(widget.item!);
+    _subtitleItems = await (widget.source as PlayerMediaSource)
+        .prepareSubtitles(widget.item!);
 
     if (_subtitleItems.isNotEmpty) {
       _subtitleItem = _subtitleItems.first;
@@ -233,6 +273,11 @@ class _PlayerLocalMediaSourcePage extends BaseSourcePageState
 
         _currentSubtitle.value = newSubtitle;
         // For remembering the last subtitle even if it has disappeared.
+        if (_currentSubtitle.value != null) {
+          widget.source.setCurrentSentence(_currentSubtitle.value!.data);
+        } else {
+          widget.source.clearCurrentSentence();
+        }
         if (newSubtitle != null) {
           _currentSubtitleMemory.value = newSubtitle;
         }
@@ -307,9 +352,14 @@ class _PlayerLocalMediaSourcePage extends BaseSourcePageState
   }
 
   void updateHistory() async {
-    MediaItem item = widget.item!;
-    item.position = _positionNotifier.value.inSeconds;
-    item.duration = _durationNotifier.value.inSeconds;
+    if (!widget.useHistory) {
+      return;
+    }
+
+    MediaItem item = widget.item!.copyWith(
+      position: _positionNotifier.value.inSeconds,
+      duration: _durationNotifier.value.inSeconds,
+    );
 
     if (item.position != 0) {
       appModel.addMediaItem(item);
@@ -318,59 +368,40 @@ class _PlayerLocalMediaSourcePage extends BaseSourcePageState
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<PlayerPayload>(
-      future: PlayerLocalMediaSource.instance.preparePayload(widget.item!),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return buildLoading();
-        } else if (snapshot.hasError) {
-          return buildError();
-        } else {
-          return buildData(snapshot.data!);
-        }
-      },
-    );
-  }
-
-  Widget buildData(PlayerPayload payload) {
-    if (!_playerInitialised) {
-      initialisePlayer(payload);
-      return buildLoading();
-    }
-
-    _currentOrientation ??= MediaQuery.of(context).orientation;
-
-    // Duration position = _playerController.value.position;
-    // if (_currentOrientation != MediaQuery.of(context).orientation) {
-    //   _currentOrientation = MediaQuery.of(context).orientation;
-    //   Future.delayed(const Duration(milliseconds: 50), () {
-    //     _playerController.seekTo(position - const Duration(milliseconds: 50));
-    //   });
-    // }
-
     return WillPopScope(
       onWillPop: onWillPop,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         backgroundColor: Colors.black,
-        body: Stack(
-          alignment: Alignment.center,
-          children: [
-            buildPlayer(),
-            buildGestureArea(),
-            buildBlurWidget(),
-            buildMenuArea(),
-            buildSubtitleArea(),
-            Padding(
-              padding: _currentOrientation == Orientation.landscape
-                  ? Spacing.of(context).insets.horizontal.extraBig * 5
-                  : EdgeInsets.zero,
-              child: buildDictionary(),
-            ),
-            buildCentralPlayPause(),
-          ],
-        ),
+        body: buildData(),
       ),
+    );
+  }
+
+  Widget buildData() {
+    if (!_playerInitialised) {
+      initialisePlayer();
+      return buildLoading();
+    }
+
+    _currentOrientation ??= MediaQuery.of(context).orientation;
+
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        buildPlayer(),
+        buildGestureArea(),
+        buildBlurWidget(),
+        buildMenuArea(),
+        buildSubtitleArea(),
+        buildCentralPlayPause(),
+        Padding(
+          padding: _currentOrientation == Orientation.landscape
+              ? Spacing.of(context).insets.horizontal.extraBig * 5
+              : EdgeInsets.zero,
+          child: buildDictionary(),
+        ),
+      ],
     );
   }
 
@@ -415,23 +446,26 @@ class _PlayerLocalMediaSourcePage extends BaseSourcePageState
           bool exporting = false;
           await dialogSmartPause();
 
-          // await openTranscript(
-          //     context: context,
-          //     subtitles: _subtitleItem.controller.subtitles,
-          //     subtitleDelay: subtitleDelay,
-          //     currentSubtitle: getNearestSubtitle(),
-          //     fontSize: _subtitleOptionsNotifier.value.fontSize,
-          //     fontName: _subtitleOptionsNotifier.value.fontName,
-          //     regexFilter: _subtitleOptionsNotifier.value.regexFilter,
-          //     onTapCallback: (index) async {
-          //       await _playerController.seekTo(
-          //           _subtitleItem.controller.subtitles[index].start -
-          //               subtitleDelay);
-          //     },
-          //     onLongPressCallback: (index) async {
-          //       exporting = true;
-          //       await exportMultipleSubtitles(index);
-          //     });
+          await Navigator.push(
+            context,
+            PageRouteBuilder(
+              opaque: false,
+              pageBuilder: (context, _, __) => PlayerTranscriptPage(
+                subtitles: _subtitleItem.controller.subtitles,
+                currentSubtitle: getNearestSubtitle(),
+                subtitleOptions: _subtitleOptionsNotifier.value,
+                onTap: (index) async {
+                  await _playerController.seekTo(
+                      _subtitleItem.controller.subtitles[index].start -
+                          subtitleDelay);
+                },
+                onLongPress: (index) async {
+                  exporting = true;
+                  // await exportMultipleSubtitles(index);
+                },
+              ),
+            ),
+          );
 
           if (!exporting) {
             await dialogSmartResume();
@@ -511,19 +545,21 @@ class _PlayerLocalMediaSourcePage extends BaseSourcePageState
       alignment: Alignment.bottomCenter,
       child: Container(
         height: menuHeight,
-        color: theme.cardColor,
+        color: theme.cardColor.withOpacity(0.8),
         child: GestureDetector(
           onTap: toggleMenuVisibility,
           child: AbsorbPointer(
             absorbing: _isMenuHidden.value,
             child: Row(
               children: [
+                const Space.small(),
                 buildPlayButton(),
                 buildDurationAndPosition(),
                 buildSlider(),
                 buildSourceButton(),
                 buildAudioSubtitlesButton(),
                 buildOptionsButton(),
+                const Space.small(),
               ],
             ),
           ),
@@ -603,7 +639,7 @@ class _PlayerLocalMediaSourcePage extends BaseSourcePageState
             child: GestureDetector(
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).dialogBackgroundColor,
+                  color: Theme.of(context).cardColor.withOpacity(0.9),
                   borderRadius: BorderRadius.circular(48),
                 ),
                 child: Padding(
@@ -798,37 +834,40 @@ class _PlayerLocalMediaSourcePage extends BaseSourcePageState
         action: () async {
           await dialogSmartPause();
 
-          // await openTranscript(
-          //     context: context,
-          //     subtitles: _subtitleItem.controller.subtitles,
-          //     subtitleDelay: subtitleDelay,
-          //     currentSubtitle: getNearestSubtitle(),
-          //     fontSize: _subtitleOptionsNotifier.value.fontSize,
-          //     fontName: _subtitleOptionsNotifier.value.fontName,
-          //     regexFilter: _subtitleOptionsNotifier.value.regexFilter,
-          //     onTapCallback: (index) async {
-          //       Subtitle subtitle = _subtitleItem.controller.subtitles[index];
+          await Navigator.push(
+            context,
+            PageRouteBuilder(
+              opaque: false,
+              pageBuilder: (context, _, __) => PlayerTranscriptPage(
+                subtitles: _subtitleItem.controller.subtitles,
+                currentSubtitle: getNearestSubtitle(),
+                subtitleOptions: _subtitleOptionsNotifier.value,
+                onTap: (index) async {
+                  Subtitle subtitle = _subtitleItem.controller.subtitles[index];
 
-          //       _subtitleOptionsNotifier.value.subtitleDelay =
-          //           subtitle.end.inMilliseconds -
-          //               _positionNotifier.value.inMilliseconds;
+                  _subtitleOptionsNotifier.value.subtitleDelay =
+                      subtitle.end.inMilliseconds -
+                          _positionNotifier.value.inMilliseconds;
 
-          //       refreshSubtitleWidget();
-          //     },
-          //     onLongPressCallback: (index) async {
-          //       Subtitle subtitle = _subtitleItem.controller.subtitles[index];
+                  refreshSubtitleWidget();
+                },
+                onLongPress: (index) async {
+                  Subtitle subtitle = _subtitleItem.controller.subtitles[index];
 
-          //       _subtitleOptionsNotifier.value.subtitleDelay =
-          //           subtitle.end.inMilliseconds -
-          //               _positionNotifier.value.inMilliseconds;
+                  _subtitleOptionsNotifier.value.subtitleDelay =
+                      subtitle.end.inMilliseconds -
+                          _positionNotifier.value.inMilliseconds;
 
-          //       SubtitleOptions subtitleOptions = appModel.subtitleOptions;
-          //       subtitleOptions.subtitleDelay = subtitle.end.inMilliseconds -
-          //           _positionNotifier.value.inMilliseconds;
-          //        appModel.setSubtitleOptions(subtitleOptions);
+                  SubtitleOptions subtitleOptions = appModel.subtitleOptions;
+                  subtitleOptions.subtitleDelay = subtitle.end.inMilliseconds -
+                      _positionNotifier.value.inMilliseconds;
+                  appModel.setSubtitleOptions(subtitleOptions);
 
-          //       refreshSubtitleWidget();
-          //     });
+                  refreshSubtitleWidget();
+                },
+              ),
+            ),
+          );
 
           await dialogSmartResume();
         },
@@ -838,7 +877,16 @@ class _PlayerLocalMediaSourcePage extends BaseSourcePageState
         icon: Icons.text_fields,
         action: () async {
           await dialogSmartPause();
-          // await showSubtitleOptionsDialog(context, subtitleOptionsNotifier);
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SubtitleOptionsDialogPage(
+                onApplyChanges: (options) {
+                  _subtitleOptionsNotifier.value = options;
+                },
+              ),
+            ),
+          );
           await dialogSmartResume();
         },
       ),
@@ -911,7 +959,13 @@ class _PlayerLocalMediaSourcePage extends BaseSourcePageState
         icon: Icons.blur_circular_sharp,
         action: () async {
           await dialogSmartPause();
-          // await showBlurWidgetOptionsDialog(context, _blurOptionsNotifier);
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const BlurOptionsDialogPage(),
+            ),
+          );
+          _blurOptionsNotifier.value = appModel.blurOptions;
           await dialogSmartResume();
         },
       ),
@@ -981,6 +1035,7 @@ class _PlayerLocalMediaSourcePage extends BaseSourcePageState
             _subtitleItem.controller.initial();
           }
           _currentSubtitle.value = null;
+          widget.source.clearCurrentSentence();
           refreshSubtitleWidget();
         },
       );
@@ -995,6 +1050,7 @@ class _PlayerLocalMediaSourcePage extends BaseSourcePageState
         action: () {
           _subtitleItem = _emptySubtitleItem;
           _currentSubtitle.value = null;
+          widget.source.clearCurrentSentence();
           refreshSubtitleWidget();
         }));
 
@@ -1056,16 +1112,17 @@ class _PlayerLocalMediaSourcePage extends BaseSourcePageState
             : Icons.stay_current_portrait,
         action: () async {
           appModel.togglePlayerOrientationPortrait();
-          if (appModel.isPlayerOrientationPortrait) {
-            await SystemChrome.setPreferredOrientations([
-              DeviceOrientation.portraitUp,
-            ]);
-          } else {
-            await SystemChrome.setPreferredOrientations([
-              DeviceOrientation.landscapeLeft,
-              DeviceOrientation.landscapeRight,
-            ]);
-          }
+
+          Navigator.pop(context);
+          await appModel.openMedia(
+            context: context,
+            ref: ref,
+            mediaSource: widget.source,
+            item: widget.item!.copyWith(
+              position: _positionNotifier.value.inSeconds,
+              duration: _durationNotifier.value.inSeconds,
+            ),
+          );
         },
       ),
       JidoujishoBottomSheetOption(
@@ -1095,12 +1152,19 @@ class _PlayerLocalMediaSourcePage extends BaseSourcePageState
   }
 
   Widget buildSubtitleArea() {
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: menuHeight + 8),
-        child: buildSubtitle(),
-      ),
+    return ValueListenableBuilder<bool>(
+      valueListenable: _isMenuHidden,
+      builder: (context, isMenuHidden, _) {
+        return Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: _isMenuHidden.value
+                ? const EdgeInsets.only(bottom: 24)
+                : const EdgeInsets.only(bottom: menuHeight + 8),
+            child: buildSubtitle(),
+          ),
+        );
+      },
     );
   }
 
@@ -1232,9 +1296,15 @@ class _PlayerLocalMediaSourcePage extends BaseSourcePageState
   }
 
   void setSearchTerm(String searchTerm) {
+    if (searchTerm.isNotEmpty) {
+      if (appModel.isPlayerDefinitionFocusMode) {
+        dialogSmartPause();
+      }
+    }
+
     searchDictionaryResult(
       searchTerm: searchTerm,
-      position: JidoujishoPopupPosition.topTwoThirds,
+      position: JidoujishoPopupPosition.topThreeFourths,
     );
   }
 
@@ -1278,6 +1348,11 @@ class _PlayerLocalMediaSourcePage extends BaseSourcePageState
     Subtitle? holder = _currentSubtitle.value;
     _currentSubtitle.value = null;
     _currentSubtitle.value = holder;
+    if (holder != null) {
+      widget.source.setCurrentSentence(holder.data);
+    } else {
+      widget.source.clearCurrentSentence();
+    }
   }
 
   void startHideTimer() {
@@ -1437,6 +1512,7 @@ class _PlayerLocalMediaSourcePage extends BaseSourcePageState
     _subtitleItems.add(item);
     _subtitleItem = item;
     _currentSubtitle.value = null;
+    widget.source.clearCurrentSentence();
     refreshSubtitleWidget();
   }
 }

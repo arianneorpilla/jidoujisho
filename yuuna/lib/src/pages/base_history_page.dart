@@ -77,6 +77,7 @@ abstract class BaseHistoryPageState<T extends BaseHistoryPage>
             context: context,
             builder: (context) => MediaItemDialogPage(item: item),
           );
+          setState(() {});
         },
         child: buildMediaItemContent(item),
       ),

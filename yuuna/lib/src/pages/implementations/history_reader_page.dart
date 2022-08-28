@@ -121,7 +121,10 @@ class HistoryReaderPageState<T extends BaseHistoryPage>
             );
           }),
           LinearProgressIndicator(
-            value: item.position / item.duration,
+            value: (item.position / item.duration) == double.nan ||
+                    (item.position / item.duration) == double.infinity
+                ? 0
+                : (item.position / item.duration),
             backgroundColor: Colors.white.withOpacity(0.6),
             valueColor: const AlwaysStoppedAnimation<Color>(Colors.red),
             minHeight: 2,

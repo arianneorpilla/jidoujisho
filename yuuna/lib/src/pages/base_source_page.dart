@@ -139,8 +139,8 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
           case JidoujishoPopupPosition.rightHalf:
             return buildRightHalfDictionary();
 
-               case JidoujishoPopupPosition.topTwoThirds:
-            return buildTopTwoThirdsDictionary();
+          case JidoujishoPopupPosition.topThreeFourths:
+            return buildTopThreeFourths();
         }
       },
     );
@@ -206,13 +206,13 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
     );
   }
 
-    /// The dictionary in the case of [JidoujishoPopupPosition.topTwoThirds].
-  Widget buildTopTwoThirdsDictionary() {
+  /// The dictionary in the case of [JidoujishoPopupPosition.topThreeFourths].
+  Widget buildTopThreeFourths() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Flexible(
-          flex: 2,
+          flex: 3,
           child: buildDictionaryResult(),
         ),
         const Flexible(

@@ -1,3 +1,4 @@
+export 'src/pages/implementations/blur_options_dialog_page.dart';
 export 'src/pages/implementations/creator_page.dart';
 export 'src/pages/implementations/creator_quick_actions_page.dart';
 export 'src/pages/implementations/enhancements_picker_dialog_page.dart';
@@ -31,7 +32,9 @@ export 'src/pages/implementations/text_segmentation_dialog_page.dart';
 export 'src/pages/implementations/field_picker_dialog_page.dart';
 export 'src/pages/implementations/reader_ttu_source_page.dart';
 export 'src/pages/implementations/reader_ttu_source_history_page.dart';
+export 'src/pages/implementations/subtitle_options_dialog_page.dart';
 export 'src/pages/implementations/placeholder_source_page.dart';
+export 'src/pages/implementations/player_transcript_page.dart';
 
 export 'src/pages/base_page.dart';
 export 'src/pages/base_history_page.dart';

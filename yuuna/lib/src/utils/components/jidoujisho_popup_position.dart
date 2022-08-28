@@ -12,6 +12,6 @@ enum JidoujishoPopupPosition {
   /// Show the pop-up in the right half portion of the screen.
   rightHalf,
 
-  /// Show the pop-up in the top two thirds portion of the screen.
-  topTwoThirds,
+  /// Show the pop-up in the top three fourths portion of the screen.
+  topThreeFourths,
 }

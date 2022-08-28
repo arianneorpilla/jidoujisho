@@ -2,13 +2,14 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/pages.dart';
-import 'package:yuuna/src/pages/implementations/player_local_media_source_page.dart';
+import 'package:yuuna/src/pages/implementations/player_source_page.dart';
 import 'package:yuuna/utils.dart';
 import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:path/path.dart' as path;
@@ -97,6 +98,18 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     );
   }
 
+  /// Used to generate a thumbnail for a video file.
+  Future<void> generateThumbnail(String inputPath, String targetPath) async {
+    String timestamp =
+        JidoujishoTimeFormat.getFfmpegTimestamp(const Duration(seconds: 30));
+    final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
+
+    String command =
+        '-ss $timestamp -y -i "$inputPath" -frames:v 1 -q:v 2 "$targetPath"';
+
+    await _flutterFFmpeg.execute(command);
+  }
+
   /// Pick a video file with a built-in file picker.
   void pickVideoFile({
     required BuildContext context,
@@ -108,6 +121,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     String cancelText = appModel.translate('dialog_cancel');
     List<Directory> rootDirectories =
         await appModel.getFilePickerDirectoriesForMediaType(mediaType);
+
     Iterable<String>? filePaths = await FilesystemPicker.open(
       context: context,
       rootDirectories: rootDirectories,
@@ -128,6 +142,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
       type: PlayerMediaType.instance,
       directory: Directory(path.dirname(filePath)),
     );
+
     MediaItem item = MediaItem(
       canDelete: true,
       canEdit: false,
@@ -137,6 +152,21 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
       position: 0,
       duration: 0,
       title: path.basename(filePath),
+    );
+
+    String thumbnailPath = appModel.getThumbnailFile().path;
+    File thumbnailFile = appModel.getThumbnailFile();
+
+    if (thumbnailFile.existsSync()) {
+      thumbnailFile.deleteSync();
+    }
+    thumbnailFile.createSync(recursive: true);
+
+    await generateThumbnail(filePath, thumbnailPath);
+    await setOverrideThumbnailFromMediaItem(
+      appModel: appModel,
+      item: item,
+      file: thumbnailFile,
     );
 
     await appModel.openMedia(
@@ -149,7 +179,11 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
 
   @override
   BaseSourcePage buildLaunchPage({MediaItem? item}) {
-    return PlayerLocalMediaSourcePage(item: item);
+    return PlayerSourcePage(
+      item: item,
+      source: this,
+      useHistory: true,
+    );
   }
 
   /// Used to filter the files found in a directory.

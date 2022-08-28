@@ -60,9 +60,11 @@ class JidoujishoLocalisations {
     'dialog_share': 'SHARE',
     'dialog_pop': 'POP',
     'dialog_save': 'SAVE',
+    'dialog_set': 'SET',
+    'reset': 'Reset',
     'dialog_launch_ankidroid': 'LAUNCH ANKIDROID',
     'media_item_delete_confirmation':
-        'This will remove this item from history. Are you sure you want to do'
+        'This will clear this item from history. Are you sure you want to do'
             ' this?',
     'dictionaries_delete_confirmation':
         'Deleting a dictionary will also clear all dictionary results from'
@@ -181,7 +183,7 @@ class JidoujishoLocalisations {
     'copy_of_mapping': 'Copy of %mapping_name%',
     'enter_search_term': 'Enter a search term...',
     'searching_for': 'Searching for 『%searchTerm%』...',
-    'no_search_results': 'No search results for 『%searchTerm%』',
+    'no_search_results': 'No search results for selection.',
     'edit_actions': 'Edit Dictionary Quick Actions',
     'remove_action': 'Remove Action',
     'assign_action': 'Assign Action',

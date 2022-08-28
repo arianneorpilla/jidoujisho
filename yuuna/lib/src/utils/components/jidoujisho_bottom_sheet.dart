@@ -55,6 +55,7 @@ class JidoujishoBottomSheet extends ConsumerWidget {
         JidoujishoBottomSheetOption option = options[i];
 
         return ListTile(
+          tileColor: Theme.of(context).cardColor,
           dense: true,
           leading: Icon(
             option.icon,

@@ -120,4 +120,39 @@ class MediaItem {
     MediaType mediaType = getMediaType(appModel: appModel);
     return appModel.mediaSources[mediaType]![mediaSourceIdentifier]!;
   }
+
+   /// Creates a deep copy of this mapping but with the given variables replaced
+  /// with the new values.
+  MediaItem copyWith({
+    int? id, 
+    String? mediaIdentifier,
+    String? title,
+    String? mediaSourceIdentifier,
+    String? mediaTypeIdentifier,
+    String? base64Image,
+    String? imageUrl,
+    String? author,
+    String? sourceMetadata,
+    int? position,
+    int? duration,
+    bool? canDelete,
+    bool? canEdit,
+  }) {
+    return MediaItem(
+      id: id ?? this.id,
+      mediaIdentifier: mediaIdentifier ?? this.mediaIdentifier,
+      title: title ?? this.title,
+        mediaSourceIdentifier: mediaSourceIdentifier ?? this.mediaSourceIdentifier,
+      mediaTypeIdentifier: mediaTypeIdentifier ?? this.mediaTypeIdentifier,
+      base64Image: base64Image ?? this.base64Image,
+        imageUrl: imageUrl ?? this.imageUrl,
+      author: author ?? this.author,
+      sourceMetadata: sourceMetadata ?? this.sourceMetadata,
+        position: position ?? this.position,
+      duration: duration ?? this.duration,
+      canDelete: canDelete ?? this.canDelete,
+      canEdit: canEdit ?? this.canEdit,
+    );
+  }
+
 }

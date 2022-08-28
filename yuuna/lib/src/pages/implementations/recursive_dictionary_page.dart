@@ -78,7 +78,7 @@ class _RecursiveDictionaryPageState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true,
+      resizeToAvoidBottomInset: false,
       backgroundColor: Theme.of(context).backgroundColor,
       body: SafeArea(
         child: Padding(

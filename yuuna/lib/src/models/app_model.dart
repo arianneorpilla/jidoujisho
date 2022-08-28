@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 
@@ -241,6 +242,12 @@ class AppModel with ChangeNotifier {
   /// For watching the dictionary history collection.
   Stream<void> Function(int) get watchDictionaryItem =>
       _database.dictionaryResults.watchObjectLazy;
+
+  /// For invoking pauses from media where needed.
+  Stream<void> get currentMediaPauseStream =>
+      _currentMediaPauseController.stream;
+  final StreamController<void> _currentMediaPauseController =
+      StreamController.broadcast();
 
   /// Used to check whether or not the creator is currently in the navigation
   /// stack.
@@ -1277,6 +1284,12 @@ class AppModel with ChangeNotifier {
     return File(audioPath);
   }
 
+    /// Get the file to be written to for thumbnail export.
+  File getThumbnailFile() {
+    String imagePath = path.join(exportDirectory.path, 'thumbnail.jpg');
+    return File(imagePath);
+  }
+
   /// Get a list of decks from the Anki background service that can be used
   /// for export.
   Future<List<String>> getDecks() async {
@@ -1580,6 +1593,8 @@ class AppModel with ChangeNotifier {
     required bool killOnPop,
     CreatorFieldValues? creatorFieldValues,
   }) async {
+    _currentMediaPauseController.add(null);
+
     List<String> decks = await getDecks();
 
     CreatorModel creatorModel = ref.read(creatorProvider);
@@ -1696,6 +1711,8 @@ class AppModel with ChangeNotifier {
     required String searchTerm,
     required bool killOnPop,
   }) async {
+    _currentMediaPauseController.add(null);
+
     if (searchTerm.trim().isEmpty) {
       return;
     }
@@ -2459,10 +2476,12 @@ class AppModel with ChangeNotifier {
     return directory;
   }
 
-
   /// Returns the last navigated directory the user used for picking a file for a
   /// certain media type.
-  void setLastPickedDirectory({required MediaType type, required Directory directory,}) {
+  void setLastPickedDirectory({
+    required MediaType type,
+    required Directory directory,
+  }) {
     _preferences.put('${type.uniqueKey}/last_picked_file', directory.path);
   }
 
@@ -2540,7 +2559,7 @@ class AppModel with ChangeNotifier {
   SubtitleOptions get subtitleOptions {
     int audioAllowance = _preferences.get('audio_allowance', defaultValue: 0);
     int subtitleDelay = _preferences.get('subtitle_delay', defaultValue: 0);
-    double fontSize = _preferences.get('font_size', defaultValue: 24.0);
+    double fontSize = _preferences.get('font_size', defaultValue: 20.0);
     String fontName = _preferences.get(
         'font_name/${targetLanguage.languageCode}',
         defaultValue: 'Roboto');

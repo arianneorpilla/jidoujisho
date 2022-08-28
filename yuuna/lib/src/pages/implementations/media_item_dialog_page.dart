@@ -174,7 +174,7 @@ class _MediaItemDialogPageState extends BasePageState<MediaItemDialogPage> {
             onPressed: () {
               appModel.deleteMediaItem(widget.item);
               Navigator.pop(context);
-              setState(() {});
+              Navigator.pop(context);
             },
           ),
           TextButton(

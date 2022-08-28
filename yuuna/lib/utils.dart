@@ -30,4 +30,6 @@ export 'src/utils/player/player_payload.dart';
 export 'src/utils/player/blur_options.dart';
 export 'src/utils/player/subtitle_options.dart';
 
+export 'src/utils/misc/jidoujisho_time_format.dart';
+
 export 'src/utils/firebase_options.dart';

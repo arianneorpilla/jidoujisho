@@ -113,8 +113,6 @@ abstract class MediaSource {
   /// initialisation step.
   Future<void> prepareResources() async {}
 
-
-
   /// Executed when this media source is closed. Perform this step to clean up
   /// resources or refresh media history.
   Future<void> onSourceExit({
@@ -219,12 +217,14 @@ abstract class MediaSource {
   /// overriding of values for display purposes. If a source does this,
   /// override this function.
   String getDisplayTitleFromMediaItem(MediaItem item) {
-    String? overrideTitle = getOverrideTitleFromMediaItem(item);
-    if (overrideTitle != null) {
-      return overrideTitle;
-    }
-
     return item.title;
+  }
+
+  /// Given a [MediaItem], return its subtitle. Some media items may allow
+  /// overriding of values for display purposes. If a source does this,
+  /// override this function.
+  String getDisplaySubtitleFromMediaItem(MediaItem item) {
+    return item.mediaIdentifier;
   }
 
   /// Given a [MediaItem], return its thumbnail. Some media items may allow
@@ -239,6 +239,7 @@ abstract class MediaSource {
       appModel: appModel,
       item: item,
     );
+
     if (!noOverride && overrideThumbnail != null) {
       return overrideThumbnail;
     }
@@ -269,9 +270,8 @@ abstract class MediaSource {
     required MediaItem item,
   }) {
     String key =
-        'override_thumbnail://${item.mediaSourceIdentifier}/${item.uniqueKey}';
-    List<int> bytes = utf8.encode(key);
-    String basename = base64Url.encode(bytes);
+        '${item.mediaIdentifier}/${item.mediaSourceIdentifier}/override_thumbnail';
+    String basename = key.hashCode.toString();
     String filename = path.join(appModel.thumbnailsDirectory.path, basename);
 
     return filename;
@@ -294,14 +294,11 @@ abstract class MediaSource {
     required AppModel appModel,
     required MediaItem item,
   }) {
-    if (!item.canEdit) {
-      return null;
-    }
-
     String filename = getOverrideThumbnailFilename(
       appModel: appModel,
       item: item,
     );
+
     File file = File(filename);
     if (!file.existsSync()) {
       return null;
@@ -341,7 +338,7 @@ abstract class MediaSource {
     );
 
     File thumbnailFile = File(filename);
-    thumbnailFile.createSync();
+    thumbnailFile.createSync(recursive: true);
     if (file == null) {
       thumbnailFile.deleteSync();
     } else {
@@ -356,6 +353,9 @@ abstract class MediaSource {
   }) async {
     await deletePreference(key: getOverrideTitleKey(item));
     await setOverrideThumbnailFromMediaItem(
-        appModel: appModel, item: item, file: null,);
+      appModel: appModel,
+      item: item,
+      file: null,
+    );
   }
 }
