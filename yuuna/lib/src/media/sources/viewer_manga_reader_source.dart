@@ -15,6 +15,7 @@ class ViewerMangaReaderSource extends ViewerMediaSource {
               ' Tachiyomi-compatible folder structure.',
           icon: Icons.photo_album,
           implementsSearch: false,
+           implementsHistory: true,
         );
 
   /// Get the singleton instance of this media type.

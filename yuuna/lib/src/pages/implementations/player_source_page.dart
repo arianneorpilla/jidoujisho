@@ -132,7 +132,6 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
 
   bool _autoPauseFlag = false;
   Subtitle? _autoPauseSubtitle;
-  bool _sliderBeingDragged = false;
 
   Duration get subtitleDelay =>
       Duration(milliseconds: _subtitleOptionsNotifier.value.subtitleDelay);
@@ -361,7 +360,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     );
 
     if (item.position != 0) {
-      appModel.addMediaItem(item);
+      appModel.updateMediaItem(item);
     }
   }
 
@@ -756,7 +755,6 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
                 ? 1.0
                 : _playerController.value.duration.inSeconds.toDouble(),
             onChangeStart: (value) {
-              _sliderBeingDragged = true;
               _autoPauseSubtitle = null;
               _autoPauseFlag = false;
               _dialogSmartPaused = false;
@@ -765,7 +763,6 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
               cancelHideTimer();
             },
             onChangeEnd: (value) {
-              _sliderBeingDragged = false;
               startHideTimer();
             },
             onChanged: validPosition

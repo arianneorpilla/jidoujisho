@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -25,6 +24,7 @@ abstract class MediaSource {
     required this.mediaType,
     required this.icon,
     required this.implementsSearch,
+    required this.implementsHistory,
   });
 
   /// A unique name that allows distinguishing this type from others,
@@ -59,6 +59,15 @@ abstract class MediaSource {
   /// Whether or not this media source has a search function. If false, this
   /// media source will have an action executed by [onSearchBarTap].
   final bool implementsSearch;
+
+  /// Whether or not this media source allows adding items to media history.
+  /// Note that some media sources produce a history of media items but do
+  /// not require this to be set true. For example, the reader fetches its
+  /// history from a source other than the actual internal media history
+  /// system provided by the media source framework. In such cases, this
+  /// should be set as false. Setting this as true results to a media item
+  /// being added to history when media is opened.
+  final bool implementsHistory;
 
   /// Used for accessing persistent key-value data specific to this source.
   /// See [initialise].

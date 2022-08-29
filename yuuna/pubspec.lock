@@ -305,14 +305,12 @@ packages:
     source: hosted
     version: "1.0.1"
   fading_edge_scrollview:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "."
-      ref: master
-      resolved-ref: "6f3b745b6af908fcbe2acd59f94cf607833708dd"
-      url: "https://github.com/ruslic19/fading_edge_scrollview"
-    source: git
-    version: "2.0.1"
+      name: fading_edge_scrollview
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.0"
   fake_async:
     dependency: transitive
     description:
@@ -345,8 +343,8 @@ packages:
     dependency: "direct main"
     description:
       path: package
-      ref: "968a4b3e04c4b19de5f3ae8e9c922a220ec67c62"
-      resolved-ref: "968a4b3e04c4b19de5f3ae8e9c922a220ec67c62"
+      ref: "3276b033f153690c49bd2f0a0dcb0411642de6e5"
+      resolved-ref: "3276b033f153690c49bd2f0a0dcb0411642de6e5"
       url: "https://github.com/lrorpilla/filesystem_picker"
     source: git
     version: "2.0.0-nullsafety.0"
@@ -805,7 +803,7 @@ packages:
       name: marquee
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.2.2"
+    version: "2.2.3"
   matcher:
     dependency: transitive
     description:

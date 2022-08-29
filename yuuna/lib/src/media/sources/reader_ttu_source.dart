@@ -31,6 +31,7 @@ class ReaderTtuSource extends ReaderMediaSource {
               ' reader.',
           icon: Icons.chrome_reader_mode_outlined,
           implementsSearch: false,
+           implementsHistory: false,
         );
 
   /// Get the singleton instance of this media type.

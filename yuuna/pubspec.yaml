@@ -26,7 +26,7 @@ dependencies:
   filesystem_picker:
     git:
       url: https://github.com/lrorpilla/filesystem_picker
-      ref: 968a4b3e04c4b19de5f3ae8e9c922a220ec67c62
+      ref: 3276b033f153690c49bd2f0a0dcb0411642de6e5
       path: package/
   firebase_crashlytics: ^2.8.1
   float_column: ^1.2.1
@@ -62,7 +62,7 @@ dependencies:
   just_audio: ^0.9.21
   kana_kit: ^2.0.0
   local_assets_server: ^2.0.2+12
-  marquee: ^2.2.2
+  marquee: ^2.2.3
   material_floating_search_bar: 
     git:
       url: https://github.com/lrorpilla/material_floating_search_bar
@@ -103,10 +103,6 @@ dependencies:
   wakelock: ^0.6.1+2
 
 dependency_overrides:
-  fading_edge_scrollview:
-      git:
-        url: https://github.com/ruslic19/fading_edge_scrollview
-        ref: master
   freezed_annotation: ^2.0.3 # Caused by spaces
 
 dev_dependencies:

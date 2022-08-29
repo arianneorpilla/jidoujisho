@@ -25,6 +25,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
           description: 'Play videos sourced from local device storage.',
           icon: Icons.storage,
           implementsSearch: false,
+          implementsHistory: true,
         );
 
   /// Get the singleton instance of this media type.

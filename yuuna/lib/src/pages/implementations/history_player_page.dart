@@ -65,6 +65,8 @@ class HistoryPlayerPageState<T extends BaseHistoryPage>
   /// This is shown as the body when [shouldPlaceholderBeShown] is false.
   @override
   Widget buildHistory(List<MediaItem> items) {
+   items = items.reversed.toList();
+
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(
         parent: BouncingScrollPhysics(),

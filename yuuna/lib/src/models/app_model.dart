@@ -97,6 +97,10 @@ class AppModel with ChangeNotifier {
   PackageInfo get packageInfo => _packageInfo;
   late final PackageInfo _packageInfo;
 
+  /// Used to get information on the Android version of the device.
+    AndroidDeviceInfo get androidDeviceInfo => _androidDeviceInfo;
+    late final AndroidDeviceInfo _androidDeviceInfo;
+
   /// Used for caching images and audio produced from media seeds.
   DefaultCacheManager get cacheManager => _cacheManager;
   final _cacheManager = DefaultCacheManager();
@@ -566,6 +570,7 @@ class AppModel with ChangeNotifier {
   Future<void> initialise() async {
     /// Prepare entities that may be repeatedly used at runtime.
     _packageInfo = await PackageInfo.fromPlatform();
+   _androidDeviceInfo =  await DeviceInfoPlugin().androidInfo;
 
     /// Perform startup activities unnecessary to further initialisation here.
     await requestExternalStoragePermissions();
@@ -1188,11 +1193,10 @@ class AppModel with ChangeNotifier {
 
   /// Requests for full external storage permissions. Required to handle video
   /// files and their subtitle files in the same directory.
-  static Future<void> requestExternalStoragePermissions() async {
-    AndroidDeviceInfo androidDeviceInfo = await DeviceInfoPlugin().androidInfo;
+   Future<void> requestExternalStoragePermissions() async {
     await Permission.storage.request();
-int _currentAudioTrack = 0;
-    if (androidDeviceInfo.version.sdkInt! >= 30) {
+
+    if (_androidDeviceInfo.version.sdkInt! >= 30) {
       await Permission.manageExternalStorage.request();
     }
   }
@@ -1634,6 +1638,10 @@ int _currentAudioTrack = 0;
     await Wakelock.enable();
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
+    if (item != null && mediaSource.implementsHistory && !isIncognitoMode) {
+      addMediaItem(item);
+    }
+
     await Navigator.push(
       _navigatorKey.currentContext!,
       MaterialPageRoute(
@@ -1642,7 +1650,6 @@ int _currentAudioTrack = 0;
     );
 
     mediaSource.clearCurrentMediaValues();
-
     _currentMediaSource = null;
     await Wakelock.disable();
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -2164,10 +2171,12 @@ int _currentAudioTrack = 0;
     return metaEntries;
   }
 
-  /// Add a [MediaItem] to history.
+  /// Add a [MediaItem] to history. This should be called at startup
+  /// when the media item is launched.
   void addMediaItem(MediaItem item) {
     _database.writeTxnSync((isar) {
       isar.mediaItems.deleteByUniqueKeySync(item.uniqueKey);
+       item.id = null;
 
       isar.mediaItems.putSync(item);
 
@@ -2188,6 +2197,15 @@ int _currentAudioTrack = 0;
     });
   }
 
+    /// Update a media item, without performing any deletion or mutation
+    /// operations. This is useful when updating constantly, for example,
+    /// with the player where the position needs to be constantly updated.
+  void updateMediaItem(MediaItem item) {
+    _database.writeTxnSync((isar) {
+      isar.mediaItems.putSync(item);
+    });
+  }
+
   /// Deletes a [MediaItem] from history and also rids of override values.
   Future<void> deleteMediaItem(MediaItem item) async {
     MediaSource mediaSource = item.getMediaSource(appModel: this);
@@ -2202,12 +2220,16 @@ int _currentAudioTrack = 0;
   void copyToClipboard(String term) {
     FlutterClipboard.copy(term);
 
+    
+    /// Redundant to do this with the share notification on Android
+   if (_androidDeviceInfo.version.sdkInt != null && _androidDeviceInfo.version.sdkInt! < 33) {
     String copiedToClipboard = translate('copied_to_clipboard');
-    Fluttertoast.showToast(
+     Fluttertoast.showToast(
       msg: copiedToClipboard,
       toastLength: Toast.LENGTH_SHORT,
       gravity: ToastGravity.BOTTOM,
     );
+   }
   }
 
   /// Fetches the tag widgets for a [DictionaryTerm].
@@ -2447,15 +2469,16 @@ int _currentAudioTrack = 0;
   /// Get the history of [MediaItem] for a particular [MediaType].
   List<MediaItem> getMediaTypeHistory({required MediaType mediaType}) {
     return _database.mediaItems
-        .where()
+        .filter()
         .mediaTypeIdentifierEqualTo(mediaType.uniqueKey)
+     
         .findAllSync();
   }
 
   /// Get the history of [MediaItem] for a particular [MediaSource].
   List<MediaItem> getMediaSourceHistory({required MediaSource mediaSource}) {
     return _database.mediaItems
-        .where()
+         .filter()
         .mediaSourceIdentifierEqualTo(mediaSource.uniqueKey)
         .findAllSync();
   }
