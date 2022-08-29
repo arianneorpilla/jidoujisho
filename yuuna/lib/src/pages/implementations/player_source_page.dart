@@ -142,8 +142,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
 
   bool _playerInitialised = false;
 
-  StreamSubscription<void>? _playSubscription;
-  StreamSubscription<void>? _pauseSubscription;
+  late final StreamSubscription<void>? _headsetButtonActionSubscription;
 
   @override
   void initState() {
@@ -152,8 +151,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
 
   @override
   void dispose() {
-    _playSubscription?.cancel();
-    _pauseSubscription?.cancel();
+    _headsetButtonActionSubscription?.cancel();
     super.dispose();
   }
 
@@ -230,7 +228,9 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
       initialiseEmbeddedSubtitles(_playerController);
     });
 
-    /// appModel.playPauseFlipflop.addListener(playPause);
+    _headsetButtonActionSubscription = appModel.playPauseHeadsetActionStream.listen((_) {
+      playPause();
+    });
 
     setState(() {
       _playerInitialised = true;

@@ -9,6 +9,7 @@ environment:
   sdk: ">=2.17.0 <3.0.0"
 
 dependencies:
+  audio_service: ^0.18.7
   audio_session: ^0.1.6+1
   blurrycontainer:
     git:

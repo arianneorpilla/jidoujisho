@@ -31,5 +31,6 @@ export 'src/utils/player/blur_options.dart';
 export 'src/utils/player/subtitle_options.dart';
 
 export 'src/utils/misc/jidoujisho_time_format.dart';
+export 'src/utils/misc/jidoujisho_audio_handler.dart';
 
 export 'src/utils/firebase_options.dart';

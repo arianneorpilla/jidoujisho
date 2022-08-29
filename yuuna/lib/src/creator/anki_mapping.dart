@@ -53,13 +53,13 @@ class AnkiMapping {
 
   /// A default map of enhancements to use for new mappings.
   static const Map<String, Map<int, String>> defaultEnhancements = {
-    SentenceField.key: {0: ClearFieldEnhancement.key},
-    TermField.key: {0: ClearFieldEnhancement.key},
+    SentenceField.key: {0: ClearFieldEnhancement.key, 1: TextSegmentationEnhancement.key},
+    TermField.key: {0: ClearFieldEnhancement.key, 1: SearchDictionaryEnhancement.key},
     ReadingField.key: {0: ClearFieldEnhancement.key},
     MeaningField.key: {0: ClearFieldEnhancement.key},
     NotesField.key: {0: ClearFieldEnhancement.key},
-    ImageField.key: {0: ClearFieldEnhancement.key},
-    AudioField.key: {0: ClearFieldEnhancement.key},
+    ImageField.key: {0: ClearFieldEnhancement.key, -1: BingImagesSearchEnhancement.key},
+    AudioField.key: {0: ClearFieldEnhancement.key, -1: JapanesePod101AudioEnhancement.key},
     ContextField.key: {0: ClearFieldEnhancement.key},
     PitchAccentField.key: {0: ClearFieldEnhancement.key},
     FuriganaField.key: {0: ClearFieldEnhancement.key},

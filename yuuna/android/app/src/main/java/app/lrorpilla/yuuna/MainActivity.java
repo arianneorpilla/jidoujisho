@@ -51,7 +51,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-public class MainActivity extends FlutterActivity {
+import com.ryanheise.audioservice.AudioServiceActivity;
+
+public class MainActivity extends AudioServiceActivity {
     private static final String ANKIDROID_CHANNEL = "app.lrorpilla.yuuna/anki";
     private static final int AD_PERM_REQUEST = 0;
 
@@ -106,7 +108,7 @@ public class MainActivity extends FlutterActivity {
                     "jidoujisho Yuuna"
                 },
                 new String[] {"<p id=\"sentence\">{{Sentence}}</p><div id=\"term\">{{Term}}</div>"},
-                    new String[] {"<p id=\"sentence\">{{Sentence}}</p><div id=\"term\">{{Term}}</div><br>{{Audio}}<div class=\"image\">{{Image}}</div><hr id=reading><p id=\"reading\">{{Reading}}</p><h2 id=\"term\">{{Term}}</h2><br><p><small id=\"meaning\">{{Meaning}}</small></p><br>{{#Context}}<a style=\"text-decoration:none;color:red;\" href=\"{{Context}}\">↩</a>{{/Context}}"},
+                    new String[] {"<p id=\"sentence\">{{Sentence}}</p><div id=\"term\">{{Term}}</div><br>[sound:{{Audio}}]<div class=\"image\"><img src=\"{{Image}}\"></div><hr id=reading><p id=\"reading\">{{Reading}}</p><h2 id=\"term\">{{Term}}</h2><br><p><small id=\"meaning\">{{Meaning}}</small></p><br>{{#Context}}<a style=\"text-decoration:none;color:red;\" href=\"{{Context}}\">↩</a>{{/Context}}"},
                             "p {\n" +
                             "    margin: 0px\n" +
                             "}\n" +
@@ -179,7 +181,7 @@ public class MainActivity extends FlutterActivity {
 
         long modelId = mAnkiDroid.findModelIdByName(model, fields.size());
        
-        Set<String> tags = new HashSet<>(Arrays.asList("Chisa"));
+        Set<String> tags = new HashSet<>(Arrays.asList("Yuuna"));
 
         api.addNote(modelId, deckId, fields.toArray(new String[fields.size()]), tags);
 

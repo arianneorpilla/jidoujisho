@@ -81,7 +81,7 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
     }
 
     return ListView.builder(
-      cacheExtent: 100000,
+      cacheExtent: 10000,
       controller: DictionaryMediaType.instance.scrollController,
       physics:
           const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
