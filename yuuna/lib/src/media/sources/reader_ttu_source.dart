@@ -87,7 +87,7 @@ class ReaderTtuSource extends ReaderMediaSource {
   }
 
   @override
-  BaseHistoryPage buildHistoryPage({MediaItem? item}) {
+  BasePage buildHistoryPage({MediaItem? item}) {
     return const ReaderTtuSourceHistoryPage();
   }
 

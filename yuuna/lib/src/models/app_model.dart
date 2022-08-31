@@ -98,8 +98,8 @@ class AppModel with ChangeNotifier {
   late final PackageInfo _packageInfo;
 
   /// Used to get information on the Android version of the device.
-    AndroidDeviceInfo get androidDeviceInfo => _androidDeviceInfo;
-    late final AndroidDeviceInfo _androidDeviceInfo;
+  AndroidDeviceInfo get androidDeviceInfo => _androidDeviceInfo;
+  late final AndroidDeviceInfo _androidDeviceInfo;
 
   /// Used for caching images and audio produced from media seeds.
   DefaultCacheManager get cacheManager => _cacheManager;
@@ -229,6 +229,10 @@ class AppModel with ChangeNotifier {
   /// Used as the history key used for the Stash.
   final String stashKey = 'stash';
 
+  /// Public flag for refreshing the dictionary tab when a search has been done
+  /// outside of media, i.e. when using the lyrics tab.
+  bool refreshOnDictionaryTabSwitch = false;
+
   /// Returns all dictionaries imported into the database. Sorted by the
   /// user-defined order in the dictionary menu.
   List<Dictionary> get dictionaries =>
@@ -253,7 +257,7 @@ class AppModel with ChangeNotifier {
   final StreamController<void> _currentMediaPauseController =
       StreamController.broadcast();
 
-        /// Allows actions to be performed upon Play/Pause on headset buttons.
+  /// Allows actions to be performed upon Play/Pause on headset buttons.
   Stream<void> get playPauseHeadsetActionStream =>
       _playPauseHeadsetActionStreamController.stream;
   final StreamController<void> _playPauseHeadsetActionStreamController =
@@ -577,7 +581,7 @@ class AppModel with ChangeNotifier {
   Future<void> initialise() async {
     /// Prepare entities that may be repeatedly used at runtime.
     _packageInfo = await PackageInfo.fromPlatform();
-   _androidDeviceInfo =  await DeviceInfoPlugin().androidInfo;
+    _androidDeviceInfo = await DeviceInfoPlugin().androidInfo;
 
     /// Perform startup activities unnecessary to further initialisation here.
     await requestExternalStoragePermissions();
@@ -1200,7 +1204,7 @@ class AppModel with ChangeNotifier {
 
   /// Requests for full external storage permissions. Required to handle video
   /// files and their subtitle files in the same directory.
-   Future<void> requestExternalStoragePermissions() async {
+  Future<void> requestExternalStoragePermissions() async {
     await Permission.storage.request();
 
     if (_androidDeviceInfo.version.sdkInt! >= 30) {
@@ -1220,7 +1224,7 @@ class AppModel with ChangeNotifier {
     String dialogCloseLabel = translate('dialog_close');
     String dialogLaunchAnkidroidLabel = translate('dialog_launch_ankidroid');
 
-      await requestAnkidroidPermissions();
+    await requestAnkidroidPermissions();
 
     await showDialog(
       barrierDismissible: true,
@@ -1297,7 +1301,7 @@ class AppModel with ChangeNotifier {
     return File(audioPath);
   }
 
-    /// Get the file to be written to for thumbnail export.
+  /// Get the file to be written to for thumbnail export.
   File getThumbnailFile() {
     String imagePath = path.join(exportDirectory.path, 'thumbnail.jpg');
     return File(imagePath);
@@ -2185,7 +2189,7 @@ class AppModel with ChangeNotifier {
   void addMediaItem(MediaItem item) {
     _database.writeTxnSync((isar) {
       isar.mediaItems.deleteByUniqueKeySync(item.uniqueKey);
-       item.id = null;
+      item.id = null;
 
       isar.mediaItems.putSync(item);
 
@@ -2206,9 +2210,9 @@ class AppModel with ChangeNotifier {
     });
   }
 
-    /// Update a media item, without performing any deletion or mutation
-    /// operations. This is useful when updating constantly, for example,
-    /// with the player where the position needs to be constantly updated.
+  /// Update a media item, without performing any deletion or mutation
+  /// operations. This is useful when updating constantly, for example,
+  /// with the player where the position needs to be constantly updated.
   void updateMediaItem(MediaItem item) {
     _database.writeTxnSync((isar) {
       isar.mediaItems.putSync(item);
@@ -2229,16 +2233,16 @@ class AppModel with ChangeNotifier {
   void copyToClipboard(String term) {
     FlutterClipboard.copy(term);
 
-    
     /// Redundant to do this with the share notification on Android
-   if (_androidDeviceInfo.version.sdkInt != null && _androidDeviceInfo.version.sdkInt! < 33) {
-    String copiedToClipboard = translate('copied_to_clipboard');
-     Fluttertoast.showToast(
-      msg: copiedToClipboard,
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-    );
-   }
+    if (_androidDeviceInfo.version.sdkInt != null &&
+        _androidDeviceInfo.version.sdkInt! < 33) {
+      String copiedToClipboard = translate('copied_to_clipboard');
+      Fluttertoast.showToast(
+        msg: copiedToClipboard,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+      );
+    }
   }
 
   /// Fetches the tag widgets for a [DictionaryTerm].
@@ -2480,14 +2484,13 @@ class AppModel with ChangeNotifier {
     return _database.mediaItems
         .filter()
         .mediaTypeIdentifierEqualTo(mediaType.uniqueKey)
-     
         .findAllSync();
   }
 
   /// Get the history of [MediaItem] for a particular [MediaSource].
   List<MediaItem> getMediaSourceHistory({required MediaSource mediaSource}) {
     return _database.mediaItems
-         .filter()
+        .filter()
         .mediaSourceIdentifierEqualTo(mediaSource.uniqueKey)
         .findAllSync();
   }
@@ -2680,5 +2683,4 @@ class AppModel with ChangeNotifier {
     await _preferences.put(
         'player_orientation_portrait', !isPlayerOrientationPortrait);
   }
-  
 }

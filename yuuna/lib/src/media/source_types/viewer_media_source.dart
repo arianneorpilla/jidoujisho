@@ -19,7 +19,7 @@ abstract class ViewerMediaSource extends MediaSource {
   /// The body widget to show in the tab when this source's media type and this
   /// source is selected.
   @override
-  BaseHistoryPage buildHistoryPage({MediaItem? item}) {
+  BasePage buildHistoryPage({MediaItem? item}) {
     return const HistoryViewerPage();
   }
 }

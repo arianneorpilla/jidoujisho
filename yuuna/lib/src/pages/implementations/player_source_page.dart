@@ -1239,7 +1239,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
           recognizer: TapGestureRecognizer()
             ..onTap = () async {
               String searchTerm = text.substring(index);
-              setSearchTerm(searchTerm);
+             
             },
         ),
       );

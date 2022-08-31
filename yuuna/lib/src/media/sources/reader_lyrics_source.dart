@@ -74,7 +74,7 @@ class ReaderLyricsSource extends ReaderMediaSource {
   }) async {}
 
   @override
-  BaseHistoryPage buildHistoryPage({MediaItem? item}) {
+  BasePage buildHistoryPage({MediaItem? item}) {
     return const ReaderLyricsPage();
   }
 

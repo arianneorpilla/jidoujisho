@@ -220,7 +220,7 @@ abstract class MediaSource {
 
   /// The body widget to show in the tab when this source's media type and this
   /// source is selected.
-  BaseHistoryPage buildHistoryPage();
+  BasePage buildHistoryPage();
 
   /// Given a [MediaItem], return its title. Some media items may allow
   /// overriding of values for display purposes. If a source does this,
