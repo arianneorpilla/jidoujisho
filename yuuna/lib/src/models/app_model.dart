@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:audio_service/audio_service.dart' as ag;
 import 'package:collection/collection.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -384,6 +383,7 @@ class AppModel with ChangeNotifier {
       ],
       ReaderMediaType.instance: [
         ReaderTtuSource.instance,
+        ReaderLyricsSource.instance,
       ],
       ViewerMediaType.instance: [
         ViewerMangaReaderSource.instance,
@@ -582,9 +582,6 @@ class AppModel with ChangeNotifier {
     /// Perform startup activities unnecessary to further initialisation here.
     await requestExternalStoragePermissions();
     await requestAnkidroidPermissions();
-
-    /// Allow headset buttons to communicate with the application.
-    await initialiseAudioHandler();
 
     /// These directories will commonly be accessed.
     _temporaryDirectory = await getTemporaryDirectory();
@@ -2683,25 +2680,5 @@ class AppModel with ChangeNotifier {
     await _preferences.put(
         'player_orientation_portrait', !isPlayerOrientationPortrait);
   }
-
-  /// Initialises audio services handling which allows headset buttons to
-  /// communicate and perform actions in the application.
-  Future<void> initialiseAudioHandler() async {
-    await ag.AudioService.init(
-      builder: () => JidoujishoAudioHandler(
-        onPlay: () {
-          _playPauseHeadsetActionStreamController.add(null);
-        },
-        onPause: () {
-           _playPauseHeadsetActionStreamController.add(null);
-        },
-      ),
-      config: const ag.AudioServiceConfig(
-        androidNotificationChannelId: 'app.lrorpilla.jidoujisho.channel.audio',
-        androidNotificationChannelName: 'jidoujisho',
-      ),
-    );
-  }
-
   
 }

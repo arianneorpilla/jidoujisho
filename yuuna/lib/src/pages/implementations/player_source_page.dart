@@ -228,10 +228,6 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
       initialiseEmbeddedSubtitles(_playerController);
     });
 
-    _headsetButtonActionSubscription = appModel.playPauseHeadsetActionStream.listen((_) {
-      playPause();
-    });
-
     setState(() {
       _playerInitialised = true;
     });

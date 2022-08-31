@@ -100,7 +100,7 @@ class _ReaderTtuSourcePageState
     return InAppWebView(
       initialUrlRequest: URLRequest(
         url: Uri.parse(
-          widget.item?.uniqueKey ?? 'http://localhost:${server.boundPort}/',
+          widget.item?.mediaIdentifier ?? 'http://localhost:${server.boundPort}/',
         ),
       ),
       initialOptions: getInitialOptions(),

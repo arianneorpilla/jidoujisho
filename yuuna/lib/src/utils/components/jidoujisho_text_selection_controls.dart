@@ -17,7 +17,15 @@ class JidoujishoTextSelectionControls extends MaterialTextSelectionControls {
     required this.allowCut,
     required this.allowPaste,
     required this.allowSelectAll,
+    this.creatorAction,
+    this.creatorActionLabel,
   });
+
+  /// Localisation for the creator action.
+  final Function(String)? creatorAction;
+
+  /// Localisation for the creator action.
+  final String? creatorActionLabel;
 
   /// Localisation for the search action.
   final String searchActionLabel;
@@ -78,6 +86,14 @@ class JidoujishoTextSelectionControls extends MaterialTextSelectionControls {
       anchorAbove: anchorAbove,
       anchorBelow: anchorBelow,
       clipboardStatus: clipboardStatus!,
+      creatorAction: () {
+        creatorAction?.call(
+          delegate.textEditingValue.selection
+              .textInside(delegate.textEditingValue.text),
+        );
+
+        delegate.hideToolbar();
+      },
       searchAction: () {
         searchAction(
           delegate.textEditingValue.selection
@@ -96,6 +112,7 @@ class JidoujishoTextSelectionControls extends MaterialTextSelectionControls {
       },
       searchActionLabel: searchActionLabel,
       stashActionLabel: stashActionLabel,
+      creatorActionLabel: creatorActionLabel,
       handleCopy: canCopy(delegate) && allowCopy
           ? () => handleCopy(delegate, clipboardStatus)
           : null,
@@ -117,6 +134,8 @@ class JidoujishoSelectionToolbar extends StatefulWidget {
     required this.anchorAbove,
     required this.anchorBelow,
     required this.clipboardStatus,
+    required this.creatorAction,
+    required this.creatorActionLabel,
     required this.searchActionLabel,
     required this.searchAction,
     required this.stashAction,
@@ -148,6 +167,12 @@ class JidoujishoSelectionToolbar extends StatefulWidget {
 
   /// Behaviour for the stash action.
   final Function() stashAction;
+
+  /// Localisation for the creator action.
+  final String? creatorActionLabel;
+
+  /// Behaviour for the creator action.
+  final Function()? creatorAction;
 
   /// Behaviour for copying.
   final VoidCallback? handleCopy;
@@ -235,6 +260,11 @@ class _JidoujishoSelectionToolbarState
         _TextSelectionToolbarItemData(
           label: localizations.selectAllButtonLabel,
           onPressed: widget.handleSelectAll,
+        ),
+      if (widget.creatorAction != null && widget.creatorActionLabel != null)
+        _TextSelectionToolbarItemData(
+          onPressed: widget.creatorAction,
+          label: widget.creatorActionLabel!,
         ),
     ];
 

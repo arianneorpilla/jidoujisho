@@ -51,9 +51,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import com.ryanheise.audioservice.AudioServiceActivity;
-
-public class MainActivity extends AudioServiceActivity {
+public class MainActivity extends FlutterActivity {
     private static final String ANKIDROID_CHANNEL = "app.lrorpilla.yuuna/anki";
     private static final int AD_PERM_REQUEST = 0;
 

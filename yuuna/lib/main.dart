@@ -64,6 +64,8 @@ void main() {
         child: const JidoujishoApp(),
       ),
     );
+
+  
   }, (exception, stack) {
     /// Print error details to the console.
     final details = FlutterErrorDetails(exception: exception, stack: stack);

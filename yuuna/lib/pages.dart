@@ -32,6 +32,7 @@ export 'src/pages/implementations/text_segmentation_dialog_page.dart';
 export 'src/pages/implementations/field_picker_dialog_page.dart';
 export 'src/pages/implementations/reader_ttu_source_page.dart';
 export 'src/pages/implementations/reader_ttu_source_history_page.dart';
+export 'src/pages/implementations/reader_lyrics_page.dart';
 export 'src/pages/implementations/subtitle_options_dialog_page.dart';
 export 'src/pages/implementations/placeholder_source_page.dart';
 export 'src/pages/implementations/player_transcript_page.dart';
