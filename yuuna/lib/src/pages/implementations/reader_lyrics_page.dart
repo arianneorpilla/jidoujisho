@@ -154,6 +154,7 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
       child: Stack(
         children: [
           SingleChildScrollView(
+            controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(
                 parent: BouncingScrollPhysics()),
             primary: false,
@@ -224,9 +225,16 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
       onSelectionChanged: (selection, cause) {
         String textSelection = selection.textInside(text);
         _currentSelection = textSelection;
+
+        /// https://github.com/flutter/flutter/issues/77721
+        Future.delayed(const Duration(milliseconds: 10), () {
+          _scrollController.jumpTo(_scrollController.offset);
+        });
       },
     );
   }
+
+  final ScrollController _scrollController = ScrollController();
 
   List<InlineSpan> getSubtitleSpans(String text) {
     List<InlineSpan> spans = [];
