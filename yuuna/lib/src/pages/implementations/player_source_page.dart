@@ -1237,9 +1237,9 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
           text: character,
           style: subtitleTextStyle,
           recognizer: TapGestureRecognizer()
-            ..onTap = () async {
+            ..onTapDown = (details) async {
               String searchTerm = text.substring(index);
-             
+              setSearchTerm(searchTerm);
             },
         ),
       );

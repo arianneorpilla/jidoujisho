@@ -170,8 +170,8 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
                     children: [
                       if (track.hasImage)
                         SizedBox(
-                          width: 96,
                           height: 96,
+                          width: 96,
                           child: Image(image: track.image!),
                         ),
                       if (track.hasImage) const Space.semiBig(),
@@ -225,11 +225,6 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
       onSelectionChanged: (selection, cause) {
         String textSelection = selection.textInside(text);
         _currentSelection = textSelection;
-
-        /// https://github.com/flutter/flutter/issues/77721
-        Future.delayed(const Duration(milliseconds: 10), () {
-          _scrollController.jumpTo(_scrollController.offset);
-        });
       },
     );
   }
