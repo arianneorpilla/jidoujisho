@@ -30,6 +30,7 @@ class MediaItem {
     this.imageUrl,
     this.audioUrl,
     this.author,
+    this.authorIdentifier,
     this.sourceMetadata,
   });
 
@@ -83,6 +84,10 @@ class MediaItem {
   /// detail. For a web video, this could be the channel where the video is
   /// from. For a book, it is the author.
   String? author;
+
+  /// This field is for future-proofing, and can be used to store an identifier
+  /// for an author, for example, a YouTube channel.
+  String? authorIdentifier;
 
   /// This field may be used to store additional details that the source may
   /// require to get more details on this item.

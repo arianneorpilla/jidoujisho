@@ -208,10 +208,15 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     _playerController =
         await (widget.source as PlayerMediaSource).preparePlayerController(
       appModel: appModel,
+      ref: ref,
       item: widget.item!,
     );
-    _subtitleItems = await (widget.source as PlayerMediaSource)
-        .prepareSubtitles(widget.item!);
+    _subtitleItems =
+        await (widget.source as PlayerMediaSource).prepareSubtitles(
+          appModel: appModel,
+      ref: ref,
+      item: widget.item!,
+    );
 
     if (_subtitleItems.isNotEmpty) {
       _subtitleItem = _subtitleItems.first;
@@ -226,9 +231,14 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     _subtitleOptionsNotifier = appModel.currentSubtitleOptions!;
 
     _currentSubtitle.value = null;
+    appModel.blockCreatorInitialMedia = true;
 
     _playerController.addOnInitListener(() async {
       initialiseEmbeddedSubtitles(_playerController);
+
+      Future.delayed(const Duration(seconds: 5), () {
+        appModel.blockCreatorInitialMedia = false;
+      });
     });
 
     setState(() {
@@ -447,13 +457,16 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
                 currentSubtitle: getNearestSubtitle(),
                 subtitleOptions: _subtitleOptionsNotifier.value,
                 onTap: (index) async {
+                  Navigator.pop(context);
                   await _playerController.seekTo(
                       _subtitleItem.controller.subtitles[index].start -
                           subtitleDelay);
                 },
                 onLongPress: (index) async {
+                  Navigator.pop(context);
                   exporting = true;
                   await exportMultipleSubtitles(index);
+                  await dialogSmartResume();
                 },
               ),
             ),
@@ -865,6 +878,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
                 currentSubtitle: getNearestSubtitle(),
                 subtitleOptions: _subtitleOptionsNotifier.value,
                 onTap: (index) async {
+                  Navigator.pop(context);
                   Subtitle subtitle = _subtitleItem.controller.subtitles[index];
 
                   _subtitleOptionsNotifier.value.subtitleDelay =
@@ -874,6 +888,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
                   refreshSubtitleWidget();
                 },
                 onLongPress: (index) async {
+                  Navigator.pop(context);
                   Subtitle subtitle = _subtitleItem.controller.subtitles[index];
 
                   _subtitleOptionsNotifier.value.subtitleDelay =
@@ -1331,9 +1346,9 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
       buffer.writeln(subtitleText);
     }
 
-    String sentence = buffer.toString();
+    String sentence = buffer.toString().trim();
 
-   await  appModel.openCreator(
+    await appModel.openCreator(
       ref: ref,
       killOnPop: false,
       subtitles: subtitles,

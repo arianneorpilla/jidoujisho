@@ -81,7 +81,10 @@ class _MediaSourcePickerDialogPageState
           mediaSource.icon,
           color: theme.appBarTheme.foregroundColor,
         ),
-        selected: mediaSource.uniqueKey == appModel.getCurrentSourceForMediaType(mediaType: widget.mediaType).uniqueKey,
+        selected: mediaSource.uniqueKey ==
+            appModel
+                .getCurrentSourceForMediaType(mediaType: widget.mediaType)
+                .uniqueKey,
         title: Row(
           children: [
             Expanded(

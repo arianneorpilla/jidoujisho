@@ -19,7 +19,7 @@ abstract class BaseHistoryPage extends BasePage {
 /// was implemented to define shortcuts for common lengthy methods across UI
 /// code.
 abstract class BaseHistoryPageState<T extends BaseHistoryPage>
-    extends BasePageState {
+    extends BasePageState<T> {
   /// The message to be shown in the placeholder that displays when
   /// [shouldPlaceholderBeShown] is true. This should be a localised message.
   String get placeholderMessage => appModel.translate('info_empty_home_tab');
@@ -34,6 +34,9 @@ abstract class BaseHistoryPageState<T extends BaseHistoryPage>
   /// For example, if a certain media type does not have any media items to
   /// show in its history.
   bool get shouldPlaceholderBeShown => true;
+
+  /// Whether or not to allow edit and delete.
+  bool get isHistory => true;
 
   @override
   void initState() {
@@ -66,7 +69,7 @@ abstract class BaseHistoryPageState<T extends BaseHistoryPage>
       child: InkWell(
         onTap: () async {
           MediaSource mediaSource = item.getMediaSource(appModel: appModel);
-          
+
           await appModel.openMedia(
             context: context,
             ref: ref,
@@ -77,9 +80,14 @@ abstract class BaseHistoryPageState<T extends BaseHistoryPage>
         onLongPress: () async {
           await showDialog(
             context: context,
-            builder: (context) => MediaItemDialogPage(item: item),
+            builder: (context) => MediaItemDialogPage(
+              item: item,
+              isHistory: isHistory,
+            ),
           );
-          setState(() {});
+          if (isHistory) {
+            setState(() {});
+          }
         },
         child: buildMediaItemContent(item),
       ),

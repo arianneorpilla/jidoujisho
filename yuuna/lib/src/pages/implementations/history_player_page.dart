@@ -14,15 +14,15 @@ class HistoryPlayerPage extends BaseHistoryPage {
   });
 
   @override
-  BaseHistoryPageState<BaseHistoryPage> createState() =>
+  HistoryPlayerPageState<HistoryPlayerPage> createState() =>
       HistoryPlayerPageState();
 }
 
 /// A base class for providing all tabs in the main menu. In large part, this
 /// was implemented to define shortcuts for common lengthy methods across UI
 /// code.
-class HistoryPlayerPageState<T extends BaseHistoryPage>
-    extends BaseHistoryPageState {
+class HistoryPlayerPageState<T extends HistoryPlayerPage>
+    extends BaseHistoryPageState<T> {
   /// This variable is true when the [buildPlaceholder] should be shown.
   /// For example, if a certain media type does not have any media items to
   /// show in its history.

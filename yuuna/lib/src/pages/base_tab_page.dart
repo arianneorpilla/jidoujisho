@@ -35,9 +35,7 @@ abstract class BaseTabPageState<T extends BaseTabPage> extends BasePageState {
 
   /// Refresh this tab.
   void refresh() {
-   setState(() {
-     
-   });
+    setState(() {});
   }
 
   @override
@@ -62,37 +60,38 @@ abstract class BaseTabPageState<T extends BaseTabPage> extends BasePageState {
   /// [buildSearchBarBody] will take the place of the remainder tab body, or
   /// the elements below the search bar when unselected.
   Widget buildFloatingSearchBar() {
-    return FloatingSearchBar(
-      isScrollControlled: true,
-      hint: mediaSource.getLocalisedSourceName(appModel),
-      controller: mediaType.floatingSearchBarController,
-      builder: (_, __) => const SizedBox.shrink(),
-      borderRadius: BorderRadius.zero,
-      elevation: 0,
-      backgroundColor: appModel.isDarkMode
-          ? const Color.fromARGB(255, 30, 30, 30)
-          : const Color.fromARGB(255, 229, 229, 229),
-      backdropColor: appModel.isDarkMode
-          ? Colors.black.withOpacity(0.95)
-          : Colors.white.withOpacity(0.95),
-      accentColor: theme.colorScheme.primary,
-      scrollPadding: const EdgeInsets.only(top: 6, bottom: 56),
-      transitionDuration: Duration.zero,
-      margins: const EdgeInsets.symmetric(horizontal: 6),
-      width: double.maxFinite,
-      transition: SlideFadeFloatingSearchBarTransition(),
-      automaticallyImplyBackButton: false,
-      onFocusChanged: (focused) => onFocusChanged(focused: focused),
-      leadingActions: [
-        buildChangeSourceButton(),
-        buildBackButton(),
-      ],
-      actions: mediaSource.getActions(
-        context: context,
-        ref: ref,
-        appModel: appModel,
-      ),
-    );
+    return mediaSource.buildBar() ??
+        FloatingSearchBar(
+          isScrollControlled: true,
+          hint: mediaSource.getLocalisedSourceName(appModel),
+          controller: mediaType.floatingSearchBarController,
+          builder: (_, __) => const SizedBox.shrink(),
+          borderRadius: BorderRadius.zero,
+          elevation: 0,
+          backgroundColor: appModel.isDarkMode
+              ? const Color.fromARGB(255, 30, 30, 30)
+              : const Color.fromARGB(255, 229, 229, 229),
+          backdropColor: appModel.isDarkMode
+              ? Colors.black.withOpacity(0.95)
+              : Colors.white.withOpacity(0.95),
+          accentColor: theme.colorScheme.primary,
+          scrollPadding: const EdgeInsets.only(top: 6, bottom: 56),
+          transitionDuration: Duration.zero,
+          margins: const EdgeInsets.symmetric(horizontal: 6),
+          width: double.maxFinite,
+          transition: SlideFadeFloatingSearchBarTransition(),
+          automaticallyImplyBackButton: false,
+          onFocusChanged: (focused) => onFocusChanged(focused: focused),
+          leadingActions: [
+            buildChangeSourceButton(),
+            buildBackButton(),
+          ],
+          actions: mediaSource.getActions(
+            context: context,
+            ref: ref,
+            appModel: appModel,
+          ),
+        );
   }
 
   /// Respond to tapping to the search bar and execute an action if the source
@@ -139,7 +138,7 @@ abstract class BaseTabPageState<T extends BaseTabPage> extends BasePageState {
               mediaType: mediaType,
             ),
           );
-          setState(() {});
+          mediaType.refreshTab();
         },
       ),
     );
@@ -151,12 +150,13 @@ abstract class BaseTabPageState<T extends BaseTabPage> extends BasePageState {
       showIfOpened: true,
       showIfClosed: false,
       child: JidoujishoIconButton(
-          size: textTheme.titleLarge?.fontSize,
-          tooltip: backLabel,
-          icon: Icons.arrow_back,
-          onTap: () {
-            mediaType.floatingSearchBarController.close();
-          }),
+        size: textTheme.titleLarge?.fontSize,
+        tooltip: backLabel,
+        icon: Icons.arrow_back,
+        onTap: () {
+          mediaType.floatingSearchBarController.close();
+        },
+      ),
     );
   }
 }

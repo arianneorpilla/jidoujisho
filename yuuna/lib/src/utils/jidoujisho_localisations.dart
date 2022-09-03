@@ -183,7 +183,7 @@ class JidoujishoLocalisations {
     'copy_of_mapping': 'Copy of %mapping_name%',
     'enter_search_term': 'Enter a search term...',
     'searching_for': 'Searching for 『%searchTerm%』...',
-    'no_search_results': 'No search results for selection.',
+    'no_search_results': 'No search results found.',
     'edit_actions': 'Edit Dictionary Quick Actions',
     'remove_action': 'Remove Action',
     'assign_action': 'Assign Action',
@@ -292,6 +292,8 @@ class JidoujishoLocalisations {
     'no_current_media': 'Play or refresh media for lyrics',
     'lyrics_permission_required': 'Required permission not granted',
     'no_lyrics_found': 'No lyrics found',
+    'trending': 'Trending',
+    'caption_filter': 'Filter Closed Captions'
   };
 
 }

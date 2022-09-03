@@ -101,6 +101,7 @@ dependencies:
       url: https://github.com/lrorpilla/ve_dart
       ref: c366bb1ae24f6fad4f5c7e3a1efad5f2b8122e58
   wakelock: ^0.6.1+2
+  youtube_explode_dart: ^1.12.0
 
 dependency_overrides:
   freezed_annotation: ^2.1.0 # Caused by spaces

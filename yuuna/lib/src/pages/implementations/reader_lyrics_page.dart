@@ -241,7 +241,7 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
           text: character,
           style: const TextStyle(fontSize: 22),
           recognizer: TapGestureRecognizer()
-            ..onTapUp = (details) async {
+            ..onTapDown = (details) async {
               double x = details.globalPosition.dx;
               double y = details.globalPosition.dy;
 

@@ -11,6 +11,7 @@ class JidoujishoSearchHistory extends ConsumerStatefulWidget {
     required this.uniqueKey,
     required this.onSearchTermSelect,
     required this.onUpdate,
+     this.searchSuggestions = const [],
     super.key,
   });
 
@@ -23,6 +24,10 @@ class JidoujishoSearchHistory extends ConsumerStatefulWidget {
   /// An action that will be performed upon deleting a search term.
   final Function() onUpdate;
 
+  /// This overrides the history display and shows search suggestions
+  /// instead if non-null.
+  final List<String> searchSuggestions;
+
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
       _JidoujishoSearchHistoryState();
@@ -34,10 +39,15 @@ class _JidoujishoSearchHistoryState
 
   @override
   Widget build(BuildContext context) {
-    List<String> searchHistory = appModel
-        .getSearchHistory(historyKey: widget.uniqueKey)
-        .reversed
-        .toList();
+    late List<String> searchHistory;
+    if (widget.searchSuggestions.isNotEmpty) {
+      searchHistory = widget.searchSuggestions;
+    } else {
+      searchHistory = appModel
+          .getSearchHistory(historyKey: widget.uniqueKey)
+          .reversed
+          .toList();
+    }
 
     return ClipRRect(
       child: Material(
@@ -71,6 +81,10 @@ class _JidoujishoSearchHistoryState
     return InkWell(
       onTap: () => onSearchTermSelect(searchTerm),
       onLongPress: () {
+        if (widget.searchSuggestions.isNotEmpty) {
+          return;
+        }
+
         appModel.removeFromSearchHistory(
           historyKey: uniqueKey,
           searchTerm: searchTerm,
@@ -92,7 +106,9 @@ class _JidoujishoSearchHistoryState
                 top: Spacing.of(context).spaces.small,
               ),
               child: Icon(
-                Icons.youtube_searched_for_outlined,
+                widget.searchSuggestions.isNotEmpty
+                    ? Icons.search
+                    : Icons.youtube_searched_for_outlined,
                 size: Theme.of(context).textTheme.titleMedium?.fontSize,
               ),
             ),

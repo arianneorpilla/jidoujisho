@@ -9,11 +9,15 @@ class MediaItemDialogPage extends BasePage {
   /// Create an instance of this page.
   const MediaItemDialogPage({
     required this.item,
+    required this.isHistory,
     super.key,
   });
 
   /// The [MediaItem] pertaining to the page.
   final MediaItem item;
+
+  /// Whether or not the media items are in history.
+  final bool isHistory;
 
   @override
   BasePageState createState() => _MediaItemDialogPageState();
@@ -94,8 +98,8 @@ class _MediaItemDialogPageState extends BasePageState<MediaItemDialogPage> {
   }
 
   List<Widget> get actions => [
-        if (widget.item.canDelete) buildClearButton(),
-        if (widget.item.canEdit) buildEditButton(),
+        if (widget.item.canDelete && widget.isHistory) buildClearButton(),
+        if (widget.item.canEdit && widget.isHistory) buildEditButton(),
         buildLaunchButton(),
       ];
 

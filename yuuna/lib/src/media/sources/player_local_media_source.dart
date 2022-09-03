@@ -74,18 +74,6 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
   }
 
   @override
-  Future<void> onSourceExit({
-    required BuildContext context,
-    required WidgetRef ref,
-  }) async {
-    await SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
-  }
-
-  @override
   Future<void> onSearchBarTap({
     required BuildContext context,
     required WidgetRef ref,
@@ -228,8 +216,8 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
   @override
   Future<VlcPlayerController> preparePlayerController({
     required AppModel appModel,
+    required WidgetRef ref,
     required MediaItem item,
-    String? audioUrl,
   }) async {
     int startTime = item.position;
 
@@ -249,7 +237,11 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
   }
 
   @override
-  Future<List<SubtitleItem>> prepareSubtitles(MediaItem item) async {
+  Future<List<SubtitleItem>> prepareSubtitles({
+    required AppModel appModel,
+    required WidgetRef ref,
+    required MediaItem item,
+  }) async {
     List<SubtitleItem> items = [];
 
     File videoFile = File(item.mediaIdentifier);

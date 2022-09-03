@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:intl/intl.dart';
 import 'package:network_to_file_image/network_to_file_image.dart';
@@ -39,15 +42,31 @@ abstract class PlayerMediaSource extends MediaSource {
   /// Get the player controller to be used when a media item is loaded up,
   Future<VlcPlayerController> preparePlayerController({
     required AppModel appModel,
+    required WidgetRef ref,
     required MediaItem item,
-    String? audioUrl,
   }) async {
     throw UnimplementedError();
   }
 
   /// Get the player controller to be used when a media item is loaded up,
-  Future<List<SubtitleItem>> prepareSubtitles(MediaItem item) async {
+  Future<List<SubtitleItem>> prepareSubtitles({
+    required AppModel appModel,
+    required WidgetRef ref,
+    required MediaItem item,
+  }) async {
     throw UnimplementedError();
+  }
+
+  @override
+  Future<void> onSourceExit({
+    required BuildContext context,
+    required WidgetRef ref,
+  }) async {
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
   }
 
   /// If this source is non-null, this will be used as the initial function
@@ -61,6 +80,10 @@ abstract class PlayerMediaSource extends MediaSource {
     required List<Subtitle>? subtitles,
     required SubtitleOptions options,
   }) async {
+    while (appModel.blockCreatorInitialMedia) {
+      await Future.delayed(const Duration(seconds: 1), () {});
+    }
+
     if (subtitles == null && appModel.currentSubtitle.value != null) {
       subtitles ??= [appModel.currentSubtitle.value!];
     }
@@ -99,6 +122,11 @@ abstract class PlayerMediaSource extends MediaSource {
 
       String timestamp = JidoujishoTimeFormat.getFfmpegTimestamp(currentTime);
       String inputPath = item.mediaIdentifier;
+      MediaSource source = item.getMediaSource(appModel: appModel);
+      if (source is PlayerYoutubeSource) {
+        inputPath = await source.getDataSource(item);
+      }
+
       String command =
           '-ss $timestamp -y -i "$inputPath" -frames:v 1 -q:v 2 "$outputPath"';
 
@@ -127,6 +155,10 @@ abstract class PlayerMediaSource extends MediaSource {
     required List<Subtitle>? subtitles,
     required SubtitleOptions options,
   }) async {
+    while (appModel.blockCreatorInitialMedia) {
+      await Future.delayed(const Duration(seconds: 1), () {});
+    }
+
     Directory appDirDoc = await getApplicationSupportDirectory();
     String playerPreviewPath = '${appDirDoc.path}/playerAudioPreview';
     Directory playerPreviewDir = Directory(playerPreviewPath);
@@ -159,10 +191,6 @@ abstract class PlayerMediaSource extends MediaSource {
       }
     }
 
-    if (item.audioUrl != null) {
-      audioIndex = 0;
-    }
-
     Duration allowance = Duration(milliseconds: options.audioAllowance);
     Duration delay = Duration(milliseconds: options.subtitleDelay);
 
@@ -175,9 +203,11 @@ abstract class PlayerMediaSource extends MediaSource {
     timeEnd = JidoujishoTimeFormat.getFfmpegTimestamp(adjustedEnd);
 
     String inputPath = item.mediaIdentifier;
-    String? altInputPath = item.audioUrl;
-    if (altInputPath != null) {
-      inputPath = altInputPath;
+
+    MediaSource source = item.getMediaSource(appModel: appModel);
+    if (source is PlayerYoutubeSource) {
+      inputPath = await source.getAudioUrl(item);
+      audioIndex = 0;
     }
 
     String command =

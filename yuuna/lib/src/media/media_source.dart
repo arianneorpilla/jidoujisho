@@ -403,4 +403,25 @@ abstract class MediaSource {
   }) {
     throw UnimplementedError();
   }
+
+  /// This returns a list of [MediaItem], and is performed to search the media
+  /// source for items.
+  Future<List<MediaItem>?> searchMediaItems({
+    required BuildContext context,
+    required String searchTerm,
+    required int pageKey,
+  }) async {
+    throw UnimplementedError();
+  }
+
+  /// Given a search term, this source may give search suggestions. If the
+  /// empty list is returned, then search history will be shown instead.
+  Future<List<String>> generateSearchSuggestions(String searchTerm) async {
+    throw UnimplementedError();
+  }
+
+  /// Used to override the search bar if needed by a source that implements search.
+  BaseMediaSearchBar? buildBar() {
+    return null;
+  }
 }

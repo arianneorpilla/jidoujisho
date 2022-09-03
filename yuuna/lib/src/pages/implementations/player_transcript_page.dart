@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:spaces/spaces.dart';
@@ -215,22 +214,12 @@ class _PlayerTranscriptPageState extends BasePageState<PlayerTranscriptPage> {
             ),
             onTap: () async {
               if (widget.onTap != null) {
-                widget.onTap?.call(index);
-
-                await SystemChrome.setEnabledSystemUIMode(
-                  SystemUiMode.immersiveSticky,
-                );
-                Navigator.pop(context);
+                await widget.onTap?.call(index);
               }
             },
             onLongPress: () async {
               if (widget.onLongPress != null) {
-                widget.onLongPress?.call(index);
-
-                await SystemChrome.setEnabledSystemUIMode(
-                  SystemUiMode.immersiveSticky,
-                );
-                Navigator.pop(context);
+                await widget.onLongPress?.call(index);
               }
             },
           ),

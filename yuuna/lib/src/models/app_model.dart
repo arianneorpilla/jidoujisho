@@ -281,6 +281,9 @@ class AppModel with ChangeNotifier {
   MediaItem? get currentMediaItem => _currentMediaItem;
   MediaItem? _currentMediaItem;
 
+  /// Blocks creator from processing initial media while player controller is not ready.
+  bool blockCreatorInitialMedia = false;
+
   /// Get the sentence to be used by the [SentenceField] upon card creation.
   String getCurrentSentence() {
     if (_currentMediaSource == null) {
@@ -1710,6 +1713,7 @@ class AppModel with ChangeNotifier {
     mediaSource.clearCurrentMediaValues();
     _currentMediaSource = null;
     _currentMediaItem = null;
+    blockCreatorInitialMedia = false;
     await Wakelock.disable();
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 

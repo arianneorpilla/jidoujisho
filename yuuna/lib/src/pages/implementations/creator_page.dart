@@ -108,11 +108,6 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
     expandableController =
         ExpandableController(initialExpanded: !isCardEditing);
-
-    /// Check if the current profile is valid and report any discrepancies.
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      
-    });
   }
 
   Future<void> initialiseCreator() async {
@@ -1052,8 +1047,8 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
         offset.dx, offset.dy, renderBox.size.width, renderBox.size.height);
   }
 
-  GlobalKey _profileMenuKey = new GlobalKey();
-  GlobalKey _scaffoldKey = new GlobalKey();
+  final GlobalKey _profileMenuKey =  GlobalKey();
+  final GlobalKey _scaffoldKey =  GlobalKey();
 
   void openProfilesMenu(TapDownDetails details) async {
     RelativeRect position = RelativeRect.fromRect(
