@@ -29,16 +29,19 @@ abstract class ImageExportField extends Field {
   int? get selectedIndex => _indexNotifier.value;
 
   /// Notifier for updating the count.
-  ValueNotifier<int?> get indexNotifier => _indexNotifier;
-  final ValueNotifier<int?> _indexNotifier = ValueNotifier<int?>(null);
+  ValueNotifier<int> get indexNotifier => _indexNotifier;
+  final ValueNotifier<int> _indexNotifier = ValueNotifier<int>(0);
 
   /// The current search term for the image.
   String? get currentSearchTerm => _currentSearchTerm;
   String? _currentSearchTerm;
 
-  /// Whether or not searching is in progress
+  /// Whether or not searching is in progress.
   bool get isSearching => _isSearching;
   bool _isSearching = false;
+
+  /// Whether or not the current media cannot be overridden by an auto enhancement.
+  bool _autoCannotOverride = false;
 
   /// Whether or not to show the top widget.
   bool get showWidget => currentImageSuggestions != null && exportFile != null;
@@ -53,18 +56,25 @@ abstract class ImageExportField extends Field {
     _indexNotifier.value = 0;
     _currentSearchTerm = null;
     _isSearching = false;
+    _autoCannotOverride = false;
 
     creatorModel.refresh();
   }
 
   /// Perform a function that generates a list of images and attempt a search
   /// with a given search term.
-  Future<void> performSearch({
+  Future<void> setImages({
     required AppModel appModel,
     required CreatorModel creatorModel,
     required String searchTerm,
     required Future<List<NetworkToFileImage>> Function() generateImages,
+    required EnhancementTriggerCause cause,
+    required bool newAutoCannotOverride,
   }) async {
+    if (_autoCannotOverride && cause == EnhancementTriggerCause.auto) {
+      return;
+    }
+
     /// Show loading state.
     setSearching(
         appModel: appModel,
@@ -80,6 +90,7 @@ abstract class ImageExportField extends Field {
         images: images,
         searchTermUsed: searchTerm,
       );
+      _autoCannotOverride = newAutoCannotOverride;
     } finally {
       /// Finish loading state.
       setSearching(

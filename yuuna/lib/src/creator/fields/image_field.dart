@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:infinite_carousel/infinite_carousel.dart';
 import 'package:network_to_file_image/network_to_file_image.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:spaces/spaces.dart';
@@ -52,7 +51,14 @@ class ImageField extends ImageExportField {
     if (isSearching) {
       return Column(
         children: [
-          SizedBox(height: MediaQuery.of(context).size.height / 4.5),
+          AspectRatio(
+            aspectRatio: 16 / 9,
+            child: Container(
+              color: Colors.transparent,
+              height: double.infinity,
+              width: double.infinity,
+            ),
+          ),
           const Space.normal(),
           buildFooterLoading(
             appModel: appModel,
@@ -74,46 +80,54 @@ class ImageField extends ImageExportField {
       ),
     );
 
-    InfiniteScrollController controller =
-        InfiniteScrollController(initialItem: selectedIndex!);
-
     return Column(
       children: [
-        SizedBox(
-          height: MediaQuery.of(context).size.height / 4.5,
-          child: InfiniteCarousel.builder(
-            itemCount: currentImageSuggestions!.length,
-            itemExtent: MediaQuery.of(context).size.width / 1.2,
-            velocityFactor: 0.7,
-            onIndexChanged: (index) {
-              indexNotifier.value = index;
-              setSelectedSearchSuggestion(index: index);
-            },
-            controller: controller,
-            itemBuilder: (context, index, _) {
-              late OverlayEntry popup;
-              NetworkToFileImage image = currentImageSuggestions![index];
+        ValueListenableBuilder<int?>(
+          valueListenable: indexNotifier,
+          builder: (context, index, child) {
+            late OverlayEntry popup;
+            NetworkToFileImage image = currentImageSuggestions![index!];
 
-              return GestureDetector(
-                onLongPress: () {
-                  popup = OverlayEntry(
-                    builder: (context) => ColoredBox(
-                      color: Colors.black.withOpacity(0.5),
-                      child: buildImage(image),
-                    ),
-                  );
-                  Overlay.of(context)?.insert(popup);
-                },
-                onLongPressEnd: (details) {
-                  popup.remove();
-                },
-                child: Padding(
-                  padding: Spacing.of(context).insets.horizontal.small,
-                  child: buildImage(currentImageSuggestions![index]),
-                ),
-              );
-            },
-          ),
+            return GestureDetector(
+              onHorizontalDragEnd: (details) {
+                if (details.primaryVelocity == 0) {
+                  return;
+                }
+
+                if (details.primaryVelocity!.compareTo(0) == -1) {
+                  if (indexNotifier.value ==
+                      currentImageSuggestions!.length - 1) {
+                    setSelectedSearchSuggestion(index: 0);
+                  } else {
+                    setSelectedSearchSuggestion(index: index + 1);
+                  }
+                } else {
+                  if (indexNotifier.value == 0) {
+                    setSelectedSearchSuggestion(
+                        index: currentImageSuggestions!.length - 1);
+                  } else {
+                    setSelectedSearchSuggestion(index: index - 1);
+                  }
+                }
+              },
+              onLongPress: () {
+                popup = OverlayEntry(
+                  builder: (context) => ColoredBox(
+                    color: Colors.black.withOpacity(0.5),
+                    child: buildImage(image),
+                  ),
+                );
+                Overlay.of(context)?.insert(popup);
+              },
+              onLongPressEnd: (details) {
+                popup.remove();
+              },
+              child: Padding(
+                padding: Spacing.of(context).insets.horizontal.small,
+                child: buildImage(currentImageSuggestions![index]),
+              ),
+            );
+          },
         ),
         const Space.normal(),
         ValueListenableBuilder<int?>(
@@ -200,28 +214,31 @@ class ImageField extends ImageExportField {
               fontSize: fontSize,
             ),
           ),
-          TextSpan(
-            text: imageSearchLabelAfter,
-            style: TextStyle(
-              fontSize: fontSize,
-              color: Theme.of(context).unselectedWidgetColor,
+          if (currentSearchTerm != null && currentSearchTerm!.trim().isNotEmpty)
+            TextSpan(
+              text: imageSearchLabelAfter,
+              style: TextStyle(
+                fontSize: fontSize,
+                color: Theme.of(context).unselectedWidgetColor,
+              ),
             ),
-          ),
-          TextSpan(
-            text: ' ',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: fontSize,
-              color: Theme.of(context).unselectedWidgetColor,
+          if (currentSearchTerm != null && currentSearchTerm!.trim().isNotEmpty)
+            TextSpan(
+              text: ' ',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: fontSize,
+                color: Theme.of(context).unselectedWidgetColor,
+              ),
             ),
-          ),
-          TextSpan(
-            text: currentSearchTerm,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: fontSize,
+          if (currentSearchTerm != null && currentSearchTerm!.trim().isNotEmpty)
+            TextSpan(
+              text: currentSearchTerm,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: fontSize,
+              ),
             ),
-          ),
         ],
       ),
       textAlign: TextAlign.center,
@@ -238,6 +255,7 @@ class ImageField extends ImageExportField {
     double fontSize =
         (Theme.of(context).textTheme.labelMedium?.fontSize)! * 0.9;
 
+    String processingInProgress = appModel.translate('processing_in_progress');
     String searchingInProgress = appModel.translate('searching_in_progress');
     return Text.rich(
       TextSpan(
@@ -257,20 +275,30 @@ class ImageField extends ImageExportField {
               ),
             ),
           ),
-          TextSpan(
-            text: searchingInProgress,
-            style: TextStyle(
-              fontSize: fontSize,
-              color: Theme.of(context).unselectedWidgetColor,
+          if (currentSearchTerm != null && currentSearchTerm!.trim().isNotEmpty)
+            TextSpan(
+              text: searchingInProgress,
+              style: TextStyle(
+                fontSize: fontSize,
+                color: Theme.of(context).unselectedWidgetColor,
+              ),
             ),
-          ),
-          TextSpan(
-            text: currentSearchTerm,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: fontSize,
+          if (currentSearchTerm != null && currentSearchTerm!.trim().isNotEmpty)
+            TextSpan(
+              text: currentSearchTerm,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: fontSize,
+              ),
+            )
+          else
+            TextSpan(
+              text: processingInProgress,
+              style: TextStyle(
+                fontSize: fontSize,
+                color: Theme.of(context).unselectedWidgetColor,
+              ),
             ),
-          ),
           WidgetSpan(
             child: SizedBox(
               height: 12,

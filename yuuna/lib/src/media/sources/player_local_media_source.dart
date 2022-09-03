@@ -227,14 +227,17 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
 
   @override
   Future<VlcPlayerController> preparePlayerController({
+    required AppModel appModel,
     required MediaItem item,
-     int audioTrack = 0,
-     String? audioUrl,
+    String? audioUrl,
   }) async {
     int startTime = item.position;
 
     List<String> advancedParams = ['--start-time=$startTime'];
-    List<String> audioParams = ['--audio-track=$audioTrack', '--sub-track=99999'];
+    List<String> audioParams = [
+      '--audio-language=${appModel.targetLanguage.languageCode}',
+      '--sub-track=99999'
+    ];
 
     return VlcPlayerController.file(
       File(item.mediaIdentifier),

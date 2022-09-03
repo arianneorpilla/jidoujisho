@@ -12,6 +12,7 @@ import 'package:multi_value_listenable_builder/multi_value_listenable_builder.da
 import 'package:share_plus/share_plus.dart';
 import 'package:spaces/spaces.dart';
 import 'package:subtitle/subtitle.dart';
+import 'package:yuuna/creator.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
@@ -101,8 +102,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
 
   final ValueNotifier<bool> _isMenuHidden = ValueNotifier<bool>(false);
 
-  final ValueNotifier<Subtitle?> _currentSubtitle =
-      ValueNotifier<Subtitle?>(null);
+  late final ValueNotifier<Subtitle?> _currentSubtitle;
   final ValueNotifier<Subtitle?> _currentSubtitleMemory =
       ValueNotifier<Subtitle?>(null);
   final ValueNotifier<Subtitle?> _shadowingSubtitle =
@@ -142,8 +142,6 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
 
   bool _playerInitialised = false;
 
-  late final StreamSubscription<void>? _headsetButtonActionSubscription;
-
   @override
   void initState() {
     super.initState();
@@ -151,7 +149,6 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
 
   @override
   void dispose() {
-    _headsetButtonActionSubscription?.cancel();
     super.dispose();
   }
 
@@ -210,6 +207,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
 
     _playerController =
         await (widget.source as PlayerMediaSource).preparePlayerController(
+      appModel: appModel,
       item: widget.item!,
     );
     _subtitleItems = await (widget.source as PlayerMediaSource)
@@ -221,8 +219,13 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     await _subtitleItem.controller.initial();
 
     _blurOptionsNotifier = ValueNotifier<BlurOptions>(appModel.blurOptions);
-    _subtitleOptionsNotifier =
-        ValueNotifier<SubtitleOptions>(appModel.subtitleOptions);
+
+    /// This is so cursed.
+    appModel.currentPlayerController = _playerController;
+    _currentSubtitle = appModel.currentSubtitle;
+    _subtitleOptionsNotifier = appModel.currentSubtitleOptions!;
+
+    _currentSubtitle.value = null;
 
     _playerController.addOnInitListener(() async {
       initialiseEmbeddedSubtitles(_playerController);
@@ -254,6 +257,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
 
       Subtitle? newSubtitle = _subtitleItem.controller
           .durationSearch(_positionNotifier.value + subtitleDelay);
+      widget.source.setCurrentSentence(newSubtitle?.data ?? '');
 
       if (_currentSubtitle.value != newSubtitle) {
         // if (!_sliderBeingDragged &&
@@ -268,11 +272,6 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
 
         _currentSubtitle.value = newSubtitle;
         // For remembering the last subtitle even if it has disappeared.
-        if (_currentSubtitle.value != null) {
-          widget.source.setCurrentSentence(_currentSubtitle.value!.data);
-        } else {
-          widget.source.clearCurrentSentence();
-        }
         if (newSubtitle != null) {
           _currentSubtitleMemory.value = newSubtitle;
         }
@@ -350,13 +349,11 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
       return;
     }
 
-    MediaItem item = widget.item!.copyWith(
-      position: _positionNotifier.value.inSeconds,
-      duration: _durationNotifier.value.inSeconds,
-    );
+    widget.item!.position = _positionNotifier.value.inSeconds;
+    widget.item!.duration = _durationNotifier.value.inSeconds;
 
-    if (item.position != 0) {
-      appModel.updateMediaItem(item);
+    if (widget.item!.position != 0) {
+      appModel.updateMediaItem(widget.item!);
     }
   }
 
@@ -456,7 +453,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
                 },
                 onLongPress: (index) async {
                   exporting = true;
-                  // await exportMultipleSubtitles(index);
+                  await exportMultipleSubtitles(index);
                 },
               ),
             ),
@@ -470,6 +467,37 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
       onTap: toggleMenuVisibility,
       child: buildScrubDetectors(),
     );
+  }
+
+  Future<void> exportMultipleSubtitles(int selectedIndex) async {
+    int maxSubtitles = 10;
+
+    Subtitle? nearestSubtitle = getNearestSubtitle();
+    if (nearestSubtitle == null) {
+      return;
+    }
+
+    List<Subtitle> subtitles = _subtitleItem.controller.subtitles;
+    List<Subtitle> selectedSubtitles = [];
+
+    if (selectedIndex < nearestSubtitle.index - 1) {
+      for (int i = selectedIndex; i <= nearestSubtitle.index - 1; i++) {
+        selectedSubtitles.add(subtitles[i]);
+        if (selectedSubtitles.length == maxSubtitles) {
+          break;
+        }
+      }
+    } else if (selectedIndex > nearestSubtitle.index - 1) {
+      for (int i = nearestSubtitle.index - 1; i <= selectedIndex; i++) {
+        selectedSubtitles.add(subtitles[i]);
+        if (selectedSubtitles.length == maxSubtitles) {
+          break;
+        }
+      }
+    } else {
+      selectedSubtitles.add(nearestSubtitle);
+    }
+    await openCardCreator(selectedSubtitles);
   }
 
   Widget buildScrubDetectors() {
@@ -832,7 +860,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
             PageRouteBuilder(
               opaque: false,
               pageBuilder: (context, _, __) => PlayerTranscriptPage(
-                 title: widget.item!.title,
+                title: widget.item!.title,
                 subtitles: _subtitleItem.controller.subtitles,
                 currentSubtitle: getNearestSubtitle(),
                 subtitleOptions: _subtitleOptionsNotifier.value,
@@ -980,8 +1008,8 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
         label: '$playerOptionAudio - $label',
         icon: Icons.music_note_outlined,
         active: audioTrack == index,
-        action: () {
-          _playerController.setAudioTrack(index);
+        action: () async {
+          await _playerController.setAudioTrack(index);
         },
       );
 
@@ -1125,8 +1153,9 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
             subtitles.add(singleSubtitle);
           }
 
-          dialogSmartPause();
+          await dialogSmartPause();
           await openCardCreator(subtitles);
+          await dialogSmartResume();
         },
       ),
     ];
@@ -1292,39 +1321,28 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
   }
 
   Future<void> openCardCreator(List<Subtitle> subtitles) async {
-    // setDictionaryMessage(appModel.translate("player_prepare_export"));
+    StringBuffer buffer = StringBuffer();
+    for (Subtitle subtitle in subtitles) {
+      String subtitleText = subtitle.data;
+      String regex = _subtitleOptionsNotifier.value.regexFilter;
+      if (regex.isNotEmpty) {
+        subtitleText = subtitleText.replaceAll(RegExp(regex), '');
+      }
+      buffer.writeln(subtitleText);
+    }
 
-    // imageCache!.clear();
-    // AnkiExportParams initialParams = await prepareExportParams(subtitles);
+    String sentence = buffer.toString();
 
-    // searchTerm.value = "";
-
-    // ClipboardListener.removeListener(copyClipboardAction);
-
-    // clearDictionaryMessage();
-    // dialogSmartPause();
-
-    // await navigateToCreator(
-    //     context: context,
-    //     appModel: appModel,
-    //     initialParams: initialParams,
-    //     backgroundColor: dictionaryColor,
-    //     appBarColor: Colors.transparent,
-    //     hideActions: true,
-    //     popOnExport: true,
-    //     exportCallback: () {
-    //       Navigator.of(context).pop();
-    //       String lastDeck = appModel.getLastAnkiDroidDeck();
-    //       setDictionaryMessage(
-    //         "deckExport://$lastDeck",
-    //         duration: const Duration(seconds: 3),
-    //       );
-    //     });
-
-    // dialogSmartResume(isSmartFocus: true);
-
-    // await Clipboard.setData(const ClipboardData(text: ""));
-    // ClipboardListener.addListener(copyClipboardAction);
+   await  appModel.openCreator(
+      ref: ref,
+      killOnPop: false,
+      subtitles: subtitles,
+      creatorFieldValues: CreatorFieldValues(
+        textValues: {
+          SentenceField.instance: sentence,
+        },
+      ),
+    );
   }
 
   void refreshSubtitleWidget() {

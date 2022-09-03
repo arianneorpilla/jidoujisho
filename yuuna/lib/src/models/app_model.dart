@@ -13,6 +13,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -24,6 +25,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:restart_app/restart_app.dart';
 import 'package:spaces/spaces.dart';
+import 'package:subtitle/subtitle.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
@@ -275,6 +277,10 @@ class AppModel with ChangeNotifier {
   MediaSource? get currentMediaSource => _currentMediaSource;
   MediaSource? _currentMediaSource;
 
+  /// Current active media item.
+  MediaItem? get currentMediaItem => _currentMediaItem;
+  MediaItem? _currentMediaItem;
+
   /// Get the sentence to be used by the [SentenceField] upon card creation.
   String getCurrentSentence() {
     if (_currentMediaSource == null) {
@@ -284,13 +290,32 @@ class AppModel with ChangeNotifier {
     }
   }
 
+  /// This should all be refactored as part of [MediaItem] if possible. No reason
+  /// to expose it here if not for card export functions. This is super cursed.
+  /// Need to extract this to its own Provider at some point.
+
+  /// Current player controller.
+   VlcPlayerController? currentPlayerController;
+
+  /// Current subtitle.
+  ValueNotifier<Subtitle?> get currentSubtitle => _currentSubtitle;
+  final ValueNotifier<Subtitle?> _currentSubtitle =
+      ValueNotifier<Subtitle?>(null);
+
+  /// Current subtitle options.
+  ValueNotifier<SubtitleOptions>? get currentSubtitleOptions {
+    _currentSubtitleOptions ??= ValueNotifier<SubtitleOptions>(subtitleOptions);
+    return _currentSubtitleOptions;
+  }
+  ValueNotifier<SubtitleOptions>? _currentSubtitleOptions;
+
   /// Get the current media item for use in tracking history and generating
   /// media for card creation based on media progress.
   MediaItem? getCurrentMediaItem() {
     if (_currentMediaSource == null) {
       return null;
     } else {
-      return _currentMediaSource!.currentMediaItem;
+      return _currentMediaItem;
     }
   }
 
@@ -1301,6 +1326,19 @@ class AppModel with ChangeNotifier {
     return File(audioPath);
   }
 
+  /// Get the file to be written to for image export.
+  File getPreviewImageFile(Directory directory, int index) {
+    String imagePath =
+        path.join(directory.path, 'previewImage$index.jpg');
+    return File(imagePath);
+  }
+
+  /// Get the file to be written to for audio export.
+  File getAudioPreviewFile(Directory directory) {
+    String audioPath = path.join(directory.path, 'previewAudio.mp3');
+    return File(audioPath);
+  }
+
   /// Get the file to be written to for thumbnail export.
   File getThumbnailFile() {
     String imagePath = path.join(exportDirectory.path, 'thumbnail.jpg');
@@ -1609,6 +1647,7 @@ class AppModel with ChangeNotifier {
     required WidgetRef ref,
     required bool killOnPop,
     CreatorFieldValues? creatorFieldValues,
+    List<Subtitle>? subtitles,
   }) async {
     _currentMediaPauseController.add(null);
 
@@ -1625,11 +1664,13 @@ class AppModel with ChangeNotifier {
     await Navigator.push(
       _navigatorKey.currentContext!,
       PageRouteBuilder(
+        opaque: false,
         pageBuilder: (context, animation1, animation2) => CreatorPage(
           decks: decks,
           editEnhancements: false,
           editFields: false,
           killOnPop: killOnPop,
+          subtitles: subtitles,
         ),
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
@@ -1648,6 +1689,10 @@ class AppModel with ChangeNotifier {
     MediaItem? item,
   }) async {
     _currentMediaSource = mediaSource;
+    if (item != null) {
+      _currentMediaItem = item;
+    }
+
     await Wakelock.enable();
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
@@ -1664,6 +1709,7 @@ class AppModel with ChangeNotifier {
 
     mediaSource.clearCurrentMediaValues();
     _currentMediaSource = null;
+    _currentMediaItem = null;
     await Wakelock.disable();
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
@@ -1684,6 +1730,7 @@ class AppModel with ChangeNotifier {
           editEnhancements: true,
           editFields: false,
           killOnPop: false,
+          subtitles: null,
         ),
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
@@ -1704,6 +1751,7 @@ class AppModel with ChangeNotifier {
           editEnhancements: false,
           editFields: true,
           killOnPop: false,
+          subtitles: null,
         ),
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,

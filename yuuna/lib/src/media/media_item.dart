@@ -28,6 +28,7 @@ class MediaItem {
     this.id,
     this.base64Image,
     this.imageUrl,
+    this.audioUrl,
     this.author,
     this.sourceMetadata,
   });
@@ -75,6 +76,9 @@ class MediaItem {
   /// otherwise [base64Image] will be attempted.
   String? imageUrl;
 
+  /// Used to override the audio to be played for the media.
+  String? audioUrl;
+
   /// This field is a convenience field as it may be common to store this
   /// detail. For a web video, this could be the channel where the video is
   /// from. For a book, it is the author.
@@ -121,16 +125,17 @@ class MediaItem {
     return appModel.mediaSources[mediaType]![mediaSourceIdentifier]!;
   }
 
-   /// Creates a deep copy of this mapping but with the given variables replaced
+  /// Creates a deep copy of this mapping but with the given variables replaced
   /// with the new values.
   MediaItem copyWith({
-    int? id, 
+    int? id,
     String? mediaIdentifier,
     String? title,
     String? mediaSourceIdentifier,
     String? mediaTypeIdentifier,
     String? base64Image,
     String? imageUrl,
+    String? audioUrl,
     String? author,
     String? sourceMetadata,
     int? position,
@@ -142,17 +147,18 @@ class MediaItem {
       id: id ?? this.id,
       mediaIdentifier: mediaIdentifier ?? this.mediaIdentifier,
       title: title ?? this.title,
-        mediaSourceIdentifier: mediaSourceIdentifier ?? this.mediaSourceIdentifier,
+      mediaSourceIdentifier:
+          mediaSourceIdentifier ?? this.mediaSourceIdentifier,
       mediaTypeIdentifier: mediaTypeIdentifier ?? this.mediaTypeIdentifier,
       base64Image: base64Image ?? this.base64Image,
-        imageUrl: imageUrl ?? this.imageUrl,
+      imageUrl: imageUrl ?? this.imageUrl,
+      audioUrl: audioUrl ?? this.audioUrl,
       author: author ?? this.author,
       sourceMetadata: sourceMetadata ?? this.sourceMetadata,
-        position: position ?? this.position,
+      position: position ?? this.position,
       duration: duration ?? this.duration,
       canDelete: canDelete ?? this.canDelete,
       canEdit: canEdit ?? this.canEdit,
     );
   }
-
 }

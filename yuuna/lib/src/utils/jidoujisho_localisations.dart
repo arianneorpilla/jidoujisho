@@ -226,9 +226,10 @@ class JidoujishoLocalisations {
     'field_fallback_used':
         'The %field% field used %secondField% as its fallback search term.',
     'no_text_to_search': 'No text to search.',
-    'image_search_label_before': 'Selecting search result ',
+    'image_search_label_before': 'Selecting image ',
     'image_search_label_middle': 'out of ',
     'image_search_label_after': 'found for',
+    'processing_in_progress': 'Processing images',
     'searching_in_progress': 'Searching for ',
     'audio_unavailable': 'No audio could be found.',
     'no_audio_enhancements': 'No audio enhancements are assigned.',

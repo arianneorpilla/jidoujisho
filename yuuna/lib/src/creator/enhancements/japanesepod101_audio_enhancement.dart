@@ -56,10 +56,12 @@ class JapanesePod101AudioEnhancement extends AudioEnhancement {
       }
     }
 
-    await audioField.performSearch(
+    await audioField.setAudio(
       appModel: appModel,
       creatorModel: creatorModel,
       searchTerm: searchTerm!,
+      newAutoCannotOverride: false,
+      cause: cause,
       generateAudio: () async {
         String reading =
             creatorModel.getFieldController(ReadingField.instance).text;

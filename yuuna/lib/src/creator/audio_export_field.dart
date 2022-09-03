@@ -26,9 +26,12 @@ abstract class AudioExportField extends Field {
   String? get currentSearchTerm => _currentSearchTerm;
   String? _currentSearchTerm;
 
-  /// Whether or not searching is in progress
+  /// Whether or not searching is in progress.
   bool get isSearching => _isSearching;
   bool _isSearching = false;
+
+  /// Whether or not the current media cannot be overridden by an auto enhancement.
+  bool _autoCannotOverride = false;
 
   /// Whether or not to show the top widget.
   bool get showWidget => exportFile != null;
@@ -40,6 +43,7 @@ abstract class AudioExportField extends Field {
   }) {
     _exportFile = null;
     _currentSearchTerm = null;
+    _autoCannotOverride = false;
     creatorModel.refresh();
   }
 
@@ -124,12 +128,18 @@ abstract class AudioExportField extends Field {
 
   /// Perform a function that generates a list of images and attempt a search
   /// with a given search term.
-  Future<void> performSearch({
+  Future<void> setAudio({
     required AppModel appModel,
     required CreatorModel creatorModel,
     required String searchTerm,
     required Future<File?> Function() generateAudio,
+    required bool newAutoCannotOverride,
+    required EnhancementTriggerCause cause,
   }) async {
+    if (_autoCannotOverride && cause == EnhancementTriggerCause.auto) {
+      return;
+    }
+
     /// Show loading state.
     setSearching(
         appModel: appModel,
@@ -147,6 +157,8 @@ abstract class AudioExportField extends Field {
           searchTermUsed: searchTerm,
         );
       }
+
+      _autoCannotOverride = newAutoCannotOverride;
     } finally {
       /// Finish loading state.
       setSearching(

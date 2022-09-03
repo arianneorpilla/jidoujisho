@@ -88,6 +88,7 @@ class _HomePageState extends BasePageState<HomePage> {
 
   PreferredSizeWidget? buildAppBar() {
     return AppBar(
+     
       leading: buildLeading(),
       title: buildTitle(),
       actions: buildActions(),

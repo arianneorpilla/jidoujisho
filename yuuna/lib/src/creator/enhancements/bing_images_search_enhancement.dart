@@ -56,9 +56,11 @@ class BingImagesSearchEnhancement extends ImageEnhancement {
       }
     }
 
-    await imageField.performSearch(
+    await imageField.setImages(
+      cause: cause,
       appModel: appModel,
       creatorModel: creatorModel,
+      newAutoCannotOverride: false,
       searchTerm: searchTerm!,
       generateImages: () async {
         return fetchImages(

@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
+import 'package:network_to_file_image/network_to_file_image.dart';
+import 'package:subtitle/subtitle.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/models.dart';
@@ -25,6 +27,8 @@ abstract class MediaSource {
     required this.icon,
     required this.implementsSearch,
     required this.implementsHistory,
+    this.overridesAutoImage = false,
+    this.overridesAutoAudio = false,
   });
 
   /// A unique name that allows distinguishing this type from others,
@@ -68,6 +72,14 @@ abstract class MediaSource {
   /// should be set as false. Setting this as true results to a media item
   /// being added to history when media is opened.
   final bool implementsHistory;
+
+  /// Whether or not a media source overrides the auto image enhancement.
+  /// See [generateImages].
+  final bool overridesAutoImage;
+
+  /// Whether or not a media source overrides the auto audio enhancement.
+  /// See [generateAudio].
+  final bool overridesAutoAudio;
 
   /// Used for accessing persistent key-value data specific to this source.
   /// See [initialise].
@@ -366,5 +378,29 @@ abstract class MediaSource {
       item: item,
       file: null,
     );
+  }
+
+  /// If this source is non-null, this will be used as the initial function
+  /// for the image field over the auto enhancement. Extra durations can be
+  /// invoked and defined when initially opening the creator, to call attention
+  /// to multiple durations to be used for image generation.
+  Future<List<NetworkToFileImage>> generateImages({
+    required AppModel appModel,
+    required MediaItem item,
+    required List<Subtitle>? subtitles,
+    required SubtitleOptions options,
+  }) {
+    throw UnimplementedError();
+  }
+
+  /// If this source is non-null, this will be used as the initial function
+  /// for the audio field over the auto enhancement.
+  Future<File?>? generateAudio({
+    required AppModel appModel,
+    required MediaItem item,
+    required List<Subtitle>? subtitles,
+    required SubtitleOptions options,
+  }) {
+    throw UnimplementedError();
   }
 }

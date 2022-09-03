@@ -1,8 +1,12 @@
+import 'dart:ui';
+
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:spaces/spaces.dart';
+import 'package:subtitle/subtitle.dart';
 import 'package:yuuna/creator.dart';
+import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
 import 'package:yuuna/models.dart';
@@ -16,6 +20,7 @@ class CreatorPage extends BasePage {
     required this.editEnhancements,
     required this.editFields,
     required this.killOnPop,
+    required this.subtitles,
     super.key,
   });
 
@@ -30,6 +35,10 @@ class CreatorPage extends BasePage {
 
   /// If true, popping will exit the application.
   final bool killOnPop;
+
+  /// Used to generate multiple images if required and invoked from a
+  /// media source. See [MediaSource.generateImages].
+  final List<Subtitle>? subtitles;
 
   @override
   BasePageState<CreatorPage> createState() => _CreatorPageState();
@@ -91,6 +100,8 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
   /// For controlling collapsed fields.
   late final ExpandableController expandableController;
 
+  bool _creatorInitialised = false;
+
   @override
   void initState() {
     super.initState();
@@ -99,13 +110,62 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
         ExpandableController(initialExpanded: !isCardEditing);
 
     /// Check if the current profile is valid and report any discrepancies.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      appModel.validateSelectedMapping(
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      
+    });
+  }
+
+  Future<void> initialiseCreator() async {
+    appModel.validateSelectedMapping(
         context: context,
         mapping: appModel.lastSelectedMapping,
       );
 
       for (Field field in appModel.activeFields) {
+        /// If a media source has a generate images or audio function, then use that
+        /// over any set auto enhancement.
+        if (appModel.isMediaOpen && appModel.getCurrentMediaItem() != null) {
+          MediaSource mediaSource = appModel
+              .getCurrentMediaItem()!
+              .getMediaSource(appModel: appModel);
+          if (field is ImageField && mediaSource.overridesAutoImage) {
+            await field.setImages(
+              appModel: appModel,
+              creatorModel: creatorModel,
+              searchTerm: '',
+              newAutoCannotOverride: true,
+              cause: EnhancementTriggerCause.manual,
+              generateImages: () async {
+                return mediaSource.generateImages(
+                  appModel: appModel,
+                  item: appModel.getCurrentMediaItem()!,
+                  subtitles: widget.subtitles,
+                  options: appModel.currentSubtitleOptions!.value,
+                );
+              },
+            );
+            continue;
+          }
+          if (field is AudioField && mediaSource.overridesAutoAudio) {
+            await field.setAudio(
+              appModel: appModel,
+              creatorModel: creatorModel,
+              searchTerm: '',
+              newAutoCannotOverride: true,
+              cause: EnhancementTriggerCause.manual,
+              generateAudio: () async {
+                return mediaSource.generateAudio(
+                  appModel: appModel,
+                  item: appModel.getCurrentMediaItem()!,
+                  subtitles: widget.subtitles,
+                  options: appModel.currentSubtitleOptions!.value,
+                );
+              },
+            );
+            continue;
+          }
+        }
+
         Enhancement? enhancement = appModel.lastSelectedMapping
             .getAutoFieldEnhancement(appModel: appModel, field: field);
 
@@ -119,27 +179,41 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
           );
         }
       }
-    });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!_creatorInitialised) {
+      _creatorInitialised = true;
+      initialiseCreator();
+    }
+
     return WillPopScope(
-        onWillPop: onWillPop,
-        child: GestureDetector(
-          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-          child: Scaffold(
-            resizeToAvoidBottomInset: true,
-            appBar: buildAppBar(),
-            body: buildBody(),
-          ),
-        
+      onWillPop: onWillPop,
+      child: GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: Stack(
+          children: [
+            buildBlur(),
+            buildScaffold(),
+          ],
+        ),
       ),
     );
   }
 
-  PreferredSizeWidget? buildAppBar() {
+  Widget buildBlur() {
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+        child: Container(),
+      ),
+    );
+  }
+
+  AppBar buildAppBar() {
     return AppBar(
+      backgroundColor: Colors.transparent,
       leading: buildBackButton(),
       title: buildTitle(),
       actions: buildActions(),
@@ -349,20 +423,72 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
     );
   }
 
-  Widget? buildBody() {
-    return SafeArea(child:Column(
+  Widget buildScaffold() {
+    bool showPortrait = (appModel.activeFields.contains(ImageField.instance) &&
+            !ImageField.instance.showWidget &&
+            !ImageField.instance.isSearching) ||
+        MediaQuery.of(context).orientation == Orientation.portrait ||
+        widget.editEnhancements ||
+        widget.editFields;
+
+    return Scaffold(
+      backgroundColor: theme.backgroundColor.withOpacity(0.5),
+      key: _scaffoldKey,
+      resizeToAvoidBottomInset: true,
+      appBar: showPortrait ? buildAppBar() : null,
+      body: showPortrait ? buildPortrait() : buildLandscape(),
+    );
+  }
+
+  Widget buildLandscape() {
+    return Row(
       children: [
-        Expanded(child: buildPortraitFields()),
-        if (widget.editEnhancements) buildEditFieldsButton(),
-        if (widget.editEnhancements) buildEditActionsButton(),
-        if (isCardEditing) buildExportButton(),
+        Flexible(
+          flex: 3,
+          child: Column(
+            children: [
+              buildAppBar(),
+              const Space.semiBig(),
+              Expanded(
+                child: buildTopWidgets(),
+              ),
+              const Space.normal(),
+              buildDeckDropdown(),
+              const Space.normal(),
+            ],
+          ),
+        ),
+        Flexible(
+          flex: 4,
+          child: Column(
+            children: [
+              Expanded(child: buildFields(isPortrait: false)),
+              if (widget.editEnhancements) buildEditFieldsButton(),
+              if (widget.editEnhancements) buildEditActionsButton(),
+              if (isCardEditing) buildExportButton(),
+            ],
+          ),
+        ),
       ],
-    ),);
+    );
+  }
+
+  Widget buildPortrait() {
+    return SafeArea(
+      child: Column(
+        children: [
+          Expanded(child: buildFields(isPortrait: true)),
+          if (widget.editEnhancements) buildEditFieldsButton(),
+          if (widget.editEnhancements) buildEditActionsButton(),
+          if (isCardEditing) buildExportButton(),
+        ],
+      ),
+    );
   }
 
   final ScrollController _scrollController = ScrollController();
 
-  Widget buildPortraitFields() {
+  Widget buildFields({required bool isPortrait}) {
     return RawScrollbar(
       thickness: 3,
       thumbVisibility: true,
@@ -374,9 +500,9 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
               parent: BouncingScrollPhysics()),
           controller: _scrollController,
           children: [
-            if (isCardEditing) buildTopWidgets(),
+            if (isCardEditing && isPortrait) buildTopWidgets(),
             if (!isCardEditing) buildTutorialMessage(),
-            if (isCardEditing) buildDeckDropdown(),
+            if (isCardEditing && isPortrait) buildDeckDropdown(),
             buildTextFields(),
             buildExpandablePanel(),
           ],
@@ -496,9 +622,6 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
   void showClearPrompt() async {
     Widget alertDialog = AlertDialog(
-      contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
-          ? Spacing.of(context).insets.exceptBottom.big
-          : Spacing.of(context).insets.exceptBottom.normal,
       title: Text(clearCreatorTitle),
       content: Text(
         clearCreatorDescription,
@@ -878,6 +1001,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
   Widget buildSwitchProfilesButton() {
     return JidoujishoIconButton(
+      key: _profileMenuKey,
       tooltip: appModel.translate('switch_profiles'),
       icon: Icons.switch_account,
       onTapDown: openProfilesMenu,
@@ -921,9 +1045,20 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
     );
   }
 
+  Rect _getWidgetGlobalRect(GlobalKey key) {
+    RenderBox renderBox = key.currentContext?.findRenderObject() as RenderBox;
+    var offset = renderBox.localToGlobal(Offset.zero);
+    return Rect.fromLTWH(
+        offset.dx, offset.dy, renderBox.size.width, renderBox.size.height);
+  }
+
+  GlobalKey _profileMenuKey = new GlobalKey();
+  GlobalKey _scaffoldKey = new GlobalKey();
+
   void openProfilesMenu(TapDownDetails details) async {
-    RelativeRect position = RelativeRect.fromLTRB(
-        details.globalPosition.dx, details.globalPosition.dy, 0, 0);
+    RelativeRect position = RelativeRect.fromRect(
+        _getWidgetGlobalRect(_profileMenuKey),
+        _getWidgetGlobalRect(_scaffoldKey));
     Function()? selectedAction = await showMenu(
       context: context,
       position: position,
