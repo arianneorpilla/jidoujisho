@@ -36,9 +36,10 @@ export 'src/pages/implementations/reader_lyrics_page.dart';
 export 'src/pages/implementations/subtitle_options_dialog_page.dart';
 export 'src/pages/implementations/placeholder_source_page.dart';
 export 'src/pages/implementations/player_transcript_page.dart';
-export 'src/pages/implementations/video_results_page.dart';
+export 'src/pages/implementations/youtube_video_results_page.dart';
 export 'src/pages/implementations/player_source_page.dart';
 export 'src/pages/implementations/youtube_media_search_bar.dart';
+export 'src/pages/implementations/closed_captions_indicator.dart';
 
 export 'src/pages/base_page.dart';
 export 'src/pages/base_history_page.dart';

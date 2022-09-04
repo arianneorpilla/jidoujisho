@@ -91,6 +91,7 @@ class HistoryReaderPageState<T extends BaseHistoryPage>
             child: AspectRatio(
               aspectRatio: 176 / 250,
               child: FadeInImage(
+                imageErrorBuilder: (_, __, ___) => const SizedBox.shrink(),
                 placeholder: MemoryImage(kTransparentImage),
                 image: mediaSource.getDisplayThumbnailFromMediaItem(
                   appModel: appModel,
@@ -122,7 +123,8 @@ class HistoryReaderPageState<T extends BaseHistoryPage>
           }),
           LinearProgressIndicator(
             value: (item.position / item.duration) == double.nan ||
-                    (item.position / item.duration) == double.infinity
+                    (item.position / item.duration) == double.infinity ||
+                    (item.position == 0 && item.duration == 0)
                 ? 0
                 : (item.position / item.duration),
             backgroundColor: Colors.white.withOpacity(0.6),

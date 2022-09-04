@@ -89,7 +89,7 @@ public class MainActivity extends FlutterActivity {
 
         long modelId;
         if (modelExists("jidoujisho Yuuna")) {
-            modelId = mAnkiDroid.findModelIdByName("jidoujisho Yuuna", 8);
+            modelId = mAnkiDroid.findModelIdByName("jidoujisho Yuuna", 11);
         } else {
             modelId = api.addNewCustomModel("jidoujisho Yuuna",
                 new String[] {
@@ -97,16 +97,19 @@ public class MainActivity extends FlutterActivity {
                     "Term",
                     "Reading",
                     "Meaning",
-                    "Extra",
+                    "Notes",
                     "Image",
                     "Audio",
-                    "Context",
+                    "Pitch Accent",
+                    "Furigana",
+                    "Expanded Meaning",
+                    "Collapsed Meaning",
                 },
                 new String[] {
                     "jidoujisho Yuuna"
                 },
-                new String[] {"<p id=\"sentence\">{{Sentence}}</p><div id=\"term\">{{Term}}</div>"},
-                    new String[] {"<p id=\"sentence\">{{Sentence}}</p><div id=\"term\">{{Term}}</div><br>[sound:{{Audio}}]<div class=\"image\"><img src=\"{{Image}}\"></div><hr id=reading><p id=\"reading\">{{Reading}}</p><h2 id=\"term\">{{Term}}</h2><br><p><small id=\"meaning\">{{Meaning}}</small></p><br>{{#Context}}<a style=\"text-decoration:none;color:red;\" href=\"{{Context}}\">↩</a>{{/Context}}"},
+                new String[] {"<div id=\"word\">{{Term}}</div><hr><p id=\"sentence\">{{Sentence}}"},
+                    new String[] {"<div id=\"word\">{{Term}}</div><hr><p id=\"sentence\">{{Sentence}}</p><br>{{#Audio}}[sound:{{Audio}}]{{/Audio}}{{#Image}}<div class=\"image\"><img src=\"{{Image}}\"></div>{{/Image}}{{#Pitch Accent}}<br>{{Pitch Accent}}<br>{{/Pitch Accent}}<br><h2 id=\"word\">{{furigana:Furigana}}</h2><br>{{#Meaning}}<p><small id=\"meaning\">{{Meaning}}</p </small><br>{{/Meaning}}{{#Expanded Meaning}}<p><small id=\"meaning\">{{Expanded Meaning}}</small></p>{{/Expanded Meaning}}<br>{{#Collapsed Meaning}}<details><summary></summary><br><p><small id=\"meaning\">{{Collapsed Meaning}}</small></p><br></details>{{/Collapsed Meaning}}"},
                             "p {\n" +
                             "    margin: 0px\n" +
                             "}\n" +

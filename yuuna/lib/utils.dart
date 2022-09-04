@@ -29,6 +29,7 @@ export 'src/utils/player/subtitle_utils.dart';
 export 'src/utils/player/player_payload.dart';
 export 'src/utils/player/blur_options.dart';
 export 'src/utils/player/subtitle_options.dart';
+export 'src/utils/player/youtube_quality.dart';
 
 export 'src/utils/misc/jidoujisho_time_format.dart';
 export 'src/utils/misc/jidoujisho_lyrics_parameters.dart';

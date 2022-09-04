@@ -6,7 +6,6 @@ import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
-import 'package:collection/collection.dart';
 
 /// Returns the widget for a list of [DictionaryEntry] making up a term.
 class DictionaryTermPage extends BasePage {
@@ -92,8 +91,8 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
     List<Widget> tags = appModel.getTagsForTerm(widget.dictionaryTerm);
     return Card(
       color: appModel.isDarkMode
-          ?  Color.fromRGBO(15, 15, 15, widget.entryOpacity)
-          :  Color.fromRGBO(246, 246, 246, widget.entryOpacity),
+          ? Color.fromRGBO(15, 15, 15, widget.entryOpacity)
+          : Color.fromRGBO(246, 246, 246, widget.entryOpacity),
       elevation: 0,
       shape: const RoundedRectangleBorder(),
       child: Padding(
@@ -103,17 +102,24 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
           right: Spacing.of(context).spaces.normal,
           bottom: Spacing.of(context).spaces.normal,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            buildTopRow(metaEntries: widget.dictionaryMetaEntries),
-            const Space.normal(),
-            Wrap(children: tags),
-            const Space.normal(),
+        child: CustomScrollView(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          slivers: [
+            SliverToBoxAdapter(
+              child: buildTopRow(metaEntries: widget.dictionaryMetaEntries),
+            ),
+            const SliverToBoxAdapter(child: Space.normal()),
+            SliverToBoxAdapter(child: Wrap(children: tags)),
+            const SliverToBoxAdapter(child: Space.normal()),
             buildMetaWidgets(metaEntries: widget.dictionaryMetaEntries),
-            const Space.normal(),
+            const SliverToBoxAdapter(child: Space.normal()),
             buildEntries(),
-            if (widget.footerWidget != null) widget.footerWidget!
+            SliverToBoxAdapter(
+              child: (widget.footerWidget != null)
+                  ? widget.footerWidget!
+                  : const SizedBox.shrink(),
+            ),
           ],
         ),
       ),
@@ -225,53 +231,53 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
     required List<DictionaryMetaEntry> metaEntries,
   }) {
     if (metaEntries.isEmpty) {
-      return const SizedBox.shrink();
+      return const SliverToBoxAdapter(
+        child: SizedBox.shrink(),
+      );
     }
 
-    List<Widget> children = metaEntries.map((metaEntry) {
-      if (widget.dictionaryMap[metaEntry.dictionaryName]!.hidden) {
-        return const SizedBox.shrink();
-      }
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          DictionaryMetaEntry metaEntry = metaEntries[index];
 
-      return Padding(
-        padding: Spacing.of(context).insets.horizontal.small,
-        child: appModel.getTagsForMetaEntry(
-          context: context,
-          dictionaryTerm: widget.dictionaryTerm,
-          metaEntry: metaEntry,
-        ),
-      );
-    }).toList();
+          if (widget.dictionaryMap[metaEntry.dictionaryName]!.hidden) {
+            return const SizedBox.shrink();
+          }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: children,
+          return Padding(
+            padding: Spacing.of(context).insets.horizontal.small,
+            child: appModel.getTagsForMetaEntry(
+              context: context,
+              dictionaryTerm: widget.dictionaryTerm,
+              metaEntry: metaEntry,
+            ),
+          );
+        },
+        childCount: metaEntries.length,
+      ),
     );
   }
 
   Widget buildEntries() {
-    List<Widget> children =
-        widget.dictionaryTerm.entries.mapIndexed((index, meaning) {
-      DictionaryEntry entry = widget.dictionaryTerm.entries[index];
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          DictionaryEntry entry = widget.dictionaryTerm.entries[index];
 
-      if (widget.dictionaryHiddens[entry.dictionaryName]!) {
-        return const SizedBox.shrink();
-      }
+          if (widget.dictionaryHiddens[entry.dictionaryName]!) {
+            return const SizedBox.shrink();
+          }
 
-      return DictionaryEntryPage(
-        expandableController:
-            widget.expandableControllers[entry.dictionaryName]!,
-        entry: entry,
-        onSearch: widget.onSearch,
-        onStash: widget.onStash,
-      );
-    }).toList();
-
-    return Padding(
-      padding: Spacing.of(context).insets.horizontal.small,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: children,
+          return DictionaryEntryPage(
+            expandableController:
+                widget.expandableControllers[entry.dictionaryName]!,
+            entry: entry,
+            onSearch: widget.onSearch,
+            onStash: widget.onStash,
+          );
+        },
+        childCount: widget.dictionaryTerm.entries.length,
       ),
     );
   }

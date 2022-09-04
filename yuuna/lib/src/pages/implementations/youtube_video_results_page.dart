@@ -6,10 +6,10 @@ import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
 
-/// The page shown to view video search results.
-class VideoResultsPage extends HistoryPlayerPage {
+/// The page shown to view YouTube search results.
+class YoutubeVideoResultsPage extends HistoryPlayerPage {
   /// Create an instance of this page.
-  const VideoResultsPage({
+  const YoutubeVideoResultsPage({
     required this.title,
     required this.pagingController,
     required this.showAppBar,
@@ -26,11 +26,12 @@ class VideoResultsPage extends HistoryPlayerPage {
   final bool showAppBar;
 
   @override
-  HistoryPlayerPageState<VideoResultsPage> createState() =>
-      _VideoResultsPageState();
+  HistoryPlayerPageState<YoutubeVideoResultsPage> createState() =>
+      _YoutubeVideoResultsPageState();
 }
 
-class _VideoResultsPageState extends HistoryPlayerPageState<VideoResultsPage> {
+class _YoutubeVideoResultsPageState
+    extends HistoryPlayerPageState<YoutubeVideoResultsPage> {
   String get backLabel => appModel.translate('back');
   String get dictionariesLabel => appModel.translate('dictionaries');
   String get searchEllipsisLabel => appModel.translate('search_ellipsis');
@@ -39,6 +40,14 @@ class _VideoResultsPageState extends HistoryPlayerPageState<VideoResultsPage> {
   String get noSearchResultsLabel => appModel.translate('no_search_results');
   String get enterSearchTermLabel => appModel.translate('enter_search_term');
   String get clearLabel => appModel.translate('clear');
+  String get captionsQueryLabel => appModel.translate('closed_captions_query');
+  String get captionsErrorLabel => appModel.translate('closed_captions_error');
+  String get captionsTargetLabel =>
+      appModel.translate('closed_captions_target');
+  String get captionsAppLabel => appModel.translate('closed_captions_app');
+  String get captionsOtherLabel => appModel.translate('closed_captions_other');
+  String get captionsUnavailableLabel =>
+      appModel.translate('closed_captions_unavailable');
 
   Map<String, Dictionary>? dictionaryMap;
   Map<int, List<DictionaryMetaEntry>> metaEntriesCache = {};
@@ -117,5 +126,73 @@ class _VideoResultsPageState extends HistoryPlayerPageState<VideoResultsPage> {
         Navigator.pop(context);
       },
     );
+  }
+
+   /// Build the right side of the history containing video information.
+   @override
+  Widget buildMetadata(MediaItem item) {
+    MediaSource source = item.getMediaSource(appModel: appModel);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          source.getDisplayTitleFromMediaItem(item),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          softWrap: true,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          source.getDisplaySubtitleFromMediaItem(item),
+          style: TextStyle(
+            color: Theme.of(context).unselectedWidgetColor,
+            fontSize: 12,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          softWrap: true,
+        ),
+        const SizedBox(height: 2),
+        Row(
+          children: [
+            Icon(
+              source.icon,
+              color: Theme.of(context).unselectedWidgetColor,
+              size: 12,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              source.getLocalisedSourceName(appModel),
+              style: TextStyle(
+                color: Theme.of(context).unselectedWidgetColor,
+                fontWeight: FontWeight.w500,
+                fontSize: 12,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              softWrap: true,
+            ),
+          ],
+        ),
+        ...extraMetadata(item),
+      ],
+    );
+  }
+
+
+  @override
+  List<Widget> extraActions(MediaItem item) {
+    return [
+      buildChannelButton(item),
+    ];
+  }
+
+  /// Allows extra metadata to be shown.
+  @override
+  List<Widget> extraMetadata(MediaItem item) {
+    return [
+      ClosedCaptionsIndicator(item: item),
+    ];
   }
 }

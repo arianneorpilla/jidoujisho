@@ -40,7 +40,10 @@ class AnkiMapping {
         NotesField.key,
         ImageField.key,
         AudioField.key,
-        ContextField.key,
+        PitchAccentField.key,
+        FuriganaField.key,
+        ExpandedMeaningField.key,
+        CollapsedMeaningField.key,
       ],
       creatorFieldKeys: defaultCreatorFieldKeys,
       creatorCollapsedFieldKeys: defaultCreatorCollapsedFieldKeys,
@@ -53,13 +56,26 @@ class AnkiMapping {
 
   /// A default map of enhancements to use for new mappings.
   static const Map<String, Map<int, String>> defaultEnhancements = {
-    SentenceField.key: {0: ClearFieldEnhancement.key, 1: TextSegmentationEnhancement.key},
-    TermField.key: {0: ClearFieldEnhancement.key, 1: SearchDictionaryEnhancement.key},
+    SentenceField.key: {
+      0: ClearFieldEnhancement.key,
+      1: TextSegmentationEnhancement.key
+    },
+    TermField.key: {
+      0: ClearFieldEnhancement.key,
+      1: SearchDictionaryEnhancement.key,
+      2: MassifExampleSentencesEnhancement.key,
+    },
     ReadingField.key: {0: ClearFieldEnhancement.key},
     MeaningField.key: {0: ClearFieldEnhancement.key},
     NotesField.key: {0: ClearFieldEnhancement.key},
-    ImageField.key: {0: ClearFieldEnhancement.key, -1: BingImagesSearchEnhancement.key},
-    AudioField.key: {0: ClearFieldEnhancement.key, -1: JapanesePod101AudioEnhancement.key},
+    ImageField.key: {
+      0: ClearFieldEnhancement.key,
+      -1: BingImagesSearchEnhancement.key
+    },
+    AudioField.key: {
+      0: ClearFieldEnhancement.key,
+      -1: JapanesePod101AudioEnhancement.key
+    },
     ContextField.key: {0: ClearFieldEnhancement.key},
     PitchAccentField.key: {0: ClearFieldEnhancement.key},
     FuriganaField.key: {0: ClearFieldEnhancement.key},
@@ -80,7 +96,10 @@ class AnkiMapping {
   ];
 
   /// Default fields to show upon opening the Card Creator.
-  static const List<String> defaultCreatorCollapsedFieldKeys = [];
+  static const List<String> defaultCreatorCollapsedFieldKeys = [
+    PitchAccentField.key,
+    FuriganaField.key,
+  ];
 
   /// A default map of enhancements to use for new mappings.
   static const Map<int, String> defaultActions = {0: CardCreatorAction.key};

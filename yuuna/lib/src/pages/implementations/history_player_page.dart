@@ -23,6 +23,9 @@ class HistoryPlayerPage extends BaseHistoryPage {
 /// code.
 class HistoryPlayerPageState<T extends HistoryPlayerPage>
     extends BaseHistoryPageState<T> {
+  /// Localisation for Channel option.
+  String get dialogChannelLabel => appModel.translate('dialog_channel');
+
   /// This variable is true when the [buildPlaceholder] should be shown.
   /// For example, if a certain media type does not have any media items to
   /// show in its history.
@@ -65,22 +68,27 @@ class HistoryPlayerPageState<T extends HistoryPlayerPage>
   /// This is shown as the body when [shouldPlaceholderBeShown] is false.
   @override
   Widget buildHistory(List<MediaItem> items) {
-   items = items.reversed.toList();
+    items = items.reversed.toList();
 
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(
-        parent: BouncingScrollPhysics(),
-      ),
+    return RawScrollbar(
+      thumbVisibility: true,
+      thickness: 3,
       controller: mediaType.scrollController,
-      children: [
-        const SizedBox(height: 48),
-        ListView.builder(
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          itemCount: items.length,
-          itemBuilder: (context, index) => buildMediaItem(items[index]),
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
         ),
-      ],
+        controller: mediaType.scrollController,
+        children: [
+          const SizedBox(height: 48),
+          ListView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemCount: items.length,
+            itemBuilder: (context, index) => buildMediaItem(items[index]),
+          ),
+        ],
+      ),
     );
   }
 
@@ -115,6 +123,7 @@ class HistoryPlayerPageState<T extends HistoryPlayerPage>
             aspectRatio: 16 / 9,
             child: FadeInImage(
               placeholder: MemoryImage(kTransparentImage),
+              imageErrorBuilder: (_, __, ___) => const SizedBox.shrink(),
               image: mediaSource.getDisplayThumbnailFromMediaItem(
                 appModel: appModel,
                 item: item,
@@ -146,10 +155,11 @@ class HistoryPlayerPageState<T extends HistoryPlayerPage>
           child: Container(
             alignment: Alignment.bottomCenter,
             child: LinearProgressIndicator(
-             value: (item.position / item.duration) == double.nan ||
-                    (item.position / item.duration) == double.infinity
-                ? 0
-                : (item.position / item.duration),
+              value: (item.position / item.duration) == double.nan ||
+                      (item.position / item.duration) == double.infinity ||
+                      (item.position == 0 && item.duration == 0)
+                  ? 0
+                  : (item.position / item.duration),
               backgroundColor: Colors.white.withOpacity(0.6),
               valueColor: const AlwaysStoppedAnimation<Color>(Colors.red),
               minHeight: 2,
@@ -205,8 +215,45 @@ class HistoryPlayerPageState<T extends HistoryPlayerPage>
               softWrap: true,
             ),
           ],
-        )
+        ),
+        ...extraMetadata(item),
       ],
+    );
+  }
+
+  /// Allows extra metadata to be shown.
+  List<Widget> extraMetadata(MediaItem item) {
+    return [];
+  }
+
+  @override
+  List<Widget> extraActions(MediaItem item) {
+    MediaSource source = item.getMediaSource(appModel: appModel);
+    if (source is! PlayerYoutubeSource) {
+      return [];
+    }
+
+    return [
+      buildChannelButton(item),
+    ];
+  }
+
+  /// Channel button for YouTube videos.
+  Widget buildChannelButton(MediaItem item) {
+    return TextButton(
+      child: Text(
+        dialogChannelLabel,
+      ),
+      onPressed: () => executeChannel(item),
+    );
+  }
+
+  /// Goes to Channel page for a YouTube video.
+  void executeChannel(MediaItem item) async {
+    await PlayerYoutubeSource.instance.showChannelPage(
+      appModel: appModel,
+      context: context,
+      item: item,
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -78,7 +79,30 @@ class PlayAudioAction extends QuickAction {
 
         if (file != null) {
           await _audioPlayer.setFilePath(file.path);
+
+          final AudioSession session = await AudioSession.instance;
+          await session.configure(
+            const AudioSessionConfiguration(
+              avAudioSessionCategory: AVAudioSessionCategory.playback,
+              avAudioSessionCategoryOptions:
+                  AVAudioSessionCategoryOptions.duckOthers,
+              avAudioSessionMode: AVAudioSessionMode.defaultMode,
+              avAudioSessionRouteSharingPolicy:
+                  AVAudioSessionRouteSharingPolicy.defaultPolicy,
+              avAudioSessionSetActiveOptions:
+                  AVAudioSessionSetActiveOptions.none,
+              androidAudioAttributes: AndroidAudioAttributes(
+                contentType: AndroidAudioContentType.music,
+                usage: AndroidAudioUsage.media,
+              ),
+              androidAudioFocusGainType:
+                  AndroidAudioFocusGainType.gainTransientMayDuck,
+              androidWillPauseWhenDucked: true,
+            ),
+          );
+          session.setActive(true);
           await _audioPlayer.play();
+          session.setActive(false);
           return;
         }
       }

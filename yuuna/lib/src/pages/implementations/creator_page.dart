@@ -112,68 +112,67 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
   Future<void> initialiseCreator() async {
     appModel.validateSelectedMapping(
-        context: context,
-        mapping: appModel.lastSelectedMapping,
-      );
+      context: context,
+      mapping: appModel.lastSelectedMapping,
+    );
 
-      for (Field field in appModel.activeFields) {
-        /// If a media source has a generate images or audio function, then use that
-        /// over any set auto enhancement.
-        if (appModel.isMediaOpen && appModel.getCurrentMediaItem() != null) {
-          MediaSource mediaSource = appModel
-              .getCurrentMediaItem()!
-              .getMediaSource(appModel: appModel);
-          if (field is ImageField && mediaSource.overridesAutoImage) {
-            await field.setImages(
-              appModel: appModel,
-              creatorModel: creatorModel,
-              searchTerm: '',
-              newAutoCannotOverride: true,
-              cause: EnhancementTriggerCause.manual,
-              generateImages: () async {
-                return mediaSource.generateImages(
-                  appModel: appModel,
-                  item: appModel.getCurrentMediaItem()!,
-                  subtitles: widget.subtitles,
-                  options: appModel.currentSubtitleOptions!.value,
-                );
-              },
-            );
-            continue;
-          }
-          if (field is AudioField && mediaSource.overridesAutoAudio) {
-            await field.setAudio(
-              appModel: appModel,
-              creatorModel: creatorModel,
-              searchTerm: '',
-              newAutoCannotOverride: true,
-              cause: EnhancementTriggerCause.manual,
-              generateAudio: () async {
-                return mediaSource.generateAudio(
-                  appModel: appModel,
-                  item: appModel.getCurrentMediaItem()!,
-                  subtitles: widget.subtitles,
-                  options: appModel.currentSubtitleOptions!.value,
-                );
-              },
-            );
-            continue;
-          }
-        }
-
-        Enhancement? enhancement = appModel.lastSelectedMapping
-            .getAutoFieldEnhancement(appModel: appModel, field: field);
-
-        if (enhancement != null) {
-          enhancement.enhanceCreatorParams(
-            context: context,
-            ref: ref,
+    for (Field field in appModel.activeFields) {
+      /// If a media source has a generate images or audio function, then use that
+      /// over any set auto enhancement.
+      if (appModel.isMediaOpen && appModel.getCurrentMediaItem() != null) {
+        MediaSource mediaSource =
+            appModel.getCurrentMediaItem()!.getMediaSource(appModel: appModel);
+        if (field is ImageField && mediaSource.overridesAutoImage) {
+          await field.setImages(
             appModel: appModel,
             creatorModel: creatorModel,
-            cause: EnhancementTriggerCause.auto,
+            searchTerm: '',
+            newAutoCannotOverride: true,
+            cause: EnhancementTriggerCause.manual,
+            generateImages: () async {
+              return mediaSource.generateImages(
+                appModel: appModel,
+                item: appModel.getCurrentMediaItem()!,
+                subtitles: widget.subtitles,
+                options: appModel.currentSubtitleOptions!.value,
+              );
+            },
           );
+          continue;
+        }
+        if (field is AudioField && mediaSource.overridesAutoAudio) {
+          await field.setAudio(
+            appModel: appModel,
+            creatorModel: creatorModel,
+            searchTerm: '',
+            newAutoCannotOverride: true,
+            cause: EnhancementTriggerCause.manual,
+            generateAudio: () async {
+              return mediaSource.generateAudio(
+                appModel: appModel,
+                item: appModel.getCurrentMediaItem()!,
+                subtitles: widget.subtitles,
+                options: appModel.currentSubtitleOptions!.value,
+              );
+            },
+          );
+          continue;
         }
       }
+
+      Enhancement? enhancement = appModel.lastSelectedMapping
+          .getAutoFieldEnhancement(appModel: appModel, field: field);
+
+      if (enhancement != null) {
+        enhancement.enhanceCreatorParams(
+          context: context,
+          ref: ref,
+          appModel: appModel,
+          creatorModel: creatorModel,
+          cause: EnhancementTriggerCause.auto,
+        );
+      }
+    }
   }
 
   @override
@@ -443,13 +442,17 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
           child: Column(
             children: [
               buildAppBar(),
-              const Space.semiBig(),
-              Expanded(
-                child: buildTopWidgets(),
-              ),
-              const Space.normal(),
-              buildDeckDropdown(),
-              const Space.normal(),
+              Expanded(child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    const Space.semiBig(),
+                    buildTopWidgets(),
+                    const Space.normal(),
+                    buildDeckDropdown(),
+                    const Space.normal(),
+                  ],
+                ),
+              ),),
             ],
           ),
         ),
@@ -1047,8 +1050,8 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
         offset.dx, offset.dy, renderBox.size.width, renderBox.size.height);
   }
 
-  final GlobalKey _profileMenuKey =  GlobalKey();
-  final GlobalKey _scaffoldKey =  GlobalKey();
+  final GlobalKey _profileMenuKey = GlobalKey();
+  final GlobalKey _scaffoldKey = GlobalKey();
 
   void openProfilesMenu(TapDownDetails details) async {
     RelativeRect position = RelativeRect.fromRect(

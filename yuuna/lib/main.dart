@@ -64,8 +64,6 @@ void main() {
         child: const JidoujishoApp(),
       ),
     );
-
-  
   }, (exception, stack) {
     /// Print error details to the console.
     final details = FlutterErrorDetails(exception: exception, stack: stack);
@@ -104,6 +102,7 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
       /// For processing text received via the global context menu option.
       String? text = await FlutterProcessText.refreshProcessText;
       if (text != null) {
+        Navigator.popUntil(context, (route) => route.isFirst);
         appModel.openRecursiveDictionarySearch(
           searchTerm: text,
           killOnPop: true,
@@ -112,6 +111,7 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
 
       /// For receiving shared text when the app is in the background.
       _sharedTextIntent = ReceiveSharingIntent.getTextStream().listen((text) {
+        Navigator.popUntil(context, (route) => route.isFirst);
         appModel.openCreator(
           creatorFieldValues: CreatorFieldValues(
             textValues: {
@@ -126,6 +126,7 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
       /// For receiving shared text when the app is initially launched.
       ReceiveSharingIntent.getInitialText().then((text) {
         if (text != null) {
+          Navigator.popUntil(context, (route) => route.isFirst);
           appModel.openCreator(
             creatorFieldValues: CreatorFieldValues(
               textValues: {

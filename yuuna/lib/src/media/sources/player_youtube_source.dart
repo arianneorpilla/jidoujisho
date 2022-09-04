@@ -36,6 +36,7 @@ class PlayerYoutubeSource extends PlayerMediaSource {
   late final SearchClient _searchClient;
   late final VideoClient _videoClient;
   late final PlaylistClient _playlistClient;
+  late final ChannelClient _channelClient;
 
   final Map<String, Video> _videoCache = <String, Video>{};
   final Map<String, StreamManifest> _streamManifestCache =
@@ -44,12 +45,17 @@ class PlayerYoutubeSource extends PlayerMediaSource {
       <String, Map<int, VideoSearchList>>{};
   final Map<String, ClosedCaptionManifest> _closedCaptionManifestCache =
       <String, ClosedCaptionManifest>{};
+  final Map<String, List<SubtitleItem>> _subtitleCache =
+      <String, List<SubtitleItem>>{};
+  final Map<String, PagingController<int, MediaItem>> _pagingControllerCache =
+      <String, PagingController<int, MediaItem>>{};
 
   @override
   Future<void> prepareResources() async {
     _searchClient = SearchClient(_client);
     _videoClient = VideoClient(_client);
     _playlistClient = PlaylistClient(_client);
+    _channelClient = ChannelClient(_client);
   }
 
   @override
@@ -276,10 +282,16 @@ class PlayerYoutubeSource extends PlayerMediaSource {
     required WidgetRef ref,
     required MediaItem item,
   }) async {
-    ClosedCaptionManifest manifest = await getClosedCaptionManifest(item);
+    String videoId = VideoId(item.mediaIdentifier).value;
+    List<SubtitleItem>? items = _subtitleCache[videoId];
+    if (items != null) {
+      return items;
+    }
 
+    items ??= [];
+
+    ClosedCaptionManifest manifest = await getClosedCaptionManifest(item);
     List<String> languageCodes = [];
-    List<SubtitleItem> items = [];
 
     for (ClosedCaptionTrackInfo trackInfo in manifest.tracks) {
       String languageCode = trackInfo.language.code;
@@ -304,18 +316,29 @@ class PlayerYoutubeSource extends PlayerMediaSource {
       );
     }
 
-    SubtitleItem priorityItem;
-    int priorityIndex =
+    int targetLanguageIndex =
         languageCodes.indexOf(appModel.targetLanguage.languageCode);
 
-    if (priorityIndex != -1) {
-      priorityItem = items[priorityIndex];
-      items.remove(priorityItem);
-      List<SubtitleItem> newItems = [];
-      newItems.add(priorityItem);
-      newItems.addAll(items);
-      items = newItems;
+    int appLanguageIndex =
+        languageCodes.indexOf(appModel.appLocale.languageCode);
+
+    SubtitleItem? targetLanguageItem;
+    SubtitleItem? appLanguageItem;
+
+    if (targetLanguageIndex != -1) {
+      targetLanguageItem = items[targetLanguageIndex];
+      items.remove(targetLanguageItem);
     }
+    if (appLanguageIndex != -1) {
+      appLanguageItem = items[appLanguageIndex];
+      items.remove(appLanguageItem);
+    }
+    items = [
+      if (targetLanguageItem != null) targetLanguageItem,
+      if (appLanguageItem != null) appLanguageItem,
+      ...items,
+    ];
+    _subtitleCache[videoId] = items;
 
     return items;
   }
@@ -323,16 +346,16 @@ class PlayerYoutubeSource extends PlayerMediaSource {
   /// Gets the network URL for a certain video quality.
   String getVideoUrlForQuality({
     required StreamManifest manifest,
-    required VideoQuality preferredQuality,
+    required VideoQuality quality,
   }) {
     for (VideoStreamInfo streamInfo in manifest.video) {
       if (!streamInfo.videoCodec.contains('avc1')) {
         continue;
       }
 
-      VideoQuality? quality = streamInfo.videoQuality;
+      VideoQuality? streamQuality = streamInfo.videoQuality;
 
-      if (quality == preferredQuality) {
+      if (streamQuality == quality) {
         return streamInfo.url.toString();
       }
     }
@@ -357,7 +380,7 @@ class PlayerYoutubeSource extends PlayerMediaSource {
 
     return getVideoUrlForQuality(
       manifest: manifest,
-      preferredQuality: currentQuality,
+      quality: currentQuality,
     );
   }
 
@@ -410,6 +433,23 @@ class PlayerYoutubeSource extends PlayerMediaSource {
     setPreference<int>(key: 'preferred_quality', value: quality.index);
   }
 
+  /// Gets a video's cached caption languages.
+  List<String>? getCaptionsLanguages(MediaItem item) {
+    return getPreference<List<String>?>(
+      key: 'captions/${item.mediaIdentifier}',
+      defaultValue: null,
+    );
+  }
+
+  /// Persists a video's caption languages.
+  void setCaptionsLanguages(
+      {required MediaItem item, required List<String> captionsLanguages}) {
+    setPreference<List<String>?>(
+      key: 'captions/${item.mediaIdentifier}',
+      value: captionsLanguages,
+    );
+  }
+
   /// Get the caption filter on the history page.
   bool get isCaptionFilterOn {
     return getPreference<bool>(key: 'caption_filter', defaultValue: false);
@@ -433,33 +473,131 @@ class PlayerYoutubeSource extends PlayerMediaSource {
     String playlistId = getTrendingPlaylistId(appModel.targetLanguage)!;
     Playlist trendingPlaylist = await _playlistClient.get(playlistId);
 
-    PagingController<int, MediaItem> pagingController =
-        PagingController(firstPageKey: 1);
+    PagingController<int, MediaItem>? pagingController =
+        _pagingControllerCache[playlistId];
+    if (pagingController == null) {
+      pagingController = PagingController(firstPageKey: 1);
 
-    pagingController.addPageRequestListener((pageKey) async {
-      List<MediaItem> items = [];
-      List<Video> videos = [];
+      pagingController.addPageRequestListener((pageKey) async {
+        List<MediaItem> items = [];
+        List<Video> videos = [];
 
-      try {
-        videos = await _playlistClient.getVideos(playlistId).toList();
-        for (Video video in videos) {
-          items.add(getMediaItem(video));
+        try {
+          videos = await _playlistClient.getVideos(playlistId).toList();
+          for (Video video in videos) {
+            items.add(getMediaItem(video));
+          }
+        } finally {
+          pagingController?.appendLastPage(items);
         }
-      } finally {
-        pagingController.appendLastPage(items);
-      }
-    });
+      });
 
-    // Prevent recursion
+      _pagingControllerCache[playlistId] = pagingController;
+    }
+
+    // Prevent recursion.
     Navigator.of(context).popUntil((route) => route.isFirst);
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (context) => VideoResultsPage(
+        builder: (context) => YoutubeVideoResultsPage(
           showAppBar: true,
           title: trendingPlaylist.title,
-          pagingController: pagingController,
+          pagingController: pagingController!,
         ),
       ),
     );
+  }
+
+  /// Launch a channel and view its videos in a page.
+  Future<void> showChannelPage({
+    required AppModel appModel,
+    required BuildContext context,
+    required MediaItem item,
+  }) async {
+    String channelId = item.authorIdentifier!;
+
+    PagingController<int, MediaItem>? pagingController =
+        _pagingControllerCache[channelId];
+    if (pagingController == null) {
+      pagingController = PagingController(firstPageKey: 1);
+      pagingController.addPageRequestListener((pageKey) async {
+        List<MediaItem> items = [];
+        List<Video> videos = [];
+
+        try {
+          videos = await _channelClient
+              .getUploads(channelId)
+              .skip(pagingController?.itemList?.length ?? 0)
+              .take(20)
+              .toList();
+          for (Video video in videos) {
+            items.add(getMediaItem(video));
+          }
+        } finally {
+          if (items.isEmpty) {
+            pagingController?.appendLastPage(items);
+          } else {
+            pagingController?.appendPage(items, pageKey + 1);
+          }
+        }
+      });
+      _pagingControllerCache[channelId] = pagingController;
+    }
+
+    // Prevent recursion.
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => YoutubeVideoResultsPage(
+          showAppBar: true,
+          title: item.author ?? '',
+          pagingController: pagingController!,
+        ),
+      ),
+    );
+  }
+
+  /// This is a list of captions that are currently being fetched. This is used
+  /// to slow down and control the slowdown of calling
+  /// [getAvailableCaptionLanguages].
+  final List<String> _fetchingCaptions = [];
+
+  /// Get the available languages for a video's closed captions with caching.
+  Future<List<String>> getAvailableCaptionLanguages(MediaItem item) async {
+    while (_fetchingCaptions.isNotEmpty) {
+      await Future.delayed(const Duration(milliseconds: 100), () {});
+    }
+
+    String url = item.mediaIdentifier;
+
+    List<String>? captions = getCaptionsLanguages(item);
+    if (captions != null) {
+      return captions;
+    }
+
+    try {
+      _fetchingCaptions.add(url);
+      ClosedCaptionManifest manifest = await getClosedCaptionManifest(item);
+      List<String> languageCodes = [];
+
+      for (ClosedCaptionTrackInfo trackInfo in manifest.tracks) {
+        if (trackInfo.isAutoGenerated) {
+          continue;
+        }
+        String languageCode = trackInfo.language.code;
+        languageCodes.add(languageCode);
+      }
+
+      languageCodes = languageCodes.toSet().toList();
+
+      setCaptionsLanguages(
+        item: item,
+        captionsLanguages: languageCodes,
+      );
+
+      return languageCodes;
+    } finally {
+      _fetchingCaptions.remove(url);
+    }
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yuuna/creator.dart';
+import 'package:yuuna/media.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/dictionary.dart';
 
@@ -40,7 +41,7 @@ class InstantExportAction extends QuickAction {
         creatorModel: creatorModel,
         dictionaryTerm: dictionaryTerm,
         metaEntries: metaEntries,
-        creatorJustLaunched: false,
+        creatorJustLaunched: true,
       );
 
       if (newTextField != null) {
@@ -53,6 +54,49 @@ class InstantExportAction extends QuickAction {
     );
 
     for (Field field in appModel.activeFields) {
+      /// If a media source has a generate images or audio function, then use that
+      /// over any set auto enhancement.
+      if (appModel.isMediaOpen && appModel.getCurrentMediaItem() != null) {
+        MediaSource mediaSource =
+            appModel.getCurrentMediaItem()!.getMediaSource(appModel: appModel);
+        if (field is ImageField && mediaSource.overridesAutoImage) {
+          await field.setImages(
+            appModel: appModel,
+            creatorModel: creatorModel,
+            searchTerm: '',
+            newAutoCannotOverride: true,
+            cause: EnhancementTriggerCause.manual,
+            generateImages: () async {
+              return mediaSource.generateImages(
+                appModel: appModel,
+                subtitles: null,
+                item: appModel.getCurrentMediaItem()!,
+                options: appModel.currentSubtitleOptions!.value,
+              );
+            },
+          );
+          continue;
+        }
+        if (field is AudioField && mediaSource.overridesAutoAudio) {
+          await field.setAudio(
+            appModel: appModel,
+            creatorModel: creatorModel,
+            searchTerm: '',
+            newAutoCannotOverride: true,
+            cause: EnhancementTriggerCause.manual,
+            generateAudio: () async {
+              return mediaSource.generateAudio(
+                appModel: appModel,
+                subtitles: null,
+                item: appModel.getCurrentMediaItem()!,
+                options: appModel.currentSubtitleOptions!.value,
+              );
+            },
+          );
+          continue;
+        }
+      }
+
       Enhancement? enhancement = appModel.lastSelectedMapping
           .getAutoFieldEnhancement(appModel: appModel, field: field);
 

@@ -37,12 +37,12 @@ packages:
     source: hosted
     version: "2.9.0"
   audio_session:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: audio_session
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.6+1"
+    version: "0.1.10"
   blurrycontainer:
     dependency: "direct main"
     description:
@@ -336,8 +336,8 @@ packages:
     dependency: "direct main"
     description:
       path: package
-      ref: "3276b033f153690c49bd2f0a0dcb0411642de6e5"
-      resolved-ref: "3276b033f153690c49bd2f0a0dcb0411642de6e5"
+      ref: f882a0e5e9473a75fb8482249ac046b5b48474fc
+      resolved-ref: f882a0e5e9473a75fb8482249ac046b5b48474fc
       url: "https://github.com/lrorpilla/filesystem_picker"
     source: git
     version: "2.0.0-nullsafety.0"

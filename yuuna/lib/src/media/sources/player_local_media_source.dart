@@ -1,7 +1,7 @@
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
@@ -9,7 +9,6 @@ import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/pages.dart';
-import 'package:yuuna/src/pages/implementations/player_source_page.dart';
 import 'package:yuuna/utils.dart';
 import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:path/path.dart' as path;
@@ -100,7 +99,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
   }
 
   /// Pick a video file with a built-in file picker.
-  void pickVideoFile({
+  Future<void> pickVideoFile({
     required BuildContext context,
     required AppModel appModel,
     required WidgetRef ref,
@@ -111,6 +110,8 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     List<Directory> rootDirectories =
         await appModel.getFilePickerDirectoriesForMediaType(mediaType);
 
+        List<String> usedFiles = appModel.getMediaSourceHistory(mediaSource: this).map((item) => item.mediaIdentifier).toList();
+
     Iterable<String>? filePaths = await FilesystemPicker.open(
       context: context,
       rootDirectories: rootDirectories,
@@ -120,6 +121,8 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
       cancelText: cancelText,
       themeData: Theme.of(context),
       folderIconColor: Theme.of(context).colorScheme.primary,
+      usedFiles: usedFiles,
+      currentActiveFile: appModel.currentMediaItem?.mediaIdentifier,
     );
 
     if (filePaths == null || filePaths.isEmpty) {
@@ -132,33 +135,39 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
       directory: Directory(path.dirname(filePath)),
     );
 
-    MediaItem item = MediaItem(
-      canDelete: true,
-      canEdit: false,
-      mediaTypeIdentifier: mediaType.uniqueKey,
-      mediaSourceIdentifier: uniqueKey,
-      mediaIdentifier: filePath,
-      position: 0,
-      duration: 0,
-      title: path.basenameWithoutExtension(filePath),
-    );
+    MediaItem? item = appModel
+        .getMediaTypeHistory(mediaType: mediaType)
+        .firstWhereOrNull((item) => item.mediaIdentifier == filePath);
+    if (item == null) {
+      item ??= MediaItem(
+        canDelete: true,
+        canEdit: false,
+        mediaTypeIdentifier: mediaType.uniqueKey,
+        mediaSourceIdentifier: uniqueKey,
+        mediaIdentifier: filePath,
+        position: 0,
+        duration: 0,
+        title: path.basenameWithoutExtension(filePath),
+      );
 
-    String thumbnailPath = appModel.getThumbnailFile().path;
-    File thumbnailFile = appModel.getThumbnailFile();
+      String thumbnailPath = appModel.getThumbnailFile().path;
+      File thumbnailFile = appModel.getThumbnailFile();
 
-    if (thumbnailFile.existsSync()) {
-      thumbnailFile.deleteSync();
+      if (thumbnailFile.existsSync()) {
+        thumbnailFile.deleteSync();
+      }
+      thumbnailFile.createSync(recursive: true);
+
+      await generateThumbnail(filePath, thumbnailPath);
+      await setOverrideThumbnailFromMediaItem(
+        appModel: appModel,
+        item: item,
+        file: thumbnailFile,
+      );
     }
-    thumbnailFile.createSync(recursive: true);
-
-    await generateThumbnail(filePath, thumbnailPath);
-    await setOverrideThumbnailFromMediaItem(
-      appModel: appModel,
-      item: item,
-      file: thumbnailFile,
-    );
 
     await appModel.openMedia(
+      pushReplacement: pushReplacement,
       context: context,
       ref: ref,
       mediaSource: this,

@@ -83,6 +83,7 @@ abstract class BaseHistoryPageState<T extends BaseHistoryPage>
             builder: (context) => MediaItemDialogPage(
               item: item,
               isHistory: isHistory,
+              extraActions: extraActions,
             ),
           );
           if (isHistory) {
@@ -92,6 +93,11 @@ abstract class BaseHistoryPageState<T extends BaseHistoryPage>
         child: buildMediaItemContent(item),
       ),
     );
+  }
+
+  /// Extra actions to supply to a history page.
+  List<Widget> extraActions(MediaItem item) {
+    return [];
   }
 
   /// Build the widget visually representing the [MediaItem]'s history tile.

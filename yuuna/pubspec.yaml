@@ -9,6 +9,7 @@ environment:
   sdk: ">=2.17.0 <3.0.0"
 
 dependencies:
+  audio_session: ^0.1.10
   blurrycontainer:
     git:
       url: https://github.com/Krish-Ideausher/blurry_container/
@@ -25,8 +26,8 @@ dependencies:
   filesystem_picker:
     git:
       url: https://github.com/lrorpilla/filesystem_picker
-      ref: 3276b033f153690c49bd2f0a0dcb0411642de6e5
-      path: package/
+      ref: f882a0e5e9473a75fb8482249ac046b5b48474fc
+      path: package
   firebase_crashlytics: ^2.8.1
   float_column: ^1.2.1
   flutter:

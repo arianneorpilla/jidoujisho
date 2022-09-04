@@ -264,7 +264,7 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
             ),
           ),
           TextSpan(
-            text: result.searchTerm,
+            text: result.searchTerm.trim().replaceAll('\n', ' '),
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: fontSize,
@@ -273,7 +273,7 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
         ],
       ),
       textAlign: TextAlign.center,
-      maxLines: 3,
+      maxLines: 2,
       overflow: TextOverflow.ellipsis,
     );
   }

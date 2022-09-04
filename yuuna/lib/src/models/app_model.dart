@@ -9,7 +9,6 @@ import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:external_path/external_path.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -212,10 +211,10 @@ class AppModel with ChangeNotifier {
   final int maximumQuickActions = 6;
 
   /// Maximum number of search history items.
-  final int maximumSearchHistoryItems = 50;
+  final int maximumSearchHistoryItems = 60;
 
   /// Maximum number of media history items.
-  final int maximumMediaHistoryItems = 50;
+  final int maximumMediaHistoryItems = 60;
 
   /// Maximum number of dictionary history items.
   final int maximumDictionaryHistoryItems = 20;
@@ -298,7 +297,7 @@ class AppModel with ChangeNotifier {
   /// Need to extract this to its own Provider at some point.
 
   /// Current player controller.
-   VlcPlayerController? currentPlayerController;
+  VlcPlayerController? currentPlayerController;
 
   /// Current subtitle.
   ValueNotifier<Subtitle?> get currentSubtitle => _currentSubtitle;
@@ -310,6 +309,7 @@ class AppModel with ChangeNotifier {
     _currentSubtitleOptions ??= ValueNotifier<SubtitleOptions>(subtitleOptions);
     return _currentSubtitleOptions;
   }
+
   ValueNotifier<SubtitleOptions>? _currentSubtitleOptions;
 
   /// Get the current media item for use in tracking history and generating
@@ -684,10 +684,7 @@ class AppModel with ChangeNotifier {
 
   /// Get whether or not the current theme is dark mode.
   bool get isDarkMode {
-    bool isSystemDarkMode =
-        Brightness.dark == SchedulerBinding.instance.window.platformBrightness;
-    bool isDarkMode =
-        _preferences.get('is_dark_mode', defaultValue: isSystemDarkMode);
+    bool isDarkMode = _preferences.get('is_dark_mode', defaultValue: true);
     return isDarkMode;
   }
 
@@ -1331,8 +1328,7 @@ class AppModel with ChangeNotifier {
 
   /// Get the file to be written to for image export.
   File getPreviewImageFile(Directory directory, int index) {
-    String imagePath =
-        path.join(directory.path, 'previewImage$index.jpg');
+    String imagePath = path.join(directory.path, 'previewImage$index.jpg');
     return File(imagePath);
   }
 
@@ -1689,6 +1685,7 @@ class AppModel with ChangeNotifier {
     required BuildContext context,
     required WidgetRef ref,
     required MediaSource mediaSource,
+    bool pushReplacement = false,
     MediaItem? item,
   }) async {
     _currentMediaSource = mediaSource;
@@ -1703,13 +1700,30 @@ class AppModel with ChangeNotifier {
       addMediaItem(item);
     }
 
-    await Navigator.push(
-      _navigatorKey.currentContext!,
-      MaterialPageRoute(
-        builder: (context) => mediaSource.buildLaunchPage(item: item),
-      ),
-    );
+    if (pushReplacement) {
+      await Navigator.pushReplacement(
+        _navigatorKey.currentContext!,
+        MaterialPageRoute(
+          builder: (context) => mediaSource.buildLaunchPage(item: item),
+        ),
+      );
+    } else {
+      await Navigator.push(
+        _navigatorKey.currentContext!,
+        MaterialPageRoute(
+          builder: (context) => mediaSource.buildLaunchPage(item: item),
+        ),
+      );
+    }
+  }
 
+  /// Ends a media session and ensures that values are reset.
+  Future<void> closeMedia({
+    required BuildContext context,
+    required WidgetRef ref,
+    required MediaSource mediaSource,
+    MediaItem? item,
+  }) async {
     mediaSource.clearCurrentMediaValues();
     _currentMediaSource = null;
     _currentMediaItem = null;
@@ -2703,8 +2717,7 @@ class AppModel with ChangeNotifier {
 
   /// Get definition focus mode for player.
   bool get isPlayerDefinitionFocusMode {
-    return _preferences.get('player_definition_focus_mode',
-        defaultValue: false);
+    return _preferences.get('player_definition_focus_mode', defaultValue: true);
   }
 
   /// Toggle definition focus mode for player.

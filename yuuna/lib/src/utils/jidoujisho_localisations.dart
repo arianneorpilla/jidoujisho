@@ -61,6 +61,7 @@ class JidoujishoLocalisations {
     'dialog_pop': 'POP',
     'dialog_save': 'SAVE',
     'dialog_set': 'SET',
+    'dialog_channel': 'CHANNEL',
     'reset': 'Reset',
     'dialog_launch_ankidroid': 'LAUNCH ANKIDROID',
     'media_item_delete_confirmation':
@@ -229,7 +230,8 @@ class JidoujishoLocalisations {
     'image_search_label_before': 'Selecting image ',
     'image_search_label_middle': 'out of ',
     'image_search_label_after': 'found for',
-    'processing_in_progress': 'Processing images',
+    'preparing_instant_export': 'Preparing card for export...',
+    'processing_in_progress': 'Preparing images',
     'searching_in_progress': 'Searching for ',
     'audio_unavailable': 'No audio could be found.',
     'no_audio_enhancements': 'No audio enhancements are assigned.',
@@ -293,7 +295,13 @@ class JidoujishoLocalisations {
     'lyrics_permission_required': 'Required permission not granted',
     'no_lyrics_found': 'No lyrics found',
     'trending': 'Trending',
-    'caption_filter': 'Filter Closed Captions'
+    'caption_filter': 'Filter Closed',
+    'change_quality': 'Change Quality',
+    'closed_captions_query': 'Querying for captions',
+    'closed_captions_target': 'Target language captions',
+    'closed_captions_app': 'App language captions',
+    'closed_captions_other': 'Other language captions',
+    'closed_captions_unavailable': 'No captions',
+    'closed_captions_error': 'Error while querying captions',
   };
-
 }

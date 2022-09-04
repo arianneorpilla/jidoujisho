@@ -10,6 +10,7 @@ class MediaItemDialogPage extends BasePage {
   const MediaItemDialogPage({
     required this.item,
     required this.isHistory,
+    this.extraActions,
     super.key,
   });
 
@@ -18,6 +19,10 @@ class MediaItemDialogPage extends BasePage {
 
   /// Whether or not the media items are in history.
   final bool isHistory;
+
+  /// Extra actions to include in the dialog page if supplied by a
+  /// media source.
+  final List<Widget>? Function(MediaItem)? extraActions;
 
   @override
   BasePageState createState() => _MediaItemDialogPageState();
@@ -85,6 +90,7 @@ class _MediaItemDialogPageState extends BasePageState<MediaItemDialogPage> {
           ),
           const Space.normal(),
           Image(
+              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
             image: mediaSource.getDisplayThumbnailFromMediaItem(
               appModel: appModel,
               item: widget.item,
@@ -99,6 +105,7 @@ class _MediaItemDialogPageState extends BasePageState<MediaItemDialogPage> {
 
   List<Widget> get actions => [
         if (widget.item.canDelete && widget.isHistory) buildClearButton(),
+        if (widget.extraActions != null) ...?widget.extraActions!(widget.item),
         if (widget.item.canEdit && widget.isHistory) buildEditButton(),
         buildLaunchButton(),
       ];
@@ -161,32 +168,7 @@ class _MediaItemDialogPageState extends BasePageState<MediaItemDialogPage> {
   }
 
   void executeClear() async {
-    await showDialog(
-      barrierDismissible: true,
-      context: context,
-      builder: (context) => AlertDialog(
-        title: buildTitle(),
-        content: Text(
-          mediaItemDeleteConfirmation,
-        ),
-        actions: [
-          TextButton(
-            child: Text(
-              dialogClearLabel,
-              style: TextStyle(color: theme.colorScheme.primary),
-            ),
-            onPressed: () {
-              appModel.deleteMediaItem(widget.item);
-              Navigator.pop(context);
-              Navigator.pop(context);
-            },
-          ),
-          TextButton(
-            child: Text(dialogCancelLabel),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
-      ),
-    );
+    await appModel.deleteMediaItem(widget.item);
+    Navigator.pop(context);
   }
 }

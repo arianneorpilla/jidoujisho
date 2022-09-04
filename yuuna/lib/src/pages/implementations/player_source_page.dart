@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:audio_session/audio_session.dart';
 import 'package:collection/collection.dart';
 import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/gestures.dart';
@@ -12,6 +13,8 @@ import 'package:multi_value_listenable_builder/multi_value_listenable_builder.da
 import 'package:share_plus/share_plus.dart';
 import 'package:spaces/spaces.dart';
 import 'package:subtitle/subtitle.dart';
+import 'package:wakelock/wakelock.dart';
+import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
@@ -35,11 +38,11 @@ class PlayerSourcePage extends BaseSourcePage {
   final bool useHistory;
 
   @override
-  BaseSourcePageState createState() => _PlayerSourcePage();
+  BaseSourcePageState createState() => _PlayerSourcePageState();
 }
 
-class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
-    with TickerProviderStateMixin {
+class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   String get playLabel => appModel.translate('player_play');
   String get pauseLabel => appModel.translate('player_pause');
   String get replayLabel => appModel.translate('player_replay');
@@ -84,8 +87,6 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
   String get optionSubtitleNone =>
       appModel.translate('player_option_subtitle_none');
 
-  Orientation? _currentOrientation;
-
   late final VlcPlayerController _playerController;
   late SubtitleItem _subtitleItem;
   late SubtitleItem _emptySubtitleItem;
@@ -113,7 +114,34 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
   late final ValueNotifier<BlurOptions> _blurOptionsNotifier;
   late final ValueNotifier<SubtitleOptions> _subtitleOptionsNotifier;
 
-  static const double menuHeight = 48;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        _session.setActive(true);
+        break;
+      case AppLifecycleState.paused:
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.detached:
+      _session.setActive(false);
+        break;
+    }
+  }
+
+  /// Controls height of bottom menu.
+  static const double _menuHeight = 48;
 
   /// Allows customisation of opacity of dictionary entries.
   @override
@@ -125,7 +153,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
   Timer? _menuHideTimer;
   Timer? _dragSubtitlesTimer;
 
-  bool unhideDuringInitFlag = false;
+  bool _unhideDuringInitFlag = false;
 
   bool _dialogSmartPaused = false;
   bool _dialogSmartFocusFlag = false;
@@ -133,24 +161,20 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
   bool _autoPauseFlag = false;
   Subtitle? _autoPauseSubtitle;
 
+  /// Subtitle delay. May be temporarily different from saved value.
   Duration get subtitleDelay =>
       Duration(milliseconds: _subtitleOptionsNotifier.value.subtitleDelay);
+
+  /// Current audio allowance. May be temporarily different from saved value.
   Duration get audioAllowance =>
       Duration(milliseconds: _subtitleOptionsNotifier.value.audioAllowance);
 
-  final FocusNode dragToSelectFocusNode = FocusNode();
+  /// This is used to control focus of selected text.
+  final FocusNode _dragToSelectFocusNode = FocusNode();
 
   bool _playerInitialised = false;
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
+  late final AudioSession _session;
 
   /// Hide the dictionary and dispose of the current result.
   @override
@@ -162,22 +186,10 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     super.clearDictionaryResult();
   }
 
+  /// This prepares the player for use and sets a lot of initial variables.
   void initialisePlayer() async {
     if (_playerInitialised) {
       return;
-    }
-
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-
-    if (appModelNoUpdate.isPlayerOrientationPortrait) {
-      await SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-      ]);
-    } else {
-      await SystemChrome.setPreferredOrientations([
-        DeviceOrientation.landscapeLeft,
-        DeviceOrientation.landscapeRight,
-      ]);
     }
 
     await Future.delayed(const Duration(seconds: 1), () {});
@@ -213,7 +225,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     );
     _subtitleItems =
         await (widget.source as PlayerMediaSource).prepareSubtitles(
-          appModel: appModel,
+      appModel: appModel,
       ref: ref,
       item: widget.item!,
     );
@@ -241,6 +253,25 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
       });
     });
 
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
+    if (appModelNoUpdate.isPlayerOrientationPortrait) {
+      await SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+      ]);
+    } else {
+      await SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+    }
+    await Wakelock.enable();
+
+    _session = await AudioSession.instance;
+    await _session.configure(const AudioSessionConfiguration.music());
+
+    _session.setActive(true);
+
     setState(() {
       _playerInitialised = true;
     });
@@ -250,10 +281,11 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     startHideTimer();
 
     Future.delayed(const Duration(seconds: 3), () {
-      unhideDuringInitFlag = true;
+      _unhideDuringInitFlag = true;
     });
   }
 
+  /// This is called each time the player ticks.
   void listener() async {
     if (!mounted) {
       return;
@@ -267,7 +299,12 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
 
       Subtitle? newSubtitle = _subtitleItem.controller
           .durationSearch(_positionNotifier.value + subtitleDelay);
-      widget.source.setCurrentSentence(newSubtitle?.data ?? '');
+      String sentence = _currentSubtitle.value?.data ?? '';
+      String regex = _subtitleOptionsNotifier.value.regexFilter;
+      if (regex.isNotEmpty) {
+        sentence = sentence.replaceAll(RegExp(regex), '');
+      }
+      widget.source.setCurrentSentence(sentence);
 
       if (_currentSubtitle.value != newSubtitle) {
         // if (!_sliderBeingDragged &&
@@ -328,6 +365,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     }
   }
 
+  /// This prepares the subtitles included with the video for use.
   void initialiseEmbeddedSubtitles(VlcPlayerController controller) async {
     if (controller.dataSourceType != DataSourceType.file) {
       return;
@@ -354,6 +392,8 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     }
   }
 
+  /// This updates the media item to its new position and duration and also
+  /// persists the change in media history.
   void updateHistory() async {
     if (!widget.useHistory) {
       return;
@@ -374,18 +414,18 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         backgroundColor: Colors.black,
-        body: buildData(),
+        body: buildBody(),
       ),
     );
   }
 
-  Widget buildData() {
+  /// This shows the loading indicator when uninitialised and shows
+  /// the player once initialised.
+  Widget buildBody() {
     if (!_playerInitialised) {
       initialisePlayer();
       return buildLoading();
     }
-
-    _currentOrientation ??= MediaQuery.of(context).orientation;
 
     return Stack(
       alignment: Alignment.center,
@@ -397,7 +437,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
         buildSubtitleArea(),
         buildCentralPlayPause(),
         Padding(
-          padding: _currentOrientation == Orientation.landscape
+          padding: MediaQuery.of(context).orientation == Orientation.landscape
               ? Spacing.of(context).insets.horizontal.extraBig * 5
               : EdgeInsets.zero,
           child: buildDictionary(),
@@ -406,6 +446,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     );
   }
 
+  /// This renders the backing player.
   Widget buildPlayer() {
     return Container(
       alignment: Alignment.center,
@@ -422,6 +463,8 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     );
   }
 
+  /// This enables gestures for repeating the current subtitle
+  /// and for showing the transcript.
   Widget buildGestureArea() {
     return GestureDetector(
       onHorizontalDragUpdate: (details) async {
@@ -482,6 +525,8 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     );
   }
 
+  /// This allows export of multiple subtitles as one sentence and
+  /// for multiple images.
   Future<void> exportMultipleSubtitles(int selectedIndex) async {
     int maxSubtitles = 10;
 
@@ -513,6 +558,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     await openCardCreator(selectedSubtitles);
   }
 
+  /// This allows the user to double tap to seek.
   Widget buildScrubDetectors() {
     return Row(
       children: [
@@ -554,12 +600,16 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     );
   }
 
+  /// This renders the blur widget that can be used to mask
+  /// burned in subtitles.
   Widget buildBlurWidget() {
     return ResizeableWidget(
       notifier: _blurOptionsNotifier,
     );
   }
 
+  /// This affects the visibility of the bottom menu depending
+  /// on the state of the menu timeout.
   Widget buildMenuArea() {
     return Align(
       alignment: Alignment.topCenter,
@@ -576,11 +626,12 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     );
   }
 
+  /// This arranges the contents of the bottom menu.
   Widget buildMenuContent() {
     return Align(
       alignment: Alignment.bottomCenter,
       child: Container(
-        height: menuHeight,
+        height: _menuHeight,
         color: theme.cardColor.withOpacity(0.8),
         child: GestureDetector(
           onTap: toggleMenuVisibility,
@@ -604,6 +655,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     );
   }
 
+  /// This shows the play/pause button in the bottomleft of the screen.
   Widget buildPlayButton() {
     return MultiValueListenableBuilder(
       valueListenables: [
@@ -638,7 +690,8 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     );
   }
 
-  Widget getIcon() {
+  /// This gets the icon for the central play/pause button.
+  Widget getCentralIcon() {
     if (_playerController.value.isEnded) {
       return const Icon(Icons.replay, size: 32);
     } else {
@@ -658,6 +711,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     }
   }
 
+  /// Shows when the player is paused, and can be used to play/pause the player.
   Widget buildCentralPlayPause() {
     return MultiValueListenableBuilder(
       valueListenables: [
@@ -670,7 +724,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
 
         return Center(
           child: AnimatedOpacity(
-            opacity: unhideDuringInitFlag && (!playing || ended) ? 1.0 : 0.0,
+            opacity: _unhideDuringInitFlag && (!playing || ended) ? 1.0 : 0.0,
             duration: const Duration(milliseconds: 300),
             child: GestureDetector(
               child: DecoratedBox(
@@ -681,7 +735,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
                 child: Padding(
                   padding: Spacing.of(context).insets.all.normal,
                   child: IconButton(
-                    icon: getIcon(),
+                    icon: getCentralIcon(),
                     onPressed: () async {
                       await playPause();
                     },
@@ -695,6 +749,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     );
   }
 
+  /// Shows current position and duration.
   Widget buildDurationAndPosition() {
     return MultiValueListenableBuilder(
       valueListenables: [
@@ -744,7 +799,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
           child: InkWell(
             child: Container(
               alignment: Alignment.center,
-              height: menuHeight,
+              height: _menuHeight,
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
                 '${getPositionText()} / ${getDurationText()}',
@@ -764,6 +819,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     );
   }
 
+  /// Shows the slider representing duration and position.
   Widget buildSlider() {
     return MultiValueListenableBuilder(
       valueListenables: [
@@ -816,10 +872,117 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     );
   }
 
+  /// This builds the source-specific button.
   Widget buildSourceButton() {
+    MediaSource source = widget.item!.getMediaSource(appModel: appModel);
+    if (source is PlayerLocalMediaSource) {
+      return buildPickVideoFileButton();
+    } else if (source is PlayerYoutubeSource) {
+      return buildChangeQualityButton();
+    }
     return const SizedBox.shrink();
   }
 
+  Widget buildPickVideoFileButton() {
+    PlayerLocalMediaSource source = widget.item!
+        .getMediaSource(appModel: appModel) as PlayerLocalMediaSource;
+    String pickVideoFileLabel = appModel.translate('pick_video_file');
+
+    return Material(
+      color: Colors.transparent,
+      child: JidoujishoIconButton(
+        size: 24,
+        icon: Icons.perm_media,
+        tooltip: pickVideoFileLabel,
+        onTap: () async {
+          dialogSmartPause();
+
+          await source.pickVideoFile(
+            appModel: appModel,
+            context: context,
+            ref: ref,
+            pushReplacement: true,
+          );
+
+          dialogSmartResume();
+        },
+      ),
+    );
+  }
+
+  Widget buildChangeQualityButton() {
+    PlayerYoutubeSource source =
+        widget.item!.getMediaSource(appModel: appModel) as PlayerYoutubeSource;
+    String pickVideoFileLabel = appModel.translate('change_quality');
+
+    return Material(
+      color: Colors.transparent,
+      child: JidoujishoIconButton(
+        size: 24,
+        icon: Icons.video_settings,
+        tooltip: pickVideoFileLabel,
+        onTap: () async {
+          StreamManifest manifest =
+              await source.getStreamManifest(widget.item!);
+
+          await showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            useRootNavigator: true,
+            builder: (context) => JidoujishoBottomSheet(
+              options: getQualityOptions(
+                manifest: manifest,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  List<JidoujishoBottomSheetOption> getQualityOptions({
+    required StreamManifest manifest,
+  }) {
+    PlayerYoutubeSource source =
+        widget.item!.getMediaSource(appModel: appModel) as PlayerYoutubeSource;
+
+    List<JidoujishoBottomSheetOption> options = [];
+
+    List<VideoQuality> qualities = source.getVideoQualities(manifest);
+
+    for (VideoQuality quality in qualities) {
+      String currentQualityVideoUrl = source.getVideoUrlForQuality(
+        manifest: manifest,
+        quality: quality,
+      );
+      bool active = currentQualityVideoUrl == _playerController.dataSource;
+
+      JidoujishoBottomSheetOption option = JidoujishoBottomSheetOption(
+        label: quality.label,
+        icon: quality.icon,
+        active: currentQualityVideoUrl == _playerController.dataSource,
+        action: () async {
+          source.setPreferredQuality(quality);
+
+          if (!active) {
+            appModel.openMedia(
+              mediaSource: source,
+              context: context,
+              ref: ref,
+              item: widget.item,
+              pushReplacement: true,
+            );
+          }
+        },
+      );
+
+      options.add(option);
+    }
+
+    return options;
+  }
+
+  /// This is the second bottomrightmost button in the menu.
   Widget buildAudioSubtitlesButton() {
     JidoujishoBottomSheetOption audioOption = JidoujishoBottomSheetOption(
       label: playerOptionSelectAudio,
@@ -834,13 +997,17 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
           isScrollControlled: true,
           useRootNavigator: true,
           builder: (context) => JidoujishoBottomSheet(
-            options: getAudioDialogOptions(audioEmbeddedTracks, audioTrack),
+            options: getAudioDialogOptions(
+                embeddedTracks: audioEmbeddedTracks, audioTrack: audioTrack),
           ),
         );
       },
     );
     List<JidoujishoBottomSheetOption> options = [];
-    options.add(audioOption);
+    MediaSource source = widget.item!.getMediaSource(appModel: appModel);
+    if (source is! PlayerYoutubeSource) {
+      options.add(audioOption);
+    }
 
     options.addAll([
       JidoujishoBottomSheetOption(
@@ -967,6 +1134,8 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     );
   }
 
+  /// These options are shown when having selected to view the
+  /// blur widget options.
   List<JidoujishoBottomSheetOption> getBlurOptions() {
     List<JidoujishoBottomSheetOption> options = [
       JidoujishoBottomSheetOption(
@@ -1014,8 +1183,11 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     return options;
   }
 
-  List<JidoujishoBottomSheetOption> getAudioDialogOptions(
-      Map<int, String> embeddedTracks, int audioTrack) {
+  /// This lists all the current available audio tracks.
+  List<JidoujishoBottomSheetOption> getAudioDialogOptions({
+    required Map<int, String> embeddedTracks,
+    required int audioTrack,
+  }) {
     List<JidoujishoBottomSheetOption> options = [];
 
     embeddedTracks.forEach((index, label) {
@@ -1034,7 +1206,11 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     return options;
   }
 
-  String getSubtitleLabel(SubtitleItem item, Map<int, String> embeddedTracks) {
+  /// This appropriately labels a given subtitle item.
+  String getSubtitleLabel({
+    required SubtitleItem item,
+    required Map<int, String> embeddedTracks,
+  }) {
     switch (item.type) {
       case SubtitleItemType.externalSubtitle:
         return '$optionSubtitle - $optionSubtitleExternal [${item.metadata}]';
@@ -1047,12 +1223,13 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     }
   }
 
+  /// This lists all the current available subtitles.
   List<JidoujishoBottomSheetOption> getSubtitleDialogOptions(
       Map<int, String> embeddedTracks) {
     List<JidoujishoBottomSheetOption> options = [];
     for (SubtitleItem item in _subtitleItems) {
       JidoujishoBottomSheetOption option = JidoujishoBottomSheetOption(
-        label: getSubtitleLabel(item, embeddedTracks),
+        label: getSubtitleLabel(item: item, embeddedTracks: embeddedTracks),
         icon: Icons.subtitles_outlined,
         active: _subtitleItem == item,
         action: () {
@@ -1070,7 +1247,8 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     }
 
     options.add(JidoujishoBottomSheetOption(
-        label: getSubtitleLabel(_emptySubtitleItem, embeddedTracks),
+        label: getSubtitleLabel(
+            item: _emptySubtitleItem, embeddedTracks: embeddedTracks),
         icon: Icons.subtitles_off_outlined,
         active: _subtitleItem == _emptySubtitleItem,
         action: () {
@@ -1083,6 +1261,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     return options;
   }
 
+  /// This is the bottomrightmost button in the menu.
   Widget buildOptionsButton() {
     return Material(
       color: Colors.transparent,
@@ -1104,6 +1283,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     );
   }
 
+  /// This lists the options available when the bottom-right option is tapped.
   List<JidoujishoBottomSheetOption> getOptions() {
     List<JidoujishoBottomSheetOption> options = [
       JidoujishoBottomSheetOption(
@@ -1178,6 +1358,8 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     return options;
   }
 
+  /// This renders the subtitle area with padding, reactive to whether or not
+  /// the menu is shown.
   Widget buildSubtitleArea() {
     return ValueListenableBuilder<bool>(
       valueListenable: _isMenuHidden,
@@ -1187,7 +1369,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
           child: Padding(
             padding: _isMenuHidden.value
                 ? const EdgeInsets.only(bottom: 20)
-                : const EdgeInsets.only(bottom: menuHeight + 8),
+                : const EdgeInsets.only(bottom: _menuHeight + 8),
             child: buildSubtitle(),
           ),
         );
@@ -1195,6 +1377,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     );
   }
 
+  /// This renders the current subtitle.
   Widget buildSubtitle() {
     return MultiValueListenableBuilder(
       valueListenables: [
@@ -1230,6 +1413,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     );
   }
 
+  /// This renders the subtitle with a [SelectableText] widget.
   Widget dragToSelectSubtitle(String subtitleText) {
     return Stack(
       alignment: Alignment.bottomCenter,
@@ -1243,7 +1427,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
         SelectableText.rich(
           TextSpan(children: getSubtitleSpans(subtitleText)),
           textAlign: TextAlign.center,
-          focusNode: dragToSelectFocusNode,
+          focusNode: _dragToSelectFocusNode,
           toolbarOptions: const ToolbarOptions(),
           onSelectionChanged: (selection, cause) {
             String newTerm = selection.textInside(subtitleText);
@@ -1254,23 +1438,28 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     );
   }
 
+  /// Subtitle paint style.
   Paint get subtitlePaintStyle => Paint()
     ..style = PaintingStyle.stroke
     ..strokeWidth = 3
     ..color = Colors.black.withOpacity(0.75);
 
+  /// Subtitle outline text style.
   TextStyle get subtitleOutlineStyle => GoogleFonts.getFont(
         _subtitleOptionsNotifier.value.fontName,
         fontSize: _subtitleOptionsNotifier.value.fontSize,
         foreground: subtitlePaintStyle,
       );
 
+  /// Subtitle text style.
   TextStyle get subtitleTextStyle => GoogleFonts.getFont(
         _subtitleOptionsNotifier.value.fontName,
         fontSize: _subtitleOptionsNotifier.value.fontSize,
         color: Colors.white,
       );
 
+  /// This renders the subtitle and assigns each character an action
+  /// according to its index.
   List<InlineSpan> getSubtitleSpans(String text) {
     List<InlineSpan> spans = [];
 
@@ -1292,6 +1481,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     return spans;
   }
 
+  /// Used for subtitle outline design.
   List<InlineSpan> getSubtitleOutlineSpans(String subtitleText) {
     List<InlineSpan> spans = [];
 
@@ -1306,12 +1496,16 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     return spans;
   }
 
+  /// Used to cancel the timeout that deselects selected text.
+  /// Called when text is selected.
   void cancelDragSubtitlesTimer() {
     if (_dragSubtitlesTimer != null) {
       _dragSubtitlesTimer?.cancel();
     }
   }
 
+  /// Used to start the timeout that deselects selected text.
+  /// Called when text is selected.
   void startDragSubtitlesTimer(String newTerm) {
     cancelDragSubtitlesTimer();
     _dragSubtitlesTimer = Timer(const Duration(milliseconds: 500), () {
@@ -1322,6 +1516,8 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     });
   }
 
+  /// This is used to set the search term upon pressing on a character
+  /// or selecting text.
   void setSearchTerm(String searchTerm) {
     if (searchTerm.isNotEmpty) {
       if (appModel.isPlayerDefinitionFocusMode) {
@@ -1335,6 +1531,9 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     );
   }
 
+  /// This is used to invoke opening the card creator given possibly
+  /// multiple subtitles. See the transcript multiple subtitles long
+  /// press action and the menu option for exporting.
   Future<void> openCardCreator(List<Subtitle> subtitles) async {
     StringBuffer buffer = StringBuffer();
     for (Subtitle subtitle in subtitles) {
@@ -1360,26 +1559,38 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     );
   }
 
+  /// This makes the subtitle widget force to reflect a change, for example
+  /// in settings and reflect that in its appearance.
   void refreshSubtitleWidget() {
     Subtitle? holder = _currentSubtitle.value;
     _currentSubtitle.value = null;
     _currentSubtitle.value = holder;
     if (holder != null) {
-      widget.source.setCurrentSentence(holder.data);
+      String sentence = _currentSubtitle.value?.data ?? '';
+      String regex = _subtitleOptionsNotifier.value.regexFilter;
+      if (regex.isNotEmpty) {
+        sentence = sentence.replaceAll(RegExp(regex), '');
+      }
+      widget.source.setCurrentSentence(sentence);
     } else {
       widget.source.clearCurrentSentence();
     }
   }
 
+  /// Used to start the timeout that hides the menu. Called when the screen
+  /// is tapped.
   void startHideTimer() {
     _menuHideTimer = Timer(const Duration(seconds: 3), toggleMenuVisibility);
   }
 
+  /// Used to cancel the timeout that hides the menu. Called when the screen
+  /// is tapped.
   void cancelHideTimer() {
     _menuHideTimer?.cancel();
     _isMenuHidden.value = false;
   }
 
+  /// This hides the
   void toggleMenuVisibility() async {
     _menuHideTimer?.cancel();
     _isMenuHidden.value = !_isMenuHidden.value;
@@ -1388,6 +1599,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     }
   }
 
+  /// This plays or pauses the player.
   Future<void> playPause() async {
     _autoPauseFlag = false;
     _dialogSmartPaused = false;
@@ -1399,22 +1611,26 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
       startHideTimer();
 
       await _playerController.pause();
+      _session.setActive(false);
     } else {
       cancelHideTimer();
 
       if (!_playerController.value.isInitialized) {
         _playerController.initialize().then((_) async {
           await _playerController.play();
+          _session.setActive(true);
           _playPauseAnimationController.forward();
         });
       } else {
         _playPauseAnimationController.forward();
 
         await _playerController.play();
+        _session.setActive(true);
 
         if (isFinished) {
           await _playerController.stop();
           await _playerController.play();
+          _session.setActive(true);
           await Future.delayed(const Duration(seconds: 2), () async {
             await _playerController.seekTo(Duration.zero);
           });
@@ -1423,6 +1639,8 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     }
   }
 
+  /// This fetches the nearest relevant subtitle for highlighting and
+  /// exporting and seeking purposes.
   Subtitle? getNearestSubtitle() {
     if (_currentSubtitle.value != null) {
       return _currentSubtitle.value!;
@@ -1444,6 +1662,7 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     }
   }
 
+  /// This sets the subtitle to be repeated.
   void setShadowingSubtitle() {
     if (_shadowingSubtitle.value != null) {
       _shadowingSubtitle.value = null;
@@ -1461,13 +1680,18 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
     }
   }
 
+  /// This is called when opening dialogs such as the transcript and the
+  /// creator, where it is appropriate to pause the player.
   Future<void> dialogSmartPause() async {
     if (_playerController.value.isPlaying) {
       _dialogSmartPaused = true;
       await _playerController.pause();
+      _session.setActive(false);
     }
   }
 
+  /// Resumes the dialog only if smart paused. This is called when dialogs
+  /// are closed after being smart paused.
   Future<void> dialogSmartResume({bool isSmartFocus = false}) async {
     _autoPauseFlag = false;
 
@@ -1481,11 +1705,13 @@ class _PlayerSourcePage extends BaseSourcePageState<PlayerSourcePage>
 
     if (_dialogSmartPaused) {
       await _playerController.play();
+      _session.setActive(true);
     }
 
     _dialogSmartPaused = false;
   }
 
+  /// Shows the dialog for importing an external subtitle.
   Future<void> importExternalSubtitle() async {
     String pickText = appModel.translate('dialog_select');
     String cancelText = appModel.translate('dialog_cancel');

@@ -27,7 +27,7 @@ class _YoutubeMediaSearchBar
   /// Shows when there are proper search results returned.
   @override
   Widget buildResultList() {
-    return VideoResultsPage(
+    return YoutubeVideoResultsPage(
       title: mediaType.floatingSearchBarController.query,
       pagingController: pagingController!,
       showAppBar: false,

@@ -71,14 +71,21 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
       content: Text(exitMediaDescription),
       actions: <Widget>[
         TextButton(
-          child: Text(
-            dialogClose,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.primary,
+            child: Text(
+              dialogClose,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
-          ),
-          onPressed: () => Navigator.pop(context, true),
-        ),
+            onPressed: () async {
+              Navigator.pop(context, true);
+              await appModel.closeMedia(
+                context: context,
+                ref: ref,
+                mediaSource: appModel.currentMediaSource!,
+                item: widget.item,
+              );
+            }),
         TextButton(
           child: Text(
             dialogCancel,

@@ -146,6 +146,7 @@ class ImageField extends ImageExportField {
     return AspectRatio(
       aspectRatio: 16 / 9,
       child: FadeInImage(
+        key: ValueKey(image),
         image: image,
         placeholder: MemoryImage(kTransparentImage),
         fit: BoxFit.contain,
@@ -242,7 +243,7 @@ class ImageField extends ImageExportField {
         ],
       ),
       textAlign: TextAlign.center,
-      maxLines: 3,
+      maxLines: 2,
       overflow: TextOverflow.ellipsis,
     );
   }
@@ -311,7 +312,7 @@ class ImageField extends ImageExportField {
         ],
       ),
       textAlign: TextAlign.center,
-      maxLines: 3,
+      maxLines: 2,
       overflow: TextOverflow.ellipsis,
     );
   }
