@@ -42,12 +42,39 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/*" />
             </intent-filter>
-             <!-- Used for Twitter OAuth callback -->
+            <!-- Used for Twitter OAuth callback -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="jidoujisho-twitter" />
+            </intent-filter>
+             <!-- Used for Plex support -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="" />
+                <data android:scheme="ftp"/>
+                <data android:scheme="ftps"/>
+                <data android:scheme="sftp"/>
+                <data android:scheme="content"/>
+                <data android:scheme="http"/>
+                <data android:scheme="https"/>
+                <data android:scheme="smb"/>
+                <data android:scheme="rtmp"/>
+                <data android:scheme="rtmpe"/>
+                <data android:scheme="rtmps"/>
+                <data android:scheme="rtp"/>
+                <data android:scheme="rtsp"/>
+                <data android:scheme="mms"/>
+                <data android:scheme="mmsh"/>
+                <data android:scheme="icyx"/>
+                <data android:scheme="httplive"/>
+                <data android:scheme="udp"/>
+                <data android:scheme="vlc"/>
+                <data android:mimeType="video/*"/>
+                <data android:mimeType="audio/*"/>
             </intent-filter>
         </activity>
         <!-- Used for dictionary search via global context menu option -->

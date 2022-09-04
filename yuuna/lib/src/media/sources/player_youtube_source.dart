@@ -18,7 +18,7 @@ class PlayerYoutubeSource extends PlayerMediaSource {
       : super(
           uniqueKey: 'player_youtube',
           sourceName: 'YouTube',
-          description: 'Select and watch videos from YouTube.',
+          description: 'Search and watch videos from YouTube.',
           icon: Icons.smart_display,
           implementsSearch: true,
           implementsHistory: true,

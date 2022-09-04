@@ -102,7 +102,10 @@ class AnkiMapping {
   ];
 
   /// A default map of enhancements to use for new mappings.
-  static const Map<int, String> defaultActions = {0: CardCreatorAction.key};
+  static const Map<int, String> defaultActions = {
+    0: CardCreatorAction.key,
+    1: InstantExportAction.key
+  };
 
   /// The default mapping name which cannot be deleted or reused.
   static String standardModelName = 'jidoujisho Yuuna';
