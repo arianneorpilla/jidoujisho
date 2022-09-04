@@ -49,6 +49,7 @@ class PlayerYoutubeSource extends PlayerMediaSource {
       <String, List<SubtitleItem>>{};
   final Map<String, PagingController<int, MediaItem>> _pagingControllerCache =
       <String, PagingController<int, MediaItem>>{};
+  final Map<String, Playlist> _playlistCache = <String, Playlist>{};
 
   @override
   Future<void> prepareResources() async {
@@ -220,7 +221,6 @@ class PlayerYoutubeSource extends PlayerMediaSource {
     Video video = await getVideoFromId(url);
     return getMediaItem(video);
   }
-
 
   /// Creates a media item from a YouTube [Video] entity.
   MediaItem getMediaItem(Video video) {
@@ -483,13 +483,24 @@ class PlayerYoutubeSource extends PlayerMediaSource {
     return item.author ?? '';
   }
 
+  /// Caches fetched playlists.
+  Future<Playlist> getPlaylistFromId(String playlistId) async {
+    Playlist? playlist = _playlistCache[playlistId];
+    if (playlist == null) {
+      playlist = await _playlistClient.get(playlistId);
+      _playlistCache[playlistId] ??= playlist;
+    }
+
+    return playlist;
+  }
+
   /// Launch a trending videos page.
   Future<void> showTrendingVideos({
     required AppModel appModel,
     required BuildContext context,
   }) async {
     String playlistId = getTrendingPlaylistId(appModel.targetLanguage)!;
-    Playlist trendingPlaylist = await _playlistClient.get(playlistId);
+    Playlist trendingPlaylist = await getPlaylistFromId(playlistId);
 
     PagingController<int, MediaItem>? pagingController =
         _pagingControllerCache[playlistId];
@@ -583,7 +594,7 @@ class PlayerYoutubeSource extends PlayerMediaSource {
   /// Get the available languages for a video's closed captions with caching.
   Future<List<String>> getAvailableCaptionLanguages(MediaItem item) async {
     while (_fetchingCaptions.isNotEmpty) {
-      await Future.delayed(const Duration(milliseconds: 100), () {});
+      await Future.delayed(const Duration(milliseconds: 500), () {});
     }
 
     String url = item.mediaIdentifier;

@@ -89,7 +89,8 @@ class JidoujishoApp extends ConsumerStatefulWidget {
 class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
   final navigatorKey = GlobalKey<NavigatorState>();
 
-  late final StreamSubscription _sharedTextIntent;
+  late final StreamSubscription<String> _contextMenuSubscription;
+  late final StreamSubscription<String> _sharedTextSubscription;
 
   @override
   void initState() {
@@ -102,16 +103,12 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       /// For processing text received via the global context menu option.
-      String? text = await FlutterProcessText.refreshProcessText;
-      if (text != null) {
-        textContextMenuAction(text);
-      }
+      _contextMenuSubscription =
+          FlutterProcessText.getProcessTextStream.listen(textContextMenuAction);
 
       /// For receiving shared text when the app is in the background.
-      _sharedTextIntent = ReceiveSharingIntent.getTextStream().listen(
-        textShareIntentAction,
-        onError: (err) {},
-      );
+      _sharedTextSubscription =
+          ReceiveSharingIntent.getTextStream().listen(textShareIntentAction);
 
       /// For receiving shared text when the app is initially launched.
       ReceiveSharingIntent.getInitialText().then((text) {
@@ -134,8 +131,6 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
       return;
     }
 
-    Navigator.popUntil(
-        appModel.navigatorKey.currentContext!, (route) => route.isFirst);
     appModel.openRecursiveDictionarySearch(
       searchTerm: text,
       killOnPop: true,
@@ -154,8 +149,6 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
       return;
     }
 
-    Navigator.popUntil(
-        appModel.navigatorKey.currentContext!, (route) => route.isFirst);
     appModel.openCreator(
       creatorFieldValues: CreatorFieldValues(
         textValues: {
@@ -198,7 +191,7 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
   @override
   void dispose() {
     super.dispose();
-    _sharedTextIntent.cancel();
+    _sharedTextSubscription.cancel();
   }
 
   @override

@@ -200,7 +200,6 @@ abstract class MediaSource {
       ref: ref,
       mediaSource: this,
     );
-
   }
 
   /// Clear all current media data once this source has been closed.
@@ -239,6 +238,11 @@ abstract class MediaSource {
   /// overriding of values for display purposes. If a source does this,
   /// override this function.
   String getDisplayTitleFromMediaItem(MediaItem item) {
+    String? overrideTitle = getOverrideTitleFromMediaItem(item);
+    if (overrideTitle != null) {
+      return overrideTitle;
+    }
+
     return item.title;
   }
 

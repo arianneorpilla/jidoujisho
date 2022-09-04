@@ -152,7 +152,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     onQueryChanged(mediaType.floatingSearchBarController.query);
   }
 
-  Duration get searchDelay => const Duration(milliseconds: 100);
+  Duration get searchDelay => const Duration(milliseconds: 300);
   Duration get historyDelay => const Duration(milliseconds: 1000);
 
   void onQueryChanged(String query) async {
