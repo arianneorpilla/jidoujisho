@@ -87,6 +87,7 @@ abstract class PlayerMediaSource extends MediaSource {
     if (subtitles == null && appModel.currentSubtitle.value != null) {
       subtitles ??= [appModel.currentSubtitle.value!];
     }
+    
     List<NetworkToFileImage> imageFiles = [];
     Directory appDirDoc = await getApplicationSupportDirectory();
     String playerPreviewPath = '${appDirDoc.path}/playerImagePreview';

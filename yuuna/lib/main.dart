@@ -12,7 +12,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:spaces/spaces.dart';
 import 'package:wakelock/wakelock.dart';
+import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:yuuna/creator.dart';
+import 'package:yuuna/media.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
@@ -102,43 +104,95 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
       /// For processing text received via the global context menu option.
       String? text = await FlutterProcessText.refreshProcessText;
       if (text != null) {
-        Navigator.popUntil(context, (route) => route.isFirst);
-        appModel.openRecursiveDictionarySearch(
-          searchTerm: text,
-          killOnPop: true,
-        );
+        textContextMenuAction(text);
       }
 
       /// For receiving shared text when the app is in the background.
-      _sharedTextIntent = ReceiveSharingIntent.getTextStream().listen((text) {
-        Navigator.popUntil(context, (route) => route.isFirst);
-        appModel.openCreator(
-          creatorFieldValues: CreatorFieldValues(
-            textValues: {
-              SentenceField.instance: text,
-            },
-          ),
-          killOnPop: true,
-          ref: ref,
-        );
-      }, onError: (err) {});
+      _sharedTextIntent = ReceiveSharingIntent.getTextStream().listen(
+        textShareIntentAction,
+        onError: (err) {},
+      );
 
       /// For receiving shared text when the app is initially launched.
       ReceiveSharingIntent.getInitialText().then((text) {
         if (text != null) {
-          Navigator.popUntil(context, (route) => route.isFirst);
-          appModel.openCreator(
-            creatorFieldValues: CreatorFieldValues(
-              textValues: {
-                SentenceField.instance: text,
-              },
-            ),
-            killOnPop: true,
-            ref: ref,
-          );
+          textShareIntentAction(text);
         }
       });
     });
+  }
+
+  void textContextMenuAction(String text) {
+    String? videoId = VideoId.parseVideoId(text);
+    if (videoId != null) {
+      launchYoutubeMediaAction(videoId);
+      return;
+    }
+
+    if (text.startsWith('https://') || text.startsWith('http://')) {
+      launchNetworkMediaAction(text);
+      return;
+    }
+
+    Navigator.popUntil(
+        appModel.navigatorKey.currentContext!, (route) => route.isFirst);
+    appModel.openRecursiveDictionarySearch(
+      searchTerm: text,
+      killOnPop: true,
+    );
+  }
+
+  void textShareIntentAction(String text) {
+    String? videoId = VideoId.parseVideoId(text);
+    if (videoId != null) {
+      launchYoutubeMediaAction(videoId);
+      return;
+    }
+
+    if (text.startsWith('https://') || text.startsWith('http://')) {
+      launchNetworkMediaAction(text);
+      return;
+    }
+
+    Navigator.popUntil(
+        appModel.navigatorKey.currentContext!, (route) => route.isFirst);
+    appModel.openCreator(
+      creatorFieldValues: CreatorFieldValues(
+        textValues: {
+          SentenceField.instance: text,
+        },
+      ),
+      killOnPop: true,
+      ref: ref,
+    );
+  }
+
+  void launchYoutubeMediaAction(String videoId) async {
+    MediaItem item =
+        await PlayerYoutubeSource.instance.getMediaItemFromId(videoId);
+
+    Navigator.popUntil(
+        appModel.navigatorKey.currentContext!, (route) => route.isFirst);
+    appModel.openMedia(
+      context: context,
+      ref: ref,
+      mediaSource: PlayerYoutubeSource.instance,
+      item: item,
+    );
+  }
+
+  void launchNetworkMediaAction(String url) {
+    MediaItem item =
+        PlayerNetworkStreamSource.instance.getMediaItemFromUrl(url);
+
+    Navigator.popUntil(
+        appModel.navigatorKey.currentContext!, (route) => route.isFirst);
+    appModel.openMedia(
+      context: context,
+      ref: ref,
+      mediaSource: PlayerNetworkStreamSource.instance,
+      item: item,
+    );
   }
 
   @override

@@ -200,6 +200,7 @@ abstract class MediaSource {
       ref: ref,
       mediaSource: this,
     );
+
   }
 
   /// Clear all current media data once this source has been closed.
@@ -278,6 +279,34 @@ abstract class MediaSource {
     /// A cached version of [MemoryImage] so that the image does not reload
     /// on every revisit
     return CacheImageProvider(item.uniqueKey, data.contentAsBytes());
+  }
+
+  /// Given a [MediaItem], return its thumbnail. Some media items may allow
+  /// overriding of values for display purposes.
+  String getThumbnailUri({
+    required AppModel appModel,
+    required MediaItem item,
+    bool noOverride = false,
+  }) {
+    ImageProvider<Object>? overrideThumbnail =
+        getOverrideThumbnailFromMediaItem(
+      appModel: appModel,
+      item: item,
+    );
+
+    if (!noOverride && overrideThumbnail != null) {
+      return getOverrideThumbnailFilename(appModel: appModel, item: item);
+    }
+
+    if (item.imageUrl != null) {
+      return item.imageUrl!;
+    }
+
+    if (item.base64Image == null) {
+      return '';
+    }
+
+    return '';
   }
 
   /// The map key used to store the override title of an item.

@@ -106,13 +106,31 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
           return buildNoCurrentMedia();
         }
 
-        JidoujishoLyricsParameters parameters = JidoujishoLyricsParameters(
-          artist: track.artist!,
-          title: track.title!,
-        );
-        return buildLyricsWhen(
-          parameters: parameters,
-          track: track,
+        ReaderLyricsSource source = ReaderLyricsSource.instance;
+
+        return StreamBuilder<void>(
+          stream: source.overrideStream,
+          builder: (context, snapshot) {
+            if (source.isOverride) {
+              return buildLyricsWhen(
+                track: NowPlaying.instance.track,
+                parameters: JidoujishoLyricsParameters(
+                  artist: source.overrideArtist!,
+                  title: source.overrideTitle!,
+                ),
+              );
+            }
+
+            JidoujishoLyricsParameters parameters = JidoujishoLyricsParameters(
+              artist: track.artist!,
+              title: track.title!,
+            );
+
+            return buildLyricsWhen(
+              parameters: parameters,
+              track: track,
+            );
+          },
         );
       },
     );
@@ -145,6 +163,8 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
     required JidoujishoLyricsParameters parameters,
     required NowPlayingTrack track,
   }) {
+       ReaderLyricsSource source = ReaderLyricsSource.instance;
+       
     if (lyrics == null) {
       return buildNoLyricsFound();
     }
@@ -166,8 +186,10 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
                 children: [
                   const Space.extraBig(),
                   const Space.big(),
+                  if (!source.isOverride || (NowPlaying.instance.track.title == parameters.title && NowPlaying.instance.track.artist == parameters.artist))
                   Row(
                     children: [
+                      
                       if (track.hasImage)
                         SizedBox(
                           height: 96,
@@ -179,13 +201,15 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            SelectableText(
                               parameters.title,
+                              selectionControls: selectionControls,
                               style: const TextStyle(
                                   fontSize: 20, fontWeight: FontWeight.bold),
                             ),
-                            Text(
+                            SelectableText(
                               parameters.artist,
+                              selectionControls: selectionControls,
                               style: const TextStyle(fontSize: 20),
                             ),
                           ],
@@ -218,7 +242,6 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
 
   Widget buildLyricsText(String text) {
     return SelectableText.rich(
-
       TextSpan(children: getSubtitleSpans(text)),
       focusNode: _lyricsFocusNode,
       selectionControls: selectionControls,

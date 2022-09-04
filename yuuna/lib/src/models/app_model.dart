@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:audio_service/audio_service.dart' as ag;
 import 'package:collection/collection.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -1688,6 +1689,8 @@ class AppModel with ChangeNotifier {
     bool pushReplacement = false,
     MediaItem? item,
   }) async {
+    await initialiseAudioHandler();
+
     _currentMediaSource = mediaSource;
     if (item != null) {
       _currentMediaItem = item;
@@ -1733,6 +1736,8 @@ class AppModel with ChangeNotifier {
 
     mediaSource.mediaType.refreshTab();
     mediaSource.onSourceExit(context: context, ref: ref);
+
+    await _audioHandler?.stop();
   }
 
   /// A helper function for opening the creator from any page in the
@@ -2747,5 +2752,30 @@ class AppModel with ChangeNotifier {
   void togglePlayerOrientationPortrait() async {
     await _preferences.put(
         'player_orientation_portrait', !isPlayerOrientationPortrait);
+  }
+
+  /// Allows the player screen to listen to handler changes.
+  Stream<void> get audioHandlerStream => _audioHandlerStreamController.stream;
+  final StreamController<void> _audioHandlerStreamController =
+      StreamController.broadcast();
+
+  /// Allows updating media item art.
+  JidoujishoAudioHandler? _audioHandler;
+
+  /// Initialises the audio service.
+  Future<void> initialiseAudioHandler() async {
+    if (_audioHandler != null) {
+      return;
+    }
+
+    _audioHandler = await ag.AudioService.init<JidoujishoAudioHandler>(
+      builder: () => JidoujishoAudioHandler(onPlayPause: () {
+        _audioHandlerStreamController.add(null);
+      }),
+      config: const ag.AudioServiceConfig(
+        androidNotificationChannelId: 'app.lrorpilla.yuuna.channel.audio',
+        androidNotificationChannelName: 'jidoujisho',
+      ),
+    );
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:audio_session/audio_session.dart';
 import 'package:collection/collection.dart';
@@ -114,6 +115,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   late final ValueNotifier<BlurOptions> _blurOptionsNotifier;
   late final ValueNotifier<SubtitleOptions> _subtitleOptionsNotifier;
 
+  StreamSubscription<void>? _playPauseSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -122,6 +125,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
   @override
   void dispose() {
+    _playPauseSubscription?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -135,7 +139,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       case AppLifecycleState.paused:
       case AppLifecycleState.inactive:
       case AppLifecycleState.detached:
-      _session.setActive(false);
+        _session.setActive(false);
         break;
     }
   }
@@ -266,6 +270,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       ]);
     }
     await Wakelock.enable();
+
+    _playPauseSubscription = appModel.audioHandlerStream.listen((_) {
+      playPause();
+    });
 
     _session = await AudioSession.instance;
     await _session.configure(const AudioSessionConfiguration.music());
@@ -1346,6 +1354,17 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           Subtitle? singleSubtitle = getNearestSubtitle();
           if (singleSubtitle != null) {
             subtitles.add(singleSubtitle);
+          }
+
+          if (subtitles.isEmpty) {
+            subtitles.add(
+              Subtitle(
+                index: 0,
+                data: '',
+                start: _positionNotifier.value - Duration(milliseconds: max(_subtitleOptionsNotifier.value.audioAllowance, 2500)),
+                end: _positionNotifier.value + Duration(milliseconds: max(_subtitleOptionsNotifier.value.audioAllowance, 2500)),
+              ),
+            );
           }
 
           await dialogSmartPause();

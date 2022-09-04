@@ -204,6 +204,24 @@ class PlayerYoutubeSource extends PlayerMediaSource {
     return _searchClient.getQuerySuggestions(searchTerm);
   }
 
+  /// Gets a Video instance from a Uri with caching.
+  Future<Video> getVideoFromId(String videoId) async {
+    Video? video = _videoCache[videoId];
+    if (video == null) {
+      video = await _videoClient.get(videoId);
+      _videoCache[videoId] = video;
+    }
+
+    return video;
+  }
+
+  /// Creatres a media item from a URL.
+  Future<MediaItem> getMediaItemFromId(String url) async {
+    Video video = await getVideoFromId(url);
+    return getMediaItem(video);
+  }
+
+
   /// Creates a media item from a YouTube [Video] entity.
   MediaItem getMediaItem(Video video) {
     return MediaItem(

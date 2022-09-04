@@ -303,5 +303,10 @@ class JidoujishoLocalisations {
     'closed_captions_other': 'Other language captions',
     'closed_captions_unavailable': 'No captions',
     'closed_captions_error': 'Error while querying captions',
+    'stream_url': 'Stream URL',
+    'paste': 'Paste',
+    'lyrics_title': 'Title',
+    'lyrics_artist': 'Artist',
+    'set_media': 'Set Media',
   };
 }
