@@ -57,24 +57,29 @@ class HistoryReaderPageState<T extends BaseHistoryPage>
   /// This is shown as the body when [shouldPlaceholderBeShown] is false.
   @override
   Widget buildHistory(List<MediaItem> items) {
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(
-        parent: BouncingScrollPhysics(),
-      ),
+    return RawScrollbar(
+      thumbVisibility: true,
+      thickness: 3,
       controller: mediaType.scrollController,
-      children: [
-        const SizedBox(height: 48),
-        GridView.builder(
-          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: 150,
-            childAspectRatio: 176 / 250,
-          ),
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          itemCount: items.length,
-          itemBuilder: (context, index) => buildMediaItem(items[index]),
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
         ),
-      ],
+        controller: mediaType.scrollController,
+        children: [
+          const SizedBox(height: 48),
+          GridView.builder(
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 150,
+              childAspectRatio: 176 / 250,
+            ),
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemCount: items.length,
+            itemBuilder: (context, index) => buildMediaItem(items[index]),
+          ),
+        ],
+      ),
     );
   }
 
