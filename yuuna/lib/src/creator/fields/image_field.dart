@@ -154,7 +154,7 @@ class ImageField extends ImageExportField {
       key: ValueKey(image),
       image: image,
       placeholder: MemoryImage(kTransparentImage),
-      fit: BoxFit.fitHeight,
+      fit: BoxFit.contain,
     );
   }
 

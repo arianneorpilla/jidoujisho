@@ -60,6 +60,9 @@ class _DictionaryDialogPageState extends BasePageState {
       child: Text(dialogImportLabel),
       onPressed: () async {
         FilePickerResult? result = await FilePicker.platform.pickFiles(
+          /// Change when adding multiple dictionary formats.
+          type: FileType.custom,
+          allowedExtensions: ['zip'],
           allowMultiple: true,
         );
         if (result == null) {
