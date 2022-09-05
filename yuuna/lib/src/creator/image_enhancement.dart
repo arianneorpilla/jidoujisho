@@ -16,6 +16,6 @@ abstract class ImageEnhancement extends Enhancement {
   /// Given a search term, generate a list of images.
   Future<List<NetworkToFileImage>> fetchImages({
     required BuildContext context,
-    required String searchTerm,
+    String? searchTerm,
   });
 }

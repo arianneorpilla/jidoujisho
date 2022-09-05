@@ -1361,8 +1361,16 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               Subtitle(
                 index: 0,
                 data: '',
-                start: _positionNotifier.value - Duration(milliseconds: max(_subtitleOptionsNotifier.value.audioAllowance, 2500)),
-                end: _positionNotifier.value + Duration(milliseconds: max(_subtitleOptionsNotifier.value.audioAllowance, 2500)),
+                start: _positionNotifier.value -
+                    Duration(
+                        milliseconds: max(
+                            _subtitleOptionsNotifier.value.audioAllowance,
+                            2500)),
+                end: _positionNotifier.value +
+                    Duration(
+                        milliseconds: max(
+                            _subtitleOptionsNotifier.value.audioAllowance,
+                            2500)),
               ),
             );
           }

@@ -7,9 +7,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_process_text/flutter_process_text.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'package:receive_intent/receive_intent.dart' as intents;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:spaces/spaces.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
@@ -89,8 +90,8 @@ class JidoujishoApp extends ConsumerStatefulWidget {
 class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
   final navigatorKey = GlobalKey<NavigatorState>();
 
-  late final StreamSubscription<String> _contextMenuSubscription;
-  late final StreamSubscription<String> _sharedTextSubscription;
+  late final StreamSubscription _otherIntentsSubscription;
+  late final StreamSubscription _sharedTextSubscription;
 
   @override
   void initState() {
@@ -102,9 +103,11 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      /// For processing text received via the global context menu option.
-      _contextMenuSubscription =
-          FlutterProcessText.getProcessTextStream.listen(textContextMenuAction);
+      /// Receive all intents and parse them depending on which they are.
+      intents.ReceiveIntent.getInitialIntent().then(handleIntent);
+      // Attach a listener to the stream for receiving intents.
+      _otherIntentsSubscription =
+          intents.ReceiveIntent.receivedIntentStream.listen(handleIntent);
 
       /// For receiving shared text when the app is in the background.
       _sharedTextSubscription =
@@ -119,40 +122,56 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
     });
   }
 
-  void textContextMenuAction(String text) {
-    String? videoId = VideoId.parseVideoId(text);
-    if (videoId != null) {
-      launchYoutubeMediaAction(videoId);
+  @override
+  void dispose() {
+    _otherIntentsSubscription.cancel();
+    _sharedTextSubscription.cancel();
+    super.dispose();
+  }
+
+  void handleIntent(intents.Intent? intent) {
+    if (intent == null) {
       return;
     }
 
-    if (text.startsWith('https://') || text.startsWith('http://')) {
-      launchNetworkMediaAction(text);
-      return;
-    }
+    debugPrint(intent.action);
+    debugPrint(intent.extra.toString());
 
+    switch (intent.action) {
+      case 'android.intent.action.PROCESS_TEXT':
+        String data = intent.extra!['android.intent.extra.PROCESS_TEXT'];
+        textContextMenuAction(data);
+        return;
+    }
+  }
+
+  void textContextMenuAction(String data) {
     appModel.openRecursiveDictionarySearch(
-      searchTerm: text,
+      searchTerm: data,
       killOnPop: true,
     );
   }
 
-  void textShareIntentAction(String text) {
-    String? videoId = VideoId.parseVideoId(text);
-    if (videoId != null) {
-      launchYoutubeMediaAction(videoId);
-      return;
-    }
+  void textShareIntentAction(String data) {
+    if (data.startsWith('https://') || data.startsWith('http://')) {
+      String? videoId = VideoId.parseVideoId(data);
+      if (videoId != null) {
+        try {
+          launchYoutubeMediaAction(videoId);
+          return;
+        } catch (e) {
+          debugPrint('Not a YouTube video');
+        }
+      }
 
-    if (text.startsWith('https://') || text.startsWith('http://')) {
-      launchNetworkMediaAction(text);
+      launchNetworkMediaAction(data);
       return;
     }
 
     appModel.openCreator(
       creatorFieldValues: CreatorFieldValues(
         textValues: {
-          SentenceField.instance: text,
+          SentenceField.instance: data,
         },
       ),
       killOnPop: true,
@@ -186,12 +205,6 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
       mediaSource: PlayerNetworkStreamSource.instance,
       item: item,
     );
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _sharedTextSubscription.cancel();
   }
 
   @override

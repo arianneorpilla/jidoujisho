@@ -117,24 +117,28 @@ class _PlayerTranscriptPageState extends BasePageState<PlayerTranscriptPage> {
   }
 
   Widget buildPlaceholder() {
-    return Material(
-      color: Colors.transparent,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.subtitles_off_outlined,
-              size: 72,
-            ),
-            const Space.normal(),
-            Text(
-              playerSubtitlesTranscriptEmpty,
-              style: const TextStyle(
-                fontSize: 20,
+    return Padding(
+      padding: Spacing.of(context).insets.onlyBottom.extraBig,
+      child: Material(
+        color: Colors.transparent,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.subtitles_off_outlined,
+                size: 72,
               ),
-            ),
-          ],
+              const Space.normal(),
+              Text(
+                playerSubtitlesTranscriptEmpty,
+                style: const TextStyle(
+                  fontSize: 20,
+                ),
+              ),
+              const Space.big(),
+            ],
+          ),
         ),
       ),
     );

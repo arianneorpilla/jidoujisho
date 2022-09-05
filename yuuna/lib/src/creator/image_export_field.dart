@@ -66,10 +66,10 @@ abstract class ImageExportField extends Field {
   Future<void> setImages({
     required AppModel appModel,
     required CreatorModel creatorModel,
-    required String searchTerm,
     required Future<List<NetworkToFileImage>> Function() generateImages,
     required EnhancementTriggerCause cause,
     required bool newAutoCannotOverride,
+    String? searchTerm,
   }) async {
     if (_autoCannotOverride && cause == EnhancementTriggerCause.auto) {
       return;
@@ -107,7 +107,7 @@ abstract class ImageExportField extends Field {
     required AppModel appModel,
     required CreatorModel creatorModel,
     required bool isSearching,
-    required String searchTerm,
+    String? searchTerm,
   }) {
     _isSearching = isSearching;
     _currentSearchTerm = searchTerm;

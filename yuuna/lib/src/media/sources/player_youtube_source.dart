@@ -594,7 +594,7 @@ class PlayerYoutubeSource extends PlayerMediaSource {
   /// Get the available languages for a video's closed captions with caching.
   Future<List<String>> getAvailableCaptionLanguages(MediaItem item) async {
     while (_fetchingCaptions.isNotEmpty) {
-      await Future.delayed(const Duration(milliseconds: 500), () {});
+      await Future.delayed(const Duration(seconds: 1), () {});
     }
 
     String url = item.mediaIdentifier;

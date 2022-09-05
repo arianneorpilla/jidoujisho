@@ -110,7 +110,10 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     List<Directory> rootDirectories =
         await appModel.getFilePickerDirectoriesForMediaType(mediaType);
 
-        List<String> usedFiles = appModel.getMediaSourceHistory(mediaSource: this).map((item) => item.mediaIdentifier).toList();
+    List<String> usedFiles = appModel
+        .getMediaSourceHistory(mediaSource: this)
+        .map((item) => item.mediaIdentifier)
+        .toList();
 
     Iterable<String>? filePaths = await FilesystemPicker.open(
       context: context,
@@ -232,7 +235,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
 
     List<String> advancedParams = ['--start-time=$startTime'];
     List<String> audioParams = [
-      '--audio-language=${appModel.targetLanguage.languageCode}',
+      '--audio-language=${appModel.targetLanguage.languageCode},${appModel.appLocale.languageCode}',
       '--sub-track=99999'
     ];
 

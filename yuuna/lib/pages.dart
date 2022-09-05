@@ -1,4 +1,5 @@
 export 'src/pages/implementations/blur_options_dialog_page.dart';
+export 'src/pages/implementations/crop_image_dialog_page.dart';
 export 'src/pages/implementations/creator_page.dart';
 export 'src/pages/implementations/creator_quick_actions_page.dart';
 export 'src/pages/implementations/enhancements_picker_dialog_page.dart';
@@ -41,6 +42,7 @@ export 'src/pages/implementations/youtube_video_results_page.dart';
 export 'src/pages/implementations/player_source_page.dart';
 export 'src/pages/implementations/youtube_media_search_bar.dart';
 export 'src/pages/implementations/closed_captions_indicator.dart';
+export 'src/pages/implementations/forvo_audio_dialog_page.dart';
 
 export 'src/pages/base_page.dart';
 export 'src/pages/base_history_page.dart';

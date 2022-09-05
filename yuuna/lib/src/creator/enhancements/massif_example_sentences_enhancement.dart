@@ -43,10 +43,10 @@ class MassifExampleSentencesEnhancement extends Enhancement {
   static const String key = 'massif_example_sentences';
 
   /// Used to store results that have already been found at runtime.
-  final Map<String, List<MassifResult>> massifCache = {};
+  final Map<String, List<MassifResult>> _massifCache = {};
 
   /// Client used to communicate with the Massif API.
-  final http.Client client = http.Client();
+  final http.Client _client = http.Client();
 
   @override
   Future<void> enhanceCreatorParams({
@@ -83,8 +83,8 @@ class MassifExampleSentencesEnhancement extends Enhancement {
       return [];
     }
 
-    if (massifCache[searchTerm] != null) {
-      return massifCache[searchTerm]!;
+    if (_massifCache[searchTerm] != null) {
+      return _massifCache[searchTerm]!;
     }
 
     List<MassifResult> results = [];
@@ -93,8 +93,8 @@ class MassifExampleSentencesEnhancement extends Enhancement {
 
     try {
       /// Query the Massif API for results.
-      response = await client.get(
-          Uri.parse('https://massif.la/ja/search?&fmt=json&q=$searchTerm'));
+      response = await _client.get(Uri.parse(
+          'https://massif.la/ja/search?&fmt=json&q=${Uri.encodeComponent(searchTerm)}'));
 
       Map<String, dynamic> json = jsonDecode(utf8.decode(response.bodyBytes));
 
@@ -169,7 +169,7 @@ class MassifExampleSentencesEnhancement extends Enhancement {
       }
 
       /// Save this into cache.
-      massifCache[searchTerm] = results;
+      _massifCache[searchTerm] = results;
 
       return results;
     } catch (e) {

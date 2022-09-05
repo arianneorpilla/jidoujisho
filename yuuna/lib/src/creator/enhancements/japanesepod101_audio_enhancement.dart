@@ -18,7 +18,7 @@ class JapanesePod101AudioEnhancement extends AudioEnhancement {
           label: 'JapanesePod101 Audio',
           description:
               'Search for matching word pronunciations from JapanesePod101.',
-          icon: Icons.record_voice_over,
+          icon: Icons.surround_sound,
           field: AudioField.instance,
         );
 

@@ -62,6 +62,7 @@ class JidoujishoLocalisations {
     'dialog_save': 'SAVE',
     'dialog_set': 'SET',
     'dialog_channel': 'CHANNEL',
+    'dialog_crop': 'CROP',
     'reset': 'Reset',
     'dialog_launch_ankidroid': 'LAUNCH ANKIDROID',
     'media_item_delete_confirmation':
@@ -308,5 +309,6 @@ class JidoujishoLocalisations {
     'lyrics_title': 'Title',
     'lyrics_artist': 'Artist',
     'set_media': 'Set Media',
+    'no_recordings_found': 'No recordings found',
   };
 }

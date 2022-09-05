@@ -213,6 +213,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.2"
+  crop_image:
+    dependency: "direct main"
+    description:
+      name: crop_image
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.2"
   cross_file:
     dependency: transitive
     description:
@@ -1121,6 +1128,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.1.0"
+  receive_intent:
+    dependency: "direct main"
+    description:
+      name: receive_intent
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.2"
   receive_sharing_intent:
     dependency: "direct main"
     description:

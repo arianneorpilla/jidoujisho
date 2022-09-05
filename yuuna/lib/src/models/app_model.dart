@@ -480,7 +480,8 @@ class AppModel with ChangeNotifier {
     final Map<Field, List<Enhancement>> availableEnhancements = {
       AudioField.instance: [
         ClearFieldEnhancement(field: AudioField.instance),
-        JapanesePod101AudioEnhancement()
+        JapanesePod101AudioEnhancement(),
+        ForvoAudioEnhancement(),
       ],
       NotesField.instance: [
         ClearFieldEnhancement(field: NotesField.instance),
@@ -491,6 +492,9 @@ class AppModel with ChangeNotifier {
       ImageField.instance: [
         ClearFieldEnhancement(field: ImageField.instance),
         BingImagesSearchEnhancement(),
+        CropImageEnhancement(),
+        PickImageEnhancement(),
+        CameraEnhancement(),
       ],
       MeaningField.instance: [
         ClearFieldEnhancement(field: MeaningField.instance),
@@ -509,6 +513,7 @@ class AppModel with ChangeNotifier {
         ClearFieldEnhancement(field: TermField.instance),
         SearchDictionaryEnhancement(),
         MassifExampleSentencesEnhancement(),
+        TatoebaExampleSentencesEnhancement(),
         OpenStashEnhancement(field: TermField.instance),
         PopFromStashEnhancement(field: TermField.instance),
       ],

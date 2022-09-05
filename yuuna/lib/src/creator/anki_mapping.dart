@@ -69,12 +69,14 @@ class AnkiMapping {
     MeaningField.key: {0: ClearFieldEnhancement.key},
     NotesField.key: {0: ClearFieldEnhancement.key},
     ImageField.key: {
+      -1: BingImagesSearchEnhancement.key,
       0: ClearFieldEnhancement.key,
-      -1: BingImagesSearchEnhancement.key
+      1: BingImagesSearchEnhancement.key,
     },
     AudioField.key: {
+      -1: JapanesePod101AudioEnhancement.key,
       0: ClearFieldEnhancement.key,
-      -1: JapanesePod101AudioEnhancement.key
+      1: JapanesePod101AudioEnhancement.key,
     },
     ContextField.key: {0: ClearFieldEnhancement.key},
     PitchAccentField.key: {0: ClearFieldEnhancement.key},

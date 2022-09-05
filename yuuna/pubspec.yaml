@@ -19,6 +19,7 @@ dependencies:
   change_notifier_builder: ^1.1.2
   characters: ^1.2.0
   clipboard: ^0.1.3
+  crop_image: ^1.0.2
   device_info_plus: ^3.2.3
   expandable: ^5.0.1
   external_app_launcher: ^2.0.2
@@ -78,6 +79,7 @@ dependencies:
   permission_handler: ^9.2.0
   pretty_json: ^2.0.0
   progress_indicators: ^1.0.0
+  receive_intent: ^0.2.2
   receive_sharing_intent: ^1.4.5
   reorderables: ^0.5.0
   restart_app: ^1.1.0+1

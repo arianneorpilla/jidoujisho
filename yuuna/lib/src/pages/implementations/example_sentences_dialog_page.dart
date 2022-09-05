@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/pages.dart';
+import 'package:yuuna/utils.dart';
 
 /// The content of the dialog used for selecting example sentences.
 class ExampleSentencesDialogPage extends BasePage {
@@ -27,6 +28,8 @@ class _ExampleSentencesDialogPageState
   final ScrollController _scrollController = ScrollController();
 
   String get dialogSelectLabel => appModel.translate('dialog_select');
+  String get dialogStashLabel => appModel.translate('dialog_stash');
+  String get noSentencesFound => appModel.translate('no_sentences_found');
 
   final Map<int, ValueNotifier<bool>> _valuesSelected = {};
 
@@ -46,7 +49,19 @@ class _ExampleSentencesDialogPageState
           ? Spacing.of(context).insets.all.big
           : Spacing.of(context).insets.all.normal,
       content: buildContent(),
-      actions: actions,
+      actions: widget.exampleSentences.isEmpty ? null : actions,
+    );
+  }
+
+  Widget buildEmptyMessage() {
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: Spacing.of(context).spaces.normal,
+      ),
+      child: JidoujishoPlaceholderMessage(
+        icon: Icons.search_off,
+        message: noSentencesFound,
+      ),
     );
   }
 
@@ -59,7 +74,9 @@ class _ExampleSentencesDialogPageState
         controller: _scrollController,
         child: SingleChildScrollView(
           controller: _scrollController,
-          child: Wrap(children: getTextWidgets()),
+          child: widget.exampleSentences.isEmpty
+              ? buildEmptyMessage()
+              : Wrap(children: getTextWidgets()),
         ),
       ),
     );
@@ -110,8 +127,16 @@ class _ExampleSentencesDialogPageState
   }
 
   List<Widget> get actions => [
+        buildStashButton(),
         buildSelectButton(),
       ];
+
+  Widget buildStashButton() {
+    return TextButton(
+      child: Text(dialogStashLabel),
+      onPressed: executeStash,
+    );
+  }
 
   Widget buildSelectButton() {
     return TextButton(
@@ -130,6 +155,17 @@ class _ExampleSentencesDialogPageState
     });
 
     return buffer.toString().trim();
+  }
+
+  void executeStash() {
+    List<String> terms = [];
+    widget.exampleSentences.forEachIndexed((index, sentence) {
+      if (_valuesSelected[index]!.value) {
+        terms.add(sentence);
+      }
+    });
+
+    appModel.addToStash(terms: terms);
   }
 
   void executeSelect() {

@@ -48,6 +48,9 @@ class BingImagesSearchEnhancement extends ImageEnhancement {
         creatorModel: creatorModel,
         fallbackSearchTerms: [TermField.instance],
       );
+      if (searchTerm == null) {
+        return;
+      }
     } else {
       searchTerm = creatorModel.getFieldController(TermField.instance).text;
 
@@ -61,11 +64,11 @@ class BingImagesSearchEnhancement extends ImageEnhancement {
       appModel: appModel,
       creatorModel: creatorModel,
       newAutoCannotOverride: false,
-      searchTerm: searchTerm!,
+      searchTerm: searchTerm,
       generateImages: () async {
         return fetchImages(
           context: context,
-          searchTerm: searchTerm!,
+          searchTerm: searchTerm,
         );
       },
     );
@@ -74,7 +77,7 @@ class BingImagesSearchEnhancement extends ImageEnhancement {
   @override
   Future<List<NetworkToFileImage>> fetchImages({
     required BuildContext context,
-    required String searchTerm,
+    String? searchTerm,
   }) async {
     List<NetworkToFileImage> images = [];
 

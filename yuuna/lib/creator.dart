@@ -19,10 +19,15 @@ export 'src/creator/actions/play_audio_action.dart';
 
 export 'src/creator/enhancements/clear_field_enhancement.dart';
 export 'src/creator/enhancements/massif_example_sentences_enhancement.dart';
+export 'src/creator/enhancements/tatoeba_example_sentences_enhancement.dart';
 export 'src/creator/enhancements/search_dictionary_enhancement.dart';
 export 'src/creator/enhancements/text_segmentation_enhancement.dart';
 export 'src/creator/enhancements/pick_from_stash_enhancement.dart';
 export 'src/creator/enhancements/pop_from_stash_enhancement.dart';
+export 'src/creator/enhancements/crop_image_enhancement.dart';
+export 'src/creator/enhancements/pick_image_enhancement.dart';
+export 'src/creator/enhancements/camera_enhancement.dart';
+export 'src/creator/enhancements/forvo_audio_enhancement.dart';
 
 export 'src/creator/fields/sentence_field.dart';
 export 'src/creator/fields/meaning_field.dart';
