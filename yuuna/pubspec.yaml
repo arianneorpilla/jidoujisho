@@ -78,6 +78,7 @@ dependencies:
   path: ^1.8.0
   path_provider: ^2.0.9
   permission_handler: ^9.2.0
+  photo_gallery: ^1.1.1
   pretty_json: ^2.0.0
   progress_indicators: ^1.0.0
   receive_intent: ^0.2.2

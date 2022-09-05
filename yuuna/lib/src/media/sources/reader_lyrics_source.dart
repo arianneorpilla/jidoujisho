@@ -56,7 +56,7 @@ class ReaderLyricsSource extends ReaderMediaSource {
   /// Manual search action.
   void setOverrideTitleAndArtist({
     required String title,
-    required String artist,
+    String? artist,
   }) {
     _overrideTitle = title;
     _overrideArtist = artist;
@@ -119,8 +119,12 @@ class ReaderLyricsSource extends ReaderMediaSource {
     String artist = Uri.encodeComponent(parameters.artist.trim());
     String title = Uri.encodeComponent(parameters.title.trim());
 
-    String searchUrl =
-        'https://www.google.com/search?q=$title+-+$artist+lyrics';
+    late String searchUrl;
+    if (artist.isEmpty) {
+      searchUrl = 'https://www.google.com/search?q=$title+lyrics';
+    } else {
+      searchUrl = 'https://www.google.com/search?q=$title+-+$artist+lyrics';
+    }
 
     late String? lyrics;
     bool webViewBusy = true;
@@ -132,8 +136,8 @@ class ReaderLyricsSource extends ReaderMediaSource {
         onLoadStop: (controller, uri) async {
           dom.Document document = parser.parse(await controller.getHtml());
 
-          List<dom.Element> elements = document.querySelectorAll(
-              '[data-attrid="kc:/music/recording_cluster:lyrics"]');
+          List<dom.Element> elements =
+              document.querySelectorAll('[data-attrid*="lyrics"]');
 
           if (elements.isEmpty) {
             lyrics = null;
@@ -197,10 +201,6 @@ class ReaderLyricsSource extends ReaderMediaSource {
           title: NowPlaying.instance.track.title ?? '',
           artist: NowPlaying.instance.track.artist ?? '',
           onSearch: (title, artist) {
-            if (artist.trim().isEmpty || title.trim().isEmpty) {
-              return;
-            }
-            
             Navigator.pop(context);
             setOverrideTitleAndArtist(
               title: title,
