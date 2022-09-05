@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/language.dart';
@@ -60,8 +61,6 @@ class ForvoAudioEnhancement extends AudioEnhancement {
     AudioExportField audioField = field as AudioExportField;
     String? searchTerm;
 
-    Codec<String, String> stringToBase64Url = utf8.fuse(base64Url);
-
     if (cause != EnhancementTriggerCause.auto) {
       searchTerm = audioField.getSearchTermWithFallback(
         appModel: appModel,
@@ -79,11 +78,100 @@ class ForvoAudioEnhancement extends AudioEnhancement {
       }
     }
 
+    List<ForvoResult> results = await getForvoResults(
+      appModel: appModel,
+      searchTerm: searchTerm!,
+    );
+
+    Directory appDirDoc = await getApplicationDocumentsDirectory();
+    String forvoAudioPath = '${appDirDoc.path}/forvoAudio';
+    Directory forvoAudioDir = Directory(forvoAudioPath);
+    if (forvoAudioDir.existsSync()) {
+      forvoAudioDir.deleteSync(recursive: true);
+    }
+    forvoAudioDir.createSync();
+
+    if (cause != EnhancementTriggerCause.manual) {
+      if (results.isNotEmpty) {
+        int index = 0;
+        ForvoResult result = results[index];
+
+        File file = File('$forvoAudioPath/$index.mp3');
+        http.Response request = await http.get(Uri.parse(result.audioUrl));
+        Uint8List bytes = request.bodyBytes;
+        await file.writeAsBytes(bytes);
+
+        await audioField.setAudio(
+          appModel: appModel,
+          creatorModel: creatorModel,
+          searchTerm: searchTerm,
+          newAutoCannotOverride: false,
+          cause: cause,
+          generateAudio: () async {
+            return file;
+          },
+        );
+      }
+    } else {
+      await showDialog(
+        context: context,
+        builder: (context) => ForvoAudioDialogPage(
+          results: results,
+          onSelect: (index) async {
+            File file = File('$forvoAudioPath/$index.mp3');
+            http.Response request =
+                await http.get(Uri.parse(results[index].audioUrl));
+            Uint8List bytes = request.bodyBytes;
+            await file.writeAsBytes(bytes);
+
+            await audioField.setAudio(
+              appModel: appModel,
+              creatorModel: creatorModel,
+              searchTerm: searchTerm!,
+              newAutoCannotOverride: false,
+              cause: cause,
+              generateAudio: () async {
+                return file;
+              },
+            );
+          },
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<File?> fetchAudio({
+    required AppModel appModel,
+    required BuildContext context,
+    required String term,
+    required String reading,
+  }) async {
+    List<ForvoResult> results = await getForvoResults(
+      appModel: appModel,
+      searchTerm: term,
+    );
+
+    String temporaryDirectoryPath = (await getTemporaryDirectory()).path;
+    String temporaryFileName =
+        'jidoujisho-${DateFormat('yyyyMMddTkkmmss').format(DateTime.now())}';
+
+    File file = File('$temporaryDirectoryPath/$temporaryFileName');
+    http.Response request = await http.get(Uri.parse(results[0].audioUrl));
+    Uint8List bytes = request.bodyBytes;
+    await file.writeAsBytes(bytes);
+
+    return file;
+  }
+
+  /// Return a list of pronunciations from a search term.
+  Future<List<ForvoResult>> getForvoResults(
+      {required AppModel appModel, required String searchTerm}) async {
+    Codec<String, String> stringToBase64Url = utf8.fuse(base64Url);
     Language language = appModel.targetLanguage;
     String cacheKey = '${language.languageCode}/$searchTerm';
 
     List<ForvoResult> results = [];
-
     if (_forvoCache[cacheKey] != null) {
       results = _forvoCache[cacheKey]!;
     } else {
@@ -137,69 +225,6 @@ class ForvoAudioEnhancement extends AudioEnhancement {
       }
     }
 
-    Directory appDirDoc = await getApplicationDocumentsDirectory();
-    String forvoAudioPath = '${appDirDoc.path}/forvoAudio';
-    Directory forvoAudioDir = Directory(forvoAudioPath);
-    if (forvoAudioDir.existsSync()) {
-      forvoAudioDir.deleteSync(recursive: true);
-    }
-    forvoAudioDir.createSync();
-
-    if (cause != EnhancementTriggerCause.manual) {
-      if (results.isNotEmpty) {
-        int index = 0;
-        ForvoResult result = results[index];
-
-        File file = File('$forvoAudioPath/$index.mp3');
-        http.Response request = await http.get(Uri.parse(result.audioUrl));
-        Uint8List bytes = request.bodyBytes;
-        await file.writeAsBytes(bytes);
-
-        await audioField.setAudio(
-          appModel: appModel,
-          creatorModel: creatorModel,
-          searchTerm: searchTerm!,
-          newAutoCannotOverride: false,
-          cause: cause,
-          generateAudio: () async {
-            return file;
-          },
-        );
-      }
-    } else {
-      await showDialog(
-        context: context,
-        builder: (context) => ForvoAudioDialogPage(
-          results: results,
-          onSelect: (index) async {
-            File file = File('$forvoAudioPath/$index.mp3');
-            http.Response request =
-                await http.get(Uri.parse(results[index].audioUrl));
-            Uint8List bytes = request.bodyBytes;
-            await file.writeAsBytes(bytes);
-
-            await audioField.setAudio(
-              appModel: appModel,
-              creatorModel: creatorModel,
-              searchTerm: searchTerm!,
-              newAutoCannotOverride: false,
-              cause: cause,
-              generateAudio: () async {
-                return file;
-              },
-            );
-          },
-        ),
-      );
-    }
-  }
-
-  @override
-  Future<File?> fetchAudio({
-    required BuildContext context,
-    required String term,
-    required String reading,
-  }) {
-    throw UnimplementedError();
+    return results;
   }
 }

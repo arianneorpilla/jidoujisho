@@ -16,6 +16,7 @@ dependencies:
       url: https://github.com/Krish-Ideausher/blurry_container/
       ref: fb26dd1fa81edeb048b14703f1c1f28e93ee43d0
   cached_network_image: ^3.2.1
+  carousel_slider: ^4.1.1
   change_notifier_builder: ^1.1.2
   characters: ^1.2.0
   clipboard: ^0.1.3

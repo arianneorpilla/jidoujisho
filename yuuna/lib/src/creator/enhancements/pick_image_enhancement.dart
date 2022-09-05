@@ -74,6 +74,7 @@ class PickImageEnhancement extends ImageEnhancement {
 
   @override
   Future<List<NetworkToFileImage>> fetchImages({
+    required AppModel appModel,
     required BuildContext context,
     String? searchTerm,
   }) async {

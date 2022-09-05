@@ -201,5 +201,6 @@ abstract class ImageExportField extends Field {
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,
+    required Orientation orientation,
   });
 }

@@ -1,6 +1,6 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:network_to_file_image/network_to_file_image.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:spaces/spaces.dart';
 import 'package:transparent_image/transparent_image.dart';
@@ -47,18 +47,29 @@ class ImageField extends ImageExportField {
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,
+    required Orientation orientation,
   }) {
     if (isSearching) {
       return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          AspectRatio(
-            aspectRatio: 16 / 9,
-            child: Container(
-              color: Colors.transparent,
-              height: double.infinity,
-              width: double.infinity,
+          if (orientation == Orientation.landscape)
+            Flexible(
+              child: Container(
+                color: Colors.transparent,
+                height: double.infinity,
+                width: double.infinity,
+              ),
+            )
+          else
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: Container(
+                color: Colors.transparent,
+                height: double.infinity,
+                width: double.infinity,
+              ),
             ),
-          ),
           const Space.normal(),
           buildFooterLoading(
             appModel: appModel,
@@ -72,63 +83,15 @@ class ImageField extends ImageExportField {
       return const SizedBox.shrink();
     }
 
-    ValueListenableBuilder<int?>(
-      valueListenable: indexNotifier,
-      builder: (context, index, _) => buildFooterTextSpans(
-        context: context,
-        appModel: appModel,
-      ),
-    );
-
     return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        ValueListenableBuilder<int?>(
-          valueListenable: indexNotifier,
-          builder: (context, index, child) {
-            late OverlayEntry popup;
-            NetworkToFileImage image = currentImageSuggestions![index!];
-
-            return GestureDetector(
-              onHorizontalDragEnd: (details) {
-                if (details.primaryVelocity == 0) {
-                  return;
-                }
-
-                if (details.primaryVelocity!.compareTo(0) == -1) {
-                  if (indexNotifier.value ==
-                      currentImageSuggestions!.length - 1) {
-                    setSelectedSearchSuggestion(index: 0);
-                  } else {
-                    setSelectedSearchSuggestion(index: index + 1);
-                  }
-                } else {
-                  if (indexNotifier.value == 0) {
-                    setSelectedSearchSuggestion(
-                        index: currentImageSuggestions!.length - 1);
-                  } else {
-                    setSelectedSearchSuggestion(index: index - 1);
-                  }
-                }
-              },
-              onLongPress: () {
-                popup = OverlayEntry(
-                  builder: (context) => ColoredBox(
-                    color: Colors.black.withOpacity(0.5),
-                    child: buildImage(image),
-                  ),
-                );
-                Overlay.of(context)?.insert(popup);
-              },
-              onLongPressEnd: (details) {
-                popup.remove();
-              },
-              child: Padding(
-                padding: Spacing.of(context).insets.horizontal.small,
-                child: buildImage(currentImageSuggestions![index]),
-              ),
-            );
-          },
-        ),
+        if (orientation == Orientation.landscape)
+          Flexible(
+            child: buildCarousel(),
+          )
+        else
+          buildCarousel(),
         const Space.normal(),
         ValueListenableBuilder<int?>(
           valueListenable: indexNotifier,
@@ -141,16 +104,57 @@ class ImageField extends ImageExportField {
     );
   }
 
+  /// Build the image carousel.
+  Widget buildCarousel() {
+    CarouselController controller = CarouselController();
+
+    return CarouselSlider.builder(
+      itemCount: currentImageSuggestions!.length,
+      carouselController: controller,
+      options: CarouselOptions(
+        enableInfiniteScroll: currentImageSuggestions!.length > 1,
+        enlargeCenterPage: true,
+        viewportFraction: 0.6,
+        initialPage: indexNotifier.value,
+        onPageChanged: (index, reason) {
+          indexNotifier.value = index;
+          setSelectedSearchSuggestion(index: index);
+        },
+      ),
+      itemBuilder: (context, index, realIndex) {
+        OverlayEntry? popup;
+        ImageProvider<Object> image = currentImageSuggestions![index];
+
+        return GestureDetector(
+          onLongPress: () {
+            popup = OverlayEntry(
+              builder: (context) => ColoredBox(
+                color: Colors.black.withOpacity(0.5),
+                child: buildImage(image),
+              ),
+            );
+            Overlay.of(context)?.insert(popup!);
+          },
+          onLongPressEnd: (details) {
+            popup?.remove();
+          },
+          child: Padding(
+            padding: Spacing.of(context).insets.horizontal.small,
+            child: buildImage(currentImageSuggestions![index]),
+          ),
+        );
+      },
+    );
+  }
+
   /// Build the given image and fade in to load if network.
   Widget buildImage(ImageProvider<Object> image) {
-    return AspectRatio(
-      aspectRatio: 16 / 9,
-      child: FadeInImage(
-        key: ValueKey(image),
-        image: image,
-        placeholder: MemoryImage(kTransparentImage),
-        fit: BoxFit.contain,
-      ),
+    return FadeInImage(
+      fadeInDuration: const Duration(milliseconds: 200),
+      key: ValueKey(image),
+      image: image,
+      placeholder: MemoryImage(kTransparentImage),
+      fit: BoxFit.fitHeight,
     );
   }
 

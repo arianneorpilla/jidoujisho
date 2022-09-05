@@ -14,7 +14,7 @@ class ViewerCameraSource extends ViewerMediaSource {
               'View images taken with the camera or picked from media.',
           icon: Icons.camera,
           implementsSearch: false,
-           implementsHistory: false,
+          implementsHistory: false,
         );
 
   /// Get the singleton instance of this media type.
@@ -25,6 +25,11 @@ class ViewerCameraSource extends ViewerMediaSource {
 
   @override
   BaseSourcePage buildLaunchPage({MediaItem? item}) {
-    return const PlaceholderSourcePage();
+    throw UnimplementedError();
+  }
+
+  @override
+  BasePage buildHistoryPage({MediaItem? item}) {
+    return const GalleryHistoryPage();
   }
 }

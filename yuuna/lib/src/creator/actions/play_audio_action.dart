@@ -72,6 +72,7 @@ class PlayAudioAction extends QuickAction {
 
       if (enhancement is AudioEnhancement) {
         File? file = await enhancement.fetchAudio(
+          appModel: appModel,
           context: context,
           term: dictionaryTerm.term,
           reading: dictionaryTerm.reading,

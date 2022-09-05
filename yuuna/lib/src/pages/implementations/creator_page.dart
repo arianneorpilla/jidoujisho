@@ -423,7 +423,8 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
             !ImageField.instance.isSearching) ||
         MediaQuery.of(context).orientation == Orientation.portrait ||
         widget.editEnhancements ||
-        widget.editFields;
+        widget.editFields ||
+        !appModel.activeFields.contains(ImageField.instance);
 
     return Scaffold(
       backgroundColor: theme.backgroundColor.withOpacity(0.5),
@@ -435,39 +436,58 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
   }
 
   Widget buildLandscape() {
-    return Row(
-      children: [
-        Flexible(
-          flex: 3,
-          child: Column(
-            children: [
-              buildAppBar(),
-              Expanded(child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    const Space.semiBig(),
-                    buildTopWidgets(),
-                    const Space.normal(),
-                    buildDeckDropdown(),
-                    const Space.normal(),
-                  ],
+    return SafeArea(
+      child: Row(
+        children: [
+          Flexible(
+            flex: 3,
+            child: Column(
+              children: [
+                buildAppBar(),
+                const Space.semiBig(),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (appModel.activeFields.contains(ImageField.instance))
+                        Expanded(
+                          child: ImageField.instance.buildTopWidget(
+                            context: context,
+                            ref: ref,
+                            appModel: appModel,
+                            creatorModel: creatorModel,
+                            orientation: Orientation.landscape,
+                          ),
+                        ),
+                      if (appModel.activeFields.contains(AudioField.instance))
+                        AudioField.instance.buildTopWidget(
+                          context: context,
+                          ref: ref,
+                          appModel: appModel,
+                          creatorModel: creatorModel,
+                          orientation: Orientation.landscape,
+                        ),
+                    ],
+                  ),
                 ),
-              ),),
-            ],
+                buildDeckDropdown(),
+                const Space.small(),
+              ],
+            ),
           ),
-        ),
-        Flexible(
-          flex: 4,
-          child: Column(
-            children: [
-              Expanded(child: buildFields(isPortrait: false)),
-              if (widget.editEnhancements) buildEditFieldsButton(),
-              if (widget.editEnhancements) buildEditActionsButton(),
-              if (isCardEditing) buildExportButton(),
-            ],
+          Flexible(
+            flex: 4,
+            child: Column(
+              children: [
+                Expanded(child: buildFields(isPortrait: false)),
+                if (widget.editEnhancements) buildEditFieldsButton(),
+                if (widget.editEnhancements) buildEditActionsButton(),
+                if (isCardEditing) buildExportButton(),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -522,6 +542,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
             ref: ref,
             appModel: appModel,
             creatorModel: creatorModel,
+            orientation: Orientation.portrait,
           );
         } else if (field is AudioExportField) {
           return field.buildTopWidget(
@@ -529,6 +550,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
             ref: ref,
             appModel: appModel,
             creatorModel: creatorModel,
+            orientation: Orientation.portrait,
           );
         }
 

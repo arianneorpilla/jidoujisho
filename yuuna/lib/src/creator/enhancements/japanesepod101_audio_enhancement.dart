@@ -18,7 +18,7 @@ class JapanesePod101AudioEnhancement extends AudioEnhancement {
           label: 'JapanesePod101 Audio',
           description:
               'Search for matching word pronunciations from JapanesePod101.',
-          icon: Icons.surround_sound,
+          icon: Icons.spatial_audio_off_outlined,
           field: AudioField.instance,
         );
 
@@ -66,6 +66,7 @@ class JapanesePod101AudioEnhancement extends AudioEnhancement {
         String reading =
             creatorModel.getFieldController(ReadingField.instance).text;
         File? file = await fetchAudio(
+          appModel: appModel,
           context: context,
           term: searchTerm!,
           reading: reading,
@@ -78,6 +79,7 @@ class JapanesePod101AudioEnhancement extends AudioEnhancement {
 
   @override
   Future<File?> fetchAudio({
+    required AppModel appModel,
     required BuildContext context,
     required String term,
     required String reading,

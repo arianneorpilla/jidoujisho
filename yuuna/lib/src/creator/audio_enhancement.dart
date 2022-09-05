@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:yuuna/creator.dart';
+import 'package:yuuna/models.dart';
 
 /// An entity for enhancements that specificallly generate audio.
 abstract class AudioEnhancement extends Enhancement {
@@ -17,6 +18,7 @@ abstract class AudioEnhancement extends Enhancement {
   /// Given a term and a reading, fetch an audio file that is playable for
   /// the play audio action.
   Future<File?> fetchAudio({
+    required AppModel appModel,
     required BuildContext context,
     required String term,
     required String reading,

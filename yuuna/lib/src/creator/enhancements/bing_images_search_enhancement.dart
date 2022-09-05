@@ -67,6 +67,7 @@ class BingImagesSearchEnhancement extends ImageEnhancement {
       searchTerm: searchTerm,
       generateImages: () async {
         return fetchImages(
+          appModel: appModel,
           context: context,
           searchTerm: searchTerm,
         );
@@ -76,6 +77,7 @@ class BingImagesSearchEnhancement extends ImageEnhancement {
 
   @override
   Future<List<NetworkToFileImage>> fetchImages({
+    required AppModel appModel,
     required BuildContext context,
     String? searchTerm,
   }) async {

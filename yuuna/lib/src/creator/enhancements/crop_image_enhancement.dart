@@ -59,6 +59,7 @@ class CropImageEnhancement extends ImageEnhancement {
       searchTerm: searchTerm,
       generateImages: () async {
         return fetchImages(
+          appModel: appModel,
           context: context,
         );
       },
@@ -67,6 +68,7 @@ class CropImageEnhancement extends ImageEnhancement {
 
   @override
   Future<List<NetworkToFileImage>> fetchImages({
+    required AppModel appModel,
     required BuildContext context,
     String? searchTerm,
   }) async {

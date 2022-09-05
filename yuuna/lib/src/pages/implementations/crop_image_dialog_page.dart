@@ -33,7 +33,8 @@ class _CropImageDialogPageState extends BasePageState<CropImageDialogPage> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      contentPadding: Spacing.of(context).insets.all.big,
+      contentPadding: Spacing.of(context).insets.all.normal,
+      actionsPadding: Spacing.of(context).insets.horizontal.normal,
       content: buildContent(),
       actions: actions,
     );
@@ -45,13 +46,11 @@ class _CropImageDialogPageState extends BasePageState<CropImageDialogPage> {
       ];
 
   Widget buildContent() {
-    return SingleChildScrollView(
-      child: SizedBox(
-          width: MediaQuery.of(context).size.width * (9 / 10),
-          child: CropImage(
-            controller: _controller,
-            image: Image(image: FileImage(widget.imageFile)),
-          )),
+    return Center(
+      child: CropImage(
+        controller: _controller,
+        image: Image(image: FileImage(widget.imageFile)),
+      ),
     );
   }
 
@@ -69,7 +68,7 @@ class _CropImageDialogPageState extends BasePageState<CropImageDialogPage> {
       child: Text(
         dialogCancelLabel,
       ),
-      onPressed: () => Navigator.pop,
+      onPressed: () => Navigator.pop(context),
     );
   }
 

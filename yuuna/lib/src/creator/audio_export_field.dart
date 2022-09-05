@@ -124,6 +124,7 @@ abstract class AudioExportField extends Field {
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,
+    required Orientation orientation,
   });
 
   /// Perform a function that generates a list of images and attempt a search

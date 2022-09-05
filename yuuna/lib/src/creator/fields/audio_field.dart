@@ -40,12 +40,50 @@ class AudioField extends AudioExportField {
 
   /// Buiid the audio player.
   Widget buildAudioPlayer() {
-    return Row(
-      children: [
-        buildPlayButton(),
-        buildDurationAndPosition(),
-        buildSlider(),
-      ],
+    return SizedBox(
+      height: 48,
+      child: Row(
+        children: [
+          buildPlayButton(),
+          buildDurationAndPosition(),
+          buildSlider(),
+        ],
+      ),
+    );
+  }
+
+  /// Buiid the audio player.
+  Widget buildDisabledPlayer(BuildContext context) {
+    return SizedBox(
+      height: 48,
+      child: IgnorePointer(
+        child: Opacity(
+          opacity: 0.5,
+          child: Row(
+            children: [
+              Container(
+                height: 48,
+                width: 48,
+                padding: const EdgeInsets.all(16),
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation(
+                      Theme.of(context).unselectedWidgetColor),
+                ),
+              ),
+              const Text(
+                '--:-- / --:--',
+              ),
+              Expanded(
+                child: Slider(
+                  value: 0,
+                  thumbColor: Theme.of(context).unselectedWidgetColor,
+                  onChanged: (value) {},
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -268,13 +306,23 @@ class AudioField extends AudioExportField {
   }
 
   @override
-  Widget buildTopWidget(
-      {required BuildContext context,
-      required WidgetRef ref,
-      required AppModel appModel,
-      required CreatorModel creatorModel}) {
+  Widget buildTopWidget({
+    required BuildContext context,
+    required WidgetRef ref,
+    required AppModel appModel,
+    required CreatorModel creatorModel,
+    required Orientation orientation,
+  }) {
+    if (isSearching) {
+      return buildDisabledPlayer(context);
+    }
+
     if (!showWidget) {
-      return const SizedBox.shrink();
+      if (orientation == Orientation.landscape) {
+        return const SizedBox(height: 24);
+      } else {
+        return const SizedBox.shrink();
+      }
     }
 
     return buildAudioPlayer();
