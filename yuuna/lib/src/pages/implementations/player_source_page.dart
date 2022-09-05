@@ -1745,6 +1745,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
     Iterable<String>? filePaths = await FilesystemPicker.open(
       title: '',
+      allowedExtensions: ['.ass', '.srt'],
       pickText: pickText,
       cancelText: cancelText,
       context: context,

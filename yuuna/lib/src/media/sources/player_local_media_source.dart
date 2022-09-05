@@ -116,6 +116,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
         .toList();
 
     Iterable<String>? filePaths = await FilesystemPicker.open(
+      allowedExtensions: allowedExtensions,
       context: context,
       rootDirectories: rootDirectories,
       fsType: FilesystemType.file,
@@ -216,8 +217,6 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     '.qt',
     '.rm',
     '.rmvb',
-    '.roq',
-    '.srt',
     '.svi',
     '.vob',
     '.webm',

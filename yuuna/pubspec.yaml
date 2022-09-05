@@ -29,7 +29,7 @@ dependencies:
   filesystem_picker:
     git:
       url: https://github.com/lrorpilla/filesystem_picker
-      ref: f882a0e5e9473a75fb8482249ac046b5b48474fc
+      ref: c0f132e44d2b5387b4babf8a09b7caf257259313
       path: package
   firebase_crashlytics: ^2.8.1
   float_column: ^1.2.1
