@@ -391,7 +391,6 @@ class AppModel with ChangeNotifier {
       [
         PlayerMediaType.instance,
         ReaderMediaType.instance,
-        ViewerMediaType.instance,
         DictionaryMediaType.instance,
       ],
     );

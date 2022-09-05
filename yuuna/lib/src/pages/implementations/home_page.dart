@@ -162,7 +162,7 @@ class _HomePageState extends BasePageState<HomePage> {
         ),
         const Space.extraSmall(),
         Text(
-          '$appVersion preview',
+          appVersion,
           style: textTheme.labelSmall!.copyWith(
             letterSpacing: 0,
             fontWeight: FontWeight.bold,
@@ -263,15 +263,13 @@ class _HomePageState extends BasePageState<HomePage> {
   }
 
   void navigateToLicensePage() async {
-    String applicationLegalese = 'A highly versatile and modular framework '
-        'enabling language-agnostic immersion learning on mobile. \n\n'
-        'Originally built for the Japanese language learning '
-        'community by Leo Rafael Orpilla. Logo by suzy and Aaron Marbella.'
-        '\n\njidoujisho is free and open source software. Visit the '
-        'repository for a more comprehensive list of other licenses '
-        'and attribution notices. Liking the application? Help out by '
+    String applicationLegalese = 'A full-featured immersion language learning suite and card creation toolkit for mobile.\n\n'
+        'Originally built for the Japanese language learning community by Leo Rafael Orpilla. Logo by suzy and Aaron Marbella.'
+        '\n\njidoujisho is free and open source software. See the '
+        'project repository for a comprehensive list of other licenses '
+        'and attribution notices. Enjoying the application? Help out by '
         'providing feedback, making a donation, reporting issues or '
-        'collaborating for further improvements on GitHub.';
+        'contributing improvements on GitHub.';
 
     Navigator.of(context).push(
       MaterialPageRoute<void>(
