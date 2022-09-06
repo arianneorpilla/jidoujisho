@@ -33,6 +33,10 @@ class ContextField extends Field {
     required List<DictionaryMetaEntry> metaEntries,
     required bool creatorJustLaunched,
   }) {
-    return '';
+    if (appModel.currentMediaItem != null) {
+      return appModel.currentMediaItem!.title;
+    } else {
+      return '';
+    }
   }
 }
