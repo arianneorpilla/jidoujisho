@@ -66,7 +66,10 @@ class AnkiMapping {
       2: MassifExampleSentencesEnhancement.key,
     },
     ReadingField.key: {0: ClearFieldEnhancement.key},
-    MeaningField.key: {0: ClearFieldEnhancement.key},
+    MeaningField.key: {
+      0: ClearFieldEnhancement.key,
+      1: TextSegmentationEnhancement.key,
+    },
     NotesField.key: {0: ClearFieldEnhancement.key},
     ImageField.key: {
       -1: BingImagesSearchEnhancement.key,

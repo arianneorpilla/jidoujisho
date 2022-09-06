@@ -88,7 +88,6 @@ class _HomePageState extends BasePageState<HomePage> {
 
   PreferredSizeWidget? buildAppBar() {
     return AppBar(
-     
       leading: buildLeading(),
       title: buildTitle(),
       actions: buildActions(),
@@ -263,7 +262,8 @@ class _HomePageState extends BasePageState<HomePage> {
   }
 
   void navigateToLicensePage() async {
-    String applicationLegalese = 'A full-featured immersion language learning suite and card creation toolkit for mobile.\n\n'
+    String applicationLegalese =
+        'A full-featured immersion language learning suite for mobile.\n\n'
         'Originally built for the Japanese language learning community by Leo Rafael Orpilla. Logo by suzy and Aaron Marbella.'
         '\n\njidoujisho is free and open source software. See the '
         'project repository for a comprehensive list of other licenses '

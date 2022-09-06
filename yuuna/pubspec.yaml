@@ -1,5 +1,5 @@
 name: yuuna
-description: A mobile language learning toolkit.
+description: A full-featured immersion language learning suite for mobile.
 publish_to: 'none'
 version: 2.0.0+1
 environment:
