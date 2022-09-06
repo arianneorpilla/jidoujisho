@@ -78,7 +78,7 @@
 <p align="center" style="margin:0">
 <img src="https://i.postimg.cc/2SkwRqhk/Screenshot-20220906-215634.png" width="24%">
 <img src="https://i.postimg.cc/YSjz0JdT/Screenshot-20220906-215643.png" width="24%">
-<img src="https://i.postimg.cc/xCzGyLDR/Screenshot-20220906-215650.png" width="24%">
+<img src="https://i.postimg.cc/5t3DWHPb/sdsd.png" width="24%">
 <img src="https://i.postimg.cc/QMPkT0PC/Screenshot-20220906-215734.png" width="24%">
 </p>
 <p align="center" style="margin:0">
@@ -88,14 +88,14 @@
 </p>
 <p align="center" style="margin:0">
   <img src="https://i.postimg.cc/Xq55rw6M/Screenshot-20220906-203650.png" width="24%">
-  <img src="https://i.postimg.cc/3xYGw4L6/Screenshot-20220906-203705.png" width="24%">
+  <img src="https://i.postimg.cc/LXqdk9TS/Screenshot-20220906-223137.png" width="24%">
   <img src="https://i.postimg.cc/02nkZQvR/Screenshot-20220906-221800.png" width="24%">
   <img src="https://i.postimg.cc/mgrbnsZc/Screenshot-20220906-222215.png" width="24%">
 </p>
 <p align="center" style="margin:0">
-  <img src="https://i.postimg.cc/cJWnrKX2/Screenshot-20220906-203507.png" width="32%">
+  <img src="https://i.postimg.cc/vBx7Lkxk/asdad.png" width="32%">
   <img src="https://i.postimg.cc/4Ns4zcrQ/Screenshot-20220906-210905.png" width="32%">
-  <img src="https://i.postimg.cc/3r42m6yP/Screenshot-20211127-191054.jpg" width="32%">
+  <img src="https://i.postimg.cc/zXDBsMqg/abccd.png" width="32%">
 </p>
 
 # ⚕️ Current state of the project
