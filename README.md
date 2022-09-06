@@ -53,7 +53,7 @@
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.23.2-beta">0.23</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.24.5-beta">0.24</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.25.12-beta">0.25</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.26.3-beta">0.26</a>
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.26.3-beta">0.26</a><br>
 </b><i>(Chisa)</i> <b>
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/1.0.0">1.0</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/1.1">1.1</a><br>
