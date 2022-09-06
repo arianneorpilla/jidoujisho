@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/lrorpilla/jidoujisho/blob/legacy/main/assets/icon/icon.png" width="120" height="120">
+  <img src="https://github.com/lrorpilla/jidoujisho/blob/chisa/main/assets/icon/icon.png" width="120" height="120">
 </p>
 
 
