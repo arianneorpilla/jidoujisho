@@ -37,7 +37,7 @@
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.7.2-beta">0.7</a> ·
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.8.1-beta">0.8</a> ·
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.9.3-beta">0.9</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.10.0-beta">0.10</a><br> 
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.10.0-beta">0.10</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.11.3-beta">0.11</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.12.4-beta">0.12</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.13.7-beta">0.13</a> ·
@@ -46,14 +46,14 @@
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.16.7-beta">0.16</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.17.4-beta">0.17</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.18.1-beta">0.18</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.19.1-beta">0.19</a><br>
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.19.1-beta">0.19</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.20.1-beta">0.20</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.21.2-beta">0.21</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.22.1-beta">0.22</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.23.2-beta">0.23</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.24.5-beta">0.24</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.25.12-beta">0.25</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.26.3-beta">0.26</a><br>
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.26.3-beta">0.26</a>
 </b><i>(Chisa)</i> <b>
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/1.0.0">1.0</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/1.1">1.1</a><br>
