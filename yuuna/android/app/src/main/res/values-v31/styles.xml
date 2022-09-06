@@ -2,12 +2,13 @@
 <resources>
     <!-- Theme applied to the Android Window while the process is starting when the OS's Dark Mode setting is off -->
     <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:colorControlActivated">#FF0000</item>
         <item name="android:forceDarkAllowed">false</item>
         <item name="android:windowFullscreen">false</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
         <item name="android:windowSplashScreenBackground">#FFFFFF</item>
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/android12splash</item>
         <item name="android:windowSplashScreenIconBackgroundColor">#FFFFFF</item>
-        <item name="android:colorControlActivated">#FF0000</item>
     </style>
     <!-- Theme applied to the Android Window as soon as the process has started.
          This theme determines the color of the Android Window while your

@@ -30,6 +30,7 @@ class _LyricsDialogPageState extends BasePageState<LyricsDialogPage> {
   String get lyricsTitleLabel => appModel.translate('lyrics_title');
   String get lyricsArtistLabel => appModel.translate('lyrics_artist');
   String get dialogSearchLabel => appModel.translate('dialog_search');
+  String get clearLabel => appModel.translate('clear');
 
   late final TextEditingController _titleController;
   late final TextEditingController _artistController;
@@ -66,6 +67,12 @@ class _LyricsDialogPageState extends BasePageState<LyricsDialogPage> {
               decoration: InputDecoration(
                 floatingLabelBehavior: FloatingLabelBehavior.always,
                 labelText: lyricsTitleLabel,
+                suffixIcon: JidoujishoIconButton(
+                  size: 18,
+                  tooltip: clearLabel,
+                  onTap: _titleController.clear,
+                  icon: Icons.clear,
+                ),
               ),
             ),
             TextField(
@@ -73,6 +80,12 @@ class _LyricsDialogPageState extends BasePageState<LyricsDialogPage> {
               decoration: InputDecoration(
                 floatingLabelBehavior: FloatingLabelBehavior.always,
                 labelText: lyricsArtistLabel,
+                suffixIcon: JidoujishoIconButton(
+                  size: 18,
+                  tooltip: clearLabel,
+                  onTap: _artistController.clear,
+                  icon: Icons.clear,
+                ),
               ),
             ),
             const SizedBox(height: 10),

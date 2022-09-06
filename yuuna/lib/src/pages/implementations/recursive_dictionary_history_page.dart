@@ -57,7 +57,7 @@ class _RecursiveDictionaryHistoryPageState
       children: [
         Expanded(
           child: JidoujishoMarquee(
-            text: widget.result.searchTerm,
+            text: widget.result.searchTerm.replaceAll('\n', ' '),
             style: TextStyle(
               fontSize: textTheme.titleMedium?.fontSize,
               fontWeight: FontWeight.bold,

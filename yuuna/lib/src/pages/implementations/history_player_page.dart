@@ -74,20 +74,14 @@ class HistoryPlayerPageState<T extends HistoryPlayerPage>
       thumbVisibility: true,
       thickness: 3,
       controller: mediaType.scrollController,
-      child: ListView(
+      child: ListView.builder(
+        padding: const EdgeInsets.only(top: 48),
+        controller: mediaType.scrollController,
         physics: const AlwaysScrollableScrollPhysics(
           parent: BouncingScrollPhysics(),
         ),
-        controller: mediaType.scrollController,
-        children: [
-          const SizedBox(height: 48),
-          ListView.builder(
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            itemCount: items.length,
-            itemBuilder: (context, index) => buildMediaItem(items[index]),
-          ),
-        ],
+        itemCount: items.length,
+        itemBuilder: (context, index) => buildMediaItem(items[index]),
       ),
     );
   }

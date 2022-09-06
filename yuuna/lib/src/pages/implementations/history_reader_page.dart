@@ -61,24 +61,18 @@ class HistoryReaderPageState<T extends BaseHistoryPage>
       thumbVisibility: true,
       thickness: 3,
       controller: mediaType.scrollController,
-      child: ListView(
+      child: GridView.builder(
+        padding: const EdgeInsets.only(top: 48),
+        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: 150,
+          childAspectRatio: 176 / 250,
+        ),
         physics: const AlwaysScrollableScrollPhysics(
           parent: BouncingScrollPhysics(),
         ),
         controller: mediaType.scrollController,
-        children: [
-          const SizedBox(height: 48),
-          GridView.builder(
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 150,
-              childAspectRatio: 176 / 250,
-            ),
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            itemCount: items.length,
-            itemBuilder: (context, index) => buildMediaItem(items[index]),
-          ),
-        ],
+        itemCount: items.length,
+        itemBuilder: (context, index) => buildMediaItem(items[index]),
       ),
     );
   }
