@@ -1,0 +1,308 @@
+import 'dart:io';
+import 'dart:isolate';
+
+import 'package:isar/isar.dart';
+import 'package:yuuna/dictionary.dart';
+import 'package:yuuna/models.dart';
+
+/// Performed in another isolate with compute. This is a top-level utility
+/// function that makes use of Isar allowing instances to be opened through
+/// multiple isolates. The function for preparing entries and tags according to
+/// the [DictionaryFormat] is also done in the same isolate, to remove having
+/// to communicate potentially hundreds of thousands of entries to another
+/// newly opened isolate.
+Future<void> depositDictionaryDataHelper(PrepareDictionaryParams params) async {
+  List<DictionaryTag> dictionaryTags =
+      await params.dictionaryFormat.prepareTags(params);
+  List<DictionaryMetaEntry> dictionaryMetaEntries =
+      await params.dictionaryFormat.prepareMetaEntries(params);
+  List<DictionaryEntry> dictionaryEntries =
+      await params.dictionaryFormat.prepareEntries(params);
+
+  final Isar database = await Isar.open(
+    directory: params.isarDirectoryPath,
+    schemas: globalSchemas,
+  );
+
+  database.writeTxnSync((database) {
+    database.dictionaryTags
+        .where()
+        .dictionaryNameEqualTo(params.dictionaryName)
+        .deleteAllSync();
+    database.dictionaryMetaEntrys
+        .where()
+        .dictionaryNameEqualTo(params.dictionaryName)
+        .deleteAllSync();
+    database.dictionaryEntrys
+        .where()
+        .dictionaryNameEqualTo(params.dictionaryName)
+        .deleteAllSync();
+
+    database.dictionaryTags.putAllSync(dictionaryTags);
+    database.dictionaryMetaEntrys.putAllSync(dictionaryMetaEntries);
+    database.dictionaryEntrys.putAllSync(dictionaryEntries);
+  });
+}
+
+/// Delete a selected dictionary from the dictionary database.
+Future<void> deleteDictionaryDataHelper(DeleteDictionaryParams params) async {
+  final Isar database = await Isar.open(
+    directory: params.isarDirectoryPath,
+    schemas: globalSchemas,
+  );
+
+  database.writeTxnSync((database) {
+    database.dictionarys.deleteByDictionaryNameSync(params.dictionaryName);
+    database.dictionaryTags
+        .where()
+        .dictionaryNameEqualTo(params.dictionaryName)
+        .deleteAllSync();
+    database.dictionaryMetaEntrys
+        .where()
+        .dictionaryNameEqualTo(params.dictionaryName)
+        .deleteAllSync();
+    database.dictionaryEntrys
+        .where()
+        .dictionaryNameEqualTo(params.dictionaryName)
+        .deleteAllSync();
+
+    database.dictionaryResults.clearSync();
+  });
+}
+
+/// Add a [DictionaryResult] to the dictionary history. If the maximum value
+/// is exceed, the dictionary history is cut down to the newest values.
+
+Future<void> addToDictionaryHistoryHelper(
+  UpdateDictionaryHistoryParams params,
+) async {
+  final Isar database = await Isar.open(
+    directory: params.isarDirectoryPath,
+    schemas: globalSchemas,
+  );
+
+  database.writeTxnSync((isar) {
+    isar.dictionaryResults.deleteBySearchTermSync(params.result.searchTerm);
+    isar.dictionaryResults.putSync(params.result);
+
+    int countInSameHistory = isar.dictionaryResults.countSync();
+
+    if (params.maximumDictionaryHistoryItems < countInSameHistory) {
+      int surplus = countInSameHistory - params.maximumDictionaryHistoryItems;
+      isar.dictionaryResults.where().limit(surplus).build().deleteAllSync();
+    }
+  });
+}
+
+/// For isolate communication purposes. See a dictionary format's directory
+/// preparation method.
+class PrepareDirectoryParams {
+  /// Prepare parameters for a dictionary format's directory preparation method.
+  PrepareDirectoryParams({
+    required this.file,
+    required this.workingDirectory,
+    required this.sendPort,
+    required this.localisation,
+  });
+
+  /// A file from which the contents must be put in working directory. This
+  /// should be non-null for dictionary formats that do not require a file for
+  /// import.
+  final File? file;
+
+  /// A working directory to be used in isolation and where data is to be
+  /// handled in later steps.
+  final Directory workingDirectory;
+
+  /// For communication with a [ReceivePort] for isolate updates.
+  final SendPort sendPort;
+
+  /// Used to send localised message count updates from a separate isolate.
+  final DictionaryImportLocalisation localisation;
+}
+
+/// For isolate communication purposes. See a dictionary format's name, entries
+/// and metadata preparation methods. Some parameters may be null at certain
+/// stages of the import.
+class PrepareDictionaryParams {
+  /// Prepare parameters for a dictionary format's name, entries and metadata
+  /// preparation methods.
+  PrepareDictionaryParams({
+    required this.dictionaryName,
+    required this.dictionaryFormat,
+    required this.workingDirectory,
+    required this.sendPort,
+    required this.isarDirectoryPath,
+    required this.localisation,
+  });
+
+  /// The dictionary name obtained in the previous stage, used to indicate
+  /// that entries are from a certain dictionary.
+  final String dictionaryName;
+
+  /// The dictionary format to be used for entry processing.
+  final DictionaryFormat dictionaryFormat;
+
+  /// A working directory from which to extract dictionary data from.
+  final Directory workingDirectory;
+
+  /// For communication with the [ReceivePort] for isolate updates.
+  final SendPort sendPort;
+
+  /// Used to pass the path to the database to open from the other isolate.
+  final String isarDirectoryPath;
+
+  /// Used to send localised message count updates from a separate isolate.
+  final DictionaryImportLocalisation localisation;
+}
+
+/// For isolate communication purposes. Used for dictionary deletion.
+class DeleteDictionaryParams {
+  /// Prepare parameters needed for deleting a dictionary from a separate
+  /// isolate.
+  DeleteDictionaryParams({
+    required this.dictionaryName,
+    required this.isarDirectoryPath,
+  });
+
+  /// The dictionary name obtained in the previous stage, used to indicate
+  /// that entries are from a certain dictionary.
+  final String dictionaryName;
+
+  /// Used to pass the path to the database to open from the other isolate.
+  final String isarDirectoryPath;
+}
+
+/// For isolate communication purposes. Used for dictionary deletion.
+class UpdateDictionaryHistoryParams {
+  /// Prepare parameters needed to update dictionary history.
+  UpdateDictionaryHistoryParams({
+    required this.result,
+    required this.maximumDictionaryHistoryItems,
+    required this.isarDirectoryPath,
+  });
+
+  /// The result of a dictionary search to be added to history.
+  final DictionaryResult result;
+
+  /// Maximum number of history items.
+  final int maximumDictionaryHistoryItems;
+
+  /// Used to pass the path to the database to open from the other isolate.
+  final String isarDirectoryPath;
+}
+
+/// For isolate communication purposes. Used for dictionary search.
+class DictionarySearchParams {
+  /// Prepare parameters needed for searching the dictioanry database from a
+  /// separate isolate.
+  DictionarySearchParams({
+    required this.searchTerm,
+    required this.maximumDictionaryEntrySearchMatch,
+    required this.maximumDictionaryTermsInResult,
+    required this.fallbackTerm,
+    required this.isarDirectoryPath,
+  });
+
+  /// Primary search term, likely taken from context.
+  final String searchTerm;
+
+  /// Fallback search term, likely sanitised with deinflection.
+  final String fallbackTerm;
+
+  /// Used to pass the path to the database to open from the other isolate.
+  final String isarDirectoryPath;
+
+  /// Maximum number of dictionary entries that can be returned from a database
+  /// dictionary search.
+  final int maximumDictionaryEntrySearchMatch;
+
+  /// Maximum number of headwords in a returned dictionary result for
+  /// performance purposes.
+  final int maximumDictionaryTermsInResult;
+}
+
+/// Bundles relevant localisation information for use in dictionary imports.
+class DictionaryImportLocalisation {
+  /// Manually define messages for localisation.
+  const DictionaryImportLocalisation({
+    required this.importMessageStart,
+    required this.importMessageClean,
+    required this.importMessageExtraction,
+    required this.importMessageName,
+    required this.importMessageEntries,
+    required this.importMessageEntryCount,
+    required this.importMessageMetaEntryCount,
+    required this.importMessageTagCount,
+    required this.importMessageMetadata,
+    required this.importMessageDatabase,
+    required this.importMessageError,
+    required this.importMessageFailed,
+    required this.importMessageComplete,
+  });
+
+  /// Return an entry count update message with a proper variable.
+  String importMessageEntryCountWithVar(int count) {
+    return importMessageEntryCount.replaceAll('%count%', '$count');
+  }
+
+  /// Return an entry count update message with a proper variable.
+  String importMessageTagCountWithVar(int count) {
+    return importMessageTagCount.replaceAll('%count%', '$count');
+  }
+
+  /// Return an entry count update message with a proper variable.
+  String importMessageMetaEntryCountWithVar(int count) {
+    return importMessageMetaEntryCount.replaceAll('%count%', '$count');
+  }
+
+  /// Return a message informing the dictionary name with a proper variable.
+  String importMessageNameWithVar(String name) {
+    return importMessageName.replaceAll('%name%', name);
+  }
+
+  /// Return an error message with a proper variable.
+  String importMessageErrorWithVar(String error) {
+    return importMessageError.replaceAll('%error%', error);
+  }
+
+  /// For message to show when initialising dictionary import.
+  final String importMessageStart;
+
+  /// For message to show when cleaning up the working directory.
+  final String importMessageClean;
+
+  /// For message to show when preparing the working directory.
+  final String importMessageExtraction;
+
+  /// For message to show when the dictionary name has been obtained.
+  final String importMessageName;
+
+  /// For message to show when current progress is processing entries.
+  final String importMessageEntries;
+
+  /// For message to show when updating entry count while processing entries.
+  final String importMessageEntryCount;
+
+  /// For message to show when updating entry count while processing meta
+  /// entries.
+  final String importMessageMetaEntryCount;
+
+  /// For message to show when updating tag count while processing tags.
+  final String importMessageTagCount;
+
+  /// For message to show when current progress is processing metadata.
+  final String importMessageMetadata;
+
+  /// For message to show when current progress is entry import to database.
+  final String importMessageDatabase;
+
+  /// For error reporting of dictionary import.
+  final String importMessageError;
+
+  /// For marking failure of dictionary import.
+  final String importMessageFailed;
+
+  /// For marking completion of dictionary import.
+  final String importMessageComplete;
+}
