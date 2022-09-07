@@ -100,7 +100,8 @@ class _ReaderTtuSourcePageState
     return InAppWebView(
       initialUrlRequest: URLRequest(
         url: Uri.parse(
-          widget.item?.mediaIdentifier ?? 'http://localhost:${server.boundPort}/',
+          widget.item?.mediaIdentifier ??
+              'http://localhost:${server.boundPort}/',
         ),
       ),
       initialOptions: getInitialOptions(),
@@ -115,7 +116,7 @@ class _ReaderTtuSourcePageState
         );
       },
       onLoadStop: (controller, uri) async {
-         await mediaSource.setPreference(key: 'firstTime', value: false);
+        await mediaSource.setPreference(key: 'firstTime', value: false);
         await controller.evaluateJavascript(source: javascriptToExecute);
       },
       onTitleChanged: (controller, title) async {

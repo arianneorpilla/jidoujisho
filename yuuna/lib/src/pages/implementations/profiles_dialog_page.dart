@@ -51,6 +51,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
       appModel.translate('error_standard_profile_name');
   String get errorStandardProfileNameContent =>
       appModel.translate('error_standard_profile_name_content');
+  String get wrapImageAudioLabel => appModel.translate('wrap_image_audio');
 
   final ScrollController _scrollController = ScrollController();
   int _selectedOrder = 0;
@@ -103,6 +104,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
           order: 0,
           enhancements: AnkiMapping.defaultEnhancements,
           actions: AnkiMapping.defaultActions,
+          exportMediaTags: false,
         );
 
         await showMappingEditDialog(newMapping);
@@ -395,10 +397,37 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
                   mappingClone: mappingClone,
                 ),
               ),
+              const Space.normal(),
+              buildWrapImageAudio(
+                mappingClone: mappingClone,
+              ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget buildWrapImageAudio({required AnkiMapping mappingClone}) {
+    ValueNotifier<bool> _notifier =
+        ValueNotifier<bool>(mappingClone.exportMediaTags ?? false);
+
+    return Row(
+      children: [
+        Expanded(child: Text(wrapImageAudioLabel)),
+        ValueListenableBuilder<bool>(
+          valueListenable: _notifier,
+          builder: (_, value, __) {
+            return Switch(
+              value: value,
+              onChanged: (value) {
+                mappingClone.exportMediaTags = value;
+                _notifier.value = value;
+              },
+            );
+          },
+        )
+      ],
     );
   }
 

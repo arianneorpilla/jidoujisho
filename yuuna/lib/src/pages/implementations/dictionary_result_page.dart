@@ -80,65 +80,70 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
 
     final ScrollController _scrollController = ScrollController();
 
-    return RawScrollbar(
-      thumbVisibility: true,
-      thickness: 3,
-      controller: _scrollController,
-      child: Padding(
-        padding: Spacing.of(context).insets.onlyRight.extraSmall,
-        child: ListView.builder(
-          padding: EdgeInsets.zero,
-          cacheExtent: 10000,
-          controller: _scrollController,
-          physics: const AlwaysScrollableScrollPhysics(
-            parent: BouncingScrollPhysics(),
-          ),
-          itemCount: widget.result.terms.length + 1,
-          itemBuilder: (context, index) {
-            if (index == 0) {
-              return widget.spaceBeforeFirstResult
-                  ? const Space.normal()
-                  : const SizedBox.shrink();
-            }
-
-            DictionaryTerm dictionaryTerm = widget.result.terms[index - 1];
-
-            if (metaEntriesCache[index - 1] == null) {
-              final Map<String, ExpandableController> controllers = {};
-              final Map<String, bool> hiddens = {};
-
-              for (String dictionaryName in dictionaryMap!.keys.toList()) {
-                controllers[dictionaryName] = ExpandableController(
-                  initialExpanded: !dictionaryMap![dictionaryName]!.collapsed,
-                );
-                hiddens[dictionaryName] =
-                    dictionaryMap![dictionaryName]!.hidden;
+    return MediaQuery(
+      data: MediaQuery.of(context).removePadding(
+        removeTop: true,
+      ),
+      child: RawScrollbar(
+        thumbVisibility: true,
+        thickness: 3,
+        controller: _scrollController,
+        child: Padding(
+          padding: Spacing.of(context).insets.onlyRight.extraSmall,
+          child: ListView.builder(
+            padding: EdgeInsets.zero,
+            cacheExtent: 10000,
+            controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
+            itemCount: widget.result.terms.length + 1,
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return widget.spaceBeforeFirstResult
+                    ? const Space.normal()
+                    : const SizedBox.shrink();
               }
 
-              List<DictionaryMetaEntry> metaEntries =
-                  appModel.getMetaEntriesFromTerm(dictionaryTerm.term);
-              metaEntries.sort(
-                (a, b) => dictionaryMap![a.dictionaryName]!.order.compareTo(
-                      dictionaryMap![b.dictionaryName]!.order,
-                    ),
+              DictionaryTerm dictionaryTerm = widget.result.terms[index - 1];
+
+              if (metaEntriesCache[index - 1] == null) {
+                final Map<String, ExpandableController> controllers = {};
+                final Map<String, bool> hiddens = {};
+
+                for (String dictionaryName in dictionaryMap!.keys.toList()) {
+                  controllers[dictionaryName] = ExpandableController(
+                    initialExpanded: !dictionaryMap![dictionaryName]!.collapsed,
+                  );
+                  hiddens[dictionaryName] =
+                      dictionaryMap![dictionaryName]!.hidden;
+                }
+
+                List<DictionaryMetaEntry> metaEntries =
+                    appModel.getMetaEntriesFromTerm(dictionaryTerm.term);
+                metaEntries.sort(
+                  (a, b) => dictionaryMap![a.dictionaryName]!.order.compareTo(
+                        dictionaryMap![b.dictionaryName]!.order,
+                      ),
+                );
+
+                metaEntriesCache[index - 1] ??= metaEntries;
+                expandedControllers[index - 1] ??= controllers;
+                dictionaryHiddens[index - 1] ??= hiddens;
+              }
+
+              return DictionaryTermPage(
+                entryOpacity: widget.entryOpacity,
+                dictionaryMap: dictionaryMap!,
+                dictionaryTerm: dictionaryTerm,
+                onSearch: widget.onSearch,
+                onStash: widget.onStash,
+                dictionaryMetaEntries: metaEntriesCache[index - 1]!,
+                expandableControllers: expandedControllers[index - 1]!,
+                dictionaryHiddens: dictionaryHiddens[index - 1]!,
               );
-
-              metaEntriesCache[index - 1] ??= metaEntries;
-              expandedControllers[index - 1] ??= controllers;
-              dictionaryHiddens[index - 1] ??= hiddens;
-            }
-
-            return DictionaryTermPage(
-              entryOpacity: widget.entryOpacity,
-              dictionaryMap: dictionaryMap!,
-              dictionaryTerm: dictionaryTerm,
-              onSearch: widget.onSearch,
-              onStash: widget.onStash,
-              dictionaryMetaEntries: metaEntriesCache[index - 1]!,
-              expandableControllers: expandedControllers[index - 1]!,
-              dictionaryHiddens: dictionaryHiddens[index - 1]!,
-            );
-          },
+            },
+          ),
         ),
       ),
     );

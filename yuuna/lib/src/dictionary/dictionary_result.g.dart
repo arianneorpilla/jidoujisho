@@ -6,7 +6,7 @@ part of 'dictionary_result.dart';
 // IsarCollectionGenerator
 // **************************************************************************
 
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, unused_local_variable
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, unused_local_variable, no_leading_underscores_for_local_identifiers
 
 extension GetDictionaryResultCollection on Isar {
   IsarCollection<DictionaryResult> get dictionaryResults => getCollection();
@@ -15,7 +15,7 @@ extension GetDictionaryResultCollection on Isar {
 const DictionaryResultSchema = CollectionSchema(
   name: 'DictionaryResult',
   schema:
-      '{"name":"DictionaryResult","idName":"id","properties":[{"name":"scrollIndex","type":"Long"},{"name":"searchTerm","type":"String"},{"name":"terms","type":"String"}],"indexes":[{"name":"searchTerm","unique":true,"properties":[{"name":"searchTerm","type":"Hash","caseSensitive":true}]}],"links":[]}',
+      '{"name":"DictionaryResult","idName":"id","properties":[{"name":"scrollIndex","type":"Long"},{"name":"searchTerm","type":"String"},{"name":"terms","type":"String"}],"indexes":[{"name":"searchTerm","unique":true,"replace":false,"properties":[{"name":"searchTerm","type":"Hash","caseSensitive":true}]}],"links":[]}',
   idName: 'id',
   propertyIds: {'scrollIndex': 0, 'searchTerm': 1, 'terms': 2},
   listProperties: {},
@@ -28,6 +28,7 @@ const DictionaryResultSchema = CollectionSchema(
   linkIds: {},
   backlinkLinkNames: {},
   getId: _dictionaryResultGetId,
+  setId: _dictionaryResultSetId,
   getLinks: _dictionaryResultGetLinks,
   attachLinks: _dictionaryResultAttachLinks,
   serializeNative: _dictionaryResultSerializeNative,
@@ -36,7 +37,7 @@ const DictionaryResultSchema = CollectionSchema(
   serializeWeb: _dictionaryResultSerializeWeb,
   deserializeWeb: _dictionaryResultDeserializeWeb,
   deserializePropWeb: _dictionaryResultDeserializePropWeb,
-  version: 3,
+  version: 4,
 );
 
 int? _dictionaryResultGetId(DictionaryResult object) {
@@ -47,6 +48,10 @@ int? _dictionaryResultGetId(DictionaryResult object) {
   }
 }
 
+void _dictionaryResultSetId(DictionaryResult object, int id) {
+  object.id = id;
+}
+
 List<IsarLinkBase> _dictionaryResultGetLinks(DictionaryResult object) {
   return [];
 }
@@ -55,7 +60,7 @@ const _dictionaryResultDictionaryTermsConverter = DictionaryTermsConverter();
 
 void _dictionaryResultSerializeNative(
     IsarCollection<DictionaryResult> collection,
-    IsarRawObject rawObj,
+    IsarCObject cObj,
     DictionaryResult object,
     int staticSize,
     List<int> offsets,
@@ -71,9 +76,9 @@ void _dictionaryResultSerializeNative(
   dynamicSize += (_terms.length) as int;
   final size = staticSize + dynamicSize;
 
-  rawObj.buffer = alloc(size);
-  rawObj.buffer_length = size;
-  final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
+  cObj.buffer = alloc(size);
+  cObj.buffer_length = size;
+  final buffer = IsarNative.bufAsBytes(cObj.buffer, size);
   final writer = IsarBinaryWriter(buffer, staticSize);
   writer.writeLong(offsets[0], _scrollIndex);
   writer.writeBytes(offsets[1], _searchTerm);

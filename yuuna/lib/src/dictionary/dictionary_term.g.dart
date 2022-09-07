@@ -6,7 +6,7 @@ part of 'dictionary_term.dart';
 // IsarCollectionGenerator
 // **************************************************************************
 
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, unused_local_variable
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, unused_local_variable, no_leading_underscores_for_local_identifiers
 
 extension GetDictionaryTermCollection on Isar {
   IsarCollection<DictionaryTerm> get dictionaryTerms => getCollection();
@@ -33,7 +33,7 @@ const DictionaryTermSchema = CollectionSchema(
   serializeWeb: _dictionaryTermSerializeWeb,
   deserializeWeb: _dictionaryTermDeserializeWeb,
   deserializePropWeb: _dictionaryTermDeserializePropWeb,
-  version: 3,
+  version: 4,
 );
 
 int? _dictionaryTermGetId(DictionaryTerm object) {
@@ -56,7 +56,7 @@ const _dictionaryTermDictionaryEntriesConverter = DictionaryEntriesConverter();
 
 void _dictionaryTermSerializeNative(
     IsarCollection<DictionaryTerm> collection,
-    IsarRawObject rawObj,
+    IsarCObject cObj,
     DictionaryTerm object,
     int staticSize,
     List<int> offsets,
@@ -76,9 +76,9 @@ void _dictionaryTermSerializeNative(
   dynamicSize += (_term.length) as int;
   final size = staticSize + dynamicSize;
 
-  rawObj.buffer = alloc(size);
-  rawObj.buffer_length = size;
-  final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
+  cObj.buffer = alloc(size);
+  cObj.buffer_length = size;
+  final buffer = IsarNative.bufAsBytes(cObj.buffer, size);
   final writer = IsarBinaryWriter(buffer, staticSize);
   writer.writeBytes(offsets[0], _entries);
   writer.writeLong(offsets[1], _hashCode);

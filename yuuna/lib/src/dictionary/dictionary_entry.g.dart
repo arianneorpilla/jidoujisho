@@ -6,7 +6,7 @@ part of 'dictionary_entry.dart';
 // IsarCollectionGenerator
 // **************************************************************************
 
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, unused_local_variable
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, unused_local_variable, no_leading_underscores_for_local_identifiers
 
 extension GetDictionaryEntryCollection on Isar {
   IsarCollection<DictionaryEntry> get dictionaryEntrys => getCollection();
@@ -15,7 +15,7 @@ extension GetDictionaryEntryCollection on Isar {
 const DictionaryEntrySchema = CollectionSchema(
   name: 'DictionaryEntry',
   schema:
-      '{"name":"DictionaryEntry","idName":"id","properties":[{"name":"dictionaryName","type":"String"},{"name":"extra","type":"String"},{"name":"hashCode","type":"Long"},{"name":"meaningTags","type":"StringList"},{"name":"meanings","type":"StringList"},{"name":"popularity","type":"Double"},{"name":"reading","type":"String"},{"name":"readingLength","type":"Long"},{"name":"sequence","type":"Long"},{"name":"term","type":"String"},{"name":"termLength","type":"Long"},{"name":"termTags","type":"StringList"}],"indexes":[{"name":"dictionaryName","unique":false,"properties":[{"name":"dictionaryName","type":"Hash","caseSensitive":true}]},{"name":"popularity","unique":false,"properties":[{"name":"popularity","type":"Value","caseSensitive":false}]},{"name":"reading","unique":false,"properties":[{"name":"reading","type":"Value","caseSensitive":true}]},{"name":"sequence","unique":false,"properties":[{"name":"sequence","type":"Value","caseSensitive":false}]},{"name":"term","unique":false,"properties":[{"name":"term","type":"Value","caseSensitive":true}]}],"links":[]}',
+      '{"name":"DictionaryEntry","idName":"id","properties":[{"name":"dictionaryName","type":"String"},{"name":"extra","type":"String"},{"name":"hashCode","type":"Long"},{"name":"meaningTags","type":"StringList"},{"name":"meanings","type":"StringList"},{"name":"popularity","type":"Double"},{"name":"reading","type":"String"},{"name":"readingLength","type":"Long"},{"name":"sequence","type":"Long"},{"name":"term","type":"String"},{"name":"termLength","type":"Long"},{"name":"termTags","type":"StringList"}],"indexes":[{"name":"dictionaryName","unique":false,"replace":false,"properties":[{"name":"dictionaryName","type":"Hash","caseSensitive":true}]},{"name":"popularity","unique":false,"replace":false,"properties":[{"name":"popularity","type":"Value","caseSensitive":false}]},{"name":"reading","unique":false,"replace":false,"properties":[{"name":"reading","type":"Value","caseSensitive":true}]},{"name":"sequence","unique":false,"replace":false,"properties":[{"name":"sequence","type":"Value","caseSensitive":false}]},{"name":"term","unique":false,"replace":false,"properties":[{"name":"term","type":"Value","caseSensitive":true}]}],"links":[]}',
   idName: 'id',
   propertyIds: {
     'dictionaryName': 0,
@@ -68,7 +68,7 @@ const DictionaryEntrySchema = CollectionSchema(
   serializeWeb: _dictionaryEntrySerializeWeb,
   deserializeWeb: _dictionaryEntryDeserializeWeb,
   deserializePropWeb: _dictionaryEntryDeserializePropWeb,
-  version: 3,
+  version: 4,
 );
 
 int? _dictionaryEntryGetId(DictionaryEntry object) {
@@ -89,7 +89,7 @@ List<IsarLinkBase> _dictionaryEntryGetLinks(DictionaryEntry object) {
 
 void _dictionaryEntrySerializeNative(
     IsarCollection<DictionaryEntry> collection,
-    IsarRawObject rawObj,
+    IsarCObject cObj,
     DictionaryEntry object,
     int staticSize,
     List<int> offsets,
@@ -149,9 +149,9 @@ void _dictionaryEntrySerializeNative(
   final _termTags = bytesList11;
   final size = staticSize + dynamicSize;
 
-  rawObj.buffer = alloc(size);
-  rawObj.buffer_length = size;
-  final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
+  cObj.buffer = alloc(size);
+  cObj.buffer_length = size;
+  final buffer = IsarNative.bufAsBytes(cObj.buffer, size);
   final writer = IsarBinaryWriter(buffer, staticSize);
   writer.writeBytes(offsets[0], _dictionaryName);
   writer.writeBytes(offsets[1], _extra);

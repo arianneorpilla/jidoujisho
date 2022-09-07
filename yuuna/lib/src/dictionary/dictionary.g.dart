@@ -6,7 +6,7 @@ part of 'dictionary.dart';
 // IsarCollectionGenerator
 // **************************************************************************
 
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, unused_local_variable
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, unused_local_variable, no_leading_underscores_for_local_identifiers
 
 extension GetDictionaryCollection on Isar {
   IsarCollection<Dictionary> get dictionarys => getCollection();
@@ -15,7 +15,7 @@ extension GetDictionaryCollection on Isar {
 const DictionarySchema = CollectionSchema(
   name: 'Dictionary',
   schema:
-      '{"name":"Dictionary","idName":"id","properties":[{"name":"collapsed","type":"Bool"},{"name":"dictionaryName","type":"String"},{"name":"formatName","type":"String"},{"name":"hidden","type":"Bool"},{"name":"metadata","type":"String"},{"name":"order","type":"Long"}],"indexes":[{"name":"dictionaryName","unique":true,"properties":[{"name":"dictionaryName","type":"Hash","caseSensitive":true}]},{"name":"order","unique":true,"properties":[{"name":"order","type":"Value","caseSensitive":false}]}],"links":[]}',
+      '{"name":"Dictionary","idName":"id","properties":[{"name":"collapsed","type":"Bool"},{"name":"dictionaryName","type":"String"},{"name":"formatName","type":"String"},{"name":"hidden","type":"Bool"},{"name":"metadata","type":"String"},{"name":"order","type":"Long"}],"indexes":[{"name":"dictionaryName","unique":true,"replace":false,"properties":[{"name":"dictionaryName","type":"Hash","caseSensitive":true}]},{"name":"order","unique":true,"replace":false,"properties":[{"name":"order","type":"Value","caseSensitive":false}]}],"links":[]}',
   idName: 'id',
   propertyIds: {
     'collapsed': 0,
@@ -47,7 +47,7 @@ const DictionarySchema = CollectionSchema(
   serializeWeb: _dictionarySerializeWeb,
   deserializeWeb: _dictionaryDeserializeWeb,
   deserializePropWeb: _dictionaryDeserializePropWeb,
-  version: 3,
+  version: 4,
 );
 
 int? _dictionaryGetId(Dictionary object) {
@@ -70,7 +70,7 @@ const _dictionaryImmutableStringMapConverter = ImmutableStringMapConverter();
 
 void _dictionarySerializeNative(
     IsarCollection<Dictionary> collection,
-    IsarRawObject rawObj,
+    IsarCObject cObj,
     Dictionary object,
     int staticSize,
     List<int> offsets,
@@ -93,9 +93,9 @@ void _dictionarySerializeNative(
   final _order = value5;
   final size = staticSize + dynamicSize;
 
-  rawObj.buffer = alloc(size);
-  rawObj.buffer_length = size;
-  final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
+  cObj.buffer = alloc(size);
+  cObj.buffer_length = size;
+  final buffer = IsarNative.bufAsBytes(cObj.buffer, size);
   final writer = IsarBinaryWriter(buffer, staticSize);
   writer.writeBool(offsets[0], _collapsed);
   writer.writeBytes(offsets[1], _dictionaryName);

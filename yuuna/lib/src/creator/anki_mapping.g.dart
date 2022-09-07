@@ -6,7 +6,7 @@ part of 'anki_mapping.dart';
 // IsarCollectionGenerator
 // **************************************************************************
 
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, unused_local_variable
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, unused_local_variable, no_leading_underscores_for_local_identifiers
 
 extension GetAnkiMappingCollection on Isar {
   IsarCollection<AnkiMapping> get ankiMappings => getCollection();
@@ -15,7 +15,7 @@ extension GetAnkiMappingCollection on Isar {
 const AnkiMappingSchema = CollectionSchema(
   name: 'AnkiMapping',
   schema:
-      '{"name":"AnkiMapping","idName":"id","properties":[{"name":"actions","type":"String"},{"name":"creatorCollapsedFieldKeys","type":"StringList"},{"name":"creatorFieldKeys","type":"StringList"},{"name":"enhancements","type":"String"},{"name":"exportFieldKeys","type":"StringList"},{"name":"label","type":"String"},{"name":"model","type":"String"},{"name":"order","type":"Long"},{"name":"tags","type":"StringList"}],"indexes":[{"name":"label","unique":true,"properties":[{"name":"label","type":"Hash","caseSensitive":true}]},{"name":"order","unique":true,"properties":[{"name":"order","type":"Value","caseSensitive":false}]}],"links":[]}',
+      '{"name":"AnkiMapping","idName":"id","properties":[{"name":"actions","type":"String"},{"name":"creatorCollapsedFieldKeys","type":"StringList"},{"name":"creatorFieldKeys","type":"StringList"},{"name":"enhancements","type":"String"},{"name":"exportFieldKeys","type":"StringList"},{"name":"exportMediaTags","type":"Bool"},{"name":"label","type":"String"},{"name":"model","type":"String"},{"name":"order","type":"Long"},{"name":"tags","type":"StringList"}],"indexes":[{"name":"label","unique":true,"replace":false,"properties":[{"name":"label","type":"Hash","caseSensitive":true}]},{"name":"order","unique":true,"replace":false,"properties":[{"name":"order","type":"Value","caseSensitive":false}]}],"links":[]}',
   idName: 'id',
   propertyIds: {
     'actions': 0,
@@ -23,10 +23,11 @@ const AnkiMappingSchema = CollectionSchema(
     'creatorFieldKeys': 2,
     'enhancements': 3,
     'exportFieldKeys': 4,
-    'label': 5,
-    'model': 6,
-    'order': 7,
-    'tags': 8
+    'exportMediaTags': 5,
+    'label': 6,
+    'model': 7,
+    'order': 8,
+    'tags': 9
   },
   listProperties: {
     'creatorCollapsedFieldKeys',
@@ -55,7 +56,7 @@ const AnkiMappingSchema = CollectionSchema(
   serializeWeb: _ankiMappingSerializeWeb,
   deserializeWeb: _ankiMappingDeserializeWeb,
   deserializePropWeb: _ankiMappingDeserializePropWeb,
-  version: 3,
+  version: 4,
 );
 
 int? _ankiMappingGetId(AnkiMapping object) {
@@ -79,7 +80,7 @@ const _ankiMappingEnhancementsConverter = EnhancementsConverter();
 
 void _ankiMappingSerializeNative(
     IsarCollection<AnkiMapping> collection,
-    IsarRawObject rawObj,
+    IsarCObject cObj,
     AnkiMapping object,
     int staticSize,
     List<int> offsets,
@@ -122,38 +123,41 @@ void _ankiMappingSerializeNative(
     }
   }
   final _exportFieldKeys = bytesList4;
-  final value5 = object.label;
-  final _label = IsarBinaryWriter.utf8Encoder.convert(value5);
+  final value5 = object.exportMediaTags;
+  final _exportMediaTags = value5;
+  final value6 = object.label;
+  final _label = IsarBinaryWriter.utf8Encoder.convert(value6);
   dynamicSize += (_label.length) as int;
-  final value6 = object.model;
-  final _model = IsarBinaryWriter.utf8Encoder.convert(value6);
+  final value7 = object.model;
+  final _model = IsarBinaryWriter.utf8Encoder.convert(value7);
   dynamicSize += (_model.length) as int;
-  final value7 = object.order;
-  final _order = value7;
-  final value8 = object.tags;
-  dynamicSize += (value8.length) * 8;
-  final bytesList8 = <IsarUint8List>[];
-  for (var str in value8) {
+  final value8 = object.order;
+  final _order = value8;
+  final value9 = object.tags;
+  dynamicSize += (value9.length) * 8;
+  final bytesList9 = <IsarUint8List>[];
+  for (var str in value9) {
     final bytes = IsarBinaryWriter.utf8Encoder.convert(str);
-    bytesList8.add(bytes);
+    bytesList9.add(bytes);
     dynamicSize += bytes.length as int;
   }
-  final _tags = bytesList8;
+  final _tags = bytesList9;
   final size = staticSize + dynamicSize;
 
-  rawObj.buffer = alloc(size);
-  rawObj.buffer_length = size;
-  final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
+  cObj.buffer = alloc(size);
+  cObj.buffer_length = size;
+  final buffer = IsarNative.bufAsBytes(cObj.buffer, size);
   final writer = IsarBinaryWriter(buffer, staticSize);
   writer.writeBytes(offsets[0], _actions);
   writer.writeStringList(offsets[1], _creatorCollapsedFieldKeys);
   writer.writeStringList(offsets[2], _creatorFieldKeys);
   writer.writeBytes(offsets[3], _enhancements);
   writer.writeStringList(offsets[4], _exportFieldKeys);
-  writer.writeBytes(offsets[5], _label);
-  writer.writeBytes(offsets[6], _model);
-  writer.writeLong(offsets[7], _order);
-  writer.writeStringList(offsets[8], _tags);
+  writer.writeBool(offsets[5], _exportMediaTags);
+  writer.writeBytes(offsets[6], _label);
+  writer.writeBytes(offsets[7], _model);
+  writer.writeLong(offsets[8], _order);
+  writer.writeStringList(offsets[9], _tags);
 }
 
 AnkiMapping _ankiMappingDeserializeNative(
@@ -169,11 +173,12 @@ AnkiMapping _ankiMappingDeserializeNative(
     enhancements: _ankiMappingEnhancementsConverter
         .fromIsar(reader.readString(offsets[3])),
     exportFieldKeys: reader.readStringOrNullList(offsets[4]) ?? [],
+    exportMediaTags: reader.readBoolOrNull(offsets[5]),
     id: id,
-    label: reader.readString(offsets[5]),
-    model: reader.readString(offsets[6]),
-    order: reader.readLong(offsets[7]),
-    tags: reader.readStringList(offsets[8]) ?? [],
+    label: reader.readString(offsets[6]),
+    model: reader.readString(offsets[7]),
+    order: reader.readLong(offsets[8]),
+    tags: reader.readStringList(offsets[9]) ?? [],
   );
   return object;
 }
@@ -196,12 +201,14 @@ P _ankiMappingDeserializePropNative<P>(
     case 4:
       return (reader.readStringOrNullList(offset) ?? []) as P;
     case 5:
-      return (reader.readString(offset)) as P;
+      return (reader.readBoolOrNull(offset)) as P;
     case 6:
       return (reader.readString(offset)) as P;
     case 7:
-      return (reader.readLong(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 8:
+      return (reader.readLong(offset)) as P;
+    case 9:
       return (reader.readStringList(offset) ?? []) as P;
     default:
       throw 'Illegal propertyIndex';
@@ -219,6 +226,7 @@ dynamic _ankiMappingSerializeWeb(
   IsarNative.jsObjectSet(jsObj, 'enhancements',
       _ankiMappingEnhancementsConverter.toIsar(object.enhancements));
   IsarNative.jsObjectSet(jsObj, 'exportFieldKeys', object.exportFieldKeys);
+  IsarNative.jsObjectSet(jsObj, 'exportMediaTags', object.exportMediaTags);
   IsarNative.jsObjectSet(jsObj, 'id', object.id);
   IsarNative.jsObjectSet(jsObj, 'label', object.label);
   IsarNative.jsObjectSet(jsObj, 'model', object.model);
@@ -249,6 +257,7 @@ AnkiMapping _ankiMappingDeserializeWeb(
     exportFieldKeys: (IsarNative.jsObjectGet(jsObj, 'exportFieldKeys') as List?)
             ?.cast<String?>() ??
         [],
+    exportMediaTags: IsarNative.jsObjectGet(jsObj, 'exportMediaTags'),
     id: IsarNative.jsObjectGet(jsObj, 'id'),
     label: IsarNative.jsObjectGet(jsObj, 'label') ?? '',
     model: IsarNative.jsObjectGet(jsObj, 'model') ?? '',
@@ -287,6 +296,8 @@ P _ankiMappingDeserializePropWeb<P>(Object jsObj, String propertyName) {
       return ((IsarNative.jsObjectGet(jsObj, 'exportFieldKeys') as List?)
               ?.cast<String?>() ??
           []) as P;
+    case 'exportMediaTags':
+      return (IsarNative.jsObjectGet(jsObj, 'exportMediaTags')) as P;
     case 'id':
       return (IsarNative.jsObjectGet(jsObj, 'id')) as P;
     case 'label':
@@ -1099,6 +1110,24 @@ extension AnkiMappingQueryFilter
     ));
   }
 
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      exportMediaTagsIsNull() {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.isNull,
+      property: 'exportMediaTags',
+      value: null,
+    ));
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      exportMediaTagsEqualTo(bool? value) {
+    return addFilterConditionInternal(FilterCondition(
+      type: ConditionType.eq,
+      property: 'exportMediaTags',
+      value: value,
+    ));
+  }
+
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition> idIsNull() {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.isNull,
@@ -1540,6 +1569,15 @@ extension AnkiMappingQueryWhereSortBy
     return addSortByInternal('enhancements', Sort.desc);
   }
 
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy> sortByExportMediaTags() {
+    return addSortByInternal('exportMediaTags', Sort.asc);
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy>
+      sortByExportMediaTagsDesc() {
+    return addSortByInternal('exportMediaTags', Sort.desc);
+  }
+
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy> sortById() {
     return addSortByInternal('id', Sort.asc);
   }
@@ -1592,6 +1630,15 @@ extension AnkiMappingQueryWhereSortThenBy
     return addSortByInternal('enhancements', Sort.desc);
   }
 
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy> thenByExportMediaTags() {
+    return addSortByInternal('exportMediaTags', Sort.asc);
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy>
+      thenByExportMediaTagsDesc() {
+    return addSortByInternal('exportMediaTags', Sort.desc);
+  }
+
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy> thenById() {
     return addSortByInternal('id', Sort.asc);
   }
@@ -1635,6 +1682,11 @@ extension AnkiMappingQueryWhereDistinct
   QueryBuilder<AnkiMapping, AnkiMapping, QDistinct> distinctByEnhancements(
       {bool caseSensitive = true}) {
     return addDistinctByInternal('enhancements', caseSensitive: caseSensitive);
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QDistinct>
+      distinctByExportMediaTags() {
+    return addDistinctByInternal('exportMediaTags');
   }
 
   QueryBuilder<AnkiMapping, AnkiMapping, QDistinct> distinctById() {
@@ -1681,6 +1733,10 @@ extension AnkiMappingQueryProperty
   QueryBuilder<AnkiMapping, List<String?>, QQueryOperations>
       exportFieldKeysProperty() {
     return addPropertyNameInternal('exportFieldKeys');
+  }
+
+  QueryBuilder<AnkiMapping, bool?, QQueryOperations> exportMediaTagsProperty() {
+    return addPropertyNameInternal('exportMediaTags');
   }
 
   QueryBuilder<AnkiMapping, int?, QQueryOperations> idProperty() {
@@ -1733,6 +1789,7 @@ AnkiMapping _$AnkiMappingFromJson(Map<String, dynamic> json) => AnkiMapping(
       actions: (json['actions'] as Map<String, dynamic>).map(
         (k, e) => MapEntry(int.parse(k), e as String),
       ),
+      exportMediaTags: json['exportMediaTags'] as bool?,
       id: json['id'] as int?,
     );
 
@@ -1748,5 +1805,6 @@ Map<String, dynamic> _$AnkiMappingToJson(AnkiMapping instance) =>
       'actions': instance.actions.map((k, e) => MapEntry(k.toString(), e)),
       'enhancements': instance.enhancements.map(
           (k, e) => MapEntry(k, e.map((k, e) => MapEntry(k.toString(), e)))),
+      'exportMediaTags': instance.exportMediaTags,
       'order': instance.order,
     };

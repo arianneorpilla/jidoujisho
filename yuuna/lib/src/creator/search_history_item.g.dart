@@ -6,7 +6,7 @@ part of 'search_history_item.dart';
 // IsarCollectionGenerator
 // **************************************************************************
 
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, unused_local_variable
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, unused_local_variable, no_leading_underscores_for_local_identifiers
 
 extension GetSearchHistoryItemCollection on Isar {
   IsarCollection<SearchHistoryItem> get searchHistoryItems => getCollection();
@@ -15,7 +15,7 @@ extension GetSearchHistoryItemCollection on Isar {
 const SearchHistoryItemSchema = CollectionSchema(
   name: 'SearchHistoryItem',
   schema:
-      '{"name":"SearchHistoryItem","idName":"id","properties":[{"name":"historyKey","type":"String"},{"name":"searchTerm","type":"String"},{"name":"uniqueKey","type":"String"}],"indexes":[{"name":"historyKey","unique":false,"properties":[{"name":"historyKey","type":"Hash","caseSensitive":true}]},{"name":"searchTerm","unique":false,"properties":[{"name":"searchTerm","type":"Hash","caseSensitive":true}]},{"name":"uniqueKey","unique":true,"properties":[{"name":"uniqueKey","type":"Hash","caseSensitive":true}]}],"links":[]}',
+      '{"name":"SearchHistoryItem","idName":"id","properties":[{"name":"historyKey","type":"String"},{"name":"searchTerm","type":"String"},{"name":"uniqueKey","type":"String"}],"indexes":[{"name":"historyKey","unique":false,"replace":false,"properties":[{"name":"historyKey","type":"Hash","caseSensitive":true}]},{"name":"searchTerm","unique":false,"replace":false,"properties":[{"name":"searchTerm","type":"Hash","caseSensitive":true}]},{"name":"uniqueKey","unique":true,"replace":false,"properties":[{"name":"uniqueKey","type":"Hash","caseSensitive":true}]}],"links":[]}',
   idName: 'id',
   propertyIds: {'historyKey': 0, 'searchTerm': 1, 'uniqueKey': 2},
   listProperties: {},
@@ -43,7 +43,7 @@ const SearchHistoryItemSchema = CollectionSchema(
   serializeWeb: _searchHistoryItemSerializeWeb,
   deserializeWeb: _searchHistoryItemDeserializeWeb,
   deserializePropWeb: _searchHistoryItemDeserializePropWeb,
-  version: 3,
+  version: 4,
 );
 
 int? _searchHistoryItemGetId(SearchHistoryItem object) {
@@ -64,7 +64,7 @@ List<IsarLinkBase> _searchHistoryItemGetLinks(SearchHistoryItem object) {
 
 void _searchHistoryItemSerializeNative(
     IsarCollection<SearchHistoryItem> collection,
-    IsarRawObject rawObj,
+    IsarCObject cObj,
     SearchHistoryItem object,
     int staticSize,
     List<int> offsets,
@@ -81,9 +81,9 @@ void _searchHistoryItemSerializeNative(
   dynamicSize += (_uniqueKey.length) as int;
   final size = staticSize + dynamicSize;
 
-  rawObj.buffer = alloc(size);
-  rawObj.buffer_length = size;
-  final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
+  cObj.buffer = alloc(size);
+  cObj.buffer_length = size;
+  final buffer = IsarNative.bufAsBytes(cObj.buffer, size);
   final writer = IsarBinaryWriter(buffer, staticSize);
   writer.writeBytes(offsets[0], _historyKey);
   writer.writeBytes(offsets[1], _searchTerm);

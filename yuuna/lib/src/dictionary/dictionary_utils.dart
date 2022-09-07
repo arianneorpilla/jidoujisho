@@ -24,7 +24,7 @@ Future<void> depositDictionaryDataHelper(PrepareDictionaryParams params) async {
     schemas: globalSchemas,
   );
 
-  database.writeTxnSync((database) {
+  database.writeTxnSync((_) {
     database.dictionaryTags
         .where()
         .dictionaryNameEqualTo(params.dictionaryName)
@@ -51,7 +51,7 @@ Future<void> deleteDictionaryDataHelper(DeleteDictionaryParams params) async {
     schemas: globalSchemas,
   );
 
-  database.writeTxnSync((database) {
+  database.writeTxnSync((_) {
     database.dictionarys.deleteByDictionaryNameSync(params.dictionaryName);
     database.dictionaryTags
         .where()
@@ -81,15 +81,15 @@ Future<void> addToDictionaryHistoryHelper(
     schemas: globalSchemas,
   );
 
-  database.writeTxnSync((isar) {
-    isar.dictionaryResults.deleteBySearchTermSync(params.result.searchTerm);
-    isar.dictionaryResults.putSync(params.result);
+  database.writeTxnSync((_) {
+    database.dictionaryResults.deleteBySearchTermSync(params.result.searchTerm);
+    database.dictionaryResults.putSync(params.result);
 
-    int countInSameHistory = isar.dictionaryResults.countSync();
+    int countInSameHistory = database.dictionaryResults.countSync();
 
     if (params.maximumDictionaryHistoryItems < countInSameHistory) {
       int surplus = countInSameHistory - params.maximumDictionaryHistoryItems;
-      isar.dictionaryResults.where().limit(surplus).build().deleteAllSync();
+      database.dictionaryResults.where().limit(surplus).build().deleteAllSync();
     }
   });
 }

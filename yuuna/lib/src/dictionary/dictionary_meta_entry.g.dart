@@ -6,7 +6,7 @@ part of 'dictionary_meta_entry.dart';
 // IsarCollectionGenerator
 // **************************************************************************
 
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, unused_local_variable
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, unused_local_variable, no_leading_underscores_for_local_identifiers
 
 extension GetDictionaryMetaEntryCollection on Isar {
   IsarCollection<DictionaryMetaEntry> get dictionaryMetaEntrys =>
@@ -16,7 +16,7 @@ extension GetDictionaryMetaEntryCollection on Isar {
 const DictionaryMetaEntrySchema = CollectionSchema(
   name: 'DictionaryMetaEntry',
   schema:
-      '{"name":"DictionaryMetaEntry","idName":"id","properties":[{"name":"dictionaryName","type":"String"},{"name":"frequency","type":"String"},{"name":"hashCode","type":"Long"},{"name":"pitches","type":"String"},{"name":"term","type":"String"},{"name":"termLength","type":"Long"}],"indexes":[{"name":"dictionaryName","unique":false,"properties":[{"name":"dictionaryName","type":"Hash","caseSensitive":true}]},{"name":"frequency","unique":false,"properties":[{"name":"frequency","type":"Hash","caseSensitive":true}]},{"name":"term","unique":false,"properties":[{"name":"term","type":"Hash","caseSensitive":true}]},{"name":"termLength_term","unique":false,"properties":[{"name":"termLength","type":"Value","caseSensitive":false},{"name":"term","type":"Hash","caseSensitive":true}]}],"links":[]}',
+      '{"name":"DictionaryMetaEntry","idName":"id","properties":[{"name":"dictionaryName","type":"String"},{"name":"frequency","type":"String"},{"name":"hashCode","type":"Long"},{"name":"pitches","type":"String"},{"name":"term","type":"String"},{"name":"termLength","type":"Long"}],"indexes":[{"name":"dictionaryName","unique":false,"replace":false,"properties":[{"name":"dictionaryName","type":"Hash","caseSensitive":true}]},{"name":"frequency","unique":false,"replace":false,"properties":[{"name":"frequency","type":"Hash","caseSensitive":true}]},{"name":"term","unique":false,"replace":false,"properties":[{"name":"term","type":"Hash","caseSensitive":true}]},{"name":"termLength_term","unique":false,"replace":false,"properties":[{"name":"termLength","type":"Value","caseSensitive":false},{"name":"term","type":"Hash","caseSensitive":true}]}],"links":[]}',
   idName: 'id',
   propertyIds: {
     'dictionaryName': 0,
@@ -60,7 +60,7 @@ const DictionaryMetaEntrySchema = CollectionSchema(
   serializeWeb: _dictionaryMetaEntrySerializeWeb,
   deserializeWeb: _dictionaryMetaEntryDeserializeWeb,
   deserializePropWeb: _dictionaryMetaEntryDeserializePropWeb,
-  version: 3,
+  version: 4,
 );
 
 int? _dictionaryMetaEntryGetId(DictionaryMetaEntry object) {
@@ -83,7 +83,7 @@ const _dictionaryMetaEntryPitchDataConverter = PitchDataConverter();
 
 void _dictionaryMetaEntrySerializeNative(
     IsarCollection<DictionaryMetaEntry> collection,
-    IsarRawObject rawObj,
+    IsarCObject cObj,
     DictionaryMetaEntry object,
     int staticSize,
     List<int> offsets,
@@ -113,9 +113,9 @@ void _dictionaryMetaEntrySerializeNative(
   final _termLength = value5;
   final size = staticSize + dynamicSize;
 
-  rawObj.buffer = alloc(size);
-  rawObj.buffer_length = size;
-  final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
+  cObj.buffer = alloc(size);
+  cObj.buffer_length = size;
+  final buffer = IsarNative.bufAsBytes(cObj.buffer, size);
   final writer = IsarBinaryWriter(buffer, staticSize);
   writer.writeBytes(offsets[0], _dictionaryName);
   writer.writeBytes(offsets[1], _frequency);

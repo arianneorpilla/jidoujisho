@@ -55,6 +55,11 @@ android {
       release {
          minifyEnabled true
          signingConfig signingConfigs.debug
+       
+      }
+
+      debug {
+        
       }
    }
 

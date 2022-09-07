@@ -332,7 +332,7 @@ class AppModel with ChangeNotifier {
   /// Update the user-defined order of a given dictionary in the database.
   /// See the dictionary dialog's [ReorderableListView] for usage.
   void updateDictionaryOrder(List<Dictionary> newDictionaries) async {
-    _database.writeTxnSync((isar) {
+    _database.writeTxnSync((_) {
       _database.dictionarys.clearSync();
       _database.dictionarys.putAllSync(newDictionaries);
     });
@@ -341,7 +341,7 @@ class AppModel with ChangeNotifier {
   /// Update the user-defined order of a given dictionary in the database.
   /// See the dictionary dialog's [ReorderableListView] for usage.
   void updateMappingsOrder(List<AnkiMapping> newMappings) async {
-    _database.writeTxnSync((isar) {
+    _database.writeTxnSync((_) {
       _database.ankiMappings.clearSync();
       _database.ankiMappings.putAllSync(newMappings);
     });
@@ -581,7 +581,7 @@ class AppModel with ChangeNotifier {
   /// Populate default mapping if it does not exist in the database.
   void populateDefaultMapping() async {
     if (_database.ankiMappings.where().findAllSync().isEmpty) {
-      _database.writeTxnSync((isar) {
+      _database.writeTxnSync((_) {
         _database.ankiMappings.putSync(AnkiMapping.defaultMapping(0));
       });
     }
@@ -1081,7 +1081,7 @@ class AppModel with ChangeNotifier {
         hidden: false,
       );
 
-      _database.writeTxnSync((isar) {
+      _database.writeTxnSync((_) {
         _database.dictionarys.putSync(dictionary);
       });
 
@@ -1115,7 +1115,7 @@ class AppModel with ChangeNotifier {
   /// Toggle a dictionary's between collapsed and expanded state. This will
   /// affect how a dictionary's search results are shown by default.
   void toggleDictionaryCollapsed(Dictionary dictionary) {
-    _database.writeTxnSync((isar) {
+    _database.writeTxnSync((_) {
       dictionary.collapsed = !dictionary.collapsed;
       _database.dictionarys.putSync(dictionary);
     });
@@ -1124,7 +1124,7 @@ class AppModel with ChangeNotifier {
   /// Toggle a dictionary's between hidden and shown state. This will
   /// affect how a dictionary's search results are shown by default.
   void toggleDictionaryHidden(Dictionary dictionary) {
-    _database.writeTxnSync((isar) {
+    _database.writeTxnSync((_) {
       dictionary.hidden = !dictionary.hidden;
       _database.dictionarys.putSync(dictionary);
     });
@@ -1150,8 +1150,8 @@ class AppModel with ChangeNotifier {
 
   /// Delete a selected mapping from the database.
   void deleteMapping(AnkiMapping mapping) async {
-    _database.writeTxnSync((database) {
-      database.ankiMappings.deleteSync(mapping.id!);
+    _database.writeTxnSync((_) {
+      _database.ankiMappings.deleteSync(mapping.id!);
     });
 
     if (mapping.label == lastSelectedMappingName) {
@@ -1161,12 +1161,12 @@ class AppModel with ChangeNotifier {
 
   /// Add a selected mapping to the database.
   void addMapping(AnkiMapping mapping) async {
-    _database.writeTxnSync((database) {
+    _database.writeTxnSync((_) {
       if (mapping.id != null &&
-          database.ankiMappings.getSync(mapping.id!) != null) {
-        database.ankiMappings.deleteSync(mapping.id!);
+          _database.ankiMappings.getSync(mapping.id!) != null) {
+        _database.ankiMappings.deleteSync(mapping.id!);
       }
-      database.ankiMappings.putSync(mapping);
+      _database.ankiMappings.putSync(mapping);
     });
   }
 
@@ -1529,9 +1529,27 @@ class AppModel with ChangeNotifier {
         return '';
       } else {
         if (field is ImageExportField) {
-          return exportedImages[field] ?? '';
+          if (exportedImages[field] == null) {
+            return '';
+          } else {
+            String text = exportedImages[field]!;
+            if (mapping.exportMediaTags ?? false) {
+              return '<img src="$text">';
+            } else {
+              return text;
+            }
+          }
         } else if (field is AudioExportField) {
-          return exportedAudio[field] ?? '';
+          if (exportedAudio[field] == null) {
+            return '';
+          } else {
+            String text = exportedAudio[field]!;
+            if (mapping.exportMediaTags ?? false) {
+              return '[sound:$text]';
+            } else {
+              return text;
+            }
+          }
         } else {
           return creatorFieldValues.textValues[field] ?? '';
         }
@@ -1570,12 +1588,12 @@ class AppModel with ChangeNotifier {
 
     AnkiMapping resetMapping =
         mapping.copyWith(exportFieldKeys: exportFieldKeys);
-    _database.writeTxnSync((database) {
+    _database.writeTxnSync((_) {
       if (mapping.id != null &&
-          database.ankiMappings.getSync(resetMapping.id!) != null) {
-        database.ankiMappings.deleteSync(resetMapping.id!);
+          _database.ankiMappings.getSync(resetMapping.id!) != null) {
+        _database.ankiMappings.deleteSync(resetMapping.id!);
       }
-      database.ankiMappings.putSync(resetMapping);
+      _database.ankiMappings.putSync(resetMapping);
     });
   }
 
@@ -1904,8 +1922,8 @@ class AppModel with ChangeNotifier {
     mapping.enhancements[field.uniqueKey] ??= {};
     mapping.enhancements[field.uniqueKey]![slotNumber] = enhancement.uniqueKey;
 
-    _database.writeTxnSync((isar) {
-      isar.ankiMappings.putSync(mapping);
+    _database.writeTxnSync((_) {
+      _database.ankiMappings.putSync(mapping);
     });
   }
 
@@ -1921,8 +1939,8 @@ class AppModel with ChangeNotifier {
       mapping.creatorFieldKeys.remove(field.uniqueKey);
     }
 
-    _database.writeTxnSync((isar) {
-      isar.ankiMappings.putSync(mapping);
+    _database.writeTxnSync((_) {
+      _database.ankiMappings.putSync(mapping);
     });
   }
 
@@ -1938,8 +1956,8 @@ class AppModel with ChangeNotifier {
       mapping.creatorFieldKeys.add(field.uniqueKey);
     }
 
-    _database.writeTxnSync((isar) {
-      isar.ankiMappings.putSync(mapping);
+    _database.writeTxnSync((_) {
+      _database.ankiMappings.putSync(mapping);
     });
   }
 
@@ -1952,8 +1970,8 @@ class AppModel with ChangeNotifier {
   }) async {
     mapping.enhancements[field.uniqueKey]!.remove(slotNumber);
 
-    _database.writeTxnSync((isar) {
-      isar.ankiMappings.putSync(mapping);
+    _database.writeTxnSync((_) {
+      _database.ankiMappings.putSync(mapping);
     });
   }
 
@@ -1964,8 +1982,8 @@ class AppModel with ChangeNotifier {
       required QuickAction quickAction}) async {
     mapping.actions[slotNumber] = quickAction.uniqueKey;
 
-    _database.writeTxnSync((isar) {
-      isar.ankiMappings.putSync(mapping);
+    _database.writeTxnSync((_) {
+      _database.ankiMappings.putSync(mapping);
     });
 
     notifyListeners();
@@ -1978,8 +1996,8 @@ class AppModel with ChangeNotifier {
   }) async {
     mapping.actions.remove(slotNumber);
 
-    _database.writeTxnSync((isar) {
-      isar.ankiMappings.putSync(mapping);
+    _database.writeTxnSync((_) {
+      _database.ankiMappings.putSync(mapping);
     });
   }
 
@@ -1994,8 +2012,8 @@ class AppModel with ChangeNotifier {
     mapping.enhancements[field.uniqueKey]![AnkiMapping.autoModeSlotNumber] =
         enhancement.uniqueKey;
 
-    _database.writeTxnSync((isar) {
-      isar.ankiMappings.putSync(mapping);
+    _database.writeTxnSync((_) {
+      _database.ankiMappings.putSync(mapping);
     });
   }
 
@@ -2009,8 +2027,8 @@ class AppModel with ChangeNotifier {
     mapping.enhancements[field.uniqueKey]!
         .remove(AnkiMapping.autoModeSlotNumber);
 
-    _database.writeTxnSync((isar) {
-      isar.ankiMappings.putSync(mapping);
+    _database.writeTxnSync((_) {
+      _database.ankiMappings.putSync(mapping);
     });
   }
 
@@ -2025,25 +2043,25 @@ class AppModel with ChangeNotifier {
       return;
     }
 
-    _database.writeTxnSync((isar) {
+    _database.writeTxnSync((_) {
       SearchHistoryItem searchHistoryItem = SearchHistoryItem(
         searchTerm: searchTerm,
         historyKey: historyKey,
       );
 
-      isar.searchHistoryItems
+      _database.searchHistoryItems
           .deleteByUniqueKeySync(searchHistoryItem.uniqueKey);
 
-      isar.searchHistoryItems.putSync(searchHistoryItem);
+      _database.searchHistoryItems.putSync(searchHistoryItem);
 
-      int countInSameHistory = isar.searchHistoryItems
+      int countInSameHistory = _database.searchHistoryItems
           .filter()
           .historyKeyEqualTo(historyKey)
           .countSync();
 
       if (maximumSearchHistoryItems < countInSameHistory) {
         int surplus = countInSameHistory - maximumSearchHistoryItems;
-        isar.searchHistoryItems
+        _database.searchHistoryItems
             .filter()
             .historyKeyEqualTo(historyKey)
             .limit(surplus)
@@ -2058,13 +2076,13 @@ class AppModel with ChangeNotifier {
     required String historyKey,
     required String searchTerm,
   }) async {
-    _database.writeTxnSync((isar) {
+    _database.writeTxnSync((_) {
       SearchHistoryItem searchHistoryItem = SearchHistoryItem(
         searchTerm: searchTerm,
         historyKey: historyKey,
       );
 
-      isar.searchHistoryItems
+      _database.searchHistoryItems
           .deleteByUniqueKeySync(searchHistoryItem.uniqueKey);
     });
   }
@@ -2073,8 +2091,8 @@ class AppModel with ChangeNotifier {
   void clearSearchHistory({
     required String historyKey,
   }) {
-    _database.writeTxnSync((isar) {
-      isar.searchHistoryItems
+    _database.writeTxnSync((_) {
+      _database.searchHistoryItems
           .where()
           .historyKeyEqualTo(historyKey)
           .build()
@@ -2244,8 +2262,8 @@ class AppModel with ChangeNotifier {
   /// dictionary is deleted, otherwise history data cannot be viewed without
   /// the necessary dictionary metadata.
   void clearDictionaryHistory() async {
-    _database.writeTxnSync((isar) {
-      isar.dictionaryResults.clearSync();
+    _database.writeTxnSync((_) {
+      _database.dictionaryResults.clearSync();
     });
 
     dictionaryEntriesNotifier.notifyListeners();
@@ -2262,20 +2280,20 @@ class AppModel with ChangeNotifier {
   /// Add a [MediaItem] to history. This should be called at startup
   /// when the media item is launched.
   void addMediaItem(MediaItem item) {
-    _database.writeTxnSync((isar) {
-      isar.mediaItems.deleteByUniqueKeySync(item.uniqueKey);
+    _database.writeTxnSync((_) {
+      _database.mediaItems.deleteByUniqueKeySync(item.uniqueKey);
       item.id = null;
 
-      isar.mediaItems.putSync(item);
+      _database.mediaItems.putSync(item);
 
-      int countInSameHistory = isar.mediaItems
+      int countInSameHistory = _database.mediaItems
           .filter()
           .mediaTypeIdentifierEqualTo(item.mediaTypeIdentifier)
           .countSync();
 
       if (maximumMediaHistoryItems < countInSameHistory) {
         int surplus = countInSameHistory - maximumSearchHistoryItems;
-        isar.mediaItems
+        _database.mediaItems
             .filter()
             .mediaTypeIdentifierEqualTo(item.mediaTypeIdentifier)
             .limit(surplus)
@@ -2289,8 +2307,8 @@ class AppModel with ChangeNotifier {
   /// operations. This is useful when updating constantly, for example,
   /// with the player where the position needs to be constantly updated.
   void updateMediaItem(MediaItem item) {
-    _database.writeTxnSync((isar) {
-      isar.mediaItems.putSync(item);
+    _database.writeTxnSync((_) {
+      _database.mediaItems.putSync(item);
     });
   }
 
@@ -2299,8 +2317,8 @@ class AppModel with ChangeNotifier {
     MediaSource mediaSource = item.getMediaSource(appModel: this);
     await mediaSource.clearOverrideValues(appModel: this, item: item);
 
-    _database.writeTxnSync((isar) {
-      isar.mediaItems.deleteSync(item.id!);
+    _database.writeTxnSync((_) {
+      _database.mediaItems.deleteSync(item.id!);
     });
   }
 

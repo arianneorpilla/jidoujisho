@@ -6,7 +6,7 @@ part of 'media_item.dart';
 // IsarCollectionGenerator
 // **************************************************************************
 
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, unused_local_variable
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, unused_local_variable, no_leading_underscores_for_local_identifiers
 
 extension GetMediaItemCollection on Isar {
   IsarCollection<MediaItem> get mediaItems => getCollection();
@@ -15,7 +15,7 @@ extension GetMediaItemCollection on Isar {
 const MediaItemSchema = CollectionSchema(
   name: 'MediaItem',
   schema:
-      '{"name":"MediaItem","idName":"id","properties":[{"name":"audioUrl","type":"String"},{"name":"author","type":"String"},{"name":"authorIdentifier","type":"String"},{"name":"base64Image","type":"String"},{"name":"canDelete","type":"Bool"},{"name":"canEdit","type":"Bool"},{"name":"duration","type":"Long"},{"name":"hashCode","type":"Long"},{"name":"imageUrl","type":"String"},{"name":"mediaIdentifier","type":"String"},{"name":"mediaSourceIdentifier","type":"String"},{"name":"mediaTypeIdentifier","type":"String"},{"name":"position","type":"Long"},{"name":"sourceMetadata","type":"String"},{"name":"title","type":"String"},{"name":"uniqueKey","type":"String"}],"indexes":[{"name":"mediaIdentifier","unique":false,"properties":[{"name":"mediaIdentifier","type":"Hash","caseSensitive":true}]},{"name":"mediaSourceIdentifier","unique":false,"properties":[{"name":"mediaSourceIdentifier","type":"Hash","caseSensitive":true}]},{"name":"mediaTypeIdentifier","unique":false,"properties":[{"name":"mediaTypeIdentifier","type":"Hash","caseSensitive":true}]},{"name":"uniqueKey","unique":true,"properties":[{"name":"uniqueKey","type":"Hash","caseSensitive":true}]}],"links":[]}',
+      '{"name":"MediaItem","idName":"id","properties":[{"name":"audioUrl","type":"String"},{"name":"author","type":"String"},{"name":"authorIdentifier","type":"String"},{"name":"base64Image","type":"String"},{"name":"canDelete","type":"Bool"},{"name":"canEdit","type":"Bool"},{"name":"duration","type":"Long"},{"name":"hashCode","type":"Long"},{"name":"imageUrl","type":"String"},{"name":"mediaIdentifier","type":"String"},{"name":"mediaSourceIdentifier","type":"String"},{"name":"mediaTypeIdentifier","type":"String"},{"name":"position","type":"Long"},{"name":"sourceMetadata","type":"String"},{"name":"title","type":"String"},{"name":"uniqueKey","type":"String"}],"indexes":[{"name":"mediaIdentifier","unique":false,"replace":false,"properties":[{"name":"mediaIdentifier","type":"Hash","caseSensitive":true}]},{"name":"mediaSourceIdentifier","unique":false,"replace":false,"properties":[{"name":"mediaSourceIdentifier","type":"Hash","caseSensitive":true}]},{"name":"mediaTypeIdentifier","unique":false,"replace":false,"properties":[{"name":"mediaTypeIdentifier","type":"Hash","caseSensitive":true}]},{"name":"uniqueKey","unique":true,"replace":false,"properties":[{"name":"uniqueKey","type":"Hash","caseSensitive":true}]}],"links":[]}',
   idName: 'id',
   propertyIds: {
     'audioUrl': 0,
@@ -68,7 +68,7 @@ const MediaItemSchema = CollectionSchema(
   serializeWeb: _mediaItemSerializeWeb,
   deserializeWeb: _mediaItemDeserializeWeb,
   deserializePropWeb: _mediaItemDeserializePropWeb,
-  version: 3,
+  version: 4,
 );
 
 int? _mediaItemGetId(MediaItem object) {
@@ -89,7 +89,7 @@ List<IsarLinkBase> _mediaItemGetLinks(MediaItem object) {
 
 void _mediaItemSerializeNative(
     IsarCollection<MediaItem> collection,
-    IsarRawObject rawObj,
+    IsarCObject cObj,
     MediaItem object,
     int staticSize,
     List<int> offsets,
@@ -158,9 +158,9 @@ void _mediaItemSerializeNative(
   dynamicSize += (_uniqueKey.length) as int;
   final size = staticSize + dynamicSize;
 
-  rawObj.buffer = alloc(size);
-  rawObj.buffer_length = size;
-  final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
+  cObj.buffer = alloc(size);
+  cObj.buffer_length = size;
+  final buffer = IsarNative.bufAsBytes(cObj.buffer, size);
   final writer = IsarBinaryWriter(buffer, staticSize);
   writer.writeBytes(offsets[0], _audioUrl);
   writer.writeBytes(offsets[1], _author);

@@ -6,7 +6,7 @@ part of 'dictionary_tag.dart';
 // IsarCollectionGenerator
 // **************************************************************************
 
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, unused_local_variable
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, unused_local_variable, no_leading_underscores_for_local_identifiers
 
 extension GetDictionaryTagCollection on Isar {
   IsarCollection<DictionaryTag> get dictionaryTags => getCollection();
@@ -15,7 +15,7 @@ extension GetDictionaryTagCollection on Isar {
 const DictionaryTagSchema = CollectionSchema(
   name: 'DictionaryTag',
   schema:
-      '{"name":"DictionaryTag","idName":"id","properties":[{"name":"category","type":"String"},{"name":"dictionaryName","type":"String"},{"name":"name","type":"String"},{"name":"notes","type":"String"},{"name":"popularity","type":"Double"},{"name":"sortingOrder","type":"Long"},{"name":"uniqueKey","type":"String"}],"indexes":[{"name":"dictionaryName","unique":false,"properties":[{"name":"dictionaryName","type":"Hash","caseSensitive":true}]},{"name":"name","unique":false,"properties":[{"name":"name","type":"Hash","caseSensitive":true}]},{"name":"uniqueKey","unique":true,"properties":[{"name":"uniqueKey","type":"Hash","caseSensitive":true}]}],"links":[]}',
+      '{"name":"DictionaryTag","idName":"id","properties":[{"name":"category","type":"String"},{"name":"dictionaryName","type":"String"},{"name":"name","type":"String"},{"name":"notes","type":"String"},{"name":"popularity","type":"Double"},{"name":"sortingOrder","type":"Long"},{"name":"uniqueKey","type":"String"}],"indexes":[{"name":"dictionaryName","unique":false,"replace":false,"properties":[{"name":"dictionaryName","type":"Hash","caseSensitive":true}]},{"name":"name","unique":false,"replace":false,"properties":[{"name":"name","type":"Hash","caseSensitive":true}]},{"name":"uniqueKey","unique":true,"replace":false,"properties":[{"name":"uniqueKey","type":"Hash","caseSensitive":true}]}],"links":[]}',
   idName: 'id',
   propertyIds: {
     'category': 0,
@@ -51,7 +51,7 @@ const DictionaryTagSchema = CollectionSchema(
   serializeWeb: _dictionaryTagSerializeWeb,
   deserializeWeb: _dictionaryTagDeserializeWeb,
   deserializePropWeb: _dictionaryTagDeserializePropWeb,
-  version: 3,
+  version: 4,
 );
 
 int? _dictionaryTagGetId(DictionaryTag object) {
@@ -72,7 +72,7 @@ List<IsarLinkBase> _dictionaryTagGetLinks(DictionaryTag object) {
 
 void _dictionaryTagSerializeNative(
     IsarCollection<DictionaryTag> collection,
-    IsarRawObject rawObj,
+    IsarCObject cObj,
     DictionaryTag object,
     int staticSize,
     List<int> offsets,
@@ -99,9 +99,9 @@ void _dictionaryTagSerializeNative(
   dynamicSize += (_uniqueKey.length) as int;
   final size = staticSize + dynamicSize;
 
-  rawObj.buffer = alloc(size);
-  rawObj.buffer_length = size;
-  final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
+  cObj.buffer = alloc(size);
+  cObj.buffer_length = size;
+  final buffer = IsarNative.bufAsBytes(cObj.buffer, size);
   final writer = IsarBinaryWriter(buffer, staticSize);
   writer.writeBytes(offsets[0], _category);
   writer.writeBytes(offsets[1], _dictionaryName);

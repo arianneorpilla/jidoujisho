@@ -21,7 +21,7 @@ class DictionaryResult {
 
   /// A unique identifier for the purposes of database storage.
   @Id()
-  final int? id;
+  int? id;
 
   /// An index that indicates which in the mapping is the last viewed and
   /// should be shown on the dashboard. Scrolling a result horizontally in the

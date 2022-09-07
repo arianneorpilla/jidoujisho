@@ -23,6 +23,7 @@ class AnkiMapping {
     required this.tags,
     required this.enhancements,
     required this.actions,
+    required this.exportMediaTags,
     this.id,
   });
 
@@ -51,6 +52,7 @@ class AnkiMapping {
       tags: [standardModelName],
       enhancements: defaultEnhancements,
       actions: defaultActions,
+      exportMediaTags: false,
     );
   }
 
@@ -156,6 +158,10 @@ class AnkiMapping {
   /// for a field.
   static int autoModeSlotNumber = -1;
 
+  /// Whether or not this mapping exports image and audio HTML/Anki syntax
+  /// or only shows the filename. If null, will be considered false.
+  bool? exportMediaTags;
+
   /// The order of this dictionary in terms of user sorting, relative to other
   /// dictionaries.
   @Index(unique: true)
@@ -214,6 +220,7 @@ class AnkiMapping {
     int? id,
     Map<String, Map<int, String>>? enhancements,
     Map<int, String>? actions,
+    bool? exportMediaTags,
   }) {
     return AnkiMapping(
       label: label ?? this.label,
@@ -227,6 +234,7 @@ class AnkiMapping {
       id: id ?? this.id,
       enhancements: enhancements ?? this.enhancements,
       actions: actions ?? this.actions,
+      exportMediaTags: exportMediaTags ?? this.exportMediaTags,
     );
   }
 
