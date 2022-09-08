@@ -102,7 +102,7 @@
 
 **jidoujisho is eagerly looking for contributors.** If you are interested in maintaining a dictionary format, media source, an enhancement or quick action or even a new language for the application, user and developer documentation is coming soon.
 
-Originally built for the Japanese language learning community, jidoujisho application is free and open source software, and is <b><a href="https://github.com/lrorpilla/jidoujisho/releases">available to download here on GitHub.</a></b>
+Originally built for the Japanese language learning community, jidoujisho is free and open source software, and is <b><a href="https://github.com/lrorpilla/jidoujisho/releases">available to download here on GitHub.</a></b>
 
 Please note that the development of the app switches between changes being implemented and being left alone for daily use. Update frequency may depend on the gravity of any issues that arise. **Hiatuses provide practical insight on usage and where development should go next.**
 
