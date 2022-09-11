@@ -174,6 +174,10 @@ class SubtitleUtils {
     String outputPath = '${subsDir.path}/assSubtitles.srt';
     File targetFile = File(outputPath);
 
+    if (targetFile.existsSync()) {
+      targetFile.deleteSync();
+    }
+
     String command = '-i "$inputPath" "$outputPath"';
 
     final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();

@@ -146,10 +146,12 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
   }
 
   void textContextMenuAction(String data) {
-    appModel.openRecursiveDictionarySearch(
-      searchTerm: data,
-      killOnPop: true,
-    );
+    if (data.trim().isNotEmpty) {
+      appModel.openRecursiveDictionarySearch(
+        searchTerm: data,
+        killOnPop: true,
+      );
+    }
   }
 
   void textShareIntentAction(String data) {
@@ -168,15 +170,17 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
       return;
     }
 
-    appModel.openCreator(
-      creatorFieldValues: CreatorFieldValues(
-        textValues: {
-          SentenceField.instance: data,
-        },
-      ),
-      killOnPop: true,
-      ref: ref,
-    );
+    if (data.trim().isNotEmpty) {
+      appModel.openCreator(
+        creatorFieldValues: CreatorFieldValues(
+          textValues: {
+            SentenceField.instance: data,
+          },
+        ),
+        killOnPop: true,
+        ref: ref,
+      );
+    }
   }
 
   void launchYoutubeMediaAction(String videoId) async {
