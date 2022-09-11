@@ -121,7 +121,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       /// over any set auto enhancement.
       if (appModel.isMediaOpen && appModel.getCurrentMediaItem() != null) {
         MediaSource mediaSource =
-            appModel.getCurrentMediaItem()!.getMediaSource(appModel: appModel);
+        appModel.getCurrentMediaItem()!.getMediaSource(appModel: appModel);
         if (field is ImageField && mediaSource.overridesAutoImage) {
           await field.setImages(
             appModel: appModel,
@@ -140,7 +140,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
           );
           continue;
         }
-        if (field is AudioField && mediaSource.overridesAutoAudio) {
+        if (field is AudioSentenceField && mediaSource.overridesAutoAudio) {
           await field.setAudio(
             appModel: appModel,
             creatorModel: creatorModel,
@@ -419,8 +419,8 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
   Widget buildScaffold() {
     bool showPortrait = (appModel.activeFields.contains(ImageField.instance) &&
-            !ImageField.instance.showWidget &&
-            !ImageField.instance.isSearching) ||
+        !ImageField.instance.showWidget &&
+        !ImageField.instance.isSearching) ||
         MediaQuery.of(context).orientation == Orientation.portrait ||
         widget.editEnhancements ||
         widget.editFields ||
@@ -461,6 +461,14 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
                         ),
                       if (appModel.activeFields.contains(AudioField.instance))
                         AudioField.instance.buildTopWidget(
+                          context: context,
+                          ref: ref,
+                          appModel: appModel,
+                          creatorModel: creatorModel,
+                          orientation: Orientation.landscape,
+                        ),
+                      if (appModel.activeFields.contains(AudioSentenceField.instance))
+                        AudioSentenceField.instance.buildTopWidget(
                           context: context,
                           ref: ref,
                           appModel: appModel,
@@ -753,7 +761,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
     required Field field,
   }) {
     Enhancement? enhancement =
-        mapping.getAutoFieldEnhancement(appModel: appModel, field: field);
+    mapping.getAutoFieldEnhancement(appModel: appModel, field: field);
 
     if (enhancement == null) {
       return JidoujishoIconButton(
@@ -829,7 +837,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
     required int slotNumber,
   }) {
     String? enhancementName =
-        (mapping.enhancements[field.uniqueKey] ?? {})[slotNumber];
+    (mapping.enhancements[field.uniqueKey] ?? {})[slotNumber];
     Enhancement? enhancement;
 
     if (enhancementName != null) {
@@ -864,7 +872,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
     required int slotNumber,
   }) {
     String? enhancementName =
-        (mapping.enhancements[field.uniqueKey] ?? {})[slotNumber];
+    (mapping.enhancements[field.uniqueKey] ?? {})[slotNumber];
     Enhancement? enhancement;
 
     if (enhancementName != null) {
@@ -924,26 +932,26 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
         decoration: InputDecoration(
           prefixIcon: widget.editEnhancements
               ? buildAutoEnhancementEditButton(
-                  mapping: mapping,
-                  field: field,
-                )
+            mapping: mapping,
+            field: field,
+          )
               : buildRemoveFieldButton(
-                  mapping: mapping,
-                  field: field,
-                  isCollapsed: isCollapsed,
-                ),
+            mapping: mapping,
+            field: field,
+            isCollapsed: isCollapsed,
+          ),
           suffixIcon: widget.editEnhancements
               ? Padding(
-                  padding: Spacing.of(context).insets.onlyRight.small,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    mainAxisSize: MainAxisSize.min,
-                    children: buildManualEnhancementEditButtons(
-                      mapping: mapping,
-                      field: field,
-                    ),
-                  ),
-                )
+            padding: Spacing.of(context).insets.onlyRight.small,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.min,
+              children: buildManualEnhancementEditButtons(
+                mapping: mapping,
+                field: field,
+              ),
+            ),
+          )
               : null,
           labelText: field.getLocalisedLabel(appModel),
           hintText: field.getLocalisedDescription(appModel),
@@ -964,16 +972,16 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
           ),
           suffixIcon: (mapping.enhancements[field.uniqueKey] ?? {}).isNotEmpty
               ? Padding(
-                  padding: Spacing.of(context).insets.onlyRight.small,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    mainAxisSize: MainAxisSize.min,
-                    children: buildManualEnhancementButtons(
-                      mapping: mapping,
-                      field: field,
-                    ),
-                  ),
-                )
+            padding: Spacing.of(context).insets.onlyRight.small,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.min,
+              children: buildManualEnhancementButtons(
+                mapping: mapping,
+                field: field,
+              ),
+            ),
+          )
               : null,
           labelText: field.getLocalisedLabel(appModel),
         ),

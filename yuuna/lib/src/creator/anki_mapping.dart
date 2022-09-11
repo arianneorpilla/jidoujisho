@@ -41,6 +41,7 @@ class AnkiMapping {
         NotesField.key,
         ImageField.key,
         AudioField.key,
+        AudioSentenceField.key,
         PitchAccentField.key,
         FuriganaField.key,
         ExpandedMeaningField.key,
@@ -83,6 +84,9 @@ class AnkiMapping {
       0: ClearFieldEnhancement.key,
       1: JapanesePod101AudioEnhancement.key,
     },
+    AudioSentenceField.key: {
+      0: ClearFieldEnhancement.key,
+    },
     ContextField.key: {0: ClearFieldEnhancement.key},
     PitchAccentField.key: {0: ClearFieldEnhancement.key},
     FuriganaField.key: {0: ClearFieldEnhancement.key},
@@ -100,6 +104,7 @@ class AnkiMapping {
     NotesField.key,
     ImageField.key,
     AudioField.key,
+    AudioSentenceField.key
   ];
 
   /// Default fields to show upon opening the Card Creator.
@@ -228,7 +233,7 @@ class AnkiMapping {
       exportFieldKeys: exportFieldKeys ?? this.exportFieldKeys,
       creatorFieldKeys: creatorFieldKeys ?? this.creatorFieldKeys,
       creatorCollapsedFieldKeys:
-          creatorCollapsedFieldKeys ?? this.creatorCollapsedFieldKeys,
+      creatorCollapsedFieldKeys ?? this.creatorCollapsedFieldKeys,
       tags: tags ?? this.tags,
       order: order ?? this.order,
       id: id ?? this.id,
@@ -264,10 +269,10 @@ class AnkiMapping {
   List<Enhancement> getManualFieldEnhancement(
       {required AppModel appModel, required Field field}) {
     List<String> enhancementNames =
-        getManualFieldEnhancementNames(field: field);
+    getManualFieldEnhancementNames(field: field);
     List<Enhancement> enhancements = enhancementNames
         .map((enhancementName) =>
-            appModel.enhancements[field]![enhancementName]!)
+    appModel.enhancements[field]![enhancementName]!)
         .toList();
 
     return enhancements;
