@@ -14,29 +14,31 @@ class AudioSentenceField extends AudioExportField {
   /// Initialise this field with the predetermined and hardset values.
   AudioSentenceField._privateConstructor()
       : super(
-    uniqueKey: key,
-    label: 'Audio Sentence',
-    description: 'Audio pertaining to the sentence. Text field can be used'
-        ' to enter search terms for audio sources.',
-    icon: Icons.audiotrack,
-  );
+          uniqueKey: key,
+          label: 'Sentence Audio',
+          description:
+              'Audio pertaining to the sentence. Text field can be used'
+              ' to enter search terms for audio sources.',
+          icon: Icons.queue_music,
+        );
 
   /// Get the singleton instance of this field.
   static AudioSentenceField get instance => _instance;
 
-  static final AudioSentenceField _instance = AudioSentenceField._privateConstructor();
+  static final AudioSentenceField _instance =
+      AudioSentenceField._privateConstructor();
 
   /// The unique key for this field.
-  static const String key = 'audio sentence';
+  static const String key = 'audio_sentence';
 
   final AudioPlayer _audioPlayer = AudioPlayer();
 
   final ValueNotifier<Duration> _positionNotifier =
-  ValueNotifier<Duration>(Duration.zero);
+      ValueNotifier<Duration>(Duration.zero);
   final ValueNotifier<Duration?> _durationNotifier =
-  ValueNotifier<Duration>(Duration.zero);
+      ValueNotifier<Duration>(Duration.zero);
   final ValueNotifier<PlayerState?> _playerStateNotifier =
-  ValueNotifier<PlayerState?>(null);
+      ValueNotifier<PlayerState?>(null);
 
   /// Build the audio player.
   Widget buildAudioPlayer() {
@@ -163,18 +165,18 @@ class AudioSentenceField extends AudioExportField {
               const AudioSessionConfiguration(
                 avAudioSessionCategory: AVAudioSessionCategory.playback,
                 avAudioSessionCategoryOptions:
-                AVAudioSessionCategoryOptions.duckOthers,
+                    AVAudioSessionCategoryOptions.duckOthers,
                 avAudioSessionMode: AVAudioSessionMode.defaultMode,
                 avAudioSessionRouteSharingPolicy:
-                AVAudioSessionRouteSharingPolicy.defaultPolicy,
+                    AVAudioSessionRouteSharingPolicy.defaultPolicy,
                 avAudioSessionSetActiveOptions:
-                AVAudioSessionSetActiveOptions.none,
+                    AVAudioSessionSetActiveOptions.none,
                 androidAudioAttributes: AndroidAudioAttributes(
                   contentType: AndroidAudioContentType.music,
                   usage: AndroidAudioUsage.media,
                 ),
                 androidAudioFocusGainType:
-                AndroidAudioFocusGainType.gainTransientMayDuck,
+                    AndroidAudioFocusGainType.gainTransientMayDuck,
                 androidWillPauseWhenDucked: true,
               ),
             );
@@ -271,7 +273,7 @@ class AudioSentenceField extends AudioExportField {
           child: Slider(
               value: sliderValue,
               max: (playerState == null ||
-                  playerState.processingState == ProcessingState.completed)
+                      playerState.processingState == ProcessingState.completed)
                   ? 1.0
                   : duration.inMilliseconds.toDouble(),
               onChanged: (progress) {

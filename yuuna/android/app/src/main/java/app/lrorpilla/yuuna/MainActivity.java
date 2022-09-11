@@ -91,7 +91,7 @@ public class MainActivity extends AudioServiceActivity {
 
         long modelId;
         if (modelExists("jidoujisho Yuuna")) {
-            modelId = mAnkiDroid.findModelIdByName("jidoujisho Yuuna", 11);
+            modelId = mAnkiDroid.findModelIdByName("jidoujisho Yuuna", 12);
         } else {
             modelId = api.addNewCustomModel("jidoujisho Yuuna",
                 new String[] {
@@ -101,17 +101,18 @@ public class MainActivity extends AudioServiceActivity {
                     "Meaning",
                     "Notes",
                     "Image",
-                    "Audio",
+                    "Term Audio",
                     "Pitch Accent",
                     "Furigana",
                     "Expanded Meaning",
                     "Collapsed Meaning",
+                    "Sentence Audio",
                 },
                 new String[] {
                     "jidoujisho Yuuna"
                 },
                 new String[] {"<div id=\"word\">{{Term}}</div><hr><p id=\"sentence\">{{Sentence}}"},
-                    new String[] {"<div id=\"word\">{{Term}}</div><hr><p id=\"sentence\">{{Sentence}}</p><br>{{#Audio}}[sound:{{Audio}}]{{/Audio}}{{#Image}}<div class=\"image\"><img src=\"{{Image}}\"></div>{{/Image}}{{#Pitch Accent}}<br>{{Pitch Accent}}<br>{{/Pitch Accent}}<br><h2 id=\"word\">{{furigana:Furigana}}</h2><br>{{#Meaning}}<p><small id=\"meaning\">{{Meaning}}</p </small><br>{{/Meaning}}{{#Expanded Meaning}}<p><small id=\"meaning\">{{Expanded Meaning}}</small></p>{{/Expanded Meaning}}<br>{{#Collapsed Meaning}}<details><summary></summary><br><p><small id=\"meaning\">{{Collapsed Meaning}}</small></p><br></details>{{/Collapsed Meaning}}"},
+                    new String[] {"<div id=\"word\">{{Term}}</div><hr><p id=\"sentence\">{{Sentence}}</p><br>{{#Sentence Audio}}[sound:{{Sentence Audio}}]{{/Sentence Audio}}{{#Term Audio}}<br>[sound:{{Term Audio}}]{{/Term Audio}}{{#Image}}<div class=\"image\"><img src=\"{{Image}}\"></div>{{/Image}}{{#Pitch Accent}}<br>{{Pitch Accent}}<br>{{/Pitch Accent}}<br><h2 id=\"word\">{{furigana:Furigana}}</h2><br>{{#Meaning}}<p><small id=\"meaning\">{{Meaning}}</p </small><br>{{/Meaning}}{{#Expanded Meaning}}<p><small id=\"meaning\">{{Expanded Meaning}}</small></p>{{/Expanded Meaning}}<br>{{#Collapsed Meaning}}<details><summary></summary><br><p><small id=\"meaning\">{{Collapsed Meaning}}</small></p><br></details>{{/Collapsed Meaning}}"},
                             "p {\n" +
                             "    margin: 0px\n" +
                             "}\n" +

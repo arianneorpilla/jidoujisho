@@ -15,7 +15,7 @@ class AudioField extends AudioExportField {
   AudioField._privateConstructor()
       : super(
           uniqueKey: key,
-          label: 'Audio',
+          label: 'Term Audio',
           description: 'Audio pertaining to the term. Text field can be used'
               ' to enter search terms for audio sources.',
           icon: Icons.audiotrack,

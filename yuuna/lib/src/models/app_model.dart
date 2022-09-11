@@ -71,7 +71,7 @@ final List<Field> globalFields = List<Field>.unmodifiable(
 final Map<String, Field> fieldsByKey = Map.unmodifiable(
   Map<String, Field>.fromEntries(
     globalFields.map(
-          (field) => MapEntry(field.uniqueKey, field),
+      (field) => MapEntry(field.uniqueKey, field),
     ),
   ),
 );
@@ -88,7 +88,7 @@ class AppModel with ChangeNotifier {
   /// Used for showing dialogs without needing to pass around a [BuildContext].
   GlobalKey<NavigatorState> get navigatorKey => _navigatorKey;
   late final GlobalKey<NavigatorState> _navigatorKey =
-  GlobalKey<NavigatorState>();
+      GlobalKey<NavigatorState>();
 
   /// Used for accessing persistent key-value data. See [initialise].
   late final Box _preferences;
@@ -128,7 +128,7 @@ class AppModel with ChangeNotifier {
   /// Used to memoize the list of widgets used to display a
   /// [DictionaryTerm]'s [DictionaryMetaEntry] tags.
   final Map<DictionaryTerm, Map<DictionaryMetaEntry, Widget>> _metaTagsCache =
-  {};
+      {};
 
   /// For refreshing on dictionary result additions.
   void refreshDictionaryHistory() {
@@ -258,13 +258,13 @@ class AppModel with ChangeNotifier {
   Stream<void> get currentMediaPauseStream =>
       _currentMediaPauseController.stream;
   final StreamController<void> _currentMediaPauseController =
-  StreamController.broadcast();
+      StreamController.broadcast();
 
   /// Allows actions to be performed upon Play/Pause on headset buttons.
   Stream<void> get playPauseHeadsetActionStream =>
       _playPauseHeadsetActionStreamController.stream;
   final StreamController<void> _playPauseHeadsetActionStreamController =
-  StreamController.broadcast();
+      StreamController.broadcast();
 
   /// Used to check whether or not the creator is currently in the navigation
   /// stack.
@@ -304,7 +304,7 @@ class AppModel with ChangeNotifier {
   /// Current subtitle.
   ValueNotifier<Subtitle?> get currentSubtitle => _currentSubtitle;
   final ValueNotifier<Subtitle?> _currentSubtitle =
-  ValueNotifier<Subtitle?>(null);
+      ValueNotifier<Subtitle?>(null);
 
   /// Current subtitle options.
   ValueNotifier<SubtitleOptions>? get currentSubtitleOptions {
@@ -326,9 +326,9 @@ class AppModel with ChangeNotifier {
 
   /// Change this once a field hide/show system is in place.
   List<Field> get activeFields => [
-    ...lastSelectedMapping.getCreatorFields(),
-    ...lastSelectedMapping.getCreatorCollapsedFields()
-  ];
+        ...lastSelectedMapping.getCreatorFields(),
+        ...lastSelectedMapping.getCreatorCollapsedFields()
+      ];
 
   /// Update the user-defined order of a given dictionary in the database.
   /// See the dictionary dialog's [ReorderableListView] for usage.
@@ -360,7 +360,7 @@ class AppModel with ChangeNotifier {
     languages = Map<String, Language>.unmodifiable(
       Map<String, Language>.fromEntries(
         availableLanguages.map(
-              (language) => MapEntry(language.locale.toLanguageTag(), language),
+          (language) => MapEntry(language.locale.toLanguageTag(), language),
         ),
       ),
     );
@@ -379,7 +379,7 @@ class AppModel with ChangeNotifier {
     locales = Map<String, Locale>.unmodifiable(
       Map<String, Locale>.fromEntries(
         availableLocales.map(
-              (locale) => MapEntry(locale.toLanguageTag(), locale),
+          (locale) => MapEntry(locale.toLanguageTag(), locale),
         ),
       ),
     );
@@ -399,7 +399,7 @@ class AppModel with ChangeNotifier {
     mediaTypes = Map<String, MediaType>.unmodifiable(
       Map<String, MediaType>.fromEntries(
         availableMediaTypes.map(
-              (mediaType) => MapEntry(mediaType.uniqueKey, mediaType),
+          (mediaType) => MapEntry(mediaType.uniqueKey, mediaType),
         ),
       ),
     );
@@ -427,12 +427,12 @@ class AppModel with ChangeNotifier {
 
     mediaSources = Map<MediaType, Map<String, MediaSource>>.unmodifiable(
       availableMediaSources.map(
-            (type, sources) => MapEntry(
+        (type, sources) => MapEntry(
           type,
           Map<String, MediaSource>.unmodifiable(
             Map<String, MediaSource>.fromEntries(
               sources.map(
-                    (source) => MapEntry(source.uniqueKey, source),
+                (source) => MapEntry(source.uniqueKey, source),
               ),
             ),
           ),
@@ -445,7 +445,7 @@ class AppModel with ChangeNotifier {
   void populateDictionaryFormats() async {
     /// A list of dictionary formats that the app will support at runtime.
     final List<DictionaryFormat> availableDictionaryFormats =
-    List<DictionaryFormat>.unmodifiable(
+        List<DictionaryFormat>.unmodifiable(
       [
         YomichanDictionaryFormat.instance,
       ],
@@ -454,7 +454,7 @@ class AppModel with ChangeNotifier {
     dictionaryFormats = Map<String, DictionaryFormat>.unmodifiable(
       Map<String, DictionaryFormat>.fromEntries(
         availableDictionaryFormats.map(
-              (dictionaryFormat) => MapEntry(
+          (dictionaryFormat) => MapEntry(
             dictionaryFormat.formatName,
             dictionaryFormat,
           ),
@@ -468,7 +468,7 @@ class AppModel with ChangeNotifier {
     fields = Map<String, Field>.unmodifiable(
       Map<String, Field>.fromEntries(
         globalFields.map(
-              (field) => MapEntry(field.uniqueKey, field),
+          (field) => MapEntry(field.uniqueKey, field),
         ),
       ),
     );
@@ -548,12 +548,12 @@ class AppModel with ChangeNotifier {
 
     enhancements = Map<Field, Map<String, Enhancement>>.unmodifiable(
       availableEnhancements.map(
-            (field, enhancements) => MapEntry(
+        (field, enhancements) => MapEntry(
           field,
           Map<String, Enhancement>.unmodifiable(
             Map<String, Enhancement>.fromEntries(
               enhancements.map(
-                    (enhancement) => MapEntry(enhancement.uniqueKey, enhancement),
+                (enhancement) => MapEntry(enhancement.uniqueKey, enhancement),
               ),
             ),
           ),
@@ -576,7 +576,7 @@ class AppModel with ChangeNotifier {
     quickActions = Map<String, QuickAction>.unmodifiable(
       Map<String, QuickAction>.fromEntries(
         availableQuickActions.map(
-              (quickAction) => MapEntry(quickAction.uniqueKey, quickAction),
+          (quickAction) => MapEntry(quickAction.uniqueKey, quickAction),
         ),
       ),
     );
@@ -597,7 +597,7 @@ class AppModel with ChangeNotifier {
   Future<Directory> prepareJidoujishoDirectory() async {
     String directoryPath = path.join(appDirectory.path, 'jidoujishoExport');
     String noMediaFilePath =
-    path.join(appDirectory.path, 'jidoujishoExport', '.nomedia');
+        path.join(appDirectory.path, 'jidoujishoExport', '.nomedia');
 
     Directory jidoujishoDirectory = Directory(directoryPath);
     File noMediaFile = File(noMediaFilePath);
@@ -706,7 +706,7 @@ class AppModel with ChangeNotifier {
   /// Get whether or not the app is in incognito mode.
   bool get isIncognitoMode {
     bool isDarkMode =
-    _preferences.get('is_incognito_mode', defaultValue: false);
+        _preferences.get('is_incognito_mode', defaultValue: false);
     return isDarkMode;
   }
 
@@ -716,7 +716,7 @@ class AppModel with ChangeNotifier {
     incognitoNotifier.notifyListeners();
 
     String toastMessage =
-    translate(isIncognitoMode ? 'info_incognito_on' : 'info_incognito_off');
+        translate(isIncognitoMode ? 'info_incognito_on' : 'info_incognito_off');
     Fluttertoast.showToast(
       msg: toastMessage,
       toastLength: Toast.LENGTH_SHORT,
@@ -728,7 +728,7 @@ class AppModel with ChangeNotifier {
   Language get targetLanguage {
     String defaultLocaleTag = languages.values.first.locale.toLanguageTag();
     String localeTag =
-    _preferences.get('target_language', defaultValue: defaultLocaleTag);
+        _preferences.get('target_language', defaultValue: defaultLocaleTag);
 
     return languages[localeTag]!;
   }
@@ -736,7 +736,7 @@ class AppModel with ChangeNotifier {
   /// Get the last selected deck from persisted preferences.
   String get lastSelectedDeckName {
     String deckName =
-    _preferences.get('last_selected_deck', defaultValue: 'Default');
+        _preferences.get('last_selected_deck', defaultValue: 'Default');
     return deckName;
   }
 
@@ -756,7 +756,7 @@ class AppModel with ChangeNotifier {
   Locale get appLocale {
     String defaultLocaleTag = locales.values.first.toLanguageTag();
     String localeTag =
-    _preferences.get('app_locale', defaultValue: defaultLocaleTag);
+        _preferences.get('app_locale', defaultValue: defaultLocaleTag);
 
     return locales[localeTag]!;
   }
@@ -777,9 +777,9 @@ class AppModel with ChangeNotifier {
     );
 
     AnkiMapping mapping = _database.ankiMappings
-        .where()
-        .labelEqualTo(mappingName)
-        .findFirstSync() ??
+            .where()
+            .labelEqualTo(mappingName)
+            .findFirstSync() ??
         _database.ankiMappings
             .where()
             .labelEqualTo(mappings.first.label)
@@ -936,7 +936,7 @@ class AppModel with ChangeNotifier {
 
     /// Message to notify user if selected file extension does not match.
     String extensionErrorMessage =
-    translate('import_file_extension_invalid').replaceAll(
+        translate('import_file_extension_invalid').replaceAll(
       '%extensions%',
       dictionaryFormat.compatibleFileExtensions.toString(),
     );
@@ -1068,7 +1068,7 @@ class AppModel with ChangeNotifier {
 
       /// Get the highest order in the dictionary database.
       Dictionary? highestOrderDictionary =
-      _database.dictionarys.where().sortByOrderDesc().findFirstSync();
+          _database.dictionarys.where().sortByOrderDesc().findFirstSync();
       late int order;
       if (highestOrderDictionary != null) {
         order = highestOrderDictionary.order + 1;
@@ -1194,7 +1194,7 @@ class AppModel with ChangeNotifier {
     );
 
     List<DictionaryTerm> terms =
-    await compute(targetLanguage.prepareSearchResults!, params);
+        await compute(targetLanguage.prepareSearchResults!, params);
 
     DictionaryResult result = DictionaryResult(
       searchTerm: searchTerm,
@@ -1213,19 +1213,19 @@ class AppModel with ChangeNotifier {
   /// exists.
   bool mappingNameHasDuplicate(AnkiMapping mapping) {
     return _database.ankiMappings
-        .where()
-        .labelEqualTo(mapping.label)
-        .filter()
-        .not()
-        .orderEqualTo(mapping.order)
-        .findFirstSync() !=
+            .where()
+            .labelEqualTo(mapping.label)
+            .filter()
+            .not()
+            .orderEqualTo(mapping.order)
+            .findFirstSync() !=
         null;
   }
 
   /// Get the newest available order for a new mapping.
   int get nextMappingOrder {
     AnkiMapping? highestOrderMapping =
-    _database.ankiMappings.where().sortByOrderDesc().findFirstSync();
+        _database.ankiMappings.where().sortByOrderDesc().findFirstSync();
     late int order;
     if (highestOrderMapping != null) {
       order = highestOrderMapping.order + 1;
@@ -1248,7 +1248,7 @@ class AppModel with ChangeNotifier {
 
   /// Used to communicate back and forth with Dart and native code.
   static const MethodChannel methodChannel =
-  MethodChannel('app.lrorpilla.yuuna/anki');
+      MethodChannel('app.lrorpilla.yuuna/anki');
 
   /// Shows the AnkiDroid API message. Called when an Anki-related API get call
   /// fails.
@@ -1358,7 +1358,7 @@ class AppModel with ChangeNotifier {
   Future<List<String>> getDecks() async {
     try {
       Map<dynamic, dynamic> result =
-      await methodChannel.invokeMethod('getDecks');
+          await methodChannel.invokeMethod('getDecks');
       List<String> decks = result.values.toList().cast<String>();
 
       decks.sort((a, b) => a.compareTo(b));
@@ -1374,7 +1374,7 @@ class AppModel with ChangeNotifier {
   Future<List<String>> getModelList() async {
     try {
       Map<dynamic, dynamic> result =
-      await methodChannel.invokeMethod('getModelList');
+          await methodChannel.invokeMethod('getModelList');
       List<String> models = result.values.toList().cast<String>();
 
       models.sort((a, b) => a.compareTo(b));
@@ -1416,9 +1416,9 @@ class AppModel with ChangeNotifier {
     Map<Field, String> exportedAudio = {};
 
     for (MapEntry<Field, File> entry
-    in creatorFieldValues.imagesToExport.entries) {
+        in creatorFieldValues.imagesToExport.entries) {
       String timestamp =
-      intl.DateFormat('yyyyMMddTkkmmss').format(DateTime.now());
+          intl.DateFormat('yyyyMMddTkkmmss').format(DateTime.now());
       String preferredName = 'jidoujisho-$timestamp';
 
       String? imageFileName;
@@ -1432,9 +1432,9 @@ class AppModel with ChangeNotifier {
     }
 
     for (MapEntry<Field, File> entry
-    in creatorFieldValues.audioToExport.entries) {
+        in creatorFieldValues.audioToExport.entries) {
       String timestamp =
-      intl.DateFormat('yyyyMMddTkkmmss').format(DateTime.now());
+          intl.DateFormat('yyyyMMddTkkmmss').format(DateTime.now());
       String preferredName = 'jidoujisho-$timestamp';
 
       String? audioFileName;
@@ -1588,10 +1588,10 @@ class AppModel with ChangeNotifier {
   Future<void> resetProfileFields(AnkiMapping mapping) async {
     List<String> fields = await getFieldList(mapping.model);
     List<String?> exportFieldKeys =
-    List.generate(fields.length, (index) => null);
+        List.generate(fields.length, (index) => null);
 
     AnkiMapping resetMapping =
-    mapping.copyWith(exportFieldKeys: exportFieldKeys);
+        mapping.copyWith(exportFieldKeys: exportFieldKeys);
     _database.writeTxnSync((_) {
       if (mapping.id != null &&
           _database.ankiMappings.getSync(resetMapping.id!) != null) {
@@ -1640,7 +1640,7 @@ class AppModel with ChangeNotifier {
     }
 
     bool newMappingModelLengthMatches =
-    await profileFieldMatchesCardTypeCount(mapping);
+        await profileFieldMatchesCardTypeCount(mapping);
 
     if (!newMappingModelLengthMatches) {
       await showDialog(
@@ -1839,9 +1839,9 @@ class AppModel with ChangeNotifier {
       PageRouteBuilder(
         pageBuilder: (context, animation1, animation2) =>
             RecursiveDictionaryPage(
-              searchTerm: searchTerm,
-              killOnPop: killOnPop,
-            ),
+          searchTerm: searchTerm,
+          killOnPop: killOnPop,
+        ),
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
       ),
@@ -1982,8 +1982,8 @@ class AppModel with ChangeNotifier {
   /// Updates a given [mapping]'s persisted action for a given [slotNumber].
   void setQuickAction(
       {required AnkiMapping mapping,
-        required int slotNumber,
-        required QuickAction quickAction}) async {
+      required int slotNumber,
+      required QuickAction quickAction}) async {
     mapping.actions[slotNumber] = quickAction.uniqueKey;
 
     _database.writeTxnSync((_) {
@@ -2160,7 +2160,7 @@ class AppModel with ChangeNotifier {
 
     if (terms.length == 1) {
       String stashAddedSingle =
-      translate('stash_added_single').replaceAll('%term%', terms.first);
+          translate('stash_added_single').replaceAll('%term%', terms.first);
       Fluttertoast.showToast(
         msg: stashAddedSingle,
         toastLength: Toast.LENGTH_SHORT,
@@ -2214,7 +2214,7 @@ class AppModel with ChangeNotifier {
     required String tagName,
   }) {
     DictionaryTag? tag =
-    _database.dictionaryTags.getByUniqueKeySync('$dictionaryName/$tagName');
+        _database.dictionaryTags.getByUniqueKeySync('$dictionaryName/$tagName');
     return tag;
   }
 
@@ -2276,7 +2276,7 @@ class AppModel with ChangeNotifier {
   /// Return a list of [DictionaryMetaEntry] for a certain term.
   List<DictionaryMetaEntry> getMetaEntriesFromTerm(String term) {
     List<DictionaryMetaEntry> metaEntries =
-    _database.dictionaryMetaEntrys.where().termEqualTo(term).findAllSync();
+        _database.dictionaryMetaEntrys.where().termEqualTo(term).findAllSync();
 
     return metaEntries;
   }
@@ -2783,7 +2783,7 @@ class AppModel with ChangeNotifier {
   /// Allows the player screen to listen to handler changes.
   Stream<void> get audioHandlerStream => _audioHandlerStreamController.stream;
   final StreamController<void> _audioHandlerStreamController =
-  StreamController.broadcast();
+      StreamController.broadcast();
 
   /// Allows updating media item art.
   JidoujishoAudioHandler? _audioHandler;
