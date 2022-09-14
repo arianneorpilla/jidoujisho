@@ -42,6 +42,8 @@ class _HomePageState extends BasePageState<HomePage> {
   String get cardCreatorLabel => appModel.translate('card_creator');
   String get showMenuLabel => appModel.translate('show_menu');
 
+  String get applicationLegaleseLabel => appModel.translate('application_legalese');
+
   @override
   void initState() {
     super.initState();
@@ -262,14 +264,6 @@ class _HomePageState extends BasePageState<HomePage> {
   }
 
   void navigateToLicensePage() async {
-    String applicationLegalese =
-        'A full-featured immersion language learning suite for mobile.\n\n'
-        'Originally built for the Japanese language learning community by Leo Rafael Orpilla. Logo by suzy and Aaron Marbella.'
-        '\n\njidoujisho is free and open source software. See the '
-        'project repository for a comprehensive list of other licenses '
-        'and attribution notices. Enjoying the application? Help out by '
-        'providing feedback, making a donation, reporting issues or '
-        'contributing improvements on GitHub.';
 
     Navigator.of(context).push(
       MaterialPageRoute<void>(
@@ -280,7 +274,7 @@ class _HomePageState extends BasePageState<HomePage> {
           child: LicensePage(
             applicationName: appModel.packageInfo.appName,
             applicationVersion: appModel.packageInfo.version,
-            applicationLegalese: applicationLegalese,
+            applicationLegalese: applicationLegaleseLabel,
             applicationIcon: Padding(
               padding: Spacing.of(context).insets.all.normal,
               child: Image.asset(

@@ -373,6 +373,7 @@ class AppModel with ChangeNotifier {
     final List<Locale> availableLocales = List<Locale>.unmodifiable(
       [
         const Locale('en', 'US'),
+        const Locale('es', 'ES')
       ],
     );
 
@@ -755,9 +756,7 @@ class AppModel with ChangeNotifier {
   /// Get the current app locale from persisted preferences.
   Locale get appLocale {
     String defaultLocaleTag = locales.values.first.toLanguageTag();
-    String localeTag =
-        _preferences.get('app_locale', defaultValue: defaultLocaleTag);
-
+    String localeTag = _preferences.get('app_locale', defaultValue: defaultLocaleTag);
     return locales[localeTag]!;
   }
 
