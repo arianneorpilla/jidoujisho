@@ -83,18 +83,18 @@ class ForvoAudioEnhancement extends AudioEnhancement {
       searchTerm: searchTerm!,
     );
 
-    Directory appDirDoc = await getApplicationDocumentsDirectory();
-    String forvoAudioPath = '${appDirDoc.path}/forvoAudio';
-    Directory forvoAudioDir = Directory(forvoAudioPath);
-    if (forvoAudioDir.existsSync()) {
-      forvoAudioDir.deleteSync(recursive: true);
-    }
-    forvoAudioDir.createSync();
-
     if (cause != EnhancementTriggerCause.manual) {
       if (results.isNotEmpty) {
         int index = 0;
         ForvoResult result = results[index];
+
+        Directory appDirDoc = await getApplicationDocumentsDirectory();
+        String forvoAudioPath = '${appDirDoc.path}/forvoAudio';
+        Directory forvoAudioDir = Directory(forvoAudioPath);
+        if (forvoAudioDir.existsSync()) {
+          forvoAudioDir.deleteSync(recursive: true);
+        }
+        forvoAudioDir.createSync();
 
         File file = File('$forvoAudioPath/$index.mp3');
         http.Response request = await http.get(Uri.parse(result.audioUrl));
@@ -118,6 +118,14 @@ class ForvoAudioEnhancement extends AudioEnhancement {
         builder: (context) => ForvoAudioDialogPage(
           results: results,
           onSelect: (index) async {
+            Directory appDirDoc = await getApplicationDocumentsDirectory();
+            String forvoAudioPath = '${appDirDoc.path}/forvoAudio';
+            Directory forvoAudioDir = Directory(forvoAudioPath);
+            if (forvoAudioDir.existsSync()) {
+              forvoAudioDir.deleteSync(recursive: true);
+            }
+            forvoAudioDir.createSync();
+
             File file = File('$forvoAudioPath/$index.mp3');
             http.Response request =
                 await http.get(Uri.parse(results[index].audioUrl));

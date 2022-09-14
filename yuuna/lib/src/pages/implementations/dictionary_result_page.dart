@@ -62,6 +62,8 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
     }
   }
 
+  final ScrollController _scrollController = ScrollController();
+
   @override
   Widget build(BuildContext context) {
     dictionaryMap = Map<String, Dictionary>.fromEntries(
@@ -78,11 +80,12 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
       );
     }
 
-    final ScrollController _scrollController = ScrollController();
-
     return MediaQuery(
       data: MediaQuery.of(context).removePadding(
         removeTop: true,
+        removeBottom: true,
+        removeLeft: true,
+        removeRight: true,
       ),
       child: RawScrollbar(
         thumbVisibility: true,

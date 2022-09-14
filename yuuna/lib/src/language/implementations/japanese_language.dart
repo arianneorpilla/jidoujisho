@@ -279,7 +279,7 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
   String searchTerm = params.searchTerm.trim();
   String fallbackTerm = params.fallbackTerm.trim();
 
-  int maxEntries = 100;
+  int maxEntries = 60;
   int limit = params.maximumDictionaryEntrySearchMatch;
 
   if (searchTerm.isEmpty) {

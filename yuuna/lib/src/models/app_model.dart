@@ -1504,7 +1504,7 @@ class AppModel with ChangeNotifier {
       String response = await methodChannel.invokeMethod(
         'addFileToMedia',
         <String, String>{
-          'filename': exportFile.path,
+          'filename': destinationPath,
           'preferredName': preferredName,
           'mimeType': mimeType,
         },

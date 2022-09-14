@@ -45,7 +45,7 @@ class ReaderLyricsSource extends ReaderMediaSource {
   static final ReaderLyricsSource _instance =
       ReaderLyricsSource._privateConstructor();
 
-  /// Used f>or manual search.
+  /// Used for manual search.
   String? get overrideTitle => _overrideTitle;
   String? _overrideTitle;
 
