@@ -259,15 +259,6 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
         textBaseline: textBaseline,
       );
 
-  /// Used to force the locale into the typography.
-  Typography get typography => Typography.material2021(
-        white: Typography.whiteMountainView.merge(textTheme),
-        black: Typography.blackMountainView.merge(textTheme),
-        englishLike: Typography.englishLike2021.merge(textTheme),
-        dense: Typography.dense2021.merge(textTheme),
-        tall: Typography.tall2021.merge(textTheme),
-      );
-
   /// This override is a workaround required to theme the app-wide [TextTheme]
   /// based on the [Locale] and [TextBaseline] of the active target language.
   TextTheme get textTheme => TextTheme(
@@ -290,7 +281,6 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
 
   /// Shows when the current [themeMode] is a light theme.
   ThemeData get theme => ThemeData(
-        typography: typography,
         backgroundColor: Colors.white,
         scaffoldBackgroundColor: Colors.white,
         selectedRowColor: Colors.grey.shade300,
