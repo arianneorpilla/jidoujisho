@@ -437,6 +437,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
   Widget buildLandscape() {
     return SafeArea(
+      top: false,
       child: Row(
         children: [
           Flexible(
@@ -502,6 +503,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
   Widget buildPortrait() {
     return SafeArea(
+      top: false,
       child: Column(
         children: [
           Expanded(child: buildFields(isPortrait: true)),

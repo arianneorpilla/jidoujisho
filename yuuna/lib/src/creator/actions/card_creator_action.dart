@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
@@ -31,6 +32,11 @@ class CardCreatorAction extends QuickAction {
     required DictionaryTerm dictionaryTerm,
     required List<DictionaryMetaEntry> metaEntries,
   }) async {
+    if (appModel.isMediaOpen) {
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      await Future.delayed(const Duration(milliseconds: 5), () {});
+    }
+
     if (appModel.isCreatorOpen) {
       Map<Field, String> newTextFields = {};
       for (Field field in appModel.activeFields) {
@@ -89,11 +95,15 @@ class CardCreatorAction extends QuickAction {
         }
       }
 
-      appModel.openCreator(
+      await appModel.openCreator(
         ref: ref,
         killOnPop: false,
         creatorFieldValues: CreatorFieldValues(textValues: newTextFields),
       );
+
+      if (appModel.isMediaOpen) {
+        await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+      }
     }
   }
 }

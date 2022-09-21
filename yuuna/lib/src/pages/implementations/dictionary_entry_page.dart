@@ -4,6 +4,7 @@ import 'package:spaces/spaces.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/pages.dart';
 import 'package:collection/collection.dart';
+import 'package:yuuna/utils.dart';
 
 /// Returns the widget for a [DictionaryEntry] making up a collection of
 /// meanings.
@@ -37,6 +38,19 @@ class DictionaryEntryPage extends BasePage {
 class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
   String get dictionaryImportTag =>
       appModelNoUpdate.translate('dictionary_import_tag');
+
+  @override
+  MaterialTextSelectionControls get selectionControls =>
+      JidoujishoTextSelectionControls(
+        searchAction: widget.onSearch,
+        searchActionLabel: searchLabel,
+        stashAction: widget.onStash,
+        stashActionLabel: stashLabel,
+        allowCopy: true,
+        allowSelectAll: true,
+        allowCut: true,
+        allowPaste: true,
+      );
 
   @override
   Widget build(BuildContext context) {

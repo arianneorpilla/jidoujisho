@@ -51,13 +51,16 @@ class _ReaderTtuSourcePageState
     return WillPopScope(
       onWillPop: onWillPop,
       child: Scaffold(
-        body: Stack(
-          fit: StackFit.expand,
-          alignment: Alignment.center,
-          children: <Widget>[
-            buildBody(),
-            buildDictionary(),
-          ],
+        body: SafeArea(
+          bottom: false,
+          child: Stack(
+            fit: StackFit.expand,
+            alignment: Alignment.center,
+            children: <Widget>[
+              buildBody(),
+              buildDictionary(),
+            ],
+          ),
         ),
       ),
     );
@@ -275,10 +278,14 @@ class _ReaderTtuSourcePageState
   void searchMenuAction() async {
     String searchTerm = await getSelectedText();
 
-    appModel.openRecursiveDictionarySearch(
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    await Future.delayed(const Duration(milliseconds: 5), () {});
+    await appModel.openRecursiveDictionarySearch(
       searchTerm: searchTerm,
       killOnPop: false,
     );
+    await Future.delayed(const Duration(milliseconds: 5), () {});
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
 
   void stashMenuAction() async {
@@ -290,7 +297,10 @@ class _ReaderTtuSourcePageState
   void creatorMenuAction() async {
     String searchTerm = await getSelectedText();
 
-    appModel.openCreator(
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    await Future.delayed(const Duration(milliseconds: 5), () {});
+
+    await appModel.openCreator(
       ref: ref,
       killOnPop: false,
       creatorFieldValues: CreatorFieldValues(
@@ -299,6 +309,9 @@ class _ReaderTtuSourcePageState
         },
       ),
     );
+
+    await Future.delayed(const Duration(milliseconds: 5), () {});
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
 
   void copyMenuAction() async {
