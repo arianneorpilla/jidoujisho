@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_exit_app/flutter_exit_app.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/dictionary.dart';
@@ -114,7 +114,7 @@ class _RecursiveDictionaryPageState
       onFocusChanged: (focused) {
         if (!focused) {
           if (widget.killOnPop) {
-            SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+            FlutterExitApp.exitApp();
           } else {
             Navigator.pop(context);
           }
@@ -137,7 +137,7 @@ class _RecursiveDictionaryPageState
     onQueryChanged(_controller.query);
   }
 
-  Duration get searchDelay => const Duration(milliseconds: 300);
+  Duration get searchDelay => const Duration(milliseconds: 200);
   Duration get historyDelay => Duration.zero;
 
   void onQueryChanged(String query) async {
@@ -165,7 +165,7 @@ class _RecursiveDictionaryPageState
                   historyKey: DictionaryMediaType.instance.uniqueKey,
                   searchTerm: _controller.query,
                 );
-                if (_result!.terms.isNotEmpty) {
+                if (_result!.terms!.isNotEmpty) {
                   await appModel.addToDictionaryHistory(result: _result!);
                 }
               }
@@ -204,7 +204,7 @@ class _RecursiveDictionaryPageState
         icon: Icons.arrow_back,
         onTap: () {
           if (widget.killOnPop) {
-            SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+            FlutterExitApp.exitApp();
           } else {
             Navigator.pop(context);
           }
@@ -307,7 +307,7 @@ class _RecursiveDictionaryPageState
         return const SizedBox.shrink();
       }
     }
-    if (_result == null || _result!.terms.isEmpty) {
+    if (_result == null || _result!.terms!.isEmpty) {
       return buildNoSearchResultsPlaceholderMessage();
     }
 

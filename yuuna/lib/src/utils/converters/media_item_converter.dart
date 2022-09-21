@@ -1,15 +1,11 @@
 import 'dart:convert';
 
-import 'package:isar/isar.dart';
 import 'package:yuuna/media.dart';
 
 /// A type converter for [MediaItem].
-class MediaItemConverter extends TypeConverter<MediaItem?, String?> {
-  /// Initialise this converter.
-  const MediaItemConverter();
-
-  @override
-  MediaItem? fromIsar(String? object) {
+class MediaItemConverter {
+  /// Deserializes the object.
+  static MediaItem? fromIsar(String? object) {
     if (object == null) {
       return null;
     }
@@ -17,8 +13,8 @@ class MediaItemConverter extends TypeConverter<MediaItem?, String?> {
     return MediaItem.fromJson(jsonDecode(object));
   }
 
-  @override
-  String? toIsar(MediaItem? object) {
+  /// Serializes the object.
+  static String? toIsar(MediaItem? object) {
     if (object == null) {
       return null;
     }

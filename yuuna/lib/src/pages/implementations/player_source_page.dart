@@ -626,7 +626,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         builder: (context, value, _) {
           return AnimatedOpacity(
             opacity: value ? 0.0 : 1.0,
-            duration: const Duration(milliseconds: 300),
+            duration: const Duration(milliseconds: 200),
             child: buildMenuContent(),
           );
         },

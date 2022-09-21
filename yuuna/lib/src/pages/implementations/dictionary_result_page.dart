@@ -72,8 +72,8 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
       ),
     );
 
-    for (DictionaryTerm term in widget.result.terms) {
-      term.entries.sort(
+    for (DictionaryTerm term in widget.result.terms!) {
+      term.entries!.sort(
         (a, b) => dictionaryMap![a.dictionaryName]!.order.compareTo(
               dictionaryMap![b.dictionaryName]!.order,
             ),
@@ -100,7 +100,7 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
             physics: const AlwaysScrollableScrollPhysics(
               parent: BouncingScrollPhysics(),
             ),
-            itemCount: widget.result.terms.length + 1,
+            itemCount: widget.result.terms!.length + 1,
             itemBuilder: (context, index) {
               if (index == 0) {
                 return widget.spaceBeforeFirstResult
@@ -108,7 +108,7 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
                     : const SizedBox.shrink();
               }
 
-              DictionaryTerm dictionaryTerm = widget.result.terms[index - 1];
+              DictionaryTerm dictionaryTerm = widget.result.terms![index - 1];
 
               if (metaEntriesCache[index - 1] == null) {
                 final Map<String, ExpandableController> controllers = {};

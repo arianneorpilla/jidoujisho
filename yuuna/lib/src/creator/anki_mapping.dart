@@ -21,9 +21,9 @@ class AnkiMapping {
     required this.creatorCollapsedFieldKeys,
     required this.order,
     required this.tags,
-    required this.enhancements,
-    required this.actions,
     required this.exportMediaTags,
+    this.enhancements,
+    this.actions,
     this.id,
   });
 
@@ -126,8 +126,7 @@ class AnkiMapping {
   static String standardProfileName = 'Standard';
 
   /// A unique identifier for the purposes of database storage.
-  @Id()
-  int? id;
+  Id? id;
 
   /// The name of this mapping.
   @Index(unique: true)
@@ -152,12 +151,22 @@ class AnkiMapping {
   final List<String> tags;
 
   /// Used to keep track of actions used in dictionary results.
-  @QuickActionsConverter()
-  final Map<int, String> actions;
+  @ignore
+  Map<int, String>? actions;
+
+  /// Serializes [actions].
+  String get actionsIsar => QuickActionsConverter.toIsar(actions!);
+  set actionsIsar(String object) =>
+      actions = QuickActionsConverter.fromIsar(object);
 
   /// Used to keep track of enhancements used in the creator per field.
-  @EnhancementsConverter()
-  final Map<String, Map<int, String>> enhancements;
+  @ignore
+  late Map<String, Map<int, String>>? enhancements;
+
+  /// Serializes [enhancements].
+  String get enhancementsIsar => EnhancementsConverter.toIsar(enhancements!);
+  set enhancementsIsar(String object) =>
+      enhancements = EnhancementsConverter.fromIsar(object);
 
   /// Reserved index for the auto mode field in the map of enhancement names
   /// for a field.
@@ -246,7 +255,7 @@ class AnkiMapping {
   /// Returns a list of enhancement names active for a certain field in the
   /// persisted enhancements map.
   List<String> getManualFieldEnhancementNames({required Field field}) {
-    return (enhancements[field.uniqueKey] ?? {})
+    return (enhancements![field.uniqueKey] ?? {})
         .entries
         .where((entry) => entry.key != autoModeSlotNumber)
         .map((entry) => entry.value)
@@ -256,12 +265,12 @@ class AnkiMapping {
   /// Returns the enhancement names active for a certain field in the persisted
   /// enhancements map.
   String? getAutoFieldEnhancementName({required Field field}) {
-    return (enhancements[field.uniqueKey] ?? {})[autoModeSlotNumber];
+    return (enhancements![field.uniqueKey] ?? {})[autoModeSlotNumber];
   }
 
   /// Returns a list of action names active in the persisted actions map.
   List<String> getActionNames() {
-    return actions.values.toList();
+    return actions!.values.toList();
   }
 
   /// Returns a list of enhancements active for a certain field in the

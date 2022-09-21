@@ -150,7 +150,7 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
     required int slotNumber,
     required List<DictionaryMetaEntry> metaEntries,
   }) {
-    String? actionName = mapping.actions[slotNumber];
+    String? actionName = mapping.actions![slotNumber];
     QuickAction? quickAction;
 
     if (actionName != null) {
@@ -263,7 +263,7 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (context, index) {
-          DictionaryEntry entry = widget.dictionaryTerm.entries[index];
+          DictionaryEntry entry = widget.dictionaryTerm.entries![index];
 
           if (widget.dictionaryHiddens[entry.dictionaryName]!) {
             return const SizedBox.shrink();
@@ -277,7 +277,7 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
             onStash: widget.onStash,
           );
         },
-        childCount: widget.dictionaryTerm.entries.length,
+        childCount: widget.dictionaryTerm.entries!.length,
       ),
     );
   }

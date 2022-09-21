@@ -248,7 +248,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
 
   /// Displays the dictionary entries.
   Widget buildSearchResult() {
-    if (_dictionaryResultNotifier.value!.terms.isEmpty) {
+    if (_dictionaryResultNotifier.value!.terms!.isEmpty) {
       return buildNoSearchResultsPlaceholderMessage();
     }
 

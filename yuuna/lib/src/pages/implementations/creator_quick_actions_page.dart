@@ -121,7 +121,7 @@ class _CreatorQuickActionsPageState extends BasePageState {
     required AnkiMapping mapping,
     required int slotNumber,
   }) {
-    String? actionName = mapping.actions[slotNumber];
+    String? actionName = mapping.actions![slotNumber];
     QuickAction? action;
 
     if (actionName != null) {

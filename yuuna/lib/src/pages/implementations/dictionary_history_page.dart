@@ -71,8 +71,8 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
         appModel.dictionaryHistory.reversed.toList();
 
     for (DictionaryResult result in historyResults) {
-      for (DictionaryTerm term in result.terms) {
-        term.entries.sort(
+      for (DictionaryTerm term in result.terms!) {
+        term.entries!.sort(
           (a, b) => dictionaryMap![a.dictionaryName]!.order.compareTo(
                 dictionaryMap![b.dictionaryName]!.order,
               ),
@@ -99,7 +99,7 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
         return ValueListenableBuilder<int>(
           valueListenable: indexNotifier,
           builder: (context, value, child) {
-            DictionaryTerm dictionaryTerm = result.terms[indexNotifier.value];
+            DictionaryTerm dictionaryTerm = result.terms![indexNotifier.value];
 
             metaEntriesCache[index - 1] ??= {};
             expandedControllers[index - 1] ??= {};
@@ -143,7 +143,7 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
               dictionaryHiddens:
                   dictionaryHiddens[index - 1]![result.scrollIndex]!,
               onScrollRight: () async {
-                if (result.scrollIndex == result.terms.length - 1) {
+                if (result.scrollIndex == result.terms!.length - 1) {
                   result.scrollIndex = 0;
                 } else {
                   result.scrollIndex += 1;
@@ -158,7 +158,7 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
               },
               onScrollLeft: () async {
                 if (result.scrollIndex == 0) {
-                  result.scrollIndex = result.terms.length - 1;
+                  result.scrollIndex = result.terms!.length - 1;
                 } else {
                   result.scrollIndex -= 1;
                 }
@@ -242,7 +242,7 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
             ),
           ),
           TextSpan(
-            text: '${result.terms.length} ',
+            text: '${result.terms!.length} ',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: fontSize,

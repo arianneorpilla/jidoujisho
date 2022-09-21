@@ -20,8 +20,7 @@ class DictionaryResult {
   });
 
   /// A unique identifier for the purposes of database storage.
-  @Id()
-  int? id;
+  Id? id;
 
   /// An index that indicates which in the mapping is the last viewed and
   /// should be shown on the dashboard. Scrolling a result horizontally in the
@@ -33,6 +32,11 @@ class DictionaryResult {
   late String searchTerm;
 
   /// A list of list of [DictionaryEntry] indexes sorted by [DictionaryPair].
-  @DictionaryTermsConverter()
-  final List<DictionaryTerm> terms;
+  @ignore
+  List<DictionaryTerm>? terms;
+
+  /// Serializes [terms].
+  String get termsIsar => DictionaryTermsConverter.toIsar(terms!);
+  set termsIsar(String object) =>
+      terms = DictionaryTermsConverter.fromIsar(object);
 }

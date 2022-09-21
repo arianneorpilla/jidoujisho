@@ -20,11 +20,11 @@ Future<void> depositDictionaryDataHelper(PrepareDictionaryParams params) async {
       await params.dictionaryFormat.prepareEntries(params);
 
   final Isar database = await Isar.open(
+    globalSchemas,
     directory: params.isarDirectoryPath,
-    schemas: globalSchemas,
   );
 
-  database.writeTxnSync((_) {
+  database.writeTxnSync(() {
     database.dictionaryTags
         .where()
         .dictionaryNameEqualTo(params.dictionaryName)
@@ -47,11 +47,11 @@ Future<void> depositDictionaryDataHelper(PrepareDictionaryParams params) async {
 /// Delete a selected dictionary from the dictionary database.
 Future<void> deleteDictionaryDataHelper(DeleteDictionaryParams params) async {
   final Isar database = await Isar.open(
+    globalSchemas,
     directory: params.isarDirectoryPath,
-    schemas: globalSchemas,
   );
 
-  database.writeTxnSync((_) {
+  database.writeTxnSync(() {
     database.dictionarys.deleteByDictionaryNameSync(params.dictionaryName);
     database.dictionaryTags
         .where()
@@ -77,11 +77,11 @@ Future<void> addToDictionaryHistoryHelper(
   UpdateDictionaryHistoryParams params,
 ) async {
   final Isar database = await Isar.open(
+    globalSchemas,
     directory: params.isarDirectoryPath,
-    schemas: globalSchemas,
   );
 
-  database.writeTxnSync((_) {
+  database.writeTxnSync(() {
     database.dictionaryResults.deleteBySearchTermSync(params.result.searchTerm);
     database.dictionaryResults.putSync(params.result);
 

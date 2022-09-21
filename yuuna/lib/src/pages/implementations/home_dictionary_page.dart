@@ -152,8 +152,8 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     onQueryChanged(mediaType.floatingSearchBarController.query);
   }
 
-  Duration get searchDelay => const Duration(milliseconds: 300);
-  Duration get historyDelay => const Duration(milliseconds: 1000);
+  Duration get searchDelay => const Duration(milliseconds: 200);
+  Duration get historyDelay => const Duration(milliseconds: 500);
 
   void onQueryChanged(String query) async {
     Future.delayed(searchDelay, () {
@@ -182,7 +182,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
                   historyKey: mediaType.uniqueKey,
                   searchTerm: mediaType.floatingSearchBarController.query,
                 );
-                if (_result!.terms.isNotEmpty) {
+                if (_result!.terms!.isNotEmpty) {
                   await appModel.addToDictionaryHistory(result: _result!);
                 }
               }
@@ -353,7 +353,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
         return const SizedBox.shrink();
       }
     }
-    if (_result == null || _result!.terms.isEmpty) {
+    if (_result == null || _result!.terms!.isEmpty) {
       return buildNoSearchResultsPlaceholderMessage();
     }
 

@@ -14,7 +14,7 @@ class DictionaryTerm {
   DictionaryTerm({
     required this.term,
     required this.reading,
-    required this.entries,
+    this.entries,
   });
 
   /// Create an instance of this class from a serialized format.
@@ -31,8 +31,13 @@ class DictionaryTerm {
   final String reading;
 
   /// The dictionary entries found for the term-reading pair.
-  @DictionaryEntriesConverter()
-  final List<DictionaryEntry> entries;
+  @ignore
+  List<DictionaryEntry>? entries;
+
+  /// Serializes [entries].
+  String get entriesIsar => DictionaryEntriesConverter.toIsar(entries!);
+  set entriesIsar(String object) =>
+      entries = DictionaryEntriesConverter.fromIsar(object);
 
   @override
   operator ==(Object other) =>
@@ -42,6 +47,5 @@ class DictionaryTerm {
   int get hashCode => term.hashCode * reading.hashCode;
 
   /// A unique identifier for the purposes of database storage.
-  @Id()
-  int? id;
+  Id? id;
 }

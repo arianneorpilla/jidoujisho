@@ -27,6 +27,5 @@ class SearchHistoryItem {
   String get uniqueKey => '$historyKey/$searchTerm';
 
   /// A unique identifier for the purposes of database storage.
-  @Id()
-  int? id;
+  Id? id;
 }
