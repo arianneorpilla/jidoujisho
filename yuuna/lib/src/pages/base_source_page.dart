@@ -110,8 +110,6 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
     required String searchTerm,
     required JidoujishoPopupPosition position,
   }) async {
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-
     DictionaryResult dictionaryResult =
         await appModel.searchDictionary(searchTerm);
     _popupPosition = position;
@@ -122,7 +120,6 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
 
   /// Hide the dictionary and dispose of the current result.
   void clearDictionaryResult() async {
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     _dictionaryResultNotifier.value = null;
     appModel.currentMediaSource?.clearCurrentSentence();
   }

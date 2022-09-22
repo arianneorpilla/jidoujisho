@@ -1143,7 +1143,7 @@ packages:
     source: hosted
     version: "1.2.1"
   quiver:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: quiver
       url: "https://pub.dartlang.org"
@@ -1279,7 +1279,7 @@ packages:
       name: sliver_tools
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.7"
+    version: "0.2.8"
   source_gen:
     dependency: transitive
     description:

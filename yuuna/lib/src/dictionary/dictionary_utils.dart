@@ -4,6 +4,7 @@ import 'dart:isolate';
 import 'package:isar/isar.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/models.dart';
+import 'package:quiver/iterables.dart';
 
 /// Performed in another isolate with compute. This is a top-level utility
 /// function that makes use of Isar allowing instances to be opened through
@@ -37,11 +38,32 @@ Future<void> depositDictionaryDataHelper(PrepareDictionaryParams params) async {
         .where()
         .dictionaryNameEqualTo(params.dictionaryName)
         .deleteAllSync();
-
-    database.dictionaryTags.putAllSync(dictionaryTags);
-    database.dictionaryMetaEntrys.putAllSync(dictionaryMetaEntries);
-    database.dictionaryEntrys.putAllSync(dictionaryEntries);
   });
+
+  List<List<DictionaryTag>> tagPartitions =
+      partition(dictionaryTags, 10000).toList();
+  List<List<DictionaryMetaEntry>> metaEntryPartitions =
+      partition(dictionaryMetaEntries, 10000).toList();
+  List<List<DictionaryEntry>> entryPartitions =
+      partition(dictionaryEntries, 10000).toList();
+
+  for (List<DictionaryTag> partition in tagPartitions) {
+    database.writeTxnSync(() {
+      database.dictionaryTags.putAllSync(partition);
+    });
+  }
+
+  for (List<DictionaryMetaEntry> partition in metaEntryPartitions) {
+    database.writeTxnSync(() {
+      database.dictionaryMetaEntrys.putAllSync(partition);
+    });
+  }
+
+  for (List<DictionaryEntry> partition in entryPartitions) {
+    database.writeTxnSync(() {
+      database.dictionaryEntrys.putAllSync(partition);
+    });
+  }
 }
 
 /// Delete a selected dictionary from the dictionary database.

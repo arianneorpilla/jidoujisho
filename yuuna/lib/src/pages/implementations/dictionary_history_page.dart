@@ -1,6 +1,7 @@
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
+import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
@@ -61,6 +62,8 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    AnkiMapping lastSelectedMapping = appModel.lastSelectedMapping;
+
     dictionaryMap = Map<String, Dictionary>.fromEntries(
       appModel.dictionaries.map(
         (dictionary) => MapEntry(dictionary.dictionaryName, dictionary),
@@ -119,6 +122,7 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
 
               List<DictionaryMetaEntry> metaEntries =
                   appModel.getMetaEntriesFromTerm(dictionaryTerm.term);
+
               metaEntries.sort(
                 (a, b) => dictionaryMap![a.dictionaryName]!.order.compareTo(
                       dictionaryMap![b.dictionaryName]!.order,
@@ -132,6 +136,7 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
             }
 
             return DictionaryTermPage(
+              lastSelectedMapping: lastSelectedMapping,
               dictionaryMap: dictionaryMap!,
               dictionaryTerm: dictionaryTerm,
               dictionaryMetaEntries:

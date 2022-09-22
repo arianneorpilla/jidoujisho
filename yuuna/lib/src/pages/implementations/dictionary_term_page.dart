@@ -18,6 +18,7 @@ class DictionaryTermPage extends BasePage {
     required this.onStash,
     required this.expandableControllers,
     required this.dictionaryHiddens,
+    required this.lastSelectedMapping,
     this.entryOpacity = 1,
     this.onScrollLeft,
     this.onScrollRight,
@@ -57,6 +58,11 @@ class DictionaryTermPage extends BasePage {
 
   /// Opacity for entries.
   final double entryOpacity;
+
+  /// Last selected mapping for optimisation purposes. Not including this
+  /// before caused rendering jank as database queries were performed multiple
+  /// times for getting this value.
+  final AnkiMapping lastSelectedMapping;
 
   @override
   BasePageState<DictionaryTermPage> createState() => _DictionaryTermPageState();
@@ -104,6 +110,7 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
         ),
         child: CustomScrollView(
           shrinkWrap: true,
+          primary: false,
           physics: const NeverScrollableScrollPhysics(),
           slivers: [
             SliverToBoxAdapter(
@@ -128,13 +135,13 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
 
   List<Widget> buildQuickActions({
     required List<DictionaryMetaEntry> metaEntries,
+    required AnkiMapping lastSelectedMapping,
   }) {
-    AnkiMapping mapping = appModel.lastSelectedMapping;
     List<Widget> buttons = [];
 
     for (int i = 0; i < appModel.maximumQuickActions; i++) {
       Widget button = buildQuickAction(
-        mapping: mapping,
+        mapping: lastSelectedMapping,
         slotNumber: i,
         metaEntries: metaEntries,
       );
@@ -207,7 +214,10 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.min,
-            children: buildQuickActions(metaEntries: metaEntries),
+            children: buildQuickActions(
+              metaEntries: metaEntries,
+              lastSelectedMapping: widget.lastSelectedMapping,
+            ),
           ),
         ),
         Floatable(

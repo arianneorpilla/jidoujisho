@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/pages.dart';
-import 'package:collection/collection.dart';
 import 'package:yuuna/utils.dart';
 
 /// Returns the widget for a [DictionaryEntry] making up a collection of
@@ -56,22 +55,6 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
   Widget build(BuildContext context) {
     List<Widget> tags = appModel.getTagsForEntry(widget.entry);
 
-    List<Widget> children = widget.entry.meanings.mapIndexed((index, meaning) {
-      if (widget.entry.meanings.length != 1) {
-        String sourceText = '• ${widget.entry.meanings[index].trim()}';
-        return SelectableText(
-          sourceText,
-          selectionControls: selectionControls,
-        );
-      } else {
-        String sourceText = widget.entry.meanings.first.trim();
-        return SelectableText(
-          sourceText,
-          selectionControls: selectionControls,
-        );
-      }
-    }).toList();
-
     return Padding(
       padding: EdgeInsets.only(
         top: Spacing.of(context).spaces.extraSmall,
@@ -94,9 +77,26 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
             top: Spacing.of(context).spaces.small,
             left: Spacing.of(context).spaces.normal,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: children,
+          child: ListView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            primary: false,
+            itemCount: widget.entry.meanings.length,
+            itemBuilder: (context, index) {
+              if (widget.entry.meanings.length != 1) {
+                String sourceText = '• ${widget.entry.meanings[index].trim()}';
+                return SelectableText(
+                  sourceText,
+                  selectionControls: selectionControls,
+                );
+              } else {
+                String sourceText = widget.entry.meanings.first.trim();
+                return SelectableText(
+                  sourceText,
+                  selectionControls: selectionControls,
+                );
+              }
+            },
           ),
         ),
       ),

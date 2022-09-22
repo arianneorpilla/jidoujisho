@@ -151,6 +151,8 @@ class _ReaderTtuSourcePageState
 
     switch (messageJson['jidoujisho-message-type']) {
       case 'lookup':
+        SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
         int index = messageJson['index'];
         String text = messageJson['text'];
         int x = messageJson['x'];
@@ -191,6 +193,7 @@ class _ReaderTtuSourcePageState
             clearDictionaryResult();
           } finally {
             unselectWebViewTextSelection(controller);
+            FocusScope.of(context).unfocus();
           }
         }
 
