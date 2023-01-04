@@ -257,8 +257,6 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       });
     });
 
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-
     if (appModelNoUpdate.isPlayerOrientationPortrait) {
       await SystemChrome.setPreferredOrientations([
         DeviceOrientation.portraitUp,
@@ -498,6 +496,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           bool exporting = false;
           await dialogSmartPause();
 
+          await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+          await Future.delayed(const Duration(milliseconds: 5), () {});
+
           await Navigator.push(
             context,
             PageRouteBuilder(
@@ -508,6 +509,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                 currentSubtitle: getNearestSubtitle(),
                 subtitleOptions: _subtitleOptionsNotifier.value,
                 onTap: (index) async {
+                  await Future.delayed(const Duration(milliseconds: 5), () {});
+                  await SystemChrome.setEnabledSystemUIMode(
+                      SystemUiMode.immersiveSticky);
                   Navigator.pop(context);
                   await _playerController.seekTo(
                       _subtitleItem.controller.subtitles[index].start -
@@ -525,10 +529,16 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
           if (!exporting) {
             await dialogSmartResume();
+            await Future.delayed(const Duration(milliseconds: 5), () {});
+            await SystemChrome.setEnabledSystemUIMode(
+                SystemUiMode.immersiveSticky);
           }
         }
       },
-      onTap: toggleMenuVisibility,
+      onTap: () {
+        SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+        toggleMenuVisibility();
+      },
       child: buildScrubDetectors(),
     );
   }
@@ -626,7 +636,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         builder: (context, value, _) {
           return AnimatedOpacity(
             opacity: value ? 0.0 : 1.0,
-            duration: const Duration(milliseconds: 300),
+            duration: const Duration(milliseconds: 200),
             child: buildMenuContent(),
           );
         },
@@ -905,12 +915,19 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         onTap: () async {
           dialogSmartPause();
 
+          await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+          await Future.delayed(const Duration(milliseconds: 5), () {});
+
           await source.pickVideoFile(
             appModel: appModel,
             context: context,
             ref: ref,
             pushReplacement: true,
           );
+
+          await Future.delayed(const Duration(milliseconds: 5), () {});
+          await SystemChrome.setEnabledSystemUIMode(
+              SystemUiMode.immersiveSticky);
 
           dialogSmartResume();
         },
@@ -1043,6 +1060,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         action: () async {
           await dialogSmartPause();
 
+          await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+          await Future.delayed(const Duration(milliseconds: 5), () {});
+
           await Navigator.push(
             context,
             PageRouteBuilder(
@@ -1075,6 +1095,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               ),
             ),
           );
+
+          await Future.delayed(const Duration(milliseconds: 5), () {});
+          await SystemChrome.setEnabledSystemUIMode(
+              SystemUiMode.immersiveSticky);
 
           await dialogSmartResume();
         },
@@ -1587,6 +1611,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
     String sentence = buffer.toString().trim();
 
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    await Future.delayed(const Duration(milliseconds: 5), () {});
+
     await appModel.openCreator(
       ref: ref,
       killOnPop: false,
@@ -1597,6 +1624,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         },
       ),
     );
+
+    await Future.delayed(const Duration(milliseconds: 5), () {});
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
 
   /// This makes the subtitle widget force to reflect a change, for example
@@ -1630,7 +1660,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     _isMenuHidden.value = false;
   }
 
-  /// This hides the
+  /// This hides or shows the menu.
   void toggleMenuVisibility() async {
     _menuHideTimer?.cancel();
     _isMenuHidden.value = !_isMenuHidden.value;

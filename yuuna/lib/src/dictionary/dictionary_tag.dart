@@ -46,10 +46,10 @@ class DictionaryTag {
   String get uniqueKey => '$dictionaryName/$name';
 
   /// A unique identifier for the purposes of database storage.
-  @Id()
-  int? id;
+  Id? id;
 
   /// Get the color for this tag based on its category.
+  @ignore
   Color get color {
     switch (category) {
       case 'name':

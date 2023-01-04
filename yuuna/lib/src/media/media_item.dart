@@ -42,8 +42,7 @@ class MediaItem {
   Map<String, dynamic> toJson() => _$MediaItemToJson(this);
 
   /// A unique identifier for the purposes of database storage.
-  @Id()
-  int? id;
+  Id? id;
 
   /// A unique identifier for the purposes of database storage.
   @Index(unique: true)

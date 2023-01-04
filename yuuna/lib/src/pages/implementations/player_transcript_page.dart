@@ -85,7 +85,7 @@ class _PlayerTranscriptPageState extends BasePageState<PlayerTranscriptPage> {
     return JidoujishoIconButton(
       tooltip: backLabel,
       icon: Icons.arrow_back,
-      onTap: () {
+      onTap: () async {
         Navigator.pop(context);
       },
     );

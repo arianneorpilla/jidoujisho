@@ -1,15 +1,11 @@
 import 'dart:convert';
 
-import 'package:isar/isar.dart';
 import 'package:yuuna/dictionary.dart';
 
 /// A type converter for [PitchData].
-class PitchDataConverter extends TypeConverter<List<PitchData>?, String?> {
-  /// Initialise this converter.
-  const PitchDataConverter();
-
-  @override
-  List<PitchData>? fromIsar(String? object) {
+class PitchDataConverter {
+  /// Deserializes the object.
+  static List<PitchData>? fromIsar(String? object) {
     if (object == null) {
       return null;
     }
@@ -23,8 +19,8 @@ class PitchDataConverter extends TypeConverter<List<PitchData>?, String?> {
     return List<PitchData>.unmodifiable(mapping);
   }
 
-  @override
-  String? toIsar(List<PitchData>? object) {
+  /// Serializes the object.
+  static String? toIsar(List<PitchData>? object) {
     if (object == null) {
       return null;
     }

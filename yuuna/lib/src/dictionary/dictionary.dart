@@ -13,10 +13,10 @@ class Dictionary {
   Dictionary({
     required this.dictionaryName,
     required this.formatName,
-    required this.metadata,
     required this.order,
     required this.collapsed,
     required this.hidden,
+    this.metadata,
   });
 
   /// Create an instance of this class from a serialized format.
@@ -27,8 +27,7 @@ class Dictionary {
   Map<String, dynamic> toJson() => _$DictionaryToJson(this);
 
   /// A unique identifier for the purposes of database storage.
-  @Id()
-  int? id;
+  Id? id;
 
   /// The name of the dictionary. For example, this could be 'Merriam-Webster
   /// Dictionary' or '大辞林' or 'JMdict'.
@@ -54,6 +53,11 @@ class Dictionary {
 
   /// Any extra dictionary-specific information that this dictionary may
   /// decide to store for use at runtime.
-  @ImmutableStringMapConverter()
-  final Map<String, dynamic> metadata;
+  @ignore
+  Map<String, dynamic>? metadata;
+
+  /// Serializes [metadata].
+  String get pitchesIsar => ImmutableStringMapConverter.toIsar(metadata!);
+  set pitchesIsar(String object) =>
+      metadata = ImmutableStringMapConverter.fromIsar(object);
 }

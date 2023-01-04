@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/media.dart';
@@ -118,7 +119,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
   }
 
   /// Hide the dictionary and dispose of the current result.
-  void clearDictionaryResult() {
+  void clearDictionaryResult() async {
     _dictionaryResultNotifier.value = null;
     appModel.currentMediaSource?.clearCurrentSentence();
   }
@@ -248,7 +249,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
 
   /// Displays the dictionary entries.
   Widget buildSearchResult() {
-    if (_dictionaryResultNotifier.value!.terms.isEmpty) {
+    if (_dictionaryResultNotifier.value!.terms!.isEmpty) {
       return buildNoSearchResultsPlaceholderMessage();
     }
 
@@ -278,11 +279,19 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
   }
 
   /// Action upon selecting the Search option.
-  void onSearch(String searchTerm) {
-    appModel.openRecursiveDictionarySearch(
+  void onSearch(String searchTerm) async {
+    if (appModel.isMediaOpen) {
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      await Future.delayed(const Duration(milliseconds: 5), () {});
+    }
+    await appModel.openRecursiveDictionarySearch(
       searchTerm: searchTerm,
       killOnPop: false,
     );
+    if (appModel.isMediaOpen) {
+      await Future.delayed(const Duration(milliseconds: 5), () {});
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    }
   }
 
   /// Action upon selecting the Stash option.

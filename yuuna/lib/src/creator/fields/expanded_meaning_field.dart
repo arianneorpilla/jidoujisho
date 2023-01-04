@@ -40,7 +40,7 @@ class ExpandedMeaningField extends Field {
         .map((dictionary) => dictionary.dictionaryName)
         .toList();
 
-    List<DictionaryEntry> expandedEntries = dictionaryTerm.entries
+    List<DictionaryEntry> expandedEntries = dictionaryTerm.entries!
         .where((entry) => expandedDictionaries.contains(entry.dictionaryName))
         .toList();
 

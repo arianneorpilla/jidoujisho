@@ -30,8 +30,7 @@ class DictionaryMetaEntry {
   Map<String, dynamic> toJson() => _$DictionaryMetaEntryToJson(this);
 
   /// A unique identifier for the purposes of database storage.
-  @Id()
-  int? id;
+  Id? id;
 
   /// The word or phrase represented by this dictionary entry.
   @Index()
@@ -51,8 +50,13 @@ class DictionaryMetaEntry {
   final String? frequency;
 
   /// List of pitch accent downsteps for this term's reading.
-  @PitchDataConverter()
-  final List<PitchData>? pitches;
+  @ignore
+  List<PitchData>? pitches;
+
+  /// Serializes [pitches].
+  String? get pitchesIsar => PitchDataConverter.toIsar(pitches);
+  set pitchesIsar(String? object) =>
+      pitches = PitchDataConverter.fromIsar(object);
 
   @override
   operator ==(Object other) => other is DictionaryMetaEntry && id == other.id;

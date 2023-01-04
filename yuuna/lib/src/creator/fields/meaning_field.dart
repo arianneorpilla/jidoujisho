@@ -88,6 +88,6 @@ class MeaningField extends Field {
     required List<DictionaryMetaEntry> metaEntries,
     required bool creatorJustLaunched,
   }) {
-    return flattenMeanings(dictionaryTerm.entries);
+    return flattenMeanings(dictionaryTerm.entries!);
   }
 }

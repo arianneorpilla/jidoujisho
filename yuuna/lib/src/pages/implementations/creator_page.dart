@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_exit_app/flutter_exit_app.dart';
 import 'package:spaces/spaces.dart';
 import 'package:subtitle/subtitle.dart';
 import 'package:yuuna/creator.dart';
@@ -83,7 +83,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
     }
 
     if (widget.killOnPop) {
-      SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+      FlutterExitApp.exitApp();
       return false;
     }
 
@@ -437,6 +437,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
   Widget buildLandscape() {
     return SafeArea(
+      top: false,
       child: Row(
         children: [
           Flexible(
@@ -502,6 +503,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
   Widget buildPortrait() {
     return SafeArea(
+      top: false,
       child: Column(
         children: [
           Expanded(child: buildFields(isPortrait: true)),
@@ -633,7 +635,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       icon: Icons.arrow_back,
       onTap: () {
         if (widget.killOnPop) {
-          SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+          FlutterExitApp.exitApp();
         } else {
           Navigator.pop(context);
         }
@@ -838,7 +840,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
     required int slotNumber,
   }) {
     String? enhancementName =
-        (mapping.enhancements[field.uniqueKey] ?? {})[slotNumber];
+        (mapping.enhancements![field.uniqueKey] ?? {})[slotNumber];
     Enhancement? enhancement;
 
     if (enhancementName != null) {
@@ -873,7 +875,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
     required int slotNumber,
   }) {
     String? enhancementName =
-        (mapping.enhancements[field.uniqueKey] ?? {})[slotNumber];
+        (mapping.enhancements![field.uniqueKey] ?? {})[slotNumber];
     Enhancement? enhancement;
 
     if (enhancementName != null) {
@@ -971,7 +973,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
             field.icon,
             size: textTheme.titleLarge?.fontSize,
           ),
-          suffixIcon: (mapping.enhancements[field.uniqueKey] ?? {}).isNotEmpty
+          suffixIcon: (mapping.enhancements![field.uniqueKey] ?? {}).isNotEmpty
               ? Padding(
                   padding: Spacing.of(context).insets.onlyRight.small,
                   child: Row(
