@@ -175,6 +175,15 @@ class _PlayerTranscriptPageState extends BasePageState<PlayerTranscriptPage> {
             JidoujishoTimeFormat.getFfmpegTimestamp(offsetEnd);
         String subtitleDuration = '$offsetStartText - $offsetEndText';
 
+        TextStyle? style = widget.subtitleOptions.fontName.trim().isEmpty
+            ? TextStyle(
+                fontSize: widget.subtitleOptions.fontSize,
+              )
+            : GoogleFonts.getFont(
+                widget.subtitleOptions.fontName,
+                fontSize: widget.subtitleOptions.fontSize,
+              );
+
         return Material(
           color: Colors.transparent,
           child: ListTile(
@@ -208,10 +217,7 @@ class _PlayerTranscriptPageState extends BasePageState<PlayerTranscriptPage> {
                   subtitleText,
                   textAlign: TextAlign.center,
                   softWrap: true,
-                  style: GoogleFonts.getFont(
-                    widget.subtitleOptions.fontName,
-                    fontSize: widget.subtitleOptions.fontSize,
-                  ),
+                  style: style,
                 ),
                 const SizedBox(height: 6),
               ],

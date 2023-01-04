@@ -1,7 +1,7 @@
 name: yuuna
 description: A full-featured immersion language learning suite for mobile.
 publish_to: 'none'
-version: 2.0.2+3
+version: 2.2.0+5
 environment:
   sdk: ">=2.17.0 <3.0.0"
 
@@ -78,6 +78,7 @@ dependencies:
   photo_gallery: ^1.1.1
   pretty_json: ^2.0.0
   progress_indicators: ^1.0.0
+  quiver: ^3.2.1
   receive_intent: ^0.2.2
   receive_sharing_intent: ^1.4.5
   reorderables: ^0.5.0
@@ -104,6 +105,7 @@ dependencies:
       url: https://github.com/lrorpilla/ve_dart
       ref: c366bb1ae24f6fad4f5c7e3a1efad5f2b8122e58
   wakelock: ^0.6.1+2
+  web_socket_channel: ^2.2.0
   youtube_explode_dart: ^1.12.0
 
 dependency_overrides:
@@ -144,3 +146,10 @@ flutter:
     - assets/ttu-ebook-reader/_app/immutable/pages/manage/
     - assets/ttu-ebook-reader/_app/immutable/pages/settings/
     - assets/ttu-ebook-reader/icons/
+
+  fonts:
+    - family: NotoSansJP
+      fonts:
+        - asset: assets/fonts/NotoSansJP-Regular.otf
+        - asset: assets/fonts/NotoSansJP-Bold.otf
+          weight: 700

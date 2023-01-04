@@ -287,10 +287,13 @@ class AppModel with ChangeNotifier {
 
   /// Get the sentence to be used by the [SentenceField] upon card creation.
   String getCurrentSentence() {
-    if (_currentMediaSource == null) {
+    MediaType mediaType = mediaTypes.values.toList()[currentHomeTabIndex];
+
+    if (mediaType is DictionaryMediaType) {
       return '';
     } else {
-      return _currentMediaSource!.currentSentence;
+      MediaSource source = getCurrentSourceForMediaType(mediaType: mediaType);
+      return source.currentSentence;
     }
   }
 
@@ -417,6 +420,7 @@ class AppModel with ChangeNotifier {
       ReaderMediaType.instance: [
         ReaderTtuSource.instance,
         ReaderLyricsSource.instance,
+        ReaderWebsocketSource.instance,
       ],
       ViewerMediaType.instance: [
         ViewerMangaReaderSource.instance,
@@ -595,9 +599,10 @@ class AppModel with ChangeNotifier {
   /// This path also initialises the folder if it does not exist, and includes
   /// a .nomedia file within the folder.
   Future<Directory> prepareJidoujishoDirectory() async {
-    String directoryPath = path.join(appDirectory.path, 'jidoujishoExport');
-    String noMediaFilePath =
-        path.join(appDirectory.path, 'jidoujishoExport', '.nomedia');
+    String dcimDirectory = await ExternalPath.getExternalStoragePublicDirectory(
+        ExternalPath.DIRECTORY_DCIM);
+    String directoryPath = path.join(dcimDirectory, 'jidoujisho');
+    String noMediaFilePath = path.join(dcimDirectory, 'jidoujisho', '.nomedia');
 
     Directory jidoujishoDirectory = Directory(directoryPath);
     File noMediaFile = File(noMediaFilePath);
@@ -1715,6 +1720,7 @@ class AppModel with ChangeNotifier {
     bool pushReplacement = false,
     MediaItem? item,
   }) async {
+    mediaSource.clearCurrentSentence();
     await initialiseAudioHandler();
 
     _currentMediaSource = mediaSource;
@@ -1753,7 +1759,7 @@ class AppModel with ChangeNotifier {
     required MediaSource mediaSource,
     MediaItem? item,
   }) async {
-    mediaSource.clearCurrentMediaValues();
+    mediaSource.clearCurrentSentence();
     _currentMediaSource = null;
     _currentMediaItem = null;
     blockCreatorInitialMedia = false;
@@ -1761,6 +1767,7 @@ class AppModel with ChangeNotifier {
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
     mediaSource.mediaType.refreshTab();
+
     mediaSource.onSourceExit(context: context, ref: ref);
 
     await _audioHandler?.stop();
@@ -2692,9 +2699,8 @@ class AppModel with ChangeNotifier {
     int audioAllowance = _preferences.get('audio_allowance', defaultValue: 0);
     int subtitleDelay = _preferences.get('subtitle_delay', defaultValue: 0);
     double fontSize = _preferences.get('font_size', defaultValue: 20.0);
-    String fontName = _preferences.get(
-        'font_name/${targetLanguage.languageCode}',
-        defaultValue: 'Roboto');
+    String fontName = _preferences
+        .get('font_name/${targetLanguage.languageCode}', defaultValue: '');
     String regexFilter = _preferences.get('regex_filter', defaultValue: '');
 
     return SubtitleOptions(

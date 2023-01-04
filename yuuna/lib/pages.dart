@@ -44,6 +44,8 @@ export 'src/pages/implementations/youtube_media_search_bar.dart';
 export 'src/pages/implementations/closed_captions_indicator.dart';
 export 'src/pages/implementations/forvo_audio_dialog_page.dart';
 export 'src/pages/implementations/gallery_history_page.dart';
+export 'src/pages/implementations/websocket_dialog_page.dart';
+export 'src/pages/implementations/reader_websocket_page.dart';
 
 export 'src/pages/base_page.dart';
 export 'src/pages/base_history_page.dart';

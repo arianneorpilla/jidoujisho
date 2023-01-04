@@ -1472,18 +1472,31 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     ..color = Colors.black.withOpacity(0.75);
 
   /// Subtitle outline text style.
-  TextStyle get subtitleOutlineStyle => GoogleFonts.getFont(
-        _subtitleOptionsNotifier.value.fontName,
-        fontSize: _subtitleOptionsNotifier.value.fontSize,
-        foreground: subtitlePaintStyle,
-      );
+  ///
+  TextStyle get subtitleOutlineStyle =>
+      _subtitleOptionsNotifier.value.fontName.trim().isEmpty
+          ? TextStyle(
+              fontSize: _subtitleOptionsNotifier.value.fontSize,
+              foreground: subtitlePaintStyle,
+            )
+          : GoogleFonts.getFont(
+              _subtitleOptionsNotifier.value.fontName,
+              fontSize: _subtitleOptionsNotifier.value.fontSize,
+              foreground: subtitlePaintStyle,
+            );
 
   /// Subtitle text style.
-  TextStyle get subtitleTextStyle => GoogleFonts.getFont(
-        _subtitleOptionsNotifier.value.fontName,
-        fontSize: _subtitleOptionsNotifier.value.fontSize,
-        color: Colors.white,
-      );
+  TextStyle get subtitleTextStyle =>
+      _subtitleOptionsNotifier.value.fontName.trim().isEmpty
+          ? TextStyle(
+              fontSize: _subtitleOptionsNotifier.value.fontSize,
+              color: Colors.white,
+            )
+          : GoogleFonts.getFont(
+              _subtitleOptionsNotifier.value.fontName,
+              fontSize: _subtitleOptionsNotifier.value.fontSize,
+              color: Colors.white,
+            );
 
   /// This renders the subtitle and assigns each character an action
   /// according to its index.

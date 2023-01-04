@@ -3,7 +3,7 @@ import 'package:spaces/spaces.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
 
-/// The content of the dialog when editing [SubtitleOptions].
+/// Used by the Reader Lyrics Source.
 class LyricsDialogPage extends BasePage {
   /// Create an instance of this page.
   const LyricsDialogPage({

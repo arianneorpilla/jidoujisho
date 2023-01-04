@@ -17,5 +17,6 @@ export 'src/media/sources/player_youtube_source.dart';
 export 'src/media/sources/reader_ttu_source.dart';
 export 'src/media/sources/reader_twitter_source.dart';
 export 'src/media/sources/reader_lyrics_source.dart';
+export 'src/media/sources/reader_websocket_source.dart';
 export 'src/media/sources/viewer_camera_source.dart';
 export 'src/media/sources/viewer_manga_reader_source.dart';

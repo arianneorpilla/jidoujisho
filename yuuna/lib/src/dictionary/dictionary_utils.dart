@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:isar/isar.dart';
+import 'package:quiver/iterables.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/models.dart';
 
@@ -37,10 +38,24 @@ Future<void> depositDictionaryDataHelper(PrepareDictionaryParams params) async {
         .where()
         .dictionaryNameEqualTo(params.dictionaryName)
         .deleteAllSync();
+  });
 
-    database.dictionaryTags.putAllSync(dictionaryTags);
-    database.dictionaryMetaEntrys.putAllSync(dictionaryMetaEntries);
-    database.dictionaryEntrys.putAllSync(dictionaryEntries);
+  partition(dictionaryTags, 1000).forEach((e) {
+    database.writeTxnSync((_) {
+      database.dictionaryTags.putAllSync(e);
+    });
+  });
+
+  partition(dictionaryMetaEntries, 1000).forEach((e) {
+    database.writeTxnSync((_) {
+      database.dictionaryMetaEntrys.putAllSync(e);
+    });
+  });
+
+  partition(dictionaryEntries, 1000).forEach((e) {
+    database.writeTxnSync((_) {
+      database.dictionaryEntrys.putAllSync(e);
+    });
   });
 }
 

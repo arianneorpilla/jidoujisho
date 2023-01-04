@@ -63,6 +63,7 @@ class JidoujishoLocalisations {
     'dialog_set': 'SET',
     'dialog_channel': 'CHANNEL',
     'dialog_crop': 'CROP',
+    'dialog_connect': 'CONNECT',
     'reset': 'Reset',
     'dialog_launch_ankidroid': 'LAUNCH ANKIDROID',
     'media_item_delete_confirmation':
@@ -310,6 +311,11 @@ class JidoujishoLocalisations {
     'lyrics_artist': 'Artist',
     'set_media': 'Set Media',
     'no_recordings_found': 'No recordings found',
-    'wrap_image_audio': 'Wrap Image/Audio with Tags'
+    'wrap_image_audio': 'Wrap Image/Audio with Tags',
+    'server_address': 'Server Address',
+    'no_active_connection': 'No active connection',
+    'failed_server_connection': 'Failed to connect to server',
+    'no_text_received': 'No text received',
+    'text_segmentation': 'Text Segmentation',
   };
 }

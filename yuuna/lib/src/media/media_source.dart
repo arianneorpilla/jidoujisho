@@ -202,11 +202,6 @@ abstract class MediaSource {
     );
   }
 
-  /// Clear all current media data once this source has been closed.
-  void clearCurrentMediaValues() {
-    _currentSentence = '';
-  }
-
   /// Supplies a sentence that can be used for the sentence field when making
   /// a card while this source is active. Can be set with [setCurrentSentence]
   /// and [clearCurrentSentence] in a source page.

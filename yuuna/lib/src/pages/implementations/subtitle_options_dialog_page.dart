@@ -65,8 +65,7 @@ class _SubtitleOptionsDialogPage
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      contentPadding:  Spacing.of(context).insets.all.big,
-      
+      contentPadding: Spacing.of(context).insets.all.big,
       content: buildContent(),
       actions: actions,
     );
@@ -142,7 +141,7 @@ class _SubtitleOptionsDialogPage
                       size: 18,
                       tooltip: resetLabel,
                       onTap: () async {
-                        _fontNameController.text = 'Roboto';
+                        _fontNameController.text = '';
                         FocusScope.of(context).unfocus();
                       },
                       icon: Icons.undo,
@@ -256,7 +255,7 @@ class _SubtitleOptionsDialogPage
     );
   }
 
-    Widget buildSetButton() {
+  Widget buildSetButton() {
     return TextButton(
       child: Text(
         dialogSetLabel,
@@ -273,7 +272,7 @@ class _SubtitleOptionsDialogPage
     await setValues(saveOptions: true);
   }
 
-   void executeSet() async {
+  void executeSet() async {
     await setValues(saveOptions: false);
   }
 }

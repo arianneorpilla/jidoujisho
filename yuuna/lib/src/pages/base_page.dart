@@ -58,7 +58,7 @@ class BasePageState<T extends BasePage> extends ConsumerState<T> {
       );
 
   /// Action to perform upon using the Search context option.
-  void onContextSearch(String searchTerm) async {
+  void onContextSearch(String searchTerm, {String? sentence = ''}) async {
     await appModel.openRecursiveDictionarySearch(
       searchTerm: searchTerm,
       killOnPop: false,
