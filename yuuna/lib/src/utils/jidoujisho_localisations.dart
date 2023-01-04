@@ -317,5 +317,6 @@ class JidoujishoLocalisations {
     'failed_server_connection': 'Failed to connect to server',
     'no_text_received': 'No text received',
     'text_segmentation': 'Text Segmentation',
+    'connect_disconnect': 'Connect/Disconnect'
   };
 }

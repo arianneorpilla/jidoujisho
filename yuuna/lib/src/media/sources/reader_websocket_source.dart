@@ -121,12 +121,12 @@ class ReaderWebsocketSource extends ReaderMediaSource {
       {required BuildContext context,
       required WidgetRef ref,
       required AppModel appModel}) {
-    String setMediaLabel = appModel.translate('set_media');
+    String connectDisconnectLabel = appModel.translate('connect_disconnect');
 
     return FloatingSearchBarAction(
       child: JidoujishoIconButton(
         size: Theme.of(context).textTheme.titleLarge?.fontSize,
-        tooltip: setMediaLabel,
+        tooltip: connectDisconnectLabel,
         enabledColor: isActive ? Colors.red : null,
         icon: Icons.leak_add,
         onTap: () {
