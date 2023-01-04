@@ -65,6 +65,8 @@ class _ReaderWebsocketPageState<ReaderLyricsPage> extends BaseSourcePageState {
       thumbVisibility: true,
       thickness: 3,
       child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics()),
         controller: controller,
         itemCount: messages.length,
         itemBuilder: (context, index) {

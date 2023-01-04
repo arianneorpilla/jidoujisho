@@ -62,8 +62,13 @@ const DictionaryEntrySchema = CollectionSchema(
       name: r'term',
       type: IsarType.string,
     ),
-    r'termTags': PropertySchema(
+    r'termLength': PropertySchema(
       id: 9,
+      name: r'termLength',
+      type: IsarType.long,
+    ),
+    r'termTags': PropertySchema(
+      id: 10,
       name: r'termTags',
       type: IsarType.stringList,
     )
@@ -74,21 +79,16 @@ const DictionaryEntrySchema = CollectionSchema(
   deserializeProp: _dictionaryEntryDeserializeProp,
   idName: r'id',
   indexes: {
-    r'term_popularity': IndexSchema(
-      id: -1676196728571323351,
-      name: r'term_popularity',
+    r'term': IndexSchema(
+      id: 5114652110782333408,
+      name: r'term',
       unique: false,
       replace: false,
       properties: [
         IndexPropertySchema(
           name: r'term',
-          type: IndexType.hash,
-          caseSensitive: true,
-        ),
-        IndexPropertySchema(
-          name: r'popularity',
           type: IndexType.value,
-          caseSensitive: false,
+          caseSensitive: true,
         )
       ],
     ),
@@ -105,21 +105,16 @@ const DictionaryEntrySchema = CollectionSchema(
         )
       ],
     ),
-    r'reading_popularity': IndexSchema(
-      id: -2975740769663428494,
-      name: r'reading_popularity',
+    r'reading': IndexSchema(
+      id: -8872607090340677149,
+      name: r'reading',
       unique: false,
       replace: false,
       properties: [
         IndexPropertySchema(
           name: r'reading',
-          type: IndexType.hash,
-          caseSensitive: true,
-        ),
-        IndexPropertySchema(
-          name: r'popularity',
           type: IndexType.value,
-          caseSensitive: false,
+          caseSensitive: true,
         )
       ],
     )
@@ -129,7 +124,7 @@ const DictionaryEntrySchema = CollectionSchema(
   getId: _dictionaryEntryGetId,
   getLinks: _dictionaryEntryGetLinks,
   attach: _dictionaryEntryAttach,
-  version: '3.0.0',
+  version: '3.0.6-dev.0',
 );
 
 int _dictionaryEntryEstimateSize(
@@ -186,7 +181,8 @@ void _dictionaryEntrySerialize(
   writer.writeString(offsets[6], object.reading);
   writer.writeLong(offsets[7], object.sequence);
   writer.writeString(offsets[8], object.term);
-  writer.writeStringList(offsets[9], object.termTags);
+  writer.writeLong(offsets[9], object.termLength);
+  writer.writeStringList(offsets[10], object.termTags);
 }
 
 DictionaryEntry _dictionaryEntryDeserialize(
@@ -205,7 +201,7 @@ DictionaryEntry _dictionaryEntryDeserialize(
     reading: reader.readStringOrNull(offsets[6]) ?? '',
     sequence: reader.readLongOrNull(offsets[7]),
     term: reader.readString(offsets[8]),
-    termTags: reader.readStringList(offsets[9]) ?? const [],
+    termTags: reader.readStringList(offsets[10]) ?? const [],
   );
   return object;
 }
@@ -236,6 +232,8 @@ P _dictionaryEntryDeserializeProp<P>(
     case 8:
       return (reader.readString(offset)) as P;
     case 9:
+      return (reader.readLong(offset)) as P;
+    case 10:
       return (reader.readStringList(offset) ?? const []) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -260,6 +258,22 @@ extension DictionaryEntryQueryWhereSort
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere> anyId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere> anyTerm() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        const IndexWhereClause.any(indexName: r'term'),
+      );
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere> anyReading() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        const IndexWhereClause.any(indexName: r'reading'),
+      );
     });
   }
 }
@@ -334,29 +348,29 @@ extension DictionaryEntryQueryWhere
     });
   }
 
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      termEqualToAnyPopularity(String term) {
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause> termEqualTo(
+      String term) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'term_popularity',
+        indexName: r'term',
         value: [term],
       ));
     });
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      termNotEqualToAnyPopularity(String term) {
+      termNotEqualTo(String term) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'term_popularity',
+              indexName: r'term',
               lower: [],
               upper: [term],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'term_popularity',
+              indexName: r'term',
               lower: [term],
               includeLower: false,
               upper: [],
@@ -364,13 +378,13 @@ extension DictionaryEntryQueryWhere
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'term_popularity',
+              indexName: r'term',
               lower: [term],
               includeLower: false,
               upper: [],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'term_popularity',
+              indexName: r'term',
               lower: [],
               upper: [term],
               includeUpper: false,
@@ -380,122 +394,97 @@ extension DictionaryEntryQueryWhere
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      termEqualToPopularityIsNull(String term) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'term_popularity',
-        value: [term, null],
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      termEqualToPopularityIsNotNull(String term) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'term_popularity',
-        lower: [term, null],
-        includeLower: false,
-        upper: [
-          term,
-        ],
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      termPopularityEqualTo(String term, double? popularity) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'term_popularity',
-        value: [term, popularity],
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      termEqualToPopularityNotEqualTo(String term, double? popularity) {
-    return QueryBuilder.apply(this, (query) {
-      if (query.whereSort == Sort.asc) {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'term_popularity',
-              lower: [term],
-              upper: [term, popularity],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'term_popularity',
-              lower: [term, popularity],
-              includeLower: false,
-              upper: [term],
-            ));
-      } else {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'term_popularity',
-              lower: [term, popularity],
-              includeLower: false,
-              upper: [term],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'term_popularity',
-              lower: [term],
-              upper: [term, popularity],
-              includeUpper: false,
-            ));
-      }
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      termEqualToPopularityGreaterThan(
-    String term,
-    double? popularity, {
+      termGreaterThan(
+    String term, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'term_popularity',
-        lower: [term, popularity],
-        includeLower: include,
-        upper: [term],
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      termEqualToPopularityLessThan(
-    String term,
-    double? popularity, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'term_popularity',
+        indexName: r'term',
         lower: [term],
-        upper: [term, popularity],
+        includeLower: include,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      termLessThan(
+    String term, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'term',
+        lower: [],
+        upper: [term],
         includeUpper: include,
       ));
     });
   }
 
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      termEqualToPopularityBetween(
-    String term,
-    double? lowerPopularity,
-    double? upperPopularity, {
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause> termBetween(
+    String lowerTerm,
+    String upperTerm, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'term_popularity',
-        lower: [term, lowerPopularity],
+        indexName: r'term',
+        lower: [lowerTerm],
         includeLower: includeLower,
-        upper: [term, upperPopularity],
+        upper: [upperTerm],
         includeUpper: includeUpper,
       ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      termStartsWith(String TermPrefix) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'term',
+        lower: [TermPrefix],
+        upper: ['$TermPrefix\u{FFFFF}'],
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      termIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'term',
+        value: [''],
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      termIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.lessThan(
+              indexName: r'term',
+              upper: [''],
+            ))
+            .addWhereClause(IndexWhereClause.greaterThan(
+              indexName: r'term',
+              lower: [''],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.greaterThan(
+              indexName: r'term',
+              lower: [''],
+            ))
+            .addWhereClause(IndexWhereClause.lessThan(
+              indexName: r'term',
+              upper: [''],
+            ));
+      }
     });
   }
 
@@ -545,28 +534,28 @@ extension DictionaryEntryQueryWhere
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      readingEqualToAnyPopularity(String reading) {
+      readingEqualTo(String reading) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'reading_popularity',
+        indexName: r'reading',
         value: [reading],
       ));
     });
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      readingNotEqualToAnyPopularity(String reading) {
+      readingNotEqualTo(String reading) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'reading_popularity',
+              indexName: r'reading',
               lower: [],
               upper: [reading],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'reading_popularity',
+              indexName: r'reading',
               lower: [reading],
               includeLower: false,
               upper: [],
@@ -574,13 +563,13 @@ extension DictionaryEntryQueryWhere
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'reading_popularity',
+              indexName: r'reading',
               lower: [reading],
               includeLower: false,
               upper: [],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'reading_popularity',
+              indexName: r'reading',
               lower: [],
               upper: [reading],
               includeUpper: false,
@@ -590,122 +579,98 @@ extension DictionaryEntryQueryWhere
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      readingEqualToPopularityIsNull(String reading) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'reading_popularity',
-        value: [reading, null],
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      readingEqualToPopularityIsNotNull(String reading) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'reading_popularity',
-        lower: [reading, null],
-        includeLower: false,
-        upper: [
-          reading,
-        ],
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      readingPopularityEqualTo(String reading, double? popularity) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'reading_popularity',
-        value: [reading, popularity],
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      readingEqualToPopularityNotEqualTo(String reading, double? popularity) {
-    return QueryBuilder.apply(this, (query) {
-      if (query.whereSort == Sort.asc) {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'reading_popularity',
-              lower: [reading],
-              upper: [reading, popularity],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'reading_popularity',
-              lower: [reading, popularity],
-              includeLower: false,
-              upper: [reading],
-            ));
-      } else {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'reading_popularity',
-              lower: [reading, popularity],
-              includeLower: false,
-              upper: [reading],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'reading_popularity',
-              lower: [reading],
-              upper: [reading, popularity],
-              includeUpper: false,
-            ));
-      }
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      readingEqualToPopularityGreaterThan(
-    String reading,
-    double? popularity, {
+      readingGreaterThan(
+    String reading, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'reading_popularity',
-        lower: [reading, popularity],
-        includeLower: include,
-        upper: [reading],
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      readingEqualToPopularityLessThan(
-    String reading,
-    double? popularity, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'reading_popularity',
+        indexName: r'reading',
         lower: [reading],
-        upper: [reading, popularity],
+        includeLower: include,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      readingLessThan(
+    String reading, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'reading',
+        lower: [],
+        upper: [reading],
         includeUpper: include,
       ));
     });
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
-      readingEqualToPopularityBetween(
-    String reading,
-    double? lowerPopularity,
-    double? upperPopularity, {
+      readingBetween(
+    String lowerReading,
+    String upperReading, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'reading_popularity',
-        lower: [reading, lowerPopularity],
+        indexName: r'reading',
+        lower: [lowerReading],
         includeLower: includeLower,
-        upper: [reading, upperPopularity],
+        upper: [upperReading],
         includeUpper: includeUpper,
       ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      readingStartsWith(String ReadingPrefix) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'reading',
+        lower: [ReadingPrefix],
+        upper: ['$ReadingPrefix\u{FFFFF}'],
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      readingIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'reading',
+        value: [''],
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      readingIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.lessThan(
+              indexName: r'reading',
+              upper: [''],
+            ))
+            .addWhereClause(IndexWhereClause.greaterThan(
+              indexName: r'reading',
+              lower: [''],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.greaterThan(
+              indexName: r'reading',
+              lower: [''],
+            ))
+            .addWhereClause(IndexWhereClause.lessThan(
+              indexName: r'reading',
+              upper: [''],
+            ));
+      }
     });
   }
 }
@@ -2013,6 +1978,62 @@ extension DictionaryEntryQueryFilter
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
+      termLengthEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'termLength',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
+      termLengthGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'termLength',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
+      termLengthLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'termLength',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
+      termLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'termLength',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
       termTagsElementEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -2340,6 +2361,20 @@ extension DictionaryEntryQuerySortBy
       return query.addSortBy(r'term', Sort.desc);
     });
   }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
+      sortByTermLength() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'termLength', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
+      sortByTermLengthDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'termLength', Sort.desc);
+    });
+  }
 }
 
 extension DictionaryEntryQuerySortThenBy
@@ -2450,6 +2485,20 @@ extension DictionaryEntryQuerySortThenBy
       return query.addSortBy(r'term', Sort.desc);
     });
   }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
+      thenByTermLength() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'termLength', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
+      thenByTermLengthDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'termLength', Sort.desc);
+    });
+  }
 }
 
 extension DictionaryEntryQueryWhereDistinct
@@ -2515,6 +2564,13 @@ extension DictionaryEntryQueryWhereDistinct
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'term', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QDistinct>
+      distinctByTermLength() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'termLength');
     });
   }
 
@@ -2589,6 +2645,12 @@ extension DictionaryEntryQueryProperty
   QueryBuilder<DictionaryEntry, String, QQueryOperations> termProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'term');
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, int, QQueryOperations> termLengthProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'termLength');
     });
   }
 

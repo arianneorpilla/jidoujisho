@@ -49,7 +49,7 @@ const DictionaryTermSchema = CollectionSchema(
   getId: _dictionaryTermGetId,
   getLinks: _dictionaryTermGetLinks,
   attach: _dictionaryTermAttach,
-  version: '3.0.0',
+  version: '3.0.6-dev.0',
 );
 
 int _dictionaryTermEstimateSize(

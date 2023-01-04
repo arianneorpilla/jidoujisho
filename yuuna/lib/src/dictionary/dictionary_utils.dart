@@ -40,19 +40,19 @@ Future<void> depositDictionaryDataHelper(PrepareDictionaryParams params) async {
         .deleteAllSync();
   });
 
-  partition(dictionaryTags, 1000).forEach((e) {
+  partition(dictionaryTags, 5000).forEach((e) {
     database.writeTxnSync(() {
       database.dictionaryTags.putAllSync(e);
     });
   });
 
-  partition(dictionaryMetaEntries, 1000).forEach((e) {
+  partition(dictionaryMetaEntries, 5000).forEach((e) {
     database.writeTxnSync(() {
       database.dictionaryMetaEntrys.putAllSync(e);
     });
   });
 
-  partition(dictionaryEntries, 1000).forEach((e) {
+  partition(dictionaryEntries, 5000).forEach((e) {
     database.writeTxnSync(() {
       database.dictionaryEntrys.putAllSync(e);
     });

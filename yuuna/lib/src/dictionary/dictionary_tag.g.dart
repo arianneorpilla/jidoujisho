@@ -104,7 +104,7 @@ const DictionaryTagSchema = CollectionSchema(
   getId: _dictionaryTagGetId,
   getLinks: _dictionaryTagGetLinks,
   attach: _dictionaryTagAttach,
-  version: '3.0.0',
+  version: '3.0.6-dev.0',
 );
 
 int _dictionaryTagEstimateSize(

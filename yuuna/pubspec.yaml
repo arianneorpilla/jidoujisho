@@ -56,9 +56,9 @@ dependencies:
   infinite_carousel: ^1.0.2
   infinite_scroll_pagination: ^3.1.0
   intl: ^0.17.0
-  isar: 3.0.0
-  isar_flutter_libs: 3.0.0
-  json_annotation: ^4.5.0
+  isar: 3.0.6-dev.0
+  isar_flutter_libs: 3.0.6-dev.0
+  json_annotation: ^4.7.0
   json_serializable: ^6.1.5
   just_audio: ^0.9.21
   kana_kit: ^2.0.0
@@ -119,7 +119,7 @@ dev_dependencies:
   flutter_lints: ^1.0.0
   flutter_test:
     sdk: flutter
-  isar_generator: 3.0.0
+  isar_generator: 3.0.6-dev.0
 
 flutter_icons:
   android: "launcher_icon"

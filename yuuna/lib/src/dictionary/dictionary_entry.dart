@@ -37,7 +37,7 @@ class DictionaryEntry {
   Id? id;
 
   /// The term represented by this dictionary entry.
-  @Index(type: IndexType.hash, composite: [CompositeIndex('popularity')])
+  @Index(type: IndexType.value)
   final String term;
 
   /// The dictionary from which this entry was imported from. This is used for
@@ -46,7 +46,7 @@ class DictionaryEntry {
   final String dictionaryName;
 
   /// The pronunciation of the term represented by this dictionary entry.
-  @Index(type: IndexType.hash, composite: [CompositeIndex('popularity')])
+  @Index(type: IndexType.value)
   final String reading;
 
   /// A list of definitions for a term. If there is only a single [String] item,
@@ -71,6 +71,9 @@ class DictionaryEntry {
   /// A value that can be used to group similar entries with the same value
   /// together.
   final int? sequence;
+
+  /// The length of term is used as an index.
+  int get termLength => term.length;
 
   @override
   operator ==(Object other) => other is DictionaryEntry && id == other.id;

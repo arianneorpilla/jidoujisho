@@ -223,7 +223,7 @@ class AppModel with ChangeNotifier {
 
   /// Maximum number of headwords in a returned dictionary result for
   /// performance purposes.
-  final int maximumDictionaryTermsInResult = 10;
+  final int maximumDictionaryTermsInResult = 20;
 
   /// Maximum number of dictionary entries that can be returned from a database
   /// dictionary search.
