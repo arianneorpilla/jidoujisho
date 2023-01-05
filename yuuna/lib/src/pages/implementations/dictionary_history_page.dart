@@ -35,15 +35,11 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
   String get seeMoreLabel => appModel.translate('see_more');
 
   late Map<String, Dictionary>? dictionaryMap;
-  Map<int, Map<int, List<DictionaryMetaEntry>>> metaEntriesCache = {};
-  Map<int, Map<int, Map<String, ExpandableController>>> expandedControllers =
-      {};
-  Map<int, Map<int, Map<String, bool>>> dictionaryHiddens = {};
 
   @override
   void initState() {
     super.initState();
-    appModelNoUpdate.dictionaryMenuNotifier.addListener(dumpCache);
+    appModelNoUpdate.dictionaryMenuNotifier.addListener(refresh);
   }
 
   @override
@@ -51,10 +47,7 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
     super.dispose();
   }
 
-  void dumpCache() {
-    metaEntriesCache.clear();
-    expandedControllers.clear();
-    dictionaryHiddens.clear();
+  void refresh() {
     if (mounted) {
       setState(() {});
     }
@@ -104,49 +97,34 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
           builder: (context, value, child) {
             DictionaryTerm dictionaryTerm = result.terms![indexNotifier.value];
 
-            metaEntriesCache[index - 1] ??= {};
-            expandedControllers[index - 1] ??= {};
-            dictionaryHiddens[index - 1] ??= {};
+            final Map<String, ExpandableController> controllers = {};
+            final Map<String, bool> hiddens = {};
 
-            if (metaEntriesCache[index - 1]![result.scrollIndex] == null) {
-              final Map<String, ExpandableController> controllers = {};
-              final Map<String, bool> hiddens = {};
-
-              for (String dictionaryName in dictionaryMap!.keys.toList()) {
-                controllers[dictionaryName] = ExpandableController(
-                  initialExpanded: !dictionaryMap![dictionaryName]!.collapsed,
-                );
-                hiddens[dictionaryName] =
-                    dictionaryMap![dictionaryName]!.hidden;
-              }
-
-              List<DictionaryMetaEntry> metaEntries =
-                  appModel.getMetaEntriesFromTerm(dictionaryTerm.term);
-
-              metaEntries.sort(
-                (a, b) => dictionaryMap![a.dictionaryName]!.order.compareTo(
-                      dictionaryMap![b.dictionaryName]!.order,
-                    ),
+            for (String dictionaryName in dictionaryMap!.keys.toList()) {
+              controllers[dictionaryName] = ExpandableController(
+                initialExpanded: !dictionaryMap![dictionaryName]!.collapsed,
               );
-
-              metaEntriesCache[index - 1]![result.scrollIndex] ??= metaEntries;
-              expandedControllers[index - 1]![result.scrollIndex] ??=
-                  controllers;
-              dictionaryHiddens[index - 1]![result.scrollIndex] ??= hiddens;
+              hiddens[dictionaryName] = dictionaryMap![dictionaryName]!.hidden;
             }
+
+            List<DictionaryMetaEntry> metaEntries =
+                appModel.getMetaEntriesFromTerm(dictionaryTerm.term);
+
+            metaEntries.sort(
+              (a, b) => dictionaryMap![a.dictionaryName]!.order.compareTo(
+                    dictionaryMap![b.dictionaryName]!.order,
+                  ),
+            );
 
             return DictionaryTermPage(
               lastSelectedMapping: lastSelectedMapping,
               dictionaryMap: dictionaryMap!,
               dictionaryTerm: dictionaryTerm,
-              dictionaryMetaEntries:
-                  metaEntriesCache[index - 1]![result.scrollIndex]!,
+              dictionaryMetaEntries: metaEntries,
               onSearch: widget.onSearch,
               onStash: widget.onStash,
-              expandableControllers:
-                  expandedControllers[index - 1]![result.scrollIndex]!,
-              dictionaryHiddens:
-                  dictionaryHiddens[index - 1]![result.scrollIndex]!,
+              expandableControllers: controllers,
+              dictionaryHiddens: hiddens,
               onScrollRight: () async {
                 if (result.scrollIndex == result.terms!.length - 1) {
                   result.scrollIndex = 0;

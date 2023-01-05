@@ -32,9 +32,6 @@ class _RecursiveDictionaryHistoryPageState
   String get clearLabel => appModel.translate('clear');
 
   Map<String, Dictionary>? dictionaryMap;
-  Map<int, List<DictionaryMetaEntry>> metaEntriesCache = {};
-  Map<int, Map<String, ExpandableController>> expandedControllers = {};
-  Map<int, Map<String, bool>> dictionaryHiddens = {};
 
   @override
   Widget build(BuildContext context) {

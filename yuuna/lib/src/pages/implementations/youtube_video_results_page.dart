@@ -50,9 +50,6 @@ class _YoutubeVideoResultsPageState
       appModel.translate('closed_captions_unavailable');
 
   Map<String, Dictionary>? dictionaryMap;
-  Map<int, List<DictionaryMetaEntry>> metaEntriesCache = {};
-  Map<int, Map<String, ExpandableController>> expandedControllers = {};
-  Map<int, Map<String, bool>> dictionaryHiddens = {};
 
   final ScrollController _scrollController = ScrollController();
 
@@ -128,8 +125,8 @@ class _YoutubeVideoResultsPageState
     );
   }
 
-   /// Build the right side of the history containing video information.
-   @override
+  /// Build the right side of the history containing video information.
+  @override
   Widget buildMetadata(MediaItem item) {
     MediaSource source = item.getMediaSource(appModel: appModel);
 
@@ -179,7 +176,6 @@ class _YoutubeVideoResultsPageState
       ],
     );
   }
-
 
   @override
   List<Widget> extraActions(MediaItem item) {
