@@ -207,28 +207,30 @@ class _SubtitleOptionsDialogPage
     String newFontName = _fontNameController.text.trim();
     String newRegexFilter = _regexFilterController.text.trim();
 
-    try {
-      if (newDelay != null && newAllowance != null && newFontSize != null) {
-        RegExp(newRegexFilter);
+    if (newDelay != null && newAllowance != null && newFontSize != null) {
+      RegExp(newRegexFilter);
+      try {
         GoogleFonts.getFont(newFontName);
-
-        SubtitleOptions subtitleOptions = appModel.subtitleOptions;
-
-        subtitleOptions.subtitleDelay = newDelay;
-        subtitleOptions.audioAllowance = newAllowance;
-        subtitleOptions.regexFilter = newRegexFilter;
-        subtitleOptions.fontName = newFontName;
-        subtitleOptions.fontSize = newFontSize;
-
-        widget.notifier.value = subtitleOptions;
-
-        if (saveOptions) {
-          appModel.setSubtitleOptions(subtitleOptions);
-        }
-
-        Navigator.pop(context);
+      } catch (e) {
+        newFontName = '';
       }
-    } finally {}
+
+      SubtitleOptions subtitleOptions = appModel.subtitleOptions;
+
+      subtitleOptions.subtitleDelay = newDelay;
+      subtitleOptions.audioAllowance = newAllowance;
+      subtitleOptions.regexFilter = newRegexFilter;
+      subtitleOptions.fontName = newFontName;
+      subtitleOptions.fontSize = newFontSize;
+
+      widget.notifier.value = subtitleOptions;
+
+      if (saveOptions) {
+        appModel.setSubtitleOptions(subtitleOptions);
+      }
+
+      Navigator.pop(context);
+    }
   }
 
   List<Widget> get actions => [

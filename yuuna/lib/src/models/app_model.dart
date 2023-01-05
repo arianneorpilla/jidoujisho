@@ -2718,7 +2718,7 @@ class AppModel with ChangeNotifier {
   SubtitleOptions get subtitleOptions {
     int audioAllowance = _preferences.get('audio_allowance', defaultValue: 0);
     int subtitleDelay = _preferences.get('subtitle_delay', defaultValue: 0);
-    double fontSize = _preferences.get('font_size', defaultValue: 20.0);
+    double fontSize = _preferences.get('font_size', defaultValue: 24.0);
     String fontName = _preferences
         .get('font_name/${targetLanguage.languageCode}', defaultValue: '');
     String regexFilter = _preferences.get('regex_filter', defaultValue: '');
