@@ -188,7 +188,7 @@ class _ReaderTtuSourcePageState
               paragraph: text,
               index: index,
             );
-            mediaSource.setCurrentSentence(sentence);
+            mediaSource.setCurrentSentence(sentence.replaceAll('\\n', '\n'));
           } catch (e) {
             clearDictionaryResult();
           } finally {

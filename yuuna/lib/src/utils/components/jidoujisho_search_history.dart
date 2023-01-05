@@ -11,7 +11,7 @@ class JidoujishoSearchHistory extends ConsumerStatefulWidget {
     required this.uniqueKey,
     required this.onSearchTermSelect,
     required this.onUpdate,
-     this.searchSuggestions = const [],
+    this.searchSuggestions = const [],
     super.key,
   });
 
@@ -79,7 +79,10 @@ class _JidoujishoSearchHistoryState
     required Function(String) onSearchTermSelect,
   }) {
     return InkWell(
-      onTap: () => onSearchTermSelect(searchTerm),
+      onTap: () {
+        onSearchTermSelect(searchTerm);
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
       onLongPress: () {
         if (widget.searchSuggestions.isNotEmpty) {
           return;
@@ -91,6 +94,8 @@ class _JidoujishoSearchHistoryState
         );
         setState(() {});
         widget.onUpdate();
+
+        FocusManager.instance.primaryFocus?.unfocus();
       },
       child: Padding(
         padding: EdgeInsets.only(

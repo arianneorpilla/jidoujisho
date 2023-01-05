@@ -502,6 +502,7 @@ class AppModel with ChangeNotifier {
         CropImageEnhancement(),
         PickImageEnhancement(),
         CameraEnhancement(),
+        ImageSearchTermPickerEnhancement(),
       ],
       MeaningField.instance: [
         ClearFieldEnhancement(field: MeaningField.instance),
@@ -599,10 +600,12 @@ class AppModel with ChangeNotifier {
   /// This path also initialises the folder if it does not exist, and includes
   /// a .nomedia file within the folder.
   Future<Directory> prepareJidoujishoDirectory() async {
-    String dcimDirectory = await ExternalPath.getExternalStoragePublicDirectory(
-        ExternalPath.DIRECTORY_DCIM);
-    String directoryPath = path.join(dcimDirectory, 'jidoujisho');
-    String noMediaFilePath = path.join(dcimDirectory, 'jidoujisho', '.nomedia');
+    String publicDirectory =
+        await ExternalPath.getExternalStoragePublicDirectory(
+            ExternalPath.DIRECTORY_PICTURES);
+    String directoryPath = path.join(publicDirectory, 'jidoujisho');
+    String noMediaFilePath =
+        path.join(publicDirectory, 'jidoujisho', '.nomedia');
 
     Directory jidoujishoDirectory = Directory(directoryPath);
     File noMediaFile = File(noMediaFilePath);
@@ -925,6 +928,11 @@ class AppModel with ChangeNotifier {
       importMessageEntryCount: translate('import_message_entry_count'),
       importMessageMetaEntryCount: translate('import_message_meta_entry_count'),
       importMessageTagCount: translate('import_message_tag_count'),
+      importMessageEntryImportCount:
+          translate('import_message_entry_import_count'),
+      importMessageMetaEntryImportCount:
+          translate('import_message_meta_entry_import_count'),
+      importMessageTagImportCount: translate('import_message_tag_import_count'),
       importMessageMetadata: translate('import_message_metadata'),
       importMessageDatabase: translate('import_message_database'),
       importMessageError: translate('import_message_error'),
@@ -1499,6 +1507,10 @@ class AppModel with ChangeNotifier {
       throw Exception('Invalid mime type, must be image or audio');
     }
 
+    if (destinationFile.existsSync()) {
+      destinationFile.deleteSync();
+    }
+
     String destinationPath = destinationFile.path;
     exportFile.copySync(destinationPath);
 
@@ -1512,6 +1524,10 @@ class AppModel with ChangeNotifier {
         },
       );
       debugPrint('Added $mimeType for [$preferredName] to Anki media');
+      if (destinationFile.existsSync()) {
+        destinationFile.deleteSync();
+      }
+
       return response;
     } on PlatformException {
       debugPrint('Failed to add [$mimeType] to Anki media');

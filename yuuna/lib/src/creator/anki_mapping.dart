@@ -67,6 +67,7 @@ class AnkiMapping {
       0: ClearFieldEnhancement.key,
       1: SearchDictionaryEnhancement.key,
       2: MassifExampleSentencesEnhancement.key,
+      3: OpenStashEnhancement.key,
     },
     ReadingField.key: {0: ClearFieldEnhancement.key},
     MeaningField.key: {
@@ -78,6 +79,7 @@ class AnkiMapping {
       -1: BingImagesSearchEnhancement.key,
       0: ClearFieldEnhancement.key,
       1: BingImagesSearchEnhancement.key,
+      2: ImageSearchTermPickerEnhancement.key,
     },
     AudioField.key: {
       -1: JapanesePod101AudioEnhancement.key,
@@ -116,7 +118,8 @@ class AnkiMapping {
   /// A default map of enhancements to use for new mappings.
   static const Map<int, String> defaultActions = {
     0: CardCreatorAction.key,
-    1: InstantExportAction.key
+    1: InstantExportAction.key,
+    2: AddToStashAction.key,
   };
 
   /// The default mapping name which cannot be deleted or reused.

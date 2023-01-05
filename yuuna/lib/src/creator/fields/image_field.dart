@@ -83,21 +83,24 @@ class ImageField extends ImageExportField {
       return const SizedBox.shrink();
     }
 
+    int itemCount = currentImageSuggestions!.length;
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         if (orientation == Orientation.landscape)
           Flexible(
-            child: buildCarousel(),
+            child: buildCarousel(itemCount),
           )
         else
-          buildCarousel(),
+          buildCarousel(itemCount),
         const Space.normal(),
         ValueListenableBuilder<int?>(
           valueListenable: indexNotifier,
           builder: (context, index, _) => buildFooterTextSpans(
             context: context,
             appModel: appModel,
+            itemCount: itemCount,
           ),
         ),
       ],
@@ -105,11 +108,11 @@ class ImageField extends ImageExportField {
   }
 
   /// Build the image carousel.
-  Widget buildCarousel() {
+  Widget buildCarousel(int itemCount) {
     CarouselController controller = CarouselController();
 
     return CarouselSlider.builder(
-      itemCount: currentImageSuggestions!.length,
+      itemCount: itemCount,
       carouselController: controller,
       options: CarouselOptions(
         enableInfiniteScroll: currentImageSuggestions!.length > 1,
@@ -127,10 +130,13 @@ class ImageField extends ImageExportField {
 
         return GestureDetector(
           onLongPress: () {
+            if (index != indexNotifier.value) {
+              return;
+            }
             popup = OverlayEntry(
               builder: (context) => ColoredBox(
                 color: Colors.black.withOpacity(0.5),
-                child: buildImage(image),
+                child: buildImage(image: image, fit: BoxFit.contain),
               ),
             );
             Overlay.of(context)?.insert(popup!);
@@ -140,7 +146,10 @@ class ImageField extends ImageExportField {
           },
           child: Padding(
             padding: Spacing.of(context).insets.horizontal.small,
-            child: buildImage(currentImageSuggestions![index]),
+            child: buildImage(
+              image: currentImageSuggestions![index],
+              fit: BoxFit.fitHeight,
+            ),
           ),
         );
       },
@@ -148,13 +157,16 @@ class ImageField extends ImageExportField {
   }
 
   /// Build the given image and fade in to load if network.
-  Widget buildImage(ImageProvider<Object> image) {
+  Widget buildImage({
+    required ImageProvider<Object> image,
+    required BoxFit fit,
+  }) {
     return FadeInImage(
       fadeInDuration: const Duration(milliseconds: 200),
       key: ValueKey(image),
       image: image,
       placeholder: MemoryImage(kTransparentImage),
-      fit: BoxFit.fitHeight,
+      fit: fit,
     );
   }
 
@@ -162,6 +174,7 @@ class ImageField extends ImageExportField {
   Widget buildFooterTextSpans({
     required BuildContext context,
     required AppModel appModel,
+    required int itemCount,
   }) {
     double fontSize =
         (Theme.of(context).textTheme.labelMedium?.fontSize)! * 0.9;
@@ -213,7 +226,7 @@ class ImageField extends ImageExportField {
             ),
           ),
           TextSpan(
-            text: '${currentImageSuggestions!.length} ',
+            text: '$itemCount ',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: fontSize,
@@ -306,8 +319,7 @@ class ImageField extends ImageExportField {
             ),
           WidgetSpan(
             child: SizedBox(
-              height: 12,
-              width: 12,
+              width: 10,
               child: JumpingDotsProgressIndicator(
                 color: Theme.of(context).appBarTheme.foregroundColor!,
               ),

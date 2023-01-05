@@ -105,6 +105,10 @@ class JidoujishoLocalisations {
     'import_message_entry_count': 'Found %count% entries...',
     'import_message_meta_entry_count': 'Found %count% meta entries...',
     'import_message_tag_count': 'Found %count% tags...',
+    'import_message_entry_import_count': 'Adding entries...\n%count% / %total%',
+    'import_message_meta_entry_import_count':
+        'Adding meta entries...\n%count% / %total%',
+    'import_message_tag_import_count': 'Adding tags...\n%count% / %total%',
     'import_message_metadata': 'Processing metadata...',
     'import_message_database': 'Adding entries to database...',
     'import_message_error': 'Import error: %error%',
@@ -317,6 +321,12 @@ class JidoujishoLocalisations {
     'failed_server_connection': 'Failed to connect to server',
     'no_text_received': 'No text received',
     'text_segmentation': 'Text Segmentation',
-    'connect_disconnect': 'Connect/Disconnect'
+    'connect_disconnect': 'Connect/Disconnect',
+    'clear_text_title': 'Clear Text',
+    'clear_text_description':
+        'This will clear all received text. Are you sure?',
+    'close_connection_title': 'Close Connection',
+    'close_connection_description':
+        'This will end the WebSocket connection and clear all received text. Are you sure?'
   };
 }

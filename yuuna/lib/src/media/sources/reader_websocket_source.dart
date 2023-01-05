@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:nowplaying/nowplaying.dart';
+import 'package:spaces/spaces.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/pages.dart';
@@ -68,9 +69,7 @@ class ReaderWebsocketSource extends ReaderMediaSource {
     required BuildContext context,
     required WidgetRef ref,
     required AppModel appModel,
-  }) async {
-    showConnectDialog(context: context);
-  }
+  }) async {}
 
   /// Communicates  changes.
   Stream<void> get stream => _controller.stream;
@@ -99,6 +98,12 @@ class ReaderWebsocketSource extends ReaderMediaSource {
     required AppModel appModel,
   }) {
     return [
+      if (isActive)
+        buildClearButton(
+          context: context,
+          ref: ref,
+          appModel: appModel,
+        ),
       buildConnectButton(
         context: context,
         ref: ref,
@@ -117,6 +122,122 @@ class ReaderWebsocketSource extends ReaderMediaSource {
   bool get isActive => _channel != null;
 
   /// Menu bar action.
+  Widget buildClearButton(
+      {required BuildContext context,
+      required WidgetRef ref,
+      required AppModel appModel}) {
+    String clearTitle = appModel.translate('clear_text_title');
+
+    return FloatingSearchBarAction(
+      child: JidoujishoIconButton(
+        size: Theme.of(context).textTheme.titleLarge?.fontSize,
+        tooltip: clearTitle,
+        icon: Icons.clear_all,
+        onTap: () {
+          showClearPrompt(
+            appModel: appModel,
+            context: context,
+            ref: ref,
+          );
+        },
+      ),
+    );
+  }
+
+  /// Shows when the clear button is pressed.
+  void showClearPrompt(
+      {required BuildContext context,
+      required WidgetRef ref,
+      required AppModel appModel}) async {
+    String dialogClearLabel = appModel.translate('dialog_clear');
+    String dialogCancelLabel = appModel.translate('dialog_cancel');
+    String clearTitle = appModel.translate('clear_text_title');
+    String clearDescription = appModel.translate('clear_text_description');
+
+    Widget alertDialog = AlertDialog(
+      contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
+          ? Spacing.of(context).insets.exceptBottom.big
+          : Spacing.of(context).insets.exceptBottom.normal,
+      title: Text(clearTitle),
+      content: Text(
+        clearDescription,
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text(
+            dialogClearLabel,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          onPressed: () async {
+            messages = [];
+            _controller.add(null);
+
+            Navigator.pop(context);
+          },
+        ),
+        TextButton(
+          child: Text(dialogCancelLabel),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ],
+    );
+
+    await showDialog(
+      context: context,
+      builder: (context) => alertDialog,
+    );
+  }
+
+  /// Shows when the close button is pressed.
+  void showDisconnectPrompt(
+      {required BuildContext context,
+      required WidgetRef ref,
+      required AppModel appModel}) async {
+    String dialogCloseLabel = appModel.translate('dialog_close');
+    String dialogCancelLabel = appModel.translate('dialog_cancel');
+    String closeTitle = appModel.translate('close_connection_title');
+    String closeDescription =
+        appModel.translate('close_connection_description');
+
+    Widget alertDialog = AlertDialog(
+      contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
+          ? Spacing.of(context).insets.exceptBottom.big
+          : Spacing.of(context).insets.exceptBottom.normal,
+      title: Text(closeTitle),
+      content: Text(
+        closeDescription,
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text(
+            dialogCloseLabel,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          onPressed: () async {
+            clearServerAddress();
+            mediaType.refreshTab();
+
+            Navigator.pop(context);
+          },
+        ),
+        TextButton(
+          child: Text(dialogCancelLabel),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ],
+    );
+
+    await showDialog(
+      context: context,
+      builder: (context) => alertDialog,
+    );
+  }
+
+  /// Menu bar action.
   Widget buildConnectButton(
       {required BuildContext context,
       required WidgetRef ref,
@@ -130,7 +251,11 @@ class ReaderWebsocketSource extends ReaderMediaSource {
         enabledColor: isActive ? Colors.red : null,
         icon: Icons.leak_add,
         onTap: () {
-          showConnectDialog(context: context);
+          showConnectDialog(
+            context: context,
+            ref: ref,
+            appModel: appModel,
+          );
         },
       ),
     );
@@ -146,10 +271,16 @@ class ReaderWebsocketSource extends ReaderMediaSource {
       getPreference<String>(key: 'last_address', defaultValue: '');
 
   /// Dialog for menu action.
-  void showConnectDialog({required BuildContext context}) async {
+  void showConnectDialog(
+      {required BuildContext context,
+      required WidgetRef ref,
+      required AppModel appModel}) async {
     if (isActive) {
-      clearServerAddress();
-      mediaType.refreshTab();
+      showDisconnectPrompt(
+        context: context,
+        ref: ref,
+        appModel: appModel,
+      );
     } else {
       await showDialog(
         context: context,

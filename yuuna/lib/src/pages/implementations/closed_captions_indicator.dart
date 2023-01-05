@@ -163,8 +163,7 @@ class _ClosedCaptionsIndicatorState
         ),
         if (loading)
           SizedBox(
-            width: 12,
-            height: 12,
+            width: 10,
             child: JumpingDotsProgressIndicator(
               color: overrideColor ??
                   (appModel.isDarkMode ? color.shade200 : color.shade600),

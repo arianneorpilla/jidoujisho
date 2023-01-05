@@ -40,22 +40,41 @@ Future<void> depositDictionaryDataHelper(PrepareDictionaryParams params) async {
         .deleteAllSync();
   });
 
-  partition(dictionaryTags, 5000).forEach((e) {
+  int tagCount = 0;
+  partition(dictionaryTags, 1000).forEach((e) {
     database.writeTxnSync(() {
       database.dictionaryTags.putAllSync(e);
     });
+
+    tagCount += e.length;
+    String message = params.localisation
+        .importMessageTagImportCountWithVar(tagCount, dictionaryTags.length);
+    params.sendPort.send(message);
   });
 
-  partition(dictionaryMetaEntries, 5000).forEach((e) {
+  int metaEntriesCount = 0;
+  partition(dictionaryMetaEntries, 1000).forEach((e) {
     database.writeTxnSync(() {
       database.dictionaryMetaEntrys.putAllSync(e);
     });
+
+    metaEntriesCount += e.length;
+    String message = params.localisation
+        .importMessageMetaEntryImportCountWithVar(
+            metaEntriesCount, dictionaryMetaEntries.length);
+    params.sendPort.send(message);
   });
 
-  partition(dictionaryEntries, 5000).forEach((e) {
+  int entriesCount = 0;
+  partition(dictionaryEntries, 1000).forEach((e) {
     database.writeTxnSync(() {
       database.dictionaryEntrys.putAllSync(e);
     });
+
+    entriesCount += e.length;
+    String message = params.localisation.importMessageEntryImportCountWithVar(
+        entriesCount, dictionaryEntries.length);
+    params.sendPort.send(message);
   });
 }
 
@@ -249,6 +268,9 @@ class DictionaryImportLocalisation {
     required this.importMessageEntryCount,
     required this.importMessageMetaEntryCount,
     required this.importMessageTagCount,
+    required this.importMessageEntryImportCount,
+    required this.importMessageMetaEntryImportCount,
+    required this.importMessageTagImportCount,
     required this.importMessageMetadata,
     required this.importMessageDatabase,
     required this.importMessageError,
@@ -269,6 +291,27 @@ class DictionaryImportLocalisation {
   /// Return an entry count update message with a proper variable.
   String importMessageMetaEntryCountWithVar(int count) {
     return importMessageMetaEntryCount.replaceAll('%count%', '$count');
+  }
+
+  /// Return an entry count update message with a proper variable.
+  String importMessageEntryImportCountWithVar(int count, int total) {
+    return importMessageEntryImportCount
+        .replaceAll('%count%', '$count')
+        .replaceAll('%total%', '$total');
+  }
+
+  /// Return an entry count update message with a proper variable.
+  String importMessageTagImportCountWithVar(int count, int total) {
+    return importMessageTagImportCount
+        .replaceAll('%count%', '$count')
+        .replaceAll('%total%', '$total');
+  }
+
+  /// Return an entry count update message with a proper variable.
+  String importMessageMetaEntryImportCountWithVar(int count, int total) {
+    return importMessageMetaEntryImportCount
+        .replaceAll('%count%', '$count')
+        .replaceAll('%total%', '$total');
   }
 
   /// Return a message informing the dictionary name with a proper variable.
@@ -305,6 +348,16 @@ class DictionaryImportLocalisation {
 
   /// For message to show when updating tag count while processing tags.
   final String importMessageTagCount;
+
+  /// For message to show when updating entry count while importing entries.
+  final String importMessageEntryImportCount;
+
+  /// For message to show when updating entry count while importing meta
+  /// entries.
+  final String importMessageMetaEntryImportCount;
+
+  /// For message to show when updating tag count while importing tags.
+  final String importMessageTagImportCount;
 
   /// For message to show when current progress is processing metadata.
   final String importMessageMetadata;
