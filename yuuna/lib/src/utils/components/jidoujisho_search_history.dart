@@ -79,10 +79,7 @@ class _JidoujishoSearchHistoryState
     required Function(String) onSearchTermSelect,
   }) {
     return InkWell(
-      onTap: () {
-        onSearchTermSelect(searchTerm);
-        FocusManager.instance.primaryFocus?.unfocus();
-      },
+      onTap: () => onSearchTermSelect(searchTerm),
       onLongPress: () {
         if (widget.searchSuggestions.isNotEmpty) {
           return;
@@ -94,8 +91,6 @@ class _JidoujishoSearchHistoryState
         );
         setState(() {});
         widget.onUpdate();
-
-        FocusManager.instance.primaryFocus?.unfocus();
       },
       child: Padding(
         padding: EdgeInsets.only(

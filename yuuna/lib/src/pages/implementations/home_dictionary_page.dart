@@ -337,6 +337,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
           onSearchTermSelect: (searchTerm) {
             setState(() {
               mediaType.floatingSearchBarController.query = searchTerm;
+              FocusManager.instance.primaryFocus?.unfocus();
             });
           },
           onUpdate: () {

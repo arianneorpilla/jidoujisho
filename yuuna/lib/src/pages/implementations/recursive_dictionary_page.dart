@@ -292,6 +292,7 @@ class _RecursiveDictionaryPageState
           onSearchTermSelect: (searchTerm) {
             setState(() {
               _controller.query = searchTerm;
+              FocusManager.instance.primaryFocus?.unfocus();
             });
           },
           onUpdate: () {
