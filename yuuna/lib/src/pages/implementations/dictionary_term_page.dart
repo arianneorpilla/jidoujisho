@@ -6,6 +6,7 @@ import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
+import 'package:collection/collection.dart';
 
 /// Returns the widget for a list of [DictionaryEntry] making up a term.
 class DictionaryTermPage extends BasePage {
@@ -97,6 +98,22 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
     List<Widget> tags = appModel.getTagsForTerm(widget.dictionaryTerm);
     List<DictionaryMetaEntry> freqEntries =
         widget.dictionaryMetaEntries.where((e) => e.frequency != null).toList();
+
+    Map<String, List<DictionaryMetaEntry>> groups =
+        groupBy<DictionaryMetaEntry, String>(
+            freqEntries, (entry) => entry.dictionaryName);
+
+    List<DictionaryMetaEntry> groupedFreqEntries = groups.entries.map((group) {
+      if (group.value.length == 1) {
+        return group.value.first;
+      } else {
+        return DictionaryMetaEntry(
+            dictionaryName: group.key,
+            term: widget.dictionaryTerm.term,
+            frequency: group.value.map((entry) => entry.frequency).join(', '));
+      }
+    }).toList();
+
     List<DictionaryMetaEntry> pitchEntries =
         widget.dictionaryMetaEntries.where((e) => e.pitches != null).toList();
 
@@ -124,7 +141,7 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
             const SliverToBoxAdapter(child: Space.normal()),
             SliverToBoxAdapter(child: Wrap(children: tags)),
             const SliverToBoxAdapter(child: Space.normal()),
-            buildFreqEntries(metaEntries: freqEntries),
+            buildFreqEntries(metaEntries: groupedFreqEntries),
             buildPitchEntries(metaEntries: pitchEntries),
             const SliverToBoxAdapter(child: Space.normal()),
             buildEntries(),
