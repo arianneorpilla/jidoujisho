@@ -1065,7 +1065,6 @@ class AppModel with ChangeNotifier {
         isarDirectoryPath: isarDirectory.path,
         localisation: localisation,
       );
-      await compute(depositDictionaryDataHelper, prepareDictionaryParams);
 
       /// Finally, any necessary metadata that is pertaining to the dictionary
       /// format that will come in handy when in actual use (i.e. interacting
@@ -1098,6 +1097,8 @@ class AppModel with ChangeNotifier {
       _database.writeTxnSync(() {
         _database.dictionarys.putSync(dictionary);
       });
+
+      await compute(depositDictionaryDataHelper, prepareDictionaryParams);
 
       /// The working directory should always be emptied before and after
       /// dictionary import to ensure that no files bloat the system and that
@@ -2473,22 +2474,17 @@ class AppModel with ChangeNotifier {
     late Widget widget;
 
     if (metaEntry.frequency != null) {
-      return Row(
-        children: [
-          Padding(
-            padding: Spacing.of(context).insets.onlyBottom.normal,
-            child: JidoujishoTag(
-              text: metaEntry.dictionaryName,
-              message: dictionaryImportTag.replaceAll(
-                '%dictionaryName%',
-                metaEntry.dictionaryName,
-              ),
-              trailingText: metaEntry.frequency,
-              backgroundColor: Colors.red.shade900,
-            ),
+      return Padding(
+        padding: Spacing.of(context).insets.onlyBottom.normal,
+        child: JidoujishoTag(
+          text: metaEntry.dictionaryName,
+          message: dictionaryImportTag.replaceAll(
+            '%dictionaryName%',
+            metaEntry.dictionaryName,
           ),
-          const Spacer(),
-        ],
+          trailingText: metaEntry.frequency,
+          backgroundColor: Colors.red.shade900,
+        ),
       );
     } else if (metaEntry.pitches != null) {
       List<Widget> children = [];

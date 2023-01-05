@@ -95,6 +95,11 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
 
   Widget buildCard() {
     List<Widget> tags = appModel.getTagsForTerm(widget.dictionaryTerm);
+    List<DictionaryMetaEntry> freqEntries =
+        widget.dictionaryMetaEntries.where((e) => e.frequency != null).toList();
+    List<DictionaryMetaEntry> pitchEntries =
+        widget.dictionaryMetaEntries.where((e) => e.pitches != null).toList();
+
     return Card(
       color: appModel.isDarkMode
           ? Color.fromRGBO(15, 15, 15, widget.entryOpacity)
@@ -119,7 +124,8 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
             const SliverToBoxAdapter(child: Space.normal()),
             SliverToBoxAdapter(child: Wrap(children: tags)),
             const SliverToBoxAdapter(child: Space.normal()),
-            buildMetaWidgets(metaEntries: widget.dictionaryMetaEntries),
+            buildFreqEntries(metaEntries: freqEntries),
+            buildPitchEntries(metaEntries: pitchEntries),
             const SliverToBoxAdapter(child: Space.normal()),
             buildEntries(),
             SliverToBoxAdapter(
@@ -237,7 +243,36 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
     );
   }
 
-  Widget buildMetaWidgets({
+  Widget buildFreqEntries({
+    required List<DictionaryMetaEntry> metaEntries,
+  }) {
+    if (metaEntries.isEmpty) {
+      return const SliverToBoxAdapter(
+        child: SizedBox.shrink(),
+      );
+    }
+
+    List<Widget> children = metaEntries.map((metaEntry) {
+      if (widget.dictionaryMap[metaEntry.dictionaryName]!.hidden) {
+        return const SizedBox.shrink();
+      }
+
+      return Padding(
+        padding: Spacing.of(context).insets.horizontal.small,
+        child: appModel.getTagsForMetaEntry(
+          context: context,
+          dictionaryTerm: widget.dictionaryTerm,
+          metaEntry: metaEntry,
+        ),
+      );
+    }).toList();
+
+    return SliverToBoxAdapter(
+      child: Wrap(children: children),
+    );
+  }
+
+  Widget buildPitchEntries({
     required List<DictionaryMetaEntry> metaEntries,
   }) {
     if (metaEntries.isEmpty) {

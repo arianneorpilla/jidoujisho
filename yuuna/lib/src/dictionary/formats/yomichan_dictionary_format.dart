@@ -188,6 +188,19 @@ Future<List<DictionaryMetaEntry>> prepareMetaEntriesYomichanTermBankFormat(
           } else if (item[2] is int) {
             int number = item[2] as int;
             frequency = '$number';
+          } else if (item[2] is Map) {
+            Map<String, dynamic> data = Map<String, dynamic>.from(item[2]);
+
+            if (data['frequency'] != null && data['frequency'] is Map) {
+              Map<String, dynamic> frequencyData =
+                  Map<String, dynamic>.from(data['frequency']);
+
+              frequency = frequencyData['displayValue'];
+            } else if (data['displayValue'] != null) {
+              frequency = data['displayValue'];
+            } else if (data['value'] != null) {
+              frequency = data['value'];
+            }
           } else {
             frequency = item[2].toString();
           }
