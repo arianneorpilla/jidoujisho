@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_archive/flutter_archive.dart';
 import 'package:path/path.dart' as path;
+import 'package:pretty_json/pretty_json.dart';
 
 import 'package:yuuna/dictionary.dart';
 
@@ -158,7 +159,7 @@ Future<List<DictionaryMetaEntry>> prepareMetaEntriesYomichanTermBankFormat(
         String term = item[0] as String;
         String type = item[1] as String;
 
-        String? frequency;
+        FrequencyData? frequency;
         List<PitchData>? pitches;
 
         if (type == 'pitch') {
@@ -181,28 +182,58 @@ Future<List<DictionaryMetaEntry>> prepareMetaEntriesYomichanTermBankFormat(
           if (item[2] is double) {
             double number = item[2] as double;
             if (number % 1 == 0) {
-              frequency = '${number.toInt()}';
+              frequency = FrequencyData(
+                value: number,
+                displayValue: '${number.toInt()}',
+              );
             } else {
-              frequency = '$number';
+              frequency = FrequencyData(
+                value: number,
+                displayValue: '$number',
+              );
             }
           } else if (item[2] is int) {
             int number = item[2] as int;
-            frequency = '$number';
+            frequency = FrequencyData(
+              value: number.toDouble(),
+              displayValue: '$number',
+            );
           } else if (item[2] is Map) {
             Map<String, dynamic> data = Map<String, dynamic>.from(item[2]);
 
-            if (data['frequency'] != null && data['frequency'] is Map) {
+            if (data['reading'] != null && data['frequency'] is Map) {
               Map<String, dynamic> frequencyData =
                   Map<String, dynamic>.from(data['frequency']);
 
-              frequency = frequencyData['displayValue'];
+              num number = frequencyData['value'] ?? 0;
+
+              frequency = FrequencyData(
+                value: number.toDouble(),
+                displayValue: frequencyData['displayValue'],
+                reading: data['reading'],
+              );
             } else if (data['displayValue'] != null) {
-              frequency = data['displayValue'];
+              num number = data['value'] ?? 0;
+
+              frequency = FrequencyData(
+                value: number.toDouble(),
+                displayValue: data['displayValue'],
+                reading: data['reading'],
+              );
             } else if (data['value'] != null) {
-              frequency = data['value'];
-            }
+              num number = data['value'] ?? 0;
+
+              frequency = FrequencyData(
+                value: number.toDouble(),
+                displayValue: number.toInt().toString(),
+                reading: data['reading'],
+              );
+            } else {}
           } else {
-            frequency = item[2].toString();
+            frequency = FrequencyData(
+              value: 0,
+              displayValue: item[2].toString(),
+            );
           }
         } else {
           continue;

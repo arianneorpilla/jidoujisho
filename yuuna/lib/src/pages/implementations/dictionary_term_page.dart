@@ -96,8 +96,12 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
 
   Widget buildCard() {
     List<Widget> tags = appModel.getTagsForTerm(widget.dictionaryTerm);
-    List<DictionaryMetaEntry> freqEntries =
-        widget.dictionaryMetaEntries.where((e) => e.frequency != null).toList();
+    List<DictionaryMetaEntry> freqEntries = widget.dictionaryMetaEntries
+        .where((e) =>
+            e.frequency != null &&
+            (e.frequency!.reading == null ||
+                e.frequency!.reading == widget.dictionaryTerm.reading))
+        .toList();
 
     Map<String, List<DictionaryMetaEntry>> groups =
         groupBy<DictionaryMetaEntry, String>(
@@ -108,9 +112,14 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
         return group.value.first;
       } else {
         return DictionaryMetaEntry(
-            dictionaryName: group.key,
-            term: widget.dictionaryTerm.term,
-            frequency: group.value.map((entry) => entry.frequency).join(', '));
+          dictionaryName: group.key,
+          term: widget.dictionaryTerm.term,
+          frequency: FrequencyData(
+            value: group.value.first.frequency!.value,
+            displayValue:
+                group.value.map((e) => e.frequency!.displayValue).join(', '),
+          ),
+        );
       }
     }).toList();
 

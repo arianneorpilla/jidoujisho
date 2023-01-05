@@ -23,6 +23,7 @@ export 'src/utils/converters/media_item_converter.dart';
 export 'src/utils/converters/pitch_data_converter.dart';
 export 'src/utils/converters/dictionary_entries_converter.dart';
 export 'src/utils/converters/dictionary_terms_converter.dart';
+export 'src/utils/converters/frequency_data_converter.dart';
 
 export 'src/utils/player/subtitle_utils.dart';
 export 'src/utils/player/player_payload.dart';

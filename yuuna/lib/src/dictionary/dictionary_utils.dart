@@ -38,43 +38,37 @@ Future<void> depositDictionaryDataHelper(PrepareDictionaryParams params) async {
         .where()
         .dictionaryNameEqualTo(params.dictionaryName)
         .deleteAllSync();
-  });
 
-  int tagCount = 0;
-  partition(dictionaryTags, 1000).forEach((e) {
-    database.writeTxnSync(() {
+    int tagCount = 0;
+    partition(dictionaryTags, 1000).forEach((e) {
       database.dictionaryTags.putAllSync(e);
+
+      tagCount += e.length;
+      String message = params.localisation
+          .importMessageTagImportCountWithVar(tagCount, dictionaryTags.length);
+      params.sendPort.send(message);
     });
 
-    tagCount += e.length;
-    String message = params.localisation
-        .importMessageTagImportCountWithVar(tagCount, dictionaryTags.length);
-    params.sendPort.send(message);
-  });
-
-  int metaEntriesCount = 0;
-  partition(dictionaryMetaEntries, 1000).forEach((e) {
-    database.writeTxnSync(() {
+    int metaEntriesCount = 0;
+    partition(dictionaryMetaEntries, 1000).forEach((e) {
       database.dictionaryMetaEntrys.putAllSync(e);
+
+      metaEntriesCount += e.length;
+      String message = params.localisation
+          .importMessageMetaEntryImportCountWithVar(
+              metaEntriesCount, dictionaryMetaEntries.length);
+      params.sendPort.send(message);
     });
 
-    metaEntriesCount += e.length;
-    String message = params.localisation
-        .importMessageMetaEntryImportCountWithVar(
-            metaEntriesCount, dictionaryMetaEntries.length);
-    params.sendPort.send(message);
-  });
-
-  int entriesCount = 0;
-  partition(dictionaryEntries, 1000).forEach((e) {
-    database.writeTxnSync(() {
+    int entriesCount = 0;
+    partition(dictionaryEntries, 1000).forEach((e) {
       database.dictionaryEntrys.putAllSync(e);
-    });
 
-    entriesCount += e.length;
-    String message = params.localisation.importMessageEntryImportCountWithVar(
-        entriesCount, dictionaryEntries.length);
-    params.sendPort.send(message);
+      entriesCount += e.length;
+      String message = params.localisation.importMessageEntryImportCountWithVar(
+          entriesCount, dictionaryEntries.length);
+      params.sendPort.send(message);
+    });
   });
 }
 

@@ -1066,14 +1066,7 @@ class AppModel with ChangeNotifier {
         localisation: localisation,
       );
 
-      /// Finally, any necessary metadata that is pertaining to the dictionary
-      /// format that will come in handy when in actual use (i.e. interacting
-      /// with the database or during searches) should be provided in this step.
-      progressNotifier.value = localisation.importMessageMetadata;
-      Map<String, String> dictionaryMetadata = await compute(
-        dictionaryFormat.prepareMetadata,
-        prepareDictionaryParams,
-      );
+      await compute(depositDictionaryDataHelper, prepareDictionaryParams);
 
       /// Get the highest order in the dictionary database.
       Dictionary? highestOrderDictionary =
@@ -1084,6 +1077,15 @@ class AppModel with ChangeNotifier {
       } else {
         order = 0;
       }
+
+      /// Finally, any necessary metadata that is pertaining to the dictionary
+      /// format that will come in handy when in actual use (i.e. interacting
+      /// with the database or during searches) should be provided in this step.
+      progressNotifier.value = localisation.importMessageMetadata;
+      Map<String, String> dictionaryMetadata = await compute(
+        dictionaryFormat.prepareMetadata,
+        prepareDictionaryParams,
+      );
 
       Dictionary dictionary = Dictionary(
         dictionaryName: dictionaryName,
@@ -1097,8 +1099,6 @@ class AppModel with ChangeNotifier {
       _database.writeTxnSync(() {
         _database.dictionarys.putSync(dictionary);
       });
-
-      await compute(depositDictionaryDataHelper, prepareDictionaryParams);
 
       /// The working directory should always be emptied before and after
       /// dictionary import to ensure that no files bloat the system and that
@@ -2482,7 +2482,7 @@ class AppModel with ChangeNotifier {
             '%dictionaryName%',
             metaEntry.dictionaryName,
           ),
-          trailingText: metaEntry.frequency,
+          trailingText: metaEntry.frequency!.displayValue,
           backgroundColor: Colors.red.shade900,
         ),
       );

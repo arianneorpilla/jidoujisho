@@ -23,9 +23,9 @@ const DictionaryMetaEntrySchema = CollectionSchema(
       name: r'dictionaryName',
       type: IsarType.string,
     ),
-    r'frequency': PropertySchema(
+    r'frequencyIsar': PropertySchema(
       id: 1,
-      name: r'frequency',
+      name: r'frequencyIsar',
       type: IsarType.string,
     ),
     r'hashCode': PropertySchema(
@@ -81,19 +81,6 @@ const DictionaryMetaEntrySchema = CollectionSchema(
         )
       ],
     ),
-    r'frequency': IndexSchema(
-      id: 3490570014255270311,
-      name: r'frequency',
-      unique: false,
-      replace: false,
-      properties: [
-        IndexPropertySchema(
-          name: r'frequency',
-          type: IndexType.hash,
-          caseSensitive: true,
-        )
-      ],
-    ),
     r'termLength_term': IndexSchema(
       id: -7107314842678945486,
       name: r'termLength_term',
@@ -129,7 +116,7 @@ int _dictionaryMetaEntryEstimateSize(
   var bytesCount = offsets.last;
   bytesCount += 3 + object.dictionaryName.length * 3;
   {
-    final value = object.frequency;
+    final value = object.frequencyIsar;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
     }
@@ -151,7 +138,7 @@ void _dictionaryMetaEntrySerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.dictionaryName);
-  writer.writeString(offsets[1], object.frequency);
+  writer.writeString(offsets[1], object.frequencyIsar);
   writer.writeLong(offsets[2], object.hashCode);
   writer.writeString(offsets[3], object.pitchesIsar);
   writer.writeString(offsets[4], object.term);
@@ -166,10 +153,10 @@ DictionaryMetaEntry _dictionaryMetaEntryDeserialize(
 ) {
   final object = DictionaryMetaEntry(
     dictionaryName: reader.readString(offsets[0]),
-    frequency: reader.readStringOrNull(offsets[1]),
     id: id,
     term: reader.readString(offsets[4]),
   );
+  object.frequencyIsar = reader.readStringOrNull(offsets[1]);
   object.pitchesIsar = reader.readStringOrNull(offsets[3]);
   return object;
 }
@@ -375,73 +362,6 @@ extension DictionaryMetaEntryQueryWhere
               indexName: r'dictionaryName',
               lower: [],
               upper: [dictionaryName],
-              includeUpper: false,
-            ));
-      }
-    });
-  }
-
-  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterWhereClause>
-      frequencyIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'frequency',
-        value: [null],
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterWhereClause>
-      frequencyIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'frequency',
-        lower: [null],
-        includeLower: false,
-        upper: [],
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterWhereClause>
-      frequencyEqualTo(String? frequency) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'frequency',
-        value: [frequency],
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterWhereClause>
-      frequencyNotEqualTo(String? frequency) {
-    return QueryBuilder.apply(this, (query) {
-      if (query.whereSort == Sort.asc) {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'frequency',
-              lower: [],
-              upper: [frequency],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'frequency',
-              lower: [frequency],
-              includeLower: false,
-              upper: [],
-            ));
-      } else {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'frequency',
-              lower: [frequency],
-              includeLower: false,
-              upper: [],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'frequency',
-              lower: [],
-              upper: [frequency],
               includeUpper: false,
             ));
       }
@@ -726,31 +646,31 @@ extension DictionaryMetaEntryQueryFilter on QueryBuilder<DictionaryMetaEntry,
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterFilterCondition>
-      frequencyIsNull() {
+      frequencyIsarIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'frequency',
+        property: r'frequencyIsar',
       ));
     });
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterFilterCondition>
-      frequencyIsNotNull() {
+      frequencyIsarIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'frequency',
+        property: r'frequencyIsar',
       ));
     });
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterFilterCondition>
-      frequencyEqualTo(
+      frequencyIsarEqualTo(
     String? value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'frequency',
+        property: r'frequencyIsar',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -758,7 +678,7 @@ extension DictionaryMetaEntryQueryFilter on QueryBuilder<DictionaryMetaEntry,
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterFilterCondition>
-      frequencyGreaterThan(
+      frequencyIsarGreaterThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
@@ -766,7 +686,7 @@ extension DictionaryMetaEntryQueryFilter on QueryBuilder<DictionaryMetaEntry,
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'frequency',
+        property: r'frequencyIsar',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -774,7 +694,7 @@ extension DictionaryMetaEntryQueryFilter on QueryBuilder<DictionaryMetaEntry,
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterFilterCondition>
-      frequencyLessThan(
+      frequencyIsarLessThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
@@ -782,7 +702,7 @@ extension DictionaryMetaEntryQueryFilter on QueryBuilder<DictionaryMetaEntry,
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'frequency',
+        property: r'frequencyIsar',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -790,7 +710,7 @@ extension DictionaryMetaEntryQueryFilter on QueryBuilder<DictionaryMetaEntry,
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterFilterCondition>
-      frequencyBetween(
+      frequencyIsarBetween(
     String? lower,
     String? upper, {
     bool includeLower = true,
@@ -799,7 +719,7 @@ extension DictionaryMetaEntryQueryFilter on QueryBuilder<DictionaryMetaEntry,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'frequency',
+        property: r'frequencyIsar',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -810,13 +730,13 @@ extension DictionaryMetaEntryQueryFilter on QueryBuilder<DictionaryMetaEntry,
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterFilterCondition>
-      frequencyStartsWith(
+      frequencyIsarStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'frequency',
+        property: r'frequencyIsar',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -824,13 +744,13 @@ extension DictionaryMetaEntryQueryFilter on QueryBuilder<DictionaryMetaEntry,
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterFilterCondition>
-      frequencyEndsWith(
+      frequencyIsarEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'frequency',
+        property: r'frequencyIsar',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -838,10 +758,10 @@ extension DictionaryMetaEntryQueryFilter on QueryBuilder<DictionaryMetaEntry,
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterFilterCondition>
-      frequencyContains(String value, {bool caseSensitive = true}) {
+      frequencyIsarContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r'frequency',
+        property: r'frequencyIsar',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -849,10 +769,10 @@ extension DictionaryMetaEntryQueryFilter on QueryBuilder<DictionaryMetaEntry,
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterFilterCondition>
-      frequencyMatches(String pattern, {bool caseSensitive = true}) {
+      frequencyIsarMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r'frequency',
+        property: r'frequencyIsar',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
@@ -860,20 +780,20 @@ extension DictionaryMetaEntryQueryFilter on QueryBuilder<DictionaryMetaEntry,
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterFilterCondition>
-      frequencyIsEmpty() {
+      frequencyIsarIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'frequency',
+        property: r'frequencyIsar',
         value: '',
       ));
     });
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterFilterCondition>
-      frequencyIsNotEmpty() {
+      frequencyIsarIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'frequency',
+        property: r'frequencyIsar',
         value: '',
       ));
     });
@@ -1379,16 +1299,16 @@ extension DictionaryMetaEntryQuerySortBy
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterSortBy>
-      sortByFrequency() {
+      sortByFrequencyIsar() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'frequency', Sort.asc);
+      return query.addSortBy(r'frequencyIsar', Sort.asc);
     });
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterSortBy>
-      sortByFrequencyDesc() {
+      sortByFrequencyIsarDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'frequency', Sort.desc);
+      return query.addSortBy(r'frequencyIsar', Sort.desc);
     });
   }
 
@@ -1466,16 +1386,16 @@ extension DictionaryMetaEntryQuerySortThenBy
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterSortBy>
-      thenByFrequency() {
+      thenByFrequencyIsar() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'frequency', Sort.asc);
+      return query.addSortBy(r'frequencyIsar', Sort.asc);
     });
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QAfterSortBy>
-      thenByFrequencyDesc() {
+      thenByFrequencyIsarDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'frequency', Sort.desc);
+      return query.addSortBy(r'frequencyIsar', Sort.desc);
     });
   }
 
@@ -1561,9 +1481,10 @@ extension DictionaryMetaEntryQueryWhereDistinct
   }
 
   QueryBuilder<DictionaryMetaEntry, DictionaryMetaEntry, QDistinct>
-      distinctByFrequency({bool caseSensitive = true}) {
+      distinctByFrequencyIsar({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'frequency', caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'frequencyIsar',
+          caseSensitive: caseSensitive);
     });
   }
 
@@ -1612,9 +1533,9 @@ extension DictionaryMetaEntryQueryProperty
   }
 
   QueryBuilder<DictionaryMetaEntry, String?, QQueryOperations>
-      frequencyProperty() {
+      frequencyIsarProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'frequency');
+      return query.addPropertyName(r'frequencyIsar');
     });
   }
 
@@ -1656,9 +1577,13 @@ DictionaryMetaEntry _$DictionaryMetaEntryFromJson(Map<String, dynamic> json) =>
       pitches: (json['pitches'] as List<dynamic>?)
           ?.map((e) => PitchData.fromJson(e as Map<String, dynamic>))
           .toList(),
-      frequency: json['frequency'] as String?,
+      frequency: json['frequency'] == null
+          ? null
+          : FrequencyData.fromJson(json['frequency'] as Map<String, dynamic>),
       id: json['id'] as int?,
-    )..pitchesIsar = json['pitchesIsar'] as String?;
+    )
+      ..pitchesIsar = json['pitchesIsar'] as String?
+      ..frequencyIsar = json['frequencyIsar'] as String?;
 
 Map<String, dynamic> _$DictionaryMetaEntryToJson(
         DictionaryMetaEntry instance) =>
@@ -1669,4 +1594,5 @@ Map<String, dynamic> _$DictionaryMetaEntryToJson(
       'frequency': instance.frequency,
       'pitches': instance.pitches,
       'pitchesIsar': instance.pitchesIsar,
+      'frequencyIsar': instance.frequencyIsar,
     };

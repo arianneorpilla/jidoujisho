@@ -46,8 +46,8 @@ class DictionaryMetaEntry {
   final String dictionaryName;
 
   /// The frequency of this term.
-  @Index()
-  final String? frequency;
+  @ignore
+  FrequencyData? frequency;
 
   /// List of pitch accent downsteps for this term's reading.
   @ignore
@@ -57,6 +57,11 @@ class DictionaryMetaEntry {
   String? get pitchesIsar => PitchDataConverter.toIsar(pitches);
   set pitchesIsar(String? object) =>
       pitches = PitchDataConverter.fromIsar(object);
+
+  /// Serializes [frequency].
+  String? get frequencyIsar => FrequencyDataConverter.toIsar(frequency);
+  set frequencyIsar(String? object) =>
+      frequency = FrequencyDataConverter.fromIsar(object);
 
   @override
   operator ==(Object other) => other is DictionaryMetaEntry && id == other.id;
