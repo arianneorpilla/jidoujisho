@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_archive/flutter_archive.dart';
 import 'package:path/path.dart' as path;
-import 'package:pretty_json/pretty_json.dart';
 
 import 'package:yuuna/dictionary.dart';
 

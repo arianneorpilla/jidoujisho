@@ -1066,8 +1066,6 @@ class AppModel with ChangeNotifier {
         localisation: localisation,
       );
 
-      await compute(depositDictionaryDataHelper, prepareDictionaryParams);
-
       /// Get the highest order in the dictionary database.
       Dictionary? highestOrderDictionary =
           _database.dictionarys.where().sortByOrderDesc().findFirstSync();
@@ -1099,6 +1097,8 @@ class AppModel with ChangeNotifier {
       _database.writeTxnSync(() {
         _database.dictionarys.putSync(dictionary);
       });
+
+      await compute(depositDictionaryDataHelper, prepareDictionaryParams);
 
       /// The working directory should always be emptied before and after
       /// dictionary import to ensure that no files bloat the system and that
@@ -1157,6 +1157,7 @@ class AppModel with ChangeNotifier {
       dictionaryName: dictionary.dictionaryName,
       isarDirectoryPath: isarDirectory.path,
     );
+
     await compute(deleteDictionaryDataHelper, params);
 
     Navigator.pop(navigatorKey.currentContext!);
