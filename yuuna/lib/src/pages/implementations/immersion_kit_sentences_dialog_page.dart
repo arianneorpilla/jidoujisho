@@ -2,6 +2,7 @@ import 'package:audio_session/audio_session.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:spaces/spaces.dart';
 import 'package:transparent_image/transparent_image.dart';
@@ -124,7 +125,12 @@ class _ImmersionKitSentencesDialogPageState
   }
 
   Widget buildTextWidgets() {
-    return ListView.builder(
+    return MasonryGridView.builder(
+      gridDelegate: SliverSimpleGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount:
+              MediaQuery.of(context).orientation == Orientation.portrait
+                  ? 1
+                  : 3),
       itemCount: widget.exampleSentences.length,
       itemBuilder: (context, index) {
         ImmersionKitResult result = widget.exampleSentences[index];

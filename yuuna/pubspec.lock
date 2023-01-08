@@ -542,6 +542,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "5.5.4"
+  flutter_staggered_grid_view:
+    dependency: "direct main"
+    description:
+      name: flutter_staggered_grid_view
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.6.2"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -897,13 +904,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.6"
-  oauth1:
-    dependency: transitive
-    description:
-      name: oauth1
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.0.0"
   octo_image:
     dependency: transitive
     description:
@@ -1072,13 +1072,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "5.0.0"
-  photo_gallery:
-    dependency: "direct main"
-    description:
-      name: photo_gallery
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.1.1"
   platform:
     dependency: transitive
     description:
@@ -1417,20 +1410,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.0"
-  twitter_api_v2:
-    dependency: "direct main"
-    description:
-      name: twitter_api_v2
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.10.0"
-  twitter_login:
-    dependency: "direct main"
-    description:
-      name: twitter_login
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "4.2.3"
   typed_data:
     dependency: transitive
     description:

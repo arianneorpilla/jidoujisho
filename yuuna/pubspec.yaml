@@ -1,7 +1,7 @@
 name: yuuna
 description: A full-featured immersion language learning suite for mobile.
 publish_to: 'none'
-version: 2.2.1+8
+version: 2.2.1+9
 environment:
   sdk: ">=2.17.0 <3.0.0"
 
@@ -44,6 +44,7 @@ dependencies:
   flutter_reorderable_list: ^1.2.0
   flutter_riverpod: ^1.0.4
   flutter_screenutil: ^5.3.1
+  flutter_staggered_grid_view: ^0.6.2
   flutter_vlc_player: ^7.1.5
   fluttertoast: ^8.0.9
   google_fonts: ^3.0.1
@@ -75,7 +76,6 @@ dependencies:
   path: ^1.8.0
   path_provider: ^2.0.9
   permission_handler: ^9.2.0
-  photo_gallery: ^1.1.1
   pretty_json: ^2.0.0
   progress_indicators: ^1.0.0
   quiver: ^3.2.1
@@ -97,8 +97,6 @@ dependencies:
       ref: 9c5307d1cbe3a9ca84c387e2023251896c9ff47f
   tabbed_view: ^1.12.0
   transparent_image: ^2.0.0
-  twitter_api_v2: ^2.4.2
-  twitter_login: ^4.2.3
   url_launcher: ^6.0.20
   ve_dart:
     git:
