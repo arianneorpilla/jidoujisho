@@ -99,7 +99,7 @@ class ReaderTtuSource extends ReaderMediaSource {
 
     List<MediaItem>? items;
     HeadlessInAppWebView webView = HeadlessInAppWebView(
-      initialUrlRequest: URLRequest(url: Uri.parse('http://localhost:$port/')),
+      initialUrlRequest: URLRequest(url: WebUri('http://localhost:$port/')),
       onLoadStop: (controller, url) async {
         controller.evaluateJavascript(source: getHistoryJs);
       },

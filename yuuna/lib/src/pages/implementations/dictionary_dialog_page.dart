@@ -120,6 +120,7 @@ class _DictionaryDialogPageState extends BasePageState {
                 ),
               const JidoujishoDivider(),
               buildImportDropdown(),
+              buildSlowImportSwitch(),
             ],
           ),
         ),
@@ -384,6 +385,29 @@ class _DictionaryDialogPageState extends BasePageState {
             setState(() {});
           },
         ),
+      ],
+    );
+  }
+
+  Widget buildSlowImportSwitch() {
+    ValueNotifier<bool> _notifier = ValueNotifier<bool>(appModel.useSlowImport);
+    String label = appModel.translate('use_slow_import');
+
+    return Row(
+      children: [
+        Expanded(child: Text(label)),
+        ValueListenableBuilder<bool>(
+          valueListenable: _notifier,
+          builder: (_, value, __) {
+            return Switch(
+              value: value,
+              onChanged: (value) {
+                appModel.toggleSlowImport();
+                _notifier.value = appModel.useSlowImport;
+              },
+            );
+          },
+        )
       ],
     );
   }

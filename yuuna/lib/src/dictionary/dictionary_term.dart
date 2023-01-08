@@ -14,7 +14,10 @@ class DictionaryTerm {
   DictionaryTerm({
     required this.term,
     required this.reading,
-    this.entries,
+    this.entries = const [],
+    this.metaEntries = const [],
+    this.termTags = const [],
+    this.meaningTagsGroups = const [],
   });
 
   /// Create an instance of this class from a serialized format.
@@ -32,12 +35,41 @@ class DictionaryTerm {
 
   /// The dictionary entries found for the term-reading pair.
   @ignore
-  List<DictionaryEntry>? entries;
+  List<DictionaryEntry> entries;
+
+  /// The dictionary meta entries found for the term-reading pair.
+  @ignore
+  List<DictionaryMetaEntry> metaEntries;
+
+  /// The dictionary tags found for the specific term-reading pair.
+  @ignore
+  List<DictionaryTag> termTags;
+
+  /// The dictionary tags found for each entry in [entries].
+  @ignore
+  List<List<DictionaryTag>> meaningTagsGroups;
 
   /// Serializes [entries].
-  String get entriesIsar => DictionaryEntriesConverter.toIsar(entries!);
+  String get entriesIsar => DictionaryEntriesConverter.toIsar(entries);
   set entriesIsar(String object) =>
       entries = DictionaryEntriesConverter.fromIsar(object);
+
+  /// Serializes [metaEntries].
+  String get metaEntriesIsar =>
+      DictionaryMetaEntriesConverter.toIsar(metaEntries);
+  set metaEntriesIsar(String object) =>
+      metaEntries = DictionaryMetaEntriesConverter.fromIsar(object);
+
+  /// Serializes [termTags].
+  String get termTagsIsar => DictionaryTagsConverter.toIsar(termTags);
+  set termTagsIsar(String object) =>
+      termTags = DictionaryTagsConverter.fromIsar(object);
+
+  /// Serializes [meaningTagsGroups].
+  String get meaningTagsGroupsIsar =>
+      DictionaryTagsListConverter.toIsar(meaningTagsGroups);
+  set meaningTagsGroupsIsar(String object) =>
+      meaningTagsGroups = DictionaryTagsListConverter.fromIsar(object);
 
   @override
   operator ==(Object other) =>

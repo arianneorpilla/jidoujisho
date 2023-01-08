@@ -41,7 +41,7 @@ class CollapsedMeaningField extends Field {
         .map((dictionary) => dictionary.dictionaryName)
         .toList();
 
-    List<DictionaryEntry> collapsedEntries = dictionaryTerm.entries!
+    List<DictionaryEntry> collapsedEntries = dictionaryTerm.entries
         .where((entry) => collapsedDictionaries.contains(entry.dictionaryName))
         .toList();
 

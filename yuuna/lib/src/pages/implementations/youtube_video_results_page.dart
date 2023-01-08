@@ -1,4 +1,3 @@
-import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:yuuna/dictionary.dart';

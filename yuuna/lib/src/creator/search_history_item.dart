@@ -15,11 +15,11 @@ class SearchHistoryItem {
   });
 
   /// The key representing the history type of this item.
-  @Index()
+  @Index(type: IndexType.hash)
   final String historyKey;
 
   /// The name of the model to use when exporting with this mapping.
-  @Index()
+  @Index(type: IndexType.hash)
   final String searchTerm;
 
   /// Enforces the uniqueness of a search term within its history type.

@@ -135,7 +135,7 @@ class ForvoAudioEnhancement extends AudioEnhancement {
             await audioField.setAudio(
               appModel: appModel,
               creatorModel: creatorModel,
-              searchTerm: searchTerm!,
+              searchTerm: searchTerm,
               newAutoCannotOverride: false,
               cause: cause,
               generateAudio: () async {

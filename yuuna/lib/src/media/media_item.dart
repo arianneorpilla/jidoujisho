@@ -61,11 +61,11 @@ class MediaItem {
   String title;
 
   /// The media type where this item is from.
-  @Index()
+  @Index(type: IndexType.hash)
   String mediaTypeIdentifier;
 
   /// The media source where this item is from.
-  @Index()
+  @Index(type: IndexType.hash)
   String mediaSourceIdentifier;
 
   /// If [imageUrl] is null and this is not null, this will be used as the

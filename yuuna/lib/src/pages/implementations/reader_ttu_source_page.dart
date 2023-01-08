@@ -102,12 +102,23 @@ class _ReaderTtuSourcePageState
   Widget buildReaderArea(LocalAssetsServer server) {
     return InAppWebView(
       initialUrlRequest: URLRequest(
-        url: Uri.parse(
+        url: WebUri(
           widget.item?.mediaIdentifier ??
               'http://localhost:${server.boundPort}/',
         ),
       ),
-      initialOptions: getInitialOptions(),
+      initialSettings: InAppWebViewSettings(
+        allowFileAccessFromFileURLs: true,
+        allowUniversalAccessFromFileURLs: true,
+        mediaPlaybackRequiresUserGesture: false,
+        verticalScrollBarEnabled: false,
+        horizontalScrollBarEnabled: false,
+        verticalScrollbarThumbColor: Colors.transparent,
+        verticalScrollbarTrackColor: Colors.transparent,
+        horizontalScrollbarThumbColor: Colors.transparent,
+        horizontalScrollbarTrackColor: Colors.transparent,
+        scrollbarFadingEnabled: false,
+      ),
       contextMenu: getContextMenu(),
       onConsoleMessage: onConsoleMessage,
       onWebViewCreated: (controller) {
@@ -207,30 +218,11 @@ class _ReaderTtuSourcePageState
     await webViewController.evaluateJavascript(source: source);
   }
 
-  InAppWebViewGroupOptions getInitialOptions() {
-    return InAppWebViewGroupOptions(
-      crossPlatform: InAppWebViewOptions(
-        allowFileAccessFromFileURLs: true,
-        allowUniversalAccessFromFileURLs: true,
-        mediaPlaybackRequiresUserGesture: false,
-        verticalScrollBarEnabled: false,
-        horizontalScrollBarEnabled: false,
-      ),
-      android: AndroidInAppWebViewOptions(
-        verticalScrollbarThumbColor: Colors.transparent,
-        verticalScrollbarTrackColor: Colors.transparent,
-        horizontalScrollbarThumbColor: Colors.transparent,
-        horizontalScrollbarTrackColor: Colors.transparent,
-        scrollbarFadingEnabled: false,
-      ),
-    );
-  }
-
   /// Get the default context menu for sources that make use of embedded web
   /// views.
   ContextMenu getContextMenu() {
     return ContextMenu(
-      options: ContextMenuOptions(
+      settings: ContextMenuSettings(
         hideDefaultSystemContextMenuItems: true,
       ),
       menuItems: [
@@ -244,8 +236,7 @@ class _ReaderTtuSourcePageState
 
   ContextMenuItem searchMenuItem() {
     return ContextMenuItem(
-      androidId: 1,
-      iosId: '1',
+      id: 1,
       title: searchLabel,
       action: searchMenuAction,
     );
@@ -253,8 +244,7 @@ class _ReaderTtuSourcePageState
 
   ContextMenuItem stashMenuItem() {
     return ContextMenuItem(
-      androidId: 2,
-      iosId: '2',
+      id: 2,
       title: stashLabel,
       action: stashMenuAction,
     );
@@ -262,8 +252,7 @@ class _ReaderTtuSourcePageState
 
   ContextMenuItem creatorMenuItem() {
     return ContextMenuItem(
-      androidId: 3,
-      iosId: '3',
+      id: 3,
       title: creatorLabel,
       action: creatorMenuAction,
     );
@@ -271,8 +260,7 @@ class _ReaderTtuSourcePageState
 
   ContextMenuItem copyMenuItem() {
     return ContextMenuItem(
-      androidId: 4,
-      iosId: '4',
+      id: 4,
       title: copyLabel,
       action: copyMenuAction,
     );

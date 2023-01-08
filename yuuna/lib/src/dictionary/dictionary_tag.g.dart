@@ -1666,3 +1666,29 @@ extension DictionaryTagQueryProperty
     });
   }
 }
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+DictionaryTag _$DictionaryTagFromJson(Map<String, dynamic> json) =>
+    DictionaryTag(
+      dictionaryName: json['dictionaryName'] as String,
+      name: json['name'] as String,
+      category: json['category'] as String,
+      sortingOrder: json['sortingOrder'] as int,
+      notes: json['notes'] as String,
+      popularity: (json['popularity'] as num?)?.toDouble(),
+      id: json['id'] as int?,
+    );
+
+Map<String, dynamic> _$DictionaryTagToJson(DictionaryTag instance) =>
+    <String, dynamic>{
+      'dictionaryName': instance.dictionaryName,
+      'name': instance.name,
+      'category': instance.category,
+      'sortingOrder': instance.sortingOrder,
+      'notes': instance.notes,
+      'popularity': instance.popularity,
+      'id': instance.id,
+    };

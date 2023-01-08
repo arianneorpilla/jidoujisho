@@ -11,19 +11,19 @@ import 'package:http/http.dart' as http;
 class MassifResult {
   /// Define a result with the given parameters.
   MassifResult({
-    required this.widget,
     required this.text,
     required this.source,
+    required this.spans,
   });
-
-  /// A formatted widget which may contain highlighted text.
-  Widget widget;
 
   /// The sentence in plain unformatted form.
   String text;
 
   /// The context from which the text was obtained.
   String source;
+
+  /// A formatted widget which may contain highlighted text.
+  List<InlineSpan> spans;
 }
 
 /// An enhancement used to fetch example sentences via Massif.
@@ -143,26 +143,10 @@ class MassifExampleSentencesEnhancement extends Enhancement {
           }
         }
 
-        Widget widget = Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text.rich(
-              TextSpan(children: spans),
-            ),
-            Text(
-              source,
-              style: TextStyle(
-                fontSize: Theme.of(context).textTheme.labelSmall?.fontSize,
-                color: Theme.of(context).unselectedWidgetColor,
-              ),
-            )
-          ],
-        );
-
         MassifResult result = MassifResult(
-          widget: widget,
           text: text,
           source: source,
+          spans: spans,
         );
 
         results.add(result);

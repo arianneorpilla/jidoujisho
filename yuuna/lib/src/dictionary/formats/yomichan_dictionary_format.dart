@@ -99,7 +99,6 @@ Future<List<DictionaryEntry>> prepareEntriesYomichanTermBankFormat(
         List<String> termTags = (item[7] as String).split(' ');
 
         List<String> meanings = [];
-        int? sequence = item[6] as int?;
 
         if (item[5] is List) {
           List<dynamic> meaningsList = List.from(item[5]);
@@ -117,7 +116,6 @@ Future<List<DictionaryEntry>> prepareEntriesYomichanTermBankFormat(
             popularity: popularity,
             meaningTags: meaningTags,
             termTags: termTags,
-            sequence: sequence,
           ),
         );
       }

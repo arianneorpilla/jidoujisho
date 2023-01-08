@@ -23,7 +23,6 @@ class DictionaryEntry {
     this.meaningTags = const [],
     this.termTags = const [],
     this.popularity,
-    this.sequence,
   });
 
   /// Create an instance of this class from a serialized format.
@@ -38,15 +37,25 @@ class DictionaryEntry {
 
   /// The term represented by this dictionary entry.
   @Index(type: IndexType.value)
+  @Index(
+    type: IndexType.hash,
+    name: 'termComposite',
+    composite: [CompositeIndex('popularity')],
+  )
   final String term;
 
   /// The dictionary from which this entry was imported from. This is used for
   /// database query purposes.
-  @Index()
+  @Index(type: IndexType.hash)
   final String dictionaryName;
 
   /// The pronunciation of the term represented by this dictionary entry.
   @Index(type: IndexType.value)
+  @Index(
+    type: IndexType.hash,
+    name: 'readingComposite',
+    composite: [CompositeIndex('popularity')],
+  )
   final String reading;
 
   /// A list of definitions for a term. If there is only a single [String] item,
@@ -66,19 +75,14 @@ class DictionaryEntry {
 
   /// A value that can be used to sort entries when performing a database
   /// search.
+  @Index(type: IndexType.value)
   final double? popularity;
-
-  /// A value that can be used to group similar entries with the same value
-  /// together.
-  final int? sequence;
-
-  /// The length of term is used as an index.
-  int get termLength => term.length;
 
   @override
   operator ==(Object other) => other is DictionaryEntry && id == other.id;
 
   @override
+  @ignore
   int get hashCode => id.hashCode;
 
   @override

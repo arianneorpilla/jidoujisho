@@ -27,48 +27,33 @@ const DictionaryEntrySchema = CollectionSchema(
       name: r'extra',
       type: IsarType.string,
     ),
-    r'hashCode': PropertySchema(
-      id: 2,
-      name: r'hashCode',
-      type: IsarType.long,
-    ),
     r'meaningTags': PropertySchema(
-      id: 3,
+      id: 2,
       name: r'meaningTags',
       type: IsarType.stringList,
     ),
     r'meanings': PropertySchema(
-      id: 4,
+      id: 3,
       name: r'meanings',
       type: IsarType.stringList,
     ),
     r'popularity': PropertySchema(
-      id: 5,
+      id: 4,
       name: r'popularity',
       type: IsarType.double,
     ),
     r'reading': PropertySchema(
-      id: 6,
+      id: 5,
       name: r'reading',
       type: IsarType.string,
     ),
-    r'sequence': PropertySchema(
-      id: 7,
-      name: r'sequence',
-      type: IsarType.long,
-    ),
     r'term': PropertySchema(
-      id: 8,
+      id: 6,
       name: r'term',
       type: IsarType.string,
     ),
-    r'termLength': PropertySchema(
-      id: 9,
-      name: r'termLength',
-      type: IsarType.long,
-    ),
     r'termTags': PropertySchema(
-      id: 10,
+      id: 7,
       name: r'termTags',
       type: IsarType.stringList,
     )
@@ -89,6 +74,24 @@ const DictionaryEntrySchema = CollectionSchema(
           name: r'term',
           type: IndexType.value,
           caseSensitive: true,
+        )
+      ],
+    ),
+    r'termComposite': IndexSchema(
+      id: -6405999970609981681,
+      name: r'termComposite',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'term',
+          type: IndexType.hash,
+          caseSensitive: true,
+        ),
+        IndexPropertySchema(
+          name: r'popularity',
+          type: IndexType.value,
+          caseSensitive: false,
         )
       ],
     ),
@@ -115,6 +118,37 @@ const DictionaryEntrySchema = CollectionSchema(
           name: r'reading',
           type: IndexType.value,
           caseSensitive: true,
+        )
+      ],
+    ),
+    r'readingComposite': IndexSchema(
+      id: 1103315040918879110,
+      name: r'readingComposite',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'reading',
+          type: IndexType.hash,
+          caseSensitive: true,
+        ),
+        IndexPropertySchema(
+          name: r'popularity',
+          type: IndexType.value,
+          caseSensitive: false,
+        )
+      ],
+    ),
+    r'popularity': IndexSchema(
+      id: -817613675826504681,
+      name: r'popularity',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'popularity',
+          type: IndexType.value,
+          caseSensitive: false,
         )
       ],
     )
@@ -174,15 +208,12 @@ void _dictionaryEntrySerialize(
 ) {
   writer.writeString(offsets[0], object.dictionaryName);
   writer.writeString(offsets[1], object.extra);
-  writer.writeLong(offsets[2], object.hashCode);
-  writer.writeStringList(offsets[3], object.meaningTags);
-  writer.writeStringList(offsets[4], object.meanings);
-  writer.writeDouble(offsets[5], object.popularity);
-  writer.writeString(offsets[6], object.reading);
-  writer.writeLong(offsets[7], object.sequence);
-  writer.writeString(offsets[8], object.term);
-  writer.writeLong(offsets[9], object.termLength);
-  writer.writeStringList(offsets[10], object.termTags);
+  writer.writeStringList(offsets[2], object.meaningTags);
+  writer.writeStringList(offsets[3], object.meanings);
+  writer.writeDouble(offsets[4], object.popularity);
+  writer.writeString(offsets[5], object.reading);
+  writer.writeString(offsets[6], object.term);
+  writer.writeStringList(offsets[7], object.termTags);
 }
 
 DictionaryEntry _dictionaryEntryDeserialize(
@@ -195,13 +226,12 @@ DictionaryEntry _dictionaryEntryDeserialize(
     dictionaryName: reader.readString(offsets[0]),
     extra: reader.readStringOrNull(offsets[1]),
     id: id,
-    meaningTags: reader.readStringList(offsets[3]) ?? const [],
-    meanings: reader.readStringList(offsets[4]) ?? [],
-    popularity: reader.readDoubleOrNull(offsets[5]),
-    reading: reader.readStringOrNull(offsets[6]) ?? '',
-    sequence: reader.readLongOrNull(offsets[7]),
-    term: reader.readString(offsets[8]),
-    termTags: reader.readStringList(offsets[10]) ?? const [],
+    meaningTags: reader.readStringList(offsets[2]) ?? const [],
+    meanings: reader.readStringList(offsets[3]) ?? [],
+    popularity: reader.readDoubleOrNull(offsets[4]),
+    reading: reader.readStringOrNull(offsets[5]) ?? '',
+    term: reader.readString(offsets[6]),
+    termTags: reader.readStringList(offsets[7]) ?? const [],
   );
   return object;
 }
@@ -218,22 +248,16 @@ P _dictionaryEntryDeserializeProp<P>(
     case 1:
       return (reader.readStringOrNull(offset)) as P;
     case 2:
-      return (reader.readLong(offset)) as P;
-    case 3:
       return (reader.readStringList(offset) ?? const []) as P;
-    case 4:
+    case 3:
       return (reader.readStringList(offset) ?? []) as P;
-    case 5:
+    case 4:
       return (reader.readDoubleOrNull(offset)) as P;
-    case 6:
+    case 5:
       return (reader.readStringOrNull(offset) ?? '') as P;
-    case 7:
-      return (reader.readLongOrNull(offset)) as P;
-    case 8:
+    case 6:
       return (reader.readString(offset)) as P;
-    case 9:
-      return (reader.readLong(offset)) as P;
-    case 10:
+    case 7:
       return (reader.readStringList(offset) ?? const []) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -273,6 +297,14 @@ extension DictionaryEntryQueryWhereSort
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         const IndexWhereClause.any(indexName: r'reading'),
+      );
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhere> anyPopularity() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        const IndexWhereClause.any(indexName: r'popularity'),
       );
     });
   }
@@ -489,6 +521,171 @@ extension DictionaryEntryQueryWhere
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      termEqualToAnyPopularity(String term) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'termComposite',
+        value: [term],
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      termNotEqualToAnyPopularity(String term) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'termComposite',
+              lower: [],
+              upper: [term],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'termComposite',
+              lower: [term],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'termComposite',
+              lower: [term],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'termComposite',
+              lower: [],
+              upper: [term],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      termEqualToPopularityIsNull(String term) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'termComposite',
+        value: [term, null],
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      termEqualToPopularityIsNotNull(String term) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'termComposite',
+        lower: [term, null],
+        includeLower: false,
+        upper: [
+          term,
+        ],
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      termPopularityEqualTo(String term, double? popularity) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'termComposite',
+        value: [term, popularity],
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      termEqualToPopularityNotEqualTo(String term, double? popularity) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'termComposite',
+              lower: [term],
+              upper: [term, popularity],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'termComposite',
+              lower: [term, popularity],
+              includeLower: false,
+              upper: [term],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'termComposite',
+              lower: [term, popularity],
+              includeLower: false,
+              upper: [term],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'termComposite',
+              lower: [term],
+              upper: [term, popularity],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      termEqualToPopularityGreaterThan(
+    String term,
+    double? popularity, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'termComposite',
+        lower: [term, popularity],
+        includeLower: include,
+        upper: [term],
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      termEqualToPopularityLessThan(
+    String term,
+    double? popularity, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'termComposite',
+        lower: [term],
+        upper: [term, popularity],
+        includeUpper: include,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      termEqualToPopularityBetween(
+    String term,
+    double? lowerPopularity,
+    double? upperPopularity, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'termComposite',
+        lower: [term, lowerPopularity],
+        includeLower: includeLower,
+        upper: [term, upperPopularity],
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
       dictionaryNameEqualTo(String dictionaryName) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
@@ -671,6 +868,286 @@ extension DictionaryEntryQueryWhere
               upper: [''],
             ));
       }
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      readingEqualToAnyPopularity(String reading) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'readingComposite',
+        value: [reading],
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      readingNotEqualToAnyPopularity(String reading) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'readingComposite',
+              lower: [],
+              upper: [reading],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'readingComposite',
+              lower: [reading],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'readingComposite',
+              lower: [reading],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'readingComposite',
+              lower: [],
+              upper: [reading],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      readingEqualToPopularityIsNull(String reading) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'readingComposite',
+        value: [reading, null],
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      readingEqualToPopularityIsNotNull(String reading) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'readingComposite',
+        lower: [reading, null],
+        includeLower: false,
+        upper: [
+          reading,
+        ],
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      readingPopularityEqualTo(String reading, double? popularity) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'readingComposite',
+        value: [reading, popularity],
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      readingEqualToPopularityNotEqualTo(String reading, double? popularity) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'readingComposite',
+              lower: [reading],
+              upper: [reading, popularity],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'readingComposite',
+              lower: [reading, popularity],
+              includeLower: false,
+              upper: [reading],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'readingComposite',
+              lower: [reading, popularity],
+              includeLower: false,
+              upper: [reading],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'readingComposite',
+              lower: [reading],
+              upper: [reading, popularity],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      readingEqualToPopularityGreaterThan(
+    String reading,
+    double? popularity, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'readingComposite',
+        lower: [reading, popularity],
+        includeLower: include,
+        upper: [reading],
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      readingEqualToPopularityLessThan(
+    String reading,
+    double? popularity, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'readingComposite',
+        lower: [reading],
+        upper: [reading, popularity],
+        includeUpper: include,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      readingEqualToPopularityBetween(
+    String reading,
+    double? lowerPopularity,
+    double? upperPopularity, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'readingComposite',
+        lower: [reading, lowerPopularity],
+        includeLower: includeLower,
+        upper: [reading, upperPopularity],
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      popularityIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'popularity',
+        value: [null],
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      popularityIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'popularity',
+        lower: [null],
+        includeLower: false,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      popularityEqualTo(double? popularity) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'popularity',
+        value: [popularity],
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      popularityNotEqualTo(double? popularity) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'popularity',
+              lower: [],
+              upper: [popularity],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'popularity',
+              lower: [popularity],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'popularity',
+              lower: [popularity],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'popularity',
+              lower: [],
+              upper: [popularity],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      popularityGreaterThan(
+    double? popularity, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'popularity',
+        lower: [popularity],
+        includeLower: include,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      popularityLessThan(
+    double? popularity, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'popularity',
+        lower: [],
+        upper: [popularity],
+        includeUpper: include,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterWhereClause>
+      popularityBetween(
+    double? lowerPopularity,
+    double? upperPopularity, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'popularity',
+        lower: [lowerPopularity],
+        includeLower: includeLower,
+        upper: [upperPopularity],
+        includeUpper: includeUpper,
+      ));
     });
   }
 }
@@ -963,62 +1440,6 @@ extension DictionaryEntryQueryFilter
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'extra',
         value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      hashCodeEqualTo(int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'hashCode',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      hashCodeGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'hashCode',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      hashCodeLessThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'hashCode',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      hashCodeBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'hashCode',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
       ));
     });
   }
@@ -1768,80 +2189,6 @@ extension DictionaryEntryQueryFilter
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      sequenceIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'sequence',
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      sequenceIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'sequence',
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      sequenceEqualTo(int? value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'sequence',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      sequenceGreaterThan(
-    int? value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'sequence',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      sequenceLessThan(
-    int? value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'sequence',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      sequenceBetween(
-    int? lower,
-    int? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'sequence',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
       termEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -1973,62 +2320,6 @@ extension DictionaryEntryQueryFilter
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'term',
         value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      termLengthEqualTo(int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'termLength',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      termLengthGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'termLength',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      termLengthLessThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'termLength',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      termLengthBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'termLength',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
       ));
     });
   }
@@ -2295,20 +2586,6 @@ extension DictionaryEntryQuerySortBy
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      sortByHashCode() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hashCode', Sort.asc);
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      sortByHashCodeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hashCode', Sort.desc);
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
       sortByPopularity() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'popularity', Sort.asc);
@@ -2335,20 +2612,6 @@ extension DictionaryEntryQuerySortBy
     });
   }
 
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      sortBySequence() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'sequence', Sort.asc);
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      sortBySequenceDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'sequence', Sort.desc);
-    });
-  }
-
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy> sortByTerm() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'term', Sort.asc);
@@ -2359,20 +2622,6 @@ extension DictionaryEntryQuerySortBy
       sortByTermDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'term', Sort.desc);
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      sortByTermLength() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'termLength', Sort.asc);
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      sortByTermLengthDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'termLength', Sort.desc);
     });
   }
 }
@@ -2403,20 +2652,6 @@ extension DictionaryEntryQuerySortThenBy
       thenByExtraDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'extra', Sort.desc);
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      thenByHashCode() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hashCode', Sort.asc);
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      thenByHashCodeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hashCode', Sort.desc);
     });
   }
 
@@ -2459,20 +2694,6 @@ extension DictionaryEntryQuerySortThenBy
     });
   }
 
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      thenBySequence() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'sequence', Sort.asc);
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      thenBySequenceDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'sequence', Sort.desc);
-    });
-  }
-
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy> thenByTerm() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'term', Sort.asc);
@@ -2483,20 +2704,6 @@ extension DictionaryEntryQuerySortThenBy
       thenByTermDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'term', Sort.desc);
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      thenByTermLength() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'termLength', Sort.asc);
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      thenByTermLengthDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'termLength', Sort.desc);
     });
   }
 }
@@ -2515,13 +2722,6 @@ extension DictionaryEntryQueryWhereDistinct
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'extra', caseSensitive: caseSensitive);
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QDistinct>
-      distinctByHashCode() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'hashCode');
     });
   }
 
@@ -2553,24 +2753,10 @@ extension DictionaryEntryQueryWhereDistinct
     });
   }
 
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QDistinct>
-      distinctBySequence() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'sequence');
-    });
-  }
-
   QueryBuilder<DictionaryEntry, DictionaryEntry, QDistinct> distinctByTerm(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'term', caseSensitive: caseSensitive);
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QDistinct>
-      distinctByTermLength() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'termLength');
     });
   }
 
@@ -2603,12 +2789,6 @@ extension DictionaryEntryQueryProperty
     });
   }
 
-  QueryBuilder<DictionaryEntry, int, QQueryOperations> hashCodeProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'hashCode');
-    });
-  }
-
   QueryBuilder<DictionaryEntry, List<String>, QQueryOperations>
       meaningTagsProperty() {
     return QueryBuilder.apply(this, (query) {
@@ -2636,21 +2816,9 @@ extension DictionaryEntryQueryProperty
     });
   }
 
-  QueryBuilder<DictionaryEntry, int?, QQueryOperations> sequenceProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'sequence');
-    });
-  }
-
   QueryBuilder<DictionaryEntry, String, QQueryOperations> termProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'term');
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, int, QQueryOperations> termLengthProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'termLength');
     });
   }
 
@@ -2684,7 +2852,6 @@ DictionaryEntry _$DictionaryEntryFromJson(Map<String, dynamic> json) =>
               .toList() ??
           const [],
       popularity: (json['popularity'] as num?)?.toDouble(),
-      sequence: json['sequence'] as int?,
     );
 
 Map<String, dynamic> _$DictionaryEntryToJson(DictionaryEntry instance) =>
@@ -2698,5 +2865,4 @@ Map<String, dynamic> _$DictionaryEntryToJson(DictionaryEntry instance) =>
       'meaningTags': instance.meaningTags,
       'termTags': instance.termTags,
       'popularity': instance.popularity,
-      'sequence': instance.sequence,
     };

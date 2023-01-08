@@ -43,12 +43,9 @@ class DictionaryResultPage extends BasePage {
 }
 
 class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
-  Map<String, Dictionary>? dictionaryMap;
-
   @override
   void initState() {
     super.initState();
-
     appModelNoUpdate.dictionaryMenuNotifier.addListener(dumpCache);
   }
 
@@ -64,19 +61,11 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
   Widget build(BuildContext context) {
     AnkiMapping lastSelectedMapping = appModel.lastSelectedMapping;
 
-    dictionaryMap = Map<String, Dictionary>.fromEntries(
+    Map<String, Dictionary> dictionaryMap = Map<String, Dictionary>.fromEntries(
       appModel.dictionaries.map(
         (dictionary) => MapEntry(dictionary.dictionaryName, dictionary),
       ),
     );
-
-    for (DictionaryTerm term in widget.result.terms!) {
-      term.entries!.sort(
-        (a, b) => dictionaryMap![a.dictionaryName]!.order.compareTo(
-              dictionaryMap![b.dictionaryName]!.order,
-            ),
-      );
-    }
 
     return MediaQuery(
       data: MediaQuery.of(context).removePadding(
@@ -100,6 +89,7 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
             slivers: [
               SliverList(
                 delegate: SliverChildBuilderDelegate(
+                  childCount: widget.result.terms!.length + 1,
                   (context, index) {
                     if (index == 0) {
                       return widget.spaceBeforeFirstResult
@@ -113,38 +103,39 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
                     final Map<String, ExpandableController> controllers = {};
                     final Map<String, bool> hiddens = {};
 
-                    for (String dictionaryName
-                        in dictionaryMap!.keys.toList()) {
+                    for (String dictionaryName in dictionaryMap.keys.toList()) {
                       controllers[dictionaryName] = ExpandableController(
                         initialExpanded:
-                            !dictionaryMap![dictionaryName]!.collapsed,
+                            !dictionaryMap[dictionaryName]!.collapsed,
                       );
                       hiddens[dictionaryName] =
-                          dictionaryMap![dictionaryName]!.hidden;
+                          dictionaryMap[dictionaryName]!.hidden;
                     }
 
-                    List<DictionaryMetaEntry> metaEntries =
-                        appModel.getMetaEntriesFromTerm(dictionaryTerm.term);
-                    metaEntries.sort(
+                    dictionaryTerm.entries.sort(
                       (a, b) =>
-                          dictionaryMap![a.dictionaryName]!.order.compareTo(
-                                dictionaryMap![b.dictionaryName]!.order,
+                          dictionaryMap[a.dictionaryName]!.order.compareTo(
+                                dictionaryMap[b.dictionaryName]!.order,
+                              ),
+                    );
+                    dictionaryTerm.metaEntries.sort(
+                      (a, b) =>
+                          dictionaryMap[a.dictionaryName]!.order.compareTo(
+                                dictionaryMap[b.dictionaryName]!.order,
                               ),
                     );
 
                     return DictionaryTermPage(
                       lastSelectedMapping: lastSelectedMapping,
                       entryOpacity: widget.entryOpacity,
-                      dictionaryMap: dictionaryMap!,
+                      dictionaryMap: dictionaryMap,
                       dictionaryTerm: dictionaryTerm,
                       onSearch: widget.onSearch,
                       onStash: widget.onStash,
-                      dictionaryMetaEntries: metaEntries,
                       expandableControllers: controllers,
                       dictionaryHiddens: hiddens,
                     );
                   },
-                  childCount: widget.result.terms!.length + 1,
                 ),
               ),
             ],

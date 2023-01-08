@@ -67,7 +67,8 @@ class AnkiMapping {
       0: ClearFieldEnhancement.key,
       1: SearchDictionaryEnhancement.key,
       2: MassifExampleSentencesEnhancement.key,
-      3: OpenStashEnhancement.key,
+      3: ImmersionKitEnhancement.key,
+      4: OpenStashEnhancement.key,
     },
     ReadingField.key: {0: ClearFieldEnhancement.key},
     MeaningField.key: {

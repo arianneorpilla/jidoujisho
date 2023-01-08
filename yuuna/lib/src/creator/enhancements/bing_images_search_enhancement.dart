@@ -87,7 +87,9 @@ class BingImagesSearchEnhancement extends ImageEnhancement {
 
     HeadlessInAppWebView webView = HeadlessInAppWebView(
         initialUrlRequest: URLRequest(
-          url: Uri.parse("https://www.bing.com/images/search?q=$searchTerm')"),
+          url: WebUri(
+            "https://www.bing.com/images/search?q=$searchTerm')",
+          ),
         ),
         onLoadStop: (controller, uri) async {
           Directory appDirDoc = await getApplicationSupportDirectory();

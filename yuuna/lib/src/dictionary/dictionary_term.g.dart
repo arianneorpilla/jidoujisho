@@ -27,14 +27,29 @@ const DictionaryTermSchema = CollectionSchema(
       name: r'hashCode',
       type: IsarType.long,
     ),
-    r'reading': PropertySchema(
+    r'meaningTagsGroupsIsar': PropertySchema(
       id: 2,
+      name: r'meaningTagsGroupsIsar',
+      type: IsarType.string,
+    ),
+    r'metaEntriesIsar': PropertySchema(
+      id: 3,
+      name: r'metaEntriesIsar',
+      type: IsarType.string,
+    ),
+    r'reading': PropertySchema(
+      id: 4,
       name: r'reading',
       type: IsarType.string,
     ),
     r'term': PropertySchema(
-      id: 3,
+      id: 5,
       name: r'term',
+      type: IsarType.string,
+    ),
+    r'termTagsIsar': PropertySchema(
+      id: 6,
+      name: r'termTagsIsar',
       type: IsarType.string,
     )
   },
@@ -59,8 +74,11 @@ int _dictionaryTermEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.entriesIsar.length * 3;
+  bytesCount += 3 + object.meaningTagsGroupsIsar.length * 3;
+  bytesCount += 3 + object.metaEntriesIsar.length * 3;
   bytesCount += 3 + object.reading.length * 3;
   bytesCount += 3 + object.term.length * 3;
+  bytesCount += 3 + object.termTagsIsar.length * 3;
   return bytesCount;
 }
 
@@ -72,8 +90,11 @@ void _dictionaryTermSerialize(
 ) {
   writer.writeString(offsets[0], object.entriesIsar);
   writer.writeLong(offsets[1], object.hashCode);
-  writer.writeString(offsets[2], object.reading);
-  writer.writeString(offsets[3], object.term);
+  writer.writeString(offsets[2], object.meaningTagsGroupsIsar);
+  writer.writeString(offsets[3], object.metaEntriesIsar);
+  writer.writeString(offsets[4], object.reading);
+  writer.writeString(offsets[5], object.term);
+  writer.writeString(offsets[6], object.termTagsIsar);
 }
 
 DictionaryTerm _dictionaryTermDeserialize(
@@ -83,11 +104,14 @@ DictionaryTerm _dictionaryTermDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = DictionaryTerm(
-    reading: reader.readString(offsets[2]),
-    term: reader.readString(offsets[3]),
+    reading: reader.readString(offsets[4]),
+    term: reader.readString(offsets[5]),
   );
   object.entriesIsar = reader.readString(offsets[0]);
   object.id = id;
+  object.meaningTagsGroupsIsar = reader.readString(offsets[2]);
+  object.metaEntriesIsar = reader.readString(offsets[3]);
+  object.termTagsIsar = reader.readString(offsets[6]);
   return object;
 }
 
@@ -105,6 +129,12 @@ P _dictionaryTermDeserializeProp<P>(
     case 2:
       return (reader.readString(offset)) as P;
     case 3:
+      return (reader.readString(offset)) as P;
+    case 4:
+      return (reader.readString(offset)) as P;
+    case 5:
+      return (reader.readString(offset)) as P;
+    case 6:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -473,6 +503,279 @@ extension DictionaryTermQueryFilter
   }
 
   QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      meaningTagsGroupsIsarEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'meaningTagsGroupsIsar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      meaningTagsGroupsIsarGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'meaningTagsGroupsIsar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      meaningTagsGroupsIsarLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'meaningTagsGroupsIsar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      meaningTagsGroupsIsarBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'meaningTagsGroupsIsar',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      meaningTagsGroupsIsarStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'meaningTagsGroupsIsar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      meaningTagsGroupsIsarEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'meaningTagsGroupsIsar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      meaningTagsGroupsIsarContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'meaningTagsGroupsIsar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      meaningTagsGroupsIsarMatches(String pattern,
+          {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'meaningTagsGroupsIsar',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      meaningTagsGroupsIsarIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'meaningTagsGroupsIsar',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      meaningTagsGroupsIsarIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'meaningTagsGroupsIsar',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      metaEntriesIsarEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'metaEntriesIsar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      metaEntriesIsarGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'metaEntriesIsar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      metaEntriesIsarLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'metaEntriesIsar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      metaEntriesIsarBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'metaEntriesIsar',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      metaEntriesIsarStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'metaEntriesIsar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      metaEntriesIsarEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'metaEntriesIsar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      metaEntriesIsarContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'metaEntriesIsar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      metaEntriesIsarMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'metaEntriesIsar',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      metaEntriesIsarIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'metaEntriesIsar',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      metaEntriesIsarIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'metaEntriesIsar',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
       readingEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -743,6 +1046,142 @@ extension DictionaryTermQueryFilter
       ));
     });
   }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      termTagsIsarEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'termTagsIsar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      termTagsIsarGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'termTagsIsar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      termTagsIsarLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'termTagsIsar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      termTagsIsarBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'termTagsIsar',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      termTagsIsarStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'termTagsIsar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      termTagsIsarEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'termTagsIsar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      termTagsIsarContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'termTagsIsar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      termTagsIsarMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'termTagsIsar',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      termTagsIsarIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'termTagsIsar',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterFilterCondition>
+      termTagsIsarIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'termTagsIsar',
+        value: '',
+      ));
+    });
+  }
 }
 
 extension DictionaryTermQueryObject
@@ -780,6 +1219,34 @@ extension DictionaryTermQuerySortBy
     });
   }
 
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterSortBy>
+      sortByMeaningTagsGroupsIsar() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'meaningTagsGroupsIsar', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterSortBy>
+      sortByMeaningTagsGroupsIsarDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'meaningTagsGroupsIsar', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterSortBy>
+      sortByMetaEntriesIsar() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'metaEntriesIsar', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterSortBy>
+      sortByMetaEntriesIsarDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'metaEntriesIsar', Sort.desc);
+    });
+  }
+
   QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterSortBy> sortByReading() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'reading', Sort.asc);
@@ -802,6 +1269,20 @@ extension DictionaryTermQuerySortBy
   QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterSortBy> sortByTermDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'term', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterSortBy>
+      sortByTermTagsIsar() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'termTagsIsar', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterSortBy>
+      sortByTermTagsIsarDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'termTagsIsar', Sort.desc);
     });
   }
 }
@@ -847,6 +1328,34 @@ extension DictionaryTermQuerySortThenBy
     });
   }
 
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterSortBy>
+      thenByMeaningTagsGroupsIsar() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'meaningTagsGroupsIsar', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterSortBy>
+      thenByMeaningTagsGroupsIsarDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'meaningTagsGroupsIsar', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterSortBy>
+      thenByMetaEntriesIsar() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'metaEntriesIsar', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterSortBy>
+      thenByMetaEntriesIsarDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'metaEntriesIsar', Sort.desc);
+    });
+  }
+
   QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterSortBy> thenByReading() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'reading', Sort.asc);
@@ -871,6 +1380,20 @@ extension DictionaryTermQuerySortThenBy
       return query.addSortBy(r'term', Sort.desc);
     });
   }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterSortBy>
+      thenByTermTagsIsar() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'termTagsIsar', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QAfterSortBy>
+      thenByTermTagsIsarDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'termTagsIsar', Sort.desc);
+    });
+  }
 }
 
 extension DictionaryTermQueryWhereDistinct
@@ -888,6 +1411,22 @@ extension DictionaryTermQueryWhereDistinct
     });
   }
 
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QDistinct>
+      distinctByMeaningTagsGroupsIsar({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'meaningTagsGroupsIsar',
+          caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QDistinct>
+      distinctByMetaEntriesIsar({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'metaEntriesIsar',
+          caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<DictionaryTerm, DictionaryTerm, QDistinct> distinctByReading(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -899,6 +1438,13 @@ extension DictionaryTermQueryWhereDistinct
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'term', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, DictionaryTerm, QDistinct>
+      distinctByTermTagsIsar({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'termTagsIsar', caseSensitive: caseSensitive);
     });
   }
 }
@@ -923,6 +1469,20 @@ extension DictionaryTermQueryProperty
     });
   }
 
+  QueryBuilder<DictionaryTerm, String, QQueryOperations>
+      meaningTagsGroupsIsarProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'meaningTagsGroupsIsar');
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, String, QQueryOperations>
+      metaEntriesIsarProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'metaEntriesIsar');
+    });
+  }
+
   QueryBuilder<DictionaryTerm, String, QQueryOperations> readingProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'reading');
@@ -932,6 +1492,13 @@ extension DictionaryTermQueryProperty
   QueryBuilder<DictionaryTerm, String, QQueryOperations> termProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'term');
+    });
+  }
+
+  QueryBuilder<DictionaryTerm, String, QQueryOperations>
+      termTagsIsarProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'termTagsIsar');
     });
   }
 }
@@ -945,10 +1512,29 @@ DictionaryTerm _$DictionaryTermFromJson(Map<String, dynamic> json) =>
       term: json['term'] as String,
       reading: json['reading'] as String,
       entries: (json['entries'] as List<dynamic>?)
-          ?.map((e) => DictionaryEntry.fromJson(e as Map<String, dynamic>))
-          .toList(),
+              ?.map((e) => DictionaryEntry.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      metaEntries: (json['metaEntries'] as List<dynamic>?)
+              ?.map((e) =>
+                  DictionaryMetaEntry.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      termTags: (json['termTags'] as List<dynamic>?)
+              ?.map((e) => DictionaryTag.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      meaningTagsGroups: (json['meaningTagsGroups'] as List<dynamic>?)
+              ?.map((e) => (e as List<dynamic>)
+                  .map((e) => DictionaryTag.fromJson(e as Map<String, dynamic>))
+                  .toList())
+              .toList() ??
+          const [],
     )
       ..entriesIsar = json['entriesIsar'] as String
+      ..metaEntriesIsar = json['metaEntriesIsar'] as String
+      ..termTagsIsar = json['termTagsIsar'] as String
+      ..meaningTagsGroupsIsar = json['meaningTagsGroupsIsar'] as String
       ..id = json['id'] as int?;
 
 Map<String, dynamic> _$DictionaryTermToJson(DictionaryTerm instance) =>
@@ -956,6 +1542,12 @@ Map<String, dynamic> _$DictionaryTermToJson(DictionaryTerm instance) =>
       'term': instance.term,
       'reading': instance.reading,
       'entries': instance.entries,
+      'metaEntries': instance.metaEntries,
+      'termTags': instance.termTags,
+      'meaningTagsGroups': instance.meaningTagsGroups,
       'entriesIsar': instance.entriesIsar,
+      'metaEntriesIsar': instance.metaEntriesIsar,
+      'termTagsIsar': instance.termTagsIsar,
+      'meaningTagsGroupsIsar': instance.meaningTagsGroupsIsar,
       'id': instance.id,
     };

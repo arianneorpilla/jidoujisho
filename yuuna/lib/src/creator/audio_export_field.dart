@@ -52,7 +52,7 @@ abstract class AudioExportField extends Field {
     required AppModel appModel,
     required CreatorModel creatorModel,
     required bool isSearching,
-    required String searchTerm,
+    String? searchTerm,
   }) {
     _isSearching = isSearching;
     _currentSearchTerm = searchTerm;
@@ -132,10 +132,10 @@ abstract class AudioExportField extends Field {
   Future<void> setAudio({
     required AppModel appModel,
     required CreatorModel creatorModel,
-    required String searchTerm,
     required Future<File?> Function() generateAudio,
     required bool newAutoCannotOverride,
     required EnhancementTriggerCause cause,
+    String? searchTerm,
   }) async {
     if (_autoCannotOverride && cause == EnhancementTriggerCause.auto) {
       return;

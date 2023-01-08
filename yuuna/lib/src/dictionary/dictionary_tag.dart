@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
+import 'package:json_annotation/json_annotation.dart';
 
 part 'dictionary_tag.g.dart';
 
 /// A helper class for tags that are present in Yomichan imported dictionary
 /// entries.
+@JsonSerializable()
 @Collection()
 class DictionaryTag {
   /// Define a tag with given parameters.
@@ -18,13 +20,20 @@ class DictionaryTag {
     this.id,
   });
 
+  /// Create an instance of this class from a serialized format.
+  factory DictionaryTag.fromJson(Map<String, dynamic> json) =>
+      _$DictionaryTagFromJson(json);
+
+  /// Convert this into a serialized format.
+  Map<String, dynamic> toJson() => _$DictionaryTagToJson(this);
+
   /// The dictionary from which this entry was imported from. This is used for
   /// database query purposes.
-  @Index()
+  @Index(type: IndexType.hash)
   final String dictionaryName;
 
   /// Tag name.
-  @Index()
+  @Index(type: IndexType.hash)
   final String name;
 
   /// Category for the tag.
@@ -42,7 +51,7 @@ class DictionaryTag {
   final double? popularity;
 
   /// The length of word is used as an index.
-  @Index(unique: true)
+  @Index(type: IndexType.hash, unique: true)
   String get uniqueKey => '$dictionaryName/$name';
 
   /// A unique identifier for the purposes of database storage.
@@ -61,7 +70,7 @@ class DictionaryTag {
       case 'partOfSpeech':
         return const Color(0xff565656);
       case 'archaism':
-        return Colors.grey.shade700;
+        return const Color(0xFF616161);
       case 'dictionary':
         return const Color(0xffa15151);
       case 'frequency':
@@ -70,6 +79,6 @@ class DictionaryTag {
         return const Color(0xff801515);
     }
 
-    return Colors.grey.shade700;
+    return const Color(0xFF616161);
   }
 }

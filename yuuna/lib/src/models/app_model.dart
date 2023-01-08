@@ -24,7 +24,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:restart_app/restart_app.dart';
-import 'package:spaces/spaces.dart';
 import 'package:subtitle/subtitle.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:yuuna/creator.dart';
@@ -117,24 +116,8 @@ class AppModel with ChangeNotifier {
   /// Used to notify dictionary widgets to dictionary menu changes.
   final ChangeNotifier dictionaryMenuNotifier = ChangeNotifier();
 
-  /// Used to memoize the list of widgets used to display a [DictionaryEntry]'s
-  /// tags.
-  final Map<DictionaryEntry, List<Widget>> _entryTagsCache = {};
-
-  /// Used to memoize the list of widgets used to display a [DictionaryTerm]'s
-  /// tags.
-  final Map<DictionaryTerm, List<Widget>> _termTagsCache = {};
-
-  /// Used to memoize the list of widgets used to display a
-  /// [DictionaryTerm]'s [DictionaryMetaEntry] tags.
-  final Map<DictionaryTerm, Map<DictionaryMetaEntry, Widget>> _metaTagsCache =
-      {};
-
   /// For refreshing on dictionary result additions.
   void refreshDictionaryHistory() {
-    _entryTagsCache.clear();
-    _termTagsCache.clear();
-    _metaTagsCache.clear();
     dictionaryMenuNotifier.notifyListeners();
   }
 
@@ -219,7 +202,7 @@ class AppModel with ChangeNotifier {
   final int maximumMediaHistoryItems = 60;
 
   /// Maximum number of dictionary history items.
-  final int maximumDictionaryHistoryItems = 20;
+  final int maximumDictionaryHistoryItems = 30;
 
   /// Maximum number of headwords in a returned dictionary result for
   /// performance purposes.
@@ -227,7 +210,7 @@ class AppModel with ChangeNotifier {
 
   /// Maximum number of dictionary entries that can be returned from a database
   /// dictionary search.
-  final int maximumDictionaryEntrySearchMatch = 25;
+  final int maximumDictionaryEntrySearchMatch = 20;
 
   /// Used as the history key used for the Stash.
   final String stashKey = ' stash';
@@ -522,6 +505,7 @@ class AppModel with ChangeNotifier {
         SearchDictionaryEnhancement(),
         MassifExampleSentencesEnhancement(),
         TatoebaExampleSentencesEnhancement(),
+        ImmersionKitEnhancement(),
         OpenStashEnhancement(field: TermField.instance),
         PopFromStashEnhancement(field: TermField.instance),
       ],
@@ -656,6 +640,7 @@ class AppModel with ChangeNotifier {
     _database = await Isar.open(
       globalSchemas,
       directory: isarDirectory.path,
+      maxSizeMiB: 10240,
     );
 
     /// Populate entities with key-value maps for constant time performance.
@@ -1064,6 +1049,7 @@ class AppModel with ChangeNotifier {
         sendPort: sendPort,
         isarDirectoryPath: isarDirectory.path,
         localisation: localisation,
+        useSlowImport: useSlowImport,
       );
 
       /// Get the highest order in the dictionary database.
@@ -1937,6 +1923,21 @@ class AppModel with ChangeNotifier {
     );
   }
 
+  /// A helper function for opening an example sentence dialog for sentences
+  /// returned from ImmersionKitEnhancement.
+  Future<void> openImmersionKitSentenceDialog({
+    required List<ImmersionKitResult> exampleSentences,
+    required Function(ImmersionKitResult) onSelect,
+  }) async {
+    await showDialog(
+      context: _navigatorKey.currentContext!,
+      builder: (context) => ImmersionKitSentencesDialogPage(
+        exampleSentences: exampleSentences,
+        onSelect: onSelect,
+      ),
+    );
+  }
+
   /// Updates a given [mapping]'s persisted enhancement for a given [field]
   /// and [slotNumber].
   void setFieldEnhancement({
@@ -2306,14 +2307,6 @@ class AppModel with ChangeNotifier {
     dictionaryEntriesNotifier.notifyListeners();
   }
 
-  /// Return a list of [DictionaryMetaEntry] for a certain term.
-  List<DictionaryMetaEntry> getMetaEntriesFromTerm(String term) {
-    List<DictionaryMetaEntry> metaEntries =
-        _database.dictionaryMetaEntrys.where().termEqualTo(term).findAllSync();
-
-    return metaEntries;
-  }
-
   /// Add a [MediaItem] to history. This should be called at startup
   /// when the media item is launched.
   void addMediaItem(MediaItem item) {
@@ -2373,214 +2366,6 @@ class AppModel with ChangeNotifier {
         gravity: ToastGravity.BOTTOM,
       );
     }
-  }
-
-  /// Fetches the tag widgets for a [DictionaryTerm].
-  List<Widget> getTagsForTerm(DictionaryTerm dictionaryTerm) {
-    if (_termTagsCache.containsKey(dictionaryTerm)) {
-      return _termTagsCache[dictionaryTerm]!;
-    }
-
-    List<Widget> tags = [];
-    tags = [];
-    Set<DictionaryPair> pairs = {};
-
-    for (DictionaryEntry entry in dictionaryTerm.entries!) {
-      for (String tag in entry.termTags) {
-        pairs.add(
-          DictionaryPair(
-            term: entry.dictionaryName,
-            reading: tag,
-          ),
-        );
-      }
-    }
-
-    tags.addAll(pairs.map((pair) {
-      DictionaryTag? tag = getDictionaryTag(
-        dictionaryName: pair.term,
-        tagName: pair.reading,
-      );
-
-      if (pair.reading.isNotEmpty && tag != null) {
-        return JidoujishoTag(
-          text: tag.name,
-          message: tag.notes,
-          backgroundColor: tag.color,
-        );
-      } else {
-        return const SizedBox.shrink();
-      }
-    }).toList());
-
-    _termTagsCache[dictionaryTerm] = tags;
-
-    return tags;
-  }
-
-  /// Fetches the tag widgets for a [DictionaryEntry].
-  List<Widget> getTagsForEntry(DictionaryEntry entry) {
-    if (_entryTagsCache.containsKey(entry)) {
-      return _entryTagsCache[entry]!;
-    }
-
-    String dictionaryImportTag = translate('dictionary_import_tag');
-
-    List<Widget> tags = [];
-    tags = [];
-    tags.add(
-      JidoujishoTag(
-        text: entry.dictionaryName,
-        message: dictionaryImportTag.replaceAll(
-          '%dictionaryName%',
-          entry.dictionaryName,
-        ),
-        backgroundColor: Colors.red.shade900,
-      ),
-    );
-    tags.addAll(entry.meaningTags.map((tagName) {
-      DictionaryTag? tag = getDictionaryTag(
-        dictionaryName: entry.dictionaryName,
-        tagName: tagName,
-      );
-
-      if (tagName.isNotEmpty && tag != null) {
-        return JidoujishoTag(
-          text: tag.name,
-          message: tag.notes,
-          backgroundColor: tag.color,
-        );
-      } else {
-        return const SizedBox.shrink();
-      }
-    }).toList());
-
-    _entryTagsCache[entry] = tags;
-
-    return tags;
-  }
-
-  /// Fetches the tag widgets for a [DictionaryEntry].
-  Widget getTagsForMetaEntry({
-    required BuildContext context,
-    required DictionaryTerm dictionaryTerm,
-    required DictionaryMetaEntry metaEntry,
-  }) {
-    _metaTagsCache[dictionaryTerm] ??= {};
-    if (_metaTagsCache[dictionaryTerm]![metaEntry] != null) {
-      return _metaTagsCache[dictionaryTerm]![metaEntry]!;
-    }
-
-    String dictionaryImportTag = translate('dictionary_import_tag');
-    late Widget widget;
-
-    if (metaEntry.frequency != null) {
-      return Padding(
-        padding: Spacing.of(context).insets.onlyBottom.normal,
-        child: JidoujishoTag(
-          text: metaEntry.dictionaryName,
-          message: dictionaryImportTag.replaceAll(
-            '%dictionaryName%',
-            metaEntry.dictionaryName,
-          ),
-          trailingText: metaEntry.frequency!.displayValue,
-          backgroundColor: Colors.red.shade900,
-        ),
-      );
-    } else if (metaEntry.pitches != null) {
-      List<Widget> children = [];
-      Widget tag = Padding(
-        padding: Spacing.of(context).insets.onlyRight.small,
-        child: JidoujishoTag(
-          text: metaEntry.dictionaryName,
-          message: dictionaryImportTag.replaceAll(
-            '%dictionaryName%',
-            metaEntry.dictionaryName,
-          ),
-          backgroundColor: Colors.red.shade900,
-        ),
-      );
-
-      List<PitchData> pitches = metaEntry.pitches!
-          .where((pitch) => pitch.reading == dictionaryTerm.reading)
-          .toList();
-
-      if (pitches.isEmpty) {
-        return const SizedBox.shrink();
-      }
-
-      if (pitches.length == 1) {
-        for (PitchData data in metaEntry.pitches!) {
-          children.add(
-            targetLanguage.getPitchWidget(
-              context: context,
-              reading: data.reading,
-              downstep: data.downstep,
-            ),
-          );
-
-          children.add(const Space.small());
-        }
-
-        children.insert(
-          0,
-          Padding(
-            padding: Spacing.of(context).insets.onlyBottom.normal,
-            child: tag,
-          ),
-        );
-
-        widget = Wrap(children: children);
-      } else {
-        List<Widget> children = [];
-        children.add(Row(
-          children: [
-            Padding(
-              padding: Spacing.of(context).insets.onlyBottom.semiSmall,
-              child: JidoujishoTag(
-                text: metaEntry.dictionaryName,
-                message: dictionaryImportTag.replaceAll(
-                  '%dictionaryName%',
-                  metaEntry.dictionaryName,
-                ),
-                backgroundColor: Colors.red.shade900,
-              ),
-            ),
-            const Spacer(),
-          ],
-        ));
-
-        children.addAll(
-          pitches.mapIndexed((index, element) {
-            PitchData data = pitches[index];
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: Spacing.of(context).spaces.small,
-                left: Spacing.of(context).spaces.small,
-              ),
-              child: targetLanguage.getPitchWidget(
-                context: context,
-                reading: data.reading,
-                downstep: data.downstep,
-              ),
-            );
-          }).toList(),
-        );
-
-        widget = Padding(
-          padding: Spacing.of(context).insets.onlyBottom.small,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: children,
-          ),
-        );
-      }
-    } else {
-      widget = const SizedBox.shrink();
-    }
-
-    _metaTagsCache[dictionaryTerm]![metaEntry] = widget;
-    return widget;
   }
 
   /// For a given [MediaType], return the selected media source. If there is
@@ -2830,5 +2615,16 @@ class AppModel with ChangeNotifier {
         androidNotificationChannelName: 'jidoujisho',
       ),
     );
+  }
+
+  /// Whether or not the app should use slow import. This is to prevent
+  /// crashing on older devices and make performance faster for newer devices.
+  bool get useSlowImport {
+    return _preferences.get('use_slow_import', defaultValue: false);
+  }
+
+  /// Toggle slow import option.
+  void toggleSlowImport() async {
+    await _preferences.put('use_slow_import', !useSlowImport);
   }
 }

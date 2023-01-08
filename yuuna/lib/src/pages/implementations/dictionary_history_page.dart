@@ -66,16 +66,6 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
     List<DictionaryResult> historyResults =
         appModel.dictionaryHistory.reversed.toList();
 
-    for (DictionaryResult result in historyResults) {
-      for (DictionaryTerm term in result.terms!) {
-        term.entries!.sort(
-          (a, b) => dictionaryMap![a.dictionaryName]!.order.compareTo(
-                dictionaryMap![b.dictionaryName]!.order,
-              ),
-        );
-      }
-    }
-
     return ListView.builder(
       cacheExtent: 10000,
       controller: DictionaryMediaType.instance.scrollController,
@@ -88,6 +78,13 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
         }
 
         DictionaryResult result = historyResults[index - 1];
+        for (DictionaryTerm term in result.terms!) {
+          term.entries.sort(
+            (a, b) => dictionaryMap![a.dictionaryName]!.order.compareTo(
+                  dictionaryMap![b.dictionaryName]!.order,
+                ),
+          );
+        }
 
         ValueNotifier<int> indexNotifier =
             ValueNotifier<int>(result.scrollIndex);
@@ -107,20 +104,10 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
               hiddens[dictionaryName] = dictionaryMap![dictionaryName]!.hidden;
             }
 
-            List<DictionaryMetaEntry> metaEntries =
-                appModel.getMetaEntriesFromTerm(dictionaryTerm.term);
-
-            metaEntries.sort(
-              (a, b) => dictionaryMap![a.dictionaryName]!.order.compareTo(
-                    dictionaryMap![b.dictionaryName]!.order,
-                  ),
-            );
-
             return DictionaryTermPage(
               lastSelectedMapping: lastSelectedMapping,
               dictionaryMap: dictionaryMap!,
               dictionaryTerm: dictionaryTerm,
-              dictionaryMetaEntries: metaEntries,
               onSearch: widget.onSearch,
               onStash: widget.onStash,
               expandableControllers: controllers,

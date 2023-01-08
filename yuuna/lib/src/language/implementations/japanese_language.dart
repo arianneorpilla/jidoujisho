@@ -278,7 +278,7 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
   String searchTerm = params.searchTerm.trim();
   String fallbackTerm = params.fallbackTerm.trim();
 
-  int maxEntries = 60;
+  int maxEntries = 50;
   int limit = params.maximumDictionaryEntrySearchMatch;
 
   if (searchTerm.isEmpty) {
@@ -295,6 +295,7 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
   final Isar database = await Isar.open(
     globalSchemas,
     directory: params.isarDirectoryPath,
+    maxSizeMiB: 10240,
   );
 
   bool searchTermStartsWithKana =
@@ -324,28 +325,28 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
     String partialTerm = searchBuffer.toString();
 
     if (capturingSearchTermKana) {
-      int partialTermMatchReadingCount = database.dictionaryEntrys
+      DictionaryEntry? partialTermMatch = database.dictionaryEntrys
           .where()
           .readingEqualTo(partialTerm)
           .or()
           .optional(kanaKit.isHiragana(partialTerm),
               (q) => q.readingEqualTo(kanaKit.toKatakana(partialTerm)))
-          .countSync();
+          .findFirstSync();
 
-      if (partialTermMatchReadingCount != 0) {
+      if (partialTermMatch != null) {
         maxExactMatchReadingLength = partialTerm.length;
       }
     }
 
-    int partialTermMatchCount = database.dictionaryEntrys
+    DictionaryEntry? partialTermMatch = database.dictionaryEntrys
         .where()
         .termEqualTo(partialTerm)
         .or()
         .optional(kanaKit.isHiragana(partialTerm),
             (q) => q.termEqualTo(kanaKit.toKatakana(partialTerm)))
-        .countSync();
+        .findFirstSync();
 
-    if (partialTermMatchCount != 0) {
+    if (partialTermMatch != null) {
       maxExactMatchLength = partialTerm.length;
     }
   }
@@ -363,28 +364,28 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
       String partialTerm = fallbackBuffer.toString();
 
       if (capturingFallbackTermKana) {
-        int partialTermMatchReadingCount = database.dictionaryEntrys
+        DictionaryEntry? partialTermMatch = database.dictionaryEntrys
             .where()
             .readingEqualTo(partialTerm)
             .or()
             .optional(kanaKit.isHiragana(partialTerm),
                 (q) => q.readingEqualTo(kanaKit.toKatakana(partialTerm)))
-            .countSync();
+            .findFirstSync();
 
-        if (partialTermMatchReadingCount != 0) {
+        if (partialTermMatch != null) {
           maxExactMatchFallbackLength = partialTerm.length;
         }
       }
 
-      int partialTermMatchCount = database.dictionaryEntrys
+      DictionaryEntry? partialTermMatch = database.dictionaryEntrys
           .where()
           .termEqualTo(partialTerm)
           .or()
           .optional(kanaKit.isHiragana(partialTerm),
               (q) => q.termEqualTo(kanaKit.toKatakana(partialTerm)))
-          .countSync();
+          .findFirstSync();
 
-      if (partialTermMatchCount != 0) {
+      if (partialTermMatch != null) {
         maxExactMatchFallbackLength = partialTerm.length;
       }
     }
@@ -408,12 +409,13 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
     if (partialTerm.length >= partialReadingTerm.length) {
       if (partialTerm.isNotEmpty) {
         List<DictionaryEntry> results = database.dictionaryEntrys
-            .where()
-            .termEqualTo(partialTerm)
+            .where(sort: Sort.desc)
+            .termEqualToAnyPopularity(partialTerm)
             .or()
-            .optional(kanaKit.isHiragana(partialTerm),
-                (q) => q.termEqualTo(kanaKit.toKatakana(partialTerm)))
-            .sortByPopularityDesc()
+            .optional(
+                kanaKit.isHiragana(partialTerm),
+                (q) =>
+                    q.termEqualToAnyPopularity(kanaKit.toKatakana(partialTerm)))
             .limit(limit)
             .findAllSync();
         exactTermResults.addAll(results);
@@ -423,12 +425,13 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
 
       if (partialReadingTerm.isNotEmpty) {
         List<DictionaryEntry> results = database.dictionaryEntrys
-            .where()
-            .readingEqualTo(partialReadingTerm)
+            .where(sort: Sort.desc)
+            .readingEqualToAnyPopularity(partialReadingTerm)
             .or()
-            .optional(kanaKit.isHiragana(partialReadingTerm),
-                (q) => q.readingEqualTo(kanaKit.toKatakana(partialReadingTerm)))
-            .sortByPopularityDesc()
+            .optional(
+                kanaKit.isHiragana(partialReadingTerm),
+                (q) => q.readingEqualToAnyPopularity(
+                    kanaKit.toKatakana(partialReadingTerm)))
             .limit(limit)
             .findAllSync();
         exactReadingResults.addAll(results);
@@ -438,12 +441,13 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
     } else {
       if (partialReadingTerm.isNotEmpty) {
         List<DictionaryEntry> results = database.dictionaryEntrys
-            .where()
-            .readingEqualTo(partialReadingTerm)
+            .where(sort: Sort.desc)
+            .readingEqualToAnyPopularity(partialReadingTerm)
             .or()
-            .optional(kanaKit.isHiragana(partialReadingTerm),
-                (q) => q.readingEqualTo(kanaKit.toKatakana(partialReadingTerm)))
-            .sortByPopularityDesc()
+            .optional(
+                kanaKit.isHiragana(partialReadingTerm),
+                (q) => q.readingEqualToAnyPopularity(
+                    kanaKit.toKatakana(partialReadingTerm)))
             .limit(limit)
             .findAllSync();
         exactReadingResults.addAll(results);
@@ -453,12 +457,13 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
 
       if (partialTerm.isNotEmpty) {
         List<DictionaryEntry> results = database.dictionaryEntrys
-            .where()
-            .termEqualTo(partialTerm)
+            .where(sort: Sort.desc)
+            .termEqualToAnyPopularity(partialTerm)
             .or()
-            .optional(kanaKit.isHiragana(partialTerm),
-                (q) => q.termEqualTo(kanaKit.toKatakana(partialTerm)))
-            .sortByPopularityDesc()
+            .optional(
+                kanaKit.isHiragana(partialTerm),
+                (q) =>
+                    q.termEqualToAnyPopularity(kanaKit.toKatakana(partialTerm)))
             .limit(limit)
             .findAllSync();
         exactTermResults.addAll(results);
@@ -479,24 +484,26 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
 
     if (fallbackTermLessDesperateThanLongestExactTermPrefix) {
       List<DictionaryEntry> results = database.dictionaryEntrys
-          .where()
-          .termEqualTo(partialTerm)
+          .where(sort: Sort.desc)
+          .termEqualToAnyPopularity(partialTerm)
           .or()
-          .optional(kanaKit.isHiragana(partialTerm),
-              (q) => q.termEqualTo(kanaKit.toKatakana(partialTerm)))
-          .sortByPopularityDesc()
+          .optional(
+              kanaKit.isHiragana(partialTerm),
+              (q) =>
+                  q.termEqualToAnyPopularity(kanaKit.toKatakana(partialTerm)))
           .limit(limit)
           .findAllSync();
       fallbackTermResults.addAll(results);
     }
     if (fallbackTermLessDesperateThanLongestExactReadingPrefix) {
       List<DictionaryEntry> results = database.dictionaryEntrys
-          .where()
-          .readingEqualTo(partialTerm)
+          .where(sort: Sort.desc)
+          .readingEqualToAnyPopularity(partialTerm)
           .or()
-          .optional(kanaKit.isHiragana(partialTerm),
-              (q) => q.readingEqualTo(kanaKit.toKatakana(partialTerm)))
-          .sortByPopularityDesc()
+          .optional(
+              kanaKit.isHiragana(partialTerm),
+              (q) => q
+                  .readingEqualToAnyPopularity(kanaKit.toKatakana(partialTerm)))
           .limit(limit)
           .findAllSync();
       fallbackReadingResults.addAll(results);
@@ -513,8 +520,7 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
   startsWithTermResults = database.dictionaryEntrys
       .where()
       .termStartsWith(searchTerm)
-      .sortByTermLength()
-      .thenByPopularityDesc()
+      .sortByPopularityDesc()
       .limit(limit)
       .findAllSync();
 
@@ -522,8 +528,7 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
     startsWithReadingResults = database.dictionaryEntrys
         .where()
         .readingStartsWith(searchTerm)
-        .sortByTermLength()
-        .thenByPopularityDesc()
+        .sortByPopularityDesc()
         .limit(limit)
         .findAllSync();
   }
@@ -531,8 +536,7 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
   startsWithFallbackTermResults = database.dictionaryEntrys
       .where()
       .termStartsWith(fallbackTerm)
-      .sortByTermLength()
-      .thenByPopularityDesc()
+      .sortByPopularityDesc()
       .limit(limit)
       .findAllSync();
 
@@ -540,31 +544,40 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
     startsWithFallbackReadingResults = database.dictionaryEntrys
         .where()
         .readingStartsWith(fallbackTerm)
-        .sortByTermLength()
-        .thenByPopularityDesc()
+        .sortByPopularityDesc()
         .limit(limit)
         .findAllSync();
   }
 
   if (exactTermResults.isNotEmpty &&
-      (exactTermResults.first.term == searchTerm ||
-          (kanaKit.isHiragana(searchTerm) &&
-              exactTermResults.first.term == kanaKit.toKatakana(searchTerm)))) {
-    entries.addEntries(exactTermResults.map((e) => MapEntry(e.id, e)).where(
-        (e) =>
-            e.value.term == searchTerm ||
-            e.value.term == kanaKit.toKatakana(searchTerm)));
+      (exactTermResults.first.term == searchTerm)) {
+    entries.addEntries(exactTermResults
+        .map((e) => MapEntry(e.id, e))
+        .where((e) => e.value.term == searchTerm));
   }
 
   if (exactReadingResults.isNotEmpty &&
-      (exactReadingResults.first.reading == searchTerm ||
-          (kanaKit.isHiragana(searchTerm) &&
-              exactReadingResults.first.reading ==
-                  kanaKit.toKatakana(searchTerm)))) {
-    entries.addEntries(exactReadingResults.map((e) => MapEntry(e.id, e)).where(
-        (e) =>
-            e.value.reading == searchTerm ||
-            e.value.reading == kanaKit.toKatakana(searchTerm)));
+      (exactReadingResults.first.reading == searchTerm)) {
+    entries.addEntries(exactReadingResults
+        .map((e) => MapEntry(e.id, e))
+        .where((e) => e.value.reading == searchTerm));
+  }
+
+  if (exactTermResults.isNotEmpty &&
+      (kanaKit.isHiragana(searchTerm) &&
+          exactTermResults.first.term == kanaKit.toKatakana(searchTerm))) {
+    entries.addEntries(exactTermResults
+        .map((e) => MapEntry(e.id, e))
+        .where((e) => e.value.term == kanaKit.toKatakana(searchTerm)));
+  }
+
+  if (exactReadingResults.isNotEmpty &&
+      (kanaKit.isHiragana(searchTerm) &&
+          exactReadingResults.first.reading ==
+              kanaKit.toKatakana(searchTerm))) {
+    entries.addEntries(exactReadingResults
+        .map((e) => MapEntry(e.id, e))
+        .where((e) => e.value.reading == kanaKit.toKatakana(searchTerm)));
   }
 
   entries.addEntries(startsWithTermResults.map((e) => MapEntry(e.id, e)));
@@ -631,17 +644,56 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
     (entry) => DictionaryPair(term: entry.term, reading: entry.reading),
   );
 
-  List<DictionaryTerm> terms = entriesByPair.entries
-      .map((entry) => DictionaryTerm(
-            term: entry.key.term,
-            reading: entry.key.reading,
-            entries: entry.value,
-          ))
-      .toList();
-
-  if (terms.length >= params.maximumDictionaryTermsInResult) {
-    terms = terms.sublist(0, params.maximumDictionaryTermsInResult);
+  if (entriesByPair.length >= params.maximumDictionaryTermsInResult) {
+    entriesByPair = Map<DictionaryPair, List<DictionaryEntry>>.fromEntries(
+        entriesByPair.entries
+            .toList()
+            .sublist(0, params.maximumDictionaryTermsInResult));
   }
+
+  List<DictionaryTerm> terms = entriesByPair.entries.map((group) {
+    DictionaryPair pair = group.key;
+    List<DictionaryEntry> entries = group.value;
+
+    List<String> termTagKeys = (entries.fold<List<String>>(
+        [],
+        (list, e) => list
+          ..addAll(e.termTags
+              .where((tag) => tag.isNotEmpty)
+              .map((tag) => '${e.dictionaryName}/$tag')
+              .toList()))).toSet().toList();
+
+    List<List<String>> meaningTagKeysByEntry = entries
+        .map((e) => e.meaningTags
+            .where((tag) => tag.isNotEmpty)
+            .map((tag) => '${e.dictionaryName}/$tag')
+            .toList())
+        .toList();
+
+    List<DictionaryTag> termTags = database.dictionaryTags
+        .getAllByUniqueKeySync(termTagKeys)
+        .map((e) => e!)
+        .toList();
+    List<DictionaryMetaEntry> metaEntries = database.dictionaryMetaEntrys
+        .where()
+        .termEqualTo(pair.term)
+        .findAllSync();
+    List<List<DictionaryTag>> meaningTagsGroups = meaningTagKeysByEntry
+        .map((meaningTagKeys) => database.dictionaryTags
+            .getAllByUniqueKeySync(meaningTagKeys)
+            .map((e) => e!)
+            .toList())
+        .toList();
+
+    return DictionaryTerm(
+      term: pair.term,
+      reading: pair.reading,
+      entries: entries,
+      metaEntries: metaEntries,
+      termTags: termTags,
+      meaningTagsGroups: meaningTagsGroups,
+    );
+  }).toList();
 
   return terms;
 }

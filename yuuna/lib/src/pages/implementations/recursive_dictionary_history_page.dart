@@ -1,4 +1,3 @@
-import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/pages.dart';

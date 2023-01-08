@@ -33,7 +33,7 @@ class DictionaryMetaEntry {
   Id? id;
 
   /// The word or phrase represented by this dictionary entry.
-  @Index()
+  @Index(type: IndexType.hash)
   final String term;
 
   /// Length of the term.
@@ -42,7 +42,7 @@ class DictionaryMetaEntry {
 
   /// The dictionary from which this entry was imported from. This is used for
   /// database query purposes.
-  @Index()
+  @Index(type: IndexType.hash)
   final String dictionaryName;
 
   /// The frequency of this term.

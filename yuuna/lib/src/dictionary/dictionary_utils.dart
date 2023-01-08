@@ -23,6 +23,7 @@ Future<void> depositDictionaryDataHelper(PrepareDictionaryParams params) async {
   final Isar database = await Isar.open(
     globalSchemas,
     directory: params.isarDirectoryPath,
+    maxSizeMiB: 10240,
   );
 
   database.writeTxnSync(() {
@@ -40,42 +41,78 @@ Future<void> depositDictionaryDataHelper(PrepareDictionaryParams params) async {
         .deleteAllSync();
   });
 
-  int tagCount = 0;
-  partition(dictionaryTags, 1000).forEach((e) {
-    database.writeTxnSync(() {
-      database.dictionaryTags.putAllSync(e);
+  if (params.useSlowImport) {
+    int tagCount = 0;
+    partition(dictionaryTags, 1000).forEach((e) {
+      database.writeTxnSync(() {
+        database.dictionaryTags.putAllSync(e);
+      });
+
+      tagCount += e.length;
+      String message = params.localisation
+          .importMessageTagImportCountWithVar(tagCount, dictionaryTags.length);
+      params.sendPort.send(message);
     });
 
-    tagCount += e.length;
-    String message = params.localisation
-        .importMessageTagImportCountWithVar(tagCount, dictionaryTags.length);
-    params.sendPort.send(message);
-  });
+    int metaEntriesCount = 0;
+    partition(dictionaryMetaEntries, 1000).forEach((e) {
+      database.writeTxnSync(() {
+        database.dictionaryMetaEntrys.putAllSync(e);
+      });
 
-  int metaEntriesCount = 0;
-  partition(dictionaryMetaEntries, 1000).forEach((e) {
-    database.writeTxnSync(() {
-      database.dictionaryMetaEntrys.putAllSync(e);
+      metaEntriesCount += e.length;
+      String message = params.localisation
+          .importMessageMetaEntryImportCountWithVar(
+              metaEntriesCount, dictionaryMetaEntries.length);
+      params.sendPort.send(message);
     });
 
-    metaEntriesCount += e.length;
-    String message = params.localisation
-        .importMessageMetaEntryImportCountWithVar(
-            metaEntriesCount, dictionaryMetaEntries.length);
-    params.sendPort.send(message);
-  });
+    int entriesCount = 0;
+    partition(dictionaryEntries, 1000).forEach((e) {
+      database.writeTxnSync(() {
+        database.dictionaryEntrys.putAllSync(e);
+      });
 
-  int entriesCount = 0;
-  partition(dictionaryEntries, 1000).forEach((e) {
-    database.writeTxnSync(() {
-      database.dictionaryEntrys.putAllSync(e);
+      entriesCount += e.length;
+      String message = params.localisation.importMessageEntryImportCountWithVar(
+          entriesCount, dictionaryEntries.length);
+      params.sendPort.send(message);
     });
+  } else {
+    database.writeTxnSync(() {
+      int tagCount = 0;
+      partition(dictionaryTags, 1000).forEach((e) {
+        database.dictionaryTags.putAllSync(e);
 
-    entriesCount += e.length;
-    String message = params.localisation.importMessageEntryImportCountWithVar(
-        entriesCount, dictionaryEntries.length);
-    params.sendPort.send(message);
-  });
+        tagCount += e.length;
+        String message = params.localisation.importMessageTagImportCountWithVar(
+            tagCount, dictionaryTags.length);
+        params.sendPort.send(message);
+      });
+
+      int metaEntriesCount = 0;
+      partition(dictionaryMetaEntries, 1000).forEach((e) {
+        database.dictionaryMetaEntrys.putAllSync(e);
+
+        metaEntriesCount += e.length;
+        String message = params.localisation
+            .importMessageMetaEntryImportCountWithVar(
+                metaEntriesCount, dictionaryMetaEntries.length);
+        params.sendPort.send(message);
+      });
+
+      int entriesCount = 0;
+      partition(dictionaryEntries, 1000).forEach((e) {
+        database.dictionaryEntrys.putAllSync(e);
+
+        entriesCount += e.length;
+        String message = params.localisation
+            .importMessageEntryImportCountWithVar(
+                entriesCount, dictionaryEntries.length);
+        params.sendPort.send(message);
+      });
+    });
+  }
 }
 
 /// Delete a selected dictionary from the dictionary database.
@@ -83,6 +120,7 @@ Future<void> deleteDictionaryDataHelper(DeleteDictionaryParams params) async {
   final Isar database = await Isar.open(
     globalSchemas,
     directory: params.isarDirectoryPath,
+    maxSizeMiB: 10240,
   );
 
   database.writeTxnSync(() {
@@ -113,6 +151,7 @@ Future<void> addToDictionaryHistoryHelper(
   final Isar database = await Isar.open(
     globalSchemas,
     directory: params.isarDirectoryPath,
+    maxSizeMiB: 10240,
   );
 
   database.writeTxnSync(() {
@@ -168,6 +207,7 @@ class PrepareDictionaryParams {
     required this.sendPort,
     required this.isarDirectoryPath,
     required this.localisation,
+    required this.useSlowImport,
   });
 
   /// The dictionary name obtained in the previous stage, used to indicate
@@ -188,6 +228,9 @@ class PrepareDictionaryParams {
 
   /// Used to send localised message count updates from a separate isolate.
   final DictionaryImportLocalisation localisation;
+
+  /// Whether or not to use slow import to prevent crashing.
+  final bool useSlowImport;
 }
 
 /// For isolate communication purposes. Used for dictionary deletion.

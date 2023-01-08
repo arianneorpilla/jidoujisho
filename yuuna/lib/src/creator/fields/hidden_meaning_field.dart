@@ -40,7 +40,7 @@ class HiddenMeaningField extends Field {
         .map((dictionary) => dictionary.dictionaryName)
         .toList();
 
-    List<DictionaryEntry> hiddenEntries = dictionaryTerm.entries!
+    List<DictionaryEntry> hiddenEntries = dictionaryTerm.entries
         .where((entry) => hiddenDictionaries.contains(entry.dictionaryName))
         .toList();
 

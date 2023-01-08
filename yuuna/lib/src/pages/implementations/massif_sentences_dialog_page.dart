@@ -106,7 +106,7 @@ class _MassifSentencesDialogPage
               color: _valuesSelected[index]!.value
                   ? theme.colorScheme.primary.withOpacity(0.3)
                   : theme.unselectedWidgetColor.withOpacity(0.1),
-              child: result.widget,
+              child: buildTextWidget(result),
             );
           },
         ),
@@ -116,6 +116,24 @@ class _MassifSentencesDialogPage
     });
 
     return widgets;
+  }
+
+  Widget buildTextWidget(MassifResult result) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text.rich(
+          TextSpan(children: result.spans),
+        ),
+        Text(
+          result.source,
+          style: TextStyle(
+            fontSize: Theme.of(context).textTheme.labelSmall?.fontSize,
+            color: Theme.of(context).unselectedWidgetColor,
+          ),
+        )
+      ],
+    );
   }
 
   List<Widget> get actions => [

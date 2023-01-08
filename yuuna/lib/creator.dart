@@ -29,6 +29,7 @@ export 'src/creator/enhancements/pick_image_enhancement.dart';
 export 'src/creator/enhancements/camera_enhancement.dart';
 export 'src/creator/enhancements/forvo_audio_enhancement.dart';
 export 'src/creator/enhancements/image_search_term_picker_enhancement.dart';
+export 'src/creator/enhancements/immersion_kit_enhancement.dart';
 
 export 'src/creator/fields/sentence_field.dart';
 export 'src/creator/fields/meaning_field.dart';

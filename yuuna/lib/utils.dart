@@ -14,8 +14,10 @@ export 'src/utils/components/jidoujisho_search_history.dart';
 export 'src/utils/components/jidoujisho_selectable_text.dart';
 export 'src/utils/components/jidoujisho_popup_position.dart';
 
+export 'src/utils/converters/dictionary_meta_entries_converter.dart';
 export 'src/utils/converters/dictionary_entries_converter.dart';
-export 'src/utils/converters/dictionary_entries_converter.dart';
+export 'src/utils/converters/dictionary_tags_converter.dart';
+export 'src/utils/converters/dictionary_tags_list_converter.dart';
 export 'src/utils/converters/immutable_string_map_converter.dart';
 export 'src/utils/converters/quick_actions_converter.dart';
 export 'src/utils/converters/enhancements_converter.dart';

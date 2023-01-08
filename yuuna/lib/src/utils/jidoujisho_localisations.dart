@@ -327,6 +327,7 @@ class JidoujishoLocalisations {
         'This will clear all received text. Are you sure?',
     'close_connection_title': 'Close Connection',
     'close_connection_description':
-        'This will end the WebSocket connection and clear all received text. Are you sure?'
+        'This will end the WebSocket connection and clear all received text. Are you sure?',
+    'use_slow_import': 'Slow import (use if crashing)'
   };
 }

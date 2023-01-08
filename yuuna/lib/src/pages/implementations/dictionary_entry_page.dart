@@ -11,6 +11,7 @@ class DictionaryEntryPage extends BasePage {
   /// Create the widget for a dictionary entry.
   const DictionaryEntryPage({
     required this.entry,
+    required this.meaningTags,
     required this.onSearch,
     required this.onStash,
     required this.expandableController,
@@ -19,6 +20,9 @@ class DictionaryEntryPage extends BasePage {
 
   /// The entry particular to this widget.
   final DictionaryEntry entry;
+
+  /// Meaning tags particular to this widget.
+  final List<DictionaryTag> meaningTags;
 
   /// Action to be done upon selecting the search option.
   final Function(String) onSearch;
@@ -53,8 +57,6 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> tags = appModel.getTagsForEntry(widget.entry);
-
     return Padding(
       padding: EdgeInsets.only(
         top: Spacing.of(context).spaces.extraSmall,
@@ -70,7 +72,7 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
           headerAlignment: ExpandablePanelHeaderAlignment.center,
         ),
         controller: widget.expandableController,
-        header: Wrap(children: tags),
+        header: Wrap(children: getTagsForEntry()),
         collapsed: const SizedBox.shrink(),
         expanded: Padding(
           padding: EdgeInsets.only(
@@ -101,5 +103,33 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
         ),
       ),
     );
+  }
+
+  /// Fetches the tag widgets for a [DictionaryEntry].
+  List<Widget> getTagsForEntry() {
+    String dictionaryImportTag = appModel.translate('dictionary_import_tag');
+
+    List<Widget> tagWidgets = [];
+
+    tagWidgets.add(
+      JidoujishoTag(
+        text: widget.entry.dictionaryName,
+        message: dictionaryImportTag.replaceAll(
+          '%dictionaryName%',
+          widget.entry.dictionaryName,
+        ),
+        backgroundColor: Colors.red.shade900,
+      ),
+    );
+
+    tagWidgets.addAll(widget.meaningTags.map((tag) {
+      return JidoujishoTag(
+        text: tag.name,
+        message: tag.notes,
+        backgroundColor: tag.color,
+      );
+    }).toList());
+
+    return tagWidgets;
   }
 }

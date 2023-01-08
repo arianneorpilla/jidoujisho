@@ -137,12 +137,12 @@ class _RecursiveDictionaryPageState
     onQueryChanged(_controller.query);
   }
 
-  Duration get searchDelay => const Duration(milliseconds: 200);
+  Duration get searchDelay => const Duration(milliseconds: 50);
   Duration get historyDelay => Duration.zero;
 
   void onQueryChanged(String query) async {
     Future.delayed(searchDelay, () {
-      if (_controller.query == query) {
+      if (mounted && _controller.query == query) {
         search(query);
       }
     });
