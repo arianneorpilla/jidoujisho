@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -35,9 +36,15 @@ class _ReaderTtuSourcePageState
 
   Duration get consoleMessageDebounce => const Duration(milliseconds: 50);
 
+  final FocusNode _focusNode = FocusNode();
+
   @override
-  void dispose() async {
-    super.dispose();
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus();
+    });
   }
 
   @override
@@ -48,18 +55,53 @@ class _ReaderTtuSourcePageState
       lastOrientation = orientation;
     }
 
-    return WillPopScope(
-      onWillPop: onWillPop,
-      child: Scaffold(
-        body: SafeArea(
-          bottom: false,
-          child: Stack(
-            fit: StackFit.expand,
-            alignment: Alignment.center,
-            children: <Widget>[
-              buildBody(),
-              buildDictionary(),
-            ],
+    return Focus(
+      autofocus: true,
+      focusNode: _focusNode,
+      canRequestFocus: true,
+      onFocusChange: (focused) {
+        _focusNode.requestFocus();
+      },
+      onKey: (data, event) {
+        if (ModalRoute.of(context)?.isCurrent ?? false) {
+          if (isDictionaryShown) {
+            clearDictionaryResult();
+            unselectWebViewTextSelection(_controller);
+            mediaSource.clearCurrentSentence();
+
+            return KeyEventResult.handled;
+          }
+
+          if (event.isKeyPressed(LogicalKeyboardKey.audioVolumeUp)) {
+            unselectWebViewTextSelection(_controller);
+            _controller.evaluateJavascript(source: leftArrowSimulateJs);
+
+            return KeyEventResult.handled;
+          }
+          if (event.isKeyPressed(LogicalKeyboardKey.audioVolumeDown)) {
+            unselectWebViewTextSelection(_controller);
+            _controller.evaluateJavascript(source: rightArrowSimulateJs);
+
+            return KeyEventResult.handled;
+          }
+          return KeyEventResult.ignored;
+        } else {
+          return KeyEventResult.ignored;
+        }
+      },
+      child: WillPopScope(
+        onWillPop: onWillPop,
+        child: Scaffold(
+          body: SafeArea(
+            bottom: false,
+            child: Stack(
+              fit: StackFit.expand,
+              alignment: Alignment.center,
+              children: <Widget>[
+                buildBody(),
+                buildDictionary(),
+              ],
+            ),
           ),
         ),
       ),
@@ -67,9 +109,9 @@ class _ReaderTtuSourcePageState
   }
 
   Widget buildBody() {
-    AsyncValue<LocalAssetsServer> tweets = ref.watch(ttuServerProvider);
+    AsyncValue<LocalAssetsServer> server = ref.watch(ttuServerProvider);
 
-    return tweets.when(
+    return server.when(
       data: buildReaderArea,
       loading: buildLoading,
       error: (error, stack) => buildError(
@@ -478,4 +520,18 @@ if (reader.length != 0) {
   reader[0].addEventListener('click', tapToSelect);
 }
 """;
+
+  String leftArrowSimulateJs = '''
+    var evt = document.createEvent('MouseEvents');
+    evt.initEvent('wheel', true, true); 
+    evt.deltaY = +120;
+    document.body.dispatchEvent(evt); 
+''';
+
+  String rightArrowSimulateJs = '''
+    var evt = document.createEvent('MouseEvents');
+    evt.initEvent('wheel', true, true); 
+    evt.deltaY = -120;
+    document.body.dispatchEvent(evt); 
+''';
 }

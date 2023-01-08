@@ -60,6 +60,9 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
   final ValueNotifier<DictionaryResult?> _dictionaryResultNotifier =
       ValueNotifier<DictionaryResult?>(null);
 
+  /// Whether or not there is a present dictionary result.
+  bool get isDictionaryShown => _dictionaryResultNotifier.value != null;
+
   /// The popup position for the [buildDictionary] widget.
   JidoujishoPopupPosition _popupPosition = JidoujishoPopupPosition.topHalf;
 
