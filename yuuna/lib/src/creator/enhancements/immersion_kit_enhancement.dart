@@ -99,21 +99,23 @@ class ImmersionKitEnhancement extends Enhancement {
         creatorModel.getFieldController(SentenceField.instance).text =
             selection.text;
 
-        await ImageField.instance.setImages(
-          cause: cause,
-          appModel: appModel,
-          creatorModel: creatorModel,
-          newAutoCannotOverride: false,
-          generateImages: () async {
-            String imagePath = '${directory.path}/image';
-            File imageFile = File(imagePath);
-            http.Response imageResponse =
-                await http.get(Uri.parse(selection.imageUrl));
-            imageFile.writeAsBytesSync(imageResponse.bodyBytes);
+        if (selection.imageUrl.isNotEmpty) {
+          await ImageField.instance.setImages(
+            cause: cause,
+            appModel: appModel,
+            creatorModel: creatorModel,
+            newAutoCannotOverride: false,
+            generateImages: () async {
+              String imagePath = '${directory.path}/image';
+              File imageFile = File(imagePath);
+              http.Response imageResponse =
+                  await http.get(Uri.parse(selection.imageUrl));
+              imageFile.writeAsBytesSync(imageResponse.bodyBytes);
 
-            return [NetworkToFileImage(file: imageFile)];
-          },
-        );
+              return [NetworkToFileImage(file: imageFile)];
+            },
+          );
+        }
 
         await AudioSentenceField.instance.setAudio(
           appModel: appModel,

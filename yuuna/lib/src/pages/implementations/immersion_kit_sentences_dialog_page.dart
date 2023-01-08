@@ -191,20 +191,21 @@ class _ImmersionKitSentencesDialogPageState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ColoredBox(
-          color: Colors.grey.shade900.withOpacity(0.3),
-          child: AspectRatio(
-            aspectRatio: 16 / 9,
-            child: FadeInImage(
-              placeholder: MemoryImage(kTransparentImage),
-              imageErrorBuilder: (_, __, ___) => const SizedBox.shrink(),
-              image: CachedNetworkImageProvider(result.imageUrl),
-              alignment: Alignment.topCenter,
-              fit: BoxFit.fitWidth,
+        if (result.imageUrl.isNotEmpty)
+          ColoredBox(
+            color: Colors.grey.shade900.withOpacity(0.3),
+            child: AspectRatio(
+              aspectRatio: 16 / 9,
+              child: FadeInImage(
+                placeholder: MemoryImage(kTransparentImage),
+                imageErrorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                image: CachedNetworkImageProvider(result.imageUrl),
+                alignment: Alignment.topCenter,
+                fit: BoxFit.fitWidth,
+              ),
             ),
           ),
-        ),
-        const Space.small(),
+        if (result.imageUrl.isNotEmpty) const Space.small(),
         Text.rich(
           TextSpan(children: spans),
         ),
