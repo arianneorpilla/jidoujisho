@@ -1,30 +1,33 @@
-const build = [
-  "/_app/immutable/start-01763cb6.js",
-  "/_app/immutable/pages/__layout.svelte-ea47fccd.js",
-  "/_app/immutable/assets/pages/__layout.svelte-cb4f023e.css",
-  "/_app/immutable/pages/__error.svelte-1e1e37dd.js",
-  "/_app/immutable/pages/b/_id_integer_.svelte-66334dc6.js",
-  "/_app/immutable/pages/b/index.svelte-e10bf996.js",
-  "/_app/immutable/assets/pages/b/index.svelte-aa463c1e.css",
-  "/_app/immutable/pages/index.svelte-84ceeaee.js",
-  "/_app/immutable/pages/manage/index.svelte-70fb421a.js",
-  "/_app/immutable/pages/settings/index.svelte-f6a4f2bb.js",
-  "/_app/immutable/chunks/index-51808792.js",
-  "/_app/immutable/chunks/index-395b34f6.js",
-  "/_app/immutable/chunks/singletons-d1fb5791.js",
-  "/_app/immutable/chunks/stores-ac37e759.js",
-  "/_app/immutable/chunks/dialog-manager-2d1393e2.js",
-  "/_app/immutable/chunks/_commonjsHelpers-850449cf.js",
-  "/_app/immutable/chunks/store-afb7c6c1.js",
-  "/_app/immutable/chunks/css-classes-4a8847d3.js",
-  "/_app/immutable/assets/css-classes-90564669.css",
-  "/_app/immutable/chunks/format-page-title-d2ff14dd.js",
-  "/_app/immutable/chunks/use-click-outside-ebc7d6ba.js",
-  "/_app/immutable/chunks/tap-495987ce.js",
-  "/_app/immutable/chunks/index.es-98a5a7c8.js",
-  "/_app/immutable/chunks/storage-ec98506e.js"
-];
-const files = [
+function j(e) {
+  return Object.entries(e).map(([s, a]) => `${encodeURIComponent(s)}=${encodeURIComponent(a)}`).join("&");
+}
+const k = [
+  "/_app/immutable/assets/merged-header-icon-32503cb2.css",
+  "/_app/immutable/assets/_page-2c8707b3.css",
+  "/_app/immutable/assets/_layout-380f49f7.css",
+  "/_app/immutable/chunks/utils-62d9d9d7.js",
+  "/_app/immutable/chunks/stores-41bc0127.js",
+  "/_app/immutable/chunks/4-c3666f27.js",
+  "/_app/immutable/chunks/storage-c0963857.js",
+  "/_app/immutable/chunks/2-6abbd74e.js",
+  "/_app/immutable/chunks/theme-option-7cf46fe1.js",
+  "/_app/immutable/chunks/5-46b1d073.js",
+  "/_app/immutable/chunks/1-d6e2df69.js",
+  "/_app/immutable/chunks/3-84acf07d.js",
+  "/_app/immutable/chunks/0-97ab93f6.js",
+  "/_app/immutable/components/error.svelte-68a20358.js",
+  "/_app/immutable/components/pages/_page.svelte-89ffe3da.js",
+  "/_app/immutable/chunks/index-63863b80.js",
+  "/_app/immutable/chunks/dialog-manager-6307dd27.js",
+  "/_app/immutable/chunks/singletons-54206af0.js",
+  "/_app/immutable/start-e64e3e18.js",
+  "/_app/immutable/chunks/merged-header-icon-aec892cb.js",
+  "/_app/immutable/chunks/format-page-title-24d86e72.js",
+  "/_app/immutable/components/pages/settings/_page.svelte-77627ad4.js",
+  "/_app/immutable/components/pages/_layout.svelte-3cc38fc8.js",
+  "/_app/immutable/components/pages/b/_page.svelte-26688fc8.js",
+  "/_app/immutable/components/pages/manage/_page.svelte-9a8c7745.js"
+], w = [
   "/apple-touch-icon.png",
   "/favicon.ico",
   "/favicon.png",
@@ -39,113 +42,82 @@ const files = [
   "/icons/regular-icon@512x512.png",
   "/manifest.webmanifest",
   "/safari-pinned-tab.svg"
-];
-const prerendered = [
-  "/index.html",
-  "/b.html",
-  "/manage.html",
-  "/settings.html"
-];
-const version = "1655939456538";
-/**
- * @license BSD-3-Clause
- * Copyright (c) 2022, ッツ Reader Authors
- * All rights reserved.
- */
-function toSearchParams(params) {
-  return Object.entries(params).map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`).join("&");
-}
-const worker = self;
-const BUILD_CACHE_NAME = `build:${version}`;
-const prerenderedSet = new Set(prerendered);
-const assetsToCache = build.concat(files).concat(prerendered);
-const cachedAssets = new Set(assetsToCache);
-worker.addEventListener("install", (event) => {
-  worker.skipWaiting();
-  event.waitUntil(caches.open(BUILD_CACHE_NAME).then((cache) => cache.addAll(assetsToCache)));
+], f = [
+  "/",
+  "/__data.json",
+  "/b",
+  "/b/__data.json",
+  "/manage",
+  "/manage/__data.json",
+  "/settings",
+  "/settings/__data.json"
+], g = "1673178127438", o = self, u = `build:${g}`, x = new Set(f), _ = k.concat(w).concat(f), v = new Set(_);
+o.addEventListener("install", (e) => {
+  o.skipWaiting(), e.waitUntil(caches.open(u).then((s) => s.addAll(_)));
 });
-worker.addEventListener("activate", (event) => {
-  event.waitUntil(caches.keys().then((keys) => {
-    const keysWithOldCache = keys.filter((key) => key !== BUILD_CACHE_NAME);
-    return Promise.all(keysWithOldCache.map((key) => caches.delete(key)));
-  }));
+o.addEventListener("activate", (e) => {
+  e.waitUntil(
+    caches.keys().then((s) => {
+      const a = s.filter((t) => t !== u);
+      return Promise.all(a.map((t) => caches.delete(t)));
+    })
+  );
 });
-worker.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET" || event.request.headers.has("range"))
+o.addEventListener("fetch", (e) => {
+  if (e.request.method !== "GET" || e.request.headers.has("range"))
     return;
-  const url = new URL(event.request.url);
-  const isHttp = url.protocol.startsWith("http");
-  const isDevServerRequest = url.hostname === worker.location.hostname && url.port !== worker.location.port;
-  const isSelfHost = url.host === worker.location.host;
-  const isBuildAsset = isSelfHost && cachedAssets.has(url.pathname);
-  const skipBecauseUncached = event.request.cache === "only-if-cached" && !isBuildAsset;
-  if (!isHttp || isDevServerRequest || skipBecauseUncached)
-    return;
-  if (isSelfHost && prerenderedSet.has(url.pathname)) {
-    event.respondWith(networkFirstRaceCache(event.request, BUILD_CACHE_NAME));
-    return;
-  }
-  if (isSelfHost) {
-    const response = isBuildAsset ? caches.match(url.pathname).then((r) => r != null ? r : fetch(event.request)) : selfHostParameterizedUrlResponse(event.request);
-    if (response) {
-      event.respondWith(response);
+  const s = new URL(e.request.url), a = s.protocol.startsWith("http"), t = s.hostname === o.location.hostname && s.port !== o.location.port, i = s.host === o.location.host, p = i && v.has(s.pathname), n = e.request.cache === "only-if-cached" && !p;
+  if (!(!a || t || n)) {
+    if (i && x.has(s.pathname)) {
+      const c = new Request(s.pathname);
+      e.respondWith(
+        b(e.request, !1, u, c)
+      );
       return;
     }
-  }
-  if (url.host === "fonts.googleapis.com") {
-    event.respondWith(networkFirstRaceCache(event.request));
+    if (i) {
+      const c = p ? caches.match(s.pathname).then((m) => m ?? fetch(e.request)) : R(e.request);
+      if (c) {
+        e.respondWith(c);
+        return;
+      }
+    }
+    s.host === "fonts.googleapis.com" && e.respondWith(b(e.request));
   }
 });
-async function networkFirstRaceCache(request, fallbackCacheName) {
-  const cache = await caches.open(`other:${version}`);
-  const controller = new AbortController();
-  let cachedResponse;
-  let done = false;
-  let attempted = false;
-  const retrieveFromCache = async () => {
-    const response = await cache.match(request);
-    if (response)
-      return response;
-    if (!fallbackCacheName)
-      return void 0;
-    return caches.match(request, { cacheName: fallbackCacheName });
+async function b(e, s = !0, a, t) {
+  const i = await caches.open(`other:${g}`), p = new AbortController();
+  let n, c = !1, m = !1;
+  const l = () => a ? caches.match(t ?? e, { cacheName: a }) : void 0, h = async () => {
+    if (!s)
+      return l();
+    const r = await i.match(e);
+    if (r)
+      return r;
+    if (!!a)
+      return l();
   };
   try {
-    const handle = setTimeout(async () => {
-      cachedResponse = await retrieveFromCache();
-      attempted = true;
-      if (!cachedResponse || done)
-        return;
-      controller.abort();
-    }, 1e3);
-    const response = await fetch(request, { signal: controller.signal });
-    done = true;
-    clearTimeout(handle);
-    cache.put(request, response.clone());
-    return response;
-  } catch (err) {
-    if (!attempted) {
-      cachedResponse = await retrieveFromCache();
-    }
-    if (cachedResponse)
-      return cachedResponse;
-    throw err;
+    const r = setTimeout(async () => {
+      n = await h(), m = !0, !(!n || c) && p.abort();
+    }, 1e3), d = await fetch(e, { signal: p.signal });
+    return c = !0, clearTimeout(r), s && i.put(e, d.clone()), d;
+  } catch (r) {
+    if (m || (n = await h()), n)
+      return n;
+    throw r;
   }
 }
-function selfHostParameterizedUrlResponse(request) {
-  const url = new URL(request.url);
-  const readerRegex = /\/b\/(?<id>\d+)\/?(\?|$)/;
-  const readerRegexResult = readerRegex.exec(url.pathname);
-  if (readerRegexResult == null ? void 0 : readerRegexResult.groups) {
-    return createRedirectResponse(`/b?${toSearchParams(readerRegexResult.groups)}`);
-  }
-  return void 0;
+function R(e) {
+  const s = new URL(e.url), t = /\/b\/(?<id>\d+)\/?(\?|$)/.exec(s.pathname);
+  if (t != null && t.groups)
+    return y(`/b?${j(t.groups)}`);
 }
-function createRedirectResponse(location) {
+function y(e) {
   return new Response(null, {
     status: 302,
     headers: {
-      location
+      location: e
     }
   });
 }

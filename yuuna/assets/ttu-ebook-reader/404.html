@@ -6,23 +6,23 @@
       content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1"
       name="viewport"
     />
-    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
-    <link rel="icon" type="image/png" sizes="152x152" href="./favicon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="152x152" href="/favicon.png" />
     <link
       rel="icon"
       type="image/png"
       sizes="32x32"
-      href="./icons/regular-icon@32x32.png"
+      href="/icons/regular-icon@32x32.png"
     />
     <link
       rel="icon"
       type="image/png"
       sizes="16x16"
-      href="./icons/regular-icon@16x16.png"
+      href="/icons/regular-icon@16x16.png"
     />
-    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="theme-color" content="#37474f" />
-    <link rel="mask-icon" href="./safari-pinned-tab.svg" color="#37474f" />
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#37474f" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -30,31 +30,27 @@
       rel="stylesheet"
     />
     <meta http-equiv="content-security-policy" content="">
-	<link rel="modulepreload" href="/_app/immutable/start-db8592a8.js">
-	<link rel="modulepreload" href="/_app/immutable/chunks/index-51808792.js">
-	<link rel="modulepreload" href="/_app/immutable/chunks/index-395b34f6.js">
-	<link rel="modulepreload" href="/_app/immutable/chunks/singletons-d1fb5791.js">
-			<script>
-		if ('serviceWorker' in navigator) {
-			addEventListener('load', () => {
-				navigator.serviceWorker.register('/service-worker.js');
-			});
-		}
-	</script>
+		<link rel="modulepreload" href="/_app/immutable/start-e64e3e18.js">
+		<link rel="modulepreload" href="/_app/immutable/chunks/singletons-54206af0.js">
+		<script>
+			if ('serviceWorker' in navigator) {
+				addEventListener('load', function () {
+					navigator.serviceWorker.register('/service-worker.js');
+				});
+			}
+		</script>
   </head>
   <body class="h-full w-full break-words font-sans">
     <div class="h-full w-full">
 		<script type="module" data-sveltekit-hydrate="45h">
-		import { start } from "/_app/immutable/start-db8592a8.js";
-		start({
-			target: document.querySelector('[data-sveltekit-hydrate="45h"]').parentNode,
-			paths: {"base":"","assets":""},
-			session: {},
-			route: true,
-			spa: true,
-			trailing_slash: "never",
-			hydrate: null
-		});
-	</script></div>
+			import { start } from "/_app/immutable/start-e64e3e18.js";
+
+			start({
+				env: {},
+				paths: {"base":"","assets":""},
+				target: document.querySelector('[data-sveltekit-hydrate="45h"]').parentNode,
+				version: "1673178127438"
+			});
+		</script></div>
   </body>
 </html>

@@ -29,48 +29,45 @@
       href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
-    <meta http-equiv="content-security-policy" content=""><title>Book Manager | ッツ Ebook Reader</title><meta name="robots" content="index,follow" data-svelte="svelte-1v2a5gq"><meta name="googlebot" content="index,follow" data-svelte="svelte-1v2a5gq"><meta name="description" content="Online e-book reader that supports Yomichan" data-svelte="svelte-1v2a5gq"><link rel="canonical" href="https://reader.ttsu.app/manage" data-svelte="svelte-1v2a5gq"><meta property="og:url" content="https://reader.ttsu.app/manage" data-svelte="svelte-1v2a5gq">
+    <meta http-equiv="content-security-policy" content="">
+		<link href="./_app/immutable/assets/_layout-380f49f7.css" rel="stylesheet">
+		<link href="./_app/immutable/assets/merged-header-icon-32503cb2.css" rel="stylesheet">
+		<link rel="modulepreload" href="./_app/immutable/start-e64e3e18.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/singletons-54206af0.js">
+		<link rel="modulepreload" href="./_app/immutable/components/pages/_layout.svelte-3cc38fc8.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/stores-41bc0127.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/dialog-manager-6307dd27.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/utils-62d9d9d7.js">
+		<link rel="modulepreload" href="./_app/immutable/components/pages/manage/_page.svelte-9a8c7745.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/format-page-title-24d86e72.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/merged-header-icon-aec892cb.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/index-63863b80.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/storage-c0963857.js">
+		<script>
+			if ('serviceWorker' in navigator) {
+				addEventListener('load', function () {
+					navigator.serviceWorker.register('./service-worker.js');
+				});
+			}
+		</script><title>Book Manager | ッツ Ebook Reader</title><!-- HEAD_svelte-1h7w4y4_START --><meta name="robots" content="index,follow"><meta name="googlebot" content="index,follow"><meta name="description" content="Online e-book reader that supports Yomichan"><link rel="canonical" href="https://reader.ttsu.app/manage"><meta property="og:url" content="https://reader.ttsu.app/manage">
 
-    <meta property="og:type" content="website" data-svelte="svelte-1v2a5gq">
+    <meta property="og:type" content="website">
       
 
-    <meta property="og:title" content="ッツ Ebook Reader" data-svelte="svelte-1v2a5gq">
+    <meta property="og:title" content="ッツ Ebook Reader">
 
-    <meta property="og:description" content="Online e-book reader that supports Yomichan" data-svelte="svelte-1v2a5gq">
+    <meta property="og:description" content="Online e-book reader that supports Yomichan">
 
-    <meta property="og:image" content="https://reader.ttsu.app/icons/regular-icon@512x512.png" data-svelte="svelte-1v2a5gq">
+    <meta property="og:image" content="https://reader.ttsu.app/icons/regular-icon@512x512.png">
         
-        <meta property="og:image:width" content="512" data-svelte="svelte-1v2a5gq">
-        <meta property="og:image:height" content="512" data-svelte="svelte-1v2a5gq">
+        <meta property="og:image:width" content="512">
+        <meta property="og:image:height" content="512">
 
     
 
     
 
-    
-	<link rel="stylesheet" href="/_app/immutable/assets/pages/__layout.svelte-cb4f023e.css">
-	<link rel="stylesheet" href="/_app/immutable/assets/css-classes-90564669.css">
-	<link rel="modulepreload" href="/_app/immutable/start-db8592a8.js">
-	<link rel="modulepreload" href="/_app/immutable/chunks/index-51808792.js">
-	<link rel="modulepreload" href="/_app/immutable/chunks/index-395b34f6.js">
-	<link rel="modulepreload" href="/_app/immutable/chunks/singletons-d1fb5791.js">
-	<link rel="modulepreload" href="/_app/immutable/pages/__layout.svelte-7777261c.js">
-	<link rel="modulepreload" href="/_app/immutable/chunks/_commonjsHelpers-850449cf.js">
-	<link rel="modulepreload" href="/_app/immutable/chunks/stores-ac37e759.js">
-	<link rel="modulepreload" href="/_app/immutable/chunks/dialog-manager-2d1393e2.js">
-	<link rel="modulepreload" href="/_app/immutable/chunks/store-afb7c6c1.js">
-	<link rel="modulepreload" href="/_app/immutable/pages/manage/index.svelte-a7bc6207.js">
-	<link rel="modulepreload" href="/_app/immutable/chunks/css-classes-4a8847d3.js">
-	<link rel="modulepreload" href="/_app/immutable/chunks/format-page-title-d2ff14dd.js">
-	<link rel="modulepreload" href="/_app/immutable/chunks/storage-ec98506e.js">
-	<link rel="modulepreload" href="/_app/immutable/chunks/index.es-98a5a7c8.js">
-			<script>
-		if ('serviceWorker' in navigator) {
-			addEventListener('load', () => {
-				navigator.serviceWorker.register('/service-worker.js');
-			});
-		}
-	</script>
+    <!-- HEAD_svelte-1h7w4y4_END --><!-- HEAD_svelte-1u9ti14_START --><!-- HEAD_svelte-1u9ti14_END -->
   </head>
   <body class="h-full w-full break-words font-sans">
     <div class="h-full w-full">
@@ -80,43 +77,49 @@
 
 
 
-<div class="elevation-4 fixed inset-x-0 top-0 z-10"><div class="relative h-12 bg-gray-700 text-white xl:h-10"><div class="flex h-full justify-between px-4 md:px-8 lg:max-w-4xl xl:max-w-none 2xl:max-w-6xl mx-auto"><div class="transform-gpu -translate-x-3 xl:-translate-x-2.5"><svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 xl:h-10 xl:w-10 p-3 xl:p-2.5 cursor-pointer transition-opacity hover:opacity-100  opacity-60" viewBox="0 0 24 24"><path class="fill-current" d="M20,4v12H8V4H20 M20,2H8C6.9,2,6,2.9,6,4v12c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2V4C22,2.9,21.1,2,20,2L20,2z M12.47,14 L9,10.5l1.4-1.41l2.07,2.08L17.6,6L19,7.41L12.47,14z M4,6H2v14c0,1.1,0.9,2,2,2h14v-2H4V6z"></path></svg></div>
+<div class="elevation-4 fixed inset-x-0 top-0 z-10"><input hidden multiple type="file" accept=".htmlz,.epub">
+<input hidden multiple type="file">
+<div class="relative h-12 bg-gray-700 text-white xl:h-10"><div class="flex h-full justify-between px-4 md:px-8 lg:max-w-4xl xl:max-w-none 2xl:max-w-6xl mx-auto"><div class="transform-gpu -translate-x-3 xl:-translate-x-2.5"><svg xmlns="http://www.w3.org/2000/svg" class="flex justify-center items-center h-12 w-12 cursor-pointer text-xl xl:h-10 xl:w-10 xl:text-lg p-3 xl:p-2.5 opacity-60 hover:opacity-100 transition-opacity  opacity-60" viewBox="0 0 24 24"><path class="fill-current" d="M20,4v12H8V4H20 M20,2H8C6.9,2,6,2.9,6,4v12c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2V4C22,2.9,21.1,2,20,2L20,2z M12.47,14 L9,10.5l1.4-1.41l2.07,2.08L17.6,6L19,7.41L12.47,14z M4,6H2v14c0,1.1,0.9,2,2,2h14v-2H4V6z"></path></svg></div>
 
-    <div class="absolute left-1/2 h-full -translate-x-1/2 transform-gpu"></div>
+      <div class="absolute left-1/2 h-full -translate-x-1/2 transform-gpu"></div>
 
-    <div class="flex transform-gpu translate-x-4 xl:translate-x-3"><label class="xl:mr-1 opacity-60 hover:opacity-100 transition-opacity cursor-pointer"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-12 w-12 xl:h-10 xl:w-10 p-3 xl:p-2.5"><path class="fill-current" d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11zM8 15.01l1.41 1.41L11 14.84V19h2v-4.16l1.59 1.59L16 15.01 12.01 11 8 15.01z"></path></svg>
-            <input type="file" accept=".htmlz,.epub"  multiple hidden></label>
-          <label class="xl:mr-1 opacity-60 hover:opacity-100 transition-opacity cursor-pointer"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-12 w-12 xl:h-10 xl:w-10 p-3 xl:p-2.5"><path class="fill-current" d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V6h5.17l2 2H20v10zM9.41 14.42L11 12.84V17h2v-4.16l1.59 1.59L16 13.01 12.01 9 8 13.01l1.41 1.41z"></path></svg>
-            <input type="file" multiple  hidden></label>
+      <div class="flex transform-gpu translate-x-4 xl:translate-x-3"><div class="relative transform-gpu"><div class="hidden sm:flex"><div class="flex justify-center items-center h-12 w-12 cursor-pointer text-xl xl:h-10 xl:w-10 xl:text-lg p-3 xl:p-2.5 opacity-60 hover:opacity-100 transition-opacity"><svg class="svelte-fa  svelte-1w3t65e" style="height:1em;vertical-align:-.125em;transform-origin:center;overflow:visible" viewBox="0 0 384 512" aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg"><g transform="translate(192 256)" transform-origin="96 0"><g transform="translate(0,0) scale(1,1)"><path d="M64 0C28.7 0 0 28.7 0 64V448c0 35.3 28.7 64 64 64H320c35.3 0 64-28.7 64-64V160H256c-17.7 0-32-14.3-32-32V0H64zM256 0V128H384L256 0zM216 408c0 13.3-10.7 24-24 24s-24-10.7-24-24V305.9l-31 31c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l72-72c9.4-9.4 24.6-9.4 33.9 0l72 72c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-31-31V408z" fill="currentColor" transform="translate(-192 -256)"></path></g></g></svg>
+      </div></div>
+  <div class="flex sm:hidden "><div data-popover class="flex items-center"><div></div>
+  <div><div slot="icon" class="flex justify-center items-center h-12 w-12 cursor-pointer text-xl xl:h-10 xl:w-10 xl:text-lg p-3 xl:p-2.5 opacity-60 hover:opacity-100 transition-opacity"><svg class="svelte-fa  svelte-1w3t65e" style="height:1em;vertical-align:-.125em;transform-origin:center;overflow:visible" viewBox="0 0 384 512" aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg"><g transform="translate(192 256)" transform-origin="96 0"><g transform="translate(0,0) scale(1,1)"><path d="M64 0C28.7 0 0 28.7 0 64V448c0 35.3 28.7 64 64 64H320c35.3 0 64-28.7 64-64V160H256c-17.7 0-32-14.3-32-32V0H64zM256 0V128H384L256 0zM216 408c0 13.3-10.7 24-24 24s-24-10.7-24-24V305.9l-31 31c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l72-72c9.4-9.4 24.6-9.4 33.9 0l72 72c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-31-31V408z" fill="currentColor" transform="translate(-192 -256)"></path></g></g></svg></div></div></div>
 
-        <a href="/settings"><span class="flex h-full items-center text-xl xl:text-lg p-4 xl:p-3 opacity-60 hover:opacity-100 transition-opacity cursor-pointer"><svg id="" class="svelte-fa  svelte-1w3t65e" style="height:1em;vertical-align:-.125em;transform-origin:center;overflow:visible" viewBox="0 0 512 512" aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg"><g transform="translate(256 256)" transform-origin="128 0"><g transform="translate(0,0) scale(1,1)"><path d="M495.9 166.6C499.2 175.2 496.4 184.9 489.6 191.2L446.3 230.6C447.4 238.9 448 247.4 448 256C448 264.6 447.4 273.1 446.3 281.4L489.6 320.8C496.4 327.1 499.2 336.8 495.9 345.4C491.5 357.3 486.2 368.8 480.2 379.7L475.5 387.8C468.9 398.8 461.5 409.2 453.4 419.1C447.4 426.2 437.7 428.7 428.9 425.9L373.2 408.1C359.8 418.4 344.1 427 329.2 433.6L316.7 490.7C314.7 499.7 307.7 506.1 298.5 508.5C284.7 510.8 270.5 512 255.1 512C241.5 512 227.3 510.8 213.5 508.5C204.3 506.1 197.3 499.7 195.3 490.7L182.8 433.6C167 427 152.2 418.4 138.8 408.1L83.14 425.9C74.3 428.7 64.55 426.2 58.63 419.1C50.52 409.2 43.12 398.8 36.52 387.8L31.84 379.7C25.77 368.8 20.49 357.3 16.06 345.4C12.82 336.8 15.55 327.1 22.41 320.8L65.67 281.4C64.57 273.1 64 264.6 64 256C64 247.4 64.57 238.9 65.67 230.6L22.41 191.2C15.55 184.9 12.82 175.3 16.06 166.6C20.49 154.7 25.78 143.2 31.84 132.3L36.51 124.2C43.12 113.2 50.52 102.8 58.63 92.95C64.55 85.8 74.3 83.32 83.14 86.14L138.8 103.9C152.2 93.56 167 84.96 182.8 78.43L195.3 21.33C197.3 12.25 204.3 5.04 213.5 3.51C227.3 1.201 241.5 0 256 0C270.5 0 284.7 1.201 298.5 3.51C307.7 5.04 314.7 12.25 316.7 21.33L329.2 78.43C344.1 84.96 359.8 93.56 373.2 103.9L428.9 86.14C437.7 83.32 447.4 85.8 453.4 92.95C461.5 102.8 468.9 113.2 475.5 124.2L480.2 132.3C486.2 143.2 491.5 154.7 495.9 166.6V166.6zM256 336C300.2 336 336 300.2 336 255.1C336 211.8 300.2 175.1 256 175.1C211.8 175.1 176 211.8 176 255.1C176 300.2 211.8 336 256 336z" fill="currentColor" transform="translate(-256 -256)"></path></g></g></svg></span></a>
+</div></div>
+          <div class="relative transform-gpu"><div class="hidden sm:flex"><div class="flex justify-center items-center h-12 w-12 cursor-pointer text-xl xl:h-10 xl:w-10 xl:text-lg p-3 xl:p-2.5 opacity-60 hover:opacity-100 transition-opacity"><svg class="svelte-fa  svelte-1w3t65e" style="height:1em;vertical-align:-.125em;transform-origin:center;overflow:visible" viewBox="0 0 512 512" aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg"><g transform="translate(256 256)" transform-origin="128 0"><g transform="translate(0,0) scale(1,1)"><path d="M160 96c17.7 0 32-14.3 32-32s-14.3-32-32-32H96C43 32 0 75 0 128V384c0 53 43 96 96 96h64c17.7 0 32-14.3 32-32s-14.3-32-32-32H96c-17.7 0-32-14.3-32-32l0-256c0-17.7 14.3-32 32-32h64zM504.5 273.4c4.8-4.5 7.5-10.8 7.5-17.4s-2.7-12.9-7.5-17.4l-144-136c-7-6.6-17.2-8.4-26-4.6s-14.5 12.5-14.5 22v72H192c-17.7 0-32 14.3-32 32l0 64c0 17.7 14.3 32 32 32H320v72c0 9.6 5.7 18.2 14.5 22s19 2 26-4.6l144-136z" fill="currentColor" transform="translate(-256 -256)"></path></g></g></svg>
+      </div><div class="flex justify-center items-center h-12 w-12 cursor-pointer text-xl xl:h-10 xl:w-10 xl:text-lg p-3 xl:p-2.5 opacity-60 hover:opacity-100 transition-opacity"><svg class="svelte-fa  svelte-1w3t65e" style="height:1em;vertical-align:-.125em;transform-origin:center;overflow:visible" viewBox="0 0 512 512" aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg"><g transform="translate(256 256)" transform-origin="128 0"><g transform="translate(0,0) scale(1,1)"><path d="M256 0c53 0 96 43 96 96v3.6c0 15.7-12.7 28.4-28.4 28.4H188.4c-15.7 0-28.4-12.7-28.4-28.4V96c0-53 43-96 96-96zM41.4 105.4c12.5-12.5 32.8-12.5 45.3 0l64 64c.7 .7 1.3 1.4 1.9 2.1c14.2-7.3 30.4-11.4 47.5-11.4H312c17.1 0 33.2 4.1 47.5 11.4c.6-.7 1.2-1.4 1.9-2.1l64-64c12.5-12.5 32.8-12.5 45.3 0s12.5 32.8 0 45.3l-64 64c-.7 .7-1.4 1.3-2.1 1.9c6.2 12 10.1 25.3 11.1 39.5H480c17.7 0 32 14.3 32 32s-14.3 32-32 32H416c0 24.6-5.5 47.8-15.4 68.6c2.2 1.3 4.2 2.9 6 4.8l64 64c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0l-63.1-63.1c-24.5 21.8-55.8 36.2-90.3 39.6V240c0-8.8-7.2-16-16-16s-16 7.2-16 16V479.2c-34.5-3.4-65.8-17.8-90.3-39.6L86.6 502.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l64-64c1.9-1.9 3.9-3.4 6-4.8C101.5 367.8 96 344.6 96 320H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H96.3c1.1-14.1 5-27.5 11.1-39.5c-.7-.6-1.4-1.2-2.1-1.9l-64-64c-12.5-12.5-12.5-32.8 0-45.3z" fill="currentColor" transform="translate(-256 -256)"></path></g></g></svg>
+      </div><div class="flex justify-center items-center h-12 w-12 cursor-pointer text-xl xl:h-10 xl:w-10 xl:text-lg p-3 xl:p-2.5 opacity-60 hover:opacity-100 transition-opacity"><svg class="svelte-fa  svelte-1w3t65e" style="height:1em;vertical-align:-.125em;transform-origin:center;overflow:visible" viewBox="0 0 512 512" aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg"><g transform="translate(256 256)" transform-origin="128 0"><g transform="translate(0,0) scale(1,1)"><path d="M495.9 166.6c3.2 8.7 .5 18.4-6.4 24.6l-43.3 39.4c1.1 8.3 1.7 16.8 1.7 25.4s-.6 17.1-1.7 25.4l43.3 39.4c6.9 6.2 9.6 15.9 6.4 24.6c-4.4 11.9-9.7 23.3-15.8 34.3l-4.7 8.1c-6.6 11-14 21.4-22.1 31.2c-5.9 7.2-15.7 9.6-24.5 6.8l-55.7-17.7c-13.4 10.3-28.2 18.9-44 25.4l-12.5 57.1c-2 9.1-9 16.3-18.2 17.8c-13.8 2.3-28 3.5-42.5 3.5s-28.7-1.2-42.5-3.5c-9.2-1.5-16.2-8.7-18.2-17.8l-12.5-57.1c-15.8-6.5-30.6-15.1-44-25.4L83.1 425.9c-8.8 2.8-18.6 .3-24.5-6.8c-8.1-9.8-15.5-20.2-22.1-31.2l-4.7-8.1c-6.1-11-11.4-22.4-15.8-34.3c-3.2-8.7-.5-18.4 6.4-24.6l43.3-39.4C64.6 273.1 64 264.6 64 256s.6-17.1 1.7-25.4L22.4 191.2c-6.9-6.2-9.6-15.9-6.4-24.6c4.4-11.9 9.7-23.3 15.8-34.3l4.7-8.1c6.6-11 14-21.4 22.1-31.2c5.9-7.2 15.7-9.6 24.5-6.8l55.7 17.7c13.4-10.3 28.2-18.9 44-25.4l12.5-57.1c2-9.1 9-16.3 18.2-17.8C227.3 1.2 241.5 0 256 0s28.7 1.2 42.5 3.5c9.2 1.5 16.2 8.7 18.2 17.8l12.5 57.1c15.8 6.5 30.6 15.1 44 25.4l55.7-17.7c8.8-2.8 18.6-.3 24.5 6.8c8.1 9.8 15.5 20.2 22.1 31.2l4.7 8.1c6.1 11 11.4 22.4 15.8 34.3zM256 336c44.2 0 80-35.8 80-80s-35.8-80-80-80s-80 35.8-80 80s35.8 80 80 80z" fill="currentColor" transform="translate(-256 -256)"></path></g></g></svg>
+      </div></div>
+  <div class="flex sm:hidden "><div data-popover class="flex items-center"><div></div>
+  <div><div slot="icon" class="flex justify-center items-center h-12 w-12 cursor-pointer text-xl xl:h-10 xl:w-10 xl:text-lg p-3 xl:p-2.5 opacity-60 hover:opacity-100 transition-opacity"><svg class="svelte-fa  svelte-1w3t65e" style="height:1em;vertical-align:-.125em;transform-origin:center;overflow:visible" viewBox="0 0 512 512" aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg"><g transform="translate(256 256)" transform-origin="128 0"><g transform="translate(0,0) scale(1,1)"><path d="M160 96c17.7 0 32-14.3 32-32s-14.3-32-32-32H96C43 32 0 75 0 128V384c0 53 43 96 96 96h64c17.7 0 32-14.3 32-32s-14.3-32-32-32H96c-17.7 0-32-14.3-32-32l0-256c0-17.7 14.3-32 32-32h64zM504.5 273.4c4.8-4.5 7.5-10.8 7.5-17.4s-2.7-12.9-7.5-17.4l-144-136c-7-6.6-17.2-8.4-26-4.6s-14.5 12.5-14.5 22v72H192c-17.7 0-32 14.3-32 32l0 64c0 17.7 14.3 32 32 32H320v72c0 9.6 5.7 18.2 14.5 22s19 2 26-4.6l144-136z" fill="currentColor" transform="translate(-256 -256)"></path></g></g></svg></div></div></div>
 
-      
+</div></div>
 
-      <div class="flex h-full items-center text-xl xl:text-lg p-4 xl:p-3 opacity-60 hover:opacity-100 transition-opacity cursor-pointer"><svg id="" class="svelte-fa  svelte-1w3t65e" style="height:1em;vertical-align:-.125em;transform-origin:center;overflow:visible" viewBox="0 0 512 512" aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg"><g transform="translate(256 256)" transform-origin="128 0"><g transform="translate(0,0) scale(1,1)"><path d="M352 96V99.56C352 115.3 339.3 128 323.6 128H188.4C172.7 128 159.1 115.3 159.1 99.56V96C159.1 42.98 202.1 0 255.1 0C309 0 352 42.98 352 96zM41.37 105.4C53.87 92.88 74.13 92.88 86.63 105.4L150.6 169.4C151.3 170 151.9 170.7 152.5 171.4C166.8 164.1 182.9 160 199.1 160H312C329.1 160 345.2 164.1 359.5 171.4C360.1 170.7 360.7 170 361.4 169.4L425.4 105.4C437.9 92.88 458.1 92.88 470.6 105.4C483.1 117.9 483.1 138.1 470.6 150.6L406.6 214.6C405.1 215.3 405.3 215.9 404.6 216.5C410.7 228.5 414.6 241.9 415.7 256H480C497.7 256 512 270.3 512 288C512 305.7 497.7 320 480 320H416C416 344.6 410.5 367.8 400.6 388.6C402.7 389.9 404.8 391.5 406.6 393.4L470.6 457.4C483.1 469.9 483.1 490.1 470.6 502.6C458.1 515.1 437.9 515.1 425.4 502.6L362.3 439.6C337.8 461.4 306.5 475.8 272 479.2V240C272 231.2 264.8 224 255.1 224C247.2 224 239.1 231.2 239.1 240V479.2C205.5 475.8 174.2 461.4 149.7 439.6L86.63 502.6C74.13 515.1 53.87 515.1 41.37 502.6C28.88 490.1 28.88 469.9 41.37 457.4L105.4 393.4C107.2 391.5 109.3 389.9 111.4 388.6C101.5 367.8 96 344.6 96 320H32C14.33 320 0 305.7 0 288C0 270.3 14.33 256 32 256H96.3C97.38 241.9 101.3 228.5 107.4 216.5C106.7 215.9 106 215.3 105.4 214.6L41.37 150.6C28.88 138.1 28.88 117.9 41.37 105.4H41.37z" fill="currentColor" transform="translate(-256 -256)"></path></g></g></svg></div></div></div></div></div>
+        </div></div></div></div>
 
 <div class="px-4 md:px-8 lg:max-w-4xl xl:max-w-none 2xl:max-w-6xl mx-auto h-full pt-16 xl:pt-14">Loading...</div>
 
 
 
 
-		<script type="module" data-sveltekit-hydrate="g6916x">
-		import { start } from "/_app/immutable/start-db8592a8.js";
-		start({
-			target: document.querySelector('[data-sveltekit-hydrate="g6916x"]').parentNode,
-			paths: {"base":"","assets":""},
-			session: {},
-			route: true,
-			spa: false,
-			trailing_slash: "never",
-			hydrate: {
-				status: 200,
-				error: null,
-				nodes: [0, 5],
-				params: {},
-				routeId: "manage"
-			}
-		});
-	</script></div>
+		<script type="module" data-sveltekit-hydrate="1l7op4d">
+			import { start } from "./_app/immutable/start-e64e3e18.js";
+
+			start({
+				env: {},
+				paths: {"base":"","assets":""},
+				target: document.querySelector('[data-sveltekit-hydrate="1l7op4d"]').parentNode,
+				version: "1673178127438",
+				hydrate: {
+					node_ids: [0, 4],
+					data: [{type:"data",data:null,uses:{}},null],
+					form: null
+				}
+			});
+		</script>
+	</div>
   </body>
 </html>
