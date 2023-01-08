@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:spaces/spaces.dart';
@@ -49,7 +51,11 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
   void initState() {
     super.initState();
     appModelNoUpdate.dictionarySearchAgainNotifier.addListener(searchAgain);
-    appModelNoUpdate.dictionaryEntriesNotifier.addListener(refresh);
+    appModelNoUpdate.dictionaryEntriesNotifier.addListener(() {
+      if (mediaType.floatingSearchBarController.isClosed) {
+        setState(() {});
+      }
+    });
   }
 
   @override
@@ -81,6 +87,10 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
   }
 
   Widget buildDictionaryHistory() {
+    if (mediaType.floatingSearchBarController.isOpen) {
+      return Container();
+    }
+
     return RawScrollbar(
       thumbVisibility: true,
       thickness: 3,
@@ -112,9 +122,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       backgroundColor: appModel.isDarkMode
           ? const Color.fromARGB(255, 30, 30, 30)
           : const Color.fromARGB(255, 229, 229, 229),
-      backdropColor: appModel.isDarkMode
-          ? Colors.black.withOpacity(0.95)
-          : Colors.white.withOpacity(0.95),
+      backdropColor: appModel.isDarkMode ? Colors.black : Colors.white,
       accentColor: theme.colorScheme.primary,
       scrollPadding: const EdgeInsets.only(top: 6, bottom: 56),
       transitionDuration: Duration.zero,
@@ -125,6 +133,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       progress: _isSearching,
       onFocusChanged: (focused) => onFocusChanged(focused: focused),
       onQueryChanged: onQueryChanged,
+      debounceDelay: const Duration(milliseconds: 200),
       leadingActions: [
         buildDictionaryButton(),
         buildBackButton(),
@@ -142,7 +151,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     if (mediaType.floatingSearchBarController.isOpen != _lastOpenedState) {
       _lastOpenedState = mediaType.floatingSearchBarController.isOpen;
       if (!_lastOpenedState) {
-        appModel.refreshDictionaryHistory();
+        setState(() {});
       }
     }
   }
@@ -152,7 +161,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     onQueryChanged(mediaType.floatingSearchBarController.query);
   }
 
-  Duration get searchDelay => const Duration(milliseconds: 50);
+  Duration get searchDelay => Duration.zero;
   Duration get historyDelay => const Duration(milliseconds: 500);
 
   void onQueryChanged(String query) async {

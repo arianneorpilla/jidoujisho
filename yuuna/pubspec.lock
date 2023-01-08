@@ -485,14 +485,7 @@ packages:
       name: flutter_inappwebview
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.0.0-beta.22"
-  flutter_inappwebview_internal_annotations:
-    dependency: transitive
-    description:
-      name: flutter_inappwebview_internal_annotations
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.1.0"
+    version: "5.7.2+3"
   flutter_launcher_icons:
     dependency: "direct main"
     description:
@@ -1410,13 +1403,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.0"
-  touch_indicator:
-    dependency: "direct main"
-    description:
-      name: touch_indicator
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.0.0"
   transparent_image:
     dependency: "direct main"
     description:

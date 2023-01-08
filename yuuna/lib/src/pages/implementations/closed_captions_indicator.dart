@@ -42,7 +42,7 @@ class _ClosedCaptionsIndicatorState
 
     return FutureBuilder<List<String>>(
       future: PlayerYoutubeSource.instance
-          .getAvailableCaptionLanguages(widget.item),
+          .getAvailableCaptionLanguages(widget.item, () => mounted),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return buildCaptionsData(snapshot.data!);

@@ -131,7 +131,7 @@ class ReaderLyricsSource extends ReaderMediaSource {
 
     HeadlessInAppWebView webView = HeadlessInAppWebView(
         initialUrlRequest: URLRequest(
-          url: WebUri(searchUrl),
+          url: Uri.parse(searchUrl),
         ),
         onLoadStop: (controller, uri) async {
           dom.Document document = parser.parse(await controller.getHtml());

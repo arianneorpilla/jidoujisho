@@ -111,6 +111,7 @@ class _RecursiveDictionaryPageState
       transition: SlideFadeFloatingSearchBarTransition(),
       automaticallyImplyBackButton: false,
       isScrollControlled: true,
+      debounceDelay: const Duration(milliseconds: 200),
       onFocusChanged: (focused) {
         if (!focused) {
           if (widget.killOnPop) {
@@ -137,7 +138,7 @@ class _RecursiveDictionaryPageState
     onQueryChanged(_controller.query);
   }
 
-  Duration get searchDelay => const Duration(milliseconds: 50);
+  Duration get searchDelay => Duration.zero;
   Duration get historyDelay => Duration.zero;
 
   void onQueryChanged(String query) async {

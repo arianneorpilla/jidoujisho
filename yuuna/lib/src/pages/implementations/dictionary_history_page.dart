@@ -37,23 +37,6 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
   late Map<String, Dictionary>? dictionaryMap;
 
   @override
-  void initState() {
-    super.initState();
-    appModelNoUpdate.dictionaryMenuNotifier.addListener(refresh);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  void refresh() {
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     AnkiMapping lastSelectedMapping = appModel.lastSelectedMapping;
 

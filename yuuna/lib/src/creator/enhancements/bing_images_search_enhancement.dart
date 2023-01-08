@@ -87,7 +87,7 @@ class BingImagesSearchEnhancement extends ImageEnhancement {
 
     HeadlessInAppWebView webView = HeadlessInAppWebView(
         initialUrlRequest: URLRequest(
-          url: WebUri(
+          url: Uri.parse(
             "https://www.bing.com/images/search?q=$searchTerm')",
           ),
         ),

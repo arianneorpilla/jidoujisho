@@ -102,22 +102,26 @@ class _ReaderTtuSourcePageState
   Widget buildReaderArea(LocalAssetsServer server) {
     return InAppWebView(
       initialUrlRequest: URLRequest(
-        url: WebUri(
+        url: Uri.parse(
           widget.item?.mediaIdentifier ??
               'http://localhost:${server.boundPort}/',
         ),
       ),
-      initialSettings: InAppWebViewSettings(
-        allowFileAccessFromFileURLs: true,
-        allowUniversalAccessFromFileURLs: true,
-        mediaPlaybackRequiresUserGesture: false,
-        verticalScrollBarEnabled: false,
-        horizontalScrollBarEnabled: false,
-        verticalScrollbarThumbColor: Colors.transparent,
-        verticalScrollbarTrackColor: Colors.transparent,
-        horizontalScrollbarThumbColor: Colors.transparent,
-        horizontalScrollbarTrackColor: Colors.transparent,
-        scrollbarFadingEnabled: false,
+      initialOptions: InAppWebViewGroupOptions(
+        crossPlatform: InAppWebViewOptions(
+          allowFileAccessFromFileURLs: true,
+          allowUniversalAccessFromFileURLs: true,
+          mediaPlaybackRequiresUserGesture: false,
+          verticalScrollBarEnabled: false,
+          horizontalScrollBarEnabled: false,
+        ),
+        android: AndroidInAppWebViewOptions(
+          verticalScrollbarThumbColor: Colors.transparent,
+          verticalScrollbarTrackColor: Colors.transparent,
+          horizontalScrollbarThumbColor: Colors.transparent,
+          horizontalScrollbarTrackColor: Colors.transparent,
+          scrollbarFadingEnabled: false,
+        ),
       ),
       contextMenu: getContextMenu(),
       onConsoleMessage: onConsoleMessage,
@@ -222,7 +226,7 @@ class _ReaderTtuSourcePageState
   /// views.
   ContextMenu getContextMenu() {
     return ContextMenu(
-      settings: ContextMenuSettings(
+      options: ContextMenuOptions(
         hideDefaultSystemContextMenuItems: true,
       ),
       menuItems: [
@@ -236,7 +240,8 @@ class _ReaderTtuSourcePageState
 
   ContextMenuItem searchMenuItem() {
     return ContextMenuItem(
-      id: 1,
+      iosId: '1',
+      androidId: 1,
       title: searchLabel,
       action: searchMenuAction,
     );
@@ -244,7 +249,8 @@ class _ReaderTtuSourcePageState
 
   ContextMenuItem stashMenuItem() {
     return ContextMenuItem(
-      id: 2,
+      iosId: '2',
+      androidId: 2,
       title: stashLabel,
       action: stashMenuAction,
     );
@@ -252,7 +258,8 @@ class _ReaderTtuSourcePageState
 
   ContextMenuItem creatorMenuItem() {
     return ContextMenuItem(
-      id: 3,
+      iosId: '3',
+      androidId: 3,
       title: creatorLabel,
       action: creatorMenuAction,
     );
@@ -260,7 +267,8 @@ class _ReaderTtuSourcePageState
 
   ContextMenuItem copyMenuItem() {
     return ContextMenuItem(
-      id: 4,
+      iosId: '4',
+      androidId: 4,
       title: copyLabel,
       action: copyMenuAction,
     );
@@ -269,6 +277,7 @@ class _ReaderTtuSourcePageState
   void searchMenuAction() async {
     String searchTerm = await getSelectedText();
 
+    await unselectWebViewTextSelection(_controller);
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     await Future.delayed(const Duration(milliseconds: 5), () {});
     await appModel.openRecursiveDictionarySearch(
@@ -288,6 +297,7 @@ class _ReaderTtuSourcePageState
   void creatorMenuAction() async {
     String searchTerm = await getSelectedText();
 
+    await unselectWebViewTextSelection(_controller);
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     await Future.delayed(const Duration(milliseconds: 5), () {});
 
@@ -296,7 +306,7 @@ class _ReaderTtuSourcePageState
       killOnPop: false,
       creatorFieldValues: CreatorFieldValues(
         textValues: {
-          SentenceField.instance: searchTerm,
+          SentenceField.instance: searchTerm.replaceAll('\\n', '\n'),
         },
       ),
     );
@@ -306,6 +316,7 @@ class _ReaderTtuSourcePageState
   }
 
   void copyMenuAction() async {
+    await unselectWebViewTextSelection(_controller);
     String searchTerm = await getSelectedText();
     Clipboard.setData(ClipboardData(text: searchTerm));
   }
