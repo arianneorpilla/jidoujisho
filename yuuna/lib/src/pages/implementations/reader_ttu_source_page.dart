@@ -58,10 +58,13 @@ class _ReaderTtuSourcePageState
     return Focus(
       autofocus: true,
       focusNode: _focusNode,
-      canRequestFocus: true,
-      onFocusChange: (focused) {
-        _focusNode.requestFocus();
+      onFocusChange: (value) {
+        if (!(ModalRoute.of(context)?.isCurrent ?? false) &&
+            !appModel.isCreatorOpen) {
+          _focusNode.requestFocus();
+        }
       },
+      canRequestFocus: true,
       onKey: (data, event) {
         if (ModalRoute.of(context)?.isCurrent ?? false) {
           if (isDictionaryShown) {
@@ -92,6 +95,7 @@ class _ReaderTtuSourcePageState
       child: WillPopScope(
         onWillPop: onWillPop,
         child: Scaffold(
+          resizeToAvoidBottomInset: false,
           body: SafeArea(
             bottom: false,
             child: Stack(
@@ -251,6 +255,7 @@ class _ReaderTtuSourcePageState
           } finally {
             unselectWebViewTextSelection(controller);
             FocusScope.of(context).unfocus();
+            _focusNode.requestFocus();
           }
         }
 

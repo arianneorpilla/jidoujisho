@@ -672,6 +672,7 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
 
     List<DictionaryTag> termTags = database.dictionaryTags
         .getAllByUniqueKeySync(termTagKeys)
+        .where((e) => e != null)
         .map((e) => e!)
         .toList();
     List<DictionaryMetaEntry> metaEntries = database.dictionaryMetaEntrys
@@ -681,6 +682,7 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
     List<List<DictionaryTag>> meaningTagsGroups = meaningTagKeysByEntry
         .map((meaningTagKeys) => database.dictionaryTags
             .getAllByUniqueKeySync(meaningTagKeys)
+            .where((e) => e != null)
             .map((e) => e!)
             .toList())
         .toList();

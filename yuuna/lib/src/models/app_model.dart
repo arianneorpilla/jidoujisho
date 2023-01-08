@@ -89,6 +89,10 @@ class AppModel with ChangeNotifier {
   late final GlobalKey<NavigatorState> _navigatorKey =
       GlobalKey<NavigatorState>();
 
+  /// Used to get the versioning metadata of the app. See [initialise].
+  RouteObserver<PageRoute> get routeObserver => _routeObserver;
+  final RouteObserver<PageRoute> _routeObserver = RouteObserver<PageRoute>();
+
   /// Used for accessing persistent key-value data. See [initialise].
   late final Box _preferences;
 
