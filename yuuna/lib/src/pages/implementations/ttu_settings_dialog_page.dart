@@ -151,7 +151,10 @@ class _DictionaryDialogPageState extends BasePageState {
           tooltip: resetLabel,
           size: 18,
           onTap: () async {
-            _speedController.text = '1';
+            _speedController.text =
+                ReaderTtuSource.defaultScrollingSpeed.toString();
+            source.setVolumePageTurningSpeed(
+                ReaderTtuSource.defaultScrollingSpeed);
             FocusScope.of(context).unfocus();
           },
           icon: Icons.undo,
