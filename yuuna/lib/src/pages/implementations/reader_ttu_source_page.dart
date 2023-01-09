@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -25,8 +26,8 @@ class ReaderTtuSourcePage extends BaseSourcePage {
   BaseSourcePageState createState() => _ReaderTtuSourcePageState();
 }
 
-class _ReaderTtuSourcePageState
-    extends BaseSourcePageState<ReaderTtuSourcePage> {
+class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
+    with WidgetsBindingObserver {
   /// The media source pertaining to this page.
   ReaderTtuSource get mediaSource => ReaderTtuSource.instance;
   late InAppWebViewController _controller;
@@ -41,10 +42,19 @@ class _ReaderTtuSourcePageState
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _focusNode.requestFocus();
-    });
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    _focusNode.requestFocus();
   }
 
   @override
@@ -67,26 +77,29 @@ class _ReaderTtuSourcePageState
       canRequestFocus: true,
       onKey: (data, event) {
         if (ModalRoute.of(context)?.isCurrent ?? false) {
-          if (isDictionaryShown) {
-            clearDictionaryResult();
-            unselectWebViewTextSelection(_controller);
-            mediaSource.clearCurrentSentence();
+          if (mediaSource.volumePageTurningEnabled) {
+            if (isDictionaryShown) {
+              clearDictionaryResult();
+              unselectWebViewTextSelection(_controller);
+              mediaSource.clearCurrentSentence();
 
-            return KeyEventResult.handled;
+              return KeyEventResult.handled;
+            }
+
+            if (event.isKeyPressed(LogicalKeyboardKey.audioVolumeUp)) {
+              unselectWebViewTextSelection(_controller);
+              _controller.evaluateJavascript(source: leftArrowSimulateJs);
+
+              return KeyEventResult.handled;
+            }
+            if (event.isKeyPressed(LogicalKeyboardKey.audioVolumeDown)) {
+              unselectWebViewTextSelection(_controller);
+              _controller.evaluateJavascript(source: rightArrowSimulateJs);
+
+              return KeyEventResult.handled;
+            }
           }
 
-          if (event.isKeyPressed(LogicalKeyboardKey.audioVolumeUp)) {
-            unselectWebViewTextSelection(_controller);
-            _controller.evaluateJavascript(source: leftArrowSimulateJs);
-
-            return KeyEventResult.handled;
-          }
-          if (event.isKeyPressed(LogicalKeyboardKey.audioVolumeDown)) {
-            unselectWebViewTextSelection(_controller);
-            _controller.evaluateJavascript(source: rightArrowSimulateJs);
-
-            return KeyEventResult.handled;
-          }
           return KeyEventResult.ignored;
         } else {
           return KeyEventResult.ignored;
@@ -150,7 +163,7 @@ class _ReaderTtuSourcePageState
       initialUrlRequest: URLRequest(
         url: Uri.parse(
           widget.item?.mediaIdentifier ??
-              'http://localhost:${server.boundPort}/',
+              'http://localhost:${server.boundPort}/manage.html',
         ),
       ),
       initialOptions: InAppWebViewGroupOptions(
@@ -179,9 +192,31 @@ class _ReaderTtuSourcePageState
           action: ServerTrustAuthResponseAction.PROCEED,
         );
       },
+      onLoadStart: (controller, url) async {
+        if (mediaSource.getPreference<bool>(
+            key: 'firstTime', defaultValue: true)) {
+          final pixelRatio = window.devicePixelRatio;
+          final logicalScreenSize = window.physicalSize / pixelRatio;
+          final logicalHeight = logicalScreenSize.height;
+
+          int secondDimensionMaxValue = (logicalHeight * 0.825).toInt();
+          await controller.evaluateJavascript(
+              source:
+                  'javascript:window.localStorage.setItem("secondDimensionMaxValue", $secondDimensionMaxValue)');
+          if (appModel.isDarkMode) {
+            await controller.evaluateJavascript(
+                source:
+                    'javascript:window.localStorage.setItem("theme", "black-theme")');
+          }
+
+          await controller.evaluateJavascript(
+              source: 'javascript:window.localStorage.setItem("fontSize", 24)');
+        }
+      },
       onLoadStop: (controller, uri) async {
         await mediaSource.setPreference(key: 'firstTime', value: false);
         await controller.evaluateJavascript(source: javascriptToExecute);
+        Future.delayed(const Duration(seconds: 1), _focusNode.requestFocus);
       },
       onTitleChanged: (controller, title) async {
         await controller.evaluateJavascript(source: javascriptToExecute);
@@ -369,8 +404,9 @@ class _ReaderTtuSourcePageState
   }
 
   Future<String> getSelectedText() async {
-    return await _controller.getSelectedText() ??
-        ''.replaceAll('\\n', '\n').trim();
+    return (await _controller.getSelectedText() ?? '')
+        .replaceAll('\\n', '\n')
+        .trim();
   }
 
   /// This is executed upon page load and change.
@@ -450,6 +486,7 @@ function tapToSelect(e) {
         "x": e.clientX,
         "y": e.clientY,
 			}));
+    console.log(text["index"]);
   }
 }
 
@@ -524,19 +561,41 @@ var reader = document.getElementsByClassName('book-content');
 if (reader.length != 0) {
   reader[0].addEventListener('click', tapToSelect);
 }
+
+document.head.insertAdjacentHTML('beforebegin', `
+<style>
+rt {
+  -webkit-touch-callout:none; /* iOS Safari */
+  -webkit-user-select:none;   /* Chrome/Safari/Opera */
+  -khtml-user-select:none;    /* Konqueror */
+  -moz-user-select:none;      /* Firefox */
+  -ms-user-select:none;       /* Internet Explorer/Edge */
+  user-select:none;           /* Non-prefixed version */
+}
+
+rp {
+  -webkit-touch-callout:none; /* iOS Safari */
+  -webkit-user-select:none;   /* Chrome/Safari/Opera */
+  -khtml-user-select:none;    /* Konqueror */
+  -moz-user-select:none;      /* Firefox */
+  -ms-user-select:none;       /* Internet Explorer/Edge */
+  user-select:none;           /* Non-prefixed version */
+}
+</style>
+`);
 """;
 
-  String leftArrowSimulateJs = '''
+  String get leftArrowSimulateJs => '''
     var evt = document.createEvent('MouseEvents');
     evt.initEvent('wheel', true, true); 
-    evt.deltaY = +120;
+    evt.deltaY = +0.001 * ${mediaSource.volumePageTurningSpeed * (mediaSource.volumePageTurningInverted ? -1 : 1)};
     document.body.dispatchEvent(evt); 
-''';
+    ''';
 
-  String rightArrowSimulateJs = '''
+  String get rightArrowSimulateJs => '''
     var evt = document.createEvent('MouseEvents');
     evt.initEvent('wheel', true, true); 
-    evt.deltaY = -120;
+    evt.deltaY = -0.001 * ${mediaSource.volumePageTurningSpeed * (mediaSource.volumePageTurningInverted ? -1 : 1)};
     document.body.dispatchEvent(evt); 
-''';
+    ''';
 }

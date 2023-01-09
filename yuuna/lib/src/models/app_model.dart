@@ -687,7 +687,9 @@ class AppModel with ChangeNotifier {
 
   /// Get whether or not the current theme is dark mode.
   bool get isDarkMode {
-    bool isDarkMode = _preferences.get('is_dark_mode', defaultValue: true);
+    bool isDarkMode = _preferences.get('is_dark_mode',
+        defaultValue: WidgetsBinding.instance.window.platformBrightness ==
+            Brightness.dark);
     return isDarkMode;
   }
 
@@ -1241,10 +1243,17 @@ class AppModel with ChangeNotifier {
   /// Requests for full external storage permissions. Required to handle video
   /// files and their subtitle files in the same directory.
   Future<void> requestExternalStoragePermissions() async {
-    await Permission.storage.request();
+    final storageGranted = await Permission.storage.isGranted;
+    if (!storageGranted) {
+      await Permission.storage.request();
+    }
 
     if (_androidDeviceInfo.version.sdkInt! >= 30) {
-      await Permission.manageExternalStorage.request();
+      final manageStorageGranted =
+          await Permission.manageExternalStorage.isGranted;
+      if (!manageStorageGranted) {
+        await Permission.manageExternalStorage.request();
+      }
     }
   }
 

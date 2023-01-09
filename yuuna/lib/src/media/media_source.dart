@@ -164,19 +164,56 @@ abstract class MediaSource {
     required WidgetRef ref,
     required AppModel appModel,
   }) {
-    String launchLabel = appModel.translate('launch_source');
+    String managerLabel = appModel.translate('manager');
+
+    return FloatingSearchBarAction(
+      showIfOpened: true,
+      child: JidoujishoIconButton(
+        size: Theme.of(context).textTheme.titleLarge?.fontSize,
+        tooltip: managerLabel,
+        icon: Icons.local_library_outlined,
+        onTap: () {
+          appModel.openMedia(
+            context: context,
+            ref: ref,
+            mediaSource: this,
+          );
+        },
+      ),
+    );
+  }
+
+  /// Allows user to close the floating search bar of a media type tab page
+  /// when open.
+  Widget buildSettingsButton({
+    required BuildContext context,
+    required WidgetRef ref,
+    required AppModel appModel,
+  }) {
+    String launchLabel = appModel.translate('settings');
 
     return FloatingSearchBarAction(
       showIfOpened: true,
       child: JidoujishoIconButton(
         size: Theme.of(context).textTheme.titleLarge?.fontSize,
         tooltip: launchLabel,
-        icon: Icons.launch,
+        icon: Icons.settings,
         onTap: () {
           appModel.openMedia(
             context: context,
             ref: ref,
             mediaSource: this,
+            item: MediaItem(
+              mediaIdentifier:
+                  'http://localhost:${ReaderTtuSource.port}/settings.html',
+              title: '',
+              mediaTypeIdentifier: ReaderTtuSource.instance.mediaType.uniqueKey,
+              mediaSourceIdentifier: ReaderTtuSource.instance.uniqueKey,
+              position: 0,
+              duration: 1,
+              canDelete: false,
+              canEdit: true,
+            ),
           );
         },
       ),

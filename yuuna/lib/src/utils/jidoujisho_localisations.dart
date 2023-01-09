@@ -328,6 +328,16 @@ class JidoujishoLocalisations {
     'close_connection_title': 'Close Connection',
     'close_connection_description':
         'This will end the WebSocket connection and clear all received text. Are you sure?',
-    'use_slow_import': 'Slow import (use if crashing)'
+    'use_slow_import': 'Slow import (use if crashing)',
+    'settings': 'Settings',
+    'manager': 'Manager',
+    'volume_button_page_turning': 'Volume button page turning',
+    'invert_volume_buttons': 'Invert volume buttons',
+    'volume_button_turning_speed': 'Continuous scrolling speed',
+    'volume_button_preferences': 'Volume Button Preferences',
+    'increase': 'Increase',
+    'decrease': 'Decrease',
+    'unit_milliseconds': 'ms',
+    'unit_pixels': 'px',
   };
 }

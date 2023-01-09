@@ -39,13 +39,15 @@ class _BlurOptionsDialogPageState extends BasePageState<BlurOptionsDialogPage> {
   Widget build(BuildContext context) {
     return AlertDialog(
       scrollable: true,
-      contentPadding:  Spacing.of(context).insets.all.big,
+      contentPadding: Spacing.of(context).insets.all.big,
       content: buildContent(),
       actions: actions,
     );
   }
 
   Widget buildContent() {
+    String suffixText = appModel.translate('unit_pixels');
+
     return SingleChildScrollView(
       child: SizedBox(
         width: MediaQuery.of(context).size.width * (3 / 4),
@@ -67,7 +69,7 @@ class _BlurOptionsDialogPageState extends BasePageState<BlurOptionsDialogPage> {
               ),
               decoration: InputDecoration(
                 floatingLabelBehavior: FloatingLabelBehavior.always,
-                suffixText: 'px',
+                suffixText: suffixText,
                 suffixIcon: JidoujishoIconButton(
                   tooltip: resetLabel,
                   size: 18,

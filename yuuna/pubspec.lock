@@ -482,9 +482,11 @@ packages:
   flutter_inappwebview:
     dependency: "direct main"
     description:
-      name: flutter_inappwebview
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "."
+      ref: jidoujisho
+      resolved-ref: "759bd376214a763ab17ce2ede2c5a00b38330e13"
+      url: "https://github.com/lrorpilla/flutter_inappwebview"
+    source: git
     version: "5.7.2+3"
   flutter_launcher_icons:
     dependency: "direct main"

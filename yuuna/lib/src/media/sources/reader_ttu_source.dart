@@ -6,9 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_assets_server/local_assets_server.dart';
+import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/pages.dart';
+import 'package:yuuna/utils.dart';
 
 /// A global [Provider] for serving a local ッツ Ebook Reader.
 final ttuServerProvider = FutureProvider<LocalAssetsServer>((ref) {
@@ -44,6 +46,9 @@ class ReaderTtuSource extends ReaderMediaSource {
   static final ReaderTtuSource _instance =
       ReaderTtuSource._privateConstructor();
 
+  /// Default scrolling speed when in continuous page turning mode.
+  static int get defaultScrollingSpeed => 100;
+
   @override
   Future<void> onSourceExit({
     required BuildContext context,
@@ -78,13 +83,51 @@ class ReaderTtuSource extends ReaderMediaSource {
     required AppModel appModel,
   }) {
     return [
+      buildVolumeButton(
+        context: context,
+        ref: ref,
+        appModel: appModel,
+      ),
+      buildSettingsButton(
+        context: context,
+        ref: ref,
+        appModel: appModel,
+      ),
       buildLaunchButton(
         context: context,
         ref: ref,
         appModel: appModel,
-      )
+      ),
     ];
   }
+
+  /// Tweaks bar action.
+  Widget buildVolumeButton(
+      {required BuildContext context,
+      required WidgetRef ref,
+      required AppModel appModel}) {
+    String tweaksLabel = appModel.translate('volume_button_preferences');
+
+    return FloatingSearchBarAction(
+      child: JidoujishoIconButton(
+        size: Theme.of(context).textTheme.titleLarge?.fontSize,
+        tooltip: tweaksLabel,
+        icon: Icons.tune,
+        onTap: () {
+          showDialog(
+            context: context,
+            builder: (context) => const TtuSettingsDialogPage(),
+          );
+        },
+      ),
+    );
+  }
+
+  /// Shows when the clear button is pressed.
+  void showClearPrompt(
+      {required BuildContext context,
+      required WidgetRef ref,
+      required AppModel appModel}) async {}
 
   @override
   BasePage buildHistoryPage({MediaItem? item}) {
@@ -183,6 +226,49 @@ class ReaderTtuSource extends ReaderMediaSource {
     }).toList();
 
     return items;
+  }
+
+  /// Whether or not using the volume buttons in the Reader should turn the
+  /// page.
+  bool get volumePageTurningEnabled {
+    return getPreference<bool>(
+        key: 'volume_page_turning_enabled', defaultValue: true);
+  }
+
+  /// Toggles the volume page turning option.
+  void toggleVolumePageTurningEnabled() async {
+    await setPreference<bool>(
+      key: 'volume_page_turning_enabled',
+      value: !volumePageTurningEnabled,
+    );
+  }
+
+  /// Controls which direction is up or down for volume button page turning.
+  bool get volumePageTurningInverted {
+    return getPreference<bool>(
+        key: 'volume_page_turning_inverted', defaultValue: false);
+  }
+
+  /// Inverts the current volume button page turning direction preference.
+  void toggleVolumePageTurningInverted() async {
+    await setPreference<bool>(
+      key: 'volume_page_turning_inverted',
+      value: !volumePageTurningInverted,
+    );
+  }
+
+  /// Controls the speed for volume button page turning.
+  int get volumePageTurningSpeed {
+    return getPreference<int>(
+        key: 'volume_page_turning_speed', defaultValue: defaultScrollingSpeed);
+  }
+
+  /// Sets the speed for volume button page turning.
+  void setVolumePageTurningSpeed(int speed) async {
+    await setPreference<int>(
+      key: 'volume_page_turning_speed',
+      value: speed,
+    );
   }
 
   /// Used to fetch JSON for all books in IndexedDB.

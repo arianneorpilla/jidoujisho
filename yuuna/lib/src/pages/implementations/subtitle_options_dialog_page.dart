@@ -37,6 +37,9 @@ class _SubtitleOptionsDialogPage
   String get dialogSaveLabel => appModel.translate('dialog_save');
   String get dialogSetLabel => appModel.translate('dialog_set');
   String get resetLabel => appModel.translate('reset');
+  String get suffixText => appModel.translate('unit_pixels');
+  String get increaseLabel => appModel.translate('increase');
+  String get decreaseLabel => appModel.translate('decrease');
 
   late SubtitleOptions _options;
 
@@ -72,6 +75,8 @@ class _SubtitleOptionsDialogPage
   }
 
   Widget buildContent() {
+    String suffixText = appModel.translate('unit_milliseconds');
+
     return SingleChildScrollView(
       child: SizedBox(
         width: MediaQuery.of(context).size.width * (1 / 3),
@@ -86,16 +91,48 @@ class _SubtitleOptionsDialogPage
               decoration: InputDecoration(
                   floatingLabelBehavior: FloatingLabelBehavior.always,
                   labelText: playerOptionSubtitleDelay,
-                  suffixIcon: JidoujishoIconButton(
-                    size: 18,
-                    tooltip: resetLabel,
-                    onTap: () async {
-                      _delayController.text = '0';
-                      FocusScope.of(context).unfocus();
-                    },
-                    icon: Icons.undo,
+                  suffixIcon: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Space.normal(),
+                      JidoujishoIconButton(
+                        size: 18,
+                        tooltip: decreaseLabel,
+                        onTap: () async {
+                          _delayController.text =
+                              ((int.tryParse(_delayController.text) ??
+                                          _options.subtitleDelay) -
+                                      500)
+                                  .toString();
+                          FocusScope.of(context).unfocus();
+                        },
+                        icon: Icons.remove,
+                      ),
+                      JidoujishoIconButton(
+                        size: 18,
+                        tooltip: increaseLabel,
+                        onTap: () async {
+                          _delayController.text =
+                              ((int.tryParse(_delayController.text) ??
+                                          _options.subtitleDelay) +
+                                      500)
+                                  .toString();
+                          FocusScope.of(context).unfocus();
+                        },
+                        icon: Icons.add,
+                      ),
+                      JidoujishoIconButton(
+                        size: 18,
+                        tooltip: resetLabel,
+                        onTap: () async {
+                          _delayController.text = '0';
+                          FocusScope.of(context).unfocus();
+                        },
+                        icon: Icons.undo,
+                      ),
+                    ],
                   ),
-                  suffixText: ' ms'),
+                  suffixText: suffixText),
             ),
             TextField(
               controller: _allowanceController,
@@ -103,18 +140,51 @@ class _SubtitleOptionsDialogPage
                 signed: true,
               ),
               decoration: InputDecoration(
-                  floatingLabelBehavior: FloatingLabelBehavior.always,
-                  labelText: playerOptionAudioAllowance,
-                  suffixIcon: JidoujishoIconButton(
-                    size: 18,
-                    tooltip: resetLabel,
-                    onTap: () async {
-                      _allowanceController.text = '0';
-                      FocusScope.of(context).unfocus();
-                    },
-                    icon: Icons.undo,
-                  ),
-                  suffixText: 'ms'),
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+                labelText: playerOptionAudioAllowance,
+                suffixIcon: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Space.normal(),
+                    JidoujishoIconButton(
+                      size: 18,
+                      tooltip: decreaseLabel,
+                      onTap: () async {
+                        _allowanceController.text =
+                            ((int.tryParse(_allowanceController.text) ??
+                                        _options.audioAllowance) -
+                                    100)
+                                .toString();
+                        FocusScope.of(context).unfocus();
+                      },
+                      icon: Icons.remove,
+                    ),
+                    JidoujishoIconButton(
+                      size: 18,
+                      tooltip: increaseLabel,
+                      onTap: () async {
+                        _allowanceController.text =
+                            ((int.tryParse(_allowanceController.text) ??
+                                        _options.audioAllowance) +
+                                    100)
+                                .toString();
+                        FocusScope.of(context).unfocus();
+                      },
+                      icon: Icons.add,
+                    ),
+                    JidoujishoIconButton(
+                      size: 18,
+                      tooltip: resetLabel,
+                      onTap: () async {
+                        _allowanceController.text = '0';
+                        FocusScope.of(context).unfocus();
+                      },
+                      icon: Icons.undo,
+                    ),
+                  ],
+                ),
+                suffixText: suffixText,
+              ),
             ),
             TextField(
               controller: _fontNameController,
@@ -167,7 +237,7 @@ class _SubtitleOptionsDialogPage
                   },
                   icon: Icons.undo,
                 ),
-                suffixText: 'px',
+                suffixText: suffixText,
               ),
             ),
             TextField(

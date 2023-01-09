@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/pages.dart';
@@ -61,12 +62,10 @@ class _MassifSentencesDialogPage
         thumbVisibility: true,
         thickness: 3,
         controller: _scrollController,
-        child: SingleChildScrollView(
-          controller: _scrollController,
-          child: widget.exampleSentences.isEmpty
-              ? buildEmptyMessage()
-              : Wrap(children: getTextWidgets()),
-        ),
+        child: widget.exampleSentences.isEmpty
+            ? SingleChildScrollView(
+                controller: _scrollController, child: buildEmptyMessage())
+            : buildTextWidgets(),
       ),
     );
   }
@@ -83,39 +82,43 @@ class _MassifSentencesDialogPage
     );
   }
 
-  List<Widget> getTextWidgets() {
-    List<Widget> widgets = [];
+  Widget buildTextWidgets() {
+    return MasonryGridView.builder(
+      gridDelegate: SliverSimpleGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount:
+              MediaQuery.of(context).orientation == Orientation.portrait
+                  ? 1
+                  : 3),
+      itemCount: widget.exampleSentences.length,
+      itemBuilder: (context, index) {
+        MassifResult result = widget.exampleSentences[index];
 
-    widget.exampleSentences.forEachIndexed((index, result) {
-      Widget widget = GestureDetector(
-        onTap: () {
-          _valuesSelected[index]!.value = !_valuesSelected[index]!.value;
-        },
-        child: ValueListenableBuilder<bool>(
-          valueListenable: _valuesSelected[index]!,
-          builder: (context, value, child) {
-            return Container(
-              padding: EdgeInsets.symmetric(
-                vertical: Spacing.of(context).spaces.small,
-                horizontal: Spacing.of(context).spaces.semiSmall,
-              ),
-              margin: EdgeInsets.only(
-                top: Spacing.of(context).spaces.normal,
-                right: Spacing.of(context).spaces.normal,
-              ),
-              color: _valuesSelected[index]!.value
-                  ? theme.colorScheme.primary.withOpacity(0.3)
-                  : theme.unselectedWidgetColor.withOpacity(0.1),
-              child: buildTextWidget(result),
-            );
+        return GestureDetector(
+          onTap: () {
+            _valuesSelected[index]!.value = !_valuesSelected[index]!.value;
           },
-        ),
-      );
-
-      widgets.add(widget);
-    });
-
-    return widgets;
+          child: ValueListenableBuilder<bool>(
+            valueListenable: _valuesSelected[index]!,
+            builder: (context, value, child) {
+              return Container(
+                padding: EdgeInsets.symmetric(
+                  vertical: Spacing.of(context).spaces.small,
+                  horizontal: Spacing.of(context).spaces.semiSmall,
+                ),
+                margin: EdgeInsets.only(
+                  top: Spacing.of(context).spaces.normal,
+                  right: Spacing.of(context).spaces.normal,
+                ),
+                color: _valuesSelected[index]!.value
+                    ? theme.colorScheme.primary.withOpacity(0.3)
+                    : theme.unselectedWidgetColor.withOpacity(0.1),
+                child: buildTextWidget(result),
+              );
+            },
+          ),
+        );
+      },
+    );
   }
 
   Widget buildTextWidget(MassifResult result) {
