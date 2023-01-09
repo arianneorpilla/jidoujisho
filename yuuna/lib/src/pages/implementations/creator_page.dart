@@ -177,7 +177,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_creatorInitialised) {
+    if (!_creatorInitialised && isCardEditing) {
       _creatorInitialised = true;
       initialiseCreator();
     }
