@@ -20,6 +20,8 @@ class _DictionaryDialogPageState extends BasePageState {
       appModel.translate('invert_volume_buttons');
   String get volumeButtonTurningSpeed =>
       appModel.translate('volume_button_turning_speed');
+  String get extendPageNavbarLabel =>
+      appModel.translate('extend_page_beyond_navbar');
 
   String get dialogCloseLabel => appModel.translate('dialog_close');
   String get resetLabel => appModel.translate('reset');
@@ -74,6 +76,8 @@ class _DictionaryDialogPageState extends BasePageState {
             children: [
               buildEnablePageTurningSwitch(),
               buildInvertPageTurningSwitch(),
+              buildExtendPageSwitch(),
+              const Space.small(),
               const JidoujishoDivider(),
               buildPageTurningSpeedField(),
             ],
@@ -125,6 +129,31 @@ class _DictionaryDialogPageState extends BasePageState {
               onChanged: (value) {
                 source.toggleVolumePageTurningInverted();
                 _notifier.value = source.volumePageTurningInverted;
+              },
+            );
+          },
+        )
+      ],
+    );
+  }
+
+  Widget buildExtendPageSwitch() {
+    ValueNotifier<bool> _notifier =
+        ValueNotifier<bool>(source.extendPageBeyondNavigationBar);
+
+    return Row(
+      children: [
+        Expanded(
+          child: Text(extendPageNavbarLabel),
+        ),
+        ValueListenableBuilder<bool>(
+          valueListenable: _notifier,
+          builder: (_, value, __) {
+            return Switch(
+              value: value,
+              onChanged: (value) {
+                source.toggleExtendPageBeyondNavigationBar();
+                _notifier.value = source.extendPageBeyondNavigationBar;
               },
             );
           },

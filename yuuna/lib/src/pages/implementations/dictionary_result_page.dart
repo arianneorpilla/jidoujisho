@@ -1,5 +1,6 @@
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
+import 'package:keframe/keframe.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
@@ -67,6 +68,19 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
       ),
     );
 
+    for (DictionaryTerm term in widget.result.terms!) {
+      term.entries.sort(
+        (a, b) => dictionaryMap[a.dictionaryName]!.order.compareTo(
+              dictionaryMap[b.dictionaryName]!.order,
+            ),
+      );
+      term.metaEntries.sort(
+        (a, b) => dictionaryMap[a.dictionaryName]!.order.compareTo(
+              dictionaryMap[b.dictionaryName]!.order,
+            ),
+      );
+    }
+
     return MediaQuery(
       data: MediaQuery.of(context).removePadding(
         removeTop: true,
@@ -80,65 +94,55 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
         controller: _scrollController,
         child: Padding(
           padding: Spacing.of(context).insets.onlyRight.extraSmall,
-          child: CustomScrollView(
-            cacheExtent: 10000,
-            controller: _scrollController,
-            physics: const AlwaysScrollableScrollPhysics(
-              parent: BouncingScrollPhysics(),
-            ),
-            slivers: [
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  childCount: widget.result.terms!.length + 1,
-                  (context, index) {
-                    if (index == 0) {
-                      return widget.spaceBeforeFirstResult
-                          ? const Space.normal()
-                          : const SizedBox.shrink();
-                    }
-
-                    DictionaryTerm dictionaryTerm =
-                        widget.result.terms![index - 1];
-
-                    final Map<String, ExpandableController> controllers = {};
-                    final Map<String, bool> hiddens = {};
-
-                    for (String dictionaryName in dictionaryMap.keys.toList()) {
-                      controllers[dictionaryName] = ExpandableController(
-                        initialExpanded:
-                            !dictionaryMap[dictionaryName]!.collapsed,
-                      );
-                      hiddens[dictionaryName] =
-                          dictionaryMap[dictionaryName]!.hidden;
-                    }
-
-                    dictionaryTerm.entries.sort(
-                      (a, b) =>
-                          dictionaryMap[a.dictionaryName]!.order.compareTo(
-                                dictionaryMap[b.dictionaryName]!.order,
-                              ),
-                    );
-                    dictionaryTerm.metaEntries.sort(
-                      (a, b) =>
-                          dictionaryMap[a.dictionaryName]!.order.compareTo(
-                                dictionaryMap[b.dictionaryName]!.order,
-                              ),
-                    );
-
-                    return DictionaryTermPage(
-                      lastSelectedMapping: lastSelectedMapping,
-                      entryOpacity: widget.entryOpacity,
-                      dictionaryMap: dictionaryMap,
-                      dictionaryTerm: dictionaryTerm,
-                      onSearch: widget.onSearch,
-                      onStash: widget.onStash,
-                      expandableControllers: controllers,
-                      dictionaryHiddens: hiddens,
-                    );
-                  },
-                ),
+          child: SizeCacheWidget(
+            child: CustomScrollView(
+              cacheExtent: 99999999999999,
+              controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
               ),
-            ],
+              slivers: [
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    childCount: widget.result.terms!.length + 1,
+                    (context, index) {
+                      if (index == 0) {
+                        return widget.spaceBeforeFirstResult
+                            ? const Space.normal()
+                            : const SizedBox.shrink();
+                      }
+
+                      DictionaryTerm dictionaryTerm =
+                          widget.result.terms![index - 1];
+
+                      final Map<String, ExpandableController> controllers = {};
+                      final Map<String, bool> hiddens = {};
+
+                      for (String dictionaryName
+                          in dictionaryMap.keys.toList()) {
+                        controllers[dictionaryName] = ExpandableController(
+                          initialExpanded:
+                              !dictionaryMap[dictionaryName]!.collapsed,
+                        );
+                        hiddens[dictionaryName] =
+                            dictionaryMap[dictionaryName]!.hidden;
+                      }
+
+                      return DictionaryTermPage(
+                        lastSelectedMapping: lastSelectedMapping,
+                        entryOpacity: widget.entryOpacity,
+                        dictionaryMap: dictionaryMap,
+                        dictionaryTerm: dictionaryTerm,
+                        onSearch: widget.onSearch,
+                        onStash: widget.onStash,
+                        expandableControllers: controllers,
+                        dictionaryHiddens: hiddens,
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -49,8 +49,18 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
     List<DictionaryResult> historyResults =
         appModel.dictionaryHistory.reversed.toList();
 
+    for (DictionaryResult result in historyResults) {
+      for (DictionaryTerm term in result.terms!) {
+        term.entries.sort(
+          (a, b) => dictionaryMap![a.dictionaryName]!.order.compareTo(
+                dictionaryMap![b.dictionaryName]!.order,
+              ),
+        );
+      }
+    }
+
     return ListView.builder(
-      cacheExtent: 10000,
+      cacheExtent: 99999999999999,
       controller: DictionaryMediaType.instance.scrollController,
       physics:
           const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
@@ -61,13 +71,6 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
         }
 
         DictionaryResult result = historyResults[index - 1];
-        for (DictionaryTerm term in result.terms!) {
-          term.entries.sort(
-            (a, b) => dictionaryMap![a.dictionaryName]!.order.compareTo(
-                  dictionaryMap![b.dictionaryName]!.order,
-                ),
-          );
-        }
 
         ValueNotifier<int> indexNotifier =
             ValueNotifier<int>(result.scrollIndex);

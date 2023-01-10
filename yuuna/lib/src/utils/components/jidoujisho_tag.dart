@@ -48,7 +48,7 @@ class JidoujishoTag extends StatelessWidget {
       padding: Spacing.of(context).insets.onlyRight.small,
       child: InkWell(
         child: Container(
-          color: backgroundColor.withOpacity(0.8),
+          color: backgroundColor,
           padding: Spacing.of(context).insets.all.small,
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -72,7 +72,7 @@ class JidoujishoTag extends StatelessWidget {
                 Flexible(
                   child: Container(
                     padding: Spacing.of(context).insets.all.extraSmall,
-                    color: Colors.white.withOpacity(0.35),
+                    color: Colors.red.shade400,
                     child: Text(
                       trailingText!,
                       style: Theme.of(context)

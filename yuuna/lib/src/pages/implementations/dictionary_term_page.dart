@@ -1,6 +1,7 @@
 import 'package:expandable/expandable.dart';
 import 'package:float_column/float_column.dart';
 import 'package:flutter/material.dart';
+import 'package:keframe/keframe.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
@@ -74,19 +75,21 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
       return buildCard();
     }
 
-    return GestureDetector(
-      child: buildCard(),
-      onHorizontalDragEnd: (details) async {
-        if (details.primaryVelocity == 0) {
-          return;
-        }
+    return FrameSeparateWidget(
+      child: GestureDetector(
+        child: buildCard(),
+        onHorizontalDragEnd: (details) async {
+          if (details.primaryVelocity == 0) {
+            return;
+          }
 
-        if (details.primaryVelocity!.compareTo(0) == -1) {
-          widget.onScrollRight?.call();
-        } else {
-          widget.onScrollLeft?.call();
-        }
-      },
+          if (details.primaryVelocity!.compareTo(0) == -1) {
+            widget.onScrollRight?.call();
+          } else {
+            widget.onScrollLeft?.call();
+          }
+        },
+      ),
     );
   }
 
@@ -142,7 +145,7 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
     return Card(
       color: appModel.isDarkMode
           ? Color.fromRGBO(15, 15, 15, widget.entryOpacity)
-          : Color.fromRGBO(246, 246, 246, widget.entryOpacity),
+          : Color.fromRGBO(249, 249, 249, widget.entryOpacity),
       elevation: 0,
       shape: const RoundedRectangleBorder(),
       child: Padding(
@@ -227,7 +230,7 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
           ),
           shapeBorder: const RoundedRectangleBorder(),
           backgroundColor:
-              Theme.of(context).appBarTheme.foregroundColor?.withOpacity(0.1),
+              appModel.isDarkMode ? Colors.grey.shade900 : Colors.grey.shade200,
           size: Spacing.of(context).spaces.semiBig,
           tooltip: quickAction.getLocalisedLabel(appModel),
           icon: quickAction.icon,

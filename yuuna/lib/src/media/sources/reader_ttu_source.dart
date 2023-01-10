@@ -83,7 +83,7 @@ class ReaderTtuSource extends ReaderMediaSource {
     required AppModel appModel,
   }) {
     return [
-      buildVolumeButton(
+      buildTweaksButton(
         context: context,
         ref: ref,
         appModel: appModel,
@@ -102,11 +102,11 @@ class ReaderTtuSource extends ReaderMediaSource {
   }
 
   /// Tweaks bar action.
-  Widget buildVolumeButton(
+  Widget buildTweaksButton(
       {required BuildContext context,
       required WidgetRef ref,
       required AppModel appModel}) {
-    String tweaksLabel = appModel.translate('volume_button_preferences');
+    String tweaksLabel = appModel.translate('tweaks');
 
     return FloatingSearchBarAction(
       child: JidoujishoIconButton(
@@ -254,6 +254,22 @@ class ReaderTtuSource extends ReaderMediaSource {
     await setPreference<bool>(
       key: 'volume_page_turning_inverted',
       value: !volumePageTurningInverted,
+    );
+  }
+
+  /// Whether or not to add to extend the webpage beyond the navigation bar.
+  /// This may be helpful for devices that don't have difficulty accessing the
+  /// top bar (i.e. don't have a teardrop notch).
+  bool get extendPageBeyondNavigationBar {
+    return getPreference<bool>(
+        key: 'extend_page_beyond_navbar', defaultValue: false);
+  }
+
+  /// Toggles the extend navbar option.
+  void toggleExtendPageBeyondNavigationBar() async {
+    await setPreference<bool>(
+      key: 'extend_page_beyond_navbar',
+      value: !extendPageBeyondNavigationBar,
     );
   }
 

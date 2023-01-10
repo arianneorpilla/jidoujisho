@@ -71,9 +71,7 @@ abstract class BaseTabPageState<T extends BaseTabPage> extends BasePageState {
           backgroundColor: appModel.isDarkMode
               ? const Color.fromARGB(255, 30, 30, 30)
               : const Color.fromARGB(255, 229, 229, 229),
-          backdropColor: appModel.isDarkMode
-              ? Colors.black.withOpacity(0.95)
-              : Colors.white.withOpacity(0.95),
+          backdropColor: appModel.isDarkMode ? Colors.black : Colors.white,
           accentColor: theme.colorScheme.primary,
           scrollPadding: const EdgeInsets.only(top: 6, bottom: 56),
           transitionDuration: Duration.zero,

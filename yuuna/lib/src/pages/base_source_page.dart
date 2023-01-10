@@ -256,15 +256,13 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
       return buildNoSearchResultsPlaceholderMessage();
     }
 
-    return ClipRect(
-      child: DictionaryResultPage(
-        entryOpacity: dictionaryEntryOpacity,
-        key: ValueKey(_dictionaryResultNotifier.value),
-        onSearch: onSearch,
-        onStash: onStash,
-        result: _dictionaryResultNotifier.value!,
-        spaceBeforeFirstResult: false,
-      ),
+    return DictionaryResultPage(
+      entryOpacity: dictionaryEntryOpacity,
+      key: ValueKey(_dictionaryResultNotifier.value),
+      onSearch: onSearch,
+      onStash: onStash,
+      result: _dictionaryResultNotifier.value!,
+      spaceBeforeFirstResult: false,
     );
   }
 

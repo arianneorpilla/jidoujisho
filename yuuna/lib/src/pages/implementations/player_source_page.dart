@@ -590,9 +590,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
               startHideTimer();
             },
-            child: SizedBox.expand(
+            child: const SizedBox.expand(
               child: ColoredBox(
-                color: Colors.red.withOpacity(0),
+                color: Colors.transparent,
               ),
             ),
           ),
@@ -607,9 +607,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
               startHideTimer();
             },
-            child: SizedBox.expand(
+            child: const SizedBox.expand(
               child: ColoredBox(
-                color: Colors.blue.withOpacity(0),
+                color: Colors.transparent,
               ),
             ),
           ),

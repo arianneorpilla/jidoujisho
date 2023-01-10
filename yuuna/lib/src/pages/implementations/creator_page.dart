@@ -197,11 +197,9 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
   }
 
   Widget buildBlur() {
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-        child: Container(),
-      ),
+    return BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+      child: Container(),
     );
   }
 

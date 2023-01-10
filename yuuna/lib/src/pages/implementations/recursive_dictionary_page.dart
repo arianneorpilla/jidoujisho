@@ -328,12 +328,10 @@ class _RecursiveDictionaryPageState
   }
 
   Widget buildSearchResult() {
-    return ClipRect(
-      child: DictionaryResultPage(
-        onSearch: onSearch,
-        onStash: onStash,
-        result: _result!,
-      ),
+    return DictionaryResultPage(
+      onSearch: onSearch,
+      onStash: onStash,
+      result: _result!,
     );
   }
 

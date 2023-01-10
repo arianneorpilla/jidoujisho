@@ -38,6 +38,7 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
   Duration get consoleMessageDebounce => const Duration(milliseconds: 50);
 
   final FocusNode _focusNode = FocusNode();
+  bool _isRecursiveSearching = false;
 
   @override
   void initState() {
@@ -54,6 +55,29 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
+
+    if (state == AppLifecycleState.resumed) {
+      _focusNode.requestFocus();
+    }
+  }
+
+  @override
+  void onSearch(String searchTerm) async {
+    _isRecursiveSearching = true;
+    if (appModel.isMediaOpen) {
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      await Future.delayed(const Duration(milliseconds: 5), () {});
+    }
+    await appModel.openRecursiveDictionarySearch(
+      searchTerm: searchTerm,
+      killOnPop: false,
+    );
+    if (appModel.isMediaOpen) {
+      await Future.delayed(const Duration(milliseconds: 5), () {});
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    }
+    _isRecursiveSearching = false;
+
     _focusNode.requestFocus();
   }
 
@@ -69,8 +93,10 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
       autofocus: true,
       focusNode: _focusNode,
       onFocusChange: (value) {
-        if (!(ModalRoute.of(context)?.isCurrent ?? false) &&
-            !appModel.isCreatorOpen) {
+        if (mediaSource.volumePageTurningEnabled &&
+            !(ModalRoute.of(context)?.isCurrent ?? false) &&
+            !appModel.isCreatorOpen &&
+            !_isRecursiveSearching) {
           _focusNode.requestFocus();
         }
       },
@@ -110,6 +136,7 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
         child: Scaffold(
           resizeToAvoidBottomInset: false,
           body: SafeArea(
+            top: !mediaSource.extendPageBeyondNavigationBar,
             bottom: false,
             child: Stack(
               fit: StackFit.expand,
@@ -358,6 +385,7 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
 
   void searchMenuAction() async {
     String searchTerm = await getSelectedText();
+    _isRecursiveSearching = true;
 
     await unselectWebViewTextSelection(_controller);
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -368,6 +396,9 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
     );
     await Future.delayed(const Duration(milliseconds: 5), () {});
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
+    _isRecursiveSearching = false;
+    _focusNode.requestFocus();
   }
 
   void stashMenuAction() async {
@@ -395,12 +426,14 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
 
     await Future.delayed(const Duration(milliseconds: 5), () {});
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
+    _focusNode.requestFocus();
   }
 
   void copyMenuAction() async {
-    await unselectWebViewTextSelection(_controller);
     String searchTerm = await getSelectedText();
     Clipboard.setData(ClipboardData(text: searchTerm));
+    await unselectWebViewTextSelection(_controller);
   }
 
   Future<String> getSelectedText() async {

@@ -80,6 +80,7 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
             left: Spacing.of(context).spaces.normal,
           ),
           child: ListView.builder(
+            cacheExtent: 99999999999999,
             physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
             primary: false,

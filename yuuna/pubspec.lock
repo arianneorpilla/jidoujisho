@@ -465,6 +465,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.5"
+  flutter_fadein:
+    dependency: "direct main"
+    description:
+      name: flutter_fadein
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.0"
   flutter_ffmpeg:
     dependency: "direct main"
     description:
@@ -806,6 +813,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.0"
+  keframe:
+    dependency: "direct main"
+    description:
+      name: keframe
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.0"
   lint:
     dependency: transitive
     description:

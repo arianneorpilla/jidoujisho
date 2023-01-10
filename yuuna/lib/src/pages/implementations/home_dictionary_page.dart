@@ -382,12 +382,10 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
   }
 
   Widget buildSearchResult() {
-    return ClipRect(
-      child: DictionaryResultPage(
-        onSearch: onSearch,
-        onStash: onStash,
-        result: _result!,
-      ),
+    return DictionaryResultPage(
+      onSearch: onSearch,
+      onStash: onStash,
+      result: _result!,
     );
   }
 
