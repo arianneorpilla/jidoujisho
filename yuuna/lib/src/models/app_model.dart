@@ -8,6 +8,7 @@ import 'package:clipboard/clipboard.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:external_path/external_path.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -214,7 +215,7 @@ class AppModel with ChangeNotifier {
 
   /// Maximum number of dictionary entries that can be returned from a database
   /// dictionary search.
-  final int maximumDictionaryEntrySearchMatch = 20;
+  final int maximumDictionaryEntrySearchMatch = 40;
 
   /// Used as the history key used for the Stash.
   final String stashKey = ' stash';
@@ -1101,6 +1102,8 @@ class AppModel with ChangeNotifier {
         workingDirectory.deleteSync(recursive: true);
         workingDirectory.createSync();
       }
+
+      await FilePicker.platform.clearTemporaryFiles();
 
       progressNotifier.value = localisation.importMessageComplete;
       await Future.delayed(const Duration(seconds: 1), () {});

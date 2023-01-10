@@ -44,25 +44,23 @@ class CropImageEnhancement extends ImageEnhancement {
       return;
     }
 
-    _croppedImage = await showDialog<File?>(
+    await showDialog<File?>(
       context: context,
       builder: (context) => CropImageDialogPage(
         imageFile: imageFile,
+        onCrop: (file) {
+          imageField.setImages(
+            cause: cause,
+            appModel: appModel,
+            creatorModel: creatorModel,
+            newAutoCannotOverride: false,
+            searchTerm: searchTerm,
+            generateImages: () async {
+              return [NetworkToFileImage(file: file)];
+            },
+          );
+        },
       ),
-    );
-
-    await imageField.setImages(
-      cause: cause,
-      appModel: appModel,
-      creatorModel: creatorModel,
-      newAutoCannotOverride: false,
-      searchTerm: searchTerm,
-      generateImages: () async {
-        return fetchImages(
-          appModel: appModel,
-          context: context,
-        );
-      },
     );
   }
 
@@ -72,10 +70,6 @@ class CropImageEnhancement extends ImageEnhancement {
     required BuildContext context,
     String? searchTerm,
   }) async {
-    List<NetworkToFileImage> images = [
-      NetworkToFileImage(file: _croppedImage),
-    ];
-
-    return images;
+    return [];
   }
 }

@@ -14,11 +14,15 @@ class CropImageDialogPage extends BasePage {
   /// Create an instance of this page.
   const CropImageDialogPage({
     required this.imageFile,
+    required this.onCrop,
     super.key,
   });
 
   /// Initial file.
   final File imageFile;
+
+  /// On crop action.
+  final Function(File) onCrop;
 
   @override
   BasePageState createState() => _CropImageDialogPageState();
@@ -48,9 +52,8 @@ class _CropImageDialogPageState extends BasePageState<CropImageDialogPage> {
   Widget buildContent() {
     return Center(
       child: CropImage(
-        controller: _controller,
-        image: Image(image: FileImage(widget.imageFile)),
-      ),
+          controller: _controller,
+          image: Image(image: FileImage(widget.imageFile))),
     );
   }
 
@@ -93,6 +96,7 @@ class _CropImageDialogPageState extends BasePageState<CropImageDialogPage> {
     imageFile.createSync(recursive: true);
     imageFile.writeAsBytesSync(bytes);
 
-    Navigator.pop(context, imageFile);
+    widget.onCrop(imageFile);
+    Navigator.pop(context);
   }
 }

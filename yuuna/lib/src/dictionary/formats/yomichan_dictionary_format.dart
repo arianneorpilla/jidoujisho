@@ -102,10 +102,28 @@ Future<List<DictionaryEntry>> prepareEntriesYomichanTermBankFormat(
 
         if (item[5] is List) {
           List<dynamic> meaningsList = List.from(item[5]);
-          meanings = meaningsList.map((e) => e.toString()).toList();
+          meanings = meaningsList.map((e) {
+            if (e is Map) {
+              Map<String, dynamic> data = Map<String, dynamic>.from(e);
+              if (data['type'] == 'image') {
+                return '';
+              } else {
+                return e.toString();
+              }
+            } else {
+              return e.toString();
+            }
+          }).toList();
+        } else if (item[5] is Map) {
+          Map<String, dynamic> data = Map<String, dynamic>.from(item[5]);
+          if (data['type'] != 'image') {
+            meanings.add(item[5].toString());
+          }
         } else {
           meanings.add(item[5].toString());
         }
+
+        meanings = meanings.where((e) => e.isNotEmpty).toList();
 
         entries.add(
           DictionaryEntry(

@@ -117,7 +117,7 @@ class ImageField extends ImageExportField {
       options: CarouselOptions(
         enableInfiniteScroll: currentImageSuggestions!.length > 1,
         enlargeCenterPage: true,
-        viewportFraction: 0.6,
+        viewportFraction: 0.75,
         initialPage: indexNotifier.value,
         onPageChanged: (index, reason) {
           indexNotifier.value = index;

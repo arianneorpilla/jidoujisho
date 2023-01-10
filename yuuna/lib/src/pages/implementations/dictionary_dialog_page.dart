@@ -59,6 +59,7 @@ class _DictionaryDialogPageState extends BasePageState {
     return TextButton(
       child: Text(dialogImportLabel),
       onPressed: () async {
+        await FilePicker.platform.clearTemporaryFiles();
         FilePickerResult? result = await FilePicker.platform.pickFiles(
           /// Change when adding multiple dictionary formats.
           type: FileType.custom,
