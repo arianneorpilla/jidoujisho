@@ -127,7 +127,7 @@ abstract class Language {
   /// In the case of English, 'This is a pen.' should ideally return a list
   /// containing 'This', ' ', 'is', ' ', 'a', ' ', 'pen', '.'. Delimiters
   /// should stay intact for languages that feature such, such as spaces.
-  FutureOr<List<String>> textToWords(String text);
+  List<String> textToWords(String text);
 
   /// Given an [index] or a character position in given [text], return a word
   /// such that it corresponds to a whole word from the parsed list of words
@@ -138,10 +138,10 @@ abstract class Language {
   ///
   /// In the case of English, 'This is a pen.' at index 10 (p), should return
   /// the word 'pen'.
-  FutureOr<String> wordFromIndex({
+  String wordFromIndex({
     required String text,
     required int index,
-  }) async {
+  }) {
     /// See [indexMaxDistance] above.
     /// If the [indexMaxDistance] is not defined...
     if (indexMaxDistance != null) {
@@ -186,7 +186,7 @@ abstract class Language {
       }
     }
 
-    List<String> words = await textToWords(text);
+    List<String> words = textToWords(text);
 
     List<String> wordTape = [];
     for (int i = 0; i < words.length; i++) {
@@ -205,15 +205,14 @@ abstract class Language {
   ///
   /// For example, for Japanese, 'しました' should be 'する'.
   /// For English, 'running' should be 'run'.
-  FutureOr<String> getRootForm(String term);
+  String getRootForm(String term);
 
   /// Generate extra fallback terms for a word for use when searching a
   /// dictionary when the word fails to find results on its own.
-  FutureOr<List<String>> generateFallbackTerms(
-      {required String searchTerm}) async {
+  List<String> generateFallbackTerms({required String searchTerm}) {
     List<String> fallbackTerms = [];
 
-    String rootForm = await getRootForm(searchTerm);
+    String rootForm = getRootForm(searchTerm);
     if (rootForm != searchTerm) {
       fallbackTerms.add(rootForm);
     }

@@ -328,7 +328,7 @@ class JidoujishoLocalisations {
     'close_connection_title': 'Close Connection',
     'close_connection_description':
         'This will end the WebSocket connection and clear all received text. Are you sure?',
-    'use_slow_import': 'Slow import (use if crashing)',
+    'use_slow_import': 'Slow import (use if failing)',
     'settings': 'Settings',
     'manager': 'Manager',
     'volume_button_page_turning': 'Volume button page turning',

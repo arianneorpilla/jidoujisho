@@ -23,9 +23,6 @@ class CropImageEnhancement extends ImageEnhancement {
   /// default mappings value of [AnkiMapping].
   static const String key = 'crop_image';
 
-  /// Holds the cropped image.
-  File? _croppedImage;
-
   @override
   Future<void> enhanceCreatorParams({
     required BuildContext context,
@@ -34,8 +31,6 @@ class CropImageEnhancement extends ImageEnhancement {
     required CreatorModel creatorModel,
     required EnhancementTriggerCause cause,
   }) async {
-    _croppedImage = null;
-
     ImageExportField imageField = field as ImageExportField;
     String? searchTerm;
 

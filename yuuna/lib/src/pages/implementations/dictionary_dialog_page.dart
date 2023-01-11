@@ -60,6 +60,7 @@ class _DictionaryDialogPageState extends BasePageState {
       child: Text(dialogImportLabel),
       onPressed: () async {
         await FilePicker.platform.clearTemporaryFiles();
+
         FilePickerResult? result = await FilePicker.platform.pickFiles(
           /// Change when adding multiple dictionary formats.
           type: FileType.custom,
@@ -76,10 +77,13 @@ class _DictionaryDialogPageState extends BasePageState {
             file: file,
             onImportSuccess: () {
               _selectedOrder = appModel.dictionaries.length - 1;
-              setState(() {});
             },
           );
+
+          setState(() {});
         }
+
+        await FilePicker.platform.clearTemporaryFiles();
       },
     );
   }

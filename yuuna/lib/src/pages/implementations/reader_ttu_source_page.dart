@@ -134,6 +134,7 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
       child: WillPopScope(
         onWillPop: onWillPop,
         child: Scaffold(
+          backgroundColor: Colors.black,
           resizeToAvoidBottomInset: false,
           body: SafeArea(
             top: !mediaSource.extendPageBeyondNavigationBar,

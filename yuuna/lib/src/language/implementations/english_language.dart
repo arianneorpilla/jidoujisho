@@ -27,14 +27,14 @@ class EnglishLanguage extends Language {
   Future<void> prepareResources() async {}
 
   @override
-  FutureOr<String> getRootForm(String term) {
+  String getRootForm(String term) {
     /// Implement an actual lemmatiser here... Could use NLTK, but it should
     /// really be light to use...
     return term;
   }
 
   @override
-  FutureOr<List<String>> textToWords(String text) {
+  List<String> textToWords(String text) {
     return text.splitWithDelim(RegExp(' '));
   }
 }

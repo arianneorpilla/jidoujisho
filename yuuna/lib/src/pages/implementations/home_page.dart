@@ -204,7 +204,9 @@ class _HomePageState extends BasePageState<HomePage> {
     return JidoujishoIconButton(
       tooltip: showMenuLabel,
       icon: Icons.more_vert,
-      onTapDown: openMenu,
+      onTapDown: (details) async {
+        openMenu(details);
+      },
     );
   }
 

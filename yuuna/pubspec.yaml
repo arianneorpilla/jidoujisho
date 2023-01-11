@@ -1,7 +1,7 @@
 name: yuuna
 description: A full-featured immersion language learning suite for mobile.
 publish_to: 'none'
-version: 2.2.6+14
+version: 2.2.8+16
 environment:
   sdk: ">=2.17.0 <3.0.0"
 
@@ -100,6 +100,7 @@ dependencies:
     git:
       url: https://github.com/lrorpilla/subtitle
       ref: 9c5307d1cbe3a9ca84c387e2023251896c9ff47f
+  system_info: ^1.0.1
   tabbed_view: ^1.12.0
   transparent_image: ^2.0.0
   url_launcher: ^6.0.20

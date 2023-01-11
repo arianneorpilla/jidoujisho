@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_process_text/flutter_process_text.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:network_to_file_image/network_to_file_image.dart';
 import 'package:receive_intent/receive_intent.dart' as intents;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -60,6 +63,9 @@ void main() {
         child: const JidoujishoApp(),
       ),
     );
+
+    /// Pre-load and make the first user search faster.
+    appModel.searchDictionary(appModel.targetLanguage.helloWorld);
   }, (exception, stack) {
     /// Print error details to the console.
     final details = FlutterErrorDetails(exception: exception, stack: stack);
@@ -85,6 +91,7 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
 
   late final StreamSubscription _otherIntentsSubscription;
   late final StreamSubscription _sharedTextSubscription;
+  late final StreamSubscription _sharedImageSubscription;
 
   @override
   void initState() {
@@ -106,12 +113,18 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
       _sharedTextSubscription =
           ReceiveSharingIntent.getTextStream().listen(textShareIntentAction);
 
+      // For sharing images when the app while the app is in the backgrfound.
+      _sharedImageSubscription =
+          ReceiveSharingIntent.getMediaStream().listen(imageShareIntentAction);
+
       /// For receiving shared text when the app is initially launched.
       ReceiveSharingIntent.getInitialText().then((text) {
         if (text != null) {
           textShareIntentAction(text);
         }
       });
+      // For sharing images when the app while the app is initially launched.
+      ReceiveSharingIntent.getInitialMedia().then(imageShareIntentAction);
     });
   }
 
@@ -119,6 +132,7 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
   void dispose() {
     _otherIntentsSubscription.cancel();
     _sharedTextSubscription.cancel();
+    _sharedImageSubscription.cancel();
     super.dispose();
   }
 
@@ -127,12 +141,15 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
       return;
     }
 
-    debugPrint(intent.action);
-    debugPrint(intent.extra.toString());
+    debugPrint(jsonEncode(intent.toMap()));
 
     switch (intent.action) {
       case 'android.intent.action.PROCESS_TEXT':
         String data = intent.extra!['android.intent.extra.PROCESS_TEXT'];
+        textContextMenuAction(data);
+        return;
+      case 'android.intent.action.WEB_SEARCH':
+        String data = intent.extra!['query'];
         textContextMenuAction(data);
         return;
     }
@@ -174,6 +191,30 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
         ref: ref,
       );
     }
+  }
+
+  void imageShareIntentAction(List<SharedMediaFile> sharedMediaFiles) {
+    if (sharedMediaFiles.isEmpty) {
+      return;
+    }
+
+    appModel.openCreator(killOnPop: true, ref: ref);
+
+    List<NetworkToFileImage> images = sharedMediaFiles
+        .map((sharedMediaFile) =>
+            NetworkToFileImage(file: File(sharedMediaFile.path)))
+        .toList();
+    Future.delayed(const Duration(milliseconds: 100), () {
+      ImageField.instance.setImages(
+        appModel: appModel,
+        creatorModel: creatorModel,
+        cause: EnhancementTriggerCause.manual,
+        newAutoCannotOverride: true,
+        generateImages: () async {
+          return images;
+        },
+      );
+    });
   }
 
   void launchYoutubeMediaAction(String videoId) async {

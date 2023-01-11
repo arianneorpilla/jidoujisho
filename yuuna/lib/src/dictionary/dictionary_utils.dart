@@ -22,8 +22,7 @@ Future<void> depositDictionaryDataHelper(PrepareDictionaryParams params) async {
 
   final Isar database = await Isar.open(
     globalSchemas,
-    directory: params.isarDirectoryPath,
-    maxSizeMiB: 10240,
+    maxSizeMiB: 4096,
   );
 
   database.writeTxnSync(() {
@@ -119,8 +118,7 @@ Future<void> depositDictionaryDataHelper(PrepareDictionaryParams params) async {
 Future<void> deleteDictionaryDataHelper(DeleteDictionaryParams params) async {
   final Isar database = await Isar.open(
     globalSchemas,
-    directory: params.isarDirectoryPath,
-    maxSizeMiB: 10240,
+    maxSizeMiB: 4096,
   );
 
   database.writeTxnSync(() {
@@ -150,8 +148,7 @@ Future<void> addToDictionaryHistoryHelper(
 ) async {
   final Isar database = await Isar.open(
     globalSchemas,
-    directory: params.isarDirectoryPath,
-    maxSizeMiB: 10240,
+    maxSizeMiB: 4096,
   );
 
   database.writeTxnSync(() {

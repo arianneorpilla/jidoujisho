@@ -8,7 +8,6 @@ import 'package:clipboard/clipboard.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:external_path/external_path.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -215,7 +214,7 @@ class AppModel with ChangeNotifier {
 
   /// Maximum number of dictionary entries that can be returned from a database
   /// dictionary search.
-  final int maximumDictionaryEntrySearchMatch = 40;
+  final int maximumDictionaryEntrySearchMatch = 60;
 
   /// Used as the history key used for the Stash.
   final String stashKey = ' stash';
@@ -644,8 +643,7 @@ class AppModel with ChangeNotifier {
     /// Initialise persistent database.
     _database = await Isar.open(
       globalSchemas,
-      directory: isarDirectory.path,
-      maxSizeMiB: 10240,
+      maxSizeMiB: 4096,
     );
 
     /// Populate entities with key-value maps for constant time performance.
@@ -902,6 +900,10 @@ class AppModel with ChangeNotifier {
     required File file,
     required Function() onImportSuccess,
   }) async {
+    /// New results may be wrong after dictionary is added so this has to be
+    /// done.
+    clearDictionaryResultsCache();
+
     /// The last selected dictionary format in the dictionary menu is used for
     /// dictionary import.
     DictionaryFormat dictionaryFormat = lastSelectedDictionaryFormat;
@@ -1091,7 +1093,17 @@ class AppModel with ChangeNotifier {
         _database.dictionarys.putSync(dictionary);
       });
 
-      await compute(depositDictionaryDataHelper, prepareDictionaryParams);
+      try {
+        await compute(depositDictionaryDataHelper, prepareDictionaryParams);
+      } catch (e) {
+        DeleteDictionaryParams params = DeleteDictionaryParams(
+          dictionaryName: dictionary.dictionaryName,
+          isarDirectoryPath: isarDirectory.path,
+        );
+        await compute(deleteDictionaryDataHelper, params);
+
+        rethrow;
+      }
 
       /// The working directory should always be emptied before and after
       /// dictionary import to ensure that no files bloat the system and that
@@ -1102,8 +1114,6 @@ class AppModel with ChangeNotifier {
         workingDirectory.deleteSync(recursive: true);
         workingDirectory.createSync();
       }
-
-      await FilePicker.platform.clearTemporaryFiles();
 
       progressNotifier.value = localisation.importMessageComplete;
       await Future.delayed(const Duration(seconds: 1), () {});
@@ -1142,6 +1152,10 @@ class AppModel with ChangeNotifier {
 
   /// Delete a selected dictionary from the database.
   Future<void> deleteDictionary(Dictionary dictionary) async {
+    /// New results may be wrong after dictionary is added so this has to be
+    /// done.
+    clearDictionaryResultsCache();
+
     showDialog(
       barrierDismissible: false,
       context: navigatorKey.currentContext!,
@@ -1181,9 +1195,23 @@ class AppModel with ChangeNotifier {
     });
   }
 
+  /// Used for caching search results. Cleared when a dictionary is added or
+  /// deleted.
+  final Map<String, DictionaryResult> _dictionarySearchCache = {};
+
+  /// Used when a dictionary is added or removed as those results may now be
+  /// wrong.
+  void clearDictionaryResultsCache() {
+    _dictionarySearchCache.clear();
+  }
+
   /// Gets the raw unprocessed entries straight from a dictionary database
   /// given a search term. This will be processed later for user viewing.
   Future<DictionaryResult> searchDictionary(String searchTerm) async {
+    if (_dictionarySearchCache[searchTerm] != null) {
+      return _dictionarySearchCache[searchTerm]!;
+    }
+
     if (searchTerm.trim().isEmpty) {
       return DictionaryResult(
         searchTerm: searchTerm,
@@ -1191,7 +1219,7 @@ class AppModel with ChangeNotifier {
       );
     }
 
-    String fallbackTerm = await targetLanguage.getRootForm(searchTerm);
+    String fallbackTerm = targetLanguage.getRootForm(searchTerm);
     DictionarySearchParams params = DictionarySearchParams(
       searchTerm: searchTerm,
       maximumDictionaryEntrySearchMatch: maximumDictionaryEntrySearchMatch,
@@ -1207,6 +1235,8 @@ class AppModel with ChangeNotifier {
       searchTerm: searchTerm,
       terms: terms,
     );
+
+    _dictionarySearchCache[searchTerm] = result;
 
     return result;
   }
@@ -1897,7 +1927,7 @@ class AppModel with ChangeNotifier {
       return;
     }
 
-    List<String> segmentedText = await targetLanguage.textToWords(sourceText);
+    List<String> segmentedText = targetLanguage.textToWords(sourceText);
 
     await showDialog(
       context: _navigatorKey.currentContext!,

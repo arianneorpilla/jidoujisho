@@ -52,7 +52,7 @@ class JapaneseLanguage extends Language {
   }
 
   @override
-  FutureOr<String> getRootForm(String term) {
+  String getRootForm(String term) {
     /// This function is supposed to just return the lemma for the starting
     /// word of a sentence but it also attempts to repair some problems with
     /// some search results.
@@ -93,7 +93,7 @@ class JapaneseLanguage extends Language {
   }
 
   @override
-  FutureOr<List<String>> textToWords(String text) {
+  List<String> textToWords(String text) {
     String delimiterSanitisedText = text
         .replaceAll('﻿', '␝')
         .replaceAll('　', '␝')
@@ -294,8 +294,7 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
 
   final Isar database = await Isar.open(
     globalSchemas,
-    directory: params.isarDirectoryPath,
-    maxSizeMiB: 10240,
+    maxSizeMiB: 4096,
   );
 
   bool searchTermStartsWithKana =

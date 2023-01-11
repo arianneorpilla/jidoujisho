@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_exit_app/flutter_exit_app.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:spaces/spaces.dart';
+import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
@@ -123,10 +124,11 @@ class _RecursiveDictionaryPageState
       },
       progress: _isSearching,
       leadingActions: [
-        buildDictionaryButton(),
         buildBackButton(),
       ],
       actions: [
+        buildSegmentButton(),
+        buildCreatorButton(),
         buildSearchButton(),
       ],
       onQueryChanged: onQueryChanged,
@@ -185,17 +187,6 @@ class _RecursiveDictionaryPageState
     }
   }
 
-  Widget buildDictionaryButton() {
-    return FloatingSearchBarAction(
-      child: JidoujishoIconButton(
-        size: textTheme.titleLarge?.fontSize,
-        tooltip: dictionariesLabel,
-        icon: Icons.auto_stories,
-        onTap: appModel.showDictionaryMenu,
-      ),
-    );
-  }
-
   Widget buildBackButton() {
     return FloatingSearchBarAction(
       showIfOpened: true,
@@ -203,7 +194,7 @@ class _RecursiveDictionaryPageState
       child: JidoujishoIconButton(
         tooltip: backLabel,
         icon: Icons.arrow_back,
-        onTap: () {
+        onTap: () async {
           if (widget.killOnPop) {
             FlutterExitApp.exitApp();
           } else {
@@ -220,6 +211,54 @@ class _RecursiveDictionaryPageState
       size: textTheme.titleLarge!.fontSize!,
       searchButtonSemanticLabel: searchLabel,
       clearButtonSemanticLabel: clearLabel,
+    );
+  }
+
+  Widget buildSegmentButton() {
+    String label = appModel.translate('text_segmentation');
+
+    return FloatingSearchBarAction(
+      showIfOpened: true,
+      child: JidoujishoIconButton(
+        size: Theme.of(context).textTheme.titleLarge?.fontSize,
+        tooltip: label,
+        icon: Icons.account_tree,
+        onTap: () {
+          appModel.openTextSegmentationDialog(
+            sourceText: _controller.query,
+            onSearch: (selection, items) async {
+              await appModel.openRecursiveDictionarySearch(
+                searchTerm: selection,
+                killOnPop: false,
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget buildCreatorButton() {
+    String label = appModel.translate('card_creator');
+
+    return FloatingSearchBarAction(
+      showIfOpened: true,
+      child: JidoujishoIconButton(
+        size: Theme.of(context).textTheme.titleLarge?.fontSize,
+        tooltip: label,
+        icon: Icons.note_add,
+        onTap: () {
+          appModel.openCreator(
+            killOnPop: false,
+            ref: ref,
+            creatorFieldValues: CreatorFieldValues(
+              textValues: {
+                SentenceField.instance: _controller.query,
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 
