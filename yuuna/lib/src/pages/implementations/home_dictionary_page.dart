@@ -133,12 +133,14 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       progress: _isSearching,
       onFocusChanged: (focused) => onFocusChanged(focused: focused),
       onQueryChanged: onQueryChanged,
-      debounceDelay: const Duration(milliseconds: 200),
+      onSubmitted: search,
+      debounceDelay: Duration(milliseconds: appModel.searchDebounceDelay),
       leadingActions: [
         buildDictionaryButton(),
         buildBackButton(),
       ],
       actions: [
+        buildSearchSettingsButton(),
         buildClearButton(),
         buildSearchClearButton(),
         buildSearchButton(),
@@ -158,18 +160,21 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
 
   void searchAgain() {
     _result = null;
-    onQueryChanged(mediaType.floatingSearchBarController.query);
+    search(mediaType.floatingSearchBarController.query);
   }
 
-  Duration get searchDelay => Duration.zero;
   Duration get historyDelay => const Duration(milliseconds: 500);
 
   void onQueryChanged(String query) async {
-    Future.delayed(searchDelay, () {
-      if (mounted && mediaType.floatingSearchBarController.query == query) {
-        search(query);
-      }
-    });
+    if (!appModel.autoSearchEnabled) {
+      return;
+    }
+
+    if (mounted &&
+        _result?.searchTerm != query &&
+        mediaType.floatingSearchBarController.query == query) {
+      search(query);
+    }
   }
 
   void search(String query) async {
@@ -250,6 +255,26 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
         tooltip: clearSearchTitle,
         icon: Icons.manage_search,
         onTap: showDeleteSearchHistoryPrompt,
+      ),
+    );
+  }
+
+  /// Search settings bar action.
+  Widget buildSearchSettingsButton() {
+    String label = appModel.translate('search_settings');
+
+    return FloatingSearchBarAction(
+      showIfOpened: true,
+      child: JidoujishoIconButton(
+        size: Theme.of(context).textTheme.titleLarge?.fontSize,
+        tooltip: label,
+        icon: Icons.settings,
+        onTap: () {
+          showDialog(
+            context: context,
+            builder: (context) => const SearchSettingsDialogPage(),
+          );
+        },
       ),
     );
   }

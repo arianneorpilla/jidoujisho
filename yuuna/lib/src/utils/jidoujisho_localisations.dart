@@ -340,5 +340,8 @@ class JidoujishoLocalisations {
     'decrease': 'Decrease',
     'unit_milliseconds': 'ms',
     'unit_pixels': 'px',
+    'search_settings': 'Search Settings',
+    'auto_search': 'Auto search',
+    'auto_search_debounce_delay': 'Auto search debounce delay',
   };
 }

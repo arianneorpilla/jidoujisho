@@ -165,9 +165,11 @@ class _DictionaryDialogPageState extends BasePageState {
   Widget buildPageTurningSpeedField() {
     return TextField(
       onChanged: (value) {
-        double? newSpeed = double.tryParse(value) ?? 1;
+        double newSpeed = double.tryParse(value) ??
+            ReaderTtuSource.defaultScrollingSpeed.toDouble();
         if (newSpeed.isNegative) {
           newSpeed = ReaderTtuSource.defaultScrollingSpeed.toDouble();
+          _speedController.text = newSpeed.toString();
         }
 
         source.setVolumePageTurningSpeed(newSpeed.toInt());

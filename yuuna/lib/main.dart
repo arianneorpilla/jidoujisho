@@ -176,20 +176,38 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
         }
       }
 
-      launchNetworkMediaAction(data);
-      return;
-    }
+      if (data.toLowerCase().endsWith('.jpg') ||
+          data.toLowerCase().endsWith('.jpeg') ||
+          data.toLowerCase().endsWith('.png')) {
+        appModel.openCreator(killOnPop: true, ref: ref);
+        List<NetworkToFileImage> images = [NetworkToFileImage(url: data)];
 
-    if (data.trim().isNotEmpty) {
-      appModel.openCreator(
-        creatorFieldValues: CreatorFieldValues(
-          textValues: {
-            SentenceField.instance: data,
-          },
-        ),
-        killOnPop: true,
-        ref: ref,
-      );
+        Future.delayed(const Duration(milliseconds: 100), () {
+          ImageField.instance.setImages(
+            appModel: appModel,
+            creatorModel: creatorModel,
+            cause: EnhancementTriggerCause.manual,
+            newAutoCannotOverride: true,
+            generateImages: () async {
+              return images;
+            },
+          );
+        });
+      } else {
+        launchNetworkMediaAction(data);
+      }
+    } else {
+      if (data.trim().isNotEmpty) {
+        appModel.openCreator(
+          creatorFieldValues: CreatorFieldValues(
+            textValues: {
+              SentenceField.instance: data,
+            },
+          ),
+          killOnPop: true,
+          ref: ref,
+        );
+      }
     }
   }
 
@@ -200,10 +218,14 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
 
     appModel.openCreator(killOnPop: true, ref: ref);
 
-    List<NetworkToFileImage> images = sharedMediaFiles
-        .map((sharedMediaFile) =>
-            NetworkToFileImage(file: File(sharedMediaFile.path)))
-        .toList();
+    List<NetworkToFileImage> images = sharedMediaFiles.map(
+      (sharedMediaFile) {
+        return NetworkToFileImage(
+          file: File(sharedMediaFile.path),
+        );
+      },
+    ).toList();
+
     Future.delayed(const Duration(milliseconds: 100), () {
       ImageField.instance.setImages(
         appModel: appModel,

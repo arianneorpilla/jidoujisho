@@ -67,7 +67,9 @@ class _RecursiveDictionaryPageState
         historyKey: DictionaryMediaType.instance.uniqueKey,
         searchTerm: widget.searchTerm,
       );
+
       appModelNoUpdate.dictionarySearchAgainNotifier.addListener(searchAgain);
+      search(widget.searchTerm);
     });
   }
 
@@ -112,7 +114,7 @@ class _RecursiveDictionaryPageState
       transition: SlideFadeFloatingSearchBarTransition(),
       automaticallyImplyBackButton: false,
       isScrollControlled: true,
-      debounceDelay: const Duration(milliseconds: 200),
+      debounceDelay: Duration(milliseconds: appModel.searchDebounceDelay),
       onFocusChanged: (focused) {
         if (!focused) {
           if (widget.killOnPop) {
@@ -132,23 +134,25 @@ class _RecursiveDictionaryPageState
         buildSearchButton(),
       ],
       onQueryChanged: onQueryChanged,
+      onSubmitted: search,
     );
   }
 
   void searchAgain() {
     _result = null;
-    onQueryChanged(_controller.query);
+    search(_controller.query);
   }
 
-  Duration get searchDelay => Duration.zero;
   Duration get historyDelay => Duration.zero;
 
   void onQueryChanged(String query) async {
-    Future.delayed(searchDelay, () {
-      if (mounted && _controller.query == query) {
-        search(query);
-      }
-    });
+    if (!appModel.autoSearchEnabled) {
+      return;
+    }
+
+    if (mounted && _result?.searchTerm != query && _controller.query == query) {
+      search(query);
+    }
   }
 
   void search(String query) async {

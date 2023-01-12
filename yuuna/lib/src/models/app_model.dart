@@ -626,15 +626,20 @@ class AppModel with ChangeNotifier {
     _thumbnailsDirectory =
         Directory(path.join(appDirectory.path, 'thumbnails'));
     _hiveDirectory = Directory(path.join(appDirectory.path, 'hive'));
-    _isarDirectory = Directory(path.join(appDirectory.path, 'isar'));
+
     _dictionaryImportWorkingDirectory = Directory(
         path.join(appDirectory.path, 'dictionaryImportWorkingDirectory'));
     _exportDirectory = await prepareJidoujishoDirectory();
 
     thumbnailsDirectory.createSync();
     hiveDirectory.createSync();
-    isarDirectory.createSync();
     dictionaryImportWorkingDirectory.createSync();
+
+    /// Old directory, cleared for legacy purposes.
+    _isarDirectory = Directory(path.join(appDirectory.path, 'isar'));
+    if (_isarDirectory.existsSync()) {
+      _isarDirectory.deleteSync(recursive: true);
+    }
 
     /// Initialise persistent key-value store.
     await Hive.initFlutter();
@@ -1220,11 +1225,12 @@ class AppModel with ChangeNotifier {
     }
 
     String fallbackTerm = targetLanguage.getRootForm(searchTerm);
+
     DictionarySearchParams params = DictionarySearchParams(
       searchTerm: searchTerm,
+      fallbackTerm: fallbackTerm,
       maximumDictionaryEntrySearchMatch: maximumDictionaryEntrySearchMatch,
       maximumDictionaryTermsInResult: maximumDictionaryTermsInResult,
-      fallbackTerm: fallbackTerm,
       isarDirectoryPath: isarDirectory.path,
     );
 
@@ -2672,5 +2678,30 @@ class AppModel with ChangeNotifier {
   /// Toggle slow import option.
   void toggleSlowImport() async {
     await _preferences.put('use_slow_import', !useSlowImport);
+  }
+
+  /// Whether or not searching in the app is performed without hitting the
+  /// submit button.
+  bool get autoSearchEnabled {
+    return _preferences.get('auto_search', defaultValue: true);
+  }
+
+  /// Toggle auto search option.
+  void toggleAutoSearchEnabled() async {
+    await _preferences.put('auto_search', !autoSearchEnabled);
+  }
+
+  /// Search debounce delay in milliseconds by default.
+  final int defaultSearchDebounceDelay = 200;
+
+  /// The search debounce delay in milliseconds for searching in the app..
+  int get searchDebounceDelay {
+    return _preferences.get('auto_search_debounce_delay',
+        defaultValue: defaultSearchDebounceDelay);
+  }
+
+  /// Sets the debounce delay in milliseconds for searching in the app..
+  void setSearchDebounceDelay(int debounceDelay) async {
+    await _preferences.put('auto_search_debounce_delay', debounceDelay);
   }
 }
