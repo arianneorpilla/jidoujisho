@@ -210,11 +210,37 @@ class _RecursiveDictionaryPageState
   }
 
   Widget buildSearchButton() {
-    return FloatingSearchBarAction.searchToClear(
-      color: theme.appBarTheme.foregroundColor,
-      size: textTheme.titleLarge!.fontSize!,
-      searchButtonSemanticLabel: searchLabel,
-      clearButtonSemanticLabel: clearLabel,
+    return FloatingSearchBarAction(
+      showIfOpened: true,
+      builder: (context, animation) {
+        final bar = FloatingSearchAppBar.of(context)!;
+
+        return ValueListenableBuilder<String>(
+          valueListenable: bar.queryNotifer,
+          builder: (context, query, _) {
+            final isEmpty = query.isEmpty;
+
+            return SearchToClear(
+              isEmpty: isEmpty,
+              size: textTheme.titleLarge!.fontSize!,
+              color: bar.style.iconColor,
+              duration: const Duration(milliseconds: 900) * 0.5,
+              onTap: () {
+                if (!isEmpty) {
+                  bar.clear();
+                } else {
+                  bar.isOpen =
+                      !bar.isOpen || (!bar.hasFocus && bar.isAlwaysOpened);
+                }
+
+                setState(() {});
+              },
+              searchButtonSemanticLabel: searchLabel,
+              clearButtonSemanticLabel: clearLabel,
+            );
+          },
+        );
+      },
     );
   }
 
@@ -336,6 +362,7 @@ class _RecursiveDictionaryPageState
           onSearchTermSelect: (searchTerm) {
             setState(() {
               _controller.query = searchTerm;
+              search(searchTerm);
               FocusManager.instance.primaryFocus?.unfocus();
             });
           },
