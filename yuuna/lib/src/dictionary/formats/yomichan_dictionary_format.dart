@@ -149,14 +149,14 @@ Future<List<DictionaryEntry>> prepareEntriesYomichanTermBankFormat(
           List<String> meanings = List<String>.from(item[4]);
 
           StringBuffer buffer = StringBuffer();
-          if (onyomis.isNotEmpty) {
+          if (onyomis.join().trim().isNotEmpty) {
             buffer.write('音読み\n');
             for (String onyomi in onyomis) {
               buffer.write('  • $onyomi\n');
             }
             buffer.write('\n');
           }
-          if (kunyomis.isNotEmpty) {
+          if (kunyomis.join().trim().isNotEmpty) {
             buffer.write('訓読み\n');
             for (String kun in kunyomis) {
               buffer.write('  • $kun\n');
