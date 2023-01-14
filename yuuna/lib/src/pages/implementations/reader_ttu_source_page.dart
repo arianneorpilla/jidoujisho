@@ -210,7 +210,7 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
           scrollbarFadingEnabled: false,
         ),
       ),
-      contextMenu: getContextMenu(),
+      contextMenu: contextMenu,
       onConsoleMessage: onConsoleMessage,
       onWebViewCreated: (controller) {
         _controller = controller;
@@ -334,19 +334,26 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
 
   /// Get the default context menu for sources that make use of embedded web
   /// views.
-  ContextMenu getContextMenu() {
-    return ContextMenu(
-      options: ContextMenuOptions(
-        hideDefaultSystemContextMenuItems: true,
-      ),
-      menuItems: [
-        searchMenuItem(),
-        stashMenuItem(),
-        creatorMenuItem(),
-        copyMenuItem(),
-      ],
-    );
-  }
+  ContextMenu get contextMenu => ContextMenu(
+        options: ContextMenuOptions(
+          hideDefaultSystemContextMenuItems: true,
+        ),
+        menuItems: [
+          searchMenuItem(),
+          stashMenuItem(),
+          creatorMenuItem(),
+          copyMenuItem(),
+        ],
+      );
+
+  /// Get the default context menu for sources that make use of embedded web
+  /// views.
+  ContextMenu get emptyContextMenu => ContextMenu(
+        options: ContextMenuOptions(
+          hideDefaultSystemContextMenuItems: true,
+        ),
+        menuItems: [],
+      );
 
   ContextMenuItem searchMenuItem() {
     return ContextMenuItem(

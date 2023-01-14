@@ -423,7 +423,7 @@ class _RecursiveDictionaryPageState
   Widget buildImportDictionariesPlaceholderMessage() {
     return Center(
       child: JidoujishoPlaceholderMessage(
-        icon: Icons.auto_stories,
+        icon: Icons.auto_stories_rounded,
         message: noDictionariesLabel,
       ),
     );

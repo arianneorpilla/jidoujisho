@@ -19,7 +19,7 @@ class YomichanDictionaryFormat extends DictionaryFormat {
   YomichanDictionaryFormat._privateConstructor()
       : super(
           formatName: 'Yomichan Dictionary',
-          formatIcon: Icons.auto_stories,
+          formatIcon: Icons.auto_stories_rounded,
           compatibleFileExtensions: const ['.zip'],
           prepareDirectory: prepareDirectoryYomichanTermBankFormat,
           prepareName: prepareNameYomichanTermBankFormat,

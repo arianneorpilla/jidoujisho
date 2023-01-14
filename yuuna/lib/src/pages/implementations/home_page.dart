@@ -314,7 +314,7 @@ class _HomePageState extends BasePageState<HomePage> {
       ),
       buildPopupItem(
         label: optionsDictionaries,
-        icon: Icons.auto_stories,
+        icon: Icons.auto_stories_rounded,
         action: appModel.showDictionaryMenu,
       ),
       buildPopupItem(

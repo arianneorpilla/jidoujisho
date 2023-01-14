@@ -37,7 +37,8 @@ class _SubtitleOptionsDialogPage
   String get dialogSaveLabel => appModel.translate('dialog_save');
   String get dialogSetLabel => appModel.translate('dialog_set');
   String get resetLabel => appModel.translate('reset');
-  String get suffixText => appModel.translate('unit_pixels');
+  String get suffixPx => appModel.translate('unit_pixels');
+  String get suffixMs => appModel.translate('unit_milliseconds');
   String get increaseLabel => appModel.translate('increase');
   String get decreaseLabel => appModel.translate('decrease');
 
@@ -75,8 +76,6 @@ class _SubtitleOptionsDialogPage
   }
 
   Widget buildContent() {
-    String suffixText = appModel.translate('unit_milliseconds');
-
     return SingleChildScrollView(
       child: SizedBox(
         width: MediaQuery.of(context).size.width * (1 / 3),
@@ -132,7 +131,7 @@ class _SubtitleOptionsDialogPage
                       ),
                     ],
                   ),
-                  suffixText: suffixText),
+                  suffixText: suffixMs),
             ),
             TextField(
               controller: _allowanceController,
@@ -183,7 +182,7 @@ class _SubtitleOptionsDialogPage
                     ),
                   ],
                 ),
-                suffixText: suffixText,
+                suffixText: suffixMs,
               ),
             ),
             TextField(
@@ -237,7 +236,7 @@ class _SubtitleOptionsDialogPage
                   },
                   icon: Icons.undo,
                 ),
-                suffixText: suffixText,
+                suffixText: suffixPx,
               ),
             ),
             TextField(

@@ -184,7 +184,7 @@ class JapaneseLanguage extends Language {
         child: Text(
           text,
           style: TextStyle(
-            fontSize: appModel.dictionaryFontSize.toDouble(),
+            fontSize: appModel.dictionaryFontSize,
           ),
         ),
       );
@@ -202,7 +202,7 @@ class JapaneseLanguage extends Language {
         child: Text(
           text,
           style: TextStyle(
-            fontSize: appModel.dictionaryFontSize.toDouble(),
+            fontSize: appModel.dictionaryFontSize,
           ),
         ),
       );
@@ -219,7 +219,7 @@ class JapaneseLanguage extends Language {
         child: Text(
           text,
           style: TextStyle(
-            fontSize: appModel.dictionaryFontSize.toDouble(),
+            fontSize: appModel.dictionaryFontSize,
           ),
         ),
       );
@@ -268,7 +268,7 @@ class JapaneseLanguage extends Language {
       Text(
         ' [$downstep]  ',
         style: TextStyle(
-          fontSize: appModel.dictionaryFontSize.toDouble(),
+          fontSize: appModel.dictionaryFontSize,
         ),
       ),
     );

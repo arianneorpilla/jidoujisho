@@ -296,7 +296,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
         tooltip: label,
         icon: Icons.settings,
         onTap: () async {
-          int oldFontSize = appModel.dictionaryFontSize;
+          double oldFontSize = appModel.dictionaryFontSize;
 
           await showDialog(
             context: context,

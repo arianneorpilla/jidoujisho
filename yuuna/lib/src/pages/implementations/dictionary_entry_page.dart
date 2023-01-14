@@ -91,7 +91,7 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
                 return SelectableText(
                   sourceText,
                   style: TextStyle(
-                    fontSize: appModel.dictionaryFontSize.toDouble(),
+                    fontSize: appModel.dictionaryFontSize,
                   ),
                   selectionControls: selectionControls,
                 );
@@ -100,7 +100,7 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
                 return SelectableText(
                   sourceText,
                   style: TextStyle(
-                    fontSize: appModel.dictionaryFontSize.toDouble(),
+                    fontSize: appModel.dictionaryFontSize,
                   ),
                   selectionControls: selectionControls,
                 );

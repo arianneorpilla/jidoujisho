@@ -2717,17 +2717,17 @@ class AppModel with ChangeNotifier {
   }
 
   /// Default dictionary font size for meanings.
-  final int defaultDictionaryFontSize = 13;
+  final double defaultDictionaryFontSize = 13;
 
   /// The search debounce delay in milliseconds for searching in the app..
-  int get dictionaryFontSize {
-    return _preferences.get('dictionary_font_size',
+  double get dictionaryFontSize {
+    return _preferences.get('dictionary_entry_font_size',
         defaultValue: defaultDictionaryFontSize);
   }
 
   /// Sets the debounce delay in milliseconds for searching in the app..
-  void setDictionaryFontSize(int fontSize) async {
-    await _preferences.put('dictionary_font_size', fontSize);
+  void setDictionaryFontSize(double fontSize) async {
+    await _preferences.put('dictionary_entry_font_size', fontSize);
   }
 
   /// The search debounce delay in milliseconds for searching in the app..

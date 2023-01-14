@@ -147,7 +147,8 @@ class _DictionaryDialogPageState extends BasePageState {
   Widget buildDictionaryFontSizeField() {
     return TextField(
       onChanged: (value) {
-        int newSize = int.tryParse(value) ?? appModel.defaultDictionaryFontSize;
+        double newSize =
+            double.tryParse(value) ?? appModel.defaultDictionaryFontSize;
         if (newSize.isNegative) {
           newSize = appModel.defaultDictionaryFontSize;
           _dictionaryFontSizeController.text = newSize.toString();
@@ -166,7 +167,7 @@ class _DictionaryDialogPageState extends BasePageState {
           onTap: () async {
             _dictionaryFontSizeController.text =
                 appModel.defaultDictionaryFontSize.toString();
-            appModel.setSearchDebounceDelay(appModel.defaultDictionaryFontSize);
+            appModel.setDictionaryFontSize(appModel.defaultDictionaryFontSize);
             FocusScope.of(context).unfocus();
           },
           icon: Icons.undo,
