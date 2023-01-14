@@ -22,6 +22,9 @@
   <a href="https://github.com/lrorpilla/jidoujisho/blob/master/LICENSE">
     <img src="https://img.shields.io/github/license/lrorpilla/jidoujisho.svg" alt="license" />
   </a>
+  <a href="https://ko-fi.com/lrorpilla">
+    <img src="https://img.shields.io/badge/donate-ko--fi-blue" alt="sponsor" />
+  </a>
 </p>
 
 ---
