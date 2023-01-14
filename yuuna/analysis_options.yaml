@@ -77,7 +77,6 @@ linter:
     unnecessary_nullable_for_final_variable_declarations: true
     unnecessary_parenthesis: true
     unnecessary_raw_strings: true
-    use_colored_box: true
     use_decorated_box: true
     use_enums: true
     use_is_even_rather_than_modulo: true

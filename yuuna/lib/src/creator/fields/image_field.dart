@@ -90,10 +90,16 @@ class ImageField extends ImageExportField {
       children: [
         if (orientation == Orientation.landscape)
           Flexible(
-            child: buildCarousel(itemCount),
+            child: buildCarousel(
+              itemCount: itemCount,
+              appModel: appModel,
+            ),
           )
         else
-          buildCarousel(itemCount),
+          buildCarousel(
+            itemCount: itemCount,
+            appModel: appModel,
+          ),
         const Space.normal(),
         ValueListenableBuilder<int?>(
           valueListenable: indexNotifier,
@@ -108,23 +114,36 @@ class ImageField extends ImageExportField {
   }
 
   /// Build the image carousel.
-  Widget buildCarousel(int itemCount) {
+  Widget buildCarousel({
+    required int itemCount,
+    required AppModel appModel,
+  }) {
     CarouselController controller = CarouselController();
 
     return CarouselSlider.builder(
-      itemCount: itemCount,
+      itemCount: itemCount + 1,
       carouselController: controller,
       options: CarouselOptions(
-        enableInfiniteScroll: currentImageSuggestions!.length > 1,
         enlargeCenterPage: true,
         viewportFraction: 0.75,
         initialPage: indexNotifier.value,
         onPageChanged: (index, reason) {
-          indexNotifier.value = index;
-          setSelectedSearchSuggestion(index: index);
+          if (index == itemCount) {
+            indexNotifier.value = -1;
+            setSelectedSearchSuggestion(index: -1);
+          } else {
+            indexNotifier.value = index;
+            setSelectedSearchSuggestion(index: index);
+          }
         },
       ),
       itemBuilder: (context, index, realIndex) {
+        if (index == itemCount) {
+          return Container(
+            color: appModel.isDarkMode ? Colors.white10 : Colors.black12,
+          );
+        }
+
         OverlayEntry? popup;
         ImageProvider<Object> image = currentImageSuggestions![index];
 
@@ -185,6 +204,10 @@ class ImageField extends ImageExportField {
         appModel.translate('image_search_label_middle');
     String imageSearchLabelAfter =
         appModel.translate('image_search_label_after');
+    String imageSearchLabelNoneBefore =
+        appModel.translate('image_search_label_none_before');
+    String imageSearchLabelNoneMiddle =
+        appModel.translate('image_search_label_none_middle');
 
     return Text.rich(
       TextSpan(
@@ -204,20 +227,38 @@ class ImageField extends ImageExportField {
               ),
             ),
           ),
-          TextSpan(
-            text: imageSearchLabelBefore,
-            style: TextStyle(
-              fontSize: fontSize,
-              color: Theme.of(context).unselectedWidgetColor,
+          if (selectedIndex == -1)
+            TextSpan(
+              text: imageSearchLabelNoneBefore,
+              style: TextStyle(
+                fontSize: fontSize,
+                color: Theme.of(context).unselectedWidgetColor,
+              ),
             ),
-          ),
-          TextSpan(
-            text: '${selectedIndex! + 1} ',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: fontSize,
+          if (selectedIndex == -1)
+            TextSpan(
+              text: imageSearchLabelNoneMiddle,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: fontSize,
+              ),
             ),
-          ),
+          if (selectedIndex != -1)
+            TextSpan(
+              text: imageSearchLabelBefore,
+              style: TextStyle(
+                fontSize: fontSize,
+                color: Theme.of(context).unselectedWidgetColor,
+              ),
+            ),
+          if (selectedIndex != -1)
+            TextSpan(
+              text: '${selectedIndex! + 1} ',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: fontSize,
+              ),
+            ),
           TextSpan(
             text: imageSearchLabelMiddle,
             style: TextStyle(

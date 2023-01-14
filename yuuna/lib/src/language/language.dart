@@ -207,19 +207,6 @@ abstract class Language {
   /// For English, 'running' should be 'run'.
   String getRootForm(String term);
 
-  /// Generate extra fallback terms for a word for use when searching a
-  /// dictionary when the word fails to find results on its own.
-  List<String> generateFallbackTerms({required String searchTerm}) {
-    List<String> fallbackTerms = [];
-
-    String rootForm = getRootForm(searchTerm);
-    if (rootForm != searchTerm) {
-      fallbackTerms.add(rootForm);
-    }
-
-    return fallbackTerms;
-  }
-
   /// Some languages may want to display custom widgets rather than the built
   /// in word and reading text that is there by default. For example, Japanese
   /// may want to display a furigana widget instead.

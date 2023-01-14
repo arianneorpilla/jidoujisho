@@ -274,15 +274,11 @@ class DictionarySearchParams {
     required this.searchTerm,
     required this.maximumDictionaryEntrySearchMatch,
     required this.maximumDictionaryTermsInResult,
-    required this.fallbackTerm,
     required this.isarDirectoryPath,
   });
 
   /// Primary search term, likely taken from context.
   final String searchTerm;
-
-  /// Fallback search term, likely sanitised with deinflection.
-  final String fallbackTerm;
 
   /// Used to pass the path to the database to open from the other isolate.
   final String isarDirectoryPath;

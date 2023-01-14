@@ -1224,11 +1224,8 @@ class AppModel with ChangeNotifier {
       );
     }
 
-    String fallbackTerm = targetLanguage.getRootForm(searchTerm);
-
     DictionarySearchParams params = DictionarySearchParams(
       searchTerm: searchTerm,
-      fallbackTerm: fallbackTerm,
       maximumDictionaryEntrySearchMatch: maximumDictionaryEntrySearchMatch,
       maximumDictionaryTermsInResult: maximumDictionaryTermsInResult,
       isarDirectoryPath: isarDirectory.path,
@@ -2703,7 +2700,7 @@ class AppModel with ChangeNotifier {
   }
 
   /// Search debounce delay in milliseconds by default.
-  final int defaultSearchDebounceDelay = 200;
+  final int defaultSearchDebounceDelay = 300;
 
   /// The search debounce delay in milliseconds for searching in the app..
   int get searchDebounceDelay {
@@ -2717,7 +2714,7 @@ class AppModel with ChangeNotifier {
   }
 
   /// Default dictionary font size for meanings.
-  final double defaultDictionaryFontSize = 13;
+  final double defaultDictionaryFontSize = 15;
 
   /// The search debounce delay in milliseconds for searching in the app..
   double get dictionaryFontSize {

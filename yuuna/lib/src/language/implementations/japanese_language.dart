@@ -283,23 +283,20 @@ class JapaneseLanguage extends Language {
 }
 
 /// Top-level function for use in compute. See [Language] for details.
+/// Credits to Matthew Chan for their port of the Yomichan parser to Dart.
 Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
     DictionarySearchParams params) async {
   String searchTerm = params.searchTerm.trim();
-  String fallbackTerm = params.fallbackTerm.trim();
+  const KanaKit kanaKit = KanaKit();
 
-  int maxEntries = 50;
+  if (kanaKit.isRomaji(searchTerm)) {
+    searchTerm = kanaKit.toHiragana(searchTerm);
+  }
+
   int limit = params.maximumDictionaryEntrySearchMatch;
 
   if (searchTerm.isEmpty) {
     return [];
-  }
-
-  KanaKit kanaKit = const KanaKit();
-
-  if (kanaKit.isRomaji(searchTerm)) {
-    searchTerm = kanaKit.toHiragana(searchTerm);
-    fallbackTerm = kanaKit.toKatakana(searchTerm);
   }
 
   final Isar database = await Isar.open(
@@ -307,349 +304,139 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
     maxSizeMiB: 4096,
   );
 
-  bool searchTermStartsWithKana =
-      searchTerm.isNotEmpty && kanaKit.isKana(searchTerm[0]);
-  bool fallbackTermStartsWithKana =
-      fallbackTerm.isNotEmpty && kanaKit.isKana(fallbackTerm[0]);
-
-  Map<int?, DictionaryEntry> entries = {};
-
-  int maxExactMatchLength = 0;
-  int maxExactMatchFallbackLength = 0;
-  int maxExactMatchReadingLength = 0;
-
-  bool capturingSearchTermKana = true;
-  bool capturingFallbackTermKana = true;
+  Map<int?, DictionaryEntry> uniqueEntriesById = {};
 
   StringBuffer searchBuffer = StringBuffer();
-  for (int rune in searchTerm.runes) {
-    if (!LanguageUtils.isCodePointKana(rune)) {
-      capturingSearchTermKana = false;
-    }
 
+  Map<int, List<DictionaryEntry>> termExactResultsByLength = {};
+  Map<int, List<DictionaryEntry>> termDeinflectedResultsByLength = {};
+  Map<int, List<DictionaryEntry>> readingExactResultsByLength = {};
+  Map<int, List<DictionaryEntry>> readingDeinflectedResultsByLength = {};
+
+  searchTerm.runes.forEachIndexed((index, rune) {
     String character = String.fromCharCode(rune);
-
     searchBuffer.write(character);
 
     String partialTerm = searchBuffer.toString();
 
-    if (capturingSearchTermKana) {
-      DictionaryEntry? partialTermMatch = database.dictionaryEntrys
-          .where()
-          .readingEqualTo(partialTerm)
-          .or()
-          .optional(kanaKit.isHiragana(partialTerm),
-              (q) => q.readingEqualTo(kanaKit.toKatakana(partialTerm)))
-          .findFirstSync();
+    bool partialTermIsKana = kanaKit.isKana(partialTerm);
+    bool partialTermIsKatakana = kanaKit.isKatakana(partialTerm);
 
-      if (partialTermMatch != null) {
-        maxExactMatchReadingLength = partialTerm.length;
-      }
-    }
+    List<String> possibleDeinflections =
+        Deinflector.deinflect(partialTerm).map((e) => e.term).toList();
 
-    DictionaryEntry? partialTermMatch = database.dictionaryEntrys
-        .where()
-        .termEqualTo(partialTerm)
+    List<DictionaryEntry> termExactResults = [];
+    List<DictionaryEntry> termDeinflectedResults = [];
+    List<DictionaryEntry> readingExactResults = [];
+    List<DictionaryEntry> readingDeinflectedResults = [];
+
+    termExactResults = database.dictionaryEntrys
+        .where(sort: Sort.desc)
+        .termEqualToAnyPopularity(partialTerm)
         .or()
-        .optional(kanaKit.isHiragana(partialTerm),
-            (q) => q.termEqualTo(kanaKit.toKatakana(partialTerm)))
-        .findFirstSync();
+        .optional(partialTermIsKatakana,
+            (q) => q.termEqualToAnyPopularity(kanaKit.toHiragana(partialTerm)))
+        .limit(limit)
+        .findAllSync();
 
-    if (partialTermMatch != null) {
-      maxExactMatchLength = partialTerm.length;
-    }
-  }
+    termDeinflectedResults = database.dictionaryEntrys
+        .where(sort: Sort.desc)
+        .anyOf(
+            possibleDeinflections,
+            // ignore: avoid_types_on_closure_parameters
+            (q, String term) => q.termEqualToAnyPopularity(term))
+        .or()
+        .optional(
+            partialTermIsKatakana,
+            (q) => q.anyOf(
+                Deinflector.deinflect(kanaKit.toHiragana(partialTerm))
+                    .map((e) => e.term)
+                    .toList(),
+                // ignore: avoid_types_on_closure_parameters
+                (q, String term) => q.termEqualToAnyPopularity(term)))
+        .limit(limit)
+        .findAllSync();
 
-  StringBuffer fallbackBuffer = StringBuffer();
-  if (fallbackTerm.length >= maxExactMatchLength) {
-    for (int rune in fallbackTerm.runes) {
-      if (!LanguageUtils.isCodePointKana(rune)) {
-        capturingFallbackTermKana = false;
-      }
-
-      String character = String.fromCharCode(rune);
-
-      fallbackBuffer.write(character);
-      String partialTerm = fallbackBuffer.toString();
-
-      if (capturingFallbackTermKana) {
-        DictionaryEntry? partialTermMatch = database.dictionaryEntrys
-            .where()
-            .readingEqualTo(partialTerm)
-            .or()
-            .optional(kanaKit.isHiragana(partialTerm),
-                (q) => q.readingEqualTo(kanaKit.toKatakana(partialTerm)))
-            .findFirstSync();
-
-        if (partialTermMatch != null) {
-          maxExactMatchFallbackLength = partialTerm.length;
-        }
-      }
-
-      DictionaryEntry? partialTermMatch = database.dictionaryEntrys
-          .where()
-          .termEqualTo(partialTerm)
-          .or()
-          .optional(kanaKit.isHiragana(partialTerm),
-              (q) => q.termEqualTo(kanaKit.toKatakana(partialTerm)))
-          .findFirstSync();
-
-      if (partialTermMatch != null) {
-        maxExactMatchFallbackLength = partialTerm.length;
-      }
-    }
-  }
-
-  List<DictionaryEntry> exactTermResults = [];
-  List<DictionaryEntry> exactReadingResults = [];
-  List<DictionaryEntry> startsWithTermResults = [];
-  List<DictionaryEntry> startsWithReadingResults = [];
-  List<DictionaryEntry> fallbackTermResults = [];
-  List<DictionaryEntry> fallbackReadingResults = [];
-  List<DictionaryEntry> startsWithFallbackTermResults = [];
-  List<DictionaryEntry> startsWithFallbackReadingResults = [];
-
-  while (maxEntries >= entries.length &&
-      (maxExactMatchLength != 0 || maxExactMatchReadingLength != 0)) {
-    String partialTerm = searchTerm.substring(0, maxExactMatchLength);
-    String partialReadingTerm =
-        searchTerm.substring(0, maxExactMatchReadingLength);
-
-    if (partialTerm.length >= partialReadingTerm.length) {
-      if (partialTerm.isNotEmpty) {
-        List<DictionaryEntry> results = database.dictionaryEntrys
-            .where(sort: Sort.desc)
-            .termEqualToAnyPopularity(partialTerm)
-            .or()
-            .optional(
-                kanaKit.isHiragana(partialTerm),
-                (q) =>
-                    q.termEqualToAnyPopularity(kanaKit.toKatakana(partialTerm)))
-            .limit(limit)
-            .findAllSync();
-        exactTermResults.addAll(results);
-
-        maxExactMatchLength -= 1;
-      }
-
-      if (partialReadingTerm.isNotEmpty) {
-        List<DictionaryEntry> results = database.dictionaryEntrys
-            .where(sort: Sort.desc)
-            .readingEqualToAnyPopularity(partialReadingTerm)
-            .or()
-            .optional(
-                kanaKit.isHiragana(partialReadingTerm),
-                (q) => q.readingEqualToAnyPopularity(
-                    kanaKit.toKatakana(partialReadingTerm)))
-            .limit(limit)
-            .findAllSync();
-        exactReadingResults.addAll(results);
-
-        maxExactMatchReadingLength -= 1;
-      }
-    } else {
-      if (partialReadingTerm.isNotEmpty) {
-        List<DictionaryEntry> results = database.dictionaryEntrys
-            .where(sort: Sort.desc)
-            .readingEqualToAnyPopularity(partialReadingTerm)
-            .or()
-            .optional(
-                kanaKit.isHiragana(partialReadingTerm),
-                (q) => q.readingEqualToAnyPopularity(
-                    kanaKit.toKatakana(partialReadingTerm)))
-            .limit(limit)
-            .findAllSync();
-        exactReadingResults.addAll(results);
-
-        maxExactMatchReadingLength -= 1;
-      }
-
-      if (partialTerm.isNotEmpty) {
-        List<DictionaryEntry> results = database.dictionaryEntrys
-            .where(sort: Sort.desc)
-            .termEqualToAnyPopularity(partialTerm)
-            .or()
-            .optional(
-                kanaKit.isHiragana(partialTerm),
-                (q) =>
-                    q.termEqualToAnyPopularity(kanaKit.toKatakana(partialTerm)))
-            .limit(limit)
-            .findAllSync();
-        exactTermResults.addAll(results);
-
-        maxExactMatchLength -= 1;
-      }
-    }
-  }
-
-  bool fallbackTermLessDesperateThanLongestExactTermPrefix =
-      maxExactMatchFallbackLength > maxExactMatchLength;
-  bool fallbackTermLessDesperateThanLongestExactReadingPrefix =
-      maxExactMatchFallbackLength > maxExactMatchReadingLength;
-
-  while (fallbackTermLessDesperateThanLongestExactTermPrefix ||
-      fallbackTermLessDesperateThanLongestExactReadingPrefix) {
-    String partialTerm = fallbackTerm.substring(0, maxExactMatchFallbackLength);
-
-    if (fallbackTermLessDesperateThanLongestExactTermPrefix) {
-      List<DictionaryEntry> results = database.dictionaryEntrys
-          .where(sort: Sort.desc)
-          .termEqualToAnyPopularity(partialTerm)
-          .or()
-          .optional(
-              kanaKit.isHiragana(partialTerm),
-              (q) =>
-                  q.termEqualToAnyPopularity(kanaKit.toKatakana(partialTerm)))
-          .limit(limit)
-          .findAllSync();
-      fallbackTermResults.addAll(results);
-    }
-    if (fallbackTermLessDesperateThanLongestExactReadingPrefix) {
-      List<DictionaryEntry> results = database.dictionaryEntrys
+    if (partialTermIsKana) {
+      readingExactResults = database.dictionaryEntrys
           .where(sort: Sort.desc)
           .readingEqualToAnyPopularity(partialTerm)
           .or()
           .optional(
-              kanaKit.isHiragana(partialTerm),
+              partialTermIsKatakana,
               (q) => q
-                  .readingEqualToAnyPopularity(kanaKit.toKatakana(partialTerm)))
+                  .readingEqualToAnyPopularity(kanaKit.toHiragana(partialTerm)))
           .limit(limit)
           .findAllSync();
-      fallbackReadingResults.addAll(results);
+
+      readingDeinflectedResults = database.dictionaryEntrys
+          .where(sort: Sort.desc)
+          .anyOf(
+              possibleDeinflections,
+              // ignore: avoid_types_on_closure_parameters
+              (q, String reading) => q.readingEqualToAnyPopularity(reading))
+          .or()
+          .optional(
+              partialTermIsKatakana,
+              (q) => q.anyOf(
+                  Deinflector.deinflect(kanaKit.toHiragana(partialTerm))
+                      .map((e) => e.term)
+                      .toList(),
+                  // ignore: avoid_types_on_closure_parameters
+                  (q, String term) => q.readingEqualToAnyPopularity(term)))
+          .limit(limit)
+          .findAllSync();
     }
 
-    maxExactMatchFallbackLength -= 1;
+    if (termExactResults.isNotEmpty) {
+      termExactResultsByLength[partialTerm.length] = termExactResults;
+    }
+    if (termDeinflectedResults.isNotEmpty) {
+      termDeinflectedResultsByLength[partialTerm.length] =
+          termDeinflectedResults;
+    }
+    if (readingExactResults.isNotEmpty) {
+      readingExactResultsByLength[partialTerm.length] = readingExactResults;
+    }
+    if (readingDeinflectedResults.isNotEmpty) {
+      readingDeinflectedResultsByLength[partialTerm.length] =
+          readingDeinflectedResults;
+    }
+  });
 
-    fallbackTermLessDesperateThanLongestExactTermPrefix =
-        maxExactMatchFallbackLength > maxExactMatchLength;
-    fallbackTermLessDesperateThanLongestExactReadingPrefix =
-        maxExactMatchFallbackLength > maxExactMatchReadingLength;
-  }
-
-  startsWithTermResults = database.dictionaryEntrys
-      .where()
+  List<DictionaryEntry> startsWithResults = database.dictionaryEntrys
+      .where(sort: Sort.desc)
       .termStartsWith(searchTerm)
-      .sortByPopularityDesc()
       .limit(limit)
       .findAllSync();
 
-  if (searchTermStartsWithKana) {
-    startsWithReadingResults = database.dictionaryEntrys
-        .where()
-        .readingStartsWith(searchTerm)
-        .sortByPopularityDesc()
-        .limit(limit)
-        .findAllSync();
+  for (int length = searchTerm.length; length > 0; length--) {
+    List<MapEntry<int?, DictionaryEntry>> exactEntriesToAdd = [
+      ...(termExactResultsByLength[length] ?? [])
+          .map((entry) => MapEntry(entry.id, entry)),
+      ...(readingExactResultsByLength[length] ?? [])
+          .map((entry) => MapEntry(entry.id, entry)),
+      ...startsWithResults.map(
+        (entry) => MapEntry(entry.id, entry),
+      ),
+    ];
+
+    List<MapEntry<int?, DictionaryEntry>> deinflectedEntriesToAdd = [
+      ...(termDeinflectedResultsByLength[length] ?? [])
+          .map((entry) => MapEntry(entry.id, entry)),
+      ...(readingDeinflectedResultsByLength[length] ?? [])
+          .map((entry) => MapEntry(entry.id, entry))
+    ];
+
+    uniqueEntriesById.addEntries(exactEntriesToAdd);
+    uniqueEntriesById.addEntries(deinflectedEntriesToAdd);
   }
 
-  startsWithFallbackTermResults = database.dictionaryEntrys
-      .where()
-      .termStartsWith(fallbackTerm)
-      .sortByPopularityDesc()
-      .limit(limit)
-      .findAllSync();
-
-  if (fallbackTermStartsWithKana) {
-    startsWithFallbackReadingResults = database.dictionaryEntrys
-        .where()
-        .readingStartsWith(fallbackTerm)
-        .sortByPopularityDesc()
-        .limit(limit)
-        .findAllSync();
-  }
-
-  if (exactTermResults.isNotEmpty &&
-      (exactTermResults.first.term == searchTerm)) {
-    entries.addEntries(exactTermResults
-        .map((e) => MapEntry(e.id, e))
-        .where((e) => e.value.term == searchTerm));
-  }
-
-  if (exactReadingResults.isNotEmpty &&
-      (exactReadingResults.first.reading == searchTerm)) {
-    entries.addEntries(exactReadingResults
-        .map((e) => MapEntry(e.id, e))
-        .where((e) => e.value.reading == searchTerm));
-  }
-
-  if (exactTermResults.isNotEmpty &&
-      (kanaKit.isHiragana(searchTerm) &&
-          exactTermResults.first.term == kanaKit.toKatakana(searchTerm))) {
-    entries.addEntries(exactTermResults
-        .map((e) => MapEntry(e.id, e))
-        .where((e) => e.value.term == kanaKit.toKatakana(searchTerm)));
-  }
-
-  if (exactReadingResults.isNotEmpty &&
-      (kanaKit.isHiragana(searchTerm) &&
-          exactReadingResults.first.reading ==
-              kanaKit.toKatakana(searchTerm))) {
-    entries.addEntries(exactReadingResults
-        .map((e) => MapEntry(e.id, e))
-        .where((e) => e.value.reading == kanaKit.toKatakana(searchTerm)));
-  }
-
-  entries.addEntries(startsWithTermResults.map((e) => MapEntry(e.id, e)));
-
-  if (fallbackTermResults.isNotEmpty &&
-      (fallbackTermResults.first.term == fallbackTerm ||
-          (kanaKit.isHiragana(fallbackTerm) &&
-              fallbackTermResults.first.term ==
-                  kanaKit.toKatakana(fallbackTerm)))) {
-    entries.addEntries(fallbackTermResults.map((e) => MapEntry(e.id, e)).where(
-        (e) =>
-            e.value.term == fallbackTerm ||
-            e.value.term == kanaKit.toKatakana(fallbackTerm)));
-  }
-
-  if (searchTermStartsWithKana) {
-    if (fallbackTermLessDesperateThanLongestExactReadingPrefix) {
-      entries.addEntries(fallbackTermResults.map((e) => MapEntry(e.id, e)));
-    }
-    if (exactReadingResults.isNotEmpty &&
-        (exactReadingResults.first.reading == searchTerm ||
-            (exactTermResults.isNotEmpty &&
-                exactTermResults.first.term.length <
-                    exactReadingResults.first.reading.length))) {
-      entries.addEntries(exactReadingResults.map((e) => MapEntry(e.id, e)));
-    }
-  }
-  if (searchTermStartsWithKana &&
-      exactTermResults.isNotEmpty &&
-      exactTermResults.first.term != searchTerm) {
-    if (fallbackTermLessDesperateThanLongestExactTermPrefix) {
-      entries.addEntries(fallbackTermResults.map((e) => MapEntry(e.id, e)));
-    }
-  }
-
-  if (fallbackTermLessDesperateThanLongestExactTermPrefix) {
-    entries.addEntries(
-        startsWithFallbackTermResults.map((e) => MapEntry(e.id, e)));
-    entries.addEntries(fallbackTermResults.map((e) => MapEntry(e.id, e)));
-    entries.addEntries(exactTermResults.map((e) => MapEntry(e.id, e)));
-  } else {
-    entries.addEntries(exactTermResults.map((e) => MapEntry(e.id, e)));
-    entries.addEntries(startsWithTermResults.map((e) => MapEntry(e.id, e)));
-    entries.addEntries(fallbackTermResults.map((e) => MapEntry(e.id, e)));
-  }
-
-  if (fallbackTermLessDesperateThanLongestExactReadingPrefix) {
-    entries.addEntries(fallbackReadingResults.map((e) => MapEntry(e.id, e)));
-    entries.addEntries(
-        startsWithFallbackReadingResults.map((e) => MapEntry(e.id, e)));
-    entries.addEntries(exactReadingResults.map((e) => MapEntry(e.id, e)));
-    entries.addEntries(startsWithReadingResults.map((e) => MapEntry(e.id, e)));
-  } else {
-    entries.addEntries(exactReadingResults.map((e) => MapEntry(e.id, e)));
-    entries.addEntries(startsWithReadingResults.map((e) => MapEntry(e.id, e)));
-    entries.addEntries(fallbackReadingResults.map((e) => MapEntry(e.id, e)));
-    entries.addEntries(
-        startsWithFallbackReadingResults.map((e) => MapEntry(e.id, e)));
-  }
+  List<DictionaryEntry> entries = uniqueEntriesById.values.toList();
 
   Map<DictionaryPair, List<DictionaryEntry>> entriesByPair =
       groupBy<DictionaryEntry, DictionaryPair>(
-    entries.values,
+    entries,
     (entry) => DictionaryPair(term: entry.term, reading: entry.reading),
   );
 
@@ -706,5 +493,1162 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
     );
   }).toList();
 
+  terms.sort((a, b) {
+    if (a.term == b.term) {
+      int hasPopularTag = (a.termTags.any((e) => e.name == 'P') ? -1 : 1)
+          .compareTo(b.termTags.any((e) => e.name == 'P') ? -1 : 1);
+      if (hasPopularTag != 0) {
+        return hasPopularTag;
+      }
+
+      int pitchCountCompare = b.metaEntries
+          .map((metaEntry) => (metaEntry.pitches ?? [])
+              .where((e) => e.reading == b.reading)
+              .length)
+          .sum
+          .compareTo(a.metaEntries
+              .map((metaEntry) => (metaEntry.pitches ?? [])
+                  .where((e) => e.reading == a.reading)
+                  .length)
+              .sum);
+      if (pitchCountCompare != 0) {
+        return pitchCountCompare;
+      }
+
+      int metaEntriesCompare = b.metaEntries
+          .where(
+              (metaEntry) => (metaEntry.frequency?.reading ?? '') == b.reading)
+          .map((metaEntry) => metaEntry.frequency?.value ?? 0)
+          .sum
+          .compareTo(a.metaEntries
+              .where((metaEntry) =>
+                  (metaEntry.frequency?.reading ?? '') == a.reading)
+              .map((metaEntry) => metaEntry.frequency?.value ?? 0)
+              .sum);
+      if (metaEntriesCompare != 0) {
+        return metaEntriesCompare;
+      }
+
+      int tagsCompare = (b.termTags.length +
+              b.meaningTagsGroups.flattened.length)
+          .compareTo(a.termTags.length + a.meaningTagsGroups.flattened.length);
+      if (tagsCompare != 0) {
+        return tagsCompare;
+      }
+    } else if ((a.reading.isNotEmpty && b.reading.isNotEmpty) &&
+        a.reading == b.reading) {
+      int hasPopularTag = (a.termTags.any((e) => e.name == 'P') ? -1 : 1)
+          .compareTo(b.termTags.any((e) => e.name == 'P') ? -1 : 1);
+      if (hasPopularTag != 0) {
+        return hasPopularTag;
+      }
+
+      int pitchCountCompare = b.metaEntries
+          .map((metaEntry) =>
+              (metaEntry.pitches ?? []).where((e) => e.reading == b.reading))
+          .length
+          .compareTo(a.metaEntries
+              .map((metaEntry) => (metaEntry.pitches ?? [])
+                  .where((e) => e.reading == a.reading))
+              .length);
+      if (pitchCountCompare != 0) {
+        return pitchCountCompare;
+      }
+
+      int metaEntriesCompare = b.metaEntries
+          .where(
+              (metaEntry) => (metaEntry.frequency?.reading ?? '') == b.reading)
+          .map((metaEntry) => metaEntry.frequency?.value ?? 0)
+          .sum
+          .compareTo(a.metaEntries
+              .where((metaEntry) =>
+                  (metaEntry.frequency?.reading ?? '') == a.reading)
+              .map((metaEntry) => metaEntry.frequency?.value ?? 0)
+              .sum);
+      if (metaEntriesCompare != 0) {
+        return metaEntriesCompare;
+      }
+
+      int tagsCompare = (b.termTags.length +
+              b.meaningTagsGroups.flattened.length)
+          .compareTo(a.termTags.length + a.meaningTagsGroups.flattened.length);
+      if (tagsCompare != 0) {
+        return tagsCompare;
+      }
+    }
+
+    return 0;
+  });
+
   return terms;
+}
+
+/// Rules for word deinflection.
+/// Ported to Dart by Matthew Chan from Yomichan.
+class DeinflectRule {
+  /// Instantiate a deinflection rule.
+  DeinflectRule({
+    required this.kanaIn,
+    required this.kanaOut,
+    required this.rulesIn,
+    required this.rulesOut,
+  });
+
+  /// Kana in.
+  String kanaIn;
+
+  /// Kana out.
+  String kanaOut;
+
+  /// Rules in.
+  List<String> rulesIn;
+
+  /// Rules out.
+  List<String> rulesOut;
+}
+
+/// https://github.com/FooSoft/yomichan/blob/master/ext/data/deinflect.json
+Map<String, List<DeinflectRule>> deinflectRules = {
+  '-ba': [
+    DeinflectRule(
+        kanaIn: 'ければ', kanaOut: 'い', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(kanaIn: 'えば', kanaOut: 'う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'けば', kanaOut: 'く', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'げば', kanaOut: 'ぐ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'せば', kanaOut: 'す', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'てば', kanaOut: 'つ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ねば', kanaOut: 'ぬ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'べば', kanaOut: 'ぶ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'めば', kanaOut: 'む', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'れば',
+        kanaOut: 'る',
+        rulesIn: [],
+        rulesOut: ['v1', 'v5', 'vk', 'vs', 'vz']),
+  ],
+  '-chau': [
+    DeinflectRule(
+        kanaIn: 'ちゃう', kanaOut: 'る', rulesIn: ['v5'], rulesOut: ['v1']),
+    DeinflectRule(
+        kanaIn: 'いじゃう', kanaOut: 'ぐ', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'いちゃう', kanaOut: 'く', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'しちゃう', kanaOut: 'す', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'っちゃう', kanaOut: 'う', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'っちゃう', kanaOut: 'く', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'っちゃう', kanaOut: 'つ', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'っちゃう', kanaOut: 'る', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'んじゃう', kanaOut: 'ぬ', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'んじゃう', kanaOut: 'ぶ', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'んじゃう', kanaOut: 'む', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'じちゃう', kanaOut: 'ずる', rulesIn: ['v5'], rulesOut: ['vz']),
+    DeinflectRule(
+        kanaIn: 'しちゃう', kanaOut: 'する', rulesIn: ['v5'], rulesOut: ['vs']),
+    DeinflectRule(
+        kanaIn: '為ちゃう', kanaOut: '為る', rulesIn: ['v5'], rulesOut: ['vs']),
+    DeinflectRule(
+        kanaIn: 'きちゃう', kanaOut: 'くる', rulesIn: ['v5'], rulesOut: ['vk']),
+    DeinflectRule(
+        kanaIn: '来ちゃう', kanaOut: '来る', rulesIn: ['v5'], rulesOut: ['vk']),
+    DeinflectRule(
+        kanaIn: '來ちゃう', kanaOut: '來る', rulesIn: ['v5'], rulesOut: ['vk']),
+  ],
+  '-chimau': [
+    DeinflectRule(
+        kanaIn: 'ちまう', kanaOut: 'る', rulesIn: ['v5'], rulesOut: ['v1']),
+    DeinflectRule(
+        kanaIn: 'いじまう', kanaOut: 'ぐ', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'いちまう', kanaOut: 'く', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'しちまう', kanaOut: 'す', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'っちまう', kanaOut: 'う', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'っちまう', kanaOut: 'く', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'っちまう', kanaOut: 'つ', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'っちまう', kanaOut: 'る', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'んじまう', kanaOut: 'ぬ', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'んじまう', kanaOut: 'ぶ', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'んじまう', kanaOut: 'む', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'じちまう', kanaOut: 'ずる', rulesIn: ['v5'], rulesOut: ['vz']),
+    DeinflectRule(
+        kanaIn: 'しちまう', kanaOut: 'する', rulesIn: ['v5'], rulesOut: ['vs']),
+    DeinflectRule(
+        kanaIn: '為ちまう', kanaOut: '為る', rulesIn: ['v5'], rulesOut: ['vs']),
+    DeinflectRule(
+        kanaIn: 'きちまう', kanaOut: 'くる', rulesIn: ['v5'], rulesOut: ['vk']),
+    DeinflectRule(
+        kanaIn: '来ちまう', kanaOut: '来る', rulesIn: ['v5'], rulesOut: ['vk']),
+    DeinflectRule(
+        kanaIn: '來ちまう', kanaOut: '來る', rulesIn: ['v5'], rulesOut: ['vk']),
+  ],
+  '-shimau': [
+    DeinflectRule(
+        kanaIn: 'てしまう', kanaOut: 'て', rulesIn: ['v5'], rulesOut: ['iru']),
+    DeinflectRule(
+        kanaIn: 'でしまう', kanaOut: 'で', rulesIn: ['v5'], rulesOut: ['iru']),
+  ],
+  '-nasai': [
+    DeinflectRule(kanaIn: 'なさい', kanaOut: 'る', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'いなさい', kanaOut: 'う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'きなさい', kanaOut: 'く', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ぎなさい', kanaOut: 'ぐ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'しなさい', kanaOut: 'す', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ちなさい', kanaOut: 'つ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'になさい', kanaOut: 'ぬ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'びなさい', kanaOut: 'ぶ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'みなさい', kanaOut: 'む', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'りなさい', kanaOut: 'る', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'じなさい', kanaOut: 'ずる', rulesIn: [], rulesOut: ['vz']),
+    DeinflectRule(kanaIn: 'しなさい', kanaOut: 'する', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(kanaIn: '為なさい', kanaOut: '為る', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(kanaIn: 'きなさい', kanaOut: 'くる', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: '来なさい', kanaOut: '来る', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: '來なさい', kanaOut: '來る', rulesIn: [], rulesOut: ['vk']),
+  ],
+  '-sou': [
+    DeinflectRule(kanaIn: 'そう', kanaOut: 'い', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(kanaIn: 'そう', kanaOut: 'る', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'いそう', kanaOut: 'う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'きそう', kanaOut: 'く', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ぎそう', kanaOut: 'ぐ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'しそう', kanaOut: 'す', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ちそう', kanaOut: 'つ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'にそう', kanaOut: 'ぬ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'びそう', kanaOut: 'ぶ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'みそう', kanaOut: 'む', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'りそう', kanaOut: 'る', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'じそう', kanaOut: 'ずる', rulesIn: [], rulesOut: ['vz']),
+    DeinflectRule(kanaIn: 'しそう', kanaOut: 'する', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(kanaIn: '為そう', kanaOut: '為る', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(kanaIn: 'きそう', kanaOut: 'くる', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: '来そう', kanaOut: '来る', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: '來そう', kanaOut: '來る', rulesIn: [], rulesOut: ['vk']),
+  ],
+  '-sugiru': [
+    DeinflectRule(
+        kanaIn: 'すぎる', kanaOut: 'い', rulesIn: ['v1'], rulesOut: ['adj-i']),
+    DeinflectRule(
+        kanaIn: 'すぎる', kanaOut: 'る', rulesIn: ['v1'], rulesOut: ['v1']),
+    DeinflectRule(
+        kanaIn: 'いすぎる', kanaOut: 'う', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'きすぎる', kanaOut: 'く', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'ぎすぎる', kanaOut: 'ぐ', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'しすぎる', kanaOut: 'す', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'ちすぎる', kanaOut: 'つ', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'にすぎる', kanaOut: 'ぬ', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'びすぎる', kanaOut: 'ぶ', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'みすぎる', kanaOut: 'む', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'りすぎる', kanaOut: 'る', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'じすぎる', kanaOut: 'ずる', rulesIn: ['v1'], rulesOut: ['vz']),
+    DeinflectRule(
+        kanaIn: 'しすぎる', kanaOut: 'する', rulesIn: ['v1'], rulesOut: ['vs']),
+    DeinflectRule(
+        kanaIn: '為すぎる', kanaOut: '為る', rulesIn: ['v1'], rulesOut: ['vs']),
+    DeinflectRule(
+        kanaIn: 'きすぎる', kanaOut: 'くる', rulesIn: ['v1'], rulesOut: ['vk']),
+    DeinflectRule(
+        kanaIn: '来すぎる', kanaOut: '来る', rulesIn: ['v1'], rulesOut: ['vk']),
+    DeinflectRule(
+        kanaIn: '來すぎる', kanaOut: '來る', rulesIn: ['v1'], rulesOut: ['vk']),
+  ],
+  '-tai': [
+    DeinflectRule(
+        kanaIn: 'たい', kanaOut: 'る', rulesIn: ['adj-i'], rulesOut: ['v1']),
+    DeinflectRule(
+        kanaIn: 'いたい', kanaOut: 'う', rulesIn: ['adj-i'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'きたい', kanaOut: 'く', rulesIn: ['adj-i'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'ぎたい', kanaOut: 'ぐ', rulesIn: ['adj-i'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'したい', kanaOut: 'す', rulesIn: ['adj-i'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'ちたい', kanaOut: 'つ', rulesIn: ['adj-i'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'にたい', kanaOut: 'ぬ', rulesIn: ['adj-i'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'びたい', kanaOut: 'ぶ', rulesIn: ['adj-i'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'みたい', kanaOut: 'む', rulesIn: ['adj-i'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'りたい', kanaOut: 'る', rulesIn: ['adj-i'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'じたい', kanaOut: 'ずる', rulesIn: ['adj-i'], rulesOut: ['vz']),
+    DeinflectRule(
+        kanaIn: 'したい', kanaOut: 'する', rulesIn: ['adj-i'], rulesOut: ['vs']),
+    DeinflectRule(
+        kanaIn: '為たい', kanaOut: '為る', rulesIn: ['adj-i'], rulesOut: ['vs']),
+    DeinflectRule(
+        kanaIn: 'きたい', kanaOut: 'くる', rulesIn: ['adj-i'], rulesOut: ['vk']),
+    DeinflectRule(
+        kanaIn: '来たい', kanaOut: '来る', rulesIn: ['adj-i'], rulesOut: ['vk']),
+    DeinflectRule(
+        kanaIn: '來たい', kanaOut: '來る', rulesIn: ['adj-i'], rulesOut: ['vk']),
+  ],
+  '-tara': [
+    DeinflectRule(
+        kanaIn: 'かったら', kanaOut: 'い', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(kanaIn: 'たら', kanaOut: 'る', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'いたら', kanaOut: 'く', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'いだら', kanaOut: 'ぐ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'したら', kanaOut: 'す', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ったら', kanaOut: 'う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ったら', kanaOut: 'つ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ったら', kanaOut: 'る', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'んだら', kanaOut: 'ぬ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'んだら', kanaOut: 'ぶ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'んだら', kanaOut: 'む', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'じたら', kanaOut: 'ずる', rulesIn: [], rulesOut: ['vz']),
+    DeinflectRule(kanaIn: 'したら', kanaOut: 'する', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(kanaIn: '為たら', kanaOut: '為る', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(kanaIn: 'きたら', kanaOut: 'くる', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: '来たら', kanaOut: '来る', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: '來たら', kanaOut: '來る', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: 'いったら', kanaOut: 'いく', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'おうたら', kanaOut: 'おう', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'こうたら', kanaOut: 'こう', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'そうたら', kanaOut: 'そう', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'とうたら', kanaOut: 'とう', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '行ったら', kanaOut: '行く', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '逝ったら', kanaOut: '逝く', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '往ったら', kanaOut: '往く', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '請うたら', kanaOut: '請う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '乞うたら', kanaOut: '乞う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '恋うたら', kanaOut: '恋う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '問うたら', kanaOut: '問う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '負うたら', kanaOut: '負う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '沿うたら', kanaOut: '沿う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '添うたら', kanaOut: '添う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '副うたら', kanaOut: '副う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '厭うたら', kanaOut: '厭う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'のたもうたら', kanaOut: 'のたまう', rulesIn: [], rulesOut: ['v5']),
+  ],
+  '-tari': [
+    DeinflectRule(
+        kanaIn: 'かったり', kanaOut: 'い', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(kanaIn: 'たり', kanaOut: 'る', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'いたり', kanaOut: 'く', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'いだり', kanaOut: 'ぐ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'したり', kanaOut: 'す', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ったり', kanaOut: 'う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ったり', kanaOut: 'つ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ったり', kanaOut: 'る', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'んだり', kanaOut: 'ぬ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'んだり', kanaOut: 'ぶ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'んだり', kanaOut: 'む', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'じたり', kanaOut: 'ずる', rulesIn: [], rulesOut: ['vz']),
+    DeinflectRule(kanaIn: 'したり', kanaOut: 'する', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(kanaIn: '為たり', kanaOut: '為る', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(kanaIn: 'きたり', kanaOut: 'くる', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: '来たり', kanaOut: '来る', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: '來たり', kanaOut: '來る', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: 'いったり', kanaOut: 'いく', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'おうたり', kanaOut: 'おう', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'こうたり', kanaOut: 'こう', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'そうたり', kanaOut: 'そう', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'とうたり', kanaOut: 'とう', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '行ったり', kanaOut: '行く', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '逝ったり', kanaOut: '逝く', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '往ったり', kanaOut: '往く', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '請うたり', kanaOut: '請う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '乞うたり', kanaOut: '乞う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '恋うたり', kanaOut: '恋う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '問うたり', kanaOut: '問う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '負うたり', kanaOut: '負う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '沿うたり', kanaOut: '沿う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '添うたり', kanaOut: '添う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '副うたり', kanaOut: '副う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '厭うたり', kanaOut: '厭う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'のたもうたり', kanaOut: 'のたまう', rulesIn: [], rulesOut: ['v5']),
+  ],
+  '-te': [
+    DeinflectRule(
+        kanaIn: 'くて', kanaOut: 'い', rulesIn: ['iru'], rulesOut: ['adj-i']),
+    DeinflectRule(
+        kanaIn: 'て', kanaOut: 'る', rulesIn: ['iru'], rulesOut: ['v1']),
+    DeinflectRule(
+        kanaIn: 'いて', kanaOut: 'く', rulesIn: ['iru'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'いで', kanaOut: 'ぐ', rulesIn: ['iru'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'して', kanaOut: 'す', rulesIn: ['iru'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'って', kanaOut: 'う', rulesIn: ['iru'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'って', kanaOut: 'つ', rulesIn: ['iru'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'って', kanaOut: 'る', rulesIn: ['iru'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'んで', kanaOut: 'ぬ', rulesIn: ['iru'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'んで', kanaOut: 'ぶ', rulesIn: ['iru'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'んで', kanaOut: 'む', rulesIn: ['iru'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'じて', kanaOut: 'ずる', rulesIn: ['iru'], rulesOut: ['vz']),
+    DeinflectRule(
+        kanaIn: 'して', kanaOut: 'する', rulesIn: ['iru'], rulesOut: ['vs']),
+    DeinflectRule(
+        kanaIn: '為て', kanaOut: '為る', rulesIn: ['iru'], rulesOut: ['vs']),
+    DeinflectRule(
+        kanaIn: 'きて', kanaOut: 'くる', rulesIn: ['iru'], rulesOut: ['vk']),
+    DeinflectRule(
+        kanaIn: '来て', kanaOut: '来る', rulesIn: ['iru'], rulesOut: ['vk']),
+    DeinflectRule(
+        kanaIn: '來て', kanaOut: '來る', rulesIn: ['iru'], rulesOut: ['vk']),
+    DeinflectRule(
+        kanaIn: 'いって', kanaOut: 'いく', rulesIn: ['iru'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'おうて', kanaOut: 'おう', rulesIn: ['iru'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'こうて', kanaOut: 'こう', rulesIn: ['iru'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'そうて', kanaOut: 'そう', rulesIn: ['iru'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'とうて', kanaOut: 'とう', rulesIn: ['iru'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: '行って', kanaOut: '行く', rulesIn: ['iru'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: '逝って', kanaOut: '逝く', rulesIn: ['iru'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: '往って', kanaOut: '往く', rulesIn: ['iru'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: '請うて', kanaOut: '請う', rulesIn: ['iru'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: '乞うて', kanaOut: '乞う', rulesIn: ['iru'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: '恋うて', kanaOut: '恋う', rulesIn: ['iru'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: '問うて', kanaOut: '問う', rulesIn: ['iru'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: '負うて', kanaOut: '負う', rulesIn: ['iru'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: '沿うて', kanaOut: '沿う', rulesIn: ['iru'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: '添うて', kanaOut: '添う', rulesIn: ['iru'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: '副うて', kanaOut: '副う', rulesIn: ['iru'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: '厭うて', kanaOut: '厭う', rulesIn: ['iru'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'のたもうて', kanaOut: 'のたまう', rulesIn: ['iru'], rulesOut: ['v5']),
+  ],
+  '-zu': [
+    DeinflectRule(kanaIn: 'ず', kanaOut: 'る', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'かず', kanaOut: 'く', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'がず', kanaOut: 'ぐ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'さず', kanaOut: 'す', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'たず', kanaOut: 'つ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'なず', kanaOut: 'ぬ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ばず', kanaOut: 'ぶ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'まず', kanaOut: 'む', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'らず', kanaOut: 'る', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'わず', kanaOut: 'う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ぜず', kanaOut: 'ずる', rulesIn: [], rulesOut: ['vz']),
+    DeinflectRule(kanaIn: 'せず', kanaOut: 'する', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(kanaIn: '為ず', kanaOut: '為る', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(kanaIn: 'こず', kanaOut: 'くる', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: '来ず', kanaOut: '来る', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: '來ず', kanaOut: '來る', rulesIn: [], rulesOut: ['vk']),
+  ],
+  '-nu': [
+    DeinflectRule(kanaIn: 'ぬ', kanaOut: 'る', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'かぬ', kanaOut: 'く', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'がぬ', kanaOut: 'ぐ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'さぬ', kanaOut: 'す', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'たぬ', kanaOut: 'つ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'なぬ', kanaOut: 'ぬ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ばぬ', kanaOut: 'ぶ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'まぬ', kanaOut: 'む', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'らぬ', kanaOut: 'る', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'わぬ', kanaOut: 'う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ぜぬ', kanaOut: 'ずる', rulesIn: [], rulesOut: ['vz']),
+    DeinflectRule(kanaIn: 'せぬ', kanaOut: 'する', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(kanaIn: '為ぬ', kanaOut: '為る', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(kanaIn: 'こぬ', kanaOut: 'くる', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: '来ぬ', kanaOut: '来る', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: '來ぬ', kanaOut: '來る', rulesIn: [], rulesOut: ['vk']),
+  ],
+  'adv': [
+    DeinflectRule(kanaIn: 'く', kanaOut: 'い', rulesIn: [], rulesOut: ['adj-i']),
+  ],
+  'causative': [
+    DeinflectRule(
+        kanaIn: 'させる', kanaOut: 'る', rulesIn: ['v1'], rulesOut: ['v1']),
+    DeinflectRule(
+        kanaIn: 'かせる', kanaOut: 'く', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'がせる', kanaOut: 'ぐ', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'させる', kanaOut: 'す', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'たせる', kanaOut: 'つ', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'なせる', kanaOut: 'ぬ', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'ばせる', kanaOut: 'ぶ', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'ませる', kanaOut: 'む', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'らせる', kanaOut: 'る', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'わせる', kanaOut: 'う', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'じさせる', kanaOut: 'ずる', rulesIn: ['v1'], rulesOut: ['vz']),
+    DeinflectRule(
+        kanaIn: 'ぜさせる', kanaOut: 'ずる', rulesIn: ['v1'], rulesOut: ['vz']),
+    DeinflectRule(
+        kanaIn: 'させる', kanaOut: 'する', rulesIn: ['v1'], rulesOut: ['vs']),
+    DeinflectRule(
+        kanaIn: '為せる', kanaOut: '為る', rulesIn: ['v1'], rulesOut: ['vs']),
+    DeinflectRule(
+        kanaIn: 'せさせる', kanaOut: 'する', rulesIn: ['v1'], rulesOut: ['vs']),
+    DeinflectRule(
+        kanaIn: '為させる', kanaOut: '為る', rulesIn: ['v1'], rulesOut: ['vs']),
+    DeinflectRule(
+        kanaIn: 'こさせる', kanaOut: 'くる', rulesIn: ['v1'], rulesOut: ['vk']),
+    DeinflectRule(
+        kanaIn: '来させる', kanaOut: '来る', rulesIn: ['v1'], rulesOut: ['vk']),
+    DeinflectRule(
+        kanaIn: '來させる', kanaOut: '來る', rulesIn: ['v1'], rulesOut: ['vk']),
+  ],
+  'imperative': [
+    DeinflectRule(kanaIn: 'ろ', kanaOut: 'る', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'よ', kanaOut: 'る', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'え', kanaOut: 'う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'け', kanaOut: 'く', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'げ', kanaOut: 'ぐ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'せ', kanaOut: 'す', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'て', kanaOut: 'つ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ね', kanaOut: 'ぬ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'べ', kanaOut: 'ぶ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'め', kanaOut: 'む', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'れ', kanaOut: 'る', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'じろ', kanaOut: 'ずる', rulesIn: [], rulesOut: ['vz']),
+    DeinflectRule(kanaIn: 'ぜよ', kanaOut: 'ずる', rulesIn: [], rulesOut: ['vz']),
+    DeinflectRule(kanaIn: 'しろ', kanaOut: 'する', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(kanaIn: 'せよ', kanaOut: 'する', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(kanaIn: '為ろ', kanaOut: '為る', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(kanaIn: '為よ', kanaOut: '為る', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(kanaIn: 'こい', kanaOut: 'くる', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: '来い', kanaOut: '来る', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: '來い', kanaOut: '來る', rulesIn: [], rulesOut: ['vk']),
+  ],
+  'imperative negative': [
+    DeinflectRule(
+        kanaIn: 'な',
+        kanaOut: '',
+        rulesIn: [],
+        rulesOut: ['v1', 'v5', 'vk', 'vs', 'vz']),
+  ],
+  'masu stem': [
+    DeinflectRule(kanaIn: 'い', kanaOut: 'いる', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'え', kanaOut: 'える', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'き', kanaOut: 'きる', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'ぎ', kanaOut: 'ぎる', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'け', kanaOut: 'ける', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'げ', kanaOut: 'げる', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'じ', kanaOut: 'じる', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'せ', kanaOut: 'せる', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'ぜ', kanaOut: 'ぜる', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'ち', kanaOut: 'ちる', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'て', kanaOut: 'てる', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'で', kanaOut: 'でる', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'に', kanaOut: 'にる', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'ね', kanaOut: 'ねる', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'ひ', kanaOut: 'ひる', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'び', kanaOut: 'びる', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'へ', kanaOut: 'へる', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'べ', kanaOut: 'べる', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'み', kanaOut: 'みる', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'め', kanaOut: 'める', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'り', kanaOut: 'りる', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'れ', kanaOut: 'れる', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'い', kanaOut: 'う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'き', kanaOut: 'く', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ぎ', kanaOut: 'ぐ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'し', kanaOut: 'す', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ち', kanaOut: 'つ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'に', kanaOut: 'ぬ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'び', kanaOut: 'ぶ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'み', kanaOut: 'む', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'り', kanaOut: 'る', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'き', kanaOut: 'くる', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: '来', kanaOut: '来る', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: '來', kanaOut: '來る', rulesIn: [], rulesOut: ['vk']),
+  ],
+  'negative': [
+    DeinflectRule(
+        kanaIn: 'くない', kanaOut: 'い', rulesIn: ['adj-i'], rulesOut: ['adj-i']),
+    DeinflectRule(
+        kanaIn: 'ない', kanaOut: 'る', rulesIn: ['adj-i'], rulesOut: ['v1']),
+    DeinflectRule(
+        kanaIn: 'かない', kanaOut: 'く', rulesIn: ['adj-i'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'がない', kanaOut: 'ぐ', rulesIn: ['adj-i'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'さない', kanaOut: 'す', rulesIn: ['adj-i'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'たない', kanaOut: 'つ', rulesIn: ['adj-i'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'なない', kanaOut: 'ぬ', rulesIn: ['adj-i'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'ばない', kanaOut: 'ぶ', rulesIn: ['adj-i'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'まない', kanaOut: 'む', rulesIn: ['adj-i'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'らない', kanaOut: 'る', rulesIn: ['adj-i'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'わない', kanaOut: 'う', rulesIn: ['adj-i'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'じない', kanaOut: 'ずる', rulesIn: ['adj-i'], rulesOut: ['vz']),
+    DeinflectRule(
+        kanaIn: 'しない', kanaOut: 'する', rulesIn: ['adj-i'], rulesOut: ['vs']),
+    DeinflectRule(
+        kanaIn: '為ない', kanaOut: '為る', rulesIn: ['adj-i'], rulesOut: ['vs']),
+    DeinflectRule(
+        kanaIn: 'こない', kanaOut: 'くる', rulesIn: ['adj-i'], rulesOut: ['vk']),
+    DeinflectRule(
+        kanaIn: '来ない', kanaOut: '来る', rulesIn: ['adj-i'], rulesOut: ['vk']),
+    DeinflectRule(
+        kanaIn: '來ない', kanaOut: '來る', rulesIn: ['adj-i'], rulesOut: ['vk']),
+  ],
+  'noun': [
+    DeinflectRule(kanaIn: 'さ', kanaOut: 'い', rulesIn: [], rulesOut: ['adj-i']),
+  ],
+  'passive': [
+    DeinflectRule(
+        kanaIn: 'かれる', kanaOut: 'く', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'がれる', kanaOut: 'ぐ', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'される', kanaOut: 'す', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'たれる', kanaOut: 'つ', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'なれる', kanaOut: 'ぬ', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'ばれる', kanaOut: 'ぶ', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'まれる', kanaOut: 'む', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'われる', kanaOut: 'う', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'られる', kanaOut: 'る', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'じされる', kanaOut: 'ずる', rulesIn: ['v1'], rulesOut: ['vz']),
+    DeinflectRule(
+        kanaIn: 'ぜされる', kanaOut: 'ずる', rulesIn: ['v1'], rulesOut: ['vz']),
+    DeinflectRule(
+        kanaIn: 'される', kanaOut: 'する', rulesIn: ['v1'], rulesOut: ['vs']),
+    DeinflectRule(
+        kanaIn: '為れる', kanaOut: '為る', rulesIn: ['v1'], rulesOut: ['vs']),
+    DeinflectRule(
+        kanaIn: 'こられる', kanaOut: 'くる', rulesIn: ['v1'], rulesOut: ['vk']),
+    DeinflectRule(
+        kanaIn: '来られる', kanaOut: '来る', rulesIn: ['v1'], rulesOut: ['vk']),
+    DeinflectRule(
+        kanaIn: '來られる', kanaOut: '來る', rulesIn: ['v1'], rulesOut: ['vk']),
+  ],
+  'past': [
+    DeinflectRule(
+        kanaIn: 'かった', kanaOut: 'い', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(kanaIn: 'た', kanaOut: 'る', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'いた', kanaOut: 'く', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'いだ', kanaOut: 'ぐ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'した', kanaOut: 'す', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'った', kanaOut: 'う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'った', kanaOut: 'つ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'った', kanaOut: 'る', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'んだ', kanaOut: 'ぬ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'んだ', kanaOut: 'ぶ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'んだ', kanaOut: 'む', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'じた', kanaOut: 'ずる', rulesIn: [], rulesOut: ['vz']),
+    DeinflectRule(kanaIn: 'した', kanaOut: 'する', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(kanaIn: '為た', kanaOut: '為る', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(kanaIn: 'きた', kanaOut: 'くる', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: '来た', kanaOut: '来る', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: '來た', kanaOut: '來る', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: 'いった', kanaOut: 'いく', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'おうた', kanaOut: 'おう', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'こうた', kanaOut: 'こう', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'そうた', kanaOut: 'そう', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'とうた', kanaOut: 'とう', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '行った', kanaOut: '行く', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '逝った', kanaOut: '逝く', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '往った', kanaOut: '往く', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '請うた', kanaOut: '請う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '乞うた', kanaOut: '乞う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '恋うた', kanaOut: '恋う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '問うた', kanaOut: '問う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '負うた', kanaOut: '負う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '沿うた', kanaOut: '沿う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '添うた', kanaOut: '添う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '副うた', kanaOut: '副う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: '厭うた', kanaOut: '厭う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'のたもうた', kanaOut: 'のたまう', rulesIn: [], rulesOut: ['v5']),
+  ],
+  'polite': [
+    DeinflectRule(kanaIn: 'ます', kanaOut: 'る', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'います', kanaOut: 'う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'きます', kanaOut: 'く', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ぎます', kanaOut: 'ぐ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'します', kanaOut: 'す', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ちます', kanaOut: 'つ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'にます', kanaOut: 'ぬ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'びます', kanaOut: 'ぶ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'みます', kanaOut: 'む', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ります', kanaOut: 'る', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'じます', kanaOut: 'ずる', rulesIn: [], rulesOut: ['vz']),
+    DeinflectRule(kanaIn: 'します', kanaOut: 'する', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(kanaIn: '為ます', kanaOut: '為る', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(kanaIn: 'きます', kanaOut: 'くる', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: '来ます', kanaOut: '来る', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: '來ます', kanaOut: '來る', rulesIn: [], rulesOut: ['vk']),
+  ],
+  'polite negative': [
+    DeinflectRule(
+        kanaIn: 'くありません', kanaOut: 'い', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(kanaIn: 'ません', kanaOut: 'る', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'いません', kanaOut: 'う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'きません', kanaOut: 'く', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ぎません', kanaOut: 'ぐ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'しません', kanaOut: 'す', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ちません', kanaOut: 'つ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'にません', kanaOut: 'ぬ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'びません', kanaOut: 'ぶ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'みません', kanaOut: 'む', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'りません', kanaOut: 'る', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'じません', kanaOut: 'ずる', rulesIn: [], rulesOut: ['vz']),
+    DeinflectRule(kanaIn: 'しません', kanaOut: 'する', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(kanaIn: '為ません', kanaOut: '為る', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(kanaIn: 'きません', kanaOut: 'くる', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: '来ません', kanaOut: '来る', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: '來ません', kanaOut: '來る', rulesIn: [], rulesOut: ['vk']),
+  ],
+  'polite past': [
+    DeinflectRule(kanaIn: 'ました', kanaOut: 'る', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'いました', kanaOut: 'う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'きました', kanaOut: 'く', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ぎました', kanaOut: 'ぐ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'しました', kanaOut: 'す', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ちました', kanaOut: 'つ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'にました', kanaOut: 'ぬ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'びました', kanaOut: 'ぶ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'みました', kanaOut: 'む', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'りました', kanaOut: 'る', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'じました', kanaOut: 'ずる', rulesIn: [], rulesOut: ['vz']),
+    DeinflectRule(kanaIn: 'しました', kanaOut: 'する', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(kanaIn: '為ました', kanaOut: '為る', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(kanaIn: 'きました', kanaOut: 'くる', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: '来ました', kanaOut: '来る', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: '來ました', kanaOut: '來る', rulesIn: [], rulesOut: ['vk']),
+  ],
+  'polite past negative': [
+    DeinflectRule(
+        kanaIn: 'くありませんでした', kanaOut: 'い', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(
+        kanaIn: 'ませんでした', kanaOut: 'る', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(
+        kanaIn: 'いませんでした', kanaOut: 'う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'きませんでした', kanaOut: 'く', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'ぎませんでした', kanaOut: 'ぐ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'しませんでした', kanaOut: 'す', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'ちませんでした', kanaOut: 'つ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'にませんでした', kanaOut: 'ぬ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'びませんでした', kanaOut: 'ぶ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'みませんでした', kanaOut: 'む', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'りませんでした', kanaOut: 'る', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'じませんでした', kanaOut: 'ずる', rulesIn: [], rulesOut: ['vz']),
+    DeinflectRule(
+        kanaIn: 'しませんでした', kanaOut: 'する', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(
+        kanaIn: '為ませんでした', kanaOut: '為る', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(
+        kanaIn: 'きませんでした', kanaOut: 'くる', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(
+        kanaIn: '来ませんでした', kanaOut: '来る', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(
+        kanaIn: '來ませんでした', kanaOut: '來る', rulesIn: [], rulesOut: ['vk']),
+  ],
+  'polite volitional': [
+    DeinflectRule(kanaIn: 'ましょう', kanaOut: 'る', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'いましょう', kanaOut: 'う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'きましょう', kanaOut: 'く', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ぎましょう', kanaOut: 'ぐ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'しましょう', kanaOut: 'す', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ちましょう', kanaOut: 'つ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'にましょう', kanaOut: 'ぬ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'びましょう', kanaOut: 'ぶ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'みましょう', kanaOut: 'む', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'りましょう', kanaOut: 'る', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'じましょう', kanaOut: 'ずる', rulesIn: [], rulesOut: ['vz']),
+    DeinflectRule(
+        kanaIn: 'しましょう', kanaOut: 'する', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(
+        kanaIn: '為ましょう', kanaOut: '為る', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(
+        kanaIn: 'きましょう', kanaOut: 'くる', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(
+        kanaIn: '来ましょう', kanaOut: '来る', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(
+        kanaIn: '來ましょう', kanaOut: '來る', rulesIn: [], rulesOut: ['vk']),
+  ],
+  'potential': [
+    DeinflectRule(
+        kanaIn: 'れる', kanaOut: 'る', rulesIn: ['v1'], rulesOut: ['v1', 'v5']),
+    DeinflectRule(
+        kanaIn: 'える', kanaOut: 'う', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'ける', kanaOut: 'く', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'げる', kanaOut: 'ぐ', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'せる', kanaOut: 'す', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'てる', kanaOut: 'つ', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'ねる', kanaOut: 'ぬ', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'べる', kanaOut: 'ぶ', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'める', kanaOut: 'む', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'これる', kanaOut: 'くる', rulesIn: ['v1'], rulesOut: ['vk']),
+    DeinflectRule(
+        kanaIn: '来れる', kanaOut: '来る', rulesIn: ['v1'], rulesOut: ['vk']),
+    DeinflectRule(
+        kanaIn: '來れる', kanaOut: '來る', rulesIn: ['v1'], rulesOut: ['vk']),
+  ],
+  'potential or passive': [
+    DeinflectRule(
+        kanaIn: 'られる', kanaOut: 'る', rulesIn: ['v1'], rulesOut: ['v1']),
+    DeinflectRule(
+        kanaIn: 'ざれる', kanaOut: 'ずる', rulesIn: ['v1'], rulesOut: ['vz']),
+    DeinflectRule(
+        kanaIn: 'ぜられる', kanaOut: 'ずる', rulesIn: ['v1'], rulesOut: ['vz']),
+    DeinflectRule(
+        kanaIn: 'せられる', kanaOut: 'する', rulesIn: ['v1'], rulesOut: ['vs']),
+    DeinflectRule(
+        kanaIn: '為られる', kanaOut: '為る', rulesIn: ['v1'], rulesOut: ['vs']),
+    DeinflectRule(
+        kanaIn: 'こられる', kanaOut: 'くる', rulesIn: ['v1'], rulesOut: ['vk']),
+    DeinflectRule(
+        kanaIn: '来られる', kanaOut: '来る', rulesIn: ['v1'], rulesOut: ['vk']),
+    DeinflectRule(
+        kanaIn: '來られる', kanaOut: '來る', rulesIn: ['v1'], rulesOut: ['vk']),
+  ],
+  'volitional': [
+    DeinflectRule(kanaIn: 'よう', kanaOut: 'る', rulesIn: [], rulesOut: ['v1']),
+    DeinflectRule(kanaIn: 'おう', kanaOut: 'う', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'こう', kanaOut: 'く', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ごう', kanaOut: 'ぐ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'そう', kanaOut: 'す', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'とう', kanaOut: 'つ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'のう', kanaOut: 'ぬ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ぼう', kanaOut: 'ぶ', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'もう', kanaOut: 'む', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'ろう', kanaOut: 'る', rulesIn: [], rulesOut: ['v5']),
+    DeinflectRule(kanaIn: 'じよう', kanaOut: 'ずる', rulesIn: [], rulesOut: ['vz']),
+    DeinflectRule(kanaIn: 'しよう', kanaOut: 'する', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(kanaIn: '為よう', kanaOut: '為る', rulesIn: [], rulesOut: ['vs']),
+    DeinflectRule(kanaIn: 'こよう', kanaOut: 'くる', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: '来よう', kanaOut: '来る', rulesIn: [], rulesOut: ['vk']),
+    DeinflectRule(kanaIn: '來よう', kanaOut: '來る', rulesIn: [], rulesOut: ['vk']),
+  ],
+  'causative passive': [
+    DeinflectRule(
+        kanaIn: 'かされる', kanaOut: 'く', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'がされる', kanaOut: 'ぐ', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'たされる', kanaOut: 'つ', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'なされる', kanaOut: 'ぬ', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'ばされる', kanaOut: 'ぶ', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'まされる', kanaOut: 'む', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'らされる', kanaOut: 'る', rulesIn: ['v1'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'わされる', kanaOut: 'う', rulesIn: ['v1'], rulesOut: ['v5']),
+  ],
+  '-toku': [
+    DeinflectRule(
+        kanaIn: 'とく', kanaOut: 'る', rulesIn: ['v5'], rulesOut: ['v1']),
+    DeinflectRule(
+        kanaIn: 'いとく', kanaOut: 'く', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'いどく', kanaOut: 'ぐ', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'しとく', kanaOut: 'す', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'っとく', kanaOut: 'う', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'っとく', kanaOut: 'つ', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'っとく', kanaOut: 'る', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'んどく', kanaOut: 'ぬ', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'んどく', kanaOut: 'ぶ', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'んどく', kanaOut: 'む', rulesIn: ['v5'], rulesOut: ['v5']),
+    DeinflectRule(
+        kanaIn: 'じとく', kanaOut: 'ずる', rulesIn: ['v5'], rulesOut: ['vz']),
+    DeinflectRule(
+        kanaIn: 'しとく', kanaOut: 'する', rulesIn: ['v5'], rulesOut: ['vs']),
+    DeinflectRule(
+        kanaIn: '為とく', kanaOut: '為る', rulesIn: ['v5'], rulesOut: ['vs']),
+    DeinflectRule(
+        kanaIn: 'きとく', kanaOut: 'くる', rulesIn: ['v5'], rulesOut: ['vk']),
+    DeinflectRule(
+        kanaIn: '来とく', kanaOut: '来る', rulesIn: ['v5'], rulesOut: ['vk']),
+    DeinflectRule(
+        kanaIn: '來とく', kanaOut: '來る', rulesIn: ['v5'], rulesOut: ['vk']),
+  ],
+  'progressive or perfect': [
+    DeinflectRule(
+        kanaIn: 'ている', kanaOut: 'て', rulesIn: ['v1'], rulesOut: ['iru']),
+    DeinflectRule(
+        kanaIn: 'ておる', kanaOut: 'て', rulesIn: ['v5'], rulesOut: ['iru']),
+    DeinflectRule(
+        kanaIn: 'てる', kanaOut: 'て', rulesIn: ['v1'], rulesOut: ['iru']),
+    DeinflectRule(
+        kanaIn: 'でいる', kanaOut: 'で', rulesIn: ['v1'], rulesOut: ['iru']),
+    DeinflectRule(
+        kanaIn: 'でおる', kanaOut: 'で', rulesIn: ['v5'], rulesOut: ['iru']),
+    DeinflectRule(
+        kanaIn: 'でる', kanaOut: 'で', rulesIn: ['v1'], rulesOut: ['iru']),
+    DeinflectRule(
+        kanaIn: 'とる', kanaOut: 'て', rulesIn: ['v5'], rulesOut: ['iru']),
+    DeinflectRule(
+        kanaIn: 'ないでいる', kanaOut: 'ない', rulesIn: ['v1'], rulesOut: ['adj-i']),
+  ],
+  '-ki': [
+    DeinflectRule(kanaIn: 'き', kanaOut: 'い', rulesIn: [], rulesOut: ['adj-i']),
+  ],
+  '-ge': [
+    DeinflectRule(
+        kanaIn: 'しげ', kanaOut: 'しい', rulesIn: [], rulesOut: ['adj-i']),
+  ],
+  '-e': [
+    DeinflectRule(
+        kanaIn: 'ねえ', kanaOut: 'ない', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(
+        kanaIn: 'めえ', kanaOut: 'むい', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(
+        kanaIn: 'みい', kanaOut: 'むい', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(
+        kanaIn: 'ちぇえ', kanaOut: 'つい', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(
+        kanaIn: 'ちい', kanaOut: 'つい', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(
+        kanaIn: 'せえ', kanaOut: 'すい', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(
+        kanaIn: 'ええ', kanaOut: 'いい', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(
+        kanaIn: 'ええ', kanaOut: 'わい', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(
+        kanaIn: 'ええ', kanaOut: 'よい', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(
+        kanaIn: 'いぇえ', kanaOut: 'よい', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(
+        kanaIn: 'うぇえ', kanaOut: 'わい', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(
+        kanaIn: 'けえ', kanaOut: 'かい', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(
+        kanaIn: 'げえ', kanaOut: 'がい', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(
+        kanaIn: 'げえ', kanaOut: 'ごい', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(
+        kanaIn: 'せえ', kanaOut: 'さい', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(
+        kanaIn: 'めえ', kanaOut: 'まい', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(
+        kanaIn: 'ぜえ', kanaOut: 'ずい', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(
+        kanaIn: 'っぜえ', kanaOut: 'ずい', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(
+        kanaIn: 'れえ', kanaOut: 'らい', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(
+        kanaIn: 'れえ', kanaOut: 'らい', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(
+        kanaIn: 'ちぇえ', kanaOut: 'ちゃい', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(
+        kanaIn: 'でえ', kanaOut: 'どい', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(
+        kanaIn: 'れえ', kanaOut: 'れい', rulesIn: [], rulesOut: ['adj-i']),
+    DeinflectRule(
+        kanaIn: 'べえ', kanaOut: 'ばい', rulesIn: [], rulesOut: ['adj-i']),
+  ],
+};
+
+/// Represents a term that has been deinflected and the its rules and reasons
+/// for having become so.
+class Deinflection {
+  /// Instantiates a deinflection.
+  Deinflection({
+    required this.term,
+    required this.rules,
+    required this.reasons,
+  });
+
+  /// Deinflected term.
+  String term;
+
+  /// Rule for deinflection.
+  int rules;
+
+  /// Reasons for deinflection.
+  List<String> reasons;
+}
+
+/// Represents a possible deinflection.
+class Variant {
+  /// Instantiate a variant.
+  Variant(
+      {required this.kanaIn,
+      required this.kanaOut,
+      required this.rulesIn,
+      required this.rulesOut});
+
+  /// Kana in.
+  String kanaIn;
+
+  /// Kana out.
+  String kanaOut;
+
+  /// Rules in.
+  int rulesIn;
+
+  /// Rules out.
+  int rulesOut;
+}
+
+/// Represents a one-to-many relationship between a reason and its variants.
+class NormalizedReason {
+  /// Instantiates a normalized reason.
+  NormalizedReason({required this.variants, required this.reason});
+
+  /// Reason for deinflection.
+  String reason;
+
+  /// Possible variants.
+  List<Variant> variants;
+}
+
+/// Ported from Javascript to Dart by Mathew Chan
+/// https://github.com/FooSoft/yomichan/blob/89ac85afd03e62818624b507c91569edbec54f3d/ext/js/language/deinflector.js
+class Deinflector {
+  /// Give the possible deinflections given source text.
+  static List<Deinflection> deinflect(String source) {
+    List<Deinflection> results = [
+      Deinflection(term: source, rules: 0, reasons: [])
+    ];
+    for (int i = 0; i < results.length; ++i) {
+      Deinflection result = results[i];
+      for (NormalizedReason normalizedReason
+          in normalizeReasons(deinflectRules)) {
+        for (Variant variant in normalizedReason.variants) {
+          if ((result.rules != 0 && (result.rules & variant.rulesIn) == 0) ||
+              !result.term.endsWith(variant.kanaIn) ||
+              (result.term.length -
+                      variant.kanaIn.length +
+                      variant.kanaOut.length) <=
+                  0) {
+            continue;
+          }
+
+          results.add(Deinflection(
+              term: result.term.substring(
+                      0, result.term.length - variant.kanaIn.length) +
+                  variant.kanaOut,
+              rules: variant.rulesOut,
+              reasons: [normalizedReason.reason, ...result.reasons]));
+        }
+      }
+    }
+    return results;
+  }
+
+  /// Sort variants per reason.
+  static List<NormalizedReason> normalizeReasons(reasons) {
+    List<NormalizedReason> normalizedReasons = [];
+    for (MapEntry<String, List<DeinflectRule>> reasons
+        in deinflectRules.entries) {
+      List<Variant> variants = reasons.value
+          .map((rule) => Variant(
+              kanaIn: rule.kanaIn,
+              kanaOut: rule.kanaOut,
+              rulesIn: rulesToRuleFlags(rule.rulesIn),
+              rulesOut: rulesToRuleFlags(rule.rulesOut)))
+          .toList();
+      normalizedReasons
+          .add(NormalizedReason(reason: reasons.key, variants: variants));
+    }
+    return normalizedReasons;
+  }
+
+  /// Convert rules to integer rule type.
+  static int rulesToRuleFlags(List<String> rules) {
+    Map<String, int> ruleTypes = _ruleTypes;
+    int value = 0;
+    for (String rule in rules) {
+      if (_ruleTypes.containsKey(rule)) {
+        value |= ruleTypes[rule]!;
+      }
+    }
+    return value;
+  }
+
+  static final Map<String, int> _ruleTypes = {
+    'v1': 1, // Verb ichidan
+    'v5': 2, // Verb godan
+    'vs': 4, // Verb suru
+    'vk': 8, // Verb kuru
+    'vz': 16, // Verb zuru
+    'adj-i': 32, // Adjective i
+    'iru': 64 // Intermediate -iru endings for progressive or perfect tense
+  };
 }

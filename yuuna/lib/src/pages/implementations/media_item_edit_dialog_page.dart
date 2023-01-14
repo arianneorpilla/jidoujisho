@@ -180,11 +180,13 @@ class _MediaItemEditDialogPageState
       item: widget.item,
       title: _nameOverrideController.text,
     );
-    await mediaSource.setOverrideThumbnailFromMediaItem(
-      appModel: appModel,
-      item: widget.item,
-      file: _newFile,
-    );
+    if (_newFile != null) {
+      await mediaSource.setOverrideThumbnailFromMediaItem(
+        appModel: appModel,
+        item: widget.item,
+        file: _newFile,
+      );
+    }
 
     Navigator.pop(context);
     Navigator.pop(context);

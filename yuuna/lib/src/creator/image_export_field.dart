@@ -44,7 +44,9 @@ abstract class ImageExportField extends Field {
   bool _autoCannotOverride = false;
 
   /// Whether or not to show the top widget.
-  bool get showWidget => currentImageSuggestions != null && exportFile != null;
+  bool get showWidget =>
+      currentImageSuggestions != null &&
+      (exportFile != null || selectedIndex == -1);
 
   /// Clears this field's data. The state refresh afterwards is not performed
   /// here and should be performed by the invocation of the clear field button.
@@ -146,7 +148,12 @@ abstract class ImageExportField extends Field {
   void setSelectedSearchSuggestion({
     required int index,
   }) {
-    _exportFile = _imageSuggestions![index];
+    if (index == -1) {
+      _exportFile = null;
+    } else {
+      _exportFile = _imageSuggestions![index];
+    }
+
     _indexNotifier.value = index;
   }
 

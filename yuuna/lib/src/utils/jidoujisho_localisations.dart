@@ -237,6 +237,8 @@ class JidoujishoLocalisations {
     'image_search_label_before': 'Selecting image ',
     'image_search_label_middle': 'out of ',
     'image_search_label_after': 'found for',
+    'image_search_label_none_middle': 'no image ',
+    'image_search_label_none_before': 'Selecting ',
     'preparing_instant_export': 'Preparing card for export...',
     'processing_in_progress': 'Preparing images',
     'searching_in_progress': 'Searching for ',
