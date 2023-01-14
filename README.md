@@ -10,6 +10,9 @@
   <a href="https://github.com/lrorpilla/jidoujisho/last-commit">
     <img src="https://img.shields.io/github/last-commit/lrorpilla/jidoujisho" alt="last update" />
   </a>
+  <a href="https://github.com/lrorpilla/jidoujisho/actions">
+    <img src="https://img.shields.io/github/actions/workflow/status/lrorpilla/jidoujisho/main.yml" alt="sponsor" />
+  </a>
   <a href="https://github.com/lrorpilla/jidoujisho/stargazers">
     <img src="https://img.shields.io/github/stars/lrorpilla/jidoujisho" alt="stars" />
   </a>
@@ -26,6 +29,7 @@
     <img src="https://img.shields.io/badge/donate-ko--fi-blue" alt="sponsor" />
   </a>
 </p>
+
 
 ---
 <p align="center" style="margin:0"><b>Latest Release:
