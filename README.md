@@ -7,7 +7,7 @@
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.2">
     <img src="https://img.shields.io/github/v/release/lrorpilla/jidoujisho" alt="latest release" />
   </a>
-  <a href="https://github.com/lrorpilla/jidoujisho/last-commit">
+  <a href="https://github.com/lrorpilla/jidoujisho/commits/main">
     <img src="https://img.shields.io/github/last-commit/lrorpilla/jidoujisho" alt="last update" />
   </a>
   <a href="https://github.com/lrorpilla/jidoujisho/actions">
