@@ -293,6 +293,10 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
     searchTerm = kanaKit.toHiragana(searchTerm);
   }
 
+  if (searchTerm.length > 20) {
+    searchTerm = searchTerm.substring(0, 20);
+  }
+
   int limit = params.maximumDictionaryEntrySearchMatch;
 
   if (searchTerm.isEmpty) {

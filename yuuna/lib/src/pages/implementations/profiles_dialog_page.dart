@@ -104,7 +104,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
           order: 0,
           enhancements: AnkiMapping.defaultEnhancements,
           actions: AnkiMapping.defaultActions,
-          exportMediaTags: false,
+          exportMediaTags: true,
         );
 
         await showMappingEditDialog(newMapping);

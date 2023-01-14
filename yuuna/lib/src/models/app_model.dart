@@ -214,7 +214,7 @@ class AppModel with ChangeNotifier {
 
   /// Maximum number of dictionary entries that can be returned from a database
   /// dictionary search.
-  final int maximumDictionaryEntrySearchMatch = 60;
+  final int maximumDictionaryEntrySearchMatch = 40;
 
   /// Used as the history key used for the Stash.
   final String stashKey = ' stash';
@@ -1240,6 +1240,9 @@ class AppModel with ChangeNotifier {
     );
 
     _dictionarySearchCache[searchTerm] = result;
+    if (_dictionarySearchCache.length > 200) {
+      _dictionarySearchCache.clear();
+    }
 
     return result;
   }
