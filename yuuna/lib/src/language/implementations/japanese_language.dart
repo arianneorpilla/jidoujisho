@@ -42,10 +42,6 @@ class JapaneseLanguage extends Language {
   /// items.
   final Map<DictionaryPair, List<RubyTextData>?> segmentsCache = {};
 
-  /// Used to cache furigana segments for already generated [PitchData]
-  /// items.
-  final Map<String, Map<int, Widget>?> pitchCache = {};
-
   @override
   Future<void> prepareResources() async {
     await mecab.init('assets/language/japanese/ipadic', true);
@@ -168,21 +164,14 @@ class JapaneseLanguage extends Language {
 
   @override
   Widget getPitchWidget({
+    required AppModel appModel,
     required BuildContext context,
     required String reading,
     required int downstep,
   }) {
-    pitchCache[reading] ??= {};
-    if (pitchCache[reading]![downstep] != null) {
-      return pitchCache[reading]![downstep]!;
-    }
-
     List<Widget> listWidgets = [];
 
     Color foregroundColor = Theme.of(context).appBarTheme.foregroundColor!;
-    TextStyle style = TextStyle(
-      fontSize: Theme.of(context).textTheme.labelMedium!.fontSize,
-    );
 
     Widget getAccentTop(String text) {
       return Container(
@@ -192,7 +181,12 @@ class JapaneseLanguage extends Language {
             top: BorderSide(color: foregroundColor),
           ),
         ),
-        child: Text(text, style: style),
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: appModel.dictionaryFontSize.toDouble(),
+          ),
+        ),
       );
     }
 
@@ -205,7 +199,12 @@ class JapaneseLanguage extends Language {
             right: BorderSide(color: foregroundColor),
           ),
         ),
-        child: Text(text, style: style),
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: appModel.dictionaryFontSize.toDouble(),
+          ),
+        ),
       );
     }
 
@@ -217,7 +216,12 @@ class JapaneseLanguage extends Language {
             top: BorderSide(color: Colors.transparent),
           ),
         ),
-        child: Text(text, style: style),
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: appModel.dictionaryFontSize.toDouble(),
+          ),
+        ),
       );
     }
 
@@ -260,14 +264,20 @@ class JapaneseLanguage extends Language {
       }
     }
 
-    listWidgets.add(Text(' [$downstep]  ', style: style));
+    listWidgets.add(
+      Text(
+        ' [$downstep]  ',
+        style: TextStyle(
+          fontSize: appModel.dictionaryFontSize.toDouble(),
+        ),
+      ),
+    );
 
     Widget widget = Wrap(
       crossAxisAlignment: WrapCrossAlignment.end,
       children: listWidgets,
     );
 
-    pitchCache[reading]![downstep] = widget;
     return widget;
   }
 }

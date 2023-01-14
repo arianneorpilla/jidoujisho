@@ -249,6 +249,7 @@ abstract class Language {
   /// Some languages may have custom widgets for generating pronunciation
   /// diagrams.
   Widget getPitchWidget({
+    required AppModel appModel,
     required BuildContext context,
     required String reading,
     required int downstep,

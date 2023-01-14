@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:multi_value_listenable_builder/multi_value_listenable_builder.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/media.dart';
@@ -60,6 +61,10 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
   final ValueNotifier<DictionaryResult?> _dictionaryResultNotifier =
       ValueNotifier<DictionaryResult?>(null);
 
+  /// The result from the last dictionary search performed with
+  /// [searchDictionaryResult].
+  final ValueNotifier<bool> _isSearchingNotifier = ValueNotifier<bool>(false);
+
   /// Whether or not there is a present dictionary result.
   bool get isDictionaryShown => _dictionaryResultNotifier.value != null;
 
@@ -113,12 +118,17 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
     required String searchTerm,
     required JidoujishoPopupPosition position,
   }) async {
-    DictionaryResult dictionaryResult =
-        await appModel.searchDictionary(searchTerm);
-    _popupPosition = position;
+    _isSearchingNotifier.value = true;
+    try {
+      DictionaryResult dictionaryResult =
+          await appModel.searchDictionary(searchTerm);
+      _popupPosition = position;
 
-    await appModel.addToDictionaryHistory(result: dictionaryResult);
-    _dictionaryResultNotifier.value = dictionaryResult;
+      await appModel.addToDictionaryHistory(result: dictionaryResult);
+      _dictionaryResultNotifier.value = dictionaryResult;
+    } finally {
+      _isSearchingNotifier.value = false;
+    }
   }
 
   /// Hide the dictionary and dispose of the current result.
@@ -130,10 +140,13 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
   /// Build a dictionary showing the result with positioning.
   /// If the result is null, show nothing.
   Widget buildDictionary() {
-    return ValueListenableBuilder<DictionaryResult?>(
-      valueListenable: _dictionaryResultNotifier,
+    return MultiValueListenableBuilder(
+      valueListenables: [
+        _dictionaryResultNotifier,
+        _isSearchingNotifier,
+      ],
       builder: (context, result, _) {
-        if (result == null) {
+        if (_dictionaryResultNotifier.value == null) {
           return const SizedBox.shrink();
         }
 
@@ -242,10 +255,36 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
         clearDictionaryResult();
       },
       child: Container(
-        padding: Spacing.of(context).insets.all.semiSmall,
-        margin: Spacing.of(context).insets.all.normal,
-        color: theme.cardColor.withOpacity(dictionaryBackgroundOpacity),
-        child: buildSearchResult(),
+          padding: Spacing.of(context).insets.all.semiSmall,
+          margin: Spacing.of(context).insets.all.normal,
+          color: theme.cardColor.withOpacity(dictionaryBackgroundOpacity),
+          child: _isSearchingNotifier.value
+              ? buildDictionaryLoading()
+              : buildSearchResult()),
+    );
+  }
+
+  /// In progress indicator for dictionary searching.
+  Widget buildDictionaryLoading() {
+    return SizedBox(
+      height: double.infinity,
+      width: double.infinity,
+      child: Card(
+        color: appModel.isDarkMode
+            ? Color.fromRGBO(15, 15, 15, dictionaryEntryOpacity)
+            : Color.fromRGBO(249, 249, 249, dictionaryEntryOpacity),
+        elevation: 0,
+        shape: const RoundedRectangleBorder(),
+        child: Column(
+          children: [
+            const LinearProgressIndicator(
+              backgroundColor: Colors.transparent,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+              minHeight: 2.75,
+            ),
+            Expanded(child: Container())
+          ],
+        ),
       ),
     );
   }

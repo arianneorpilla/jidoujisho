@@ -12,14 +12,18 @@ class MassifSentencesDialogPage extends BasePage {
   const MassifSentencesDialogPage({
     required this.exampleSentences,
     required this.onSelect,
+    required this.onAppend,
     super.key,
   });
 
   /// The example sentences to be shown in the dialog.
   final List<MassifResult> exampleSentences;
 
-  /// The callback to be called when an example sentence has been picked.
-  final Function(String) onSelect;
+  /// Select action callback.
+  final Function(List<String>) onSelect;
+
+  /// Append action callback.
+  final Function(List<String>) onAppend;
 
   @override
   BasePageState createState() => _MassifSentencesDialogPage();
@@ -30,7 +34,7 @@ class _MassifSentencesDialogPage
   final ScrollController _scrollController = ScrollController();
 
   String get dialogSelectLabel => appModel.translate('dialog_select');
-  String get dialogStashLabel => appModel.translate('dialog_stash');
+  String get dialogAppendLabel => appModel.translate('dialog_append');
   String get noSentencesFound => appModel.translate('no_sentences_found');
 
   final Map<int, ValueNotifier<bool>> _valuesSelected = {};
@@ -140,14 +144,14 @@ class _MassifSentencesDialogPage
   }
 
   List<Widget> get actions => [
-        buildStashButton(),
+        buildAppendButton(),
         buildSelectButton(),
       ];
 
-  Widget buildStashButton() {
+  Widget buildAppendButton() {
     return TextButton(
-      child: Text(dialogStashLabel),
-      onPressed: executeStash,
+      child: Text(dialogAppendLabel),
+      onPressed: executeAppend,
     );
   }
 
@@ -158,33 +162,25 @@ class _MassifSentencesDialogPage
     );
   }
 
-  String get selection {
-    StringBuffer buffer = StringBuffer();
+  List<String> get selection {
+    List<String> results = [];
 
     widget.exampleSentences.forEachIndexed((index, result) {
       if (_valuesSelected[index]!.value) {
-        buffer.writeln(result.text);
+        results.add(result.text);
       }
     });
 
-    return buffer.toString().trim();
+    return results;
   }
 
-  void executeStash() {
-    List<String> terms = [];
-    widget.exampleSentences.forEachIndexed((index, result) {
-      if (_valuesSelected[index]!.value) {
-        terms.add(result.text);
-      }
-    });
-
-    appModel.addToStash(terms: terms);
+  void executeAppend() {
+    Navigator.pop(context);
+    widget.onAppend(selection);
   }
 
   void executeSelect() {
     Navigator.pop(context);
-    if (selection.isNotEmpty) {
-      widget.onSelect(selection);
-    }
+    widget.onSelect(selection);
   }
 }

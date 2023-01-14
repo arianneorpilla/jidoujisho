@@ -140,7 +140,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
         buildBackButton(),
       ],
       actions: [
-        buildSearchSettingsButton(),
+        buildDictionarySettingsButton(),
         buildClearButton(),
         buildSearchClearButton(),
         buildSearchButton(),
@@ -285,9 +285,9 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     );
   }
 
-  /// Search settings bar action.
-  Widget buildSearchSettingsButton() {
-    String label = appModel.translate('search_settings');
+  /// Dictionary settings bar action.
+  Widget buildDictionarySettingsButton() {
+    String label = appModel.translate('dictionary_settings');
 
     return FloatingSearchBarAction(
       showIfOpened: true,
@@ -295,11 +295,17 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
         size: Theme.of(context).textTheme.titleLarge?.fontSize,
         tooltip: label,
         icon: Icons.settings,
-        onTap: () {
-          showDialog(
+        onTap: () async {
+          int oldFontSize = appModel.dictionaryFontSize;
+
+          await showDialog(
             context: context,
-            builder: (context) => const SearchSettingsDialogPage(),
+            builder: (context) => const DictionarySettingsDialogPage(),
           );
+
+          if (appModel.dictionaryFontSize != oldFontSize) {
+            appModel.refresh();
+          }
         },
       ),
     );

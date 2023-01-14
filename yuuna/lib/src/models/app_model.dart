@@ -1641,6 +1641,11 @@ class AppModel with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Refresh all screens and have them respond to new variables.
+  Future<void> refresh() async {
+    notifyListeners();
+  }
+
   /// Resets a profile's fields such that it will have the model's number of
   /// fields, all empty.
   Future<void> resetProfileFields(AnkiMapping mapping) async {
@@ -1949,13 +1954,15 @@ class AppModel with ChangeNotifier {
   /// A helper function for opening an example sentence dialog.
   Future<void> openExampleSentenceDialog({
     required List<String> exampleSentences,
-    required Function(String) onSelect,
+    required Function(List<String>) onSelect,
+    required Function(List<String>) onAppend,
   }) async {
     await showDialog(
       context: _navigatorKey.currentContext!,
       builder: (context) => ExampleSentencesDialogPage(
         exampleSentences: exampleSentences,
         onSelect: onSelect,
+        onAppend: onAppend,
       ),
     );
   }
@@ -1964,13 +1971,15 @@ class AppModel with ChangeNotifier {
   /// returned from Massif.
   Future<void> openMassifSentenceDialog({
     required List<MassifResult> exampleSentences,
-    required Function(String) onSelect,
+    required Function(List<String>) onSelect,
+    required Function(List<String>) onAppend,
   }) async {
     await showDialog(
       context: _navigatorKey.currentContext!,
       builder: (context) => MassifSentencesDialogPage(
         exampleSentences: exampleSentences,
         onSelect: onSelect,
+        onAppend: onAppend,
       ),
     );
   }
@@ -1979,13 +1988,15 @@ class AppModel with ChangeNotifier {
   /// returned from ImmersionKitEnhancement.
   Future<void> openImmersionKitSentenceDialog({
     required List<ImmersionKitResult> exampleSentences,
-    required Function(ImmersionKitResult) onSelect,
+    required Function(List<ImmersionKitResult>) onSelect,
+    required Function(List<ImmersionKitResult>) onAppend,
   }) async {
     await showDialog(
       context: _navigatorKey.currentContext!,
       builder: (context) => ImmersionKitSentencesDialogPage(
         exampleSentences: exampleSentences,
         onSelect: onSelect,
+        onAppend: onAppend,
       ),
     );
   }
@@ -2703,5 +2714,29 @@ class AppModel with ChangeNotifier {
   /// Sets the debounce delay in milliseconds for searching in the app..
   void setSearchDebounceDelay(int debounceDelay) async {
     await _preferences.put('auto_search_debounce_delay', debounceDelay);
+  }
+
+  /// Default dictionary font size for meanings.
+  final int defaultDictionaryFontSize = 13;
+
+  /// The search debounce delay in milliseconds for searching in the app..
+  int get dictionaryFontSize {
+    return _preferences.get('dictionary_font_size',
+        defaultValue: defaultDictionaryFontSize);
+  }
+
+  /// Sets the debounce delay in milliseconds for searching in the app..
+  void setDictionaryFontSize(int fontSize) async {
+    await _preferences.put('dictionary_font_size', fontSize);
+  }
+
+  /// The search debounce delay in milliseconds for searching in the app..
+  bool get closeCreatorOnExport {
+    return _preferences.get('close_on_export', defaultValue: false);
+  }
+
+  /// Sets the debounce delay in milliseconds for searching in the app..
+  void toggleCloseCreatorOnExport() async {
+    await _preferences.put('close_on_export', !closeCreatorOnExport);
   }
 }

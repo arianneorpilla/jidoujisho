@@ -48,8 +48,23 @@ class TatoebaExampleSentencesEnhancement extends Enhancement {
     appModel.openExampleSentenceDialog(
       exampleSentences: exampleSentences,
       onSelect: (selection) {
+        if (selection.isEmpty) {
+          return;
+        }
+
         creatorModel.getFieldController(SentenceField.instance).text =
-            selection;
+            selection.join('\n\n');
+      },
+      onAppend: (selection) {
+        if (selection.isEmpty) {
+          return;
+        }
+
+        String currentSentence =
+            creatorModel.getFieldController(SentenceField.instance).text;
+
+        creatorModel.getFieldController(SentenceField.instance).text =
+            '${currentSentence.trim()}\n\n${selection.join('\n\n')}'.trim();
       },
     );
   }

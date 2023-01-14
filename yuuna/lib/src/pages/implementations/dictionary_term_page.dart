@@ -395,6 +395,7 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
         for (PitchData data in metaEntry.pitches!) {
           children.add(
             appModel.targetLanguage.getPitchWidget(
+              appModel: appModel,
               context: context,
               reading: data.reading,
               downstep: data.downstep,
@@ -441,6 +442,7 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
                 left: Spacing.of(context).spaces.small,
               ),
               child: appModel.targetLanguage.getPitchWidget(
+                appModel: appModel,
                 context: context,
                 reading: data.reading,
                 downstep: data.downstep,

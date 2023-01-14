@@ -84,58 +84,110 @@ Future<List<DictionaryEntry>> prepareEntriesYomichanTermBankFormat(
 
     for (File file in files) {
       String filename = path.basename(file.path);
-      if (!filename.startsWith('term_bank')) {
-        continue;
-      }
+      if (filename.startsWith('term_bank')) {
+        List<dynamic> items = jsonDecode(file.readAsStringSync());
 
-      List<dynamic> items = jsonDecode(file.readAsStringSync());
+        for (List<dynamic> item in items) {
+          String term = item[0] as String;
+          String reading = item[1] as String;
 
-      for (List<dynamic> item in items) {
-        String term = item[0] as String;
-        String reading = item[1] as String;
+          double popularity = (item[4] as num).toDouble();
+          List<String> meaningTags = (item[2] as String).split(' ');
+          List<String> termTags = (item[7] as String).split(' ');
 
-        double popularity = (item[4] as num).toDouble();
-        List<String> meaningTags = (item[2] as String).split(' ');
-        List<String> termTags = (item[7] as String).split(' ');
+          List<String> meanings = [];
 
-        List<String> meanings = [];
-
-        if (item[5] is List) {
-          List<dynamic> meaningsList = List.from(item[5]);
-          meanings = meaningsList.map((e) {
-            if (e is Map) {
-              Map<String, dynamic> data = Map<String, dynamic>.from(e);
-              if (data['type'] == 'image') {
-                return '';
+          if (item[5] is List) {
+            List<dynamic> meaningsList = List.from(item[5]);
+            meanings = meaningsList.map((e) {
+              if (e is Map) {
+                Map<String, dynamic> data = Map<String, dynamic>.from(e);
+                if (data['type'] == 'image' ||
+                    data['type'] == 'structured-content') {
+                  return '';
+                } else {
+                  return e.toString();
+                }
               } else {
                 return e.toString();
               }
-            } else {
-              return e.toString();
+            }).toList();
+          } else if (item[5] is Map) {
+            Map<String, dynamic> data = Map<String, dynamic>.from(item[5]);
+            if (data['type'] != 'image' &&
+                data['type'] != 'structured-content') {
+              meanings.add(item[5].toString());
             }
-          }).toList();
-        } else if (item[5] is Map) {
-          Map<String, dynamic> data = Map<String, dynamic>.from(item[5]);
-          if (data['type'] != 'image') {
+          } else {
             meanings.add(item[5].toString());
           }
-        } else {
-          meanings.add(item[5].toString());
+
+          meanings = meanings.where((e) => e.isNotEmpty).toList();
+
+          if (meanings.isNotEmpty) {
+            entries.add(
+              DictionaryEntry(
+                dictionaryName: params.dictionaryName,
+                term: term,
+                reading: reading,
+                meanings: meanings,
+                popularity: popularity,
+                meaningTags: meaningTags,
+                termTags: termTags,
+              ),
+            );
+          }
         }
+      } else if (filename.startsWith('kanji_bank')) {
+        List<dynamic> items = jsonDecode(file.readAsStringSync());
 
-        meanings = meanings.where((e) => e.isNotEmpty).toList();
+        for (List<dynamic> item in items) {
+          String term = item[0] as String;
+          List<String> onyomis = (item[1] as String).split(' ');
+          List<String> kunyomis = (item[2] as String).split(' ');
+          List<String> termTags = (item[3] as String).split(' ');
+          List<String> meanings = List<String>.from(item[4]);
 
-        entries.add(
-          DictionaryEntry(
-            dictionaryName: params.dictionaryName,
-            term: term,
-            reading: reading,
-            meanings: meanings,
-            popularity: popularity,
-            meaningTags: meaningTags,
-            termTags: termTags,
-          ),
-        );
+          StringBuffer buffer = StringBuffer();
+          if (onyomis.isNotEmpty) {
+            buffer.write('音読み\n');
+            for (String onyomi in onyomis) {
+              buffer.write('  • $onyomi\n');
+            }
+            buffer.write('\n');
+          }
+          if (kunyomis.isNotEmpty) {
+            buffer.write('訓読み\n');
+            for (String kun in kunyomis) {
+              buffer.write('  • $kun\n');
+            }
+            buffer.write('\n');
+          }
+          if (meanings.isNotEmpty) {
+            buffer.write('意味\n');
+            for (String meaning in meanings) {
+              buffer.write('  • $meaning\n');
+            }
+            buffer.write('\n');
+          }
+
+          String meaning = buffer.toString().trim();
+
+          List<String> normalisedMeaning = [meaning];
+
+          meanings = meanings.where((e) => e.isNotEmpty).toList();
+
+          if (meaning.isNotEmpty) {
+            entries.add(
+              DictionaryEntry(
+                dictionaryName: params.dictionaryName,
+                term: term,
+                meanings: normalisedMeaning,
+                termTags: termTags,
+              ),
+            );
+          }
+        }
       }
 
       String message =

@@ -64,6 +64,7 @@ class JidoujishoLocalisations {
     'dialog_channel': 'CHANNEL',
     'dialog_crop': 'CROP',
     'dialog_connect': 'CONNECT',
+    'dialog_append': 'APPEND',
     'reset': 'Reset',
     'dialog_launch_ankidroid': 'LAUNCH ANKIDROID',
     'media_item_delete_confirmation':
@@ -340,8 +341,14 @@ class JidoujishoLocalisations {
     'decrease': 'Decrease',
     'unit_milliseconds': 'ms',
     'unit_pixels': 'px',
-    'search_settings': 'Search Settings',
+    'dictionary_settings': 'Dictionary Settings',
     'auto_search': 'Auto search',
     'auto_search_debounce_delay': 'Auto search debounce delay',
+    'dictionary_font_size': 'Dictionary font size',
+    'close_on_export': 'Close on Export',
+    'close_on_export_on':
+        'The Card Creator will now automatically close upon card export.',
+    'close_on_export_off':
+        'The Card Creator will no longer close upon card export.',
   };
 }

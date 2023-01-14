@@ -90,12 +90,18 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
                 String sourceText = '• ${widget.entry.meanings[index].trim()}';
                 return SelectableText(
                   sourceText,
+                  style: TextStyle(
+                    fontSize: appModel.dictionaryFontSize.toDouble(),
+                  ),
                   selectionControls: selectionControls,
                 );
               } else {
                 String sourceText = widget.entry.meanings.first.trim();
                 return SelectableText(
                   sourceText,
+                  style: TextStyle(
+                    fontSize: appModel.dictionaryFontSize.toDouble(),
+                  ),
                   selectionControls: selectionControls,
                 );
               }

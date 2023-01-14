@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_exit_app/flutter_exit_app.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:spaces/spaces.dart';
 import 'package:subtitle/subtitle.dart';
 import 'package:yuuna/creator.dart';
@@ -71,6 +72,9 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
   String get dialogClearLabel => appModel.translate('dialog_clear');
   String get dialogCancelLabel => appModel.translate('dialog_cancel');
   String get editFieldsLabel => appModel.translate('edit_fields');
+  String get closeOnExportLabel => appModel.translate('close_on_export');
+  String get closeOnExportOnToast => appModel.translate('close_on_export_on');
+  String get closeOnExportOffToast => appModel.translate('close_on_export_off');
 
   bool get isCardEditing => !widget.editEnhancements && !widget.editFields;
 
@@ -297,6 +301,10 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       deck: appModel.lastSelectedDeckName,
     );
     creatorModel.clearAll();
+
+    if (appModel.closeCreatorOnExport) {
+      Navigator.pop(context);
+    }
   }
 
   Widget buildExportButton() {
@@ -1019,6 +1027,8 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       return [];
     } else {
       return [
+        buildCloseOnExportButton(),
+        const Space.small(),
         buildSearchClearButton(),
         const Space.small(),
         buildManageEnhancementsButton(),
@@ -1045,6 +1055,37 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       onTap: () async {
         await appModel.openCreatorEnhancementsEditor();
         setState(() {});
+      },
+    );
+  }
+
+  /// Allows user to toggle whether or not to filter for videos with
+  /// closed captions.
+  Widget buildCloseOnExportButton() {
+    ValueNotifier<bool> notifier =
+        ValueNotifier<bool>(appModel.closeCreatorOnExport);
+
+    return ValueListenableBuilder<bool>(
+      valueListenable: notifier,
+      builder: (context, value, child) {
+        return JidoujishoIconButton(
+          size: Theme.of(context).textTheme.titleLarge?.fontSize,
+          tooltip: closeOnExportLabel,
+          enabledColor: value ? Colors.red : null,
+          icon: Icons.exit_to_app,
+          onTap: () {
+            appModel.toggleCloseCreatorOnExport();
+            notifier.value = appModel.closeCreatorOnExport;
+
+            Fluttertoast.showToast(
+              msg: appModel.closeCreatorOnExport
+                  ? closeOnExportOnToast
+                  : closeOnExportOffToast,
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.BOTTOM,
+            );
+          },
+        );
       },
     );
   }

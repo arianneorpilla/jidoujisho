@@ -16,14 +16,18 @@ class ImmersionKitSentencesDialogPage extends BasePage {
   const ImmersionKitSentencesDialogPage({
     required this.exampleSentences,
     required this.onSelect,
+    required this.onAppend,
     super.key,
   });
 
   /// The example sentences to be shown in the dialog.
   final List<ImmersionKitResult> exampleSentences;
 
-  /// The callback to be called when an example sentence has been picked.
-  final Function(ImmersionKitResult) onSelect;
+  /// Select action callback.
+  final Function(List<ImmersionKitResult>) onSelect;
+
+  /// Append action callback.
+  final Function(List<ImmersionKitResult>) onAppend;
 
   @override
   BasePageState createState() => _ImmersionKitSentencesDialogPageState();
@@ -34,18 +38,22 @@ class _ImmersionKitSentencesDialogPageState
   final ScrollController _scrollController = ScrollController();
 
   String get dialogSelectLabel => appModel.translate('dialog_select');
-  String get dialogStashLabel => appModel.translate('dialog_stash');
+  String get dialogAppendLabel => appModel.translate('dialog_append');
   String get noSentencesFound => appModel.translate('no_sentences_found');
 
-  int _selectedIndex = 0;
+  final Map<int, ValueNotifier<bool>> _valuesSelected = {};
   final AudioPlayer _audioPlayer = AudioPlayer();
 
   @override
   void initState() {
     super.initState();
 
+    widget.exampleSentences.forEachIndexed((index, element) {
+      _valuesSelected[index] = ValueNotifier<bool>(false);
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      playCurrentAudio();
+      playCurrentAudio(0);
     });
   }
 
@@ -55,7 +63,7 @@ class _ImmersionKitSentencesDialogPageState
     super.dispose();
   }
 
-  void playCurrentAudio() async {
+  void playCurrentAudio(int index) async {
     if (widget.exampleSentences.isEmpty) {
       return;
     }
@@ -80,7 +88,7 @@ class _ImmersionKitSentencesDialogPageState
     );
 
     await _audioPlayer.stop();
-    await _audioPlayer.setUrl(widget.exampleSentences[_selectedIndex].audioUrl);
+    await _audioPlayer.setUrl(widget.exampleSentences[index].audioUrl);
     session.setActive(true);
     await _audioPlayer.play();
     session.setActive(false);
@@ -138,9 +146,11 @@ class _ImmersionKitSentencesDialogPageState
         return GestureDetector(
           onTap: () {
             setState(() {
-              _selectedIndex = index;
+              _valuesSelected[index]!.value = !_valuesSelected[index]!.value;
+              if (_valuesSelected[index]!.value) {
+                playCurrentAudio(index);
+              }
             });
-            playCurrentAudio();
           },
           child: Container(
             padding: EdgeInsets.symmetric(
@@ -151,7 +161,7 @@ class _ImmersionKitSentencesDialogPageState
               top: Spacing.of(context).spaces.normal,
               right: Spacing.of(context).spaces.normal,
             ),
-            color: _selectedIndex == index
+            color: _valuesSelected[index]!.value
                 ? theme.colorScheme.primary.withOpacity(0.3)
                 : theme.unselectedWidgetColor.withOpacity(0.1),
             child: buildTextWidget(result),
@@ -221,14 +231,14 @@ class _ImmersionKitSentencesDialogPageState
   }
 
   List<Widget> get actions => [
-        buildStashButton(),
+        buildAppendButton(),
         buildSelectButton(),
       ];
 
-  Widget buildStashButton() {
+  Widget buildAppendButton() {
     return TextButton(
-      child: Text(dialogStashLabel),
-      onPressed: executeStash,
+      child: Text(dialogAppendLabel),
+      onPressed: executeAppend,
     );
   }
 
@@ -239,12 +249,21 @@ class _ImmersionKitSentencesDialogPageState
     );
   }
 
-  ImmersionKitResult get selection {
-    return widget.exampleSentences[_selectedIndex];
+  List<ImmersionKitResult> get selection {
+    List<ImmersionKitResult> results = [];
+
+    widget.exampleSentences.forEachIndexed((index, result) {
+      if (_valuesSelected[index]!.value) {
+        results.add(result);
+      }
+    });
+
+    return results;
   }
 
-  void executeStash() {
-    appModel.addToStash(terms: [selection.text]);
+  void executeAppend() {
+    Navigator.pop(context);
+    widget.onAppend(selection);
   }
 
   void executeSelect() {

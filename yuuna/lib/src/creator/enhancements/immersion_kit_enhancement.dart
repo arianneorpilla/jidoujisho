@@ -96,10 +96,14 @@ class ImmersionKitEnhancement extends Enhancement {
     appModel.openImmersionKitSentenceDialog(
       exampleSentences: exampleSentences,
       onSelect: (selection) async {
-        creatorModel.getFieldController(SentenceField.instance).text =
-            selection.text;
+        if (selection.isEmpty) {
+          return;
+        }
 
-        if (selection.imageUrl.isNotEmpty) {
+        creatorModel.getFieldController(SentenceField.instance).text =
+            selection.map((result) => result.text).join('\n\n');
+
+        if (selection.first.imageUrl.isNotEmpty) {
           await ImageField.instance.setImages(
             cause: cause,
             appModel: appModel,
@@ -109,7 +113,7 @@ class ImmersionKitEnhancement extends Enhancement {
               String imagePath = '${directory.path}/image';
               File imageFile = File(imagePath);
               http.Response imageResponse =
-                  await http.get(Uri.parse(selection.imageUrl));
+                  await http.get(Uri.parse(selection.first.imageUrl));
               imageFile.writeAsBytesSync(imageResponse.bodyBytes);
 
               return [NetworkToFileImage(file: imageFile)];
@@ -117,22 +121,73 @@ class ImmersionKitEnhancement extends Enhancement {
           );
         }
 
-        await AudioSentenceField.instance.setAudio(
-          appModel: appModel,
-          creatorModel: creatorModel,
-          searchTerm: searchTerm,
-          newAutoCannotOverride: false,
-          cause: cause,
-          generateAudio: () async {
-            String audioPath = '${directory.path}/audio.mp3';
-            File audioFile = File(audioPath);
-            http.Response audioResponse =
-                await http.get(Uri.parse(selection.audioUrl));
-            audioFile.writeAsBytesSync(audioResponse.bodyBytes);
+        if (selection.first.audioUrl.isNotEmpty) {
+          await AudioSentenceField.instance.setAudio(
+            appModel: appModel,
+            creatorModel: creatorModel,
+            searchTerm: searchTerm,
+            newAutoCannotOverride: false,
+            cause: cause,
+            generateAudio: () async {
+              String audioPath = '${directory.path}/audio.mp3';
+              File audioFile = File(audioPath);
+              http.Response audioResponse =
+                  await http.get(Uri.parse(selection.first.audioUrl));
+              audioFile.writeAsBytesSync(audioResponse.bodyBytes);
 
-            return audioFile;
-          },
-        );
+              return audioFile;
+            },
+          );
+        }
+      },
+      onAppend: (selection) async {
+        if (selection.isEmpty) {
+          return;
+        }
+
+        String currentSentence =
+            creatorModel.getFieldController(SentenceField.instance).text;
+
+        creatorModel.getFieldController(SentenceField.instance).text =
+            '${currentSentence.trim()}\n\n${selection.map((result) => result.text).join('\n\n')}'
+                .trim();
+
+        if (selection.first.imageUrl.isNotEmpty) {
+          await ImageField.instance.setImages(
+            cause: cause,
+            appModel: appModel,
+            creatorModel: creatorModel,
+            newAutoCannotOverride: false,
+            generateImages: () async {
+              String imagePath = '${directory.path}/image';
+              File imageFile = File(imagePath);
+              http.Response imageResponse =
+                  await http.get(Uri.parse(selection.first.imageUrl));
+              imageFile.writeAsBytesSync(imageResponse.bodyBytes);
+
+              return [NetworkToFileImage(file: imageFile)];
+            },
+          );
+        }
+
+        if (selection.first.audioUrl.isNotEmpty) {
+          await AudioSentenceField.instance.setAudio(
+            appModel: appModel,
+            creatorModel: creatorModel,
+            searchTerm: searchTerm,
+            newAutoCannotOverride: false,
+            cause: cause,
+            generateAudio: () async {
+              String audioPath = '${directory.path}/audio.mp3';
+              File audioFile = File(audioPath);
+              http.Response audioResponse =
+                  await http.get(Uri.parse(selection.first.audioUrl));
+              audioFile.writeAsBytesSync(audioResponse.bodyBytes);
+
+              return audioFile;
+            },
+          );
+        }
       },
     );
   }
@@ -209,7 +264,25 @@ class ImmersionKitEnhancement extends Enhancement {
 
       /// Make sure series aren't too consecutive.
       results.shuffle();
-      results.sort((a, b) => a.text.length.compareTo(b.text.length));
+
+      /// Results with images come first.
+      results.sort((a, b) {
+        int hasImage = (a.imageUrl.isNotEmpty ? -1 : 1)
+            .compareTo(b.imageUrl.isNotEmpty ? -1 : 1);
+
+        if (hasImage != 0) {
+          return hasImage;
+        }
+
+        int hasAudio = (a.audioUrl.isNotEmpty ? -1 : 1)
+            .compareTo(b.audioUrl.isNotEmpty ? -1 : 1);
+
+        if (hasAudio != 0) {
+          return hasAudio;
+        }
+
+        return a.text.length.compareTo(b.text.length);
+      });
 
       /// Save this into cache.
       _immersionKitCache[searchTerm] = results;
