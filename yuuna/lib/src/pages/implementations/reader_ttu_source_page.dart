@@ -231,6 +231,9 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
           await controller.evaluateJavascript(
               source:
                   'javascript:window.localStorage.setItem("secondDimensionMaxValue", $secondDimensionMaxValue)');
+          await controller.evaluateJavascript(
+              source:
+                  'javascript:window.localStorage.setItem("avoidPageBreak", 1)');
           if (appModel.isDarkMode) {
             await controller.evaluateJavascript(
                 source:
@@ -456,7 +459,7 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
   String javascriptToExecute = """
 /*jshint esversion: 6 */
 function tapToSelect(e) {
-  if (getSelectionText()) {
+  if (getSelectionText()) {f
     console.log(JSON.stringify({
 				"index": -1,
 				"text": getSelectionText(),
@@ -544,6 +547,7 @@ function tapToSelect(e) {
       index = index - 1;
     }
     
+    
 		console.log(JSON.stringify({
 				"index": index,
 				"text": text,
@@ -622,7 +626,7 @@ function getSelectionText() {
 };
 var reader = document.getElementsByClassName('book-content');
 if (reader.length != 0) {
-  reader[0].addEventListener('click', tapToSelect);
+  reader[0].addEventListener('click', tapToSelect, true);
 }
 document.head.insertAdjacentHTML('beforebegin', `
 <style>
