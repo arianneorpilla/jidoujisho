@@ -1,9 +1,11 @@
 name: Build Android APK
 on:
   push:
-    branches: [ "main" ]
+    branches: ['main']
+    paths: ['yuuna/**']
   pull_request:
-    branches: [ "main" ]
+    branches: ['main']
+    paths: ['yuuna/**']
   workflow_dispatch:
 jobs:
   build:
