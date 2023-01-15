@@ -76,7 +76,6 @@ class _YoutubeVideoResultsPageState
 
   Widget buildList() {
     return PagedListView<int, MediaItem>(
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       physics:
           const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
       scrollController: _scrollController,

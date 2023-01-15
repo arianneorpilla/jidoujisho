@@ -60,7 +60,6 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
     }
 
     return ListView.builder(
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       cacheExtent: 99999999999999,
       controller: DictionaryMediaType.instance.scrollController,
       physics:
