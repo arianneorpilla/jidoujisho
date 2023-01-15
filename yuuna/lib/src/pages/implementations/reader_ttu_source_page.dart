@@ -459,7 +459,7 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
   String javascriptToExecute = """
 /*jshint esversion: 6 */
 function tapToSelect(e) {
-  if (getSelectionText()) {f
+  if (getSelectionText()) {
     console.log(JSON.stringify({
 				"index": -1,
 				"text": getSelectionText(),

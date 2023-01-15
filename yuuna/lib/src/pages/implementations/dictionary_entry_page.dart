@@ -43,7 +43,7 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
       appModelNoUpdate.translate('dictionary_import_tag');
 
   @override
-  MaterialTextSelectionControls get selectionControls =>
+  JidoujishoTextSelectionControls get selectionControls =>
       JidoujishoTextSelectionControls(
         searchAction: widget.onSearch,
         searchActionLabel: searchLabel,

@@ -3,9 +3,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:audio_session/audio_session.dart';
-import 'package:collection/collection.dart';
 import 'package:filesystem_picker/filesystem_picker.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
@@ -1459,30 +1457,34 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           subtitleText = subtitleText.replaceAll(RegExp(regex), '');
         }
 
-        return dragToSelectSubtitle(subtitleText);
+        return buildTapToSelectSubtitle(subtitleText);
       },
     );
   }
 
   /// This renders the subtitle with a [SelectableText] widget.
-  Widget dragToSelectSubtitle(String subtitleText) {
+  Widget buildTapToSelectSubtitle(String subtitleText) {
     return Stack(
       alignment: Alignment.bottomCenter,
       children: <Widget>[
-        SelectableText.rich(
-          TextSpan(children: getSubtitleOutlineSpans(subtitleText)),
+        SelectableText(
+          subtitleText,
+          style: subtitleOutlineStyle,
           textAlign: TextAlign.center,
           toolbarOptions: const ToolbarOptions(),
           enableInteractiveSelection: false,
         ),
-        SelectableText.rich(
-          TextSpan(children: getSubtitleSpans(subtitleText)),
+        SelectableText(
+          subtitleText,
+          style: subtitleTextStyle,
           textAlign: TextAlign.center,
           focusNode: _dragToSelectFocusNode,
-          toolbarOptions: const ToolbarOptions(),
+          selectionControls: selectionControls,
           onSelectionChanged: (selection, cause) {
-            String newTerm = selection.textInside(subtitleText);
-            startDragSubtitlesTimer(newTerm);
+            if (cause == SelectionChangedCause.tap) {
+              String searchTerm = subtitleText.substring(selection.baseOffset);
+              setSearchTerm(searchTerm);
+            }
           },
         ),
       ],
@@ -1521,44 +1523,6 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               fontSize: _subtitleOptionsNotifier.value.fontSize,
               color: Colors.white,
             );
-
-  /// This renders the subtitle and assigns each character an action
-  /// according to its index.
-  List<InlineSpan> getSubtitleSpans(String text) {
-    List<InlineSpan> spans = [];
-
-    text.runes.forEachIndexed((index, rune) {
-      String character = String.fromCharCode(rune);
-      spans.add(
-        TextSpan(
-          text: character,
-          style: subtitleTextStyle,
-          recognizer: TapGestureRecognizer()
-            ..onTapDown = (details) async {
-              String searchTerm = text.substring(index);
-              setSearchTerm(searchTerm);
-            },
-        ),
-      );
-    });
-
-    return spans;
-  }
-
-  /// Used for subtitle outline design.
-  List<InlineSpan> getSubtitleOutlineSpans(String subtitleText) {
-    List<InlineSpan> spans = [];
-
-    subtitleText.runes.forEachIndexed((index, rune) {
-      String character = String.fromCharCode(rune);
-      spans.add(TextSpan(
-        text: character,
-        style: subtitleOutlineStyle,
-      ));
-    });
-
-    return spans;
-  }
 
   /// Used to cancel the timeout that deselects selected text.
   /// Called when text is selected.
