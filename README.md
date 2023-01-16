@@ -4,7 +4,7 @@
 <h3 align="center">jidoujisho</h3>
 <p align="center">A full-featured immersion language learning suite for mobile.</p>
 <p align="center">
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.2">
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.3">
     <img src="https://img.shields.io/github/v/release/lrorpilla/jidoujisho" alt="latest release" />
   </a>
   <a href="https://github.com/lrorpilla/jidoujisho/commits/main">
@@ -33,7 +33,7 @@
 
 ---
 <p align="center" style="margin:0"><b>Latest Release:
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.2">2.2.12</a>
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.3">2.3.0</a>
 </b></p>
 
 <p align="center" style="margin:0"><b>Release Notes:</b><br>
@@ -67,7 +67,8 @@
 </b><i>(Yuuna)</i> <b>
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.0.0">2.0</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.1">2.1</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.2">2.2</a></b></b>
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.2">2.2</a> · 
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.2">2.3</a></b>
 </p>
 
 # 📱 Language learning in the palm of your hand
