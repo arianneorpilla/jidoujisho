@@ -115,14 +115,11 @@ class _ExampleSentencesDialogPageState
                 color: _valuesSelected[index]!.value
                     ? theme.colorScheme.primary.withOpacity(0.3)
                     : theme.unselectedWidgetColor.withOpacity(0.1),
-                child: SizedBox(
-                  height: (textTheme.titleLarge?.fontSize)! * 1.3,
-                  child: Text(
-                    sentence,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: textTheme.titleMedium?.fontSize,
-                    ),
+                child: Text(
+                  sentence,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: textTheme.titleMedium?.fontSize,
                   ),
                 ),
               );

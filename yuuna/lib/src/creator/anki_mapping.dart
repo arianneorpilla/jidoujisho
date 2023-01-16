@@ -162,9 +162,6 @@ class AnkiMapping {
   static const List<String> defaultCreatorCollapsedFieldKeys = [
     PitchAccentField.key,
     FuriganaField.key,
-    ExpandedMeaningField.key,
-    CollapsedMeaningField.key,
-    HiddenMeaningField.key,
   ];
 
   /// A default map of enhancements to use for new mappings.
