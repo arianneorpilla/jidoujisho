@@ -1018,10 +1018,14 @@ class AppModel with ChangeNotifier {
 
       Uint8List bytes = file.readAsBytesSync();
       String charset = '';
-      try {
+
+      /// Find a way to check if this is a text file or a binary file instead
+      /// of doing this, it's not good to do format-specific tweaks in a
+      /// general function like this.
+      if (dictionaryFormat is AbbyyLingvoFormat) {
         DecodingResult result = await CharsetDetector.autoDecode(bytes);
         charset = result.charset;
-      } finally {}
+      }
 
       prepareDirectoryParams = PrepareDirectoryParams(
         file: file,
