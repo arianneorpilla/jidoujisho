@@ -88,9 +88,24 @@ Future<List<DictionaryTerm>> prepareSearchResultsEnglishLanguage(
   Map<int, List<DictionaryEntry>> termDeinflectedResultsByLength = {};
 
   List<String> segments = searchTerm.splitWithDelim(RegExp('[ -]'));
-  if (segments.length > 1) {
-    String last = segments.removeLast();
-    segments.addAll(last.split(''));
+
+  if (segments.length >= 3) {
+    String first = segments.removeAt(0);
+    String second = segments.removeAt(0);
+    String third = segments.removeAt(0);
+
+    segments = [
+      ...first.split(''),
+      second,
+      ...third.split(''),
+      ...segments,
+    ];
+  } else if (segments.length == 1) {
+    String first = segments.removeAt(0);
+    segments = [
+      ...first.split(''),
+      ...segments,
+    ];
   }
 
   segments.forEachIndexed((index, word) {
@@ -140,9 +155,9 @@ Future<List<DictionaryTerm>> prepareSearchResultsEnglishLanguage(
   });
 
   List<DictionaryEntry> startsWithResults = database.dictionaryEntrys
-      .where(sort: Sort.desc)
+      .where()
       .termStartsWith(searchTerm)
-      .sortByTermLengthDesc()
+      .sortByTermLength()
       .limit(limit)
       .findAllSync();
 

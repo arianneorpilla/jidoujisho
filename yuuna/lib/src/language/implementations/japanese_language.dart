@@ -369,9 +369,9 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
   });
 
   List<DictionaryEntry> startsWithResults = database.dictionaryEntrys
-      .where(sort: Sort.desc)
+      .where()
       .termStartsWith(searchTerm)
-      .sortByTermLengthDesc()
+      .sortByTermLength()
       .limit(limit)
       .findAllSync();
 
