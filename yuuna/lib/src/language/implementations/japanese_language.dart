@@ -277,6 +277,8 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
   Map<int, List<DictionaryEntry>> readingExactResultsByLength = {};
   Map<int, List<DictionaryEntry>> readingDeinflectedResultsByLength = {};
 
+  List<String> deinflectionsAlreadySearched = [];
+
   searchTerm.runes.forEachIndexed((index, rune) {
     String character = String.fromCharCode(rune);
     searchBuffer.write(character);
@@ -286,8 +288,11 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
     bool partialTermIsKana = kanaKit.isKana(partialTerm);
     bool partialTermIsKatakana = kanaKit.isKatakana(partialTerm);
 
-    List<String> possibleDeinflections =
-        Deinflector.deinflect(partialTerm).map((e) => e.term).toList();
+    List<String> possibleDeinflections = Deinflector.deinflect(partialTerm)
+        .map((e) => e.term)
+        .where((e) => !deinflectionsAlreadySearched.contains(e))
+        .toList();
+    possibleDeinflections.toSet().addAll(deinflectionsAlreadySearched);
 
     List<DictionaryEntry> termExactResults = [];
     List<DictionaryEntry> termDeinflectedResults = [];
@@ -398,7 +403,6 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
   }
 
   List<DictionaryEntry> entries = uniqueEntriesById.values.toList();
-
   Map<DictionaryPair, List<DictionaryEntry>> entriesByPair =
       groupBy<DictionaryEntry, DictionaryPair>(
     entries,

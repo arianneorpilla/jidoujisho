@@ -360,6 +360,8 @@ class JidoujishoLocalisations {
     'first_time_setup': 'First-Time Setup',
     'first_time_setup_description': 'Welcome to jidoujisho! Set your target '
         'language and a default profile will be tailored for you. You can '
-        'change this later at anytime.'
+        'change this later at anytime.',
+    'maximum_entries': 'Maximum dictionary entry query limit',
+    'maximum_terms': 'Maximum dictionary headwords in result',
   };
 }

@@ -211,11 +211,11 @@ class AppModel with ChangeNotifier {
 
   /// Maximum number of headwords in a returned dictionary result for
   /// performance purposes.
-  final int maximumDictionaryTermsInResult = 20;
+  final int defaultMaximumDictionaryTermsInResult = 20;
 
   /// Maximum number of dictionary entries that can be returned from a database
   /// dictionary search.
-  final int maximumDictionaryEntrySearchMatch = 40;
+  final int defaultMaximumDictionaryEntrySearchMatch = 40;
 
   /// Used as the history key used for the Stash.
   final String stashKey = ' stash';
@@ -1256,8 +1256,8 @@ class AppModel with ChangeNotifier {
 
     DictionarySearchParams params = DictionarySearchParams(
       searchTerm: searchTerm,
-      maximumDictionaryEntrySearchMatch: maximumDictionaryEntrySearchMatch,
-      maximumDictionaryTermsInResult: maximumDictionaryTermsInResult,
+      maximumDictionaryEntrySearchMatch: maximumEntries,
+      maximumDictionaryTermsInResult: maximumTerms,
       isarDirectoryPath: isarDirectory.path,
     );
 
@@ -2789,5 +2789,27 @@ class AppModel with ChangeNotifier {
   /// again.
   void setFirstTimeSetupFlag() async {
     await _preferences.put('first_time_setup', false);
+  }
+
+  /// The maximum dictionary terms in a result.
+  int get maximumTerms {
+    return _preferences.get('maximum_terms',
+        defaultValue: defaultMaximumDictionaryTermsInResult);
+  }
+
+  /// Sets the maximum dictionary terms in a result.
+  void setMaximumTerms(int value) async {
+    await _preferences.put('maximum_terms', value);
+  }
+
+  /// The maximum dictionary entries in a search match.
+  int get maximumEntries {
+    return _preferences.get('maximum_entries',
+        defaultValue: defaultMaximumDictionaryEntrySearchMatch);
+  }
+
+  /// Sets the maximum dictionary entries in a search match.
+  void setMaximumEntries(int value) async {
+    await _preferences.put('maximum_entries', value);
   }
 }
