@@ -431,9 +431,12 @@ class PlayerYoutubeSource extends PlayerMediaSource {
 
   /// Add your target language country under this Trending 20 playlist support.
   String? getTrendingPlaylistId(Language language) {
-    switch ('${language.languageCode}-${language.countryCode}') {
+    // Language Customizable
+    switch (language.languageCountryCode) {
       case 'ja-JP': // Japanese (Japan)
         return 'PLuXL6NS58Dyx-wTr5o7NiC7CZRbMA91DC';
+      case 'en-US': // English (United States)
+        return 'PLrEnWoR732-DtKgaDdnPkezM_nDidBU9H';
       default:
         return null;
     }

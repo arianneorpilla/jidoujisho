@@ -1,6 +1,7 @@
 import 'package:isar/isar.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:yuuna/creator.dart';
+import 'package:yuuna/language.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/utils.dart';
 
@@ -28,8 +29,10 @@ class AnkiMapping {
   });
 
   /// Get the default mapping that is included with the application at first
-  /// startup.
-  factory AnkiMapping.defaultMapping(int order) {
+  /// startup. Requires a language so that the appropriate default enhancements
+  /// are suggested.
+  factory AnkiMapping.defaultMapping(
+      {required Language language, required int order}) {
     return AnkiMapping(
       label: standardProfileName,
       model: standardModelName,
@@ -51,51 +54,92 @@ class AnkiMapping {
       creatorCollapsedFieldKeys: defaultCreatorCollapsedFieldKeys,
       order: order,
       tags: [standardModelName],
-      enhancements: defaultEnhancements,
+      enhancements: defaultEnhancementsByLanguage[language.languageCountryCode],
       actions: defaultActions,
       exportMediaTags: false,
     );
   }
 
   /// A default map of enhancements to use for new mappings.
-  static const Map<String, Map<int, String>> defaultEnhancements = {
-    SentenceField.key: {
-      0: ClearFieldEnhancement.key,
-      1: TextSegmentationEnhancement.key
+  static const Map<String, Map<String, Map<int, String>>>
+      defaultEnhancementsByLanguage = {
+    'ja-JP': {
+      SentenceField.key: {
+        0: ClearFieldEnhancement.key,
+        1: TextSegmentationEnhancement.key
+      },
+      TermField.key: {
+        0: ClearFieldEnhancement.key,
+        1: SearchDictionaryEnhancement.key,
+        2: MassifExampleSentencesEnhancement.key,
+        3: ImmersionKitEnhancement.key,
+        4: OpenStashEnhancement.key,
+      },
+      ReadingField.key: {0: ClearFieldEnhancement.key},
+      MeaningField.key: {
+        0: ClearFieldEnhancement.key,
+        1: TextSegmentationEnhancement.key,
+      },
+      NotesField.key: {0: ClearFieldEnhancement.key},
+      ImageField.key: {
+        -1: BingImagesSearchEnhancement.key,
+        0: ClearFieldEnhancement.key,
+        1: BingImagesSearchEnhancement.key,
+        2: ImageSearchTermPickerEnhancement.key,
+      },
+      AudioField.key: {
+        -1: JapanesePod101AudioEnhancement.key,
+        0: ClearFieldEnhancement.key,
+        1: JapanesePod101AudioEnhancement.key,
+      },
+      AudioSentenceField.key: {
+        0: ClearFieldEnhancement.key,
+      },
+      ContextField.key: {0: ClearFieldEnhancement.key},
+      PitchAccentField.key: {0: ClearFieldEnhancement.key},
+      FuriganaField.key: {0: ClearFieldEnhancement.key},
+      CollapsedMeaningField.key: {0: ClearFieldEnhancement.key},
+      ExpandedMeaningField.key: {0: ClearFieldEnhancement.key},
+      HiddenMeaningField.key: {0: ClearFieldEnhancement.key},
     },
-    TermField.key: {
-      0: ClearFieldEnhancement.key,
-      1: SearchDictionaryEnhancement.key,
-      2: MassifExampleSentencesEnhancement.key,
-      3: ImmersionKitEnhancement.key,
-      4: OpenStashEnhancement.key,
+    'en-US': {
+      SentenceField.key: {
+        0: ClearFieldEnhancement.key,
+        1: TextSegmentationEnhancement.key
+      },
+      TermField.key: {
+        0: ClearFieldEnhancement.key,
+        1: SearchDictionaryEnhancement.key,
+        2: TatoebaExampleSentencesEnhancement.key,
+        3: OpenStashEnhancement.key,
+      },
+      ReadingField.key: {0: ClearFieldEnhancement.key},
+      MeaningField.key: {
+        0: ClearFieldEnhancement.key,
+        1: TextSegmentationEnhancement.key,
+      },
+      NotesField.key: {0: ClearFieldEnhancement.key},
+      ImageField.key: {
+        -1: BingImagesSearchEnhancement.key,
+        0: ClearFieldEnhancement.key,
+        1: BingImagesSearchEnhancement.key,
+        2: ImageSearchTermPickerEnhancement.key,
+      },
+      AudioField.key: {
+        -1: ForvoAudioEnhancement.key,
+        0: ClearFieldEnhancement.key,
+        1: ForvoAudioEnhancement.key,
+      },
+      AudioSentenceField.key: {
+        0: ClearFieldEnhancement.key,
+      },
+      ContextField.key: {0: ClearFieldEnhancement.key},
+      PitchAccentField.key: {0: ClearFieldEnhancement.key},
+      FuriganaField.key: {0: ClearFieldEnhancement.key},
+      CollapsedMeaningField.key: {0: ClearFieldEnhancement.key},
+      ExpandedMeaningField.key: {0: ClearFieldEnhancement.key},
+      HiddenMeaningField.key: {0: ClearFieldEnhancement.key},
     },
-    ReadingField.key: {0: ClearFieldEnhancement.key},
-    MeaningField.key: {
-      0: ClearFieldEnhancement.key,
-      1: TextSegmentationEnhancement.key,
-    },
-    NotesField.key: {0: ClearFieldEnhancement.key},
-    ImageField.key: {
-      -1: BingImagesSearchEnhancement.key,
-      0: ClearFieldEnhancement.key,
-      1: BingImagesSearchEnhancement.key,
-      2: ImageSearchTermPickerEnhancement.key,
-    },
-    AudioField.key: {
-      -1: JapanesePod101AudioEnhancement.key,
-      0: ClearFieldEnhancement.key,
-      1: JapanesePod101AudioEnhancement.key,
-    },
-    AudioSentenceField.key: {
-      0: ClearFieldEnhancement.key,
-    },
-    ContextField.key: {0: ClearFieldEnhancement.key},
-    PitchAccentField.key: {0: ClearFieldEnhancement.key},
-    FuriganaField.key: {0: ClearFieldEnhancement.key},
-    CollapsedMeaningField.key: {0: ClearFieldEnhancement.key},
-    ExpandedMeaningField.key: {0: ClearFieldEnhancement.key},
-    HiddenMeaningField.key: {0: ClearFieldEnhancement.key},
   };
 
   /// Default fields to show upon opening the Card Creator.
@@ -121,6 +165,8 @@ class AnkiMapping {
     0: CardCreatorAction.key,
     1: InstantExportAction.key,
     2: AddToStashAction.key,
+    3: ShareAction.key,
+    4: PlayAudioAction.key,
   };
 
   /// The default mapping name which cannot be deleted or reused.
@@ -153,6 +199,10 @@ class AnkiMapping {
 
   /// A collection of tags to always include when exporting with this mapping.
   final List<String> tags;
+
+  /// Whether or not this mapping has any non-empty fields set.
+  bool get isExportFieldsEmpty =>
+      exportFieldKeys.where((e) => e != null).isEmpty;
 
   /// Used to keep track of actions used in dictionary results.
   @ignore

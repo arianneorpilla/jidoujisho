@@ -102,7 +102,8 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
               AnkiMapping.defaultCreatorCollapsedFieldKeys,
           tags: [],
           order: 0,
-          enhancements: AnkiMapping.defaultEnhancements,
+          enhancements: AnkiMapping.defaultEnhancementsByLanguage[
+              appModel.targetLanguage.languageCountryCode],
           actions: AnkiMapping.defaultActions,
           exportMediaTags: true,
         );
@@ -207,7 +208,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
             ),
             if (_selectedOrder == mapping.order) const Space.normal(),
             if (_selectedOrder == mapping.order)
-              buildMappingTileTrailing(mapping)
+              buildMappingTileTrailing(mapping.label)
           ],
         ),
         onTap: () async {
@@ -223,13 +224,15 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
     );
   }
 
-  Widget buildMappingTileTrailing(AnkiMapping mapping) {
+  Widget buildMappingTileTrailing(String label) {
     return JidoujishoIconButton(
       padding: EdgeInsets.zero,
       constraints: const BoxConstraints(),
       icon: Icons.more_vert,
-      onTapDown: (details) =>
-          openMappingOptionsMenu(details: details, mapping: mapping),
+      onTapDown: (details) => openMappingOptionsMenu(
+        details: details,
+        label: label,
+      ),
       tooltip: showOptionsLabel,
     );
   }
@@ -260,20 +263,24 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
     );
   }
 
-  void openMappingOptionsMenu(
-      {required TapDownDetails details, required AnkiMapping mapping}) async {
+  void openMappingOptionsMenu({
+    required TapDownDetails details,
+    required String label,
+  }) async {
     RelativeRect position = RelativeRect.fromLTRB(
         details.globalPosition.dx, details.globalPosition.dy, 0, 0);
     Function()? selectedAction = await showMenu(
       context: context,
       position: position,
-      items: getMenuItems(mapping),
+      items: getMenuItems(label),
     );
 
     selectedAction?.call();
   }
 
-  List<PopupMenuItem<VoidCallback>> getMenuItems(AnkiMapping mapping) {
+  List<PopupMenuItem<VoidCallback>> getMenuItems(String label) {
+    AnkiMapping mapping = appModel.getMappingFromLabel(label)!;
+
     return [
       buildPopupItem(
         label: optionsEditLabel,

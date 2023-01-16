@@ -10,4 +10,5 @@ export 'src/dictionary/dictionary_meta_entry.dart';
 export 'src/dictionary/frequency_data.dart';
 export 'src/dictionary/pitch_data.dart';
 
+export 'src/dictionary/formats/abbyy_lingvo_format.dart';
 export 'src/dictionary/formats/yomichan_dictionary_format.dart';

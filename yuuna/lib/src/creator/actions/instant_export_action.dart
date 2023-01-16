@@ -115,7 +115,9 @@ class InstantExportAction extends QuickAction {
       creatorFieldValues: creatorModel.getExportDetails(ref),
       mapping: appModel.lastSelectedMapping,
       deck: appModel.lastSelectedDeckName,
+      onSuccess: () {
+        creatorModel.clearAll();
+      },
     );
-    creatorModel.clearAll();
   }
 }

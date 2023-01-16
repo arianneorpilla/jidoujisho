@@ -299,12 +299,14 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       creatorFieldValues: creatorModel.getExportDetails(ref),
       mapping: appModel.lastSelectedMapping,
       deck: appModel.lastSelectedDeckName,
-    );
-    creatorModel.clearAll();
+      onSuccess: () {
+        creatorModel.clearAll();
 
-    if (appModel.closeCreatorOnExport) {
-      Navigator.pop(context);
-    }
+        if (appModel.closeCreatorOnExport) {
+          Navigator.pop(context);
+        }
+      },
+    );
   }
 
   Widget buildExportButton() {

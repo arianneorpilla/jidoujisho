@@ -21,12 +21,13 @@ class YomichanDictionaryFormat extends DictionaryFormat {
           formatName: 'Yomichan Dictionary',
           formatIcon: Icons.auto_stories_rounded,
           compatibleFileExtensions: const ['.zip'],
-          prepareDirectory: prepareDirectoryYomichanTermBankFormat,
-          prepareName: prepareNameYomichanTermBankFormat,
-          prepareEntries: prepareEntriesYomichanTermBankFormat,
-          prepareMetaEntries: prepareMetaEntriesYomichanTermBankFormat,
-          prepareTags: prepareTagsYomichanTermBankFormat,
-          prepareMetadata: prepareMetadataYomichanTermBankFormat,
+          prepareDirectory: prepareDirectoryYomichanDictionaryFormat,
+          prepareName: prepareNameYomichanDictionaryFormat,
+          prepareEntries: prepareEntriesYomichanDictionaryFormat,
+          prepareMetaEntries: prepareMetaEntriesYomichanDictionaryFormat,
+          prepareTags: prepareTagsYomichanDictionaryFormat,
+          prepareMetadata: prepareMetadataYomichanDictionaryFormat,
+          useAnyPicker: false,
         );
 
   /// Get the singleton instance of this dictionary format.
@@ -37,7 +38,7 @@ class YomichanDictionaryFormat extends DictionaryFormat {
 }
 
 /// Top-level function for use in compute. See [DictionaryFormat] for details.
-Future<void> prepareDirectoryYomichanTermBankFormat(
+Future<void> prepareDirectoryYomichanDictionaryFormat(
     PrepareDirectoryParams params) async {
   try {
     /// Extract the user selected archive to the working directory.
@@ -52,7 +53,7 @@ Future<void> prepareDirectoryYomichanTermBankFormat(
 }
 
 /// Top-level function for use in compute. See [DictionaryFormat] for details.
-Future<String> prepareNameYomichanTermBankFormat(
+Future<String> prepareNameYomichanDictionaryFormat(
     PrepareDirectoryParams params) async {
   try {
     /// Get the index, which contains the name of the dictionary contained by
@@ -74,7 +75,7 @@ Future<String> prepareNameYomichanTermBankFormat(
 }
 
 /// Top-level function for use in compute. See [DictionaryFormat] for details.
-Future<List<DictionaryEntry>> prepareEntriesYomichanTermBankFormat(
+Future<List<DictionaryEntry>> prepareEntriesYomichanDictionaryFormat(
     PrepareDictionaryParams params) async {
   try {
     List<DictionaryEntry> entries = [];
@@ -205,7 +206,7 @@ Future<List<DictionaryEntry>> prepareEntriesYomichanTermBankFormat(
 }
 
 /// Top-level function for use in compute. See [DictionaryFormat] for details.
-Future<List<DictionaryMetaEntry>> prepareMetaEntriesYomichanTermBankFormat(
+Future<List<DictionaryMetaEntry>> prepareMetaEntriesYomichanDictionaryFormat(
     PrepareDictionaryParams params) async {
   try {
     List<DictionaryMetaEntry> metaEntries = [];
@@ -331,7 +332,7 @@ Future<List<DictionaryMetaEntry>> prepareMetaEntriesYomichanTermBankFormat(
 }
 
 /// Top-level function for use in compute. See [DictionaryFormat] for details.
-Future<List<DictionaryTag>> prepareTagsYomichanTermBankFormat(
+Future<List<DictionaryTag>> prepareTagsYomichanDictionaryFormat(
     PrepareDictionaryParams params) async {
   try {
     List<DictionaryTag> tags = [];
@@ -382,7 +383,7 @@ Future<List<DictionaryTag>> prepareTagsYomichanTermBankFormat(
 }
 
 /// Top-level function for use in compute. See [DictionaryFormat] for details.
-Future<Map<String, String>> prepareMetadataYomichanTermBankFormat(
+Future<Map<String, String>> prepareMetadataYomichanDictionaryFormat(
     PrepareDictionaryParams params) async {
   return {};
 }

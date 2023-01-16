@@ -288,7 +288,11 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
                 }
               }
 
-              String searchTerm = text.substring(index);
+              String searchTerm =
+                  appModel.targetLanguage.getSearchTermFromIndex(
+                text: text,
+                index: index,
+              );
 
               if (_currentSelection.isEmpty) {
                 searchDictionaryResult(

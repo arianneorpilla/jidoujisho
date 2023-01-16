@@ -20,6 +20,7 @@ abstract class Language {
     required this.isSpaceDelimited,
     required this.textBaseline,
     required this.helloWorld,
+    required this.standardFormat,
     this.prepareSearchResults = prepareSearchResultsStandard,
   });
 
@@ -64,6 +65,11 @@ abstract class Language {
   /// a language.
   final Future<List<DictionaryTerm>> Function(DictionarySearchParams params)?
       prepareSearchResults;
+
+  /// A standard format that dictionaries of this language can be found in.
+  /// This is only to set this as the default last selected format on first
+  /// time setup.
+  final DictionaryFormat standardFormat;
 
   /// Whether or not [initialise] has been called for the language.
   bool _initialised = false;
@@ -117,6 +123,9 @@ abstract class Language {
 
     return sentenceToReturn.trim();
   }
+
+  /// The language and country code separated by a dash.
+  String get languageCountryCode => '$languageCode-$countryCode';
 
   /// Given unsegmented [text], perform text segmentation particular to the
   /// language and return a list of parsed words.
@@ -201,11 +210,31 @@ abstract class Language {
     return word;
   }
 
-  /// Given a word, lemmatise and get the root form of the word.
-  ///
-  /// For example, for Japanese, 'しました' should be 'する'.
-  /// For English, 'running' should be 'run'.
-  String getRootForm(String term);
+  /// Gets a search term and for a space-delimited language, assumes the index
+  /// is within the range of the first word, with remainder words included.
+  /// For a language that is not space-delimited, this is simply the substring
+  /// function.
+  String getSearchTermFromIndex({
+    required String text,
+    required int index,
+  }) {
+    if (isSpaceDelimited) {
+      final workingBuffer = StringBuffer();
+      final termBuffer = StringBuffer();
+      List<String> words = textToWords(text);
+
+      for (String word in words) {
+        workingBuffer.write(word);
+        if (workingBuffer.length > index) {
+          termBuffer.write(word);
+        }
+      }
+
+      return termBuffer.toString();
+    } else {
+      return text.substring(index);
+    }
+  }
 
   /// Some languages may want to display custom widgets rather than the built
   /// in word and reading text that is there by default. For example, Japanese

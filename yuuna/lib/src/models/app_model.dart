@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'dart:io';
 import 'dart:isolate';
 
@@ -12,10 +13,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:flutter_charset_detector/flutter_charset_detector.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:isar/isar.dart';
 import 'package:intl/intl.dart' as intl;
@@ -314,6 +315,11 @@ class AppModel with ChangeNotifier {
     }
   }
 
+  /// Get a mapping with a given mapping name.
+  AnkiMapping? getMappingFromLabel(String label) {
+    return _database.ankiMappings.where().labelEqualTo(label).findFirstSync();
+  }
+
   /// Change this once a field hide/show system is in place.
   List<Field> get activeFields => [
         ...lastSelectedMapping.getCreatorFields(),
@@ -344,6 +350,7 @@ class AppModel with ChangeNotifier {
     final List<Language> availableLanguages = List<Language>.unmodifiable(
       [
         JapaneseLanguage.instance,
+        EnglishLanguage.instance,
       ],
     );
 
@@ -439,6 +446,7 @@ class AppModel with ChangeNotifier {
         List<DictionaryFormat>.unmodifiable(
       [
         YomichanDictionaryFormat.instance,
+        AbbyyLingvoFormat.instance,
       ],
     );
 
@@ -576,10 +584,13 @@ class AppModel with ChangeNotifier {
   }
 
   /// Populate default mapping if it does not exist in the database.
-  void populateDefaultMapping() async {
+  void populateDefaultMapping(Language language) async {
     if (_database.ankiMappings.where().findAllSync().isEmpty) {
       _database.writeTxnSync(() {
-        _database.ankiMappings.putSync(AnkiMapping.defaultMapping(0));
+        _database.ankiMappings.putSync(AnkiMapping.defaultMapping(
+          language: language,
+          order: 0,
+        ));
       });
     }
   }
@@ -660,7 +671,6 @@ class AppModel with ChangeNotifier {
     populateDictionaryFormats();
     populateEnhancements();
     populateQuickActions();
-    populateDefaultMapping();
 
     /// Get the current target language and prepare its resources for use. This
     /// will not re-run if the target language is already initialised, as
@@ -800,6 +810,9 @@ class AppModel with ChangeNotifier {
   Future<void> setTargetLanguage(Language language) async {
     String localeTag = language.locale.toLanguageTag();
     await _preferences.put('target_language', localeTag);
+
+    language.initialise();
+
     notifyListeners();
   }
 
@@ -878,7 +891,9 @@ class AppModel with ChangeNotifier {
     await showDialog(
       barrierDismissible: true,
       context: navigatorKey.currentContext!,
-      builder: (context) => const LanguageDialogPage(),
+      builder: (context) => LanguageDialogPage(
+        isFirstTimeSetup: isFirstTimeSetup,
+      ),
     );
   }
 
@@ -1001,8 +1016,16 @@ class AppModel with ChangeNotifier {
         throw Exception(extensionErrorMessage);
       }
 
+      Uint8List bytes = file.readAsBytesSync();
+      String charset = '';
+      try {
+        DecodingResult result = await CharsetDetector.autoDecode(bytes);
+        charset = result.charset;
+      } finally {}
+
       prepareDirectoryParams = PrepareDirectoryParams(
         file: file,
+        charset: charset,
         workingDirectory: workingDirectory,
         sendPort: sendPort,
         localisation: localisation,
@@ -1059,6 +1082,7 @@ class AppModel with ChangeNotifier {
       PrepareDictionaryParams prepareDictionaryParams = PrepareDictionaryParams(
         dictionaryName: dictionaryName,
         dictionaryFormat: dictionaryFormat,
+        charset: charset,
         workingDirectory: workingDirectory,
         sendPort: sendPort,
         isarDirectoryPath: isarDirectory.path,
@@ -1461,7 +1485,18 @@ class AppModel with ChangeNotifier {
     required CreatorFieldValues creatorFieldValues,
     required AnkiMapping mapping,
     required String deck,
+    required Function() onSuccess,
   }) async {
+    if (mapping.isExportFieldsEmpty) {
+      String message = translate('export_profile_empty');
+      Fluttertoast.showToast(
+        msg: message,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+      );
+      return;
+    }
+
     Map<Field, String> exportedImages = {};
     Map<Field, String> exportedAudio = {};
 
@@ -1515,14 +1550,23 @@ class AppModel with ChangeNotifier {
         },
       );
 
-      String exportedMessage = translate('card_exported');
+      String message = translate('card_exported');
       Fluttertoast.showToast(
-        msg: exportedMessage.replaceAll('%deck%', deck),
+        msg: message.replaceAll('%deck%', deck),
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
       );
+
+      onSuccess.call();
     } on PlatformException {
       debugPrint('Failed to add note');
+      String message = translate('error_add_note_ankidroid');
+      Fluttertoast.showToast(
+        msg: message,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+      );
+
       rethrow;
     } finally {
       debugPrint('Added note to Anki media');
@@ -1570,7 +1614,13 @@ class AppModel with ChangeNotifier {
 
       return response;
     } on PlatformException {
-      debugPrint('Failed to add [$mimeType] to Anki media');
+      String message = translate('error_export_media_ankidroid');
+      Fluttertoast.showToast(
+        msg: message,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+      );
+
       rethrow;
     }
   }
@@ -1939,6 +1989,9 @@ class AppModel with ChangeNotifier {
     }
 
     List<String> segmentedText = targetLanguage.textToWords(sourceText);
+    if (targetLanguage.isSpaceDelimited) {
+      segmentedText = segmentedText.where((e) => e != ' ').toList();
+    }
 
     await showDialog(
       context: _navigatorKey.currentContext!,
@@ -2591,26 +2644,6 @@ class AppModel with ChangeNotifier {
     _preferences.put('audio_index/${item.uniqueKey}', index);
   }
 
-  /// Get fonts that are available to be chosen for the current target language.
-  List<String> getAvailableFonts() {
-    if (targetLanguage is JapaneseLanguage) {
-      return [
-        'Hachi Maru Pop',
-        'Kosugi',
-        'Kosugi Maru',
-        'M PLUS 1p',
-        'M PLUS Rounded 1c',
-        'Potta One',
-        'Roboto',
-        'Sawarabi Gothic',
-        'Sawarabi Mincho',
-        'Yusei Magic',
-      ];
-    }
-
-    return GoogleFonts.asMap().keys.toList();
-  }
-
   /// Set the subtitle options used in the player.
   void setSubtitleOptions(SubtitleOptions options) {
     _preferences.put('audio_allowance', options.audioAllowance);
@@ -2703,7 +2736,7 @@ class AppModel with ChangeNotifier {
   }
 
   /// Search debounce delay in milliseconds by default.
-  final int defaultSearchDebounceDelay = 300;
+  final int defaultSearchDebounceDelay = 200;
 
   /// The search debounce delay in milliseconds for searching in the app..
   int get searchDebounceDelay {
@@ -2717,7 +2750,7 @@ class AppModel with ChangeNotifier {
   }
 
   /// Default dictionary font size for meanings.
-  final double defaultDictionaryFontSize = 15;
+  final double defaultDictionaryFontSize = 14;
 
   /// The search debounce delay in milliseconds for searching in the app..
   double get dictionaryFontSize {
@@ -2738,5 +2771,17 @@ class AppModel with ChangeNotifier {
   /// Sets the debounce delay in milliseconds for searching in the app..
   void toggleCloseCreatorOnExport() async {
     await _preferences.put('close_on_export', !closeCreatorOnExport);
+  }
+
+  /// Whether or not it is the app's first time setup to show the languages
+  /// dialog.
+  bool get isFirstTimeSetup {
+    return _preferences.get('first_time_setup', defaultValue: true);
+  }
+
+  /// Sets the first time setup flag so the first time message does not show
+  /// again.
+  void setFirstTimeSetupFlag() async {
+    await _preferences.put('first_time_setup', false);
   }
 }

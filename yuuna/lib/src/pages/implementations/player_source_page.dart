@@ -1482,7 +1482,11 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           selectionControls: selectionControls,
           onSelectionChanged: (selection, cause) {
             if (cause == SelectionChangedCause.tap) {
-              String searchTerm = subtitleText.substring(selection.baseOffset);
+              String searchTerm =
+                  appModel.targetLanguage.getSearchTermFromIndex(
+                text: subtitleText,
+                index: selection.baseOffset,
+              );
               setSearchTerm(searchTerm);
             }
           },

@@ -228,20 +228,34 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
           final logicalHeight = logicalScreenSize.height;
 
           int secondDimensionMaxValue = (logicalHeight * 0.825).toInt();
-          await controller.evaluateJavascript(
-              source:
-                  'javascript:window.localStorage.setItem("secondDimensionMaxValue", $secondDimensionMaxValue)');
-          await controller.evaluateJavascript(
-              source:
-                  'javascript:window.localStorage.setItem("avoidPageBreak", 1)');
+
           if (appModel.isDarkMode) {
             await controller.evaluateJavascript(
                 source:
                     'javascript:window.localStorage.setItem("theme", "black-theme")');
           }
 
-          await controller.evaluateJavascript(
-              source: 'javascript:window.localStorage.setItem("fontSize", 24)');
+          if (!appModel.targetLanguage.preferVerticalReading) {
+            await controller.evaluateJavascript(
+                source:
+                    'javascript:window.localStorage.setItem("writingMode", "horizontal-tb")');
+            await controller.evaluateJavascript(
+                source:
+                    'javascript:window.localStorage.setItem("fontSize", 16)');
+            await controller.evaluateJavascript(
+                source:
+                    'javascript:window.localStorage.setItem("firstDimensionMargin", 24)');
+          } else {
+            await controller.evaluateJavascript(
+                source:
+                    'javascript:window.localStorage.setItem("fontSize", 24)');
+            await controller.evaluateJavascript(
+                source:
+                    'javascript:window.localStorage.setItem("avoidPageBreak", 1)');
+            await controller.evaluateJavascript(
+                source:
+                    'javascript:window.localStorage.setItem("secondDimensionMaxValue", $secondDimensionMaxValue)');
+          }
         }
       },
       onLoadStop: (controller, uri) async {
@@ -305,7 +319,10 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
           mediaSource.clearCurrentSentence();
         } else {
           try {
-            String searchTerm = text.substring(index);
+            String searchTerm = appModel.targetLanguage.getSearchTermFromIndex(
+              text: text,
+              index: index,
+            );
 
             searchDictionaryResult(
               searchTerm: searchTerm,

@@ -47,23 +47,28 @@ const AnkiMappingSchema = CollectionSchema(
       name: r'exportMediaTags',
       type: IsarType.bool,
     ),
-    r'label': PropertySchema(
+    r'isExportFieldsEmpty': PropertySchema(
       id: 6,
+      name: r'isExportFieldsEmpty',
+      type: IsarType.bool,
+    ),
+    r'label': PropertySchema(
+      id: 7,
       name: r'label',
       type: IsarType.string,
     ),
     r'model': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'model',
       type: IsarType.string,
     ),
     r'order': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'order',
       type: IsarType.long,
     ),
     r'tags': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'tags',
       type: IsarType.stringList,
     )
@@ -164,10 +169,11 @@ void _ankiMappingSerialize(
   writer.writeString(offsets[3], object.enhancementsIsar);
   writer.writeStringList(offsets[4], object.exportFieldKeys);
   writer.writeBool(offsets[5], object.exportMediaTags);
-  writer.writeString(offsets[6], object.label);
-  writer.writeString(offsets[7], object.model);
-  writer.writeLong(offsets[8], object.order);
-  writer.writeStringList(offsets[9], object.tags);
+  writer.writeBool(offsets[6], object.isExportFieldsEmpty);
+  writer.writeString(offsets[7], object.label);
+  writer.writeString(offsets[8], object.model);
+  writer.writeLong(offsets[9], object.order);
+  writer.writeStringList(offsets[10], object.tags);
 }
 
 AnkiMapping _ankiMappingDeserialize(
@@ -182,10 +188,10 @@ AnkiMapping _ankiMappingDeserialize(
     exportFieldKeys: reader.readStringOrNullList(offsets[4]) ?? [],
     exportMediaTags: reader.readBoolOrNull(offsets[5]),
     id: id,
-    label: reader.readString(offsets[6]),
-    model: reader.readString(offsets[7]),
-    order: reader.readLong(offsets[8]),
-    tags: reader.readStringList(offsets[9]) ?? [],
+    label: reader.readString(offsets[7]),
+    model: reader.readString(offsets[8]),
+    order: reader.readLong(offsets[9]),
+    tags: reader.readStringList(offsets[10]) ?? [],
   );
   object.actionsIsar = reader.readString(offsets[0]);
   object.enhancementsIsar = reader.readString(offsets[3]);
@@ -212,12 +218,14 @@ P _ankiMappingDeserializeProp<P>(
     case 5:
       return (reader.readBoolOrNull(offset)) as P;
     case 6:
-      return (reader.readString(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 7:
       return (reader.readString(offset)) as P;
     case 8:
-      return (reader.readLong(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 9:
+      return (reader.readLong(offset)) as P;
+    case 10:
       return (reader.readStringList(offset) ?? []) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1636,6 +1644,16 @@ extension AnkiMappingQueryFilter
     });
   }
 
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      isExportFieldsEmptyEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isExportFieldsEmpty',
+        value: value,
+      ));
+    });
+  }
+
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition> labelEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -2226,6 +2244,20 @@ extension AnkiMappingQuerySortBy
     });
   }
 
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy>
+      sortByIsExportFieldsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isExportFieldsEmpty', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy>
+      sortByIsExportFieldsEmptyDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isExportFieldsEmpty', Sort.desc);
+    });
+  }
+
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy> sortByLabel() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'label', Sort.asc);
@@ -2316,6 +2348,20 @@ extension AnkiMappingQuerySortThenBy
     });
   }
 
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy>
+      thenByIsExportFieldsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isExportFieldsEmpty', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy>
+      thenByIsExportFieldsEmptyDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isExportFieldsEmpty', Sort.desc);
+    });
+  }
+
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy> thenByLabel() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'label', Sort.asc);
@@ -2398,6 +2444,13 @@ extension AnkiMappingQueryWhereDistinct
     });
   }
 
+  QueryBuilder<AnkiMapping, AnkiMapping, QDistinct>
+      distinctByIsExportFieldsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isExportFieldsEmpty');
+    });
+  }
+
   QueryBuilder<AnkiMapping, AnkiMapping, QDistinct> distinctByLabel(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2470,6 +2523,13 @@ extension AnkiMappingQueryProperty
   QueryBuilder<AnkiMapping, bool?, QQueryOperations> exportMediaTagsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'exportMediaTags');
+    });
+  }
+
+  QueryBuilder<AnkiMapping, bool, QQueryOperations>
+      isExportFieldsEmptyProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isExportFieldsEmpty');
     });
   }
 

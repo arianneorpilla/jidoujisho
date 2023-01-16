@@ -352,5 +352,14 @@ class JidoujishoLocalisations {
         'The Card Creator will now automatically close upon card export.',
     'close_on_export_off':
         'The Card Creator will no longer close upon card export.',
+    'export_profile_empty':
+        'Your export profile has no set fields and requires configuration.',
+    'error_export_media_ankidroid':
+        'There was an error in exporting media to AnkiDroid.',
+    'error_add_note': 'There was an error in adding a note to AnkiDroid.',
+    'first_time_setup': 'First-Time Setup',
+    'first_time_setup_description': 'Welcome to jidoujisho! Set your target '
+        'language and a default profile will be tailored for you. You can '
+        'change this later at anytime.'
   };
 }

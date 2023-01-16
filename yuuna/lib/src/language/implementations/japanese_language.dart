@@ -24,6 +24,7 @@ class JapaneseLanguage extends Language {
           textBaseline: TextBaseline.ideographic,
           prepareSearchResults: prepareSearchResultsJapaneseLanguage,
           helloWorld: 'こんにちは世界',
+          standardFormat: YomichanDictionaryFormat.instance,
         );
 
   /// Get the singleton instance of this language.
@@ -45,47 +46,6 @@ class JapaneseLanguage extends Language {
   @override
   Future<void> prepareResources() async {
     await mecab.init('assets/language/japanese/ipadic', true);
-  }
-
-  @override
-  String getRootForm(String term) {
-    /// This function is supposed to just return the lemma for the starting
-    /// word of a sentence but it also attempts to repair some problems with
-    /// some search results.
-    try {
-      if (kanaKit.isRomaji(term)) {
-        return kanaKit.toHiragana(term);
-      }
-
-      List<Word> termTokens = parseVe(mecab, term);
-
-      if (term.startsWith('気に') && termTokens.length >= 2) {
-        return '気に${termTokens[1].lemma}';
-      }
-
-      if (termTokens.length >= 3 &&
-          (termTokens[0].word == termTokens[0].lemma ||
-              kanaKit.isKana(termTokens[0].word!)) &&
-          termTokens[1].partOfSpeech == Pos.Postposition &&
-          termTokens[2].partOfSpeech == Pos.Verb) {
-        return '${termTokens[0]}${termTokens[1].word}${termTokens[2].lemma}';
-      }
-
-      if (termTokens.first.word!.length < termTokens.first.lemma!.length) {
-        return termTokens.first.lemma ?? termTokens.first.word!;
-      }
-
-      if (termTokens.first.word!.length == 1) {
-        return term;
-      }
-
-      if (termTokens.first.lemma == '*') {
-        return term[0];
-      }
-      return termTokens.first.lemma ?? '';
-    } catch (e) {
-      return term[0];
-    }
   }
 
   @override
@@ -411,6 +371,7 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
   List<DictionaryEntry> startsWithResults = database.dictionaryEntrys
       .where(sort: Sort.desc)
       .termStartsWith(searchTerm)
+      .sortByTermLengthDesc()
       .limit(limit)
       .findAllSync();
 

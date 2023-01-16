@@ -8,24 +8,41 @@ import 'package:yuuna/utils.dart';
 /// locale.
 class LanguageDialogPage extends BasePage {
   /// Create an instance of this page.
-  const LanguageDialogPage({super.key});
+  const LanguageDialogPage({
+    required this.isFirstTimeSetup,
+    super.key,
+  });
+
+  /// Whether or not it is the first time setup.
+  final bool isFirstTimeSetup;
 
   @override
   BasePageState createState() => _LanguageDialogPageState();
 }
 
-class _LanguageDialogPageState extends BasePageState {
+class _LanguageDialogPageState extends BasePageState<LanguageDialogPage> {
   String get dialogCloseLabel => appModel.translate('dialog_close');
   String get targetLanguageLabel => appModel.translate('target_language');
   String get appLocaleLabel => appModel.translate('app_locale');
   String get appLocaleWarning => appModel.translate('app_locale_warning');
+  String get firstTimeSetupLabel => appModel.translate('first_time_setup');
+  String get firstTimeSetupDescription =>
+      appModel.translate('first_time_setup_description');
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
-          ? Spacing.of(context).insets.exceptBottom.big
-          : Spacing.of(context).insets.exceptBottom.normal,
+      title: widget.isFirstTimeSetup ? Text(firstTimeSetupLabel) : null,
+      titlePadding: Spacing.of(context)
+          .insets
+          .all
+          .big
+          .copyWith(bottom: Spacing.of(context).spaces.semiBig),
+      contentPadding: widget.isFirstTimeSetup
+          ? Spacing.of(context).insets.horizontal.big
+          : MediaQuery.of(context).orientation == Orientation.portrait
+              ? Spacing.of(context).insets.exceptBottom.big
+              : Spacing.of(context).insets.exceptBottom.normal,
       content: buildContent(),
       actions: actions,
     );
@@ -57,6 +74,15 @@ class _LanguageDialogPageState extends BasePageState {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (widget.isFirstTimeSetup)
+                Text(
+                  firstTimeSetupDescription,
+                  style: TextStyle(
+                    fontSize: textTheme.bodySmall?.fontSize,
+                  ),
+                  textAlign: TextAlign.justify,
+                ),
+              if (widget.isFirstTimeSetup) const Space.semiBig(),
               Padding(
                 padding: Spacing.of(context).insets.onlyLeft.small,
                 child: Text(

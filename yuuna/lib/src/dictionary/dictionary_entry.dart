@@ -36,7 +36,7 @@ class DictionaryEntry {
   Id? id;
 
   /// The term represented by this dictionary entry.
-  @Index(type: IndexType.value)
+  @Index(type: IndexType.value, caseSensitive: false)
   @Index(
     type: IndexType.hash,
     name: 'termComposite',
@@ -50,7 +50,7 @@ class DictionaryEntry {
   final String dictionaryName;
 
   /// The pronunciation of the term represented by this dictionary entry.
-  @Index(type: IndexType.value)
+  @Index(type: IndexType.value, caseSensitive: false)
   @Index(
     type: IndexType.hash,
     name: 'readingComposite',
@@ -77,6 +77,10 @@ class DictionaryEntry {
   /// search.
   @Index(type: IndexType.value)
   final double? popularity;
+
+  /// Used to sort starts with matches.
+  @Index(type: IndexType.value)
+  int get termLength => term.length;
 
   @override
   operator ==(Object other) => other is DictionaryEntry && id == other.id;

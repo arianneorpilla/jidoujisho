@@ -63,8 +63,14 @@ class _DictionaryDialogPageState extends BasePageState {
 
         FilePickerResult? result = await FilePicker.platform.pickFiles(
           /// Change when adding multiple dictionary formats.
-          type: FileType.custom,
-          allowedExtensions: ['zip'],
+          type: appModel.lastSelectedDictionaryFormat.useAnyPicker
+              ? FileType.any
+              : FileType.custom,
+          allowedExtensions: appModel.lastSelectedDictionaryFormat.useAnyPicker
+              ? null
+              : appModel.lastSelectedDictionaryFormat.compatibleFileExtensions
+                  .map((ext) => ext.replaceAll('.', ''))
+                  .toList(),
           allowMultiple: true,
         );
         if (result == null) {

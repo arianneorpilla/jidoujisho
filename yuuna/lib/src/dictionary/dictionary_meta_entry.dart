@@ -33,7 +33,7 @@ class DictionaryMetaEntry {
   Id? id;
 
   /// The word or phrase represented by this dictionary entry.
-  @Index(type: IndexType.hash)
+  @Index(type: IndexType.hash, caseSensitive: false)
   final String term;
 
   /// Length of the term.

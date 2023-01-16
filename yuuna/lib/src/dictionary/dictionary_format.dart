@@ -21,6 +21,7 @@ abstract class DictionaryFormat {
     required this.prepareMetaEntries,
     required this.prepareTags,
     required this.prepareMetadata,
+    this.useAnyPicker = true,
   });
 
   /// The name of this dictionary format. For example, this could be a
@@ -33,6 +34,10 @@ abstract class DictionaryFormat {
   /// This will be used to notify the user about the required extension if they
   /// select a file with the wrong extension.
   late List<String> compatibleFileExtensions;
+
+  /// Whether or not the file picker supports the file extensions of this
+  /// format.
+  final bool useAnyPicker;
 
   /// [IMPORTANT]: The following parameters below point to functions defined in
   /// the top-level, not within the inheriting class. They are meant to be

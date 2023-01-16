@@ -64,7 +64,7 @@ const DictionaryMetaEntrySchema = CollectionSchema(
         IndexPropertySchema(
           name: r'term',
           type: IndexType.hash,
-          caseSensitive: true,
+          caseSensitive: false,
         )
       ],
     ),

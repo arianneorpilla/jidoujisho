@@ -1,5 +1,4 @@
 export 'src/utils/jidoujisho_localisations.dart';
-export 'src/utils/jidoujisho_common.dart';
 
 export 'src/utils/components/cache_image_provider.dart';
 export 'src/utils/components/jidoujisho_icon_button.dart';
@@ -33,6 +32,7 @@ export 'src/utils/player/blur_options.dart';
 export 'src/utils/player/subtitle_options.dart';
 export 'src/utils/player/youtube_quality.dart';
 
+export 'src/utils/misc/jidoujisho_color.dart';
 export 'src/utils/misc/jidoujisho_time_format.dart';
 export 'src/utils/misc/jidoujisho_lyrics_parameters.dart';
 export 'src/utils/misc/jidoujisho_audio_handler.dart';

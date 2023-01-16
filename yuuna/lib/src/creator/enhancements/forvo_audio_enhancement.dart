@@ -188,8 +188,17 @@ class ForvoAudioEnhancement extends AudioEnhancement {
       var document = parser.parse(response.body);
 
       try {
+        String className = '';
+
+        // Language Customizable
+        if (appModel.targetLanguage is JapaneseLanguage) {
+          className = 'pronunciations-list-ja';
+        } else if (appModel.targetLanguage is EnglishLanguage) {
+          className = 'pronunciations-list-en_usa';
+        }
+
         List<dom.Element> liElements = document
-            .getElementsByClassName('pronunciations-list-ja')
+            .getElementsByClassName(className)
             .first
             .children
             .where((element) =>

@@ -65,6 +65,16 @@ class _HomePageState extends BasePageState<HomePage> {
     appIcon = Image.asset(
       'assets/meta/icon.png',
     );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (appModel.isFirstTimeSetup) {
+        await appModel.showLanguageMenu();
+        appModel.populateDefaultMapping(appModel.targetLanguage);
+        appModel.setLastSelectedDictionaryFormat(
+            appModel.targetLanguage.standardFormat);
+        appModel.setFirstTimeSetupFlag();
+      }
+    });
   }
 
   @override
@@ -142,7 +152,7 @@ class _HomePageState extends BasePageState<HomePage> {
           padding: Spacing.of(context).insets.onlyLeft.normal,
           child: appModel.isIncognitoMode
               ? ColorFiltered(
-                  colorFilter: JidoujishoCommon.greyscaleWithAlphaFilter,
+                  colorFilter: JidoujishoColor.greyscaleWithAlphaFilter,
                   child: appIcon,
                 )
               : appIcon,
