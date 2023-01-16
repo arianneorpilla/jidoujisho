@@ -3,7 +3,9 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:audio_session/audio_session.dart';
+import 'package:collection/collection.dart';
 import 'package:filesystem_picker/filesystem_picker.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
@@ -1457,42 +1459,77 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           subtitleText = subtitleText.replaceAll(RegExp(regex), '');
         }
 
-        return buildTapToSelectSubtitle(subtitleText);
+        return dragToSelectSubtitle(subtitleText);
       },
     );
   }
 
   /// This renders the subtitle with a [SelectableText] widget.
-  Widget buildTapToSelectSubtitle(String subtitleText) {
+  Widget dragToSelectSubtitle(String subtitleText) {
     return Stack(
       alignment: Alignment.bottomCenter,
       children: <Widget>[
-        SelectableText(
-          subtitleText,
-          style: subtitleOutlineStyle,
+        SelectableText.rich(
+          TextSpan(children: getSubtitleOutlineSpans(subtitleText)),
           textAlign: TextAlign.center,
           toolbarOptions: const ToolbarOptions(),
           enableInteractiveSelection: false,
         ),
-        SelectableText(
-          subtitleText,
-          style: subtitleTextStyle,
+        SelectableText.rich(
+          TextSpan(children: getSubtitleSpans(subtitleText)),
           textAlign: TextAlign.center,
           focusNode: _dragToSelectFocusNode,
-          selectionControls: selectionControls,
+          toolbarOptions: const ToolbarOptions(),
           onSelectionChanged: (selection, cause) {
-            if (cause == SelectionChangedCause.tap) {
-              String searchTerm =
-                  appModel.targetLanguage.getSearchTermFromIndex(
-                text: subtitleText,
-                index: selection.baseOffset,
-              );
-              setSearchTerm(searchTerm);
-            }
+            String newTerm = selection.textInside(subtitleText);
+            startDragSubtitlesTimer(newTerm);
           },
         ),
       ],
     );
+  }
+
+  /// This renders the subtitle and assigns each character an action
+  /// according to its index.
+  List<InlineSpan> getSubtitleSpans(String text) {
+    List<InlineSpan> spans = [];
+
+    text.runes.forEachIndexed((index, rune) {
+      String character = String.fromCharCode(rune);
+      spans.add(
+        TextSpan(
+          text: character,
+          style: subtitleTextStyle,
+          recognizer: TapGestureRecognizer()
+            ..onTapDown = (details) async {
+              String searchTerm =
+                  appModel.targetLanguage.getSearchTermFromIndex(
+                text: text,
+                index: index,
+              );
+
+              setSearchTerm(searchTerm);
+            },
+        ),
+      );
+    });
+
+    return spans;
+  }
+
+  /// Used for subtitle outline design.
+  List<InlineSpan> getSubtitleOutlineSpans(String subtitleText) {
+    List<InlineSpan> spans = [];
+
+    subtitleText.runes.forEachIndexed((index, rune) {
+      String character = String.fromCharCode(rune);
+      spans.add(TextSpan(
+        text: character,
+        style: subtitleOutlineStyle,
+      ));
+    });
+
+    return spans;
   }
 
   /// Subtitle paint style.
