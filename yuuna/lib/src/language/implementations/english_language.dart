@@ -87,9 +87,13 @@ Future<List<DictionaryTerm>> prepareSearchResultsEnglishLanguage(
   Map<int, List<DictionaryEntry>> termExactResultsByLength = {};
   Map<int, List<DictionaryEntry>> termDeinflectedResultsByLength = {};
 
-  List<String> words = searchTerm.splitWithDelim(RegExp('[ -]'));
+  List<String> segments = searchTerm.splitWithDelim(RegExp('[ -]'));
+  if (segments.length > 1) {
+    String last = segments.removeLast();
+    segments.addAll(last.split(''));
+  }
 
-  words.forEachIndexed((index, word) {
+  segments.forEachIndexed((index, word) {
     searchBuffer.write(word);
 
     if (word == ' ') {

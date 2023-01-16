@@ -221,7 +221,7 @@ abstract class Language {
     if (isSpaceDelimited) {
       final workingBuffer = StringBuffer();
       final termBuffer = StringBuffer();
-      List<String> words = textToWords(text);
+      List<String> words = textToWords(text.replaceAll('\n', ' '));
 
       for (String word in words) {
         workingBuffer.write(word);

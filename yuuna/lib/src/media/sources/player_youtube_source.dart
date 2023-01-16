@@ -347,7 +347,7 @@ class PlayerYoutubeSource extends PlayerMediaSource {
       targetLanguageItem = items[targetLanguageIndex];
       items.remove(targetLanguageItem);
     }
-    if (appLanguageIndex != -1) {
+    if (appLanguageIndex != -1 && targetLanguageIndex != appLanguageIndex) {
       appLanguageItem = items[appLanguageIndex];
       items.remove(appLanguageItem);
     }

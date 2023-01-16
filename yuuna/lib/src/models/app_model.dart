@@ -1241,6 +1241,8 @@ class AppModel with ChangeNotifier {
       return _dictionarySearchCache[searchTerm]!;
     }
 
+    searchTerm = searchTerm.replaceAll('\n', ' ');
+
     if (searchTerm.trim().isEmpty) {
       return DictionaryResult(
         searchTerm: searchTerm,
