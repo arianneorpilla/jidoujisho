@@ -311,7 +311,7 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
   /// This override is a workaround required to theme the app-wide [TextStyle]
   /// based on the [Locale] and [TextBaseline] of the active target language.
   TextStyle get textStyle => TextStyle(
-        fontFamily: 'NotoSansJP',
+        fontFamily: appModel.targetLanguage.defaultFontFamily,
         locale: locale,
         textBaseline: textBaseline,
       );

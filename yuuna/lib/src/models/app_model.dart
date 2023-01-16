@@ -445,8 +445,9 @@ class AppModel with ChangeNotifier {
     final List<DictionaryFormat> availableDictionaryFormats =
         List<DictionaryFormat>.unmodifiable(
       [
-        YomichanDictionaryFormat.instance,
         AbbyyLingvoFormat.instance,
+        MigakuDictionaryFormat.instance,
+        YomichanDictionaryFormat.instance,
       ],
     );
 

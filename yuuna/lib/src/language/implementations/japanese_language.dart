@@ -25,6 +25,7 @@ class JapaneseLanguage extends Language {
           prepareSearchResults: prepareSearchResultsJapaneseLanguage,
           helloWorld: 'こんにちは世界',
           standardFormat: YomichanDictionaryFormat.instance,
+          defaultFontFamily: 'NotoSansJP',
         );
 
   /// Get the singleton instance of this language.

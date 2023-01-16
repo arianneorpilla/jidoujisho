@@ -22,6 +22,7 @@ class EnglishLanguage extends Language {
           helloWorld: 'Hello world',
           prepareSearchResults: prepareSearchResultsEnglishLanguage,
           standardFormat: AbbyyLingvoFormat.instance,
+          defaultFontFamily: 'Roboto',
         );
 
   /// Get the singleton instance of this media type.

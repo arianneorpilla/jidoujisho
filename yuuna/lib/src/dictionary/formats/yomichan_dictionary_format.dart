@@ -11,7 +11,7 @@ import 'package:yuuna/dictionary.dart';
 /// Example dictionaries for this format may be downloaded from the Yomichan
 /// website.
 ///
-/// Details on the term bank schema particularly can be found here:
+/// Details on the format can be found here:
 /// https://github.com/FooSoft/yomichan/blob/master/ext/data/schemas/dictionary-term-bank-v3-schema.json
 class YomichanDictionaryFormat extends DictionaryFormat {
   /// Define a format with the given metadata that has its behaviour for

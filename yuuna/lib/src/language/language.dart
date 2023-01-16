@@ -21,6 +21,7 @@ abstract class Language {
     required this.textBaseline,
     required this.helloWorld,
     required this.standardFormat,
+    required this.defaultFontFamily,
     this.prepareSearchResults = prepareSearchResultsStandard,
   });
 
@@ -70,6 +71,9 @@ abstract class Language {
   /// This is only to set this as the default last selected format on first
   /// time setup.
   final DictionaryFormat standardFormat;
+
+  /// Default font for a language.
+  final String defaultFontFamily;
 
   /// Whether or not [initialise] has been called for the language.
   bool _initialised = false;
