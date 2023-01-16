@@ -68,7 +68,7 @@
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.0.0">2.0</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.1">2.1</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.2">2.2</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.2">2.3</a></b>
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.3">2.3</a></b>
 </p>
 
 # 📱 Language learning in the palm of your hand
