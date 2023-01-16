@@ -198,6 +198,7 @@ class _DictionaryDialogPageState extends BasePageState {
         }
 
         appModel.setMaximumEntries(newAmount);
+        appModel.clearDictionaryResultsCache();
       },
       controller: _maximumEntriesController,
       keyboardType: TextInputType.number,
@@ -231,6 +232,7 @@ class _DictionaryDialogPageState extends BasePageState {
         }
 
         appModel.setMaximumTerms(newAmount);
+        appModel.clearDictionaryResultsCache();
       },
       controller: _maximumTermsController,
       keyboardType: TextInputType.number,
