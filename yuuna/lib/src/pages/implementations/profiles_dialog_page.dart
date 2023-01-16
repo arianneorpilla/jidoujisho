@@ -52,6 +52,9 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
   String get errorStandardProfileNameContent =>
       appModel.translate('error_standard_profile_name_content');
   String get wrapImageAudioLabel => appModel.translate('wrap_image_audio');
+  String get useBrTagsLabel => appModel.translate('use_br_tags');
+  String get prependDictionaryNamesLabel =>
+      appModel.translate('prepend_dictionary_names');
 
   final ScrollController _scrollController = ScrollController();
   int _selectedOrder = 0;
@@ -106,6 +109,8 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
               appModel.targetLanguage.languageCountryCode],
           actions: AnkiMapping.defaultActions,
           exportMediaTags: true,
+          useBrTags: true,
+          prependDictionaryNames: true,
         );
 
         await showMappingEditDialog(newMapping);
@@ -405,9 +410,11 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
                 ),
               ),
               const Space.normal(),
-              buildWrapImageAudio(
-                mappingClone: mappingClone,
-              ),
+              buildWrapImageAudio(mappingClone: mappingClone),
+              const Space.small(),
+              buildUseBrTags(mappingClone: mappingClone),
+              const Space.small(),
+              buildPrependDictionaryNames(mappingClone: mappingClone),
             ],
           ),
         ),
@@ -429,6 +436,52 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
               value: value,
               onChanged: (value) {
                 mappingClone.exportMediaTags = value;
+                _notifier.value = value;
+              },
+            );
+          },
+        )
+      ],
+    );
+  }
+
+  Widget buildUseBrTags({required AnkiMapping mappingClone}) {
+    ValueNotifier<bool> _notifier =
+        ValueNotifier<bool>(mappingClone.useBrTags ?? false);
+
+    return Row(
+      children: [
+        Expanded(child: Text(useBrTagsLabel)),
+        ValueListenableBuilder<bool>(
+          valueListenable: _notifier,
+          builder: (_, value, __) {
+            return Switch(
+              value: value,
+              onChanged: (value) {
+                mappingClone.useBrTags = value;
+                _notifier.value = value;
+              },
+            );
+          },
+        )
+      ],
+    );
+  }
+
+  Widget buildPrependDictionaryNames({required AnkiMapping mappingClone}) {
+    ValueNotifier<bool> _notifier =
+        ValueNotifier<bool>(mappingClone.prependDictionaryNames ?? false);
+
+    return Row(
+      children: [
+        Expanded(child: Text(prependDictionaryNamesLabel)),
+        ValueListenableBuilder<bool>(
+          valueListenable: _notifier,
+          builder: (_, value, __) {
+            return Switch(
+              value: value,
+              onChanged: (value) {
+                mappingClone.prependDictionaryNames = value;
                 _notifier.value = value;
               },
             );

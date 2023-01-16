@@ -1669,7 +1669,12 @@ class AppModel with ChangeNotifier {
             }
           }
         } else {
-          return creatorFieldValues.textValues[field] ?? '';
+          String text = creatorFieldValues.textValues[field] ?? '';
+          if (mapping.useBrTags ?? false) {
+            text = text.replaceAll('\n', '<br>');
+          }
+
+          return text;
         }
       }
     }).toList();

@@ -44,6 +44,9 @@ class ExpandedMeaningField extends Field {
         .where((entry) => expandedDictionaries.contains(entry.dictionaryName))
         .toList();
 
-    return MeaningField.flattenMeanings(expandedEntries);
+    return MeaningField.flattenMeanings(
+        entries: expandedEntries,
+        prependDictionaryNames:
+            appModel.lastSelectedMapping.prependDictionaryNames ?? false);
   }
 }

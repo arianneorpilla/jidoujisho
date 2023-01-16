@@ -25,7 +25,10 @@ class MeaningField extends Field {
   static const String key = 'meaning';
 
   /// Get a single combined text for all meanings in a list of entries.
-  static String flattenMeanings(List<DictionaryEntry> entries) {
+  static String flattenMeanings({
+    required List<DictionaryEntry> entries,
+    required bool prependDictionaryNames,
+  }) {
     StringBuffer meaningBuffer = StringBuffer();
 
     Map<String, List<DictionaryEntry>> entriesByDictionaryName =
@@ -38,6 +41,10 @@ class MeaningField extends Field {
       int meaningsCount = 0;
       for (DictionaryEntry entry in singleDictionaryEntries) {
         meaningsCount += entry.meanings.length;
+      }
+
+      if (prependDictionaryNames) {
+        meaningBuffer.writeln('【$dictionaryName】');
       }
 
       for (DictionaryEntry entry in singleDictionaryEntries) {
@@ -88,6 +95,10 @@ class MeaningField extends Field {
     required List<DictionaryMetaEntry> metaEntries,
     required bool creatorJustLaunched,
   }) {
-    return flattenMeanings(dictionaryTerm.entries);
+    return flattenMeanings(
+      entries: dictionaryTerm.entries,
+      prependDictionaryNames:
+          appModel.lastSelectedMapping.prependDictionaryNames ?? false,
+    );
   }
 }

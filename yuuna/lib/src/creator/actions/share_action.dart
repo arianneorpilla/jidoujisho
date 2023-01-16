@@ -35,7 +35,12 @@ class ShareAction extends QuickAction {
       buffer.write(' (${dictionaryTerm.reading})');
     }
     buffer.write('\n\n');
-    buffer.write(MeaningField.flattenMeanings(dictionaryTerm.entries));
+    buffer.write(
+      MeaningField.flattenMeanings(
+          entries: dictionaryTerm.entries,
+          prependDictionaryNames:
+              appModel.lastSelectedMapping.prependDictionaryNames ?? false),
+    );
 
     String shareText = buffer.toString();
 

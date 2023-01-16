@@ -44,6 +44,9 @@ class HiddenMeaningField extends Field {
         .where((entry) => hiddenDictionaries.contains(entry.dictionaryName))
         .toList();
 
-    return MeaningField.flattenMeanings(hiddenEntries);
+    return MeaningField.flattenMeanings(
+        entries: hiddenEntries,
+        prependDictionaryNames:
+            appModel.lastSelectedMapping.prependDictionaryNames ?? false);
   }
 }

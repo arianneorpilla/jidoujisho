@@ -67,10 +67,20 @@ const AnkiMappingSchema = CollectionSchema(
       name: r'order',
       type: IsarType.long,
     ),
-    r'tags': PropertySchema(
+    r'prependDictionaryNames': PropertySchema(
       id: 10,
+      name: r'prependDictionaryNames',
+      type: IsarType.bool,
+    ),
+    r'tags': PropertySchema(
+      id: 11,
       name: r'tags',
       type: IsarType.stringList,
+    ),
+    r'useBrTags': PropertySchema(
+      id: 12,
+      name: r'useBrTags',
+      type: IsarType.bool,
     )
   },
   estimateSize: _ankiMappingEstimateSize,
@@ -173,7 +183,9 @@ void _ankiMappingSerialize(
   writer.writeString(offsets[7], object.label);
   writer.writeString(offsets[8], object.model);
   writer.writeLong(offsets[9], object.order);
-  writer.writeStringList(offsets[10], object.tags);
+  writer.writeBool(offsets[10], object.prependDictionaryNames);
+  writer.writeStringList(offsets[11], object.tags);
+  writer.writeBool(offsets[12], object.useBrTags);
 }
 
 AnkiMapping _ankiMappingDeserialize(
@@ -191,7 +203,9 @@ AnkiMapping _ankiMappingDeserialize(
     label: reader.readString(offsets[7]),
     model: reader.readString(offsets[8]),
     order: reader.readLong(offsets[9]),
-    tags: reader.readStringList(offsets[10]) ?? [],
+    prependDictionaryNames: reader.readBoolOrNull(offsets[10]),
+    tags: reader.readStringList(offsets[11]) ?? [],
+    useBrTags: reader.readBoolOrNull(offsets[12]),
   );
   object.actionsIsar = reader.readString(offsets[0]);
   object.enhancementsIsar = reader.readString(offsets[3]);
@@ -226,7 +240,11 @@ P _ankiMappingDeserializeProp<P>(
     case 9:
       return (reader.readLong(offset)) as P;
     case 10:
+      return (reader.readBoolOrNull(offset)) as P;
+    case 11:
       return (reader.readStringList(offset) ?? []) as P;
+    case 12:
+      return (reader.readBoolOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -1973,6 +1991,34 @@ extension AnkiMappingQueryFilter
   }
 
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      prependDictionaryNamesIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'prependDictionaryNames',
+      ));
+    });
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      prependDictionaryNamesIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'prependDictionaryNames',
+      ));
+    });
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      prependDictionaryNamesEqualTo(bool? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'prependDictionaryNames',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
       tagsElementEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -2195,6 +2241,34 @@ extension AnkiMappingQueryFilter
       );
     });
   }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      useBrTagsIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'useBrTags',
+      ));
+    });
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      useBrTagsIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'useBrTags',
+      ));
+    });
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      useBrTagsEqualTo(bool? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'useBrTags',
+        value: value,
+      ));
+    });
+  }
 }
 
 extension AnkiMappingQueryObject
@@ -2291,6 +2365,32 @@ extension AnkiMappingQuerySortBy
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy> sortByOrderDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'order', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy>
+      sortByPrependDictionaryNames() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'prependDictionaryNames', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy>
+      sortByPrependDictionaryNamesDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'prependDictionaryNames', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy> sortByUseBrTags() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'useBrTags', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy> sortByUseBrTagsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'useBrTags', Sort.desc);
     });
   }
 }
@@ -2397,6 +2497,32 @@ extension AnkiMappingQuerySortThenBy
       return query.addSortBy(r'order', Sort.desc);
     });
   }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy>
+      thenByPrependDictionaryNames() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'prependDictionaryNames', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy>
+      thenByPrependDictionaryNamesDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'prependDictionaryNames', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy> thenByUseBrTags() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'useBrTags', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy> thenByUseBrTagsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'useBrTags', Sort.desc);
+    });
+  }
 }
 
 extension AnkiMappingQueryWhereDistinct
@@ -2471,9 +2597,22 @@ extension AnkiMappingQueryWhereDistinct
     });
   }
 
+  QueryBuilder<AnkiMapping, AnkiMapping, QDistinct>
+      distinctByPrependDictionaryNames() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'prependDictionaryNames');
+    });
+  }
+
   QueryBuilder<AnkiMapping, AnkiMapping, QDistinct> distinctByTags() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'tags');
+    });
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QDistinct> distinctByUseBrTags() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'useBrTags');
     });
   }
 }
@@ -2551,9 +2690,22 @@ extension AnkiMappingQueryProperty
     });
   }
 
+  QueryBuilder<AnkiMapping, bool?, QQueryOperations>
+      prependDictionaryNamesProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'prependDictionaryNames');
+    });
+  }
+
   QueryBuilder<AnkiMapping, List<String>, QQueryOperations> tagsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'tags');
+    });
+  }
+
+  QueryBuilder<AnkiMapping, bool?, QQueryOperations> useBrTagsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'useBrTags');
     });
   }
 }
@@ -2578,6 +2730,8 @@ AnkiMapping _$AnkiMappingFromJson(Map<String, dynamic> json) => AnkiMapping(
       order: json['order'] as int,
       tags: (json['tags'] as List<dynamic>).map((e) => e as String).toList(),
       exportMediaTags: json['exportMediaTags'] as bool?,
+      useBrTags: json['useBrTags'] as bool?,
+      prependDictionaryNames: json['prependDictionaryNames'] as bool?,
       enhancements: (json['enhancements'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(
             k,
@@ -2608,5 +2762,7 @@ Map<String, dynamic> _$AnkiMappingToJson(AnkiMapping instance) =>
           (k, e) => MapEntry(k, e.map((k, e) => MapEntry(k.toString(), e)))),
       'enhancementsIsar': instance.enhancementsIsar,
       'exportMediaTags': instance.exportMediaTags,
+      'useBrTags': instance.useBrTags,
+      'prependDictionaryNames': instance.prependDictionaryNames,
       'order': instance.order,
     };

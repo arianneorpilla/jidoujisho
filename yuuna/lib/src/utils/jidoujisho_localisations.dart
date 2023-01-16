@@ -318,7 +318,7 @@ class JidoujishoLocalisations {
     'lyrics_artist': 'Artist',
     'set_media': 'Set Media',
     'no_recordings_found': 'No recordings found',
-    'wrap_image_audio': 'Wrap Image/Audio with Tags',
+    'wrap_image_audio': 'Include image/audio HTML tags on export',
     'server_address': 'Server Address',
     'no_active_connection': 'No active connection',
     'failed_server_connection': 'Failed to connect to server',
@@ -363,5 +363,7 @@ class JidoujishoLocalisations {
         'change this later at anytime.',
     'maximum_entries': 'Maximum dictionary entry query limit',
     'maximum_terms': 'Maximum dictionary headwords in result',
+    'use_br_tags': 'Use line break tag instead of newline on export',
+    'prepend_dictionary_names': 'Prepend dictionary name in meaning',
   };
 }

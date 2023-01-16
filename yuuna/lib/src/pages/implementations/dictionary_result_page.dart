@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:keframe/keframe.dart';
@@ -69,16 +70,28 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
     );
 
     for (DictionaryTerm term in widget.result.terms!) {
-      term.entries.sort(
-        (a, b) => dictionaryMap[a.dictionaryName]!.order.compareTo(
-              dictionaryMap[b.dictionaryName]!.order,
-            ),
-      );
+      List<MapEntry<DictionaryEntry, List<DictionaryTag>>> entryTagGroups = term
+          .entries
+          .mapIndexed(
+              (index, entry) => MapEntry(entry, term.meaningTagsGroups[index]))
+          .toList();
+
       term.metaEntries.sort(
         (a, b) => dictionaryMap[a.dictionaryName]!.order.compareTo(
               dictionaryMap[b.dictionaryName]!.order,
             ),
       );
+      entryTagGroups.sort(
+        (a, b) => dictionaryMap[a.key.dictionaryName]!.order.compareTo(
+              dictionaryMap[b.key.dictionaryName]!.order,
+            ),
+      );
+
+      Map<DictionaryEntry, List<DictionaryTag>> entryTagMap =
+          Map.fromEntries(entryTagGroups);
+
+      term.entries = entryTagMap.keys.toList();
+      term.meaningTagsGroups = entryTagMap.values.toList();
     }
 
     return MediaQuery(

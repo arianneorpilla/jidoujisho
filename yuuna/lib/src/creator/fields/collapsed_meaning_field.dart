@@ -45,6 +45,9 @@ class CollapsedMeaningField extends Field {
         .where((entry) => collapsedDictionaries.contains(entry.dictionaryName))
         .toList();
 
-    return MeaningField.flattenMeanings(collapsedEntries);
+    return MeaningField.flattenMeanings(
+        entries: collapsedEntries,
+        prependDictionaryNames:
+            appModel.lastSelectedMapping.prependDictionaryNames ?? false);
   }
 }

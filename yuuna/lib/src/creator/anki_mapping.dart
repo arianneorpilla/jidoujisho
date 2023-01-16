@@ -23,6 +23,8 @@ class AnkiMapping {
     required this.order,
     required this.tags,
     required this.exportMediaTags,
+    required this.useBrTags,
+    required this.prependDictionaryNames,
     this.enhancements,
     this.actions,
     this.id,
@@ -57,6 +59,8 @@ class AnkiMapping {
       enhancements: defaultEnhancementsByLanguage[language.languageCountryCode],
       actions: defaultActions,
       exportMediaTags: false,
+      useBrTags: false,
+      prependDictionaryNames: true,
     );
   }
 
@@ -158,6 +162,9 @@ class AnkiMapping {
   static const List<String> defaultCreatorCollapsedFieldKeys = [
     PitchAccentField.key,
     FuriganaField.key,
+    ExpandedMeaningField.key,
+    CollapsedMeaningField.key,
+    HiddenMeaningField.key,
   ];
 
   /// A default map of enhancements to use for new mappings.
@@ -230,6 +237,12 @@ class AnkiMapping {
   /// or only shows the filename. If null, will be considered false.
   bool? exportMediaTags;
 
+  /// Whether or not this mapping exports <br> tags instead of \n.
+  bool? useBrTags;
+
+  /// Whether or not to add the dictionary name before the meaning.
+  bool? prependDictionaryNames;
+
   /// The order of this dictionary in terms of user sorting, relative to other
   /// dictionaries.
   @Index(unique: true)
@@ -289,6 +302,8 @@ class AnkiMapping {
     Map<String, Map<int, String>>? enhancements,
     Map<int, String>? actions,
     bool? exportMediaTags,
+    bool? useBrTags,
+    bool? prependDictionaryNames,
   }) {
     return AnkiMapping(
       label: label ?? this.label,
@@ -303,6 +318,9 @@ class AnkiMapping {
       enhancements: enhancements ?? this.enhancements,
       actions: actions ?? this.actions,
       exportMediaTags: exportMediaTags ?? this.exportMediaTags,
+      useBrTags: useBrTags ?? this.useBrTags,
+      prependDictionaryNames:
+          prependDictionaryNames ?? this.prependDictionaryNames,
     );
   }
 

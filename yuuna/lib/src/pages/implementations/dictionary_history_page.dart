@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
@@ -34,13 +35,11 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
   String get searchLabelAfter => appModel.translate('search_label_after');
   String get seeMoreLabel => appModel.translate('see_more');
 
-  late Map<String, Dictionary>? dictionaryMap;
-
   @override
   Widget build(BuildContext context) {
     AnkiMapping lastSelectedMapping = appModel.lastSelectedMapping;
 
-    dictionaryMap = Map<String, Dictionary>.fromEntries(
+    Map<String, Dictionary> dictionaryMap = Map<String, Dictionary>.fromEntries(
       appModel.dictionaries.map(
         (dictionary) => MapEntry(dictionary.dictionaryName, dictionary),
       ),
@@ -48,16 +47,6 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
 
     List<DictionaryResult> historyResults =
         appModel.dictionaryHistory.reversed.toList();
-
-    for (DictionaryResult result in historyResults) {
-      for (DictionaryTerm term in result.terms!) {
-        term.entries.sort(
-          (a, b) => dictionaryMap![a.dictionaryName]!.order.compareTo(
-                dictionaryMap![b.dictionaryName]!.order,
-              ),
-        );
-      }
-    }
 
     return ListView.builder(
       cacheExtent: 99999999999999,
@@ -75,6 +64,32 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
         ValueNotifier<int> indexNotifier =
             ValueNotifier<int>(result.scrollIndex);
 
+        for (DictionaryTerm term in result.terms!) {
+          List<MapEntry<DictionaryEntry, List<DictionaryTag>>> entryTagGroups =
+              term
+                  .entries
+                  .mapIndexed((index, entry) =>
+                      MapEntry(entry, term.meaningTagsGroups[index]))
+                  .toList();
+
+          term.metaEntries.sort(
+            (a, b) => dictionaryMap[a.dictionaryName]!.order.compareTo(
+                  dictionaryMap[b.dictionaryName]!.order,
+                ),
+          );
+          entryTagGroups.sort(
+            (a, b) => dictionaryMap[a.key.dictionaryName]!.order.compareTo(
+                  dictionaryMap[b.key.dictionaryName]!.order,
+                ),
+          );
+
+          Map<DictionaryEntry, List<DictionaryTag>> entryTagMap =
+              Map.fromEntries(entryTagGroups);
+
+          term.entries = entryTagMap.keys.toList();
+          term.meaningTagsGroups = entryTagMap.values.toList();
+        }
+
         return ValueListenableBuilder<int>(
           valueListenable: indexNotifier,
           builder: (context, value, child) {
@@ -83,16 +98,16 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
             final Map<String, ExpandableController> controllers = {};
             final Map<String, bool> hiddens = {};
 
-            for (String dictionaryName in dictionaryMap!.keys.toList()) {
+            for (String dictionaryName in dictionaryMap.keys.toList()) {
               controllers[dictionaryName] = ExpandableController(
-                initialExpanded: !dictionaryMap![dictionaryName]!.collapsed,
+                initialExpanded: !dictionaryMap[dictionaryName]!.collapsed,
               );
-              hiddens[dictionaryName] = dictionaryMap![dictionaryName]!.hidden;
+              hiddens[dictionaryName] = dictionaryMap[dictionaryName]!.hidden;
             }
 
             return DictionaryTermPage(
               lastSelectedMapping: lastSelectedMapping,
-              dictionaryMap: dictionaryMap!,
+              dictionaryMap: dictionaryMap,
               dictionaryTerm: dictionaryTerm,
               onSearch: widget.onSearch,
               onStash: widget.onStash,
