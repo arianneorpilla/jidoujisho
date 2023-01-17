@@ -9,7 +9,7 @@ import 'package:yuuna/utils.dart';
 
 /// A page template which assumes use of [BaseSourcePageState] by which all
 /// pages in the app that are used for when using a certain source will
-/// conveniently share base functionality.
+/// conveniently share base functionality.f
 abstract class BaseSourcePage extends BasePage {
   /// Create an instance of this tab page.
   const BaseSourcePage({
@@ -146,7 +146,8 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
         _isSearchingNotifier,
       ],
       builder: (context, result, _) {
-        if (_dictionaryResultNotifier.value == null) {
+        if (!_isSearchingNotifier.value &&
+            _dictionaryResultNotifier.value == null) {
           return const SizedBox.shrink();
         }
 
@@ -250,47 +251,76 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
   /// positioned version.
   Widget buildDictionaryResult() {
     return Dismissible(
-      key: const ValueKey('result'),
+      key: UniqueKey(),
       onDismissed: (dismissDirection) {
         clearDictionaryResult();
       },
+      dismissThresholds: const {DismissDirection.horizontal: 0.05},
+      movementDuration: const Duration(milliseconds: 50),
       child: Container(
-          padding: Spacing.of(context).insets.all.semiSmall,
-          margin: Spacing.of(context).insets.all.normal,
-          color: theme.cardColor.withOpacity(dictionaryBackgroundOpacity),
-          child: _isSearchingNotifier.value
-              ? buildDictionaryLoading()
-              : buildSearchResult()),
-    );
-  }
-
-  /// In progress indicator for dictionary searching.
-  Widget buildDictionaryLoading() {
-    return SizedBox(
-      height: double.infinity,
-      width: double.infinity,
-      child: Card(
-        color: appModel.isDarkMode
-            ? Color.fromRGBO(15, 15, 15, dictionaryEntryOpacity)
-            : Color.fromRGBO(249, 249, 249, dictionaryEntryOpacity),
-        elevation: 0,
-        shape: const RoundedRectangleBorder(),
-        child: Column(
+        padding: Spacing.of(context).insets.all.semiSmall,
+        margin: Spacing.of(context).insets.all.normal,
+        color: theme.cardColor.withOpacity(dictionaryBackgroundOpacity),
+        child: Stack(
           children: [
-            const LinearProgressIndicator(
-              backgroundColor: Colors.transparent,
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
-              minHeight: 2.75,
-            ),
-            Expanded(child: Container())
+            buildSearchResult(),
+            buildDictionaryLoading(),
           ],
         ),
       ),
     );
   }
 
+  /// In progress indicator for dictionary searching.
+  Widget buildDictionaryLoading() {
+    return ValueListenableBuilder<bool>(
+      valueListenable: _isSearchingNotifier,
+      builder: (context, value, child) {
+        return Visibility(
+          visible: value,
+          child: SizedBox(
+            height: double.infinity,
+            width: double.infinity,
+            child: Card(
+              color: Colors.transparent,
+              elevation: 0,
+              shape: const RoundedRectangleBorder(),
+              child: Column(
+                children: [
+                  const LinearProgressIndicator(
+                    backgroundColor: Colors.transparent,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+                    minHeight: 2.75,
+                  ),
+                  Expanded(child: Container())
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   /// Displays the dictionary entries.
   Widget buildSearchResult() {
+    if (_dictionaryResultNotifier.value == null) {
+      return SizedBox(
+        height: double.infinity,
+        width: double.infinity,
+        child: Card(
+          color: appModel.isDarkMode
+              ? Color.fromRGBO(15, 15, 15, dictionaryEntryOpacity)
+              : Color.fromRGBO(249, 249, 249, dictionaryEntryOpacity),
+          elevation: 0,
+          shape: const RoundedRectangleBorder(),
+          child: Column(
+            children: [Container()],
+          ),
+        ),
+      );
+    }
+
     if (_dictionaryResultNotifier.value!.terms!.isEmpty) {
       return buildNoSearchResultsPlaceholderMessage();
     }
