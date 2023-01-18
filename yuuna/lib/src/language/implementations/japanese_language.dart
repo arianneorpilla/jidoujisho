@@ -85,10 +85,13 @@ class JapaneseLanguage extends Language {
     required DictionaryTerm dictionaryTerm,
   }) {
     if (dictionaryTerm.reading.isEmpty) {
-      return super.getTermReadingOverrideWidget(
-        context: context,
-        appModel: appModel,
-        dictionaryTerm: dictionaryTerm,
+      return RubyText(
+        [RubyTextData(dictionaryTerm.term)],
+        style: Theme.of(context)
+            .textTheme
+            .titleLarge!
+            .copyWith(fontWeight: FontWeight.bold),
+        rubyStyle: Theme.of(context).textTheme.labelSmall,
       );
     }
 
@@ -96,7 +99,9 @@ class JapaneseLanguage extends Language {
         term: dictionaryTerm.term, reading: dictionaryTerm.reading);
     return RubyText(
       segments ??
-          [RubyTextData(dictionaryTerm.term, ruby: dictionaryTerm.reading)],
+          [
+            RubyTextData(dictionaryTerm.term, ruby: dictionaryTerm.reading),
+          ],
       style: Theme.of(context)
           .textTheme
           .titleLarge!

@@ -61,8 +61,10 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
   final ValueNotifier<DictionaryResult?> _dictionaryResultNotifier =
       ValueNotifier<DictionaryResult?>(null);
 
-  /// The result from the last dictionary search performed with
-  /// [searchDictionaryResult].
+  /// Notifies the popup dictionary to refresh positions.
+  final ValueNotifier<bool> _popupPositionNotifier = ValueNotifier<bool>(false);
+
+  /// Notifies the progress bar whether or not to refresh.
   final ValueNotifier<bool> _isSearchingNotifier = ValueNotifier<bool>(false);
 
   /// Whether or not there is a present dictionary result.
@@ -118,11 +120,12 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
     required String searchTerm,
     required JidoujishoPopupPosition position,
   }) async {
-    _isSearchingNotifier.value = true;
+    _popupPosition = position;
+    _popupPositionNotifier.value = true;
     try {
+      _isSearchingNotifier.value = true;
       DictionaryResult dictionaryResult =
           await appModel.searchDictionary(searchTerm);
-      _popupPosition = position;
 
       await appModel.addToDictionaryHistory(result: dictionaryResult);
       _dictionaryResultNotifier.value = dictionaryResult;
@@ -134,6 +137,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
   /// Hide the dictionary and dispose of the current result.
   void clearDictionaryResult() async {
     _dictionaryResultNotifier.value = null;
+    _popupPositionNotifier.value = false;
     appModel.currentMediaSource?.clearCurrentSentence();
   }
 
@@ -143,7 +147,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
     return MultiValueListenableBuilder(
       valueListenables: [
         _dictionaryResultNotifier,
-        _isSearchingNotifier,
+        _popupPositionNotifier,
       ],
       builder: (context, result, _) {
         if (!_isSearchingNotifier.value &&

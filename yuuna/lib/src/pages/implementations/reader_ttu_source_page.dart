@@ -475,6 +475,7 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
   /// https://github.com/birchill/10ten-ja-reader/blob/fbbbde5c429f1467a7b5a938e9d67597d7bd5ffa/src/content/get-text.ts#L314
   String javascriptToExecute = """
 /*jshint esversion: 6 */
+
 function tapToSelect(e) {
   if (getSelectionText()) {
     console.log(JSON.stringify({
@@ -487,6 +488,20 @@ function tapToSelect(e) {
 			}));
   } else {
     var result = document.caretRangeFromPoint(e.clientX, e.clientY);
+
+    if (e.target.classList.contains('book-content')) {
+      console.log(JSON.stringify({
+				"index": -1,
+				"text": getSelectionText(),
+				"jidoujisho-message-type": "lookup",
+        "x": e.clientX,
+        "y": e.clientY,
+        "isCreator": "no",
+			}));
+      return;
+    }
+
+    
     var selectedElement = result.startContainer;
     var paragraph = result.startContainer;
     var offsetNode = result.startContainer;
@@ -494,7 +509,7 @@ function tapToSelect(e) {
 
     var adjustIndex = false;
 
-    if (!!offsetNode && offsetNode.nodeType == Node.TEXT_NODE && offset) {
+    if (!!offsetNode && offsetNode.nodeType === Node.TEXT_NODE && offset) {
         const range = new Range();
         range.setStart(offsetNode, offset - 1);
         range.setEnd(offsetNode, offset);
@@ -511,7 +526,7 @@ function tapToSelect(e) {
     while (paragraph && paragraph.nodeName !== 'P') {
       paragraph = paragraph.parentNode;
     }
-    if (paragraph == null) {
+    if (paragraph === null) {
       paragraph = result.startContainer.parentNode;
     }
 		var noFuriganaText = [];
@@ -563,16 +578,27 @@ function tapToSelect(e) {
     if (adjustIndex) {
       index = index - 1;
     }
-    
-    
-		console.log(JSON.stringify({
+
+    var character = text[index];
+    if (character) {
+      console.log(JSON.stringify({
 				"index": index,
 				"text": text,
 				"jidoujisho-message-type": "lookup",
         "x": e.clientX,
         "y": e.clientY,
 			}));
-    console.log(text[index]);
+      console.log(character);
+    } else {
+      console.log(JSON.stringify({
+				"index": -1,
+				"text": getSelectionText(),
+				"jidoujisho-message-type": "lookup",
+        "x": e.clientX,
+        "y": e.clientY,
+        "isCreator": "no",
+			}));
+    }
   }
 }
 function getSelectionText() {

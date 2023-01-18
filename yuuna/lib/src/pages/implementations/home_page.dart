@@ -17,7 +17,8 @@ class HomePage extends BasePage {
   BasePageState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends BasePageState<HomePage> {
+class _HomePageState extends BasePageState<HomePage>
+    with WidgetsBindingObserver {
   late final List<Widget> mediaTypeBodies;
   late final List<BottomNavigationBarItem> navBarItems;
 
@@ -45,6 +46,7 @@ class _HomePageState extends BasePageState<HomePage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
 
     /// Populate and define the tabs and their respective content bodies based
     /// on the media types specified and ordered by [AppModel]. As [ref.watch]
@@ -75,6 +77,22 @@ class _HomePageState extends BasePageState<HomePage> {
         appModel.setFirstTimeSetupFlag();
       }
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (AppLifecycleState.resumed == state) {
+      /// Keep the search database ready.
+      debugPrint('Lifecycle Resumed');
+      appModel.searchDictionary(appModel.targetLanguage.helloWorld);
+    }
   }
 
   @override
