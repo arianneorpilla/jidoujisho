@@ -250,8 +250,9 @@ class JapaneseLanguage extends Language {
 
 /// Top-level function for use in compute. See [Language] for details.
 /// Credits to Matthew Chan for their port of the Yomichan parser to Dart.
-Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
+Future<DictionaryResult> prepareSearchResultsJapaneseLanguage(
     DictionarySearchParams params) async {
+  int bestLength = 0;
   String searchTerm = params.searchTerm.trim();
   const KanaKit kanaKit = KanaKit();
 
@@ -266,7 +267,9 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
   int limit = params.maximumDictionaryEntrySearchMatch;
 
   if (searchTerm.isEmpty) {
-    return [];
+    return DictionaryResult(
+      searchTerm: searchTerm,
+    );
   }
 
   final Isar database = await Isar.open(
@@ -365,17 +368,21 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
 
     if (termExactResults.isNotEmpty) {
       termExactResultsByLength[partialTerm.length] = termExactResults;
+      bestLength = partialTerm.length;
     }
     if (termDeinflectedResults.isNotEmpty) {
       termDeinflectedResultsByLength[partialTerm.length] =
           termDeinflectedResults;
+      bestLength = partialTerm.length;
     }
     if (readingExactResults.isNotEmpty) {
       readingExactResultsByLength[partialTerm.length] = readingExactResults;
+      bestLength = partialTerm.length;
     }
     if (readingDeinflectedResults.isNotEmpty) {
       readingDeinflectedResultsByLength[partialTerm.length] =
           readingDeinflectedResults;
+      bestLength = partialTerm.length;
     }
   });
 
@@ -555,7 +562,11 @@ Future<List<DictionaryTerm>> prepareSearchResultsJapaneseLanguage(
     return 0;
   });
 
-  return terms;
+  return DictionaryResult(
+    searchTerm: searchTerm,
+    bestLength: bestLength,
+    terms: terms,
+  );
 }
 
 /// Rules for word deinflection.

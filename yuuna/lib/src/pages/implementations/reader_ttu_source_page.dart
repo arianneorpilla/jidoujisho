@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -79,6 +80,13 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
     _isRecursiveSearching = false;
 
     _focusNode.requestFocus();
+  }
+
+  /// Hide the dictionary and dispose of the current result.
+  @override
+  void clearDictionaryResult() async {
+    super.clearDictionaryResult();
+    unselectWebViewTextSelection(_controller);
   }
 
   @override
@@ -269,6 +277,22 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
     );
   }
 
+  void selectTextOnwards({
+    required int cursorX,
+    required int cursorY,
+    required int offsetIndex,
+    required int length,
+    required int whitespaceOffset,
+    required bool isSpaceDelimited,
+  }) async {
+    _controller.setContextMenu(emptyContextMenu);
+    await _controller.evaluateJavascript(
+      source:
+          'selectTextForTextLength($cursorX, $cursorY, $offsetIndex, $length, $whitespaceOffset, $isSpaceDelimited);',
+    );
+    _controller.setContextMenu(contextMenu);
+  }
+
   void onConsoleMessage(
     InAppWebViewController controller,
     ConsoleMessage message,
@@ -319,15 +343,39 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
           mediaSource.clearCurrentSentence();
         } else {
           try {
+            bool isSpaceDelimited = appModel.targetLanguage.isSpaceDelimited;
+
             String searchTerm = appModel.targetLanguage.getSearchTermFromIndex(
               text: text,
               index: index,
             );
+            int whitespaceOffset =
+                searchTerm.length - searchTerm.trimLeft().length;
+
+            int offsetIndex = isSpaceDelimited
+                ? appModel.targetLanguage.getStartingIndex(
+                    text: text,
+                    index: index,
+                  )
+                : index + whitespaceOffset;
 
             searchDictionaryResult(
               searchTerm: searchTerm,
               position: position,
-            );
+            ).then((result) {
+              int length = isSpaceDelimited
+                  ? searchTerm.split(' ').first.length
+                  : max(1, result.bestLength);
+
+              selectTextOnwards(
+                cursorX: x,
+                cursorY: y,
+                offsetIndex: offsetIndex,
+                length: length,
+                whitespaceOffset: whitespaceOffset,
+                isSpaceDelimited: isSpaceDelimited,
+              );
+            });
             String sentence = appModel.targetLanguage.getSentenceFromParagraph(
               paragraph: text,
               index: index,
@@ -336,7 +384,6 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
           } catch (e) {
             clearDictionaryResult();
           } finally {
-            unselectWebViewTextSelection(controller);
             FocusScope.of(context).unfocus();
             _focusNode.requestFocus();
           }
@@ -475,7 +522,6 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
   /// https://github.com/birchill/10ten-ja-reader/blob/fbbbde5c429f1467a7b5a938e9d67597d7bd5ffa/src/content/get-text.ts#L314
   String javascriptToExecute = """
 /*jshint esversion: 6 */
-
 function tapToSelect(e) {
   if (getSelectionText()) {
     console.log(JSON.stringify({
@@ -501,7 +547,6 @@ function tapToSelect(e) {
       return;
     }
 
-    
     var selectedElement = result.startContainer;
     var paragraph = result.startContainer;
     var offsetNode = result.startContainer;
@@ -521,7 +566,8 @@ function tapToSelect(e) {
             result.startOffset = result.startOffset - 1;
             adjustIndex = true;
         }
-    }
+      }
+    
     
     while (paragraph && paragraph.nodeName !== 'P') {
       paragraph = paragraph.parentNode;
@@ -679,7 +725,7 @@ rt {
   -khtml-user-select:none;    /* Konqueror */
   -moz-user-select:none;      /* Firefox */
   -ms-user-select:none;       /* Internet Explorer/Edge */
-  user-select:none;           /* Non-prefixed version */f
+  user-select:none;           /* Non-prefixed version */
 }
 rp {
   -webkit-touch-callout:none; /* iOS Safari */
@@ -689,8 +735,143 @@ rp {
   -ms-user-select:none;       /* Internet Explorer/Edge */
   user-select:none;           /* Non-prefixed version */
 }
+
+::selection {
+  color: white;
+  background: rgba(255, 0, 0, 0.6);
+}
 </style>
 `);
+
+function selectTextForTextLength(x, y, index, length, whitespaceOffset, isSpaceDelimited) {
+  var result = document.caretRangeFromPoint(x, y);
+
+  var selectedElement = result.startContainer;
+  var paragraph = result.startContainer;
+  var offsetNode = result.startContainer;
+  var offset = result.startOffset;
+
+  var adjustIndex = false;
+
+  if (!!offsetNode && offsetNode.nodeType === Node.TEXT_NODE && offset) {
+      const range = new Range();
+      range.setStart(offsetNode, offset - 1);
+      range.setEnd(offsetNode, offset);
+
+      const bbox = range.getBoundingClientRect();
+      if (bbox.left <= x && bbox.right >= x &&
+          bbox.top <= y && bbox.bottom >= y) {
+          if (length == 1) {
+            const range = new Range();
+            range.setStart(offsetNode, result.startOffset - 1);
+            range.setEnd(offsetNode, result.startOffset);
+
+            var selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            return;
+          }
+
+          result.startOffset = result.startOffset - 1;
+          adjustIndex = true;
+      }
+  }
+
+  if (isSpaceDelimited) {
+    const range = new Range();
+    range.setStart(offsetNode, index);
+    range.setEnd(offsetNode, index + length);
+  
+    var selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    return;
+  } 
+
+  if (length == 1) {
+    const range = new Range();
+    range.setStart(offsetNode, result.startOffset);
+    range.setEnd(offsetNode, result.startOffset + 1);
+
+    var selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    return;
+  }
+
+  
+
+  while (paragraph && paragraph.nodeName !== 'P') {
+    paragraph = paragraph.parentNode;
+  }
+  if (paragraph === null) {
+    paragraph = result.startContainer.parentNode;
+  }
+  var noFuriganaText = [];
+  var lastNode;
+
+  var endOffset = 0;
+  var done = false;
+
+  for (var value of paragraph.childNodes.values()) {
+    if (done) {
+      console.log(noFuriganaText.join());
+      break;
+    }
+    
+    if (value.nodeName === "#text") {
+      endOffset = 0;
+      lastNode = value;
+      for (var i = 0; i < value.textContent.length; i++) {
+        noFuriganaText.push(value.textContent[i]);
+        endOffset = endOffset + 1;
+        if (noFuriganaText.length >= length + index) {
+          done = true;
+          break;
+        }
+      }
+    } else {
+      for (var node of value.childNodes.values()) {
+        if (done) {
+          break;
+        }
+
+        if (node.nodeName === "#text") {
+          endOffset = 0;
+          lastNode = node;
+
+          for (var i = 0; i < node.textContent.length; i++) {
+            noFuriganaText.push(node.textContent[i]);
+            endOffset = endOffset + 1;
+            if (noFuriganaText.length >= length + index) {
+              done = true;
+              break;
+            }
+          }
+        } else if (node.firstChild.nodeName === "#text" && node.nodeName !== "RT" && node.nodeName !== "RP") {
+          endOffset = 0;
+          lastNode = node.firstChild;
+          for (var i = 0; i < node.firstChild.textContent.length; i++) {
+            noFuriganaText.push(node.firstChild.textContent[i]);
+            endOffset = endOffset + 1;
+            if (noFuriganaText.length >= length + index) {
+              done = true;
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  const range = new Range();
+  range.setStart(offsetNode, result.startOffset - adjustIndex + whitespaceOffset);
+  range.setEnd(lastNode, endOffset);
+  
+  var selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
 """;
 
   String get leftArrowSimulateJs => '''

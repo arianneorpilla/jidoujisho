@@ -16,6 +16,7 @@ class DictionaryResult {
     required this.searchTerm,
     this.terms = const [],
     this.scrollIndex = 0,
+    this.bestLength = 0,
     this.id,
   });
 
@@ -26,6 +27,10 @@ class DictionaryResult {
   /// should be shown on the dashboard. Scrolling a result horizontally in the
   /// dictionary history will change and update this result in the database.
   int scrollIndex;
+
+  /// The best length found for the search term used for highlighting the
+  /// selected word.
+  int bestLength;
 
   /// Original search term used to make the result.
   @Index(unique: true)

@@ -42,8 +42,9 @@ class EnglishLanguage extends Language {
 
 /// Top-level function for use in compute. See [Language] for details.
 /// Credits to Matthew Chan for their port of the Yomichan parser to Dart.
-Future<List<DictionaryTerm>> prepareSearchResultsEnglishLanguage(
+Future<DictionaryResult> prepareSearchResultsEnglishLanguage(
     DictionarySearchParams params) async {
+  int bestLength = 0;
   String searchTerm = params.searchTerm.toLowerCase().trim();
 
   /// Handle contractions well enough.
@@ -72,7 +73,9 @@ Future<List<DictionaryTerm>> prepareSearchResultsEnglishLanguage(
   int limit = params.maximumDictionaryEntrySearchMatch;
 
   if (searchTerm.isEmpty) {
-    return [];
+    return DictionaryResult(
+      searchTerm: searchTerm,
+    );
   }
 
   final Lemmatizer lemmatizer = Lemmatizer();
@@ -148,10 +151,12 @@ Future<List<DictionaryTerm>> prepareSearchResultsEnglishLanguage(
 
     if (termExactResults.isNotEmpty) {
       termExactResultsByLength[partialTerm.length] = termExactResults;
+      bestLength = partialTerm.length;
     }
     if (termDeinflectedResults.isNotEmpty) {
       termDeinflectedResultsByLength[partialTerm.length] =
           termDeinflectedResults;
+      bestLength = partialTerm.length;
     }
   });
 
@@ -241,5 +246,9 @@ Future<List<DictionaryTerm>> prepareSearchResultsEnglishLanguage(
     );
   }).toList();
 
-  return terms;
+  return DictionaryResult(
+    searchTerm: searchTerm,
+    bestLength: bestLength,
+    terms: terms,
+  );
 }

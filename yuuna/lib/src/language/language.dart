@@ -64,7 +64,7 @@ abstract class Language {
 
   /// Overrides the base search function and implements search specific to
   /// a language.
-  final Future<List<DictionaryTerm>> Function(DictionarySearchParams params)?
+  final Future<DictionaryResult> Function(DictionarySearchParams params)?
       prepareSearchResults;
 
   /// A standard format that dictionaries of this language can be found in.
@@ -240,6 +240,32 @@ abstract class Language {
     }
   }
 
+  /// Returns the starting index from which the search term should be chopped
+  /// from, given a clicked index and full text. For a space-delimited language,
+  /// this will return the starting index of a clicked word. Otherwise, this
+  /// returns the clicked index itself.
+  int getStartingIndex({
+    required String text,
+    required int index,
+  }) {
+    if (isSpaceDelimited) {
+      final workingBuffer = StringBuffer();
+
+      List<String> words = textToWords(text.replaceAll('\n', ' '));
+
+      for (String word in words) {
+        workingBuffer.write(word);
+        if (workingBuffer.length > index) {
+          return workingBuffer.length - word.length;
+        }
+      }
+
+      return index;
+    } else {
+      return index;
+    }
+  }
+
   /// Some languages may want to display custom widgets rather than the built
   /// in word and reading text that is there by default. For example, Japanese
   /// may want to display a furigana widget instead.
@@ -279,7 +305,7 @@ abstract class Language {
 }
 
 /// Top-level function for use in compute. See [Language] for details.
-Future<List<DictionaryTerm>> prepareSearchResultsStandard(
+Future<DictionaryResult> prepareSearchResultsStandard(
     DictionarySearchParams params) {
   throw UnimplementedError();
 }

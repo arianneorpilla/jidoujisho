@@ -116,22 +116,24 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
   /// Perform a search with a given query and update the dictionary search
   /// result. The [position] parameter determines where the pop-up will
   /// be shown on the screen.
-  void searchDictionaryResult({
+  Future<DictionaryResult> searchDictionaryResult({
     required String searchTerm,
     required JidoujishoPopupPosition position,
   }) async {
+    late DictionaryResult dictionaryResult;
     _popupPosition = position;
     _popupPositionNotifier.value = true;
     try {
       _isSearchingNotifier.value = true;
-      DictionaryResult dictionaryResult =
-          await appModel.searchDictionary(searchTerm);
+      dictionaryResult = await appModel.searchDictionary(searchTerm);
 
       await appModel.addToDictionaryHistory(result: dictionaryResult);
       _dictionaryResultNotifier.value = dictionaryResult;
     } finally {
       _isSearchingNotifier.value = false;
     }
+
+    return dictionaryResult;
   }
 
   /// Hide the dictionary and dispose of the current result.

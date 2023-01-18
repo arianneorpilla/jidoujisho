@@ -1262,14 +1262,8 @@ class AppModel with ChangeNotifier {
       isarDirectoryPath: isarDirectory.path,
     );
 
-    List<DictionaryTerm> terms =
+    DictionaryResult result =
         await compute(targetLanguage.prepareSearchResults!, params);
-
-    DictionaryResult result = DictionaryResult(
-      searchTerm: searchTerm,
-      terms: terms,
-    );
-
     _dictionarySearchCache[searchTerm] = result;
     if (_dictionarySearchCache.length > 200) {
       _dictionarySearchCache.clear();
