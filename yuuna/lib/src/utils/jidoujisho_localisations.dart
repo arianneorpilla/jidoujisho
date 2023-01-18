@@ -365,5 +365,6 @@ class JidoujishoLocalisations {
     'maximum_terms': 'Maximum dictionary headwords in result',
     'use_br_tags': 'Use line break tag instead of newline on export',
     'prepend_dictionary_names': 'Prepend dictionary name in meaning',
+    'highlight_on_tap': 'Highlight text on tap',
   };
 }

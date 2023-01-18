@@ -362,14 +362,16 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
             int length =
                 appModel.targetLanguage.textToWords(searchTerm).first.length;
 
-            await selectTextOnwards(
-              cursorX: x,
-              cursorY: y,
-              offsetIndex: offsetIndex,
-              length: length,
-              whitespaceOffset: whitespaceOffset,
-              isSpaceDelimited: isSpaceDelimited,
-            );
+            if (mediaSource.highlightOnTap) {
+              await selectTextOnwards(
+                cursorX: x,
+                cursorY: y,
+                offsetIndex: offsetIndex,
+                length: length,
+                whitespaceOffset: whitespaceOffset,
+                isSpaceDelimited: isSpaceDelimited,
+              );
+            }
 
             searchDictionaryResult(
               searchTerm: searchTerm,
@@ -379,14 +381,16 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
                   ? searchTerm.split(' ').first.length
                   : max(1, result.bestLength);
 
-              selectTextOnwards(
-                cursorX: x,
-                cursorY: y,
-                offsetIndex: offsetIndex,
-                length: length,
-                whitespaceOffset: whitespaceOffset,
-                isSpaceDelimited: isSpaceDelimited,
-              );
+              if (mediaSource.highlightOnTap) {
+                selectTextOnwards(
+                  cursorX: x,
+                  cursorY: y,
+                  offsetIndex: offsetIndex,
+                  length: length,
+                  whitespaceOffset: whitespaceOffset,
+                  isSpaceDelimited: isSpaceDelimited,
+                );
+              }
             });
             String sentence = appModel.targetLanguage.getSentenceFromParagraph(
               paragraph: text,

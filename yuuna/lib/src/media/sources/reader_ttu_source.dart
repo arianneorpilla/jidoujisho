@@ -287,6 +287,22 @@ class ReaderTtuSource extends ReaderMediaSource {
     );
   }
 
+  /// Whether the reader will highlight words on tap.
+  bool get highlightOnTap {
+    return getPreference<bool>(
+      key: 'highlight_on_tap',
+      defaultValue: true,
+    );
+  }
+
+  /// Toggles whether the reader will highlight words on tap.
+  void toggleHighlightOnTap() async {
+    await setPreference<bool>(
+      key: 'highlight_on_tap',
+      value: !highlightOnTap,
+    );
+  }
+
   /// Used to fetch JSON for all books in IndexedDB.
   static const String getHistoryJs = '''
 var bookmarkJson = JSON.stringify([]);

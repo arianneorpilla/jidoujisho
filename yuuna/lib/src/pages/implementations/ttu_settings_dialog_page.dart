@@ -20,6 +20,7 @@ class _DictionaryDialogPageState extends BasePageState {
       appModel.translate('invert_volume_buttons');
   String get volumeButtonTurningSpeed =>
       appModel.translate('volume_button_turning_speed');
+  String get highlightOnTapLabel => appModel.translate('highlight_on_tap');
   String get extendPageNavbarLabel =>
       appModel.translate('extend_page_beyond_navbar');
 
@@ -74,6 +75,7 @@ class _DictionaryDialogPageState extends BasePageState {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              buildHighlightOnTapSwitch(),
               buildEnablePageTurningSwitch(),
               buildInvertPageTurningSwitch(),
               buildExtendPageSwitch(),
@@ -154,6 +156,30 @@ class _DictionaryDialogPageState extends BasePageState {
               onChanged: (value) {
                 source.toggleExtendPageBeyondNavigationBar();
                 _notifier.value = source.extendPageBeyondNavigationBar;
+              },
+            );
+          },
+        )
+      ],
+    );
+  }
+
+  Widget buildHighlightOnTapSwitch() {
+    ValueNotifier<bool> _notifier = ValueNotifier<bool>(source.highlightOnTap);
+
+    return Row(
+      children: [
+        Expanded(
+          child: Text(highlightOnTapLabel),
+        ),
+        ValueListenableBuilder<bool>(
+          valueListenable: _notifier,
+          builder: (_, value, __) {
+            return Switch(
+              value: value,
+              onChanged: (value) {
+                source.toggleHighlightOnTap();
+                _notifier.value = source.highlightOnTap;
               },
             );
           },
