@@ -354,15 +354,12 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
             int whitespaceOffset =
                 searchTerm.length - searchTerm.trimLeft().length;
 
-            int offsetIndex = isSpaceDelimited
-                ? appModel.targetLanguage.getStartingIndex(
-                    text: text,
-                    index: index,
-                  )
-                : index + whitespaceOffset;
+            int offsetIndex = index + whitespaceOffset;
 
-            int length =
-                appModel.targetLanguage.textToWords(searchTerm).first.length;
+            int length = appModel.targetLanguage
+                .textToWords(text)
+                .firstWhere((e) => e.trim().isNotEmpty)
+                .length;
 
             if (mediaSource.highlightOnTap) {
               await selectTextOnwards(
@@ -761,6 +758,7 @@ rp {
 </style>
 `);
 
+
 function selectTextForTextLength(x, y, index, length, whitespaceOffset, isSpaceDelimited) {
   var result = document.caretRangeFromPoint(x, y);
 
@@ -770,6 +768,18 @@ function selectTextForTextLength(x, y, index, length, whitespaceOffset, isSpaceD
   var offset = result.startOffset;
 
   var adjustIndex = false;
+
+  if (isSpaceDelimited) {
+    const range = new Range();
+    range.setStart(offsetNode, index);
+    range.setEnd(offsetNode, index);
+    range.expand("word")
+
+    var selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    return;
+  } 
 
   if (!!offsetNode && offsetNode.nodeType === Node.TEXT_NODE && offset) {
       const range = new Range();
@@ -795,17 +805,6 @@ function selectTextForTextLength(x, y, index, length, whitespaceOffset, isSpaceD
       }
   }
 
-  if (isSpaceDelimited) {
-    const range = new Range();
-    range.setStart(offsetNode, index);
-    range.setEnd(offsetNode, index + length);
-  
-    var selection = window.getSelection();
-    selection.removeAllRanges();
-    selection.addRange(range);
-    return;
-  } 
-
   if (length == 1) {
     const range = new Range();
     range.setStart(offsetNode, result.startOffset);
@@ -816,8 +815,6 @@ function selectTextForTextLength(x, y, index, length, whitespaceOffset, isSpaceD
     selection.addRange(range);
     return;
   }
-
-  
 
   while (paragraph && paragraph.nodeName !== 'P') {
     paragraph = paragraph.parentNode;
