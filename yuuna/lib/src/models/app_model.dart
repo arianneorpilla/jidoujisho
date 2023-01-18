@@ -211,11 +211,11 @@ class AppModel with ChangeNotifier {
 
   /// Maximum number of headwords in a returned dictionary result for
   /// performance purposes.
-  final int defaultMaximumDictionaryTermsInResult = 20;
+  final int defaultMaximumDictionaryTermsInResult = 10;
 
   /// Maximum number of dictionary entries that can be returned from a database
   /// dictionary search.
-  final int defaultMaximumDictionaryEntrySearchMatch = 40;
+  final int defaultMaximumDictionaryEntrySearchMatch = 20;
 
   /// Used as the history key used for the Stash.
   final String stashKey = ' stash';

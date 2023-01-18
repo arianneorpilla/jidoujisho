@@ -277,7 +277,7 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
     );
   }
 
-  void selectTextOnwards({
+  Future<void> selectTextOnwards({
     required int cursorX,
     required int cursorY,
     required int offsetIndex,
@@ -285,12 +285,12 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
     required int whitespaceOffset,
     required bool isSpaceDelimited,
   }) async {
-    _controller.setContextMenu(emptyContextMenu);
+    await _controller.setContextMenu(emptyContextMenu);
     await _controller.evaluateJavascript(
       source:
           'selectTextForTextLength($cursorX, $cursorY, $offsetIndex, $length, $whitespaceOffset, $isSpaceDelimited);',
     );
-    _controller.setContextMenu(contextMenu);
+    await _controller.setContextMenu(contextMenu);
   }
 
   void onConsoleMessage(
@@ -358,6 +358,18 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
                     index: index,
                   )
                 : index + whitespaceOffset;
+
+            int length =
+                appModel.targetLanguage.textToWords(searchTerm).first.length;
+
+            await selectTextOnwards(
+              cursorX: x,
+              cursorY: y,
+              offsetIndex: offsetIndex,
+              length: length,
+              whitespaceOffset: whitespaceOffset,
+              isSpaceDelimited: isSpaceDelimited,
+            );
 
             searchDictionaryResult(
               searchTerm: searchTerm,
