@@ -31,6 +31,7 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
     with WidgetsBindingObserver {
   /// The media source pertaining to this page.
   ReaderTtuSource get mediaSource => ReaderTtuSource.instance;
+  bool _controllerInitialised = false;
   late InAppWebViewController _controller;
 
   DateTime? lastMessageTime;
@@ -86,6 +87,7 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
   @override
   void clearDictionaryResult() async {
     super.clearDictionaryResult();
+
     unselectWebViewTextSelection(_controller);
   }
 
@@ -93,7 +95,9 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
   Widget build(BuildContext context) {
     Orientation orientation = MediaQuery.of(context).orientation;
     if (orientation != lastOrientation) {
-      clearDictionaryResult();
+      if (_controllerInitialised) {
+        clearDictionaryResult();
+      }
       lastOrientation = orientation;
     }
 
@@ -222,6 +226,7 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
       onConsoleMessage: onConsoleMessage,
       onWebViewCreated: (controller) {
         _controller = controller;
+        _controllerInitialised = true;
       },
       onReceivedServerTrustAuthRequest: (controller, challenge) async {
         return ServerTrustAuthResponse(
@@ -257,9 +262,6 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
             await controller.evaluateJavascript(
                 source:
                     'javascript:window.localStorage.setItem("fontSize", 24)');
-            await controller.evaluateJavascript(
-                source:
-                    'javascript:window.localStorage.setItem("avoidPageBreak", 1)');
             await controller.evaluateJavascript(
                 source:
                     'javascript:window.localStorage.setItem("secondDimensionMaxValue", $secondDimensionMaxValue)');
