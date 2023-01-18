@@ -7,19 +7,22 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_assets_server/local_assets_server.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
+import 'package:yuuna/language.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
 
 /// A global [Provider] for serving a local ッツ Ebook Reader.
-final ttuServerProvider = FutureProvider<LocalAssetsServer>((ref) {
-  return ReaderTtuSource.instance.serveLocalAssets();
+final ttuServerProvider =
+    FutureProvider.family<LocalAssetsServer, Language>((ref, language) {
+  return ReaderTtuSource.instance.serveLocalAssets(language);
 });
 
 /// A global [Provider] for getting ッツ Ebook Reader books from IndexedDB.
-final ttuBooksProvider = FutureProvider<List<MediaItem>>((ref) {
-  return ReaderTtuSource.instance.getBooksHistory();
+final ttuBooksProvider =
+    FutureProvider.family<List<MediaItem>, Language>((ref, language) {
+  return ReaderTtuSource.instance.getBooksHistory(language);
 });
 
 /// A media source that allows the user to read from ッツ Ebook Reader.
@@ -39,10 +42,6 @@ class ReaderTtuSource extends ReaderMediaSource {
   /// Get the singleton instance of this media type.
   static ReaderTtuSource get instance => _instance;
 
-  /// This port should ideally not conflict but should remain the same for
-  /// caching purposes.
-  static int get port => 52059;
-
   static final ReaderTtuSource _instance =
       ReaderTtuSource._privateConstructor();
 
@@ -51,17 +50,31 @@ class ReaderTtuSource extends ReaderMediaSource {
 
   @override
   Future<void> onSourceExit({
+    required AppModel appModel,
     required BuildContext context,
     required WidgetRef ref,
   }) async {
-    ref.refresh(ttuBooksProvider);
+    ref.refresh(ttuBooksProvider(appModel.targetLanguage));
+  }
+
+  /// Get the port for the current language. This port should ideally not conflict but should remain the same for
+  /// caching purposes.
+  int getPortForLanguage(Language language) {
+    /// Language Customizable
+    if (language is JapaneseLanguage) {
+      return 52059;
+    } else if (language is EnglishLanguage) {
+      return 52076;
+    }
+
+    throw UnimplementedError();
   }
 
   /// For serving the reader assets locally.
-  Future<LocalAssetsServer> serveLocalAssets() async {
+  Future<LocalAssetsServer> serveLocalAssets(Language language) async {
     final server = LocalAssetsServer(
       address: InternetAddress.loopbackIPv4,
-      port: port,
+      port: getPortForLanguage(language),
       assetsBasePath: 'assets/ttu-ebook-reader',
       logger: const DebugLogger(),
     );
@@ -101,6 +114,69 @@ class ReaderTtuSource extends ReaderMediaSource {
     ];
   }
 
+  /// Allows user to close the floating search bar of a media type tab page
+  /// when open.
+  Widget buildLaunchButton({
+    required BuildContext context,
+    required WidgetRef ref,
+    required AppModel appModel,
+  }) {
+    String managerLabel = appModel.translate('manager');
+
+    return FloatingSearchBarAction(
+      showIfOpened: true,
+      child: JidoujishoIconButton(
+        size: Theme.of(context).textTheme.titleLarge?.fontSize,
+        tooltip: managerLabel,
+        icon: Icons.local_library_outlined,
+        onTap: () {
+          appModel.openMedia(
+            context: context,
+            ref: ref,
+            mediaSource: this,
+          );
+        },
+      ),
+    );
+  }
+
+  /// Allows user to close the floating search bar of a media type tab page
+  /// when open.
+  Widget buildSettingsButton({
+    required BuildContext context,
+    required WidgetRef ref,
+    required AppModel appModel,
+  }) {
+    String launchLabel = appModel.translate('settings');
+    int port = getPortForLanguage(appModel.targetLanguage);
+
+    return FloatingSearchBarAction(
+      showIfOpened: true,
+      child: JidoujishoIconButton(
+        size: Theme.of(context).textTheme.titleLarge?.fontSize,
+        tooltip: launchLabel,
+        icon: Icons.settings,
+        onTap: () {
+          appModel.openMedia(
+            context: context,
+            ref: ref,
+            mediaSource: this,
+            item: MediaItem(
+              mediaIdentifier: 'http://localhost:$port/settings.html',
+              title: '',
+              mediaTypeIdentifier: ReaderTtuSource.instance.mediaType.uniqueKey,
+              mediaSourceIdentifier: ReaderTtuSource.instance.uniqueKey,
+              position: 0,
+              duration: 1,
+              canDelete: false,
+              canEdit: true,
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   /// Tweaks bar action.
   Widget buildTweaksButton(
       {required BuildContext context,
@@ -134,11 +210,18 @@ class ReaderTtuSource extends ReaderMediaSource {
     return const ReaderTtuSourceHistoryPage();
   }
 
+  /// Get the first time key for a certain language.
+  String getFirstTimeKey(Language language) {
+    return 'firstTime_${getPortForLanguage(language)}';
+  }
+
   /// Fetch JSON for all books in IndexedDB.
-  Future<List<MediaItem>> getBooksHistory() async {
-    if (getPreference(key: 'firstTime', defaultValue: true)) {
+  Future<List<MediaItem>> getBooksHistory(Language language) async {
+    if (getPreference(key: getFirstTimeKey(language), defaultValue: true)) {
       return [];
     }
+
+    int port = getPortForLanguage(language);
 
     List<MediaItem>? items;
     HeadlessInAppWebView webView = HeadlessInAppWebView(
@@ -152,7 +235,7 @@ class ReaderTtuSource extends ReaderMediaSource {
 
         if (messageJson['messageType'] != null) {
           try {
-            items = getItemsFromJson(messageJson);
+            items = getItemsFromJson(messageJson, port);
           } catch (error, stack) {
             items = [];
             debugPrint('$error');
@@ -177,7 +260,7 @@ class ReaderTtuSource extends ReaderMediaSource {
   }
 
   /// Fetch the list of history items given JSON from IndexedDB.
-  List<MediaItem> getItemsFromJson(Map<String, dynamic> json) {
+  List<MediaItem> getItemsFromJson(Map<String, dynamic> json, int port) {
     List<Map<String, dynamic>> bookmarks =
         List<Map<String, dynamic>>.from(jsonDecode(json['bookmark']));
     List<Map<String, dynamic>> datas =

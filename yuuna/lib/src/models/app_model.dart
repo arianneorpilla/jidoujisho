@@ -1882,7 +1882,11 @@ class AppModel with ChangeNotifier {
 
     mediaSource.mediaType.refreshTab();
 
-    mediaSource.onSourceExit(context: context, ref: ref);
+    mediaSource.onSourceExit(
+      appModel: this,
+      context: context,
+      ref: ref,
+    );
 
     await _audioHandler?.stop();
   }

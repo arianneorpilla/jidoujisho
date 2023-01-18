@@ -4,7 +4,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
-import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:network_to_file_image/network_to_file_image.dart';
 import 'package:subtitle/subtitle.dart';
 import 'package:transparent_image/transparent_image.dart';
@@ -137,6 +136,7 @@ abstract class MediaSource {
   /// Executed when this media source is closed. Perform this step to clean up
   /// resources or refresh media history.
   Future<void> onSourceExit({
+    required AppModel appModel,
     required BuildContext context,
     required WidgetRef ref,
   }) async {}
@@ -148,76 +148,7 @@ abstract class MediaSource {
     required WidgetRef ref,
     required AppModel appModel,
   }) {
-    return [
-      buildLaunchButton(
-        context: context,
-        ref: ref,
-        appModel: appModel,
-      )
-    ];
-  }
-
-  /// Allows user to close the floating search bar of a media type tab page
-  /// when open.
-  Widget buildLaunchButton({
-    required BuildContext context,
-    required WidgetRef ref,
-    required AppModel appModel,
-  }) {
-    String managerLabel = appModel.translate('manager');
-
-    return FloatingSearchBarAction(
-      showIfOpened: true,
-      child: JidoujishoIconButton(
-        size: Theme.of(context).textTheme.titleLarge?.fontSize,
-        tooltip: managerLabel,
-        icon: Icons.local_library_outlined,
-        onTap: () {
-          appModel.openMedia(
-            context: context,
-            ref: ref,
-            mediaSource: this,
-          );
-        },
-      ),
-    );
-  }
-
-  /// Allows user to close the floating search bar of a media type tab page
-  /// when open.
-  Widget buildSettingsButton({
-    required BuildContext context,
-    required WidgetRef ref,
-    required AppModel appModel,
-  }) {
-    String launchLabel = appModel.translate('settings');
-
-    return FloatingSearchBarAction(
-      showIfOpened: true,
-      child: JidoujishoIconButton(
-        size: Theme.of(context).textTheme.titleLarge?.fontSize,
-        tooltip: launchLabel,
-        icon: Icons.settings,
-        onTap: () {
-          appModel.openMedia(
-            context: context,
-            ref: ref,
-            mediaSource: this,
-            item: MediaItem(
-              mediaIdentifier:
-                  'http://localhost:${ReaderTtuSource.port}/settings.html',
-              title: '',
-              mediaTypeIdentifier: ReaderTtuSource.instance.mediaType.uniqueKey,
-              mediaSourceIdentifier: ReaderTtuSource.instance.uniqueKey,
-              position: 0,
-              duration: 1,
-              canDelete: false,
-              canEdit: true,
-            ),
-          );
-        },
-      ),
-    );
+    return [];
   }
 
   /// The widget to show when this source is launched. An optional [MediaItem]

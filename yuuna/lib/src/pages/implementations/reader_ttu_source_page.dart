@@ -166,7 +166,8 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
   }
 
   Widget buildBody() {
-    AsyncValue<LocalAssetsServer> server = ref.watch(ttuServerProvider);
+    AsyncValue<LocalAssetsServer> server =
+        ref.watch(ttuServerProvider(appModel.targetLanguage));
 
     return server.when(
       data: buildReaderArea,
@@ -175,7 +176,7 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
         error: error,
         stack: stack,
         refresh: () {
-          ref.refresh(ttuServerProvider);
+          ref.refresh(ttuServerProvider(appModel.targetLanguage));
         },
       ),
     );
@@ -235,7 +236,9 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
       },
       onLoadStart: (controller, url) async {
         if (mediaSource.getPreference<bool>(
-            key: 'firstTime', defaultValue: true)) {
+          key: mediaSource.getFirstTimeKey(appModel.targetLanguage),
+          defaultValue: true,
+        )) {
           final pixelRatio = window.devicePixelRatio;
           final logicalScreenSize = window.physicalSize / pixelRatio;
           final logicalHeight = logicalScreenSize.height;
@@ -269,7 +272,10 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
         }
       },
       onLoadStop: (controller, uri) async {
-        await mediaSource.setPreference(key: 'firstTime', value: false);
+        await mediaSource.setPreference(
+          key: mediaSource.getFirstTimeKey(appModel.targetLanguage),
+          value: false,
+        );
         await controller.evaluateJavascript(source: javascriptToExecute);
         Future.delayed(const Duration(seconds: 1), _focusNode.requestFocus);
       },

@@ -84,6 +84,7 @@ class ReaderLyricsSource extends ReaderMediaSource {
 
   @override
   Future<void> onSourceExit({
+    required AppModel appModel,
     required BuildContext context,
     required WidgetRef ref,
   }) async {}

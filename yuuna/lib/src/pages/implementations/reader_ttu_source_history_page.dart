@@ -41,7 +41,8 @@ class _ReaderTtuSourceHistoryPageState<T extends HistoryReaderPage>
 
   @override
   Widget build(BuildContext context) {
-    AsyncValue<LocalAssetsServer> server = ref.watch(ttuServerProvider);
+    AsyncValue<LocalAssetsServer> server =
+        ref.watch(ttuServerProvider(appModel.targetLanguage));
 
     return server.when(
       data: buildData,
@@ -50,14 +51,15 @@ class _ReaderTtuSourceHistoryPageState<T extends HistoryReaderPage>
         error: error,
         stack: stack,
         refresh: () {
-          ref.refresh(ttuServerProvider);
+          ref.refresh(ttuServerProvider(appModel.targetLanguage));
         },
       ),
     );
   }
 
   Widget buildData(LocalAssetsServer server) {
-    AsyncValue<List<MediaItem>> books = ref.watch(ttuBooksProvider);
+    AsyncValue<List<MediaItem>> books =
+        ref.watch(ttuBooksProvider(appModel.targetLanguage));
 
     return books.when(
       data: buildBody,
@@ -65,7 +67,7 @@ class _ReaderTtuSourceHistoryPageState<T extends HistoryReaderPage>
         error: error,
         stack: stack,
         refresh: () {
-          ref.refresh(ttuBooksProvider);
+          ref.refresh(ttuBooksProvider(appModel.targetLanguage));
         },
       ),
       loading: buildLoading,
