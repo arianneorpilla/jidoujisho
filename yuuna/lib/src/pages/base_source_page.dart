@@ -257,7 +257,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
   /// positioned version.
   Widget buildDictionaryResult() {
     return Dismissible(
-      key: UniqueKey(),
+      key: ValueKey(_dictionaryResultNotifier.value),
       onDismissed: (dismissDirection) {
         clearDictionaryResult();
       },

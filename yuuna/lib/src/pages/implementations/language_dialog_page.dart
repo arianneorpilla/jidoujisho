@@ -99,6 +99,7 @@ class _LanguageDialogPageState extends BasePageState<LanguageDialogPage> {
                 generateLabel: (language) => language.languageName,
                 onChanged: (language) {
                   appModel.setTargetLanguage(language!);
+                  appModel.clearDictionaryResultsCache();
                   setState(() {});
                 },
               ),

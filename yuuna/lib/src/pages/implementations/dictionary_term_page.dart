@@ -243,7 +243,9 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
               dictionaryTerm: widget.dictionaryTerm,
               metaEntries: metaEntries,
             );
-            setState(() {});
+            if (mounted) {
+              setState(() {});
+            }
           },
         ),
       );

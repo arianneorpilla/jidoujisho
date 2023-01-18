@@ -357,7 +357,7 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
             int offsetIndex = index + whitespaceOffset;
 
             int length = appModel.targetLanguage
-                .textToWords(text)
+                .textToWords(searchTerm)
                 .firstWhere((e) => e.trim().isNotEmpty)
                 .length;
 
@@ -377,7 +377,10 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
               position: position,
             ).then((result) {
               int length = isSpaceDelimited
-                  ? searchTerm.split(' ').first.length
+                  ? appModel.targetLanguage
+                      .textToWords(searchTerm)
+                      .firstWhere((e) => e.trim().isNotEmpty)
+                      .length
                   : max(1, result.bestLength);
 
               if (mediaSource.highlightOnTap) {
