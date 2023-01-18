@@ -26,14 +26,14 @@
     <img src="https://img.shields.io/github/license/lrorpilla/jidoujisho.svg" alt="license" />
   </a>
   <a href="https://ko-fi.com/lrorpilla">
-    <img src="https://img.shields.io/badge/donate-ko--fi-ff5f5f" alt="sponsor" />
+    <img src="https://img.shields.io/badge/donate-ko--fi-ff5f5f" alt="sponsor" />s
   </a>
 </p>
 
 
 ---
 <p align="center" style="margin:0"><b>Latest Release:
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.3">2.3.3</a>
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.3">2.3.4</a>
 </b></p>
 
 <p align="center" style="margin:0"><b>Release Notes:</b><br>
