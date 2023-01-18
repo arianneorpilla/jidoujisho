@@ -23,7 +23,7 @@
     <img src="https://img.shields.io/github/issues/lrorpilla/jidoujisho" alt="open issues" />
   </a>
   <a href="https://github.com/lrorpilla/jidoujisho/blob/master/LICENSE">
-    <img src="https://img.shields.io/github/license/lrorpilla/jidoujisho.svg" alt="license" />
+    <img src="https://img.shields.io/github/license/lrorpilla/jidoujisho" alt="license" />
   </a>
   <a href="https://ko-fi.com/lrorpilla">
     <img src="https://img.shields.io/badge/donate-ko--fi-ff5f5f" alt="sponsor" />
