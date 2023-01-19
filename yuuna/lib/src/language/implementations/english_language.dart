@@ -92,6 +92,9 @@ Future<DictionaryResult> prepareSearchResultsEnglishLanguage(
   Map<int, List<DictionaryEntry>> termDeinflectedResultsByLength = {};
 
   List<String> segments = searchTerm.splitWithDelim(RegExp('[ -]'));
+  if (segments.length > 10) {
+    segments = segments.sublist(0, 10);
+  }
 
   if (segments.length >= 3) {
     String first = segments.removeAt(0);
