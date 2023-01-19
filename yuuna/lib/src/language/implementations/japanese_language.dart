@@ -399,9 +399,6 @@ Future<DictionaryResult> prepareSearchResultsJapaneseLanguage(
           .map((entry) => MapEntry(entry.id, entry)),
       ...(readingExactResultsByLength[length] ?? [])
           .map((entry) => MapEntry(entry.id, entry)),
-      ...startsWithResults.map(
-        (entry) => MapEntry(entry.id, entry),
-      ),
     ];
 
     List<MapEntry<int?, DictionaryEntry>> deinflectedEntriesToAdd = [
@@ -413,6 +410,9 @@ Future<DictionaryResult> prepareSearchResultsJapaneseLanguage(
 
     uniqueEntriesById.addEntries(exactEntriesToAdd);
     uniqueEntriesById.addEntries(deinflectedEntriesToAdd);
+    uniqueEntriesById.addEntries(startsWithResults.map(
+      (entry) => MapEntry(entry.id, entry),
+    ));
   }
 
   List<DictionaryEntry> entries = uniqueEntriesById.values.toList();

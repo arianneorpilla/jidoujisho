@@ -124,14 +124,19 @@ class LanguageUtils {
     }
 
     String readingNormalized = _kanaKit.toHiragana(reading);
-    List<RubyTextData>? segments = segmentizeFurigana(
-      reading: reading,
-      readingNormalized: readingNormalized,
-      groups: groups,
-      groupsStart: 0,
-    );
-    if (segments != null) {
-      return segments;
+    try {
+      List<RubyTextData>? segments = segmentizeFurigana(
+        reading: reading,
+        readingNormalized: readingNormalized,
+        groups: groups,
+        groupsStart: 0,
+      );
+      if (segments != null) {
+        return segments;
+      }
+    } catch (e) {
+      /// This is the fallback upon failure.
+      return [RubyTextData(term, ruby: reading)];
     }
 
     /// This is the fallback upon failure.
