@@ -90,6 +90,7 @@ Future<List<DictionaryEntry>> prepareEntriesAbbyyLingvoFormat(
 
     String text = dictionaryFile
         .readAsStringSync()
+        .replaceAll('<br>', '\n')
         .replaceAll('[', '<')
         .replaceAll(']', '>')
         .replaceAll('{{', '<')

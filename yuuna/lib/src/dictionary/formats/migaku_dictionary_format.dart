@@ -87,6 +87,10 @@ Future<List<DictionaryEntry>> prepareEntriesMigakuDictionaryFormat(
         String reading = map['pronunciation'] as String;
         String definition = map['definition'] as String;
 
+        definition = definition
+            .replaceAll('<br>', '\n')
+            .replaceAll(RegExp('<[^<]+?>'), '');
+
         entries.add(
           DictionaryEntry(
             dictionaryName: params.dictionaryName,
