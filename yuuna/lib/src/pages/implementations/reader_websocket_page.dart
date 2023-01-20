@@ -1,3 +1,7 @@
+import 'dart:math';
+
+import 'package:collection/collection.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
@@ -41,7 +45,19 @@ class _ReaderWebsocketPageState<ReaderLyricsPage> extends BaseSourcePageState {
         if (source.messages.isEmpty) {
           return buildEmpty();
         } else {
-          return buildMessageBuilder();
+          return Stack(
+            children: [
+              buildMessageBuilder(),
+              Column(
+                children: [
+                  const Space.extraBig(),
+                  Expanded(
+                    child: buildDictionary(),
+                  ),
+                ],
+              ),
+            ],
+          );
         }
       },
     );
@@ -90,7 +106,103 @@ class _ReaderWebsocketPageState<ReaderLyricsPage> extends BaseSourcePageState {
     );
   }
 
+  SelectableTextController? _lastTappedController;
+
+  @override
+  void clearDictionaryResult() {
+    super.clearDictionaryResult();
+    _lastTappedController?.clearSelection();
+    source.clearCurrentSentence();
+  }
+
+  List<InlineSpan> getTextSpans({
+    required SelectableTextController controller,
+    required String text,
+  }) {
+    List<InlineSpan> spans = [];
+
+    text.runes.forEachIndexed((index, rune) {
+      String character = String.fromCharCode(rune);
+      spans.add(
+        TextSpan(
+          text: character,
+          style: const TextStyle(fontSize: 18),
+          recognizer: TapGestureRecognizer()
+            ..onTapDown = (details) async {
+              _lastTappedController?.clearSelection();
+              _lastTappedController = controller;
+
+              source.setCurrentSentence(text);
+
+              double x = details.globalPosition.dx;
+              double y = details.globalPosition.dy;
+
+              late JidoujishoPopupPosition position;
+              if (MediaQuery.of(context).orientation == Orientation.portrait) {
+                if (y < MediaQuery.of(context).size.height / 2) {
+                  position = JidoujishoPopupPosition.bottomHalf;
+                } else {
+                  position = JidoujishoPopupPosition.topHalf;
+                }
+              } else {
+                if (x < MediaQuery.of(context).size.width / 2) {
+                  position = JidoujishoPopupPosition.rightHalf;
+                } else {
+                  position = JidoujishoPopupPosition.leftHalf;
+                }
+              }
+
+              String searchTerm =
+                  appModel.targetLanguage.getSearchTermFromIndex(
+                text: text,
+                index: index,
+              );
+
+              if (character.trim().isNotEmpty) {
+                bool isSpaceDelimited =
+                    appModel.targetLanguage.isSpaceDelimited;
+                int whitespaceOffset =
+                    searchTerm.length - searchTerm.trimLeft().length;
+                int offsetIndex = index + whitespaceOffset;
+                int length = appModel.targetLanguage
+                    .textToWords(searchTerm)
+                    .firstWhere((e) => e.trim().isNotEmpty)
+                    .length;
+
+                controller.setSelection(
+                  offsetIndex,
+                  offsetIndex + length,
+                );
+
+                searchDictionaryResult(
+                  searchTerm: searchTerm,
+                  position: position,
+                ).then((result) {
+                  int length = isSpaceDelimited
+                      ? appModel.targetLanguage
+                          .textToWords(searchTerm)
+                          .firstWhere((e) => e.trim().isNotEmpty)
+                          .length
+                      : max(1, result.bestLength);
+
+                  controller.setSelection(offsetIndex, offsetIndex + length);
+                });
+              } else {
+                clearDictionaryResult();
+              }
+
+              FocusScope.of(context).unfocus();
+            },
+        ),
+      );
+    });
+
+    return spans;
+  }
+
   Widget buildMessage(String message) {
+    final SelectableTextController controller = SelectableTextController();
+
     return Padding(
       padding: EdgeInsets.only(
         top: Spacing.of(context).spaces.extraSmall,
@@ -103,8 +215,13 @@ class _ReaderWebsocketPageState<ReaderLyricsPage> extends BaseSourcePageState {
           child: Row(
             children: [
               Expanded(
-                child: SelectableText(
-                  message,
+                child: SelectableText.rich(
+                  TextSpan(
+                    children: getTextSpans(
+                      controller: controller,
+                      text: message,
+                    ),
+                  ),
                   selectionControls: JidoujishoTextSelectionControls(
                     searchAction: (selection) async {
                       source.setCurrentSentence(message);
@@ -126,6 +243,7 @@ class _ReaderWebsocketPageState<ReaderLyricsPage> extends BaseSourcePageState {
                     allowCut: true,
                     allowPaste: true,
                   ),
+                  controller: controller,
                   style: const TextStyle(fontSize: 18),
                 ),
               ),
