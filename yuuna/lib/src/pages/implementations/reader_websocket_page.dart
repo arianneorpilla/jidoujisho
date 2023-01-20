@@ -163,7 +163,9 @@ class _ReaderWebsocketPageState<ReaderLyricsPage> extends BaseSourcePageState {
                     appModel.targetLanguage.isSpaceDelimited;
                 int whitespaceOffset =
                     searchTerm.length - searchTerm.trimLeft().length;
-                int offsetIndex = index + whitespaceOffset;
+                int offsetIndex = appModel.targetLanguage
+                        .getStartingIndex(text: text, index: index) +
+                    whitespaceOffset;
                 int length = appModel.targetLanguage
                     .textToWords(searchTerm)
                     .firstWhere((e) => e.trim().isNotEmpty)

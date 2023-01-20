@@ -170,7 +170,6 @@ class PrepareDirectoryParams {
   /// Prepare parameters for a dictionary format's directory preparation method.
   PrepareDirectoryParams({
     required this.file,
-    required this.charset,
     required this.workingDirectory,
     required this.sendPort,
     required this.localisation,
@@ -180,10 +179,6 @@ class PrepareDirectoryParams {
   /// should be non-null for dictionary formats that do not require a file for
   /// import.
   final File? file;
-
-  /// Used for dictionary formats that do not use UTF-8 and may require the
-  /// encoding to be determined before reading.
-  final String charset;
 
   /// A working directory to be used in isolation and where data is to be
   /// handled in later steps.

@@ -273,6 +273,7 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
   void clearDictionaryResult() {
     super.clearDictionaryResult();
     _selectableTextController.clearSelection();
+    source.clearCurrentSentence();
   }
 
   final ScrollController _scrollController = ScrollController();
@@ -306,6 +307,9 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
                 }
               }
 
+              source.setCurrentSentence(appModel.targetLanguage
+                  .getSentenceFromParagraph(paragraph: text, index: index));
+
               String searchTerm =
                   appModel.targetLanguage.getSearchTermFromIndex(
                 text: text,
@@ -317,7 +321,9 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
                     appModel.targetLanguage.isSpaceDelimited;
                 int whitespaceOffset =
                     searchTerm.length - searchTerm.trimLeft().length;
-                int offsetIndex = index + whitespaceOffset;
+                int offsetIndex = appModel.targetLanguage
+                        .getStartingIndex(text: text, index: index) +
+                    whitespaceOffset;
                 int length = appModel.targetLanguage
                     .textToWords(searchTerm)
                     .firstWhere((e) => e.trim().isNotEmpty)

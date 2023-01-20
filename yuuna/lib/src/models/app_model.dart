@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'dart:io';
 import 'dart:isolate';
 
 import 'package:audio_service/audio_service.dart' as ag;
+import 'package:charset/charset.dart';
 import 'package:collection/collection.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -13,7 +15,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:flutter_charset_detector/flutter_charset_detector.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -1020,17 +1021,13 @@ class AppModel with ChangeNotifier {
       Uint8List bytes = file.readAsBytesSync();
       String charset = '';
 
-      /// Find a way to check if this is a text file or a binary file instead
-      /// of doing this, it's not good to do format-specific tweaks in a
-      /// general function like this.
-      if (dictionaryFormat is AbbyyLingvoFormat) {
-        DecodingResult result = await CharsetDetector.autoDecode(bytes);
-        charset = result.charset;
+      Encoding? encoding = Charset.detect(bytes);
+      if (encoding != null) {
+        charset = encoding.name;
       }
 
       prepareDirectoryParams = PrepareDirectoryParams(
         file: file,
-        charset: charset,
         workingDirectory: workingDirectory,
         sendPort: sendPort,
         localisation: localisation,

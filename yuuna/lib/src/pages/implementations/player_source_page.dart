@@ -1578,7 +1578,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   }) {
     bool isSpaceDelimited = appModel.targetLanguage.isSpaceDelimited;
     int whitespaceOffset = searchTerm.length - searchTerm.trimLeft().length;
-    int offsetIndex = index + whitespaceOffset;
+    int offsetIndex = appModel.targetLanguage
+            .getStartingIndex(text: searchTerm, index: index) +
+        whitespaceOffset;
     int length = appModel.targetLanguage
         .textToWords(searchTerm)
         .firstWhere((e) => e.trim().isNotEmpty)

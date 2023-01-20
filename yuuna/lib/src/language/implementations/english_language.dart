@@ -190,21 +190,23 @@ Future<DictionaryResult> prepareSearchResultsEnglishLanguage(
 
   List<DictionaryEntry> entries = uniqueEntriesById.values.toList();
 
-  Map<DictionaryPair, List<DictionaryEntry>> entriesByPair =
-      groupBy<DictionaryEntry, DictionaryPair>(
-    entries,
-    (entry) => DictionaryPair(term: entry.term, reading: entry.reading),
-  );
+  Map<String, List<DictionaryEntry>> entriesByPair =
+      groupBy<DictionaryEntry, String>(entries, (entry) => entry.term);
 
   if (entriesByPair.length >= params.maximumDictionaryTermsInResult) {
-    entriesByPair = Map<DictionaryPair, List<DictionaryEntry>>.fromEntries(
-        entriesByPair.entries
-            .toList()
-            .sublist(0, params.maximumDictionaryTermsInResult));
+    entriesByPair = Map<String, List<DictionaryEntry>>.fromEntries(entriesByPair
+        .entries
+        .toList()
+        .sublist(0, params.maximumDictionaryTermsInResult));
   }
 
   List<DictionaryTerm> terms = entriesByPair.entries.map((group) {
-    DictionaryPair pair = group.key;
+    String term = group.key;
+    String reading = group.value
+            .firstWhereOrNull((e) => e.reading.trim().isNotEmpty)
+            ?.reading ??
+        '';
+
     List<DictionaryEntry> entries = group.value;
 
     List<String> termTagKeys = (entries.fold<List<String>>(
@@ -227,10 +229,8 @@ Future<DictionaryResult> prepareSearchResultsEnglishLanguage(
         .where((e) => e != null)
         .map((e) => e!)
         .toList();
-    List<DictionaryMetaEntry> metaEntries = database.dictionaryMetaEntrys
-        .where()
-        .termEqualTo(pair.term)
-        .findAllSync();
+    List<DictionaryMetaEntry> metaEntries =
+        database.dictionaryMetaEntrys.where().termEqualTo(term).findAllSync();
     List<List<DictionaryTag>> meaningTagsGroups = meaningTagKeysByEntry
         .map((meaningTagKeys) => database.dictionaryTags
             .getAllByUniqueKeySync(meaningTagKeys)
@@ -240,8 +240,8 @@ Future<DictionaryResult> prepareSearchResultsEnglishLanguage(
         .toList();
 
     return DictionaryTerm(
-      term: pair.term,
-      reading: pair.reading,
+      term: term,
+      reading: reading,
       entries: entries,
       metaEntries: metaEntries,
       termTags: termTags,

@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:charset/charset.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 
@@ -41,13 +43,13 @@ Future<void> prepareDictionaryAbbyyLingvoFormat(
         path.join(params.workingDirectory.path, 'dictionary.dsl');
     File originalFile = params.file!;
     File newFile = File(dictionaryFilePath);
+    final bytes = originalFile.readAsBytesSync();
 
-    if (params.charset.startsWith('UTF-16')) {
-      final utf16CodeUnits =
-          originalFile.readAsBytesSync().buffer.asUint16List();
-      var converted = String.fromCharCodes(utf16CodeUnits);
+    Encoding? encoding = Charset.detect(bytes);
+    if (encoding != null) {
+      String decoded = encoding.decode(bytes);
       newFile.createSync();
-      newFile.writeAsStringSync(converted);
+      newFile.writeAsStringSync(decoded);
     } else {
       originalFile.copySync(newFile.path);
     }

@@ -185,6 +185,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.2.1"
+  charset:
+    dependency: "direct main"
+    description:
+      name: charset
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.1.1"
   checked_yaml:
     dependency: transitive
     description:
@@ -479,34 +486,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.3.0"
-  flutter_charset_detector:
-    dependency: "direct main"
-    description:
-      name: flutter_charset_detector
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.2"
-  flutter_charset_detector_android:
-    dependency: transitive
-    description:
-      name: flutter_charset_detector_android
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.0"
-  flutter_charset_detector_ios:
-    dependency: transitive
-    description:
-      name: flutter_charset_detector_ios
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.2"
-  flutter_charset_detector_platform_interface:
-    dependency: transitive
-    description:
-      name: flutter_charset_detector_platform_interface
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.0"
   flutter_colorpicker:
     dependency: "direct main"
     description:
