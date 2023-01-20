@@ -15,7 +15,8 @@ import 'package:yuuna/utils.dart';
 
 /// A global [Provider] for getting lyrics from Google.
 final lyricsProvider =
-    FutureProvider.family<String?, JidoujishoLyricsParameters>((ref, track) {
+    FutureProvider.family<JidoujishoLyrics, JidoujishoLyricsParameters>(
+        (ref, track) {
   return ReaderLyricsSource.instance.getLyrics(track);
 });
 
@@ -116,7 +117,8 @@ class ReaderLyricsSource extends ReaderMediaSource {
   }
 
   /// Get lyrics
-  Future<String?> getLyrics(JidoujishoLyricsParameters parameters) async {
+  Future<JidoujishoLyrics> getLyrics(
+      JidoujishoLyricsParameters parameters) async {
     String artist = Uri.encodeComponent(parameters.artist.trim());
     String title = Uri.encodeComponent(parameters.title.trim());
 
@@ -127,7 +129,7 @@ class ReaderLyricsSource extends ReaderMediaSource {
       searchUrl = 'https://www.google.com/search?q=$title+-+$artist+lyrics';
     }
 
-    late String? lyrics;
+    String? text;
     bool webViewBusy = true;
 
     HeadlessInAppWebView webView = HeadlessInAppWebView(
@@ -141,9 +143,9 @@ class ReaderLyricsSource extends ReaderMediaSource {
               document.querySelectorAll('[data-attrid*="lyrics"]');
 
           if (elements.isEmpty) {
-            lyrics = null;
+            text = null;
           } else {
-            lyrics = elements.first.innerHtml
+            text = elements.first.innerHtml
                 .replaceAll(RegExp('<[^>]*>|&[^;]+;'), '\n')
                 .replaceAll('\n\n\n', '\n')
                 .trim();
@@ -158,7 +160,22 @@ class ReaderLyricsSource extends ReaderMediaSource {
       await Future.delayed(const Duration(milliseconds: 100), () {});
     }
 
-    return lyrics;
+    /// Try again, but without an artist. This will probably be wrong. But it's
+    /// better to have tried and gotten a good result sometimes than for this
+    /// to always fail just because the artist's name might make it difficult.
+    if (artist.isNotEmpty && text == null) {
+      return getLyrics(
+        JidoujishoLyricsParameters(
+          artist: '',
+          title: parameters.title,
+        ),
+      );
+    }
+
+    return JidoujishoLyrics(
+      includesArtist: artist.isNotEmpty,
+      text: text,
+    );
   }
 
   /// Get permissions to get the current playing media.

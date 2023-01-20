@@ -87,11 +87,13 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
     );
   }
 
-  Widget buildNoLyricsFound() {
+  Widget buildNoLyricsFound({required JidoujishoLyricsParameters parameters}) {
     return Center(
       child: JidoujishoPlaceholderMessage(
         icon: Icons.music_off,
-        message: noLyricsFound,
+        message: parameters.artist.isEmpty
+            ? '$noLyricsFound\n『${parameters.title}』'
+            : '$noLyricsFound\n『${parameters.title} - ${parameters.artist}』',
       ),
     );
   }
@@ -145,7 +147,7 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
     required JidoujishoLyricsParameters parameters,
     required NowPlayingTrack track,
   }) {
-    AsyncValue<String?> lyrics = ref.watch(lyricsProvider(parameters));
+    AsyncValue<JidoujishoLyrics> lyrics = ref.watch(lyricsProvider(parameters));
     return lyrics.when(
       loading: buildLoading,
       error: (error, stack) => buildError(
@@ -164,14 +166,14 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
   }
 
   Widget buildLyrics({
-    required String? lyrics,
+    required JidoujishoLyrics lyrics,
     required JidoujishoLyricsParameters parameters,
     required NowPlayingTrack track,
   }) {
     ReaderLyricsSource source = ReaderLyricsSource.instance;
 
-    if (lyrics == null) {
-      return buildNoLyricsFound();
+    if (lyrics.text == null) {
+      return buildNoLyricsFound(parameters: parameters);
     }
 
     return GestureDetector(
@@ -214,19 +216,21 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
                                 style: const TextStyle(
                                     fontSize: 20, fontWeight: FontWeight.bold),
                               ),
-                              SelectableText(
-                                parameters.artist,
-                                selectionControls: selectionControls,
-                                style: const TextStyle(fontSize: 20),
-                              ),
+                              if (lyrics.includesArtist)
+                                SelectableText(
+                                  parameters.artist,
+                                  selectionControls: selectionControls,
+                                  style: const TextStyle(fontSize: 20),
+                                ),
                             ],
                           ),
                         ),
                       ],
                     ),
                   const Space.big(),
-                  buildLyricsText(lyrics),
+                  buildLyricsText(lyrics.text!),
                   const Space.big(),
+                  Container(height: MediaQuery.of(context).size.height / 2)
                 ],
               ),
             ),
