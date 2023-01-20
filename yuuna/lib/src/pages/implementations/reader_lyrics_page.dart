@@ -203,13 +203,14 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
                               parameters.artist))
                     Row(
                       children: [
-                        if (track.hasImage)
+                        if (track.hasImage && lyrics.includesArtist)
                           SizedBox(
                             height: 96,
                             width: 96,
                             child: Image(image: track.image!),
                           ),
-                        if (track.hasImage) const Space.semiBig(),
+                        if (track.hasImage && lyrics.includesArtist)
+                          const Space.semiBig(),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
