@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
@@ -86,25 +88,51 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
             primary: false,
             itemCount: widget.entry.meanings.length,
             itemBuilder: (context, index) {
-              if (widget.entry.meanings.length != 1) {
-                String sourceText = '• ${widget.entry.meanings[index].trim()}';
-                return SelectableText(
-                  sourceText,
-                  style: TextStyle(
-                    fontSize: appModel.dictionaryFontSize,
-                  ),
-                  selectionControls: selectionControls,
-                );
-              } else {
-                String sourceText = widget.entry.meanings.first.trim();
-                return SelectableText(
-                  sourceText,
-                  style: TextStyle(
-                    fontSize: appModel.dictionaryFontSize,
-                  ),
-                  selectionControls: selectionControls,
-                );
-              }
+              String sourceText = widget.entry.meanings.length != 1
+                  ? '• ${widget.entry.meanings[index].trim()}'
+                  : widget.entry.meanings.first.trim();
+
+              final SelectableTextController _selectableTextController =
+                  SelectableTextController();
+
+              return SelectableText(
+                sourceText,
+                controller: _selectableTextController,
+                style: TextStyle(fontSize: appModel.dictionaryFontSize),
+                selectionControls: selectionControls,
+                onSelectionChanged: (selection, cause) {
+                  if (!selection.isCollapsed &&
+                      cause == SelectionChangedCause.tap) {
+                    String text = sourceText.substring(selection.baseOffset);
+
+                    bool isSpaceDelimited =
+                        appModel.targetLanguage.isSpaceDelimited;
+                    int whitespaceOffset = text.length - text.trimLeft().length;
+                    int offsetIndex = selection.baseOffset + whitespaceOffset;
+                    int length = appModel.targetLanguage
+                        .textToWords(text)
+                        .firstWhere((e) => e.trim().isNotEmpty)
+                        .length;
+
+                    _selectableTextController.setSelection(
+                      offsetIndex,
+                      offsetIndex + length,
+                    );
+
+                    appModel.searchDictionary(text).then((result) {
+                      int length = isSpaceDelimited
+                          ? appModel.targetLanguage
+                              .textToWords(text)
+                              .firstWhere((e) => e.trim().isNotEmpty)
+                              .length
+                          : max(1, result.bestLength);
+
+                      _selectableTextController.setSelection(
+                          offsetIndex, offsetIndex + length);
+                    });
+                  }
+                },
+              );
             },
           ),
         ),

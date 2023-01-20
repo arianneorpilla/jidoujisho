@@ -182,6 +182,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   /// Hide the dictionary and dispose of the current result.
   @override
   void clearDictionaryResult() {
+    _selectableTextController.clearSelection();
+
     if (appModel.isPlayerDefinitionFocusMode) {
       dialogSmartResume(isSmartFocus: true);
     }

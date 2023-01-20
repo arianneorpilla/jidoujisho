@@ -264,6 +264,12 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
     );
   }
 
+  @override
+  void clearDictionaryResult() {
+    super.clearDictionaryResult();
+    _selectableTextController.clearSelection();
+  }
+
   final ScrollController _scrollController = ScrollController();
 
   List<InlineSpan> getSubtitleSpans(String text) {
