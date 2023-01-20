@@ -302,7 +302,7 @@ class JidoujishoLocalisations {
     'player_change_player_orientation': 'Change Player Orientation',
     'no_current_media': 'Play or refresh media for lyrics',
     'lyrics_permission_required': 'Required permission not granted',
-    'no_lyrics_found': 'No lyrics found',
+    'no_lyrics_found': 'No lyrics found for',
     'trending': 'Trending',
     'caption_filter': 'Filter Closed',
     'change_quality': 'Change Quality',
