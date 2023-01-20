@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -245,11 +247,16 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
   String _currentSelection = '';
   final FocusNode _lyricsFocusNode = FocusNode(skipTraversal: true);
 
+  /// Allows programmatic changing of the current text selection.
+  final SelectableTextController _selectableTextController =
+      SelectableTextController();
+
   Widget buildLyricsText(String text) {
     return SelectableText.rich(
       TextSpan(children: getSubtitleSpans(text)),
       focusNode: _lyricsFocusNode,
       selectionControls: selectionControls,
+      controller: _selectableTextController,
       onSelectionChanged: (selection, cause) {
         String textSelection = selection.textInside(text);
         _currentSelection = textSelection;
@@ -294,11 +301,36 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
                 index: index,
               );
 
-              if (_currentSelection.isEmpty) {
+              if (_currentSelection.isEmpty && character.trim().isNotEmpty) {
+                bool isSpaceDelimited =
+                    appModel.targetLanguage.isSpaceDelimited;
+                int whitespaceOffset =
+                    searchTerm.length - searchTerm.trimLeft().length;
+                int offsetIndex = index + whitespaceOffset;
+                int length = appModel.targetLanguage
+                    .textToWords(searchTerm)
+                    .firstWhere((e) => e.trim().isNotEmpty)
+                    .length;
+
+                _selectableTextController.setSelection(
+                  offsetIndex,
+                  offsetIndex + length,
+                );
+
                 searchDictionaryResult(
                   searchTerm: searchTerm,
                   position: position,
-                );
+                ).then((result) {
+                  int length = isSpaceDelimited
+                      ? appModel.targetLanguage
+                          .textToWords(searchTerm)
+                          .firstWhere((e) => e.trim().isNotEmpty)
+                          .length
+                      : max(1, result.bestLength);
+
+                  _selectableTextController.setSelection(
+                      offsetIndex, offsetIndex + length);
+                });
               } else {
                 clearDictionaryResult();
                 _currentSelection = '';

@@ -155,7 +155,6 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   double get dictionaryEntryOpacity => 0.5;
 
   Timer? _menuHideTimer;
-  Timer? _dragSubtitlesTimer;
 
   bool _unhideDuringInitFlag = false;
 
@@ -1464,6 +1463,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     );
   }
 
+  /// Allows programmatic changing of the current text selection.
+  final SelectableTextController _selectableTextController =
+      SelectableTextController();
+
   /// This renders the subtitle with a [SelectableText] widget.
   Widget dragToSelectSubtitle(String subtitleText) {
     return Stack(
@@ -1477,13 +1480,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         ),
         SelectableText.rich(
           TextSpan(children: getSubtitleSpans(subtitleText)),
+          controller: _selectableTextController,
           textAlign: TextAlign.center,
           focusNode: _dragToSelectFocusNode,
           toolbarOptions: const ToolbarOptions(),
-          onSelectionChanged: (selection, cause) {
-            String newTerm = selection.textInside(subtitleText);
-            startDragSubtitlesTimer(newTerm);
-          },
         ),
       ],
     );
@@ -1508,7 +1508,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                 index: index,
               );
 
-              setSearchTerm(searchTerm);
+              setSearchTerm(
+                searchTerm: searchTerm,
+                index: index,
+              );
             },
         ),
       );
@@ -1565,29 +1568,22 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               color: Colors.white,
             );
 
-  /// Used to cancel the timeout that deselects selected text.
-  /// Called when text is selected.
-  void cancelDragSubtitlesTimer() {
-    if (_dragSubtitlesTimer != null) {
-      _dragSubtitlesTimer?.cancel();
-    }
-  }
-
-  /// Used to start the timeout that deselects selected text.
-  /// Called when text is selected.
-  void startDragSubtitlesTimer(String newTerm) {
-    cancelDragSubtitlesTimer();
-    _dragSubtitlesTimer = Timer(const Duration(milliseconds: 500), () {
-      if (newTerm.isNotEmpty) {
-        setSearchTerm(newTerm);
-      }
-      refreshSubtitleWidget();
-    });
-  }
-
   /// This is used to set the search term upon pressing on a character
   /// or selecting text.
-  void setSearchTerm(String searchTerm) {
+  void setSearchTerm({
+    required String searchTerm,
+    required int index,
+  }) {
+    bool isSpaceDelimited = appModel.targetLanguage.isSpaceDelimited;
+    int whitespaceOffset = searchTerm.length - searchTerm.trimLeft().length;
+    int offsetIndex = index + whitespaceOffset;
+    int length = appModel.targetLanguage
+        .textToWords(searchTerm)
+        .firstWhere((e) => e.trim().isNotEmpty)
+        .length;
+
+    _selectableTextController.setSelection(offsetIndex, offsetIndex + length);
+
     if (searchTerm.isNotEmpty) {
       if (appModel.isPlayerDefinitionFocusMode) {
         dialogSmartPause();
@@ -1597,7 +1593,16 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     searchDictionaryResult(
       searchTerm: searchTerm,
       position: JidoujishoPopupPosition.topThreeFourths,
-    );
+    ).then((result) {
+      int length = isSpaceDelimited
+          ? appModel.targetLanguage
+              .textToWords(searchTerm)
+              .firstWhere((e) => e.trim().isNotEmpty)
+              .length
+          : max(1, result.bestLength);
+
+      _selectableTextController.setSelection(offsetIndex, offsetIndex + length);
+    });
   }
 
   /// This is used to invoke opening the card creator given possibly
