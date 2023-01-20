@@ -2607,7 +2607,7 @@ class AppModel with ChangeNotifier {
   }
 
   /// Default dictionary font size for meanings.
-  final double defaultDictionaryFontSize = 14;
+  final double defaultDictionaryFontSize = 16;
 
   /// The search debounce delay in milliseconds for searching in the app..
   double get dictionaryFontSize {
