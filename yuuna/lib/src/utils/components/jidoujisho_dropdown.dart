@@ -58,7 +58,7 @@ class _JidoujishoDropdownState<T> extends State<JidoujishoDropdown<T>> {
               ),
             ),
           ),
-          focusColor: Theme.of(context).selectedRowColor,
+          focusColor: Theme.of(context).listTileTheme.selectedTileColor,
           value: selectedOption,
           items: widget.options.map((value) {
             String text = widget.generateLabel(value);

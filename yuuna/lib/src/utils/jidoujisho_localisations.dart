@@ -75,7 +75,7 @@ class JidoujishoLocalisations {
             ' history. Are you sure you want to do this?',
     'mappings_delete_confirmation': 'This profile will be deleted. Are you '
         'sure you want to do this?',
-    'dictionaries_deleting_entries': 'Deleting dictionary entries...',
+    'dictionaries_deleting_entries': 'Deleting dictionary data...',
     'dictionaries_menu_empty': 'Import a dictionary for use',
     'options_theme_light': 'Use light theme',
     'options_theme_dark': 'Use dark theme',
@@ -366,5 +366,6 @@ class JidoujishoLocalisations {
     'use_br_tags': 'Use line break tag instead of newline on export',
     'prepend_dictionary_names': 'Prepend dictionary name in meaning',
     'highlight_on_tap': 'Highlight text on tap',
+    'search_with_dictionary': 'Enter term to search'
   };
 }

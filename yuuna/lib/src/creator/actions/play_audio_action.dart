@@ -29,14 +29,12 @@ class PlayAudioAction extends QuickAction {
   static const String key = 'play_audio';
 
   @override
-  Future<void> executeAction({
-    required BuildContext context,
-    required WidgetRef ref,
-    required AppModel appModel,
-    required CreatorModel creatorModel,
-    required DictionaryTerm dictionaryTerm,
-    required List<DictionaryMetaEntry> metaEntries,
-  }) async {
+  Future<void> executeAction(
+      {required BuildContext context,
+      required WidgetRef ref,
+      required AppModel appModel,
+      required CreatorModel creatorModel,
+      required DictionaryHeading heading}) async {
     _audioPlayer.stop();
 
     List<Enhancement> audioEnhancements = [];
@@ -74,8 +72,8 @@ class PlayAudioAction extends QuickAction {
         File? file = await enhancement.fetchAudio(
           appModel: appModel,
           context: context,
-          term: dictionaryTerm.term,
-          reading: dictionaryTerm.reading,
+          term: heading.term,
+          reading: heading.reading,
         );
 
         if (file != null) {

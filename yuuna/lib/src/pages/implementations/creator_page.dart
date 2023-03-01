@@ -436,7 +436,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
     return Scaffold(
       backgroundColor:
-          theme.backgroundColor.withOpacity(isCardEditing ? 0.5 : 1),
+          theme.colorScheme.background.withOpacity(isCardEditing ? 0.5 : 1),
       key: _scaffoldKey,
       resizeToAvoidBottomInset: true,
       appBar: showPortrait ? buildAppBar() : null,

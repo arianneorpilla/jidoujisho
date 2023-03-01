@@ -39,14 +39,22 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
   Widget build(BuildContext context) {
     AnkiMapping lastSelectedMapping = appModel.lastSelectedMapping;
 
-    Map<String, Dictionary> dictionaryMap = Map<String, Dictionary>.fromEntries(
-      appModel.dictionaries.map(
-        (dictionary) => MapEntry(dictionary.dictionaryName, dictionary),
-      ),
-    );
+    List<DictionarySearchResult> historyResults = [];
 
-    List<DictionaryResult> historyResults =
-        appModel.dictionaryHistory.reversed.toList();
+    List<DictionaryHeading> headings = [];
+
+    final Map<DictionaryHeading, Map<Dictionary, ExpandableController>>
+        expandableControllersByHeading = {};
+    for (DictionaryHeading heading in headings) {
+      expandableControllersByHeading.putIfAbsent(heading, () => {});
+      for (DictionaryEntry entry in heading.entries) {
+        Dictionary dictionary = entry.dictionary.value!;
+        expandableControllersByHeading[heading]?.putIfAbsent(
+          dictionary,
+          () => ExpandableController(initialExpanded: !dictionary.collapsed),
+        );
+      }
+    }
 
     return ListView.builder(
       cacheExtent: 99999999999999,
@@ -59,87 +67,52 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
           return const SizedBox(height: 60);
         }
 
-        DictionaryResult result = historyResults[index - 1];
+        DictionarySearchResult result = historyResults[index - 1];
 
         ValueNotifier<int> indexNotifier =
-            ValueNotifier<int>(result.scrollIndex);
-
-        for (DictionaryTerm term in result.terms!) {
-          List<MapEntry<DictionaryEntry, List<DictionaryTag>>> entryTagGroups =
-              term
-                  .entries
-                  .mapIndexed((index, entry) =>
-                      MapEntry(entry, term.meaningTagsGroups[index]))
-                  .toList();
-
-          term.metaEntries.sort(
-            (a, b) => dictionaryMap[a.dictionaryName]!.order.compareTo(
-                  dictionaryMap[b.dictionaryName]!.order,
-                ),
-          );
-          entryTagGroups.sort(
-            (a, b) => dictionaryMap[a.key.dictionaryName]!.order.compareTo(
-                  dictionaryMap[b.key.dictionaryName]!.order,
-                ),
-          );
-
-          Map<DictionaryEntry, List<DictionaryTag>> entryTagMap =
-              Map.fromEntries(entryTagGroups);
-
-          term.entries = entryTagMap.keys.toList();
-          term.meaningTagsGroups = entryTagMap.values.toList();
-        }
+            ValueNotifier<int>(result.scrollPosition);
 
         return ValueListenableBuilder<int>(
           valueListenable: indexNotifier,
           builder: (context, value, child) {
-            DictionaryTerm dictionaryTerm = result.terms![indexNotifier.value];
-
-            final Map<String, ExpandableController> controllers = {};
-            final Map<String, bool> hiddens = {};
-
-            for (String dictionaryName in dictionaryMap.keys.toList()) {
-              controllers[dictionaryName] = ExpandableController(
-                initialExpanded: !dictionaryMap[dictionaryName]!.collapsed,
-              );
-              hiddens[dictionaryName] = dictionaryMap[dictionaryName]!.hidden;
-            }
+            DictionaryHeading heading =
+                result.headings.elementAt(indexNotifier.value);
+            Map<Dictionary, ExpandableController> expandableControllers =
+                expandableControllersByHeading[heading]!;
 
             return DictionaryTermPage(
               lastSelectedMapping: lastSelectedMapping,
-              dictionaryMap: dictionaryMap,
-              dictionaryTerm: dictionaryTerm,
+              heading: heading,
               onSearch: widget.onSearch,
               onStash: widget.onStash,
-              expandableControllers: controllers,
-              dictionaryHiddens: hiddens,
+              expandableControllers: expandableControllers,
               onScrollRight: () async {
-                if (result.scrollIndex == result.terms!.length - 1) {
-                  result.scrollIndex = 0;
+                if (result.scrollPosition == result.headings.length - 1) {
+                  result.scrollPosition = 0;
                 } else {
-                  result.scrollIndex += 1;
+                  result.scrollPosition += 1;
                 }
 
                 await appModel.updateDictionaryResultScrollIndex(
                   result: result,
-                  newIndex: result.scrollIndex,
+                  newIndex: result.scrollPosition,
                 );
 
-                indexNotifier.value = result.scrollIndex;
+                indexNotifier.value = result.scrollPosition;
               },
               onScrollLeft: () async {
-                if (result.scrollIndex == 0) {
-                  result.scrollIndex = result.terms!.length - 1;
+                if (result.scrollPosition == 0) {
+                  result.scrollPosition = result.headings.length - 1;
                 } else {
-                  result.scrollIndex -= 1;
+                  result.scrollPosition -= 1;
                 }
 
                 await appModel.updateDictionaryResultScrollIndex(
                   result: result,
-                  newIndex: result.scrollIndex,
+                  newIndex: result.scrollPosition,
                 );
 
-                indexNotifier.value = result.scrollIndex;
+                indexNotifier.value = result.scrollPosition;
               },
               footerWidget: buildFooterWidget(result, indexNotifier.value),
             );
@@ -151,7 +124,7 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
 
   double get fontSize => (textTheme.labelMedium?.fontSize)! * 0.9;
 
-  Widget buildFooterWidget(DictionaryResult result, int index) {
+  Widget buildFooterWidget(DictionarySearchResult result, int index) {
     return Center(
       child: Tooltip(
         message: seeMoreLabel,
@@ -170,7 +143,7 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
   }
 
   Widget buildFooterTextSpans(
-    DictionaryResult result,
+    DictionarySearchResult result,
     int index,
   ) {
     return Text.rich(
@@ -213,7 +186,7 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
             ),
           ),
           TextSpan(
-            text: '${result.terms!.length} ',
+            text: '${result.headings.length} ',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: fontSize,

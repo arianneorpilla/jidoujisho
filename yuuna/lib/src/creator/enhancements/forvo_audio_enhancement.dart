@@ -193,8 +193,6 @@ class ForvoAudioEnhancement extends AudioEnhancement {
         // Language Customizable
         if (appModel.targetLanguage is JapaneseLanguage) {
           className = 'pronunciations-list-ja';
-        } else if (appModel.targetLanguage is EnglishLanguage) {
-          className = 'pronunciations-list-en_usa';
         }
 
         List<dom.Element> liElements = document

@@ -32,17 +32,11 @@ class CollapsedMeaningField extends Field {
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,
-    required DictionaryTerm dictionaryTerm,
-    required List<DictionaryMetaEntry> metaEntries,
+    required DictionaryHeading heading,
     required bool creatorJustLaunched,
   }) {
-    List<String> collapsedDictionaries = appModel.dictionaries
-        .where((dictionary) => dictionary.collapsed && !dictionary.hidden)
-        .map((dictionary) => dictionary.dictionaryName)
-        .toList();
-
-    List<DictionaryEntry> collapsedEntries = dictionaryTerm.entries
-        .where((entry) => collapsedDictionaries.contains(entry.dictionaryName))
+    List<DictionaryEntry> collapsedEntries = heading.entries
+        .where((entry) => entry.dictionary.value!.collapsed)
         .toList();
 
     return MeaningField.flattenMeanings(

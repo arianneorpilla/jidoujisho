@@ -24,14 +24,12 @@ class CardCreatorAction extends QuickAction {
   static const String key = 'card_creator';
 
   @override
-  Future<void> executeAction({
-    required BuildContext context,
-    required WidgetRef ref,
-    required AppModel appModel,
-    required CreatorModel creatorModel,
-    required DictionaryTerm dictionaryTerm,
-    required List<DictionaryMetaEntry> metaEntries,
-  }) async {
+  Future<void> executeAction(
+      {required BuildContext context,
+      required WidgetRef ref,
+      required AppModel appModel,
+      required CreatorModel creatorModel,
+      required DictionaryHeading heading}) async {
     if (appModel.isMediaOpen) {
       await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
       await Future.delayed(const Duration(milliseconds: 5), () {});
@@ -45,8 +43,7 @@ class CardCreatorAction extends QuickAction {
           ref: ref,
           appModel: appModel,
           creatorModel: creatorModel,
-          dictionaryTerm: dictionaryTerm,
-          metaEntries: metaEntries,
+          heading: heading,
           creatorJustLaunched: false,
         );
 
@@ -85,8 +82,7 @@ class CardCreatorAction extends QuickAction {
           ref: ref,
           appModel: appModel,
           creatorModel: creatorModel,
-          dictionaryTerm: dictionaryTerm,
-          metaEntries: metaEntries,
+          heading: heading,
           creatorJustLaunched: true,
         );
 

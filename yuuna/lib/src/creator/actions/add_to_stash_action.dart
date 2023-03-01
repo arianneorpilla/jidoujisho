@@ -24,32 +24,30 @@ class AddToStashAction extends QuickAction {
   Color getIconColor({
     required BuildContext context,
     required AppModel appModel,
-    required DictionaryTerm dictionaryTerm,
+    required DictionaryHeading heading,
   }) {
-    if (appModel.isTermInStash(dictionaryTerm.term)) {
+    if (appModel.isTermInStash(heading.term)) {
       return Theme.of(context).colorScheme.primary;
     } else {
       return super.getIconColor(
         context: context,
         appModel: appModel,
-        dictionaryTerm: dictionaryTerm,
+        heading: heading,
       );
     }
   }
 
   @override
-  Future<void> executeAction({
-    required BuildContext context,
-    required WidgetRef ref,
-    required AppModel appModel,
-    required CreatorModel creatorModel,
-    required DictionaryTerm dictionaryTerm,
-    required List<DictionaryMetaEntry> metaEntries,
-  }) async {
-    if (!appModel.isTermInStash(dictionaryTerm.term)) {
-      appModel.addToStash(terms: [dictionaryTerm.term]);
+  Future<void> executeAction(
+      {required BuildContext context,
+      required WidgetRef ref,
+      required AppModel appModel,
+      required CreatorModel creatorModel,
+      required DictionaryHeading heading}) async {
+    if (!appModel.isTermInStash(heading.term)) {
+      appModel.addToStash(terms: [heading.term]);
     } else {
-      appModel.removeFromStash(term: dictionaryTerm.term);
+      appModel.removeFromStash(term: heading.term);
     }
   }
 }

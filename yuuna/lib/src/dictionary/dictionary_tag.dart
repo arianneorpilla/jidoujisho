@@ -1,39 +1,48 @@
-import 'package:flutter/material.dart';
+import 'dart:ui';
+
+import 'package:yuuna/dictionary.dart';
 import 'package:isar/isar.dart';
-import 'package:json_annotation/json_annotation.dart';
 
 part 'dictionary_tag.g.dart';
 
-/// A helper class for tags that are present in Yomichan imported dictionary
-/// entries.
-@JsonSerializable()
+/// A database entity for tags, heavily based on the Yomichan format.
 @Collection()
 class DictionaryTag {
-  /// Define a tag with given parameters.
+  /// Initiates a tag with given parameters.
   DictionaryTag({
-    required this.dictionaryName,
+    required this.dictionaryId,
     required this.name,
     required this.category,
     required this.sortingOrder,
     required this.notes,
     required this.popularity,
-    this.id,
   });
 
-  /// Create an instance of this class from a serialized format.
-  factory DictionaryTag.fromJson(Map<String, dynamic> json) =>
-      _$DictionaryTagFromJson(json);
+  /// Makes a tag for a dictionary.
+  factory DictionaryTag.dictionary(Dictionary dictionary) {
+    return DictionaryTag(
+      dictionaryId: dictionary.id,
+      name: dictionary.name,
+      notes: '',
+      sortingOrder: -100000000000,
+      category: 'frequent',
+      popularity: 0,
+    );
+  }
 
-  /// Convert this into a serialized format.
-  Map<String, dynamic> toJson() => _$DictionaryTagToJson(this);
+  /// Dictionary ID for hashing this tag.
+  final int dictionaryId;
 
-  /// The dictionary from which this entry was imported from. This is used for
-  /// database query purposes.
-  @Index(type: IndexType.hash)
-  final String dictionaryName;
+  /// Function to generate a lookup ID for heading by its unique string key.
+  static int hash({required int dictionaryId, required String name}) {
+    return fastHash('$dictionaryId/$name');
+  }
 
-  /// Tag name.
-  @Index(type: IndexType.hash)
+  /// Identifier for database purposes.
+  Id get isarId => hash(dictionaryId: dictionaryId, name: name);
+
+  /// Display name for the tag.
+  @Index()
   final String name;
 
   /// Category for the tag.
@@ -48,14 +57,7 @@ class DictionaryTag {
   /// Score used to determine popularity.
   /// Negative values are more rare and positive values are more frequent.
   /// This score is also used to sort search results.
-  final double? popularity;
-
-  /// The length of word is used as an index.
-  @Index(type: IndexType.hash, unique: true)
-  String get uniqueKey => '$dictionaryName/$name';
-
-  /// A unique identifier for the purposes of database storage.
-  Id? id;
+  final double popularity;
 
   /// Get the color for this tag based on its category.
   @ignore
@@ -81,4 +83,14 @@ class DictionaryTag {
 
     return const Color(0xFF616161);
   }
+
+  /// A value is yielded from a single key.
+  final IsarLink<Dictionary> dictionary = IsarLink<Dictionary>();
+
+  @override
+  bool operator ==(Object other) =>
+      other is DictionaryTag && isarId == other.isarId;
+
+  @override
+  int get hashCode => isarId.hashCode;
 }

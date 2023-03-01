@@ -22,7 +22,7 @@ class DictionaryResultPage extends BasePage {
   });
 
   /// The result made from a dictionary database search.
-  final DictionaryResult result;
+  final DictionarySearchResult result;
 
   /// Action to be done upon selecting the search option.
   final Function(String) onSearch;
@@ -53,8 +53,14 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
 
   void dumpCache() {
     if (mounted) {
-      setState(() {});
+      for (DictionaryHeading heading in widget.result.headings) {
+        for (DictionaryEntry entry in heading.entries) {
+          entry.dictionary.loadSync();
+        }
+      }
     }
+
+    setState(() {});
   }
 
   final ScrollController _scrollController = ScrollController();
@@ -63,35 +69,113 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
   Widget build(BuildContext context) {
     AnkiMapping lastSelectedMapping = appModel.lastSelectedMapping;
 
-    Map<String, Dictionary> dictionaryMap = Map<String, Dictionary>.fromEntries(
-      appModel.dictionaries.map(
-        (dictionary) => MapEntry(dictionary.dictionaryName, dictionary),
+    Map<int, DictionaryHeading> headingsById = Map.fromEntries(
+      widget.result.headings.map(
+        (heading) => MapEntry(heading.id, heading),
       ),
     );
 
-    for (DictionaryTerm term in widget.result.terms!) {
-      List<MapEntry<DictionaryEntry, List<DictionaryTag>>> entryTagGroups = term
-          .entries
-          .mapIndexed(
-              (index, entry) => MapEntry(entry, term.meaningTagsGroups[index]))
-          .toList();
+    List<DictionaryHeading> headings = widget.result.headingIds
+        .map((id) => headingsById[id]!)
+        .toList()
+        .where((heading) => heading.entries.isNotEmpty)
+        .toList();
+    Map<DictionaryHeading, int> headingOrders = Map.fromEntries(
+      headings.mapIndexed(
+        (index, id) => MapEntry(headings[index], index),
+      ),
+    );
 
-      term.metaEntries.sort(
-        (a, b) => dictionaryMap[a.dictionaryName]!.order.compareTo(
-              dictionaryMap[b.dictionaryName]!.order,
-            ),
-      );
-      entryTagGroups.sort(
-        (a, b) => dictionaryMap[a.key.dictionaryName]!.order.compareTo(
-              dictionaryMap[b.key.dictionaryName]!.order,
-            ),
-      );
+    headings.sort((a, b) {
+      if (a.term == b.term) {
+        int hasPopularTag = (a.tags.any((e) => e.name == 'P') ? -1 : 1)
+            .compareTo(b.tags.any((e) => e.name == 'P') ? -1 : 1);
+        if (hasPopularTag != 0) {
+          return hasPopularTag;
+        }
 
-      Map<DictionaryEntry, List<DictionaryTag>> entryTagMap =
-          Map.fromEntries(entryTagGroups);
+        int popularityCompare = (b.popularitySum).compareTo(a.popularitySum);
+        if (popularityCompare != 0) {
+          return popularityCompare;
+        }
+      } else if ((a.reading.isNotEmpty && b.reading.isNotEmpty) &&
+          a.reading == b.reading) {
+        int hasPopularTag = (a.tags.any((e) => e.name == 'P') ? -1 : 1)
+            .compareTo(b.tags.any((e) => e.name == 'P') ? -1 : 1);
+        if (hasPopularTag != 0) {
+          return hasPopularTag;
+        }
 
-      term.entries = entryTagMap.keys.toList();
-      term.meaningTagsGroups = entryTagMap.values.toList();
+        int popularityCompare = (b.popularitySum).compareTo(a.popularitySum);
+        if (popularityCompare != 0) {
+          return popularityCompare;
+        }
+      }
+
+      return headingOrders[a]!.compareTo(headingOrders[b]!);
+    });
+
+    //  headings.sort((a, b) {
+    //   if (a.term == b.term ||
+    //       (a.reading.isNotEmpty && b.reading.isNotEmpty) &&
+    //           a.reading == b.reading) {
+    //     int hasPopularTag = (a.tags.any((e) => e.name == 'P') ? -1 : 1)
+    //         .compareTo(b.tags.any((e) => e.name == 'P') ? -1 : 1);
+    //     if (hasPopularTag != 0) {
+    //       return hasPopularTag;
+    //     }
+
+    //     List<DictionaryFrequency> aFrequencies = a.frequencies.toList();
+    //     List<DictionaryFrequency> bFrequencies = b.frequencies.toList();
+    //     aFrequencies.sort((a, b) =>
+    //         a.dictionary.value!.order.compareTo(b.dictionary.value!.order));
+    //     bFrequencies.sort((a, b) =>
+    //         a.dictionary.value!.order.compareTo(b.dictionary.value!.order));
+
+    //     Map<Dictionary, List<DictionaryFrequency>> aFrequenciesByDictionary =
+    //         groupBy<DictionaryFrequency, Dictionary>(
+    //             aFrequencies, (frequency) => frequency.dictionary.value!);
+    //     Map<Dictionary, List<DictionaryFrequency>> bFrequenciesByDictionary =
+    //         groupBy<DictionaryFrequency, Dictionary>(
+    //             bFrequencies, (frequency) => frequency.dictionary.value!);
+    //     Map<Dictionary, double> aValues = aFrequenciesByDictionary
+    //         .map((k, v) => MapEntry(k, v.map((e) => e.value).max));
+    //     Map<Dictionary, double> bValues = bFrequenciesByDictionary
+    //         .map((k, v) => MapEntry(k, v.map((e) => e.value).max));
+
+    //     Set<Dictionary> sharedDictionaries =
+    //         aValues.keys.toSet().intersection(bValues.keys.toSet());
+
+    //     if (sharedDictionaries.isNotEmpty) {
+    //       for (Dictionary dictionary in sharedDictionaries) {
+    //         int freqCompare =
+    //             bValues[dictionary]!.compareTo(aValues[dictionary]!);
+    //         if (freqCompare != 0) {
+    //           return freqCompare;
+    //         }
+    //       }
+    //     } else {
+    //       int popularityCompare = (b.popularitySum).compareTo(a.popularitySum);
+    //       if (popularityCompare != 0) {
+    //         return popularityCompare;
+    //       }
+    //     }
+    //   }
+
+    //   return headingOrders[a]!.compareTo(headingOrders[b]!);
+    // });
+
+    final Map<DictionaryHeading, Map<Dictionary, ExpandableController>>
+        expandableControllersByHeading = {};
+    for (DictionaryHeading heading in headings) {
+      expandableControllersByHeading.putIfAbsent(heading, () => {});
+      for (DictionaryEntry entry in heading.entries) {
+        Dictionary dictionary = entry.dictionary.value!;
+        expandableControllersByHeading[heading]?.putIfAbsent(
+          dictionary,
+          () => ExpandableController(initialExpanded: !dictionary.collapsed),
+        );
+      }
     }
 
     return MediaQuery(
@@ -117,7 +201,7 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
               slivers: [
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
-                    childCount: widget.result.terms!.length + 1,
+                    childCount: headings.length,
                     (context, index) {
                       if (index == 0) {
                         return widget.spaceBeforeFirstResult
@@ -125,31 +209,18 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
                             : const SizedBox.shrink();
                       }
 
-                      DictionaryTerm dictionaryTerm =
-                          widget.result.terms![index - 1];
-
-                      final Map<String, ExpandableController> controllers = {};
-                      final Map<String, bool> hiddens = {};
-
-                      for (String dictionaryName
-                          in dictionaryMap.keys.toList()) {
-                        controllers[dictionaryName] = ExpandableController(
-                          initialExpanded:
-                              !dictionaryMap[dictionaryName]!.collapsed,
-                        );
-                        hiddens[dictionaryName] =
-                            dictionaryMap[dictionaryName]!.hidden;
-                      }
+                      DictionaryHeading heading = headings.elementAt(index - 1);
+                      Map<Dictionary, ExpandableController>
+                          expandableControllers =
+                          expandableControllersByHeading[heading]!;
 
                       return DictionaryTermPage(
                         lastSelectedMapping: lastSelectedMapping,
                         entryOpacity: widget.entryOpacity,
-                        dictionaryMap: dictionaryMap,
-                        dictionaryTerm: dictionaryTerm,
+                        heading: heading,
                         onSearch: widget.onSearch,
                         onStash: widget.onStash,
-                        expandableControllers: controllers,
-                        dictionaryHiddens: hiddens,
+                        expandableControllers: expandableControllers,
                       );
                     },
                   ),

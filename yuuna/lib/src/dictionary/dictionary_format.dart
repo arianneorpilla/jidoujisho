@@ -1,7 +1,8 @@
 import 'dart:io';
 
-import 'package:flutter/widgets.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:yuuna/dictionary.dart';
+import 'package:flutter/widgets.dart';
 
 /// Information making up a supported dictionary format, as well as the methods
 /// that the format will use in a separate isolate for importing or enabling
@@ -12,32 +13,39 @@ abstract class DictionaryFormat {
   /// Define a format with the given metadata that has its behaviour for
   /// import, search and display defined with a set of top-level helper methods.
   DictionaryFormat({
-    required this.formatName,
-    required this.formatIcon,
-    required this.compatibleFileExtensions,
+    required this.uniqueKey,
+    required this.name,
+    required this.icon,
+    required this.allowedExtensions,
+    required this.fileType,
     required this.prepareDirectory,
     required this.prepareName,
     required this.prepareEntries,
-    required this.prepareMetaEntries,
     required this.prepareTags,
-    required this.prepareMetadata,
-    this.useAnyPicker = true,
+    required this.preparePitches,
+    required this.prepareFrequencies,
   });
 
-  /// The name of this dictionary format. For example, this could be a
-  /// 'Yomichan Term Bank Dictionary' or 'ABBYY Lingvo'.
-  late String formatName;
+  /// This is used to distinguish dictionary formats from one another, and to
+  /// allow editing of the display name easily without having to worry about
+  /// backwards compatibility.
+  late String uniqueKey;
+
+  /// The display name of this dictionary format. For example, this could be a
+  /// 'Yomichan Dictionary' or 'ABBYY Lingvo'.
+  late String name;
 
   /// An appropriate icon for this dictionary format.
-  late IconData formatIcon;
+  late IconData icon;
 
   /// This will be used to notify the user about the required extension if they
-  /// select a file with the wrong extension.
-  late List<String> compatibleFileExtensions;
+  /// select a file with the wrong extension. Elements should not include
+  /// leading dots.
+  late List<String> allowedExtensions;
 
   /// Whether or not the file picker supports the file extensions of this
   /// format.
-  final bool useAnyPicker;
+  final FileType fileType;
 
   /// [IMPORTANT]: The following parameters below point to functions defined in
   /// the top-level, not within the inheriting class. They are meant to be
@@ -70,46 +78,27 @@ abstract class DictionaryFormat {
   /// parameters.
   Future<String> Function(PrepareDirectoryParams params) prepareName;
 
-  /// Given a [Directory] of files pertaining to this dictionary format,
-  /// return a list of [DictionaryEntry] that will be added to the database.
-  ///
-  /// See [PrepareDictionaryParams] for how to work with the individual input
-  /// parameters.
-  Future<List<DictionaryEntry>> Function(PrepareDictionaryParams params)
-      prepareEntries;
-
-  /// Given a [Directory] of files pertaining to this dictionary format,
-  /// prepare a list of [DictionaryTag] that will be added to the database.
-  ///
-  /// For example, a dictionary format may make use of tags separate from the
-  /// entry. This will be preserved.
-  ///
+  /// Prepares a list of tags that will be added to the database.
   /// See [PrepareDictionaryParams] for how to work with the individual input
   /// parameters.
   Future<List<DictionaryTag>> Function(PrepareDictionaryParams params)
       prepareTags;
 
-  /// Given a [Directory] of files pertaining to this dictionary format,
-  /// prepare a list of [DictionaryMetaEntry] that will be added to the database.
-  ///
-  /// For example, a dictionary format may make use of data that may match a
-  /// certain word-reading combination. This will be preserved.
-  ///
+  /// Prepares a map with entries that will be added to the database.
   /// See [PrepareDictionaryParams] for how to work with the individual input
   /// parameters.
-  Future<List<DictionaryMetaEntry>> Function(PrepareDictionaryParams params)
-      prepareMetaEntries;
+  Future<Map<DictionaryHeading, List<DictionaryEntry>>> Function(
+      PrepareDictionaryParams params) prepareEntries;
 
-  /// Given a [Directory] of files pertaining to this dictionary format,
-  /// prepare a [Map] of metadata that will be used for cleaning up and
-  /// enhancing raw database results.
-  ///
-  /// For example, a dictionary format may make use of tags separate from the
-  /// entry. This will be preserved by the dictionary. This field may also
-  /// be used to store trivial metadata pertaining to the dictionary itself.
-  ///
+  /// Prepares a map with pitch entries that will be added to the database.
   /// See [PrepareDictionaryParams] for how to work with the individual input
   /// parameters.
-  Future<Map<String, String>> Function(PrepareDictionaryParams params)
-      prepareMetadata;
+  Future<Map<DictionaryHeading, List<DictionaryPitch>>> Function(
+      PrepareDictionaryParams params) preparePitches;
+
+  /// Prepares a map with frequency entries that will be added to the database.
+  /// See [PrepareDictionaryParams] for how to work with the individual input
+  /// parameters.
+  Future<Map<DictionaryHeading, List<DictionaryFrequency>>> Function(
+      PrepareDictionaryParams params) prepareFrequencies;
 }

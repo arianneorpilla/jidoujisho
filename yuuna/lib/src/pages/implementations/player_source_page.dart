@@ -365,9 +365,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         }
       }
 
-      if (!appModel.isIncognitoMode) {
-        updateHistory();
-      }
+      updateHistory();
     }
   }
 
@@ -1472,7 +1470,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         SelectableText.rich(
           TextSpan(children: getSubtitleOutlineSpans(subtitleText)),
           textAlign: TextAlign.center,
-          toolbarOptions: const ToolbarOptions(),
+          toolbarOptions: ToolbarOptions.empty,
           enableInteractiveSelection: false,
         ),
         SelectableText.rich(

@@ -84,8 +84,6 @@ class TatoebaExampleSentencesEnhancement extends Enhancement {
     // Language Customizable
     if (language is JapaneseLanguage) {
       langCode = 'jpn';
-    } else if (language is EnglishLanguage) {
-      langCode = 'eng';
     } else {
       throw UnimplementedError('This language is not implemented for Tatoeba');
     }

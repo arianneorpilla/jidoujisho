@@ -37,11 +37,6 @@ class HistoryViewerPageState<T extends BaseHistoryPage>
   bool get shouldPlaceholderBeShown => true;
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     List<MediaItem> items = appModel.getMediaTypeHistory(mediaType: mediaType);
 

@@ -1,94 +1,103 @@
+import 'package:yuuna/dictionary.dart';
 import 'package:isar/isar.dart';
-import 'package:json_annotation/json_annotation.dart';
-import 'package:pretty_json/pretty_json.dart';
 
 part 'dictionary_entry.g.dart';
 
-/// A base class representing a generic implementation of a dictionary entry.
-/// Not all variables need to be defined in an entry. This class is heavily
-/// based on the Yomichan's term bank schema, though it does not completely
-/// parallel its feature set. The intent is to allow compatibility for most
-/// cases when importing data using that schema.
-@JsonSerializable()
+/// A database entity that represents single or multiple dictionary definitions,
+/// which can be in text, media or in a custom format.
+///
+/// A dictionary value belongs to a certain imported dictionary. There may be
+/// multiple distinct values belonging to a single key.
 @Collection()
 class DictionaryEntry {
-  /// Initialise a dictionary entry with given details of a certain term.
+  /// A standard dictionary entry would only contain text content, but may
+  /// also be represented with image or audio, or in a custom format.
   DictionaryEntry({
-    required this.term,
-    required this.dictionaryName,
-    required this.meanings,
-    this.reading = '',
-    this.id,
+    required this.definitions,
+    required this.popularity,
+    this.headingTagNames = const [],
+    this.entryTagNames = const [],
+    this.onyomis,
+    this.kunyomis,
+    this.imagePaths,
+    this.audioPaths,
     this.extra,
-    this.meaningTags = const [],
-    this.termTags = const [],
-    this.popularity,
+    this.id,
   });
 
-  /// Create an instance of this class from a serialized format.
-  factory DictionaryEntry.fromJson(Map<String, dynamic> json) =>
-      _$DictionaryEntryFromJson(json);
-
-  /// Convert this into a serialized format.
-  Map<String, dynamic> toJson() => _$DictionaryEntryToJson(this);
-
-  /// A unique identifier for the purposes of database storage.
+  /// Identifier for database purposes.
   Id? id;
 
-  /// The term represented by this dictionary entry.
-  @Index(type: IndexType.value, caseSensitive: false)
-  @Index(
-    type: IndexType.hash,
-    name: 'termComposite',
-    composite: [CompositeIndex('popularity')],
-  )
-  final String term;
+  /// This field is used for definitions that can be represented in text form,
+  /// which will probably make up the majority of use cases.
+  final List<String> definitions;
 
-  /// The dictionary from which this entry was imported from. This is used for
-  /// database query purposes.
-  @Index(type: IndexType.hash)
-  final String dictionaryName;
+  /// Name of tags that add detail to and describe the heading this entry
+  /// belongs to. This entity is non-null only during the import process. Use
+  /// [tags] from the [heading] instead.
+  @ignore
+  final List<String> headingTagNames;
 
-  /// The pronunciation of the term represented by this dictionary entry.
-  @Index(type: IndexType.value, caseSensitive: false)
-  @Index(
-    type: IndexType.hash,
-    name: 'readingComposite',
-    composite: [CompositeIndex('popularity')],
-  )
-  final String reading;
+  /// Name of tags that add detail to and describe this entry. This entity is
+  /// non-null only during the import process. Use [tags] instead.
+  @ignore
+  final List<String> entryTagNames;
 
-  /// A list of definitions for a term. If there is only a single [String] item,
-  /// this should be a single item list.
-  final List<String> meanings;
+  /// An optional value that if non-null, contains onyomi readings. This
+  /// field is non-null if the entry is a kanji entry.
+  final List<String>? onyomis;
 
-  /// A bonus field for storing any additional kind of information. For example,
-  /// if there are any grammar rules related to this term.
+  /// An optional value that if non-null, contains kunyomi readings. This
+  /// field is non-null if the entry is a kanji entry.
+  final List<String>? kunyomis;
+
+  /// An optional value that if non-null, contains a path that will point to
+  /// an image resource. The resource contained in the path is deleted if it
+  /// exists in the file system.
+  final List<String>? imagePaths;
+
+  /// An optional value that if non-null, contains a path that will point to
+  /// audio resources. All paths in this will all be deleted if it
+  /// exists in the file system.
+  final List<String>? audioPaths;
+
+  /// An optional value that may be used to store structured content or
+  /// metadata that cannot be represented in any other parameters.
   final String? extra;
 
-  /// Tags that are used to indicate a certain trait to the definitions of
-  /// this term.
-  final List<String> meaningTags;
-
-  /// Tags that are used to indicate a certain trait to this particular term.
-  final List<String> termTags;
-
   /// A value that can be used to sort entries when performing a database
-  /// search.
-  @Index(type: IndexType.value)
-  final double? popularity;
+  /// search. Lower negative values mean rarer, and higher positive values are
+  /// more common.
+  @Index()
+  final double popularity;
 
-  /// Used to sort starts with matches.
-  @Index(type: IndexType.value)
-  int get termLength => term.length;
+  /// Returns all definitions bullet pointed if multiple, and returns the
+  /// single definition if otherwise.
+  String get compactDefinitions {
+    if (definitions.length > 1) {
+      return definitions
+          .map((definition) => '• ${definition.trim()}')
+          .join('\n');
+    }
+
+    return definitions.join();
+  }
+
+  /// Each dictionary entry belongs to a certain heading.
+  final IsarLink<DictionaryHeading> heading = IsarLink<DictionaryHeading>();
+
+  /// Each dictionary entry belongs to a dictionary.
+  final IsarLink<Dictionary> dictionary = IsarLink<Dictionary>();
+
+  /// Each dictionary entry may have a set of tags.
+  final IsarLinks<DictionaryTag> tags = IsarLinks<DictionaryTag>();
+
+  /// Whether or not this entry is a kanji entry.
+  bool get isKanjiEntry => onyomis != null && kunyomis != null;
 
   @override
-  operator ==(Object other) => other is DictionaryEntry && id == other.id;
+  bool operator ==(Object other) => other is DictionaryEntry && id == other.id;
 
   @override
-  @ignore
   int get hashCode => id.hashCode;
-
-  @override
-  String toString() => prettyJson(toJson());
 }

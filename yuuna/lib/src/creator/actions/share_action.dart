@@ -21,23 +21,21 @@ class ShareAction extends QuickAction {
   static const String key = 'share';
 
   @override
-  Future<void> executeAction({
-    required BuildContext context,
-    required WidgetRef ref,
-    required AppModel appModel,
-    required CreatorModel creatorModel,
-    required DictionaryTerm dictionaryTerm,
-    required List<DictionaryMetaEntry> metaEntries,
-  }) async {
+  Future<void> executeAction(
+      {required BuildContext context,
+      required WidgetRef ref,
+      required AppModel appModel,
+      required CreatorModel creatorModel,
+      required DictionaryHeading heading}) async {
     StringBuffer buffer = StringBuffer();
-    buffer.write(dictionaryTerm.term);
-    if (dictionaryTerm.reading.isNotEmpty) {
-      buffer.write(' (${dictionaryTerm.reading})');
+    buffer.write(heading.term);
+    if (heading.reading.isNotEmpty) {
+      buffer.write(' (${heading.reading})');
     }
     buffer.write('\n\n');
     buffer.write(
       MeaningField.flattenMeanings(
-          entries: dictionaryTerm.entries,
+          entries: heading.entries.toList(),
           prependDictionaryNames:
               appModel.lastSelectedMapping.prependDictionaryNames ?? false),
     );

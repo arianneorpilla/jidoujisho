@@ -81,7 +81,7 @@ abstract class QuickAction {
   Color getIconColor({
     required BuildContext context,
     required AppModel appModel,
-    required DictionaryTerm dictionaryTerm,
+    required DictionaryHeading heading,
   }) {
     return Theme.of(context).appBarTheme.foregroundColor!;
   }
@@ -92,7 +92,6 @@ abstract class QuickAction {
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,
-    required DictionaryTerm dictionaryTerm,
-    required List<DictionaryMetaEntry> metaEntries,
+    required DictionaryHeading heading,
   });
 }
