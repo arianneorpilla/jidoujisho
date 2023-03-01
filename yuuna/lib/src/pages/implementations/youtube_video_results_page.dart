@@ -59,7 +59,7 @@ class _YoutubeVideoResultsPageState
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      backgroundColor: Theme.of(context).backgroundColor,
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: widget.showAppBar ? buildAppBar() : null,
       body: buildBody(),
     );

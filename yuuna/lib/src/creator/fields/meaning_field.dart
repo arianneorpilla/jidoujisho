@@ -34,13 +34,13 @@ class MeaningField extends Field {
     Map<String, List<DictionaryEntry>> entriesByDictionaryName =
         groupBy<DictionaryEntry, String>(
       entries,
-      (entry) => entry.dictionaryName,
+      (entry) => entry.dictionary.value!.name,
     );
 
     entriesByDictionaryName.forEach((dictionaryName, singleDictionaryEntries) {
       int meaningsCount = 0;
       for (DictionaryEntry entry in singleDictionaryEntries) {
-        meaningsCount += entry.meanings.length;
+        meaningsCount += entry.definitions.length;
       }
 
       if (prependDictionaryNames) {
@@ -49,19 +49,19 @@ class MeaningField extends Field {
 
       for (DictionaryEntry entry in singleDictionaryEntries) {
         if (singleDictionaryEntries.length == 1) {
-          entry.meanings.forEachIndexed((index, meaning) {
+          entry.definitions.forEachIndexed((index, meaning) {
             if (meaningsCount != 1) {
               meaningBuffer.write('• $meaning');
             } else {
               meaningBuffer.write(meaning);
             }
 
-            if (index != entry.meanings.length - 1) {
+            if (index != entry.definitions.length - 1) {
               meaningBuffer.write('\n');
             }
           });
         } else {
-          entry.meanings.forEachIndexed((index, meaning) {
+          entry.definitions.forEachIndexed((index, meaning) {
             if (meaningsCount == 1) {
               meaningBuffer.write('$meaning\n');
             } else {
@@ -69,7 +69,7 @@ class MeaningField extends Field {
                 meaningBuffer.write('• ');
               }
               meaningBuffer.write(meaning);
-              if (index != entry.meanings.length - 1) {
+              if (index != entry.definitions.length - 1) {
                 meaningBuffer.write('; ');
               }
             }
@@ -91,12 +91,11 @@ class MeaningField extends Field {
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,
-    required DictionaryTerm dictionaryTerm,
-    required List<DictionaryMetaEntry> metaEntries,
+    required DictionaryHeading heading,
     required bool creatorJustLaunched,
   }) {
     return flattenMeanings(
-      entries: dictionaryTerm.entries,
+      entries: heading.entries.toList(),
       prependDictionaryNames:
           appModel.lastSelectedMapping.prependDictionaryNames ?? false,
     );

@@ -12,7 +12,7 @@ class RecursiveDictionaryHistoryPage extends BasePage {
   });
 
   /// The result made from a dictionary database search.
-  final DictionaryResult result;
+  final DictionarySearchResult result;
 
   @override
   BasePageState<RecursiveDictionaryHistoryPage> createState() =>
@@ -36,7 +36,7 @@ class _RecursiveDictionaryHistoryPageState
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      backgroundColor: Theme.of(context).backgroundColor,
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: buildAppBar(),
       body: DictionaryResultPage(
         result: widget.result,

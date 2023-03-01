@@ -47,7 +47,7 @@ class _RecursiveDictionaryPageState
 
   final FloatingSearchBarController _controller = FloatingSearchBarController();
 
-  DictionaryResult? _result;
+  DictionarySearchResult? _result;
 
   bool _isSearching = false;
   @override
@@ -82,7 +82,7 @@ class _RecursiveDictionaryPageState
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: Theme.of(context).backgroundColor,
+      backgroundColor: Theme.of(context).colorScheme.background,
       body: SafeArea(
         child: Padding(
           padding: Spacing.of(context).insets.onlyTop.semiSmall,
@@ -165,19 +165,14 @@ class _RecursiveDictionaryPageState
     } finally {
       if (_result != null) {
         if (_result!.searchTerm == _controller.query) {
-          if (!appModel.isIncognitoMode) {
-            Future.delayed(historyDelay, () async {
-              if (_result!.searchTerm == _controller.query) {
-                appModel.addToSearchHistory(
-                  historyKey: DictionaryMediaType.instance.uniqueKey,
-                  searchTerm: _controller.query,
-                );
-                if (_result!.terms!.isNotEmpty) {
-                  await appModel.addToDictionaryHistory(result: _result!);
-                }
-              }
-            });
-          }
+          Future.delayed(historyDelay, () async {
+            if (_result!.searchTerm == _controller.query) {
+              appModel.addToSearchHistory(
+                historyKey: DictionaryMediaType.instance.uniqueKey,
+                searchTerm: _controller.query,
+              );
+            }
+          });
 
           setState(() {
             _isSearching = false;
@@ -379,7 +374,7 @@ class _RecursiveDictionaryPageState
         return const SizedBox.shrink();
       }
     }
-    if (_result == null || _result!.terms!.isEmpty) {
+    if (_result == null || _result!.headings.isEmpty) {
       return buildNoSearchResultsPlaceholderMessage();
     }
 

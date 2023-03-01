@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
+import 'package:yuuna/i18n/strings.g.dart';
 import 'package:yuuna/pages.dart';
 
 /// The content of the dialog used for showing dictionary import progress when
@@ -9,12 +10,20 @@ class DictionaryDialogImportPage extends BasePage {
   /// Create an instance of this page.
   const DictionaryDialogImportPage({
     required this.progressNotifier,
+    required this.currentCount,
+    required this.totalCount,
     super.key,
   });
 
   /// A notifier for reporting text updates for the current progress text in
   /// the dialog.
   final ValueNotifier<String> progressNotifier;
+
+  /// The count of the current dictionary being imported.
+  final int currentCount;
+
+  /// The number of dictionaries being imported.
+  final int totalCount;
 
   @override
   BasePageState createState() => _DictionaryDialogImportPageState();
@@ -60,7 +69,9 @@ class _DictionaryDialogImportPageState
           Padding(
             padding: const EdgeInsets.only(left: 0.5),
             child: Text(
-              importInProgressLabel,
+              widget.totalCount != 1
+                  ? '${t.import_in_progress}\n${widget.currentCount} / ${widget.totalCount}'
+                  : t.import_in_progress,
               style: TextStyle(
                 fontSize: textTheme.bodySmall?.fontSize,
                 color: theme.unselectedWidgetColor,

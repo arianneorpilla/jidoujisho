@@ -11,7 +11,6 @@ class DictionaryEntryPage extends BasePage {
   /// Create the widget for a dictionary entry.
   const DictionaryEntryPage({
     required this.entry,
-    required this.meaningTags,
     required this.onSearch,
     required this.onStash,
     required this.expandableController,
@@ -20,9 +19,6 @@ class DictionaryEntryPage extends BasePage {
 
   /// The entry particular to this widget.
   final DictionaryEntry entry;
-
-  /// Meaning tags particular to this widget.
-  final List<DictionaryTag> meaningTags;
 
   /// Action to be done upon selecting the search option.
   final Function(String) onSearch;
@@ -79,33 +75,12 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
             top: Spacing.of(context).spaces.small,
             left: Spacing.of(context).spaces.normal,
           ),
-          child: ListView.builder(
-            cacheExtent: 99999999999999,
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            primary: false,
-            itemCount: widget.entry.meanings.length,
-            itemBuilder: (context, index) {
-              if (widget.entry.meanings.length != 1) {
-                String sourceText = '• ${widget.entry.meanings[index].trim()}';
-                return SelectableText(
-                  sourceText,
-                  style: TextStyle(
-                    fontSize: appModel.dictionaryFontSize,
-                  ),
-                  selectionControls: selectionControls,
-                );
-              } else {
-                String sourceText = widget.entry.meanings.first.trim();
-                return SelectableText(
-                  sourceText,
-                  style: TextStyle(
-                    fontSize: appModel.dictionaryFontSize,
-                  ),
-                  selectionControls: selectionControls,
-                );
-              }
-            },
+          child: SelectableText(
+            widget.entry.compactDefinitions,
+            style: TextStyle(
+              fontSize: appModel.dictionaryFontSize,
+            ),
+            selectionControls: selectionControls,
           ),
         ),
       ),
@@ -118,18 +93,20 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
 
     List<Widget> tagWidgets = [];
 
+    Dictionary dictionary = widget.entry.dictionary.value!;
+
     tagWidgets.add(
       JidoujishoTag(
-        text: widget.entry.dictionaryName,
+        text: dictionary.name,
         message: dictionaryImportTag.replaceAll(
           '%dictionaryName%',
-          widget.entry.dictionaryName,
+          dictionary.name,
         ),
         backgroundColor: Colors.red.shade900,
       ),
     );
 
-    tagWidgets.addAll(widget.meaningTags.map((tag) {
+    tagWidgets.addAll(widget.entry.tags.map((tag) {
       return JidoujishoTag(
         text: tag.name,
         message: tag.notes,

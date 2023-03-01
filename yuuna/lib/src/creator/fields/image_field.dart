@@ -34,8 +34,7 @@ class ImageField extends ImageExportField {
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,
-    required DictionaryTerm dictionaryTerm,
-    required List<DictionaryMetaEntry> metaEntries,
+    required DictionaryHeading heading,
     required bool creatorJustLaunched,
   }) {
     return null;
@@ -158,7 +157,7 @@ class ImageField extends ImageExportField {
                 child: buildImage(image: image, fit: BoxFit.contain),
               ),
             );
-            Overlay.of(context)?.insert(popup!);
+            Overlay.of(context).insert(popup!);
           },
           onLongPressEnd: (details) {
             popup?.remove();

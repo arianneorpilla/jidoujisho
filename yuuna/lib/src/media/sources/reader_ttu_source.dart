@@ -63,8 +63,6 @@ class ReaderTtuSource extends ReaderMediaSource {
     /// Language Customizable
     if (language is JapaneseLanguage) {
       return 52059;
-    } else if (language is EnglishLanguage) {
-      return 52076;
     }
 
     throw UnimplementedError();

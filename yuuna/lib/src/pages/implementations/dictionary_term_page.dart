@@ -13,12 +13,10 @@ import 'package:collection/collection.dart';
 class DictionaryTermPage extends BasePage {
   /// Create the widget for a dictionary word.
   const DictionaryTermPage({
-    required this.dictionaryMap,
-    required this.dictionaryTerm,
+    required this.heading,
     required this.onSearch,
     required this.onStash,
     required this.expandableControllers,
-    required this.dictionaryHiddens,
     required this.lastSelectedMapping,
     this.entryOpacity = 1,
     this.onScrollLeft,
@@ -27,11 +25,8 @@ class DictionaryTermPage extends BasePage {
     super.key,
   });
 
-  /// Used for optimisations.
-  final Map<String, Dictionary> dictionaryMap;
-
   /// The result made from a dictionary database search.
-  final DictionaryTerm dictionaryTerm;
+  final DictionaryHeading heading;
 
   /// Action to be done upon selecting the search option.
   final Function(String) onSearch;
@@ -40,10 +35,7 @@ class DictionaryTermPage extends BasePage {
   final Function(String) onStash;
 
   /// Controls expandables by dictionary name.
-  final Map<String, ExpandableController> expandableControllers;
-
-  /// Used to hide entries by dictionary name.
-  final Map<String, bool> dictionaryHiddens;
+  final Map<Dictionary, ExpandableController> expandableControllers;
 
   /// Called when the widget is scrolled to the left.
   final Function()? onScrollLeft;
@@ -93,11 +85,11 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
     );
   }
 
-  /// Fetches the tag widgets for a [DictionaryTerm].
+  /// Fetches the tag widgets for the [DictionaryHeading].
   List<Widget> getTagsForTerm() {
     List<Widget> tagWidgets = [];
 
-    tagWidgets.addAll(widget.dictionaryTerm.termTags.map((tag) {
+    tagWidgets.addAll(widget.heading.tags.map((tag) {
       return JidoujishoTag(
         text: tag.name,
         message: tag.notes,
@@ -109,37 +101,6 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
   }
 
   Widget buildCard() {
-    List<DictionaryMetaEntry> freqEntries = widget.dictionaryTerm.metaEntries
-        .where((e) =>
-            e.frequency != null &&
-            (e.frequency!.reading == null ||
-                e.frequency!.reading == widget.dictionaryTerm.reading))
-        .toList();
-
-    Map<String, List<DictionaryMetaEntry>> groups =
-        groupBy<DictionaryMetaEntry, String>(
-            freqEntries, (entry) => entry.dictionaryName);
-
-    List<DictionaryMetaEntry> groupedFreqEntries = groups.entries.map((group) {
-      if (group.value.length == 1) {
-        return group.value.first;
-      } else {
-        return DictionaryMetaEntry(
-          dictionaryName: group.key,
-          term: widget.dictionaryTerm.term,
-          frequency: FrequencyData(
-            value: group.value.first.frequency!.value,
-            displayValue:
-                group.value.map((e) => e.frequency!.displayValue).join(', '),
-          ),
-        );
-      }
-    }).toList();
-
-    List<DictionaryMetaEntry> pitchEntries = widget.dictionaryTerm.metaEntries
-        .where((e) => e.pitches != null)
-        .toList();
-
     List<Widget> termTags = getTagsForTerm();
 
     return Card(
@@ -161,17 +122,15 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
           physics: const NeverScrollableScrollPhysics(),
           slivers: [
             SliverToBoxAdapter(
-              child: buildTopRow(
-                metaEntries: widget.dictionaryTerm.metaEntries,
-              ),
+              child: buildTopRow(),
             ),
             if (termTags.isNotEmpty)
               const SliverToBoxAdapter(child: Space.normal()),
             if (termTags.isNotEmpty)
               SliverToBoxAdapter(child: Wrap(children: termTags)),
             const SliverToBoxAdapter(child: Space.normal()),
-            buildFreqEntries(metaEntries: groupedFreqEntries),
-            buildPitchEntries(metaEntries: pitchEntries),
+            buildFreqEntries(),
+            buildPitchEntries(),
             const SliverToBoxAdapter(child: Space.normal()),
             buildEntries(),
             SliverToBoxAdapter(
@@ -186,7 +145,6 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
   }
 
   List<Widget> buildQuickActions({
-    required List<DictionaryMetaEntry> metaEntries,
     required AnkiMapping lastSelectedMapping,
   }) {
     List<Widget> buttons = [];
@@ -195,7 +153,6 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
       Widget button = buildQuickAction(
         mapping: lastSelectedMapping,
         slotNumber: i,
-        metaEntries: metaEntries,
       );
 
       buttons.add(button);
@@ -207,7 +164,6 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
   Widget buildQuickAction({
     required AnkiMapping mapping,
     required int slotNumber,
-    required List<DictionaryMetaEntry> metaEntries,
   }) {
     String? actionName = mapping.actions![slotNumber];
     QuickAction? quickAction;
@@ -226,7 +182,7 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
           enabledColor: quickAction.getIconColor(
             context: context,
             appModel: appModel,
-            dictionaryTerm: widget.dictionaryTerm,
+            heading: widget.heading,
           ),
           shapeBorder: const RoundedRectangleBorder(),
           backgroundColor:
@@ -240,8 +196,7 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
               ref: ref,
               appModel: appModel,
               creatorModel: creatorModel,
-              dictionaryTerm: widget.dictionaryTerm,
-              metaEntries: metaEntries,
+              heading: widget.heading,
             );
             if (mounted) {
               setState(() {});
@@ -252,9 +207,127 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
     }
   }
 
-  Widget buildTopRow({
-    required List<DictionaryMetaEntry> metaEntries,
-  }) {
+  Widget buildFreqEntries() {
+    List<DictionaryFrequency> frequencies = widget.heading.frequencies
+        .where((frequency) => !frequency.dictionary.value!.hidden)
+        .toList();
+
+    if (frequencies.isEmpty) {
+      return const SliverToBoxAdapter(
+        child: SizedBox.shrink(),
+      );
+    }
+
+    List<Widget> children = frequencies.map((tag) {
+      return Padding(
+        padding: Spacing.of(context).insets.onlyBottom.normal,
+        child: JidoujishoTag(
+          text: tag.dictionary.value!.name,
+          message: dictionaryImportTag.replaceAll(
+            '%dictionaryName%',
+            tag.dictionary.value!.name,
+          ),
+          trailingText: tag.displayValue,
+          backgroundColor: Colors.red.shade900,
+        ),
+      );
+    }).toList();
+
+    return SliverToBoxAdapter(
+      child: Wrap(children: children),
+    );
+  }
+
+  Widget buildPitchEntries() {
+    List<DictionaryPitch> pitches = widget.heading.pitches
+        .where((pitch) => !pitch.dictionary.value!.hidden)
+        .toList();
+    if (pitches.isEmpty) {
+      return const SliverToBoxAdapter(
+        child: SizedBox.shrink(),
+      );
+    }
+
+    Map<Dictionary, List<DictionaryPitch>> pitchesByDictionary =
+        groupBy<DictionaryPitch, Dictionary>(
+            pitches, (pitch) => pitch.dictionary.value!);
+
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          MapEntry<Dictionary, List<DictionaryPitch>> pitchesForDictionary =
+              pitchesByDictionary.entries.elementAt(index);
+          Dictionary dictionary = pitchesForDictionary.key;
+          List<DictionaryPitch> pitches = pitchesForDictionary.value;
+
+          if (pitches.length > 1) {
+            List<Widget> pitchWidgets = pitches
+                .map(
+                  (pitch) => Padding(
+                    padding: Spacing.of(context).insets.onlyLeft.normal,
+                    child: appModel.targetLanguage.getPitchWidget(
+                      appModel: appModel,
+                      context: context,
+                      reading: widget.heading.reading,
+                      downstep: pitch.downstep,
+                    ),
+                  ),
+                )
+                .toList();
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: Spacing.of(context).insets.onlyBottom.semiSmall,
+                  child: JidoujishoTag(
+                    text: dictionary.name,
+                    message: dictionaryImportTag.replaceAll(
+                      '%dictionaryName%',
+                      dictionary.name,
+                    ),
+                    backgroundColor: Colors.red.shade900,
+                  ),
+                ),
+                ...pitchWidgets,
+              ],
+            );
+          } else {
+            List<Widget> pitchWidgets = pitches
+                .map(
+                  (pitch) => Padding(
+                    padding: Spacing.of(context).insets.onlyLeft.small,
+                    child: appModel.targetLanguage.getPitchWidget(
+                      appModel: appModel,
+                      context: context,
+                      reading: widget.heading.reading,
+                      downstep: pitch.downstep,
+                    ),
+                  ),
+                )
+                .toList();
+
+            return Wrap(
+              children: [
+                JidoujishoTag(
+                  text: dictionary.name,
+                  message: dictionaryImportTag.replaceAll(
+                    '%dictionaryName%',
+                    dictionary.name,
+                  ),
+                  backgroundColor: Colors.red.shade900,
+                ),
+                ...pitchWidgets,
+              ],
+            );
+          }
+        },
+        childCount: pitchesByDictionary.length,
+      ),
+    );
+  }
+
+  Widget buildTopRow() {
     return FloatColumn(
       children: [
         Floatable(
@@ -269,7 +342,6 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.min,
             children: buildQuickActions(
-              metaEntries: metaEntries,
               lastSelectedMapping: widget.lastSelectedMapping,
             ),
           ),
@@ -280,216 +352,38 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
             child: appModel.targetLanguage.getTermReadingOverrideWidget(
               context: context,
               appModel: appModel,
-              dictionaryTerm: widget.dictionaryTerm,
+              heading: widget.heading,
             ),
-            onTap: () => appModel.copyToClipboard(widget.dictionaryTerm.term),
-            onLongPress: () =>
-                appModel.copyToClipboard(widget.dictionaryTerm.term),
+            onTap: () => appModel.copyToClipboard(widget.heading.term),
+            onLongPress: () => appModel.copyToClipboard(widget.heading.term),
           ),
         ),
       ],
     );
   }
 
-  Widget buildFreqEntries({
-    required List<DictionaryMetaEntry> metaEntries,
-  }) {
-    if (metaEntries.isEmpty) {
-      return const SliverToBoxAdapter(
-        child: SizedBox.shrink(),
-      );
-    }
-
-    List<Widget> children = metaEntries.map((metaEntry) {
-      if (widget.dictionaryMap[metaEntry.dictionaryName]!.hidden) {
-        return const SizedBox.shrink();
-      }
-
-      return Padding(
-        padding: Spacing.of(context).insets.horizontal.small,
-        child: getTagsForMetaEntry(
-          dictionaryTerm: widget.dictionaryTerm,
-          metaEntry: metaEntry,
-        ),
-      );
-    }).toList();
-
-    return SliverToBoxAdapter(
-      child: Wrap(children: children),
-    );
-  }
-
-  Widget buildPitchEntries({
-    required List<DictionaryMetaEntry> metaEntries,
-  }) {
-    if (metaEntries.isEmpty) {
-      return const SliverToBoxAdapter(
-        child: SizedBox.shrink(),
-      );
-    }
-
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          DictionaryMetaEntry metaEntry = metaEntries[index];
-
-          if (widget.dictionaryMap[metaEntry.dictionaryName]!.hidden) {
-            return const SizedBox.shrink();
-          }
-
-          return Padding(
-            padding: Spacing.of(context).insets.horizontal.small,
-            child: getTagsForMetaEntry(
-              dictionaryTerm: widget.dictionaryTerm,
-              metaEntry: metaEntry,
-            ),
-          );
-        },
-        childCount: metaEntries.length,
-      ),
-    );
-  }
-
-  /// Fetches the tag widgets for a [DictionaryEntry].
-  Widget getTagsForMetaEntry({
-    required DictionaryTerm dictionaryTerm,
-    required DictionaryMetaEntry metaEntry,
-  }) {
-    String dictionaryImportTag = appModel.translate('dictionary_import_tag');
-    late Widget widget;
-
-    if (metaEntry.frequency != null) {
-      return Padding(
-        padding: Spacing.of(context).insets.onlyBottom.normal,
-        child: JidoujishoTag(
-          text: metaEntry.dictionaryName,
-          message: dictionaryImportTag.replaceAll(
-            '%dictionaryName%',
-            metaEntry.dictionaryName,
-          ),
-          trailingText: metaEntry.frequency!.displayValue,
-          backgroundColor: Colors.red.shade900,
-        ),
-      );
-    } else if (metaEntry.pitches != null) {
-      List<Widget> children = [];
-      Widget tag = Padding(
-        padding: Spacing.of(context).insets.onlyRight.small,
-        child: JidoujishoTag(
-          text: metaEntry.dictionaryName,
-          message: dictionaryImportTag.replaceAll(
-            '%dictionaryName%',
-            metaEntry.dictionaryName,
-          ),
-          backgroundColor: Colors.red.shade900,
-        ),
-      );
-
-      List<PitchData> pitches = metaEntry.pitches!
-          .where((pitch) => pitch.reading == dictionaryTerm.reading)
-          .toList();
-
-      if (pitches.isEmpty) {
-        return const SizedBox.shrink();
-      }
-
-      if (pitches.length == 1) {
-        for (PitchData data in metaEntry.pitches!) {
-          children.add(
-            appModel.targetLanguage.getPitchWidget(
-              appModel: appModel,
-              context: context,
-              reading: data.reading,
-              downstep: data.downstep,
-            ),
-          );
-
-          children.add(const Space.small());
-        }
-
-        children.insert(
-          0,
-          Padding(
-            padding: Spacing.of(context).insets.onlyBottom.normal,
-            child: tag,
-          ),
-        );
-
-        widget = Wrap(children: children);
-      } else {
-        List<Widget> children = [];
-        children.add(Row(
-          children: [
-            Padding(
-              padding: Spacing.of(context).insets.onlyBottom.semiSmall,
-              child: JidoujishoTag(
-                text: metaEntry.dictionaryName,
-                message: dictionaryImportTag.replaceAll(
-                  '%dictionaryName%',
-                  metaEntry.dictionaryName,
-                ),
-                backgroundColor: Colors.red.shade900,
-              ),
-            ),
-            const Spacer(),
-          ],
-        ));
-
-        children.addAll(
-          pitches.mapIndexed((index, element) {
-            PitchData data = pitches[index];
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: Spacing.of(context).spaces.small,
-                left: Spacing.of(context).spaces.small,
-              ),
-              child: appModel.targetLanguage.getPitchWidget(
-                appModel: appModel,
-                context: context,
-                reading: data.reading,
-                downstep: data.downstep,
-              ),
-            );
-          }).toList(),
-        );
-
-        widget = Padding(
-          padding: Spacing.of(context).insets.onlyBottom.small,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: children,
-          ),
-        );
-      }
-    } else {
-      widget = const SizedBox.shrink();
-    }
-
-    return widget;
-  }
-
   Widget buildEntries() {
+    List<DictionaryEntry> entries = widget.heading.entries
+        .where((entry) => !entry.dictionary.value!.hidden)
+        .toList();
+
+    entries.sort((a, b) =>
+        a.dictionary.value!.order.compareTo(b.dictionary.value!.order));
+
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (context, index) {
-          DictionaryEntry entry = widget.dictionaryTerm.entries[index];
-          List<DictionaryTag> meaningTags =
-              widget.dictionaryTerm.meaningTagsGroups[index];
-
-          if (widget.dictionaryHiddens[entry.dictionaryName]!) {
-            return const SizedBox.shrink();
-          }
+          DictionaryEntry entry = entries[index];
 
           return DictionaryEntryPage(
             entry: entry,
-            meaningTags: meaningTags,
             onSearch: widget.onSearch,
             onStash: widget.onStash,
             expandableController:
-                widget.expandableControllers[entry.dictionaryName]!,
+                widget.expandableControllers[entry.dictionary.value!]!,
           );
         },
-        childCount: widget.dictionaryTerm.entries.length,
+        childCount: entries.length,
       ),
     );
   }

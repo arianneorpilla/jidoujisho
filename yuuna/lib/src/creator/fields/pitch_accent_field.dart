@@ -27,15 +27,18 @@ class PitchAccentField extends Field {
   static const String key = 'pitch_accent';
 
   /// Returns Furigana for a single [PitchData].
-  static String getHtmlPitch(PitchData data) {
+  static String getHtmlPitch({
+    required String reading,
+    required int downstep,
+  }) {
     StringBuffer html = StringBuffer();
 
     List<String> moras = [];
-    for (int i = 0; i < data.reading.length; i++) {
-      String current = data.reading[i];
+    for (int i = 0; i < reading.length; i++) {
+      String current = reading[i];
       String? next;
-      if (i + 1 < data.reading.length) {
-        next = data.reading[i + 1];
+      if (i + 1 < reading.length) {
+        next = reading[i + 1];
       }
 
       if (next != null && 'ゃゅょぁぃぅぇぉャュョァィゥェォ'.contains(next)) {
@@ -47,7 +50,7 @@ class PitchAccentField extends Field {
       }
     }
 
-    if (data.downstep == 0) {
+    if (downstep == 0) {
       html.write(moras[0]);
       html.write('<span class="pitch">');
       for (int i = 1; i < moras.length; i++) {
@@ -57,7 +60,7 @@ class PitchAccentField extends Field {
     } else {
       List<int> beforePitchNumbers = [];
       for (int i = 1; i < moras.length; i++) {
-        if (i < data.downstep - 1) {
+        if (i < downstep - 1) {
           beforePitchNumbers.add(i);
         }
       }
@@ -72,11 +75,11 @@ class PitchAccentField extends Field {
       for (int i = 0; i < moras.length; i++) {
         if (i == firstBeforePitchNumber) {
           html.write('<span class="pitch">');
-        } else if (i == data.downstep - 1) {
+        } else if (i == downstep - 1) {
           html.write('<span class="pitch_end">');
         }
         html.write(moras[i]);
-        if (i == lastBeforePitchNumber || i == data.downstep - 1) {
+        if (i == lastBeforePitchNumber || i == downstep - 1) {
           html.write('</span>');
         }
       }
@@ -85,17 +88,22 @@ class PitchAccentField extends Field {
     return html.toString();
   }
 
-  /// Returns Furigana for multiple [PitchData].
-  static String getAllHtmlPitch(List<PitchData> datas) {
-    if (datas.isEmpty) {
+  /// Returns Furigana for multiple [DictionaryPitch].
+  static String getAllHtmlPitch({required DictionaryHeading heading}) {
+    if (heading.pitches.isEmpty) {
       return '';
     }
 
     StringBuffer html = StringBuffer();
 
-    datas.forEachIndexed((index, data) {
-      html.write(getHtmlPitch(data));
-      if (index != datas.length - 1) {
+    heading.pitches.forEachIndexed((index, pitch) {
+      html.write(
+        getHtmlPitch(
+          reading: heading.reading,
+          downstep: pitch.downstep,
+        ),
+      );
+      if (index != heading.pitches.length - 1) {
         html.write('<br>');
       }
     });
@@ -109,21 +117,9 @@ class PitchAccentField extends Field {
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,
-    required DictionaryTerm dictionaryTerm,
-    required List<DictionaryMetaEntry> metaEntries,
+    required DictionaryHeading heading,
     required bool creatorJustLaunched,
   }) {
-    List<DictionaryMetaEntry> pitchMetaEntries =
-        metaEntries.where((metaEntry) => metaEntry.pitches != null).toList();
-
-    List<PitchData> datas = [];
-    for (DictionaryMetaEntry metaEntry in pitchMetaEntries) {
-      datas.addAll(
-        metaEntry.pitches!
-            .where((pitch) => pitch.reading == dictionaryTerm.reading),
-      );
-    }
-
-    return getAllHtmlPitch(datas);
+    return getAllHtmlPitch(heading: heading);
   }
 }

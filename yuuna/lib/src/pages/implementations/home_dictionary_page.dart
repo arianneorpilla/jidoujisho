@@ -40,9 +40,9 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
 
   /// The message to be shown in the placeholder that displays when
   /// [shouldPlaceholderBeShown] is true. This should be a localised message.
-  String get placeholderMessage => appModel.translate('info_empty_home_tab');
+  String get placeholderMessage => appModel.translate('enter_search_term');
 
-  DictionaryResult? _result;
+  DictionarySearchResult? _result;
 
   bool _isSearching = false;
   bool _lastOpenedState = false;
@@ -63,7 +63,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     super.dispose();
   }
 
-  bool get shouldPlaceholderBeShown => appModel.dictionaryHistory.isEmpty;
+  bool get shouldPlaceholderBeShown => true;
 
   @override
   Widget build(BuildContext context) {
@@ -188,20 +188,15 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       if (_result != null) {
         if (_result!.searchTerm ==
             mediaType.floatingSearchBarController.query) {
-          if (!appModel.isIncognitoMode) {
-            Future.delayed(historyDelay, () async {
-              if (_result!.searchTerm ==
-                  mediaType.floatingSearchBarController.query) {
-                appModel.addToSearchHistory(
-                  historyKey: mediaType.uniqueKey,
-                  searchTerm: mediaType.floatingSearchBarController.query,
-                );
-                if (_result!.terms!.isNotEmpty) {
-                  await appModel.addToDictionaryHistory(result: _result!);
-                }
-              }
-            });
-          }
+          Future.delayed(historyDelay, () async {
+            if (_result!.searchTerm ==
+                mediaType.floatingSearchBarController.query) {
+              appModel.addToSearchHistory(
+                historyKey: mediaType.uniqueKey,
+                searchTerm: mediaType.floatingSearchBarController.query,
+              );
+            }
+          });
 
           setState(() {
             _isSearching = false;
@@ -421,7 +416,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
         return const SizedBox.shrink();
       }
     }
-    if (_result == null || _result!.terms!.isEmpty) {
+    if (_result == null || _result!.headings.isEmpty) {
       return buildNoSearchResultsPlaceholderMessage();
     }
 

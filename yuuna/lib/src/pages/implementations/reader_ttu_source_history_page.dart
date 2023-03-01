@@ -35,11 +35,6 @@ class _ReaderTtuSourceHistoryPageState<T extends HistoryReaderPage>
   ReaderTtuSource get mediaSource => ReaderTtuSource.instance;
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     AsyncValue<LocalAssetsServer> server =
         ref.watch(ttuServerProvider(appModel.targetLanguage));

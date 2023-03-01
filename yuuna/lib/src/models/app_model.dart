@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:audio_service/audio_service.dart' as ag;
+import 'package:cancelable_compute/cancelable_compute.dart' as cancelable;
 import 'package:collection/collection.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -13,7 +14,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:flutter_charset_detector/flutter_charset_detector.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -29,6 +29,7 @@ import 'package:subtitle/subtitle.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
+import 'package:yuuna/i18n/strings.g.dart';
 import 'package:yuuna/language.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/models.dart';
@@ -39,9 +40,11 @@ import 'package:yuuna/utils.dart';
 final List<CollectionSchema> globalSchemas = [
   DictionarySchema,
   DictionaryEntrySchema,
-  DictionaryMetaEntrySchema,
+  DictionaryHeadingSchema,
+  DictionaryPitchSchema,
+  DictionaryFrequencySchema,
   DictionaryTagSchema,
-  DictionaryResultSchema,
+  DictionarySearchResultSchema,
   MediaItemSchema,
   AnkiMappingSchema,
   SearchHistoryItemSchema,
@@ -207,11 +210,11 @@ class AppModel with ChangeNotifier {
   final int maximumMediaHistoryItems = 60;
 
   /// Maximum number of dictionary history items.
-  final int maximumDictionaryHistoryItems = 20;
+  final int maximumDictionaryHistoryItems = 500;
 
   /// Maximum number of headwords in a returned dictionary result for
   /// performance purposes.
-  final int defaultMaximumDictionaryTermsInResult = 10;
+  final int defaultMaximumDictionaryTermsInResult = 30;
 
   /// Maximum number of dictionary entries that can be returned from a database
   /// dictionary search.
@@ -235,12 +238,12 @@ class AppModel with ChangeNotifier {
       _database.ankiMappings.where().sortByOrder().findAllSync();
 
   /// Returns all dictionary history results. Oldest is first.
-  List<DictionaryResult> get dictionaryHistory =>
-      _database.dictionaryResults.where().findAllSync();
+  List<DictionarySearchResult> get dictionaryHistory =>
+      _database.dictionarySearchResults.where().findAllSync();
 
   /// For watching the dictionary history collection.
   Stream<void> Function(int) get watchDictionaryItem =>
-      _database.dictionaryResults.watchObjectLazy;
+      _database.dictionarySearchResults.watchObjectLazy;
 
   /// For invoking pauses from media where needed.
   Stream<void> get currentMediaPauseStream =>
@@ -330,7 +333,6 @@ class AppModel with ChangeNotifier {
   /// See the dictionary dialog's [ReorderableListView] for usage.
   void updateDictionaryOrder(List<Dictionary> newDictionaries) async {
     _database.writeTxnSync(() {
-      _database.dictionarys.clearSync();
       _database.dictionarys.putAllSync(newDictionaries);
     });
   }
@@ -350,7 +352,6 @@ class AppModel with ChangeNotifier {
     final List<Language> availableLanguages = List<Language>.unmodifiable(
       [
         JapaneseLanguage.instance,
-        EnglishLanguage.instance,
       ],
     );
 
@@ -445,9 +446,7 @@ class AppModel with ChangeNotifier {
     final List<DictionaryFormat> availableDictionaryFormats =
         List<DictionaryFormat>.unmodifiable(
       [
-        AbbyyLingvoFormat.instance,
-        MigakuDictionaryFormat.instance,
-        YomichanDictionaryFormat.instance,
+        YomichanFormat.instance,
       ],
     );
 
@@ -455,7 +454,7 @@ class AppModel with ChangeNotifier {
       Map<String, DictionaryFormat>.fromEntries(
         availableDictionaryFormats.map(
           (dictionaryFormat) => MapEntry(
-            dictionaryFormat.formatName,
+            dictionaryFormat.uniqueKey,
             dictionaryFormat,
           ),
         ),
@@ -714,27 +713,6 @@ class AppModel with ChangeNotifier {
     Restart.restartApp();
   }
 
-  /// Get whether or not the app is in incognito mode.
-  bool get isIncognitoMode {
-    bool isDarkMode =
-        _preferences.get('is_incognito_mode', defaultValue: false);
-    return isDarkMode;
-  }
-
-  /// Toggle incognito mode.
-  void toggleIncognitoMode() async {
-    await _preferences.put('is_incognito_mode', !isIncognitoMode);
-    incognitoNotifier.notifyListeners();
-
-    String toastMessage =
-        translate(isIncognitoMode ? 'info_incognito_on' : 'info_incognito_off');
-    Fluttertoast.showToast(
-      msg: toastMessage,
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-    );
-  }
-
   /// Get the target language from persisted preferences.
   Language get targetLanguage {
     String defaultLocaleTag = languages.values.first.locale.toLanguageTag();
@@ -753,8 +731,7 @@ class AppModel with ChangeNotifier {
 
   /// Get the target language from persisted preferences.
   DictionaryFormat get lastSelectedDictionaryFormat {
-    String firstDictionaryFormatName =
-        dictionaryFormats.values.first.formatName;
+    String firstDictionaryFormatName = dictionaryFormats.values.first.uniqueKey;
     String lastDictionaryFormatName = _preferences.get(
       'last_selected_dictionary_format',
       defaultValue: firstDictionaryFormatName,
@@ -819,7 +796,7 @@ class AppModel with ChangeNotifier {
 
   /// Persist a new app locale in preferences.
   Future<void> setAppLocale(String localeTag) async {
-    await _preferences.put('app_locale', localeTag);
+    await _preferences.put('appf_locale', localeTag);
     notifyListeners();
   }
 
@@ -827,7 +804,7 @@ class AppModel with ChangeNotifier {
   /// user changes the import format in the dictionary menu.
   Future<void> setLastSelectedDictionaryFormat(
       DictionaryFormat dictionaryFormat) async {
-    String lastDictionaryFormatName = dictionaryFormat.formatName;
+    String lastDictionaryFormatName = dictionaryFormat.uniqueKey;
     await _preferences.put(
         'last_selected_dictionary_format', lastDictionaryFormatName);
   }
@@ -919,249 +896,115 @@ class AppModel with ChangeNotifier {
   /// [lastSelectedDictionaryFormat].
   Future<void> importDictionary({
     required File file,
+    required int currentCount,
+    required int totalCount,
     required Function() onImportSuccess,
   }) async {
     /// New results may be wrong after dictionary is added so this has to be
     /// done.
     clearDictionaryResultsCache();
 
-    /// The last selected dictionary format in the dictionary menu is used for
-    /// dictionary import.
+    Directory workingDirectory = _dictionaryImportWorkingDirectory;
     DictionaryFormat dictionaryFormat = lastSelectedDictionaryFormat;
-
-    /// This is the directory where files are prepared for processing.
-    Directory workingDirectory = dictionaryImportWorkingDirectory;
-
-    /// Over-engineered way to deliver localised dictionary progress messages
-    /// across multiple isolates.
-    DictionaryImportLocalisation localisation = DictionaryImportLocalisation(
-      importMessageStart: translate('import_message_start'),
-      importMessageClean: translate('import_message_clean'),
-      importMessageExtraction: translate('import_message_extraction'),
-      importMessageName: translate('import_message_name'),
-      importMessageEntries: translate('import_message_entries'),
-      importMessageEntryCount: translate('import_message_entry_count'),
-      importMessageMetaEntryCount: translate('import_message_meta_entry_count'),
-      importMessageTagCount: translate('import_message_tag_count'),
-      importMessageEntryImportCount:
-          translate('import_message_entry_import_count'),
-      importMessageMetaEntryImportCount:
-          translate('import_message_meta_entry_import_count'),
-      importMessageTagImportCount: translate('import_message_tag_import_count'),
-      importMessageMetadata: translate('import_message_metadata'),
-      importMessageDatabase: translate('import_message_database'),
-      importMessageError: translate('import_message_error'),
-      importMessageFailed: translate('import_message_failed'),
-      importMessageComplete: translate('import_message_complete'),
-    );
-
-    /// Message to notify user if a dictionary with the same name is already
-    /// imported.
-    String sameNameDictionaryMessage = translate('same_name_dictionary_found');
-
-    /// Message to notify user if selected file extension does not match.
-    String extensionErrorMessage =
-        translate('import_file_extension_invalid').replaceAll(
-      '%extensions%',
-      dictionaryFormat.compatibleFileExtensions.toString(),
-    );
 
     /// A [ValueNotifier] that will update a message based on the progress of
     /// the ongoing dictionary file import. See [DictionaryImportProgressPage].
-    ValueNotifier<String> progressNotifier = ValueNotifier<String>('');
+    ValueNotifier<String> progressNotifier =
+        ValueNotifier<String>(t.import_start);
+    progressNotifier.addListener(() {
+      debugPrint('[Dictionary Import] ${progressNotifier.value}');
+    });
+    showDialog(
+      context: navigatorKey.currentContext!,
+      barrierDismissible: false,
+      builder: (context) => DictionaryDialogImportPage(
+        progressNotifier: progressNotifier,
+        currentCount: currentCount,
+        totalCount: totalCount,
+      ),
+    );
 
     /// Importing makes heavy use of isolates as it is very performance
     /// intensive to work with files. In order to ensure the UI isolate isn't
     /// blocked, a [ReceivePort] is necessary to receive UI updates.
     ReceivePort receivePort = ReceivePort();
-    SendPort sendPort = receivePort.sendPort;
-    receivePort.listen((data) {
-      if (data is String) {
-        progressNotifier.value = data;
-        debugPrint(data);
-      }
+    receivePort.listen((message) {
+      progressNotifier.value = '$message';
     });
 
     /// If any [Exception] occurs, the process is aborted with a message as
     /// shown below. A dialog is shown to show the progress of the dictionary
     /// file import, with messages pertaining to the above [ValueNotifier].
     try {
-      showDialog(
-        barrierDismissible: false,
-        context: navigatorKey.currentContext!,
-        builder: (context) =>
-            DictionaryDialogImportPage(progressNotifier: progressNotifier),
-      );
-
-      /// Tfhe following hard waits give enough time to inform the user to read
-      /// the progress messages.
-      progressNotifier.value = localisation.importMessageStart;
-      await Future.delayed(const Duration(milliseconds: 500), () {});
-
       /// The working directory should always be emptied before and after
       /// dictionary import to ensure that no files bloat the system and that
       /// files from previous imports do not carry over.
       if (workingDirectory.existsSync()) {
-        progressNotifier.value = localisation.importMessageClean;
-        await Future.delayed(const Duration(milliseconds: 500), () {});
+        progressNotifier.value = t.import_clean;
         workingDirectory.deleteSync(recursive: true);
         workingDirectory.createSync();
       }
 
-      /// Show the file picker if the [lastSelectedDictionaryFormat] requires a
-      /// file for dictionary import.
-      late final PrepareDirectoryParams prepareDirectoryParams;
-
-      if (!dictionaryFormat.compatibleFileExtensions
-          .contains(path.extension(file.path).toLowerCase())) {
-        throw Exception(extensionErrorMessage);
-      }
-
-      Uint8List bytes = file.readAsBytesSync();
-      String charset = '';
-
-      /// Find a way to check if this is a text file or a binary file instead
-      /// of doing this, it's not good to do format-specific tweaks in a
-      /// general function like this.
-      if (dictionaryFormat is AbbyyLingvoFormat) {
-        DecodingResult result = await CharsetDetector.autoDecode(bytes);
-        charset = result.charset;
-      }
-
-      prepareDirectoryParams = PrepareDirectoryParams(
+      PrepareDirectoryParams prepareDirectoryParams = PrepareDirectoryParams(
         file: file,
-        charset: charset,
         workingDirectory: workingDirectory,
-        sendPort: sendPort,
-        localisation: localisation,
+        dictionaryFormat: dictionaryFormat,
+        sendPort: receivePort.sendPort,
       );
-
-      /// Many formats require ZIP extraction, while others have their own
-      /// particular cases.
-      ///
-      /// The purpose of this function is to make it such that it can be
-      /// assumed that the remaining operations after this can be performed
-      /// from the working directory, and allow different formats to
-      /// gracefully follow the remaining generic steps.
-      progressNotifier.value = localisation.importMessageExtraction;
+      progressNotifier.value = t.import_extract;
       await dictionaryFormat.prepareDirectory(prepareDirectoryParams);
 
-      /// It is now assumed that the rest of the operations can be performed
-      /// from the working area. A dictionary name is required for import, and
-      /// all dictionaries in the database must have a unique name. Hence,
-      /// through the [workingDirectory], a [String] name must be obtainable,
-      /// and generically handled by all formats.
-      ///
-      /// If a format does not keep the name of a dictionary as metadata, it
-      /// should provide a sufficiently unique and considerate name with no
-      /// collision with other existing dictionaries and other dictionary
-      /// formats.
-      String dictionaryName = await compute(
-        dictionaryFormat.prepareName,
-        prepareDirectoryParams,
-      );
-      progressNotifier.value =
-          localisation.importMessageNameWithVar(dictionaryName);
-
-      Dictionary? duplicateDictionary = _database.dictionarys
-          .where()
-          .dictionaryNameEqualTo(dictionaryName)
+      String name = await dictionaryFormat.prepareName(prepareDirectoryParams);
+      progressNotifier.value = t.import_name(name: name);
+      Dictionary? bottomMostDictionary = _database.dictionarys
+          .where(sort: Sort.desc)
+          .anyOrder()
           .findFirstSync();
 
-      if (duplicateDictionary != null) {
-        throw Exception(sameNameDictionaryMessage);
+      Dictionary? sameNameDictionary =
+          _database.dictionarys.where().nameEqualTo(name).findFirstSync();
+      if (sameNameDictionary != null) {
+        throw Exception(t.import_duplicate(name: name));
       }
 
-      /// From the working directory, the format is mainly responsible for
-      /// parsing its entries. [extractAndDepositEntries] handles two main
-      /// performance-intensive operations. Firstly, the format-defined entry
-      /// extraction function [getDictionaryEntries]. Then, it adds these to an
-      /// Isar database -- ensuring other developers don't have to learn Isar to
-      /// implement their own formats is vital.
-      ///
-      /// It is necessary to perform the database deposit in another isolate
-      /// itself as receiving the entries and then pushing these arguments to
-      /// another isolate will cause a lot of jank. Therefore, one isolate is
-      /// necessary for these two operations.
-      progressNotifier.value = localisation.importMessageEntries;
-      PrepareDictionaryParams prepareDictionaryParams = PrepareDictionaryParams(
-        dictionaryName: dictionaryName,
-        dictionaryFormat: dictionaryFormat,
-        charset: charset,
-        workingDirectory: workingDirectory,
-        sendPort: sendPort,
-        isarDirectoryPath: isarDirectory.path,
-        localisation: localisation,
-        useSlowImport: useSlowImport,
-      );
-
-      /// Get the highest order in the dictionary database.
-      Dictionary? highestOrderDictionary =
-          _database.dictionarys.where().sortByOrderDesc().findFirstSync();
-      late int order;
-      if (highestOrderDictionary != null) {
-        order = highestOrderDictionary.order + 1;
-      } else {
-        order = 0;
-      }
-
-      /// Finally, any necessary metadata that is pertaining to the dictionary
-      /// format that will come in handy when in actual use (i.e. interacting
-      /// with the database or during searches) should be provided in this step.
-      progressNotifier.value = localisation.importMessageMetadata;
-      Map<String, String> dictionaryMetadata = await compute(
-        dictionaryFormat.prepareMetadata,
-        prepareDictionaryParams,
-      );
+      int order = (bottomMostDictionary?.order ?? 0) + 1;
 
       Dictionary dictionary = Dictionary(
-        dictionaryName: dictionaryName,
-        formatName: dictionaryFormat.formatName,
-        metadata: dictionaryMetadata,
-        order: order,
         collapsed: false,
         hidden: false,
+        order: order,
+        name: name,
+        formatKey: dictionaryFormat.uniqueKey,
       );
 
-      _database.writeTxnSync(() {
-        _database.dictionarys.putSync(dictionary);
-      });
+      PrepareDictionaryParams prepareDictionaryParams = PrepareDictionaryParams(
+        dictionary: dictionary,
+        workingDirectory: workingDirectory,
+        dictionaryFormat: dictionaryFormat,
+        sendPort: receivePort.sendPort,
+      );
 
-      try {
-        await compute(depositDictionaryDataHelper, prepareDictionaryParams);
-      } catch (e) {
-        DeleteDictionaryParams params = DeleteDictionaryParams(
-          dictionaryName: dictionary.dictionaryName,
-          isarDirectoryPath: isarDirectory.path,
-        );
-        await compute(deleteDictionaryDataHelper, params);
-
-        rethrow;
-      }
+      await compute(depositDictionaryDataHelper, prepareDictionaryParams);
 
       /// The working directory should always be emptied before and after
       /// dictionary import to ensure that no files bloat the system and that
       /// files from previous imports do not carry over.
       if (workingDirectory.existsSync()) {
-        progressNotifier.value = localisation.importMessageClean;
-        await Future.delayed(const Duration(milliseconds: 500), () {});
+        progressNotifier.value = t.import_clean;
         workingDirectory.deleteSync(recursive: true);
         workingDirectory.createSync();
       }
 
-      progressNotifier.value = localisation.importMessageComplete;
-      await Future.delayed(const Duration(seconds: 1), () {});
-
+      progressNotifier.value = t.import_complete;
       onImportSuccess();
-    } catch (e) {
-      progressNotifier.value = localisation.importMessageErrorWithVar('$e');
-      await Future.delayed(const Duration(seconds: 3), () {});
-      progressNotifier.value = localisation.importMessageFailed;
       await Future.delayed(const Duration(seconds: 1), () {});
-
-      throw Exception(e);
+    } catch (e) {
+      progressNotifier.value = '$e';
+      await Future.delayed(const Duration(seconds: 3), () {});
+      progressNotifier.value = t.import_failed;
+      await Future.delayed(const Duration(seconds: 1), () {});
     } finally {
-      /// Close the import progress dialog opened earlier.
+      receivePort.close();
       Navigator.pop(navigatorKey.currentContext!);
     }
   }
@@ -1184,8 +1027,8 @@ class AppModel with ChangeNotifier {
     });
   }
 
-  /// Delete a selected dictionary from the database.
-  Future<void> deleteDictionary(Dictionary dictionary) async {
+  /// Delete all dictionary data from the database.
+  Future<void> deleteDictionaries() async {
     /// New results may be wrong after dictionary is added so this has to be
     /// done.
     clearDictionaryResultsCache();
@@ -1196,12 +1039,14 @@ class AppModel with ChangeNotifier {
       builder: (context) => const DictionaryDialogDeletePage(),
     );
 
-    DeleteDictionaryParams params = DeleteDictionaryParams(
-      dictionaryName: dictionary.dictionaryName,
-      isarDirectoryPath: isarDirectory.path,
-    );
-
-    await compute(deleteDictionaryDataHelper, params);
+    _database.writeTxnSync(() {
+      _database.dictionaryTags.clearSync();
+      _database.dictionaryEntrys.clearSync();
+      _database.dictionaryHeadings.clearSync();
+      _database.dictionaryPitchs.clearSync();
+      _database.dictionaryFrequencys.clearSync();
+      _database.dictionarys.clearSync();
+    });
 
     Navigator.pop(navigatorKey.currentContext!);
     dictionarySearchAgainNotifier.notifyListeners();
@@ -1231,7 +1076,7 @@ class AppModel with ChangeNotifier {
 
   /// Used for caching search results. Cleared when a dictionary is added or
   /// deleted.
-  final Map<String, DictionaryResult> _dictionarySearchCache = {};
+  final Map<String, DictionarySearchResult> _dictionarySearchCache = {};
 
   /// Used when a dictionary is added or removed as those results may now be
   /// wrong.
@@ -1239,37 +1084,64 @@ class AppModel with ChangeNotifier {
     _dictionarySearchCache.clear();
   }
 
+  /// Whether or not the app is currently searching.
+  cancelable.ComputeOperation? _searchOperation;
+
+  /// Whether or not the app is currently searching.
+  cancelable.ComputeOperation? _preloadOperation;
+
   /// Gets the raw unprocessed entries straight from a dictionary database
   /// given a search term. This will be processed later for user viewing.
-  Future<DictionaryResult> searchDictionary(String searchTerm) async {
+  Future<DictionarySearchResult> searchDictionary(String searchTerm) async {
     if (_dictionarySearchCache[searchTerm] != null) {
       return _dictionarySearchCache[searchTerm]!;
     }
 
     searchTerm = searchTerm.replaceAll('\n', ' ');
-
-    if (searchTerm.trim().isEmpty) {
-      return DictionaryResult(
-        searchTerm: searchTerm,
-        terms: [],
-      );
-    }
+    ReceivePort receivePort = ReceivePort();
+    receivePort.listen((message) {
+      debugPrint(message);
+    });
 
     DictionarySearchParams params = DictionarySearchParams(
       searchTerm: searchTerm,
-      maximumDictionaryEntrySearchMatch: maximumEntries,
+      maximumDictionaryHistoryItems: maximumDictionaryHistoryItems,
       maximumDictionaryTermsInResult: maximumTerms,
-      isarDirectoryPath: isarDirectory.path,
+      searchWithWildcards: false,
+      enabledDictionaryIds: [],
+      sendPort: receivePort.sendPort,
     );
 
-    DictionaryResult result =
-        await compute(targetLanguage.prepareSearchResults!, params);
-    _dictionarySearchCache[searchTerm] = result;
-    if (_dictionarySearchCache.length > 200) {
-      _dictionarySearchCache.clear();
+    if (params.searchTerm.trim().isEmpty) {
+      return DictionarySearchResult();
     }
 
-    return result;
+    /// Searching also persists the result in the database. This is useful for
+    /// dictionary search history, as well as allowing a result to be linked
+    /// to the actual data, rather than duplicating that data within the
+    /// database, which is not ideal for storage purposes.
+    _searchOperation =
+        cancelable.compute(targetLanguage.prepareSearchResults, params);
+    int? id = await _searchOperation?.value;
+
+    if (id == null) {
+      return DictionarySearchResult();
+    }
+
+    DictionarySearchResult? result =
+        _database.dictionarySearchResults.getSync(id);
+
+    if (result != null) {
+      /// This preloads the data so that displaying the results does not busy
+      /// up the UI isolate.
+      _preloadOperation = cancelable.compute(preloadResult, id);
+      await _preloadOperation?.value;
+
+      _dictionarySearchCache[searchTerm] = result;
+      return result;
+    } else {
+      return DictionarySearchResult();
+    }
   }
 
   /// Get a specific dictionary entry index from the database.
@@ -1845,7 +1717,7 @@ class AppModel with ChangeNotifier {
     await Wakelock.enable();
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
-    if (item != null && mediaSource.implementsHistory && !isIncognitoMode) {
+    if (item != null && mediaSource.implementsHistory) {
       addMediaItem(item);
     }
 
@@ -1976,7 +1848,7 @@ class AppModel with ChangeNotifier {
 
   /// A helper function for showing a result already in dictionary history.
   Future<void> openResultFromHistory({
-    required DictionaryResult result,
+    required DictionarySearchResult result,
   }) async {
     await Navigator.push(
       _navigatorKey.currentContext!,
@@ -2368,16 +2240,6 @@ class AppModel with ChangeNotifier {
     return isTermInSearchHistory(historyKey: stashKey, searchTerm: searchTerm);
   }
 
-  /// Get the [DictionaryTag] given details from a [DictionaryEntry].
-  DictionaryTag? getDictionaryTag({
-    required String dictionaryName,
-    required String tagName,
-  }) {
-    DictionaryTag? tag =
-        _database.dictionaryTags.getByUniqueKeySync('$dictionaryName/$tagName');
-    return tag;
-  }
-
   /// Shown when a query fails to be made to an online service. For example,
   /// when there is no internet connection.
   void showFailedToCommunicateMessage() {
@@ -2389,37 +2251,19 @@ class AppModel with ChangeNotifier {
     );
   }
 
-  /// Add a [DictionaryResult] to the dictionary history. If the maximum value
-  /// is exceed, the dictionary history is cut down to the newest values.
-  Future<void> addToDictionaryHistory({
-    required DictionaryResult result,
-  }) async {
-    if (result.terms!.isEmpty || result.searchTerm.isEmpty) {
-      return;
-    }
-
-    UpdateDictionaryHistoryParams params = UpdateDictionaryHistoryParams(
-      result: result,
-      maximumDictionaryHistoryItems: maximumDictionaryHistoryItems,
-      isarDirectoryPath: isarDirectory.path,
-    );
-    await compute(addToDictionaryHistoryHelper, params);
-
-    dictionaryEntriesNotifier.notifyListeners();
-  }
-
   /// Update the scroll index of a given [DictionaryResult] in the database.
   Future<void> updateDictionaryResultScrollIndex({
-    required DictionaryResult result,
+    required DictionarySearchResult result,
     required int newIndex,
   }) async {
-    result.scrollIndex = newIndex;
+    ReceivePort receivePort = ReceivePort();
     UpdateDictionaryHistoryParams params = UpdateDictionaryHistoryParams(
-      result: result,
+      resultId: result.id!,
+      newPosition: newIndex,
       maximumDictionaryHistoryItems: maximumDictionaryHistoryItems,
-      isarDirectoryPath: isarDirectory.path,
+      sendPort: receivePort.sendPort,
     );
-    await compute(addToDictionaryHistoryHelper, params);
+    await compute(updateDictionaryHistoryHelper, params);
   }
 
   /// Clear the entire dictionary history. This must be performed when a
@@ -2427,7 +2271,7 @@ class AppModel with ChangeNotifier {
   /// the necessary dictionary metadata.
   void clearDictionaryHistory() async {
     _database.writeTxnSync(() {
-      _database.dictionaryResults.clearSync();
+      _database.dictionarySearchResults.clearSync();
     });
 
     dictionaryEntriesNotifier.notifyListeners();

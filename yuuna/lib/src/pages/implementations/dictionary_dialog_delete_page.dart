@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
+import 'package:yuuna/i18n/strings.g.dart';
 import 'package:yuuna/pages.dart';
 
 /// The content of the dialog used for showing dictionary import progress when
@@ -26,7 +27,7 @@ class _DictionaryDialogDeletePageState
     return WillPopScope(
       onWillPop: () async => false,
       child: AlertDialog(
-             contentPadding: Spacing.of(context).insets.all.big,
+        contentPadding: Spacing.of(context).insets.all.big,
         content: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -57,7 +58,7 @@ class _DictionaryDialogDeletePageState
           Padding(
             padding: const EdgeInsets.only(left: 0.5),
             child: Text(
-              deleteInProgress,
+              t.delete_in_progress,
               style: TextStyle(
                 fontSize: textTheme.bodySmall?.fontSize,
                 color: theme.unselectedWidgetColor,

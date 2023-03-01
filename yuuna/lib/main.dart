@@ -338,16 +338,9 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
 
   /// Shows when the current [themeMode] is a light theme.
   ThemeData get theme => ThemeData(
-        backgroundColor: Colors.white,
         scaffoldBackgroundColor: Colors.white,
-        selectedRowColor: Colors.grey.shade300,
         unselectedWidgetColor: Colors.black54,
         textTheme: textTheme,
-        colorScheme: ColorScheme.fromSwatch().copyWith(
-          primary: Colors.red,
-          secondary: Colors.red,
-          brightness: Brightness.light,
-        ),
         appBarTheme: const AppBarTheme(
           elevation: 0,
           centerTitle: false,
@@ -417,19 +410,19 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
           trackHeight: 2,
           thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6),
         ),
+        colorScheme: ColorScheme.fromSwatch()
+            .copyWith(
+              primary: Colors.red,
+              secondary: Colors.red,
+              brightness: Brightness.light,
+            )
+            .copyWith(background: Colors.white),
       );
 
   /// Shows when the current [themeMode] is a dark theme.
   ThemeData get darkTheme => ThemeData(
-        backgroundColor: Colors.black,
         scaffoldBackgroundColor: Colors.black,
-        selectedRowColor: Colors.grey.shade600,
         textTheme: textTheme,
-        colorScheme: ColorScheme.fromSwatch().copyWith(
-          primary: Colors.red,
-          secondary: Colors.red,
-          brightness: Brightness.dark,
-        ),
         switchTheme: SwitchThemeData(
           thumbColor: MaterialStateColor.resolveWith((states) {
             return states.contains(MaterialState.selected)
@@ -498,5 +491,12 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
           trackHeight: 2,
           thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6),
         ),
+        colorScheme: ColorScheme.fromSwatch()
+            .copyWith(
+              primary: Colors.red,
+              secondary: Colors.red,
+              brightness: Brightness.dark,
+            )
+            .copyWith(background: Colors.black),
       );
 }

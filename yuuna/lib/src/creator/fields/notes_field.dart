@@ -29,8 +29,7 @@ class NotesField extends Field {
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,
-    required DictionaryTerm dictionaryTerm,
-    required List<DictionaryMetaEntry> metaEntries,
+    required DictionaryHeading heading,
     required bool creatorJustLaunched,
   }) {
     return null;

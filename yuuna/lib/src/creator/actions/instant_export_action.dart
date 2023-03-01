@@ -22,14 +22,12 @@ class InstantExportAction extends QuickAction {
   static const String key = 'instant_export';
 
   @override
-  Future<void> executeAction({
-    required BuildContext context,
-    required WidgetRef ref,
-    required AppModel appModel,
-    required CreatorModel creatorModel,
-    required DictionaryTerm dictionaryTerm,
-    required List<DictionaryMetaEntry> metaEntries,
-  }) async {
+  Future<void> executeAction(
+      {required BuildContext context,
+      required WidgetRef ref,
+      required AppModel appModel,
+      required CreatorModel creatorModel,
+      required DictionaryHeading heading}) async {
     CreatorModel creatorModel = ref.read(instantExportProvider);
 
     Map<Field, String> newTextFields = {};
@@ -39,8 +37,7 @@ class InstantExportAction extends QuickAction {
         ref: ref,
         appModel: appModel,
         creatorModel: creatorModel,
-        dictionaryTerm: dictionaryTerm,
-        metaEntries: metaEntries,
+        heading: heading,
         creatorJustLaunched: true,
       );
 

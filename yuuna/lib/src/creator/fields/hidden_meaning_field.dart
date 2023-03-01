@@ -31,17 +31,11 @@ class HiddenMeaningField extends Field {
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,
-    required DictionaryTerm dictionaryTerm,
-    required List<DictionaryMetaEntry> metaEntries,
+    required DictionaryHeading heading,
     required bool creatorJustLaunched,
   }) {
-    List<String> hiddenDictionaries = appModel.dictionaries
-        .where((dictionary) => dictionary.hidden)
-        .map((dictionary) => dictionary.dictionaryName)
-        .toList();
-
-    List<DictionaryEntry> hiddenEntries = dictionaryTerm.entries
-        .where((entry) => hiddenDictionaries.contains(entry.dictionaryName))
+    List<DictionaryEntry> hiddenEntries = heading.entries
+        .where((entry) => !entry.dictionary.value!.hidden)
         .toList();
 
     return MeaningField.flattenMeanings(

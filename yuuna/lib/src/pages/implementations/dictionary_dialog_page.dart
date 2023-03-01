@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:reorderables/reorderables.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/dictionary.dart';
+import 'package:yuuna/i18n/strings.g.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
@@ -25,8 +26,6 @@ class _DictionaryDialogPageState extends BasePageState {
       appModel.translate('dictionaries_menu_empty');
   String get showOptionsLabel => appModel.translate('show_options');
   String get dictionaryCollapseLabel => appModel.translate('options_collapse');
-  String get dictionaryDeleteConfirmationLabel =>
-      appModel.translate('dictionaries_delete_confirmation');
   String get dictionaryExpandLabel => appModel.translate('options_expand');
   String get dictionaryDeleteLabel => appModel.translate('options_delete');
   String get dictionaryShowLabel => appModel.translate('options_show');
@@ -35,6 +34,7 @@ class _DictionaryDialogPageState extends BasePageState {
   String get dialogCloseLabel => appModel.translate('dialog_close');
   String get dialogDeleteLabel => appModel.translate('dialog_delete');
   String get dialogCancelLabel => appModel.translate('dialog_cancel');
+  String get dialogClearLabel => appModel.translate('dialog_clear');
 
   final ScrollController _scrollController = ScrollController();
   int _selectedOrder = 0;
@@ -51,9 +51,43 @@ class _DictionaryDialogPageState extends BasePageState {
   }
 
   List<Widget> get actions => [
+        buildClearButton(),
         buildImportButton(),
         buildCloseButton(),
       ];
+
+  Future<void> showDictionaryDeleteDialog() async {
+    Widget alertDialog = AlertDialog(
+      title: Text(t.dialog_title_dictionary_clear),
+      content: Text(
+        t.dialog_content_dictionary_clear,
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text(
+            dialogDeleteLabel,
+            style: TextStyle(color: theme.colorScheme.primary),
+          ),
+          onPressed: () async {
+            await appModel.deleteDictionaries();
+            Navigator.pop(context);
+
+            _selectedOrder = -1;
+            setState(() {});
+          },
+        ),
+        TextButton(
+          child: Text(dialogCancelLabel),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) => alertDialog,
+    );
+  }
 
   Widget buildImportButton() {
     return TextButton(
@@ -63,34 +97,43 @@ class _DictionaryDialogPageState extends BasePageState {
 
         FilePickerResult? result = await FilePicker.platform.pickFiles(
           /// Change when adding multiple dictionary formats.
-          type: appModel.lastSelectedDictionaryFormat.useAnyPicker
-              ? FileType.any
-              : FileType.custom,
-          allowedExtensions: appModel.lastSelectedDictionaryFormat.useAnyPicker
-              ? null
-              : appModel.lastSelectedDictionaryFormat.compatibleFileExtensions
-                  .map((ext) => ext.replaceAll('.', ''))
-                  .toList(),
+          type: appModel.lastSelectedDictionaryFormat.fileType,
+          allowedExtensions:
+              appModel.lastSelectedDictionaryFormat.allowedExtensions,
           allowMultiple: true,
         );
         if (result == null) {
           return;
         }
 
-        for (PlatformFile platformFile in result.files) {
+        for (int i = 0; i < result.files.length; i++) {
+          PlatformFile platformFile = result.files[i];
           File file = File(platformFile.path!);
           await appModel.importDictionary(
             file: file,
+            currentCount: i + 1,
+            totalCount: result.files.length,
             onImportSuccess: () {
               _selectedOrder = appModel.dictionaries.length - 1;
+              setState(() {});
             },
           );
-
-          setState(() {});
         }
 
         await FilePicker.platform.clearTemporaryFiles();
       },
+    );
+  }
+
+  Widget buildClearButton() {
+    return TextButton(
+      child: Text(
+        dialogClearLabel,
+        style: const TextStyle(
+          color: Colors.red,
+        ),
+      ),
+      onPressed: showDictionaryDeleteDialog,
     );
   }
 
@@ -201,7 +244,7 @@ class _DictionaryDialogPageState extends BasePageState {
       );
     } else {
       return Icon(
-        dictionaryFormat.formatIcon,
+        dictionaryFormat.icon,
         size: textTheme.titleLarge?.fontSize,
       );
     }
@@ -209,11 +252,11 @@ class _DictionaryDialogPageState extends BasePageState {
 
   Widget buildDictionaryTile(Dictionary dictionary) {
     DictionaryFormat dictionaryFormat =
-        appModel.dictionaryFormats[dictionary.formatName]!;
+        appModel.dictionaryFormats[dictionary.formatKey]!;
 
     return Material(
       type: MaterialType.transparency,
-      key: ValueKey(dictionary.dictionaryName),
+      key: ValueKey(dictionary.name),
       child: ListTile(
         selected: _selectedOrder == dictionary.order,
         leading: getIcon(
@@ -226,7 +269,7 @@ class _DictionaryDialogPageState extends BasePageState {
               child: Column(
                 children: [
                   JidoujishoMarquee(
-                    text: dictionary.dictionaryName,
+                    text: dictionary.name,
                     style: TextStyle(
                       fontSize: textTheme.bodyMedium?.fontSize,
                       color: dictionary.hidden
@@ -235,7 +278,7 @@ class _DictionaryDialogPageState extends BasePageState {
                     ),
                   ),
                   JidoujishoMarquee(
-                    text: dictionary.formatName,
+                    text: dictionaryFormat.name,
                     style: TextStyle(
                       fontSize: textTheme.bodySmall?.fontSize,
                       color: dictionary.hidden
@@ -329,48 +372,7 @@ class _DictionaryDialogPageState extends BasePageState {
           setState(() {});
         },
       ),
-      buildPopupItem(
-        label: dictionaryDeleteLabel,
-        icon: Icons.delete,
-        action: () {
-          showDictionaryDeleteDialog(dictionary);
-        },
-        color: theme.colorScheme.primary,
-      ),
     ];
-  }
-
-  Future<void> showDictionaryDeleteDialog(Dictionary dictionary) async {
-    Widget alertDialog = AlertDialog(
-      title: Text(dictionary.dictionaryName),
-      content: Text(
-        dictionaryDeleteConfirmationLabel,
-      ),
-      actions: <Widget>[
-        TextButton(
-          child: Text(
-            dialogDeleteLabel,
-            style: TextStyle(color: theme.colorScheme.primary),
-          ),
-          onPressed: () async {
-            await appModel.deleteDictionary(dictionary);
-            Navigator.pop(context);
-
-            _selectedOrder = -1;
-            setState(() {});
-          },
-        ),
-        TextButton(
-          child: Text(dialogCancelLabel),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ],
-    );
-
-    showDialog(
-      context: context,
-      builder: (context) => alertDialog,
-    );
   }
 
   Widget buildImportDropdown() {
@@ -390,7 +392,7 @@ class _DictionaryDialogPageState extends BasePageState {
         JidoujishoDropdown<DictionaryFormat>(
           options: appModel.dictionaryFormats.values.toList(),
           initialOption: appModel.lastSelectedDictionaryFormat,
-          generateLabel: (format) => format.formatName,
+          generateLabel: (format) => format.name,
           onChanged: (format) {
             appModel.setLastSelectedDictionaryFormat(format!);
             setState(() {});

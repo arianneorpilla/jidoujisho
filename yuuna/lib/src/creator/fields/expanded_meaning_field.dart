@@ -31,17 +31,11 @@ class ExpandedMeaningField extends Field {
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,
-    required DictionaryTerm dictionaryTerm,
-    required List<DictionaryMetaEntry> metaEntries,
+    required DictionaryHeading heading,
     required bool creatorJustLaunched,
   }) {
-    List<String> expandedDictionaries = appModel.dictionaries
-        .where((dictionary) => !dictionary.hidden && !dictionary.collapsed)
-        .map((dictionary) => dictionary.dictionaryName)
-        .toList();
-
-    List<DictionaryEntry> expandedEntries = dictionaryTerm.entries
-        .where((entry) => expandedDictionaries.contains(entry.dictionaryName))
+    List<DictionaryEntry> expandedEntries = heading.entries
+        .where((entry) => !entry.dictionary.value!.collapsed)
         .toList();
 
     return MeaningField.flattenMeanings(

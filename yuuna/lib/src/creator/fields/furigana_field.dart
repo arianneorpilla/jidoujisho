@@ -32,13 +32,11 @@ class FuriganaField extends Field {
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,
-    required DictionaryTerm dictionaryTerm,
-    required List<DictionaryMetaEntry> metaEntries,
+    required DictionaryHeading heading,
     required bool creatorJustLaunched,
   }) {
     List<RubyTextData>? rubyDatas = JapaneseLanguage.instance.fetchFurigana(
-      term: dictionaryTerm.term,
-      reading: dictionaryTerm.reading,
+      heading: heading,
     );
 
     if (rubyDatas == null) {

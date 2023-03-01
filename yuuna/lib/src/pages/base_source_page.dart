@@ -58,8 +58,8 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
 
   /// The result from the last dictionary search performed with
   /// [searchDictionaryResult].
-  final ValueNotifier<DictionaryResult?> _dictionaryResultNotifier =
-      ValueNotifier<DictionaryResult?>(null);
+  final ValueNotifier<DictionarySearchResult?> _dictionaryResultNotifier =
+      ValueNotifier<DictionarySearchResult?>(null);
 
   /// Notifies the popup dictionary to refresh positions.
   final ValueNotifier<bool> _popupPositionNotifier = ValueNotifier<bool>(false);
@@ -116,24 +116,21 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
   /// Perform a search with a given query and update the dictionary search
   /// result. The [position] parameter determines where the pop-up will
   /// be shown on the screen.
-  Future<DictionaryResult> searchDictionaryResult({
+  Future<void> searchDictionaryResult({
     required String searchTerm,
     required JidoujishoPopupPosition position,
   }) async {
-    late DictionaryResult dictionaryResult;
+    late DictionarySearchResult dictionaryResult;
     _popupPosition = position;
     _popupPositionNotifier.value = true;
     try {
       _isSearchingNotifier.value = true;
       dictionaryResult = await appModel.searchDictionary(searchTerm);
 
-      await appModel.addToDictionaryHistory(result: dictionaryResult);
       _dictionaryResultNotifier.value = dictionaryResult;
     } finally {
       _isSearchingNotifier.value = false;
     }
-
-    return dictionaryResult;
   }
 
   /// Hide the dictionary and dispose of the current result.
@@ -327,7 +324,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
       );
     }
 
-    if (_dictionaryResultNotifier.value!.terms!.isEmpty) {
+    if (_dictionaryResultNotifier.value!.headings.isEmpty) {
       return buildNoSearchResultsPlaceholderMessage();
     }
 
@@ -353,6 +350,8 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
       ),
     );
   }
+
+  DictionarySearchResult? get currentResult => _dictionaryResultNotifier.value;
 
   /// Action upon selecting the Search option.
   void onSearch(String searchTerm) async {

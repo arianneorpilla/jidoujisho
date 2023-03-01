@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_archive/flutter_archive.dart';
 import 'package:path/path.dart' as path;
-
 import 'package:yuuna/dictionary.dart';
+import 'package:yuuna/i18n/strings.g.dart';
 
 /// A dictionary format for archives following the latest Yomichan bank schema.
 /// Example dictionaries for this format may be downloaded from the Yomichan
@@ -13,377 +14,335 @@ import 'package:yuuna/dictionary.dart';
 ///
 /// Details on the format can be found here:
 /// https://github.com/FooSoft/yomichan/blob/master/ext/data/schemas/dictionary-term-bank-v3-schema.json
-class YomichanDictionaryFormat extends DictionaryFormat {
+class YomichanFormat extends DictionaryFormat {
   /// Define a format with the given metadata that has its behaviour for
   /// import, search and display defined with af set of top-level helper methods.
-  YomichanDictionaryFormat._privateConstructor()
+  YomichanFormat._privateConstructor()
       : super(
-          formatName: 'Yomichan Dictionary',
-          formatIcon: Icons.auto_stories_rounded,
-          compatibleFileExtensions: const ['.zip'],
-          prepareDirectory: prepareDirectoryYomichanDictionaryFormat,
-          prepareName: prepareNameYomichanDictionaryFormat,
-          prepareEntries: prepareEntriesYomichanDictionaryFormat,
-          prepareMetaEntries: prepareMetaEntriesYomichanDictionaryFormat,
-          prepareTags: prepareTagsYomichanDictionaryFormat,
-          prepareMetadata: prepareMetadataYomichanDictionaryFormat,
-          useAnyPicker: false,
+          uniqueKey: 'yomichan',
+          name: 'Yomichan Dictionary',
+          icon: Icons.auto_stories_rounded,
+          allowedExtensions: const ['zip'],
+          fileType: FileType.custom,
+          prepareDirectory: prepareDirectoryYomichanFormat,
+          prepareName: prepareNameYomichanFormat,
+          prepareEntries: prepareEntriesYomichanFormat,
+          prepareTags: prepareTagsYomichanFormat,
+          preparePitches: preparePitchesYomichanFormat,
+          prepareFrequencies: prepareFrequenciesYomichanFormat,
         );
 
   /// Get the singleton instance of this dictionary format.
-  static YomichanDictionaryFormat get instance => _instance;
+  static YomichanFormat get instance => _instance;
 
-  static final YomichanDictionaryFormat _instance =
-      YomichanDictionaryFormat._privateConstructor();
+  static final YomichanFormat _instance = YomichanFormat._privateConstructor();
 }
 
 /// Top-level function for use in compute. See [DictionaryFormat] for details.
-Future<void> prepareDirectoryYomichanDictionaryFormat(
+Future<void> prepareDirectoryYomichanFormat(
     PrepareDirectoryParams params) async {
-  try {
-    /// Extract the user selected archive to the working directory.
-    await ZipFile.extractToDirectory(
-      zipFile: params.file!,
-      destinationDir: params.workingDirectory,
-    );
-  } catch (e) {
-    String message = params.localisation.importMessageErrorWithVar('$e');
-    params.sendPort.send(message);
-  }
+  /// Extract the user selected archive to the working directory.
+  await ZipFile.extractToDirectory(
+    zipFile: params.file,
+    destinationDir: params.workingDirectory,
+  );
 }
 
 /// Top-level function for use in compute. See [DictionaryFormat] for details.
-Future<String> prepareNameYomichanDictionaryFormat(
-    PrepareDirectoryParams params) async {
-  try {
-    /// Get the index, which contains the name of the dictionary contained by
-    /// the archive.
-    String indexFilePath =
-        path.join(params.workingDirectory.path, 'index.json');
-    File indexFile = File(indexFilePath);
-    String indexJson = indexFile.readAsStringSync();
-    Map<String, dynamic> index = jsonDecode(indexJson);
+Future<String> prepareNameYomichanFormat(PrepareDirectoryParams params) async {
+  /// Get the index, which contains the name of the dictionary contained by
+  /// the archive.
+  String indexFilePath = path.join(params.workingDirectory.path, 'index.json');
+  File indexFile = File(indexFilePath);
+  String indexJson = indexFile.readAsStringSync();
+  Map<String, dynamic> index = jsonDecode(indexJson);
 
-    String dictionaryName = (index['title'] as String).trim();
-    return dictionaryName;
-  } catch (e) {
-    String message = params.localisation.importMessageErrorWithVar('$e');
-    params.sendPort.send(message);
-  }
-
-  throw Exception('Unable to get name');
+  String dictionaryName = (index['title'] as String).trim();
+  return dictionaryName;
 }
 
 /// Top-level function for use in compute. See [DictionaryFormat] for details.
-Future<List<DictionaryEntry>> prepareEntriesYomichanDictionaryFormat(
-    PrepareDictionaryParams params) async {
-  try {
-    List<DictionaryEntry> entries = [];
+Future<Map<DictionaryHeading, List<DictionaryEntry>>>
+    prepareEntriesYomichanFormat(PrepareDictionaryParams params) async {
+  Map<DictionaryHeading, List<DictionaryEntry>> entriesByHeading = {};
 
-    final List<FileSystemEntity> entities = params.workingDirectory.listSync();
-    final Iterable<File> files = entities.whereType<File>();
+  final List<FileSystemEntity> entities = params.workingDirectory.listSync();
+  final Iterable<File> files = entities.whereType<File>();
 
-    for (File file in files) {
-      String filename = path.basename(file.path);
-      if (filename.startsWith('term_bank')) {
-        List<dynamic> items = jsonDecode(file.readAsStringSync());
-
-        for (List<dynamic> item in items) {
-          String term = item[0] as String;
-          String reading = item[1] as String;
-
-          double popularity = (item[4] as num).toDouble();
-          List<String> meaningTags = (item[2] as String).split(' ');
-          List<String> termTags = (item[7] as String).split(' ');
-
-          List<String> meanings = [];
-
-          if (item[5] is List) {
-            List<dynamic> meaningsList = List.from(item[5]);
-            meanings = meaningsList.map((e) {
-              if (e is Map) {
-                Map<String, dynamic> data = Map<String, dynamic>.from(e);
-                if (data['type'] == 'image' ||
-                    data['type'] == 'structured-content') {
-                  return '';
-                } else {
-                  return e.toString();
-                }
-              } else {
-                return e.toString();
-              }
-            }).toList();
-          } else if (item[5] is Map) {
-            Map<String, dynamic> data = Map<String, dynamic>.from(item[5]);
-            if (data['type'] != 'image' &&
-                data['type'] != 'structured-content') {
-              meanings.add(item[5].toString());
-            }
-          } else {
-            meanings.add(item[5].toString());
-          }
-
-          meanings = meanings.where((e) => e.isNotEmpty).toList();
-
-          if (meanings.isNotEmpty) {
-            entries.add(
-              DictionaryEntry(
-                dictionaryName: params.dictionaryName,
-                term: term,
-                reading: reading,
-                meanings: meanings,
-                popularity: popularity,
-                meaningTags: meaningTags,
-                termTags: termTags,
-              ),
-            );
-          }
-        }
-      } else if (filename.startsWith('kanji_bank')) {
-        List<dynamic> items = jsonDecode(file.readAsStringSync());
-
-        for (List<dynamic> item in items) {
-          String term = item[0] as String;
-          List<String> onyomis = (item[1] as String).split(' ');
-          List<String> kunyomis = (item[2] as String).split(' ');
-          List<String> termTags = (item[3] as String).split(' ');
-          List<String> meanings = List<String>.from(item[4]);
-
-          StringBuffer buffer = StringBuffer();
-          if (onyomis.join().trim().isNotEmpty) {
-            buffer.write('音読み\n');
-            for (String onyomi in onyomis) {
-              buffer.write('  • $onyomi\n');
-            }
-            buffer.write('\n');
-          }
-          if (kunyomis.join().trim().isNotEmpty) {
-            buffer.write('訓読み\n');
-            for (String kun in kunyomis) {
-              buffer.write('  • $kun\n');
-            }
-            buffer.write('\n');
-          }
-          if (meanings.isNotEmpty) {
-            buffer.write('意味\n');
-            for (String meaning in meanings) {
-              buffer.write('  • $meaning\n');
-            }
-            buffer.write('\n');
-          }
-
-          String meaning = buffer.toString().trim();
-
-          List<String> normalisedMeaning = [meaning];
-
-          meanings = meanings.where((e) => e.isNotEmpty).toList();
-
-          if (meaning.isNotEmpty) {
-            entries.add(
-              DictionaryEntry(
-                dictionaryName: params.dictionaryName,
-                term: term,
-                meanings: normalisedMeaning,
-                termTags: termTags,
-              ),
-            );
-          }
-        }
-      }
-
-      String message =
-          params.localisation.importMessageEntryCountWithVar(entries.length);
-      params.sendPort.send(message);
-    }
-
-    return entries;
-  } catch (e) {
-    String message = params.localisation.importMessageErrorWithVar('$e');
-    params.sendPort.send(message);
-  }
-
-  throw Exception('Unable to get entries');
-}
-
-/// Top-level function for use in compute. See [DictionaryFormat] for details.
-Future<List<DictionaryMetaEntry>> prepareMetaEntriesYomichanDictionaryFormat(
-    PrepareDictionaryParams params) async {
-  try {
-    List<DictionaryMetaEntry> metaEntries = [];
-
-    final List<FileSystemEntity> entities = params.workingDirectory.listSync();
-    final Iterable<File> files = entities.whereType<File>();
-
-    for (File file in files) {
-      String filename = path.basename(file.path);
-      if (!filename.startsWith('term_meta_bank')) {
-        continue;
-      }
-
-      String json = file.readAsStringSync();
-      List<dynamic> items = jsonDecode(json);
+  for (File file in files) {
+    String filename = path.basename(file.path);
+    if (filename.startsWith('term_bank')) {
+      List<dynamic> items = jsonDecode(file.readAsStringSync());
 
       for (List<dynamic> item in items) {
         String term = item[0] as String;
-        String type = item[1] as String;
+        String reading = item[1] as String;
 
-        FrequencyData? frequency;
-        List<PitchData>? pitches;
+        double popularity = (item[4] as num).toDouble();
+        List<String> entryTagNames = (item[2] as String).split(' ');
+        List<String> headingTagNames = (item[7] as String).split(' ');
 
-        if (type == 'pitch') {
-          pitches = [];
+        List<String> definitions = [];
 
-          Map<String, dynamic> data = Map<String, dynamic>.from(item[2]);
-          String reading = data['reading'];
-
-          List<Map<String, dynamic>> distinctPitchJsons =
-              List<Map<String, dynamic>>.from(data['pitches']);
-          for (Map<String, dynamic> distinctPitch in distinctPitchJsons) {
-            int downstep = distinctPitch['position'];
-            PitchData pitch = PitchData(
-              reading: reading,
-              downstep: downstep,
-            );
-            pitches.add(pitch);
-          }
-        } else if (type == 'freq') {
-          if (item[2] is double) {
-            double number = item[2] as double;
-            if (number % 1 == 0) {
-              frequency = FrequencyData(
-                value: number,
-                displayValue: '${number.toInt()}',
-              );
+        if (item[5] is List) {
+          List<dynamic> meaningsList = List.from(item[5]);
+          definitions = meaningsList.map((e) {
+            if (e is Map) {
+              Map<String, dynamic> data = Map<String, dynamic>.from(e);
+              if (data['type'] == 'image' ||
+                  data['type'] == 'structured-content') {
+                return '';
+              } else {
+                return e.toString();
+              }
             } else {
-              frequency = FrequencyData(
-                value: number,
-                displayValue: '$number',
-              );
+              return e.toString();
             }
-          } else if (item[2] is int) {
-            int number = item[2] as int;
-            frequency = FrequencyData(
-              value: number.toDouble(),
-              displayValue: '$number',
-            );
-          } else if (item[2] is Map) {
-            Map<String, dynamic> data = Map<String, dynamic>.from(item[2]);
-
-            if (data['reading'] != null && data['frequency'] is Map) {
-              Map<String, dynamic> frequencyData =
-                  Map<String, dynamic>.from(data['frequency']);
-
-              num number = frequencyData['value'] ?? 0;
-
-              frequency = FrequencyData(
-                value: number.toDouble(),
-                displayValue: frequencyData['displayValue'],
-                reading: data['reading'],
-              );
-            } else if (data['displayValue'] != null) {
-              num number = data['value'] ?? 0;
-
-              frequency = FrequencyData(
-                value: number.toDouble(),
-                displayValue: data['displayValue'],
-                reading: data['reading'],
-              );
-            } else if (data['value'] != null) {
-              num number = data['value'] ?? 0;
-
-              frequency = FrequencyData(
-                value: number.toDouble(),
-                displayValue: number.toInt().toString(),
-                reading: data['reading'],
-              );
-            } else {}
-          } else {
-            frequency = FrequencyData(
-              value: 0,
-              displayValue: item[2].toString(),
-            );
+          }).toList();
+        } else if (item[5] is Map) {
+          Map<String, dynamic> data = Map<String, dynamic>.from(item[5]);
+          if (data['type'] != 'image' && data['type'] != 'structured-content') {
+            definitions.add(item[5].toString());
           }
         } else {
-          continue;
+          definitions.add(item[5].toString());
         }
 
-        DictionaryMetaEntry metaEntry = DictionaryMetaEntry(
-          dictionaryName: params.dictionaryName,
-          term: term,
-          frequency: frequency,
-          pitches: pitches,
-        );
+        definitions = definitions.where((e) => e.isNotEmpty).toList();
 
-        metaEntries.add(metaEntry);
+        if (definitions.isNotEmpty) {
+          DictionaryHeading heading = DictionaryHeading(
+            reading: reading,
+            term: term,
+          );
+          DictionaryEntry entry = DictionaryEntry(
+            definitions: definitions,
+            entryTagNames: entryTagNames,
+            headingTagNames: headingTagNames,
+            popularity: popularity,
+          );
+
+          entriesByHeading.putIfAbsent(heading, () => []);
+          entriesByHeading[heading]!.add(entry);
+        }
       }
-
-      String message = params.localisation
-          .importMessageMetaEntryCountWithVar(metaEntries.length);
-      params.sendPort.send(message);
     }
 
-    return metaEntries;
-  } catch (e) {
-    String message = params.localisation.importMessageErrorWithVar('$e');
-    params.sendPort.send(message);
+    if (entriesByHeading.isNotEmpty) {
+      params.send(t.import_found_entry(count: entriesByHeading.length));
+    }
   }
 
-  throw Exception('Unable to get meta entries');
+  return entriesByHeading;
 }
 
 /// Top-level function for use in compute. See [DictionaryFormat] for details.
-Future<List<DictionaryTag>> prepareTagsYomichanDictionaryFormat(
+Future<List<DictionaryTag>> prepareTagsYomichanFormat(
     PrepareDictionaryParams params) async {
-  try {
-    List<DictionaryTag> tags = [];
+  List<DictionaryTag> tags = [];
 
-    final List<FileSystemEntity> entities = params.workingDirectory.listSync();
-    final Iterable<File> files = entities.whereType<File>();
+  final List<FileSystemEntity> entities = params.workingDirectory.listSync();
+  final Iterable<File> files = entities.whereType<File>();
 
-    for (File file in files) {
-      String filename = path.basename(file.path);
-      if (!filename.startsWith('tag_bank')) {
+  for (File file in files) {
+    String filename = path.basename(file.path);
+    if (!filename.startsWith('tag_bank')) {
+      continue;
+    }
+
+    String json = file.readAsStringSync();
+    List<dynamic> items = jsonDecode(json);
+
+    for (List<dynamic> item in items) {
+      String name = item[0] as String;
+      String category = item[1] as String;
+      int sortingOrder = item[2] as int;
+      String notes = item[3] as String;
+      double popularity = (item[4] as num).toDouble();
+
+      DictionaryTag tag = DictionaryTag(
+        dictionaryId: params.dictionary.id,
+        name: name,
+        category: category,
+        sortingOrder: sortingOrder,
+        notes: notes,
+        popularity: popularity,
+      );
+
+      tags.add(tag);
+    }
+
+    if (tags.isNotEmpty) {
+      params.send(t.import_found_tag(count: tags.length));
+    }
+  }
+
+  return tags;
+}
+
+/// Top-level function for use in compute. See [DictionaryFormat] for details.
+Future<Map<DictionaryHeading, List<DictionaryPitch>>>
+    preparePitchesYomichanFormat(PrepareDictionaryParams params) async {
+  Map<DictionaryHeading, List<DictionaryPitch>> pitchesByHeading = {};
+  final List<FileSystemEntity> entities = params.workingDirectory.listSync();
+  final Iterable<File> files = entities.whereType<File>();
+
+  for (File file in files) {
+    String filename = path.basename(file.path);
+    if (!filename.startsWith('term_meta_bank')) {
+      continue;
+    }
+
+    String json = file.readAsStringSync();
+    List<dynamic> items = jsonDecode(json);
+
+    for (List<dynamic> item in items) {
+      String term = item[0] as String;
+      String type = item[1] as String;
+
+      if (type == 'pitch') {
+        Map<String, dynamic> data = Map<String, dynamic>.from(item[2]);
+        String reading = data['reading'] ?? '';
+        DictionaryHeading heading = DictionaryHeading(
+          term: term,
+          reading: reading,
+        );
+        pitchesByHeading.putIfAbsent(heading, () => []);
+
+        List<Map<String, dynamic>> distinctPitchJsons =
+            List<Map<String, dynamic>>.from(data['pitches']);
+        for (Map<String, dynamic> distinctPitch in distinctPitchJsons) {
+          int downstep = distinctPitch['position'];
+          DictionaryPitch pitch = DictionaryPitch(downstep: downstep);
+
+          pitchesByHeading[heading]!.add(pitch);
+        }
+      } else {
         continue;
       }
-
-      String json = file.readAsStringSync();
-      List<dynamic> items = jsonDecode(json);
-
-      for (List<dynamic> item in items) {
-        String name = item[0] as String;
-        String category = item[1] as String;
-        int sortingOrder = item[2] as int;
-        String notes = item[3] as String;
-        double popularity = (item[4] as num).toDouble();
-
-        DictionaryTag tag = DictionaryTag(
-          dictionaryName: params.dictionaryName,
-          name: name,
-          category: category,
-          sortingOrder: sortingOrder,
-          notes: notes,
-          popularity: popularity,
-        );
-
-        tags.add(tag);
-      }
-
-      String message =
-          params.localisation.importMessageTagCountWithVar(tags.length);
-      params.sendPort.send(message);
     }
 
-    return tags;
-  } catch (e) {
-    String message = params.localisation.importMessageErrorWithVar('$e');
-    params.sendPort.send(message);
+    if (pitchesByHeading.isNotEmpty) {
+      params.send(t.import_found_pitch(count: pitchesByHeading.length));
+    }
   }
 
-  throw Exception('Unable to get tags');
+  return pitchesByHeading;
 }
 
 /// Top-level function for use in compute. See [DictionaryFormat] for details.
-Future<Map<String, String>> prepareMetadataYomichanDictionaryFormat(
-    PrepareDictionaryParams params) async {
-  return {};
+Future<Map<DictionaryHeading, List<DictionaryFrequency>>>
+    prepareFrequenciesYomichanFormat(PrepareDictionaryParams params) async {
+  Map<DictionaryHeading, List<DictionaryFrequency>> frequenciesByHeading = {};
+  final List<FileSystemEntity> entities = params.workingDirectory.listSync();
+  final Iterable<File> files = entities.whereType<File>();
+
+  for (File file in files) {
+    String filename = path.basename(file.path);
+    if (!filename.startsWith('term_meta_bank')) {
+      continue;
+    }
+
+    String json = file.readAsStringSync();
+    List<dynamic> items = jsonDecode(json);
+
+    for (List<dynamic> item in items) {
+      String term = item[0] as String;
+      String type = item[1] as String;
+
+      late DictionaryHeading heading;
+      late DictionaryFrequency frequency;
+
+      if (type == 'freq') {
+        if (item[2] is double) {
+          double number = item[2] as double;
+          if (number % 1 == 0) {
+            heading = DictionaryHeading(term: term);
+            frequency = DictionaryFrequency(
+              value: number,
+              displayValue: '${number.toInt()}',
+            );
+          } else {
+            heading = DictionaryHeading(term: term);
+            frequency = DictionaryFrequency(
+              value: number,
+              displayValue: '$number',
+            );
+          }
+        } else if (item[2] is int) {
+          int number = item[2] as int;
+          heading = DictionaryHeading(term: term);
+          DictionaryFrequency(
+            value: number.toDouble(),
+            displayValue: '$number',
+          );
+          frequency = DictionaryFrequency(
+            value: number.toDouble(),
+            displayValue: '$number',
+          );
+        } else if (item[2] is Map) {
+          Map<String, dynamic> data = Map<String, dynamic>.from(item[2]);
+
+          if (data['reading'] != null && data['frequency'] is Map) {
+            Map<String, dynamic> frequencyData =
+                Map<String, dynamic>.from(data['frequency']);
+
+            String reading = data['reading'] ?? '';
+            heading = DictionaryHeading(
+              term: term,
+              reading: reading,
+            );
+
+            num number = frequencyData['value'] ?? 0;
+
+            frequency = DictionaryFrequency(
+              value: number.toDouble(),
+              displayValue: frequencyData['displayValue'],
+            );
+          } else if (data['displayValue'] != null) {
+            String reading = data['reading'] ?? '';
+            heading = DictionaryHeading(
+              term: term,
+              reading: reading,
+            );
+            num number = data['value'] ?? 0;
+
+            frequency = DictionaryFrequency(
+              value: number.toDouble(),
+              displayValue: data['displayValue'],
+            );
+          } else if (data['value'] != null) {
+            String reading = data['reading'] ?? '';
+            heading = DictionaryHeading(
+              term: term,
+              reading: reading,
+            );
+            num number = data['value'] ?? 0;
+
+            frequency = DictionaryFrequency(
+              value: number.toDouble(),
+              displayValue: number.toInt().toString(),
+            );
+          } else {}
+        } else {
+          heading = DictionaryHeading(term: term);
+          frequency = DictionaryFrequency(
+            value: 0,
+            displayValue: item[2].toString(),
+          );
+        }
+
+        frequenciesByHeading.putIfAbsent(heading, () => []);
+        frequenciesByHeading[heading]!.add(frequency);
+      } else {
+        continue;
+      }
+    }
+
+    if (frequenciesByHeading.isNotEmpty) {
+      params.send(t.import_found_frequency(count: frequenciesByHeading.length));
+    }
+  }
+
+  return frequenciesByHeading;
 }

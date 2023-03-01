@@ -168,12 +168,7 @@ class _HomePageState extends BasePageState<HomePage>
       builder: (context, notifier, widget) {
         return Padding(
           padding: Spacing.of(context).insets.onlyLeft.normal,
-          child: appModel.isIncognitoMode
-              ? ColorFiltered(
-                  colorFilter: JidoujishoColor.greyscaleWithAlphaFilter,
-                  child: appIcon,
-                )
-              : appIcon,
+          child: appIcon,
         );
       },
     );
@@ -305,7 +300,7 @@ class _HomePageState extends BasePageState<HomePage>
       MaterialPageRoute<void>(
         builder: (context) => Theme(
           data: theme.copyWith(
-            cardColor: theme.backgroundColor,
+            cardColor: theme.colorScheme.background,
           ),
           child: LicensePage(
             applicationName: appModel.packageInfo.appName,
@@ -331,14 +326,6 @@ class _HomePageState extends BasePageState<HomePage>
         label: appModel.isDarkMode ? optionsToggleLight : optionsToggleDark,
         icon: appModel.isDarkMode ? Icons.light_mode : Icons.dark_mode,
         action: appModel.toggleDarkMode,
-      ),
-      buildPopupItem(
-        label:
-            appModel.isIncognitoMode ? optionsIncognitoOff : optionsIncognitoOn,
-        icon: appModel.isIncognitoMode
-            ? Icons.person_off_outlined
-            : Icons.person_off,
-        action: appModel.toggleIncognitoMode,
       ),
       buildPopupItem(
         label: optionsDictionaries,

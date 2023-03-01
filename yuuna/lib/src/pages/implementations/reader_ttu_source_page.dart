@@ -381,13 +381,13 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
             searchDictionaryResult(
               searchTerm: searchTerm,
               position: position,
-            ).then((result) {
+            ).then((_) {
               int length = isSpaceDelimited
                   ? appModel.targetLanguage
                       .textToWords(searchTerm)
                       .firstWhere((e) => e.trim().isNotEmpty)
                       .length
-                  : max(1, result.bestLength);
+                  : max(1, currentResult?.bestLength ?? 0);
 
               if (mediaSource.highlightOnTap) {
                 selectTextOnwards(
