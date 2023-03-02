@@ -40,7 +40,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
 
   /// The message to be shown in the placeholder that displays when
   /// [shouldPlaceholderBeShown] is true. This should be a localised message.
-  String get placeholderMessage => appModel.translate('enter_search_term');
+  String get placeholderMessage => appModel.translate('info_empty_home_tab');
 
   DictionarySearchResult? _result;
 
@@ -63,7 +63,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     super.dispose();
   }
 
-  bool get shouldPlaceholderBeShown => true;
+  bool get shouldPlaceholderBeShown => appModel.dictionaryHistory.isEmpty;
 
   @override
   Widget build(BuildContext context) {
@@ -177,13 +177,24 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     }
   }
 
+  String lastQuery = '';
+
   void search(String query) async {
+    if (lastQuery == query) {
+      return;
+    } else {
+      lastQuery = query;
+    }
+
     setState(() {
       _isSearching = true;
     });
 
     try {
-      _result = await appModel.searchDictionary(query);
+      _result = await appModel.searchDictionary(
+        searchTerm: query,
+        searchWithWildcards: true,
+      );
     } finally {
       if (_result != null) {
         if (_result!.searchTerm ==
@@ -195,6 +206,9 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
                 historyKey: mediaType.uniqueKey,
                 searchTerm: mediaType.floatingSearchBarController.query,
               );
+              if (_result!.headings.isNotEmpty) {
+                appModel.addToDictionaryHistory(result: _result!);
+              }
             }
           });
 

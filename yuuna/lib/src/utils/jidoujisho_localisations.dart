@@ -362,7 +362,8 @@ class JidoujishoLocalisations {
         'language and a default profile will be tailored for you. You can '
         'change this later at anytime.',
     'maximum_entries': 'Maximum dictionary entry query limit',
-    'maximum_terms': 'Maximum dictionary headwords in result',
+    'maximum_term_query_limit': 'Dictionary search query limit',
+    'maximum_terms': 'Maximum headwords in result',
     'use_br_tags': 'Use line break tag instead of newline on export',
     'prepend_dictionary_names': 'Prepend dictionary name in meaning',
     'highlight_on_tap': 'Highlight text on tap',

@@ -210,7 +210,9 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
                                 parameters.title,
                                 selectionControls: selectionControls,
                                 style: const TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold),
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               SelectableText(
                                 parameters.artist,

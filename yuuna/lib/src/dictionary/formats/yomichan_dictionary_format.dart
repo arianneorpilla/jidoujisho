@@ -93,19 +93,19 @@ Future<Map<DictionaryHeading, List<DictionaryEntry>>>
                   data['type'] == 'structured-content') {
                 return '';
               } else {
-                return e.toString();
+                return e.toString().trim();
               }
             } else {
-              return e.toString();
+              return e.toString().trim();
             }
           }).toList();
         } else if (item[5] is Map) {
           Map<String, dynamic> data = Map<String, dynamic>.from(item[5]);
           if (data['type'] != 'image' && data['type'] != 'structured-content') {
-            definitions.add(item[5].toString());
+            definitions.add(item[5].toString().trim());
           }
         } else {
-          definitions.add(item[5].toString());
+          definitions.add(item[5].toString().trim());
         }
 
         definitions = definitions.where((e) => e.isNotEmpty).toList();
@@ -120,6 +120,56 @@ Future<Map<DictionaryHeading, List<DictionaryEntry>>>
             entryTagNames: entryTagNames,
             headingTagNames: headingTagNames,
             popularity: popularity,
+          );
+
+          entriesByHeading.putIfAbsent(heading, () => []);
+          entriesByHeading[heading]!.add(entry);
+        }
+      }
+    } else if (filename.startsWith('kanji_bank')) {
+      List<dynamic> items = jsonDecode(file.readAsStringSync());
+
+      for (List<dynamic> item in items) {
+        String term = item[0] as String;
+        List<String> onyomis = (item[1] as String).split(' ');
+        List<String> kunyomis = (item[2] as String).split(' ');
+        List<String> headingTagNames = (item[3] as String).split(' ');
+        List<String> meanings = List<String>.from(item[4]);
+
+        StringBuffer buffer = StringBuffer();
+        if (onyomis.join().trim().isNotEmpty) {
+          buffer.write('音読み\n');
+          for (String onyomi in onyomis) {
+            buffer.write('  • $onyomi\n');
+          }
+          buffer.write('\n');
+        }
+        if (kunyomis.join().trim().isNotEmpty) {
+          buffer.write('訓読み\n');
+          for (String kun in kunyomis) {
+            buffer.write('  • $kun\n');
+          }
+          buffer.write('\n');
+        }
+        if (meanings.isNotEmpty) {
+          buffer.write('意味\n');
+          for (String meaning in meanings) {
+            buffer.write('  • $meaning\n');
+          }
+          buffer.write('\n');
+        }
+
+        String definition = buffer.toString().trim();
+
+        if (definition.isNotEmpty) {
+          DictionaryHeading heading = DictionaryHeading(
+            term: term,
+          );
+          DictionaryEntry entry = DictionaryEntry(
+            definitions: [definition],
+            entryTagNames: [],
+            headingTagNames: headingTagNames,
+            popularity: 0,
           );
 
           entriesByHeading.putIfAbsent(heading, () => []);

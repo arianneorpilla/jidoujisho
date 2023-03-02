@@ -150,18 +150,32 @@ class _RecursiveDictionaryPageState
       return;
     }
 
-    if (mounted && _result?.searchTerm != query && _controller.query == query) {
+    if (mounted &&
+        _result?.searchTerm != query &&
+        _controller.query == query &&
+        !_isSearching) {
       search(query);
     }
   }
 
+  String lastQuery = '';
+
   void search(String query) async {
+    if (lastQuery == query) {
+      return;
+    } else {
+      lastQuery = query;
+    }
+
     setState(() {
       _isSearching = true;
     });
 
     try {
-      _result = await appModel.searchDictionary(query);
+      _result = await appModel.searchDictionary(
+        searchTerm: query,
+        searchWithWildcards: true,
+      );
     } finally {
       if (_result != null) {
         if (_result!.searchTerm == _controller.query) {
@@ -171,6 +185,9 @@ class _RecursiveDictionaryPageState
                 historyKey: DictionaryMediaType.instance.uniqueKey,
                 searchTerm: _controller.query,
               );
+            }
+            if (_result!.headings.isNotEmpty) {
+              appModel.addToDictionaryHistory(result: _result!);
             }
           });
 

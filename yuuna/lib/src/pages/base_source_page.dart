@@ -125,8 +125,12 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
     _popupPositionNotifier.value = true;
     try {
       _isSearchingNotifier.value = true;
-      dictionaryResult = await appModel.searchDictionary(searchTerm);
+      dictionaryResult = await appModel.searchDictionary(
+        searchTerm: searchTerm,
+        searchWithWildcards: false,
+      );
 
+      appModel.addToDictionaryHistory(result: dictionaryResult);
       _dictionaryResultNotifier.value = dictionaryResult;
     } finally {
       _isSearchingNotifier.value = false;
@@ -351,6 +355,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
     );
   }
 
+  /// Get the result returned from the last search.
   DictionarySearchResult? get currentResult => _dictionaryResultNotifier.value;
 
   /// Action upon selecting the Search option.

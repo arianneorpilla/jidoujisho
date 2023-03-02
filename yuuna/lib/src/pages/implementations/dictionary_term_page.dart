@@ -212,22 +212,39 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
         .where((frequency) => !frequency.dictionary.value!.hidden)
         .toList();
 
+    frequencies += appModel.getNoReadingFrequencies(heading: widget.heading);
+
     if (frequencies.isEmpty) {
       return const SliverToBoxAdapter(
         child: SizedBox.shrink(),
       );
     }
 
-    List<Widget> children = frequencies.map((tag) {
+    List<MapEntry<Dictionary, List<DictionaryFrequency>>>
+        frequenciesByDictionary = groupBy<DictionaryFrequency, Dictionary>(
+                frequencies, (frequency) => frequency.dictionary.value!)
+            .entries
+            .toList();
+
+    frequenciesByDictionary.sort((a, b) => a.key.order.compareTo(b.key.order));
+    for (MapEntry<Dictionary, List<DictionaryFrequency>> entries
+        in frequenciesByDictionary) {
+      entries.value.sort((a, b) => b.value.compareTo(a.value));
+    }
+
+    List<Widget> children =
+        frequenciesByDictionary.map((frequenciesForDictionary) {
       return Padding(
         padding: Spacing.of(context).insets.onlyBottom.normal,
         child: JidoujishoTag(
-          text: tag.dictionary.value!.name,
+          text: frequenciesForDictionary.key.name,
           message: dictionaryImportTag.replaceAll(
             '%dictionaryName%',
-            tag.dictionary.value!.name,
+            frequenciesForDictionary.key.name,
           ),
-          trailingText: tag.displayValue,
+          trailingText: frequenciesForDictionary.value
+              .map((e) => e.displayValue)
+              .join(', '),
           backgroundColor: Colors.red.shade900,
         ),
       );
@@ -247,6 +264,9 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
         child: SizedBox.shrink(),
       );
     }
+
+    pitches.sort((a, b) =>
+        a.dictionary.value!.order.compareTo(b.dictionary.value!.order));
 
     Map<Dictionary, List<DictionaryPitch>> pitchesByDictionary =
         groupBy<DictionaryPitch, Dictionary>(

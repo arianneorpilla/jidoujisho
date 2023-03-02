@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
@@ -39,22 +38,8 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
   Widget build(BuildContext context) {
     AnkiMapping lastSelectedMapping = appModel.lastSelectedMapping;
 
-    List<DictionarySearchResult> historyResults = [];
-
-    List<DictionaryHeading> headings = [];
-
-    final Map<DictionaryHeading, Map<Dictionary, ExpandableController>>
-        expandableControllersByHeading = {};
-    for (DictionaryHeading heading in headings) {
-      expandableControllersByHeading.putIfAbsent(heading, () => {});
-      for (DictionaryEntry entry in heading.entries) {
-        Dictionary dictionary = entry.dictionary.value!;
-        expandableControllersByHeading[heading]?.putIfAbsent(
-          dictionary,
-          () => ExpandableController(initialExpanded: !dictionary.collapsed),
-        );
-      }
-    }
+    List<DictionarySearchResult> historyResults =
+        appModel.dictionaryHistory.reversed.toList();
 
     return ListView.builder(
       cacheExtent: 99999999999999,
@@ -68,6 +53,28 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
         }
 
         DictionarySearchResult result = historyResults[index - 1];
+        Map<int, DictionaryHeading> headingsById = Map.fromEntries(
+          result.headings.map(
+            (heading) => MapEntry(heading.id, heading),
+          ),
+        );
+
+        List<DictionaryHeading> headings =
+            result.headingIds.map((id) => headingsById[id]!).toList();
+
+        final Map<DictionaryHeading, Map<Dictionary, ExpandableController>>
+            expandableControllersByHeading = {};
+        for (DictionaryHeading heading in headings) {
+          expandableControllersByHeading.putIfAbsent(heading, () => {});
+          for (DictionaryEntry entry in heading.entries) {
+            Dictionary dictionary = entry.dictionary.value!;
+            expandableControllersByHeading[heading]?.putIfAbsent(
+              dictionary,
+              () =>
+                  ExpandableController(initialExpanded: !dictionary.collapsed),
+            );
+          }
+        }
 
         ValueNotifier<int> indexNotifier =
             ValueNotifier<int>(result.scrollPosition);
@@ -75,8 +82,8 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
         return ValueListenableBuilder<int>(
           valueListenable: indexNotifier,
           builder: (context, value, child) {
-            DictionaryHeading heading =
-                result.headings.elementAt(indexNotifier.value);
+            DictionaryHeading heading = headings.elementAt(indexNotifier.value);
+
             Map<Dictionary, ExpandableController> expandableControllers =
                 expandableControllersByHeading[heading]!;
 
@@ -87,7 +94,7 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
               onStash: widget.onStash,
               expandableControllers: expandableControllers,
               onScrollRight: () async {
-                if (result.scrollPosition == result.headings.length - 1) {
+                if (result.scrollPosition == headings.length - 1) {
                   result.scrollPosition = 0;
                 } else {
                   result.scrollPosition += 1;
@@ -102,7 +109,7 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
               },
               onScrollLeft: () async {
                 if (result.scrollPosition == 0) {
-                  result.scrollPosition = result.headings.length - 1;
+                  result.scrollPosition = headings.length - 1;
                 } else {
                   result.scrollPosition -= 1;
                 }
@@ -114,7 +121,11 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
 
                 indexNotifier.value = result.scrollPosition;
               },
-              footerWidget: buildFooterWidget(result, indexNotifier.value),
+              footerWidget: buildFooterWidget(
+                result: result,
+                length: headings.length,
+                index: indexNotifier.value,
+              ),
             );
           },
         );
@@ -124,7 +135,11 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
 
   double get fontSize => (textTheme.labelMedium?.fontSize)! * 0.9;
 
-  Widget buildFooterWidget(DictionarySearchResult result, int index) {
+  Widget buildFooterWidget({
+    required DictionarySearchResult result,
+    required int length,
+    required int index,
+  }) {
     return Center(
       child: Tooltip(
         message: seeMoreLabel,
@@ -135,17 +150,22 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
           },
           child: Padding(
             padding: Spacing.of(context).insets.all.small,
-            child: buildFooterTextSpans(result, index),
+            child: buildFooterTextSpans(
+              result: result,
+              length: length,
+              index: index,
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget buildFooterTextSpans(
-    DictionarySearchResult result,
-    int index,
-  ) {
+  Widget buildFooterTextSpans({
+    required DictionarySearchResult result,
+    required int length,
+    required int index,
+  }) {
     return Text.rich(
       TextSpan(
         text: '',
@@ -186,7 +206,7 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
             ),
           ),
           TextSpan(
-            text: '${result.headings.length} ',
+            text: '$length ',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: fontSize,

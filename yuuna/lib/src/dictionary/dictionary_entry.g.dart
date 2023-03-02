@@ -47,23 +47,8 @@ const DictionaryEntrySchema = CollectionSchema(
       name: r'imagePaths',
       type: IsarType.stringList,
     ),
-    r'isKanjiEntry': PropertySchema(
-      id: 6,
-      name: r'isKanjiEntry',
-      type: IsarType.bool,
-    ),
-    r'kunyomis': PropertySchema(
-      id: 7,
-      name: r'kunyomis',
-      type: IsarType.stringList,
-    ),
-    r'onyomis': PropertySchema(
-      id: 8,
-      name: r'onyomis',
-      type: IsarType.stringList,
-    ),
     r'popularity': PropertySchema(
-      id: 9,
+      id: 6,
       name: r'popularity',
       type: IsarType.double,
     )
@@ -159,30 +144,6 @@ int _dictionaryEntryEstimateSize(
       }
     }
   }
-  {
-    final list = object.kunyomis;
-    if (list != null) {
-      bytesCount += 3 + list.length * 3;
-      {
-        for (var i = 0; i < list.length; i++) {
-          final value = list[i];
-          bytesCount += value.length * 3;
-        }
-      }
-    }
-  }
-  {
-    final list = object.onyomis;
-    if (list != null) {
-      bytesCount += 3 + list.length * 3;
-      {
-        for (var i = 0; i < list.length; i++) {
-          final value = list[i];
-          bytesCount += value.length * 3;
-        }
-      }
-    }
-  }
   return bytesCount;
 }
 
@@ -198,10 +159,7 @@ void _dictionaryEntrySerialize(
   writer.writeString(offsets[3], object.extra);
   writer.writeLong(offsets[4], object.hashCode);
   writer.writeStringList(offsets[5], object.imagePaths);
-  writer.writeBool(offsets[6], object.isKanjiEntry);
-  writer.writeStringList(offsets[7], object.kunyomis);
-  writer.writeStringList(offsets[8], object.onyomis);
-  writer.writeDouble(offsets[9], object.popularity);
+  writer.writeDouble(offsets[6], object.popularity);
 }
 
 DictionaryEntry _dictionaryEntryDeserialize(
@@ -216,9 +174,7 @@ DictionaryEntry _dictionaryEntryDeserialize(
     extra: reader.readStringOrNull(offsets[3]),
     id: id,
     imagePaths: reader.readStringList(offsets[5]),
-    kunyomis: reader.readStringList(offsets[7]),
-    onyomis: reader.readStringList(offsets[8]),
-    popularity: reader.readDouble(offsets[9]),
+    popularity: reader.readDouble(offsets[6]),
   );
   return object;
 }
@@ -243,12 +199,6 @@ P _dictionaryEntryDeserializeProp<P>(
     case 5:
       return (reader.readStringList(offset)) as P;
     case 6:
-      return (reader.readBool(offset)) as P;
-    case 7:
-      return (reader.readStringList(offset)) as P;
-    case 8:
-      return (reader.readStringList(offset)) as P;
-    case 9:
       return (reader.readDouble(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1588,502 +1538,6 @@ extension DictionaryEntryQueryFilter
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      isKanjiEntryEqualTo(bool value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'isKanjiEntry',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      kunyomisIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'kunyomis',
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      kunyomisIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'kunyomis',
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      kunyomisElementEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'kunyomis',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      kunyomisElementGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'kunyomis',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      kunyomisElementLessThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'kunyomis',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      kunyomisElementBetween(
-    String lower,
-    String upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'kunyomis',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      kunyomisElementStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'kunyomis',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      kunyomisElementEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'kunyomis',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      kunyomisElementContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'kunyomis',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      kunyomisElementMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'kunyomis',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      kunyomisElementIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'kunyomis',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      kunyomisElementIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'kunyomis',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      kunyomisLengthEqualTo(int length) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'kunyomis',
-        length,
-        true,
-        length,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      kunyomisIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'kunyomis',
-        0,
-        true,
-        0,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      kunyomisIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'kunyomis',
-        0,
-        false,
-        999999,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      kunyomisLengthLessThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'kunyomis',
-        0,
-        true,
-        length,
-        include,
-      );
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      kunyomisLengthGreaterThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'kunyomis',
-        length,
-        include,
-        999999,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      kunyomisLengthBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'kunyomis',
-        lower,
-        includeLower,
-        upper,
-        includeUpper,
-      );
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      onyomisIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'onyomis',
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      onyomisIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'onyomis',
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      onyomisElementEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'onyomis',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      onyomisElementGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'onyomis',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      onyomisElementLessThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'onyomis',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      onyomisElementBetween(
-    String lower,
-    String upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'onyomis',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      onyomisElementStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'onyomis',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      onyomisElementEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'onyomis',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      onyomisElementContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'onyomis',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      onyomisElementMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'onyomis',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      onyomisElementIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'onyomis',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      onyomisElementIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'onyomis',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      onyomisLengthEqualTo(int length) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'onyomis',
-        length,
-        true,
-        length,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      onyomisIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'onyomis',
-        0,
-        true,
-        0,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      onyomisIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'onyomis',
-        0,
-        false,
-        999999,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      onyomisLengthLessThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'onyomis',
-        0,
-        true,
-        length,
-        include,
-      );
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      onyomisLengthGreaterThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'onyomis',
-        length,
-        include,
-        999999,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
-      onyomisLengthBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'onyomis',
-        lower,
-        includeLower,
-        upper,
-        includeUpper,
-      );
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterFilterCondition>
       popularityEqualTo(
     double value, {
     double epsilon = Query.epsilon,
@@ -2289,20 +1743,6 @@ extension DictionaryEntryQuerySortBy
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      sortByIsKanjiEntry() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isKanjiEntry', Sort.asc);
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      sortByIsKanjiEntryDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isKanjiEntry', Sort.desc);
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
       sortByPopularity() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'popularity', Sort.asc);
@@ -2373,20 +1813,6 @@ extension DictionaryEntryQuerySortThenBy
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      thenByIsKanjiEntry() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isKanjiEntry', Sort.asc);
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
-      thenByIsKanjiEntryDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isKanjiEntry', Sort.desc);
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QAfterSortBy>
       thenByPopularity() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'popularity', Sort.asc);
@@ -2447,27 +1873,6 @@ extension DictionaryEntryQueryWhereDistinct
   }
 
   QueryBuilder<DictionaryEntry, DictionaryEntry, QDistinct>
-      distinctByIsKanjiEntry() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'isKanjiEntry');
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QDistinct>
-      distinctByKunyomis() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'kunyomis');
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QDistinct>
-      distinctByOnyomis() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'onyomis');
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, DictionaryEntry, QDistinct>
       distinctByPopularity() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'popularity');
@@ -2520,26 +1925,6 @@ extension DictionaryEntryQueryProperty
       imagePathsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'imagePaths');
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, bool, QQueryOperations> isKanjiEntryProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'isKanjiEntry');
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, List<String>?, QQueryOperations>
-      kunyomisProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'kunyomis');
-    });
-  }
-
-  QueryBuilder<DictionaryEntry, List<String>?, QQueryOperations>
-      onyomisProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'onyomis');
     });
   }
 

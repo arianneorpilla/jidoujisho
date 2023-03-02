@@ -20,7 +20,8 @@ class _DictionaryDialogPageState extends BasePageState {
       appModel.translate('dictionary_font_size');
   String get unitMillisecondsLabel => appModel.translate('unit_milliseconds');
   String get unitPixelsLabel => appModel.translate('unit_pixels');
-  String get maximumEntriesLabel => appModel.translate('maximum_entries');
+  String get maximumTermQueryLimit =>
+      appModel.translate('maximum_term_query_limit');
   String get maximumTermsLabel => appModel.translate('maximum_terms');
 
   String get dialogCloseLabel => appModel.translate('dialog_close');
@@ -39,8 +40,8 @@ class _DictionaryDialogPageState extends BasePageState {
         text: appModelNoUpdate.searchDebounceDelay.toString());
     _dictionaryFontSizeController = TextEditingController(
         text: appModelNoUpdate.dictionaryFontSize.toString());
-    _maximumEntriesController =
-        TextEditingController(text: appModelNoUpdate.maximumEntries.toString());
+    _maximumEntriesController = TextEditingController(
+        text: appModelNoUpdate.maximumTermQueryLimit.toString());
     _maximumTermsController =
         TextEditingController(text: appModelNoUpdate.maximumTerms.toString());
   }
@@ -87,7 +88,7 @@ class _DictionaryDialogPageState extends BasePageState {
               buildDebounceDelayField(),
               buildDictionaryFontSizeField(),
               buildMaximumTermsField(),
-              // buildMaximumEntriesField(),
+              buildMaximumTermLimitField(),
             ],
           ),
         ),
@@ -187,17 +188,17 @@ class _DictionaryDialogPageState extends BasePageState {
     );
   }
 
-  Widget buildMaximumEntriesField() {
+  Widget buildMaximumTermLimitField() {
     return TextField(
       onChanged: (value) {
         int newAmount = int.tryParse(value) ??
-            appModel.defaultMaximumDictionaryEntrySearchMatch;
+            appModel.defaultMaximumDictionaryTermQueryLimit;
         if (newAmount.isNegative) {
-          newAmount = appModel.defaultMaximumDictionaryEntrySearchMatch;
+          newAmount = appModel.defaultMaximumDictionaryTermQueryLimit;
           _maximumEntriesController.text = newAmount.toString();
         }
 
-        appModel.setMaximumEntries(newAmount);
+        appModel.setMaximumTermQueryLimit(newAmount);
         appModel.clearDictionaryResultsCache();
       },
       controller: _maximumEntriesController,
@@ -209,14 +210,14 @@ class _DictionaryDialogPageState extends BasePageState {
           size: 18,
           onTap: () async {
             _maximumEntriesController.text =
-                appModel.defaultMaximumDictionaryEntrySearchMatch.toString();
-            appModel.setMaximumEntries(
-                appModel.defaultMaximumDictionaryEntrySearchMatch);
+                appModel.defaultMaximumDictionaryTermQueryLimit.toString();
+            appModel.setMaximumTermQueryLimit(
+                appModel.defaultMaximumDictionaryTermQueryLimit);
             FocusScope.of(context).unfocus();
           },
           icon: Icons.undo,
         ),
-        labelText: maximumEntriesLabel,
+        labelText: maximumTermQueryLimit,
       ),
     );
   }

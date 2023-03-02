@@ -65,7 +65,10 @@ void main() {
     );
 
     /// Pre-load and make the first user search faster.
-    appModel.searchDictionary(appModel.targetLanguage.helloWorld);
+    appModel.searchDictionary(
+      searchTerm: appModel.targetLanguage.helloWorld,
+      searchWithWildcards: false,
+    );
   }, (exception, stack) {
     /// Print error details to the console.
     final details = FlutterErrorDetails(exception: exception, stack: stack);

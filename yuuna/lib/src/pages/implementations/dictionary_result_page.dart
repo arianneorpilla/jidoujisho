@@ -1,6 +1,3 @@
-import 'dart:math';
-
-import 'package:collection/collection.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:keframe/keframe.dart';
@@ -9,10 +6,10 @@ import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/pages.dart';
 
-/// Returns the widget for a [DictionaryResult] which returns a scrollable list
+/// Returns the widget for a [DictionarySearchResult] which returns a scrollable list
 /// of each [DictionaryEntry] in its mappings.
 class DictionaryResultPage extends BasePage {
-  /// Create the widget of a [DictionaryResult].
+  /// Create the widget of a [DictionarySearchResult].
   const DictionaryResultPage({
     required this.result,
     required this.onSearch,
@@ -59,6 +56,12 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
         for (DictionaryEntry entry in heading.entries) {
           entry.dictionary.loadSync();
         }
+        for (DictionaryFrequency frequency in heading.frequencies) {
+          frequency.dictionary.loadSync();
+        }
+        for (DictionaryPitch pitch in heading.pitches) {
+          pitch.dictionary.loadSync();
+        }
       }
     }
 
@@ -77,102 +80,8 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
       ),
     );
 
-    List<DictionaryHeading> headings = widget.result.headingIds
-        .map((id) => headingsById[id]!)
-        .toList()
-        .where((heading) => heading.entries.isNotEmpty)
-        .toList();
-    headings = headings.sublist(0, min(headings.length, appModel.maximumTerms));
-    Map<DictionaryHeading, int> headingOrders = Map.fromEntries(
-      headings.mapIndexed(
-        (index, id) => MapEntry(headings[index], index),
-      ),
-    );
-
-    // headings.sort((a, b) {
-    //   if (a.term == b.term) {
-    //     int hasPopularTag = (a.tags.any((e) => e.name == 'P') ? -1 : 1)
-    //         .compareTo(b.tags.any((e) => e.name == 'P') ? -1 : 1);
-    //     if (hasPopularTag != 0) {
-    //       return hasPopularTag;
-    //     }
-
-    //     int popularityCompare = (b.popularitySum).compareTo(a.popularitySum);
-    //     if (popularityCompare != 0) {
-    //       return popularityCompare;
-    //     }
-    //   } else if ((a.reading.isNotEmpty && b.reading.isNotEmpty) &&
-    //       a.reading == b.reading) {
-    //     int hasPopularTag = (a.tags.any((e) => e.name == 'P') ? -1 : 1)
-    //         .compareTo(b.tags.any((e) => e.name == 'P') ? -1 : 1);
-    //     if (hasPopularTag != 0) {
-    //       return hasPopularTag;
-    //     }
-
-    //     int popularityCompare = (b.popularitySum).compareTo(a.popularitySum);
-    //     if (popularityCompare != 0) {
-    //       return popularityCompare;
-    //     }
-    //   }
-
-    //   return headingOrders[a]!.compareTo(headingOrders[b]!);
-    // });
-
-    headings.sort((a, b) {
-      if (a.term == b.term ||
-          (a.reading.isNotEmpty && b.reading.isNotEmpty) &&
-              a.reading == b.reading) {
-        int hasPopularTag = (a.tags.any((e) => e.name == 'P') ? -1 : 1)
-            .compareTo(b.tags.any((e) => e.name == 'P') ? -1 : 1);
-        if (hasPopularTag != 0) {
-          return hasPopularTag;
-        }
-
-        List<DictionaryFrequency> aFrequencies = a.frequencies.toList();
-        List<DictionaryFrequency> bFrequencies = b.frequencies.toList();
-        aFrequencies.sort((a, b) =>
-            a.dictionary.value!.order.compareTo(b.dictionary.value!.order));
-        bFrequencies.sort((a, b) =>
-            a.dictionary.value!.order.compareTo(b.dictionary.value!.order));
-
-        Map<Dictionary, List<DictionaryFrequency>> aFrequenciesByDictionary =
-            groupBy<DictionaryFrequency, Dictionary>(
-                aFrequencies, (frequency) => frequency.dictionary.value!);
-        Map<Dictionary, List<DictionaryFrequency>> bFrequenciesByDictionary =
-            groupBy<DictionaryFrequency, Dictionary>(
-                bFrequencies, (frequency) => frequency.dictionary.value!);
-        Map<Dictionary, double> aValues = aFrequenciesByDictionary
-            .map((k, v) => MapEntry(k, v.map((e) => e.value).max));
-        Map<Dictionary, double> bValues = bFrequenciesByDictionary
-            .map((k, v) => MapEntry(k, v.map((e) => e.value).max));
-
-        Set<Dictionary> sharedDictionaries =
-            aValues.keys.toSet().intersection(bValues.keys.toSet());
-
-        if (sharedDictionaries.isNotEmpty) {
-          for (Dictionary dictionary in sharedDictionaries) {
-            int freqCompare =
-                bValues[dictionary]!.compareTo(aValues[dictionary]!);
-            if (freqCompare != 0) {
-              return freqCompare;
-            }
-          }
-        } else {
-          int freqTotalCompare =
-              (bValues.values.sum).compareTo(aValues.values.sum);
-          if (freqTotalCompare != 0) {
-            return freqTotalCompare;
-          }
-
-          int popularityCompare = (b.popularitySum).compareTo(a.popularitySum);
-          if (popularityCompare != 0) {
-            return popularityCompare;
-          }
-        }
-      }
-
-      return headingOrders[a]!.compareTo(headingOrders[b]!);
-    });
+    List<DictionaryHeading> headings =
+        widget.result.headingIds.map((id) => headingsById[id]!).toList();
 
     final Map<DictionaryHeading, Map<Dictionary, ExpandableController>>
         expandableControllersByHeading = {};
@@ -210,7 +119,7 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
               slivers: [
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
-                    childCount: headings.length,
+                    childCount: headings.length + 1,
                     (context, index) {
                       if (index == 0) {
                         return widget.spaceBeforeFirstResult
