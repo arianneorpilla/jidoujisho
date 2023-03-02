@@ -186,15 +186,32 @@ Future<void> depositDictionaryDataHelper(PrepareDictionaryParams params) async {
   }
 }
 
-/// Performed in another isolate with compute. This is a top-level utility
-/// function that makes use of Isar allowing instances to be opened through
-/// multiple isolates.
+/// Preloads the entities linked to a search result. Performed from compute.
 Future<void> preloadResult(int id) async {
   /// Create a new instance of Isar as this is a different isolate.
   final Isar database = await Isar.open(
     globalSchemas,
     maxSizeMiB: 4096,
   );
+  DictionarySearchResult result = database.dictionarySearchResults.getSync(id)!;
+
+  result.headings.loadSync();
+  for (DictionaryHeading heading in result.headings) {
+    heading.entries.loadSync();
+    for (DictionaryEntry entry in heading.entries) {
+      entry.dictionary.loadSync();
+      entry.tags.loadSync();
+    }
+    heading.pitches.loadSync();
+    heading.frequencies.loadSync();
+    heading.tags.loadSync();
+  }
+}
+
+/// Preloads the entities linked to a search result.
+void preloadResultSync(int id) {
+  /// Create a new instance of Isar as this is a different isolate.
+  final Isar database = Isar.getInstance()!;
   DictionarySearchResult result = database.dictionarySearchResults.getSync(id)!;
 
   result.headings.loadSync();
@@ -237,6 +254,7 @@ Future<void> deleteDictionariesHelper(DeleteDictionaryParams params) async {
   );
 
   database.writeTxnSync(() {
+    database.dictionarySearchResults.clearSync();
     database.dictionaryTags.clearSync();
     database.dictionaryEntrys.clearSync();
     database.dictionaryHeadings.clearSync();

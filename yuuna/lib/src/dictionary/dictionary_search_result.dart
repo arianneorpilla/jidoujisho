@@ -6,12 +6,11 @@ part 'dictionary_search_result.g.dart';
 /// A database entity for storing references to [DictionaryEntry] results that
 /// are yielded from dictionary database searches.
 @Collection()
-@Collection(accessor: 'dictionarySearchHistory')
 class DictionarySearchResult {
   /// Define a search result with the given references to [DictionaryEntry]
   /// items.
   DictionarySearchResult({
-    this.searchTerm = '',
+    required this.searchTerm,
     this.bestLength = 0,
     this.scrollPosition = 0,
     this.headingIds = const [],
@@ -32,7 +31,7 @@ class DictionarySearchResult {
   /// The current scroll position of the result in dictionary history.
   int scrollPosition;
 
-  /// List of ids by order.
+  /// List of heading ids by sorting order.
   final List<int> headingIds;
 
   /// A single result may have multiple headings in the result, which in turn

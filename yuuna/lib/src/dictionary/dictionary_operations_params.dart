@@ -106,8 +106,9 @@ class DictionarySearchParams extends IsolateParams {
   /// separate isolate.
   DictionarySearchParams({
     required this.searchTerm,
-    required this.maximumDictionaryHistoryItems,
+    required this.maximumDictionarySearchResults,
     required this.maximumDictionaryTermsInResult,
+    required this.maximumDictionaryTermQueryLimit,
     required this.enabledDictionaryIds,
     required this.searchWithWildcards,
     required super.sendPort,
@@ -117,11 +118,13 @@ class DictionarySearchParams extends IsolateParams {
   final String searchTerm;
 
   /// Maximum number of items that can be in dictionary history.
-  final int maximumDictionaryHistoryItems;
+  final int maximumDictionarySearchResults;
 
-  /// Maximum number of headwords in a returned dictionary result for
-  /// performance purposes.
+  /// Maximum number of headwords in a returned dictionary result.
   final int maximumDictionaryTermsInResult;
+
+  /// Maximum query limit for database queries for performance purposes,
+  final int maximumDictionaryTermQueryLimit;
 
   /// Whether or not this search performs a wildcard search.
   final bool searchWithWildcards;

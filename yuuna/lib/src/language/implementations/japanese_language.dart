@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -261,7 +262,7 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
     searchTerm = searchTerm.substring(0, 20);
   }
 
-  int limit = params.maximumDictionaryTermsInResult;
+  int limit = params.maximumDictionaryTermQueryLimit;
 
   if (searchTerm.isEmpty) {
     return null;
@@ -274,10 +275,13 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
 
   Map<int, DictionaryHeading> uniqueHeadingsById = {};
 
-  if (searchTerm.contains('※') ||
-      searchTerm.contains('？') ||
-      searchTerm.contains('*') ||
-      searchTerm.contains('?')) {
+  bool shouldSearchWildcards = params.searchWithWildcards &&
+      (searchTerm.contains('※') ||
+          searchTerm.contains('？') ||
+          searchTerm.contains('*') ||
+          searchTerm.contains('?'));
+
+  if (shouldSearchWildcards) {
     bool noExactMatches = database.dictionaryHeadings
         .where()
         .termEqualTo(searchTerm)
@@ -320,181 +324,242 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
         ...readingMatchHeadings.map((heading) => MapEntry(heading.id, heading)),
       ];
       uniqueHeadingsById.addEntries(matchesToAdd);
-
-      DictionarySearchResult result = DictionarySearchResult(
-        searchTerm: searchTerm,
-        bestLength: bestLength,
-        headingIds: uniqueHeadingsById.keys.toList(),
-      );
-      result.headings.addAll(uniqueHeadingsById.values);
-
-      late int id;
-
-      database.writeTxnSync(() async {
-        database.dictionarySearchResults
-            .deleteBySearchTermSync(params.searchTerm);
-        id = database.dictionarySearchResults.putSync(result);
-
-        int countInSameHistory = database.dictionarySearchResults.countSync();
-
-        if (params.maximumDictionaryHistoryItems < countInSameHistory) {
-          int surplus =
-              countInSameHistory - params.maximumDictionaryHistoryItems;
-          database.dictionarySearchResults
-              .where()
-              .limit(surplus)
-              .build()
-              .deleteAllSync();
-        }
-      });
-
-      return id;
     }
-  }
+  } else {
+    StringBuffer searchBuffer = StringBuffer();
 
-  StringBuffer searchBuffer = StringBuffer();
+    Map<int, List<DictionaryHeading>> termExactResultsByLength = {};
+    Map<int, List<DictionaryHeading>> termDeinflectedResultsByLength = {};
+    Map<int, List<DictionaryHeading>> readingExactResultsByLength = {};
+    Map<int, List<DictionaryHeading>> readingDeinflectedResultsByLength = {};
 
-  Map<int, List<DictionaryHeading>> termExactResultsByLength = {};
-  Map<int, List<DictionaryHeading>> termDeinflectedResultsByLength = {};
-  Map<int, List<DictionaryHeading>> readingExactResultsByLength = {};
-  Map<int, List<DictionaryHeading>> readingDeinflectedResultsByLength = {};
+    List<String> deinflectionsAlreadySearched = [];
 
-  List<String> deinflectionsAlreadySearched = [];
+    searchTerm.characters.forEachIndexed((index, character) {
+      searchBuffer.write(character);
 
-  searchTerm.characters.forEachIndexed((index, character) {
-    searchBuffer.write(character);
+      String partialTerm = searchBuffer.toString();
 
-    String partialTerm = searchBuffer.toString();
+      bool partialTermIsKana = kanaKit.isKana(partialTerm);
+      bool partialTermIsKatakana = kanaKit.isKatakana(partialTerm);
 
-    bool partialTermIsKana = kanaKit.isKana(partialTerm);
-    bool partialTermIsKatakana = kanaKit.isKatakana(partialTerm);
+      List<String> possibleDeinflections = Deinflector.deinflect(partialTerm)
+          .map((e) => e.term)
+          .where((e) => !deinflectionsAlreadySearched.contains(e))
+          .toList();
+      possibleDeinflections.toSet().addAll(deinflectionsAlreadySearched);
 
-    List<String> possibleDeinflections = Deinflector.deinflect(partialTerm)
-        .map((e) => e.term)
-        .where((e) => !deinflectionsAlreadySearched.contains(e))
-        .toList();
-    possibleDeinflections.toSet().addAll(deinflectionsAlreadySearched);
+      List<DictionaryHeading> termExactResults = [];
+      List<DictionaryHeading> termDeinflectedResults = [];
+      List<DictionaryHeading> readingExactResults = [];
+      List<DictionaryHeading> readingDeinflectedResults = [];
 
-    List<DictionaryHeading> termExactResults = [];
-    List<DictionaryHeading> termDeinflectedResults = [];
-    List<DictionaryHeading> readingExactResults = [];
-    List<DictionaryHeading> readingDeinflectedResults = [];
-
-    termExactResults = database.dictionaryHeadings
-        .where()
-        .termEqualTo(partialTerm)
-        .or()
-        .optional(partialTermIsKatakana,
-            (q) => q.termEqualTo(kanaKit.toHiragana(partialTerm)))
-        .limit(limit)
-        .findAllSync();
-
-    termDeinflectedResults = database.dictionaryHeadings
-        .where()
-        .anyOf(possibleDeinflections, (q, String term) => q.termEqualTo(term))
-        .or()
-        .optional(
-            partialTermIsKatakana,
-            (q) => q.anyOf(
-                Deinflector.deinflect(kanaKit.toHiragana(partialTerm))
-                    .map((e) => e.term)
-                    .toList(),
-                (q, String term) => q.termEqualTo(term)))
-        .limit(limit)
-        .findAllSync();
-
-    if (partialTermIsKana) {
-      readingExactResults = database.dictionaryHeadings
+      termExactResults = database.dictionaryHeadings
           .where()
-          .readingEqualTo(partialTerm)
+          .termEqualTo(partialTerm)
           .or()
           .optional(partialTermIsKatakana,
-              (q) => q.readingEqualTo(kanaKit.toHiragana(partialTerm)))
+              (q) => q.termEqualTo(kanaKit.toHiragana(partialTerm)))
           .limit(limit)
           .findAllSync();
 
-      readingDeinflectedResults = database.dictionaryHeadings
+      termDeinflectedResults = database.dictionaryHeadings
           .where()
-          .anyOf(possibleDeinflections,
-              (q, String reading) => q.readingEqualTo(reading))
+          .anyOf<String, String>(
+              possibleDeinflections, (q, term) => q.termEqualTo(term))
           .or()
           .optional(
               partialTermIsKatakana,
-              (q) => q.anyOf(
+              (q) => q.anyOf<String, String>(
                   Deinflector.deinflect(kanaKit.toHiragana(partialTerm))
                       .map((e) => e.term)
                       .toList(),
-                  (q, String term) => q.readingEqualTo(term)))
+                  (q, term) => q.termEqualTo(term)))
           .limit(limit)
           .findAllSync();
-    }
 
-    if (termExactResults.isNotEmpty) {
-      termExactResultsByLength[partialTerm.length] = termExactResults;
-      bestLength = partialTerm.length;
-    }
-    if (termDeinflectedResults.isNotEmpty) {
-      termDeinflectedResultsByLength[partialTerm.length] =
-          termDeinflectedResults;
-      bestLength = partialTerm.length;
-    }
-    if (readingExactResults.isNotEmpty) {
-      readingExactResultsByLength[partialTerm.length] = readingExactResults;
-      bestLength = partialTerm.length;
-    }
-    if (readingDeinflectedResults.isNotEmpty) {
-      readingDeinflectedResultsByLength[partialTerm.length] =
-          readingDeinflectedResults;
-      bestLength = partialTerm.length;
-    }
-  });
+      if (partialTermIsKana) {
+        readingExactResults = database.dictionaryHeadings
+            .where()
+            .readingEqualTo(partialTerm)
+            .or()
+            .optional(partialTermIsKatakana,
+                (q) => q.readingEqualTo(kanaKit.toHiragana(partialTerm)))
+            .limit(limit)
+            .findAllSync();
 
-  List<DictionaryHeading> startsWithToAdd = database.dictionaryHeadings
-      .where()
-      .termStartsWith(searchTerm)
-      .sortByTermLength()
-      .limit(limit)
-      .findAllSync();
+        readingDeinflectedResults = database.dictionaryHeadings
+            .where()
+            .anyOf<String, String>(possibleDeinflections,
+                (q, reading) => q.readingEqualTo(reading))
+            .or()
+            .optional(
+                partialTermIsKatakana,
+                (q) => q.anyOf<String, String>(
+                    Deinflector.deinflect(kanaKit.toHiragana(partialTerm))
+                        .map((e) => e.term)
+                        .toList(),
+                    (q, term) => q.readingEqualTo(term)))
+            .limit(limit)
+            .findAllSync();
+      }
 
-  for (int length = searchTerm.length; length > 0; length--) {
-    List<MapEntry<int, DictionaryHeading>> exactToAdd = [
-      ...(termExactResultsByLength[length] ?? [])
-          .map((heading) => MapEntry(heading.id, heading)),
-      ...(readingExactResultsByLength[length] ?? [])
-          .map((heading) => MapEntry(heading.id, heading)),
-    ];
+      if (termExactResults.isNotEmpty) {
+        termExactResultsByLength[partialTerm.length] = termExactResults;
+        bestLength = partialTerm.length;
+      }
+      if (termDeinflectedResults.isNotEmpty) {
+        termDeinflectedResultsByLength[partialTerm.length] =
+            termDeinflectedResults;
+        bestLength = partialTerm.length;
+      }
+      if (readingExactResults.isNotEmpty) {
+        readingExactResultsByLength[partialTerm.length] = readingExactResults;
+        bestLength = partialTerm.length;
+      }
+      if (readingDeinflectedResults.isNotEmpty) {
+        readingDeinflectedResultsByLength[partialTerm.length] =
+            readingDeinflectedResults;
+        bestLength = partialTerm.length;
+      }
+    });
 
-    List<MapEntry<int, DictionaryHeading>> deinflectedToAdd = [
-      ...(termDeinflectedResultsByLength[length] ?? [])
-          .map((heading) => MapEntry(heading.id, heading)),
-      ...(readingDeinflectedResultsByLength[length] ?? [])
-          .map((heading) => MapEntry(heading.id, heading))
-    ];
+    List<DictionaryHeading> startsWithToAdd = database.dictionaryHeadings
+        .where()
+        .termStartsWith(searchTerm)
+        .sortByTermLength()
+        .limit(limit)
+        .findAllSync();
 
-    uniqueHeadingsById.addEntries(exactToAdd);
-    uniqueHeadingsById.addEntries(deinflectedToAdd);
-    uniqueHeadingsById.addEntries(startsWithToAdd.map(
-      (heading) => MapEntry(heading.id, heading),
-    ));
+    for (int length = searchTerm.length; length > 0; length--) {
+      List<MapEntry<int, DictionaryHeading>> exactToAdd = [
+        ...(termExactResultsByLength[length] ?? [])
+            .map((heading) => MapEntry(heading.id, heading)),
+        ...(readingExactResultsByLength[length] ?? [])
+            .map((heading) => MapEntry(heading.id, heading)),
+      ];
+
+      List<MapEntry<int, DictionaryHeading>> deinflectedToAdd = [
+        ...(termDeinflectedResultsByLength[length] ?? [])
+            .map((heading) => MapEntry(heading.id, heading)),
+        ...(readingDeinflectedResultsByLength[length] ?? [])
+            .map((heading) => MapEntry(heading.id, heading))
+      ];
+
+      uniqueHeadingsById.addEntries(exactToAdd);
+      uniqueHeadingsById.addEntries(deinflectedToAdd);
+      uniqueHeadingsById.addEntries(startsWithToAdd.map(
+        (heading) => MapEntry(heading.id, heading),
+      ));
+    }
   }
 
-  DictionarySearchResult result = DictionarySearchResult(
+  List<DictionaryHeading> headings =
+      uniqueHeadingsById.values.where((e) => e.entries.isNotEmpty).toList();
+  Map<DictionaryHeading, int> headingOrders = Map.fromEntries(
+    headings.mapIndexed(
+      (index, id) => MapEntry(headings[index], index),
+    ),
+  );
+
+  if (headings.isEmpty) {
+    return null;
+  }
+
+  DictionarySearchResult unsortedResult = DictionarySearchResult(
     searchTerm: searchTerm,
     bestLength: bestLength,
-    headingIds: uniqueHeadingsById.keys.toList(),
   );
-  result.headings.addAll(uniqueHeadingsById.values);
+  unsortedResult.headings.addAll(headings);
 
-  late int id;
-
+  late int resultId;
   database.writeTxnSync(() async {
     database.dictionarySearchResults.deleteBySearchTermSync(searchTerm);
-    id = database.dictionarySearchResults.putSync(result);
+    resultId = database.dictionarySearchResults.putSync(unsortedResult);
+  });
+
+  preloadResultSync(resultId);
+
+  headings.sort((a, b) {
+    if (a.term == b.term ||
+        (a.reading.isNotEmpty && b.reading.isNotEmpty) &&
+            a.reading == b.reading) {
+      int hasPopularTag = (a.tags.any((e) => e.name == 'P') ? -1 : 1)
+          .compareTo(b.tags.any((e) => e.name == 'P') ? -1 : 1);
+      if (hasPopularTag != 0) {
+        return hasPopularTag;
+      }
+
+      int popularityCompare = (b.popularitySum).compareTo(a.popularitySum);
+      if (popularityCompare != 0) {
+        return popularityCompare;
+      }
+
+      List<DictionaryFrequency> aFrequencies = a.frequencies.toList();
+      List<DictionaryFrequency> bFrequencies = b.frequencies.toList();
+      aFrequencies.sort((a, b) =>
+          a.dictionary.value!.order.compareTo(b.dictionary.value!.order));
+      bFrequencies.sort((a, b) =>
+          a.dictionary.value!.order.compareTo(b.dictionary.value!.order));
+
+      Map<Dictionary, List<DictionaryFrequency>> aFrequenciesByDictionary =
+          groupBy<DictionaryFrequency, Dictionary>(
+              aFrequencies, (frequency) => frequency.dictionary.value!);
+      Map<Dictionary, List<DictionaryFrequency>> bFrequenciesByDictionary =
+          groupBy<DictionaryFrequency, Dictionary>(
+              bFrequencies, (frequency) => frequency.dictionary.value!);
+      Map<Dictionary, double> aValues = aFrequenciesByDictionary
+          .map((k, v) => MapEntry(k, v.map((e) => e.value).max));
+      Map<Dictionary, double> bValues = bFrequenciesByDictionary
+          .map((k, v) => MapEntry(k, v.map((e) => e.value).max));
+
+      Set<Dictionary> sharedDictionaries =
+          aValues.keys.toSet().intersection(bValues.keys.toSet());
+
+      if (sharedDictionaries.isNotEmpty) {
+        for (Dictionary dictionary in sharedDictionaries) {
+          int freqCompare =
+              bValues[dictionary]!.compareTo(aValues[dictionary]!);
+          if (freqCompare != 0) {
+            return freqCompare;
+          }
+        }
+      } else {
+        int freqTotalCompare =
+            (bValues.values.sum).compareTo(aValues.values.sum);
+        if (freqTotalCompare != 0) {
+          return freqTotalCompare;
+        }
+      }
+
+      int entriesCompare = (b.entries.length).compareTo(a.entries.length);
+      if (entriesCompare != 0) {
+        return entriesCompare;
+      }
+    }
+
+    return headingOrders[a]!.compareTo(headingOrders[b]!);
+  });
+
+  headings = headings.sublist(
+      0, min(headings.length, params.maximumDictionaryTermsInResult));
+  List<int> headingIds =
+      headings.where((e) => e.entries.isNotEmpty).map((e) => e.id).toList();
+
+  DictionarySearchResult result = DictionarySearchResult(
+    id: resultId,
+    searchTerm: searchTerm,
+    bestLength: bestLength,
+    headingIds: headingIds,
+  );
+
+  database.writeTxnSync(() async {
+    resultId = database.dictionarySearchResults.putSync(result);
 
     int countInSameHistory = database.dictionarySearchResults.countSync();
 
-    if (params.maximumDictionaryHistoryItems < countInSameHistory) {
-      int surplus = countInSameHistory - params.maximumDictionaryHistoryItems;
+    if (params.maximumDictionarySearchResults < countInSameHistory) {
+      int surplus = countInSameHistory - params.maximumDictionarySearchResults;
       database.dictionarySearchResults
           .where()
           .limit(surplus)
@@ -503,7 +568,7 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
     }
   });
 
-  return id;
+  return resultId;
 }
 
 /// Rules for word deinflection.

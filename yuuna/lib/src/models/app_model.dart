@@ -100,6 +100,9 @@ class AppModel with ChangeNotifier {
   /// Used for accessing persistent key-value data. See [initialise].
   late final Box _preferences;
 
+  /// Used for accessing persistent dictonary history. See [initialise].
+  late final Box<int> _dictionaryHistory;
+
   /// Used for accessing persistent database data. See [initialise].
   late final Isar _database;
 
@@ -210,18 +213,21 @@ class AppModel with ChangeNotifier {
   final int maximumMediaHistoryItems = 60;
 
   /// Maximum number of dictionary history items.
-  final int maximumDictionaryHistoryItems = 500;
+  final int maximumDictionaryHistoryItems = 60;
+
+  /// Maximum number of dictionary search results stored in the database.
+  final int maximumDictionarySearchResults = 500;
 
   /// Maximum number of headwords in a returned dictionary result for
   /// performance purposes.
-  final int defaultMaximumDictionaryTermsInResult = 30;
+  final int defaultMaximumDictionaryTermsInResult = 10;
 
   /// Maximum number of dictionary entries that can be returned from a database
   /// dictionary search.
-  final int defaultMaximumDictionaryEntrySearchMatch = 20;
+  final int defaultMaximumDictionaryTermQueryLimit = 20;
 
   /// Used as the history key used for the Stash.
-  final String stashKey = ' stash';
+  final String stashKey = 'stash';
 
   /// Public flag for refreshing the dictionary tab when a search has been done
   /// outside of media, i.e. when using the lyrics tab.
@@ -239,7 +245,10 @@ class AppModel with ChangeNotifier {
 
   /// Returns all dictionary history results. Oldest is first.
   List<DictionarySearchResult> get dictionaryHistory =>
-      _database.dictionarySearchResults.where().findAllSync();
+      _database.dictionarySearchResults
+          .getAllSync(_dictionaryHistory.values.toList())
+          .whereNotNull()
+          .toList();
 
   /// For watching the dictionary history collection.
   Stream<void> Function(int) get watchDictionaryItem =>
@@ -655,6 +664,7 @@ class AppModel with ChangeNotifier {
     /// Initialise persistent key-value store.
     await Hive.initFlutter();
     _preferences = await Hive.openBox('appModel');
+    _dictionaryHistory = await Hive.openBox('dictionaryHistory');
 
     /// Initialise persistent database.
     _database = await Isar.open(
@@ -1085,12 +1095,12 @@ class AppModel with ChangeNotifier {
   /// Whether or not the app is currently searching.
   cancelable.ComputeOperation? _searchOperation;
 
-  /// Whether or not the app is currently searching.
-  cancelable.ComputeOperation? _preloadOperation;
-
   /// Gets the raw unprocessed entries straight from a dictionary database
   /// given a search term. This will be processed later for user viewing.
-  Future<DictionarySearchResult> searchDictionary(String searchTerm) async {
+  Future<DictionarySearchResult> searchDictionary({
+    required String searchTerm,
+    required bool searchWithWildcards,
+  }) async {
     if (_dictionarySearchCache[searchTerm] != null) {
       return _dictionarySearchCache[searchTerm]!;
     }
@@ -1098,20 +1108,21 @@ class AppModel with ChangeNotifier {
     searchTerm = searchTerm.replaceAll('\n', ' ');
     ReceivePort receivePort = ReceivePort();
     receivePort.listen((message) {
-      debugPrint(message);
+      debugPrint(message.toString());
     });
 
     DictionarySearchParams params = DictionarySearchParams(
       searchTerm: searchTerm,
-      maximumDictionaryHistoryItems: maximumDictionaryHistoryItems,
+      maximumDictionarySearchResults: maximumDictionarySearchResults,
       maximumDictionaryTermsInResult: maximumTerms,
-      searchWithWildcards: false,
+      maximumDictionaryTermQueryLimit: maximumTermQueryLimit,
+      searchWithWildcards: searchWithWildcards,
       enabledDictionaryIds: [],
       sendPort: receivePort.sendPort,
     );
 
     if (params.searchTerm.trim().isEmpty) {
-      return DictionarySearchResult();
+      return DictionarySearchResult(searchTerm: searchTerm);
     }
 
     /// Searching also persists the result in the database. This is useful for
@@ -1123,22 +1134,17 @@ class AppModel with ChangeNotifier {
     int? id = await _searchOperation?.value;
 
     if (id == null) {
-      return DictionarySearchResult();
+      return DictionarySearchResult(searchTerm: searchTerm);
     }
 
     DictionarySearchResult? result =
         _database.dictionarySearchResults.getSync(id);
 
     if (result != null) {
-      /// This preloads the data so that displaying the results does not busy
-      /// up the UI isolate.
-      _preloadOperation = cancelable.compute(preloadResult, id);
-      await _preloadOperation?.value;
-
       _dictionarySearchCache[searchTerm] = result;
       return result;
     } else {
-      return DictionarySearchResult();
+      return DictionarySearchResult(searchTerm: searchTerm);
     }
   }
 
@@ -2249,7 +2255,7 @@ class AppModel with ChangeNotifier {
     );
   }
 
-  /// Update the scroll index of a given [DictionaryResult] in the database.
+  /// Update the scroll index of a given [DictionarySearchResult] in the database.
   Future<void> updateDictionaryResultScrollIndex({
     required DictionarySearchResult result,
     required int newIndex,
@@ -2268,9 +2274,7 @@ class AppModel with ChangeNotifier {
   /// dictionary is deleted, otherwise history data cannot be viewed without
   /// the necessary dictionary metadata.
   void clearDictionaryHistory() async {
-    _database.writeTxnSync(() {
-      _database.dictionarySearchResults.clearSync();
-    });
+    _dictionaryHistory.clear();
 
     dictionaryEntriesNotifier.notifyListeners();
   }
@@ -2588,7 +2592,7 @@ class AppModel with ChangeNotifier {
   }
 
   /// Search debounce delay in milliseconds by default.
-  final int defaultSearchDebounceDelay = 200;
+  final int defaultSearchDebounceDelay = 100;
 
   /// The search debounce delay in milliseconds for searching in the app..
   int get searchDebounceDelay {
@@ -2648,14 +2652,56 @@ class AppModel with ChangeNotifier {
     await _preferences.put('maximum_terms', value);
   }
 
-  /// The maximum dictionary entries in a search match.
-  int get maximumEntries {
-    return _preferences.get('maximum_entries',
-        defaultValue: defaultMaximumDictionaryEntrySearchMatch);
+  /// The limit for the database searches.
+  int get maximumTermQueryLimit {
+    return _preferences.get('maximum_term_query_limit',
+        defaultValue: defaultMaximumDictionaryTermQueryLimit);
   }
 
   /// Sets the maximum dictionary entries in a search match.
-  void setMaximumEntries(int value) async {
-    await _preferences.put('maximum_entries', value);
+  void setMaximumTermQueryLimit(int value) async {
+    await _preferences.put('maximum_term_query_limit', value);
+  }
+
+  /// Adds a [DictionarySearchResult] to dictionary history.
+  void addToDictionaryHistory({required DictionarySearchResult result}) async {
+    if (result.headings.isEmpty || result.searchTerm.isEmpty) {
+      return;
+    }
+
+    _dictionaryHistory.deleteAll(_dictionaryHistory
+        .toMap()
+        .entries
+        .where((e) => e.value == result.id)
+        .map((e) => e.key)
+        .toList());
+
+    await _dictionaryHistory.add(result.id!);
+
+    int countInSameHistory = _dictionaryHistory.length;
+
+    if (maximumDictionaryHistoryItems < countInSameHistory) {
+      int surplus = countInSameHistory - maximumDictionaryHistoryItems;
+      List<int> toDelete =
+          _dictionaryHistory.values.toList().sublist(0, surplus);
+      _dictionaryHistory.deleteAll(toDelete);
+    }
+
+    dictionaryEntriesNotifier.notifyListeners();
+  }
+
+  /// Adds a [DictionarySearchResult] to dictionary history.
+  List<DictionaryFrequency> getNoReadingFrequencies(
+      {required DictionaryHeading heading}) {
+    if (heading.reading.isEmpty) {
+      return [];
+    }
+
+    return _database.dictionaryHeadings
+            .getSync(DictionaryHeading.hash(term: heading.term, reading: ''))
+            ?.frequencies
+            .where((frequency) => !frequency.dictionary.value!.hidden)
+            .toList() ??
+        [];
   }
 }

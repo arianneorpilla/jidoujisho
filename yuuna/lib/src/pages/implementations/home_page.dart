@@ -91,7 +91,10 @@ class _HomePageState extends BasePageState<HomePage>
     if (AppLifecycleState.resumed == state) {
       /// Keep the search database ready.
       debugPrint('Lifecycle Resumed');
-      appModel.searchDictionary(appModel.targetLanguage.helloWorld);
+      appModel.searchDictionary(
+        searchTerm: appModel.targetLanguage.helloWorld,
+        searchWithWildcards: false,
+      );
     }
   }
 

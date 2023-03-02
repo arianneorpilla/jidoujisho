@@ -17,8 +17,6 @@ class DictionaryEntry {
     required this.popularity,
     this.headingTagNames = const [],
     this.entryTagNames = const [],
-    this.onyomis,
-    this.kunyomis,
     this.imagePaths,
     this.audioPaths,
     this.extra,
@@ -42,14 +40,6 @@ class DictionaryEntry {
   /// non-null only during the import process. Use [tags] instead.
   @ignore
   final List<String> entryTagNames;
-
-  /// An optional value that if non-null, contains onyomi readings. This
-  /// field is non-null if the entry is a kanji entry.
-  final List<String>? onyomis;
-
-  /// An optional value that if non-null, contains kunyomi readings. This
-  /// field is non-null if the entry is a kanji entry.
-  final List<String>? kunyomis;
 
   /// An optional value that if non-null, contains a path that will point to
   /// an image resource. The resource contained in the path is deleted if it
@@ -91,9 +81,6 @@ class DictionaryEntry {
 
   /// Each dictionary entry may have a set of tags.
   final IsarLinks<DictionaryTag> tags = IsarLinks<DictionaryTag>();
-
-  /// Whether or not this entry is a kanji entry.
-  bool get isKanjiEntry => onyomis != null && kunyomis != null;
 
   @override
   bool operator ==(Object other) => other is DictionaryEntry && id == other.id;
