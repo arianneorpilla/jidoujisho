@@ -87,7 +87,7 @@ class _DictionaryDialogPageState extends BasePageState {
               buildDebounceDelayField(),
               buildDictionaryFontSizeField(),
               buildMaximumTermsField(),
-              buildMaximumEntriesField(),
+              // buildMaximumEntriesField(),
             ],
           ),
         ),

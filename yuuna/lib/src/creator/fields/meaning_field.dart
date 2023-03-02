@@ -50,6 +50,7 @@ class MeaningField extends Field {
       for (DictionaryEntry entry in singleDictionaryEntries) {
         if (singleDictionaryEntries.length == 1) {
           entry.definitions.forEachIndexed((index, meaning) {
+            meaning = meaning.trim();
             if (meaningsCount != 1) {
               meaningBuffer.write('• $meaning');
             } else {
@@ -62,6 +63,7 @@ class MeaningField extends Field {
           });
         } else {
           entry.definitions.forEachIndexed((index, meaning) {
+            meaning = meaning.trim();
             if (meaningsCount == 1) {
               meaningBuffer.write('$meaning\n');
             } else {

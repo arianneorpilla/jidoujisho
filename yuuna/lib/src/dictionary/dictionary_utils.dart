@@ -228,3 +228,20 @@ Future<void> updateDictionaryHistoryHelper(
     database.dictionarySearchResults.putSync(result);
   });
 }
+
+/// Clears all data from the dictionary database.
+Future<void> deleteDictionariesHelper(DeleteDictionaryParams params) async {
+  final Isar database = await Isar.open(
+    globalSchemas,
+    maxSizeMiB: 4096,
+  );
+
+  database.writeTxnSync(() {
+    database.dictionaryTags.clearSync();
+    database.dictionaryEntrys.clearSync();
+    database.dictionaryHeadings.clearSync();
+    database.dictionaryPitchs.clearSync();
+    database.dictionaryFrequencys.clearSync();
+    database.dictionarys.clearSync();
+  });
+}

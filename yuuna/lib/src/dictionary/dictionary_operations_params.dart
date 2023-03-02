@@ -72,13 +72,12 @@ class DeleteDictionaryParams extends IsolateParams {
   /// Prepare parameters needed for deleting a dictionary from a separate
   /// isolate.
   DeleteDictionaryParams({
-    required this.dictionary,
     required super.sendPort,
+    this.dictionaryId,
   });
 
-  /// The dictionary name obtained in the previous stage, used to indicate
-  /// that entries are from a certain dictionary.
-  final Dictionary dictionary;
+  /// If null, this will delete all dictionaries.
+  final int? dictionaryId;
 }
 
 /// For isolate communication purposes. Used for dictionary deletion.

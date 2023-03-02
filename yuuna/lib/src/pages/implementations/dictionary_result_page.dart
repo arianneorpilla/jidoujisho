@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:collection/collection.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
@@ -80,90 +82,97 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
         .toList()
         .where((heading) => heading.entries.isNotEmpty)
         .toList();
+    headings = headings.sublist(0, min(headings.length, appModel.maximumTerms));
     Map<DictionaryHeading, int> headingOrders = Map.fromEntries(
       headings.mapIndexed(
         (index, id) => MapEntry(headings[index], index),
       ),
     );
 
-    headings.sort((a, b) {
-      if (a.term == b.term) {
-        int hasPopularTag = (a.tags.any((e) => e.name == 'P') ? -1 : 1)
-            .compareTo(b.tags.any((e) => e.name == 'P') ? -1 : 1);
-        if (hasPopularTag != 0) {
-          return hasPopularTag;
-        }
-
-        int popularityCompare = (b.popularitySum).compareTo(a.popularitySum);
-        if (popularityCompare != 0) {
-          return popularityCompare;
-        }
-      } else if ((a.reading.isNotEmpty && b.reading.isNotEmpty) &&
-          a.reading == b.reading) {
-        int hasPopularTag = (a.tags.any((e) => e.name == 'P') ? -1 : 1)
-            .compareTo(b.tags.any((e) => e.name == 'P') ? -1 : 1);
-        if (hasPopularTag != 0) {
-          return hasPopularTag;
-        }
-
-        int popularityCompare = (b.popularitySum).compareTo(a.popularitySum);
-        if (popularityCompare != 0) {
-          return popularityCompare;
-        }
-      }
-
-      return headingOrders[a]!.compareTo(headingOrders[b]!);
-    });
-
-    //  headings.sort((a, b) {
-    //   if (a.term == b.term ||
-    //       (a.reading.isNotEmpty && b.reading.isNotEmpty) &&
-    //           a.reading == b.reading) {
+    // headings.sort((a, b) {
+    //   if (a.term == b.term) {
     //     int hasPopularTag = (a.tags.any((e) => e.name == 'P') ? -1 : 1)
     //         .compareTo(b.tags.any((e) => e.name == 'P') ? -1 : 1);
     //     if (hasPopularTag != 0) {
     //       return hasPopularTag;
     //     }
 
-    //     List<DictionaryFrequency> aFrequencies = a.frequencies.toList();
-    //     List<DictionaryFrequency> bFrequencies = b.frequencies.toList();
-    //     aFrequencies.sort((a, b) =>
-    //         a.dictionary.value!.order.compareTo(b.dictionary.value!.order));
-    //     bFrequencies.sort((a, b) =>
-    //         a.dictionary.value!.order.compareTo(b.dictionary.value!.order));
+    //     int popularityCompare = (b.popularitySum).compareTo(a.popularitySum);
+    //     if (popularityCompare != 0) {
+    //       return popularityCompare;
+    //     }
+    //   } else if ((a.reading.isNotEmpty && b.reading.isNotEmpty) &&
+    //       a.reading == b.reading) {
+    //     int hasPopularTag = (a.tags.any((e) => e.name == 'P') ? -1 : 1)
+    //         .compareTo(b.tags.any((e) => e.name == 'P') ? -1 : 1);
+    //     if (hasPopularTag != 0) {
+    //       return hasPopularTag;
+    //     }
 
-    //     Map<Dictionary, List<DictionaryFrequency>> aFrequenciesByDictionary =
-    //         groupBy<DictionaryFrequency, Dictionary>(
-    //             aFrequencies, (frequency) => frequency.dictionary.value!);
-    //     Map<Dictionary, List<DictionaryFrequency>> bFrequenciesByDictionary =
-    //         groupBy<DictionaryFrequency, Dictionary>(
-    //             bFrequencies, (frequency) => frequency.dictionary.value!);
-    //     Map<Dictionary, double> aValues = aFrequenciesByDictionary
-    //         .map((k, v) => MapEntry(k, v.map((e) => e.value).max));
-    //     Map<Dictionary, double> bValues = bFrequenciesByDictionary
-    //         .map((k, v) => MapEntry(k, v.map((e) => e.value).max));
-
-    //     Set<Dictionary> sharedDictionaries =
-    //         aValues.keys.toSet().intersection(bValues.keys.toSet());
-
-    //     if (sharedDictionaries.isNotEmpty) {
-    //       for (Dictionary dictionary in sharedDictionaries) {
-    //         int freqCompare =
-    //             bValues[dictionary]!.compareTo(aValues[dictionary]!);
-    //         if (freqCompare != 0) {
-    //           return freqCompare;
-    //         }
-    //       }
-    //     } else {
-    //       int popularityCompare = (b.popularitySum).compareTo(a.popularitySum);
-    //       if (popularityCompare != 0) {
-    //         return popularityCompare;
-    //       }
+    //     int popularityCompare = (b.popularitySum).compareTo(a.popularitySum);
+    //     if (popularityCompare != 0) {
+    //       return popularityCompare;
     //     }
     //   }
 
     //   return headingOrders[a]!.compareTo(headingOrders[b]!);
     // });
+
+    headings.sort((a, b) {
+      if (a.term == b.term ||
+          (a.reading.isNotEmpty && b.reading.isNotEmpty) &&
+              a.reading == b.reading) {
+        int hasPopularTag = (a.tags.any((e) => e.name == 'P') ? -1 : 1)
+            .compareTo(b.tags.any((e) => e.name == 'P') ? -1 : 1);
+        if (hasPopularTag != 0) {
+          return hasPopularTag;
+        }
+
+        List<DictionaryFrequency> aFrequencies = a.frequencies.toList();
+        List<DictionaryFrequency> bFrequencies = b.frequencies.toList();
+        aFrequencies.sort((a, b) =>
+            a.dictionary.value!.order.compareTo(b.dictionary.value!.order));
+        bFrequencies.sort((a, b) =>
+            a.dictionary.value!.order.compareTo(b.dictionary.value!.order));
+
+        Map<Dictionary, List<DictionaryFrequency>> aFrequenciesByDictionary =
+            groupBy<DictionaryFrequency, Dictionary>(
+                aFrequencies, (frequency) => frequency.dictionary.value!);
+        Map<Dictionary, List<DictionaryFrequency>> bFrequenciesByDictionary =
+            groupBy<DictionaryFrequency, Dictionary>(
+                bFrequencies, (frequency) => frequency.dictionary.value!);
+        Map<Dictionary, double> aValues = aFrequenciesByDictionary
+            .map((k, v) => MapEntry(k, v.map((e) => e.value).max));
+        Map<Dictionary, double> bValues = bFrequenciesByDictionary
+            .map((k, v) => MapEntry(k, v.map((e) => e.value).max));
+
+        Set<Dictionary> sharedDictionaries =
+            aValues.keys.toSet().intersection(bValues.keys.toSet());
+
+        if (sharedDictionaries.isNotEmpty) {
+          for (Dictionary dictionary in sharedDictionaries) {
+            int freqCompare =
+                bValues[dictionary]!.compareTo(aValues[dictionary]!);
+            if (freqCompare != 0) {
+              return freqCompare;
+            }
+          }
+        } else {
+          int freqTotalCompare =
+              (bValues.values.sum).compareTo(aValues.values.sum);
+          if (freqTotalCompare != 0) {
+            return freqTotalCompare;
+          }
+
+          int popularityCompare = (b.popularitySum).compareTo(a.popularitySum);
+          if (popularityCompare != 0) {
+            return popularityCompare;
+          }
+        }
+      }
+
+      return headingOrders[a]!.compareTo(headingOrders[b]!);
+    });
 
     final Map<DictionaryHeading, Map<Dictionary, ExpandableController>>
         expandableControllersByHeading = {};

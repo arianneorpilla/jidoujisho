@@ -80,7 +80,7 @@ class DictionaryEntry {
           .join('\n');
     }
 
-    return definitions.join();
+    return definitions.join().trim();
   }
 
   /// Each dictionary entry belongs to a certain heading.
