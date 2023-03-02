@@ -260,7 +260,6 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
   if (searchTerm.length > 20) {
     searchTerm = searchTerm.substring(0, 20);
   }
-  params.send(searchTerm);
 
   int limit = params.maximumDictionaryTermsInResult;
 
@@ -274,6 +273,84 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
   );
 
   Map<int, DictionaryHeading> uniqueHeadingsById = {};
+
+  if (searchTerm.contains('※') ||
+      searchTerm.contains('？') ||
+      searchTerm.contains('*') ||
+      searchTerm.contains('?')) {
+    bool noExactMatches = database.dictionaryHeadings
+        .where()
+        .termEqualTo(searchTerm)
+        .isEmptySync();
+
+    if (noExactMatches) {
+      String matchesTerm = searchTerm
+          .replaceAll('※', '*')
+          .replaceAll('？', '?')
+          .replaceAll('?', '???');
+
+      List<DictionaryHeading> termMatchHeadings = [];
+      List<DictionaryHeading> readingMatchHeadings = [];
+      String withoutWildcards =
+          matchesTerm.replaceAll('?', '').replaceAll('*', '');
+      bool matchTermIsKana = kanaKit.isKana(withoutWildcards);
+      bool matchTermIsKatakana = kanaKit.isKatakana(withoutWildcards);
+
+      termMatchHeadings = database.dictionaryHeadings
+          .where()
+          .filter()
+          .termMatches(matchesTerm, caseSensitive: false)
+          .limit(limit)
+          .findAllSync();
+
+      if (matchTermIsKana) {
+        readingMatchHeadings = database.dictionaryHeadings
+            .where()
+            .filter()
+            .readingMatches(matchesTerm)
+            .or()
+            .optional(matchTermIsKatakana,
+                (q) => q.readingMatches(kanaKit.toHiragana(matchesTerm)))
+            .limit(limit)
+            .findAllSync();
+      }
+
+      List<MapEntry<int, DictionaryHeading>> matchesToAdd = [
+        ...termMatchHeadings.map((heading) => MapEntry(heading.id, heading)),
+        ...readingMatchHeadings.map((heading) => MapEntry(heading.id, heading)),
+      ];
+      uniqueHeadingsById.addEntries(matchesToAdd);
+
+      DictionarySearchResult result = DictionarySearchResult(
+        searchTerm: searchTerm,
+        bestLength: bestLength,
+        headingIds: uniqueHeadingsById.keys.toList(),
+      );
+      result.headings.addAll(uniqueHeadingsById.values);
+
+      late int id;
+
+      database.writeTxnSync(() async {
+        database.dictionarySearchResults
+            .deleteBySearchTermSync(params.searchTerm);
+        id = database.dictionarySearchResults.putSync(result);
+
+        int countInSameHistory = database.dictionarySearchResults.countSync();
+
+        if (params.maximumDictionaryHistoryItems < countInSameHistory) {
+          int surplus =
+              countInSameHistory - params.maximumDictionaryHistoryItems;
+          database.dictionarySearchResults
+              .where()
+              .limit(surplus)
+              .build()
+              .deleteAllSync();
+        }
+      });
+
+      return id;
+    }
+  }
 
   StringBuffer searchBuffer = StringBuffer();
 

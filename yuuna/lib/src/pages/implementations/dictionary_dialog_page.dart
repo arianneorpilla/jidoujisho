@@ -65,7 +65,7 @@ class _DictionaryDialogPageState extends BasePageState {
       actions: <Widget>[
         TextButton(
           child: Text(
-            dialogDeleteLabel,
+            dialogClearLabel,
             style: TextStyle(color: theme.colorScheme.primary),
           ),
           onPressed: () async {
@@ -174,7 +174,7 @@ class _DictionaryDialogPageState extends BasePageState {
                 ),
               const JidoujishoDivider(),
               buildImportDropdown(),
-              buildSlowImportSwitch(),
+              // buildSlowImportSwitch(),
             ],
           ),
         ),

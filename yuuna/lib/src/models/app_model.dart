@@ -1039,14 +1039,12 @@ class AppModel with ChangeNotifier {
       builder: (context) => const DictionaryDialogDeletePage(),
     );
 
-    _database.writeTxnSync(() {
-      _database.dictionaryTags.clearSync();
-      _database.dictionaryEntrys.clearSync();
-      _database.dictionaryHeadings.clearSync();
-      _database.dictionaryPitchs.clearSync();
-      _database.dictionaryFrequencys.clearSync();
-      _database.dictionarys.clearSync();
-    });
+    ReceivePort receivePort = ReceivePort();
+    DeleteDictionaryParams params = DeleteDictionaryParams(
+      sendPort: receivePort.sendPort,
+    );
+
+    await compute(deleteDictionariesHelper, params);
 
     Navigator.pop(navigatorKey.currentContext!);
     dictionarySearchAgainNotifier.notifyListeners();
