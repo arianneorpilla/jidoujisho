@@ -36,7 +36,9 @@ class CollapsedMeaningField extends Field {
     required bool creatorJustLaunched,
   }) {
     List<DictionaryEntry> collapsedEntries = heading.entries
-        .where((entry) => entry.dictionary.value!.collapsed)
+        .where((entry) =>
+            !entry.dictionary.value!.hidden &&
+            entry.dictionary.value!.collapsed)
         .toList();
 
     return MeaningField.flattenMeanings(
