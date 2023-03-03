@@ -35,7 +35,9 @@ class ExpandedMeaningField extends Field {
     required bool creatorJustLaunched,
   }) {
     List<DictionaryEntry> expandedEntries = heading.entries
-        .where((entry) => !entry.dictionary.value!.collapsed)
+        .where((entry) =>
+            !entry.dictionary.value!.hidden &&
+            !entry.dictionary.value!.collapsed)
         .toList();
 
     return MeaningField.flattenMeanings(
