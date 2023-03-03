@@ -293,7 +293,7 @@ class AppModel with ChangeNotifier {
   String getCurrentSentence() {
     MediaType mediaType = mediaTypes.values.toList()[currentHomeTabIndex];
 
-    if (mediaType is DictionaryMediaType) {
+    if (!isMediaOpen && mediaType is DictionaryMediaType) {
       return '';
     } else {
       MediaSource source =
