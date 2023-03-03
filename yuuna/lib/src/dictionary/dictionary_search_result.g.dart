@@ -108,7 +108,7 @@ DictionarySearchResult _dictionarySearchResultDeserialize(
     headingIds: reader.readLongList(offsets[1]) ?? const [],
     id: id,
     scrollPosition: reader.readLongOrNull(offsets[2]) ?? 0,
-    searchTerm: reader.readStringOrNull(offsets[3]) ?? '',
+    searchTerm: reader.readString(offsets[3]),
   );
   return object;
 }
@@ -127,7 +127,7 @@ P _dictionarySearchResultDeserializeProp<P>(
     case 2:
       return (reader.readLongOrNull(offset) ?? 0) as P;
     case 3:
-      return (reader.readStringOrNull(offset) ?? '') as P;
+      return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }

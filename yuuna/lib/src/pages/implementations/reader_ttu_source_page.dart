@@ -207,6 +207,12 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
               'http://localhost:${server.boundPort}/manage.html',
         ),
       ),
+      androidOnPermissionRequest: (controller, origin, resources) async {
+        return PermissionRequestResponse(
+          resources: resources,
+          action: PermissionRequestResponseAction.GRANT,
+        );
+      },
       initialOptions: InAppWebViewGroupOptions(
         crossPlatform: InAppWebViewOptions(
           allowFileAccessFromFileURLs: true,
@@ -221,6 +227,8 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
           horizontalScrollbarThumbColor: Colors.transparent,
           horizontalScrollbarTrackColor: Colors.transparent,
           scrollbarFadingEnabled: false,
+          appCachePath: appModel.browserDirectory.path,
+          cacheMode: AndroidCacheMode.LOAD_CACHE_ELSE_NETWORK,
         ),
       ),
       contextMenu: contextMenu,

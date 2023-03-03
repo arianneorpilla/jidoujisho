@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_exit_app/flutter_exit_app.dart';
 import 'package:flutter_process_text/flutter_process_text.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:network_to_file_image/network_to_file_image.dart';
@@ -151,6 +152,16 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
         String data = intent.extra!['android.intent.extra.PROCESS_TEXT'];
         textContextMenuAction(data);
         return;
+      case 'android.intent.action.VIEW':
+        String? subtitleUrl = intent.extra?['subtitles_location'];
+        String? subtitleMetadata = subtitleUrl != null ? 'External' : null;
+
+        launchNetworkMediaAction(
+          videoUrl: intent.data ?? '',
+          subtitleUrl: subtitleUrl,
+          subtitleMetadata: subtitleMetadata,
+        );
+        return;
       case 'android.intent.action.WEB_SEARCH':
         String data = intent.extra!['query'];
         textContextMenuAction(data);
@@ -196,8 +207,6 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
             },
           );
         });
-      } else {
-        launchNetworkMediaAction(data);
       }
     } else {
       if (data.trim().isNotEmpty) {
@@ -248,26 +257,37 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
 
     Navigator.popUntil(
         appModel.navigatorKey.currentContext!, (route) => route.isFirst);
-    appModel.openMedia(
+    await appModel.openMedia(
       context: context,
       ref: ref,
       mediaSource: PlayerYoutubeSource.instance,
       item: item,
     );
+
+    FlutterExitApp.exitApp();
   }
 
-  void launchNetworkMediaAction(String url) {
-    MediaItem item =
-        PlayerNetworkStreamSource.instance.getMediaItemFromUrl(url);
+  void launchNetworkMediaAction({
+    required String videoUrl,
+    String? subtitleUrl,
+    String? subtitleMetadata,
+  }) async {
+    MediaItem item = PlayerNetworkStreamSource.instance.getMediaItemFromUrl(
+      videoUrl: videoUrl,
+      subtitleUrl: subtitleUrl,
+      subtitleMetadata: subtitleMetadata,
+    );
 
     Navigator.popUntil(
         appModel.navigatorKey.currentContext!, (route) => route.isFirst);
-    appModel.openMedia(
+    await appModel.openMedia(
       context: context,
       ref: ref,
       mediaSource: PlayerNetworkStreamSource.instance,
       item: item,
     );
+
+    FlutterExitApp.exitApp();
   }
 
   @override

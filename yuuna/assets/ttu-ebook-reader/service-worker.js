@@ -5,23 +5,23 @@ const k = [
   "/_app/immutable/assets/_page-b843624e.css",
   "/_app/immutable/assets/merged-header-icon-32503cb2.css",
   "/_app/immutable/assets/_layout-7b47a741.css",
+  "/_app/immutable/chunks/stores-41bc0127.js",
+  "/_app/immutable/chunks/storage-c0963857.js",
   "/_app/immutable/chunks/1-d6e2df69.js",
-  "/_app/immutable/components/error.svelte-68a20358.js",
+  "/_app/immutable/chunks/2-248ae2f9.js",
+  "/_app/immutable/chunks/theme-option-56eff79b.js",
+  "/_app/immutable/chunks/3-7a94f7e3.js",
+  "/_app/immutable/chunks/utils-87ab534e.js",
+  "/_app/immutable/chunks/5-a8b975f9.js",
+  "/_app/immutable/chunks/0-5e766e1c.js",
   "/_app/immutable/chunks/4-feab9671.js",
   "/_app/immutable/components/pages/_page.svelte-ad22f881.js",
-  "/_app/immutable/chunks/5-a8b975f9.js",
-  "/_app/immutable/chunks/3-7a94f7e3.js",
-  "/_app/immutable/chunks/0-5e766e1c.js",
-  "/_app/immutable/chunks/theme-option-56eff79b.js",
-  "/_app/immutable/chunks/storage-c0963857.js",
-  "/_app/immutable/chunks/2-248ae2f9.js",
-  "/_app/immutable/chunks/stores-41bc0127.js",
-  "/_app/immutable/chunks/utils-87ab534e.js",
+  "/_app/immutable/components/error.svelte-68a20358.js",
   "/_app/immutable/chunks/index-cb88fc2b.js",
   "/_app/immutable/chunks/dialog-manager-6307dd27.js",
   "/_app/immutable/chunks/singletons-54206af0.js",
-  "/_app/immutable/chunks/format-page-title-d410bd5f.js",
   "/_app/immutable/start-6e359251.js",
+  "/_app/immutable/chunks/format-page-title-d410bd5f.js",
   "/_app/immutable/chunks/merged-header-icon-3ae6f6f3.js",
   "/_app/immutable/components/pages/settings/_page.svelte-4df55ee5.js",
   "/_app/immutable/components/pages/_layout.svelte-f15cbc52.js",
@@ -51,7 +51,7 @@ const k = [
   "/manage/__data.json",
   "/settings.html",
   "/settings/__data.json"
-], g = "1673326779821", c = self, u = `build:${g}`, x = new Set(f), _ = k.concat(w).concat(f), v = new Set(_);
+], g = "1677808139749", c = self, u = `build:${g}`, x = new Set(f), _ = k.concat(w).concat(f), v = new Set(_);
 c.addEventListener("install", (e) => {
   c.skipWaiting(), e.waitUntil(caches.open(u).then((s) => s.addAll(_)));
 });

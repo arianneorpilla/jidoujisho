@@ -1,6 +1,12 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/pages.dart';
@@ -35,12 +41,18 @@ class PlayerNetworkStreamSource extends PlayerMediaSource {
   }
 
   /// Produce media item from URL.
-  MediaItem getMediaItemFromUrl(String url) {
+  MediaItem getMediaItemFromUrl({
+    required String videoUrl,
+    String? subtitleUrl,
+    String? subtitleMetadata,
+  }) {
     return MediaItem(
-      title: url,
-      mediaIdentifier: url,
+      title: videoUrl,
+      mediaIdentifier: videoUrl,
       mediaSourceIdentifier: uniqueKey,
       mediaTypeIdentifier: mediaType.uniqueKey,
+      extraUrl: subtitleUrl,
+      extra: subtitleMetadata,
       position: 0,
       duration: 0,
       canEdit: false,
@@ -57,10 +69,10 @@ class PlayerNetworkStreamSource extends PlayerMediaSource {
     showDialog(
       context: context,
       builder: (context) => NetworkStreamDialogPage(
-        onPlay: (url) {
+        onPlay: (videoUrl) {
           Navigator.pop(context);
 
-          MediaItem item = getMediaItemFromUrl(url);
+          MediaItem item = getMediaItemFromUrl(videoUrl: videoUrl);
 
           appModel.openMedia(
             context: context,
@@ -103,6 +115,29 @@ class PlayerNetworkStreamSource extends PlayerMediaSource {
     required WidgetRef ref,
     required MediaItem item,
   }) async {
-    return [];
+    List<SubtitleItem> items = [];
+
+    String temporaryDirectoryPath = (await getTemporaryDirectory()).path;
+    String temporaryFileName =
+        'jidoujisho-${DateFormat('yyyyMMddTkkmmss').format(DateTime.now())}';
+
+    try {
+      File file = File('$temporaryDirectoryPath/$temporaryFileName.ass');
+      if (item.extraUrl != null) {
+        http.Response request = await http.get(Uri.parse(item.extraUrl!));
+        Uint8List bytes = request.bodyBytes;
+        await file.writeAsBytes(bytes);
+        SubtitleItem? subtitleItem = await SubtitleUtils.subtitlesFromFile(
+          file: file,
+          metadata: item.extra,
+          type: SubtitleItemType.webSubtitle,
+        );
+        items.add(subtitleItem);
+      }
+    } catch (e) {
+      debugPrint('$e');
+    }
+
+    return items;
   }
 }
