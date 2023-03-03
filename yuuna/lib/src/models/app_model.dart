@@ -146,6 +146,10 @@ class AppModel with ChangeNotifier {
   Directory get appDirectory => _appDirectory;
   late final Directory _appDirectory;
 
+  /// Directory where browser cache data may be persisted.
+  Directory get browserDirectory => _browserDirectory;
+  late final Directory _browserDirectory;
+
   /// Directory where media source thumbnails may be persisted.
   Directory get thumbnailsDirectory => _thumbnailsDirectory;
   late final Directory _thumbnailsDirectory;
@@ -644,6 +648,7 @@ class AppModel with ChangeNotifier {
     /// These directories will commonly be accessed.
     _temporaryDirectory = await getTemporaryDirectory();
     _appDirectory = await getApplicationDocumentsDirectory();
+    _browserDirectory = Directory(path.join(appDirectory.path, 'browser'));
     _thumbnailsDirectory =
         Directory(path.join(appDirectory.path, 'thumbnails'));
     _hiveDirectory = Directory(path.join(appDirectory.path, 'hive'));

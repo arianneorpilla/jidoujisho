@@ -183,7 +183,7 @@ class _ReaderWebsocketPageState<ReaderLyricsPage> extends BaseSourcePageState {
                           .textToWords(searchTerm)
                           .firstWhere((e) => e.trim().isNotEmpty)
                           .length
-                      : max(1, result.bestLength);
+                      : max(1, currentResult?.bestLength ?? 0);
 
                   controller.setSelection(offsetIndex, offsetIndex + length);
                 });

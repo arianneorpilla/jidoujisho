@@ -26,6 +26,8 @@ class MediaItem {
     required this.canDelete,
     required this.canEdit,
     this.id,
+    this.extraUrl,
+    this.extra,
     this.base64Image,
     this.imageUrl,
     this.audioUrl,
@@ -83,6 +85,12 @@ class MediaItem {
   /// detail. For a web video, this could be the channel where the video is
   /// from. For a book, it is the author.
   String? author;
+
+  /// Used to provide any extra URL information.
+  String? extraUrl;
+
+  /// This field is a convenience field for metadata information.
+  String? extra;
 
   /// This field is for future-proofing, and can be used to store an identifier
   /// for an author, for example, a YouTube channel.
