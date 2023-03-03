@@ -22,6 +22,7 @@ class JidoujishoLocalisations {
     'search': 'Search',
     'search_ellipsis': 'Search...',
     'see_more': 'See More',
+    'stream': 'Stream',
     'show_menu': 'Show Menu',
     'stash': 'Stash',
     'pick_image': 'Pick Image',
@@ -367,6 +368,7 @@ class JidoujishoLocalisations {
     'use_br_tags': 'Use line break tag instead of newline on export',
     'prepend_dictionary_names': 'Prepend dictionary name in meaning',
     'highlight_on_tap': 'Highlight text on tap',
-    'search_with_dictionary': 'Enter term to search'
+    'search_with_dictionary': 'Enter term to search',
+    'no_text_in_clipboard': 'No text to display'
   };
 }

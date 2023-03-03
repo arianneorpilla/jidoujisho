@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/models.dart';
@@ -40,6 +41,30 @@ class PlayerNetworkStreamSource extends PlayerMediaSource {
     );
   }
 
+  @override
+  List<Widget> getActions({
+    required BuildContext context,
+    required WidgetRef ref,
+    required AppModel appModel,
+  }) {
+    return [
+      FloatingSearchBarAction(
+        child: JidoujishoIconButton(
+          size: Theme.of(context).textTheme.titleLarge?.fontSize,
+          tooltip: appModel.translate('stream'),
+          icon: Icons.link,
+          onTap: () async {
+            showStreamDialog(
+              appModel: appModel,
+              context: context,
+              ref: ref,
+            );
+          },
+        ),
+      ),
+    ];
+  }
+
   /// Produce media item from URL.
   MediaItem getMediaItemFromUrl({
     required String videoUrl,
@@ -60,12 +85,12 @@ class PlayerNetworkStreamSource extends PlayerMediaSource {
     );
   }
 
-  @override
-  Future<void> onSearchBarTap({
+  /// Shows the dialog where the user can enter a link.
+  void showStreamDialog({
     required BuildContext context,
     required WidgetRef ref,
     required AppModel appModel,
-  }) async {
+  }) {
     showDialog(
       context: context,
       builder: (context) => NetworkStreamDialogPage(
@@ -82,6 +107,19 @@ class PlayerNetworkStreamSource extends PlayerMediaSource {
           );
         },
       ),
+    );
+  }
+
+  @override
+  Future<void> onSearchBarTap({
+    required BuildContext context,
+    required WidgetRef ref,
+    required AppModel appModel,
+  }) async {
+    showStreamDialog(
+      appModel: appModel,
+      context: context,
+      ref: ref,
     );
   }
 

@@ -217,7 +217,7 @@ class AppModel with ChangeNotifier {
   final int maximumMediaHistoryItems = 60;
 
   /// Maximum number of dictionary history items.
-  final int maximumDictionaryHistoryItems = 60;
+  final int maximumDictionaryHistoryItems = 20;
 
   /// Maximum number of dictionary search results stored in the database.
   final int maximumDictionarySearchResults = 500;
@@ -434,6 +434,7 @@ class AppModel with ChangeNotifier {
       ReaderMediaType.instance: [
         ReaderTtuSource.instance,
         ReaderLyricsSource.instance,
+        ReaderClipboardSource.instance,
         ReaderWebsocketSource.instance,
       ],
       ViewerMediaType.instance: [
@@ -1066,6 +1067,7 @@ class AppModel with ChangeNotifier {
     );
 
     await compute(deleteDictionariesHelper, params);
+    await _dictionaryHistory.clear();
 
     Navigator.pop(navigatorKey.currentContext!);
     dictionarySearchAgainNotifier.notifyListeners();

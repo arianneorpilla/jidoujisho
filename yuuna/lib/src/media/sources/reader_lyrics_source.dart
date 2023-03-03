@@ -160,6 +160,15 @@ class ReaderLyricsSource extends ReaderMediaSource {
       await Future.delayed(const Duration(milliseconds: 100), () {});
     }
 
+    if (parameters.artist.endsWith(' - Topic') && text == null) {
+      return getLyrics(
+        JidoujishoLyricsParameters(
+          artist: parameters.artist.replaceAll(' - Topic', ''),
+          title: parameters.title,
+        ),
+      );
+    }
+
     /// Try again, but without an artist. This will probably be wrong. But it's
     /// better to have tried and gotten a good result sometimes than for this
     /// to always fail just because the artist's name might make it difficult.
