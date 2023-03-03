@@ -114,7 +114,7 @@ abstract class Language {
 
     Iterable<Match> matches = regex.allMatches(paragraph);
     int currentIndex = 0;
-    late String sentenceToReturn;
+    String sentenceToReturn = paragraph;
 
     for (Match match in matches) {
       sentenceToReturn = match.group(0) ?? '';
