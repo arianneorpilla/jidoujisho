@@ -224,7 +224,7 @@ class AppModel with ChangeNotifier {
 
   /// Maximum number of dictionary entries that can be returned from a database
   /// dictionary search.
-  final int defaultMaximumDictionaryTermQueryLimit = 20;
+  final int defaultMaximumDictionaryTermQueryLimit = 30;
 
   /// Used as the history key used for the Stash.
   final String stashKey = 'stash';
@@ -292,7 +292,8 @@ class AppModel with ChangeNotifier {
     if (mediaType is DictionaryMediaType) {
       return '';
     } else {
-      MediaSource source = getCurrentSourceForMediaType(mediaType: mediaType);
+      MediaSource source =
+          getCurrentMediaItem()!.getMediaSource(appModel: this);
       return source.currentSentence;
     }
   }

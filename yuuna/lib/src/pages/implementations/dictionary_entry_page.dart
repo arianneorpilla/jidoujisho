@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
@@ -53,6 +55,9 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final SelectableTextController _selectableTextController =
+        SelectableTextController();
+
     return Padding(
       padding: EdgeInsets.only(
         top: Spacing.of(context).spaces.extraSmall,
@@ -94,7 +99,28 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
             //     ],
             //   );
             // },
+            controller: _selectableTextController,
             selectionControls: selectionControls,
+            onSelectionChanged: (selection, cause) {
+              if (!selection.isCollapsed &&
+                  cause == SelectionChangedCause.tap) {
+                String searchTerm = widget.entry.compactDefinitions
+                    .substring(selection.baseOffset);
+
+                int whitespaceOffset =
+                    searchTerm.length - searchTerm.trimLeft().length;
+                int offsetIndex = selection.baseOffset + whitespaceOffset;
+                int length = appModel.targetLanguage
+                    .textToWords(searchTerm)
+                    .firstWhere((e) => e.trim().isNotEmpty)
+                    .length;
+
+                _selectableTextController.setSelection(
+                  offsetIndex,
+                  offsetIndex + length,
+                );
+              }
+            },
           ),
         ),
       ),
