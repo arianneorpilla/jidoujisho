@@ -1,6 +1,7 @@
 export 'src/pages/implementations/blur_options_dialog_page.dart';
 export 'src/pages/implementations/crop_image_dialog_page.dart';
 export 'src/pages/implementations/creator_page.dart';
+export 'src/pages/implementations/context_menu_page.dart';
 export 'src/pages/implementations/creator_quick_actions_page.dart';
 export 'src/pages/implementations/enhancements_picker_dialog_page.dart';
 export 'src/pages/implementations/example_sentences_dialog_page.dart';

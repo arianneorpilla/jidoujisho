@@ -5,7 +5,7 @@ import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/models.dart';
 import 'package:collection/collection.dart';
 
-/// Returns the formatted pitch accent diagram HTML of a [DictionaryTerm].
+/// Returns the formatted pitch accent diagram HTML of a [DictionaryHeading].
 class PitchAccentField extends Field {
   /// Initialise this field with the predetermined and hardset values.
   PitchAccentField._privateConstructor()
@@ -26,7 +26,7 @@ class PitchAccentField extends Field {
   /// The unique key for this field.
   static const String key = 'pitch_accent';
 
-  /// Returns Furigana for a single [PitchData].
+  /// Returns Furigana for a single [DictionaryHeading].
   static String getHtmlPitch({
     required String reading,
     required int downstep,

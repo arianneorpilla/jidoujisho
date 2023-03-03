@@ -80,6 +80,20 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
             style: TextStyle(
               fontSize: appModel.dictionaryFontSize,
             ),
+            // contextMenuBuilder: (context, state) {
+            //   String searchTerm = _selectableTextController.selection
+            //       .textInside(widget.entry.compactDefinitions);
+
+            //   return JidoujishoTextSelectionToolbar(
+            //     anchorAbove: state.contextMenuAnchors.primaryAnchor,
+            //     anchorBelow: state.contextMenuAnchors.secondaryAnchor == null
+            //         ? state.contextMenuAnchors.primaryAnchor
+            //         : state.contextMenuAnchors.secondaryAnchor!,
+            //     children: [
+            //       ContextMenuPage(searchTerm: searchTerm),
+            //     ],
+            //   );
+            // },
             selectionControls: selectionControls,
           ),
         ),
