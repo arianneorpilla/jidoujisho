@@ -328,6 +328,11 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
                   searchTerm: searchTerm,
                   position: position,
                 ).then((result) {
+                  source.setCurrentSentence(
+                    appModel.targetLanguage.getSentenceFromParagraph(
+                        paragraph: text, index: index),
+                  );
+
                   int length = isSpaceDelimited
                       ? appModel.targetLanguage
                           .textToWords(searchTerm)
@@ -356,6 +361,7 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
   void clearDictionaryResult() {
     super.clearDictionaryResult();
     _selectableTextController.clearSelection();
+    source.clearCurrentSentence();
   }
 
   void creatorAction(String text) async {

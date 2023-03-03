@@ -291,14 +291,19 @@ class AppModel with ChangeNotifier {
 
   /// Get the sentence to be used by the [SentenceField] upon card creation.
   String getCurrentSentence() {
-    MediaType mediaType = mediaTypes.values.toList()[currentHomeTabIndex];
-
-    if (!isMediaOpen && mediaType is DictionaryMediaType) {
-      return '';
+    if (isMediaOpen) {
+      return getCurrentMediaItem()
+              ?.getMediaSource(appModel: this)
+              .currentSentence ??
+          '';
     } else {
-      MediaSource source =
-          getCurrentMediaItem()!.getMediaSource(appModel: this);
-      return source.currentSentence;
+      MediaType mediaType = mediaTypes.values.toList()[currentHomeTabIndex];
+      if (mediaType is DictionaryMediaType) {
+        return '';
+      } else {
+        return getCurrentSourceForMediaType(mediaType: mediaType)
+            .currentSentence;
+      }
     }
   }
 
