@@ -6,7 +6,7 @@ import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/language.dart';
 import 'package:yuuna/models.dart';
 
-/// Returns the formatted furigana HTML of a [DictionaryTerm].
+/// Returns the formatted furigana HTML of a [DictionaryHeading].
 class FuriganaField extends Field {
   /// Initialise this field with the predetermined and hardset values.
   FuriganaField._privateConstructor()

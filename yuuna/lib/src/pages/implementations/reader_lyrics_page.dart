@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -34,6 +36,10 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
   Orientation? lastOrientation;
 
   ReaderLyricsSource get source => ReaderLyricsSource.instance;
+
+  /// Allows programmatic changing of the current text selection.
+  final SelectableTextController _selectableTextController =
+      SelectableTextController();
 
   @override
   void initState() {
@@ -251,6 +257,7 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
     return SelectableText.rich(
       TextSpan(children: getSubtitleSpans(text)),
       focusNode: _lyricsFocusNode,
+      controller: _selectableTextController,
       selectionControls: selectionControls,
       onSelectionChanged: (selection, cause) {
         String textSelection = selection.textInside(text);
@@ -296,11 +303,36 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
                 index: index,
               );
 
-              if (_currentSelection.isEmpty) {
+              if (_currentSelection.isEmpty && character.trim().isNotEmpty) {
+                bool isSpaceDelimited =
+                    appModel.targetLanguage.isSpaceDelimited;
+                int whitespaceOffset =
+                    searchTerm.length - searchTerm.trimLeft().length;
+                int offsetIndex = index + whitespaceOffset;
+                int length = appModel.targetLanguage
+                    .textToWords(searchTerm)
+                    .firstWhere((e) => e.trim().isNotEmpty)
+                    .length;
+
+                _selectableTextController.setSelection(
+                  offsetIndex,
+                  offsetIndex + length,
+                );
+
                 searchDictionaryResult(
                   searchTerm: searchTerm,
                   position: position,
-                );
+                ).then((result) {
+                  int length = isSpaceDelimited
+                      ? appModel.targetLanguage
+                          .textToWords(searchTerm)
+                          .firstWhere((e) => e.trim().isNotEmpty)
+                          .length
+                      : max(1, currentResult?.bestLength ?? 0);
+
+                  _selectableTextController.setSelection(
+                      offsetIndex, offsetIndex + length);
+                });
               } else {
                 clearDictionaryResult();
                 _currentSelection = '';
@@ -313,6 +345,12 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
     });
 
     return spans;
+  }
+
+  @override
+  void clearDictionaryResult() {
+    super.clearDictionaryResult();
+    _selectableTextController.clearSelection();
   }
 
   void creatorAction(String text) async {

@@ -10,7 +10,6 @@ export 'src/utils/components/jidoujisho_tag.dart';
 export 'src/utils/components/jidoujisho_placeholder_message.dart';
 export 'src/utils/components/jidoujisho_text_selection_controls.dart';
 export 'src/utils/components/jidoujisho_search_history.dart';
-export 'src/utils/components/jidoujisho_selectable_text.dart';
 export 'src/utils/components/jidoujisho_popup_position.dart';
 
 export 'src/utils/converters/immutable_string_map_converter.dart';
@@ -28,5 +27,6 @@ export 'src/utils/misc/jidoujisho_color.dart';
 export 'src/utils/misc/jidoujisho_time_format.dart';
 export 'src/utils/misc/jidoujisho_lyrics_parameters.dart';
 export 'src/utils/misc/jidoujisho_audio_handler.dart';
+export 'src/utils/misc/jidoujisho_text_selection.dart';
 
 export 'src/utils/firebase_options.dart';

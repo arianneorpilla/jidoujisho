@@ -82,7 +82,7 @@ class LanguageUtils {
     return isCodePointInRanges(codePoint, _kanaRanges);
   }
 
-  /// Generate Furigana for a [term] given its [reading].
+  /// Generate Furigana for a [DictionaryHeading].
   static List<RubyTextData> distributeFurigana(
       {required DictionaryHeading heading}) {
     if (_furiganaCache[heading] != null) {
