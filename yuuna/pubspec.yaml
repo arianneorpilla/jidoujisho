@@ -105,7 +105,7 @@ dependencies:
   subtitle:
     git:
       url: https://github.com/lrorpilla/subtitle
-      ref: 9c5307d1cbe3a9ca84c387e2023251896c9ff47f
+      ref: 86fde1c8f7470f0b9591d3e8420706ab1a76a74a
   system_info: ^1.0.1
   tabbed_view: ^1.12.0
   transparent_image: ^2.0.0
