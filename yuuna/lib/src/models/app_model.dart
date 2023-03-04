@@ -220,22 +220,14 @@ class AppModel with ChangeNotifier {
   final int maximumDictionaryHistoryItems = 20;
 
   /// Maximum number of dictionary search results stored in the database.
-  final int maximumDictionarySearchResults = 500;
+  final int maximumDictionarySearchResults = 200;
 
   /// Maximum number of headwords in a returned dictionary result for
   /// performance purposes.
   final int defaultMaximumDictionaryTermsInResult = 10;
 
-  /// Maximum number of dictionary entries that can be returned from a database
-  /// dictionary search.
-  final int defaultMaximumDictionaryTermQueryLimit = 30;
-
   /// Used as the history key used for the Stash.
   final String stashKey = 'stash';
-
-  /// Public flag for refreshing the dictionary tab when a search has been done
-  /// outside of media, i.e. when using the lyrics tab.
-  bool refreshOnDictionaryTabSwitch = false;
 
   /// Returns all dictionaries imported into the database. Sorted by the
   /// user-defined order in the dictionary menu.
@@ -1128,7 +1120,6 @@ class AppModel with ChangeNotifier {
       searchTerm: searchTerm,
       maximumDictionarySearchResults: maximumDictionarySearchResults,
       maximumDictionaryTermsInResult: maximumTerms,
-      maximumDictionaryTermQueryLimit: maximumTermQueryLimit,
       searchWithWildcards: searchWithWildcards,
       enabledDictionaryIds: [],
       sendPort: receivePort.sendPort,
@@ -1770,6 +1761,7 @@ class AppModel with ChangeNotifier {
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
     mediaSource.mediaType.refreshTab();
+    DictionaryMediaType.instance.refreshTab();
 
     mediaSource.onSourceExit(
       appModel: this,
@@ -2663,17 +2655,6 @@ class AppModel with ChangeNotifier {
   /// Sets the maximum dictionary terms in a result.
   void setMaximumTerms(int value) async {
     await _preferences.put('maximum_terms', value);
-  }
-
-  /// The limit for the database searches.
-  int get maximumTermQueryLimit {
-    return _preferences.get('maximum_term_query_limit',
-        defaultValue: defaultMaximumDictionaryTermQueryLimit);
-  }
-
-  /// Sets the maximum dictionary entries in a search match.
-  void setMaximumTermQueryLimit(int value) async {
-    await _preferences.put('maximum_term_query_limit', value);
   }
 
   /// Adds a [DictionarySearchResult] to dictionary history.

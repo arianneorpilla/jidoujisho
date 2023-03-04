@@ -262,7 +262,7 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
     searchTerm = searchTerm.substring(0, 20);
   }
 
-  int limit = params.maximumDictionaryTermQueryLimit;
+  int maximumHeadings = params.maximumDictionarySearchResults;
 
   if (searchTerm.isEmpty) {
     return null;
@@ -274,6 +274,10 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
   );
 
   Map<int, DictionaryHeading> uniqueHeadingsById = {};
+
+  int limit() {
+    return maximumHeadings - uniqueHeadingsById.length;
+  }
 
   bool shouldSearchWildcards = params.searchWithWildcards &&
       (searchTerm.contains('※') ||
@@ -300,45 +304,69 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
       bool matchTermIsKana = kanaKit.isKana(withoutWildcards);
       bool matchTermIsKatakana = kanaKit.isKatakana(withoutWildcards);
 
-      termMatchHeadings = database.dictionaryHeadings
-          .where()
-          .filter()
-          .termMatches(matchesTerm, caseSensitive: false)
-          .limit(limit)
-          .findAllSync();
+      bool questionMarkOnly = !matchesTerm.contains('*');
+      String noAsterisks = searchTerm
+          .replaceAll('※', '*')
+          .replaceAll('？', '?')
+          .replaceAll('※', '');
 
-      if (matchTermIsKana) {
-        readingMatchHeadings = database.dictionaryHeadings
-            .where()
-            .filter()
-            .readingMatches(matchesTerm)
-            .or()
-            .optional(matchTermIsKatakana,
-                (q) => q.readingMatches(kanaKit.toHiragana(matchesTerm)))
-            .limit(limit)
-            .findAllSync();
+      if (params.maximumDictionaryTermsInResult > uniqueHeadingsById.length) {
+        if (questionMarkOnly) {
+          termMatchHeadings = database.dictionaryHeadings
+              .where()
+              .termLengthEqualTo(searchTerm.length)
+              .filter()
+              .termMatches(matchesTerm, caseSensitive: false)
+              .and()
+              .entriesIsNotEmpty()
+              .limit(maximumHeadings - uniqueHeadingsById.length)
+              .findAllSync();
+        } else {
+          termMatchHeadings = database.dictionaryHeadings
+              .where()
+              .termLengthGreaterThan(noAsterisks.length, include: true)
+              .filter()
+              .termMatches(matchesTerm, caseSensitive: false)
+              .and()
+              .entriesIsNotEmpty()
+              .limit(maximumHeadings - uniqueHeadingsById.length)
+              .findAllSync();
+        }
       }
 
-      List<MapEntry<int, DictionaryHeading>> matchesToAdd = [
-        ...termMatchHeadings.map((heading) => MapEntry(heading.id, heading)),
-        ...readingMatchHeadings.map((heading) => MapEntry(heading.id, heading)),
-      ];
-      uniqueHeadingsById.addEntries(matchesToAdd);
+      uniqueHeadingsById.addEntries(
+        termMatchHeadings.map(
+          (heading) => MapEntry(heading.id, heading),
+        ),
+      );
+
+      if (params.maximumDictionaryTermsInResult > uniqueHeadingsById.length) {
+        if (matchTermIsKana) {
+          readingMatchHeadings = database.dictionaryHeadings
+              .where()
+              .filter()
+              .entriesIsNotEmpty()
+              .readingMatches(matchesTerm)
+              .or()
+              .optional(matchTermIsKatakana,
+                  (q) => q.readingMatches(kanaKit.toHiragana(matchesTerm)))
+              .and()
+              .entriesIsNotEmpty()
+              .findAllSync();
+
+          uniqueHeadingsById.addEntries(
+            readingMatchHeadings.map(
+              (heading) => MapEntry(heading.id, heading),
+            ),
+          );
+        }
+      }
     }
   } else {
-    StringBuffer searchBuffer = StringBuffer();
-
-    Map<int, List<DictionaryHeading>> termExactResultsByLength = {};
-    Map<int, List<DictionaryHeading>> termDeinflectedResultsByLength = {};
-    Map<int, List<DictionaryHeading>> readingExactResultsByLength = {};
-    Map<int, List<DictionaryHeading>> readingDeinflectedResultsByLength = {};
-
     List<String> deinflectionsAlreadySearched = [];
 
-    searchTerm.characters.forEachIndexed((index, character) {
-      searchBuffer.write(character);
-
-      String partialTerm = searchBuffer.toString();
+    for (int i = 0; i < searchTerm.length; i++) {
+      String partialTerm = searchTerm.substring(0, searchTerm.length - i);
 
       bool partialTermIsKana = kanaKit.isKana(partialTerm);
       bool partialTermIsKatakana = kanaKit.isKatakana(partialTerm);
@@ -354,44 +382,49 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
       List<DictionaryHeading> readingExactResults = [];
       List<DictionaryHeading> readingDeinflectedResults = [];
 
-      termExactResults = database.dictionaryHeadings
-          .where()
-          .termEqualTo(partialTerm)
-          .or()
-          .optional(partialTermIsKatakana,
-              (q) => q.termEqualTo(kanaKit.toHiragana(partialTerm)))
-          .limit(limit)
-          .findAllSync();
-
-      termDeinflectedResults = database.dictionaryHeadings
-          .where()
-          .anyOf<String, String>(
-              possibleDeinflections, (q, term) => q.termEqualTo(term))
-          .or()
-          .optional(
-              partialTermIsKatakana,
-              (q) => q.anyOf<String, String>(
-                  Deinflector.deinflect(kanaKit.toHiragana(partialTerm))
-                      .map((e) => e.term)
-                      .toList(),
-                  (q, term) => q.termEqualTo(term)))
-          .limit(limit)
-          .findAllSync();
-
-      if (partialTermIsKana) {
-        readingExactResults = database.dictionaryHeadings
+      if (params.maximumDictionaryTermsInResult > uniqueHeadingsById.length) {
+        termExactResults = database.dictionaryHeadings
             .where()
-            .readingEqualTo(partialTerm)
+            .termEqualTo(partialTerm)
             .or()
             .optional(partialTermIsKatakana,
-                (q) => q.readingEqualTo(kanaKit.toHiragana(partialTerm)))
-            .limit(limit)
+                (q) => q.termEqualTo(kanaKit.toHiragana(partialTerm)))
+            .filter()
+            .entriesIsNotEmpty()
             .findAllSync();
 
-        readingDeinflectedResults = database.dictionaryHeadings
+        uniqueHeadingsById.addEntries(
+          termExactResults.map(
+            (heading) => MapEntry(heading.id, heading),
+          ),
+        );
+      }
+
+      if (params.maximumDictionaryTermsInResult > uniqueHeadingsById.length) {
+        if (partialTermIsKana) {
+          readingExactResults = database.dictionaryHeadings
+              .where()
+              .readingEqualTo(partialTerm)
+              .or()
+              .optional(partialTermIsKatakana,
+                  (q) => q.readingEqualTo(kanaKit.toHiragana(partialTerm)))
+              .filter()
+              .entriesIsNotEmpty()
+              .findAllSync();
+
+          uniqueHeadingsById.addEntries(
+            readingExactResults.map(
+              (heading) => MapEntry(heading.id, heading),
+            ),
+          );
+        }
+      }
+
+      if (params.maximumDictionaryTermsInResult > uniqueHeadingsById.length) {
+        termDeinflectedResults = database.dictionaryHeadings
             .where()
-            .anyOf<String, String>(possibleDeinflections,
-                (q, reading) => q.readingEqualTo(reading))
+            .anyOf<String, String>(
+                possibleDeinflections, (q, term) => q.termEqualTo(term))
             .or()
             .optional(
                 partialTermIsKatakana,
@@ -399,58 +432,75 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
                     Deinflector.deinflect(kanaKit.toHiragana(partialTerm))
                         .map((e) => e.term)
                         .toList(),
-                    (q, term) => q.readingEqualTo(term)))
-            .limit(limit)
+                    (q, term) => q.termEqualTo(term)))
+            .filter()
+            .entriesIsNotEmpty()
             .findAllSync();
+
+        uniqueHeadingsById.addEntries(
+          termDeinflectedResults.map(
+            (heading) => MapEntry(heading.id, heading),
+          ),
+        );
       }
 
-      if (termExactResults.isNotEmpty) {
-        termExactResultsByLength[partialTerm.length] = termExactResults;
+      if (params.maximumDictionaryTermsInResult > uniqueHeadingsById.length) {
+        if (partialTermIsKana) {
+          readingDeinflectedResults = database.dictionaryHeadings
+              .where()
+              .anyOf<String, String>(possibleDeinflections,
+                  (q, reading) => q.readingEqualTo(reading))
+              .or()
+              .optional(
+                  partialTermIsKatakana,
+                  (q) => q.anyOf<String, String>(
+                      Deinflector.deinflect(kanaKit.toHiragana(partialTerm))
+                          .map((e) => e.term)
+                          .toList(),
+                      (q, term) => q.readingEqualTo(term)))
+              .filter()
+              .entriesIsNotEmpty()
+              .limit(limit())
+              .findAllSync();
+
+          uniqueHeadingsById.addEntries(
+            readingDeinflectedResults.map(
+              (heading) => MapEntry(heading.id, heading),
+            ),
+          );
+        }
+      }
+
+      if (params.maximumDictionaryTermsInResult > uniqueHeadingsById.length) {
+        if (i == 0) {
+          List<DictionaryHeading> startsWithToAdd = database.dictionaryHeadings
+              .where()
+              .termStartsWith(searchTerm)
+              .filter()
+              .entriesIsNotEmpty()
+              .sortByTermLength()
+              .findAllSync();
+
+          uniqueHeadingsById.addEntries(startsWithToAdd.map(
+            (heading) => MapEntry(heading.id, heading),
+          ));
+        }
+      }
+
+      if (termExactResults.isNotEmpty && bestLength < partialTerm.length) {
         bestLength = partialTerm.length;
       }
-      if (termDeinflectedResults.isNotEmpty) {
-        termDeinflectedResultsByLength[partialTerm.length] =
-            termDeinflectedResults;
+      if (termDeinflectedResults.isNotEmpty &&
+          bestLength < partialTerm.length) {
         bestLength = partialTerm.length;
       }
-      if (readingExactResults.isNotEmpty) {
-        readingExactResultsByLength[partialTerm.length] = readingExactResults;
+      if (readingExactResults.isNotEmpty && bestLength < partialTerm.length) {
         bestLength = partialTerm.length;
       }
-      if (readingDeinflectedResults.isNotEmpty) {
-        readingDeinflectedResultsByLength[partialTerm.length] =
-            readingDeinflectedResults;
+      if (readingDeinflectedResults.isNotEmpty &&
+          bestLength < partialTerm.length) {
         bestLength = partialTerm.length;
       }
-    });
-
-    List<DictionaryHeading> startsWithToAdd = database.dictionaryHeadings
-        .where()
-        .termStartsWith(searchTerm)
-        .sortByTermLength()
-        .limit(limit)
-        .findAllSync();
-
-    for (int length = searchTerm.length; length > 0; length--) {
-      List<MapEntry<int, DictionaryHeading>> exactToAdd = [
-        ...(termExactResultsByLength[length] ?? [])
-            .map((heading) => MapEntry(heading.id, heading)),
-        ...(readingExactResultsByLength[length] ?? [])
-            .map((heading) => MapEntry(heading.id, heading)),
-      ];
-
-      List<MapEntry<int, DictionaryHeading>> deinflectedToAdd = [
-        ...(termDeinflectedResultsByLength[length] ?? [])
-            .map((heading) => MapEntry(heading.id, heading)),
-        ...(readingDeinflectedResultsByLength[length] ?? [])
-            .map((heading) => MapEntry(heading.id, heading))
-      ];
-
-      uniqueHeadingsById.addEntries(exactToAdd);
-      uniqueHeadingsById.addEntries(deinflectedToAdd);
-      uniqueHeadingsById.addEntries(startsWithToAdd.map(
-        (heading) => MapEntry(heading.id, heading),
-      ));
     }
   }
 
@@ -525,10 +575,9 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
           }
         }
       } else {
-        int freqTotalCompare =
-            (bValues.values.sum).compareTo(aValues.values.sum);
-        if (freqTotalCompare != 0) {
-          return freqTotalCompare;
+        int freqSumCompare = (bValues.values.sum).compareTo(aValues.values.sum);
+        if (freqSumCompare != 0) {
+          return freqSumCompare;
         }
       }
 
@@ -543,8 +592,7 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
 
   headings = headings.sublist(
       0, min(headings.length, params.maximumDictionaryTermsInResult));
-  List<int> headingIds =
-      headings.where((e) => e.entries.isNotEmpty).map((e) => e.id).toList();
+  List<int> headingIds = headings.map((e) => e.id).toList();
 
   DictionarySearchResult result = DictionarySearchResult(
     id: resultId,
