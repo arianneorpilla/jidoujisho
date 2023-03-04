@@ -155,11 +155,13 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
       case 'android.intent.action.VIEW':
         String? subtitleUrl = intent.extra?['subtitles_location'];
         String? subtitleMetadata = subtitleUrl != null ? 'External' : null;
+        String? title = intent.extra?['title'];
 
         launchNetworkMediaAction(
           videoUrl: intent.data ?? '',
           subtitleUrl: subtitleUrl,
           subtitleMetadata: subtitleMetadata,
+          title: title,
         );
         return;
       case 'android.intent.action.WEB_SEARCH':
@@ -271,11 +273,13 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
     required String videoUrl,
     String? subtitleUrl,
     String? subtitleMetadata,
+    String? title,
   }) async {
     MediaItem item = PlayerNetworkStreamSource.instance.getMediaItemFromUrl(
       videoUrl: videoUrl,
       subtitleUrl: subtitleUrl,
       subtitleMetadata: subtitleMetadata,
+      title: title,
     );
 
     Navigator.popUntil(

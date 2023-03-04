@@ -70,9 +70,10 @@ class PlayerNetworkStreamSource extends PlayerMediaSource {
     required String videoUrl,
     String? subtitleUrl,
     String? subtitleMetadata,
+    String? title,
   }) {
     return MediaItem(
-      title: videoUrl,
+      title: title ?? videoUrl,
       mediaIdentifier: videoUrl,
       mediaSourceIdentifier: uniqueKey,
       mediaTypeIdentifier: mediaType.uniqueKey,

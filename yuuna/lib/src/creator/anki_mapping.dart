@@ -160,8 +160,8 @@ class AnkiMapping {
 
   /// Default fields to show upon opening the Card Creator.
   static const List<String> defaultCreatorCollapsedFieldKeys = [
-    PitchAccentField.key,
     FuriganaField.key,
+    PitchAccentField.key,
   ];
 
   /// A default map of enhancements to use for new mappings.

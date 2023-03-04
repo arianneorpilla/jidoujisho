@@ -53,7 +53,9 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     appModelNoUpdate.dictionarySearchAgainNotifier.addListener(searchAgain);
     appModelNoUpdate.dictionaryEntriesNotifier.addListener(() {
       if (mediaType.floatingSearchBarController.isClosed) {
-        setState(() {});
+        if (!appModel.isMediaOpen) {
+          setState(() {});
+        }
       }
     });
   }
