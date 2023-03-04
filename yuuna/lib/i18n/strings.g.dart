@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 298
+/// Strings: 306
 ///
-/// Built on 2023-03-01 at 13:45 UTC
+/// Built on 2023-03-04 at 12:24 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -393,7 +393,15 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get lyrics_permission_required => 'Required permission not granted';
 	String get no_lyrics_found => 'No lyrics found';
 	String get trending => 'Trending';
-	String get caption_filter => 'Filter Closed';
+	String get caption_filter => 'Filter Closed Captions';
+	String get captions_query => 'Querying for captions';
+	String get captions_target => 'Target language';
+	String get captions_app => 'App language';
+	String get captions_other => 'Other language';
+	String get captions_closed => 'Closed captioning';
+	String get captions_auto => 'Automatic captioning';
+	String get captions_unavailable => 'No captioning';
+	String get captions_error => 'Error while querying captions';
 	String get change_quality => 'Change Quality';
 	String get closed_captions_query => 'Querying for captions';
 	String get closed_captions_target => 'Target language captions';
@@ -699,7 +707,15 @@ extension on _StringsEn {
 			case 'lyrics_permission_required': return 'Required permission not granted';
 			case 'no_lyrics_found': return 'No lyrics found';
 			case 'trending': return 'Trending';
-			case 'caption_filter': return 'Filter Closed';
+			case 'caption_filter': return 'Filter Closed Captions';
+			case 'captions_query': return 'Querying for captions';
+			case 'captions_target': return 'Target language';
+			case 'captions_app': return 'App language';
+			case 'captions_other': return 'Other language';
+			case 'captions_closed': return 'Closed captioning';
+			case 'captions_auto': return 'Automatic captioning';
+			case 'captions_unavailable': return 'No captioning';
+			case 'captions_error': return 'Error while querying captions';
 			case 'change_quality': return 'Change Quality';
 			case 'closed_captions_query': return 'Querying for captions';
 			case 'closed_captions_target': return 'Target language captions';

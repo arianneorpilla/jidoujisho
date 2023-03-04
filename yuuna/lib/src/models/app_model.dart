@@ -217,7 +217,7 @@ class AppModel with ChangeNotifier {
   final int maximumMediaHistoryItems = 60;
 
   /// Maximum number of dictionary history items.
-  final int maximumDictionaryHistoryItems = 20;
+  final int maximumDictionaryHistoryItems = 10;
 
   /// Maximum number of dictionary search results stored in the database.
   final int maximumDictionarySearchResults = 200;
