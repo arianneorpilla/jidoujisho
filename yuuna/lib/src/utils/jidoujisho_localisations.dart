@@ -305,14 +305,8 @@ class JidoujishoLocalisations {
     'lyrics_permission_required': 'Required permission not granted',
     'no_lyrics_found': 'No lyrics found for',
     'trending': 'Trending',
-    'caption_filter': 'Filter Closed',
+    'caption_filter': 'Filter Closed Captions',
     'change_quality': 'Change Quality',
-    'closed_captions_query': 'Querying for captions',
-    'closed_captions_target': 'Target language captions',
-    'closed_captions_app': 'App language captions',
-    'closed_captions_other': 'Other language captions',
-    'closed_captions_unavailable': 'No captions',
-    'closed_captions_error': 'Error while querying captions',
     'stream_url': 'Stream URL',
     'paste': 'Paste',
     'lyrics_title': 'Title',
@@ -369,6 +363,6 @@ class JidoujishoLocalisations {
     'prepend_dictionary_names': 'Prepend dictionary name in meaning',
     'highlight_on_tap': 'Highlight text on tap',
     'search_with_dictionary': 'Enter term to search',
-    'no_text_in_clipboard': 'No text to display'
+    'no_text_in_clipboard': 'No text to display',
   };
 }
