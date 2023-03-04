@@ -299,9 +299,9 @@ class AppModel with ChangeNotifier {
     }
   }
 
-  /// This should all be refactored as part of [MediaItem] if possible. No reason
-  /// to expose it here if not for card export functions. This is super cursed.
-  /// Need to extract this to its own Provider at some point.
+  /// This should all be refactored as part of [MediaItem] if possible. No
+  /// reason to expose it here if not for card export functions. This is super
+  /// cursed. Need to extract this to its own Provider at some point.
 
   /// Current player controller.
   VlcPlayerController? currentPlayerController;
