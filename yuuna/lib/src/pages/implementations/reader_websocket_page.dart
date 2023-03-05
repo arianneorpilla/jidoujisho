@@ -35,31 +35,34 @@ class _ReaderWebsocketPageState<ReaderLyricsPage> extends BaseSourcePageState {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<void>(
-      stream: source.stream,
-      builder: (context, snapshot) {
-        if (!source.isActive) {
-          return buildNoActiveConnection();
-        }
+    return GestureDetector(
+      onTap: clearDictionaryResult,
+      child: StreamBuilder<void>(
+        stream: source.stream,
+        builder: (context, snapshot) {
+          if (!source.isActive) {
+            return buildNoActiveConnection();
+          }
 
-        if (source.messages.isEmpty) {
-          return buildEmpty();
-        } else {
-          return Stack(
-            children: [
-              buildMessageBuilder(),
-              Column(
-                children: [
-                  const Space.extraBig(),
-                  Expanded(
-                    child: buildDictionary(),
-                  ),
-                ],
-              ),
-            ],
-          );
-        }
-      },
+          if (source.messages.isEmpty) {
+            return buildEmpty();
+          } else {
+            return Stack(
+              children: [
+                buildMessageBuilder(),
+                Column(
+                  children: [
+                    const Space.extraBig(),
+                    Expanded(
+                      child: buildDictionary(),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          }
+        },
+      ),
     );
   }
 

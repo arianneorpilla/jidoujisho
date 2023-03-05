@@ -19,6 +19,7 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
+import 'package:yuuna/src/pages/implementations/player_comments_page.dart';
 import 'package:yuuna/utils.dart';
 import 'package:path/path.dart' as path;
 
@@ -899,7 +900,12 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     if (source is PlayerLocalMediaSource) {
       return buildPickVideoFileButton();
     } else if (source is PlayerYoutubeSource) {
-      return buildChangeQualityButton();
+      return Row(
+        children: [
+          buildCommentsButton(),
+          buildChangeQualityButton(),
+        ],
+      );
     }
     return const SizedBox.shrink();
   }
@@ -963,6 +969,46 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               ),
             ),
           );
+        },
+      ),
+    );
+  }
+
+  Widget buildCommentsButton() {
+    return Material(
+      color: Colors.transparent,
+      child: JidoujishoIconButton(
+        size: 24,
+        icon: Icons.comment_outlined,
+        tooltip: appModel.translate('comments'),
+        onTap: () async {
+          await dialogSmartPause();
+          await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+          await Future.delayed(const Duration(milliseconds: 5), () {});
+
+          try {
+            widget.source.setShouldGenerateAudio(value: false);
+
+            await Navigator.of(context).push(
+              PageRouteBuilder(
+                opaque: false,
+                pageBuilder: (context, _, __) =>
+                    PlayerCommentsPage(videoUrl: widget.item!.uniqueKey),
+                settings: RouteSettings(
+                  name: (PlayerCommentsPage).toString(),
+                ),
+              ),
+            );
+          } finally {
+            widget.source.setShouldGenerateAudio(value: true);
+            widget.source
+                .setCurrentSentence(_currentSubtitle.value?.data ?? '');
+          }
+
+          await Future.delayed(const Duration(milliseconds: 5), () {});
+          await SystemChrome.setEnabledSystemUIMode(
+              SystemUiMode.immersiveSticky);
+          await dialogSmartResume();
         },
       ),
     );

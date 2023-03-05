@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 306
+/// Strings: 308
 ///
-/// Built on 2023-03-04 at 12:24 UTC
+/// Built on 2023-03-05 at 04:20 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -455,6 +455,20 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get use_br_tags => 'Use line break tag instead of newline on export';
 	String get prepend_dictionary_names => 'Prepend dictionary name in meaning';
 	String get highlight_on_tap => 'Highlight text on tap';
+	late final _StringsViewRepliesEn view_replies = _StringsViewRepliesEn._(_root);
+}
+
+// Path: view_replies
+class _StringsViewRepliesEn {
+	_StringsViewRepliesEn._(this._root);
+
+	final _StringsEn _root; // ignore: unused_field
+
+	// Translations
+	String reply({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: 'SHOW ${n} REPLY',
+		other: 'SHOW ${n} REPLIES',
+	);
 }
 
 /// Flat map(s) containing all translations.
@@ -769,6 +783,10 @@ extension on _StringsEn {
 			case 'use_br_tags': return 'Use line break tag instead of newline on export';
 			case 'prepend_dictionary_names': return 'Prepend dictionary name in meaning';
 			case 'highlight_on_tap': return 'Highlight text on tap';
+			case 'view_replies.reply': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+				one: 'SHOW ${n} REPLY',
+				other: 'SHOW ${n} REPLIES',
+			);
 			default: return null;
 		}
 	}

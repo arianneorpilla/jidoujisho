@@ -329,5 +329,11 @@
     "maximum_terms": "Maximum dictionary headwords in result",
     "use_br_tags": "Use line break tag instead of newline on export",
     "prepend_dictionary_names": "Prepend dictionary name in meaning",
-    "highlight_on_tap": "Highlight text on tap"
+    "highlight_on_tap": "Highlight text on tap",
+    "view_replies": {
+        "reply": {
+          "one": "SHOW $n REPLY",
+          "other": "SHOW $n REPLIES"
+        }
+      }
   }

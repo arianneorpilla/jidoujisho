@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:flutter/material.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:isar/isar.dart';
 
@@ -35,13 +34,13 @@ class DictionaryHeading {
 
   /// A word or phrase. This effectively acts as the headword, or the primary
   /// concept to be learned or represented in a dictionary entry.
-  @Index(type: IndexType.value)
+  @Index(type: IndexType.value, caseSensitive: false)
   final String term;
 
   /// An alternate form of the term. This is useful for languages which have an
   /// which must distinguish different keys which share the same term, but may
   /// have multiple pronunciations.
-  @Index(type: IndexType.value)
+  @Index(type: IndexType.value, caseSensitive: false)
   final String reading;
 
   /// Term of the reading. Used for prioritising starts with matches.
