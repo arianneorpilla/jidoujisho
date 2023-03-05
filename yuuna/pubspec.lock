@@ -1436,6 +1436,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.5"
+  remove_emoji:
+    dependency: "direct main"
+    description:
+      name: remove_emoji
+      sha256: "3cf5b2a4a26c2f05704e5c9676c782c3ccb711271bf774a3a18af019b6180f85"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.7"
   reorderables:
     dependency: "direct main"
     description:

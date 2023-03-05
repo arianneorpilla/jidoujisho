@@ -127,6 +127,13 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
         MediaSource mediaSource =
             appModel.getCurrentMediaItem()!.getMediaSource(appModel: appModel);
         if (field is ImageField && mediaSource.overridesAutoImage) {
+          if (!appModel
+              .getCurrentMediaItem()!
+              .getMediaSource(appModel: appModel)
+              .shouldGenerateImage) {
+            continue;
+          }
+
           await field.setImages(
             appModel: appModel,
             creatorModel: creatorModel,
@@ -145,6 +152,13 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
           continue;
         }
         if (field is AudioSentenceField && mediaSource.overridesAutoAudio) {
+          if (!appModel
+              .getCurrentMediaItem()!
+              .getMediaSource(appModel: appModel)
+              .shouldGenerateAudio) {
+            continue;
+          }
+
           await field.setAudio(
             appModel: appModel,
             creatorModel: creatorModel,

@@ -11,6 +11,27 @@ import 'package:yuuna/models.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
 
+/// A global [Provider] for getting the paging controller for comments for a
+/// video.
+final commentsProvider =
+    FutureProvider.family<PagingController<int, Comment>?, String>((ref, url) {
+  return PlayerYoutubeSource.instance.getCommentsForVideo(url);
+});
+
+/// A global [Provider] for getting the paging controller for replies for a
+/// comment.
+final repliesProvider =
+    FutureProvider.family<PagingController<int, Comment>?, Comment>(
+        (ref, comment) {
+  return PlayerYoutubeSource.instance.getRepliesForComment(comment);
+});
+
+/// A global [Provider] for getting the paging controller for replies for a
+/// comment.
+final channelProvider = FutureProvider.family<Channel, String>((ref, id) {
+  return PlayerYoutubeSource.instance.getChannelFromId(id);
+});
+
 /// A media source that allows the user to stream a selected video from YouTube.
 class PlayerYoutubeSource extends PlayerMediaSource {
   /// Define this media source.
@@ -37,6 +58,7 @@ class PlayerYoutubeSource extends PlayerMediaSource {
   late final VideoClient _videoClient;
   late final PlaylistClient _playlistClient;
   late final ChannelClient _channelClient;
+  late final CommentsClient _commentsClient;
 
   final Map<String, Video> _videoCache = <String, Video>{};
   final Map<String, StreamManifest> _streamManifestCache =
@@ -50,6 +72,11 @@ class PlayerYoutubeSource extends PlayerMediaSource {
   final Map<String, PagingController<int, MediaItem>> _pagingControllerCache =
       <String, PagingController<int, MediaItem>>{};
   final Map<String, Playlist> _playlistCache = <String, Playlist>{};
+  final Map<String, PagingController<int, Comment>> _commentsPagingCache =
+      <String, PagingController<int, Comment>>{};
+  final Map<Comment, PagingController<int, Comment>> _repliesPagingCache =
+      <Comment, PagingController<int, Comment>>{};
+  final Map<String, Channel> _channelCache = {};
 
   @override
   Future<void> prepareResources() async {
@@ -57,6 +84,7 @@ class PlayerYoutubeSource extends PlayerMediaSource {
     _videoClient = VideoClient(_client);
     _playlistClient = PlaylistClient(_client);
     _channelClient = ChannelClient(_client);
+    _commentsClient = CommentsClient(_client);
   }
 
   @override
@@ -208,19 +236,25 @@ class PlayerYoutubeSource extends PlayerMediaSource {
   }
 
   /// Gets a Video instance from a Uri with caching.
-  Future<Video> getVideoFromId(String videoId) async {
-    Video? video = _videoCache[videoId];
+  String getChannelIdFromVideo(String videoUrl) {
+    Video video = _videoCache[videoUrl]!;
+    return video.channelId.value;
+  }
+
+  /// Gets a Video instance from a Uri with caching.
+  Future<Video> getVideoFromUrl(String url) async {
+    Video? video = _videoCache[url];
     if (video == null) {
-      video = await _videoClient.get(videoId);
-      _videoCache[videoId] = video;
+      video = await _videoClient.get(url);
+      _videoCache[url] = video;
     }
 
     return video;
   }
 
   /// Creatres a media item from a URL.
-  Future<MediaItem> getMediaItemFromId(String url) async {
-    Video video = await getVideoFromId(url);
+  Future<MediaItem> getMediaItemFromUrl(String url) async {
+    Video video = await getVideoFromUrl(url);
     return getMediaItem(video);
   }
 
@@ -272,6 +306,7 @@ class PlayerYoutubeSource extends PlayerMediaSource {
   Future<StreamManifest> getStreamManifest(MediaItem item) async {
     String videoId = VideoId(item.mediaIdentifier).value;
     StreamManifest? manifest = _streamManifestCache[videoId];
+
     if (manifest == null) {
       manifest = await _videoClient.streams.getManifest(videoId);
       _streamManifestCache[videoId] ??= manifest;
@@ -687,5 +722,80 @@ class PlayerYoutubeSource extends PlayerMediaSource {
     } finally {
       _fetchingCaptions.remove(url);
     }
+  }
+
+  /// Gets channel from ID.
+  Future<Channel> getChannelFromId(String id) async {
+    Channel? channel = _channelCache[id];
+    if (channel != null) {
+      return channel;
+    }
+
+    channel = await _channelClient.get(id);
+    _channelCache[id] = channel;
+    return channel;
+  }
+
+  /// Returns the paging controller for a video's comments.
+  Future<PagingController<int, Comment>?> getCommentsForVideo(
+      String videoUrl) async {
+    Video video = await getVideoFromUrl(videoUrl);
+    PagingController<int, Comment>? pagingController =
+        _commentsPagingCache[video.id.value];
+    if (pagingController != null) {
+      return pagingController;
+    }
+
+    CommentsList? commentsList = await _commentsClient.getComments(video);
+    pagingController = PagingController(firstPageKey: 1);
+
+    pagingController.addPageRequestListener((pageKey) async {
+      List<Comment> comments = [];
+
+      try {
+        comments.addAll(commentsList!.toList());
+        commentsList = await commentsList?.nextPage();
+      } finally {
+        if (comments.isEmpty) {
+          pagingController?.appendLastPage(comments);
+        } else {
+          pagingController?.appendPage(comments, pageKey + 1);
+        }
+      }
+    });
+    _commentsPagingCache[video.id.value] = pagingController;
+
+    return pagingController;
+  }
+
+  /// Returns the paging controller for a comment's replies.
+  Future<PagingController<int, Comment>?> getRepliesForComment(
+      Comment comment) async {
+    PagingController<int, Comment>? pagingController =
+        _repliesPagingCache[comment];
+    if (pagingController != null) {
+      return pagingController;
+    }
+
+    CommentsList? commentsList = await _commentsClient.getReplies(comment);
+    pagingController = PagingController(firstPageKey: 1);
+
+    pagingController.addPageRequestListener((pageKey) async {
+      List<Comment> comments = [];
+
+      try {
+        comments.addAll(commentsList!.toList());
+        commentsList = await commentsList?.nextPage();
+      } finally {
+        if (comments.isEmpty) {
+          pagingController?.appendLastPage(comments);
+        } else {
+          pagingController?.appendPage(comments, pageKey + 1);
+        }
+      }
+    });
+    _repliesPagingCache[comment] = pagingController;
+
+    return pagingController;
   }
 }

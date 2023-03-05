@@ -24,6 +24,7 @@ import 'package:path/path.dart' as path;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:remove_emoji/remove_emoji.dart';
 import 'package:restart_app/restart_app.dart';
 import 'package:subtitle/subtitle.dart';
 import 'package:wakelock/wakelock.dart';
@@ -131,6 +132,9 @@ class AppModel with ChangeNotifier {
   void refreshDictionaryHistory() {
     dictionaryMenuNotifier.notifyListeners();
   }
+
+  /// Used to strip emoji from search terms.
+  final _removeEmoji = RemoveEmoji();
 
   /// Used to notify toggling incognito. Updates the app logo to and from
   /// grayscale.
@@ -1111,6 +1115,8 @@ class AppModel with ChangeNotifier {
     }
 
     searchTerm = searchTerm.replaceAll('\n', ' ');
+    searchTerm = _removeEmoji.removemoji(searchTerm);
+
     ReceivePort receivePort = ReceivePort();
     receivePort.listen((message) {
       debugPrint(message.toString());
@@ -1753,6 +1759,8 @@ class AppModel with ChangeNotifier {
     required MediaSource mediaSource,
     MediaItem? item,
   }) async {
+    mediaSource.setShouldGenerateImage(value: true);
+    mediaSource.setShouldGenerateAudio(value: true);
     mediaSource.clearCurrentSentence();
     _currentMediaSource = null;
     _currentMediaItem = null;

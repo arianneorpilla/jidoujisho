@@ -185,7 +185,7 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
       String? videoId = VideoId.parseVideoId(data);
       if (videoId != null) {
         try {
-          launchYoutubeMediaAction(videoId);
+          launchYoutubeMediaAction(data);
           return;
         } catch (e) {
           debugPrint('Not a YouTube video');
@@ -253,9 +253,9 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
     });
   }
 
-  void launchYoutubeMediaAction(String videoId) async {
+  void launchYoutubeMediaAction(String url) async {
     MediaItem item =
-        await PlayerYoutubeSource.instance.getMediaItemFromId(videoId);
+        await PlayerYoutubeSource.instance.getMediaItemFromUrl(url);
 
     Navigator.popUntil(
         appModel.navigatorKey.currentContext!, (route) => route.isFirst);

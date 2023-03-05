@@ -186,6 +186,24 @@ abstract class MediaSource {
     _currentSentence = '';
   }
 
+  /// Gets whether or not a media source should currently supply images.
+  bool get shouldGenerateImage => _shouldGenerateImage;
+  bool _shouldGenerateImage = true;
+
+  /// Gets whether or not a media source should currently supply audio.
+  bool get shouldGenerateAudio => _shouldGenerateAudio;
+  bool _shouldGenerateAudio = true;
+
+  /// Controls whether or not a media source should currently supply images.
+  void setShouldGenerateImage({required bool value}) {
+    _shouldGenerateImage = value;
+  }
+
+  /// Controls whether or not a media source should currently supply audio.
+  void setShouldGenerateAudio({required bool value}) {
+    _shouldGenerateAudio = value;
+  }
+
   /// Supplies a media item that can be used for tracking and updating history,
   /// as well as generating video and audio with timestamp information. This
   /// should be uniquely implemented for each source. Some sources may want

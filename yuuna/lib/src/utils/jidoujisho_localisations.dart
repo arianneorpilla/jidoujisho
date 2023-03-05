@@ -307,6 +307,14 @@ class JidoujishoLocalisations {
     'trending': 'Trending',
     'caption_filter': 'Filter Closed Captions',
     'change_quality': 'Change Quality',
+    'captions_query': 'Querying for captions',
+    'captions_target': 'Target language',
+    'captions_app': 'App language',
+    'captions_other': 'Other language',
+    'captions_closed': 'Closed captioning',
+    'captions_auto': 'Automatic captioning',
+    'captions_unavailable': 'No captioning',
+    'captions_error': 'Error while querying captions',
     'stream_url': 'Stream URL',
     'paste': 'Paste',
     'lyrics_title': 'Title',
@@ -364,5 +372,8 @@ class JidoujishoLocalisations {
     'highlight_on_tap': 'Highlight text on tap',
     'search_with_dictionary': 'Enter term to search',
     'no_text_in_clipboard': 'No text to display',
+    'comments': 'Comments',
+    'no_comments_queried': 'No comments queried',
+    'replies': 'Replies',
   };
 }
