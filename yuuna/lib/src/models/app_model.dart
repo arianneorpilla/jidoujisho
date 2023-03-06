@@ -686,6 +686,17 @@ class AppModel with ChangeNotifier {
     _packageInfo = await PackageInfo.fromPlatform();
     _androidDeviceInfo = await DeviceInfoPlugin().androidInfo;
 
+    /// Initialise persistent key-value store.
+    await Hive.initFlutter();
+    _preferences = await Hive.openBox('appModel');
+    _dictionaryHistory = await Hive.openBox('dictionaryHistory');
+
+    /// Initialise persistent database.
+    _database = await Isar.open(
+      globalSchemas,
+      maxSizeMiB: 4096,
+    );
+
     /// Perform startup activities unnecessary to further initialisation here.
     await requestExternalStoragePermissions();
     await requestAnkidroidPermissions();
@@ -711,17 +722,6 @@ class AppModel with ChangeNotifier {
     if (_isarDirectory.existsSync()) {
       _isarDirectory.deleteSync(recursive: true);
     }
-
-    /// Initialise persistent key-value store.
-    await Hive.initFlutter();
-    _preferences = await Hive.openBox('appModel');
-    _dictionaryHistory = await Hive.openBox('dictionaryHistory');
-
-    /// Initialise persistent database.
-    _database = await Isar.open(
-      globalSchemas,
-      maxSizeMiB: 4096,
-    );
 
     /// Populate entities with key-value maps for constant time performance.
     /// This is not the initialisation step, which occurs below.
@@ -1236,32 +1236,22 @@ class AppModel with ChangeNotifier {
   /// Requests for full external storage permissions. Required to handle video
   /// files and their subtitle files in the same directory.
   Future<void> requestExternalStoragePermissions() async {
-    bool toastShown = false;
+    if (isFirstTimeSetup) {
+      Fluttertoast.showToast(
+        msg: t.storage_permissions,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+      );
+    }
 
     final cameraGranted = await Permission.camera.isGranted;
     if (!cameraGranted) {
       await Permission.camera.request();
-      if (!toastShown) {
-        Fluttertoast.showToast(
-          msg: t.storage_permissions,
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-        );
-        toastShown = true;
-      }
     }
 
     final storageGranted = await Permission.storage.isGranted;
     if (!storageGranted) {
       await Permission.storage.request();
-      if (!toastShown) {
-        Fluttertoast.showToast(
-          msg: t.storage_permissions,
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-        );
-        toastShown = true;
-      }
     }
 
     if (_androidDeviceInfo.version.sdkInt! >= 30) {
@@ -1269,14 +1259,6 @@ class AppModel with ChangeNotifier {
           await Permission.manageExternalStorage.isGranted;
       if (!manageStorageGranted) {
         await Permission.manageExternalStorage.request();
-        if (!toastShown) {
-          Fluttertoast.showToast(
-            msg: t.storage_permissions,
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-          );
-          toastShown = true;
-        }
       }
     }
   }

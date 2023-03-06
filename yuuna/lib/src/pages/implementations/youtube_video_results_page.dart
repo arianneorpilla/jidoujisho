@@ -81,7 +81,6 @@ class _YoutubeVideoResultsPageState
       scrollController: _scrollController,
       pagingController: widget.pagingController,
       key: UniqueKey(),
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       builderDelegate: PagedChildBuilderDelegate<MediaItem>(
         itemBuilder: (context, item, index) {
           return buildMediaItem(item);
