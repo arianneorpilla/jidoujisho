@@ -660,7 +660,7 @@ class AppModel with ChangeNotifier {
   Future<Directory> prepareJidoujishoDirectory() async {
     String publicDirectory =
         await ExternalPath.getExternalStoragePublicDirectory(
-            ExternalPath.DIRECTORY_PICTURES);
+            ExternalPath.DIRECTORY_DCIM);
     String directoryPath = path.join(publicDirectory, 'jidoujisho');
     String noMediaFilePath =
         path.join(publicDirectory, 'jidoujisho', '.nomedia');
@@ -1236,9 +1236,32 @@ class AppModel with ChangeNotifier {
   /// Requests for full external storage permissions. Required to handle video
   /// files and their subtitle files in the same directory.
   Future<void> requestExternalStoragePermissions() async {
+    bool toastShown = false;
+
+    final cameraGranted = await Permission.camera.isGranted;
+    if (!cameraGranted) {
+      await Permission.camera.request();
+      if (!toastShown) {
+        Fluttertoast.showToast(
+          msg: t.storage_permissions,
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+        );
+        toastShown = true;
+      }
+    }
+
     final storageGranted = await Permission.storage.isGranted;
     if (!storageGranted) {
       await Permission.storage.request();
+      if (!toastShown) {
+        Fluttertoast.showToast(
+          msg: t.storage_permissions,
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+        );
+        toastShown = true;
+      }
     }
 
     if (_androidDeviceInfo.version.sdkInt! >= 30) {
@@ -1246,6 +1269,14 @@ class AppModel with ChangeNotifier {
           await Permission.manageExternalStorage.isGranted;
       if (!manageStorageGranted) {
         await Permission.manageExternalStorage.request();
+        if (!toastShown) {
+          Fluttertoast.showToast(
+            msg: t.storage_permissions,
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+          );
+          toastShown = true;
+        }
       }
     }
   }

@@ -345,17 +345,15 @@ class _DictionaryTermPitchList extends ConsumerWidget {
               )
               .toList();
 
-          return SliverToBoxAdapter(
-            child: Wrap(
-              children: [
-                JidoujishoTag(
-                  text: dictionary.name,
-                  message: t.dictionary_import_tag(name: dictionary.name),
-                  backgroundColor: Colors.red.shade900,
-                ),
-                ...pitchWidgets,
-              ],
-            ),
+          return Wrap(
+            children: [
+              JidoujishoTag(
+                text: dictionary.name,
+                message: t.dictionary_import_tag(name: dictionary.name),
+                backgroundColor: Colors.red.shade900,
+              ),
+              ...pitchWidgets,
+            ],
           );
         }
       }),
