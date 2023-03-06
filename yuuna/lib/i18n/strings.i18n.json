@@ -48,6 +48,8 @@
     "dialog_crop": "CROP",
     "dialog_connect": "CONNECT",
     "dialog_append": "APPEND",
+    "dialog_record": "RECORD",
+    "dialog_stop": "STOP",
     "reset": "Reset",
     "dialog_launch_ankidroid": "LAUNCH ANKIDROID",
     "media_item_delete_confirmation":
@@ -221,9 +223,11 @@
     "local_media_directory_empty": "Directory has no folders or video",
     "pick_video_file": "Pick Video File",
     "navigate_up_one_directory_level": "Navigate Up One Directory Level",
-    "player_play": "Play",
-    "player_pause": "Pause",
-    "player_replay": "Replay",
+    "play": "Play",
+    "pause": "Pause",
+    "record": "Record",
+    "stop": "Stop",
+    "replay": "Replay",
     "audio_subtitles": "Audio/Subtitles",
     "player_option_shadowing": "Shadowing Mode",
     "player_option_definition_focus": "Definition Focus Mode",
@@ -330,6 +334,7 @@
     "use_br_tags": "Use line break tag instead of newline on export",
     "prepend_dictionary_names": "Prepend dictionary name in meaning",
     "highlight_on_tap": "Highlight text on tap",
+    "no_audio_file": "No audio file to save.",
     "view_replies": {
         "reply": {
           "one": "SHOW $n REPLY",

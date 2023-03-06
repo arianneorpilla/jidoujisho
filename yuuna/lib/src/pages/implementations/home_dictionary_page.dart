@@ -443,15 +443,6 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       searchTerm: searchTerm,
       killOnPop: false,
     );
-
-    Future.delayed(const Duration(milliseconds: 100), () {
-      Scrollable.ensureVisible(
-        GlobalObjectKey(searchTerm).currentContext!,
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
-      );
-    });
   }
 
   void onStash(String searchTerm) {

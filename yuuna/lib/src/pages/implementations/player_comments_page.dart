@@ -63,19 +63,19 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
     return Stack(
       children: [
         buildBlur(),
-        GestureDetector(
-          onTap: clearDictionaryResult,
-          child: Scaffold(
-            appBar: buildAppBar(),
-            backgroundColor: Theme.of(context).cardColor.withOpacity(0.85),
-            resizeToAvoidBottomInset: false,
-            body: SafeArea(
-              child: Stack(
-                children: [
-                  buildBody(),
-                  buildDictionary(),
-                ],
-              ),
+        Scaffold(
+          appBar: buildAppBar(),
+          backgroundColor: Theme.of(context).cardColor.withOpacity(0.85),
+          resizeToAvoidBottomInset: false,
+          body: SafeArea(
+            child: Stack(
+              children: [
+                GestureDetector(
+                  onTap: clearDictionaryResult,
+                  child: buildBody(),
+                ),
+                buildDictionary(),
+              ],
             ),
           ),
         ),

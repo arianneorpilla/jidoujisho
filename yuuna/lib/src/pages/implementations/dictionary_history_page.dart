@@ -1,7 +1,5 @@
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:keframe/keframe.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
@@ -37,29 +35,26 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
     List<DictionarySearchResult> historyResults =
         appModel.dictionaryHistory.reversed.toList();
 
-    return SizeCacheWidget(
-      child: ListView.builder(
-        cacheExtent: 99999999999999,
-        controller: DictionaryMediaType.instance.scrollController,
-        physics: const AlwaysScrollableScrollPhysics(
-            parent: BouncingScrollPhysics()),
-        itemCount: historyResults.length + 1,
-        itemBuilder: (context, index) {
-          if (index == 0) {
-            return const SizedBox(height: 60);
-          }
-
-          DictionarySearchResult result = historyResults[index - 1];
-
-          return _DictionaryHistoryScrollableItem(
-            key: GlobalObjectKey(result.searchTerm),
-            result: result,
-            onSearch: widget.onSearch,
-            onStash: widget.onStash,
-            lastSelectedMapping: lastSelectedMapping,
-          );
-        },
+    return CustomScrollView(
+      key: const GlobalObjectKey('dictionaryHistory'),
+      controller: DictionaryMediaType.instance.scrollController,
+      physics: const AlwaysScrollableScrollPhysics(
+        parent: BouncingScrollPhysics(),
       ),
+      slivers: [
+        const SliverToBoxAdapter(child: SizedBox(height: 60)),
+        ...historyResults
+            .map(
+              (result) => _DictionaryHistoryScrollableItem(
+                key: GlobalObjectKey(result.id!),
+                result: result,
+                onSearch: widget.onSearch,
+                onStash: widget.onStash,
+                lastSelectedMapping: lastSelectedMapping,
+              ),
+            )
+            .toList(),
+      ],
     );
   }
 }
@@ -97,8 +92,6 @@ class _DictionaryHistoryScrollableItemState
   bool get wantKeepAlive => true;
 
   String get searchLabelBefore => appModel.translate('search_label_before');
-  String get searchLabelMiddle => appModel.translate('search_label_middle');
-  String get searchLabelFrom => appModel.translate('search_label_from');
   String get searchLabelAfter => appModel.translate('search_label_after');
   String get seeMoreLabel => appModel.translate('see_more');
 
@@ -132,57 +125,19 @@ class _DictionaryHistoryScrollableItemState
     ValueNotifier<int> indexNotifier =
         ValueNotifier<int>(result.scrollPosition);
 
-    return ValueListenableBuilder<int>(
-      valueListenable: indexNotifier,
-      builder: (context, value, child) {
-        DictionaryHeading heading = headings.elementAt(indexNotifier.value);
-
-        Map<Dictionary, ExpandableController> expandableControllers =
-            expandableControllersByHeading[heading]!;
-
-        return FrameSeparateWidget(
-          child: DictionaryTermPage(
-            lastSelectedMapping: widget.lastSelectedMapping,
-            heading: heading,
-            onSearch: widget.onSearch,
-            onStash: widget.onStash,
-            expandableControllers: expandableControllers,
-            onScrollRight: () async {
-              if (result.scrollPosition == headings.length - 1) {
-                result.scrollPosition = 0;
-              } else {
-                result.scrollPosition += 1;
-              }
-
-              await appModel.updateDictionaryResultScrollIndex(
-                result: result,
-                newIndex: result.scrollPosition,
-              );
-
-              indexNotifier.value = result.scrollPosition;
-            },
-            onScrollLeft: () async {
-              if (result.scrollPosition == 0) {
-                result.scrollPosition = headings.length - 1;
-              } else {
-                result.scrollPosition -= 1;
-              }
-
-              await appModel.updateDictionaryResultScrollIndex(
-                result: result,
-                newIndex: result.scrollPosition,
-              );
-
-              indexNotifier.value = result.scrollPosition;
-            },
-            footerWidget: buildFooterWidget(
+    return DictionaryTermPage(
+      lastSelectedMapping: widget.lastSelectedMapping,
+      heading: headings.elementAt(indexNotifier.value),
+      onSearch: widget.onSearch,
+      onStash: widget.onStash,
+      expandableControllers: expandableControllersByHeading[
+          headings.elementAt(indexNotifier.value)]!,
+      footerWidget: headings.length > 1
+          ? buildFooterWidget(
               result: result,
               length: headings.length,
-              index: indexNotifier.value,
-            ),
-          ),
-        );
-      },
+              index: indexNotifier.value)
+          : null,
     );
   }
 
@@ -191,7 +146,8 @@ class _DictionaryHistoryScrollableItemState
     required int length,
     required int index,
   }) {
-    return Center(
+    return Padding(
+      padding: Spacing.of(context).insets.onlyBottom.small,
       child: Tooltip(
         message: seeMoreLabel,
         child: InkWell(
@@ -199,12 +155,18 @@ class _DictionaryHistoryScrollableItemState
             await appModel.openResultFromHistory(result: result);
             appModel.refreshDictionaryHistory();
           },
-          child: Padding(
-            padding: Spacing.of(context).insets.all.small,
-            child: buildFooterTextSpans(
-              result: result,
-              length: length,
-              index: index,
+          child: Container(
+            color: appModel.isDarkMode
+                ? Colors.grey.shade900
+                : Colors.grey.shade200,
+            width: double.maxFinite,
+            child: Padding(
+              padding: Spacing.of(context).insets.all.small,
+              child: buildFooterTextSpans(
+                result: result,
+                length: length,
+                index: index,
+              ),
             ),
           ),
         ),
@@ -239,20 +201,6 @@ class _DictionaryHistoryScrollableItemState
           ),
           TextSpan(
             text: searchLabelBefore,
-            style: TextStyle(
-              fontSize: fontSize,
-              color: Theme.of(context).unselectedWidgetColor,
-            ),
-          ),
-          TextSpan(
-            text: '${index + 1} ',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: fontSize,
-            ),
-          ),
-          TextSpan(
-            text: searchLabelMiddle,
             style: TextStyle(
               fontSize: fontSize,
               color: Theme.of(context).unselectedWidgetColor,

@@ -1,6 +1,5 @@
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
-import 'package:keframe/keframe.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
@@ -15,7 +14,7 @@ class DictionaryResultPage extends BasePage {
     required this.onSearch,
     required this.onStash,
     this.scrollController,
-    this.entryOpacity = 1,
+    this.opacity = 1,
     this.updateHistory = true,
     this.spaceBeforeFirstResult = true,
     super.key,
@@ -37,7 +36,7 @@ class DictionaryResultPage extends BasePage {
   final bool spaceBeforeFirstResult;
 
   /// Opacity for entries.
-  final double entryOpacity;
+  final double opacity;
 
   /// Allows controlling the scroll position of the page.
   final ScrollController? scrollController;
@@ -103,7 +102,6 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
     }
 
     return MediaQuery(
-      key: ValueKey(widget.result.id),
       data: MediaQuery.of(context).removePadding(
         removeTop: true,
         removeBottom: true,
@@ -117,40 +115,29 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
         child: Padding(
           padding: Spacing.of(context).insets.onlyRight.extraSmall,
           child: CustomScrollView(
-            cacheExtent: 99999999999999,
+            key: GlobalObjectKey(widget.result),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            cacheExtent: 9999999999999,
             controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(
               parent: BouncingScrollPhysics(),
             ),
             slivers: [
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  childCount: headings.length + 1,
-                  (context, index) {
-                    if (index == 0) {
-                      return widget.spaceBeforeFirstResult
-                          ? const Space.normal()
-                          : const SizedBox.shrink();
-                    }
-
-                    DictionaryHeading heading = headings.elementAt(index - 1);
-                    Map<Dictionary, ExpandableController>
-                        expandableControllers =
-                        expandableControllersByHeading[heading]!;
-
-                    return FrameSeparateWidget(
-                      child: DictionaryTermPage(
+              SliverToBoxAdapter(
+                  child: widget.spaceBeforeFirstResult
+                      ? const Space.normal()
+                      : const SizedBox.shrink()),
+              ...headings
+                  .map((heading) => DictionaryTermPage(
                         lastSelectedMapping: lastSelectedMapping,
-                        entryOpacity: widget.entryOpacity,
+                        opacity: widget.opacity,
                         heading: heading,
                         onSearch: widget.onSearch,
                         onStash: widget.onStash,
-                        expandableControllers: expandableControllers,
-                      ),
-                    );
-                  },
-                ),
-              ),
+                        expandableControllers:
+                            expandableControllersByHeading[heading]!,
+                      ))
+                  .toList(),
             ],
           ),
         ),

@@ -58,7 +58,7 @@ class _YoutubeVideoResultsPageState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true,
+      resizeToAvoidBottomInset: false,
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: widget.showAppBar ? buildAppBar() : null,
       body: buildBody(),
@@ -81,6 +81,7 @@ class _YoutubeVideoResultsPageState
       scrollController: _scrollController,
       pagingController: widget.pagingController,
       key: UniqueKey(),
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       builderDelegate: PagedChildBuilderDelegate<MediaItem>(
         itemBuilder: (context, item, index) {
           return buildMediaItem(item);

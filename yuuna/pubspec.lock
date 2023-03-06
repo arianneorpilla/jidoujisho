@@ -1460,6 +1460,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.5"
+  record_mp3:
+    dependency: "direct main"
+    description:
+      name: record_mp3
+      sha256: dd3d221d223f4a38816835e7a887a401a808c583d11d793ef04a60e4f13e781e
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
   remove_emoji:
     dependency: "direct main"
     description:
@@ -1618,13 +1626,13 @@ packages:
     source: hosted
     version: "3.13.0"
   sliver_tools:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: sliver_tools
-      sha256: edf005f1a47c2ffa6f1e1a4f24dd99c45b8bccfff9b928d39170d36dc6fda871
+      sha256: bfa69411ebb203cc1a115b1e8bc7935b893eb381fdcf8d453b40c0d4e1db3247
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.8"
+    version: "0.2.9"
   source_gen:
     dependency: transitive
     description:

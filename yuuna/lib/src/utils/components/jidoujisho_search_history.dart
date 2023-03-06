@@ -53,6 +53,7 @@ class _JidoujishoSearchHistoryState
       child: Material(
         color: Colors.transparent,
         child: ListView.builder(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
           ),
