@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 308
+/// Strings: 313
 ///
-/// Built on 2023-03-05 at 04:20 UTC
+/// Built on 2023-03-06 at 11:58 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -198,6 +198,8 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get dialog_crop => 'CROP';
 	String get dialog_connect => 'CONNECT';
 	String get dialog_append => 'APPEND';
+	String get dialog_record => 'RECORD';
+	String get dialog_stop => 'STOP';
 	String get reset => 'Reset';
 	String get dialog_launch_ankidroid => 'LAUNCH ANKIDROID';
 	String get media_item_delete_confirmation => 'This will clear this item from history. Are you sure you want to do this?';
@@ -352,9 +354,11 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get local_media_directory_empty => 'Directory has no folders or video';
 	String get pick_video_file => 'Pick Video File';
 	String get navigate_up_one_directory_level => 'Navigate Up One Directory Level';
-	String get player_play => 'Play';
-	String get player_pause => 'Pause';
-	String get player_replay => 'Replay';
+	String get play => 'Play';
+	String get pause => 'Pause';
+	String get record => 'Record';
+	String get stop => 'Stop';
+	String get replay => 'Replay';
 	String get audio_subtitles => 'Audio/Subtitles';
 	String get player_option_shadowing => 'Shadowing Mode';
 	String get player_option_definition_focus => 'Definition Focus Mode';
@@ -455,6 +459,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get use_br_tags => 'Use line break tag instead of newline on export';
 	String get prepend_dictionary_names => 'Prepend dictionary name in meaning';
 	String get highlight_on_tap => 'Highlight text on tap';
+	String get no_audio_file => 'No audio file to save.';
 	late final _StringsViewRepliesEn view_replies = _StringsViewRepliesEn._(_root);
 }
 
@@ -526,6 +531,8 @@ extension on _StringsEn {
 			case 'dialog_crop': return 'CROP';
 			case 'dialog_connect': return 'CONNECT';
 			case 'dialog_append': return 'APPEND';
+			case 'dialog_record': return 'RECORD';
+			case 'dialog_stop': return 'STOP';
 			case 'reset': return 'Reset';
 			case 'dialog_launch_ankidroid': return 'LAUNCH ANKIDROID';
 			case 'media_item_delete_confirmation': return 'This will clear this item from history. Are you sure you want to do this?';
@@ -680,9 +687,11 @@ extension on _StringsEn {
 			case 'local_media_directory_empty': return 'Directory has no folders or video';
 			case 'pick_video_file': return 'Pick Video File';
 			case 'navigate_up_one_directory_level': return 'Navigate Up One Directory Level';
-			case 'player_play': return 'Play';
-			case 'player_pause': return 'Pause';
-			case 'player_replay': return 'Replay';
+			case 'play': return 'Play';
+			case 'pause': return 'Pause';
+			case 'record': return 'Record';
+			case 'stop': return 'Stop';
+			case 'replay': return 'Replay';
 			case 'audio_subtitles': return 'Audio/Subtitles';
 			case 'player_option_shadowing': return 'Shadowing Mode';
 			case 'player_option_definition_focus': return 'Definition Focus Mode';
@@ -783,6 +792,7 @@ extension on _StringsEn {
 			case 'use_br_tags': return 'Use line break tag instead of newline on export';
 			case 'prepend_dictionary_names': return 'Prepend dictionary name in meaning';
 			case 'highlight_on_tap': return 'Highlight text on tap';
+			case 'no_audio_file': return 'No audio file to save.';
 			case 'view_replies.reply': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
 				one: 'SHOW ${n} REPLY',
 				other: 'SHOW ${n} REPLIES',

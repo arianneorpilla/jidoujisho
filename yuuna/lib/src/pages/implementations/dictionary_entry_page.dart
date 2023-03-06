@@ -1,13 +1,15 @@
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/dictionary.dart';
-import 'package:yuuna/pages.dart';
+import 'package:yuuna/i18n/strings.g.dart';
+import 'package:yuuna/models.dart';
 import 'package:yuuna/utils.dart';
 
 /// Returns the widget for a [DictionaryEntry] making up a collection of
 /// meanings.
-class DictionaryEntryPage extends BasePage {
+class DictionaryEntryPage extends ConsumerWidget {
   /// Create the widget for a dictionary entry.
   const DictionaryEntryPage({
     required this.entry,
@@ -17,7 +19,7 @@ class DictionaryEntryPage extends BasePage {
     super.key,
   });
 
-  /// The entry particular to this widget.
+  /// The entry particular to this
   final DictionaryEntry entry;
 
   /// Action to be done upon selecting the search option.
@@ -30,29 +32,9 @@ class DictionaryEntryPage extends BasePage {
   final ExpandableController expandableController;
 
   @override
-  BasePageState<DictionaryEntryPage> createState() =>
-      _DictionaryEntryPageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    AppModel appModel = ref.watch(appProvider);
 
-class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
-  String get dictionaryImportTag =>
-      appModelNoUpdate.translate('dictionary_import_tag');
-
-  @override
-  JidoujishoTextSelectionControls get selectionControls =>
-      JidoujishoTextSelectionControls(
-        searchAction: widget.onSearch,
-        searchActionLabel: searchLabel,
-        stashAction: widget.onStash,
-        stashActionLabel: stashLabel,
-        allowCopy: true,
-        allowSelectAll: true,
-        allowCut: true,
-        allowPaste: true,
-      );
-
-  @override
-  Widget build(BuildContext context) {
     final SelectableTextController _selectableTextController =
         SelectableTextController();
 
@@ -70,8 +52,8 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
           iconColor: Theme.of(context).unselectedWidgetColor,
           headerAlignment: ExpandablePanelHeaderAlignment.center,
         ),
-        controller: widget.expandableController,
-        header: Wrap(children: getTagsForEntry()),
+        controller: expandableController,
+        header: _DictionaryEntryTagsWrap(entry: entry),
         collapsed: const SizedBox.shrink(),
         expanded: Padding(
           padding: EdgeInsets.only(
@@ -79,31 +61,26 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
             left: Spacing.of(context).spaces.normal,
           ),
           child: SelectableText(
-            widget.entry.compactDefinitions,
+            entry.compactDefinitions,
             style: TextStyle(
               fontSize: appModel.dictionaryFontSize,
             ),
-            // contextMenuBuilder: (context, state) {
-            //   String searchTerm = _selectableTextController.selection
-            //       .textInside(widget.entry.compactDefinitions);
-
-            //   return JidoujishoTextSelectionToolbar(
-            //     anchorAbove: state.contextMenuAnchors.primaryAnchor,
-            //     anchorBelow: state.contextMenuAnchors.secondaryAnchor == null
-            //         ? state.contextMenuAnchors.primaryAnchor
-            //         : state.contextMenuAnchors.secondaryAnchor!,
-            //     children: [
-            //       ContextMenuPage(searchTerm: searchTerm),
-            //     ],
-            //   );
-            // },
             controller: _selectableTextController,
-            selectionControls: selectionControls,
+            selectionControls: JidoujishoTextSelectionControls(
+              searchAction: onSearch,
+              searchActionLabel: t.search,
+              stashAction: onStash,
+              stashActionLabel: t.stash,
+              allowCopy: true,
+              allowSelectAll: true,
+              allowCut: true,
+              allowPaste: true,
+            ),
             onSelectionChanged: (selection, cause) {
               if (!selection.isCollapsed &&
                   cause == SelectionChangedCause.tap) {
-                String searchTerm = widget.entry.compactDefinitions
-                    .substring(selection.baseOffset);
+                String searchTerm =
+                    entry.compactDefinitions.substring(selection.baseOffset);
 
                 int whitespaceOffset =
                     searchTerm.length - searchTerm.trimLeft().length;
@@ -124,34 +101,35 @@ class _DictionaryEntryPageState extends BasePageState<DictionaryEntryPage> {
       ),
     );
   }
+}
 
-  /// Fetches the tag widgets for a [DictionaryEntry].
-  List<Widget> getTagsForEntry() {
-    String dictionaryImportTag = appModel.translate('dictionary_import_tag');
+class _DictionaryEntryTagsWrap extends ConsumerWidget {
+  const _DictionaryEntryTagsWrap({
+    required this.entry,
+  });
 
-    List<Widget> tagWidgets = [];
+  final DictionaryEntry entry;
 
-    Dictionary dictionary = widget.entry.dictionary.value!;
-
-    tagWidgets.add(
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    Dictionary dictionary = entry.dictionary.value!;
+    List<Widget> children = [
       JidoujishoTag(
         text: dictionary.name,
-        message: dictionaryImportTag.replaceAll(
-          '%dictionaryName%',
-          dictionary.name,
-        ),
+        message: t.dictionary_import_tag(name: dictionary.name),
         backgroundColor: Colors.red.shade900,
       ),
+      ...entry.tags.map((tag) {
+        return JidoujishoTag(
+          text: tag.name,
+          message: tag.notes,
+          backgroundColor: tag.color,
+        );
+      })
+    ];
+
+    return Wrap(
+      children: children,
     );
-
-    tagWidgets.addAll(widget.entry.tags.map((tag) {
-      return JidoujishoTag(
-        text: tag.name,
-        message: tag.notes,
-        backgroundColor: tag.color,
-      );
-    }).toList());
-
-    return tagWidgets;
   }
 }

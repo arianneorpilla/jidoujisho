@@ -45,9 +45,9 @@ class PlayerSourcePage extends BaseSourcePage {
 
 class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     with TickerProviderStateMixin, WidgetsBindingObserver {
-  String get playLabel => appModel.translate('player_play');
-  String get pauseLabel => appModel.translate('player_pause');
-  String get replayLabel => appModel.translate('player_replay');
+  String get playLabel => appModel.translate('play');
+  String get pauseLabel => appModel.translate('pause');
+  String get replayLabel => appModel.translate('replay');
   String get playerOptionSelectAudio =>
       appModel.translate('player_option_select_audio');
   String get playerOptionSelectSubtitle =>

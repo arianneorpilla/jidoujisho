@@ -33,7 +33,7 @@ class _SubtitleOptionsDialogPage
       appModel.translate('player_option_font_size');
   String get playerOptionRegexFilter =>
       appModel.translate('player_option_regex_filter');
-  String get dialogCancelLabel => appModel.translate('dialog_cancel');
+
   String get dialogSaveLabel => appModel.translate('dialog_save');
   String get dialogSetLabel => appModel.translate('dialog_set');
   String get resetLabel => appModel.translate('reset');
@@ -303,19 +303,9 @@ class _SubtitleOptionsDialogPage
   }
 
   List<Widget> get actions => [
-        buildCancelButton(),
         buildSaveButton(),
         buildSetButton(),
       ];
-
-  Widget buildCancelButton() {
-    return TextButton(
-      child: Text(
-        dialogCancelLabel,
-      ),
-      onPressed: executeCancel,
-    );
-  }
 
   Widget buildSaveButton() {
     return TextButton(

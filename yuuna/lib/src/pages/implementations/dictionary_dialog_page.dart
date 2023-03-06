@@ -131,6 +131,7 @@ class _DictionaryDialogPageState extends BasePageState {
         dialogClearLabel,
         style: const TextStyle(
           color: Colors.red,
+          fontWeight: FontWeight.w500,
         ),
       ),
       onPressed: showDictionaryDeleteDialog,

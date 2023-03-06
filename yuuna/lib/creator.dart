@@ -16,6 +16,7 @@ export 'src/creator/actions/instant_export_action.dart';
 export 'src/creator/actions/add_to_stash_action.dart';
 export 'src/creator/actions/share_action.dart';
 export 'src/creator/actions/play_audio_action.dart';
+export 'src/creator/actions/character_search_action.dart';
 
 export 'src/creator/enhancements/clear_field_enhancement.dart';
 export 'src/creator/enhancements/massif_example_sentences_enhancement.dart';
@@ -30,6 +31,8 @@ export 'src/creator/enhancements/camera_enhancement.dart';
 export 'src/creator/enhancements/forvo_audio_enhancement.dart';
 export 'src/creator/enhancements/image_search_term_picker_enhancement.dart';
 export 'src/creator/enhancements/immersion_kit_enhancement.dart';
+export 'src/creator/enhancements/pick_audio_enhancement.dart';
+export 'src/creator/enhancements/audio_recorder_enhancement.dart';
 
 export 'src/creator/fields/sentence_field.dart';
 export 'src/creator/fields/meaning_field.dart';

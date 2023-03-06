@@ -535,9 +535,13 @@ class AppModel with ChangeNotifier {
         ClearFieldEnhancement(field: AudioField.instance),
         JapanesePod101AudioEnhancement(),
         ForvoAudioEnhancement(),
+        PickAudioEnhancement(field: AudioField.instance),
+        AudioRecorderEnhancement(field: AudioField.instance),
       ],
       AudioSentenceField.instance: [
         ClearFieldEnhancement(field: AudioSentenceField.instance),
+        PickAudioEnhancement(field: AudioSentenceField.instance),
+        AudioRecorderEnhancement(field: AudioSentenceField.instance),
       ],
       NotesField.instance: [
         ClearFieldEnhancement(field: NotesField.instance),
@@ -626,6 +630,7 @@ class AppModel with ChangeNotifier {
       AddToStashAction(),
       ShareAction(),
       PlayAudioAction(),
+      CharacterSearchAction(),
     ];
 
     quickActions = Map<String, QuickAction>.unmodifiable(
@@ -1918,6 +1923,7 @@ class AppModel with ChangeNotifier {
   /// A helper function for opening a text segmentation dialog.
   Future<void> openTextSegmentationDialog({
     required String sourceText,
+    List<String>? segmentedText,
     Function(String, List<String>)? onSelect,
     Function(String, List<String>)? onSearch,
   }) async {
@@ -1925,7 +1931,7 @@ class AppModel with ChangeNotifier {
       return;
     }
 
-    List<String> segmentedText = targetLanguage.textToWords(sourceText);
+    segmentedText ??= targetLanguage.textToWords(sourceText);
     if (targetLanguage.isSpaceDelimited) {
       segmentedText = segmentedText.where((e) => e != ' ').toList();
     }
@@ -1934,7 +1940,7 @@ class AppModel with ChangeNotifier {
       context: _navigatorKey.currentContext!,
       builder: (context) => TextSegmentationDialogPage(
         sourceText: sourceText,
-        segmentedText: segmentedText,
+        segmentedText: segmentedText!,
         onSelect: onSelect,
         onSearch: onSearch,
       ),
@@ -2708,6 +2714,7 @@ class AppModel with ChangeNotifier {
     MediaType mediaType = mediaTypes.values.toList()[currentHomeTabIndex];
     if (mediaType != DictionaryMediaType.instance) {
       shouldRefreshTabs = true;
+      DictionaryMediaType.instance.scrollController.jumpTo(0);
     }
 
     if (result.headings.isEmpty || result.searchTerm.isEmpty) {
@@ -2729,11 +2736,8 @@ class AppModel with ChangeNotifier {
       int surplus = countInSameHistory - maximumDictionaryHistoryItems;
 
       _dictionaryHistory
-          .deleteAll(_dictionaryHistory.values.toList().sublist(0, surplus));
+          .deleteAll(_dictionaryHistory.keys.toList().sublist(0, surplus));
     }
-
-    DictionaryMediaType.instance.scrollController.jumpTo(0);
-    dictionaryEntriesNotifier.notifyListeners();
   }
 
   /// Adds a [DictionarySearchResult] to dictionary history.

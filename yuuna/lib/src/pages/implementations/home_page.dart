@@ -110,7 +110,7 @@ class _HomePageState extends BasePageState<HomePage>
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
-        resizeToAvoidBottomInset: true,
+        resizeToAvoidBottomInset: false,
         appBar: buildAppBar(),
         body: buildBody(),
         bottomNavigationBar: buildBottomNavigationBar(),

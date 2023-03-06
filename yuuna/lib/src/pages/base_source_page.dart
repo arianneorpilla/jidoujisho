@@ -333,7 +333,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
     }
 
     return DictionaryResultPage(
-      entryOpacity: dictionaryEntryOpacity,
+      opacity: dictionaryEntryOpacity,
       key: ValueKey(_dictionaryResultNotifier.value),
       onSearch: onSearch,
       onStash: onStash,
