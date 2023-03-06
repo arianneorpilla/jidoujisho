@@ -67,21 +67,19 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
       return buildCard();
     }
 
-    return FrameSeparateWidget(
-      child: GestureDetector(
-        child: buildCard(),
-        onHorizontalDragEnd: (details) async {
-          if (details.primaryVelocity == 0) {
-            return;
-          }
+    return GestureDetector(
+      child: buildCard(),
+      onHorizontalDragEnd: (details) async {
+        if (details.primaryVelocity == 0) {
+          return;
+        }
 
-          if (details.primaryVelocity!.compareTo(0) == -1) {
-            widget.onScrollRight?.call();
-          } else {
-            widget.onScrollLeft?.call();
-          }
-        },
-      ),
+        if (details.primaryVelocity!.compareTo(0) == -1) {
+          widget.onScrollRight?.call();
+        } else {
+          widget.onScrollLeft?.call();
+        }
+      },
     );
   }
 
@@ -103,6 +101,8 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
   Widget buildCard() {
     List<Widget> termTags = getTagsForTerm();
 
+    bool isPipMode = appModel.isPipMode;
+
     return Card(
       color: appModel.isDarkMode
           ? Color.fromRGBO(15, 15, 15, widget.entryOpacity)
@@ -117,6 +117,7 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
           bottom: Spacing.of(context).spaces.normal,
         ),
         child: CustomScrollView(
+          cacheExtent: 99999999999999,
           shrinkWrap: true,
           primary: false,
           physics: const NeverScrollableScrollPhysics(),
@@ -126,12 +127,12 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
             ),
             if (termTags.isNotEmpty)
               const SliverToBoxAdapter(child: Space.normal()),
-            if (termTags.isNotEmpty)
+            if (!isPipMode && termTags.isNotEmpty)
               SliverToBoxAdapter(child: Wrap(children: termTags)),
             const SliverToBoxAdapter(child: Space.normal()),
-            buildFreqEntries(),
-            buildPitchEntries(),
-            const SliverToBoxAdapter(child: Space.normal()),
+            if (!isPipMode) buildFreqEntries(),
+            if (!isPipMode) buildPitchEntries(),
+            if (!isPipMode) const SliverToBoxAdapter(child: Space.normal()),
             buildEntries(),
             SliverToBoxAdapter(
               child: (widget.footerWidget != null)
@@ -350,22 +351,23 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
   Widget buildTopRow() {
     return FloatColumn(
       children: [
-        Floatable(
-          float: FCFloat.end,
-          padding: EdgeInsets.only(
-            top: Spacing.of(context).spaces.small,
-            right: Spacing.of(context).spaces.small,
-            bottom: Spacing.of(context).spaces.small,
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.end,
-            mainAxisSize: MainAxisSize.min,
-            children: buildQuickActions(
-              lastSelectedMapping: widget.lastSelectedMapping,
+        if (!appModel.isPipMode)
+          Floatable(
+            float: FCFloat.end,
+            padding: EdgeInsets.only(
+              top: Spacing.of(context).spaces.small,
+              right: Spacing.of(context).spaces.small,
+              bottom: Spacing.of(context).spaces.small,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: buildQuickActions(
+                lastSelectedMapping: widget.lastSelectedMapping,
+              ),
             ),
           ),
-        ),
         Floatable(
           float: FCFloat.start,
           child: GestureDetector(
@@ -390,20 +392,22 @@ class _DictionaryTermPageState extends BasePageState<DictionaryTermPage> {
     entries.sort((a, b) =>
         a.dictionary.value!.order.compareTo(b.dictionary.value!.order));
 
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          DictionaryEntry entry = entries[index];
+    return SizeCacheWidget(
+      child: SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            DictionaryEntry entry = entries[index];
 
-          return DictionaryEntryPage(
-            entry: entry,
-            onSearch: widget.onSearch,
-            onStash: widget.onStash,
-            expandableController:
-                widget.expandableControllers[entry.dictionary.value!]!,
-          );
-        },
-        childCount: entries.length,
+            return DictionaryEntryPage(
+              entry: entry,
+              onSearch: widget.onSearch,
+              onStash: widget.onStash,
+              expandableController:
+                  widget.expandableControllers[entry.dictionary.value!]!,
+            );
+          },
+          childCount: entries.length,
+        ),
       ),
     );
   }

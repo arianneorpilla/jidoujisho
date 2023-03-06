@@ -14,6 +14,7 @@ class DictionaryResultPage extends BasePage {
     required this.result,
     required this.onSearch,
     required this.onStash,
+    this.scrollController,
     this.entryOpacity = 1,
     this.updateHistory = true,
     this.spaceBeforeFirstResult = true,
@@ -38,6 +39,9 @@ class DictionaryResultPage extends BasePage {
   /// Opacity for entries.
   final double entryOpacity;
 
+  /// Allows controlling the scroll position of the page.
+  final ScrollController? scrollController;
+
   @override
   BasePageState<DictionaryResultPage> createState() =>
       _DictionaryResultPageState();
@@ -48,6 +52,8 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
   void initState() {
     super.initState();
     appModelNoUpdate.dictionaryMenuNotifier.addListener(dumpCache);
+
+    _scrollController = widget.scrollController ?? ScrollController();
   }
 
   void dumpCache() {
@@ -68,7 +74,7 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
     setState(() {});
   }
 
-  final ScrollController _scrollController = ScrollController();
+  late ScrollController _scrollController;
 
   @override
   Widget build(BuildContext context) {
@@ -97,6 +103,7 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
     }
 
     return MediaQuery(
+      key: ValueKey(widget.result.id),
       data: MediaQuery.of(context).removePadding(
         removeTop: true,
         removeBottom: true,
@@ -109,42 +116,42 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
         controller: _scrollController,
         child: Padding(
           padding: Spacing.of(context).insets.onlyRight.extraSmall,
-          child: SizeCacheWidget(
-            child: CustomScrollView(
-              cacheExtent: 99999999999999,
-              controller: _scrollController,
-              physics: const AlwaysScrollableScrollPhysics(
-                parent: BouncingScrollPhysics(),
-              ),
-              slivers: [
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    childCount: headings.length + 1,
-                    (context, index) {
-                      if (index == 0) {
-                        return widget.spaceBeforeFirstResult
-                            ? const Space.normal()
-                            : const SizedBox.shrink();
-                      }
+          child: CustomScrollView(
+            cacheExtent: 99999999999999,
+            controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
+            slivers: [
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  childCount: headings.length + 1,
+                  (context, index) {
+                    if (index == 0) {
+                      return widget.spaceBeforeFirstResult
+                          ? const Space.normal()
+                          : const SizedBox.shrink();
+                    }
 
-                      DictionaryHeading heading = headings.elementAt(index - 1);
-                      Map<Dictionary, ExpandableController>
-                          expandableControllers =
-                          expandableControllersByHeading[heading]!;
+                    DictionaryHeading heading = headings.elementAt(index - 1);
+                    Map<Dictionary, ExpandableController>
+                        expandableControllers =
+                        expandableControllersByHeading[heading]!;
 
-                      return DictionaryTermPage(
+                    return FrameSeparateWidget(
+                      child: DictionaryTermPage(
                         lastSelectedMapping: lastSelectedMapping,
                         entryOpacity: widget.entryOpacity,
                         heading: heading,
                         onSearch: widget.onSearch,
                         onStash: widget.onStash,
                         expandableControllers: expandableControllers,
-                      );
-                    },
-                  ),
+                      ),
+                    );
+                  },
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

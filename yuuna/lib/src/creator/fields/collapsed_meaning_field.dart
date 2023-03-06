@@ -41,6 +41,9 @@ class CollapsedMeaningField extends Field {
             entry.dictionary.value!.collapsed)
         .toList();
 
+    collapsedEntries.sort((a, b) =>
+        a.dictionary.value!.order.compareTo(b.dictionary.value!.order));
+
     return MeaningField.flattenMeanings(
         entries: collapsedEntries,
         prependDictionaryNames:

@@ -13,6 +13,8 @@ import 'package:external_path/external_path.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_accessibility_service/accessibility_event.dart';
+import 'package:flutter_accessibility_service/flutter_accessibility_service.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
@@ -85,6 +87,32 @@ final appProvider = ChangeNotifierProvider<AppModel>((ref) {
   return AppModel();
 });
 
+/// A global [Provider] for listening to accessibility events in PIP mode.
+final accessibilityProvider = StreamProvider<AccessibilityEvent>((ref) {
+  return FlutterAccessibilityService.accessStream..asBroadcastStream();
+});
+
+/// A global [Provider] for listening to search results in PIP mode.
+final pipSearchResultProvider =
+    FutureProvider<DictionarySearchResult?>((ref) async {
+  AppModel appModel = ref.watch(appProvider);
+  int currentPosition = ref.watch(pipSearchPositionProvider);
+  String searchTerm = ref.watch(pipSearchTermProvider);
+  DictionarySearchResult result = await appModel.searchDictionary(
+    searchTerm: searchTerm.substring(currentPosition),
+    searchWithWildcards: false,
+  );
+  appModel.addToDictionaryHistory(result: result);
+
+  return result;
+});
+
+/// A global [Provider] for listening to search term changes in PIP mode.
+final pipSearchTermProvider = StateProvider<String>((ref) => '');
+
+/// A global [Provider] for listening to search term position changes in PIP mode.
+final pipSearchPositionProvider = StateProvider<int>((ref) => 0);
+
 /// A scoped model for parameters that affect the entire application.
 /// RiverPod is used for global state management across multiple layers,
 /// especially for preferences that persist across application restarts.
@@ -127,6 +155,13 @@ class AppModel with ChangeNotifier {
 
   /// Used to notify dictionary widgets to dictionary menu changes.
   final ChangeNotifier dictionaryMenuNotifier = ChangeNotifier();
+
+  /// Search term for picture-in-picture mode.
+  String pipSearchTerm = '';
+
+  /// Allows checking if the app is currently in PIP mode.
+  bool get isPipMode => _isPipMode;
+  bool _isPipMode = false;
 
   /// For refreshing on dictionary result additions.
   void refreshDictionaryHistory() {
@@ -232,6 +267,9 @@ class AppModel with ChangeNotifier {
 
   /// Used as the history key used for the Stash.
   final String stashKey = 'stash';
+
+  /// Used to check if the dictionary tab should be refreshed on switching tabs.
+  bool shouldRefreshTabs = false;
 
   /// Returns all dictionaries imported into the database. Sorted by the
   /// user-defined order in the dictionary menu.
@@ -2667,6 +2705,11 @@ class AppModel with ChangeNotifier {
 
   /// Adds a [DictionarySearchResult] to dictionary history.
   void addToDictionaryHistory({required DictionarySearchResult result}) async {
+    MediaType mediaType = mediaTypes.values.toList()[currentHomeTabIndex];
+    if (mediaType != DictionaryMediaType.instance) {
+      shouldRefreshTabs = true;
+    }
+
     if (result.headings.isEmpty || result.searchTerm.isEmpty) {
       return;
     }
@@ -2684,11 +2727,12 @@ class AppModel with ChangeNotifier {
 
     if (maximumDictionaryHistoryItems < countInSameHistory) {
       int surplus = countInSameHistory - maximumDictionaryHistoryItems;
-      List<int> toDelete =
-          _dictionaryHistory.values.toList().sublist(0, surplus);
-      _dictionaryHistory.deleteAll(toDelete);
+
+      _dictionaryHistory
+          .deleteAll(_dictionaryHistory.values.toList().sublist(0, surplus));
     }
 
+    DictionaryMediaType.instance.scrollController.jumpTo(0);
     dictionaryEntriesNotifier.notifyListeners();
   }
 
@@ -2705,5 +2749,60 @@ class AppModel with ChangeNotifier {
             .where((frequency) => !frequency.dictionary.value!.hidden)
             .toList() ??
         [];
+  }
+
+  StreamSubscription<AccessibilityEvent>? _accessibilityStream;
+
+  /// Cancels the listener for OS accessibility events in PIP mode.
+  void cancelAccessibilityStream() {
+    _isPipMode = false;
+    _accessibilityStream?.cancel();
+  }
+
+  /// Switches the app to PIP mode.
+  void usePictureInPicture({required WidgetRef ref}) async {
+    bool permissionGranted =
+        await FlutterAccessibilityService.isAccessibilityPermissionEnabled();
+    if (!permissionGranted) {
+      Fluttertoast.showToast(
+        msg: translate('accessibility'),
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+      );
+      await FlutterAccessibilityService.requestAccessibilityPermission();
+    }
+
+    ref.watch(pipSearchTermProvider.notifier).state = '';
+    ref.watch(pipSearchPositionProvider.notifier).state = 0;
+
+    _accessibilityStream =
+        FlutterAccessibilityService.accessStream.listen((event) {
+      bool shouldUpdateSearchTerm =
+          event.packageName == 'com.android.systemui' &&
+              event.contentChangeTypes.toString() ==
+                  'ContentChangeTypes.contentChangeTypeSubtree' &&
+              event.nodesText != null &&
+              event.nodesText!.length == 1 &&
+              !(event.isActive ?? false) &&
+              !(event.isFocused ?? false) &&
+              !(event.isPip ?? false);
+
+      if (shouldUpdateSearchTerm) {
+        String searchTerm = event.nodesText?.join().trim() ?? '';
+        if (ref.watch(pipSearchTermProvider.notifier).state != searchTerm) {
+          ref.watch(pipSearchTermProvider.notifier).state = searchTerm;
+          ref.watch(pipSearchPositionProvider.notifier).state = 0;
+        }
+      }
+    });
+
+    Navigator.push(
+      _navigatorKey.currentContext!,
+      MaterialPageRoute(
+        builder: (context) => const PipPage(),
+      ),
+    );
+
+    _isPipMode = true;
   }
 }

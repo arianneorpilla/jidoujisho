@@ -1,5 +1,7 @@
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:keframe/keframe.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
@@ -28,6 +30,72 @@ class DictionaryHistoryPage extends BasePage {
 }
 
 class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
+  @override
+  Widget build(BuildContext context) {
+    AnkiMapping lastSelectedMapping = appModel.lastSelectedMapping;
+
+    List<DictionarySearchResult> historyResults =
+        appModel.dictionaryHistory.reversed.toList();
+
+    return SizeCacheWidget(
+      child: ListView.builder(
+        cacheExtent: 99999999999999,
+        controller: DictionaryMediaType.instance.scrollController,
+        physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics()),
+        itemCount: historyResults.length + 1,
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            return const SizedBox(height: 60);
+          }
+
+          DictionarySearchResult result = historyResults[index - 1];
+
+          return _DictionaryHistoryScrollableItem(
+            key: GlobalObjectKey(result.searchTerm),
+            result: result,
+            onSearch: widget.onSearch,
+            onStash: widget.onStash,
+            lastSelectedMapping: lastSelectedMapping,
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _DictionaryHistoryScrollableItem extends BasePage {
+  const _DictionaryHistoryScrollableItem({
+    required this.result,
+    required this.onStash,
+    required this.onSearch,
+    required this.lastSelectedMapping,
+    super.key,
+  });
+
+  /// The result pertaining to this item.
+  final DictionarySearchResult result;
+
+  /// Action to be done upon selecting the search option.
+  final Function(String) onSearch;
+
+  /// Action to be done upon selecting the stash option.
+  final Function(String) onStash;
+
+  /// The current mapping.
+  final AnkiMapping lastSelectedMapping;
+
+  @override
+  _DictionaryHistoryScrollableItemState createState() =>
+      _DictionaryHistoryScrollableItemState();
+}
+
+class _DictionaryHistoryScrollableItemState
+    extends BasePageState<_DictionaryHistoryScrollableItem>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   String get searchLabelBefore => appModel.translate('search_label_before');
   String get searchLabelMiddle => appModel.translate('search_label_middle');
   String get searchLabelFrom => appModel.translate('search_label_from');
@@ -36,104 +104,87 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    AnkiMapping lastSelectedMapping = appModel.lastSelectedMapping;
+    super.build(context);
 
-    List<DictionarySearchResult> historyResults =
-        appModel.dictionaryHistory.reversed.toList();
+    DictionarySearchResult result = widget.result;
+    Map<int, DictionaryHeading> headingsById = Map.fromEntries(
+      result.headings.map(
+        (heading) => MapEntry(heading.id, heading),
+      ),
+    );
 
-    return ListView.builder(
-      cacheExtent: 99999999999999,
-      controller: DictionaryMediaType.instance.scrollController,
-      physics:
-          const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-      itemCount: historyResults.length + 1,
-      itemBuilder: (context, index) {
-        if (index == 0) {
-          return const SizedBox(height: 60);
-        }
+    List<DictionaryHeading> headings =
+        result.headingIds.map((id) => headingsById[id]!).toList();
 
-        DictionarySearchResult result = historyResults[index - 1];
-        Map<int, DictionaryHeading> headingsById = Map.fromEntries(
-          result.headings.map(
-            (heading) => MapEntry(heading.id, heading),
-          ),
+    final Map<DictionaryHeading, Map<Dictionary, ExpandableController>>
+        expandableControllersByHeading = {};
+    for (DictionaryHeading heading in headings) {
+      expandableControllersByHeading.putIfAbsent(heading, () => {});
+      for (DictionaryEntry entry in heading.entries) {
+        Dictionary dictionary = entry.dictionary.value!;
+        expandableControllersByHeading[heading]?.putIfAbsent(
+          dictionary,
+          () => ExpandableController(initialExpanded: !dictionary.collapsed),
         );
+      }
+    }
 
-        List<DictionaryHeading> headings =
-            result.headingIds.map((id) => headingsById[id]!).toList();
+    ValueNotifier<int> indexNotifier =
+        ValueNotifier<int>(result.scrollPosition);
 
-        final Map<DictionaryHeading, Map<Dictionary, ExpandableController>>
-            expandableControllersByHeading = {};
-        for (DictionaryHeading heading in headings) {
-          expandableControllersByHeading.putIfAbsent(heading, () => {});
-          for (DictionaryEntry entry in heading.entries) {
-            Dictionary dictionary = entry.dictionary.value!;
-            expandableControllersByHeading[heading]?.putIfAbsent(
-              dictionary,
-              () =>
-                  ExpandableController(initialExpanded: !dictionary.collapsed),
-            );
-          }
-        }
+    return ValueListenableBuilder<int>(
+      valueListenable: indexNotifier,
+      builder: (context, value, child) {
+        DictionaryHeading heading = headings.elementAt(indexNotifier.value);
 
-        ValueNotifier<int> indexNotifier =
-            ValueNotifier<int>(result.scrollPosition);
+        Map<Dictionary, ExpandableController> expandableControllers =
+            expandableControllersByHeading[heading]!;
 
-        return ValueListenableBuilder<int>(
-          valueListenable: indexNotifier,
-          builder: (context, value, child) {
-            DictionaryHeading heading = headings.elementAt(indexNotifier.value);
+        return FrameSeparateWidget(
+          child: DictionaryTermPage(
+            lastSelectedMapping: widget.lastSelectedMapping,
+            heading: heading,
+            onSearch: widget.onSearch,
+            onStash: widget.onStash,
+            expandableControllers: expandableControllers,
+            onScrollRight: () async {
+              if (result.scrollPosition == headings.length - 1) {
+                result.scrollPosition = 0;
+              } else {
+                result.scrollPosition += 1;
+              }
 
-            Map<Dictionary, ExpandableController> expandableControllers =
-                expandableControllersByHeading[heading]!;
-
-            return DictionaryTermPage(
-              lastSelectedMapping: lastSelectedMapping,
-              heading: heading,
-              onSearch: widget.onSearch,
-              onStash: widget.onStash,
-              expandableControllers: expandableControllers,
-              onScrollRight: () async {
-                if (result.scrollPosition == headings.length - 1) {
-                  result.scrollPosition = 0;
-                } else {
-                  result.scrollPosition += 1;
-                }
-
-                await appModel.updateDictionaryResultScrollIndex(
-                  result: result,
-                  newIndex: result.scrollPosition,
-                );
-
-                indexNotifier.value = result.scrollPosition;
-              },
-              onScrollLeft: () async {
-                if (result.scrollPosition == 0) {
-                  result.scrollPosition = headings.length - 1;
-                } else {
-                  result.scrollPosition -= 1;
-                }
-
-                await appModel.updateDictionaryResultScrollIndex(
-                  result: result,
-                  newIndex: result.scrollPosition,
-                );
-
-                indexNotifier.value = result.scrollPosition;
-              },
-              footerWidget: buildFooterWidget(
+              await appModel.updateDictionaryResultScrollIndex(
                 result: result,
-                length: headings.length,
-                index: indexNotifier.value,
-              ),
-            );
-          },
+                newIndex: result.scrollPosition,
+              );
+
+              indexNotifier.value = result.scrollPosition;
+            },
+            onScrollLeft: () async {
+              if (result.scrollPosition == 0) {
+                result.scrollPosition = headings.length - 1;
+              } else {
+                result.scrollPosition -= 1;
+              }
+
+              await appModel.updateDictionaryResultScrollIndex(
+                result: result,
+                newIndex: result.scrollPosition,
+              );
+
+              indexNotifier.value = result.scrollPosition;
+            },
+            footerWidget: buildFooterWidget(
+              result: result,
+              length: headings.length,
+              index: indexNotifier.value,
+            ),
+          ),
         );
       },
     );
   }
-
-  double get fontSize => (textTheme.labelMedium?.fontSize)! * 0.9;
 
   Widget buildFooterWidget({
     required DictionarySearchResult result,
@@ -160,6 +211,8 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
       ),
     );
   }
+
+  double get fontSize => (textTheme.labelMedium?.fontSize)! * 0.9;
 
   Widget buildFooterTextSpans({
     required DictionarySearchResult result,
