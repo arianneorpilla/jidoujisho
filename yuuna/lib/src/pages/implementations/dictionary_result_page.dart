@@ -116,7 +116,6 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
           padding: Spacing.of(context).insets.onlyRight.extraSmall,
           child: CustomScrollView(
             key: GlobalObjectKey(widget.result),
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             cacheExtent: 9999999999999,
             controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(
