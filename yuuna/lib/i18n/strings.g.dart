@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 313
+/// Strings: 314
 ///
-/// Built on 2023-03-06 at 11:58 UTC
+/// Built on 2023-03-06 at 14:10 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -460,6 +460,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get prepend_dictionary_names => 'Prepend dictionary name in meaning';
 	String get highlight_on_tap => 'Highlight text on tap';
 	String get no_audio_file => 'No audio file to save.';
+	String get storage_permissions => 'Please grant the following permissions for exporting to AnkiDroid.';
 	late final _StringsViewRepliesEn view_replies = _StringsViewRepliesEn._(_root);
 }
 
@@ -793,6 +794,7 @@ extension on _StringsEn {
 			case 'prepend_dictionary_names': return 'Prepend dictionary name in meaning';
 			case 'highlight_on_tap': return 'Highlight text on tap';
 			case 'no_audio_file': return 'No audio file to save.';
+			case 'storage_permissions': return 'Please grant the following permissions for exporting to AnkiDroid.';
 			case 'view_replies.reply': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
 				one: 'SHOW ${n} REPLY',
 				other: 'SHOW ${n} REPLIES',
