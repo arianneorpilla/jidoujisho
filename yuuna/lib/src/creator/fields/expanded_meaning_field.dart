@@ -40,6 +40,9 @@ class ExpandedMeaningField extends Field {
             !entry.dictionary.value!.collapsed)
         .toList();
 
+    expandedEntries.sort((a, b) =>
+        a.dictionary.value!.order.compareTo(b.dictionary.value!.order));
+
     return MeaningField.flattenMeanings(
         entries: expandedEntries,
         prependDictionaryNames:

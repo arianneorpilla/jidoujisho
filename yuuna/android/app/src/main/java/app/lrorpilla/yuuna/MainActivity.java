@@ -52,6 +52,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import com.ryanheise.audioservice.AudioServiceActivity;
+import cl.puntito.simple_pip_mode.PipCallbackHelper;
+import android.content.res.Configuration;
+import android.view.accessibility.AccessibilityEvent;
 
 public class MainActivity extends AudioServiceActivity {
     private static final String ANKIDROID_CHANNEL = "app.lrorpilla.yuuna/anki";
@@ -73,6 +76,11 @@ public class MainActivity extends AudioServiceActivity {
     private boolean deckExists(String deck) {
         Long deckId = mAnkiDroid.findDeckIdByName(deck);
         return (deckId != null);
+    }
+
+    @Override
+    public void onPictureInPictureModeChanged(boolean active, Configuration newConfig) {
+        callbackHelper.onPictureInPictureModeChanged(active);
     }
 
     private boolean modelExists(String model) {
@@ -194,10 +202,13 @@ public class MainActivity extends AudioServiceActivity {
         System.out.println("Deck: " + deckId);
     }
 
+    private final PipCallbackHelper callbackHelper = new PipCallbackHelper();
+
     @Override
     public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
-
         super.configureFlutterEngine(flutterEngine);
+        callbackHelper.configureFlutterEngine(flutterEngine);
+
         new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), ANKIDROID_CHANNEL)
             .setMethodCallHandler(
                 (call, result) -> {

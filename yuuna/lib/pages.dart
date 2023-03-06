@@ -50,6 +50,7 @@ export 'src/pages/implementations/immersion_kit_sentences_dialog_page.dart';
 export 'src/pages/implementations/ttu_settings_dialog_page.dart';
 export 'src/pages/implementations/dictionary_settings_dialog_page.dart';
 export 'src/pages/implementations/reader_clipboard_page.dart';
+export 'src/pages/implementations/pip_page.dart';
 
 export 'src/pages/base_page.dart';
 export 'src/pages/base_history_page.dart';

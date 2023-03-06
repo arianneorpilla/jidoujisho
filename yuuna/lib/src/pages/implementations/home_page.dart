@@ -32,6 +32,7 @@ class _HomePageState extends BasePageState<HomePage>
   String get optionsToggleLight => appModel.translate('options_theme_light');
   String get optionsIncognitoOn => appModel.translate('options_incognito_on');
   String get optionsIncognitoOff => appModel.translate('options_incognito_off');
+  String get optionsPipMode => appModel.translate('options_pip_mode');
   String get optionsDictionaries => appModel.translate('options_dictionaries');
   String get optionsProfiles => appModel.translate('options_profiles');
   String get optionsEnhancements => appModel.translate('options_enhancements');
@@ -144,8 +145,8 @@ class _HomePageState extends BasePageState<HomePage>
   }
 
   void switchTab(int index) async {
+    MediaType mediaType = appModelNoUpdate.mediaTypes.values.toList()[index];
     if (index == currentHomeTabIndex) {
-      MediaType mediaType = appModelNoUpdate.mediaTypes.values.toList()[index];
       mediaType.floatingSearchBarController.close();
 
       if (mediaType.scrollController.hasClients) {
@@ -162,6 +163,11 @@ class _HomePageState extends BasePageState<HomePage>
     } else {
       await appModel.setCurrentHomeTabIndex(index);
       setState(() {});
+
+      if (mediaType is DictionaryMediaType && appModel.shouldRefreshTabs) {
+        appModel.shouldRefreshTabs = false;
+        mediaType.refreshTab();
+      }
     }
   }
 
@@ -330,6 +336,14 @@ class _HomePageState extends BasePageState<HomePage>
         icon: appModel.isDarkMode ? Icons.light_mode : Icons.dark_mode,
         action: appModel.toggleDarkMode,
       ),
+      if ((appModel.androidDeviceInfo.version.sdkInt ?? 0) >= 33)
+        buildPopupItem(
+          label: optionsPipMode,
+          icon: Icons.picture_in_picture,
+          action: () {
+            appModel.usePictureInPicture(ref: ref);
+          },
+        ),
       buildPopupItem(
         label: optionsDictionaries,
         icon: Icons.auto_stories_rounded,

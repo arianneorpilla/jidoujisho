@@ -82,6 +82,7 @@ class JidoujishoLocalisations {
     'options_theme_dark': 'Use dark theme',
     'options_incognito_on': 'Turn on incognito mode',
     'options_incognito_off': 'Turn off incognito mode',
+    'options_pip_mode': 'Enter picture-in-picture',
     'options_dictionaries': 'Manage dictionaries',
     'options_profiles': 'Export profiles',
     'options_enhancements': 'User enhancements',
@@ -375,5 +376,7 @@ class JidoujishoLocalisations {
     'comments': 'Comments',
     'no_comments_queried': 'No comments queried',
     'replies': 'Replies',
+    'accessibility':
+        'Permission is required to capture text from accessibility events.'
   };
 }

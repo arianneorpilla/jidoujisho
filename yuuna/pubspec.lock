@@ -234,6 +234,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.3"
+  clipboard_listener:
+    dependency: "direct main"
+    description:
+      name: clipboard_listener
+      sha256: "2b014fc8238b7d05287f16ebbe3bb6d6df505b3d98cd1c370f7f88e114de839c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   clock:
     dependency: transitive
     description:
@@ -394,6 +402,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  easy_pip:
+    dependency: "direct main"
+    description:
+      name: easy_pip
+      sha256: f361b0e664d8415e682fa7dcd440ec4d244e0ee8ae47d519520078bd0fff8900
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   equatable:
     dependency: transitive
     description:
@@ -544,6 +560,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_accessibility_service:
+    dependency: "direct main"
+    description:
+      name: flutter_accessibility_service
+      sha256: "789ca251c435e402be798854c3cb7e480fdad0ad51bbe0c6f8946372eeb03d81"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.2"
   flutter_archive:
     dependency: "direct main"
     description:
@@ -1564,6 +1588,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
+  simple_pip_mode:
+    dependency: "direct main"
+    description:
+      name: simple_pip_mode
+      sha256: "89f8137fa5a8d113f39c61007d4b658048a9359362447b8cfb8bce93631882ad"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.8.0"
   sky_engine:
     dependency: transitive
     description: flutter

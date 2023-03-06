@@ -23,6 +23,7 @@
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
+            android:supportsPictureInPicture="true"
             android:windowSoftInputMode="adjustResize">
             <!-- Specifies an Android theme to apply to this Activity as soon as
                     the Android process has started. This theme is visible to the user
@@ -102,6 +103,13 @@
             <intent-filter>
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
+        </service>
+            <service android:name="slayer.accessibility.service.flutter_accessibility_service.AccessibilityListener"
+                    android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" android:exported="false">
+        <intent-filter>
+            <action android:name="android.accessibilityservice.AccessibilityService" />
+        </intent-filter>
+        <meta-data android:name="android.accessibilityservice" android:resource="@xml/accessibilityservice" />
         </service>
          <service android:name="com.ryanheise.audioservice.AudioService"
             android:foregroundServiceType="mediaPlayback"

@@ -53,7 +53,10 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     appModelNoUpdate.dictionarySearchAgainNotifier.addListener(searchAgain);
     appModelNoUpdate.dictionaryEntriesNotifier.addListener(() {
       if (mediaType.floatingSearchBarController.isClosed) {
-        if (!appModel.isMediaOpen) {
+        if (!appModel.isMediaOpen &&
+            DictionaryMediaType.instance ==
+                appModel.mediaTypes.values
+                    .toList()[appModel.currentHomeTabIndex]) {
           setState(() {});
         }
       }
@@ -89,10 +92,6 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
   }
 
   Widget buildDictionaryHistory() {
-    if (mediaType.floatingSearchBarController.isOpen) {
-      return Container();
-    }
-
     return RawScrollbar(
       thumbVisibility: true,
       thickness: 3,
@@ -444,6 +443,15 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       searchTerm: searchTerm,
       killOnPop: false,
     );
+
+    Future.delayed(const Duration(milliseconds: 100), () {
+      Scrollable.ensureVisible(
+        GlobalObjectKey(searchTerm).currentContext!,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+      );
+    });
   }
 
   void onStash(String searchTerm) {

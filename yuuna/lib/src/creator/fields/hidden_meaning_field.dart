@@ -38,6 +38,9 @@ class HiddenMeaningField extends Field {
         .where((entry) => !entry.dictionary.value!.hidden)
         .toList();
 
+    hiddenEntries.sort((a, b) =>
+        a.dictionary.value!.order.compareTo(b.dictionary.value!.order));
+
     return MeaningField.flattenMeanings(
         entries: hiddenEntries,
         prependDictionaryNames:

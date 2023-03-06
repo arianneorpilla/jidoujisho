@@ -18,9 +18,11 @@ dependencies:
   change_notifier_builder: ^1.1.2
   characters: ^1.2.0
   clipboard: ^0.1.3
+  clipboard_listener: ^2.0.0
   copy_with_extension: ^5.0.2
   crop_image: ^1.0.2
   device_info_plus: ^3.2.3
+  easy_pip: ^0.1.0
   expandable: ^5.0.1
   external_app_launcher: ^2.0.2
   external_path: ^1.0.1
@@ -34,6 +36,7 @@ dependencies:
   float_column: ^1.2.1
   flutter:
     sdk: flutter
+  flutter_accessibility_service: ^0.2.2
   flutter_archive: ^5.0.0
   flutter_cache_manager: ^3.3.0
   flutter_charset_detector: ^1.0.2
@@ -97,6 +100,7 @@ dependencies:
   scrollable_positioned_list: ^0.3.2
   settings_ui: ^2.0.2
   share_plus: ^4.0.4
+  simple_pip_mode: ^0.8.0
   slang: ^3.13.0
   slang_flutter: ^3.13.0
   spaces:
