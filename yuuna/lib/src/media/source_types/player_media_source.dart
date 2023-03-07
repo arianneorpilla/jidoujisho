@@ -211,7 +211,7 @@ abstract class PlayerMediaSource extends MediaSource {
 
     MediaSource source = item.getMediaSource(appModel: appModel);
     if (source is PlayerYoutubeSource) {
-      inputPath = await source.getAudioUrl(item);
+      inputPath = await source.getAudioUrl(item, playerController.dataSource);
       audioIndex = 0;
     }
 
