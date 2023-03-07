@@ -171,9 +171,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       return;
     }
 
-    if (mounted &&
-        _result?.searchTerm != query &&
-        mediaType.floatingSearchBarController.query == query) {
+    if (mounted) {
       search(query);
     }
   }
@@ -198,11 +196,12 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       );
     } finally {
       if (_result != null) {
-        if (_result!.searchTerm ==
-            mediaType.floatingSearchBarController.query) {
+        if (query == mediaType.floatingSearchBarController.query) {
+          setState(() {
+            _isSearching = false;
+          });
           Future.delayed(historyDelay, () async {
-            if (_result!.searchTerm ==
-                mediaType.floatingSearchBarController.query) {
+            if (query == mediaType.floatingSearchBarController.query) {
               appModel.addToSearchHistory(
                 historyKey: mediaType.uniqueKey,
                 searchTerm: mediaType.floatingSearchBarController.query,
@@ -212,15 +211,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
               }
             }
           });
-
-          setState(() {
-            _isSearching = false;
-          });
         }
-      } else {
-        setState(() {
-          _isSearching = false;
-        });
       }
     }
   }
@@ -423,10 +414,13 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
         );
       }
     }
-    if (_isSearching ||
-        _result?.searchTerm != mediaType.floatingSearchBarController.query) {
+    if (_isSearching) {
       if (_result != null) {
-        return buildSearchResult();
+        if (_result!.headings.isNotEmpty) {
+          return buildSearchResult();
+        } else {
+          return buildNoSearchResultsPlaceholderMessage();
+        }
       } else {
         return const SizedBox.shrink();
       }

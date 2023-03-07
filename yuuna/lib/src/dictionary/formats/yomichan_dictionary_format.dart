@@ -373,16 +373,25 @@ Future<Map<DictionaryHeading, List<DictionaryFrequency>>>
               value: number.toDouble(),
               displayValue: number.toInt().toString(),
             );
-          } else if (data['frequency'] is double) {
+          } else if (data['frequency'] is num) {
+            num frequencyValue = data['frequency'];
             String reading = data['reading'] ?? '';
             heading = DictionaryHeading(
               term: term,
               reading: reading,
             );
-            frequency = DictionaryFrequency(
-              value: data['frequency'],
-              displayValue: data['frequency'].toString(),
-            );
+
+            if (frequencyValue % 1 == 0) {
+              frequency = DictionaryFrequency(
+                value: frequencyValue.toDouble(),
+                displayValue: frequencyValue.toInt().toString(),
+              );
+            } else {
+              frequency = DictionaryFrequency(
+                value: frequencyValue.toDouble(),
+                displayValue: frequencyValue.toDouble().toString(),
+              );
+            }
           }
         } else {
           heading = DictionaryHeading(term: term);

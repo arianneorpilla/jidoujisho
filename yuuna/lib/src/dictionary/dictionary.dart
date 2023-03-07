@@ -49,13 +49,22 @@ class Dictionary {
   /// Whether this dictionary is shown or not in search results.
   bool hidden;
 
-  /// A dictionary may have multiple values.
+  /// A dictionary may have multiple entries.
   @Backlink(to: 'dictionary')
   final IsarLinks<DictionaryEntry> entries = IsarLinks<DictionaryEntry>();
 
   /// A dictionary may have multiple tags.
   @Backlink(to: 'dictionary')
   final IsarLinks<DictionaryTag> tags = IsarLinks<DictionaryTag>();
+
+  /// A dictionary may have multiple pitch entries.
+  @Backlink(to: 'dictionary')
+  final IsarLinks<DictionaryPitch> pitches = IsarLinks<DictionaryPitch>();
+
+  /// A dictionary may have multiple frequency entries.
+  @Backlink(to: 'dictionary')
+  final IsarLinks<DictionaryFrequency> frequencies =
+      IsarLinks<DictionaryFrequency>();
 
   /// Returns the resource path for within the applications documents directory.
   String getBasePath({required String appDirDocPath}) {

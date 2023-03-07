@@ -57,7 +57,7 @@
     "dictionaries_delete_confirmation":
         "Deleting a dictionary will also clear all dictionary results from history. Are you sure you want to do this?",
     "mappings_delete_confirmation": "This profile will be deleted. Are you sure you want to do this?",
-    "dictionaries_deleting_entries": "Deleting dictionary entries...",
+    "dictionaries_deleting_data": "Deleting dictionary data...",
     "dictionaries_menu_empty": "Import a dictionary for use",
     "options_theme_light": "Use light theme",
     "options_theme_dark": "Use dark theme",
@@ -98,6 +98,8 @@
     "import_duplicate": "A dictionary with the name『$name』is already imported.",
     "dialog_title_dictionary_clear": "Clear all dictionaries?",
     "dialog_content_dictionary_clear": "Wiping the dictionary database will also clear all search results in history.",
+    "dialog_title_dictionary_delete": "Delete 『$name』?",
+    "dialog_content_dictionary_delete": "Deleting a single dictionary may take longer than clearing the entire dictionary database. This will also clear all search results in history.",
     "delete_dictionary_data": "Clearing all dictionary data...",
     "dictionary_tag": "Imported from $name",
     "legalese": "A full-featured immersion language learning suite for mobile.\n\nOriginally built for the Japanese language learning community by Leo Rafael Orpilla. Logo by suzy and Aaron Marbella.\n\njidoujisho is free and open source software. See the project repository for a comprehensive list of other licenses and attribution notices. Enjoying the application? Help out by providing feedback, making a donation, reporting issues or contributing improvements on GitHub.",

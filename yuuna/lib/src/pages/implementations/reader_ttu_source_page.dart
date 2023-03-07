@@ -87,7 +87,6 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
   @override
   void clearDictionaryResult() async {
     super.clearDictionaryResult();
-
     unselectWebViewTextSelection(_controller);
   }
 
@@ -354,29 +353,53 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
           }
         }
 
-        if (text.isEmpty || index == text.length) {
+        if (text.isEmpty || index == -1) {
           clearDictionaryResult();
           mediaSource.clearCurrentSentence();
-        } else {
-          try {
-            bool isSpaceDelimited = appModel.targetLanguage.isSpaceDelimited;
+          return;
+        }
 
-            String searchTerm = appModel.targetLanguage.getSearchTermFromIndex(
-              text: text,
-              index: index,
+        try {
+          bool isSpaceDelimited = appModel.targetLanguage.isSpaceDelimited;
+
+          String searchTerm = appModel.targetLanguage.getSearchTermFromIndex(
+            text: text,
+            index: index,
+          );
+          int whitespaceOffset =
+              searchTerm.length - searchTerm.trimLeft().length;
+
+          int offsetIndex = index + whitespaceOffset;
+
+          int length = appModel.targetLanguage
+              .textToWords(searchTerm)
+              .firstWhere((e) => e.trim().isNotEmpty)
+              .length;
+
+          if (mediaSource.highlightOnTap) {
+            await selectTextOnwards(
+              cursorX: x,
+              cursorY: y,
+              offsetIndex: offsetIndex,
+              length: length,
+              whitespaceOffset: whitespaceOffset,
+              isSpaceDelimited: isSpaceDelimited,
             );
-            int whitespaceOffset =
-                searchTerm.length - searchTerm.trimLeft().length;
+          }
 
-            int offsetIndex = index + whitespaceOffset;
-
-            int length = appModel.targetLanguage
-                .textToWords(searchTerm)
-                .firstWhere((e) => e.trim().isNotEmpty)
-                .length;
+          searchDictionaryResult(
+            searchTerm: searchTerm,
+            position: position,
+          ).then((_) {
+            int length = isSpaceDelimited
+                ? appModel.targetLanguage
+                    .textToWords(searchTerm)
+                    .firstWhere((e) => e.trim().isNotEmpty)
+                    .length
+                : max(1, currentResult?.bestLength ?? 0);
 
             if (mediaSource.highlightOnTap) {
-              await selectTextOnwards(
+              selectTextOnwards(
                 cursorX: x,
                 cursorY: y,
                 offsetIndex: offsetIndex,
@@ -385,40 +408,17 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
                 isSpaceDelimited: isSpaceDelimited,
               );
             }
-
-            searchDictionaryResult(
-              searchTerm: searchTerm,
-              position: position,
-            ).then((_) {
-              int length = isSpaceDelimited
-                  ? appModel.targetLanguage
-                      .textToWords(searchTerm)
-                      .firstWhere((e) => e.trim().isNotEmpty)
-                      .length
-                  : max(1, currentResult?.bestLength ?? 0);
-
-              if (mediaSource.highlightOnTap) {
-                selectTextOnwards(
-                  cursorX: x,
-                  cursorY: y,
-                  offsetIndex: offsetIndex,
-                  length: length,
-                  whitespaceOffset: whitespaceOffset,
-                  isSpaceDelimited: isSpaceDelimited,
-                );
-              }
-            });
-            String sentence = appModel.targetLanguage.getSentenceFromParagraph(
-              paragraph: text,
-              index: index,
-            );
-            mediaSource.setCurrentSentence(sentence.replaceAll('\\n', '\n'));
-          } catch (e) {
-            clearDictionaryResult();
-          } finally {
-            FocusScope.of(context).unfocus();
-            _focusNode.requestFocus();
-          }
+          });
+          String sentence = appModel.targetLanguage.getSentenceFromParagraph(
+            paragraph: text,
+            index: index,
+          );
+          mediaSource.setCurrentSentence(sentence.replaceAll('\\n', '\n'));
+        } catch (e) {
+          clearDictionaryResult();
+        } finally {
+          FocusScope.of(context).unfocus();
+          _focusNode.requestFocus();
         }
 
         break;
@@ -429,6 +429,7 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
       InAppWebViewController webViewController) async {
     String source = 'window.getSelection().removeAllRanges();';
     await webViewController.evaluateJavascript(source: source);
+    await webViewController.evaluateJavascript(source: 'lastIndex = -1;');
   }
 
   /// Get the default context menu for sources that make use of embedded web
@@ -554,8 +555,102 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
   /// https://github.com/birchill/10ten-ja-reader/blob/fbbbde5c429f1467a7b5a938e9d67597d7bd5ffa/src/content/get-text.ts#L314
   String javascriptToExecute = """
 /*jshint esversion: 6 */
+var lastIndex = -1;
+
 function tapToSelect(e) {
-  if (getSelectionText()) {
+  var result = document.caretRangeFromPoint(e.clientX, e.clientY);
+
+  if (e.target.classList.contains('book-content')) {
+    console.log(JSON.stringify({
+      "index": -1,
+      "text": getSelectionText(),
+      "jidoujisho-message-type": "lookup",
+      "x": e.clientX,
+      "y": e.clientY,
+      "isCreator": "no",
+    }));
+    return;
+  }
+
+  var selectedElement = result.startContainer;
+  var paragraph = result.startContainer;
+  var offsetNode = result.startContainer;
+  var offset = result.startOffset;
+
+  var adjustIndex = false;
+
+  if (!!offsetNode && offsetNode.nodeType === Node.TEXT_NODE && offset) {
+      const range = new Range();
+      range.setStart(offsetNode, offset - 1);
+      range.setEnd(offsetNode, offset);
+
+      const bbox = range.getBoundingClientRect();
+      if (bbox.left <= e.x && bbox.right >= e.x &&
+          bbox.top <= e.y && bbox.bottom >= e.y) {
+          
+          result.startOffset = result.startOffset - 1;
+          adjustIndex = true;
+      }
+    }
+  
+  
+  while (paragraph && paragraph.nodeName !== 'P') {
+    paragraph = paragraph.parentNode;
+  }
+  if (paragraph === null) {
+    paragraph = result.startContainer.parentNode;
+  }
+  var noFuriganaText = [];
+  var noFuriganaNodes = [];
+  var selectedFound = false;
+  var index = 0;
+  for (var value of paragraph.childNodes.values()) {
+    if (value.nodeName === "#text") {
+      noFuriganaText.push(value.textContent);
+      noFuriganaNodes.push(value);
+      if (selectedFound === false) {
+        if (selectedElement !== value) {
+          index = index + value.textContent.length;
+        } else {
+          index = index + result.startOffset;
+          selectedFound = true;
+        }
+      }
+    } else {
+      for (var node of value.childNodes.values()) {
+        if (node.nodeName === "#text") {
+          noFuriganaText.push(node.textContent);
+          noFuriganaNodes.push(node);
+          if (selectedFound === false) {
+            if (selectedElement !== node) {
+              index = index + node.textContent.length;
+            } else {
+              index = index + result.startOffset;
+              selectedFound = true;
+            }
+          }
+        } else if (node.firstChild.nodeName === "#text" && node.nodeName !== "RT" && node.nodeName !== "RP") {
+          noFuriganaText.push(node.firstChild.textContent);
+          noFuriganaNodes.push(node.firstChild);
+          if (selectedFound === false) {
+            if (selectedElement !== node.firstChild) {
+              index = index + node.firstChild.textContent.length;
+            } else {
+              index = index + result.startOffset;
+              selectedFound = true;
+            }
+          }
+        }
+      }
+    }
+  }
+  var text = noFuriganaText.join("");
+  var offset = index;
+  if (adjustIndex) {
+    index = index - 1;
+  }
+
+  if (lastIndex === index && getSelectionText()) {
     console.log(JSON.stringify({
 				"index": -1,
 				"text": getSelectionText(),
@@ -564,119 +659,28 @@ function tapToSelect(e) {
         "y": e.clientY,
         "isCreator": "no",
 			}));
+  }
+
+  var character = text[index];
+  if (character) {
+    lastIndex = index;
+    console.log(JSON.stringify({
+      "index": index,
+      "text": text,
+      "jidoujisho-message-type": "lookup",
+      "x": e.clientX,
+      "y": e.clientY,
+    }));
+    console.log(character);
   } else {
-    var result = document.caretRangeFromPoint(e.clientX, e.clientY);
-
-    if (e.target.classList.contains('book-content')) {
-      console.log(JSON.stringify({
-				"index": -1,
-				"text": getSelectionText(),
-				"jidoujisho-message-type": "lookup",
-        "x": e.clientX,
-        "y": e.clientY,
-        "isCreator": "no",
-			}));
-      return;
-    }
-
-    var selectedElement = result.startContainer;
-    var paragraph = result.startContainer;
-    var offsetNode = result.startContainer;
-    var offset = result.startOffset;
-
-    var adjustIndex = false;
-
-    if (!!offsetNode && offsetNode.nodeType === Node.TEXT_NODE && offset) {
-        const range = new Range();
-        range.setStart(offsetNode, offset - 1);
-        range.setEnd(offsetNode, offset);
-
-        const bbox = range.getBoundingClientRect();
-        if (bbox.left <= e.x && bbox.right >= e.x &&
-            bbox.top <= e.y && bbox.bottom >= e.y) {
-            
-            result.startOffset = result.startOffset - 1;
-            adjustIndex = true;
-        }
-      }
-    
-    
-    while (paragraph && paragraph.nodeName !== 'P') {
-      paragraph = paragraph.parentNode;
-    }
-    if (paragraph === null) {
-      paragraph = result.startContainer.parentNode;
-    }
-		var noFuriganaText = [];
-		var noFuriganaNodes = [];
-		var selectedFound = false;
-		var index = 0;
-		for (var value of paragraph.childNodes.values()) {
-			if (value.nodeName === "#text") {
-				noFuriganaText.push(value.textContent);
-				noFuriganaNodes.push(value);
-				if (selectedFound === false) {
-					if (selectedElement !== value) {
-						index = index + value.textContent.length;
-					} else {
-						index = index + result.startOffset;
-						selectedFound = true;
-					}
-				}
-			} else {
-				for (var node of value.childNodes.values()) {
-					if (node.nodeName === "#text") {
-						noFuriganaText.push(node.textContent);
-						noFuriganaNodes.push(node);
-						if (selectedFound === false) {
-							if (selectedElement !== node) {
-								index = index + node.textContent.length;
-							} else {
-								index = index + result.startOffset;
-								selectedFound = true;
-							}
-						}
-					} else if (node.firstChild.nodeName === "#text" && node.nodeName !== "RT" && node.nodeName !== "RP") {
-						noFuriganaText.push(node.firstChild.textContent);
-						noFuriganaNodes.push(node.firstChild);
-						if (selectedFound === false) {
-							if (selectedElement !== node.firstChild) {
-								index = index + node.firstChild.textContent.length;
-							} else {
-								index = index + result.startOffset;
-								selectedFound = true;
-							}
-						}
-					}
-				}
-			}
-		}
-		var text = noFuriganaText.join("");
-		var offset = index;
-    if (adjustIndex) {
-      index = index - 1;
-    }
-
-    var character = text[index];
-    if (character) {
-      console.log(JSON.stringify({
-				"index": index,
-				"text": text,
-				"jidoujisho-message-type": "lookup",
-        "x": e.clientX,
-        "y": e.clientY,
-			}));
-      console.log(character);
-    } else {
-      console.log(JSON.stringify({
-				"index": -1,
-				"text": getSelectionText(),
-				"jidoujisho-message-type": "lookup",
-        "x": e.clientX,
-        "y": e.clientY,
-        "isCreator": "no",
-			}));
-    }
+    console.log(JSON.stringify({
+      "index": -1,
+      "text": getSelectionText(),
+      "jidoujisho-message-type": "lookup",
+      "x": e.clientX,
+      "y": e.clientY,
+      "isCreator": "no",
+    }));
   }
 }
 function getSelectionText() {

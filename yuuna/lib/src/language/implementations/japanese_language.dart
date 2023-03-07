@@ -590,6 +590,16 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
     return headingOrders[a]!.compareTo(headingOrders[b]!);
   });
 
+  /// Prioritise kanji match.
+  if (searchTerm.length == 1 && kanaKit.isKanji(searchTerm)) {
+    DictionaryHeading? heading = database.dictionaryHeadings
+        .getSync(DictionaryHeading.hash(term: searchTerm, reading: ''));
+    if (heading != null && heading.entries.isNotEmpty) {
+      headings.remove(heading);
+      headings.insert(0, heading);
+    }
+  }
+
   headings = headings.sublist(
       0, min(headings.length, params.maximumDictionaryTermsInResult));
   List<int> headingIds = headings.map((e) => e.id).toList();

@@ -135,6 +135,12 @@ class _ReaderWebsocketPageState<ReaderLyricsPage> extends BaseSourcePageState {
               _lastTappedController?.clearSelection();
               _lastTappedController = controller;
 
+              if (controller.selection.start == index &&
+                  currentResult != null) {
+                clearDictionaryResult();
+                return;
+              }
+
               source.setCurrentSentence(text);
 
               double x = details.globalPosition.dx;

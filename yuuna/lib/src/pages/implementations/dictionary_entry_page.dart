@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,7 +11,7 @@ import 'package:yuuna/utils.dart';
 
 /// Returns the widget for a [DictionaryEntry] making up a collection of
 /// meanings.
-class DictionaryEntryPage extends ConsumerWidget {
+class DictionaryEntryPage extends ConsumerStatefulWidget {
   /// Create the widget for a dictionary entry.
   const DictionaryEntryPage({
     required this.entry,
@@ -32,11 +34,19 @@ class DictionaryEntryPage extends ConsumerWidget {
   final ExpandableController expandableController;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _DictionaryEntryPageState();
+}
+
+class _DictionaryEntryPageState extends ConsumerState<DictionaryEntryPage> {
+  @override
+  Widget build(BuildContext context) {
     AppModel appModel = ref.watch(appProvider);
 
     final SelectableTextController _selectableTextController =
         SelectableTextController();
+
+    bool _isSearching = false;
 
     return Padding(
       padding: EdgeInsets.only(
@@ -52,8 +62,8 @@ class DictionaryEntryPage extends ConsumerWidget {
           iconColor: Theme.of(context).unselectedWidgetColor,
           headerAlignment: ExpandablePanelHeaderAlignment.center,
         ),
-        controller: expandableController,
-        header: _DictionaryEntryTagsWrap(entry: entry),
+        controller: widget.expandableController,
+        header: _DictionaryEntryTagsWrap(entry: widget.entry),
         collapsed: const SizedBox.shrink(),
         expanded: Padding(
           padding: EdgeInsets.only(
@@ -61,39 +71,61 @@ class DictionaryEntryPage extends ConsumerWidget {
             left: Spacing.of(context).spaces.normal,
           ),
           child: SelectableText(
-            entry.compactDefinitions,
+            widget.entry.compactDefinitions,
             style: TextStyle(
               fontSize: appModel.dictionaryFontSize,
             ),
             controller: _selectableTextController,
             selectionControls: JidoujishoTextSelectionControls(
-              searchAction: onSearch,
+              searchAction: widget.onSearch,
               searchActionLabel: t.search,
-              stashAction: onStash,
+              stashAction: widget.onStash,
               stashActionLabel: t.stash,
               allowCopy: true,
               allowSelectAll: true,
               allowCut: true,
               allowPaste: true,
             ),
-            onSelectionChanged: (selection, cause) {
+            onSelectionChanged: (selection, cause) async {
               if (!selection.isCollapsed &&
-                  cause == SelectionChangedCause.tap) {
-                String searchTerm =
-                    entry.compactDefinitions.substring(selection.baseOffset);
+                  cause == SelectionChangedCause.tap &&
+                  !_isSearching) {
+                _isSearching = true;
+                try {
+                  String searchTerm = widget.entry.compactDefinitions
+                      .substring(selection.baseOffset);
 
-                int whitespaceOffset =
-                    searchTerm.length - searchTerm.trimLeft().length;
-                int offsetIndex = selection.baseOffset + whitespaceOffset;
-                int length = appModel.targetLanguage
-                    .textToWords(searchTerm)
-                    .firstWhere((e) => e.trim().isNotEmpty)
-                    .length;
+                  int whitespaceOffset =
+                      searchTerm.length - searchTerm.trimLeft().length;
+                  int offsetIndex = selection.baseOffset + whitespaceOffset;
+                  int length = appModel.targetLanguage
+                      .textToWords(searchTerm)
+                      .firstWhere((e) => e.trim().isNotEmpty)
+                      .length;
 
-                _selectableTextController.setSelection(
-                  offsetIndex,
-                  offsetIndex + length,
-                );
+                  _selectableTextController.setSelection(
+                    offsetIndex,
+                    offsetIndex + length,
+                  );
+
+                  DictionarySearchResult result =
+                      await appModel.searchDictionary(
+                    searchTerm: searchTerm,
+                    searchWithWildcards: false,
+                  );
+
+                  length = appModel.targetLanguage.isSpaceDelimited
+                      ? appModel.targetLanguage
+                          .textToWords(searchTerm)
+                          .firstWhere((e) => e.trim().isNotEmpty)
+                          .length
+                      : max(1, result.bestLength);
+
+                  _selectableTextController.setSelection(
+                      offsetIndex, offsetIndex + length);
+                } finally {
+                  _isSearching = false;
+                }
               }
             },
           ),

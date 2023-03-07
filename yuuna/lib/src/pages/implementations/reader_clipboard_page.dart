@@ -125,6 +125,12 @@ class _ReaderClipboardPageState<ReaderClipboardPage>
           style: const TextStyle(fontSize: 22),
           recognizer: TapGestureRecognizer()
             ..onTapDown = (details) async {
+              if (_selectableTextController.selection.start == index &&
+                  currentResult != null) {
+                clearDictionaryResult();
+                return;
+              }
+
               double x = details.globalPosition.dx;
               double y = details.globalPosition.dy;
 

@@ -150,10 +150,7 @@ class _RecursiveDictionaryPageState
       return;
     }
 
-    if (mounted &&
-        _result?.searchTerm != query &&
-        _controller.query == query &&
-        !_isSearching) {
+    if (mounted) {
       search(query);
     }
   }
@@ -178,9 +175,12 @@ class _RecursiveDictionaryPageState
       );
     } finally {
       if (_result != null) {
-        if (_result!.searchTerm == _controller.query) {
+        if (query == _controller.query) {
+          setState(() {
+            _isSearching = false;
+          });
           Future.delayed(historyDelay, () async {
-            if (_result!.searchTerm == _controller.query) {
+            if (query == _controller.query) {
               appModel.addToSearchHistory(
                 historyKey: DictionaryMediaType.instance.uniqueKey,
                 searchTerm: _controller.query,
@@ -190,15 +190,7 @@ class _RecursiveDictionaryPageState
               appModel.addToDictionaryHistory(result: _result!);
             }
           });
-
-          setState(() {
-            _isSearching = false;
-          });
         }
-      } else {
-        setState(() {
-          _isSearching = false;
-        });
       }
     }
   }
@@ -384,9 +376,13 @@ class _RecursiveDictionaryPageState
         );
       }
     }
-    if (_isSearching || _result?.searchTerm != _controller.query) {
+    if (_isSearching) {
       if (_result != null) {
-        return buildSearchResult();
+        if (_result!.headings.isNotEmpty) {
+          return buildSearchResult();
+        } else {
+          return buildNoSearchResultsPlaceholderMessage();
+        }
       } else {
         return const SizedBox.shrink();
       }

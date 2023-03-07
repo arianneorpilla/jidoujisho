@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 314
+/// Strings: 316
 ///
-/// Built on 2023-03-06 at 14:10 UTC
+/// Built on 2023-03-07 at 04:03 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -205,7 +205,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get media_item_delete_confirmation => 'This will clear this item from history. Are you sure you want to do this?';
 	String get dictionaries_delete_confirmation => 'Deleting a dictionary will also clear all dictionary results from history. Are you sure you want to do this?';
 	String get mappings_delete_confirmation => 'This profile will be deleted. Are you sure you want to do this?';
-	String get dictionaries_deleting_entries => 'Deleting dictionary entries...';
+	String get dictionaries_deleting_data => 'Deleting dictionary data...';
 	String get dictionaries_menu_empty => 'Import a dictionary for use';
 	String get options_theme_light => 'Use light theme';
 	String get options_theme_dark => 'Use dark theme';
@@ -246,6 +246,8 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String import_duplicate({required Object name}) => 'A dictionary with the name『${name}』is already imported.';
 	String get dialog_title_dictionary_clear => 'Clear all dictionaries?';
 	String get dialog_content_dictionary_clear => 'Wiping the dictionary database will also clear all search results in history.';
+	String dialog_title_dictionary_delete({required Object name}) => 'Delete 『${name}』?';
+	String get dialog_content_dictionary_delete => 'Deleting a single dictionary may take longer than clearing the entire dictionary database. This will also clear all search results in history.';
 	String get delete_dictionary_data => 'Clearing all dictionary data...';
 	String dictionary_tag({required Object name}) => 'Imported from ${name}';
 	String get legalese => 'A full-featured immersion language learning suite for mobile.\n\nOriginally built for the Japanese language learning community by Leo Rafael Orpilla. Logo by suzy and Aaron Marbella.\n\njidoujisho is free and open source software. See the project repository for a comprehensive list of other licenses and attribution notices. Enjoying the application? Help out by providing feedback, making a donation, reporting issues or contributing improvements on GitHub.';
@@ -539,7 +541,7 @@ extension on _StringsEn {
 			case 'media_item_delete_confirmation': return 'This will clear this item from history. Are you sure you want to do this?';
 			case 'dictionaries_delete_confirmation': return 'Deleting a dictionary will also clear all dictionary results from history. Are you sure you want to do this?';
 			case 'mappings_delete_confirmation': return 'This profile will be deleted. Are you sure you want to do this?';
-			case 'dictionaries_deleting_entries': return 'Deleting dictionary entries...';
+			case 'dictionaries_deleting_data': return 'Deleting dictionary data...';
 			case 'dictionaries_menu_empty': return 'Import a dictionary for use';
 			case 'options_theme_light': return 'Use light theme';
 			case 'options_theme_dark': return 'Use dark theme';
@@ -580,6 +582,8 @@ extension on _StringsEn {
 			case 'import_duplicate': return ({required Object name}) => 'A dictionary with the name『${name}』is already imported.';
 			case 'dialog_title_dictionary_clear': return 'Clear all dictionaries?';
 			case 'dialog_content_dictionary_clear': return 'Wiping the dictionary database will also clear all search results in history.';
+			case 'dialog_title_dictionary_delete': return ({required Object name}) => 'Delete 『${name}』?';
+			case 'dialog_content_dictionary_delete': return 'Deleting a single dictionary may take longer than clearing the entire dictionary database. This will also clear all search results in history.';
 			case 'delete_dictionary_data': return 'Clearing all dictionary data...';
 			case 'dictionary_tag': return ({required Object name}) => 'Imported from ${name}';
 			case 'legalese': return 'A full-featured immersion language learning suite for mobile.\n\nOriginally built for the Japanese language learning community by Leo Rafael Orpilla. Logo by suzy and Aaron Marbella.\n\njidoujisho is free and open source software. See the project repository for a comprehensive list of other licenses and attribution notices. Enjoying the application? Help out by providing feedback, making a donation, reporting issues or contributing improvements on GitHub.';

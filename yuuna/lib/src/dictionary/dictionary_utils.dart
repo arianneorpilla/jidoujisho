@@ -161,7 +161,7 @@ Future<void> depositDictionaryDataHelper(PrepareDictionaryParams params) async {
             count: frequencyCount, total: frequencyTotal));
       });
 
-      /// Write [DictionaryEntry] entities.
+      /// Write [DictionaryEntry] eBacklinkntities.
       int entryCount = 0;
       int entryTotal = entriesByHeading.values.map((e) => e.length).sum;
       partition<MapEntry<DictionaryHeading, List<DictionaryEntry>>>(
@@ -261,5 +261,47 @@ Future<void> deleteDictionariesHelper(DeleteDictionaryParams params) async {
     database.dictionaryPitchs.clearSync();
     database.dictionaryFrequencys.clearSync();
     database.dictionarys.clearSync();
+  });
+}
+
+/// Clears single dictionary data from the dictionary database.
+Future<void> deleteDictionaryHelper(DeleteDictionaryParams params) async {
+  final Isar database = await Isar.open(
+    globalSchemas,
+    maxSizeMiB: 4096,
+  );
+
+  int id = params.dictionaryId!;
+  Dictionary dictionary = database.dictionarys.getSync(id)!;
+
+  database.writeTxnSync(() {
+    database.dictionarySearchResults.clearSync();
+    database.dictionaryEntrys
+        .filter()
+        .dictionary((q) => q.idEqualTo(id))
+        .deleteAllSync();
+    database.dictionaryTags
+        .filter()
+        .dictionary((q) => q.idEqualTo(id))
+        .deleteAllSync();
+    database.dictionaryPitchs
+        .filter()
+        .dictionary((q) => q.idEqualTo(id))
+        .deleteAllSync();
+    database.dictionaryFrequencys
+        .filter()
+        .dictionary((q) => q.idEqualTo(id))
+        .deleteAllSync();
+    database.dictionaryHeadings
+        .filter()
+        .entriesIsEmpty()
+        .and()
+        .tagsIsEmpty()
+        .and()
+        .pitchesIsEmpty()
+        .and()
+        .frequenciesIsEmpty()
+        .deleteAllSync();
+    database.dictionarys.deleteSync(dictionary.id);
   });
 }

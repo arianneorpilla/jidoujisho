@@ -9,8 +9,12 @@ import 'package:yuuna/pages.dart';
 class DictionaryDialogDeletePage extends BasePage {
   /// Create an instance of this page.
   const DictionaryDialogDeletePage({
+    this.name,
     super.key,
   });
+
+  /// Name of current dictionary being deleted.
+  final String? name;
 
   @override
   BasePageState createState() => _DictionaryDialogDeletePageState();
@@ -20,7 +24,7 @@ class _DictionaryDialogDeletePageState
     extends BasePageState<DictionaryDialogDeletePage> {
   String get deleteInProgress => appModel.translate('delete_in_progress');
   String get dictionariesDeletingEntries =>
-      appModel.translate('dictionaries_deleting_entries');
+      appModel.translate('dictionaries_deleting_data');
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +62,9 @@ class _DictionaryDialogDeletePageState
           Padding(
             padding: const EdgeInsets.only(left: 0.5),
             child: Text(
-              t.delete_in_progress,
+              widget.name != null
+                  ? '${t.delete_in_progress}\n${widget.name}'
+                  : t.delete_in_progress,
               style: TextStyle(
                 fontSize: textTheme.bodySmall?.fontSize,
                 color: theme.unselectedWidgetColor,

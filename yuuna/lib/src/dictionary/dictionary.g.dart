@@ -95,6 +95,20 @@ const DictionarySchema = CollectionSchema(
       target: r'DictionaryTag',
       single: false,
       linkName: r'dictionary',
+    ),
+    r'pitches': LinkSchema(
+      id: -7520712212815729325,
+      name: r'pitches',
+      target: r'DictionaryPitch',
+      single: false,
+      linkName: r'dictionary',
+    ),
+    r'frequencies': LinkSchema(
+      id: -268974686324604299,
+      name: r'frequencies',
+      target: r'DictionaryFrequency',
+      single: false,
+      linkName: r'dictionary',
     )
   },
   embeddedSchemas: {},
@@ -174,13 +188,17 @@ Id _dictionaryGetId(Dictionary object) {
 }
 
 List<IsarLinkBase<dynamic>> _dictionaryGetLinks(Dictionary object) {
-  return [object.entries, object.tags];
+  return [object.entries, object.tags, object.pitches, object.frequencies];
 }
 
 void _dictionaryAttach(IsarCollection<dynamic> col, Id id, Dictionary object) {
   object.entries
       .attach(col, col.isar.collection<DictionaryEntry>(), r'entries', id);
   object.tags.attach(col, col.isar.collection<DictionaryTag>(), r'tags', id);
+  object.pitches
+      .attach(col, col.isar.collection<DictionaryPitch>(), r'pitches', id);
+  object.frequencies.attach(
+      col, col.isar.collection<DictionaryFrequency>(), r'frequencies', id);
 }
 
 extension DictionaryByIndex on IsarCollection<Dictionary> {
@@ -1024,6 +1042,127 @@ extension DictionaryQueryLinks
     return QueryBuilder.apply(this, (query) {
       return query.linkLength(
           r'tags', lower, includeLower, upper, includeUpper);
+    });
+  }
+
+  QueryBuilder<Dictionary, Dictionary, QAfterFilterCondition> pitches(
+      FilterQuery<DictionaryPitch> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.link(q, r'pitches');
+    });
+  }
+
+  QueryBuilder<Dictionary, Dictionary, QAfterFilterCondition>
+      pitchesLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'pitches', length, true, length, true);
+    });
+  }
+
+  QueryBuilder<Dictionary, Dictionary, QAfterFilterCondition> pitchesIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'pitches', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<Dictionary, Dictionary, QAfterFilterCondition>
+      pitchesIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'pitches', 0, false, 999999, true);
+    });
+  }
+
+  QueryBuilder<Dictionary, Dictionary, QAfterFilterCondition>
+      pitchesLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'pitches', 0, true, length, include);
+    });
+  }
+
+  QueryBuilder<Dictionary, Dictionary, QAfterFilterCondition>
+      pitchesLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'pitches', length, include, 999999, true);
+    });
+  }
+
+  QueryBuilder<Dictionary, Dictionary, QAfterFilterCondition>
+      pitchesLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(
+          r'pitches', lower, includeLower, upper, includeUpper);
+    });
+  }
+
+  QueryBuilder<Dictionary, Dictionary, QAfterFilterCondition> frequencies(
+      FilterQuery<DictionaryFrequency> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.link(q, r'frequencies');
+    });
+  }
+
+  QueryBuilder<Dictionary, Dictionary, QAfterFilterCondition>
+      frequenciesLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'frequencies', length, true, length, true);
+    });
+  }
+
+  QueryBuilder<Dictionary, Dictionary, QAfterFilterCondition>
+      frequenciesIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'frequencies', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<Dictionary, Dictionary, QAfterFilterCondition>
+      frequenciesIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'frequencies', 0, false, 999999, true);
+    });
+  }
+
+  QueryBuilder<Dictionary, Dictionary, QAfterFilterCondition>
+      frequenciesLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'frequencies', 0, true, length, include);
+    });
+  }
+
+  QueryBuilder<Dictionary, Dictionary, QAfterFilterCondition>
+      frequenciesLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'frequencies', length, include, 999999, true);
+    });
+  }
+
+  QueryBuilder<Dictionary, Dictionary, QAfterFilterCondition>
+      frequenciesLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(
+          r'frequencies', lower, includeLower, upper, includeUpper);
     });
   }
 }

@@ -56,11 +56,12 @@ class _DictionaryDialogPageState extends BasePageState {
         buildCloseButton(),
       ];
 
-  Future<void> showDictionaryDeleteDialog() async {
+  Future<void> showDictionaryClearDialog() async {
     Widget alertDialog = AlertDialog(
       title: Text(t.dialog_title_dictionary_clear),
       content: Text(
         t.dialog_content_dictionary_clear,
+        textAlign: TextAlign.justify,
       ),
       actions: <Widget>[
         TextButton(
@@ -70,6 +71,40 @@ class _DictionaryDialogPageState extends BasePageState {
           ),
           onPressed: () async {
             await appModel.deleteDictionaries();
+            Navigator.pop(context);
+
+            _selectedOrder = -1;
+            setState(() {});
+          },
+        ),
+        TextButton(
+          child: Text(dialogCancelLabel),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) => alertDialog,
+    );
+  }
+
+  Future<void> showDictionaryDeleteDialog(Dictionary dictionary) async {
+    Widget alertDialog = AlertDialog(
+      title: Text(t.dialog_title_dictionary_delete(name: dictionary.name)),
+      content: Text(
+        t.dialog_content_dictionary_delete,
+        textAlign: TextAlign.justify,
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text(
+            dialogDeleteLabel,
+            style: TextStyle(color: theme.colorScheme.primary),
+          ),
+          onPressed: () async {
+            await appModel.deleteDictionary(dictionary);
             Navigator.pop(context);
 
             _selectedOrder = -1;
@@ -131,10 +166,9 @@ class _DictionaryDialogPageState extends BasePageState {
         dialogClearLabel,
         style: const TextStyle(
           color: Colors.red,
-          fontWeight: FontWeight.w500,
         ),
       ),
-      onPressed: showDictionaryDeleteDialog,
+      onPressed: showDictionaryClearDialog,
     );
   }
 
@@ -372,6 +406,14 @@ class _DictionaryDialogPageState extends BasePageState {
           appModel.toggleDictionaryHidden(dictionary);
           setState(() {});
         },
+      ),
+      buildPopupItem(
+        label: dictionaryDeleteLabel,
+        icon: Icons.delete,
+        action: () {
+          showDictionaryDeleteDialog(dictionary);
+        },
+        color: theme.colorScheme.primary,
       ),
     ];
   }

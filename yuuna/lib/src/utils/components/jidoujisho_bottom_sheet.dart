@@ -17,15 +17,18 @@ class JidoujishoBottomSheetOption {
 
   /// Label to display in the option.
   String label;
+
   /// Icon to display left of the label.
   IconData icon;
+
   /// Whether or not the option is available.
   bool active;
+
   /// Action to perform upon selecting the option.
   FutureOr<void> Function() action;
 }
 
-///  
+///
 class JidoujishoBottomSheet extends ConsumerWidget {
   /// Initialise a bottom sheet.
   const JidoujishoBottomSheet({
@@ -42,9 +45,11 @@ class JidoujishoBottomSheet extends ConsumerWidget {
 
     ScrollController scrollController = ScrollController();
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      scrollController.jumpTo(
-        scrollController.position.maxScrollExtent,
-      );
+      if (scrollController.hasClients) {
+        scrollController.jumpTo(
+          scrollController.position.maxScrollExtent,
+        );
+      }
     });
 
     return ListView.builder(

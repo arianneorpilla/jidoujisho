@@ -326,16 +326,14 @@ class AppModel with ChangeNotifier {
   /// Get the sentence to be used by the [SentenceField] upon card creation.
   String getCurrentSentence() {
     if (isMediaOpen) {
-      return getCurrentMediaItem()
-              ?.getMediaSource(appModel: this)
-              .currentSentence ??
-          '';
+      return _currentMediaSource!.currentSentence;
     } else {
       MediaType mediaType = mediaTypes.values.toList()[currentHomeTabIndex];
       if (mediaType is DictionaryMediaType) {
         return '';
       } else {
-        return getCurrentSourceForMediaType(mediaType: mediaType)
+        return (_currentMediaSource ??
+                (getCurrentSourceForMediaType(mediaType: mediaType)))
             .currentSentence;
       }
     }
@@ -658,6 +656,10 @@ class AppModel with ChangeNotifier {
   /// This path also initialises the folder if it does not exist, and includes
   /// a .nomedia file within the folder.
   Future<Directory> prepareJidoujishoDirectory() async {
+    // String directoryPath = path.join(appDirectory.path, 'jidoujishoExport');
+    // String noMediaFilePath =
+    //     path.join(appDirectory.path, 'jidoujishoExport', '.nomedia');
+
     String publicDirectory =
         await ExternalPath.getExternalStoragePublicDirectory(
             ExternalPath.DIRECTORY_DCIM);
@@ -1112,6 +1114,31 @@ class AppModel with ChangeNotifier {
     dictionarySearchAgainNotifier.notifyListeners();
   }
 
+  /// Delete all dictionary data from the database.
+  Future<void> deleteDictionary(Dictionary dictionary) async {
+    /// New results may be wrong after dictionary is added so this has to be
+    /// done.
+    clearDictionaryResultsCache();
+
+    showDialog(
+      barrierDismissible: false,
+      context: navigatorKey.currentContext!,
+      builder: (context) => DictionaryDialogDeletePage(name: dictionary.name),
+    );
+
+    ReceivePort receivePort = ReceivePort();
+    DeleteDictionaryParams params = DeleteDictionaryParams(
+      dictionaryId: dictionary.id,
+      sendPort: receivePort.sendPort,
+    );
+
+    await compute(deleteDictionaryHelper, params);
+    await _dictionaryHistory.clear();
+
+    Navigator.pop(navigatorKey.currentContext!);
+    dictionarySearchAgainNotifier.notifyListeners();
+  }
+
   /// Delete a selected mapping from the database.
   void deleteMapping(AnkiMapping mapping) async {
     _database.writeTxnSync(() {
@@ -1153,6 +1180,10 @@ class AppModel with ChangeNotifier {
     required String searchTerm,
     required bool searchWithWildcards,
   }) async {
+    if (_searchOperation != null) {
+      _searchOperation?.cancel(null);
+    }
+
     if (_dictionarySearchCache[searchTerm] != null) {
       return _dictionarySearchCache[searchTerm]!;
     }
@@ -1185,6 +1216,7 @@ class AppModel with ChangeNotifier {
     _searchOperation =
         cancelable.compute(targetLanguage.prepareSearchResults, params);
     int? id = await _searchOperation?.value;
+    _searchOperation = null;
 
     if (id == null) {
       return DictionarySearchResult(searchTerm: searchTerm);
@@ -1199,11 +1231,6 @@ class AppModel with ChangeNotifier {
     } else {
       return DictionarySearchResult(searchTerm: searchTerm);
     }
-  }
-
-  /// Get a specific dictionary entry index from the database.
-  DictionaryEntry getEntryFromIndex(int index) {
-    return _database.dictionaryEntrys.getSync(index)!;
   }
 
   /// Check if a mapping with a certain name with a different order already
@@ -2502,13 +2529,13 @@ class AppModel with ChangeNotifier {
     double top = _preferences.get('blur_top', defaultValue: -1.0);
 
     int red = _preferences.get('blur_red',
-        defaultValue: Colors.black.withOpacity(0.5).red);
+        defaultValue: Colors.black.withOpacity(0).red);
     int green = _preferences.get('blur_green',
-        defaultValue: Colors.black.withOpacity(0.5).green);
+        defaultValue: Colors.black.withOpacity(0).green);
     int blue = _preferences.get('blur_blue',
-        defaultValue: Colors.black.withOpacity(0.5).blue);
+        defaultValue: Colors.black.withOpacity(0).blue);
     double opacity = _preferences.get('blur_opacity',
-        defaultValue: Colors.black.withOpacity(0.5).opacity);
+        defaultValue: Colors.black.withOpacity(0).opacity);
 
     Color color = Color.fromRGBO(red, green, blue, opacity);
 
@@ -2531,7 +2558,7 @@ class AppModel with ChangeNotifier {
     _preferences.put('blur_width', options.width);
     _preferences.put('blur_height', options.height);
     _preferences.put('blur_left', options.left);
-    _preferences.put('blur_right', options.top);
+    _preferences.put('blur_top', options.top);
 
     _preferences.put('blur_red', options.color.red);
     _preferences.put('blur_green', options.color.green);
@@ -2546,7 +2573,7 @@ class AppModel with ChangeNotifier {
   SubtitleOptions get subtitleOptions {
     int audioAllowance = _preferences.get('audio_allowance', defaultValue: 0);
     int subtitleDelay = _preferences.get('subtitle_delay', defaultValue: 0);
-    double fontSize = _preferences.get('font_size', defaultValue: 24.0);
+    double fontSize = _preferences.get('font_size', defaultValue: 20.0);
     String fontName = _preferences
         .get('font_name/${targetLanguage.languageCode}', defaultValue: '');
     String regexFilter = _preferences.get('regex_filter', defaultValue: '');
@@ -2727,7 +2754,11 @@ class AppModel with ChangeNotifier {
     MediaType mediaType = mediaTypes.values.toList()[currentHomeTabIndex];
     if (mediaType != DictionaryMediaType.instance) {
       shouldRefreshTabs = true;
-      DictionaryMediaType.instance.scrollController.jumpTo(0);
+      ScrollController scrollController =
+          DictionaryMediaType.instance.scrollController;
+      if (scrollController.hasClients) {
+        scrollController.jumpTo(0);
+      }
     }
 
     if (result.headings.isEmpty || result.searchTerm.isEmpty) {
@@ -2771,9 +2802,10 @@ class AppModel with ChangeNotifier {
   StreamSubscription<AccessibilityEvent>? _accessibilityStream;
 
   /// Cancels the listener for OS accessibility events in PIP mode.
-  void cancelAccessibilityStream() {
+  void cancelAccessibilityStream() async {
     _isPipMode = false;
-    _accessibilityStream?.cancel();
+    await _accessibilityStream?.cancel();
+    Restart.restartApp();
   }
 
   /// Switches the app to PIP mode.

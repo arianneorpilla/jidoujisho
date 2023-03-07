@@ -329,7 +329,6 @@ class _AudioRecorderDialogPageState
         t.dialog_stop,
         style: const TextStyle(
           color: Colors.red,
-          fontWeight: FontWeight.w500,
         ),
       ),
       onPressed: () {
