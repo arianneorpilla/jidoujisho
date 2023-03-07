@@ -37,6 +37,7 @@ class _PipPageState extends BasePageState<PipPage> {
   @override
   void dispose() {
     super.dispose();
+    appModel.cancelAccessibilityStream();
   }
 
   final ScrollController _scrollController = ScrollController();
@@ -52,7 +53,6 @@ class _PipPageState extends BasePageState<PipPage> {
 
     return PipWidget(
       onPipExited: () {
-        appModel.cancelAccessibilityStream();
         Navigator.of(context).pop();
       },
       builder: (context) => const SizedBox.shrink(),

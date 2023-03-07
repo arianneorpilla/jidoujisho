@@ -53,7 +53,7 @@ const DictionaryHeadingSchema = CollectionSchema(
         IndexPropertySchema(
           name: r'term',
           type: IndexType.value,
-          caseSensitive: true,
+          caseSensitive: false,
         )
       ],
     ),
@@ -66,7 +66,7 @@ const DictionaryHeadingSchema = CollectionSchema(
         IndexPropertySchema(
           name: r'reading',
           type: IndexType.value,
-          caseSensitive: true,
+          caseSensitive: false,
         )
       ],
     ),

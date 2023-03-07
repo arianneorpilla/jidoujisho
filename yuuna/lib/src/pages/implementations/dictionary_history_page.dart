@@ -36,7 +36,6 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
         appModel.dictionaryHistory.reversed.toList();
 
     return CustomScrollView(
-      key: const GlobalObjectKey('dictionaryHistory'),
       controller: DictionaryMediaType.instance.scrollController,
       physics: const AlwaysScrollableScrollPhysics(
         parent: BouncingScrollPhysics(),
@@ -46,7 +45,6 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
         ...historyResults
             .map(
               (result) => _DictionaryHistoryScrollableItem(
-                key: GlobalObjectKey(result.id!),
                 result: result,
                 onSearch: widget.onSearch,
                 onStash: widget.onStash,
@@ -65,7 +63,6 @@ class _DictionaryHistoryScrollableItem extends BasePage {
     required this.onStash,
     required this.onSearch,
     required this.lastSelectedMapping,
-    super.key,
   });
 
   /// The result pertaining to this item.

@@ -180,11 +180,11 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
       return buildNoLyricsFound(parameters: parameters);
     }
 
-    return GestureDetector(
-      onTap: clearDictionaryResult,
-      child: Stack(
-        children: [
-          SingleChildScrollView(
+    return Stack(
+      children: [
+        GestureDetector(
+          onTap: clearDictionaryResult,
+          child: SingleChildScrollView(
             controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(
                 parent: BouncingScrollPhysics()),
@@ -242,16 +242,16 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
               ),
             ),
           ),
-          Column(
-            children: [
-              const Space.extraBig(),
-              Expanded(
-                child: buildDictionary(),
-              ),
-            ],
-          ),
-        ],
-      ),
+        ),
+        Column(
+          children: [
+            const Space.extraBig(),
+            Expanded(
+              child: buildDictionary(),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -284,6 +284,12 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
           style: const TextStyle(fontSize: 22),
           recognizer: TapGestureRecognizer()
             ..onTapDown = (details) async {
+              if (_selectableTextController.selection.start == index &&
+                  currentResult != null) {
+                clearDictionaryResult();
+                return;
+              }
+
               double x = details.globalPosition.dx;
               double y = details.globalPosition.dy;
 

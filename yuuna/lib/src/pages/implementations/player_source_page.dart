@@ -192,7 +192,6 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     }
 
     _selectableTextController.clearSelection();
-
     super.clearDictionaryResult();
   }
 
@@ -1553,13 +1552,18 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           style: subtitleTextStyle,
           recognizer: TapGestureRecognizer()
             ..onTapDown = (details) async {
-              String searchTerm =
-                  appModel.targetLanguage.getSearchTermFromIndex(
-                text: text,
-                index: index,
-              );
+              if (_selectableTextController.selection.start == index &&
+                  currentResult != null) {
+                clearDictionaryResult();
+              } else {
+                String searchTerm =
+                    appModel.targetLanguage.getSearchTermFromIndex(
+                  text: text,
+                  index: index,
+                );
 
-              setSearchTerm(searchTerm: searchTerm, index: index);
+                setSearchTerm(searchTerm: searchTerm, index: index);
+              }
             },
         ),
       );
