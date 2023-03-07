@@ -102,6 +102,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       ValueNotifier<Duration>(Duration.zero);
   final ValueNotifier<bool> _playingNotifier = ValueNotifier<bool>(true);
   final ValueNotifier<bool> _endedNotifier = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _bufferingNotifier = ValueNotifier<bool>(false);
 
   final ValueNotifier<bool> _isMenuHidden = ValueNotifier<bool>(false);
 
@@ -117,6 +118,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   late final ValueNotifier<SubtitleOptions> _subtitleOptionsNotifier;
 
   StreamSubscription<void>? _playPauseSubscription;
+
+  Timer? _notPlayingTimer;
 
   @override
   void initState() {
@@ -183,6 +186,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   bool _playerInitialised = false;
 
   late final AudioSession _session;
+
+  Duration? _bufferingDuration;
 
   /// Hide the dictionary and dispose of the current result.
   @override
@@ -308,6 +313,21 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       _playingNotifier.value = _playerController.value.isPlaying;
       _endedNotifier.value = _playerController.value.isEnded;
 
+      if (_playingNotifier.value) {
+        if (_notPlayingTimer == null) {
+          _bufferingDuration = _positionNotifier.value;
+        }
+        _notPlayingTimer ??= Timer(const Duration(milliseconds: 1000), () {
+          _bufferingNotifier.value =
+              _bufferingDuration == _positionNotifier.value;
+          _notPlayingTimer?.cancel();
+          _notPlayingTimer = null;
+        });
+      } else {
+        _bufferingNotifier.value = false;
+        _bufferingDuration = null;
+      }
+
       Subtitle? newSubtitle = _subtitleItem.controller
           .durationSearch(_positionNotifier.value + subtitleDelay);
       String sentence = _currentSubtitle.value?.data ?? '';
@@ -354,6 +374,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                     audioAllowance) {
           _playerController.seekTo(
               _shadowingSubtitle.value!.start + subtitleDelay - audioAllowance);
+          _bufferingNotifier.value = true;
         }
       }
 
@@ -370,7 +391,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         }
       }
 
-      updateHistory();
+      if (_durationNotifier.value != Duration.zero) {
+        updateHistory();
+      }
     }
   }
 
@@ -436,12 +459,26 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       return buildLoading();
     }
 
+    Widget buildBuffering() {
+      return ValueListenableBuilder<bool>(
+        valueListenable: _bufferingNotifier,
+        builder: (context, isBuffering, _) {
+          if (isBuffering) {
+            return buildLoading();
+          } else {
+            return const SizedBox.shrink();
+          }
+        },
+      );
+    }
+
     return Stack(
       alignment: Alignment.center,
       children: [
         buildPlayer(),
         buildGestureArea(),
         buildBlurWidget(),
+        buildBuffering(),
         buildMenuArea(),
         buildSubtitleArea(),
         buildCentralPlayPause(),
@@ -483,6 +520,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           _listeningSubtitle.value = nearestSubtitle;
           await _playerController
               .seekTo(nearestSubtitle!.start - subtitleDelay);
+          _bufferingNotifier.value = true;
         }
       },
       onHorizontalDragEnd: (dragEndDetails) async {
@@ -492,6 +530,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           _listeningSubtitle.value = nearestSubtitle;
           await _playerController
               .seekTo(nearestSubtitle!.start - subtitleDelay);
+          _bufferingNotifier.value = true;
         }
       },
       onVerticalDragEnd: (details) async {
@@ -519,6 +558,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                   await _playerController.seekTo(
                       _subtitleItem.controller.subtitles[index].start -
                           subtitleDelay);
+                  _bufferingNotifier.value = true;
+                  _listeningSubtitle.value = getNearestSubtitle();
                 },
                 onLongPress: (index) async {
                   Navigator.pop(context);
@@ -590,6 +631,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
               await _playerController.seekTo(
                   _positionNotifier.value - const Duration(seconds: 10));
+              _bufferingNotifier.value = true;
+              _listeningSubtitle.value = getNearestSubtitle();
 
               startHideTimer();
             },
@@ -607,6 +650,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
               await _playerController.seekTo(
                   _positionNotifier.value + const Duration(seconds: 10));
+              _bufferingNotifier.value = true;
+              _listeningSubtitle.value = getNearestSubtitle();
 
               startHideTimer();
             },
@@ -878,6 +923,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             },
             onChangeEnd: (value) {
               startHideTimer();
+              _bufferingNotifier.value = true;
             },
             onChanged: validPosition
                 ? (progress) {
@@ -885,6 +931,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
                     sliderValue = progress.floor().toDouble();
                     _playerController.setTime(sliderValue.toInt() * 1000);
+                    _listeningSubtitle.value = getNearestSubtitle();
                   }
                 : null,
           ),
@@ -1764,6 +1811,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           _session.setActive(true);
           await Future.delayed(const Duration(seconds: 2), () async {
             await _playerController.seekTo(Duration.zero);
+            _bufferingNotifier.value = true;
           });
         }
       }

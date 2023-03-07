@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
+import 'package:transparent_image/transparent_image.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/src/pages/implementations/media_item_edit_dialog_page.dart';
@@ -89,14 +90,32 @@ class _MediaItemDialogPageState extends BasePageState<MediaItemDialogPage> {
             ],
           ),
           const Space.normal(),
-          Image(
-              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-            image: mediaSource.getDisplayThumbnailFromMediaItem(
-              appModel: appModel,
-              item: widget.item,
+          AspectRatio(
+            aspectRatio: mediaSource.aspectRatio,
+            child: FadeInImage(
+              placeholder: MemoryImage(kTransparentImage),
+              imageErrorBuilder: (_, __, ___) {
+                if (widget.item.extraUrl != null) {
+                  return FadeInImage(
+                    placeholder: MemoryImage(kTransparentImage),
+                    imageErrorBuilder: (_, __, ___) => const SizedBox.expand(),
+                    image: mediaSource.getDisplayThumbnailFromMediaItem(
+                      appModel: appModel,
+                      item: widget.item,
+                      fallbackUrl: widget.item.extraUrl,
+                    ),
+                    fit: BoxFit.fitWidth,
+                  );
+                } else {
+                  return const SizedBox.expand();
+                }
+              },
+              image: mediaSource.getDisplayThumbnailFromMediaItem(
+                appModel: appModel,
+                item: widget.item,
+              ),
+              fit: BoxFit.fitWidth,
             ),
-            alignment: Alignment.topCenter,
-            fit: BoxFit.fitWidth,
           ),
         ],
       ),

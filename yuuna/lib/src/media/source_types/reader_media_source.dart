@@ -16,6 +16,9 @@ abstract class ReaderMediaSource extends MediaSource {
           mediaType: ReaderMediaType.instance,
         );
 
+  @override
+  double get aspectRatio => 176 / 250;
+
   /// The body widget to show in the tab when this source's media type and this
   /// source is selected.
   @override

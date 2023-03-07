@@ -239,6 +239,7 @@ abstract class MediaSource {
   ImageProvider<Object> getDisplayThumbnailFromMediaItem({
     required AppModel appModel,
     required MediaItem item,
+    String? fallbackUrl,
     bool noOverride = false,
   }) {
     ImageProvider<Object>? overrideThumbnail =
@@ -252,7 +253,10 @@ abstract class MediaSource {
     }
 
     if (item.imageUrl != null) {
-      return CachedNetworkImageProvider(item.imageUrl!);
+      return CachedNetworkImageProvider(
+        fallbackUrl ?? item.imageUrl!,
+        cacheKey: item.uniqueKey,
+      );
     }
 
     if (item.base64Image == null) {
@@ -438,4 +442,7 @@ abstract class MediaSource {
   BaseMediaSearchBar? buildBar() {
     return null;
   }
+
+  /// Aspect ratio of media items.
+  double get aspectRatio;
 }

@@ -32,6 +32,9 @@ abstract class PlayerMediaSource extends MediaSource {
           overridesAutoImage: true,
         );
 
+  @override
+  double get aspectRatio => 16 / 9;
+
   /// The body widget to show in the tab when this source's media type and this
   /// source is selected.
   @override
