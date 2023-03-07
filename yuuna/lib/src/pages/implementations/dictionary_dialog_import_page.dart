@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:multi_value_listenable_builder/multi_value_listenable_builder.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/i18n/strings.g.dart';
 import 'package:yuuna/pages.dart';
@@ -10,8 +11,8 @@ class DictionaryDialogImportPage extends BasePage {
   /// Create an instance of this page.
   const DictionaryDialogImportPage({
     required this.progressNotifier,
-    required this.currentCount,
-    required this.totalCount,
+    required this.countNotifier,
+    required this.totalNotifier,
     super.key,
   });
 
@@ -19,11 +20,12 @@ class DictionaryDialogImportPage extends BasePage {
   /// the dialog.
   final ValueNotifier<String> progressNotifier;
 
-  /// The count of the current dictionary being imported.
-  final int currentCount;
+  /// A notifier for reporting text updates for the current progress text in
+  /// the dialog.
+  final ValueNotifier<int?> countNotifier;
 
   /// The number of dictionaries being imported.
-  final int totalCount;
+  final ValueNotifier<int?> totalNotifier;
 
   @override
   BasePageState createState() => _DictionaryDialogImportPageState();
@@ -68,15 +70,24 @@ class _DictionaryDialogImportPageState
           const Space.extraSmall(),
           Padding(
             padding: const EdgeInsets.only(left: 0.5),
-            child: Text(
-              widget.totalCount != 1
-                  ? '${t.import_in_progress}\n${widget.currentCount} / ${widget.totalCount}'
-                  : t.import_in_progress,
-              style: TextStyle(
-                fontSize: textTheme.bodySmall?.fontSize,
-                color: theme.unselectedWidgetColor,
-              ),
-            ),
+            child: MultiValueListenableBuilder(
+                valueListenables: [widget.countNotifier, widget.totalNotifier],
+                builder: (context, values, _) {
+                  int? currentCount = values.elementAt(0);
+                  int? totalCount = values.elementAt(1);
+
+                  return Text(
+                    currentCount != null &&
+                            totalCount != null &&
+                            totalCount != 1
+                        ? '${t.import_in_progress}\n$currentCount / $totalCount'
+                        : t.import_in_progress,
+                    style: TextStyle(
+                      fontSize: textTheme.bodySmall?.fontSize,
+                      color: theme.unselectedWidgetColor,
+                    ),
+                  );
+                }),
           ),
           const Space.small(),
           ValueListenableBuilder<String>(

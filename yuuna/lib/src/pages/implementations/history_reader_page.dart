@@ -58,9 +58,9 @@ class HistoryReaderPageState<T extends BaseHistoryPage>
       controller: mediaType.scrollController,
       child: GridView.builder(
         padding: const EdgeInsets.only(top: 48),
-        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: 150,
-          childAspectRatio: 176 / 250,
+          childAspectRatio: mediaSource.aspectRatio,
         ),
         physics: const AlwaysScrollableScrollPhysics(
           parent: BouncingScrollPhysics(),
@@ -83,7 +83,7 @@ class HistoryReaderPageState<T extends BaseHistoryPage>
           ColoredBox(
             color: Colors.grey.shade800.withOpacity(0.3),
             child: AspectRatio(
-              aspectRatio: 176 / 250,
+              aspectRatio: mediaSource.aspectRatio,
               child: FadeInImage(
                 imageErrorBuilder: (_, __, ___) => const SizedBox.shrink(),
                 placeholder: MemoryImage(kTransparentImage),

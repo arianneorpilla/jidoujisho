@@ -112,17 +112,31 @@ class HistoryPlayerPageState<T extends HistoryPlayerPage>
       alignment: Alignment.bottomCenter,
       children: [
         ColoredBox(
-          color: Colors.black,
+          color: theme.unselectedWidgetColor.withOpacity(0.1),
           child: AspectRatio(
-            aspectRatio: 16 / 9,
+            aspectRatio: mediaSource.aspectRatio,
             child: FadeInImage(
               placeholder: MemoryImage(kTransparentImage),
-              imageErrorBuilder: (_, __, ___) => const SizedBox.shrink(),
+              imageErrorBuilder: (_, __, ___) {
+                if (item.extraUrl != null) {
+                  return FadeInImage(
+                    placeholder: MemoryImage(kTransparentImage),
+                    imageErrorBuilder: (_, __, ___) => const SizedBox.expand(),
+                    image: mediaSource.getDisplayThumbnailFromMediaItem(
+                      appModel: appModel,
+                      item: item,
+                      fallbackUrl: item.extraUrl,
+                    ),
+                    fit: BoxFit.fitWidth,
+                  );
+                } else {
+                  return const SizedBox.expand();
+                }
+              },
               image: mediaSource.getDisplayThumbnailFromMediaItem(
                 appModel: appModel,
                 item: item,
               ),
-              alignment: Alignment.topCenter,
               fit: BoxFit.fitWidth,
             ),
           ),

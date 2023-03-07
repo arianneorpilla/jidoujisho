@@ -179,6 +179,12 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
         pagingController: pagingController,
         key: UniqueKey(),
         builderDelegate: PagedChildBuilderDelegate<Comment>(
+          firstPageProgressIndicatorBuilder: (context) {
+            return buildLoading();
+          },
+          newPageProgressIndicatorBuilder: (context) {
+            return buildLoading();
+          },
           noItemsFoundIndicatorBuilder: (context) {
             return buildPlaceholder();
           },

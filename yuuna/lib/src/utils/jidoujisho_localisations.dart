@@ -362,7 +362,8 @@ class JidoujishoLocalisations {
         'Your export profile has no set fields and requires configuration.',
     'error_export_media_ankidroid':
         'There was an error in exporting media to AnkiDroid.',
-    'error_add_note': 'There was an error in adding a note to AnkiDroid.',
+    'error_add_note_ankidroid':
+        'There was an error in adding a note to AnkiDroid.',
     'first_time_setup': 'First-Time Setup',
     'first_time_setup_description': 'Welcome to jidoujisho! Set your target '
         'language and a default profile will be tailored for you. You can '

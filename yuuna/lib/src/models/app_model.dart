@@ -206,6 +206,11 @@ class AppModel with ChangeNotifier {
   Directory get exportDirectory => _exportDirectory;
   late final Directory _exportDirectory;
 
+  /// Directory where media for export is stored for communication with
+  /// third-party APIs. Fallback for failure.
+  Directory get alternateExportDirectory => _alternateExportDirectory;
+  late final Directory _alternateExportDirectory;
+
   /// Directory used as a working directory for dictionary imports.
   Directory get dictionaryImportWorkingDirectory =>
       _dictionaryImportWorkingDirectory;
@@ -656,16 +661,33 @@ class AppModel with ChangeNotifier {
   /// This path also initialises the folder if it does not exist, and includes
   /// a .nomedia file within the folder.
   Future<Directory> prepareJidoujishoDirectory() async {
-    // String directoryPath = path.join(appDirectory.path, 'jidoujishoExport');
-    // String noMediaFilePath =
-    //     path.join(appDirectory.path, 'jidoujishoExport', '.nomedia');
-
     String publicDirectory =
         await ExternalPath.getExternalStoragePublicDirectory(
             ExternalPath.DIRECTORY_DCIM);
     String directoryPath = path.join(publicDirectory, 'jidoujisho');
     String noMediaFilePath =
         path.join(publicDirectory, 'jidoujisho', '.nomedia');
+
+    Directory jidoujishoDirectory = Directory(directoryPath);
+    File noMediaFile = File(noMediaFilePath);
+
+    if (!jidoujishoDirectory.existsSync()) {
+      jidoujishoDirectory.createSync(recursive: true);
+    }
+    if (!noMediaFile.existsSync()) {
+      noMediaFile.createSync();
+    }
+
+    return jidoujishoDirectory;
+  }
+
+  /// Return the app external directory found in the internal app directory.
+  /// This path also initialises the folder if it does not exist, and includes
+  /// a .nomedia file within the folder.
+  Future<Directory> prepareFallbackJidoujishoDirectory() async {
+    String directoryPath = path.join(appDirectory.path, 'jidoujishoExport');
+    String noMediaFilePath =
+        path.join(appDirectory.path, 'jidoujishoExport', '.nomedia');
 
     Directory jidoujishoDirectory = Directory(directoryPath);
     File noMediaFile = File(noMediaFilePath);
@@ -714,6 +736,7 @@ class AppModel with ChangeNotifier {
     _dictionaryImportWorkingDirectory = Directory(
         path.join(appDirectory.path, 'dictionaryImportWorkingDirectory'));
     _exportDirectory = await prepareJidoujishoDirectory();
+    _alternateExportDirectory = await prepareFallbackJidoujishoDirectory();
 
     thumbnailsDirectory.createSync();
     hiveDirectory.createSync();
@@ -959,8 +982,7 @@ class AppModel with ChangeNotifier {
   /// [lastSelectedDictionaryFormat].
   Future<void> importDictionary({
     required File file,
-    required int currentCount,
-    required int totalCount,
+    required ValueNotifier<String> progressNotifier,
     required Function() onImportSuccess,
   }) async {
     /// New results may be wrong after dictionary is added so this has to be
@@ -969,23 +991,6 @@ class AppModel with ChangeNotifier {
 
     Directory workingDirectory = _dictionaryImportWorkingDirectory;
     DictionaryFormat dictionaryFormat = lastSelectedDictionaryFormat;
-
-    /// A [ValueNotifier] that will update a message based on the progress of
-    /// the ongoing dictionary file import. See [DictionaryImportProgressPage].
-    ValueNotifier<String> progressNotifier =
-        ValueNotifier<String>(t.import_start);
-    progressNotifier.addListener(() {
-      debugPrint('[Dictionary Import] ${progressNotifier.value}');
-    });
-    showDialog(
-      context: navigatorKey.currentContext!,
-      barrierDismissible: false,
-      builder: (context) => DictionaryDialogImportPage(
-        progressNotifier: progressNotifier,
-        currentCount: currentCount,
-        totalCount: totalCount,
-      ),
-    );
 
     /// Importing makes heavy use of isolates as it is very performance
     /// intensive to work with files. In order to ensure the UI isolate isn't
@@ -1068,7 +1073,6 @@ class AppModel with ChangeNotifier {
       await Future.delayed(const Duration(seconds: 1), () {});
     } finally {
       receivePort.close();
-      Navigator.pop(navigatorKey.currentContext!);
     }
   }
 
@@ -1096,12 +1100,6 @@ class AppModel with ChangeNotifier {
     /// done.
     clearDictionaryResultsCache();
 
-    showDialog(
-      barrierDismissible: false,
-      context: navigatorKey.currentContext!,
-      builder: (context) => const DictionaryDialogDeletePage(),
-    );
-
     ReceivePort receivePort = ReceivePort();
     DeleteDictionaryParams params = DeleteDictionaryParams(
       sendPort: receivePort.sendPort,
@@ -1110,7 +1108,6 @@ class AppModel with ChangeNotifier {
     await compute(deleteDictionariesHelper, params);
     await _dictionaryHistory.clear();
 
-    Navigator.pop(navigatorKey.currentContext!);
     dictionarySearchAgainNotifier.notifyListeners();
   }
 
@@ -1119,12 +1116,6 @@ class AppModel with ChangeNotifier {
     /// New results may be wrong after dictionary is added so this has to be
     /// done.
     clearDictionaryResultsCache();
-
-    showDialog(
-      barrierDismissible: false,
-      context: navigatorKey.currentContext!,
-      builder: (context) => DictionaryDialogDeletePage(name: dictionary.name),
-    );
 
     ReceivePort receivePort = ReceivePort();
     DeleteDictionaryParams params = DeleteDictionaryParams(
@@ -1368,14 +1359,18 @@ class AppModel with ChangeNotifier {
   }
 
   /// Get the file to be written to for image export.
-  File getImageExportFile() {
-    String imagePath = path.join(exportDirectory.path, 'exportImage.jpg');
+  File getImageExportFile({bool fallback = false}) {
+    String imagePath = path.join(
+        (fallback ? alternateExportDirectory : exportDirectory).path,
+        'exportImage.jpg');
     return File(imagePath);
   }
 
   /// Get the file to be written to for audio export.
-  File getAudioExportFile() {
-    String audioPath = path.join(exportDirectory.path, 'exportAudio.mp3');
+  File getAudioExportFile({bool fallback = false}) {
+    String audioPath = path.join(
+        (fallback ? alternateExportDirectory : exportDirectory).path,
+        'exportAudio.mp3');
     return File(audioPath);
   }
 
@@ -1551,12 +1546,13 @@ class AppModel with ChangeNotifier {
     required File exportFile,
     required String preferredName,
     required String mimeType,
+    bool fallback = false,
   }) async {
     late File destinationFile;
     if (mimeType == 'image') {
-      destinationFile = getImageExportFile();
+      destinationFile = getImageExportFile(fallback: fallback);
     } else if (mimeType == 'audio') {
-      destinationFile = getAudioExportFile();
+      destinationFile = getAudioExportFile(fallback: fallback);
     } else {
       throw Exception('Invalid mime type, must be image or audio');
     }
@@ -1584,14 +1580,23 @@ class AppModel with ChangeNotifier {
 
       return response;
     } on PlatformException {
-      String message = translate('error_export_media_ankidroid');
-      Fluttertoast.showToast(
-        msg: message,
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-      );
+      if (fallback) {
+        String message = translate('error_export_media_ankidroid');
+        Fluttertoast.showToast(
+          msg: message,
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+        );
 
-      rethrow;
+        rethrow;
+      } else {
+        return addFileToMedia(
+          exportFile: exportFile,
+          preferredName: preferredName,
+          mimeType: mimeType,
+          fallback: true,
+        );
+      }
     }
   }
 

@@ -82,6 +82,12 @@ class _YoutubeVideoResultsPageState
       pagingController: widget.pagingController,
       key: UniqueKey(),
       builderDelegate: PagedChildBuilderDelegate<MediaItem>(
+        firstPageProgressIndicatorBuilder: (context) {
+          return buildLoading();
+        },
+        newPageProgressIndicatorBuilder: (context) {
+          return buildLoading();
+        },
         itemBuilder: (context, item, index) {
           return buildMediaItem(item);
         },

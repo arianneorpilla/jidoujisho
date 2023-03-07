@@ -106,7 +106,7 @@ abstract class BaseMediaSearchBarState<T extends BaseMediaSearchBar>
             pageKey: pageKey,
           );
           if (newItems != null && newItems.isNotEmpty) {
-            pagingController?.appendPage(newItems, pageKey + 1);
+            pagingController?.appendPage(newItems, pageKey);
           }
         } catch (e) {
           pagingController?.appendLastPage([]);

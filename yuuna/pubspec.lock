@@ -1726,8 +1726,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "86fde1c8f7470f0b9591d3e8420706ab1a76a74a"
-      resolved-ref: "86fde1c8f7470f0b9591d3e8420706ab1a76a74a"
+      ref: "6c9163c97e869114485bd1f90ba005db2fae8188"
+      resolved-ref: "6c9163c97e869114485bd1f90ba005db2fae8188"
       url: "https://github.com/lrorpilla/subtitle"
     source: git
     version: "0.1.0-beta.2"

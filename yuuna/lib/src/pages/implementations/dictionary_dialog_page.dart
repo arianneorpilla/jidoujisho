@@ -70,8 +70,21 @@ class _DictionaryDialogPageState extends BasePageState {
             style: TextStyle(color: theme.colorScheme.primary),
           ),
           onPressed: () async {
+            showDialog(
+              barrierDismissible: false,
+              context: context,
+              builder: (context) => const DictionaryDialogDeletePage(),
+            );
+
             await appModel.deleteDictionaries();
-            Navigator.pop(context);
+
+            if (mounted) {
+              Navigator.pop(context);
+            }
+
+            if (mounted) {
+              Navigator.pop(context);
+            }
 
             _selectedOrder = -1;
             setState(() {});
@@ -104,8 +117,22 @@ class _DictionaryDialogPageState extends BasePageState {
             style: TextStyle(color: theme.colorScheme.primary),
           ),
           onPressed: () async {
+            showDialog(
+              barrierDismissible: false,
+              context: context,
+              builder: (context) =>
+                  DictionaryDialogDeletePage(name: dictionary.name),
+            );
+
             await appModel.deleteDictionary(dictionary);
-            Navigator.pop(context);
+
+            if (mounted) {
+              Navigator.pop(context);
+            }
+
+            if (mounted) {
+              Navigator.pop(context);
+            }
 
             _selectedOrder = -1;
             setState(() {});
@@ -128,6 +155,16 @@ class _DictionaryDialogPageState extends BasePageState {
     return TextButton(
       child: Text(dialogImportLabel),
       onPressed: () async {
+        /// A [ValueNotifier] that will update a message based on the progress of
+        /// the ongoing dictionary file import. See [DictionaryImportProgressPage].
+        ValueNotifier<String> progressNotifier =
+            ValueNotifier<String>(t.import_start);
+        ValueNotifier<int?> countNotifier = ValueNotifier<int?>(null);
+        ValueNotifier<int?> totalNotifier = ValueNotifier<int?>(null);
+        progressNotifier.addListener(() {
+          debugPrint('[Dictionary Import] ${progressNotifier.value}');
+        });
+
         await FilePicker.platform.clearTemporaryFiles();
 
         FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -136,18 +173,37 @@ class _DictionaryDialogPageState extends BasePageState {
           allowedExtensions:
               appModel.lastSelectedDictionaryFormat.allowedExtensions,
           allowMultiple: true,
+          onFileLoading: (status) {
+            if (status == FilePickerStatus.done) {
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => DictionaryDialogImportPage(
+                  progressNotifier: progressNotifier,
+                  countNotifier: countNotifier,
+                  totalNotifier: totalNotifier,
+                ),
+              );
+            }
+          },
         );
         if (result == null) {
+          if (mounted) {
+            Navigator.pop(context);
+          }
           return;
         }
 
+        totalNotifier.value = result.files.length;
         for (int i = 0; i < result.files.length; i++) {
+          countNotifier.value = i + 1;
+
           PlatformFile platformFile = result.files[i];
           File file = File(platformFile.path!);
+
           await appModel.importDictionary(
+            progressNotifier: progressNotifier,
             file: file,
-            currentCount: i + 1,
-            totalCount: result.files.length,
             onImportSuccess: () {
               _selectedOrder = appModel.dictionaries.length - 1;
               setState(() {});
@@ -156,6 +212,10 @@ class _DictionaryDialogPageState extends BasePageState {
         }
 
         await FilePicker.platform.clearTemporaryFiles();
+
+        if (mounted) {
+          Navigator.pop(context);
+        }
       },
     );
   }
