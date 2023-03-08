@@ -35,7 +35,8 @@ class HiddenMeaningField extends Field {
     required bool creatorJustLaunched,
   }) {
     List<DictionaryEntry> hiddenEntries = heading.entries
-        .where((entry) => !entry.dictionary.value!.hidden)
+        .where((entry) =>
+            !entry.dictionary.value!.isHidden(appModel.targetLanguage))
         .toList();
 
     hiddenEntries.sort((a, b) =>

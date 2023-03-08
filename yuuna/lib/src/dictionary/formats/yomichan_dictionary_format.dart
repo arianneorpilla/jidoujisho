@@ -23,6 +23,7 @@ class YomichanFormat extends DictionaryFormat {
           name: 'Yomichan Dictionary',
           icon: Icons.auto_stories_rounded,
           allowedExtensions: const ['zip'],
+          isTextFormat: false,
           fileType: FileType.custom,
           prepareDirectory: prepareDirectoryYomichanFormat,
           prepareName: prepareNameYomichanFormat,

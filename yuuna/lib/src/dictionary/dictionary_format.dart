@@ -17,6 +17,7 @@ abstract class DictionaryFormat {
     required this.name,
     required this.icon,
     required this.allowedExtensions,
+    required this.isTextFormat,
     required this.fileType,
     required this.prepareDirectory,
     required this.prepareName,
@@ -42,6 +43,9 @@ abstract class DictionaryFormat {
   /// select a file with the wrong extension. Elements should not include
   /// leading dots.
   late List<String> allowedExtensions;
+
+  /// If this is true, the charset of this format will be taken.
+  late bool isTextFormat;
 
   /// Whether or not the file picker supports the file extensions of this
   /// format.

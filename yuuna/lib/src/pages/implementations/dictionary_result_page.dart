@@ -96,7 +96,9 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
         Dictionary dictionary = entry.dictionary.value!;
         expandableControllersByHeading[heading]?.putIfAbsent(
           dictionary,
-          () => ExpandableController(initialExpanded: !dictionary.collapsed),
+          () => ExpandableController(
+            initialExpanded: !dictionary.isCollapsed(appModel.targetLanguage),
+          ),
         );
       }
     }

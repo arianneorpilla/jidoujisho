@@ -16,6 +16,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_accessibility_service/accessibility_event.dart';
 import 'package:flutter_accessibility_service/flutter_accessibility_service.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:flutter_charset_detector/flutter_charset_detector.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -408,6 +409,7 @@ class AppModel with ChangeNotifier {
     final List<Language> availableLanguages = List<Language>.unmodifiable(
       [
         JapaneseLanguage.instance,
+        EnglishLanguage.instance,
       ],
     );
 
@@ -504,6 +506,8 @@ class AppModel with ChangeNotifier {
         List<DictionaryFormat>.unmodifiable(
       [
         YomichanFormat.instance,
+        MigakuFormat.instance,
+        AbbyyLingvoFormat.instance,
       ],
     );
 
@@ -1013,8 +1017,20 @@ class AppModel with ChangeNotifier {
         workingDirectory.createSync();
       }
 
+      String charset = '';
+
+      /// Find a way to check if this is a text file or a binary file instead
+      /// of doing this, it's not good to do format-specific tweaks in a
+      /// general function like this.
+      if (dictionaryFormat.isTextFormat) {
+        Uint8List bytes = file.readAsBytesSync();
+        DecodingResult result = await CharsetDetector.autoDecode(bytes);
+        charset = result.charset;
+      }
+
       PrepareDirectoryParams prepareDirectoryParams = PrepareDirectoryParams(
         file: file,
+        charset: charset,
         workingDirectory: workingDirectory,
         dictionaryFormat: dictionaryFormat,
         sendPort: receivePort.sendPort,
@@ -1038,8 +1054,6 @@ class AppModel with ChangeNotifier {
       int order = (bottomMostDictionary?.order ?? 0) + 1;
 
       Dictionary dictionary = Dictionary(
-        collapsed: false,
-        hidden: false,
         order: order,
         name: name,
         formatKey: dictionaryFormat.uniqueKey,
@@ -1080,7 +1094,15 @@ class AppModel with ChangeNotifier {
   /// affect how a dictionary's search results are shown by default.
   void toggleDictionaryCollapsed(Dictionary dictionary) {
     _database.writeTxnSync(() {
-      dictionary.collapsed = !dictionary.collapsed;
+      if (dictionary.isCollapsed(targetLanguage)) {
+        dictionary.collapsedLanguages = [...dictionary.collapsedLanguages]
+          ..remove(targetLanguage.languageCode);
+      } else {
+        dictionary.collapsedLanguages = [
+          ...dictionary.collapsedLanguages,
+          targetLanguage.languageCode
+        ];
+      }
       _database.dictionarys.putSync(dictionary);
     });
   }
@@ -1089,7 +1111,15 @@ class AppModel with ChangeNotifier {
   /// affect how a dictionary's search results are shown by default.
   void toggleDictionaryHidden(Dictionary dictionary) {
     _database.writeTxnSync(() {
-      dictionary.hidden = !dictionary.hidden;
+      if (dictionary.isHidden(targetLanguage)) {
+        dictionary.hiddenLanguages = [...dictionary.hiddenLanguages]
+          ..remove(targetLanguage.languageCode);
+      } else {
+        dictionary.hiddenLanguages = [
+          ...dictionary.hiddenLanguages,
+          targetLanguage.languageCode
+        ];
+      }
       _database.dictionarys.putSync(dictionary);
     });
   }
@@ -2799,7 +2829,8 @@ class AppModel with ChangeNotifier {
     return _database.dictionaryHeadings
             .getSync(DictionaryHeading.hash(term: heading.term, reading: ''))
             ?.frequencies
-            .where((frequency) => !frequency.dictionary.value!.hidden)
+            .where((frequency) =>
+                !frequency.dictionary.value!.isHidden(targetLanguage))
             .toList() ??
         [];
   }

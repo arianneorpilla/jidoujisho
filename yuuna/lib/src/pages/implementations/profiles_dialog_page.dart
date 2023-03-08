@@ -107,7 +107,8 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
           order: 0,
           enhancements: AnkiMapping.defaultEnhancementsByLanguage[
               appModel.targetLanguage.languageCountryCode],
-          actions: AnkiMapping.defaultActions,
+          actions: AnkiMapping.defaultActionsByLanguage[
+              appModel.targetLanguage.languageCountryCode],
           exportMediaTags: true,
           useBrTags: true,
           prependDictionaryNames: true,

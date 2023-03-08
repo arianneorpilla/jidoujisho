@@ -56,11 +56,17 @@ class DictionaryTermPage extends ConsumerWidget {
     bool isPipMode = appModel.isPipMode;
 
     List<DictionaryEntry> entries = heading.entries
-        .where((entry) => !entry.dictionary.value!.hidden)
+        .where(
+          (entry) => !entry.dictionary.value!.isHidden(appModel.targetLanguage),
+        )
         .toList();
 
     entries.sort((a, b) =>
         a.dictionary.value!.order.compareTo(b.dictionary.value!.order));
+
+    if (entries.isEmpty) {
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
 
     return SliverStack(
       children: <Widget>[
@@ -278,7 +284,8 @@ class _DictionaryTermPitchList extends ConsumerWidget {
     AppModel appModel = ref.watch(appProvider);
 
     List<DictionaryPitch> pitches = heading.pitches
-        .where((pitch) => !pitch.dictionary.value!.hidden)
+        .where((pitch) =>
+            !pitch.dictionary.value!.isHidden(appModel.targetLanguage))
         .toList();
     if (pitches.isEmpty) {
       return const SliverToBoxAdapter(
@@ -374,7 +381,8 @@ class _DictionaryTermFreqList extends ConsumerWidget {
     AppModel appModel = ref.watch(appProvider);
 
     List<DictionaryFrequency> frequencies = heading.frequencies
-        .where((frequency) => !frequency.dictionary.value!.hidden)
+        .where((frequency) =>
+            !frequency.dictionary.value!.isHidden(appModel.targetLanguage))
         .toList();
 
     frequencies += appModel.getNoReadingFrequencies(heading: heading);

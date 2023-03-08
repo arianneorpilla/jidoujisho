@@ -87,6 +87,10 @@ class _DictionaryEntryPageState extends ConsumerState<DictionaryEntryPage> {
               allowPaste: true,
             ),
             onSelectionChanged: (selection, cause) async {
+              if (appModel.targetLanguage.isSpaceDelimited) {
+                return;
+              }
+
               if (!selection.isCollapsed &&
                   cause == SelectionChangedCause.tap &&
                   !_isSearching) {
@@ -97,7 +101,11 @@ class _DictionaryEntryPageState extends ConsumerState<DictionaryEntryPage> {
 
                   int whitespaceOffset =
                       searchTerm.length - searchTerm.trimLeft().length;
-                  int offsetIndex = selection.baseOffset + whitespaceOffset;
+                  int offsetIndex = appModel.targetLanguage.getStartingIndex(
+                        text: widget.entry.compactDefinitions,
+                        index: selection.baseOffset,
+                      ) +
+                      whitespaceOffset;
                   int length = appModel.targetLanguage
                       .textToWords(searchTerm)
                       .firstWhere((e) => e.trim().isNotEmpty)

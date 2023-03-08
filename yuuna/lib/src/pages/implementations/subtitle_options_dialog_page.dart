@@ -198,6 +198,7 @@ class _SubtitleOptionsDialogPage
                       size: 18,
                       tooltip: resetLabel,
                       onTap: () async {
+                        /// Language Customizable
                         if (appModel.targetLanguage is JapaneseLanguage) {
                           launchUrlString(
                               'https://fonts.google.com/?subset=japanese');

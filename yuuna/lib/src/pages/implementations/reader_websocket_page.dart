@@ -135,7 +135,15 @@ class _ReaderWebsocketPageState<ReaderLyricsPage> extends BaseSourcePageState {
               _lastTappedController?.clearSelection();
               _lastTappedController = controller;
 
-              if (controller.selection.start == index &&
+              bool firstCharacterCondition =
+                  !appModel.targetLanguage.isSpaceDelimited &&
+                      (controller.selection.start == index);
+              bool wholeWordCondition =
+                  appModel.targetLanguage.isSpaceDelimited &&
+                      controller.selection.start <= index &&
+                      controller.selection.end > index;
+
+              if ((firstCharacterCondition || wholeWordCondition) &&
                   currentResult != null) {
                 clearDictionaryResult();
                 return;
@@ -172,7 +180,9 @@ class _ReaderWebsocketPageState<ReaderLyricsPage> extends BaseSourcePageState {
                     appModel.targetLanguage.isSpaceDelimited;
                 int whitespaceOffset =
                     searchTerm.length - searchTerm.trimLeft().length;
-                int offsetIndex = index + whitespaceOffset;
+                int offsetIndex = appModel.targetLanguage
+                        .getStartingIndex(text: text, index: index) +
+                    whitespaceOffset;
                 int length = appModel.targetLanguage
                     .textToWords(searchTerm)
                     .firstWhere((e) => e.trim().isNotEmpty)

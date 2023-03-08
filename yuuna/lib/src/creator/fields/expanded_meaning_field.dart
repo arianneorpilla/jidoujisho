@@ -36,8 +36,8 @@ class ExpandedMeaningField extends Field {
   }) {
     List<DictionaryEntry> expandedEntries = heading.entries
         .where((entry) =>
-            !entry.dictionary.value!.hidden &&
-            !entry.dictionary.value!.collapsed)
+            !entry.dictionary.value!.isHidden(appModel.targetLanguage) &&
+            !entry.dictionary.value!.isCollapsed(appModel.targetLanguage))
         .toList();
 
     expandedEntries.sort((a, b) =>

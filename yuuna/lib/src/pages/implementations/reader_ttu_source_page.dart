@@ -284,6 +284,9 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
           value: false,
         );
         await controller.evaluateJavascript(source: javascriptToExecute);
+        await controller.evaluateJavascript(
+            source:
+                'spaceDelimited = ${appModel.targetLanguage.isSpaceDelimited};');
         Future.delayed(const Duration(seconds: 1), _focusNode.requestFocus);
       },
       onTitleChanged: (controller, title) async {
@@ -369,7 +372,9 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
           int whitespaceOffset =
               searchTerm.length - searchTerm.trimLeft().length;
 
-          int offsetIndex = index + whitespaceOffset;
+          int offsetIndex = appModel.targetLanguage
+                  .getStartingIndex(text: text, index: index) +
+              whitespaceOffset;
 
           int length = appModel.targetLanguage
               .textToWords(searchTerm)
@@ -556,8 +561,20 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
   String javascriptToExecute = """
 /*jshint esversion: 6 */
 var lastIndex = -1;
+var spaceDelimited = false;
 
 function tapToSelect(e) {
+  if (spaceDelimited && getSelectionText()) {
+    console.log(JSON.stringify({
+				"index": -1,
+				"text": getSelectionText(),
+				"jidoujisho-message-type": "lookup",
+        "x": e.clientX,
+        "y": e.clientY,
+        "isCreator": "no",
+			}));
+  }
+
   var result = document.caretRangeFromPoint(e.clientX, e.clientY);
 
   if (e.target.classList.contains('book-content')) {

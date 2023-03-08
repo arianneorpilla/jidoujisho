@@ -1648,7 +1648,15 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           style: subtitleTextStyle,
           recognizer: TapGestureRecognizer()
             ..onTapDown = (details) async {
-              if (_selectableTextController.selection.start == index &&
+              bool firstCharacterCondition =
+                  !appModel.targetLanguage.isSpaceDelimited &&
+                      (_selectableTextController.selection.start == index);
+              bool wholeWordCondition =
+                  appModel.targetLanguage.isSpaceDelimited &&
+                      _selectableTextController.selection.start <= index &&
+                      _selectableTextController.selection.end > index;
+
+              if ((firstCharacterCondition || wholeWordCondition) &&
                   currentResult != null) {
                 clearDictionaryResult();
               } else {
@@ -1658,7 +1666,11 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                   index: index,
                 );
 
-                setSearchTerm(searchTerm: searchTerm, index: index);
+                setSearchTerm(
+                  searchTerm: searchTerm,
+                  text: text,
+                  index: index,
+                );
               }
             },
         ),
@@ -1719,12 +1731,15 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   /// This is used to set the search term upon pressing on a character
   /// or selecting text.
   void setSearchTerm({
+    required String text,
     required String searchTerm,
     required int index,
   }) {
     bool isSpaceDelimited = appModel.targetLanguage.isSpaceDelimited;
     int whitespaceOffset = searchTerm.length - searchTerm.trimLeft().length;
-    int offsetIndex = index + whitespaceOffset;
+    int offsetIndex =
+        appModel.targetLanguage.getStartingIndex(text: text, index: index) +
+            whitespaceOffset;
     int length = appModel.targetLanguage
         .textToWords(searchTerm)
         .firstWhere((e) => e.trim().isNotEmpty)

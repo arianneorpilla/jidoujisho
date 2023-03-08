@@ -167,11 +167,13 @@ class _DictionaryDialogPageState extends BasePageState {
 
         await FilePicker.platform.clearTemporaryFiles();
 
+        FileType type = appModel.lastSelectedDictionaryFormat.fileType;
         FilePickerResult? result = await FilePicker.platform.pickFiles(
           /// Change when adding multiple dictionary formats.
-          type: appModel.lastSelectedDictionaryFormat.fileType,
-          allowedExtensions:
-              appModel.lastSelectedDictionaryFormat.allowedExtensions,
+          type: type,
+          allowedExtensions: type == FileType.any
+              ? null
+              : appModel.lastSelectedDictionaryFormat.allowedExtensions,
           allowMultiple: true,
           onFileLoading: (status) {
             if (status == FilePickerStatus.done) {
@@ -325,13 +327,13 @@ class _DictionaryDialogPageState extends BasePageState {
     required Dictionary dictionary,
     required DictionaryFormat dictionaryFormat,
   }) {
-    if (dictionary.hidden) {
+    if (dictionary.isHidden(appModel.targetLanguage)) {
       return Icon(
         Icons.visibility_off,
         size: textTheme.titleLarge?.fontSize,
         color: theme.unselectedWidgetColor,
       );
-    } else if (dictionary.collapsed) {
+    } else if (dictionary.isCollapsed(appModel.targetLanguage)) {
       return Icon(
         Icons.close_fullscreen,
         size: textTheme.titleLarge?.fontSize,
@@ -367,7 +369,7 @@ class _DictionaryDialogPageState extends BasePageState {
                     text: dictionary.name,
                     style: TextStyle(
                       fontSize: textTheme.bodyMedium?.fontSize,
-                      color: dictionary.hidden
+                      color: dictionary.isHidden(appModel.targetLanguage)
                           ? theme.unselectedWidgetColor
                           : null,
                     ),
@@ -376,7 +378,7 @@ class _DictionaryDialogPageState extends BasePageState {
                     text: dictionaryFormat.name,
                     style: TextStyle(
                       fontSize: textTheme.bodySmall?.fontSize,
-                      color: dictionary.hidden
+                      color: dictionary.isHidden(appModel.targetLanguage)
                           ? theme.unselectedWidgetColor
                           : null,
                     ),
@@ -449,19 +451,24 @@ class _DictionaryDialogPageState extends BasePageState {
   List<PopupMenuItem<VoidCallback>> getMenuItems(Dictionary dictionary) {
     return [
       buildPopupItem(
-        label: dictionary.collapsed
+        label: dictionary.isCollapsed(appModel.targetLanguage)
             ? dictionaryExpandLabel
             : dictionaryCollapseLabel,
-        icon:
-            dictionary.collapsed ? Icons.open_in_full : Icons.close_fullscreen,
+        icon: dictionary.isCollapsed(appModel.targetLanguage)
+            ? Icons.open_in_full
+            : Icons.close_fullscreen,
         action: () {
           appModel.toggleDictionaryCollapsed(dictionary);
           setState(() {});
         },
       ),
       buildPopupItem(
-        label: dictionary.hidden ? dictionaryShowLabel : dictionaryHideLabel,
-        icon: dictionary.collapsed ? Icons.visibility : Icons.visibility_off,
+        label: dictionary.isHidden(appModel.targetLanguage)
+            ? dictionaryShowLabel
+            : dictionaryHideLabel,
+        icon: dictionary.isCollapsed(appModel.targetLanguage)
+            ? Icons.visibility
+            : Icons.visibility_off,
         action: () {
           appModel.toggleDictionaryHidden(dictionary);
           setState(() {});
