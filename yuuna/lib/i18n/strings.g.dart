@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 316
+/// Strings: 318
 ///
-/// Built on 2023-03-07 at 04:03 UTC
+/// Built on 2023-03-08 at 06:57 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -416,6 +416,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get closed_captions_unavailable => 'No captions';
 	String get closed_captions_error => 'Error while querying captions';
 	String get stream_url => 'Stream URL';
+	String get default_option => 'Default';
 	String get paste => 'Paste';
 	String get lyrics_title => 'Title';
 	String get lyrics_artist => 'Artist';
@@ -463,6 +464,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get highlight_on_tap => 'Highlight text on tap';
 	String get no_audio_file => 'No audio file to save.';
 	String get storage_permissions => 'Please grant the following permissions for exporting to AnkiDroid.';
+	String get network_subtitles_warning => 'Embedded subtitles are unsupported for network streams.';
 	late final _StringsViewRepliesEn view_replies = _StringsViewRepliesEn._(_root);
 }
 
@@ -752,6 +754,7 @@ extension on _StringsEn {
 			case 'closed_captions_unavailable': return 'No captions';
 			case 'closed_captions_error': return 'Error while querying captions';
 			case 'stream_url': return 'Stream URL';
+			case 'default_option': return 'Default';
 			case 'paste': return 'Paste';
 			case 'lyrics_title': return 'Title';
 			case 'lyrics_artist': return 'Artist';
@@ -799,6 +802,7 @@ extension on _StringsEn {
 			case 'highlight_on_tap': return 'Highlight text on tap';
 			case 'no_audio_file': return 'No audio file to save.';
 			case 'storage_permissions': return 'Please grant the following permissions for exporting to AnkiDroid.';
+			case 'network_subtitles_warning': return 'Embedded subtitles are unsupported for network streams.';
 			case 'view_replies.reply': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
 				one: 'SHOW ${n} REPLY',
 				other: 'SHOW ${n} REPLIES',

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -339,6 +340,7 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
   /// based on the [Locale] and [TextBaseline] of the active target language.
   TextStyle get textStyle => TextStyle(
         fontFamily: appModel.targetLanguage.defaultFontFamily,
+        fontFeatures: const [FontFeature('liga', 0)],
         locale: locale,
         textBaseline: textBaseline,
       );

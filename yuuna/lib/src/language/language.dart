@@ -14,6 +14,7 @@ abstract class Language {
   Language({
     required this.languageName,
     required this.languageCode,
+    required this.threeLetterCode,
     required this.countryCode,
     required this.textDirection,
     required this.preferVerticalReading,
@@ -36,6 +37,12 @@ abstract class Language {
   /// For example, in the case of Japanese, this is 'ja'.
   /// In the case of English, this is 'en'.
   final String languageCode;
+
+  /// The ISO 639-3 code or the international standard language code.
+  ///
+  /// For example, in the case of Japanese, this is 'jpn'.
+  /// In the case of English, this is 'eng'.
+  final String threeLetterCode;
 
   /// The ISO 3166-1 code or the international standard name of country.
   ///

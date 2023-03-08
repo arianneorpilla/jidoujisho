@@ -4,6 +4,7 @@ import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:subtitle/subtitle.dart';
 import 'package:path/path.dart' as path;
+import 'package:yuuna/language.dart';
 
 /// Differentiates different types of [SubtitleItem].
 enum SubtitleItemType {
@@ -108,11 +109,56 @@ class SubtitleUtils {
   }
 
   /// Gets a list of subtitles from a video file.
-  static Future<List<SubtitleItem>> subtitlesFromVideo(
-    File file,
-    int embeddedTrackCount,
-  ) async {
+  static Future<SubtitleItem?> targetSubtitleFromVideo({
+    required File file,
+    required Language language,
+    required Function(SubtitleItem) onItemComplete,
+  }) async {
+    Directory appDocDir = await getApplicationDocumentsDirectory();
+    Directory subsDir = Directory('${appDocDir.path}/targetSubtitles');
+    if (!subsDir.existsSync()) {
+      subsDir.createSync(recursive: true);
+    }
+
+    String inputPath = file.path;
+
+    String threeLanguageCode = language.threeLetterCode;
+    String outputPath = '${subsDir.path}/extractSrt.srt';
+    String command =
+        '-loglevel quiet -i "$inputPath" -map 0:m:language:$threeLanguageCode -map -0:a -map -0:v "$outputPath"';
+
+    File outputFile = File(outputPath);
+
+    if (outputFile.existsSync()) {
+      outputFile.deleteSync();
+    }
+
+    final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
+
+    await _flutterFFmpeg.execute(command);
+
+    await Future.delayed(const Duration(seconds: 1));
+
+    if (outputFile.existsSync()) {
+      SubtitleItem item = await subtitlesFromFile(
+        file: outputFile,
+        type: SubtitleItemType.embeddedSubtitle,
+      );
+      onItemComplete(item);
+      return item;
+    } else {
+      return null;
+    }
+  }
+
+  /// Gets a list of subtitles from a video file.
+  static Future<List<SubtitleItem>> subtitlesFromVideo({
+    required File file,
+    required int embeddedTrackCount,
+    required Function(SubtitleItem) onItemComplete,
+  }) async {
     List<File> outputFiles = [];
+    List<SubtitleItem> items = [];
 
     Directory appDocDir = await getApplicationDocumentsDirectory();
     Directory subsDir = Directory('${appDocDir.path}/subtitles');
@@ -125,7 +171,7 @@ class SubtitleUtils {
     for (int i = 0; i < embeddedTrackCount - 1; i++) {
       String outputPath = '${subsDir.path}/extractSrt$i.srt';
       String command =
-          '-loglevel verbose -i "$inputPath" -map 0:s:$i "$outputPath"';
+          '-loglevel quiet -i "$inputPath" -map 0:s:$i "$outputPath"';
 
       File outputFile = File(outputPath);
 
@@ -144,19 +190,14 @@ class SubtitleUtils {
 
       await Future.delayed(const Duration(seconds: 1));
 
-      outputFiles.add(outputFile);
-    }
-
-    List<SubtitleItem> items = [];
-    for (int i = 0; i < outputFiles.length; i++) {
-      File outputFile = outputFiles[i];
-
       SubtitleItem item = await subtitlesFromFile(
         file: outputFile,
         type: SubtitleItemType.embeddedSubtitle,
         index: i,
       );
 
+      onItemComplete(item);
+      outputFiles.add(outputFile);
       items.add(item);
     }
 

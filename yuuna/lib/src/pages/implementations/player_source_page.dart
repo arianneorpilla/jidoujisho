@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:multi_value_listenable_builder/multi_value_listenable_builder.dart';
 import 'package:share_plus/share_plus.dart';
@@ -17,6 +18,7 @@ import 'package:subtitle/subtitle.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:yuuna/creator.dart';
+import 'package:yuuna/i18n/strings.g.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/src/pages/implementations/player_comments_page.dart';
@@ -113,6 +115,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       ValueNotifier<Subtitle?>(null);
   final ValueNotifier<Subtitle?> _listeningSubtitle =
       ValueNotifier<Subtitle?>(null);
+  final ValueNotifier<bool> _subtitleItemNotifier = ValueNotifier<bool>(false);
 
   late final ValueNotifier<BlurOptions> _blurOptionsNotifier;
   late final ValueNotifier<SubtitleOptions> _subtitleOptionsNotifier;
@@ -410,25 +413,43 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       return;
     }
 
+    await SubtitleUtils.targetSubtitleFromVideo(
+      file: File(controller.dataSource),
+      language: appModel.targetLanguage,
+      onItemComplete: (item) async {
+        _subtitleItems.add(item);
+
+        if (_subtitleItem.type == SubtitleItemType.noneSubtitle) {
+          await item.controller.initial();
+
+          _subtitleItem = item;
+          _currentSubtitle.value = null;
+          widget.source.clearCurrentSentence();
+          refreshSubtitleWidget();
+        }
+        _subtitleItemNotifier.value = !_subtitleItemNotifier.value;
+      },
+    );
+
     await Future.delayed(const Duration(seconds: 2), () {});
 
     int embeddedTrackCount = await _playerController.getSpuTracksCount() ?? 0;
 
-    List<SubtitleItem> embeddedItems = await SubtitleUtils.subtitlesFromVideo(
-        File(controller.dataSource), embeddedTrackCount);
-
-    _subtitleItems.addAll(embeddedItems);
-
-    if (_subtitleItem.type == SubtitleItemType.noneSubtitle) {
-      for (int i = 0; i < _subtitleItems.length; i++) {
-        SubtitleItem item = _subtitleItems[i];
-        if (item.controller.subtitles.isNotEmpty) {
+    await SubtitleUtils.subtitlesFromVideo(
+      file: File(controller.dataSource),
+      embeddedTrackCount: embeddedTrackCount,
+      onItemComplete: (item) async {
+        _subtitleItems.add(item);
+        if (_subtitleItem.type == SubtitleItemType.noneSubtitle) {
           await item.controller.initial();
           _subtitleItem = item;
-          break;
+          _currentSubtitle.value = null;
+          widget.source.clearCurrentSentence();
+          refreshSubtitleWidget();
         }
-      }
-    }
+        _subtitleItemNotifier.value = !_subtitleItemNotifier.value;
+      },
+    );
   }
 
   /// This updates the media item to its new position and duration and also
@@ -1143,12 +1164,22 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           Map<int, String> subtitleEmbeddedTracks =
               await _playerController.getSpuTracks();
 
+          if (source is PlayerNetworkStreamSource) {
+            Fluttertoast.showToast(msg: t.network_subtitles_warning);
+          }
+
           await showModalBottomSheet(
             context: context,
             isScrollControlled: true,
             useRootNavigator: true,
-            builder: (context) => JidoujishoBottomSheet(
-              options: getSubtitleDialogOptions(subtitleEmbeddedTracks),
+            builder: (context) => ValueListenableBuilder(
+              valueListenable: _subtitleItemNotifier,
+              builder: (context, _, child) {
+                return JidoujishoBottomSheet(
+                  scrollToExtent: false,
+                  options: getSubtitleDialogOptions(subtitleEmbeddedTracks),
+                );
+              },
             ),
           );
 
@@ -1346,11 +1377,23 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   }) {
     switch (item.type) {
       case SubtitleItemType.externalSubtitle:
-        return '$optionSubtitle - $optionSubtitleExternal [${item.metadata}]';
+        if (item.metadata != null) {
+          return '$optionSubtitle - $optionSubtitleExternal [${item.metadata}]';
+        } else {
+          return '$optionSubtitle - $optionSubtitleExternal';
+        }
       case SubtitleItemType.embeddedSubtitle:
-        return '$optionSubtitle - ${embeddedTracks.values.toList()[item.index!]}';
+        if (item.index != null) {
+          return '$optionSubtitle - ${embeddedTracks.values.toList()[item.index!]}';
+        } else {
+          return '$optionSubtitle - ${t.default_option}';
+        }
       case SubtitleItemType.webSubtitle:
-        return '$optionSubtitle - ${item.metadata}';
+        if (item.metadata != null) {
+          return '$optionSubtitle - ${item.metadata}';
+        } else {
+          return optionSubtitle;
+        }
       case SubtitleItemType.noneSubtitle:
         return '$optionSubtitle - $optionSubtitleNone';
     }

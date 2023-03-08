@@ -285,6 +285,7 @@
     "closed_captions_unavailable": "No captions",
     "closed_captions_error": "Error while querying captions",
     "stream_url": "Stream URL",
+    "default_option": "Default",
     "paste": "Paste",
     "lyrics_title": "Title",
     "lyrics_artist": "Artist",
@@ -338,6 +339,7 @@
     "highlight_on_tap": "Highlight text on tap",
     "no_audio_file": "No audio file to save.",
     "storage_permissions": "Please grant the following permissions for exporting to AnkiDroid.",
+    "network_subtitles_warning": "Embedded subtitles are unsupported for network streams.",
     "view_replies": {
         "reply": {
           "one": "SHOW $n REPLY",

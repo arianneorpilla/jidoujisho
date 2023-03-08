@@ -19,6 +19,7 @@ class JapaneseLanguage extends Language {
           languageName: '日本語',
           languageCode: 'ja',
           countryCode: 'JP',
+          threeLetterCode: 'jpn',
           preferVerticalReading: true,
           textDirection: TextDirection.ltr,
           isSpaceDelimited: false,
