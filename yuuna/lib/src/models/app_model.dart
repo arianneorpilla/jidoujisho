@@ -1859,7 +1859,7 @@ class AppModel with ChangeNotifier {
     mediaSource.mediaType.refreshTab();
     DictionaryMediaType.instance.refreshTab();
 
-    mediaSource.onSourceExit(
+    await mediaSource.onSourceExit(
       appModel: this,
       context: context,
       ref: ref,

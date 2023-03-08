@@ -42,6 +42,14 @@ abstract class PlayerMediaSource extends MediaSource {
     return const HistoryPlayerPage();
   }
 
+  /// It may be useful to do multiple operations at the same time, so this
+  /// is used before preparing the controller and subtitles.
+  Future<void> prepareMediaResources({
+    required AppModel appModel,
+    required WidgetRef ref,
+    required MediaItem item,
+  }) async {}
+
   /// Get the player controller to be used when a media item is loaded up,
   Future<VlcPlayerController> preparePlayerController({
     required AppModel appModel,

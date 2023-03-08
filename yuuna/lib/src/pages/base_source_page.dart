@@ -89,16 +89,16 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
               ),
             ),
             onPressed: () async {
+              if (mounted) {
+                Navigator.pop(context, true);
+              }
+
               await appModel.closeMedia(
                 context: context,
                 ref: ref,
                 mediaSource: appModel.currentMediaSource!,
                 item: widget.item,
               );
-
-              if (mounted) {
-                Navigator.pop(context, true);
-              }
             }),
         TextButton(
           child: Text(
