@@ -84,29 +84,27 @@
 
 # 🎞️ A glimpse of jidoujisho in action
 
-
-
 <p align="center" style="margin:0">
-<img src="https://i.postimg.cc/2SkwRqhk/Screenshot-20220906-215634.png" width="24%">
-<img src="https://i.postimg.cc/YSjz0JdT/Screenshot-20220906-215643.png" width="24%">
-<img src="https://i.postimg.cc/5t3DWHPb/sdsd.png" width="24%">
-<img src="https://i.postimg.cc/QMPkT0PC/Screenshot-20220906-215734.png" width="24%">
+  <img src="https://i.postimg.cc/L8LYkCVy/Screenshot-20230305-144013.png" width="32%">
+  <img src="https://i.postimg.cc/KcpMmgz5/Screenshot-20230305-144108.png" width="32%">
+  <img src="https://i.postimg.cc/3JW2GF66/Screenshot-20230305-144122.png" width="32%">
 </p>
 <p align="center" style="margin:0">
-  <img src="https://i.postimg.cc/qgffpd4c/Screenshot-20220906-193649.png" width="32%">
-  <img src="https://i.postimg.cc/BnHFS5c2/Screenshot-20220906-203450.png" width="32%">
-  <img src="https://i.postimg.cc/hvYmjp51/Screenshot-20220906-203310.png" width="32%">
+<img src="https://i.postimg.cc/MGVcDMZy/Screenshot-20230308-215737.png" width="24%">
+<img src="https://i.postimg.cc/4xr7VbGf/Screenshot-20230308-215808.png" width="24%">
+<img src="https://i.postimg.cc/XJhzbYy7/Screenshot-20230304-233104.png" width="24%">
+<img src="https://i.postimg.cc/qq5nFPPn/Screenshot-20230308-222130.png" width="24%">
 </p>
 <p align="center" style="margin:0">
-  <img src="https://i.postimg.cc/Xq55rw6M/Screenshot-20220906-203650.png" width="24%">
-  <img src="https://i.postimg.cc/LXqdk9TS/Screenshot-20220906-223137.png" width="24%">
-  <img src="https://i.postimg.cc/02nkZQvR/Screenshot-20220906-221800.png" width="24%">
-  <img src="https://i.postimg.cc/mgrbnsZc/Screenshot-20220906-222215.png" width="24%">
+  <img src="https://i.postimg.cc/mgFGnKzs/aaaafba.png" width="32%">
+  <img src="https://i.postimg.cc/nL3W3kFm/Screenshot-20230304-233201.png" width="32%">
+  <img src="https://i.postimg.cc/kgFzbCLf/Screenshot-20230305-014420.png" width="32%">
 </p>
 <p align="center" style="margin:0">
-  <img src="https://i.postimg.cc/vBx7Lkxk/asdad.png" width="32%">
-  <img src="https://i.postimg.cc/4Ns4zcrQ/Screenshot-20220906-210905.png" width="32%">
-  <img src="https://i.postimg.cc/zXDBsMqg/abccd.png" width="32%">
+  <img src="https://i.postimg.cc/9Xp7K7db/Screenshot-20230308-215933.png" width="24%">
+  <img src="https://i.postimg.cc/SKpns6Cw/Screenshot-20230308-222919.png" width="24%">
+  <img src="https://i.postimg.cc/Hxd8SwLQ/Screenshot-20230308-223247.png" width="24%">
+  <img src="https://i.postimg.cc/YCF4MnG6/Screenshot-20230308-223209.png" width="24%">
 </p>
 
 # ⚕️ Current state of the project
