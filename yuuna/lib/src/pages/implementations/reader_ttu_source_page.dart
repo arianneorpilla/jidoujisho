@@ -284,9 +284,6 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
           value: false,
         );
         await controller.evaluateJavascript(source: javascriptToExecute);
-        await controller.evaluateJavascript(
-            source:
-                'spaceDelimited = ${appModel.targetLanguage.isSpaceDelimited};');
         Future.delayed(const Duration(seconds: 1), _focusNode.requestFocus);
       },
       onTitleChanged: (controller, title) async {
@@ -434,7 +431,6 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
       InAppWebViewController webViewController) async {
     String source = 'window.getSelection().removeAllRanges();';
     await webViewController.evaluateJavascript(source: source);
-    await webViewController.evaluateJavascript(source: 'lastIndex = -1;');
   }
 
   /// Get the default context menu for sources that make use of embedded web
@@ -560,11 +556,9 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
   /// https://github.com/birchill/10ten-ja-reader/blob/fbbbde5c429f1467a7b5a938e9d67597d7bd5ffa/src/content/get-text.ts#L314
   String javascriptToExecute = """
 /*jshint esversion: 6 */
-var lastIndex = -1;
-var spaceDelimited = false;
 
 function tapToSelect(e) {
-  if (spaceDelimited && getSelectionText()) {
+  if (getSelectionText()) {
     console.log(JSON.stringify({
 				"index": -1,
 				"text": getSelectionText(),
@@ -667,20 +661,8 @@ function tapToSelect(e) {
     index = index - 1;
   }
 
-  if (lastIndex === index && getSelectionText()) {
-    console.log(JSON.stringify({
-				"index": -1,
-				"text": getSelectionText(),
-				"jidoujisho-message-type": "lookup",
-        "x": e.clientX,
-        "y": e.clientY,
-        "isCreator": "no",
-			}));
-  }
-
   var character = text[index];
   if (character) {
-    lastIndex = index;
     console.log(JSON.stringify({
       "index": index,
       "text": text,

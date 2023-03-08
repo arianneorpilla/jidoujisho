@@ -1648,17 +1648,13 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           style: subtitleTextStyle,
           recognizer: TapGestureRecognizer()
             ..onTapDown = (details) async {
-              bool firstCharacterCondition =
-                  !appModel.targetLanguage.isSpaceDelimited &&
-                      (_selectableTextController.selection.start == index);
               bool wholeWordCondition =
-                  appModel.targetLanguage.isSpaceDelimited &&
-                      _selectableTextController.selection.start <= index &&
+                  _selectableTextController.selection.start <= index &&
                       _selectableTextController.selection.end > index;
 
-              if ((firstCharacterCondition || wholeWordCondition) &&
-                  currentResult != null) {
+              if (wholeWordCondition && currentResult != null) {
                 clearDictionaryResult();
+                return;
               } else {
                 String searchTerm =
                     appModel.targetLanguage.getSearchTermFromIndex(

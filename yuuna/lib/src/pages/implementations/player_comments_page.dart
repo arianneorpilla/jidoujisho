@@ -233,16 +233,10 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
               _lastTappedController?.clearSelection();
               _lastTappedController = controller;
 
-              bool firstCharacterCondition =
-                  !appModel.targetLanguage.isSpaceDelimited &&
-                      (controller.selection.start == index);
-              bool wholeWordCondition =
-                  appModel.targetLanguage.isSpaceDelimited &&
-                      controller.selection.start <= index &&
-                      controller.selection.end > index;
+              bool wholeWordCondition = controller.selection.start <= index &&
+                  controller.selection.end > index;
 
-              if ((firstCharacterCondition || wholeWordCondition) &&
-                  currentResult != null) {
+              if (wholeWordCondition && currentResult != null) {
                 clearDictionaryResult();
                 return;
               }

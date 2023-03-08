@@ -284,16 +284,11 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
           style: const TextStyle(fontSize: 22),
           recognizer: TapGestureRecognizer()
             ..onTapDown = (details) async {
-              bool firstCharacterCondition =
-                  !appModel.targetLanguage.isSpaceDelimited &&
-                      (_selectableTextController.selection.start == index);
               bool wholeWordCondition =
-                  appModel.targetLanguage.isSpaceDelimited &&
-                      _selectableTextController.selection.start <= index &&
+                  _selectableTextController.selection.start <= index &&
                       _selectableTextController.selection.end > index;
 
-              if ((firstCharacterCondition || wholeWordCondition) &&
-                  currentResult != null) {
+              if (wholeWordCondition && currentResult != null) {
                 clearDictionaryResult();
                 return;
               }
