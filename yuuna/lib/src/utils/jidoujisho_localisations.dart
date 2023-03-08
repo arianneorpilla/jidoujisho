@@ -380,6 +380,7 @@ class JidoujishoLocalisations {
     'no_comments_queried': 'No comments queried',
     'replies': 'Replies',
     'accessibility':
-        'Permission is required to capture text from accessibility events.'
+        'Permission is required to capture text from accessibility events.',
+    'default': 'Default'
   };
 }

@@ -297,7 +297,6 @@ class PlayerYoutubeSource extends PlayerMediaSource {
     bool subtitlesCached = getSubtitleItems(videoId) != null &&
         getSubtitleMetadata(videoId) != null;
     bool streamCached = _streamManifestCache[videoId] != null;
-    bool captionsCached = _closedCaptionManifestCache[videoId] != null;
 
     if (!subtitlesCached || !streamCached) {
       ComputeManifestParams params = ComputeManifestParams(
@@ -379,8 +378,8 @@ class PlayerYoutubeSource extends PlayerMediaSource {
     required MediaItem item,
   }) async {
     String videoId = VideoId(item.mediaIdentifier).value;
-    List<String> subtitlesList = getSubtitleItems(videoId)!;
-    List<String> metadataList = getSubtitleMetadata(videoId)!;
+    List<String> subtitlesList = [...getSubtitleItems(videoId)!];
+    List<String> metadataList = [...getSubtitleMetadata(videoId)!];
 
     String? targetLanguageItem;
     String? appLanguageItem;
@@ -395,9 +394,8 @@ class PlayerYoutubeSource extends PlayerMediaSource {
         .indexWhere((e) => e.contains('[${appModel.appLocale.languageCode}]'));
 
     if (targetLanguageIndex != -1) {
-      targetLanguageItem = subtitlesList[targetLanguageIndex];
       targetLanguageMeta = metadataList.removeAt(targetLanguageIndex);
-      subtitlesList.remove(targetLanguageItem);
+      targetLanguageItem = subtitlesList.removeAt(targetLanguageIndex);
     }
 
     targetLanguageIndex = metadataList.indexWhere(
@@ -406,9 +404,8 @@ class PlayerYoutubeSource extends PlayerMediaSource {
         .indexWhere((e) => e.contains('[${appModel.appLocale.languageCode}]'));
 
     if (appLanguageIndex != -1 && targetLanguageIndex != appLanguageIndex) {
-      appLanguageItem = subtitlesList[appLanguageIndex];
       appLanguageMeta = metadataList.removeAt(appLanguageIndex);
-      subtitlesList.remove(appLanguageItem);
+      appLanguageItem = subtitlesList.removeAt(appLanguageIndex);
     }
 
     subtitlesList = [
@@ -442,7 +439,7 @@ class PlayerYoutubeSource extends PlayerMediaSource {
   /// Get cached item.
   List<String>? getSubtitleItems(String videoId) {
     return getPreference<List<String>?>(
-      key: 'subtitle_items/$videoId',
+      key: 'subtitles_cache/$videoId',
       defaultValue: null,
     );
   }
@@ -451,7 +448,7 @@ class PlayerYoutubeSource extends PlayerMediaSource {
   void setSubtitleItems(
       {required String videoId, required List<String> subtitles}) async {
     await setPreference<List<String>?>(
-      key: 'subtitle_items/$videoId',
+      key: 'subtitles_cache/$videoId',
       value: subtitles,
     );
   }
@@ -459,7 +456,7 @@ class PlayerYoutubeSource extends PlayerMediaSource {
   /// Get cached item.
   List<String>? getSubtitleMetadata(String videoId) {
     return getPreference<List<String>?>(
-      key: 'subtitle_meta/$videoId',
+      key: 'subtitle_metadata_cache/$videoId',
       defaultValue: null,
     );
   }
@@ -468,7 +465,7 @@ class PlayerYoutubeSource extends PlayerMediaSource {
   void setSubtitleMetadata(
       {required String videoId, required List<String> metadata}) async {
     await setPreference<List<String>?>(
-      key: 'subtitle_meta/$videoId',
+      key: 'subtitle_metadata_cache/$videoId',
       value: metadata,
     );
   }

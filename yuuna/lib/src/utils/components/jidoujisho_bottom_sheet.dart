@@ -33,11 +33,15 @@ class JidoujishoBottomSheet extends ConsumerWidget {
   /// Initialise a bottom sheet.
   const JidoujishoBottomSheet({
     required this.options,
+    this.scrollToExtent = true,
     super.key,
   });
 
   /// Options to show in the bottom sheet.
   final List<JidoujishoBottomSheetOption> options;
+
+  /// Whether or not to scroll to bottom.
+  final bool scrollToExtent;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -45,7 +49,7 @@ class JidoujishoBottomSheet extends ConsumerWidget {
 
     ScrollController scrollController = ScrollController();
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (scrollController.hasClients) {
+      if (scrollController.hasClients && scrollToExtent) {
         scrollController.jumpTo(
           scrollController.position.maxScrollExtent,
         );
