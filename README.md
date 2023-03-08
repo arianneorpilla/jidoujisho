@@ -32,12 +32,8 @@
 
 
 ---
-<p align="center" style="margin:0"><b>Preview Release:
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.4-preview">2.4</a>
-</b></p>
-
 <p align="center" style="margin:0"><b>Latest Release:
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.3">2.3.7</a>
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.4">2.4</a>
 </b></p>
 
 <p align="center" style="margin:0"><b>Release Notes:</b><br>
@@ -72,7 +68,8 @@
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.0.0">2.0</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.1">2.1</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.2">2.2</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.3">2.3</a></b>
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.3">2.3</a> · 
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.4">2.4</a></b>
 </p>
 
 # 📱 Language learning in the palm of your hand
