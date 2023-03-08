@@ -10,3 +10,5 @@ export 'src/dictionary/dictionary_format.dart';
 export 'src/dictionary/dictionary_operations_params.dart';
 
 export 'src/dictionary/formats/yomichan_dictionary_format.dart';
+export 'src/dictionary/formats/abbyy_lingvo_format.dart';
+export 'src/dictionary/formats/migaku_dictionary_format.dart';

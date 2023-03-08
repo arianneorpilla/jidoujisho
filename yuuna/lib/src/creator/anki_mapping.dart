@@ -33,8 +33,10 @@ class AnkiMapping {
   /// Get the default mapping that is included with the application at first
   /// startup. Requires a language so that the appropriate default enhancements
   /// are suggested.
-  factory AnkiMapping.defaultMapping(
-      {required Language language, required int order}) {
+  factory AnkiMapping.defaultMapping({
+    required Language language,
+    required int order,
+  }) {
     return AnkiMapping(
       label: standardProfileName,
       model: standardModelName,
@@ -57,7 +59,7 @@ class AnkiMapping {
       order: order,
       tags: [standardModelName],
       enhancements: defaultEnhancementsByLanguage[language.languageCountryCode],
-      actions: defaultActions,
+      actions: defaultActionsByLanguage[language.languageCountryCode],
       exportMediaTags: false,
       useBrTags: false,
       prependDictionaryNames: true,
@@ -165,13 +167,22 @@ class AnkiMapping {
   ];
 
   /// A default map of enhancements to use for new mappings.
-  static const Map<int, String> defaultActions = {
-    0: CardCreatorAction.key,
-    1: InstantExportAction.key,
-    2: AddToStashAction.key,
-    3: CharacterSearchAction.key,
-    4: ShareAction.key,
-    5: PlayAudioAction.key,
+  static const Map<String, Map<int, String>> defaultActionsByLanguage = {
+    'ja-JP': {
+      0: CardCreatorAction.key,
+      1: InstantExportAction.key,
+      2: AddToStashAction.key,
+      3: CharacterSearchAction.key,
+      4: ShareAction.key,
+      5: PlayAudioAction.key,
+    },
+    'en-US': {
+      0: CardCreatorAction.key,
+      1: InstantExportAction.key,
+      2: AddToStashAction.key,
+      3: ShareAction.key,
+      4: PlayAudioAction.key,
+    }
   };
 
   /// The default mapping name which cannot be deleted or reused.

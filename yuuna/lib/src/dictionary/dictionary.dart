@@ -2,6 +2,7 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:isar/isar.dart';
 import 'package:path/path.dart' as path;
+import 'package:yuuna/language.dart';
 
 part 'dictionary.g.dart';
 
@@ -14,9 +15,9 @@ class Dictionary {
   Dictionary({
     required this.name,
     required this.formatKey,
-    required this.collapsed,
-    required this.hidden,
     required this.order,
+    this.hiddenLanguages = const [],
+    this.collapsedLanguages = const [],
   });
 
   /// Function to generate a lookup ID for heading by its unique string key.
@@ -43,12 +44,6 @@ class Dictionary {
   @Index()
   int order;
 
-  /// Whether this dictionary is collapsed or not by default in search results.
-  bool collapsed;
-
-  /// Whether this dictionary is shown or not in search results.
-  bool hidden;
-
   /// A dictionary may have multiple entries.
   @Backlink(to: 'dictionary')
   final IsarLinks<DictionaryEntry> entries = IsarLinks<DictionaryEntry>();
@@ -69,6 +64,26 @@ class Dictionary {
   /// Returns the resource path for within the applications documents directory.
   String getBasePath({required String appDirDocPath}) {
     return path.join(appDirDocPath, name);
+  }
+
+  /// Languages where this dictionary is hidden. If a language has set this
+  /// dictionary to hidden, then its language code will be here.
+  @Index()
+  List<String> hiddenLanguages;
+
+  /// Languages where this dictionary is collapsed. If a language has set this
+  /// dictionary to hidden, then its language code will be here.
+  @Index()
+  List<String> collapsedLanguages;
+
+  /// Whether this dictionary is hidden for a given language.
+  bool isHidden(Language language) {
+    return hiddenLanguages.contains(language.languageCode);
+  }
+
+  /// Whether this dictionary is collapsed for a given language.
+  bool isCollapsed(Language language) {
+    return collapsedLanguages.contains(language.languageCode);
   }
 
   /// Given an asset name, returns an appropriate path to place the asset

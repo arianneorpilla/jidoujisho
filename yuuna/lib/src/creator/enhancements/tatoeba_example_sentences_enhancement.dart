@@ -79,19 +79,11 @@ class TatoebaExampleSentencesEnhancement extends Enhancement {
       return [];
     }
 
-    late String langCode;
     Language language = appModel.targetLanguage;
-    // Language Customizable
-    if (language is JapaneseLanguage) {
-      langCode = 'jpn';
-    } else {
-      throw UnimplementedError('This language is not implemented for Tatoeba');
-    }
+    String langCode = language.threeLetterCode;
 
-    String cacheKey = '$langCode/$searchTerm';
-
-    if (_tatoebaCache[cacheKey] != null) {
-      return _tatoebaCache[cacheKey]!;
+    if (_tatoebaCache[langCode] != null) {
+      return _tatoebaCache[langCode]!;
     }
 
     List<String> sentences = [];
@@ -104,7 +96,7 @@ class TatoebaExampleSentencesEnhancement extends Enhancement {
         List<Map<String, dynamic>>.from(json['results']);
 
     sentences = results.map((result) => result['text'].toString()).toList();
-    _tatoebaCache[cacheKey] = sentences;
+    _tatoebaCache[langCode] = sentences;
 
     return sentences;
   }

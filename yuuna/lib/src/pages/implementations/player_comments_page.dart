@@ -217,6 +217,7 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
 
   List<InlineSpan> getTextSpans({
     required SelectableTextController controller,
+    required String author,
     required String text,
   }) {
     List<InlineSpan> spans = [];
@@ -232,13 +233,21 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
               _lastTappedController?.clearSelection();
               _lastTappedController = controller;
 
-              if (controller.selection.start == index &&
+              bool firstCharacterCondition =
+                  !appModel.targetLanguage.isSpaceDelimited &&
+                      (controller.selection.start == index);
+              bool wholeWordCondition =
+                  appModel.targetLanguage.isSpaceDelimited &&
+                      controller.selection.start <= index &&
+                      controller.selection.end > index;
+
+              if ((firstCharacterCondition || wholeWordCondition) &&
                   currentResult != null) {
                 clearDictionaryResult();
                 return;
               }
 
-              source.setCurrentSentence(text);
+              source.setCurrentSentence('$author:\n$text');
 
               double x = details.globalPosition.dx;
               double y = details.globalPosition.dy;
@@ -269,7 +278,9 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
                     appModel.targetLanguage.isSpaceDelimited;
                 int whitespaceOffset =
                     searchTerm.length - searchTerm.trimLeft().length;
-                int offsetIndex = index + whitespaceOffset;
+                int offsetIndex = appModel.targetLanguage
+                        .getStartingIndex(text: text, index: index) +
+                    whitespaceOffset;
                 int length = appModel.targetLanguage
                     .textToWords(searchTerm)
                     .firstWhere((e) => e.trim().isNotEmpty)
@@ -363,12 +374,14 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
                       TextSpan(
                         children: getTextSpans(
                           controller: controller,
+                          author: comment.author,
                           text: comment.text,
                         ),
                       ),
                       selectionControls: JidoujishoTextSelectionControls(
                         searchAction: (selection) async {
-                          source.setCurrentSentence(comment.text);
+                          source.setCurrentSentence(
+                              '${comment.author}:\n${comment.text}');
                           await appModel.openRecursiveDictionarySearch(
                             searchTerm: selection,
                             killOnPop: false,
@@ -392,8 +405,8 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
                       style: const TextStyle(fontSize: 18),
                     ),
                   ),
-                  buildTextSegmentButton(comment.text),
-                  buildCardCreatorButton(comment.text),
+                  buildTextSegmentButton('${comment.author}:\n${comment.text}'),
+                  buildCardCreatorButton('${comment.author}:\n${comment.text}'),
                 ],
               ),
               const Space.normal(),

@@ -26,6 +26,7 @@ class PrepareDirectoryParams extends IsolateParams {
   /// Prepare parameters for a dictionary format's directory preparation method.
   PrepareDirectoryParams({
     required this.file,
+    required this.charset,
     required this.workingDirectory,
     required this.dictionaryFormat,
     required super.sendPort,
@@ -35,6 +36,9 @@ class PrepareDirectoryParams extends IsolateParams {
   /// should be non-null for dictionary formats that do not require a file for
   /// import.
   final File file;
+
+  /// Used for checking if a file is UTF-16 or not. Otherwise, this is blank.
+  final String charset;
 
   /// A working directory to be used in isolation and where data is to be
   /// handled in later steps.

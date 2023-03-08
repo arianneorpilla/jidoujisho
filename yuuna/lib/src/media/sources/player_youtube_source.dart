@@ -24,6 +24,17 @@ Future<ClosedCaptionManifest> computeCaptionsManifest(String videoId) async {
   return manifest;
 }
 
+/// Used to not block the UI isolate.
+Future<CommentsList?> computeCommentsList(CommentsList? commentsList) async {
+  return commentsList?.nextPage();
+}
+
+/// Used to not block the UI isolate.
+Future<Channel> computeChannel(String channelId) async {
+  YoutubeExplode yt = YoutubeExplode();
+  return yt.channels.get(channelId);
+}
+
 /// A global [Provider] for getting the paging controller for comments for a
 /// video.
 final commentsProvider =
@@ -781,7 +792,7 @@ class PlayerYoutubeSource extends PlayerMediaSource {
       return channel;
     }
 
-    channel = await _channelClient.get(id);
+    channel = await computeChannel(id);
     _channelCache[id] = channel;
     return channel;
   }
@@ -804,7 +815,7 @@ class PlayerYoutubeSource extends PlayerMediaSource {
 
       try {
         comments.addAll(commentsList!.toList());
-        commentsList = await commentsList?.nextPage();
+        commentsList = await compute(computeCommentsList, commentsList);
       } finally {
         if (comments.isEmpty) {
           pagingController?.appendLastPage(comments);

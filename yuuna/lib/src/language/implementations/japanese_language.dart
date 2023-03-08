@@ -254,7 +254,6 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
   int bestLength = 0;
   String searchTerm = params.searchTerm.trim();
   const KanaKit kanaKit = KanaKit();
-
   if (kanaKit.isRomaji(searchTerm)) {
     searchTerm = kanaKit.toHiragana(searchTerm);
   }
@@ -309,7 +308,7 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
       String noAsterisks = searchTerm
           .replaceAll('※', '*')
           .replaceAll('？', '?')
-          .replaceAll('※', '');
+          .replaceAll('*', '');
 
       if (params.maximumDictionaryTermsInResult > uniqueHeadingsById.length) {
         if (questionMarkOnly) {
@@ -603,6 +602,7 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
 
   headings = headings.sublist(
       0, min(headings.length, params.maximumDictionaryTermsInResult));
+
   List<int> headingIds = headings.map((e) => e.id).toList();
 
   DictionarySearchResult result = DictionarySearchResult(

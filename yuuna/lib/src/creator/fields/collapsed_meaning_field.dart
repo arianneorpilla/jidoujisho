@@ -37,8 +37,8 @@ class CollapsedMeaningField extends Field {
   }) {
     List<DictionaryEntry> collapsedEntries = heading.entries
         .where((entry) =>
-            !entry.dictionary.value!.hidden &&
-            entry.dictionary.value!.collapsed)
+            !entry.dictionary.value!.isHidden(appModel.targetLanguage) &&
+            entry.dictionary.value!.isCollapsed(appModel.targetLanguage))
         .toList();
 
     collapsedEntries.sort((a, b) =>

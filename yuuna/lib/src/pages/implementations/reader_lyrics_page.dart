@@ -284,7 +284,15 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
           style: const TextStyle(fontSize: 22),
           recognizer: TapGestureRecognizer()
             ..onTapDown = (details) async {
-              if (_selectableTextController.selection.start == index &&
+              bool firstCharacterCondition =
+                  !appModel.targetLanguage.isSpaceDelimited &&
+                      (_selectableTextController.selection.start == index);
+              bool wholeWordCondition =
+                  appModel.targetLanguage.isSpaceDelimited &&
+                      _selectableTextController.selection.start <= index &&
+                      _selectableTextController.selection.end > index;
+
+              if ((firstCharacterCondition || wholeWordCondition) &&
                   currentResult != null) {
                 clearDictionaryResult();
                 return;
@@ -319,7 +327,9 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
                     appModel.targetLanguage.isSpaceDelimited;
                 int whitespaceOffset =
                     searchTerm.length - searchTerm.trimLeft().length;
-                int offsetIndex = index + whitespaceOffset;
+                int offsetIndex = appModel.targetLanguage
+                        .getStartingIndex(text: text, index: index) +
+                    whitespaceOffset;
                 int length = appModel.targetLanguage
                     .textToWords(searchTerm)
                     .firstWhere((e) => e.trim().isNotEmpty)
