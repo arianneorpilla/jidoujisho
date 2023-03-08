@@ -128,9 +128,13 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   }
 
   @override
-  void dispose() {
+  void dispose() async {
     _playPauseSubscription?.cancel();
     WidgetsBinding.instance.removeObserver(this);
+
+    await _playerController.stop();
+    await _playerController.dispose();
+
     super.dispose();
   }
 
@@ -189,6 +193,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
   Duration? _bufferingDuration;
 
+  PlayerMediaSource get source => widget.source as PlayerMediaSource;
+
   /// Hide the dictionary and dispose of the current result.
   @override
   void clearDictionaryResult() {
@@ -231,18 +237,19 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       reverseDuration: const Duration(milliseconds: 400),
     );
 
-    _playerController =
-        await (widget.source as PlayerMediaSource).preparePlayerController(
-      appModel: appModel,
-      ref: ref,
-      item: widget.item!,
+    await source.prepareMediaResources(
+        appModel: appModel, ref: ref, item: widget.item!);
+    final futures = await Future.wait(
+      [
+        source.preparePlayerController(
+            appModel: appModel, ref: ref, item: widget.item!),
+        source.prepareSubtitles(
+            appModel: appModel, ref: ref, item: widget.item!),
+      ],
     );
-    _subtitleItems =
-        await (widget.source as PlayerMediaSource).prepareSubtitles(
-      appModel: appModel,
-      ref: ref,
-      item: widget.item!,
-    );
+
+    _playerController = futures.elementAt(0) as VlcPlayerController;
+    _subtitleItems = futures.elementAt(1) as List<SubtitleItem>;
 
     if (_subtitleItems.isNotEmpty) {
       _subtitleItem = _subtitleItems.first;
@@ -1002,8 +1009,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         icon: Icons.video_settings,
         tooltip: pickVideoFileLabel,
         onTap: () async {
-          StreamManifest manifest =
-              await source.getStreamManifest(widget.item!);
+          StreamManifest manifest = source.getStreamManifest(widget.item!);
 
           await showModalBottomSheet(
             context: context,
