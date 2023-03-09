@@ -369,6 +369,7 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
       String partialTerm = searchTerm.substring(0, searchTerm.length - i);
 
       bool partialTermIsKana = kanaKit.isKana(partialTerm);
+      bool partialTermIsHiragana = kanaKit.isHiragana(partialTerm);
       bool partialTermIsKatakana = kanaKit.isKatakana(partialTerm);
 
       List<String> possibleDeinflections = Deinflector.deinflect(partialTerm)
@@ -381,6 +382,7 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
       List<DictionaryHeading> termDeinflectedResults = [];
       List<DictionaryHeading> readingExactResults = [];
       List<DictionaryHeading> readingDeinflectedResults = [];
+      List<DictionaryHeading> termExactKatakanaResults = [];
 
       if (params.maximumDictionaryTermsInResult > uniqueHeadingsById.length) {
         termExactResults = database.dictionaryHeadings
@@ -472,6 +474,23 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
       }
 
       if (params.maximumDictionaryTermsInResult > uniqueHeadingsById.length) {
+        if (partialTermIsHiragana) {
+          termExactKatakanaResults = database.dictionaryHeadings
+              .where()
+              .termEqualTo(kanaKit.toKatakana(partialTerm))
+              .filter()
+              .entriesIsNotEmpty()
+              .findAllSync();
+
+          uniqueHeadingsById.addEntries(
+            termExactKatakanaResults.map(
+              (heading) => MapEntry(heading.id, heading),
+            ),
+          );
+        }
+      }
+
+      if (params.maximumDictionaryTermsInResult > uniqueHeadingsById.length) {
         if (i == 0) {
           List<DictionaryHeading> startsWithToAdd = database.dictionaryHeadings
               .where()
@@ -498,6 +517,10 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
         bestLength = partialTerm.length;
       }
       if (readingDeinflectedResults.isNotEmpty &&
+          bestLength < partialTerm.length) {
+        bestLength = partialTerm.length;
+      }
+      if (termExactKatakanaResults.isNotEmpty &&
           bestLength < partialTerm.length) {
         bestLength = partialTerm.length;
       }

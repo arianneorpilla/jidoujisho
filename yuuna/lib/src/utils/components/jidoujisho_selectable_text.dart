@@ -26,17 +26,17 @@ const int iOSHorizontalOffset = -2;
 
 class _TextSpanEditingController extends TextEditingController {
   _TextSpanEditingController({required TextSpan textSpan})
-      : assert(textSpan != null),
-        _textSpan = textSpan,
+      : _textSpan = textSpan,
         super(text: textSpan.toPlainText(includeSemanticsLabels: false));
 
   final TextSpan _textSpan;
 
   @override
-  TextSpan buildTextSpan(
-      {required BuildContext context,
-      TextStyle? style,
-      required bool withComposing}) {
+  TextSpan buildTextSpan({
+    required BuildContext context,
+    required bool withComposing,
+    TextStyle? style,
+  }) {
     // This does not care about composing.
     return TextSpan(
       style: style,
@@ -121,7 +121,7 @@ class JidoujishoSelectableTextController {
   /// The selected text's range.
   late TextSelection selection = _textSpanEditingController!.selection;
 
-  /// Whether the is a valid selection ([selection.start] less than [selection.end]).
+  /// Whether the is a valid selection start less than end.
   bool get hasSelection => !selection.isCollapsed;
 
   /// Select a range of text.
@@ -150,8 +150,13 @@ class JidoujishoSelectableTextController {
       return;
     }
 
-    _textSpanEditingController!.value = _textSpanEditingController!.value
-        .copyWith(selection: TextSelection(baseOffset: -1, extentOffset: -1));
+    _textSpanEditingController!.value =
+        _textSpanEditingController!.value.copyWith(
+      selection: const TextSelection(
+        baseOffset: -1,
+        extentOffset: -1,
+      ),
+    );
   }
 }
 
@@ -258,25 +263,13 @@ class JidoujishoSelectableText extends StatefulWidget {
     this.onSelectionChanged,
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.magnifierConfiguration,
-  })  : assert(showCursor != null),
-        assert(autofocus != null),
-        assert(dragStartBehavior != null),
-        assert(selectionHeightStyle != null),
-        assert(selectionWidthStyle != null),
-        assert(maxLines == null || maxLines > 0),
+  })  : assert(maxLines == null || maxLines > 0),
         assert(minLines == null || minLines > 0),
         assert(
           (maxLines == null) || (minLines == null) || (maxLines >= minLines),
           "minLines can't be greater than maxLines",
         ),
-        assert(
-          data != null,
-          'A non-null String must be provided to a JidoujishoSelectableText widget.',
-        ),
         textSpan = null;
-
-  /// Controls this widget.
-  final JidoujishoSelectableTextController? controller;
 
   /// Creates a selectable text widget with a [TextSpan].
   ///
@@ -320,20 +313,16 @@ class JidoujishoSelectableText extends StatefulWidget {
     this.onSelectionChanged,
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.magnifierConfiguration,
-  })  : assert(showCursor != null),
-        assert(autofocus != null),
-        assert(dragStartBehavior != null),
-        assert(maxLines == null || maxLines > 0),
+  })  : assert(maxLines == null || maxLines > 0),
         assert(minLines == null || minLines > 0),
         assert(
           (maxLines == null) || (minLines == null) || (maxLines >= minLines),
           "minLines can't be greater than maxLines",
         ),
-        assert(
-          textSpan != null,
-          'A non-null TextSpan must be provided to a JidoujishoSelectableText.rich widget.',
-        ),
         data = null;
+
+  /// Allows control of this widget's current selection.
+  final JidoujishoSelectableTextController? controller;
 
   /// The text to display.
   ///
@@ -662,8 +651,6 @@ class _JidoujishoSelectableTextState extends State<JidoujishoSelectableText>
     widget.controller?.selection = selection;
     widget.onSelectionChanged?.call(selection, cause);
 
-    // TODO(chunhtai): The selection may be the same. We should remove this
-    // check once this is fixed https://github.com/flutter/flutter/issues/76349.
     if (widget.onSelectionChanged != null &&
         _lastSeenTextSelection != selection) {
       widget.onSelectionChanged!(selection, cause);
@@ -720,11 +707,6 @@ class _JidoujishoSelectableTextState extends State<JidoujishoSelectableText>
 
   @override
   Widget build(BuildContext context) {
-    // TODO(garyq): Assert to block WidgetSpans from being used here are removed,
-    // but we still do not yet have nice handling of things like carets, clipboard,
-    // and other features. We should add proper support. Currently, caret handling
-    // is blocked on SkParagraph switch and https://github.com/flutter/engine/pull/27010
-    // should be landed in SkParagraph after the switch is complete.
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasDirectionality(context));
     assert(
