@@ -185,9 +185,11 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       lastQuery = query;
     }
 
-    setState(() {
-      _isSearching = true;
-    });
+    if (mounted) {
+      setState(() {
+        _isSearching = true;
+      });
+    }
 
     try {
       _result = await appModel.searchDictionary(
@@ -197,9 +199,11 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     } finally {
       if (_result != null) {
         if (query == mediaType.floatingSearchBarController.query) {
-          setState(() {
-            _isSearching = false;
-          });
+          if (mounted) {
+            setState(() {
+              _isSearching = false;
+            });
+          }
           Future.delayed(historyDelay, () async {
             if (query == mediaType.floatingSearchBarController.query) {
               appModel.addToSearchHistory(

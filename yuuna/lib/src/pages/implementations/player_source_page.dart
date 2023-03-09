@@ -146,6 +146,18 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     switch (state) {
       case AppLifecycleState.resumed:
         _session.setActive(true);
+
+        if (appModelNoUpdate.isPlayerOrientationPortrait) {
+          SystemChrome.setPreferredOrientations([
+            DeviceOrientation.portraitUp,
+          ]);
+        } else {
+          SystemChrome.setPreferredOrientations([
+            DeviceOrientation.landscapeLeft,
+            DeviceOrientation.landscapeRight,
+          ]);
+        }
+
         break;
       case AppLifecycleState.paused:
       case AppLifecycleState.inactive:
@@ -168,8 +180,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   Timer? _menuHideTimer;
 
   /// Allows programmatic changing of the current text selection.
-  final SelectableTextController _selectableTextController =
-      SelectableTextController();
+  final JidoujishoSelectableTextController _selectableTextController =
+      JidoujishoSelectableTextController();
 
   bool _unhideDuringInitFlag = false;
 
@@ -1613,7 +1625,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     return Stack(
       alignment: Alignment.bottomCenter,
       children: <Widget>[
-        SelectableText.rich(
+        JidoujishoSelectableText.rich(
           TextSpan(children: getSubtitleOutlineSpans(subtitleText)),
           textAlign: TextAlign.center,
           contextMenuBuilder: (_, __) {
@@ -1621,7 +1633,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           },
           enableInteractiveSelection: false,
         ),
-        SelectableText.rich(
+        JidoujishoSelectableText.rich(
           TextSpan(children: getSubtitleSpans(subtitleText)),
           textAlign: TextAlign.center,
           controller: _selectableTextController,

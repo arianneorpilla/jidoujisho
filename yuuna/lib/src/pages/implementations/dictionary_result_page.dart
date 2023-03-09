@@ -75,6 +75,9 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
 
   late ScrollController _scrollController;
 
+  Map<DictionaryHeading, Map<Dictionary, ExpandableController>>
+      expandableControllersByHeading = {};
+
   @override
   Widget build(BuildContext context) {
     AnkiMapping lastSelectedMapping = appModel.lastSelectedMapping;
@@ -88,8 +91,6 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
     List<DictionaryHeading> headings =
         widget.result.headingIds.map((id) => headingsById[id]!).toList();
 
-    final Map<DictionaryHeading, Map<Dictionary, ExpandableController>>
-        expandableControllersByHeading = {};
     for (DictionaryHeading heading in headings) {
       expandableControllersByHeading.putIfAbsent(heading, () => {});
       for (DictionaryEntry entry in heading.entries) {
@@ -117,7 +118,6 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
         child: Padding(
           padding: Spacing.of(context).insets.onlyRight.extraSmall,
           child: CustomScrollView(
-            cacheExtent: 999999999999,
             controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(
               parent: BouncingScrollPhysics(),

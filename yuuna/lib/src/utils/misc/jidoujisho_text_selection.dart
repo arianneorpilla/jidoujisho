@@ -113,7 +113,7 @@ const double _kToolbarContentDistance = 8;
 ///
 ///  * [AdaptiveTextSelectionToolbar], which builds the toolbar for the current
 ///    platform.
-///  * [CupertinoTextSelectfionToolbar], which is similar, but builds an iOS-
+///  * [CupertinoTextSelectionToolbar], which is similar, but builds an iOS-
 ///    style toolbar.
 class JidoujishoTextSelectionToolbar extends StatelessWidget {
   /// Creates an instance of TextSelectionToolbar.

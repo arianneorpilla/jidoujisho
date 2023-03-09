@@ -109,7 +109,7 @@ class _ReaderWebsocketPageState<ReaderLyricsPage> extends BaseSourcePageState {
     );
   }
 
-  SelectableTextController? _lastTappedController;
+  JidoujishoSelectableTextController? _lastTappedController;
 
   @override
   void clearDictionaryResult() {
@@ -119,7 +119,7 @@ class _ReaderWebsocketPageState<ReaderLyricsPage> extends BaseSourcePageState {
   }
 
   List<InlineSpan> getTextSpans({
-    required SelectableTextController controller,
+    required JidoujishoSelectableTextController controller,
     required String text,
   }) {
     List<InlineSpan> spans = [];
@@ -214,7 +214,8 @@ class _ReaderWebsocketPageState<ReaderLyricsPage> extends BaseSourcePageState {
   }
 
   Widget buildMessage(String message) {
-    final SelectableTextController controller = SelectableTextController();
+    final JidoujishoSelectableTextController controller =
+        JidoujishoSelectableTextController();
 
     return Padding(
       padding: EdgeInsets.only(
@@ -228,7 +229,7 @@ class _ReaderWebsocketPageState<ReaderLyricsPage> extends BaseSourcePageState {
           child: Row(
             children: [
               Expanded(
-                child: SelectableText.rich(
+                child: JidoujishoSelectableText.rich(
                   TextSpan(
                     children: getTextSpans(
                       controller: controller,

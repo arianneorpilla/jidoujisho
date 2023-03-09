@@ -206,7 +206,7 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
     );
   }
 
-  SelectableTextController? _lastTappedController;
+  JidoujishoSelectableTextController? _lastTappedController;
 
   @override
   void clearDictionaryResult() {
@@ -216,7 +216,7 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
   }
 
   List<InlineSpan> getTextSpans({
-    required SelectableTextController controller,
+    required JidoujishoSelectableTextController controller,
     required String author,
     required String text,
   }) {
@@ -315,7 +315,8 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
     required Comment comment,
     bool headComment = false,
   }) {
-    final SelectableTextController controller = SelectableTextController();
+    final JidoujishoSelectableTextController controller =
+        JidoujishoSelectableTextController();
     String videoChannelId = source.getChannelIdFromVideo(widget.videoUrl);
 
     return Padding(
@@ -364,7 +365,7 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
               Row(
                 children: [
                   Expanded(
-                    child: SelectableText.rich(
+                    child: JidoujishoSelectableText.rich(
                       TextSpan(
                         children: getTextSpans(
                           controller: controller,

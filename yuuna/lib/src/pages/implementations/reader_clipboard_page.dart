@@ -34,8 +34,8 @@ class _ReaderClipboardPageState<ReaderClipboardPage>
   ReaderClipboardSource get source => ReaderClipboardSource.instance;
 
   /// Allows programmatic changing of the current text selection.
-  final SelectableTextController _selectableTextController =
-      SelectableTextController();
+  final JidoujishoSelectableTextController _selectableTextController =
+      JidoujishoSelectableTextController();
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +100,7 @@ class _ReaderClipboardPageState<ReaderClipboardPage>
   final FocusNode _focusNode = FocusNode(skipTraversal: true);
 
   Widget buildText(String text) {
-    return SelectableText.rich(
+    return JidoujishoSelectableText.rich(
       TextSpan(children: getSubtitleSpans(text)),
       focusNode: _focusNode,
       controller: _selectableTextController,

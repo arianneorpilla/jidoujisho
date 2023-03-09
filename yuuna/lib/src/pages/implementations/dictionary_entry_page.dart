@@ -43,8 +43,8 @@ class _DictionaryEntryPageState extends ConsumerState<DictionaryEntryPage> {
   Widget build(BuildContext context) {
     AppModel appModel = ref.watch(appProvider);
 
-    final SelectableTextController _selectableTextController =
-        SelectableTextController();
+    final JidoujishoSelectableTextController _selectableTextController =
+        JidoujishoSelectableTextController();
 
     bool _isSearching = false;
 
@@ -70,7 +70,7 @@ class _DictionaryEntryPageState extends ConsumerState<DictionaryEntryPage> {
             top: Spacing.of(context).spaces.small,
             left: Spacing.of(context).spaces.normal,
           ),
-          child: SelectableText(
+          child: JidoujishoSelectableText(
             widget.entry.compactDefinitions,
             style: TextStyle(
               fontSize: appModel.dictionaryFontSize,

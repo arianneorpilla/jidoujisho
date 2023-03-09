@@ -36,6 +36,7 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
         appModel.dictionaryHistory.reversed.toList();
 
     return CustomScrollView(
+      cacheExtent: 999999999999,
       controller: DictionaryMediaType.instance.scrollController,
       physics: const AlwaysScrollableScrollPhysics(
         parent: BouncingScrollPhysics(),

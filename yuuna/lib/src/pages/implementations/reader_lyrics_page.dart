@@ -38,8 +38,8 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
   ReaderLyricsSource get source => ReaderLyricsSource.instance;
 
   /// Allows programmatic changing of the current text selection.
-  final SelectableTextController _selectableTextController =
-      SelectableTextController();
+  final JidoujishoSelectableTextController _selectableTextController =
+      JidoujishoSelectableTextController();
 
   @override
   void initState() {
@@ -259,7 +259,7 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
   final FocusNode _lyricsFocusNode = FocusNode(skipTraversal: true);
 
   Widget buildLyricsText(String text) {
-    return SelectableText.rich(
+    return JidoujishoSelectableText.rich(
       TextSpan(children: getSubtitleSpans(text)),
       focusNode: _lyricsFocusNode,
       controller: _selectableTextController,

@@ -164,9 +164,11 @@ class _RecursiveDictionaryPageState
       lastQuery = query;
     }
 
-    setState(() {
-      _isSearching = true;
-    });
+    if (mounted) {
+      setState(() {
+        _isSearching = true;
+      });
+    }
 
     try {
       _result = await appModel.searchDictionary(
@@ -176,9 +178,11 @@ class _RecursiveDictionaryPageState
     } finally {
       if (_result != null) {
         if (query == _controller.query) {
-          setState(() {
-            _isSearching = false;
-          });
+          if (mounted) {
+            setState(() {
+              _isSearching = false;
+            });
+          }
           Future.delayed(historyDelay, () async {
             if (query == _controller.query) {
               appModel.addToSearchHistory(
@@ -331,8 +335,10 @@ class _RecursiveDictionaryPageState
                 historyKey: DictionaryMediaType.instance.uniqueKey);
             _controller.clear();
 
-            setState(() {});
-            Navigator.pop(context);
+            if (mounted) {
+              Navigator.pop(context);
+              setState(() {});
+            }
           },
         ),
         TextButton(
