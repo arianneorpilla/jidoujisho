@@ -22,10 +22,6 @@ class DictionaryDialogDeletePage extends BasePage {
 
 class _DictionaryDialogDeletePageState
     extends BasePageState<DictionaryDialogDeletePage> {
-  String get deleteInProgress => appModel.translate('delete_in_progress');
-  String get dictionariesDeletingEntries =>
-      appModel.translate('dictionaries_deleting_data');
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -73,7 +69,7 @@ class _DictionaryDialogDeletePageState
           ),
           const Space.small(),
           Text(
-            dictionariesDeletingEntries,
+            t.dictionaries_deleting_data,
             maxLines: 10,
             overflow: TextOverflow.ellipsis,
           ),

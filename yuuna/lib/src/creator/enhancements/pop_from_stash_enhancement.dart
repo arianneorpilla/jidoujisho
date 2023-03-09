@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
+import 'package:yuuna/utils.dart';
 
 /// An enhancement used to pop the latest element of the Stash onto a field.
 class PopFromStashEnhancement extends Enhancement {
@@ -29,9 +30,8 @@ class PopFromStashEnhancement extends Enhancement {
   }) async {
     List<String> stashContents = appModel.getStash();
     if (stashContents.isEmpty) {
-      String stashNothingToPop = appModel.translate('stash_nothing_to_pop');
       Fluttertoast.showToast(
-        msg: stashNothingToPop,
+        msg: t.stash_nothing_to_pop,
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
       );

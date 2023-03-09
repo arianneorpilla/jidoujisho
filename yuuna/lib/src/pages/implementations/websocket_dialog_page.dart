@@ -23,10 +23,6 @@ class WebsocketDialogPage extends BasePage {
 }
 
 class _WebsocketDialogPageState extends BasePageState<WebsocketDialogPage> {
-  String get serverAddressLabel => appModel.translate('server_address');
-  String get dialogConnectLabel => appModel.translate('dialog_connect');
-  String get clearLabel => appModel.translate('clear');
-
   late final TextEditingController _addressController;
 
   @override
@@ -60,10 +56,10 @@ class _WebsocketDialogPageState extends BasePageState<WebsocketDialogPage> {
               decoration: InputDecoration(
                 hintText: 'wss://',
                 floatingLabelBehavior: FloatingLabelBehavior.always,
-                labelText: serverAddressLabel,
+                labelText: t.server_address,
                 suffixIcon: JidoujishoIconButton(
                   size: 18,
-                  tooltip: clearLabel,
+                  tooltip: t.clear,
                   onTap: _addressController.clear,
                   icon: Icons.clear,
                 ),
@@ -78,9 +74,7 @@ class _WebsocketDialogPageState extends BasePageState<WebsocketDialogPage> {
 
   Widget buildConnectButton() {
     return TextButton(
-      child: Text(
-        dialogConnectLabel,
-      ),
+      child: Text(t.dialog_connect),
       onPressed: executeSearch,
     );
   }

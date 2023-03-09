@@ -38,19 +38,13 @@ class BasePageState<T extends BasePage> extends ConsumerState<T> {
   /// Shortcut for accessing the app-wide theme.
   ThemeData get theme => Theme.of(context);
 
-  /// Localisation for Search context option.
-  String get searchLabel => appModelNoUpdate.translate('search');
-
-  /// Localisation for Stash context option.
-  String get stashLabel => appModelNoUpdate.translate('stash');
-
   /// Get the selection controls for a [SelectableText].
   MaterialTextSelectionControls get selectionControls =>
       JidoujishoTextSelectionControls(
         searchAction: onContextSearch,
-        searchActionLabel: searchLabel,
+        searchActionLabel: t.search,
         stashAction: onContextStash,
-        stashActionLabel: stashLabel,
+        stashActionLabel: t.stash,
         allowCopy: true,
         allowSelectAll: true,
         allowCut: true,

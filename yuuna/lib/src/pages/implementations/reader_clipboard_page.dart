@@ -27,8 +27,6 @@ class ReaderClipboardPage extends BaseSourcePage {
 /// code.
 class _ReaderClipboardPageState<ReaderClipboardPage>
     extends BaseSourcePageState {
-  String get noTextInClipboard => appModel.translate('no_text_in_clipboard');
-
   Orientation? lastOrientation;
 
   ReaderClipboardSource get source => ReaderClipboardSource.instance;
@@ -91,7 +89,7 @@ class _ReaderClipboardPageState<ReaderClipboardPage>
     return Center(
       child: JidoujishoPlaceholderMessage(
         icon: Icons.paste,
-        message: noTextInClipboard,
+        message: t.no_text_in_clipboard,
       ),
     );
   }
@@ -227,10 +225,10 @@ class _ReaderClipboardPageState<ReaderClipboardPage>
   MaterialTextSelectionControls get selectionControls =>
       JidoujishoTextSelectionControls(
         searchAction: onContextSearch,
-        searchActionLabel: searchLabel,
+        searchActionLabel: t.search,
         stashAction: onContextStash,
-        stashActionLabel: stashLabel,
-        creatorActionLabel: creatorLabel,
+        stashActionLabel: t.stash,
+        creatorActionLabel: t.creator,
         creatorAction: creatorAction,
         allowCopy: true,
         allowSelectAll: false,

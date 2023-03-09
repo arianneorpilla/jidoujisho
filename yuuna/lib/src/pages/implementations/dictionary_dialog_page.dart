@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:reorderables/reorderables.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/dictionary.dart';
-import 'package:yuuna/i18n/strings.g.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
@@ -21,21 +20,6 @@ class DictionaryDialogPage extends BasePage {
 }
 
 class _DictionaryDialogPageState extends BasePageState {
-  String get importFormatLabel => appModel.translate('import_format');
-  String get dictionaryMenuEmptyLabel =>
-      appModel.translate('dictionaries_menu_empty');
-  String get showOptionsLabel => appModel.translate('show_options');
-  String get dictionaryCollapseLabel => appModel.translate('options_collapse');
-  String get dictionaryExpandLabel => appModel.translate('options_expand');
-  String get dictionaryDeleteLabel => appModel.translate('options_delete');
-  String get dictionaryShowLabel => appModel.translate('options_show');
-  String get dictionaryHideLabel => appModel.translate('options_hide');
-  String get dialogImportLabel => appModel.translate('dialog_import');
-  String get dialogCloseLabel => appModel.translate('dialog_close');
-  String get dialogDeleteLabel => appModel.translate('dialog_delete');
-  String get dialogCancelLabel => appModel.translate('dialog_cancel');
-  String get dialogClearLabel => appModel.translate('dialog_clear');
-
   final ScrollController _scrollController = ScrollController();
   int _selectedOrder = 0;
 
@@ -66,7 +50,7 @@ class _DictionaryDialogPageState extends BasePageState {
       actions: <Widget>[
         TextButton(
           child: Text(
-            dialogClearLabel,
+            t.dialog_clear,
             style: TextStyle(color: theme.colorScheme.primary),
           ),
           onPressed: () async {
@@ -91,7 +75,7 @@ class _DictionaryDialogPageState extends BasePageState {
           },
         ),
         TextButton(
-          child: Text(dialogCancelLabel),
+          child: Text(t.dialog_cancel),
           onPressed: () => Navigator.pop(context),
         ),
       ],
@@ -113,7 +97,7 @@ class _DictionaryDialogPageState extends BasePageState {
       actions: <Widget>[
         TextButton(
           child: Text(
-            dialogDeleteLabel,
+            t.dialog_delete,
             style: TextStyle(color: theme.colorScheme.primary),
           ),
           onPressed: () async {
@@ -139,7 +123,7 @@ class _DictionaryDialogPageState extends BasePageState {
           },
         ),
         TextButton(
-          child: Text(dialogCancelLabel),
+          child: Text(t.dialog_cancel),
           onPressed: () => Navigator.pop(context),
         ),
       ],
@@ -153,7 +137,7 @@ class _DictionaryDialogPageState extends BasePageState {
 
   Widget buildImportButton() {
     return TextButton(
-      child: Text(dialogImportLabel),
+      child: Text(t.dialog_import),
       onPressed: () async {
         /// A [ValueNotifier] that will update a message based on the progress of
         /// the ongoing dictionary file import. See [DictionaryImportProgressPage].
@@ -225,7 +209,7 @@ class _DictionaryDialogPageState extends BasePageState {
   Widget buildClearButton() {
     return TextButton(
       child: Text(
-        dialogClearLabel,
+        t.dialog_clear,
         style: const TextStyle(
           color: Colors.red,
         ),
@@ -236,7 +220,7 @@ class _DictionaryDialogPageState extends BasePageState {
 
   Widget buildCloseButton() {
     return TextButton(
-      child: Text(dialogCloseLabel),
+      child: Text(t.dialog_close),
       onPressed: () => Navigator.pop(context),
     );
   }
@@ -286,7 +270,7 @@ class _DictionaryDialogPageState extends BasePageState {
       ),
       child: JidoujishoPlaceholderMessage(
         icon: DictionaryMediaType.instance.outlinedIcon,
-        message: dictionaryMenuEmptyLabel,
+        message: t.dictionaries_menu_empty,
       ),
     );
   }
@@ -405,7 +389,7 @@ class _DictionaryDialogPageState extends BasePageState {
       icon: Icons.more_vert,
       onTapDown: (details) =>
           openDictionaryOptionsMenu(details: details, dictionary: dictionary),
-      tooltip: showOptionsLabel,
+      tooltip: t.show_options,
     );
   }
 
@@ -452,8 +436,8 @@ class _DictionaryDialogPageState extends BasePageState {
     return [
       buildPopupItem(
         label: dictionary.isCollapsed(appModel.targetLanguage)
-            ? dictionaryExpandLabel
-            : dictionaryCollapseLabel,
+            ? t.options_expand
+            : t.options_collapse,
         icon: dictionary.isCollapsed(appModel.targetLanguage)
             ? Icons.open_in_full
             : Icons.close_fullscreen,
@@ -464,8 +448,8 @@ class _DictionaryDialogPageState extends BasePageState {
       ),
       buildPopupItem(
         label: dictionary.isHidden(appModel.targetLanguage)
-            ? dictionaryShowLabel
-            : dictionaryHideLabel,
+            ? t.options_show
+            : t.options_hide,
         icon: dictionary.isCollapsed(appModel.targetLanguage)
             ? Icons.visibility
             : Icons.visibility_off,
@@ -475,7 +459,7 @@ class _DictionaryDialogPageState extends BasePageState {
         },
       ),
       buildPopupItem(
-        label: dictionaryDeleteLabel,
+        label: t.options_delete,
         icon: Icons.delete,
         action: () {
           showDictionaryDeleteDialog(dictionary);
@@ -492,7 +476,7 @@ class _DictionaryDialogPageState extends BasePageState {
         Padding(
           padding: Spacing.of(context).insets.onlyLeft.small,
           child: Text(
-            importFormatLabel,
+            t.import_format,
             style: TextStyle(
               fontSize: 10,
               color: theme.unselectedWidgetColor,
@@ -514,11 +498,10 @@ class _DictionaryDialogPageState extends BasePageState {
 
   Widget buildSlowImportSwitch() {
     ValueNotifier<bool> _notifier = ValueNotifier<bool>(appModel.useSlowImport);
-    String label = appModel.translate('use_slow_import');
 
     return Row(
       children: [
-        Expanded(child: Text(label)),
+        Expanded(child: Text(t.use_slow_import)),
         ValueListenableBuilder<bool>(
           valueListenable: _notifier,
           builder: (_, value, __) {

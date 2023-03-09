@@ -6,7 +6,6 @@ import 'package:sliver_tools/sliver_tools.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
-import 'package:yuuna/i18n/strings.g.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/src/models/app_model.dart';
 import 'package:yuuna/src/models/creator_model.dart';
@@ -65,11 +64,11 @@ class DictionaryTermPage extends ConsumerWidget {
         a.dictionary.value!.order.compareTo(b.dictionary.value!.order));
 
     if (entries.isEmpty) {
-      return const SliverToBoxAdapter(child: SizedBox.shrink());
+      return const SliverPadding(padding: EdgeInsets.zero);
     }
 
     return SliverStack(
-      children: <Widget>[
+      children: [
         SliverPositioned.fill(
           child: Card(
             color: appModel.isDarkMode
@@ -88,109 +87,51 @@ class DictionaryTermPage extends ConsumerWidget {
           ),
           sliver: MultiSliver(
             children: [
-              SliverToBoxAdapter(
-                child: FloatColumn(
-                  children: [
-                    if (!appModel.isPipMode)
-                      Floatable(
-                        float: FCFloat.end,
-                        padding: EdgeInsets.only(
-                          top: Spacing.of(context).spaces.small,
-                          right: Spacing.of(context).spaces.small,
-                          bottom: Spacing.of(context).spaces.small,
-                        ),
-                        child: _DictionaryTermActionsRow(heading: heading),
-                      ),
-                    Floatable(
-                      float: FCFloat.start,
-                      child: GestureDetector(
-                        child: appModel.targetLanguage
-                            .getTermReadingOverrideWidget(
-                          context: context,
-                          appModel: appModel,
-                          heading: heading,
-                        ),
-                        onTap: () => appModel.copyToClipboard(heading.term),
-                        onLongPress: () =>
-                            appModel.copyToClipboard(heading.term),
-                      ),
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  [
+                    _DictionaryTermTopRow(
+                      heading: heading,
                     ),
+                    if (heading.tags.isNotEmpty) const Space.normal(),
+                    if (heading.tags.isNotEmpty)
+                      _DictionaryTermTagsWrap(heading: heading),
+                    const Space.normal(),
+                    _DictionaryTermFreqList(heading: heading),
                   ],
                 ),
               ),
-              if (heading.tags.isNotEmpty)
-                const SliverToBoxAdapter(
-                  child: Space.normal(),
-                ),
-              if (!isPipMode && heading.tags.isNotEmpty)
-                SliverToBoxAdapter(
-                  child: _DictionaryTermTagsWrap(heading: heading),
-                ),
-              const SliverToBoxAdapter(
-                child: Space.normal(),
-              ),
-              if (!isPipMode) _DictionaryTermFreqList(heading: heading),
-              if (!isPipMode) _DictionaryTermPitchList(heading: heading),
               if (!isPipMode)
-                const SliverToBoxAdapter(
-                  child: Space.normal(),
+                SliverPadding(
+                  padding: Spacing.of(context).insets.onlyBottom.normal,
+                  sliver: _DictionaryTermPitchList(heading: heading),
                 ),
-              _DictionaryEntryList(
-                entries: entries,
-                onStash: onStash,
-                onSearch: onSearch,
-                expandableControllers: expandableControllers,
-              ),
-              SliverToBoxAdapter(
-                child: footerWidget != null
-                    ? footerWidget!
-                    : const SizedBox.shrink(),
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  childCount: footerWidget != null
+                      ? entries.length + 1
+                      : entries.length,
+                  (context, index) {
+                    if (index == entries.length && footerWidget != null) {
+                      return footerWidget;
+                    }
+
+                    DictionaryEntry entry = entries[index];
+
+                    return DictionaryEntryPage(
+                      entry: entry,
+                      onSearch: onSearch,
+                      onStash: onStash,
+                      expandableController:
+                          expandableControllers[entry.dictionary.value!]!,
+                    );
+                  },
+                ),
               ),
             ],
           ),
         ),
       ],
-    );
-  }
-}
-
-class _DictionaryEntryList extends ConsumerWidget {
-  const _DictionaryEntryList({
-    required this.entries,
-    required this.onSearch,
-    required this.onStash,
-    required this.expandableControllers,
-  });
-
-  /// The result made from a dictionary database search.
-  final List<DictionaryEntry> entries;
-
-  /// Action to be done upon selecting the search option.
-  final Function(String) onSearch;
-
-  /// Action to be done upon selecting the stash option.
-  final Function(String) onStash;
-
-  /// Controls expandables by dictionary name.
-  final Map<Dictionary, ExpandableController> expandableControllers;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        childCount: entries.length,
-        (context, index) {
-          DictionaryEntry entry = entries[index];
-
-          return DictionaryEntryPage(
-            entry: entry,
-            onSearch: onSearch,
-            onStash: onStash,
-            expandableController:
-                expandableControllers[entry.dictionary.value!]!,
-          );
-        },
-      ),
     );
   }
 }
@@ -288,9 +229,7 @@ class _DictionaryTermPitchList extends ConsumerWidget {
             !pitch.dictionary.value!.isHidden(appModel.targetLanguage))
         .toList();
     if (pitches.isEmpty) {
-      return const SliverToBoxAdapter(
-        child: SizedBox.shrink(),
-      );
+      return const SliverPadding(padding: EdgeInsets.zero);
     }
 
     pitches.sort((a, b) =>
@@ -388,9 +327,7 @@ class _DictionaryTermFreqList extends ConsumerWidget {
     frequencies += appModel.getNoReadingFrequencies(heading: heading);
 
     if (frequencies.isEmpty) {
-      return const SliverToBoxAdapter(
-        child: SizedBox.shrink(),
-      );
+      return const SizedBox.shrink();
     }
 
     List<MapEntry<Dictionary, List<DictionaryFrequency>>>
@@ -421,9 +358,7 @@ class _DictionaryTermFreqList extends ConsumerWidget {
       );
     }).toList();
 
-    return SliverToBoxAdapter(
-      child: Wrap(children: children),
-    );
+    return Wrap(children: children);
   }
 }
 
@@ -446,5 +381,46 @@ class _DictionaryTermTagsWrap extends ConsumerWidget {
     }).toList();
 
     return Wrap(children: children);
+  }
+}
+
+class _DictionaryTermTopRow extends ConsumerWidget {
+  const _DictionaryTermTopRow({
+    required this.heading,
+  });
+
+  /// The result made from a dictionary database search.
+  final DictionaryHeading heading;
+
+  /// The result made fr
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    AppModel appModel = ref.watch(appProvider);
+    return FloatColumn(
+      children: [
+        if (!appModel.isPipMode)
+          Floatable(
+            float: FCFloat.end,
+            padding: EdgeInsets.only(
+              top: Spacing.of(context).spaces.small,
+              right: Spacing.of(context).spaces.small,
+              bottom: Spacing.of(context).spaces.small,
+            ),
+            child: _DictionaryTermActionsRow(heading: heading),
+          ),
+        Floatable(
+          float: FCFloat.start,
+          child: GestureDetector(
+            child: appModel.targetLanguage.getTermReadingOverrideWidget(
+              context: context,
+              appModel: appModel,
+              heading: heading,
+            ),
+            onTap: () => appModel.copyToClipboard(heading.term),
+            onLongPress: () => appModel.copyToClipboard(heading.term),
+          ),
+        ),
+      ],
+    );
   }
 }

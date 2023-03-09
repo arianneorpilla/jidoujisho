@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 318
+/// Strings: 307
 ///
-/// Built on 2023-03-08 at 06:57 UTC
+/// Built on 2023-03-09 at 13:57 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -253,24 +253,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get legalese => 'A full-featured immersion language learning suite for mobile.\n\nOriginally built for the Japanese language learning community by Leo Rafael Orpilla. Logo by suzy and Aaron Marbella.\n\njidoujisho is free and open source software. See the project repository for a comprehensive list of other licenses and attribution notices. Enjoying the application? Help out by providing feedback, making a donation, reporting issues or contributing improvements on GitHub.';
 	String get same_name_dictionary_found => 'Dictionary with same name found.';
 	String import_file_extension_invalid({required Object extensions}) => 'This format expects files with the following extensions: ${extensions}';
-	String get field_label_sentence => 'Sentence';
-	String get field_label_term => 'Term';
-	String get field_label_reading => 'Reading';
-	String get field_label_meaning => 'Meaning';
-	String get field_label_extra => 'Extra';
-	String get field_label_image => 'Image';
-	String get field_label_audio => 'Audio';
-	String get field_label_context => 'Context';
 	String get field_label_empty => 'Empty';
-	String get field_hint_sentence => 'Sentence or written context';
-	String get field_hint_term => 'The term of the card';
-	String get field_hint_reading => 'Reading or pronunciation';
-	String get field_hint_meaning => 'Meaning or dictionary definition';
-	String get field_hint_extra => 'Any extra information here';
-	String get field_hint_image => 'Enter image search term';
-	String get field_hint_audio => 'Enter audio search term';
-	String get field_hint_context => 'Information on media context';
-	String get field_hint_empty => 'Leave field blank';
 	String get model_to_map => 'Card type to use for new profile';
 	String get mapping_name => 'Profile name';
 	String get mapping_name_hint => 'Name to assign to profile';
@@ -464,7 +447,13 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get highlight_on_tap => 'Highlight text on tap';
 	String get no_audio_file => 'No audio file to save.';
 	String get storage_permissions => 'Please grant the following permissions for exporting to AnkiDroid.';
+	String get stream => 'Stream';
 	String get network_subtitles_warning => 'Embedded subtitles are unsupported for network streams.';
+	String get accessibility => 'Permission is required to capture text from accessibility events.';
+	String get comments => 'Comments';
+	String get replies => 'Replies';
+	String get no_comments_queried => 'No comments queried';
+	String get no_text_in_clipboard => 'No text to display';
 	late final _StringsViewRepliesEn view_replies = _StringsViewRepliesEn._(_root);
 }
 
@@ -591,24 +580,7 @@ extension on _StringsEn {
 			case 'legalese': return 'A full-featured immersion language learning suite for mobile.\n\nOriginally built for the Japanese language learning community by Leo Rafael Orpilla. Logo by suzy and Aaron Marbella.\n\njidoujisho is free and open source software. See the project repository for a comprehensive list of other licenses and attribution notices. Enjoying the application? Help out by providing feedback, making a donation, reporting issues or contributing improvements on GitHub.';
 			case 'same_name_dictionary_found': return 'Dictionary with same name found.';
 			case 'import_file_extension_invalid': return ({required Object extensions}) => 'This format expects files with the following extensions: ${extensions}';
-			case 'field_label_sentence': return 'Sentence';
-			case 'field_label_term': return 'Term';
-			case 'field_label_reading': return 'Reading';
-			case 'field_label_meaning': return 'Meaning';
-			case 'field_label_extra': return 'Extra';
-			case 'field_label_image': return 'Image';
-			case 'field_label_audio': return 'Audio';
-			case 'field_label_context': return 'Context';
 			case 'field_label_empty': return 'Empty';
-			case 'field_hint_sentence': return 'Sentence or written context';
-			case 'field_hint_term': return 'The term of the card';
-			case 'field_hint_reading': return 'Reading or pronunciation';
-			case 'field_hint_meaning': return 'Meaning or dictionary definition';
-			case 'field_hint_extra': return 'Any extra information here';
-			case 'field_hint_image': return 'Enter image search term';
-			case 'field_hint_audio': return 'Enter audio search term';
-			case 'field_hint_context': return 'Information on media context';
-			case 'field_hint_empty': return 'Leave field blank';
 			case 'model_to_map': return 'Card type to use for new profile';
 			case 'mapping_name': return 'Profile name';
 			case 'mapping_name_hint': return 'Name to assign to profile';
@@ -802,7 +774,13 @@ extension on _StringsEn {
 			case 'highlight_on_tap': return 'Highlight text on tap';
 			case 'no_audio_file': return 'No audio file to save.';
 			case 'storage_permissions': return 'Please grant the following permissions for exporting to AnkiDroid.';
+			case 'stream': return 'Stream';
 			case 'network_subtitles_warning': return 'Embedded subtitles are unsupported for network streams.';
+			case 'accessibility': return 'Permission is required to capture text from accessibility events.';
+			case 'comments': return 'Comments';
+			case 'replies': return 'Replies';
+			case 'no_comments_queried': return 'No comments queried';
+			case 'no_text_in_clipboard': return 'No text to display';
 			case 'view_replies.reply': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
 				one: 'SHOW ${n} REPLY',
 				other: 'SHOW ${n} REPLIES',

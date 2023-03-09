@@ -6,6 +6,7 @@ import 'package:spaces/spaces.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
+import 'package:yuuna/i18n/strings.g.dart';
 import 'package:yuuna/models.dart';
 
 /// Returns audio information from context.
@@ -197,17 +198,6 @@ class ImageField extends ImageExportField {
     double fontSize =
         (Theme.of(context).textTheme.labelMedium?.fontSize)! * 0.9;
 
-    String imageSearchLabelBefore =
-        appModel.translate('image_search_label_before');
-    String imageSearchLabelMiddle =
-        appModel.translate('image_search_label_middle');
-    String imageSearchLabelAfter =
-        appModel.translate('image_search_label_after');
-    String imageSearchLabelNoneBefore =
-        appModel.translate('image_search_label_none_before');
-    String imageSearchLabelNoneMiddle =
-        appModel.translate('image_search_label_none_middle');
-
     return Text.rich(
       TextSpan(
         text: '',
@@ -228,7 +218,7 @@ class ImageField extends ImageExportField {
           ),
           if (selectedIndex == -1)
             TextSpan(
-              text: imageSearchLabelNoneBefore,
+              text: t.image_search_label_none_before,
               style: TextStyle(
                 fontSize: fontSize,
                 color: Theme.of(context).unselectedWidgetColor,
@@ -236,7 +226,7 @@ class ImageField extends ImageExportField {
             ),
           if (selectedIndex == -1)
             TextSpan(
-              text: imageSearchLabelNoneMiddle,
+              text: t.image_search_label_none_middle,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: fontSize,
@@ -244,7 +234,7 @@ class ImageField extends ImageExportField {
             ),
           if (selectedIndex != -1)
             TextSpan(
-              text: imageSearchLabelBefore,
+              text: t.image_search_label_before,
               style: TextStyle(
                 fontSize: fontSize,
                 color: Theme.of(context).unselectedWidgetColor,
@@ -259,7 +249,7 @@ class ImageField extends ImageExportField {
               ),
             ),
           TextSpan(
-            text: imageSearchLabelMiddle,
+            text: t.image_search_label_middle,
             style: TextStyle(
               fontSize: fontSize,
               color: Theme.of(context).unselectedWidgetColor,
@@ -274,7 +264,7 @@ class ImageField extends ImageExportField {
           ),
           if (currentSearchTerm != null && currentSearchTerm!.trim().isNotEmpty)
             TextSpan(
-              text: imageSearchLabelAfter,
+              text: t.image_search_label_after,
               style: TextStyle(
                 fontSize: fontSize,
                 color: Theme.of(context).unselectedWidgetColor,
@@ -313,8 +303,6 @@ class ImageField extends ImageExportField {
     double fontSize =
         (Theme.of(context).textTheme.labelMedium?.fontSize)! * 0.9;
 
-    String processingInProgress = appModel.translate('processing_in_progress');
-    String searchingInProgress = appModel.translate('searching_in_progress');
     return Text.rich(
       TextSpan(
         text: '',
@@ -335,7 +323,7 @@ class ImageField extends ImageExportField {
           ),
           if (currentSearchTerm != null && currentSearchTerm!.trim().isNotEmpty)
             TextSpan(
-              text: searchingInProgress,
+              text: t.searching_in_progress,
               style: TextStyle(
                 fontSize: fontSize,
                 color: Theme.of(context).unselectedWidgetColor,
@@ -351,7 +339,7 @@ class ImageField extends ImageExportField {
             )
           else
             TextSpan(
-              text: processingInProgress,
+              text: t.processing_in_progress,
               style: TextStyle(
                 fontSize: fontSize,
                 color: Theme.of(context).unselectedWidgetColor,

@@ -26,11 +26,6 @@ class ReaderWebsocketPage extends BaseSourcePage {
 /// was implemented to define shortcuts for common lengthy methods across UI
 /// code.
 class _ReaderWebsocketPageState<ReaderLyricsPage> extends BaseSourcePageState {
-  String get noActiveConnectionLabel =>
-      appModel.translate('no_active_connection');
-
-  String get noTextReceived => appModel.translate('no_text_received');
-
   ReaderWebsocketSource get source => ReaderWebsocketSource.instance;
 
   @override
@@ -70,7 +65,7 @@ class _ReaderWebsocketPageState<ReaderLyricsPage> extends BaseSourcePageState {
     return Center(
       child: JidoujishoPlaceholderMessage(
         icon: Icons.leak_remove,
-        message: noActiveConnectionLabel,
+        message: t.no_active_connection,
       ),
     );
   }
@@ -104,7 +99,7 @@ class _ReaderWebsocketPageState<ReaderLyricsPage> extends BaseSourcePageState {
     return Center(
       child: JidoujishoPlaceholderMessage(
         icon: Icons.message,
-        message: noTextReceived,
+        message: t.no_text_received,
       ),
     );
   }
@@ -245,13 +240,13 @@ class _ReaderWebsocketPageState<ReaderLyricsPage> extends BaseSourcePageState {
                       );
                       source.clearCurrentSentence();
                     },
-                    searchActionLabel: searchLabel,
+                    searchActionLabel: t.search,
                     stashAction: onContextStash,
-                    stashActionLabel: stashLabel,
+                    stashActionLabel: t.stash,
                     creatorAction: (selection) async {
                       launchCreator(term: selection, sentence: message);
                     },
-                    creatorActionLabel: creatorLabel,
+                    creatorActionLabel: t.creator,
                     allowCopy: true,
                     allowSelectAll: false,
                     allowCut: true,
@@ -272,8 +267,6 @@ class _ReaderWebsocketPageState<ReaderLyricsPage> extends BaseSourcePageState {
   }
 
   Widget buildTextSegmentButton(String message) {
-    String tooltip = appModel.translate('text_segmentation');
-
     return Padding(
       padding: Spacing.of(context).insets.onlyLeft.semiSmall,
       child: JidoujishoIconButton(
@@ -282,7 +275,7 @@ class _ReaderWebsocketPageState<ReaderLyricsPage> extends BaseSourcePageState {
         backgroundColor:
             Theme.of(context).appBarTheme.foregroundColor?.withOpacity(0.1),
         size: Spacing.of(context).spaces.semiBig,
-        tooltip: tooltip,
+        tooltip: t.text_segmentation,
         icon: Icons.account_tree,
         onTap: () async {
           appModel.openTextSegmentationDialog(
@@ -318,8 +311,6 @@ class _ReaderWebsocketPageState<ReaderLyricsPage> extends BaseSourcePageState {
   void onContextSearch(String searchTerm, {String? sentence}) async {}
 
   Widget buildCardCreatorButton(String message) {
-    String tooltip = appModel.translate('card_creator');
-
     return Padding(
       padding: Spacing.of(context).insets.onlyLeft.semiSmall,
       child: JidoujishoIconButton(
@@ -328,7 +319,7 @@ class _ReaderWebsocketPageState<ReaderLyricsPage> extends BaseSourcePageState {
         backgroundColor:
             Theme.of(context).appBarTheme.foregroundColor?.withOpacity(0.1),
         size: Spacing.of(context).spaces.semiBig,
-        tooltip: tooltip,
+        tooltip: t.card_creator,
         icon: Icons.note_add,
         onTap: () async {
           launchCreator(term: '', sentence: message);

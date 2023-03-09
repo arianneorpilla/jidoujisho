@@ -21,10 +21,6 @@ class NetworkStreamDialogPage extends BasePage {
 
 class _NetworkStreamDialogPageState
     extends BasePageState<NetworkStreamDialogPage> {
-  String get streamUrlLabel => appModel.translate('stream_url');
-  String get dialogPlayLabel => appModel.translate('dialog_play');
-  String get pasteLabel => appModel.translate('paste');
-
   late final TextEditingController _controller;
 
   @override
@@ -59,14 +55,14 @@ class _NetworkStreamDialogPageState
                 floatingLabelBehavior: FloatingLabelBehavior.always,
                 suffixIcon: JidoujishoIconButton(
                   size: 18,
-                  tooltip: pasteLabel,
+                  tooltip: t.paste,
                   onTap: () async {
                     _controller.text =
                         (await Clipboard.getData('text/plain'))?.text ?? '';
                   },
                   icon: Icons.paste,
                 ),
-                labelText: streamUrlLabel,
+                labelText: t.stream_url,
               ),
             ),
             const SizedBox(height: 10),
@@ -78,9 +74,7 @@ class _NetworkStreamDialogPageState
 
   Widget buildPlayButton() {
     return TextButton(
-      child: Text(
-        dialogPlayLabel,
-      ),
+      child: Text(t.dialog_play),
       onPressed: executePlay,
     );
   }

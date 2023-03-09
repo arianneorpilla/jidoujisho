@@ -32,9 +32,6 @@ class EnhancementsPickerDialogPage extends BasePage {
 
 class _EnhancementsPickerDialogPage
     extends BasePageState<EnhancementsPickerDialogPage> {
-  String get noMoreAvailableEnhancementsLabel =>
-      appModel.translate('no_more_available_enhancements');
-
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -90,7 +87,7 @@ class _EnhancementsPickerDialogPage
       ),
       child: JidoujishoPlaceholderMessage(
         icon: Icons.auto_fix_high,
-        message: noMoreAvailableEnhancementsLabel,
+        message: t.no_more_available_enhancements,
       ),
     );
   }

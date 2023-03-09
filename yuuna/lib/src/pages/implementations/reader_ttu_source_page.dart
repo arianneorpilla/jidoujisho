@@ -460,7 +460,7 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
     return ContextMenuItem(
       iosId: '1',
       androidId: 1,
-      title: searchLabel,
+      title: t.search,
       action: searchMenuAction,
     );
   }
@@ -469,7 +469,7 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
     return ContextMenuItem(
       iosId: '2',
       androidId: 2,
-      title: stashLabel,
+      title: t.stash,
       action: stashMenuAction,
     );
   }
@@ -478,7 +478,7 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
     return ContextMenuItem(
       iosId: '3',
       androidId: 3,
-      title: creatorLabel,
+      title: t.creator,
       action: creatorMenuAction,
     );
   }
@@ -487,7 +487,7 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
     return ContextMenuItem(
       iosId: '4',
       androidId: 4,
-      title: copyLabel,
+      title: t.copy,
       action: copyMenuAction,
     );
   }

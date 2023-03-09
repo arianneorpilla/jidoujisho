@@ -13,18 +13,6 @@ class DictionarySettingsDialogPage extends BasePage {
 }
 
 class _DictionaryDialogPageState extends BasePageState {
-  String get autoSearchLabel => appModel.translate('auto_search');
-  String get autoSearchDebounceDelayLabel =>
-      appModel.translate('auto_search_debounce_delay');
-  String get dictionaryFontSizeLabel =>
-      appModel.translate('dictionary_font_size');
-  String get unitMillisecondsLabel => appModel.translate('unit_milliseconds');
-  String get unitPixelsLabel => appModel.translate('unit_pixels');
-  String get maximumTermsLabel => appModel.translate('maximum_terms');
-
-  String get dialogCloseLabel => appModel.translate('dialog_close');
-  String get resetLabel => appModel.translate('reset');
-
   late TextEditingController _debounceDelayController;
   late TextEditingController _dictionaryFontSizeController;
   late TextEditingController _maximumTermsController;
@@ -59,7 +47,7 @@ class _DictionaryDialogPageState extends BasePageState {
 
   Widget buildCloseButton() {
     return TextButton(
-      child: Text(dialogCloseLabel),
+      child: Text(t.dialog_close),
       onPressed: () => Navigator.pop(context),
     );
   }
@@ -98,7 +86,7 @@ class _DictionaryDialogPageState extends BasePageState {
     return Row(
       children: [
         Expanded(
-          child: Text(autoSearchLabel),
+          child: Text(t.auto_search),
         ),
         ValueListenableBuilder<bool>(
           valueListenable: _notifier,
@@ -132,9 +120,9 @@ class _DictionaryDialogPageState extends BasePageState {
       keyboardType: TextInputType.number,
       decoration: InputDecoration(
         floatingLabelBehavior: FloatingLabelBehavior.always,
-        suffixText: unitMillisecondsLabel,
+        suffixText: t.unit_milliseconds,
         suffixIcon: JidoujishoIconButton(
-          tooltip: resetLabel,
+          tooltip: t.reset,
           size: 18,
           onTap: () async {
             _debounceDelayController.text =
@@ -145,7 +133,7 @@ class _DictionaryDialogPageState extends BasePageState {
           },
           icon: Icons.undo,
         ),
-        labelText: autoSearchDebounceDelayLabel,
+        labelText: t.auto_search_debounce_delay,
       ),
     );
   }
@@ -166,9 +154,9 @@ class _DictionaryDialogPageState extends BasePageState {
       keyboardType: TextInputType.number,
       decoration: InputDecoration(
         floatingLabelBehavior: FloatingLabelBehavior.always,
-        suffixText: unitPixelsLabel,
+        suffixText: t.unit_pixels,
         suffixIcon: JidoujishoIconButton(
-          tooltip: resetLabel,
+          tooltip: t.reset,
           size: 18,
           onTap: () async {
             _dictionaryFontSizeController.text =
@@ -178,7 +166,7 @@ class _DictionaryDialogPageState extends BasePageState {
           },
           icon: Icons.undo,
         ),
-        labelText: dictionaryFontSizeLabel,
+        labelText: t.dictionary_font_size,
       ),
     );
   }
@@ -201,7 +189,7 @@ class _DictionaryDialogPageState extends BasePageState {
       decoration: InputDecoration(
         floatingLabelBehavior: FloatingLabelBehavior.always,
         suffixIcon: JidoujishoIconButton(
-          tooltip: resetLabel,
+          tooltip: t.reset,
           size: 18,
           onTap: () async {
             _maximumTermsController.text =
@@ -212,7 +200,7 @@ class _DictionaryDialogPageState extends BasePageState {
           },
           icon: Icons.undo,
         ),
-        labelText: maximumTermsLabel,
+        labelText: t.maximum_terms,
       ),
     );
   }

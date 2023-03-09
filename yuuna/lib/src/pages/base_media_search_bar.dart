@@ -15,15 +15,6 @@ abstract class BaseMediaSearchBar extends BaseTabPage {
 /// State for [BaseMediaSearchBar].
 abstract class BaseMediaSearchBarState<T extends BaseMediaSearchBar>
     extends BaseTabPageState {
-  String get _noSearchResultsLabel => appModel.translate('no_search_results');
-  String get _enterSearchTermLabel => appModel.translate('enter_search_term');
-  String get _clearLabel => appModel.translate('clear');
-  String get _dialogClearLabel => appModel.translate('dialog_clear');
-  String get _dialogCancelLabel => appModel.translate('dialog_cancel');
-  String get _clearSearchTitle => appModel.translate('clear_search_title');
-  String get _clearSearchDescription =>
-      appModel.translate('clear_search_description');
-
   /// The paging controller which holds the media items for the search.
   PagingController<int, MediaItem>? pagingController;
 
@@ -146,8 +137,8 @@ abstract class BaseMediaSearchBarState<T extends BaseMediaSearchBar>
     return FloatingSearchBarAction.searchToClear(
       color: theme.appBarTheme.foregroundColor,
       size: textTheme.titleLarge!.fontSize!,
-      searchButtonSemanticLabel: searchLabel,
-      clearButtonSemanticLabel: _clearLabel,
+      searchButtonSemanticLabel: t.search,
+      clearButtonSemanticLabel: t.clear,
     );
   }
 
@@ -158,7 +149,7 @@ abstract class BaseMediaSearchBarState<T extends BaseMediaSearchBar>
       showIfClosed: false,
       child: JidoujishoIconButton(
         size: textTheme.titleLarge?.fontSize,
-        tooltip: _clearSearchTitle,
+        tooltip: t.clear_search_title,
         icon: Icons.manage_search,
         onTap: showDeleteSearchHistoryPrompt,
       ),
@@ -171,14 +162,14 @@ abstract class BaseMediaSearchBarState<T extends BaseMediaSearchBar>
       contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
           ? Spacing.of(context).insets.exceptBottom.big
           : Spacing.of(context).insets.exceptBottom.normal,
-      title: Text(_clearSearchTitle),
+      title: Text(t.clear_search_title),
       content: Text(
-        _clearSearchDescription,
+        t.clear_search_description,
       ),
       actions: <Widget>[
         TextButton(
           child: Text(
-            _dialogClearLabel,
+            t.dialog_clear,
             style: TextStyle(
               color: theme.colorScheme.primary,
             ),
@@ -192,7 +183,7 @@ abstract class BaseMediaSearchBarState<T extends BaseMediaSearchBar>
           },
         ),
         TextButton(
-          child: Text(_dialogCancelLabel),
+          child: Text(t.dialog_cancel),
           onPressed: () => Navigator.pop(context),
         ),
       ],
@@ -269,7 +260,7 @@ abstract class BaseMediaSearchBarState<T extends BaseMediaSearchBar>
     return Center(
       child: JidoujishoPlaceholderMessage(
         icon: Icons.search,
-        message: _enterSearchTermLabel,
+        message: t.enter_search_term,
       ),
     );
   }
@@ -279,7 +270,7 @@ abstract class BaseMediaSearchBarState<T extends BaseMediaSearchBar>
     return Center(
       child: JidoujishoPlaceholderMessage(
         icon: Icons.search_off,
-        message: _noSearchResultsLabel,
+        message: t.no_search_results,
       ),
     );
   }

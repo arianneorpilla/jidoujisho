@@ -25,9 +25,6 @@ class FieldPickerDialogPage extends BasePage {
 }
 
 class _FieldPickerDialogPageState extends BasePageState<FieldPickerDialogPage> {
-  String get noMoreAvailableFieldsLabel =>
-      appModel.translate('no_more_available_fields');
-
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -82,7 +79,7 @@ class _FieldPickerDialogPageState extends BasePageState<FieldPickerDialogPage> {
       ),
       child: JidoujishoPlaceholderMessage(
         icon: Icons.edit,
-        message: noMoreAvailableFieldsLabel,
+        message: t.no_more_available_fields,
       ),
     );
   }

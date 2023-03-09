@@ -149,12 +149,10 @@ class PlayerYoutubeSource extends PlayerMediaSource {
     required WidgetRef ref,
     required AppModel appModel,
   }) {
-    String trendingLabel = appModel.translate('trending');
-
     return FloatingSearchBarAction(
       child: JidoujishoIconButton(
         size: Theme.of(context).textTheme.titleLarge?.fontSize,
-        tooltip: trendingLabel,
+        tooltip: t.trending,
         icon: Icons.whatshot,
         onTap: () => showTrendingVideos(
           context: context,
@@ -171,8 +169,6 @@ class PlayerYoutubeSource extends PlayerMediaSource {
     required WidgetRef ref,
     required AppModel appModel,
   }) {
-    String trendingLabel = appModel.translate('caption_filter');
-
     ValueNotifier<bool> notifier = ValueNotifier<bool>(isCaptionFilterOn);
 
     return FloatingSearchBarAction(
@@ -183,7 +179,7 @@ class PlayerYoutubeSource extends PlayerMediaSource {
         builder: (context, value, child) {
           return JidoujishoIconButton(
             size: Theme.of(context).textTheme.titleLarge?.fontSize,
-            tooltip: trendingLabel,
+            tooltip: t.caption_filter,
             enabledColor: value ? Colors.red : null,
             icon: Icons.closed_caption,
             onTap: () {

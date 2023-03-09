@@ -121,13 +121,11 @@ class ReaderTtuSource extends ReaderMediaSource {
     required WidgetRef ref,
     required AppModel appModel,
   }) {
-    String managerLabel = appModel.translate('manager');
-
     return FloatingSearchBarAction(
       showIfOpened: true,
       child: JidoujishoIconButton(
         size: Theme.of(context).textTheme.titleLarge?.fontSize,
-        tooltip: managerLabel,
+        tooltip: t.manager,
         icon: Icons.local_library_outlined,
         onTap: () {
           appModel.openMedia(
@@ -147,14 +145,13 @@ class ReaderTtuSource extends ReaderMediaSource {
     required WidgetRef ref,
     required AppModel appModel,
   }) {
-    String launchLabel = appModel.translate('settings');
     int port = getPortForLanguage(appModel.targetLanguage);
 
     return FloatingSearchBarAction(
       showIfOpened: true,
       child: JidoujishoIconButton(
         size: Theme.of(context).textTheme.titleLarge?.fontSize,
-        tooltip: launchLabel,
+        tooltip: t.settings,
         icon: Icons.settings,
         onTap: () {
           appModel.openMedia(
@@ -182,12 +179,10 @@ class ReaderTtuSource extends ReaderMediaSource {
       {required BuildContext context,
       required WidgetRef ref,
       required AppModel appModel}) {
-    String tweaksLabel = appModel.translate('tweaks');
-
     return FloatingSearchBarAction(
       child: JidoujishoIconButton(
         size: Theme.of(context).textTheme.titleLarge?.fontSize,
-        tooltip: tweaksLabel,
+        tooltip: t.tweaks,
         icon: Icons.tune,
         onTap: () {
           showDialog(

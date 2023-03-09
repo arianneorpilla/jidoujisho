@@ -30,10 +30,6 @@ class ForvoAudioDialogPage extends BasePage {
 class _ForvoAudioDialogPageState extends BasePageState<ForvoAudioDialogPage> {
   final ScrollController _scrollController = ScrollController();
 
-  String get dialogSelectLabel => appModel.translate('dialog_select');
-  String get noRecordingsFoundLabel =>
-      appModel.translate('no_recordings_found');
-
   final ValueNotifier<int> _notifier = ValueNotifier<int>(0);
   final AudioPlayer _audioPlayer = AudioPlayer();
 
@@ -118,7 +114,7 @@ class _ForvoAudioDialogPageState extends BasePageState<ForvoAudioDialogPage> {
       ),
       child: JidoujishoPlaceholderMessage(
         icon: Icons.search_off,
-        message: noRecordingsFoundLabel,
+        message: t.no_recordings_found,
       ),
     );
   }
@@ -179,7 +175,7 @@ class _ForvoAudioDialogPageState extends BasePageState<ForvoAudioDialogPage> {
 
   Widget buildSelectButton() {
     return TextButton(
-      child: Text(dialogSelectLabel),
+      child: Text(t.dialog_select),
       onPressed: executeSelect,
     );
   }

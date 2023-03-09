@@ -23,11 +23,6 @@ class ReaderTtuSourceHistoryPage extends HistoryReaderPage {
 /// code.
 class _ReaderTtuSourceHistoryPageState<T extends HistoryReaderPage>
     extends HistoryReaderPageState {
-  /// The message to be shown in the placeholder that displays when
-  /// [shouldPlaceholderBeShown] is true. This should be a localised message.
-  @override
-  String get placeholderMessage => appModel.translate('ttu_no_books_added');
-
   @override
   MediaType get mediaType => mediaSource.mediaType;
 
@@ -83,7 +78,7 @@ class _ReaderTtuSourceHistoryPageState<T extends HistoryReaderPage>
     return Center(
       child: JidoujishoPlaceholderMessage(
         icon: mediaSource.icon,
-        message: placeholderMessage,
+        message: t.ttu_no_books_added,
       ),
     );
   }

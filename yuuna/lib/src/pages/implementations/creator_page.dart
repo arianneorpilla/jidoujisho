@@ -46,36 +46,6 @@ class CreatorPage extends BasePage {
 }
 
 class _CreatorPageState extends BasePageState<CreatorPage> {
-  String get creatorExportingAsLabel =>
-      appModel.translate('creator_exporting_as');
-  String get creatorExportingAsEditingEnhancementsLabel =>
-      appModel.translate('creator_exporting_as_enhancements_editing');
-  String get creatorExportingAsEditingFieldsLabel =>
-      appModel.translate('creator_exporting_as_fields_editing');
-  String get infoEnhancementsLabel => appModel.translate('info_enhancements');
-  String get infoFieldsLabel => appModel.translate('info_fields');
-  String get creatorExportCard => appModel.translate('creator_export_card');
-  String get assignManualEnhancementLabel =>
-      appModel.translate('assign_manual_enhancement');
-  String get assignAutoEnhancementLabel =>
-      appModel.translate('assign_auto_enhancement');
-  String get removeField => appModel.translate('remove_field');
-  String get addField => appModel.translate('add_field');
-  String get addFieldHint => appModel.translate('add_field_hint');
-  String get hiddenFields => appModel.translate('hidden_fields');
-  String get removeEnhancementLabel => appModel.translate('remove_enhancement');
-  String get editActionsLabel => appModel.translate('edit_actions');
-  String get backLabel => appModel.translate('back');
-  String get clearCreatorTitle => appModel.translate('clear_creator_title');
-  String get clearCreatorDescription =>
-      appModel.translate('clear_creator_description');
-  String get dialogClearLabel => appModel.translate('dialog_clear');
-  String get dialogCancelLabel => appModel.translate('dialog_cancel');
-  String get editFieldsLabel => appModel.translate('edit_fields');
-  String get closeOnExportLabel => appModel.translate('close_on_export');
-  String get closeOnExportOnToast => appModel.translate('close_on_export_on');
-  String get closeOnExportOffToast => appModel.translate('close_on_export_off');
-
   bool get isCardEditing => !widget.editEnhancements && !widget.editFields;
 
   /// Get the export details pertaining to the fields.
@@ -248,9 +218,8 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
               child: SizedBox(width: 8),
             ),
             TextSpan(
-              text: widget.editEnhancements
-                  ? infoEnhancementsLabel
-                  : infoFieldsLabel,
+              text:
+                  widget.editEnhancements ? t.info_enhancements : t.info_fields,
               style: TextStyle(
                 fontSize: textTheme.bodySmall?.fontSize,
               ),
@@ -275,7 +244,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
               size: textTheme.labelLarge?.fontSize),
           const Space.semiSmall(),
           Text(
-            hiddenFields,
+            t.hidden_fields,
             style: TextStyle(
               fontWeight: FontWeight.w500,
               color: Theme.of(context).unselectedWidgetColor,
@@ -350,7 +319,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
               ),
               const Space.small(),
               Text(
-                creatorExportCard,
+                t.creator_export_card,
                 style: textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: isExportable ? activeTextColor : inactiveTextColor,
@@ -383,7 +352,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
               ),
               const Space.small(),
               Text(
-                editActionsLabel,
+                t.edit_actions,
                 style: textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: activeTextColor,
@@ -419,7 +388,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
               ),
               const Space.small(),
               Text(
-                editFieldsLabel,
+                t.edit_fields,
                 style: textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: activeTextColor,
@@ -654,7 +623,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
   Widget buildBackButton() {
     return JidoujishoIconButton(
-      tooltip: backLabel,
+      tooltip: t.back,
       icon: Icons.arrow_back,
       onTap: () {
         if (widget.killOnPop) {
@@ -668,7 +637,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
   Widget buildSearchClearButton() {
     return JidoujishoIconButton(
-      tooltip: clearCreatorTitle,
+      tooltip: t.clear_creator_title,
       icon: Icons.delete_sweep,
       onTap: showClearPrompt,
     );
@@ -676,14 +645,12 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
   void showClearPrompt() async {
     Widget alertDialog = AlertDialog(
-      title: Text(clearCreatorTitle),
-      content: Text(
-        clearCreatorDescription,
-      ),
+      title: Text(t.clear_creator_title),
+      content: Text(t.clear_creator_description),
       actions: <Widget>[
         TextButton(
           child: Text(
-            dialogClearLabel,
+            t.dialog_clear,
             style: TextStyle(
               color: theme.colorScheme.primary,
             ),
@@ -694,7 +661,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
           },
         ),
         TextButton(
-          child: Text(dialogCancelLabel),
+          child: Text(t.dialog_cancel),
           onPressed: () => Navigator.pop(context),
         ),
       ],
@@ -709,11 +676,11 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
   Widget buildTitle() {
     late String label;
     if (widget.editEnhancements) {
-      label = creatorExportingAsEditingEnhancementsLabel;
+      label = t.creator_exporting_as_enhancements_editing;
     } else if (widget.editFields) {
-      label = creatorExportingAsEditingFieldsLabel;
+      label = t.creator_exporting_as_fields_editing;
     } else {
-      label = creatorExportingAsLabel;
+      label = t.creator_exporting_as;
     }
 
     return Row(
@@ -745,7 +712,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
     return JidoujishoIconButton(
       isWideTapArea: true,
       size: textTheme.titleLarge?.fontSize,
-      tooltip: removeField,
+      tooltip: t.remove_field,
       enabledColor: theme.colorScheme.primary,
       icon: field.icon,
       onTap: () async {
@@ -766,7 +733,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
     return JidoujishoIconButton(
       isWideTapArea: true,
       size: textTheme.titleLarge?.fontSize,
-      tooltip: addField,
+      tooltip: t.add_field,
       icon: Icons.add_circle,
       onTap: () async {
         await showDialog(
@@ -793,7 +760,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       return JidoujishoIconButton(
         isWideTapArea: true,
         size: textTheme.titleLarge?.fontSize,
-        tooltip: assignAutoEnhancementLabel,
+        tooltip: t.assign_auto_enhancement,
         icon: Icons.add_circle,
         onTap: () async {
           await showDialog(
@@ -812,7 +779,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       return JidoujishoIconButton(
         isWideTapArea: true,
         size: textTheme.titleLarge?.fontSize,
-        tooltip: removeEnhancementLabel,
+        tooltip: t.remove_enhancement,
         enabledColor: theme.colorScheme.primary,
         icon: enhancement.icon,
         onTap: () async {
@@ -909,7 +876,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       return JidoujishoIconButton(
         isWideTapArea: true,
         size: textTheme.titleLarge?.fontSize,
-        tooltip: assignManualEnhancementLabel,
+        tooltip: t.assign_manual_enhancement,
         icon: Icons.add_circle,
         onTap: () async {
           await showDialog(
@@ -928,7 +895,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       return JidoujishoIconButton(
         isWideTapArea: true,
         size: textTheme.titleLarge?.fontSize,
-        tooltip: removeEnhancementLabel,
+        tooltip: t.remove_enhancement,
         enabledColor: theme.colorScheme.primary,
         icon: enhancement.icon,
         onTap: () async {
@@ -1031,8 +998,8 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
           mapping: mapping,
           isCollapsed: isCollapsed,
         ),
-        labelText: addField,
-        hintText: addFieldHint,
+        labelText: t.add_field,
+        hintText: t.add_field_hint,
       ),
       selectionControls: selectionControls,
     );
@@ -1058,7 +1025,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
   Widget buildSwitchProfilesButton() {
     return JidoujishoIconButton(
       key: _profileMenuKey,
-      tooltip: appModel.translate('switch_profiles'),
+      tooltip: t.switch_profiles,
       icon: Icons.switch_account,
       onTapDown: openProfilesMenu,
     );
@@ -1066,7 +1033,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
   Widget buildManageEnhancementsButton() {
     return JidoujishoIconButton(
-      tooltip: appModel.translate('enhancements'),
+      tooltip: t.enhancements,
       icon: Icons.auto_fix_high,
       onTap: () async {
         await appModel.openCreatorEnhancementsEditor();
@@ -1086,7 +1053,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       builder: (context, value, child) {
         return JidoujishoIconButton(
           size: Theme.of(context).textTheme.titleLarge?.fontSize,
-          tooltip: closeOnExportLabel,
+          tooltip: t.close_on_export,
           enabledColor: value ? Colors.red : null,
           icon: Icons.exit_to_app,
           onTap: () {
@@ -1095,8 +1062,8 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
             Fluttertoast.showToast(
               msg: appModel.closeCreatorOnExport
-                  ? closeOnExportOnToast
-                  : closeOnExportOffToast,
+                  ? t.close_on_export_on
+                  : t.close_on_export_off,
               toastLength: Toast.LENGTH_SHORT,
               gravity: ToastGravity.BOTTOM,
             );

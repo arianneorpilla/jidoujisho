@@ -33,7 +33,6 @@ import 'package:subtitle/subtitle.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
-import 'package:yuuna/i18n/strings.g.dart';
 import 'package:yuuna/language.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/models.dart';
@@ -929,17 +928,6 @@ class AppModel with ChangeNotifier {
     await _preferences.put('current_home_tab_index', index);
   }
 
-  /// Get the value of a localisation item given the current target language.
-  String translate(String key) {
-    String tag = appLocale.toLanguageTag();
-    try {
-      return JidoujishoLocalisations.localisations[tag]![key]!;
-    } catch (e) {
-      debugPrint('Localisation for key $key not found for locale $tag');
-      rethrow;
-    }
-  }
-
   /// Show the dictionary menu. This should be callable from many parts of the
   /// app, so it is appropriately handled by the model.
   Future<void> showDictionaryMenu() async {
@@ -1318,24 +1306,19 @@ class AppModel with ChangeNotifier {
   /// Shows the AnkiDroid API message. Called when an Anki-related API get call
   /// fails.
   void showAnkidroidApiMessage() async {
-    String errorAnkidroidApi = translate('error_ankidroid_api');
-    String errorAnkidroidApiContent = translate('error_ankidroid_api_content');
-    String dialogCloseLabel = translate('dialog_close');
-    String dialogLaunchAnkidroidLabel = translate('dialog_launch_ankidroid');
-
     await requestAnkidroidPermissions();
 
     await showDialog(
       barrierDismissible: true,
       context: _navigatorKey.currentContext!,
       builder: (context) => AlertDialog(
-        title: Text(errorAnkidroidApi),
+        title: Text(t.error_ankidroid_api),
         content: Text(
-          errorAnkidroidApiContent,
+          t.error_ankidroid_api_content,
         ),
         actions: [
           TextButton(
-            child: Text(dialogLaunchAnkidroidLabel),
+            child: Text(t.dialog_launch_ankidroid),
             onPressed: () async {
               await LaunchApp.openApp(
                 androidPackageName: 'com.ichi2.anki',
@@ -1345,7 +1328,7 @@ class AppModel with ChangeNotifier {
             },
           ),
           TextButton(
-            child: Text(dialogCloseLabel),
+            child: Text(t.dialog_close),
             onPressed: () => Navigator.pop(context),
           ),
         ],
@@ -1361,10 +1344,6 @@ class AppModel with ChangeNotifier {
 
   /// Adds the default 'jidoujisho Yuuna' model to the list of Anki card types.
   void addDefaultModelIfMissing() async {
-    String infoStandardModel = translate('info_standard_model');
-    String infoStandardModelContent = translate('info_standard_model_content');
-    String dialogCloseLabel = translate('dialog_close');
-
     List<String> models = await getModelList();
     if (!models.contains(AnkiMapping.standardModelName)) {
       methodChannel.invokeMethod('addDefaultModel');
@@ -1373,13 +1352,13 @@ class AppModel with ChangeNotifier {
         barrierDismissible: true,
         context: _navigatorKey.currentContext!,
         builder: (context) => AlertDialog(
-          title: Text(infoStandardModel),
+          title: Text(t.info_standard_model),
           content: Text(
-            infoStandardModelContent,
+            t.info_standard_model_content,
           ),
           actions: [
             TextButton(
-              child: Text(dialogCloseLabel),
+              child: Text(t.dialog_close),
               onPressed: () => Navigator.pop(context),
             ),
           ],
@@ -1483,9 +1462,8 @@ class AppModel with ChangeNotifier {
     required Function() onSuccess,
   }) async {
     if (mapping.isExportFieldsEmpty) {
-      String message = translate('export_profile_empty');
       Fluttertoast.showToast(
-        msg: message,
+        msg: t.export_profile_empty,
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
       );
@@ -1545,9 +1523,8 @@ class AppModel with ChangeNotifier {
         },
       );
 
-      String message = translate('card_exported');
       Fluttertoast.showToast(
-        msg: message.replaceAll('%deck%', deck),
+        msg: t.card_exported(deck: deck),
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
       );
@@ -1555,9 +1532,9 @@ class AppModel with ChangeNotifier {
       onSuccess.call();
     } on PlatformException {
       debugPrint('Failed to add note');
-      String message = translate('error_add_note_ankidroid');
+
       Fluttertoast.showToast(
-        msg: message,
+        msg: t.error_add_note,
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
       );
@@ -1611,9 +1588,8 @@ class AppModel with ChangeNotifier {
       return response;
     } on PlatformException {
       if (fallback) {
-        String message = translate('error_export_media_ankidroid');
         Fluttertoast.showToast(
-          msg: message,
+          msg: t.error_export_media_ankidroid,
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
         );
@@ -1732,12 +1708,6 @@ class AppModel with ChangeNotifier {
     /// Ensure that the following case never happens to the default profile.
     addDefaultModelIfMissing();
 
-    String errorModelChanged = translate('error_model_changed');
-    String errorModelChangedContent = translate('error_model_changed_content');
-    String errorModelMissing = translate('error_model_missing');
-    String errorModelMissingContent = translate('error_model_missing_content');
-    String dialogCloseLabel = translate('dialog_close');
-
     bool newMappingModelExists = await profileModelExists(mapping);
 
     if (!newMappingModelExists) {
@@ -1745,13 +1715,13 @@ class AppModel with ChangeNotifier {
         barrierDismissible: true,
         context: context,
         builder: (context) => AlertDialog(
-          title: Text(errorModelMissing),
+          title: Text(t.error_model_missing),
           content: Text(
-            errorModelMissingContent,
+            t.error_model_missing_content,
           ),
           actions: [
             TextButton(
-              child: Text(dialogCloseLabel),
+              child: Text(t.dialog_close),
               onPressed: () => Navigator.pop(context),
             ),
           ],
@@ -1770,13 +1740,13 @@ class AppModel with ChangeNotifier {
         barrierDismissible: true,
         context: context,
         builder: (context) => AlertDialog(
-          title: Text(errorModelChanged),
+          title: Text(t.error_model_changed),
           content: Text(
-            errorModelChangedContent,
+            t.error_model_changed_content,
           ),
           actions: [
             TextButton(
-              child: Text(dialogCloseLabel),
+              child: Text(t.dialog_close),
               onPressed: () => Navigator.pop(context),
             ),
           ],
@@ -2327,17 +2297,14 @@ class AppModel with ChangeNotifier {
     }
 
     if (terms.length == 1) {
-      String stashAddedSingle =
-          translate('stash_added_single').replaceAll('%term%', terms.first);
       Fluttertoast.showToast(
-        msg: stashAddedSingle,
+        msg: t.stash_added_single(term: terms.first),
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
       );
     } else {
-      String stashAddedMultiple = translate('stash_added_multiple');
       Fluttertoast.showToast(
-        msg: stashAddedMultiple,
+        msg: t.stash_added_multiple,
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
       );
@@ -2348,14 +2315,13 @@ class AppModel with ChangeNotifier {
   Future<void> removeFromStash({
     required String term,
   }) async {
-    String stashClearSingle = translate('stash_clear_single');
     removeFromSearchHistory(
       historyKey: stashKey,
       searchTerm: term,
     );
 
     Fluttertoast.showToast(
-      msg: stashClearSingle.replaceAll('%term%', term),
+      msg: t.stash_clear_single(term: term),
       toastLength: Toast.LENGTH_SHORT,
       gravity: ToastGravity.BOTTOM,
     );
@@ -2379,9 +2345,8 @@ class AppModel with ChangeNotifier {
   /// Shown when a query fails to be made to an online service. For example,
   /// when there is no internet connection.
   void showFailedToCommunicateMessage() {
-    String failedOnlineService = translate('failed_online_service');
     Fluttertoast.showToast(
-      msg: failedOnlineService,
+      msg: t.failed_online_service,
       toastLength: Toast.LENGTH_SHORT,
       gravity: ToastGravity.BOTTOM,
     );
@@ -2463,9 +2428,8 @@ class AppModel with ChangeNotifier {
     /// Redundant to do this with the share notification on Android
     if (_androidDeviceInfo.version.sdkInt != null &&
         _androidDeviceInfo.version.sdkInt! < 33) {
-      String copiedToClipboard = translate('copied_to_clipboard');
       Fluttertoast.showToast(
-        msg: copiedToClipboard,
+        msg: t.copied_to_clipboard,
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
       );
@@ -2850,7 +2814,7 @@ class AppModel with ChangeNotifier {
         await FlutterAccessibilityService.isAccessibilityPermissionEnabled();
     if (!permissionGranted) {
       Fluttertoast.showToast(
-        msg: translate('accessibility'),
+        msg: t.accessibility,
         toastLength: Toast.LENGTH_LONG,
         gravity: ToastGravity.BOTTOM,
       );

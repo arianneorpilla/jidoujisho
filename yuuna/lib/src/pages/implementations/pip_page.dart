@@ -6,7 +6,6 @@ import 'package:simple_pip_mode/pip_widget.dart';
 import 'package:simple_pip_mode/simple_pip.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/dictionary.dart';
-import 'package:yuuna/i18n/strings.g.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/src/models/app_model.dart';
 import 'package:yuuna/utils.dart';
@@ -24,8 +23,6 @@ class PipPage extends BasePage {
 }
 
 class _PipPageState extends BasePageState<PipPage> {
-  String get noSearchResultsLabel => appModel.translate('no_search_results');
-
   @override
   void initState() {
     super.initState();
@@ -242,10 +239,7 @@ class _PipPageState extends BasePageState<PipPage> {
           return Center(
             child: JidoujishoPlaceholderMessage(
               icon: Icons.search_off,
-              message: noSearchResultsLabel.replaceAll(
-                '%searchTerm%',
-                result.searchTerm,
-              ),
+              message: t.no_search_results,
             ),
           );
         }

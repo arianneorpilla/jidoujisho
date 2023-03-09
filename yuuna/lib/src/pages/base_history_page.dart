@@ -20,10 +20,6 @@ abstract class BaseHistoryPage extends BasePage {
 /// code.
 abstract class BaseHistoryPageState<T extends BaseHistoryPage>
     extends BasePageState<T> {
-  /// The message to be shown in the placeholder that displays when
-  /// [shouldPlaceholderBeShown] is true. This should be a localised message.
-  String get placeholderMessage => appModel.translate('info_empty_home_tab');
-
   /// Each tab in the home page represents a media type.
   MediaType get mediaType;
 
@@ -51,7 +47,7 @@ abstract class BaseHistoryPageState<T extends BaseHistoryPage>
     return Center(
       child: JidoujishoPlaceholderMessage(
         icon: mediaType.outlinedIcon,
-        message: placeholderMessage,
+        message: t.info_empty_home_tab,
       ),
     );
   }

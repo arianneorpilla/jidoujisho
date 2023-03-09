@@ -23,25 +23,6 @@ class SubtitleOptionsDialogPage extends BasePage {
 
 class _SubtitleOptionsDialogPage
     extends BasePageState<SubtitleOptionsDialogPage> {
-  String get playerOptionSubtitleDelay =>
-      appModel.translate('player_option_subtitle_delay');
-  String get playerOptionAudioAllowance =>
-      appModel.translate('player_option_audio_allowance');
-  String get playerOptionFontName =>
-      appModel.translate('player_option_font_name');
-  String get playerOptionFontSize =>
-      appModel.translate('player_option_font_size');
-  String get playerOptionRegexFilter =>
-      appModel.translate('player_option_regex_filter');
-
-  String get dialogSaveLabel => appModel.translate('dialog_save');
-  String get dialogSetLabel => appModel.translate('dialog_set');
-  String get resetLabel => appModel.translate('reset');
-  String get suffixPx => appModel.translate('unit_pixels');
-  String get suffixMs => appModel.translate('unit_milliseconds');
-  String get increaseLabel => appModel.translate('increase');
-  String get decreaseLabel => appModel.translate('decrease');
-
   late SubtitleOptions _options;
 
   late final TextEditingController _allowanceController;
@@ -89,14 +70,14 @@ class _SubtitleOptionsDialogPage
               ),
               decoration: InputDecoration(
                   floatingLabelBehavior: FloatingLabelBehavior.always,
-                  labelText: playerOptionSubtitleDelay,
+                  labelText: t.player_option_subtitle_delay,
                   suffixIcon: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const Space.normal(),
                       JidoujishoIconButton(
                         size: 18,
-                        tooltip: decreaseLabel,
+                        tooltip: t.decrease,
                         onTap: () async {
                           _delayController.text =
                               ((int.tryParse(_delayController.text) ??
@@ -109,7 +90,7 @@ class _SubtitleOptionsDialogPage
                       ),
                       JidoujishoIconButton(
                         size: 18,
-                        tooltip: increaseLabel,
+                        tooltip: t.increase,
                         onTap: () async {
                           _delayController.text =
                               ((int.tryParse(_delayController.text) ??
@@ -122,7 +103,7 @@ class _SubtitleOptionsDialogPage
                       ),
                       JidoujishoIconButton(
                         size: 18,
-                        tooltip: resetLabel,
+                        tooltip: t.reset,
                         onTap: () async {
                           _delayController.text = '0';
                           FocusScope.of(context).unfocus();
@@ -131,7 +112,7 @@ class _SubtitleOptionsDialogPage
                       ),
                     ],
                   ),
-                  suffixText: suffixMs),
+                  suffixText: t.unit_milliseconds),
             ),
             TextField(
               controller: _allowanceController,
@@ -140,14 +121,14 @@ class _SubtitleOptionsDialogPage
               ),
               decoration: InputDecoration(
                 floatingLabelBehavior: FloatingLabelBehavior.always,
-                labelText: playerOptionAudioAllowance,
+                labelText: t.player_option_audio_allowance,
                 suffixIcon: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Space.normal(),
                     JidoujishoIconButton(
                       size: 18,
-                      tooltip: decreaseLabel,
+                      tooltip: t.decrease,
                       onTap: () async {
                         _allowanceController.text =
                             ((int.tryParse(_allowanceController.text) ??
@@ -160,7 +141,7 @@ class _SubtitleOptionsDialogPage
                     ),
                     JidoujishoIconButton(
                       size: 18,
-                      tooltip: increaseLabel,
+                      tooltip: t.increase,
                       onTap: () async {
                         _allowanceController.text =
                             ((int.tryParse(_allowanceController.text) ??
@@ -173,7 +154,7 @@ class _SubtitleOptionsDialogPage
                     ),
                     JidoujishoIconButton(
                       size: 18,
-                      tooltip: resetLabel,
+                      tooltip: t.reset,
                       onTap: () async {
                         _allowanceController.text = '0';
                         FocusScope.of(context).unfocus();
@@ -182,21 +163,21 @@ class _SubtitleOptionsDialogPage
                     ),
                   ],
                 ),
-                suffixText: suffixMs,
+                suffixText: t.unit_milliseconds,
               ),
             ),
             TextField(
               controller: _fontNameController,
               decoration: InputDecoration(
                 floatingLabelBehavior: FloatingLabelBehavior.always,
-                labelText: playerOptionFontName,
+                labelText: t.player_option_font_name,
                 suffixIcon: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     JidoujishoIconButton(
                       size: 18,
-                      tooltip: resetLabel,
+                      tooltip: t.reset,
                       onTap: () async {
                         /// Language Customizable
                         if (appModel.targetLanguage is JapaneseLanguage) {
@@ -209,7 +190,7 @@ class _SubtitleOptionsDialogPage
                     ),
                     JidoujishoIconButton(
                       size: 18,
-                      tooltip: resetLabel,
+                      tooltip: t.reset,
                       onTap: () async {
                         _fontNameController.text = '';
                         FocusScope.of(context).unfocus();
@@ -227,17 +208,17 @@ class _SubtitleOptionsDialogPage
               ),
               decoration: InputDecoration(
                 floatingLabelBehavior: FloatingLabelBehavior.always,
-                labelText: playerOptionFontSize,
+                labelText: t.player_option_font_size,
                 suffixIcon: JidoujishoIconButton(
                   size: 18,
-                  tooltip: resetLabel,
+                  tooltip: t.reset,
                   onTap: () async {
-                    _fontSizeController.text = '24.0';
+                    _fontSizeController.text = '20.0';
                     FocusScope.of(context).unfocus();
                   },
                   icon: Icons.undo,
                 ),
-                suffixText: suffixPx,
+                suffixText: t.unit_pixels,
               ),
             ),
             TextField(
@@ -245,10 +226,10 @@ class _SubtitleOptionsDialogPage
               keyboardType: TextInputType.text,
               decoration: InputDecoration(
                 floatingLabelBehavior: FloatingLabelBehavior.always,
-                labelText: playerOptionRegexFilter,
+                labelText: t.player_option_regex_filter,
                 suffixIcon: JidoujishoIconButton(
                   size: 18,
-                  tooltip: resetLabel,
+                  tooltip: t.reset,
                   onTap: () async {
                     _regexFilterController.clear();
                     FocusScope.of(context).unfocus();
@@ -311,7 +292,7 @@ class _SubtitleOptionsDialogPage
   Widget buildSaveButton() {
     return TextButton(
       child: Text(
-        dialogSaveLabel,
+        t.dialog_save,
       ),
       onPressed: executeSave,
     );
@@ -320,7 +301,7 @@ class _SubtitleOptionsDialogPage
   Widget buildSetButton() {
     return TextButton(
       child: Text(
-        dialogSetLabel,
+        t.dialog_set,
       ),
       onPressed: executeSet,
     );

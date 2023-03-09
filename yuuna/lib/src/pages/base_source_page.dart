@@ -28,28 +28,6 @@ abstract class BaseSourcePage extends BasePage {
 /// collection of shared functions and variables. In large part, this was
 /// implemented to define shortcuts for common lengthy methods across UI code.
 class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
-  /// Localisation for the alert dialog title.
-  String get exitMediaTitle => appModel.translate('exit_media_title');
-
-  /// Localisation for the alert dialog description.
-  String get exitMediaDescription =>
-      appModel.translate('exit_media_description');
-
-  /// Localisation for no results case.
-  String get noSearchResultsLabel => appModel.translate('no_search_results');
-
-  /// Localisation for the Close alert dialog option for closing the source.
-  String get dialogClose => appModel.translate('dialog_exit');
-
-  /// Localisation for the Cancel alert dialog option for closing the source.
-  String get dialogCancel => appModel.translate('dialog_cancel');
-
-  /// Localisation for context menu option.
-  String get creatorLabel => appModel.translate('creator');
-
-  /// Localisation for context menu option.
-  String get copyLabel => appModel.translate('copy');
-
   /// Allows customisation of dictionary background.
   double get dictionaryBackgroundOpacity => 0.95;
 
@@ -78,12 +56,12 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
   Future<bool> onWillPop() async {
     Widget alertDialog = AlertDialog(
       shape: const RoundedRectangleBorder(),
-      title: Text(exitMediaTitle),
-      content: Text(exitMediaDescription),
+      title: Text(t.exit_media_title),
+      content: Text(t.exit_media_description),
       actions: <Widget>[
         TextButton(
             child: Text(
-              dialogClose,
+              t.dialog_exit,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.primary,
               ),
@@ -102,7 +80,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
             }),
         TextButton(
           child: Text(
-            dialogCancel,
+            t.dialog_cancel,
           ),
           onPressed: () => Navigator.pop(context, false),
         ),
@@ -350,10 +328,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
     return Center(
       child: JidoujishoPlaceholderMessage(
         icon: Icons.search_off,
-        message: noSearchResultsLabel.replaceAll(
-          '%searchTerm%',
-          _dictionaryResultNotifier.value!.searchTerm,
-        ),
+        message: t.no_search_results,
       ),
     );
   }

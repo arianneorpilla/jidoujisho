@@ -4,6 +4,7 @@ import 'package:transparent_image/transparent_image.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/src/pages/implementations/media_item_edit_dialog_page.dart';
+import 'package:yuuna/utils.dart';
 
 /// The content of the dialog used upon long-pressing a [MediaItem].
 class MediaItemDialogPage extends BasePage {
@@ -30,15 +31,6 @@ class MediaItemDialogPage extends BasePage {
 }
 
 class _MediaItemDialogPageState extends BasePageState<MediaItemDialogPage> {
-  String get dialogPlayLabel => appModel.translate('dialog_play');
-  String get dialogReadLabel => appModel.translate('dialog_read');
-  String get dialogViewLabel => appModel.translate('dialog_view');
-  String get dialogClearLabel => appModel.translate('dialog_clear');
-  String get dialogEditLabel => appModel.translate('dialog_edit');
-  String get dialogCancelLabel => appModel.translate('dialog_cancel');
-  String get mediaItemDeleteConfirmation =>
-      appModel.translate('media_item_delete_confirmation');
-
   MediaSource get mediaSource => widget.item.getMediaSource(appModel: appModel);
 
   @override
@@ -132,11 +124,11 @@ class _MediaItemDialogPageState extends BasePageState<MediaItemDialogPage> {
   String get launchLabel {
     MediaType mediaType = widget.item.getMediaType(appModel: appModel);
     if (mediaType == PlayerMediaType.instance) {
-      return dialogPlayLabel;
+      return t.dialog_play;
     } else if (mediaType == ReaderMediaType.instance) {
-      return dialogReadLabel;
+      return t.dialog_read;
     } else if (mediaType == ViewerMediaType.instance) {
-      return dialogViewLabel;
+      return t.dialog_view;
     } else {
       throw UnimplementedError('Media type launch label unimplemented');
     }
@@ -145,7 +137,7 @@ class _MediaItemDialogPageState extends BasePageState<MediaItemDialogPage> {
   Widget buildClearButton() {
     return TextButton(
       child: Text(
-        dialogClearLabel,
+        t.dialog_clear,
         style: TextStyle(color: theme.colorScheme.primary),
       ),
       onPressed: executeClear,
@@ -163,7 +155,7 @@ class _MediaItemDialogPageState extends BasePageState<MediaItemDialogPage> {
 
   Widget buildEditButton() {
     return TextButton(
-      child: Text(dialogEditLabel),
+      child: Text(t.dialog_edit),
       onPressed: executeEdit,
     );
   }

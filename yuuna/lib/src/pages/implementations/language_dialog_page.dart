@@ -21,18 +21,10 @@ class LanguageDialogPage extends BasePage {
 }
 
 class _LanguageDialogPageState extends BasePageState<LanguageDialogPage> {
-  String get dialogCloseLabel => appModel.translate('dialog_close');
-  String get targetLanguageLabel => appModel.translate('target_language');
-  String get appLocaleLabel => appModel.translate('app_locale');
-  String get appLocaleWarning => appModel.translate('app_locale_warning');
-  String get firstTimeSetupLabel => appModel.translate('first_time_setup');
-  String get firstTimeSetupDescription =>
-      appModel.translate('first_time_setup_description');
-
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: widget.isFirstTimeSetup ? Text(firstTimeSetupLabel) : null,
+      title: widget.isFirstTimeSetup ? Text(t.first_time_setup) : null,
       titlePadding: Spacing.of(context)
           .insets
           .all
@@ -54,7 +46,7 @@ class _LanguageDialogPageState extends BasePageState<LanguageDialogPage> {
 
   Widget buildCloseButton() {
     return TextButton(
-      child: Text(dialogCloseLabel),
+      child: Text(t.dialog_close),
       onPressed: () => Navigator.pop(context),
     );
   }
@@ -76,7 +68,7 @@ class _LanguageDialogPageState extends BasePageState<LanguageDialogPage> {
             children: [
               if (widget.isFirstTimeSetup)
                 Text(
-                  firstTimeSetupDescription,
+                  t.first_time_setup_description,
                   style: TextStyle(
                     fontSize: textTheme.bodySmall?.fontSize,
                   ),
@@ -86,7 +78,7 @@ class _LanguageDialogPageState extends BasePageState<LanguageDialogPage> {
               Padding(
                 padding: Spacing.of(context).insets.onlyLeft.small,
                 child: Text(
-                  targetLanguageLabel,
+                  t.target_language,
                   style: TextStyle(
                     fontSize: 10,
                     color: theme.unselectedWidgetColor,
@@ -107,7 +99,7 @@ class _LanguageDialogPageState extends BasePageState<LanguageDialogPage> {
               Padding(
                 padding: Spacing.of(context).insets.onlyLeft.small,
                 child: Text(
-                  appLocaleLabel,
+                  t.app_locale,
                   style: TextStyle(
                     fontSize: 10,
                     color: theme.unselectedWidgetColor,
@@ -141,7 +133,7 @@ class _LanguageDialogPageState extends BasePageState<LanguageDialogPage> {
                         child: SizedBox(width: 8),
                       ),
                       TextSpan(
-                        text: appLocaleWarning,
+                        text: t.app_locale_warning,
                         style: TextStyle(
                           fontSize: textTheme.bodySmall?.fontSize,
                         ),

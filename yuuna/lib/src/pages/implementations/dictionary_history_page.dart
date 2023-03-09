@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
+import 'package:yuuna/i18n/strings.g.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
 
@@ -36,13 +37,13 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
         appModel.dictionaryHistory.reversed.toList();
 
     return CustomScrollView(
-      cacheExtent: 999999999999,
+      cacheExtent: 999999999999999,
       controller: DictionaryMediaType.instance.scrollController,
       physics: const AlwaysScrollableScrollPhysics(
         parent: BouncingScrollPhysics(),
       ),
       slivers: [
-        const SliverToBoxAdapter(child: SizedBox(height: 60)),
+        const SliverPadding(padding: EdgeInsets.only(top: 60)),
         ...historyResults
             .map(
               (result) => _DictionaryHistoryScrollableItem(
@@ -88,10 +89,6 @@ class _DictionaryHistoryScrollableItemState
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
-
-  String get searchLabelBefore => appModel.translate('search_label_before');
-  String get searchLabelAfter => appModel.translate('search_label_after');
-  String get seeMoreLabel => appModel.translate('see_more');
 
   @override
   Widget build(BuildContext context) {
@@ -151,7 +148,7 @@ class _DictionaryHistoryScrollableItemState
     return Padding(
       padding: Spacing.of(context).insets.onlyBottom.small,
       child: Tooltip(
-        message: seeMoreLabel,
+        message: t.see_more,
         child: InkWell(
           onTap: () async {
             await appModel.openResultFromHistory(result: result);
@@ -202,7 +199,7 @@ class _DictionaryHistoryScrollableItemState
             ),
           ),
           TextSpan(
-            text: searchLabelBefore,
+            text: t.search_label_before,
             style: TextStyle(
               fontSize: fontSize,
               color: Theme.of(context).unselectedWidgetColor,
@@ -216,7 +213,7 @@ class _DictionaryHistoryScrollableItemState
             ),
           ),
           TextSpan(
-            text: searchLabelAfter,
+            text: t.search_label_after,
             style: TextStyle(
               fontSize: fontSize,
               color: Theme.of(context).unselectedWidgetColor,

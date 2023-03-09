@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/dictionary.dart';
-import 'package:yuuna/i18n/strings.g.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/utils.dart';
 

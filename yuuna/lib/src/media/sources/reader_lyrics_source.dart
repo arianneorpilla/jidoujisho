@@ -200,12 +200,10 @@ class ReaderLyricsSource extends ReaderMediaSource {
       {required BuildContext context,
       required WidgetRef ref,
       required AppModel appModel}) {
-    String setMediaLabel = appModel.translate('set_media');
-
     return FloatingSearchBarAction(
       child: JidoujishoIconButton(
         size: Theme.of(context).textTheme.titleLarge?.fontSize,
-        tooltip: setMediaLabel,
+        tooltip: t.set_media,
         enabledColor: isOverride ? Colors.red : null,
         icon: Icons.audio_file,
         onTap: () {

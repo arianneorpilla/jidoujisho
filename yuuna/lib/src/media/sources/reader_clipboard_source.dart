@@ -64,7 +64,7 @@ class ReaderClipboardSource extends ReaderMediaSource {
     return FloatingSearchBarAction(
       child: JidoujishoIconButton(
         size: Theme.of(context).textTheme.titleLarge?.fontSize,
-        tooltip: appModel.translate('paste'),
+        tooltip: t.paste,
         icon: Icons.note_alt_outlined,
         onTap: () async {
           ClipboardData? data = await Clipboard.getData('text/plain');

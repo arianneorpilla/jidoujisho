@@ -31,20 +31,6 @@ class RecursiveDictionaryPage extends BasePage {
 
 class _RecursiveDictionaryPageState
     extends BasePageState<RecursiveDictionaryPage> {
-  String get backLabel => appModel.translate('back');
-  String get dictionariesLabel => appModel.translate('dictionaries');
-  String get searchEllipsisLabel => appModel.translate('search_ellipsis');
-  String get noDictionariesLabel =>
-      appModel.translate('dictionaries_menu_empty');
-  String get noSearchResultsLabel => appModel.translate('no_search_results');
-  String get enterSearchTermLabel => appModel.translate('enter_search_term');
-  String get clearLabel => appModel.translate('clear');
-  String get clearSearchTitle => appModel.translate('clear_search_title');
-  String get clearSearchDescription =>
-      appModel.translate('clear_search_description');
-  String get dialogClearLabel => appModel.translate('dialog_clear');
-  String get dialogCancelLabel => appModel.translate('dialog_cancel');
-
   final FloatingSearchBarController _controller = FloatingSearchBarController();
 
   DictionarySearchResult? _result;
@@ -97,7 +83,7 @@ class _RecursiveDictionaryPageState
       physics: const AlwaysScrollableScrollPhysics(
         parent: BouncingScrollPhysics(),
       ),
-      hint: searchEllipsisLabel,
+      hint: t.search_ellipsis,
       controller: _controller,
       builder: buildFloatingSearchBody,
       borderRadius: BorderRadius.zero,
@@ -204,7 +190,7 @@ class _RecursiveDictionaryPageState
       showIfOpened: true,
       showIfClosed: false,
       child: JidoujishoIconButton(
-        tooltip: backLabel,
+        tooltip: t.back,
         icon: Icons.arrow_back,
         onTap: () async {
           if (widget.killOnPop) {
@@ -243,8 +229,8 @@ class _RecursiveDictionaryPageState
 
                 setState(() {});
               },
-              searchButtonSemanticLabel: searchLabel,
-              clearButtonSemanticLabel: clearLabel,
+              searchButtonSemanticLabel: t.search,
+              clearButtonSemanticLabel: t.clear,
             );
           },
         );
@@ -253,13 +239,11 @@ class _RecursiveDictionaryPageState
   }
 
   Widget buildSegmentButton() {
-    String label = appModel.translate('text_segmentation');
-
     return FloatingSearchBarAction(
       showIfOpened: true,
       child: JidoujishoIconButton(
         size: Theme.of(context).textTheme.titleLarge?.fontSize,
-        tooltip: label,
+        tooltip: t.text_segmentation,
         icon: Icons.account_tree,
         onTap: () {
           appModel.openTextSegmentationDialog(
@@ -277,13 +261,11 @@ class _RecursiveDictionaryPageState
   }
 
   Widget buildCreatorButton() {
-    String label = appModel.translate('card_creator');
-
     return FloatingSearchBarAction(
       showIfOpened: true,
       child: JidoujishoIconButton(
         size: Theme.of(context).textTheme.titleLarge?.fontSize,
-        tooltip: label,
+        tooltip: t.card_creator,
         icon: Icons.note_add,
         onTap: () {
           appModel.openCreator(
@@ -306,7 +288,7 @@ class _RecursiveDictionaryPageState
       showIfClosed: false,
       child: JidoujishoIconButton(
         size: textTheme.titleLarge?.fontSize,
-        tooltip: clearLabel,
+        tooltip: t.clear,
         icon: Icons.manage_search,
         onTap: showDeleteSearchHistoryPrompt,
       ),
@@ -318,14 +300,12 @@ class _RecursiveDictionaryPageState
       contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
           ? Spacing.of(context).insets.exceptBottom.big
           : Spacing.of(context).insets.exceptBottom.normal,
-      title: Text(clearSearchTitle),
-      content: Text(
-        clearSearchDescription,
-      ),
+      title: Text(t.clear_search_title),
+      content: Text(t.clear_browser_description),
       actions: <Widget>[
         TextButton(
           child: Text(
-            dialogClearLabel,
+            t.dialog_clear,
             style: TextStyle(
               color: theme.colorScheme.primary,
             ),
@@ -342,7 +322,7 @@ class _RecursiveDictionaryPageState
           },
         ),
         TextButton(
-          child: Text(dialogCancelLabel),
+          child: Text(t.dialog_cancel),
           onPressed: () => Navigator.pop(context),
         ),
       ],
@@ -429,7 +409,7 @@ class _RecursiveDictionaryPageState
     return Center(
       child: JidoujishoPlaceholderMessage(
         icon: Icons.search,
-        message: enterSearchTermLabel,
+        message: t.enter_search_term,
       ),
     );
   }
@@ -438,7 +418,7 @@ class _RecursiveDictionaryPageState
     return Center(
       child: JidoujishoPlaceholderMessage(
         icon: Icons.auto_stories_rounded,
-        message: noDictionariesLabel,
+        message: t.dictionaries_menu_empty,
       ),
     );
   }
@@ -447,10 +427,7 @@ class _RecursiveDictionaryPageState
     return Center(
       child: JidoujishoPlaceholderMessage(
         icon: Icons.search_off,
-        message: noSearchResultsLabel.replaceAll(
-          '%searchTerm%',
-          _controller.query,
-        ),
+        message: t.no_search_results,
       ),
     );
   }

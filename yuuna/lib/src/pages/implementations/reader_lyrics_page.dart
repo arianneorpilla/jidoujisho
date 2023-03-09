@@ -28,11 +28,6 @@ class ReaderLyricsPage extends BaseSourcePage {
 /// was implemented to define shortcuts for common lengthy methods across UI
 /// code.
 class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
-  String get noCurrentMediaLabel => appModel.translate('no_current_media');
-  String get lyricsPermissionRequiredLabel =>
-      appModel.translate('lyrics_permission_required');
-  String get noLyricsFound => appModel.translate('no_lyrics_found');
-
   Orientation? lastOrientation;
 
   ReaderLyricsSource get source => ReaderLyricsSource.instance;
@@ -86,7 +81,7 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
     return Center(
       child: JidoujishoPlaceholderMessage(
         icon: Icons.error,
-        message: lyricsPermissionRequiredLabel,
+        message: t.lyrics_permission_required,
       ),
     );
   }
@@ -96,8 +91,8 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
       child: JidoujishoPlaceholderMessage(
         icon: Icons.music_off,
         message: parameters.artist.isEmpty
-            ? '$noLyricsFound\n『${parameters.title}』'
-            : '$noLyricsFound\n『${parameters.title} - ${parameters.artist}』',
+            ? '${t.no_lyrics_found}\n『${parameters.title}』'
+            : '${t.no_lyrics_found}\n『${parameters.title} - ${parameters.artist}』',
       ),
     );
   }
@@ -106,7 +101,7 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
     return Center(
       child: JidoujishoPlaceholderMessage(
         icon: Icons.lyrics,
-        message: noCurrentMediaLabel,
+        message: t.no_current_media,
       ),
     );
   }
@@ -391,10 +386,10 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
   MaterialTextSelectionControls get selectionControls =>
       JidoujishoTextSelectionControls(
         searchAction: onContextSearch,
-        searchActionLabel: searchLabel,
+        searchActionLabel: t.search,
         stashAction: onContextStash,
-        stashActionLabel: stashLabel,
-        creatorActionLabel: creatorLabel,
+        stashActionLabel: t.stash,
+        creatorActionLabel: t.creator,
         creatorAction: creatorAction,
         allowCopy: true,
         allowSelectAll: false,

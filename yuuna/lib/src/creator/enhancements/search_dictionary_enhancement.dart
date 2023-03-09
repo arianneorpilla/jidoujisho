@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
+import 'package:yuuna/utils.dart';
 
 /// An enhancement used effectively as a shortcut for performing a dictionary
 /// search.
@@ -32,9 +33,8 @@ class SearchDictionaryEnhancement extends Enhancement {
     String searchTerm = creatorModel.getFieldController(field).text.trim();
 
     if (searchTerm.isEmpty) {
-      String noTextToSearch = appModel.translate('no_text_to_search');
       Fluttertoast.showToast(
-        msg: noTextToSearch,
+        msg: t.no_text_to_search,
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
       );

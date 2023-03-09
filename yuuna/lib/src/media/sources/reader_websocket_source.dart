@@ -127,12 +127,10 @@ class ReaderWebsocketSource extends ReaderMediaSource {
       {required BuildContext context,
       required WidgetRef ref,
       required AppModel appModel}) {
-    String clearTitle = appModel.translate('clear_text_title');
-
     return FloatingSearchBarAction(
       child: JidoujishoIconButton(
         size: Theme.of(context).textTheme.titleLarge?.fontSize,
-        tooltip: clearTitle,
+        tooltip: t.clear_text_title,
         icon: Icons.clear_all,
         onTap: () {
           showClearPrompt(
@@ -150,23 +148,16 @@ class ReaderWebsocketSource extends ReaderMediaSource {
       {required BuildContext context,
       required WidgetRef ref,
       required AppModel appModel}) async {
-    String dialogClearLabel = appModel.translate('dialog_clear');
-    String dialogCancelLabel = appModel.translate('dialog_cancel');
-    String clearTitle = appModel.translate('clear_text_title');
-    String clearDescription = appModel.translate('clear_text_description');
-
     Widget alertDialog = AlertDialog(
       contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
           ? Spacing.of(context).insets.exceptBottom.big
           : Spacing.of(context).insets.exceptBottom.normal,
-      title: Text(clearTitle),
-      content: Text(
-        clearDescription,
-      ),
+      title: Text(t.clear_text_title),
+      content: Text(t.clear_text_description),
       actions: <Widget>[
         TextButton(
           child: Text(
-            dialogClearLabel,
+            t.dialog_clear,
             style: TextStyle(
               color: Theme.of(context).colorScheme.primary,
             ),
@@ -179,7 +170,7 @@ class ReaderWebsocketSource extends ReaderMediaSource {
           },
         ),
         TextButton(
-          child: Text(dialogCancelLabel),
+          child: Text(t.dialog_cancel),
           onPressed: () => Navigator.pop(context),
         ),
       ],
@@ -196,24 +187,18 @@ class ReaderWebsocketSource extends ReaderMediaSource {
       {required BuildContext context,
       required WidgetRef ref,
       required AppModel appModel}) async {
-    String dialogCloseLabel = appModel.translate('dialog_close');
-    String dialogCancelLabel = appModel.translate('dialog_cancel');
-    String closeTitle = appModel.translate('close_connection_title');
-    String closeDescription =
-        appModel.translate('close_connection_description');
-
     Widget alertDialog = AlertDialog(
       contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
           ? Spacing.of(context).insets.exceptBottom.big
           : Spacing.of(context).insets.exceptBottom.normal,
-      title: Text(closeTitle),
+      title: Text(t.close_connection_title),
       content: Text(
-        closeDescription,
+        t.close_connection_description,
       ),
       actions: <Widget>[
         TextButton(
           child: Text(
-            dialogCloseLabel,
+            t.dialog_close,
             style: TextStyle(
               color: Theme.of(context).colorScheme.primary,
             ),
@@ -226,7 +211,7 @@ class ReaderWebsocketSource extends ReaderMediaSource {
           },
         ),
         TextButton(
-          child: Text(dialogCancelLabel),
+          child: Text(t.dialog_cancel),
           onPressed: () => Navigator.pop(context),
         ),
       ],
@@ -243,12 +228,10 @@ class ReaderWebsocketSource extends ReaderMediaSource {
       {required BuildContext context,
       required WidgetRef ref,
       required AppModel appModel}) {
-    String connectDisconnectLabel = appModel.translate('connect_disconnect');
-
     return FloatingSearchBarAction(
       child: JidoujishoIconButton(
         size: Theme.of(context).textTheme.titleLarge?.fontSize,
-        tooltip: connectDisconnectLabel,
+        tooltip: t.connect_disconnect,
         enabledColor: isActive ? Colors.red : null,
         icon: Icons.leak_add,
         onTap: () {

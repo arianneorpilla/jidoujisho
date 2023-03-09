@@ -25,9 +25,6 @@ class QuickActionsPickerDialogPage extends BasePage {
 
 class _QuickActionsPickerDialogPageState
     extends BasePageState<QuickActionsPickerDialogPage> {
-  String get noMoreAvailableQuickActions =>
-      appModel.translate('no_more_available_quick_actions');
-
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -81,7 +78,7 @@ class _QuickActionsPickerDialogPageState
       ),
       child: JidoujishoPlaceholderMessage(
         icon: Icons.electric_bolt,
-        message: noMoreAvailableQuickActions,
+        message: t.no_more_available_quick_actions,
       ),
     );
   }

@@ -14,11 +14,6 @@ class CreatorQuickActionsPage extends BasePage {
 }
 
 class _CreatorQuickActionsPageState extends BasePageState {
-  String get dialogCloseLabel => appModel.translate('dialog_close');
-  String get infoActionsLabel => appModel.translate('info_actions');
-  String get assignActionLabel => appModel.translate('assign_action');
-  String get removeActionLabel => appModel.translate('remove_action');
-
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -36,7 +31,7 @@ class _CreatorQuickActionsPageState extends BasePageState {
 
   Widget buildCloseButton() {
     return TextButton(
-      child: Text(dialogCloseLabel),
+      child: Text(t.dialog_close),
       onPressed: () => Navigator.pop(context),
     );
   }
@@ -72,7 +67,7 @@ class _CreatorQuickActionsPageState extends BasePageState {
                         child: SizedBox(width: 8),
                       ),
                       TextSpan(
-                        text: infoActionsLabel,
+                        text: t.info_actions,
                         style: TextStyle(
                           fontSize: textTheme.bodySmall?.fontSize,
                         ),
@@ -132,7 +127,7 @@ class _CreatorQuickActionsPageState extends BasePageState {
       return JidoujishoIconButton(
         isWideTapArea: true,
         size: textTheme.titleLarge?.fontSize,
-        tooltip: assignActionLabel,
+        tooltip: t.assign_action,
         icon: Icons.add_circle,
         onTap: () async {
           await showDialog(
@@ -150,7 +145,7 @@ class _CreatorQuickActionsPageState extends BasePageState {
       return JidoujishoIconButton(
         isWideTapArea: true,
         size: textTheme.titleLarge?.fontSize,
-        tooltip: removeActionLabel,
+        tooltip: t.remove_action,
         enabledColor: theme.colorScheme.primary,
         icon: action.icon,
         onTap: () async {

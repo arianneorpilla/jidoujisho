@@ -118,15 +118,16 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
         child: Padding(
           padding: Spacing.of(context).insets.onlyRight.extraSmall,
           child: CustomScrollView(
+            cacheExtent: 999999999999999,
             controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(
               parent: BouncingScrollPhysics(),
             ),
             slivers: [
-              SliverToBoxAdapter(
-                  child: widget.spaceBeforeFirstResult
-                      ? const Space.normal()
-                      : const SizedBox.shrink()),
+              SliverPadding(
+                  padding: widget.spaceBeforeFirstResult
+                      ? Spacing.of(context).insets.onlyTop.normal
+                      : EdgeInsets.zero),
               ...headings
                   .map((heading) => DictionaryTermPage(
                         lastSelectedMapping: lastSelectedMapping,

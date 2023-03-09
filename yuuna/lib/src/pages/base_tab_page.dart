@@ -21,12 +21,6 @@ abstract class BaseTabPage extends BasePage {
 /// was implemented to define shortcuts for common lengthy methods across UI
 /// code.
 abstract class BaseTabPageState<T extends BaseTabPage> extends BasePageState {
-  /// Tooltip for the [buildChangeSourceButton].
-  String get changeSourceLabel => appModel.translate('change_source');
-
-  /// Tooltip for the [buildBackButton].
-  String get backLabel => appModel.translate('back');
-
   @override
   void initState() {
     super.initState();
@@ -126,7 +120,7 @@ abstract class BaseTabPageState<T extends BaseTabPage> extends BasePageState {
     return FloatingSearchBarAction(
       child: JidoujishoIconButton(
         size: textTheme.titleLarge?.fontSize,
-        tooltip: changeSourceLabel,
+        tooltip: t.change_source,
         icon: mediaSource.icon,
         onTap: () async {
           await showDialog(
@@ -149,7 +143,7 @@ abstract class BaseTabPageState<T extends BaseTabPage> extends BasePageState {
       showIfClosed: false,
       child: JidoujishoIconButton(
         size: textTheme.titleLarge?.fontSize,
-        tooltip: backLabel,
+        tooltip: t.back,
         icon: Icons.arrow_back,
         onTap: () {
           mediaType.floatingSearchBarController.close();

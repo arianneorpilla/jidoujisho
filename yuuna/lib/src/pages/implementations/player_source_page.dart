@@ -18,7 +18,6 @@ import 'package:subtitle/subtitle.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:yuuna/creator.dart';
-import 'package:yuuna/i18n/strings.g.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/src/pages/implementations/player_comments_page.dart';
@@ -47,50 +46,6 @@ class PlayerSourcePage extends BaseSourcePage {
 
 class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     with TickerProviderStateMixin, WidgetsBindingObserver {
-  String get playLabel => appModel.translate('play');
-  String get pauseLabel => appModel.translate('pause');
-  String get replayLabel => appModel.translate('replay');
-  String get playerOptionSelectAudio =>
-      appModel.translate('player_option_select_audio');
-  String get playerOptionSelectSubtitle =>
-      appModel.translate('player_option_select_subtitle');
-  String get playerAlignSubtitleTranscript =>
-      appModel.translate('player_align_subtitle_transcript');
-  String get playerOptionSubtitleAppearance =>
-      appModel.translate('player_option_subtitle_appearance');
-  String get playerOptionBlurPreferences =>
-      appModel.translate('player_option_blur_preferences');
-  String get playerOptionLoadSubtitles =>
-      appModel.translate('player_option_load_subtitles');
-  String get playerOptionBlurUse =>
-      appModel.translate('player_option_blur_use');
-  String get playerOptionBlurOptions =>
-      appModel.translate('player_option_blur_options');
-  String get playerOptionBlurReset =>
-      appModel.translate('player_option_blur_reset');
-  String get playerOptionAudio => appModel.translate('player_option_audio');
-
-  String get playerOptionShadowing =>
-      appModel.translate('player_option_shadowing');
-  String get playerOptionDefinitionFocus =>
-      appModel.translate('player_option_definition_focus');
-  String get playerOptionListeningComprehension =>
-      appModel.translate('player_option_listening_comprehension');
-  String get playerChangePlayerOrientation =>
-      appModel.translate('player_change_player_orientation');
-  String get playerOptionShareSubtitle =>
-      appModel.translate('player_option_share_subtitle');
-  String get playerOptionExport => appModel.translate('player_option_export');
-
-  String get audioSubtitlesLabel => appModel.translate('audio_subtitles');
-  String get showOptions => appModel.translate('show_options');
-
-  String get optionSubtitle => appModel.translate('player_option_subtitle');
-  String get optionSubtitleExternal =>
-      appModel.translate('player_option_subtitle_external');
-  String get optionSubtitleNone =>
-      appModel.translate('player_option_subtitle_none');
-
   late final VlcPlayerController _playerController;
   late SubtitleItem _subtitleItem;
   late SubtitleItem _emptySubtitleItem;
@@ -782,10 +737,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                     ? Icons.pause
                     : Icons.play_arrow,
             tooltip: ended
-                ? replayLabel
+                ? t.replay
                 : playing
-                    ? pauseLabel
-                    : playLabel,
+                    ? t.pause
+                    : t.play,
             onTap: () async {
               cancelHideTimer();
               await playPause();
@@ -999,14 +954,13 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   Widget buildPickVideoFileButton() {
     PlayerLocalMediaSource source = widget.item!
         .getMediaSource(appModel: appModel) as PlayerLocalMediaSource;
-    String pickVideoFileLabel = appModel.translate('pick_video_file');
 
     return Material(
       color: Colors.transparent,
       child: JidoujishoIconButton(
         size: 24,
         icon: Icons.perm_media,
-        tooltip: pickVideoFileLabel,
+        tooltip: t.pick_video_file,
         onTap: () async {
           dialogSmartPause();
 
@@ -1033,14 +987,13 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   Widget buildChangeQualityButton() {
     PlayerYoutubeSource source =
         widget.item!.getMediaSource(appModel: appModel) as PlayerYoutubeSource;
-    String pickVideoFileLabel = appModel.translate('change_quality');
 
     return Material(
       color: Colors.transparent,
       child: JidoujishoIconButton(
         size: 24,
         icon: Icons.video_settings,
-        tooltip: pickVideoFileLabel,
+        tooltip: t.change_quality,
         onTap: () async {
           StreamManifest manifest = source.getStreamManifest(widget.item!);
 
@@ -1065,7 +1018,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       child: JidoujishoIconButton(
         size: 24,
         icon: Icons.comment_outlined,
-        tooltip: appModel.translate('comments'),
+        tooltip: t.comments,
         onTap: () async {
           await dialogSmartPause();
           await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -1144,7 +1097,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   /// This is the second bottomrightmost button in the menu.
   Widget buildAudioSubtitlesButton() {
     JidoujishoBottomSheetOption audioOption = JidoujishoBottomSheetOption(
-      label: playerOptionSelectAudio,
+      label: t.player_option_select_audio,
       icon: Icons.music_note_outlined,
       action: () async {
         Map<int, String> audioEmbeddedTracks =
@@ -1170,7 +1123,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
     options.addAll([
       JidoujishoBottomSheetOption(
-        label: playerOptionSelectSubtitle,
+        label: t.player_option_select_subtitle,
         icon: Icons.subtitles_outlined,
         action: () async {
           Map<int, String> subtitleEmbeddedTracks =
@@ -1199,7 +1152,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         },
       ),
       JidoujishoBottomSheetOption(
-        label: playerAlignSubtitleTranscript,
+        label: t.player_align_subtitle_transcript,
         icon: Icons.timer,
         action: () async {
           await dialogSmartPause();
@@ -1248,7 +1201,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         },
       ),
       JidoujishoBottomSheetOption(
-        label: playerOptionSubtitleAppearance,
+        label: t.player_option_subtitle_appearance,
         icon: Icons.text_fields,
         action: () async {
           await dialogSmartPause();
@@ -1262,7 +1215,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         },
       ),
       JidoujishoBottomSheetOption(
-        label: playerOptionBlurPreferences,
+        label: t.player_option_blur_preferences,
         icon: Icons.blur_circular_sharp,
         action: () async {
           await showModalBottomSheet(
@@ -1276,7 +1229,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         },
       ),
       JidoujishoBottomSheetOption(
-        label: playerOptionLoadSubtitles,
+        label: t.player_option_load_subtitles,
         icon: Icons.upload_file,
         action: () async {
           await dialogSmartPause();
@@ -1291,7 +1244,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       child: JidoujishoIconButton(
         size: 24,
         icon: Icons.queue_music_outlined,
-        tooltip: audioSubtitlesLabel,
+        tooltip: t.audio_subtitles,
         onTap: () async {
           if (await _playerController.getAudioTracksCount() == 0) {
             options.remove(audioOption);
@@ -1315,7 +1268,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   List<JidoujishoBottomSheetOption> getBlurOptions() {
     List<JidoujishoBottomSheetOption> options = [
       JidoujishoBottomSheetOption(
-        label: playerOptionBlurUse,
+        label: t.player_option_blur_use,
         active: appModel.blurOptions.visible,
         icon: appModel.blurOptions.visible
             ? Icons.blur_on_outlined
@@ -1328,7 +1281,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         },
       ),
       JidoujishoBottomSheetOption(
-        label: playerOptionBlurOptions,
+        label: t.player_option_blur_options,
         icon: Icons.blur_circular_sharp,
         action: () async {
           await dialogSmartPause();
@@ -1341,7 +1294,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         },
       ),
       JidoujishoBottomSheetOption(
-        label: playerOptionBlurReset,
+        label: t.player_option_blur_reset,
         icon: Icons.timer_sharp,
         action: () async {
           BlurOptions options = appModel.blurOptions;
@@ -1368,7 +1321,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
     embeddedTracks.forEach((index, label) {
       JidoujishoBottomSheetOption option = JidoujishoBottomSheetOption(
-        label: '$playerOptionAudio - $label',
+        label: '${t.player_option_audio} - $label',
         icon: Icons.music_note_outlined,
         active: audioTrack == index,
         action: () async {
@@ -1390,24 +1343,24 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     switch (item.type) {
       case SubtitleItemType.externalSubtitle:
         if (item.metadata != null) {
-          return '$optionSubtitle - $optionSubtitleExternal [${item.metadata}]';
+          return '${t.player_option_subtitle} - ${t.player_option_subtitle_external} [${item.metadata}]';
         } else {
-          return '$optionSubtitle - $optionSubtitleExternal';
+          return '${t.player_option_subtitle} - ${t.player_option_subtitle_external}';
         }
       case SubtitleItemType.embeddedSubtitle:
         if (item.index != null) {
-          return '$optionSubtitle - ${embeddedTracks.values.toList()[item.index!]}';
+          return '${t.player_option_subtitle} - ${embeddedTracks.values.toList()[item.index!]}';
         } else {
-          return '$optionSubtitle - ${t.default_option}';
+          return '${t.player_option_subtitle} - ${t.default_option}';
         }
       case SubtitleItemType.webSubtitle:
         if (item.metadata != null) {
-          return '$optionSubtitle - ${item.metadata}';
+          return '${t.player_option_subtitle} - ${item.metadata}';
         } else {
-          return optionSubtitle;
+          return t.player_option_subtitle;
         }
       case SubtitleItemType.noneSubtitle:
-        return '$optionSubtitle - $optionSubtitleNone';
+        return '${t.player_option_subtitle} - ${t.player_option_subtitle_none}';
     }
   }
 
@@ -1456,7 +1409,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       child: JidoujishoIconButton(
         size: 24,
         icon: Icons.more_vert,
-        tooltip: showOptions,
+        tooltip: t.show_options,
         onTap: () async {
           await showModalBottomSheet(
             context: context,
@@ -1475,13 +1428,13 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   List<JidoujishoBottomSheetOption> getOptions() {
     List<JidoujishoBottomSheetOption> options = [
       JidoujishoBottomSheetOption(
-        label: playerOptionShadowing,
+        label: t.player_option_shadowing,
         icon: Icons.loop,
         active: _shadowingSubtitle.value != null,
         action: setShadowingSubtitle,
       ),
       JidoujishoBottomSheetOption(
-        label: playerOptionDefinitionFocus,
+        label: t.player_option_definition_focus,
         icon: appModel.isPlayerDefinitionFocusMode
             ? Icons.flash_on
             : Icons.flash_off,
@@ -1489,7 +1442,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         action: appModel.togglePlayerDefinitionFocusMode,
       ),
       JidoujishoBottomSheetOption(
-        label: playerOptionListeningComprehension,
+        label: t.player_option_listening_comprehension,
         icon: appModel.isPlayerListeningComprehensionMode
             ? Icons.hearing
             : Icons.hearing_disabled,
@@ -1500,7 +1453,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         },
       ),
       JidoujishoBottomSheetOption(
-        label: playerChangePlayerOrientation,
+        label: t.player_change_player_orientation,
         icon: appModel.isPlayerOrientationPortrait
             ? Icons.stay_current_landscape
             : Icons.stay_current_portrait,
@@ -1520,14 +1473,14 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         },
       ),
       JidoujishoBottomSheetOption(
-        label: playerOptionShareSubtitle,
+        label: t.player_option_share_subtitle,
         icon: Icons.share,
         action: () async {
           await Share.share(getNearestSubtitle()?.data ?? '');
         },
       ),
       JidoujishoBottomSheetOption(
-        label: playerOptionExport,
+        label: t.player_option_export,
         icon: Icons.mobile_screen_share,
         action: () async {
           List<Subtitle> subtitles = [];
@@ -1964,14 +1917,11 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
   /// Shows the dialog for importing an external subtitle.
   Future<void> importExternalSubtitle() async {
-    String pickText = appModel.translate('dialog_select');
-    String cancelText = appModel.translate('dialog_cancel');
-
     Iterable<String>? filePaths = await FilesystemPicker.open(
       title: '',
       allowedExtensions: ['.ass', '.srt'],
-      pickText: pickText,
-      cancelText: cancelText,
+      pickText: t.dialog_select,
+      cancelText: t.dialog_cancel,
       context: context,
       rootDirectories: await appModel
           .getFilePickerDirectoriesForMediaType(PlayerMediaType.instance),

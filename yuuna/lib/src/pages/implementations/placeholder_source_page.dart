@@ -15,8 +15,6 @@ class PlaceholderSourcePage extends BaseSourcePage {
 }
 
 class _PlaceholderSourcePage extends BaseSourcePageState {
-  String get unimplementedSource => appModel.translate('unimplemented_source');
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -32,7 +30,7 @@ class _PlaceholderSourcePage extends BaseSourcePageState {
   Widget buildPlaceholder() {
     return JidoujishoPlaceholderMessage(
       icon: Icons.construction,
-      message: unimplementedSource,
+      message: t.unimplemented_source,
     );
   }
 }

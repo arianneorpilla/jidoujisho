@@ -27,19 +27,6 @@ class OpenStashDialogPage extends BasePage {
 class _OpenStashDialogPage extends BasePageState<OpenStashDialogPage> {
   final ScrollController _scrollController = ScrollController();
 
-  String get dialogShareLabel => appModel.translate('dialog_share');
-  String get dialogSearchLabel => appModel.translate('dialog_search');
-  String get dialogSelectLabel => appModel.translate('dialog_select');
-  String get dialogClearLabel => appModel.translate('dialog_clear');
-  String get dialogCancelLabel => appModel.translate('dialog_cancel');
-  String get dialogCloseLabel => appModel.translate('dialog_close');
-
-  String get stashClearTitle => appModel.translate('stash_clear_title');
-
-  String get stashClearDescription =>
-      appModel.translate('stash_clear_description');
-  String get stashPlaceholder => appModel.translate('stash_placeholder');
-
   final ValueNotifier<int?> _selectionNotifier = ValueNotifier<int?>(null);
 
   @override
@@ -65,7 +52,7 @@ class _OpenStashDialogPage extends BasePageState<OpenStashDialogPage> {
       ),
       child: JidoujishoPlaceholderMessage(
         icon: Icons.inventory_2,
-        message: stashPlaceholder,
+        message: t.stash_placeholder,
       ),
     );
   }
@@ -144,7 +131,7 @@ class _OpenStashDialogPage extends BasePageState<OpenStashDialogPage> {
   Widget buildClearButton() {
     return TextButton(
       child: Text(
-        dialogClearLabel,
+        t.dialog_clear,
         style: TextStyle(color: theme.colorScheme.primary),
       ),
       onPressed: executeClear,
@@ -153,21 +140,21 @@ class _OpenStashDialogPage extends BasePageState<OpenStashDialogPage> {
 
   Widget buildExportButton() {
     return TextButton(
-      child: Text(dialogShareLabel),
+      child: Text(t.dialog_share),
       onPressed: executeExport,
     );
   }
 
   Widget buildSearchButton() {
     return TextButton(
-      child: Text(dialogSearchLabel),
+      child: Text(t.dialog_search),
       onPressed: executeSearch,
     );
   }
 
   Widget buildSelectButton() {
     return TextButton(
-      child: Text(dialogSelectLabel),
+      child: Text(t.dialog_select),
       onPressed: executeSelect,
     );
   }
@@ -197,14 +184,12 @@ class _OpenStashDialogPage extends BasePageState<OpenStashDialogPage> {
       barrierDismissible: true,
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(stashClearTitle),
-        content: Text(
-          stashClearDescription,
-        ),
+        title: Text(t.stash_clear_title),
+        content: Text(t.stash_clear_description),
         actions: [
           TextButton(
               child: Text(
-                dialogClearLabel,
+                t.dialog_clear,
                 style: TextStyle(color: theme.colorScheme.primary),
               ),
               onPressed: () {
@@ -213,7 +198,7 @@ class _OpenStashDialogPage extends BasePageState<OpenStashDialogPage> {
                 setState(() {});
               }),
           TextButton(
-            child: Text(dialogCloseLabel),
+            child: Text(t.dialog_close),
             onPressed: () => Navigator.pop(context),
           ),
         ],

@@ -54,13 +54,11 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     required WidgetRef ref,
     required AppModel appModel,
   }) {
-    String pickVideoFileLabel = appModel.translate('pick_video_file');
-
     return FloatingSearchBarAction(
       showIfOpened: true,
       child: JidoujishoIconButton(
         size: Theme.of(context).textTheme.titleLarge?.fontSize,
-        tooltip: pickVideoFileLabel,
+        tooltip: t.pick_video_file,
         icon: Icons.perm_media,
         onTap: () => pickVideoFile(
           context: context,
@@ -105,8 +103,6 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     required WidgetRef ref,
     required bool pushReplacement,
   }) async {
-    String pickText = appModel.translate('dialog_select');
-    String cancelText = appModel.translate('dialog_cancel');
     List<Directory> rootDirectories =
         await appModel.getFilePickerDirectoriesForMediaType(mediaType);
 
@@ -121,8 +117,8 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
       rootDirectories: rootDirectories,
       fsType: FilesystemType.file,
       title: '',
-      pickText: pickText,
-      cancelText: cancelText,
+      pickText: t.dialog_select,
+      cancelText: t.dialog_cancel,
       themeData: Theme.of(context),
       folderIconColor: Theme.of(context).colorScheme.primary,
       usedFiles: usedFiles,

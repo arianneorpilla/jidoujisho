@@ -14,19 +14,6 @@ class TtuSettingsDialogPage extends BasePage {
 }
 
 class _DictionaryDialogPageState extends BasePageState {
-  String get volumeButtonPageTurningLabel =>
-      appModel.translate('volume_button_page_turning');
-  String get invertVolumeButtonsLabel =>
-      appModel.translate('invert_volume_buttons');
-  String get volumeButtonTurningSpeed =>
-      appModel.translate('volume_button_turning_speed');
-  String get highlightOnTapLabel => appModel.translate('highlight_on_tap');
-  String get extendPageNavbarLabel =>
-      appModel.translate('extend_page_beyond_navbar');
-
-  String get dialogCloseLabel => appModel.translate('dialog_close');
-  String get resetLabel => appModel.translate('reset');
-
   ReaderTtuSource get source => ReaderTtuSource.instance;
 
   late TextEditingController _speedController;
@@ -56,7 +43,7 @@ class _DictionaryDialogPageState extends BasePageState {
 
   Widget buildCloseButton() {
     return TextButton(
-      child: Text(dialogCloseLabel),
+      child: Text(t.dialog_close),
       onPressed: () => Navigator.pop(context),
     );
   }
@@ -96,7 +83,7 @@ class _DictionaryDialogPageState extends BasePageState {
     return Row(
       children: [
         Expanded(
-          child: Text(volumeButtonPageTurningLabel),
+          child: Text(t.volume_button_page_turning),
         ),
         ValueListenableBuilder<bool>(
           valueListenable: _notifier,
@@ -121,7 +108,7 @@ class _DictionaryDialogPageState extends BasePageState {
     return Row(
       children: [
         Expanded(
-          child: Text(invertVolumeButtonsLabel),
+          child: Text(t.invert_volume_buttons),
         ),
         ValueListenableBuilder<bool>(
           valueListenable: _notifier,
@@ -146,7 +133,7 @@ class _DictionaryDialogPageState extends BasePageState {
     return Row(
       children: [
         Expanded(
-          child: Text(extendPageNavbarLabel),
+          child: Text(t.extend_page_beyond_navbar),
         ),
         ValueListenableBuilder<bool>(
           valueListenable: _notifier,
@@ -170,7 +157,7 @@ class _DictionaryDialogPageState extends BasePageState {
     return Row(
       children: [
         Expanded(
-          child: Text(highlightOnTapLabel),
+          child: Text(t.highlight_on_tap),
         ),
         ValueListenableBuilder<bool>(
           valueListenable: _notifier,
@@ -205,7 +192,7 @@ class _DictionaryDialogPageState extends BasePageState {
       decoration: InputDecoration(
         floatingLabelBehavior: FloatingLabelBehavior.always,
         suffixIcon: JidoujishoIconButton(
-          tooltip: resetLabel,
+          tooltip: t.reset,
           size: 18,
           onTap: () async {
             _speedController.text =
@@ -216,7 +203,7 @@ class _DictionaryDialogPageState extends BasePageState {
           },
           icon: Icons.undo,
         ),
-        labelText: volumeButtonTurningSpeed,
+        labelText: t.volume_button_turning_speed,
       ),
     );
   }

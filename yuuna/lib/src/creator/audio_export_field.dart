@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
+import 'package:yuuna/utils.dart';
 
 /// A special kind of field that has a special widget at the top of the creator.
 /// For example, the audio field has a media player that can be controlled
@@ -81,9 +82,6 @@ abstract class AudioExportField extends Field {
     required CreatorModel creatorModel,
     required List<Field> fallbackSearchTerms,
   }) {
-    String fallbackMessage = appModel.translate('field_fallback_used');
-    String noTextToSearch = appModel.translate('no_text_to_search');
-
     String searchTerm = creatorModel.getFieldController(this).text.trim();
     if (searchTerm.isNotEmpty) {
       return searchTerm;
@@ -93,12 +91,10 @@ abstract class AudioExportField extends Field {
             creatorModel.getFieldController(fallbackField).text.trim();
         if (fallbackTerm.isNotEmpty) {
           Fluttertoast.showToast(
-            msg: fallbackMessage
-                .replaceAll('%field%', getLocalisedLabel(appModel))
-                .replaceAll(
-                  '%secondField%',
-                  fallbackField.getLocalisedLabel(appModel),
-                ),
+            msg: t.field_fallback_used(
+              field: getLocalisedLabel(appModel),
+              secondField: fallbackField.getLocalisedLabel(appModel),
+            ),
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.BOTTOM,
           );
@@ -109,7 +105,7 @@ abstract class AudioExportField extends Field {
     }
 
     Fluttertoast.showToast(
-      msg: noTextToSearch,
+      msg: t.no_text_to_search,
       toastLength: Toast.LENGTH_SHORT,
       gravity: ToastGravity.BOTTOM,
     );

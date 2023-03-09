@@ -51,7 +51,7 @@ class PlayerNetworkStreamSource extends PlayerMediaSource {
       FloatingSearchBarAction(
         child: JidoujishoIconButton(
           size: Theme.of(context).textTheme.titleLarge?.fontSize,
-          tooltip: appModel.translate('stream'),
+          tooltip: t.stream,
           icon: Icons.link,
           onTap: () async {
             showStreamDialog(

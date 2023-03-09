@@ -10,7 +10,6 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:spaces/spaces.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:yuuna/creator.dart';
-import 'package:yuuna/i18n/strings.g.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
@@ -42,11 +41,6 @@ class PlayerCommentsPage extends BaseSourcePage {
 class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
   @override
   double get dictionaryEntryOpacity => 0.5;
-
-  String get commentsLabel => appModel.translate('comments');
-  String get repliesLabel => appModel.translate('replies');
-  String get placeholderLabel => appModel.translate('no_comments_queried');
-  String get backLabel => appModel.translate('back');
 
   PlayerYoutubeSource get source => PlayerYoutubeSource.instance;
 
@@ -101,7 +95,7 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
 
   Widget buildBackButton() {
     return JidoujishoIconButton(
-      tooltip: backLabel,
+      tooltip: t.back,
       icon: Icons.arrow_back,
       onTap: () async {
         Navigator.pop(context);
@@ -115,7 +109,7 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
       children: [
         Expanded(
           child: JidoujishoMarquee(
-            text: widget.comment == null ? commentsLabel : repliesLabel,
+            text: widget.comment == null ? t.comments : t.replies,
             style: TextStyle(
               fontSize: textTheme.titleMedium?.fontSize,
               fontWeight: FontWeight.bold,
@@ -157,7 +151,7 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
     return Center(
       child: JidoujishoPlaceholderMessage(
         icon: Icons.comments_disabled,
-        message: placeholderLabel,
+        message: t.no_comments_queried,
       ),
     );
   }
@@ -383,14 +377,14 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
                           );
                           source.clearCurrentSentence();
                         },
-                        searchActionLabel: searchLabel,
+                        searchActionLabel: t.search,
                         stashAction: onContextStash,
-                        stashActionLabel: stashLabel,
+                        stashActionLabel: t.stash,
                         creatorAction: (selection) async {
                           launchCreator(
                               term: selection, sentence: comment.text);
                         },
-                        creatorActionLabel: creatorLabel,
+                        creatorActionLabel: t.creator,
                         allowCopy: true,
                         allowSelectAll: false,
                         allowCut: true,
@@ -462,8 +456,6 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
   }
 
   Widget buildTextSegmentButton(String message) {
-    String tooltip = appModel.translate('text_segmentation');
-
     return Padding(
       padding: Spacing.of(context).insets.onlyLeft.semiSmall,
       child: JidoujishoIconButton(
@@ -472,7 +464,7 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
         backgroundColor:
             Theme.of(context).appBarTheme.foregroundColor?.withOpacity(0.1),
         size: Spacing.of(context).spaces.semiBig,
-        tooltip: tooltip,
+        tooltip: t.text_segmentation,
         icon: Icons.account_tree,
         onTap: () async {
           appModel.openTextSegmentationDialog(
@@ -508,8 +500,6 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
   void onContextSearch(String searchTerm, {String? sentence}) async {}
 
   Widget buildCardCreatorButton(String message) {
-    String tooltip = appModel.translate('card_creator');
-
     return Padding(
       padding: Spacing.of(context).insets.onlyLeft.semiSmall,
       child: JidoujishoIconButton(
@@ -518,7 +508,7 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
         backgroundColor:
             Theme.of(context).appBarTheme.foregroundColor?.withOpacity(0.1),
         size: Spacing.of(context).spaces.semiBig,
-        tooltip: tooltip,
+        tooltip: t.card_creator,
         icon: Icons.note_add,
         onTap: () async {
           launchCreator(term: '', sentence: message);

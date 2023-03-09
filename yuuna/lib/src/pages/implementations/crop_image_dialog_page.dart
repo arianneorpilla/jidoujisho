@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/pages.dart';
+import 'package:yuuna/utils.dart';
 
 /// The content of the dialog when using the crop image enhancement.
 class CropImageDialogPage extends BasePage {
@@ -29,9 +30,6 @@ class CropImageDialogPage extends BasePage {
 }
 
 class _CropImageDialogPageState extends BasePageState<CropImageDialogPage> {
-  String get dialogCropLabel => appModel.translate('dialog_crop');
-  String get dialogCancelLabel => appModel.translate('dialog_cancel');
-
   final CropController _controller = CropController();
 
   @override
@@ -59,18 +57,14 @@ class _CropImageDialogPageState extends BasePageState<CropImageDialogPage> {
 
   Widget buildCropButton() {
     return TextButton(
-      child: Text(
-        dialogCropLabel,
-      ),
+      child: Text(t.dialog_crop),
       onPressed: executeCrop,
     );
   }
 
   Widget buildCancelButton() {
     return TextButton(
-      child: Text(
-        dialogCancelLabel,
-      ),
+      child: Text(t.dialog_cancel),
       onPressed: () => Navigator.pop(context),
     );
   }

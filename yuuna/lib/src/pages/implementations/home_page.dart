@@ -28,22 +28,6 @@ class _HomePageState extends BasePageState<HomePage>
 
   int get currentHomeTabIndex => appModel.currentHomeTabIndex;
 
-  String get optionsToggleDark => appModel.translate('options_theme_dark');
-  String get optionsToggleLight => appModel.translate('options_theme_light');
-  String get optionsIncognitoOn => appModel.translate('options_incognito_on');
-  String get optionsIncognitoOff => appModel.translate('options_incognito_off');
-  String get optionsPipMode => appModel.translate('options_pip_mode');
-  String get optionsDictionaries => appModel.translate('options_dictionaries');
-  String get optionsProfiles => appModel.translate('options_profiles');
-  String get optionsEnhancements => appModel.translate('options_enhancements');
-  String get optionsLanguage => appModel.translate('options_language');
-  String get optionsGithub => appModel.translate('options_github');
-  String get optionsAttribution => appModel.translate('options_attribution');
-
-  String get resumeLastMediaLabel => appModel.translate('resume_last_media');
-  String get cardCreatorLabel => appModel.translate('card_creator');
-  String get showMenuLabel => appModel.translate('show_menu');
-
   @override
   void initState() {
     super.initState();
@@ -59,7 +43,7 @@ class _HomePageState extends BasePageState<HomePage>
         (mediaType) => BottomNavigationBarItem(
           activeIcon: Icon(mediaType.icon),
           icon: Icon(mediaType.outlinedIcon),
-          label: appModelNoUpdate.translate(mediaType.uniqueKey),
+          label: t[mediaType.uniqueKey],
         ),
       ),
     );
@@ -214,7 +198,7 @@ class _HomePageState extends BasePageState<HomePage>
 
   Widget buildResumeButton() {
     return JidoujishoIconButton(
-      tooltip: resumeLastMediaLabel,
+      tooltip: t.resume_last_media,
       icon: Icons.update,
       enabled: false,
       onTap: resumeAction,
@@ -223,7 +207,7 @@ class _HomePageState extends BasePageState<HomePage>
 
   Widget buildCreatorButton() {
     return JidoujishoIconButton(
-      tooltip: cardCreatorLabel,
+      tooltip: t.card_creator,
       icon: Icons.note_add_outlined,
       onTap: () => appModel.openCreator(
         ref: ref,
@@ -234,7 +218,7 @@ class _HomePageState extends BasePageState<HomePage>
 
   Widget buildShowMenuButton() {
     return JidoujishoIconButton(
-      tooltip: showMenuLabel,
+      tooltip: t.show_menu,
       icon: Icons.more_vert,
       onTapDown: (details) async {
         openMenu(details);
@@ -296,15 +280,6 @@ class _HomePageState extends BasePageState<HomePage>
   }
 
   void navigateToLicensePage() async {
-    String applicationLegalese =
-        'A full-featured immersion language learning suite for mobile.\n\n'
-        'Originally built for the Japanese language learning community by Leo Rafael Orpilla. Logo by suzy and Aaron Marbella.'
-        '\n\njidoujisho is free and open source software. See the '
-        'project repository for a comprehensive list of other licenses '
-        'and attribution notices. Enjoying the application? Help out by '
-        'providing feedback, making a donation, reporting issues or '
-        'contributing improvements on GitHub.';
-
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => Theme(
@@ -314,7 +289,7 @@ class _HomePageState extends BasePageState<HomePage>
           child: LicensePage(
             applicationName: appModel.packageInfo.appName,
             applicationVersion: appModel.packageInfo.version,
-            applicationLegalese: applicationLegalese,
+            applicationLegalese: t.legalese,
             applicationIcon: Padding(
               padding: Spacing.of(context).insets.all.normal,
               child: Image.asset(
@@ -332,7 +307,8 @@ class _HomePageState extends BasePageState<HomePage>
   List<PopupMenuItem<VoidCallback>> getMenuItems() {
     return [
       buildPopupItem(
-        label: appModel.isDarkMode ? optionsToggleLight : optionsToggleDark,
+        label:
+            appModel.isDarkMode ? t.options_theme_light : t.options_theme_dark,
         icon: appModel.isDarkMode ? Icons.light_mode : Icons.dark_mode,
         action: appModel.toggleDarkMode,
       ),
@@ -345,32 +321,32 @@ class _HomePageState extends BasePageState<HomePage>
       //     },
       //   ),
       buildPopupItem(
-        label: optionsDictionaries,
+        label: t.options_dictionaries,
         icon: Icons.auto_stories_rounded,
         action: appModel.showDictionaryMenu,
       ),
       buildPopupItem(
-        label: optionsEnhancements,
+        label: t.options_enhancements,
         icon: Icons.auto_fix_high,
         action: appModel.openCreatorEnhancementsEditor,
       ),
       buildPopupItem(
-        label: optionsLanguage,
+        label: t.options_language,
         icon: Icons.translate,
         action: appModel.showLanguageMenu,
       ),
       buildPopupItem(
-        label: optionsProfiles,
+        label: t.options_profiles,
         icon: Icons.switch_account,
         action: appModel.showProfilesMenu,
       ),
       buildPopupItem(
-        label: optionsGithub,
+        label: t.options_github,
         icon: Icons.code,
         action: browseToGithub,
       ),
       buildPopupItem(
-        label: optionsAttribution,
+        label: t.options_attribution,
         icon: Icons.info,
         action: navigateToLicensePage,
       ),

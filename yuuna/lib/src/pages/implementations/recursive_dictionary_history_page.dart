@@ -21,17 +21,6 @@ class RecursiveDictionaryHistoryPage extends BasePage {
 
 class _RecursiveDictionaryHistoryPageState
     extends BasePageState<RecursiveDictionaryHistoryPage> {
-  String get backLabel => appModel.translate('back');
-  String get dictionariesLabel => appModel.translate('dictionaries');
-  String get searchEllipsisLabel => appModel.translate('search_ellipsis');
-  String get noDictionariesLabel =>
-      appModel.translate('dictionaries_menu_empty');
-  String get noSearchResultsLabel => appModel.translate('no_search_results');
-  String get enterSearchTermLabel => appModel.translate('enter_search_term');
-  String get clearLabel => appModel.translate('clear');
-
-  Map<String, Dictionary>? dictionaryMap;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,7 +63,7 @@ class _RecursiveDictionaryHistoryPageState
 
   Widget buildBackButton() {
     return JidoujishoIconButton(
-      tooltip: backLabel,
+      tooltip: t.back,
       icon: Icons.arrow_back,
       onTap: () {
         Navigator.pop(context);

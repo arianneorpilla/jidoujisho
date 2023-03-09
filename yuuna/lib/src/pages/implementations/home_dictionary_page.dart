@@ -21,27 +21,6 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
   @override
   MediaType get mediaType => DictionaryMediaType.instance;
 
-  String get dictionariesLabel => appModel.translate('dictionaries');
-  String get searchEllipsisLabel => appModel.translate('search_ellipsis');
-  String get noDictionariesLabel =>
-      appModel.translate('dictionaries_menu_empty');
-  String get noSearchResultsLabel => appModel.translate('no_search_results');
-  String get enterSearchTermLabel => appModel.translate('enter_search_term');
-  String get clearLabel => appModel.translate('clear');
-  String get dialogClearLabel => appModel.translate('dialog_clear');
-  String get dialogCancelLabel => appModel.translate('dialog_cancel');
-  String get clearDictionaryTitle =>
-      appModel.translate('clear_dictionary_title');
-  String get clearDictionaryDescription =>
-      appModel.translate('clear_dictionary_description');
-  String get clearSearchTitle => appModel.translate('clear_search_title');
-  String get clearSearchDescription =>
-      appModel.translate('clear_search_description');
-
-  /// The message to be shown in the placeholder that displays when
-  /// [shouldPlaceholderBeShown] is true. This should be a localised message.
-  String get placeholderMessage => appModel.translate('info_empty_home_tab');
-
   DictionarySearchResult? _result;
 
   bool _isSearching = false;
@@ -86,7 +65,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     return Center(
       child: JidoujishoPlaceholderMessage(
         icon: mediaType.outlinedIcon,
-        message: placeholderMessage,
+        message: t.info_empty_home_tab,
       ),
     );
   }
@@ -115,7 +94,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
   Widget buildFloatingSearchBar() {
     return FloatingSearchBar(
       isScrollControlled: true,
-      hint: searchEllipsisLabel,
+      hint: t.search_ellipsis,
       controller: mediaType.floatingSearchBarController,
       builder: buildFloatingSearchBody,
       borderRadius: BorderRadius.zero,
@@ -224,7 +203,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     return FloatingSearchBarAction(
       child: JidoujishoIconButton(
         size: textTheme.titleLarge?.fontSize,
-        tooltip: dictionariesLabel,
+        tooltip: t.dictionaries,
         icon: Icons.auto_stories,
         onTap: appModel.showDictionaryMenu,
       ),
@@ -235,7 +214,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     return FloatingSearchBarAction(
       child: JidoujishoIconButton(
         size: textTheme.titleLarge?.fontSize,
-        tooltip: clearDictionaryTitle,
+        tooltip: t.clear_dictionary_title,
         icon: Icons.delete_sweep,
         onTap: showDeleteDictionaryHistoryPrompt,
       ),
@@ -268,8 +247,8 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
 
                 setState(() {});
               },
-              searchButtonSemanticLabel: searchLabel,
-              clearButtonSemanticLabel: clearLabel,
+              searchButtonSemanticLabel: t.search,
+              clearButtonSemanticLabel: t.clear,
             );
           },
         );
@@ -283,7 +262,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       showIfClosed: false,
       child: JidoujishoIconButton(
         size: textTheme.titleLarge?.fontSize,
-        tooltip: clearSearchTitle,
+        tooltip: t.clear_search_title,
         icon: Icons.manage_search,
         onTap: showDeleteSearchHistoryPrompt,
       ),
@@ -292,13 +271,11 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
 
   /// Dictionary settings bar action.
   Widget buildDictionarySettingsButton() {
-    String label = appModel.translate('dictionary_settings');
-
     return FloatingSearchBarAction(
       showIfOpened: true,
       child: JidoujishoIconButton(
         size: Theme.of(context).textTheme.titleLarge?.fontSize,
-        tooltip: label,
+        tooltip: t.dictionary_settings,
         icon: Icons.settings,
         onTap: () async {
           double oldFontSize = appModel.dictionaryFontSize;
@@ -321,14 +298,14 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
           ? Spacing.of(context).insets.exceptBottom.big
           : Spacing.of(context).insets.exceptBottom.normal,
-      title: Text(clearSearchTitle),
+      title: Text(t.clear_search_title),
       content: Text(
-        clearSearchDescription,
+        t.clear_search_description,
       ),
       actions: <Widget>[
         TextButton(
           child: Text(
-            dialogClearLabel,
+            t.dialog_clear,
             style: TextStyle(
               color: theme.colorScheme.primary,
             ),
@@ -343,7 +320,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
           },
         ),
         TextButton(
-          child: Text(dialogCancelLabel),
+          child: Text(t.dialog_cancel),
           onPressed: () => Navigator.pop(context),
         ),
       ],
@@ -360,14 +337,14 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
           ? Spacing.of(context).insets.exceptBottom.big
           : Spacing.of(context).insets.exceptBottom.normal,
-      title: Text(clearDictionaryTitle),
+      title: Text(t.clear_dictionary_title),
       content: Text(
-        clearDictionaryDescription,
+        t.clear_dictionary_description,
       ),
       actions: <Widget>[
         TextButton(
           child: Text(
-            dialogClearLabel,
+            t.dialog_clear,
             style: TextStyle(
               color: theme.colorScheme.primary,
             ),
@@ -380,7 +357,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
           },
         ),
         TextButton(
-          child: Text(dialogCancelLabel),
+          child: Text(t.dialog_cancel),
           onPressed: () => Navigator.pop(context),
         ),
       ],
@@ -459,7 +436,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     return Center(
       child: JidoujishoPlaceholderMessage(
         icon: Icons.search,
-        message: enterSearchTermLabel,
+        message: t.enter_search_term,
       ),
     );
   }
@@ -468,7 +445,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     return Center(
       child: JidoujishoPlaceholderMessage(
         icon: mediaType.outlinedIcon,
-        message: noDictionariesLabel,
+        message: t.dictionaries_menu_empty,
       ),
     );
   }
@@ -477,10 +454,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     return Center(
       child: JidoujishoPlaceholderMessage(
         icon: Icons.search_off,
-        message: noSearchResultsLabel.replaceAll(
-          '%searchTerm%',
-          mediaType.floatingSearchBarController.query,
-        ),
+        message: t.no_search_results,
       ),
     );
   }

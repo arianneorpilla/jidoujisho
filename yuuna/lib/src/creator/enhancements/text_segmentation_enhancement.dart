@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
+import 'package:yuuna/utils.dart';
 
 /// An enhancement used to pick an appropriate term from a text field easily.
 class TextSegmentationEnhancement extends Enhancement {
@@ -30,9 +31,8 @@ class TextSegmentationEnhancement extends Enhancement {
     String sourceText = creatorModel.getFieldController(field).text;
 
     if (sourceText.trim().isEmpty) {
-      String noTextLabel = appModel.translate('no_text_to_segment');
       Fluttertoast.showToast(
-        msg: noTextLabel,
+        msg: t.no_text_to_segment,
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
       );

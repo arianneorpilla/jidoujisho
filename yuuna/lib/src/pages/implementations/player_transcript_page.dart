@@ -44,10 +44,6 @@ class PlayerTranscriptPage extends BasePage {
 }
 
 class _PlayerTranscriptPageState extends BasePageState<PlayerTranscriptPage> {
-  String get backLabel => appModel.translate('back');
-  String get playerSubtitlesTranscriptEmpty =>
-      appModel.translate('player_subtitles_transcript_empty');
-
   int _selectedIndex = 0;
 
   final ItemScrollController _itemScrollController = ItemScrollController();
@@ -83,7 +79,7 @@ class _PlayerTranscriptPageState extends BasePageState<PlayerTranscriptPage> {
 
   Widget buildBackButton() {
     return JidoujishoIconButton(
-      tooltip: backLabel,
+      tooltip: t.back,
       icon: Icons.arrow_back,
       onTap: () async {
         Navigator.pop(context);
@@ -131,7 +127,7 @@ class _PlayerTranscriptPageState extends BasePageState<PlayerTranscriptPage> {
               ),
               const Space.normal(),
               Text(
-                playerSubtitlesTranscriptEmpty,
+                t.player_subtitles_transcript_empty,
                 style: const TextStyle(
                   fontSize: 20,
                 ),

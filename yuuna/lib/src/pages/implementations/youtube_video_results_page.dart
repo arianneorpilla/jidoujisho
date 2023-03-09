@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
-import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
@@ -31,25 +30,6 @@ class YoutubeVideoResultsPage extends HistoryPlayerPage {
 
 class _YoutubeVideoResultsPageState
     extends HistoryPlayerPageState<YoutubeVideoResultsPage> {
-  String get backLabel => appModel.translate('back');
-  String get dictionariesLabel => appModel.translate('dictionaries');
-  String get searchEllipsisLabel => appModel.translate('search_ellipsis');
-  String get noDictionariesLabel =>
-      appModel.translate('dictionaries_menu_empty');
-  String get noSearchResultsLabel => appModel.translate('no_search_results');
-  String get enterSearchTermLabel => appModel.translate('enter_search_term');
-  String get clearLabel => appModel.translate('clear');
-  String get captionsQueryLabel => appModel.translate('closed_captions_query');
-  String get captionsErrorLabel => appModel.translate('closed_captions_error');
-  String get captionsTargetLabel =>
-      appModel.translate('closed_captions_target');
-  String get captionsAppLabel => appModel.translate('closed_captions_app');
-  String get captionsOtherLabel => appModel.translate('closed_captions_other');
-  String get captionsUnavailableLabel =>
-      appModel.translate('closed_captions_unavailable');
-
-  Map<String, Dictionary>? dictionaryMap;
-
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -122,7 +102,7 @@ class _YoutubeVideoResultsPageState
 
   Widget buildBackButton() {
     return JidoujishoIconButton(
-      tooltip: backLabel,
+      tooltip: t.back,
       icon: Icons.arrow_back,
       onTap: () {
         Navigator.pop(context);

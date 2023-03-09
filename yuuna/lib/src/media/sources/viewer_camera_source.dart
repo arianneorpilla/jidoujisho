@@ -27,9 +27,4 @@ class ViewerCameraSource extends ViewerMediaSource {
   BaseSourcePage buildLaunchPage({MediaItem? item}) {
     throw UnimplementedError();
   }
-
-  @override
-  BasePage buildHistoryPage({MediaItem? item}) {
-    return const GalleryHistoryPage();
-  }
 }

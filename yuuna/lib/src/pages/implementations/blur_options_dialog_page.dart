@@ -16,12 +16,6 @@ class BlurOptionsDialogPage extends BasePage {
 }
 
 class _BlurOptionsDialogPageState extends BasePageState<BlurOptionsDialogPage> {
-  String get playerOptionBlurRadius =>
-      appModel.translate('player_option_blur_radius');
-  String get dialogCancelLabel => appModel.translate('dialog_cancel');
-  String get dialogSaveLabel => appModel.translate('dialog_save');
-  String get resetLabel => appModel.translate('reset');
-
   late BlurOptions _blurOptions;
   late Color _pendingColor;
   late TextEditingController _blurrinessController;
@@ -46,8 +40,6 @@ class _BlurOptionsDialogPageState extends BasePageState<BlurOptionsDialogPage> {
   }
 
   Widget buildContent() {
-    String suffixText = appModel.translate('unit_pixels');
-
     return SingleChildScrollView(
       child: SizedBox(
         width: MediaQuery.of(context).size.width * (3 / 4),
@@ -69,9 +61,9 @@ class _BlurOptionsDialogPageState extends BasePageState<BlurOptionsDialogPage> {
               ),
               decoration: InputDecoration(
                 floatingLabelBehavior: FloatingLabelBehavior.always,
-                suffixText: suffixText,
+                suffixText: t.unit_pixels,
                 suffixIcon: JidoujishoIconButton(
-                  tooltip: resetLabel,
+                  tooltip: t.reset,
                   size: 18,
                   onTap: () async {
                     _blurrinessController.text = '5.0';
@@ -79,7 +71,7 @@ class _BlurOptionsDialogPageState extends BasePageState<BlurOptionsDialogPage> {
                   },
                   icon: Icons.undo,
                 ),
-                labelText: playerOptionBlurRadius,
+                labelText: t.player_option_blur_radius,
               ),
             ),
           ],
@@ -95,18 +87,14 @@ class _BlurOptionsDialogPageState extends BasePageState<BlurOptionsDialogPage> {
 
   Widget buildCancelButton() {
     return TextButton(
-      child: Text(
-        dialogCancelLabel,
-      ),
+      child: Text(t.dialog_cancel),
       onPressed: executeCancel,
     );
   }
 
   Widget buildSaveButton() {
     return TextButton(
-      child: Text(
-        dialogSaveLabel,
-      ),
+      child: Text(t.dialog_save),
       onPressed: executeSave,
     );
   }

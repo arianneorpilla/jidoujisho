@@ -32,10 +32,6 @@ class _ExampleSentencesDialogPageState
     extends BasePageState<ExampleSentencesDialogPage> {
   final ScrollController _scrollController = ScrollController();
 
-  String get dialogSelectLabel => appModel.translate('dialog_select');
-  String get dialogAppendLabel => appModel.translate('dialog_append');
-  String get noSentencesFound => appModel.translate('no_sentences_found');
-
   final Map<int, ValueNotifier<bool>> _valuesSelected = {};
 
   @override
@@ -65,7 +61,7 @@ class _ExampleSentencesDialogPageState
       ),
       child: JidoujishoPlaceholderMessage(
         icon: Icons.search_off,
-        message: noSentencesFound,
+        message: t.no_sentences_found,
       ),
     );
   }
@@ -137,14 +133,14 @@ class _ExampleSentencesDialogPageState
 
   Widget buildAppendButton() {
     return TextButton(
-      child: Text(dialogAppendLabel),
+      child: Text(t.dialog_append),
       onPressed: executeAppend,
     );
   }
 
   Widget buildSelectButton() {
     return TextButton(
-      child: Text(dialogSelectLabel),
+      child: Text(t.dialog_select),
       onPressed: executeSelect,
     );
   }

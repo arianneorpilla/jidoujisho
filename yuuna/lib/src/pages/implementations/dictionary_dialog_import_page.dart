@@ -33,8 +33,6 @@ class DictionaryDialogImportPage extends BasePage {
 
 class _DictionaryDialogImportPageState
     extends BasePageState<DictionaryDialogImportPage> {
-  String get importInProgressLabel => appModel.translate('import_in_progress');
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(

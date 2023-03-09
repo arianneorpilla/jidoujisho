@@ -25,11 +25,6 @@ class MediaItemEditDialogPage extends BasePage {
 
 class _MediaItemEditDialogPageState
     extends BasePageState<MediaItemEditDialogPage> {
-  String get undoLabel => appModel.translate('undo');
-  String get pickImageLabel => appModel.translate('pick_image');
-  String get dialogCancelLabel => appModel.translate('dialog_cancel');
-  String get dialogSaveLabel => appModel.translate('dialog_save');
-
   MediaSource get mediaSource => widget.item.getMediaSource(appModel: appModel);
   ImageProvider? _defaultImageProvider;
   ImageProvider? _coverImageProvider;
@@ -87,7 +82,7 @@ class _MediaItemEditDialogPageState
           maxLines: null,
           decoration: InputDecoration(
             suffixIcon: JidoujishoIconButton(
-              tooltip: undoLabel,
+              tooltip: t.undo,
               isWideTapArea: true,
               icon: Icons.undo,
               onTap: () async {
@@ -116,7 +111,7 @@ class _MediaItemEditDialogPageState
                 ),
                 const SizedBox(width: 5),
                 JidoujishoIconButton(
-                  tooltip: pickImageLabel,
+                  tooltip: t.pick_image,
                   isWideTapArea: true,
                   icon: Icons.file_upload,
                   onTap: () async {
@@ -130,7 +125,7 @@ class _MediaItemEditDialogPageState
                   },
                 ),
                 JidoujishoIconButton(
-                  tooltip: undoLabel,
+                  tooltip: t.undo,
                   isWideTapArea: true,
                   icon: Icons.undo,
                   onTap: () async {
@@ -155,18 +150,14 @@ class _MediaItemEditDialogPageState
 
   Widget buildCancelButton() {
     return TextButton(
-      child: Text(
-        dialogCancelLabel,
-      ),
+      child: Text(t.dialog_cancel),
       onPressed: executeCancel,
     );
   }
 
   Widget buildSaveButton() {
     return TextButton(
-      child: Text(
-        dialogSaveLabel,
-      ),
+      child: Text(t.dialog_save),
       onPressed: executeSave,
     );
   }

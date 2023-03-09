@@ -23,9 +23,6 @@ class HistoryPlayerPage extends BaseHistoryPage {
 /// code.
 class HistoryPlayerPageState<T extends HistoryPlayerPage>
     extends BaseHistoryPageState<T> {
-  /// Localisation for Channel option.
-  String get dialogChannelLabel => appModel.translate('dialog_channel');
-
   /// This variable is true when the [buildPlaceholder] should be shown.
   /// For example, if a certain media type does not have any media items to
   /// show in its history.
@@ -250,7 +247,7 @@ class HistoryPlayerPageState<T extends HistoryPlayerPage>
   Widget buildChannelButton(MediaItem item) {
     return TextButton(
       child: Text(
-        dialogChannelLabel,
+        t.dialog_channel,
       ),
       onPressed: () => executeChannel(item),
     );

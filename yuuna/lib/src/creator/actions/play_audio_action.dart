@@ -8,6 +8,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/dictionary.dart';
+import 'package:yuuna/utils.dart';
 
 /// An enhancement used effectively as a shortcut for previewing audio.
 class PlayAudioAction extends QuickAction {
@@ -55,9 +56,8 @@ class PlayAudioAction extends QuickAction {
     );
 
     if (audioEnhancements.isEmpty) {
-      String noAudioEnhancements = appModel.translate('no_audio_enhancements');
       Fluttertoast.showToast(
-        msg: noAudioEnhancements,
+        msg: t.no_audio_enhancements,
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
       );
@@ -107,9 +107,8 @@ class PlayAudioAction extends QuickAction {
       }
     }
 
-    String noAudioEnhancements = appModel.translate('audio_unavailable');
     Fluttertoast.showToast(
-      msg: noAudioEnhancements,
+      msg: t.audio_unavailable,
       toastLength: Toast.LENGTH_SHORT,
       gravity: ToastGravity.BOTTOM,
     );

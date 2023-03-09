@@ -28,34 +28,6 @@ class ProfilesDialogPage extends BasePage {
 }
 
 class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
-  String get mappingsDeleteConfirmationLabel =>
-      appModel.translate('mappings_delete_confirmation');
-  String get copyOfMappingLabel => appModel.translate('copy_of_mapping');
-  String get optionsCopyLabel => appModel.translate('options_copy');
-  String get optionsDeleteLabel => appModel.translate('options_delete');
-  String get optionsEditLabel => appModel.translate('options_edit');
-  String get showOptionsLabel => appModel.translate('show_options');
-  String get dialogCreateLabel => appModel.translate('dialog_create');
-  String get dialogCloseLabel => appModel.translate('dialog_close');
-  String get dialogDeleteLabel => appModel.translate('dialog_delete');
-  String get dialogSaveLabel => appModel.translate('dialog_save');
-  String get dialogCancelLabel => appModel.translate('dialog_cancel');
-  String get mappingNameLabel => appModel.translate('mapping_name');
-  String get emptyFieldLabel => appModel.translate('field_label_empty');
-  String get mappingNameHintLabel => appModel.translate('mapping_name_hint');
-  String get modelToMapLabel => appModel.translate('model_to_map');
-  String get errorMappingName => appModel.translate('error_profile_name');
-  String get errorMappingNameContent =>
-      appModel.translate('error_profile_name_content');
-  String get errorStandardProfileName =>
-      appModel.translate('error_standard_profile_name');
-  String get errorStandardProfileNameContent =>
-      appModel.translate('error_standard_profile_name_content');
-  String get wrapImageAudioLabel => appModel.translate('wrap_image_audio');
-  String get useBrTagsLabel => appModel.translate('use_br_tags');
-  String get prependDictionaryNamesLabel =>
-      appModel.translate('prepend_dictionary_names');
-
   final ScrollController _scrollController = ScrollController();
   int _selectedOrder = 0;
 
@@ -89,7 +61,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
 
   Widget buildAddNewButton() {
     return TextButton(
-      child: Text(dialogCreateLabel),
+      child: Text(t.dialog_create),
       onPressed: () async {
         String model = appModel.lastSelectedModel ?? widget.initialModel;
         List<String> modelFields = await appModel.getFieldList(model);
@@ -121,7 +93,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
 
   Widget buildCloseButton() {
     return TextButton(
-      child: Text(dialogCloseLabel),
+      child: Text(t.dialog_close),
       onPressed: () => Navigator.pop(context),
     );
   }
@@ -239,7 +211,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
         details: details,
         label: label,
       ),
-      tooltip: showOptionsLabel,
+      tooltip: t.show_options,
     );
   }
 
@@ -289,22 +261,18 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
 
     return [
       buildPopupItem(
-        label: optionsEditLabel,
+        label: t.options_edit,
         icon: Icons.edit,
         action: () async {
           await showMappingEditDialog(mapping);
         },
       ),
       buildPopupItem(
-        label: optionsCopyLabel,
+        label: t.options_copy,
         icon: Icons.copy,
         action: () async {
-          AnkiMapping mappingClone = mapping.copyWith(
-            label: copyOfMappingLabel.replaceAll(
-              '%mapping_name%',
-              mapping.label,
-            ),
-          );
+          AnkiMapping mappingClone =
+              mapping.copyWith(label: t.copy_of_mapping(name: mapping.label));
 
           mappingClone.id = null;
 
@@ -313,7 +281,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
       ),
       if (AnkiMapping.standardProfileName != mapping.label)
         buildPopupItem(
-          label: optionsDeleteLabel,
+          label: t.options_delete,
           icon: Icons.delete,
           action: () {
             showMappingDeleteDialog(mapping);
@@ -327,12 +295,12 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
     Widget alertDialog = AlertDialog(
       title: Text(mapping.label),
       content: Text(
-        mappingsDeleteConfirmationLabel,
+        t.mappings_delete_confirmation,
       ),
       actions: <Widget>[
         TextButton(
           child: Text(
-            dialogDeleteLabel,
+            t.dialog_delete,
             style: TextStyle(color: theme.colorScheme.primary),
           ),
           onPressed: () async {
@@ -344,7 +312,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
           },
         ),
         TextButton(
-          child: Text(dialogCancelLabel),
+          child: Text(t.dialog_cancel),
           onPressed: () => Navigator.pop(context),
         ),
       ],
@@ -363,7 +331,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
         Padding(
           padding: Spacing.of(context).insets.onlyLeft.small,
           child: Text(
-            modelToMapLabel,
+            t.model_to_map,
             style: TextStyle(
               fontSize: 10,
               color: theme.unselectedWidgetColor,
@@ -429,7 +397,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
 
     return Row(
       children: [
-        Expanded(child: Text(wrapImageAudioLabel)),
+        Expanded(child: Text(t.wrap_image_audio)),
         ValueListenableBuilder<bool>(
           valueListenable: _notifier,
           builder: (_, value, __) {
@@ -452,7 +420,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
 
     return Row(
       children: [
-        Expanded(child: Text(useBrTagsLabel)),
+        Expanded(child: Text(t.use_br_tags)),
         ValueListenableBuilder<bool>(
           valueListenable: _notifier,
           builder: (_, value, __) {
@@ -475,7 +443,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
 
     return Row(
       children: [
-        Expanded(child: Text(prependDictionaryNamesLabel)),
+        Expanded(child: Text(t.prepend_dictionary_names)),
         ValueListenableBuilder<bool>(
           valueListenable: _notifier,
           builder: (_, value, __) {
@@ -524,7 +492,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
                 initialOption: fields.elementAt(index),
                 generateLabel: (field) {
                   if (field == null) {
-                    return emptyFieldLabel;
+                    return t.field_label_empty;
                   } else {
                     return field.label;
                   }
@@ -553,8 +521,8 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
       controller: controller,
       decoration: InputDecoration(
         prefixIcon: const Icon(Icons.account_box),
-        labelText: mappingNameLabel,
-        hintText: mappingNameHintLabel,
+        labelText: t.mapping_name,
+        hintText: t.mapping_name_hint,
       ),
     );
   }
@@ -579,7 +547,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
       actions: <Widget>[
         TextButton(
           child: Text(
-            dialogSaveLabel,
+            t.dialog_save,
           ),
           onPressed: () async {
             addNewMapping(
@@ -589,7 +557,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
           },
         ),
         TextButton(
-          child: Text(dialogCancelLabel),
+          child: Text(t.dialog_cancel),
           onPressed: () => Navigator.pop(context),
         ),
       ],
@@ -616,13 +584,13 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
         barrierDismissible: true,
         context: context,
         builder: (context) => AlertDialog(
-          title: Text(errorStandardProfileName),
+          title: Text(t.error_standard_profile_name),
           content: Text(
-            errorStandardProfileNameContent,
+            t.error_standard_profile_name_content,
           ),
           actions: [
             TextButton(
-              child: Text(dialogCloseLabel),
+              child: Text(t.dialog_close),
               onPressed: () => Navigator.pop(context),
             ),
           ],
@@ -647,13 +615,13 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
           barrierDismissible: true,
           context: context,
           builder: (context) => AlertDialog(
-            title: Text(errorMappingName),
+            title: Text(t.error_profile_name),
             content: Text(
-              errorMappingNameContent,
+              t.error_profile_name_content,
             ),
             actions: [
               TextButton(
-                child: Text(dialogCloseLabel),
+                child: Text(t.dialog_close),
                 onPressed: () => Navigator.pop(context),
               ),
             ],

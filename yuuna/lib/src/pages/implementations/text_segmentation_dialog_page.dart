@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/pages.dart';
+import 'package:yuuna/utils.dart';
 
 /// The content of the dialog used for selecting segmented units of a source
 /// text.
@@ -35,10 +36,6 @@ class TextSegmentationDialogPage extends BasePage {
 class _TextSegmentationDialogPage
     extends BasePageState<TextSegmentationDialogPage> {
   final ScrollController _scrollController = ScrollController();
-
-  String get dialogSelectLabel => appModel.translate('dialog_select');
-  String get dialogStashLabel => appModel.translate('dialog_stash');
-  String get dialogSearchLabel => appModel.translate('dialog_search');
 
   final Map<int, ValueNotifier<bool>> _valuesSelected = {};
 
@@ -123,7 +120,7 @@ class _TextSegmentationDialogPage
 
   Widget buildStashButton() {
     return TextButton(
-      child: Text(dialogStashLabel),
+      child: Text(t.dialog_stash),
       onPressed: executeStash,
     );
   }
@@ -136,14 +133,14 @@ class _TextSegmentationDialogPage
 
   Widget buildSearchButton() {
     return TextButton(
-      child: Text(dialogSearchLabel),
+      child: Text(t.dialog_search),
       onPressed: executeSearch,
     );
   }
 
   Widget buildSelectButton() {
     return TextButton(
-      child: Text(dialogSelectLabel),
+      child: Text(t.dialog_select),
       onPressed: executeSelect,
     );
   }
