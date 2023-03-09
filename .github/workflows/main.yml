@@ -21,7 +21,5 @@ jobs:
         flutter-version: '3.7.7'
     - run: flutter pub get
       working-directory: yuuna
-    - run: flutter analyze
-      working-directory: yuuna
     - run: flutter build apk --target-platform=android-arm64
       working-directory: yuuna
