@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
@@ -102,7 +103,7 @@ class _DictionaryHistoryScrollableItemState
     );
 
     List<DictionaryHeading> headings =
-        result.headingIds.map((id) => headingsById[id]!).toList();
+        result.headingIds.map((id) => headingsById[id]).whereNotNull().toList();
 
     final Map<DictionaryHeading, Map<Dictionary, ExpandableController>>
         expandableControllersByHeading = {};
@@ -121,21 +122,20 @@ class _DictionaryHistoryScrollableItemState
       }
     }
 
-    ValueNotifier<int> indexNotifier =
-        ValueNotifier<int>(result.scrollPosition);
+    if (headings.isEmpty) {
+      return const SliverPadding(padding: EdgeInsets.zero);
+    }
+
+    DictionaryHeading heading = headings.first;
 
     return DictionaryTermPage(
       lastSelectedMapping: widget.lastSelectedMapping,
-      heading: headings.elementAt(indexNotifier.value),
+      heading: heading,
       onSearch: widget.onSearch,
       onStash: widget.onStash,
-      expandableControllers: expandableControllersByHeading[
-          headings.elementAt(indexNotifier.value)]!,
+      expandableControllers: expandableControllersByHeading[heading]!,
       footerWidget: headings.length > 1
-          ? buildFooterWidget(
-              result: result,
-              length: headings.length,
-              index: indexNotifier.value)
+          ? buildFooterWidget(result: result, length: headings.length)
           : null,
     );
   }
@@ -143,7 +143,6 @@ class _DictionaryHistoryScrollableItemState
   Widget buildFooterWidget({
     required DictionarySearchResult result,
     required int length,
-    required int index,
   }) {
     return Padding(
       padding: Spacing.of(context).insets.onlyBottom.small,
@@ -164,7 +163,6 @@ class _DictionaryHistoryScrollableItemState
               child: buildFooterTextSpans(
                 result: result,
                 length: length,
-                index: index,
               ),
             ),
           ),
@@ -178,7 +176,6 @@ class _DictionaryHistoryScrollableItemState
   Widget buildFooterTextSpans({
     required DictionarySearchResult result,
     required int length,
-    required int index,
   }) {
     return Text.rich(
       TextSpan(

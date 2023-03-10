@@ -170,6 +170,10 @@ abstract class MediaSource {
     );
   }
 
+  /// This function can be used to clean up resources associated with a
+  /// media item upon clearing it.
+  Future<void> onMediaItemClear(MediaItem item) async {}
+
   /// Supplies a sentence that can be used for the sentence field when making
   /// a card while this source is active. Can be set with [setCurrentSentence]
   /// and [clearCurrentSentence] in a source page.

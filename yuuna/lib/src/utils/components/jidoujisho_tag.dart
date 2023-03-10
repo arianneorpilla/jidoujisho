@@ -66,6 +66,8 @@ class JidoujishoTag extends StatelessWidget {
                     .textTheme
                     .labelSmall
                     ?.copyWith(color: foregroundColor),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
               if (trailingText != null) const Space.small(),
               if (trailingText != null)
@@ -79,23 +81,25 @@ class JidoujishoTag extends StatelessWidget {
                           .textTheme
                           .labelSmall
                           ?.copyWith(color: foregroundColor),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ),
             ],
           ),
         ),
-        onTap: () {
-          if (message != null) {
-            Fluttertoast.showToast(
-              backgroundColor: backgroundColor,
-              textColor: foregroundColor,
-              msg: message!,
-              toastLength: Toast.LENGTH_SHORT,
-              gravity: ToastGravity.BOTTOM,
-            );
-          }
-        },
+        onTap: message != null
+            ? () {
+                Fluttertoast.showToast(
+                  backgroundColor: backgroundColor,
+                  textColor: foregroundColor,
+                  msg: message!,
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.BOTTOM,
+                );
+              }
+            : null,
       ),
     );
   }

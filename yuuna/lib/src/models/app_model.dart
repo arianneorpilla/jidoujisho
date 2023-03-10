@@ -476,7 +476,6 @@ class AppModel with ChangeNotifier {
         ReaderWebsocketSource.instance,
       ],
       ViewerMediaType.instance: [
-        ViewerMangaReaderSource.instance,
         ViewerCameraSource.instance,
       ],
       DictionaryMediaType.instance: [],
@@ -2415,6 +2414,7 @@ class AppModel with ChangeNotifier {
   Future<void> deleteMediaItem(MediaItem item) async {
     MediaSource mediaSource = item.getMediaSource(appModel: this);
     await mediaSource.clearOverrideValues(appModel: this, item: item);
+    await mediaSource.onMediaItemClear(item);
 
     _database.writeTxnSync(() {
       _database.mediaItems.deleteSync(item.id!);

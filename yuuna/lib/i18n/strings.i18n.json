@@ -159,9 +159,9 @@
     "stash_nothing_to_pop": "No items to be popped from the Stash.",
     "no_sentences_found": "No sentences found",
     "failed_online_service": "Failed to communicate with online service",
-    "search_label_before": "Search result ",
+    "search_label_before": "Show all ",
     "search_label_middle": "out of ",
-    "search_label_after": "found for",
+    "search_label_after": "search results found for",
     "clear_dictionary_title": "Clear Dictionary Result History",
     "clear_dictionary_description":
         "This will clear all dictionary results from history. Are you sure?",

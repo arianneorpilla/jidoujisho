@@ -36,7 +36,9 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
             DictionaryMediaType.instance ==
                 appModel.mediaTypes.values
                     .toList()[appModel.currentHomeTabIndex]) {
-          setState(() {});
+          if (mounted) {
+            setState(() {});
+          }
         }
       }
     });
@@ -396,12 +398,8 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       }
     }
     if (_isSearching) {
-      if (_result != null) {
-        if (_result!.headings.isNotEmpty) {
-          return buildSearchResult();
-        } else {
-          return buildNoSearchResultsPlaceholderMessage();
-        }
+      if (_result != null && _result!.headings.isNotEmpty) {
+        return buildSearchResult();
       } else {
         return const SizedBox.shrink();
       }

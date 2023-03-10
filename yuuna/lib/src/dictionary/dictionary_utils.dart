@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/i18n/strings.g.dart';
@@ -90,6 +91,7 @@ Future<void> depositDictionaryDataHelper(PrepareDictionaryParams params) async {
         entryForHeading.heading.value!.tags.addAll(headingTags);
       }
     }
+
     for (MapEntry<DictionaryHeading, List<DictionaryPitch>> pitchesForHeading
         in pitchesByHeading.entries) {
       for (DictionaryPitch pitchForHeading in pitchesForHeading.value) {
@@ -161,7 +163,37 @@ Future<void> depositDictionaryDataHelper(PrepareDictionaryParams params) async {
             count: frequencyCount, total: frequencyTotal));
       });
 
-      /// Write [DictionaryEntry] eBacklinkntities.
+      /// Used to test the collision resistance of the FNV-1a algorithm used
+      /// for hashing dictionary headings to each have unique integer IDs.
+      /// This doesn't seem that heavy but we shouldn't instantiate millions
+      /// of elements at any given time, so this should be commented out for
+      /// a production release or when not debugging for collisions.
+      ///
+      /// For testing, a mix of Japanese bilingual and monolingual dictionaries
+      /// can be imported in sequence. The collision count should always be
+      /// zero. Interestingly, the Dart implementation of FNV-1a recommended by
+      /// Isar seems to produce less collisions than a MurmurHash V3
+      /// implementation. In any case, the code below can be uncommented for
+      /// and hash algorithm comparison testing and research.
+      ///
+      /// The idea is to get the delta number of headings, but also take into
+      /// account the number of headings already in the database.
+
+      // int headingsInDatabase = database.dictionaryHeadings.countSync();
+      // int headingsToImportAlreadyInDatabase = database.dictionaryHeadings
+      //     .getAllSync(entriesByHeading.keys.map((e) => e.id).toList())
+      //     .whereNotNull()
+      //     .length;
+      // int headingsToImportNotInDatabase =
+      //     entriesByHeading.keys.length - headingsToImportAlreadyInDatabase;
+
+      // debugPrint('Headings In Database: $headingsInDatabase');
+      // debugPrint(
+      //     'Headings To Import Already In Database: $headingsToImportAlreadyInDatabase');
+      // debugPrint(
+      //     'Headings To Import Not In Database: $headingsToImportNotInDatabase');
+
+      /// Write [DictionaryEntry] entities.
       int entryCount = 0;
       int entryTotal = entriesByHeading.values.map((e) => e.length).sum;
       partition<MapEntry<DictionaryHeading, List<DictionaryEntry>>>(
@@ -179,6 +211,15 @@ Future<void> depositDictionaryDataHelper(PrepareDictionaryParams params) async {
 
         params.send(t.import_write_entry(count: entryCount, total: entryTotal));
       });
+
+      /// Collision count should always be zero.
+
+      // int newHeadingsInDatabase = database.dictionaryHeadings.countSync();
+      // int collisionsFound = newHeadingsInDatabase -
+      //     headingsInDatabase -
+      //     headingsToImportNotInDatabase;
+      // debugPrint('New Headings In Database: $newHeadingsInDatabase');
+      // debugPrint('Collisions Found: $collisionsFound');
     });
   } catch (e, stackTrace) {
     params.send(stackTrace);

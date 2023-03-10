@@ -72,7 +72,7 @@ class DictionaryTermPage extends ConsumerWidget {
         SliverPositioned.fill(
           child: Card(
             color: appModel.isDarkMode
-                ? Color.fromRGBO(15, 15, 15, opacity)
+                ? Color.fromRGBO(16, 16, 16, opacity)
                 : Color.fromRGBO(249, 249, 249, opacity),
             elevation: 0,
             shape: const RoundedRectangleBorder(),
@@ -269,7 +269,6 @@ class _DictionaryTermPitchList extends ConsumerWidget {
                 padding: Spacing.of(context).insets.onlyBottom.semiSmall,
                 child: JidoujishoTag(
                   text: dictionary.name,
-                  message: t.dictionary_import_tag(name: dictionary.name),
                   backgroundColor: Colors.red.shade900,
                 ),
               ),
@@ -295,7 +294,6 @@ class _DictionaryTermPitchList extends ConsumerWidget {
             children: [
               JidoujishoTag(
                 text: dictionary.name,
-                message: t.dictionary_import_tag(name: dictionary.name),
                 backgroundColor: Colors.red.shade900,
               ),
               ...pitchWidgets,
@@ -348,8 +346,6 @@ class _DictionaryTermFreqList extends ConsumerWidget {
         padding: Spacing.of(context).insets.onlyBottom.normal,
         child: JidoujishoTag(
           text: frequenciesForDictionary.key.name,
-          message:
-              t.dictionary_import_tag(name: frequenciesForDictionary.key.name),
           trailingText: frequenciesForDictionary.value
               .map((e) => e.displayValue)
               .join(', '),

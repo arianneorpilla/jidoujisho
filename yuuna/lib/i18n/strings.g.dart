@@ -3,7 +3,7 @@
 /// Locales: 1
 /// Strings: 307
 ///
-/// Built on 2023-03-09 at 13:57 UTC
+/// Built on 2023-03-10 at 03:58 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -297,9 +297,9 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get stash_nothing_to_pop => 'No items to be popped from the Stash.';
 	String get no_sentences_found => 'No sentences found';
 	String get failed_online_service => 'Failed to communicate with online service';
-	String get search_label_before => 'Search result ';
+	String get search_label_before => 'Show all ';
 	String get search_label_middle => 'out of ';
-	String get search_label_after => 'found for';
+	String get search_label_after => 'search results found for';
 	String get clear_dictionary_title => 'Clear Dictionary Result History';
 	String get clear_dictionary_description => 'This will clear all dictionary results from history. Are you sure?';
 	String get clear_search_title => 'Clear Search History';
@@ -624,9 +624,9 @@ extension on _StringsEn {
 			case 'stash_nothing_to_pop': return 'No items to be popped from the Stash.';
 			case 'no_sentences_found': return 'No sentences found';
 			case 'failed_online_service': return 'Failed to communicate with online service';
-			case 'search_label_before': return 'Search result ';
+			case 'search_label_before': return 'Show all ';
 			case 'search_label_middle': return 'out of ';
-			case 'search_label_after': return 'found for';
+			case 'search_label_after': return 'search results found for';
 			case 'clear_dictionary_title': return 'Clear Dictionary Result History';
 			case 'clear_dictionary_description': return 'This will clear all dictionary results from history. Are you sure?';
 			case 'clear_search_title': return 'Clear Search History';

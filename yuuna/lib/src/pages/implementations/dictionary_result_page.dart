@@ -70,7 +70,9 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
       }
     }
 
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   late ScrollController _scrollController;

@@ -12,7 +12,7 @@ class ViewerCameraSource extends ViewerMediaSource {
           sourceName: 'Camera',
           description:
               'View images taken with the camera or picked from media.',
-          icon: Icons.camera,
+          icon: Icons.camera_alt_outlined,
           implementsSearch: false,
           implementsHistory: false,
         );
