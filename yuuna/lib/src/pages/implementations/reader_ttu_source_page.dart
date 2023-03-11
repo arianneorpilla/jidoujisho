@@ -3,12 +3,15 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:document_file_save_plus/document_file_save_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:local_assets_server/local_assets_server.dart';
 import 'package:pretty_json/pretty_json.dart';
+import 'package:spaces/spaces.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/src/creator/creator_field_values.dart';
 import 'package:yuuna/src/creator/fields/sentence_field.dart';
@@ -198,6 +201,26 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
     return selectedText;
   }
 
+  AndroidCacheMode get cacheMode {
+    if (mediaSource.currentTtuInternalVersion ==
+        ReaderTtuSource.ttuInternalVersion) {
+      return AndroidCacheMode.LOAD_CACHE_ELSE_NETWORK;
+    } else {
+      mediaSource.setTtuInternalVersion();
+      return AndroidCacheMode.LOAD_NO_CACHE;
+    }
+  }
+
+  createFileFromBase64(String base64Content) async {
+    var bytes = base64Decode(base64Content.replaceAll('\n', ''));
+    DocumentFileSavePlus().saveFile(
+      bytes.buffer.asUint8List(),
+      _suggestedFilename,
+      _mimeType,
+    );
+    Fluttertoast.showToast(msg: t.file_downloaded(name: _suggestedFilename));
+  }
+
   Widget buildReaderArea(LocalAssetsServer server) {
     return InAppWebView(
       initialUrlRequest: URLRequest(
@@ -219,6 +242,8 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
           mediaPlaybackRequiresUserGesture: false,
           verticalScrollBarEnabled: false,
           horizontalScrollBarEnabled: false,
+          javaScriptCanOpenWindowsAutomatically: true,
+          useOnDownloadStart: true,
         ),
         android: AndroidInAppWebViewOptions(
           verticalScrollbarThumbColor: Colors.transparent,
@@ -227,7 +252,8 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
           horizontalScrollbarTrackColor: Colors.transparent,
           scrollbarFadingEnabled: false,
           appCachePath: appModel.browserDirectory.path,
-          cacheMode: AndroidCacheMode.LOAD_CACHE_ELSE_NETWORK,
+          cacheMode: cacheMode,
+          supportMultipleWindows: true,
         ),
       ),
       contextMenu: contextMenu,
@@ -235,6 +261,65 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
       onWebViewCreated: (controller) {
         _controller = controller;
         _controllerInitialised = true;
+
+        controller.addJavaScriptHandler(
+          handlerName: 'blobToBase64Handler',
+          callback: (data) async {
+            if (data.isNotEmpty) {
+              final String base64Content = data[0];
+              createFileFromBase64(base64Content);
+            }
+          },
+        );
+      },
+      onCreateWindow: (controller, createWindowRequest) async {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              insetPadding: Spacing.of(context).insets.all.big,
+              contentPadding: EdgeInsets.zero,
+              content: SizedBox(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height * (3 / 4),
+                child: InAppWebView(
+                  initialOptions: InAppWebViewGroupOptions(
+                    crossPlatform: InAppWebViewOptions(
+                      supportZoom: false,
+                      disableContextMenu: true,
+                      allowFileAccessFromFileURLs: true,
+                      allowUniversalAccessFromFileURLs: true,
+                      mediaPlaybackRequiresUserGesture: false,
+                      verticalScrollBarEnabled: false,
+                      horizontalScrollBarEnabled: false,
+                      javaScriptCanOpenWindowsAutomatically: true,
+                      userAgent: 'random',
+                      useOnDownloadStart: true,
+                    ),
+                    android: AndroidInAppWebViewOptions(
+                      verticalScrollbarThumbColor: Colors.transparent,
+                      verticalScrollbarTrackColor: Colors.transparent,
+                      horizontalScrollbarThumbColor: Colors.transparent,
+                      horizontalScrollbarTrackColor: Colors.transparent,
+                      scrollbarFadingEnabled: false,
+                      appCachePath: appModel.browserDirectory.path,
+                      cacheMode: cacheMode,
+                      supportMultipleWindows: true,
+                    ),
+                  ),
+                  windowId: createWindowRequest.windowId,
+                  onDownloadStartRequest: onDownloadStartRequest,
+                  onCloseWindow: (controller) {
+                    if (mounted) {
+                      Navigator.pop(context);
+                    }
+                  },
+                ),
+              ),
+            );
+          },
+        );
+        return true;
       },
       onReceivedServerTrustAuthRequest: (controller, challenge) async {
         return ServerTrustAuthResponse(
@@ -289,7 +374,22 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
       onTitleChanged: (controller, title) async {
         await controller.evaluateJavascript(source: javascriptToExecute);
       },
+      onDownloadStartRequest: onDownloadStartRequest,
     );
+  }
+
+  String _suggestedFilename = '';
+  String _mimeType = '';
+
+  void onDownloadStartRequest(
+      InAppWebViewController controller, DownloadStartRequest request) async {
+    _mimeType = request.mimeType ?? _mimeType;
+
+    _suggestedFilename = request.suggestedFilename ?? _suggestedFilename;
+
+    await controller.evaluateJavascript(
+        source: downloadFileJs.replaceAll(
+            'blobUrlPlaceholder', request.url.toString()));
   }
 
   Future<void> selectTextOnwards({
@@ -550,6 +650,30 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
         .replaceAll('\\n', '\n')
         .trim();
   }
+
+  String downloadFileJs = '''
+var xhr = new XMLHttpRequest();
+var blobUrl = "blobUrlPlaceholder";
+console.log(blobUrl);
+xhr.open('GET', blobUrl, true);
+xhr.responseType = 'blob';
+xhr.onload = function(e) {
+  if (this.status == 200) {
+    var blob = this.response;
+    var reader = new FileReader();
+    reader.readAsDataURL(blob);
+    reader.onloadend = function() {
+      var base64data = reader.result;
+      var base64ContentArray = base64data.split(",")     ;
+      var mimeType = base64ContentArray[0].match(/[^:\\s*]\\w+\\/[\\w-+\\d.]+(?=[;| ])/)[0];
+      var decodedFile = base64ContentArray[1];
+      console.log(mimeType);
+      window.flutter_inappwebview.callHandler('blobToBase64Handler', decodedFile, mimeType);
+    };
+  };
+};
+xhr.send();
+''';
 
   /// This is executed upon page load and change.
   /// More accurate readability courtesy of

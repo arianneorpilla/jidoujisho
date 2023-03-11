@@ -402,6 +402,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  document_file_save_plus:
+    dependency: "direct main"
+    description:
+      name: document_file_save_plus
+      sha256: ff05c6a3b072377566e8e92666db38eb277786f90c0ac267ea47dc22725c1df3
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   easy_pip:
     dependency: "direct main"
     description:
@@ -1384,10 +1392,10 @@ packages:
     dependency: transitive
     description:
       name: plugin_platform_interface
-      sha256: "075f927ebbab4262ace8d0b283929ac5410c0ac4e7fc123c76429564facfb757"
+      sha256: "6a2128648c854906c53fa8e33986fc0247a1116122f9534dd20e3ab9e16a32bc"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.2"
+    version: "2.1.4"
   pool:
     dependency: transitive
     description:

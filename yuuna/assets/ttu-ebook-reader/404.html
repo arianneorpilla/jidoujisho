@@ -23,34 +23,36 @@
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="theme-color" content="#37474f" />
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#37474f" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;500;700&display=swap"
-      rel="stylesheet"
-    />
     <meta http-equiv="content-security-policy" content="">
-		<link rel="modulepreload" href="/_app/immutable/start-6e359251.js">
-		<link rel="modulepreload" href="/_app/immutable/chunks/singletons-54206af0.js">
-		<script>
-			if ('serviceWorker' in navigator) {
-				addEventListener('load', function () {
-					navigator.serviceWorker.register('/service-worker.js');
-				});
-			}
-		</script>
+		<link rel="modulepreload" href="/_app/immutable/entry/start.dc8c5fd8.js">
+		<link rel="modulepreload" href="/_app/immutable/chunks/index.a1b1e1bc.js">
+		<link rel="modulepreload" href="/_app/immutable/chunks/singletons.e193b7a2.js">
+		<link rel="modulepreload" href="/_app/immutable/entry/app.ae166eb4.js">
   </head>
   <body class="h-full w-full break-words font-sans">
     <div class="h-full w-full">
-		<script type="module" data-sveltekit-hydrate="45h">
-			import { start } from "/_app/immutable/start-6e359251.js";
+			<script>
+				{
+					__sveltekit_fwr1me = {
+						env: {},
+						base: "",
+						element: document.currentScript.parentElement
+					};
 
-			start({
-				env: {},
-				paths: {"base":"","assets":""},
-				target: document.querySelector('[data-sveltekit-hydrate="45h"]').parentNode,
-				version: "1677808139749"
-			});
-		</script></div>
+					Promise.all([
+						import("/_app/immutable/entry/start.dc8c5fd8.js"),
+						import("/_app/immutable/entry/app.ae166eb4.js")
+					]).then(([kit, app]) => {
+						kit.start(app, __sveltekit_fwr1me.element);
+					});
+
+					if ('serviceWorker' in navigator) {
+						addEventListener('load', function () {
+							navigator.serviceWorker.register('/service-worker.js');
+						});
+					}
+				}
+			</script>
+		</div>
   </body>
 </html>

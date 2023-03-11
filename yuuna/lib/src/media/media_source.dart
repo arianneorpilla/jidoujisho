@@ -267,11 +267,14 @@ abstract class MediaSource {
       return MemoryImage(kTransparentImage);
     }
 
-    UriData data = Uri.parse(item.base64Image!).data!;
-
-    /// A cached version of [MemoryImage] so that the image does not reload
-    /// on every revisit
-    return CacheImageProvider(item.uniqueKey, data.contentAsBytes());
+    UriData? data = Uri.parse(item.base64Image!).data;
+    if (data != null) {
+      /// A cached version of [MemoryImage] so that the image does not reload
+      /// on every revisit
+      return CacheImageProvider(item.uniqueKey, data.contentAsBytes());
+    } else {
+      return MemoryImage(kTransparentImage);
+    }
   }
 
   /// Given a [MediaItem], return its thumbnail. Some media items may allow

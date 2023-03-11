@@ -476,4 +476,24 @@ try {
   console.log(JSON.stringify({messageType: "history", lastItem: lastItemJson, bookmark: bookmarkJson, data: dataJson}));
 }
 ''';
+
+  /// This ensures that the internal version included with the app always uses
+  /// the cache and is consistent. If this version changes and the current stored
+  /// last version mismatches, a load from network is forced. The app will then
+  /// update its new last version, and all new loads will be from the cache
+  /// unless there is a new app version loaded with a different internal version.
+  static const ttuInternalVersion = 2;
+
+  /// Used to check for the current version.
+  int? get currentTtuInternalVersion {
+    return getPreference<int?>(key: 'ttu_internal_version', defaultValue: null);
+  }
+
+  /// Sets the new version.
+  void setTtuInternalVersion() async {
+    await setPreference<int?>(
+      key: 'ttu_internal_version',
+      value: ttuInternalVersion,
+    );
+  }
 }

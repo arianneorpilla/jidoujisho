@@ -1,7 +1,7 @@
 name: yuuna
 description: A full-featured immersion language learning suite for mobile.
 publish_to: 'none'
-version: 2.4.0+40
+version: 2.4.1+41
 environment:
   sdk: ">=2.17.0 <3.0.0"
 
@@ -22,6 +22,7 @@ dependencies:
   copy_with_extension: ^5.0.2
   crop_image: ^1.0.2
   device_info_plus: ^3.2.3
+  document_file_save_plus: ^2.0.0
   easy_pip: ^0.1.0
   expandable: ^5.0.1
   external_app_launcher: ^2.0.2
@@ -156,12 +157,10 @@ flutter:
     - assets/ttu-ebook-reader/_app/immutable/
     - assets/ttu-ebook-reader/_app/immutable/assets/
     - assets/ttu-ebook-reader/_app/immutable/chunks/
-    - assets/ttu-ebook-reader/_app/immutable/components/
-    - assets/ttu-ebook-reader/_app/immutable/components/pages/
-    - assets/ttu-ebook-reader/_app/immutable/components/pages/b/
-    - assets/ttu-ebook-reader/_app/immutable/components/pages/manage/
-    - assets/ttu-ebook-reader/_app/immutable/components/pages/settings/
+    - assets/ttu-ebook-reader/_app/immutable/entry/
+    - assets/ttu-ebook-reader/auth/
     - assets/ttu-ebook-reader/b/
+    - assets/ttu-ebook-reader/fonts/
     - assets/ttu-ebook-reader/icons/
     - assets/ttu-ebook-reader/manage/
     - assets/ttu-ebook-reader/settings/
