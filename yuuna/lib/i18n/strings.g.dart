@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 308
+/// Strings: 309
 ///
-/// Built on 2023-03-11 at 16:23 UTC
+/// Built on 2023-03-12 at 04:12 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -455,6 +455,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get no_comments_queried => 'No comments queried';
 	String get no_text_in_clipboard => 'No text to display';
 	String file_downloaded({required Object name}) => 'File downloaded: ${name}';
+	String get change_sort_order => 'Change Sort Order';
 	late final _StringsViewRepliesEn view_replies = _StringsViewRepliesEn._(_root);
 }
 
@@ -783,6 +784,7 @@ extension on _StringsEn {
 			case 'no_comments_queried': return 'No comments queried';
 			case 'no_text_in_clipboard': return 'No text to display';
 			case 'file_downloaded': return ({required Object name}) => 'File downloaded: ${name}';
+			case 'change_sort_order': return 'Change Sort Order';
 			case 'view_replies.reply': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
 				one: 'SHOW ${n} REPLY',
 				other: 'SHOW ${n} REPLIES',

@@ -5,8 +5,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
+import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
-import 'package:yuuna/src/media/sources/reader_clipboard_source.dart';
 import 'package:yuuna/utils.dart';
 
 /// A page for [ReaderClipboardPage] which shows the content of the current
@@ -48,40 +48,45 @@ class _ReaderClipboardPageState<ReaderClipboardPage>
       return buildPlaceholder();
     }
 
-    return GestureDetector(
-      onTap: clearDictionaryResult,
-      child: Stack(
-        children: [
-          SingleChildScrollView(
-            controller: _scrollController,
-            physics: const AlwaysScrollableScrollPhysics(
-                parent: BouncingScrollPhysics()),
-            primary: false,
-            child: Padding(
-              padding: Spacing.of(context).insets.horizontal.extraBig,
-              child: ListView(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                children: [
-                  const Space.extraBig(),
-                  const Space.big(),
-                  buildText(text),
-                  const Space.big(),
-                  Container(height: MediaQuery.of(context).size.height / 2)
-                ],
+    return Stack(
+      children: [
+        GestureDetector(
+          onTap: clearDictionaryResult,
+          child: RawScrollbar(
+            thumbVisibility: true,
+            thickness: 3,
+            controller: ReaderMediaType.instance.scrollController,
+            child: SingleChildScrollView(
+              controller: ReaderMediaType.instance.scrollController,
+              physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics()),
+              primary: false,
+              child: Padding(
+                padding: Spacing.of(context).insets.horizontal.extraBig,
+                child: ListView(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    const Space.extraBig(),
+                    const Space.big(),
+                    buildText(text),
+                    const Space.big(),
+                    Container(height: MediaQuery.of(context).size.height / 2)
+                  ],
+                ),
               ),
             ),
           ),
-          Column(
-            children: [
-              const Space.extraBig(),
-              Expanded(
-                child: buildDictionary(),
-              ),
-            ],
-          ),
-        ],
-      ),
+        ),
+        Column(
+          children: [
+            const Space.extraBig(),
+            Expanded(
+              child: buildDictionary(),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -109,8 +114,6 @@ class _ReaderClipboardPageState<ReaderClipboardPage>
       },
     );
   }
-
-  final ScrollController _scrollController = ScrollController();
 
   List<InlineSpan> getSubtitleSpans(String text) {
     List<InlineSpan> spans = [];

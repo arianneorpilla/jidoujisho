@@ -83,7 +83,9 @@ class ReaderWebsocketSource extends ReaderMediaSource {
   }) async {}
 
   @override
-  BaseSourcePage buildLaunchPage({MediaItem? item}) {
+  BaseSourcePage buildLaunchPage({
+    MediaItem? item,
+  }) {
     throw UnsupportedError('WebSocket source does not launch any page');
   }
 

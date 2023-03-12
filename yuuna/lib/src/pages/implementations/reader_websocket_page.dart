@@ -5,8 +5,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
+import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
-import 'package:yuuna/src/media/sources/reader_websocket_source.dart';
 import 'package:yuuna/utils.dart';
 
 /// A page for [ReaderWebsocketSource] which shows lyrics of current playing
@@ -71,17 +71,15 @@ class _ReaderWebsocketPageState<ReaderLyricsPage> extends BaseSourcePageState {
   }
 
   Widget buildMessageBuilder() {
-    ScrollController controller = ScrollController();
-
     List<String> messages = source.messages.reversed.toList();
     return RawScrollbar(
-      controller: controller,
+      controller: ReaderMediaType.instance.scrollController,
       thumbVisibility: true,
       thickness: 3,
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics()),
-        controller: controller,
+        controller: ReaderMediaType.instance.scrollController,
         itemCount: messages.length,
         itemBuilder: (context, index) {
           String message = messages[index];

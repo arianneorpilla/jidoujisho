@@ -41,7 +41,9 @@ class ReaderClipboardSource extends ReaderMediaSource {
   }) async {}
 
   @override
-  BaseSourcePage buildLaunchPage({MediaItem? item}) {
+  BaseSourcePage buildLaunchPage({
+    MediaItem? item,
+  }) {
     throw UnsupportedError('Clipboard source does not launch any page');
   }
 

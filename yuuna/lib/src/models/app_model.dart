@@ -17,6 +17,7 @@ import 'package:flutter_accessibility_service/accessibility_event.dart';
 import 'package:flutter_accessibility_service/flutter_accessibility_service.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_charset_detector/flutter_charset_detector.dart';
+import 'package:flutter_exit_app/flutter_exit_app.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -1289,7 +1290,7 @@ class AppModel with ChangeNotifier {
       await Permission.storage.request();
     }
 
-    if (_androidDeviceInfo.version.sdkInt! >= 30) {
+    if (_androidDeviceInfo.version.sdkInt >= 30) {
       final manageStorageGranted =
           await Permission.manageExternalStorage.isGranted;
       if (!manageStorageGranted) {
@@ -1799,14 +1800,22 @@ class AppModel with ChangeNotifier {
     _isCreatorOpen = false;
   }
 
+  /// Whether or not the media item should be killed upon exit.
+  bool _shouldKillMediaOnPop = false;
+
   /// A helper function for launching a media source.
   Future<void> openMedia({
     required BuildContext context,
     required WidgetRef ref,
     required MediaSource mediaSource,
+    bool killOnPop = false,
     bool pushReplacement = false,
     MediaItem? item,
   }) async {
+    if (killOnPop) {
+      _shouldKillMediaOnPop = true;
+    }
+
     mediaSource.clearCurrentSentence();
     await initialiseAudioHandler();
 
@@ -1865,6 +1874,10 @@ class AppModel with ChangeNotifier {
     );
 
     await _audioHandler?.stop();
+
+    if (_shouldKillMediaOnPop) {
+      await FlutterExitApp.exitApp();
+    }
   }
 
   /// A helper function for opening the creator from any page in the
@@ -2426,8 +2439,7 @@ class AppModel with ChangeNotifier {
     FlutterClipboard.copy(term);
 
     /// Redundant to do this with the share notification on Android
-    if (_androidDeviceInfo.version.sdkInt != null &&
-        _androidDeviceInfo.version.sdkInt! < 33) {
+    if (_androidDeviceInfo.version.sdkInt < 33) {
       Fluttertoast.showToast(
         msg: t.copied_to_clipboard,
         toastLength: Toast.LENGTH_SHORT,

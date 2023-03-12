@@ -124,6 +124,7 @@ class ImageField extends ImageExportField {
       itemCount: itemCount + 1,
       carouselController: controller,
       options: CarouselOptions(
+        enlargeStrategy: CenterPageEnlargeStrategy.zoom,
         enlargeCenterPage: true,
         viewportFraction: 0.75,
         initialPage: indexNotifier.value,

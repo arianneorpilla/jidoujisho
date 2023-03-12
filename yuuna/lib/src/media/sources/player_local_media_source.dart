@@ -176,7 +176,9 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
   }
 
   @override
-  BaseSourcePage buildLaunchPage({MediaItem? item}) {
+  BaseSourcePage buildLaunchPage({
+    MediaItem? item,
+  }) {
     return PlayerSourcePage(
       item: item,
       source: this,

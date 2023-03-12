@@ -330,6 +330,7 @@
     "no_comments_queried": "No comments queried",
     "no_text_in_clipboard": "No text to display",
     "file_downloaded": "File downloaded: $name",
+    "change_sort_order": "Change Sort Order",
     "view_replies": {
         "reply": {
           "one": "SHOW $n REPLY",

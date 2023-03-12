@@ -179,61 +179,66 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
       children: [
         GestureDetector(
           onTap: clearDictionaryResult,
-          child: SingleChildScrollView(
-            controller: _scrollController,
-            physics: const AlwaysScrollableScrollPhysics(
-                parent: BouncingScrollPhysics()),
-            primary: false,
-            child: Padding(
-              padding: Spacing.of(context).insets.horizontal.extraBig,
-              child: ListView(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                children: [
-                  const Space.extraBig(),
-                  const Space.big(),
-                  if (!source.isOverride ||
-                      (NowPlaying.instance.track.title == parameters.title &&
-                          NowPlaying.instance.track.artist ==
-                              parameters.artist))
-                    Row(
-                      children: [
-                        if (track.hasImage && lyrics.includesArtist)
-                          SizedBox(
-                            height: 96,
-                            width: 96,
-                            child: Image(image: track.image!),
-                          ),
-                        if (track.hasImage && lyrics.includesArtist)
-                          const Space.semiBig(),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SelectableText(
-                                parameters.title,
-                                selectionControls: selectionControls,
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              if (lyrics.includesArtist)
+          child: RawScrollbar(
+            thumbVisibility: true,
+            thickness: 3,
+            controller: ReaderMediaType.instance.scrollController,
+            child: SingleChildScrollView(
+              controller: ReaderMediaType.instance.scrollController,
+              physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics()),
+              primary: false,
+              child: Padding(
+                padding: Spacing.of(context).insets.horizontal.extraBig,
+                child: ListView(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    const Space.extraBig(),
+                    const Space.big(),
+                    if (!source.isOverride ||
+                        (NowPlaying.instance.track.title == parameters.title &&
+                            NowPlaying.instance.track.artist ==
+                                parameters.artist))
+                      Row(
+                        children: [
+                          if (track.hasImage && lyrics.includesArtist)
+                            SizedBox(
+                              height: 96,
+                              width: 96,
+                              child: Image(image: track.image!),
+                            ),
+                          if (track.hasImage && lyrics.includesArtist)
+                            const Space.semiBig(),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
                                 SelectableText(
-                                  parameters.artist,
+                                  parameters.title,
                                   selectionControls: selectionControls,
-                                  style: const TextStyle(fontSize: 20),
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                            ],
+                                if (lyrics.includesArtist)
+                                  SelectableText(
+                                    parameters.artist,
+                                    selectionControls: selectionControls,
+                                    style: const TextStyle(fontSize: 20),
+                                  ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  const Space.big(),
-                  buildLyricsText(lyrics.text!),
-                  const Space.big(),
-                  Container(height: MediaQuery.of(context).size.height / 2)
-                ],
+                        ],
+                      ),
+                    const Space.big(),
+                    buildLyricsText(lyrics.text!),
+                    const Space.big(),
+                    Container(height: MediaQuery.of(context).size.height / 2)
+                  ],
+                ),
               ),
             ),
           ),
@@ -265,8 +270,6 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
       },
     );
   }
-
-  final ScrollController _scrollController = ScrollController();
 
   List<InlineSpan> getSubtitleSpans(String text) {
     List<InlineSpan> spans = [];

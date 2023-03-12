@@ -85,7 +85,9 @@ class ReaderTtuSource extends ReaderMediaSource {
   }
 
   @override
-  BaseSourcePage buildLaunchPage({MediaItem? item}) {
+  BaseSourcePage buildLaunchPage({
+    MediaItem? item,
+  }) {
     return ReaderTtuSourcePage(item: item);
   }
 

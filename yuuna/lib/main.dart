@@ -6,7 +6,6 @@ import 'dart:ui';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_exit_app/flutter_exit_app.dart';
 import 'package:flutter_process_text/flutter_process_text.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:network_to_file_image/network_to_file_image.dart';
@@ -260,14 +259,15 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
 
     Navigator.popUntil(
         appModel.navigatorKey.currentContext!, (route) => route.isFirst);
-    await appModel.openMedia(
-      context: context,
-      ref: ref,
-      mediaSource: PlayerYoutubeSource.instance,
-      item: item,
-    );
-
-    FlutterExitApp.exitApp();
+    if (mounted) {
+      await appModel.openMedia(
+        context: context,
+        ref: ref,
+        mediaSource: PlayerYoutubeSource.instance,
+        killOnPop: true,
+        item: item,
+      );
+    }
   }
 
   void launchNetworkMediaAction({
@@ -289,10 +289,9 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
       context: context,
       ref: ref,
       mediaSource: PlayerNetworkStreamSource.instance,
+      killOnPop: true,
       item: item,
     );
-
-    FlutterExitApp.exitApp();
   }
 
   @override

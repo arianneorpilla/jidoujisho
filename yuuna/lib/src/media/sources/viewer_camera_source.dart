@@ -24,7 +24,9 @@ class ViewerCameraSource extends ViewerMediaSource {
       ViewerCameraSource._privateConstructor();
 
   @override
-  BaseSourcePage buildLaunchPage({MediaItem? item}) {
+  BaseSourcePage buildLaunchPage({
+    MediaItem? item,
+  }) {
     throw UnimplementedError();
   }
 }
