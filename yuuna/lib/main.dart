@@ -92,6 +92,7 @@ class JidoujishoApp extends ConsumerStatefulWidget {
 
 class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
   final navigatorKey = GlobalKey<NavigatorState>();
+  bool _isMainIntent = false;
 
   late final StreamSubscription _otherIntentsSubscription;
   late final StreamSubscription _sharedTextSubscription;
@@ -148,6 +149,11 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
     debugPrint(jsonEncode(intent.toMap()));
 
     switch (intent.action) {
+      case 'android.intent.action.MAIN':
+        setState(() {
+          _isMainIntent = true;
+        });
+        return;
       case 'android.intent.action.PROCESS_TEXT':
         String data = intent.extra!['android.intent.extra.PROCESS_TEXT'];
         textContextMenuAction(data);
@@ -322,7 +328,7 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
   CreatorModel get creatorModel => ref.watch(creatorProvider);
 
   /// The application will open to this page upon startup.
-  Widget get home => const HomePage();
+  Widget get home => _isMainIntent ? const HomePage() : const Scaffold();
 
   /// The current theme mode, which by default is based on system setting
   /// and toggleable.
