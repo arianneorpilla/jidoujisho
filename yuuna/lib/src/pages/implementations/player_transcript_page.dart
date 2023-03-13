@@ -142,6 +142,7 @@ class _PlayerTranscriptPageState extends BasePageState<PlayerTranscriptPage> {
 
   Widget buildSubtitles() {
     return ScrollablePositionedList.builder(
+      padding: const EdgeInsets.only(bottom: 48),
       physics: const BouncingScrollPhysics(),
       itemScrollController: _itemScrollController,
       itemPositionsListener: _itemPositionsListener,

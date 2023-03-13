@@ -113,6 +113,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           ]);
         }
 
+        Wakelock.enable();
+
         break;
       case AppLifecycleState.paused:
       case AppLifecycleState.inactive:
@@ -1795,6 +1797,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
   /// This hides or shows the menu.
   void toggleMenuVisibility() async {
+    Wakelock.enable();
     _menuHideTimer?.cancel();
     _isMenuHidden.value = !_isMenuHidden.value;
     if (!_isMenuHidden.value) {

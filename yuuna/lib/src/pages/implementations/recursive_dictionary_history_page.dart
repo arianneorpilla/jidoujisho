@@ -27,11 +27,16 @@ class _RecursiveDictionaryHistoryPageState
       resizeToAvoidBottomInset: false,
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: buildAppBar(),
-      body: DictionaryResultPage(
-        result: widget.result,
-        onSearch: onSearch,
-        onStash: onStash,
-        updateHistory: false,
+      body: SafeArea(
+        left: false,
+        top: false,
+        right: false,
+        child: DictionaryResultPage(
+          result: widget.result,
+          onSearch: onSearch,
+          onStash: onStash,
+          updateHistory: false,
+        ),
       ),
     );
   }

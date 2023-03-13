@@ -835,6 +835,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.15.2"
+  html_unescape:
+    dependency: transitive
+    description:
+      name: html_unescape
+      sha256: "15362d7a18f19d7b742ef8dcb811f5fd2a2df98db9f80ea393c075189e0b61e3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   http:
     dependency: "direct main"
     description:
@@ -1647,8 +1655,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "6c9163c97e869114485bd1f90ba005db2fae8188"
-      resolved-ref: "6c9163c97e869114485bd1f90ba005db2fae8188"
+      ref: ff4a7900d66338c7322a7335f14714f7cb964b82
+      resolved-ref: ff4a7900d66338c7322a7335f14714f7cb964b82
       url: "https://github.com/lrorpilla/subtitle"
     source: git
     version: "0.1.0-beta.2"
