@@ -558,6 +558,24 @@ class AppModel with ChangeNotifier {
 
   ValueNotifier<SubtitleOptions>? _currentSubtitleOptions;
 
+  /// Override color for the dictionary widget.
+  Color? get overrideDictionaryColor => _overrideDictionaryColor;
+  Color? _overrideDictionaryColor;
+
+  /// Override theme for the dictionary widget.
+  ThemeData? get overrideDictionaryTheme => _overrideDictionaryTheme;
+  ThemeData? _overrideDictionaryTheme;
+
+  /// Override color for the dictionary widget.
+  void setOverrideDictionaryColor(Color? color) {
+    _overrideDictionaryColor = color;
+  }
+
+  /// Override theme for the dictionary widget.
+  void setOverrideDictionaryTheme(ThemeData? themeData) {
+    _overrideDictionaryTheme = themeData;
+  }
+
   /// Get the current media item for use in tracking history and generating
   /// media for card creation based on media progress.
   MediaItem? getCurrentMediaItem() {
@@ -2017,6 +2035,9 @@ class AppModel with ChangeNotifier {
       _currentMediaItem = item;
     }
 
+    _overrideDictionaryColor = null;
+    _overrideDictionaryTheme = null;
+
     await Wakelock.enable();
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
@@ -2053,6 +2074,8 @@ class AppModel with ChangeNotifier {
     mediaSource.clearCurrentSentence();
     _currentMediaSource = null;
     _currentMediaItem = null;
+    _overrideDictionaryColor = null;
+    _overrideDictionaryTheme = null;
     blockCreatorInitialMedia = false;
     await Wakelock.disable();
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);

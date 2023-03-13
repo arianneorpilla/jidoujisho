@@ -189,38 +189,38 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
         .toString();
     switch (currentTheme) {
       case 'light-theme':
-        setOverrideDictionaryTheme(appModel.theme);
-        setOverrideDictionaryColor(
+        appModel.setOverrideDictionaryTheme(appModel.theme);
+        appModel.setOverrideDictionaryColor(
           Color.fromRGBO(249, 249, 249, dictionaryEntryOpacity),
         );
         break;
       case 'ecru-theme':
-        setOverrideDictionaryTheme(appModel.theme);
-        setOverrideDictionaryColor(
+        appModel.setOverrideDictionaryTheme(appModel.theme);
+        appModel.setOverrideDictionaryColor(
           Color.fromRGBO(247, 246, 235, dictionaryEntryOpacity),
         );
         break;
       case 'water-theme':
-        setOverrideDictionaryTheme(appModel.theme);
-        setOverrideDictionaryColor(
+        appModel.setOverrideDictionaryTheme(appModel.theme);
+        appModel.setOverrideDictionaryColor(
           Color.fromRGBO(223, 236, 244, dictionaryEntryOpacity),
         );
         break;
       case 'gray-theme':
-        setOverrideDictionaryTheme(appModel.darkTheme);
-        setOverrideDictionaryColor(
+        appModel.setOverrideDictionaryTheme(appModel.darkTheme);
+        appModel.setOverrideDictionaryColor(
           Color.fromRGBO(35, 39, 42, dictionaryEntryOpacity),
         );
         break;
       case 'dark-theme':
-        setOverrideDictionaryTheme(appModel.darkTheme);
-        setOverrideDictionaryColor(
+        appModel.setOverrideDictionaryTheme(appModel.darkTheme);
+        appModel.setOverrideDictionaryColor(
           Color.fromRGBO(18, 18, 18, dictionaryEntryOpacity),
         );
         break;
       case 'black-theme':
-        setOverrideDictionaryTheme(appModel.darkTheme);
-        setOverrideDictionaryColor(
+        appModel.setOverrideDictionaryTheme(appModel.darkTheme);
+        appModel.setOverrideDictionaryColor(
           Color.fromRGBO(16, 16, 16, dictionaryEntryOpacity),
         );
         break;

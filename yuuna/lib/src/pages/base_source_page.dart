@@ -129,7 +129,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
   /// If the result is null, show nothing.
   Widget buildDictionary() {
     return Theme(
-      data: _overrideDictionaryTheme ?? theme,
+      data: appModel.overrideDictionaryTheme ?? theme,
       child: MultiValueListenableBuilder(
         valueListenables: [
           _dictionaryResultNotifier,
@@ -241,9 +241,10 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
   /// The dictionary result unpositioned. See [buildDictionary] for the
   /// positioned version.
   Widget buildDictionaryResult() {
-    Color color = _overrideDictionaryColor ?? theme.cardColor;
+    Color color = appModel.overrideDictionaryColor ?? theme.cardColor;
 
-    if ((_overrideDictionaryTheme ?? theme).brightness == Brightness.dark) {
+    if ((appModel.overrideDictionaryTheme ?? theme).brightness ==
+        Brightness.dark) {
       color = JidoujishoColor.lighten(color, 0.05);
     } else {
       color = JidoujishoColor.darken(color, 0.05);
@@ -301,22 +302,6 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
     );
   }
 
-  /// Override color for the dictionary widget.
-  Color? _overrideDictionaryColor;
-
-  /// Override theme for the dictionary widget.
-  ThemeData? _overrideDictionaryTheme;
-
-  /// Override color for the dictionary widget.
-  void setOverrideDictionaryColor(Color? color) {
-    _overrideDictionaryColor = color;
-  }
-
-  /// Override theme for the dictionary widget.
-  void setOverrideDictionaryTheme(ThemeData? themeData) {
-    _overrideDictionaryTheme = themeData;
-  }
-
   /// Displays the dictionary entries.
   Widget buildSearchResult() {
     if (_dictionaryResultNotifier.value == null) {
@@ -324,11 +309,11 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
         height: double.infinity,
         width: double.infinity,
         child: Card(
-          color:
-              _overrideDictionaryColor?.withOpacity(dictionaryEntryOpacity) ??
-                  (Theme.of(context).brightness == Brightness.dark
-                      ? Color.fromRGBO(16, 16, 16, dictionaryEntryOpacity)
-                      : Color.fromRGBO(249, 249, 249, dictionaryEntryOpacity)),
+          color: appModel.overrideDictionaryColor
+                  ?.withOpacity(dictionaryEntryOpacity) ??
+              (Theme.of(context).brightness == Brightness.dark
+                  ? Color.fromRGBO(16, 16, 16, dictionaryEntryOpacity)
+                  : Color.fromRGBO(249, 249, 249, dictionaryEntryOpacity)),
           elevation: 0,
           shape: const RoundedRectangleBorder(),
           child: Column(
@@ -343,7 +328,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
     }
 
     return DictionaryResultPage(
-      cardColor: _overrideDictionaryColor,
+      cardColor: appModel.overrideDictionaryColor,
       opacity: dictionaryEntryOpacity,
       key: ValueKey(_dictionaryResultNotifier.value),
       onSearch: onSearch,
