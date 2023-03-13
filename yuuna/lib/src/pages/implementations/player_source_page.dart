@@ -556,7 +556,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                       _subtitleItem.controller.subtitles[index].start -
                           subtitleDelay);
                   _bufferingNotifier.value = true;
-                  _listeningSubtitle.value = getNearestSubtitle();
+                  _listeningSubtitle.value =
+                      _subtitleItem.controller.subtitles[index];
                 },
                 onLongPress: (index) async {
                   Navigator.pop(context);
