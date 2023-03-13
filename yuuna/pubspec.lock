@@ -1431,10 +1431,11 @@ packages:
   ruby_text:
     dependency: "direct main"
     description:
-      name: ruby_text
-      sha256: d7afe30893eb06aa2e153695dd2bab1b86f257b15def2cae4e773fe0001bd23c
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: cb723f87c9ac575aa735b40016c0ffb3242d921e
+      resolved-ref: cb723f87c9ac575aa735b40016c0ffb3242d921e
+      url: "https://github.com/lrorpilla/RubyText"
+    source: git
     version: "3.0.1"
   rxdart:
     dependency: transitive

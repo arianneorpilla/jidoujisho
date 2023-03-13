@@ -172,7 +172,7 @@ class AnkiMapping {
       0: CardCreatorAction.key,
       1: InstantExportAction.key,
       2: AddToStashAction.key,
-      3: CharacterSearchAction.key,
+      3: CopyToClipboardAction.key,
       4: ShareAction.key,
       5: PlayAudioAction.key,
     },
@@ -180,8 +180,9 @@ class AnkiMapping {
       0: CardCreatorAction.key,
       1: InstantExportAction.key,
       2: AddToStashAction.key,
-      3: ShareAction.key,
-      4: PlayAudioAction.key,
+      3: CopyToClipboardAction.key,
+      4: ShareAction.key,
+      5: PlayAudioAction.key,
     }
   };
 

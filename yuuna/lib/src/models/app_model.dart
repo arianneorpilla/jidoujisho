@@ -634,9 +634,9 @@ class AppModel with ChangeNotifier {
       CardCreatorAction(),
       InstantExportAction(),
       AddToStashAction(),
+      CopyToClipboardAction(),
       ShareAction(),
       PlayAudioAction(),
-      CharacterSearchAction(),
     ];
 
     quickActions = Map<String, QuickAction>.unmodifiable(

@@ -412,8 +412,6 @@ class _DictionaryTermTopRow extends ConsumerWidget {
               appModel: appModel,
               heading: heading,
             ),
-            onTap: () => appModel.copyToClipboard(heading.term),
-            onLongPress: () => appModel.copyToClipboard(heading.term),
           ),
         ),
       ],

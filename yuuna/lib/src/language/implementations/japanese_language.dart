@@ -86,6 +86,29 @@ class JapaneseLanguage extends Language {
     required AppModel appModel,
     required DictionaryHeading heading,
   }) {
+    /// Responsible for the underline on the heading term.
+    TextStyle indexStyle(int index, String character) {
+      if (kanaKit.isKanji(character)) {
+        return const TextStyle(
+          decoration: TextDecoration.underline,
+          decorationStyle: TextDecorationStyle.dotted,
+        );
+      } else {
+        return const TextStyle();
+      }
+    }
+
+    /// Responsible for the action performed on tapping a certain character
+    /// on the heading term.
+    void indexAction(int index, String character) {
+      if (kanaKit.isKanji(character)) {
+        appModel.openRecursiveDictionarySearch(
+          searchTerm: character,
+          killOnPop: false,
+        );
+      }
+    }
+
     if (heading.reading.isEmpty) {
       return RubyText(
         [RubyTextData(heading.term)],
@@ -94,6 +117,8 @@ class JapaneseLanguage extends Language {
             .titleLarge!
             .copyWith(fontWeight: FontWeight.bold),
         rubyStyle: Theme.of(context).textTheme.labelSmall,
+        indexAction: indexAction,
+        indexStyle: indexStyle,
       );
     }
 
@@ -108,6 +133,8 @@ class JapaneseLanguage extends Language {
           .titleLarge!
           .copyWith(fontWeight: FontWeight.bold),
       rubyStyle: Theme.of(context).textTheme.labelSmall,
+      indexAction: indexAction,
+      indexStyle: indexStyle,
     );
   }
 
