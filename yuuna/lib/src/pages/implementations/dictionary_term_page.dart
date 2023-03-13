@@ -21,6 +21,7 @@ class DictionaryTermPage extends ConsumerWidget {
     required this.onStash,
     required this.expandableControllers,
     required this.lastSelectedMapping,
+    this.cardColor,
     this.opacity = 1,
     this.footerWidget,
     super.key,
@@ -40,6 +41,9 @@ class DictionaryTermPage extends ConsumerWidget {
 
   /// Optional footer foor use in [DictionaryHistoryPage].
   final Widget? footerWidget;
+
+  /// Override color for card background color.
+  final Color? cardColor;
 
   /// Opacity for entries.
   final double opacity;
@@ -71,9 +75,10 @@ class DictionaryTermPage extends ConsumerWidget {
       children: [
         SliverPositioned.fill(
           child: Card(
-            color: appModel.isDarkMode
-                ? Color.fromRGBO(16, 16, 16, opacity)
-                : Color.fromRGBO(249, 249, 249, opacity),
+            color: cardColor?.withOpacity(opacity) ??
+                (appModel.isDarkMode
+                    ? Color.fromRGBO(16, 16, 16, opacity)
+                    : Color.fromRGBO(249, 249, 249, opacity)),
             elevation: 0,
             shape: const RoundedRectangleBorder(),
           ),
@@ -178,9 +183,9 @@ class _DictionaryTermActionsRow extends ConsumerWidget {
                   heading: heading,
                 ),
                 shapeBorder: const RoundedRectangleBorder(),
-                backgroundColor: appModel.isDarkMode
-                    ? Colors.grey.shade900
-                    : Colors.grey.shade200,
+                backgroundColor: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white.withOpacity(0.05)
+                    : Colors.black.withOpacity(0.05),
                 size: Spacing.of(context).spaces.semiBig,
                 tooltip: quickAction.getLocalisedLabel(appModel),
                 icon: quickAction.icon,

@@ -28,4 +28,25 @@ class JidoujishoColor {
       0,
     ],
   );
+
+  /// Adjust a color and make it darker.
+  static Color darken(Color color, [double amount = .1]) {
+    assert(amount >= 0 && amount <= 1, 'Needs to be in range');
+
+    final hsl = HSLColor.fromColor(color);
+    final hslDark = hsl.withLightness((hsl.lightness - amount).clamp(0.0, 1.0));
+
+    return hslDark.toColor();
+  }
+
+  /// Adjust a color and make it brighter.
+  static Color lighten(Color color, [double amount = .1]) {
+    assert(amount >= 0 && amount <= 1, 'Needs to be in range');
+
+    final hsl = HSLColor.fromColor(color);
+    final hslLight =
+        hsl.withLightness((hsl.lightness + amount).clamp(0.0, 1.0));
+
+    return hslLight.toColor();
+  }
 }

@@ -154,9 +154,9 @@ class _DictionaryHistoryScrollableItemState
             appModel.refreshDictionaryHistory();
           },
           child: Container(
-            color: appModel.isDarkMode
-                ? Colors.grey.shade900
-                : Colors.grey.shade200,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white.withOpacity(0.05)
+                : Colors.black.withOpacity(0.05),
             width: double.maxFinite,
             child: Padding(
               padding: Spacing.of(context).insets.all.small,

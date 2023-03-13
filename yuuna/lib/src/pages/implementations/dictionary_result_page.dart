@@ -13,6 +13,7 @@ class DictionaryResultPage extends BasePage {
     required this.result,
     required this.onSearch,
     required this.onStash,
+    this.cardColor,
     this.scrollController,
     this.opacity = 1,
     this.updateHistory = true,
@@ -34,6 +35,9 @@ class DictionaryResultPage extends BasePage {
 
   /// Whether or not to put a space before the first result.
   final bool spaceBeforeFirstResult;
+
+  /// Override color for the background color for [DictionaryTermPage].
+  final Color? cardColor;
 
   /// Opacity for entries.
   final double opacity;
@@ -134,6 +138,7 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
                   .map((heading) => DictionaryTermPage(
                         lastSelectedMapping: lastSelectedMapping,
                         opacity: widget.opacity,
+                        cardColor: widget.cardColor,
                         heading: heading,
                         onSearch: widget.onSearch,
                         onStash: widget.onStash,

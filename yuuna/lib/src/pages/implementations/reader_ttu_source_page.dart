@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:document_file_save_plus/document_file_save_plus.dart';
 import 'package:flutter/material.dart';
@@ -184,6 +183,55 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
     );
   }
 
+  void setDictionaryColors() async {
+    String currentTheme = (await _controller.evaluateJavascript(
+            source: 'window.localStorage.getItem("theme")'))
+        .toString();
+    switch (currentTheme) {
+      case 'light-theme':
+        setOverrideDictionaryTheme(appModel.theme);
+        setOverrideDictionaryColor(
+          Color.fromRGBO(249, 249, 249, dictionaryEntryOpacity),
+        );
+        break;
+      case 'ecru-theme':
+        setOverrideDictionaryTheme(appModel.theme);
+        setOverrideDictionaryColor(
+          Color.fromRGBO(247, 246, 235, dictionaryEntryOpacity),
+        );
+        break;
+      case 'water-theme':
+        setOverrideDictionaryTheme(appModel.theme);
+        setOverrideDictionaryColor(
+          Color.fromRGBO(223, 236, 244, dictionaryEntryOpacity),
+        );
+        break;
+      case 'gray-theme':
+        setOverrideDictionaryTheme(appModel.darkTheme);
+        setOverrideDictionaryColor(
+          Color.fromRGBO(35, 39, 42, dictionaryEntryOpacity),
+        );
+        break;
+      case 'dark-theme':
+        setOverrideDictionaryTheme(appModel.darkTheme);
+        setOverrideDictionaryColor(
+          Color.fromRGBO(18, 18, 18, dictionaryEntryOpacity),
+        );
+        break;
+      case 'black-theme':
+        setOverrideDictionaryTheme(appModel.darkTheme);
+        setOverrideDictionaryColor(
+          Color.fromRGBO(16, 16, 16, dictionaryEntryOpacity),
+        );
+        break;
+    }
+
+    if (mounted) {
+      clearDictionaryResult();
+      setState(() {});
+    }
+  }
+
   String sanitizeWebViewTextSelection(String? text) {
     if (text == null) {
       return '';
@@ -331,12 +379,6 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
           key: mediaSource.getFirstTimeKey(appModel.targetLanguage),
           defaultValue: true,
         )) {
-          final pixelRatio = window.devicePixelRatio;
-          final logicalScreenSize = window.physicalSize / pixelRatio;
-          final logicalHeight = logicalScreenSize.height;
-
-          int secondDimensionMaxValue = (logicalHeight * 0.825).toInt();
-
           if (appModel.isDarkMode) {
             await controller.evaluateJavascript(
                 source:
@@ -357,9 +399,6 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
             await controller.evaluateJavascript(
                 source:
                     'javascript:window.localStorage.setItem("fontSize", 24)');
-            await controller.evaluateJavascript(
-                source:
-                    'javascript:window.localStorage.setItem("secondDimensionMaxValue", $secondDimensionMaxValue)');
           }
         }
       },
@@ -368,11 +407,16 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
           key: mediaSource.getFirstTimeKey(appModel.targetLanguage),
           value: false,
         );
+
+        setDictionaryColors();
+
         await controller.evaluateJavascript(source: javascriptToExecute);
         Future.delayed(const Duration(seconds: 1), _focusNode.requestFocus);
       },
       onTitleChanged: (controller, title) async {
         await controller.evaluateJavascript(source: javascriptToExecute);
+
+        setDictionaryColors();
       },
       onDownloadStartRequest: onDownloadStartRequest,
     );

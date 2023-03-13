@@ -72,8 +72,10 @@ class _DictionaryEntryPageState extends ConsumerState<DictionaryEntryPage> {
           child: JidoujishoSelectableText(
             widget.entry.compactDefinitions,
             style: TextStyle(
-              fontSize: appModel.dictionaryFontSize,
-            ),
+                fontSize: appModel.dictionaryFontSize,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Colors.black),
             controller: _selectableTextController,
             selectionControls: JidoujishoTextSelectionControls(
               searchAction: widget.onSearch,

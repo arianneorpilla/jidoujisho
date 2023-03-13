@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:ui';
 
 import 'package:audio_service/audio_service.dart' as ag;
 import 'package:cancelable_compute/cancelable_compute.dart' as cancelable;
@@ -328,6 +329,198 @@ class AppModel with ChangeNotifier {
 
   /// Blocks creator from processing initial media while player controller is not ready.
   bool blockCreatorInitialMedia = false;
+
+  /// Get the app-wide text style.
+  TextStyle get textStyle => TextStyle(
+        fontFamily: targetLanguage.defaultFontFamily,
+        fontFeatures: const [FontFeature('liga', 0)],
+        locale: targetLanguage.locale,
+        textBaseline: targetLanguage.textBaseline,
+      );
+
+  /// This override is a workaround required to theme the app-wide [TextTheme]
+  /// based on the [Locale] and [TextBaseline] of the active target language.
+  TextTheme get textTheme => TextTheme(
+        displayLarge: textStyle,
+        displayMedium: textStyle,
+        displaySmall: textStyle,
+        headlineLarge: textStyle,
+        headlineMedium: textStyle,
+        headlineSmall: textStyle,
+        titleLarge: textStyle,
+        titleMedium: textStyle,
+        titleSmall: textStyle,
+        bodyLarge: textStyle,
+        bodyMedium: textStyle,
+        bodySmall: textStyle,
+        labelLarge: textStyle,
+        labelMedium: textStyle,
+        labelSmall: textStyle,
+      );
+
+  /// Shows when the current mode is a light theme.
+  ThemeData get theme => ThemeData(
+        scaffoldBackgroundColor: Colors.white,
+        unselectedWidgetColor: Colors.black54,
+        textTheme: textTheme,
+        appBarTheme: const AppBarTheme(
+          elevation: 0,
+          centerTitle: false,
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+        ),
+        switchTheme: SwitchThemeData(
+          thumbColor: MaterialStateColor.resolveWith((states) {
+            return states.contains(MaterialState.selected)
+                ? Colors.red
+                : Colors.white;
+          }),
+          trackColor: MaterialStateColor.resolveWith((states) {
+            return states.contains(MaterialState.selected)
+                ? Colors.red.withOpacity(0.5)
+                : Colors.grey;
+          }),
+        ),
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          elevation: 0,
+          type: BottomNavigationBarType.fixed,
+          selectedLabelStyle: textTheme.labelSmall,
+          unselectedLabelStyle: textTheme.labelSmall,
+          showSelectedLabels: true,
+          showUnselectedLabels: true,
+          backgroundColor: Colors.white,
+        ),
+        popupMenuTheme: const PopupMenuThemeData(
+          color: Colors.white,
+          shape: RoundedRectangleBorder(),
+        ),
+        dialogTheme: const DialogTheme(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(),
+        ),
+        cardColor: Colors.white,
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.black,
+          ),
+        ),
+        listTileTheme: ListTileThemeData(
+          dense: true,
+          selectedTileColor: Colors.grey.shade300,
+          selectedColor: Colors.black,
+          horizontalTitleGap: 0,
+        ),
+        inputDecorationTheme: const InputDecorationTheme(
+          enabledBorder: UnderlineInputBorder(
+            borderSide: BorderSide(
+              color: Colors.black54,
+            ),
+          ),
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Colors.red),
+          ),
+        ),
+        scrollbarTheme: ScrollbarThemeData(
+          thickness: MaterialStateProperty.all(3),
+          thumbVisibility: MaterialStateProperty.all(true),
+        ),
+        sliderTheme: const SliderThemeData(
+          thumbColor: Colors.red,
+          activeTrackColor: Colors.red,
+          inactiveTrackColor: Colors.grey,
+          trackShape: RectangularSliderTrackShape(),
+          trackHeight: 2,
+          thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6),
+        ),
+        colorScheme: ColorScheme.fromSwatch()
+            .copyWith(
+              primary: Colors.red,
+              secondary: Colors.red,
+              brightness: Brightness.light,
+            )
+            .copyWith(background: Colors.white),
+      );
+
+  /// Shows when the current mode is a dark theme.
+  ThemeData get darkTheme => ThemeData(
+        scaffoldBackgroundColor: Colors.black,
+        textTheme: textTheme,
+        switchTheme: SwitchThemeData(
+          thumbColor: MaterialStateColor.resolveWith((states) {
+            return states.contains(MaterialState.selected)
+                ? Colors.red
+                : Colors.grey;
+          }),
+          trackColor: MaterialStateColor.resolveWith((states) {
+            return states.contains(MaterialState.selected)
+                ? Colors.red.withOpacity(0.5)
+                : Colors.grey;
+          }),
+        ),
+        appBarTheme: const AppBarTheme(
+          elevation: 0,
+          centerTitle: false,
+          backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
+        ),
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          elevation: 0,
+          type: BottomNavigationBarType.fixed,
+          selectedLabelStyle: textTheme.labelSmall,
+          unselectedLabelStyle: textTheme.labelSmall,
+          showSelectedLabels: true,
+          showUnselectedLabels: true,
+          backgroundColor: Colors.black,
+        ),
+        popupMenuTheme: const PopupMenuThemeData(
+          color: Color.fromARGB(255, 30, 30, 30),
+          shape: RoundedRectangleBorder(),
+        ),
+        dialogTheme: const DialogTheme(
+          backgroundColor: Color.fromARGB(255, 30, 30, 30),
+          shape: RoundedRectangleBorder(),
+        ),
+        cardColor: const Color.fromARGB(255, 30, 30, 30),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.white,
+          ),
+        ),
+        listTileTheme: ListTileThemeData(
+          dense: true,
+          selectedTileColor: Colors.grey.shade600,
+          selectedColor: Colors.white,
+          horizontalTitleGap: 0,
+        ),
+        inputDecorationTheme: const InputDecorationTheme(
+          enabledBorder: UnderlineInputBorder(
+            borderSide: BorderSide(
+              color: Colors.white70,
+            ),
+          ),
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Colors.red),
+          ),
+        ),
+        scrollbarTheme: ScrollbarThemeData(
+          thumbVisibility: MaterialStateProperty.all(true),
+        ),
+        sliderTheme: const SliderThemeData(
+          thumbColor: Colors.red,
+          activeTrackColor: Colors.red,
+          inactiveTrackColor: Colors.grey,
+          trackShape: RectangularSliderTrackShape(),
+          trackHeight: 2,
+          thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6),
+        ),
+        colorScheme: ColorScheme.fromSwatch()
+            .copyWith(
+              primary: Colors.red,
+              secondary: Colors.red,
+              brightness: Brightness.dark,
+            )
+            .copyWith(background: Colors.black),
+      );
 
   /// Get the sentence to be used by the [SentenceField] upon card creation.
   String getCurrentSentence() {

@@ -128,34 +128,37 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
   /// Build a dictionary showing the result with positioning.
   /// If the result is null, show nothing.
   Widget buildDictionary() {
-    return MultiValueListenableBuilder(
-      valueListenables: [
-        _dictionaryResultNotifier,
-        _popupPositionNotifier,
-      ],
-      builder: (context, result, _) {
-        if (!_isSearchingNotifier.value &&
-            _dictionaryResultNotifier.value == null) {
-          return const SizedBox.shrink();
-        }
+    return Theme(
+      data: _overrideDictionaryTheme ?? theme,
+      child: MultiValueListenableBuilder(
+        valueListenables: [
+          _dictionaryResultNotifier,
+          _popupPositionNotifier,
+        ],
+        builder: (context, result, _) {
+          if (!_isSearchingNotifier.value &&
+              _dictionaryResultNotifier.value == null) {
+            return const SizedBox.shrink();
+          }
 
-        switch (_popupPosition) {
-          case JidoujishoPopupPosition.topHalf:
-            return buildTopHalfDictionary();
+          switch (_popupPosition) {
+            case JidoujishoPopupPosition.topHalf:
+              return buildTopHalfDictionary();
 
-          case JidoujishoPopupPosition.bottomHalf:
-            return buildBottomHalfDictionary();
+            case JidoujishoPopupPosition.bottomHalf:
+              return buildBottomHalfDictionary();
 
-          case JidoujishoPopupPosition.leftHalf:
-            return buildLeftHalfDictionary();
+            case JidoujishoPopupPosition.leftHalf:
+              return buildLeftHalfDictionary();
 
-          case JidoujishoPopupPosition.rightHalf:
-            return buildRightHalfDictionary();
+            case JidoujishoPopupPosition.rightHalf:
+              return buildRightHalfDictionary();
 
-          case JidoujishoPopupPosition.topThreeFourths:
-            return buildTopThreeFourths();
-        }
-      },
+            case JidoujishoPopupPosition.topThreeFourths:
+              return buildTopThreeFourths();
+          }
+        },
+      ),
     );
   }
 
@@ -238,6 +241,14 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
   /// The dictionary result unpositioned. See [buildDictionary] for the
   /// positioned version.
   Widget buildDictionaryResult() {
+    Color color = _overrideDictionaryColor ?? theme.cardColor;
+
+    if ((_overrideDictionaryTheme ?? theme).brightness == Brightness.dark) {
+      color = JidoujishoColor.lighten(color, 0.05);
+    } else {
+      color = JidoujishoColor.darken(color, 0.05);
+    }
+
     return Dismissible(
       key: ValueKey(_dictionaryResultNotifier.value),
       onDismissed: (dismissDirection) {
@@ -248,7 +259,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
       child: Container(
         padding: Spacing.of(context).insets.all.semiSmall,
         margin: Spacing.of(context).insets.all.normal,
-        color: theme.cardColor.withOpacity(dictionaryBackgroundOpacity),
+        color: color.withOpacity(dictionaryBackgroundOpacity),
         child: Stack(
           children: [
             buildSearchResult(),
@@ -290,6 +301,22 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
     );
   }
 
+  /// Override color for the dictionary widget.
+  Color? _overrideDictionaryColor;
+
+  /// Override theme for the dictionary widget.
+  ThemeData? _overrideDictionaryTheme;
+
+  /// Override color for the dictionary widget.
+  void setOverrideDictionaryColor(Color? color) {
+    _overrideDictionaryColor = color;
+  }
+
+  /// Override theme for the dictionary widget.
+  void setOverrideDictionaryTheme(ThemeData? themeData) {
+    _overrideDictionaryTheme = themeData;
+  }
+
   /// Displays the dictionary entries.
   Widget buildSearchResult() {
     if (_dictionaryResultNotifier.value == null) {
@@ -297,9 +324,11 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
         height: double.infinity,
         width: double.infinity,
         child: Card(
-          color: appModel.isDarkMode
-              ? Color.fromRGBO(15, 15, 15, dictionaryEntryOpacity)
-              : Color.fromRGBO(249, 249, 249, dictionaryEntryOpacity),
+          color:
+              _overrideDictionaryColor?.withOpacity(dictionaryEntryOpacity) ??
+                  (Theme.of(context).brightness == Brightness.dark
+                      ? Color.fromRGBO(16, 16, 16, dictionaryEntryOpacity)
+                      : Color.fromRGBO(249, 249, 249, dictionaryEntryOpacity)),
           elevation: 0,
           shape: const RoundedRectangleBorder(),
           child: Column(
@@ -314,6 +343,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
     }
 
     return DictionaryResultPage(
+      cardColor: _overrideDictionaryColor,
       opacity: dictionaryEntryOpacity,
       key: ValueKey(_dictionaryResultNotifier.value),
       onSearch: onSearch,
