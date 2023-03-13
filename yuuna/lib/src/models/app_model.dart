@@ -1355,11 +1355,10 @@ class AppModel with ChangeNotifier {
     await compute(deleteDictionaryHelper, params);
     await _dictionaryHistory.clear();
 
-    Navigator.pop(navigatorKey.currentContext!);
     dictionarySearchAgainNotifier.notifyListeners();
   }
 
-  /// Delete a selected mapping from the database.
+  /// Delete a selected mapping fromf the database.
   void deleteMapping(AnkiMapping mapping) async {
     _database.writeTxnSync(() {
       _database.ankiMappings.deleteSync(mapping.id!);
