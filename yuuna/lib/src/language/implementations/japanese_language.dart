@@ -161,19 +161,22 @@ class JapaneseLanguage extends Language {
   }) {
     List<Widget> listWidgets = [];
 
-    Color foregroundColor = Theme.of(context).appBarTheme.foregroundColor!;
+    Color color = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white
+        : Colors.black;
 
     Widget getAccentTop(String text) {
       return Container(
         padding: const EdgeInsets.only(top: 1),
         decoration: BoxDecoration(
           border: Border(
-            top: BorderSide(color: foregroundColor),
+            top: BorderSide(color: color),
           ),
         ),
         child: Text(
           text,
           style: TextStyle(
+            color: color,
             fontSize: appModel.dictionaryFontSize,
           ),
         ),
@@ -185,13 +188,14 @@ class JapaneseLanguage extends Language {
         padding: const EdgeInsets.only(top: 1),
         decoration: BoxDecoration(
           border: Border(
-            top: BorderSide(color: foregroundColor),
-            right: BorderSide(color: foregroundColor),
+            top: BorderSide(color: color),
+            right: BorderSide(color: color),
           ),
         ),
         child: Text(
           text,
           style: TextStyle(
+            color: color,
             fontSize: appModel.dictionaryFontSize,
           ),
         ),
@@ -209,6 +213,7 @@ class JapaneseLanguage extends Language {
         child: Text(
           text,
           style: TextStyle(
+            color: color,
             fontSize: appModel.dictionaryFontSize,
           ),
         ),
@@ -258,6 +263,7 @@ class JapaneseLanguage extends Language {
       Text(
         ' [$downstep]  ',
         style: TextStyle(
+          color: color,
           fontSize: appModel.dictionaryFontSize,
         ),
       ),
