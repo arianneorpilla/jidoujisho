@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_exit_app/flutter_exit_app.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:spaces/spaces.dart';
@@ -135,7 +136,7 @@ class _RecursiveDictionaryPageState
       onFocusChanged: (focused) {
         if (!focused) {
           if (widget.killOnPop) {
-            FlutterExitApp.exitApp();
+            SystemNavigator.pop();
           } else {
             Navigator.pop(context);
           }
@@ -225,7 +226,7 @@ class _RecursiveDictionaryPageState
         icon: Icons.arrow_back,
         onTap: () async {
           if (widget.killOnPop) {
-            FlutterExitApp.exitApp();
+            SystemNavigator.pop();
           } else {
             Navigator.pop(context);
           }

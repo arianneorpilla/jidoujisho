@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_exit_app/flutter_exit_app.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:spaces/spaces.dart';
@@ -57,7 +58,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
     }
 
     if (widget.killOnPop) {
-      FlutterExitApp.exitApp();
+      SystemNavigator.pop();
       return false;
     }
 
@@ -627,7 +628,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       icon: Icons.arrow_back,
       onTap: () {
         if (widget.killOnPop) {
-          FlutterExitApp.exitApp();
+          SystemNavigator.pop();
         } else {
           Navigator.pop(context);
         }
