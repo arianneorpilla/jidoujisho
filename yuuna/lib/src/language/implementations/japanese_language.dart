@@ -303,7 +303,7 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
 
   final Isar database = await Isar.open(
     globalSchemas,
-    maxSizeMiB: 4096,
+    maxSizeMiB: 8192,
   );
 
   Map<int, DictionaryHeading> uniqueHeadingsById = {};

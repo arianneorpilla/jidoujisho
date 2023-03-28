@@ -36,7 +36,7 @@ Future<void> depositDictionaryDataHelper(PrepareDictionaryParams params) async {
     /// Create a new instance of Isar as this is a different isolate.
     final Isar database = await Isar.open(
       globalSchemas,
-      maxSizeMiB: 4096,
+      maxSizeMiB: 8192,
     );
 
     /// Perform format-specific entity generation.
@@ -108,130 +108,247 @@ Future<void> depositDictionaryDataHelper(PrepareDictionaryParams params) async {
       }
     }
 
-    /// Write the [Dictionary] entity.
-    database.writeTxnSync(() {
-      database.dictionarys.putSync(params.dictionary);
-    });
-
-    /// Write [DictionaryTag] entities.
-    int tagCount = 0;
-    int tagTotal = tags.length;
-    partition<DictionaryTag>(tags, 10000).forEach((batch) {
+    if (params.useSlowImport) {
+      /// Write the [Dictionary] entity.
       database.writeTxnSync(() {
-        database.dictionaryTags.putAllSync(batch);
-      });
-      tagCount += batch.length;
-      params.send(t.import_write_tag(count: tagCount, total: tagTotal));
-    });
-
-    /// Write [DictionaryPitch] entities.
-    int pitchCount = 0;
-    int pitchTotal = pitchesByHeading.values.map((e) => e.length).sum;
-    partition<MapEntry<DictionaryHeading, List<DictionaryPitch>>>(
-            pitchesByHeading.entries, 10000)
-        .forEach((batch) {
-      database.writeTxnSync(() {
-        for (MapEntry<DictionaryHeading,
-            List<DictionaryPitch>> pitchesForHeading in batch) {
-          DictionaryHeading heading = pitchesForHeading.key;
-          List<DictionaryPitch> pitches = pitchesForHeading.value;
-
-          database.dictionaryHeadings.putSync(heading);
-          database.dictionaryPitchs.putAllSync(pitches);
-
-          pitchCount += pitches.length;
-        }
+        database.dictionarys.putSync(params.dictionary);
       });
 
-      params.send(t.import_write_pitch(count: pitchCount, total: pitchTotal));
-    });
-
-    /// Write [DictionaryFrequency] entities.
-    int frequencyCount = 0;
-    int frequencyTotal = frequenciesByHeading.values.map((e) => e.length).sum;
-    partition<MapEntry<DictionaryHeading, List<DictionaryFrequency>>>(
-            frequenciesByHeading.entries, 10000)
-        .forEach((batch) {
-      database.writeTxnSync(() {
-        for (MapEntry<DictionaryHeading,
-            List<DictionaryFrequency>> frequenciesForHeading in batch) {
-          DictionaryHeading heading = frequenciesForHeading.key;
-          List<DictionaryFrequency> frequencies = frequenciesForHeading.value;
-
-          database.dictionaryHeadings.putSync(heading);
-          database.dictionaryFrequencys.putAllSync(frequencies);
-
-          frequencyCount += frequencies.length;
-        }
+      /// Write [DictionaryTag] entities.
+      int tagCount = 0;
+      int tagTotal = tags.length;
+      partition<DictionaryTag>(tags, 10000).forEach((batch) {
+        database.writeTxnSync(() {
+          database.dictionaryTags.putAllSync(batch);
+        });
+        tagCount += batch.length;
+        params.send(t.import_write_tag(count: tagCount, total: tagTotal));
       });
 
-      params.send(t.import_write_frequency(
-          count: frequencyCount, total: frequencyTotal));
-    });
+      /// Write [DictionaryPitch] entities.
+      int pitchCount = 0;
+      int pitchTotal = pitchesByHeading.values.map((e) => e.length).sum;
+      partition<MapEntry<DictionaryHeading, List<DictionaryPitch>>>(
+              pitchesByHeading.entries, 10000)
+          .forEach((batch) {
+        database.writeTxnSync(() {
+          for (MapEntry<DictionaryHeading,
+              List<DictionaryPitch>> pitchesForHeading in batch) {
+            DictionaryHeading heading = pitchesForHeading.key;
+            List<DictionaryPitch> pitches = pitchesForHeading.value;
 
-    /// Used to test the collision resistance of the FNV-1a algorithm used
-    /// for hashing dictionary headings to each have unique integer IDs.
-    /// This doesn't seem that heavy but we shouldn't instantiate millions
-    /// of elements at any given time, so this should be commented out for
-    /// a production release or when not debugging for collisions.
-    ///
-    /// For testing, a mix of Japanese bilingual and monolingual dictionaries
-    /// can be imported in sequence. The collision count should always be
-    /// zero. Interestingly, the Dart implementation of FNV-1a recommended by
-    /// Isar seems to produce less collisions than a MurmurHash V3
-    /// implementation. In any case, the code below can be uncommented for
-    /// and hash algorithm comparison testing and research.
-    ///
-    /// The idea is to get the delta number of headings, but also take into
-    /// account the number of headings already in the database.
+            database.dictionaryHeadings.putSync(heading);
+            database.dictionaryPitchs.putAllSync(pitches);
 
-    // int headingsInDatabase = database.dictionaryHeadings.countSync();
-    // int headingsToImportAlreadyInDatabase = database.dictionaryHeadings
-    //     .getAllSync(entriesByHeading.keys.map((e) => e.id).toList())
-    //     .whereNotNull()
-    //     .length;
-    // int headingsToImportNotInDatabase =
-    //     entriesByHeading.keys.length - headingsToImportAlreadyInDatabase;
+            pitchCount += pitches.length;
+          }
+        });
 
-    // debugPrint('Headings In Database: $headingsInDatabase');
-    // debugPrint(
-    //     'Headings To Import Already In Database: $headingsToImportAlreadyInDatabase');
-    // debugPrint(
-    //     'Headings To Import Not In Database: $headingsToImportNotInDatabase');
-
-    /// Write [DictionaryEntry] entities.
-    int entryCount = 0;
-    int entryTotal = entriesByHeading.values.map((e) => e.length).sum;
-    partition<MapEntry<DictionaryHeading, List<DictionaryEntry>>>(
-            entriesByHeading.entries, 10000)
-        .forEach((batch) {
-      database.writeTxnSync(() {
-        for (MapEntry<DictionaryHeading,
-            List<DictionaryEntry>> entriesForHeading in batch) {
-          DictionaryHeading heading = entriesForHeading.key;
-          List<DictionaryEntry> entries = entriesForHeading.value;
-
-          database.dictionaryHeadings.putSync(heading);
-          database.dictionaryEntrys.putAllSync(entries);
-
-          entryCount += entries.length;
-        }
+        params.send(t.import_write_pitch(count: pitchCount, total: pitchTotal));
       });
 
-      params.send(t.import_write_entry(count: entryCount, total: entryTotal));
-    });
+      /// Write [DictionaryFrequency] entities.
+      int frequencyCount = 0;
+      int frequencyTotal = frequenciesByHeading.values.map((e) => e.length).sum;
+      partition<MapEntry<DictionaryHeading, List<DictionaryFrequency>>>(
+              frequenciesByHeading.entries, 10000)
+          .forEach((batch) {
+        database.writeTxnSync(() {
+          for (MapEntry<DictionaryHeading,
+              List<DictionaryFrequency>> frequenciesForHeading in batch) {
+            DictionaryHeading heading = frequenciesForHeading.key;
+            List<DictionaryFrequency> frequencies = frequenciesForHeading.value;
 
-    /// Collision count should always be zero.
+            database.dictionaryHeadings.putSync(heading);
+            database.dictionaryFrequencys.putAllSync(frequencies);
 
-    // int newHeadingsInDatabase = database.dictionaryHeadings.countSync();
-    // int collisionsFound = newHeadingsInDatabase -
-    //     headingsInDatabase -
-    //     headingsToImportNotInDatabase;
-    // debugPrint('New Headings In Database: $newHeadingsInDatabase');
-    // debugPrint('Collisions Found: $collisionsFound');
+            frequencyCount += frequencies.length;
+          }
+        });
+
+        params.send(t.import_write_frequency(
+            count: frequencyCount, total: frequencyTotal));
+      });
+
+      /// Used to test the collision resistance of the FNV-1a algorithm used
+      /// for hashing dictionary headings to each have unique integer IDs.
+      /// This doesn't seem that heavy but we shouldn't instantiate millions
+      /// of elements at any given time, so this should be commented out for
+      /// a production release or when not debugging for collisions.
+      ///
+      /// For testing, a mix of Japanese bilingual and monolingual dictionaries
+      /// can be imported in sequence. The collision count should always be
+      /// zero. Interestingly, the Dart implementation of FNV-1a recommended by
+      /// Isar seems to produce less collisions than a MurmurHash V3
+      /// implementation. In any case, the code below can be uncommented for
+      /// and hash algorithm comparison testing and research.
+      ///
+      /// The idea is to get the delta number of headings, but also take into
+      /// account the number of headings already in the database.
+
+      // int headingsInDatabase = database.dictionaryHeadings.countSync();
+      // int headingsToImportAlreadyInDatabase = database.dictionaryHeadings
+      //     .getAllSync(entriesByHeading.keys.map((e) => e.id).toList())
+      //     .whereNotNull()
+      //     .length;
+      // int headingsToImportNotInDatabase =
+      //     entriesByHeading.keys.length - headingsToImportAlreadyInDatabase;
+
+      // debugPrint('Headings In Database: $headingsInDatabase');
+      // debugPrint(
+      //     'Headings To Import Already In Database: $headingsToImportAlreadyInDatabase');
+      // debugPrint(
+      //     'Headings To Import Not In Database: $headingsToImportNotInDatabase');
+
+      /// Write [DictionaryEntry] entities.
+      int entryCount = 0;
+      int entryTotal = entriesByHeading.values.map((e) => e.length).sum;
+      partition<MapEntry<DictionaryHeading, List<DictionaryEntry>>>(
+              entriesByHeading.entries, 10000)
+          .forEach((batch) {
+        database.writeTxnSync(() {
+          for (MapEntry<DictionaryHeading,
+              List<DictionaryEntry>> entriesForHeading in batch) {
+            DictionaryHeading heading = entriesForHeading.key;
+            List<DictionaryEntry> entries = entriesForHeading.value;
+
+            database.dictionaryHeadings.putSync(heading);
+            database.dictionaryEntrys.putAllSync(entries);
+
+            entryCount += entries.length;
+          }
+        });
+
+        params.send(t.import_write_entry(count: entryCount, total: entryTotal));
+      });
+
+      /// Collision count should always be zero.
+
+      // int newHeadingsInDatabase = database.dictionaryHeadings.countSync();
+      // int collisionsFound = newHeadingsInDatabase -
+      //     headingsInDatabase -
+      //     headingsToImportNotInDatabase;
+      // debugPrint('New Headings In Database: $newHeadingsInDatabase');
+      // debugPrint('Collisions Found: $collisionsFound');
+    } else {
+      /// Write as one transaction. If anything fails, no changes should occur.
+      database.writeTxnSync(() {
+        /// Write the [Dictionary] entity.
+        database.dictionarys.putSync(params.dictionary);
+
+        /// Write [DictionaryTag] entities.
+        int tagCount = 0;
+        int tagTotal = tags.length;
+        database.dictionaryTags.putAllSync(tags);
+        partition<DictionaryTag>(tags, 10000).forEach((batch) {
+          database.dictionaryTags.putAllSync(batch);
+          tagCount += batch.length;
+          params.send(t.import_write_tag(count: tagCount, total: tagTotal));
+        });
+
+        /// Write [DictionaryPitch] entities.
+        int pitchCount = 0;
+        int pitchTotal = pitchesByHeading.values.map((e) => e.length).sum;
+        partition<MapEntry<DictionaryHeading, List<DictionaryPitch>>>(
+                pitchesByHeading.entries, 10000)
+            .forEach((batch) {
+          for (MapEntry<DictionaryHeading,
+              List<DictionaryPitch>> pitchesForHeading in batch) {
+            DictionaryHeading heading = pitchesForHeading.key;
+            List<DictionaryPitch> pitches = pitchesForHeading.value;
+
+            database.dictionaryHeadings.putSync(heading);
+            database.dictionaryPitchs.putAllSync(pitches);
+            pitchCount += pitches.length;
+          }
+
+          params
+              .send(t.import_write_pitch(count: pitchCount, total: pitchTotal));
+        });
+
+        /// Write [DictionaryFrequency] entities.
+        int frequencyCount = 0;
+        int frequencyTotal =
+            frequenciesByHeading.values.map((e) => e.length).sum;
+        partition<MapEntry<DictionaryHeading, List<DictionaryFrequency>>>(
+                frequenciesByHeading.entries, 10000)
+            .forEach((batch) {
+          for (MapEntry<DictionaryHeading,
+              List<DictionaryFrequency>> frequenciesForHeading in batch) {
+            DictionaryHeading heading = frequenciesForHeading.key;
+            List<DictionaryFrequency> frequencies = frequenciesForHeading.value;
+
+            database.dictionaryHeadings.putSync(heading);
+            database.dictionaryFrequencys.putAllSync(frequencies);
+            frequencyCount += frequencies.length;
+          }
+
+          params.send(t.import_write_frequency(
+              count: frequencyCount, total: frequencyTotal));
+        });
+
+        /// Used to test the collision resistance of the FNV-1a algorithm used
+        /// for hashing dictionary headings to each have unique integer IDs.
+        /// This doesn't seem that heavy but we shouldn't instantiate millions
+        /// of elements at any given time, so this should be commented out for
+        /// a production release or when not debugging for collisions.
+        ///
+        /// For testing, a mix of Japanese bilingual and monolingual dictionaries
+        /// can be imported in sequence. The collision count should always be
+        /// zero. Interestingly, the Dart implementation of FNV-1a recommended by
+        /// Isar seems to produce less collisions than a MurmurHash V3
+        /// implementation. In any case, the code below can be uncommented for
+        /// and hash algorithm comparison testing and research.
+        ///
+        /// The idea is to get the delta number of headings, but also take into
+        /// account the number of headings already in the database.
+        // int headingsInDatabase = database.dictionaryHeadings.countSync();
+        // int headingsToImportAlreadyInDatabase = database.dictionaryHeadings
+        //     .getAllSync(entriesByHeading.keys.map((e) => e.id).toList())
+        //     .whereNotNull()
+        //     .length;
+        // int headingsToImportNotInDatabase =
+        //     entriesByHeading.keys.length - headingsToImportAlreadyInDatabase;
+
+        // debugPrint('Headings In Database: $headingsInDatabase');
+        // debugPrint(
+        //     'Headings To Import Already In Database: $headingsToImportAlreadyInDatabase');
+        // debugPrint(
+        //     'Headings To Import Not In Database: $headingsToImportNotInDatabase');
+
+        /// Write [DictionaryEntry] entities.
+        int entryCount = 0;
+        int entryTotal = entriesByHeading.values.map((e) => e.length).sum;
+        partition<MapEntry<DictionaryHeading, List<DictionaryEntry>>>(
+                entriesByHeading.entries, 10000)
+            .forEach((batch) {
+          for (MapEntry<DictionaryHeading,
+              List<DictionaryEntry>> entriesForHeading in batch) {
+            DictionaryHeading heading = entriesForHeading.key;
+            List<DictionaryEntry> entries = entriesForHeading.value;
+
+            database.dictionaryHeadings.putSync(heading);
+            database.dictionaryEntrys.putAllSync(entries);
+            entryCount += entries.length;
+          }
+
+          params
+              .send(t.import_write_entry(count: entryCount, total: entryTotal));
+        });
+
+        /// Collision count should always be zero.
+        // int newHeadingsInDatabase = database.dictionaryHeadings.countSync();
+        // int collisionsFound = newHeadingsInDatabase -
+        //     headingsInDatabase -
+        //     headingsToImportNotInDatabase;
+        // debugPrint('New Headings In Database: $newHeadingsInDatabase');
+        // debugPrint('Collisions Found: $collisionsFound');
+      });
+    }
   } catch (e, stackTrace) {
     params.send(stackTrace);
     params.send(e);
+    rethrow;
   }
 }
 
@@ -240,7 +357,7 @@ Future<void> preloadResult(int id) async {
   /// Create a new instance of Isar as this is a different isolate.
   final Isar database = await Isar.open(
     globalSchemas,
-    maxSizeMiB: 4096,
+    maxSizeMiB: 8192,
   );
   DictionarySearchResult result = database.dictionarySearchResults.getSync(id)!;
 
@@ -283,7 +400,7 @@ Future<void> updateDictionaryHistoryHelper(
 ) async {
   final Isar database = await Isar.open(
     globalSchemas,
-    maxSizeMiB: 4096,
+    maxSizeMiB: 8192,
   );
 
   DictionarySearchResult result =
@@ -299,7 +416,7 @@ Future<void> updateDictionaryHistoryHelper(
 Future<void> deleteDictionariesHelper(DeleteDictionaryParams params) async {
   final Isar database = await Isar.open(
     globalSchemas,
-    maxSizeMiB: 4096,
+    maxSizeMiB: 8192,
   );
 
   database.writeTxnSync(() {
@@ -317,7 +434,7 @@ Future<void> deleteDictionariesHelper(DeleteDictionaryParams params) async {
 Future<void> deleteDictionaryHelper(DeleteDictionaryParams params) async {
   final Isar database = await Isar.open(
     globalSchemas,
-    maxSizeMiB: 4096,
+    maxSizeMiB: 8192,
   );
 
   int id = params.dictionaryId!;

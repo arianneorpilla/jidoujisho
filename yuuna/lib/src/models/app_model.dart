@@ -18,7 +18,6 @@ import 'package:flutter_accessibility_service/accessibility_event.dart';
 import 'package:flutter_accessibility_service/flutter_accessibility_service.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_charset_detector/flutter_charset_detector.dart';
-import 'package:flutter_exit_app/flutter_exit_app.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -932,7 +931,7 @@ class AppModel with ChangeNotifier {
     /// Initialise persistent database.
     _database = await Isar.open(
       globalSchemas,
-      maxSizeMiB: 4096,
+      maxSizeMiB: 8192,
     );
 
     /// Perform startup activities unnecessary to further initialisation here.
@@ -1262,6 +1261,7 @@ class AppModel with ChangeNotifier {
         dictionary: dictionary,
         workingDirectory: workingDirectory,
         dictionaryFormat: dictionaryFormat,
+        useSlowImport: useSlowImport,
         sendPort: receivePort.sendPort,
       );
 
@@ -2091,7 +2091,7 @@ class AppModel with ChangeNotifier {
     await _audioHandler?.stop();
 
     if (_shouldKillMediaOnPop) {
-      await FlutterExitApp.exitApp();
+      SystemNavigator.pop();
     }
   }
 

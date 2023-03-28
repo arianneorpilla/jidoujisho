@@ -255,7 +255,7 @@ class _DictionaryDialogPageState extends BasePageState {
                 ),
               const JidoujishoDivider(),
               buildImportDropdown(),
-              // buildSlowImportSwitch(),
+              buildSlowImportSwitch(),
             ],
           ),
         ),

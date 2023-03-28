@@ -48,7 +48,7 @@ Future<int?> prepareSearchResultsEnglishLanguage(
   final Lemmatizer lemmatizer = Lemmatizer();
   final Isar database = await Isar.open(
     globalSchemas,
-    maxSizeMiB: 4096,
+    maxSizeMiB: 8192,
   );
 
   int bestLength = 0;

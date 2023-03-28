@@ -58,6 +58,7 @@ class PrepareDictionaryParams extends IsolateParams {
     required this.dictionary,
     required this.dictionaryFormat,
     required this.workingDirectory,
+    required this.useSlowImport,
     required super.sendPort,
   });
 
@@ -69,6 +70,9 @@ class PrepareDictionaryParams extends IsolateParams {
 
   /// A working directory from which to extract dictionary data from.
   final Directory workingDirectory;
+
+  /// Whether or not to use ACID-compliant importing.
+  final bool useSlowImport;
 }
 
 /// For isolate communication purposes. Used for dictionary deletion.
