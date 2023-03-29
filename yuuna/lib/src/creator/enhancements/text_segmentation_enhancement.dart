@@ -32,7 +32,7 @@ class TextSegmentationEnhancement extends Enhancement {
 
     if (sourceText.trim().isEmpty) {
       Fluttertoast.showToast(
-        msg: t.no_text_to_segment,
+        msg: t.no_text,
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
       );

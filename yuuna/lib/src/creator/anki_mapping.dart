@@ -72,7 +72,8 @@ class AnkiMapping {
     'ja-JP': {
       SentenceField.key: {
         0: ClearFieldEnhancement.key,
-        1: TextSegmentationEnhancement.key
+        1: TextSegmentationEnhancement.key,
+        2: SentencePickerEnhancement.key,
       },
       TermField.key: {
         0: ClearFieldEnhancement.key,

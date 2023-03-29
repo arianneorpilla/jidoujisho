@@ -784,6 +784,7 @@ class AppModel with ChangeNotifier {
       SentenceField.instance: [
         ClearFieldEnhancement(field: SentenceField.instance),
         TextSegmentationEnhancement(field: SentenceField.instance),
+        SentencePickerEnhancement(),
         OpenStashEnhancement(field: SentenceField.instance),
         PopFromStashEnhancement(field: SentenceField.instance),
       ],
@@ -2224,7 +2225,7 @@ class AppModel with ChangeNotifier {
   Future<void> openExampleSentenceDialog({
     required List<String> exampleSentences,
     required Function(List<String>) onSelect,
-    required Function(List<String>) onAppend,
+    Function(List<String>)? onAppend,
   }) async {
     await showDialog(
       context: _navigatorKey.currentContext!,

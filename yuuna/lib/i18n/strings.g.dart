@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 318
+/// Strings: 319
 ///
-/// Built on 2023-03-29 at 09:33 UTC
+/// Built on 2023-03-29 at 22:01 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -307,7 +307,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get clear_creator_title => 'Clear Creator';
 	String get clear_creator_description => 'This will clear all fields. Are you sure?';
 	String get copied_to_clipboard => 'Copied to clipboard.';
-	String get no_text_to_segment => 'No text to segment.';
+	String get no_text => 'No text.';
 	String get info_fields => 'Fields are pre-filled based on the term selected on instant export or prior to opening the Card Creator. In order to include a field for card export, it must be enabled below as well as mapped in the current selected export profile. Enabled fields may also be collapsed below in order to reduce clutter during editing. Use the Clear button on the top-right of the Card Creator in order to wipe these hidden fields quickly when manually editing a card.';
 	String get edit_fields => 'Edit and Reorder Fields';
 	String get remove_field => 'Remove Field';
@@ -465,6 +465,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get clear_message_description => 'This will clear all messages and start a new chat. Are you sure?';
 	String get error_chatgpt_response => 'Failed to get a response. Request rate-limited or denied.';
 	String get error_chatgpt_expired => 'Login token has expired. Please login again.';
+	String get login_successful_chatgpt => 'Login successful.';
 	late final _StringsViewRepliesEn view_replies = _StringsViewRepliesEn._(_root);
 }
 
@@ -645,7 +646,7 @@ extension on _StringsEn {
 			case 'clear_creator_title': return 'Clear Creator';
 			case 'clear_creator_description': return 'This will clear all fields. Are you sure?';
 			case 'copied_to_clipboard': return 'Copied to clipboard.';
-			case 'no_text_to_segment': return 'No text to segment.';
+			case 'no_text': return 'No text.';
 			case 'info_fields': return 'Fields are pre-filled based on the term selected on instant export or prior to opening the Card Creator. In order to include a field for card export, it must be enabled below as well as mapped in the current selected export profile. Enabled fields may also be collapsed below in order to reduce clutter during editing. Use the Clear button on the top-right of the Card Creator in order to wipe these hidden fields quickly when manually editing a card.';
 			case 'edit_fields': return 'Edit and Reorder Fields';
 			case 'remove_field': return 'Remove Field';
@@ -803,6 +804,7 @@ extension on _StringsEn {
 			case 'clear_message_description': return 'This will clear all messages and start a new chat. Are you sure?';
 			case 'error_chatgpt_response': return 'Failed to get a response. Request rate-limited or denied.';
 			case 'error_chatgpt_expired': return 'Login token has expired. Please login again.';
+			case 'login_successful_chatgpt': return 'Login successful.';
 			case 'view_replies.reply': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
 				one: 'SHOW ${n} REPLY',
 				other: 'SHOW ${n} REPLIES',

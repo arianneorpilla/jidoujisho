@@ -171,7 +171,7 @@
     "clear_creator_title": "Clear Creator",
     "clear_creator_description": "This will clear all fields. Are you sure?",
     "copied_to_clipboard": "Copied to clipboard.",
-    "no_text_to_segment": "No text to segment.",
+    "no_text": "No text.",
     "info_fields": "Fields are pre-filled based on the term selected on instant export or prior to opening the Card Creator. In order to include a field for card export, it must be enabled below as well as mapped in the current selected export profile. Enabled fields may also be collapsed below in order to reduce clutter during editing. Use the Clear button on the top-right of the Card Creator in order to wipe these hidden fields quickly when manually editing a card.",
     "edit_fields": "Edit and Reorder Fields",
     "remove_field": "Remove Field",

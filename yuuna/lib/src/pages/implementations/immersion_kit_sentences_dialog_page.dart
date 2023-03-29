@@ -135,6 +135,7 @@ class _ImmersionKitSentencesDialogPageState
               MediaQuery.of(context).orientation == Orientation.portrait
                   ? 1
                   : 3),
+      shrinkWrap: true,
       itemCount: widget.exampleSentences.length,
       itemBuilder: (context, index) {
         ImmersionKitResult result = widget.exampleSentences[index];
