@@ -7,6 +7,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_chatgpt_api/flutter_chatgpt_api.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
@@ -215,6 +216,8 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
       );
     } catch (e) {
       if (source.messageAccessToken == null) {
+        Fluttertoast.showToast(msg: t.error_chatgpt_expired);
+
         CookieManager.instance().deleteCookies(
           url: Uri.parse('https://chat.openai.com/'),
           domain: 'openai.com',
@@ -222,6 +225,8 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
 
         ref.refresh(accessCookieProvider);
         ref.refresh(clearanceCookieProvider);
+      } else {
+        Fluttertoast.showToast(msg: t.error_chatgpt_response);
       }
     } finally {
       SchedulerBinding.instance.addPostFrameCallback((_) {
