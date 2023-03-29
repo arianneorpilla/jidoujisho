@@ -89,6 +89,7 @@ class _MassifSentencesDialogPage
               MediaQuery.of(context).orientation == Orientation.portrait
                   ? 1
                   : 3),
+      shrinkWrap: true,
       itemCount: widget.exampleSentences.length,
       itemBuilder: (context, index) {
         MassifResult result = widget.exampleSentences[index];

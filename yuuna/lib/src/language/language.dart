@@ -117,14 +117,12 @@ abstract class Language {
     required String paragraph,
     required int index,
   }) {
-    RegExp regex = RegExp(r'.{1,}?([。.」?？!！]+|\n)');
-
-    Iterable<Match> matches = regex.allMatches(paragraph);
+    List<String> sentences = getSentences(paragraph);
     int currentIndex = 0;
     String sentenceToReturn = paragraph;
 
-    for (Match match in matches) {
-      sentenceToReturn = match.group(0) ?? '';
+    for (String sentence in sentences) {
+      sentenceToReturn = sentence;
 
       currentIndex += sentenceToReturn.length;
       if (currentIndex > index) {
@@ -133,6 +131,14 @@ abstract class Language {
     }
 
     return sentenceToReturn.trim();
+  }
+
+  /// Returns a list of sentences for a block of text.
+  List<String> getSentences(String text) {
+    RegExp regex = RegExp(r'.{1,}?([。.」?？!！]+|\n)');
+
+    Iterable<Match> matches = regex.allMatches(text);
+    return matches.map((match) => match.group(0) ?? '').toList();
   }
 
   /// The language and country code separated by a dash.

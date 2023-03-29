@@ -5,22 +5,21 @@ import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/utils.dart';
 
-/// An enhancement used to pick a new image search term.
-class ImageSearchTermPickerEnhancement extends Enhancement {
+/// An enhancement used to pick a sentence from text.
+class SentencePickerEnhancement extends Enhancement {
   /// Initialise this enhancement with the hardset parameters.
-  ImageSearchTermPickerEnhancement()
+  SentencePickerEnhancement()
       : super(
+          field: SentenceField.instance,
           uniqueKey: key,
-          label: 'Image Search Term Picker',
-          description:
-              'Select an image search term from all text currently in the Card Creator.',
-          icon: Icons.account_tree,
-          field: ImageField.instance,
+          label: 'Sentence Picker',
+          description: 'Pick sentences delimited by punctuation and spacing.',
+          icon: Icons.colorize,
         );
 
   /// Used to identify this enhancement and to allow a constant value for the
   /// default mappings value of [AnkiMapping].
-  static const String key = 'image_search_term_picker';
+  static const String key = 'sentence_picker';
 
   @override
   Future<void> enhanceCreatorParams({
@@ -30,11 +29,7 @@ class ImageSearchTermPickerEnhancement extends Enhancement {
     required CreatorModel creatorModel,
     required EnhancementTriggerCause cause,
   }) async {
-    List<String> controllers = appModel.lastSelectedMapping
-        .getCreatorFields()
-        .map((field) => creatorModel.getFieldController(field).text)
-        .toList();
-    String sourceText = controllers.join(' ');
+    String sourceText = creatorModel.getFieldController(field).text;
 
     if (sourceText.trim().isEmpty) {
       Fluttertoast.showToast(
@@ -45,12 +40,12 @@ class ImageSearchTermPickerEnhancement extends Enhancement {
       return;
     }
 
-    appModel.openTextSegmentationDialog(
-      sourceText: sourceText,
-      onSelect: (selection, items) {
-        creatorModel.getFieldController(ImageField.instance).text =
-            selection.replaceAll('\n', ' ');
-        Navigator.pop(context);
+    appModel.openExampleSentenceDialog(
+      exampleSentences: appModel.targetLanguage.getSentences(sourceText),
+      onSelect: (selection) {
+        creatorModel.getFieldController(SentenceField.instance).text = selection
+            .join(appModel.targetLanguage.isSpaceDelimited ? ' ' : '')
+            .trim();
       },
     );
   }

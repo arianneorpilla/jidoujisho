@@ -225,6 +225,13 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
 
         ref.refresh(accessCookieProvider);
         ref.refresh(clearanceCookieProvider);
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const ReaderChatgptLoginPage(),
+          ),
+        );
       } else {
         Fluttertoast.showToast(msg: t.error_chatgpt_response);
       }

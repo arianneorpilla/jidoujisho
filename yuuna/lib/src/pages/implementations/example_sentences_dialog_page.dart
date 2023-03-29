@@ -11,7 +11,7 @@ class ExampleSentencesDialogPage extends BasePage {
   const ExampleSentencesDialogPage({
     required this.exampleSentences,
     required this.onSelect,
-    required this.onAppend,
+    this.onAppend,
     super.key,
   });
 
@@ -22,7 +22,7 @@ class ExampleSentencesDialogPage extends BasePage {
   final Function(List<String>) onSelect;
 
   /// Append action callback.
-  final Function(List<String>) onAppend;
+  final Function(List<String>)? onAppend;
 
   @override
   BasePageState createState() => _ExampleSentencesDialogPageState();
@@ -83,6 +83,7 @@ class _ExampleSentencesDialogPageState
 
   Widget buildTextWidgets() {
     return MasonryGridView.builder(
+      shrinkWrap: true,
       gridDelegate: SliverSimpleGridDelegateWithFixedCrossAxisCount(
           crossAxisCount:
               MediaQuery.of(context).orientation == Orientation.portrait
@@ -127,7 +128,7 @@ class _ExampleSentencesDialogPageState
   }
 
   List<Widget> get actions => [
-        buildAppendButton(),
+        if (widget.onAppend != null) buildAppendButton(),
         buildSelectButton(),
       ];
 
@@ -159,7 +160,7 @@ class _ExampleSentencesDialogPageState
 
   void executeAppend() {
     Navigator.pop(context);
-    widget.onAppend(selection);
+    widget.onAppend?.call(selection);
   }
 
   void executeSelect() {
