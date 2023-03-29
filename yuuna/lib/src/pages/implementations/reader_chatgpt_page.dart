@@ -37,6 +37,7 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
       ReaderMediaType.instance.scrollController;
   final TextEditingController _controller = TextEditingController();
 
+  Orientation? _lastOrientation;
   bool _isLoading = false;
 
   ChatGPTApi? _api;
@@ -45,6 +46,12 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
 
   @override
   Widget build(BuildContext context) {
+    Orientation orientation = MediaQuery.of(context).orientation;
+    if (orientation != _lastOrientation) {
+      clearDictionaryResult();
+      _lastOrientation = orientation;
+    }
+
     return ref.watch(accessCookieProvider).when(
           data: (accessCookie) {
             return ref.watch(clearanceCookieProvider).when(
@@ -395,7 +402,7 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
         right: Spacing.of(context).spaces.normal,
       ),
       child: Card(
-        color: isBot ? Colors.red.withOpacity(0.5) : null,
+        color: isBot ? null : Colors.red.withOpacity(0.5),
         child: Padding(
           padding: Spacing.of(context).insets.all.normal,
           child: isLoading && text.isEmpty
@@ -439,7 +446,7 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
                           stashAction: onContextStash,
                           stashActionLabel: t.stash,
                           creatorAction: (selection) async {
-                            launchCreator(term: selection, sentence: text);
+                            launchCreator(term: '', sentence: selection);
                           },
                           creatorActionLabel: t.creator,
                           allowCopy: true,

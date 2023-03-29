@@ -381,8 +381,7 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
                         stashAction: onContextStash,
                         stashActionLabel: t.stash,
                         creatorAction: (selection) async {
-                          launchCreator(
-                              term: selection, sentence: comment.text);
+                          launchCreator(term: '', sentence: selection);
                         },
                         creatorActionLabel: t.creator,
                         allowCopy: true,

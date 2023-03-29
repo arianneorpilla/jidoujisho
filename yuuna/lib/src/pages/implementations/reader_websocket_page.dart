@@ -243,7 +243,7 @@ class _ReaderWebsocketPageState
                     stashAction: onContextStash,
                     stashActionLabel: t.stash,
                     creatorAction: (selection) async {
-                      launchCreator(term: selection, sentence: message);
+                      launchCreator(term: '', sentence: selection);
                     },
                     creatorActionLabel: t.creator,
                     allowCopy: true,
