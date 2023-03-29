@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 309
+/// Strings: 316
 ///
-/// Built on 2023-03-12 at 04:12 UTC
+/// Built on 2023-03-28 at 13:06 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -456,6 +456,13 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get no_text_in_clipboard => 'No text to display';
 	String file_downloaded({required Object name}) => 'File downloaded: ${name}';
 	String get change_sort_order => 'Change Sort Order';
+	String get login => 'Login';
+	String get access_token_missing_expired => 'Access token missing or expired';
+	String get send => 'Send';
+	String get no_messages => 'Enter text to chat';
+	String get enter_message => 'Enter message...';
+	String get clear_message_title => 'Clear Messages';
+	String get clear_message_description => 'This will clear all messages. Are you sure?';
 	late final _StringsViewRepliesEn view_replies = _StringsViewRepliesEn._(_root);
 }
 
@@ -785,6 +792,13 @@ extension on _StringsEn {
 			case 'no_text_in_clipboard': return 'No text to display';
 			case 'file_downloaded': return ({required Object name}) => 'File downloaded: ${name}';
 			case 'change_sort_order': return 'Change Sort Order';
+			case 'login': return 'Login';
+			case 'access_token_missing_expired': return 'Access token missing or expired';
+			case 'send': return 'Send';
+			case 'no_messages': return 'Enter text to chat';
+			case 'enter_message': return 'Enter message...';
+			case 'clear_message_title': return 'Clear Messages';
+			case 'clear_message_description': return 'This will clear all messages. Are you sure?';
 			case 'view_replies.reply': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
 				one: 'SHOW ${n} REPLY',
 				other: 'SHOW ${n} REPLIES',

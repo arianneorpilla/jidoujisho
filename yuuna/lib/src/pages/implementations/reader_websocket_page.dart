@@ -25,7 +25,8 @@ class ReaderWebsocketPage extends BaseSourcePage {
 /// A base class for providing all tabs in the main menu. In large part, this
 /// was implemented to define shortcuts for common lengthy methods across UI
 /// code.
-class _ReaderWebsocketPageState<ReaderLyricsPage> extends BaseSourcePageState {
+class _ReaderWebsocketPageState
+    extends BaseSourcePageState<ReaderWebsocketPage> {
   ReaderWebsocketSource get source => ReaderWebsocketSource.instance;
 
   @override

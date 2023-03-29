@@ -1,7 +1,7 @@
 name: yuuna
 description: A full-featured immersion language learning suite for mobile.
 publish_to: 'none'
-version: 2.4.5+46
+version: 2.5.0+47
 environment:
   sdk: ">=2.17.0 <3.0.0"
 
@@ -42,6 +42,10 @@ dependencies:
   flutter_archive: ^5.0.0
   flutter_cache_manager: ^3.3.0
   flutter_charset_detector: ^1.0.2
+  flutter_chatgpt_api:
+    git:
+      url: https://github.com/lrorpilla/flutter_chatgpt_api
+      ref: master
   flutter_colorpicker: ^1.0.3
   flutter_exit_app: ^1.0.5
   flutter_fadein: ^2.0.0

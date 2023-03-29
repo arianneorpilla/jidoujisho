@@ -331,6 +331,13 @@
     "no_text_in_clipboard": "No text to display",
     "file_downloaded": "File downloaded: $name",
     "change_sort_order": "Change Sort Order",
+    "login": "Login",
+    "access_token_missing_expired": "Login token missing or expired",
+    "send": "Send",
+    "no_messages": "Start a chat",
+    "enter_message": "Enter message...",
+    "clear_message_title": "Clear Messages",
+    "clear_message_description": "This will clear all messages and start a new chat. Are you sure?",
     "view_replies": {
         "reply": {
           "one": "SHOW $n REPLY",

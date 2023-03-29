@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_exit_app/flutter_exit_app.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:spaces/spaces.dart';
 import 'package:subtitle/subtitle.dart';

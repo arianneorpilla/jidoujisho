@@ -51,6 +51,8 @@ export 'src/pages/implementations/dictionary_settings_dialog_page.dart';
 export 'src/pages/implementations/reader_clipboard_page.dart';
 export 'src/pages/implementations/pip_page.dart';
 export 'src/pages/implementations/audio_recorder_page.dart';
+export 'src/pages/implementations/reader_chatgpt_page.dart';
+export 'src/pages/implementations/reader_chatgpt_login_page.dart';
 
 export 'src/pages/base_page.dart';
 export 'src/pages/base_history_page.dart';

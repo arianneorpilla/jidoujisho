@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_exit_app/flutter_exit_app.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
