@@ -50,7 +50,9 @@ class _ReaderChatgptLoginPageState extends BasePageState {
           );
 
           if (accessCookie != null && clearanceCookie != null) {
-            if (mounted) {
+            source.messageAccessToken = null;
+            await source.prepareMessageAccessToken();
+            if (mounted && source.messageAccessToken != null) {
               Navigator.popUntil(context, (route) => route.isFirst);
             }
           }

@@ -153,7 +153,7 @@ class ReaderChatgptSource extends ReaderMediaSource {
     return FloatingSearchBarAction(
       child: JidoujishoIconButton(
         size: Theme.of(context).textTheme.titleLarge?.fontSize,
-        tooltip: t.clear_text_title,
+        tooltip: t.clear_message_title,
         icon: Icons.clear_all,
         onTap: () {
           showClearPrompt(

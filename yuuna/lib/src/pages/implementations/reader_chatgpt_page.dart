@@ -207,15 +207,9 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
       );
     } catch (e) {
       if (source.messageAccessToken == null) {
-        await CookieManager.instance().deleteCookies(
+        CookieManager.instance().deleteCookies(
           url: Uri.parse('https://chat.openai.com/'),
-          domain: ref.read(accessCookieProvider).value?.domain,
-          path: ref.read(accessCookieProvider).value?.path ?? '/',
-        );
-        await CookieManager.instance().deleteCookies(
-          url: Uri.parse('https://chat.openai.com/'),
-          domain: ref.read(clearanceCookieProvider).value?.domain,
-          path: ref.read(clearanceCookieProvider).value?.path ?? '/',
+          domain: 'openai.com',
         );
 
         ref.refresh(accessCookieProvider);
@@ -223,8 +217,8 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
       }
     } finally {
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
         _focusNode.requestFocus();
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
       });
 
       setState(() {
