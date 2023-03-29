@@ -36,7 +36,6 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
   final ScrollController _scrollController =
       ReaderMediaType.instance.scrollController;
   final TextEditingController _controller = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
 
   bool _isLoading = false;
 
@@ -59,10 +58,13 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
                       );
 
                       source.prepareMessageAccessToken();
-                      if (_scrollController.hasClients) {
-                        _scrollController
-                            .jumpTo(_scrollController.position.maxScrollExtent);
-                      }
+
+                      SchedulerBinding.instance.addPostFrameCallback((_) {
+                        if (_scrollController.hasClients) {
+                          _scrollController.jumpTo(
+                              _scrollController.position.maxScrollExtent);
+                        }
+                      });
 
                       return Column(
                         children: [
@@ -125,7 +127,6 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
     return Padding(
       padding: Spacing.of(context).insets.all.normal,
       child: TextField(
-        focusNode: _focusNode,
         controller: _controller,
         keyboardType: TextInputType.multiline,
         maxLines: null,
@@ -217,7 +218,6 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
       }
     } finally {
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        _focusNode.requestFocus();
         _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
       });
 
