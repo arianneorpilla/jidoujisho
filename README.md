@@ -32,6 +32,10 @@
 
 
 ---
+<p align="center" style="margin:0"><b>Preview Release:
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.5-preview">2.5</a>
+</b></p>
+
 <p align="center" style="margin:0"><b>Latest Release:
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.4">2.4</a>
 </b></p>
