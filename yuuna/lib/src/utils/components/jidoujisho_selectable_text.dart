@@ -742,7 +742,7 @@ class _JidoujishoSelectableTextState extends State<JidoujishoSelectableText>
             cupertinoTheme.primaryColor;
         selectionColor = selectionStyle.selectionColor ??
             cupertinoTheme.primaryColor.withOpacity(0.40);
-        cursorRadius ??= const Radius.circular(2.0);
+        cursorRadius ??= const Radius.circular(2);
         cursorOffset = Offset(
             iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
         break;
@@ -758,7 +758,7 @@ class _JidoujishoSelectableTextState extends State<JidoujishoSelectableText>
             cupertinoTheme.primaryColor;
         selectionColor = selectionStyle.selectionColor ??
             cupertinoTheme.primaryColor.withOpacity(0.40);
-        cursorRadius ??= const Radius.circular(2.0);
+        cursorRadius ??= const Radius.circular(2);
         cursorOffset = Offset(
             iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
         break;

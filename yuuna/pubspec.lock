@@ -608,6 +608,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+  flutter_chatgpt_api:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: master
+      resolved-ref: b249c8cd078ebc9c62d957bc3b07cec8ba7328bf
+      url: "https://github.com/lrorpilla/flutter_chatgpt_api"
+    source: git
+    version: "1.1.0"
   flutter_colorpicker:
     dependency: "direct main"
     description:
@@ -1808,10 +1817,10 @@ packages:
     dependency: transitive
     description:
       name: uuid
-      sha256: "2469694ad079893e3b434a627970c33f2fa5adc46dfe03c9617546969a9a8afc"
+      sha256: "648e103079f7c64a36dc7d39369cabb358d377078a051d6ae2ad3aa539519313"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.6"
+    version: "3.0.7"
   ve_dart:
     dependency: "direct main"
     description:
