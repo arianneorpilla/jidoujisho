@@ -82,7 +82,7 @@ class _SubtitleOptionsDialogPage
                           _delayController.text =
                               ((int.tryParse(_delayController.text) ??
                                           _options.subtitleDelay) -
-                                      500)
+                                      100)
                                   .toString();
                           FocusScope.of(context).unfocus();
                         },
@@ -95,7 +95,7 @@ class _SubtitleOptionsDialogPage
                           _delayController.text =
                               ((int.tryParse(_delayController.text) ??
                                           _options.subtitleDelay) +
-                                      500)
+                                      100)
                                   .toString();
                           FocusScope.of(context).unfocus();
                         },
