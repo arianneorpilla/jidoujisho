@@ -47,10 +47,6 @@ class _ImmersionKitSentencesDialogPageState
     widget.exampleSentences.forEachIndexed((index, element) {
       _valuesSelected[index] = ValueNotifier<bool>(false);
     });
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      playCurrentAudio(0);
-    });
   }
 
   @override

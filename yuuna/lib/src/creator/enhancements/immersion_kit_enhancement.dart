@@ -151,43 +151,6 @@ class ImmersionKitEnhancement extends Enhancement {
         creatorModel.getFieldController(SentenceField.instance).text =
             '${currentSentence.trim()}\n\n${selection.map((result) => result.text).join('\n\n')}'
                 .trim();
-
-        if (selection.first.imageUrl.isNotEmpty) {
-          await ImageField.instance.setImages(
-            cause: cause,
-            appModel: appModel,
-            creatorModel: creatorModel,
-            newAutoCannotOverride: false,
-            generateImages: () async {
-              String imagePath = '${directory.path}/image';
-              File imageFile = File(imagePath);
-              http.Response imageResponse =
-                  await http.get(Uri.parse(selection.first.imageUrl));
-              imageFile.writeAsBytesSync(imageResponse.bodyBytes);
-
-              return [NetworkToFileImage(file: imageFile)];
-            },
-          );
-        }
-
-        if (selection.first.audioUrl.isNotEmpty) {
-          await AudioSentenceField.instance.setAudio(
-            appModel: appModel,
-            creatorModel: creatorModel,
-            searchTerm: searchTerm,
-            newAutoCannotOverride: false,
-            cause: cause,
-            generateAudio: () async {
-              String audioPath = '${directory.path}/audio.mp3';
-              File audioFile = File(audioPath);
-              http.Response audioResponse =
-                  await http.get(Uri.parse(selection.first.audioUrl));
-              audioFile.writeAsBytesSync(audioResponse.bodyBytes);
-
-              return audioFile;
-            },
-          );
-        }
       },
     );
   }
