@@ -193,24 +193,24 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
     _controller.clear();
     _progressNotifier.value = '';
 
-    await source.prepareMessageAccessToken();
-    source.messageAccessToken!;
-
-    setState(() {
-      appModel.addMessage(
-        MessageItem.fromChatMessage(
-          ChatMessage(
-            text: text,
-            chatMessageType: ChatMessageType.user,
-          ),
-        ),
-      );
-      _isLoading = true;
-    });
-
-    Future.delayed(const Duration(milliseconds: 100), scrollToBottom);
-
     try {
+      await source.prepareMessageAccessToken();
+      source.messageAccessToken!;
+
+      setState(() {
+        appModel.addMessage(
+          MessageItem.fromChatMessage(
+            ChatMessage(
+              text: text,
+              chatMessageType: ChatMessageType.user,
+            ),
+          ),
+        );
+        _isLoading = true;
+      });
+
+      Future.delayed(const Duration(milliseconds: 100), scrollToBottom);
+
       final response = await _api!.sendMessage(
         accessToken: source.messageAccessToken!,
         message: text,
