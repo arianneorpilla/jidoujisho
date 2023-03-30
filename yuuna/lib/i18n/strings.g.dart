@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 319
+/// Strings: 318
 ///
-/// Built on 2023-03-29 at 22:01 UTC
+/// Built on 2023-03-30 at 03:15 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -464,8 +464,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get clear_message_title => 'Clear Messages';
 	String get clear_message_description => 'This will clear all messages and start a new chat. Are you sure?';
 	String get error_chatgpt_response => 'Failed to get a response. Request rate-limited or denied.';
-	String get error_chatgpt_expired => 'Login token has expired. Please login again.';
-	String get login_successful_chatgpt => 'Login successful.';
+	String get error_chatgpt_expired => 'Login token has expired. Please login again or solve a challenge.';
 	late final _StringsViewRepliesEn view_replies = _StringsViewRepliesEn._(_root);
 }
 
@@ -803,8 +802,7 @@ extension on _StringsEn {
 			case 'clear_message_title': return 'Clear Messages';
 			case 'clear_message_description': return 'This will clear all messages and start a new chat. Are you sure?';
 			case 'error_chatgpt_response': return 'Failed to get a response. Request rate-limited or denied.';
-			case 'error_chatgpt_expired': return 'Login token has expired. Please login again.';
-			case 'login_successful_chatgpt': return 'Login successful.';
+			case 'error_chatgpt_expired': return 'Login token has expired. Please login again or solve a challenge.';
 			case 'view_replies.reply': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
 				one: 'SHOW ${n} REPLY',
 				other: 'SHOW ${n} REPLIES',

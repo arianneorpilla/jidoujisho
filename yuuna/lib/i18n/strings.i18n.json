@@ -339,7 +339,7 @@
     "clear_message_title": "Clear Messages",
     "clear_message_description": "This will clear all messages and start a new chat. Are you sure?",
     "error_chatgpt_response": "Failed to get a response. Request rate-limited or denied.",
-    "error_chatgpt_expired": "Login token has expired. Please login again.",
+    "error_chatgpt_expired": "Login token has expired. Please login again or solve a challenge.",
     "view_replies": {
         "reply": {
           "one": "SHOW $n REPLY",
