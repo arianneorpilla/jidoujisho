@@ -41,7 +41,10 @@ class SentencePickerEnhancement extends Enhancement {
     }
 
     appModel.openExampleSentenceDialog(
-      exampleSentences: appModel.targetLanguage.getSentences(sourceText),
+      exampleSentences: appModel.targetLanguage
+          .getSentences(sourceText)
+          .map((e) => e.trim())
+          .toList(),
       onSelect: (selection) {
         creatorModel.getFieldController(SentenceField.instance).text = selection
             .join(appModel.targetLanguage.isSpaceDelimited ? ' ' : '')

@@ -179,6 +179,9 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
         _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
       }
     });
+
+    await source.prepareMessageAccessToken();
+
     setState(() {
       appModel.addMessage(
         MessageItem.fromChatMessage(
@@ -190,8 +193,6 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
       );
       _isLoading = true;
     });
-
-    await source.prepareMessageAccessToken();
 
     try {
       final response = await _api!.sendMessage(
