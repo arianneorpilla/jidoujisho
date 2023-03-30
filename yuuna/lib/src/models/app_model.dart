@@ -52,6 +52,7 @@ final List<CollectionSchema> globalSchemas = [
   MediaItemSchema,
   AnkiMappingSchema,
   SearchHistoryItemSchema,
+  MessageItemSchema,
 ];
 
 /// A list of media types that the app will support at runtime.
@@ -286,6 +287,24 @@ class AppModel with ChangeNotifier {
   /// user-defined order in the dictionary menu.
   List<AnkiMapping> get mappings =>
       _database.ankiMappings.where().sortByOrder().findAllSync();
+
+  /// Returns the message log for the [ReaderChatgptSource].
+  List<MessageItem> get messages =>
+      _database.messageItems.where().findAllSync();
+
+  /// Adds a message to the  log for the [ReaderChatgptSource].
+  void addMessage(MessageItem message) {
+    _database.writeTxnSync(() {
+      _database.messageItems.putSync(message);
+    });
+  }
+
+  /// Clears the message log for the [ReaderChatgptSource].
+  void clearMessages() {
+    _database.writeTxnSync(() {
+      _database.messageItems.clearSync();
+    });
+  }
 
   /// Returns all dictionary history results. Oldest is first.
   List<DictionarySearchResult> get dictionaryHistory =>

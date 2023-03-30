@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_chatgpt_api/flutter_chatgpt_api.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
@@ -10,9 +9,6 @@ import 'package:yuuna/media.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
-
-// ignore: implementation_imports
-import 'package:flutter_chatgpt_api/src/models/chat_response.model.dart';
 
 /// A global [Provider] for getting necessary cookies.
 final accessCookieProvider = FutureProvider<Cookie?>((ref) {
@@ -50,11 +46,25 @@ class ReaderChatgptSource extends ReaderMediaSource {
   static final ReaderChatgptSource _instance =
       ReaderChatgptSource._privateConstructor();
 
-  /// List of chat messages sent to and received from ChatGPT.
-  List<ChatMessage> messages = [];
+  /// Used to get last chat details.
+  String? getLastMessageId() {
+    return getPreference<String?>(key: 'message_id', defaultValue: null);
+  }
 
-  /// Gets the last response from ChatGPT.
-  ChatResponse? lastResponse;
+  /// Used to get last chat details.
+  String? getLastConversationId() {
+    return getPreference<String?>(key: 'conversation_id', defaultValue: null);
+  }
+
+  /// Used to persist last chat details.
+  Future<void> setLastMessageId(String? value) async {
+    await setPreference(key: 'message_id', value: value);
+  }
+
+  /// Used to persist last chat details.
+  Future<void> setLastConversationId(String? value) async {
+    await setPreference(key: 'conversation_id', value: value);
+  }
 
   /// Access token used for sending messages.
   String? messageAccessToken;
@@ -186,8 +196,10 @@ class ReaderChatgptSource extends ReaderMediaSource {
             ),
           ),
           onPressed: () async {
-            messages = [];
-            lastResponse = null;
+            await setLastMessageId(null);
+            await setLastConversationId(null);
+            appModel.clearMessages();
+
             appModel.refresh();
 
             Navigator.pop(context);

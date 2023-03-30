@@ -79,7 +79,7 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
                           Expanded(
                             child: Stack(
                               children: [
-                                if (source.messages.isEmpty)
+                                if (appModel.messages.isEmpty)
                                   buildEmpty()
                                 else
                                   GestureDetector(
@@ -180,10 +180,12 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
       }
     });
     setState(() {
-      source.messages.add(
-        ChatMessage(
-          text: text,
-          chatMessageType: ChatMessageType.user,
+      appModel.addMessage(
+        MessageItem.fromChatMessage(
+          ChatMessage(
+            text: text,
+            chatMessageType: ChatMessageType.user,
+          ),
         ),
       );
       _isLoading = true;
@@ -202,16 +204,19 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
                 .jumpTo(_scrollController.position.maxScrollExtent);
           }
         },
-        conversationId: source.lastResponse?.conversationId,
-        parentMessageId: source.lastResponse?.messageId,
+        conversationId: source.getLastConversationId(),
+        parentMessageId: source.getLastMessageId(),
       );
 
-      source.lastResponse = response;
+      await source.setLastConversationId(response.conversationId);
+      await source.setLastMessageId(response.messageId);
 
-      source.messages.add(
-        ChatMessage(
-          text: response.message.trim(),
-          chatMessageType: ChatMessageType.bot,
+      appModel.addMessage(
+        MessageItem.fromChatMessage(
+          ChatMessage(
+            text: response.message.trim(),
+            chatMessageType: ChatMessageType.bot,
+          ),
         ),
       );
     } catch (e) {
@@ -256,7 +261,7 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
   }
 
   Widget buildMessageBuilder() {
-    List<ChatMessage> messages = source.messages.toList();
+    List<MessageItem> messages = appModel.messages;
     return RawScrollbar(
       controller: _scrollController,
       thumbVisibility: true,
@@ -280,13 +285,13 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
             );
           }
 
-          ChatMessage message = messages[index];
+          MessageItem item = messages[index];
 
           return Padding(
             padding: EdgeInsets.only(top: index == 0 ? 60 : 0),
             child: buildMessage(
-              text: message.text,
-              isBot: message.chatMessageType == ChatMessageType.bot,
+              text: item.message,
+              isBot: item.isBot,
               isLoading: false,
             ),
           );
