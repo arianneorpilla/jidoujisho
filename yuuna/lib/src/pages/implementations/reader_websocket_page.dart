@@ -78,6 +78,7 @@ class _ReaderWebsocketPageState
       thumbVisibility: true,
       thickness: 3,
       child: ListView.builder(
+        cacheExtent: 999999999999999,
         physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics()),
         controller: ReaderMediaType.instance.scrollController,

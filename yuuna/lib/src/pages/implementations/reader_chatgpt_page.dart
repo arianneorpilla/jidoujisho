@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_chatgpt_api/flutter_chatgpt_api.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -46,6 +45,15 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
   final ValueNotifier<String> _progressNotifier = ValueNotifier<String>('');
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).unfocus();
+      Future.delayed(const Duration(milliseconds: 300), scrollToBottom);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     Orientation orientation = MediaQuery.of(context).orientation;
     if (orientation != _lastOrientation) {
@@ -66,13 +74,6 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
                       );
 
                       source.prepareMessageAccessToken();
-
-                      SchedulerBinding.instance.addPostFrameCallback((_) {
-                        if (_scrollController.hasClients) {
-                          _scrollController.jumpTo(
-                              _scrollController.position.maxScrollExtent);
-                        }
-                      });
 
                       return Column(
                         children: [
@@ -159,10 +160,28 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
                   onTap: () => onSubmitted(_controller.text),
                 ),
         ),
-        onTap: clearDictionaryResult,
+        onTap: () {
+          clearDictionaryResult();
+          Future.delayed(const Duration(milliseconds: 300), scrollToBottom);
+        },
         onSubmitted: onSubmitted,
       ),
     );
+  }
+
+  void scrollToBottom() {
+    if (_scrollController.hasClients) {
+      Future.doWhile(() {
+        if (_scrollController.position.extentAfter == 0) {
+          return Future.value(false);
+        }
+        return _scrollController
+            .animateTo(_scrollController.position.maxScrollExtent,
+                duration: const Duration(milliseconds: 100),
+                curve: Curves.linear)
+            .then((value) => true);
+      });
+    }
   }
 
   void onSubmitted(String input) async {
@@ -174,13 +193,8 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
     _controller.clear();
     _progressNotifier.value = '';
 
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-      }
-    });
-
     await source.prepareMessageAccessToken();
+    source.messageAccessToken!;
 
     setState(() {
       appModel.addMessage(
@@ -194,16 +208,18 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
       _isLoading = true;
     });
 
+    Future.delayed(const Duration(milliseconds: 100), scrollToBottom);
+
     try {
       final response = await _api!.sendMessage(
         accessToken: source.messageAccessToken!,
         message: text,
         onProgress: (progress) {
           _progressNotifier.value = progress.message;
-          if (_scrollController.hasClients) {
-            _scrollController
-                .jumpTo(_scrollController.position.maxScrollExtent);
-          }
+          _scrollController.animateTo(
+              _scrollController.position.maxScrollExtent,
+              duration: const Duration(milliseconds: 100),
+              curve: Curves.linear);
         },
         conversationId: source.getLastConversationId(),
         parentMessageId: source.getLastMessageId(),
@@ -242,13 +258,11 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
         Fluttertoast.showToast(msg: t.error_chatgpt_response);
       }
     } finally {
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-      });
-
       setState(() {
         _isLoading = false;
       });
+
+      Future.delayed(const Duration(milliseconds: 300), scrollToBottom);
     }
   }
 
@@ -268,6 +282,7 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
       thumbVisibility: true,
       thickness: 3,
       child: ListView.builder(
+        cacheExtent: 999999999999999,
         physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics()),
         controller: _scrollController,
