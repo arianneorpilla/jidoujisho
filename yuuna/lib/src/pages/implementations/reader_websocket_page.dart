@@ -73,25 +73,20 @@ class _ReaderWebsocketPageState
 
   Widget buildMessageBuilder() {
     List<String> messages = source.messages.reversed.toList();
-    return RawScrollbar(
+    return ListView.builder(
+      cacheExtent: 999999999999999,
+      physics:
+          const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
       controller: ReaderMediaType.instance.scrollController,
-      thumbVisibility: true,
-      thickness: 3,
-      child: ListView.builder(
-        cacheExtent: 999999999999999,
-        physics: const AlwaysScrollableScrollPhysics(
-            parent: BouncingScrollPhysics()),
-        controller: ReaderMediaType.instance.scrollController,
-        itemCount: messages.length,
-        itemBuilder: (context, index) {
-          String message = messages[index];
+      itemCount: messages.length,
+      itemBuilder: (context, index) {
+        String message = messages[index];
 
-          return Padding(
-            padding: EdgeInsets.only(top: index == 0 ? 60 : 0),
-            child: buildMessage(message),
-          );
-        },
-      ),
+        return Padding(
+          padding: EdgeInsets.only(top: index == 0 ? 60 : 0),
+          child: buildMessage(message),
+        );
+      },
     );
   }
 
@@ -123,89 +118,101 @@ class _ReaderWebsocketPageState
       String character = String.fromCharCode(rune);
       spans.add(
         TextSpan(
-          text: character,
-          style: const TextStyle(fontSize: 18),
-          recognizer: TapGestureRecognizer()
-            ..onTapDown = (details) async {
-              _lastTappedController?.clearSelection();
-              _lastTappedController = controller;
-
-              bool wholeWordCondition = controller.selection.start <= index &&
-                  controller.selection.end > index;
-
-              if (wholeWordCondition && currentResult != null) {
-                clearDictionaryResult();
-                return;
-              }
-
-              source.setCurrentSentence(text);
-
-              double x = details.globalPosition.dx;
-              double y = details.globalPosition.dy;
-
-              late JidoujishoPopupPosition position;
-              if (MediaQuery.of(context).orientation == Orientation.portrait) {
-                if (y < MediaQuery.of(context).size.height / 2) {
-                  position = JidoujishoPopupPosition.bottomHalf;
-                } else {
-                  position = JidoujishoPopupPosition.topHalf;
-                }
-              } else {
-                if (x < MediaQuery.of(context).size.width / 2) {
-                  position = JidoujishoPopupPosition.rightHalf;
-                } else {
-                  position = JidoujishoPopupPosition.leftHalf;
-                }
-              }
-
-              String searchTerm =
-                  appModel.targetLanguage.getSearchTermFromIndex(
-                text: text,
-                index: index,
-              );
-
-              if (character.trim().isNotEmpty) {
-                bool isSpaceDelimited =
-                    appModel.targetLanguage.isSpaceDelimited;
-                int whitespaceOffset =
-                    searchTerm.length - searchTerm.trimLeft().length;
-                int offsetIndex = appModel.targetLanguage
-                        .getStartingIndex(text: text, index: index) +
-                    whitespaceOffset;
-                int length = appModel.targetLanguage
-                    .textToWords(searchTerm)
-                    .firstWhere((e) => e.trim().isNotEmpty)
-                    .length;
-
-                controller.setSelection(
-                  offsetIndex,
-                  offsetIndex + length,
+            text: character,
+            style: const TextStyle(fontSize: 18),
+            recognizer: TapGestureRecognizer()
+              ..onTapDown = (details) async {
+                onTapDown(
+                  character: character,
+                  text: text,
+                  index: index,
+                  controller: controller,
+                  details: details,
                 );
-
-                searchDictionaryResult(
-                  searchTerm: searchTerm,
-                  position: position,
-                ).then((result) {
-                  int length = isSpaceDelimited
-                      ? appModel.targetLanguage
-                          .textToWords(searchTerm)
-                          .firstWhere((e) => e.trim().isNotEmpty)
-                          .length
-                      : max(1, currentResult?.bestLength ?? 0);
-
-                  controller.setSelection(offsetIndex, offsetIndex + length);
-                });
-              } else {
-                clearDictionaryResult();
-              }
-
-              FocusScope.of(context).unfocus();
-            },
-        ),
+              }),
       );
     });
 
     return spans;
+  }
+
+  void onTapDown({
+    required String text,
+    required String character,
+    required int index,
+    required TapDownDetails details,
+    required JidoujishoSelectableTextController controller,
+  }) {
+    _lastTappedController?.clearSelection();
+    _lastTappedController = controller;
+
+    bool wholeWordCondition =
+        controller.selection.start <= index && controller.selection.end > index;
+
+    if (wholeWordCondition && currentResult != null) {
+      clearDictionaryResult();
+      return;
+    }
+
+    source.setCurrentSentence(text);
+
+    double x = details.globalPosition.dx;
+    double y = details.globalPosition.dy;
+
+    late JidoujishoPopupPosition position;
+    if (MediaQuery.of(context).orientation == Orientation.portrait) {
+      if (y < MediaQuery.of(context).size.height / 2) {
+        position = JidoujishoPopupPosition.bottomHalf;
+      } else {
+        position = JidoujishoPopupPosition.topHalf;
+      }
+    } else {
+      if (x < MediaQuery.of(context).size.width / 2) {
+        position = JidoujishoPopupPosition.rightHalf;
+      } else {
+        position = JidoujishoPopupPosition.leftHalf;
+      }
+    }
+
+    String searchTerm = appModel.targetLanguage.getSearchTermFromIndex(
+      text: text,
+      index: index,
+    );
+
+    if (character.trim().isNotEmpty) {
+      bool isSpaceDelimited = appModel.targetLanguage.isSpaceDelimited;
+      int whitespaceOffset = searchTerm.length - searchTerm.trimLeft().length;
+      int offsetIndex =
+          appModel.targetLanguage.getStartingIndex(text: text, index: index) +
+              whitespaceOffset;
+      int length = appModel.targetLanguage
+          .textToWords(searchTerm)
+          .firstWhere((e) => e.trim().isNotEmpty)
+          .length;
+
+      controller.setSelection(
+        offsetIndex,
+        offsetIndex + length,
+      );
+
+      searchDictionaryResult(
+        searchTerm: searchTerm,
+        position: position,
+      ).then((result) {
+        int length = isSpaceDelimited
+            ? appModel.targetLanguage
+                .textToWords(searchTerm)
+                .firstWhere((e) => e.trim().isNotEmpty)
+                .length
+            : max(1, currentResult?.bestLength ?? 0);
+
+        controller.setSelection(offsetIndex, offsetIndex + length);
+      });
+    } else {
+      clearDictionaryResult();
+    }
+
+    FocusScope.of(context).unfocus();
   }
 
   Widget buildMessage(String message) {

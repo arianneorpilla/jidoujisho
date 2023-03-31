@@ -477,7 +477,15 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         buildBlurWidget(),
         buildBuffering(),
         buildMenuArea(),
-        buildSubtitleArea(),
+        if (MediaQuery.of(context).orientation == Orientation.landscape)
+          Center(
+            child: AspectRatio(
+              aspectRatio: 16 / 9,
+              child: buildSubtitleArea(),
+            ),
+          )
+        else
+          buildSubtitleArea(),
         buildCentralPlayPause(),
         Padding(
           padding: MediaQuery.of(context).orientation == Orientation.landscape
@@ -1616,32 +1624,43 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           style: subtitleTextStyle,
           recognizer: TapGestureRecognizer()
             ..onTapDown = (details) async {
-              bool wholeWordCondition =
-                  _selectableTextController.selection.start <= index &&
-                      _selectableTextController.selection.end > index;
-
-              if (wholeWordCondition && currentResult != null) {
-                clearDictionaryResult();
-                return;
-              } else {
-                String searchTerm =
-                    appModel.targetLanguage.getSearchTermFromIndex(
-                  text: text,
-                  index: index,
-                );
-
-                setSearchTerm(
-                  searchTerm: searchTerm,
-                  text: text,
-                  index: index,
-                );
-              }
+              onTapDown(
+                character: character,
+                text: text,
+                index: index,
+              );
             },
         ),
       );
     });
 
     return spans;
+  }
+
+  void onTapDown({
+    required String text,
+    required String character,
+    required int index,
+  }) {
+    bool wholeWordCondition =
+        _selectableTextController.selection.start <= index &&
+            _selectableTextController.selection.end > index;
+
+    if (wholeWordCondition && currentResult != null) {
+      clearDictionaryResult();
+      return;
+    } else {
+      String searchTerm = appModel.targetLanguage.getSearchTermFromIndex(
+        text: text,
+        index: index,
+      );
+
+      setSearchTerm(
+        searchTerm: searchTerm,
+        text: text,
+        index: index,
+      );
+    }
   }
 
   /// Used for subtitle outline design.

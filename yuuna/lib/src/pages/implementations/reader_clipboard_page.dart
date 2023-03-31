@@ -126,83 +126,94 @@ class _ReaderClipboardPageState<ReaderClipboardPage>
           style: const TextStyle(fontSize: 22),
           recognizer: TapGestureRecognizer()
             ..onTapDown = (details) async {
-              if (_selectableTextController.selection.start == index &&
-                  currentResult != null) {
-                clearDictionaryResult();
-                return;
-              }
-
-              double x = details.globalPosition.dx;
-              double y = details.globalPosition.dy;
-
-              late JidoujishoPopupPosition position;
-              if (MediaQuery.of(context).orientation == Orientation.portrait) {
-                if (y < MediaQuery.of(context).size.height / 2) {
-                  position = JidoujishoPopupPosition.bottomHalf;
-                } else {
-                  position = JidoujishoPopupPosition.topHalf;
-                }
-              } else {
-                if (x < MediaQuery.of(context).size.width / 2) {
-                  position = JidoujishoPopupPosition.rightHalf;
-                } else {
-                  position = JidoujishoPopupPosition.leftHalf;
-                }
-              }
-
-              String searchTerm =
-                  appModel.targetLanguage.getSearchTermFromIndex(
+              onTapDown(
+                character: character,
                 text: text,
                 index: index,
+                controller: _selectableTextController,
+                details: details,
               );
-
-              if (_currentSelection.isEmpty && character.trim().isNotEmpty) {
-                bool isSpaceDelimited =
-                    appModel.targetLanguage.isSpaceDelimited;
-                int whitespaceOffset =
-                    searchTerm.length - searchTerm.trimLeft().length;
-                int offsetIndex = index + whitespaceOffset;
-                int length = appModel.targetLanguage
-                    .textToWords(searchTerm)
-                    .firstWhere((e) => e.trim().isNotEmpty)
-                    .length;
-
-                _selectableTextController.setSelection(
-                  offsetIndex,
-                  offsetIndex + length,
-                );
-
-                searchDictionaryResult(
-                  searchTerm: searchTerm,
-                  position: position,
-                ).then((result) {
-                  source.setCurrentSentence(
-                    appModel.targetLanguage.getSentenceFromParagraph(
-                        paragraph: text, index: index),
-                  );
-
-                  int length = isSpaceDelimited
-                      ? appModel.targetLanguage
-                          .textToWords(searchTerm)
-                          .firstWhere((e) => e.trim().isNotEmpty)
-                          .length
-                      : max(1, currentResult?.bestLength ?? 0);
-
-                  _selectableTextController.setSelection(
-                      offsetIndex, offsetIndex + length);
-                });
-              } else {
-                clearDictionaryResult();
-                _currentSelection = '';
-              }
-
-              FocusScope.of(context).unfocus();
             },
         ),
       );
     });
 
     return spans;
+  }
+
+  void onTapDown({
+    required String text,
+    required String character,
+    required int index,
+    required TapDownDetails details,
+    required JidoujishoSelectableTextController controller,
+  }) {
+    if (controller.selection.start == index && currentResult != null) {
+      clearDictionaryResult();
+      return;
+    }
+
+    double x = details.globalPosition.dx;
+    double y = details.globalPosition.dy;
+
+    late JidoujishoPopupPosition position;
+    if (MediaQuery.of(context).orientation == Orientation.portrait) {
+      if (y < MediaQuery.of(context).size.height / 2) {
+        position = JidoujishoPopupPosition.bottomHalf;
+      } else {
+        position = JidoujishoPopupPosition.topHalf;
+      }
+    } else {
+      if (x < MediaQuery.of(context).size.width / 2) {
+        position = JidoujishoPopupPosition.rightHalf;
+      } else {
+        position = JidoujishoPopupPosition.leftHalf;
+      }
+    }
+
+    String searchTerm = appModel.targetLanguage.getSearchTermFromIndex(
+      text: text,
+      index: index,
+    );
+
+    if (_currentSelection.isEmpty && character.trim().isNotEmpty) {
+      bool isSpaceDelimited = appModel.targetLanguage.isSpaceDelimited;
+      int whitespaceOffset = searchTerm.length - searchTerm.trimLeft().length;
+      int offsetIndex = index + whitespaceOffset;
+      int length = appModel.targetLanguage
+          .textToWords(searchTerm)
+          .firstWhere((e) => e.trim().isNotEmpty)
+          .length;
+
+      controller.setSelection(
+        offsetIndex,
+        offsetIndex + length,
+      );
+
+      searchDictionaryResult(
+        searchTerm: searchTerm,
+        position: position,
+      ).then((result) {
+        source.setCurrentSentence(
+          appModel.targetLanguage
+              .getSentenceFromParagraph(paragraph: text, index: index),
+        );
+
+        int length = isSpaceDelimited
+            ? appModel.targetLanguage
+                .textToWords(searchTerm)
+                .firstWhere((e) => e.trim().isNotEmpty)
+                .length
+            : max(1, currentResult?.bestLength ?? 0);
+
+        controller.setSelection(offsetIndex, offsetIndex + length);
+      });
+    } else {
+      clearDictionaryResult();
+      _currentSelection = '';
+    }
+
+    FocusScope.of(context).unfocus();
   }
 
   @override
