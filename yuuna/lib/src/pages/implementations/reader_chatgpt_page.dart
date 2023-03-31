@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:collection/collection.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chatgpt_api/flutter_chatgpt_api.dart';
@@ -71,6 +72,10 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
                       _api ??= ChatGPTApi(
                         sessionToken: accessCookie.value,
                         clearanceToken: clearanceCookie.value,
+                        apiBaseUrl: FirebaseRemoteConfig.instance
+                            .getString('chatgpt_api_base_url'),
+                        backendApiBaseUrl: FirebaseRemoteConfig.instance
+                            .getString('chatgpt_backend_api_base_url'),
                       );
 
                       source.prepareMessageAccessToken();
@@ -277,42 +282,36 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
 
   Widget buildMessageBuilder() {
     List<MessageItem> messages = appModel.messages;
-    return RawScrollbar(
+    return ListView.builder(
+      physics:
+          const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
       controller: _scrollController,
-      thumbVisibility: true,
-      thickness: 3,
-      child: ListView.builder(
-        cacheExtent: 999999999999999,
-        physics: const AlwaysScrollableScrollPhysics(
-            parent: BouncingScrollPhysics()),
-        controller: _scrollController,
-        itemCount: _isLoading ? messages.length + 1 : messages.length,
-        itemBuilder: (context, index) {
-          if (index == messages.length) {
-            return ValueListenableBuilder(
-              valueListenable: _progressNotifier,
-              builder: (context, value, child) {
-                return buildMessage(
-                  isBot: true,
-                  isLoading: true,
-                  text: _progressNotifier.value,
-                );
-              },
-            );
-          }
-
-          MessageItem item = messages[index];
-
-          return Padding(
-            padding: EdgeInsets.only(top: index == 0 ? 60 : 0),
-            child: buildMessage(
-              text: item.message,
-              isBot: item.isBot,
-              isLoading: false,
-            ),
+      itemCount: _isLoading ? messages.length + 1 : messages.length,
+      itemBuilder: (context, index) {
+        if (index == messages.length) {
+          return ValueListenableBuilder(
+            valueListenable: _progressNotifier,
+            builder: (context, value, child) {
+              return buildMessage(
+                isBot: true,
+                isLoading: true,
+                text: _progressNotifier.value,
+              );
+            },
           );
-        },
-      ),
+        }
+
+        MessageItem item = messages[index];
+
+        return Padding(
+          padding: EdgeInsets.only(top: index == 0 ? 60 : 0),
+          child: buildMessage(
+            text: item.message,
+            isBot: item.isBot,
+            isLoading: false,
+          ),
+        );
+      },
     );
   }
 
@@ -338,86 +337,99 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
           text: character,
           style: const TextStyle(fontSize: 18),
           recognizer: TapGestureRecognizer()
-            ..onTapDown = (details) async {
-              _lastTappedController?.clearSelection();
-              _lastTappedController = controller;
-
-              bool wholeWordCondition = controller.selection.start <= index &&
-                  controller.selection.end > index;
-
-              if (wholeWordCondition && currentResult != null) {
-                clearDictionaryResult();
-                return;
-              }
-
-              source.setCurrentSentence(text);
-
-              double x = details.globalPosition.dx;
-              double y = details.globalPosition.dy;
-
-              late JidoujishoPopupPosition position;
-              if (MediaQuery.of(context).orientation == Orientation.portrait) {
-                if (y < MediaQuery.of(context).size.height / 2) {
-                  position = JidoujishoPopupPosition.bottomHalf;
-                } else {
-                  position = JidoujishoPopupPosition.topHalf;
-                }
-              } else {
-                if (x < MediaQuery.of(context).size.width / 2) {
-                  position = JidoujishoPopupPosition.rightHalf;
-                } else {
-                  position = JidoujishoPopupPosition.leftHalf;
-                }
-              }
-
-              String searchTerm =
-                  appModel.targetLanguage.getSearchTermFromIndex(
+            ..onTapDown = (details) {
+              onTapDown(
+                character: character,
                 text: text,
                 index: index,
+                controller: controller,
+                details: details,
               );
-
-              if (character.trim().isNotEmpty) {
-                bool isSpaceDelimited =
-                    appModel.targetLanguage.isSpaceDelimited;
-                int whitespaceOffset =
-                    searchTerm.length - searchTerm.trimLeft().length;
-                int offsetIndex = appModel.targetLanguage
-                        .getStartingIndex(text: text, index: index) +
-                    whitespaceOffset;
-                int length = appModel.targetLanguage
-                    .textToWords(searchTerm)
-                    .firstWhere((e) => e.trim().isNotEmpty)
-                    .length;
-
-                controller.setSelection(
-                  offsetIndex,
-                  offsetIndex + length,
-                );
-
-                searchDictionaryResult(
-                  searchTerm: searchTerm,
-                  position: position,
-                ).then((result) {
-                  int length = isSpaceDelimited
-                      ? appModel.targetLanguage
-                          .textToWords(searchTerm)
-                          .firstWhere((e) => e.trim().isNotEmpty)
-                          .length
-                      : max(1, currentResult?.bestLength ?? 0);
-
-                  controller.setSelection(offsetIndex, offsetIndex + length);
-                });
-              } else {
-                clearDictionaryResult();
-              }
-
-              FocusScope.of(context).unfocus();
             },
         ),
       );
     });
 
     return spans;
+  }
+
+  void onTapDown({
+    required String text,
+    required String character,
+    required int index,
+    required TapDownDetails details,
+    required JidoujishoSelectableTextController controller,
+  }) {
+    _lastTappedController?.clearSelection();
+    _lastTappedController = controller;
+
+    bool wholeWordCondition =
+        controller.selection.start <= index && controller.selection.end > index;
+
+    if (wholeWordCondition && currentResult != null) {
+      clearDictionaryResult();
+      return;
+    }
+
+    source.setCurrentSentence(text);
+
+    double x = details.globalPosition.dx;
+    double y = details.globalPosition.dy;
+
+    late JidoujishoPopupPosition position;
+    if (MediaQuery.of(context).orientation == Orientation.portrait) {
+      if (y < MediaQuery.of(context).size.height / 2) {
+        position = JidoujishoPopupPosition.bottomHalf;
+      } else {
+        position = JidoujishoPopupPosition.topHalf;
+      }
+    } else {
+      if (x < MediaQuery.of(context).size.width / 2) {
+        position = JidoujishoPopupPosition.rightHalf;
+      } else {
+        position = JidoujishoPopupPosition.leftHalf;
+      }
+    }
+
+    String searchTerm = appModel.targetLanguage.getSearchTermFromIndex(
+      text: text,
+      index: index,
+    );
+
+    if (character.trim().isNotEmpty) {
+      bool isSpaceDelimited = appModel.targetLanguage.isSpaceDelimited;
+      int whitespaceOffset = searchTerm.length - searchTerm.trimLeft().length;
+      int offsetIndex =
+          appModel.targetLanguage.getStartingIndex(text: text, index: index) +
+              whitespaceOffset;
+      int length = appModel.targetLanguage
+          .textToWords(searchTerm)
+          .firstWhere((e) => e.trim().isNotEmpty)
+          .length;
+
+      controller.setSelection(
+        offsetIndex,
+        offsetIndex + length,
+      );
+
+      searchDictionaryResult(
+        searchTerm: searchTerm,
+        position: position,
+      ).then((result) {
+        int length = isSpaceDelimited
+            ? appModel.targetLanguage
+                .textToWords(searchTerm)
+                .firstWhere((e) => e.trim().isNotEmpty)
+                .length
+            : max(1, currentResult?.bestLength ?? 0);
+
+        controller.setSelection(offsetIndex, offsetIndex + length);
+      });
+    } else {
+      clearDictionaryResult();
+    }
+
+    FocusScope.of(context).unfocus();
   }
 
   Widget buildMessage({

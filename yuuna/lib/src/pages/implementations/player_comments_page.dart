@@ -161,41 +161,35 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
   }) {
     ScrollController controller = ScrollController();
 
-    return RawScrollbar(
-      controller: controller,
-      thumbVisibility: true,
-      thickness: 3,
-      child: PagedListView<int, Comment>(
-        physics: const AlwaysScrollableScrollPhysics(
-          parent: BouncingScrollPhysics(),
-        ),
-        scrollController: controller,
-        pagingController: pagingController,
-        key: UniqueKey(),
-        builderDelegate: PagedChildBuilderDelegate<Comment>(
-          firstPageProgressIndicatorBuilder: (context) {
-            return buildLoading();
-          },
-          newPageProgressIndicatorBuilder: (context) {
-            return buildLoading();
-          },
-          noItemsFoundIndicatorBuilder: (context) {
-            return buildPlaceholder();
-          },
-          itemBuilder: (context, comment, index) {
-            if (index == 0 && widget.comment != null) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  buildComment(comment: widget.comment!, headComment: true),
-                  buildComment(comment: comment),
-                ],
-              );
-            } else {
-              return buildComment(comment: comment);
-            }
-          },
-        ),
+    return PagedListView<int, Comment>(
+      physics: const AlwaysScrollableScrollPhysics(
+        parent: BouncingScrollPhysics(),
+      ),
+      scrollController: controller,
+      pagingController: pagingController,
+      builderDelegate: PagedChildBuilderDelegate<Comment>(
+        firstPageProgressIndicatorBuilder: (context) {
+          return buildLoading();
+        },
+        newPageProgressIndicatorBuilder: (context) {
+          return buildLoading();
+        },
+        noItemsFoundIndicatorBuilder: (context) {
+          return buildPlaceholder();
+        },
+        itemBuilder: (context, comment, index) {
+          if (index == 0 && widget.comment != null) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                buildComment(comment: widget.comment!, headComment: true),
+                buildComment(comment: comment),
+              ],
+            );
+          } else {
+            return buildComment(comment: comment);
+          }
+        },
       ),
     );
   }
@@ -224,85 +218,100 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
           style: const TextStyle(fontSize: 18),
           recognizer: TapGestureRecognizer()
             ..onTapDown = (details) async {
-              _lastTappedController?.clearSelection();
-              _lastTappedController = controller;
-
-              bool wholeWordCondition = controller.selection.start <= index &&
-                  controller.selection.end > index;
-
-              if (wholeWordCondition && currentResult != null) {
-                clearDictionaryResult();
-                return;
-              }
-
-              source.setCurrentSentence('$author:\n$text');
-
-              double x = details.globalPosition.dx;
-              double y = details.globalPosition.dy;
-
-              late JidoujishoPopupPosition position;
-              if (MediaQuery.of(context).orientation == Orientation.portrait) {
-                if (y < MediaQuery.of(context).size.height / 2) {
-                  position = JidoujishoPopupPosition.bottomHalf;
-                } else {
-                  position = JidoujishoPopupPosition.topHalf;
-                }
-              } else {
-                if (x < MediaQuery.of(context).size.width / 2) {
-                  position = JidoujishoPopupPosition.rightHalf;
-                } else {
-                  position = JidoujishoPopupPosition.leftHalf;
-                }
-              }
-
-              String searchTerm =
-                  appModel.targetLanguage.getSearchTermFromIndex(
+              onTapDown(
+                author: author,
+                character: character,
                 text: text,
                 index: index,
+                controller: controller,
+                details: details,
               );
-
-              if (character.trim().isNotEmpty) {
-                bool isSpaceDelimited =
-                    appModel.targetLanguage.isSpaceDelimited;
-                int whitespaceOffset =
-                    searchTerm.length - searchTerm.trimLeft().length;
-                int offsetIndex = appModel.targetLanguage
-                        .getStartingIndex(text: text, index: index) +
-                    whitespaceOffset;
-                int length = appModel.targetLanguage
-                    .textToWords(searchTerm)
-                    .firstWhere((e) => e.trim().isNotEmpty)
-                    .length;
-
-                controller.setSelection(
-                  offsetIndex,
-                  offsetIndex + length,
-                );
-
-                searchDictionaryResult(
-                  searchTerm: searchTerm,
-                  position: position,
-                ).then((result) {
-                  int length = isSpaceDelimited
-                      ? appModel.targetLanguage
-                          .textToWords(searchTerm)
-                          .firstWhere((e) => e.trim().isNotEmpty)
-                          .length
-                      : max(1, currentResult?.bestLength ?? 0);
-
-                  controller.setSelection(offsetIndex, offsetIndex + length);
-                });
-              } else {
-                clearDictionaryResult();
-              }
-
-              FocusScope.of(context).unfocus();
             },
         ),
       );
     });
 
     return spans;
+  }
+
+  void onTapDown({
+    required String author,
+    required String text,
+    required String character,
+    required int index,
+    required TapDownDetails details,
+    required JidoujishoSelectableTextController controller,
+  }) {
+    _lastTappedController?.clearSelection();
+    _lastTappedController = controller;
+
+    bool wholeWordCondition =
+        controller.selection.start <= index && controller.selection.end > index;
+
+    if (wholeWordCondition && currentResult != null) {
+      clearDictionaryResult();
+      return;
+    }
+
+    source.setCurrentSentence('$author:\n$text');
+
+    double x = details.globalPosition.dx;
+    double y = details.globalPosition.dy;
+
+    late JidoujishoPopupPosition position;
+    if (MediaQuery.of(context).orientation == Orientation.portrait) {
+      if (y < MediaQuery.of(context).size.height / 2) {
+        position = JidoujishoPopupPosition.bottomHalf;
+      } else {
+        position = JidoujishoPopupPosition.topHalf;
+      }
+    } else {
+      if (x < MediaQuery.of(context).size.width / 2) {
+        position = JidoujishoPopupPosition.rightHalf;
+      } else {
+        position = JidoujishoPopupPosition.leftHalf;
+      }
+    }
+
+    String searchTerm = appModel.targetLanguage.getSearchTermFromIndex(
+      text: text,
+      index: index,
+    );
+
+    if (character.trim().isNotEmpty) {
+      bool isSpaceDelimited = appModel.targetLanguage.isSpaceDelimited;
+      int whitespaceOffset = searchTerm.length - searchTerm.trimLeft().length;
+      int offsetIndex =
+          appModel.targetLanguage.getStartingIndex(text: text, index: index) +
+              whitespaceOffset;
+      int length = appModel.targetLanguage
+          .textToWords(searchTerm)
+          .firstWhere((e) => e.trim().isNotEmpty)
+          .length;
+
+      controller.setSelection(
+        offsetIndex,
+        offsetIndex + length,
+      );
+
+      searchDictionaryResult(
+        searchTerm: searchTerm,
+        position: position,
+      ).then((result) {
+        int length = isSpaceDelimited
+            ? appModel.targetLanguage
+                .textToWords(searchTerm)
+                .firstWhere((e) => e.trim().isNotEmpty)
+                .length
+            : max(1, currentResult?.bestLength ?? 0);
+
+        controller.setSelection(offsetIndex, offsetIndex + length);
+      });
+    } else {
+      clearDictionaryResult();
+    }
+
+    FocusScope.of(context).unfocus();
   }
 
   Widget buildComment({

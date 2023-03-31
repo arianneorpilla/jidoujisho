@@ -38,7 +38,7 @@ class EnglishLanguage extends Language {
 
   @override
   List<String> textToWords(String text) {
-    return text.splitWithDelim(RegExp('[ -]'));
+    return text.splitWithDelim(RegExp(r'[-\n\r\s]+'));
   }
 }
 

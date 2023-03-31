@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -35,6 +36,21 @@ void main() {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+
+    /// Allows the app to have configurable variables that can be changed on
+    /// the fly without manual updates.
+    final remoteConfig = FirebaseRemoteConfig.instance;
+    await remoteConfig.setConfigSettings(RemoteConfigSettings(
+      fetchTimeout: const Duration(minutes: 1),
+      minimumFetchInterval: const Duration(hours: 1),
+    ));
+
+    /// Set default variables if there are none available from the server.
+    await remoteConfig.setDefaults(const {
+      'chatgpt_api_base_url': 'https://chat.openai.com/api',
+      'chatgpt_backend_api_base_url': 'https://bypass.churchless.tech/api'
+    });
+    await remoteConfig.fetchAndActivate();
 
     /// Ensure the top and bottom bars are shown at launch and wake prevention
     /// is disabled if not reverted from entering a media source.

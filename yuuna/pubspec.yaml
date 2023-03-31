@@ -1,7 +1,7 @@
 name: yuuna
 description: A full-featured immersion language learning suite for mobile.
 publish_to: 'none'
-version: 2.5.0+49
+version: 2.5.0+50
 environment:
   sdk: ">=2.17.0 <3.0.0"
 
@@ -35,6 +35,7 @@ dependencies:
   firebase_analytics: ^10.1.5
   firebase_core: ^2.7.1
   firebase_crashlytics: ^3.0.16
+  firebase_remote_config: ^4.0.0
   float_column: ^1.4.1
   flutter:
     sdk: flutter
