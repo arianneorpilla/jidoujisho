@@ -193,6 +193,7 @@ class PlayerNetworkStreamSource extends PlayerMediaSource {
         SubtitleItem? subtitleItem = await SubtitleUtils.subtitlesFromFile(
           file: file,
           metadata: subtitleName,
+          source: fileName,
           type: SubtitleItemType.webSubtitle,
         );
         items.add(subtitleItem);
@@ -201,17 +202,17 @@ class PlayerNetworkStreamSource extends PlayerMediaSource {
       }
     }
 
-    String? preferredSubtitle;
+    String? preferredFilename;
     if (intentExtra['subs.enable'] != null) {
       List<String> enabledSubtitles =
           List<String>.from(intentExtra['subs.enable']);
       if (enabledSubtitles.isNotEmpty) {
-        preferredSubtitle = enabledSubtitles.first;
+        preferredFilename = enabledSubtitles.first;
       }
     }
 
     SubtitleItem? preferredItem =
-        items.firstWhereOrNull((item) => item.metadata == preferredSubtitle);
+        items.firstWhereOrNull((item) => preferredFilename == item.source);
 
     items.remove(preferredItem);
     if (preferredItem != null) {
