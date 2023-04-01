@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 318
+/// Strings: 330
 ///
-/// Built on 2023-03-30 at 03:15 UTC
+/// Built on 2023-04-01 at 09:04 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -199,12 +199,15 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get dialog_connect => 'CONNECT';
 	String get dialog_append => 'APPEND';
 	String get dialog_record => 'RECORD';
+	String get dialog_manage => 'MANAGE';
 	String get dialog_stop => 'STOP';
+	String get dialog_add => 'ADD';
 	String get reset => 'Reset';
 	String get dialog_launch_ankidroid => 'LAUNCH ANKIDROID';
 	String get media_item_delete_confirmation => 'This will clear this item from history. Are you sure you want to do this?';
 	String get dictionaries_delete_confirmation => 'Deleting a dictionary will also clear all dictionary results from history. Are you sure you want to do this?';
 	String get mappings_delete_confirmation => 'This profile will be deleted. Are you sure you want to do this?';
+	String get catalog_delete_confirmation => 'This catalog will be deleted. Are you sure you want to do this?';
 	String get dictionaries_deleting_data => 'Deleting dictionary data...';
 	String get dictionaries_menu_empty => 'Import a dictionary for use';
 	String get options_theme_light => 'Use light theme';
@@ -455,7 +458,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get no_comments_queried => 'No comments queried';
 	String get no_text_in_clipboard => 'No text to display';
 	String file_downloaded({required Object name}) => 'File downloaded: ${name}';
-	String get change_sort_order => 'Change Sort Order';
+	String get cfhange_sort_order => 'Change Sort Order';
 	String get login => 'Login';
 	String get access_token_missing_expired => 'Login token missing or expired';
 	String get send => 'Send';
@@ -465,6 +468,15 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get clear_message_description => 'This will clear all messages and start a new chat. Are you sure?';
 	String get error_chatgpt_response => 'Failed to get a response. Request rate-limited or denied.';
 	String get error_chatgpt_expired => 'Login token has expired. Please login again or solve a challenge.';
+	String get pick_file => 'Pick File';
+	String get open_url => 'Open URL';
+	String get catalogs => 'Catalogs';
+	String get catalog_name => 'Catalog Name';
+	String get url => 'URL';
+	String get duplicate_catalog => 'A catalog with this URL already exists.';
+	String get no_catalogs_listed => 'No catalogs listed';
+	String get go_back => 'Go Back';
+	String get invalid_mokuro_file => 'File is not a Mokuro generated HTML file.';
 	late final _StringsViewRepliesEn view_replies = _StringsViewRepliesEn._(_root);
 }
 
@@ -537,12 +549,15 @@ extension on _StringsEn {
 			case 'dialog_connect': return 'CONNECT';
 			case 'dialog_append': return 'APPEND';
 			case 'dialog_record': return 'RECORD';
+			case 'dialog_manage': return 'MANAGE';
 			case 'dialog_stop': return 'STOP';
+			case 'dialog_add': return 'ADD';
 			case 'reset': return 'Reset';
 			case 'dialog_launch_ankidroid': return 'LAUNCH ANKIDROID';
 			case 'media_item_delete_confirmation': return 'This will clear this item from history. Are you sure you want to do this?';
 			case 'dictionaries_delete_confirmation': return 'Deleting a dictionary will also clear all dictionary results from history. Are you sure you want to do this?';
 			case 'mappings_delete_confirmation': return 'This profile will be deleted. Are you sure you want to do this?';
+			case 'catalog_delete_confirmation': return 'This catalog will be deleted. Are you sure you want to do this?';
 			case 'dictionaries_deleting_data': return 'Deleting dictionary data...';
 			case 'dictionaries_menu_empty': return 'Import a dictionary for use';
 			case 'options_theme_light': return 'Use light theme';
@@ -793,7 +808,7 @@ extension on _StringsEn {
 			case 'no_comments_queried': return 'No comments queried';
 			case 'no_text_in_clipboard': return 'No text to display';
 			case 'file_downloaded': return ({required Object name}) => 'File downloaded: ${name}';
-			case 'change_sort_order': return 'Change Sort Order';
+			case 'cfhange_sort_order': return 'Change Sort Order';
 			case 'login': return 'Login';
 			case 'access_token_missing_expired': return 'Login token missing or expired';
 			case 'send': return 'Send';
@@ -803,6 +818,15 @@ extension on _StringsEn {
 			case 'clear_message_description': return 'This will clear all messages and start a new chat. Are you sure?';
 			case 'error_chatgpt_response': return 'Failed to get a response. Request rate-limited or denied.';
 			case 'error_chatgpt_expired': return 'Login token has expired. Please login again or solve a challenge.';
+			case 'pick_file': return 'Pick File';
+			case 'open_url': return 'Open URL';
+			case 'catalogs': return 'Catalogs';
+			case 'catalog_name': return 'Catalog Name';
+			case 'url': return 'URL';
+			case 'duplicate_catalog': return 'A catalog with this URL already exists.';
+			case 'no_catalogs_listed': return 'No catalogs listed';
+			case 'go_back': return 'Go Back';
+			case 'invalid_mokuro_file': return 'File is not a Mokuro generated HTML file.';
 			case 'view_replies.reply': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
 				one: 'SHOW ${n} REPLY',
 				other: 'SHOW ${n} REPLIES',

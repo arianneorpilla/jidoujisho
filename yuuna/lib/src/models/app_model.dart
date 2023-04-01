@@ -53,6 +53,7 @@ final List<CollectionSchema> globalSchemas = [
   AnkiMappingSchema,
   SearchHistoryItemSchema,
   MessageItemSchema,
+  MokuroCatalogSchema,
 ];
 
 /// A list of media types that the app will support at runtime.
@@ -283,10 +284,13 @@ class AppModel with ChangeNotifier {
   List<Dictionary> get dictionaries =>
       _database.dictionarys.where().sortByOrder().findAllSync();
 
-  /// Returns all dictionaries imported into the database. Sorted by the
-  /// user-defined order in the dictionary menu.
+  /// Returns all export profiles.
   List<AnkiMapping> get mappings =>
       _database.ankiMappings.where().sortByOrder().findAllSync();
+
+  /// Returns all Mokuro catalogs.
+  List<MokuroCatalog> get mokuroCatalogs =>
+      _database.mokuroCatalogs.where().sortByOrder().findAllSync();
 
   /// Returns the message log for the [ReaderChatgptSource].
   List<MessageItem> get messages =>
@@ -632,6 +636,15 @@ class AppModel with ChangeNotifier {
     });
   }
 
+  /// Update the user-defined order of given catalogs in the database.
+  /// See the catalog dialog's [ReorderableListView] for usage.
+  void updateCatalogsOrder(List<MokuroCatalog> newCatalogs) async {
+    _database.writeTxnSync(() {
+      _database.mokuroCatalogs.clearSync();
+      _database.mokuroCatalogs.putAllSync(newCatalogs);
+    });
+  }
+
   /// Populate maps for languages at startup to optimise performance.
   void populateLanguages() async {
     /// A list of languages that the app will support at runtime.
@@ -701,6 +714,7 @@ class AppModel with ChangeNotifier {
       ],
       ReaderMediaType.instance: [
         ReaderTtuSource.instance,
+        ReaderMokuroSource.instance,
         ReaderLyricsSource.instance,
         ReaderChatgptSource.instance,
         ReaderClipboardSource.instance,
@@ -1401,6 +1415,24 @@ class AppModel with ChangeNotifier {
     });
   }
 
+  /// Delete a selected catalog from the database.
+  void deleteCatalog(MokuroCatalog mapping) async {
+    _database.writeTxnSync(() {
+      _database.mokuroCatalogs.deleteSync(mapping.id!);
+    });
+  }
+
+  /// Add a selected catalog to the database.
+  void addCatalog(MokuroCatalog catalog) async {
+    _database.writeTxnSync(() {
+      if (catalog.id != null &&
+          _database.mokuroCatalogs.getSync(catalog.id!) != null) {
+        _database.mokuroCatalogs.deleteSync(catalog.id!);
+      }
+      _database.mokuroCatalogs.putSync(catalog);
+    });
+  }
+
   /// Used for caching search results. Cleared when a dictionary is added or
   /// deleted.
   final Map<String, DictionarySearchResult> _dictionarySearchCache = {};
@@ -1486,6 +1518,19 @@ class AppModel with ChangeNotifier {
         null;
   }
 
+  /// Check if a catalog with a certain name with a different order already
+  /// exists.
+  bool catalogUrlHasDuplicate(MokuroCatalog catalog) {
+    return _database.mokuroCatalogs
+            .where()
+            .urlEqualTo(catalog.url)
+            .filter()
+            .not()
+            .orderEqualTo(catalog.order)
+            .findFirstSync() !=
+        null;
+  }
+
   /// Get the newest available order for a new mapping.
   int get nextMappingOrder {
     AnkiMapping? highestOrderMapping =
@@ -1493,6 +1538,20 @@ class AppModel with ChangeNotifier {
     late int order;
     if (highestOrderMapping != null) {
       order = highestOrderMapping.order + 1;
+    } else {
+      order = 0;
+    }
+
+    return order;
+  }
+
+  /// Get the newest available order for a new catalog.
+  int get nextCatalogOrder {
+    MokuroCatalog? highestOrderCatalog =
+        _database.mokuroCatalogs.where().sortByOrderDesc().findFirstSync();
+    late int order;
+    if (highestOrderCatalog != null) {
+      order = highestOrderCatalog.order + 1;
     } else {
       order = 0;
     }

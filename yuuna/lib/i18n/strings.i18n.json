@@ -49,7 +49,9 @@
     "dialog_connect": "CONNECT",
     "dialog_append": "APPEND",
     "dialog_record": "RECORD",
+    "dialog_manage": "MANAGE",
     "dialog_stop": "STOP",
+    "dialog_add": "ADD",
     "reset": "Reset",
     "dialog_launch_ankidroid": "LAUNCH ANKIDROID",
     "media_item_delete_confirmation":
@@ -57,6 +59,7 @@
     "dictionaries_delete_confirmation":
         "Deleting a dictionary will also clear all dictionary results from history. Are you sure you want to do this?",
     "mappings_delete_confirmation": "This profile will be deleted. Are you sure you want to do this?",
+    "catalog_delete_confirmation": "This catalog will be deleted. Are you sure you want to do this?",
     "dictionaries_deleting_data": "Deleting dictionary data...",
     "dictionaries_menu_empty": "Import a dictionary for use",
     "options_theme_light": "Use light theme",
@@ -330,7 +333,7 @@
     "no_comments_queried": "No comments queried",
     "no_text_in_clipboard": "No text to display",
     "file_downloaded": "File downloaded: $name",
-    "change_sort_order": "Change Sort Order",
+    "cfhange_sort_order": "Change Sort Order",
     "login": "Login",
     "access_token_missing_expired": "Login token missing or expired",
     "send": "Send",
@@ -340,6 +343,15 @@
     "clear_message_description": "This will clear all messages and start a new chat. Are you sure?",
     "error_chatgpt_response": "Failed to get a response. Request rate-limited or denied.",
     "error_chatgpt_expired": "Login token has expired. Please login again or solve a challenge.",
+    "pick_file": "Pick File",
+    "open_url": "Open URL",
+    "catalogs": "Catalogs",
+    "catalog_name": "Catalog Name",
+    "url": "URL",
+    "duplicate_catalog": "A catalog with this URL already exists.",
+    "no_catalogs_listed": "No catalogs listed",
+    "go_back": "Go Back",
+    "invalid_mokuro_file": "File is not a Mokuro generated HTML file.",
     "view_replies": {
         "reply": {
           "one": "SHOW $n REPLY",

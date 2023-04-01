@@ -53,6 +53,13 @@ export 'src/pages/implementations/pip_page.dart';
 export 'src/pages/implementations/audio_recorder_page.dart';
 export 'src/pages/implementations/reader_chatgpt_page.dart';
 export 'src/pages/implementations/reader_chatgpt_login_page.dart';
+export 'src/pages/implementations/reader_mokuro_history_page.dart';
+export 'src/pages/implementations/mokuro_catalog_dialog_page.dart';
+export 'src/pages/implementations/mokuro_catalog_manage_dialog_page.dart';
+export 'src/pages/implementations/mokuro_catalog_edit_dialog_page.dart';
+export 'src/pages/implementations/mokuro_link_dialog_page.dart';
+export 'src/pages/implementations/reader_mokuro_source_page.dart';
+export 'src/pages/implementations/mokuro_catalog_browse_page.dart';
 
 export 'src/pages/base_page.dart';
 export 'src/pages/base_history_page.dart';
