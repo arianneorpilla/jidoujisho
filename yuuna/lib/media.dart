@@ -19,4 +19,5 @@ export 'src/media/sources/reader_lyrics_source.dart';
 export 'src/media/sources/reader_clipboard_source.dart';
 export 'src/media/sources/reader_chatgpt_source.dart';
 export 'src/media/sources/reader_websocket_source.dart';
+export 'src/media/sources/reader_mokuro_source.dart';
 export 'src/media/sources/viewer_camera_source.dart';

@@ -35,6 +35,11 @@ class _ReaderChatgptLoginPageState extends BasePageState {
             userAgent:
                 'Mozilla 5.0 (Linux; U; Android 13) Chrome/104.0.5112.99',
           ),
+          android: AndroidInAppWebViewOptions(
+            forceDark: appModel.isDarkMode
+                ? AndroidForceDark.FORCE_DARK_ON
+                : AndroidForceDark.FORCE_DARK_OFF,
+          ),
         ),
         initialUrlRequest: URLRequest(
           url: Uri.parse('https://chat.openai.com/auth/login'),

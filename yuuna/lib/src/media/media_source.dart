@@ -257,10 +257,14 @@ abstract class MediaSource {
     }
 
     if (item.imageUrl != null) {
-      return CachedNetworkImageProvider(
-        fallbackUrl ?? item.imageUrl!,
-        cacheKey: item.uniqueKey,
-      );
+      if (item.imageUrl!.startsWith('file://')) {
+        return FileImage(File(item.imageUrl!.replaceFirst('file://', '')));
+      } else {
+        return CachedNetworkImageProvider(
+          fallbackUrl ?? item.imageUrl!,
+          cacheKey: item.uniqueKey,
+        );
+      }
     }
 
     if (item.base64Image == null) {
