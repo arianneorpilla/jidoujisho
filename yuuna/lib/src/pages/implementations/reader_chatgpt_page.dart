@@ -195,12 +195,12 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
       return;
     }
 
-    _controller.clear();
-    _progressNotifier.value = '';
-
     try {
       await source.prepareMessageAccessToken();
       source.messageAccessToken!;
+
+      _controller.clear();
+      _progressNotifier.value = '';
 
       setState(() {
         appModel.addMessage(
