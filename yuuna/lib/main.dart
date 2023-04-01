@@ -156,7 +156,7 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
     super.dispose();
   }
 
-  void handleIntent(intents.Intent? intent) {
+  void handleIntent(intents.Intent? intent) async {
     if (intent == null) {
       return;
     }
@@ -175,6 +175,15 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
         return;
       case 'android.intent.action.VIEW':
         String? subtitleUrl = intent.extra?['subtitles_location'];
+
+        if (subtitleUrl == null) {
+          if (intent.extra?['subs.enable'] != null) {
+            try {
+              subtitleUrl =
+                  List<String>.from(intent.extra?['subs.enable']).first;
+            } finally {}
+          }
+        }
         String? subtitleMetadata = subtitleUrl != null ? 'External' : null;
         String? title = intent.extra?['title'];
 
