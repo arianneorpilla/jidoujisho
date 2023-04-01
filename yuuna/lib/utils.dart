@@ -31,6 +31,7 @@ export 'src/utils/misc/jidoujisho_time_format.dart';
 export 'src/utils/misc/jidoujisho_lyrics_parameters.dart';
 export 'src/utils/misc/jidoujisho_audio_handler.dart';
 export 'src/utils/misc/jidoujisho_text_selection.dart';
+export 'src/utils/misc/jidoujisho_selectable_region.dart';
 export 'src/utils/misc/message_item.dart';
 
 export 'src/utils/firebase_options.dart';
