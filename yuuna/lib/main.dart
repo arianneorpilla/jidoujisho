@@ -179,18 +179,19 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
         if (subtitleUrl == null) {
           if (intent.extra?['subs.enable'] != null) {
             try {
-              subtitleUrl =
-                  List<String>.from(intent.extra?['subs.enable']).first;
+              List<String> subtitles =
+                  List<String>.from(intent.extra?['subs.enable']);
+              if (subtitles.isNotEmpty) {
+                subtitleUrl = subtitles.first;
+              }
             } finally {}
           }
         }
-        String? subtitleMetadata = subtitleUrl != null ? 'External' : null;
         String? title = intent.extra?['title'];
 
         launchNetworkMediaAction(
           videoUrl: intent.data ?? '',
-          subtitleUrl: subtitleUrl,
-          subtitleMetadata: subtitleMetadata,
+          extra: jsonEncode(intent.extra ?? {}),
           title: title,
         );
         return;
@@ -302,14 +303,12 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
 
   void launchNetworkMediaAction({
     required String videoUrl,
-    String? subtitleUrl,
-    String? subtitleMetadata,
+    required String extra,
     String? title,
   }) async {
     MediaItem item = PlayerNetworkStreamSource.instance.getMediaItemFromUrl(
       videoUrl: videoUrl,
-      subtitleUrl: subtitleUrl,
-      subtitleMetadata: subtitleMetadata,
+      extra: extra,
       title: title,
     );
 
