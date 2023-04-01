@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -12,6 +13,7 @@ import 'package:yuuna/media.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
+import 'package:collection/collection.dart';
 
 /// A media source that allows the user to stream video from a URL.
 class PlayerNetworkStreamSource extends PlayerMediaSource {
@@ -70,8 +72,7 @@ class PlayerNetworkStreamSource extends PlayerMediaSource {
   /// Produce media item from URL.
   MediaItem getMediaItemFromUrl({
     required String videoUrl,
-    String? subtitleUrl,
-    String? subtitleMetadata,
+    String? extra,
     String? title,
   }) {
     return MediaItem(
@@ -79,8 +80,7 @@ class PlayerNetworkStreamSource extends PlayerMediaSource {
       mediaIdentifier: videoUrl,
       mediaSourceIdentifier: uniqueKey,
       mediaTypeIdentifier: mediaType.uniqueKey,
-      extraUrl: subtitleUrl,
-      extra: subtitleMetadata,
+      extra: extra,
       position: 0,
       duration: 0,
       canEdit: false,
@@ -158,25 +158,64 @@ class PlayerNetworkStreamSource extends PlayerMediaSource {
   }) async {
     List<SubtitleItem> items = [];
 
-    String temporaryDirectoryPath = (await getTemporaryDirectory()).path;
-    String temporaryFileName =
-        'jidoujisho-${DateFormat('yyyyMMddTkkmmss').format(DateTime.now())}';
+    Map<String, dynamic> intentExtra = jsonDecode(item.extra ?? '{}');
 
-    try {
-      File file = File('$temporaryDirectoryPath/$temporaryFileName.ass');
-      if (item.extraUrl != null) {
-        http.Response request = await http.get(Uri.parse(item.extraUrl!));
+    List<String>? fileNames;
+    List<String>? subtitleNames;
+
+    if (intentExtra['subs'] != null && intentExtra['subs.name'] != null) {
+      fileNames ??= List<String>.from(intentExtra['subs']);
+      subtitleNames ??= List<String>.from(intentExtra['subs.name']);
+    }
+
+    if (fileNames == null && intentExtra['subtitles_location'] != null) {
+      fileNames = [intentExtra['subtitles_location']];
+      subtitleNames = ['External'];
+    }
+
+    fileNames ??= [];
+    subtitleNames ??= [];
+
+    for (int i = 0; i < fileNames.length; i++) {
+      String fileName = fileNames[i];
+      String subtitleName = subtitleNames[i];
+
+      String temporaryDirectoryPath = (await getTemporaryDirectory()).path;
+      String temporaryFileName =
+          'jidoujisho-${DateFormat('yyyyMMddTkkmmss').format(DateTime.now())}';
+
+      try {
+        File file = File('$temporaryDirectoryPath/$temporaryFileName.ass');
+
+        http.Response request = await http.get(Uri.parse(fileName));
         Uint8List bytes = request.bodyBytes;
         await file.writeAsBytes(bytes);
         SubtitleItem? subtitleItem = await SubtitleUtils.subtitlesFromFile(
           file: file,
-          metadata: item.extra,
+          metadata: subtitleName,
           type: SubtitleItemType.webSubtitle,
         );
         items.add(subtitleItem);
+      } catch (e) {
+        debugPrint('$e');
       }
-    } catch (e) {
-      debugPrint('$e');
+    }
+
+    String? preferredSubtitle;
+    if (intentExtra['subs.enable'] != null) {
+      List<String> enabledSubtitles =
+          List<String>.from(intentExtra['subs.enable']);
+      if (enabledSubtitles.isNotEmpty) {
+        preferredSubtitle = enabledSubtitles.first;
+      }
+    }
+
+    SubtitleItem? preferredItem =
+        items.firstWhereOrNull((item) => item.metadata == preferredSubtitle);
+
+    items.remove(preferredItem);
+    if (preferredItem != null) {
+      items.insert(0, preferredItem);
     }
 
     return items;
