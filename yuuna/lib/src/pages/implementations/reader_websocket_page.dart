@@ -74,7 +74,7 @@ class _ReaderWebsocketPageState
   Widget buildMessageBuilder() {
     List<String> messages = source.messages.reversed.toList();
     return ListView.builder(
-      cacheExtent: 999999999999999,
+      padding: const EdgeInsets.only(top: 60),
       physics:
           const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
       controller: ReaderMediaType.instance.scrollController,
@@ -82,10 +82,7 @@ class _ReaderWebsocketPageState
       itemBuilder: (context, index) {
         String message = messages[index];
 
-        return Padding(
-          padding: EdgeInsets.only(top: index == 0 ? 60 : 0),
-          child: buildMessage(message),
-        );
+        return buildMessage(message);
       },
     );
   }

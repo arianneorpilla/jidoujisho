@@ -48,10 +48,6 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      FocusScope.of(context).unfocus();
-      Future.delayed(const Duration(milliseconds: 300), scrollToBottom);
-    });
   }
 
   @override
@@ -177,11 +173,11 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
   void scrollToBottom() {
     if (_scrollController.hasClients) {
       Future.doWhile(() {
-        if (_scrollController.position.extentAfter == 0) {
+        if (_scrollController.position.extentBefore == 0) {
           return Future.value(false);
         }
         return _scrollController
-            .animateTo(_scrollController.position.maxScrollExtent,
+            .animateTo(_scrollController.position.minScrollExtent,
                 duration: const Duration(milliseconds: 100),
                 curve: Curves.linear)
             .then((value) => true);
@@ -222,7 +218,7 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
         onProgress: (progress) {
           _progressNotifier.value = progress.message;
           _scrollController.animateTo(
-              _scrollController.position.maxScrollExtent,
+              _scrollController.position.minScrollExtent,
               duration: const Duration(milliseconds: 100),
               curve: Curves.linear);
         },
@@ -281,14 +277,16 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
   }
 
   Widget buildMessageBuilder() {
-    List<MessageItem> messages = appModel.messages;
+    List<MessageItem> messages = appModel.messages.reversed.toList();
     return ListView.builder(
+      padding: const EdgeInsets.only(top: 60),
+      reverse: true,
       physics:
           const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
       controller: _scrollController,
       itemCount: _isLoading ? messages.length + 1 : messages.length,
       itemBuilder: (context, index) {
-        if (index == messages.length) {
+        if (index == 0 && _isLoading) {
           return ValueListenableBuilder(
             valueListenable: _progressNotifier,
             builder: (context, value, child) {
@@ -301,15 +299,12 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
           );
         }
 
-        MessageItem item = messages[index];
+        MessageItem item = messages[_isLoading ? index - 1 : index];
 
-        return Padding(
-          padding: EdgeInsets.only(top: index == 0 ? 60 : 0),
-          child: buildMessage(
-            text: item.message,
-            isBot: item.isBot,
-            isLoading: false,
-          ),
+        return buildMessage(
+          text: item.message,
+          isBot: item.isBot,
+          isLoading: false,
         );
       },
     );
