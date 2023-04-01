@@ -27,6 +27,7 @@ class SubtitleItem {
   SubtitleItem({
     required this.controller,
     required this.type,
+    this.source,
     this.metadata,
     this.index,
   });
@@ -36,6 +37,9 @@ class SubtitleItem {
 
   /// The type of the subtitle, embedded, external, etc.
   SubtitleItemType type;
+
+  /// Used to identify the source of a subtitle. This could be a filename.
+  String? source;
 
   /// Used to possibly identify the content of a subtitle.
   String? metadata;
@@ -50,6 +54,7 @@ class SubtitleUtils {
   static Future<SubtitleItem> subtitlesFromFile({
     required File file,
     required SubtitleItemType type,
+    String? source,
     String? metadata,
     int? index,
   }) async {
@@ -63,6 +68,7 @@ class SubtitleUtils {
           ),
         ),
         metadata: metadata,
+        source: source,
         type: type,
         index: index,
       );
