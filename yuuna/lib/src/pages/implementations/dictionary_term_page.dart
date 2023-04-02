@@ -175,29 +175,40 @@ class _DictionaryTermActionsRow extends ConsumerWidget {
           child: ValueListenableBuilder<bool>(
             valueListenable: notifier,
             builder: (context, _, child) {
-              return JidoujishoIconButton(
-                busy: true,
-                enabledColor: quickAction!.getIconColor(
+              return FutureBuilder<Color?>(
+                future: quickAction!.getIconColor(
                   context: context,
                   appModel: appModel,
                   heading: heading,
                 ),
-                shapeBorder: const RoundedRectangleBorder(),
-                backgroundColor: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white.withOpacity(0.05)
-                    : Colors.black.withOpacity(0.05),
-                size: Spacing.of(context).spaces.semiBig,
-                tooltip: quickAction.getLocalisedLabel(appModel),
-                icon: quickAction.icon,
-                onTap: () async {
-                  await quickAction!.executeAction(
-                    context: context,
-                    ref: ref,
-                    appModel: appModel,
-                    creatorModel: creatorModel,
-                    heading: heading,
+                builder: (context, snapshot) {
+                  late Color enabledColor;
+                  Color defaultColor =
+                      appModel.isDarkMode ? Colors.white : Colors.black;
+                  enabledColor = snapshot.data ?? defaultColor;
+
+                  return JidoujishoIconButton(
+                    busy: true,
+                    enabledColor: enabledColor,
+                    shapeBorder: const RoundedRectangleBorder(),
+                    backgroundColor:
+                        Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white.withOpacity(0.05)
+                            : Colors.black.withOpacity(0.05),
+                    size: Spacing.of(context).spaces.semiBig,
+                    tooltip: quickAction!.getLocalisedLabel(appModel),
+                    icon: quickAction.icon,
+                    onTap: () async {
+                      await quickAction!.executeAction(
+                        context: context,
+                        ref: ref,
+                        appModel: appModel,
+                        creatorModel: creatorModel,
+                        heading: heading,
+                      );
+                      notifier.value = !notifier.value;
+                    },
                   );
-                  notifier.value = !notifier.value;
                 },
               );
             },

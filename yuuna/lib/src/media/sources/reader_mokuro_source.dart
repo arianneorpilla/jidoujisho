@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -159,7 +158,6 @@ class ReaderMokuroSource extends ReaderMediaSource {
                 HeadlessInAppWebView webView = HeadlessInAppWebView(
                   initialUrlRequest: URLRequest(url: url),
                   onLoadStop: (controller, url) async {
-                    Navigator.popUntil(context, (route) => route.isFirst);
                     MediaItem? item = await generateMediaItemFromWebView(
                       appModel: appModel,
                       controller: controller,
@@ -168,13 +166,11 @@ class ReaderMokuroSource extends ReaderMediaSource {
                       Fluttertoast.showToast(msg: t.invalid_mokuro_file);
                       return;
                     } else {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => MokuroCatalogBrowsePage(
-                            item: item,
-                            catalog: null,
-                          ),
-                        ),
+                      appModel.openMedia(
+                        context: context,
+                        item: item,
+                        ref: ref,
+                        mediaSource: this,
                       );
                     }
                   },
@@ -221,6 +217,7 @@ class ReaderMokuroSource extends ReaderMediaSource {
     List<String> usedFiles = appModel
         .getMediaSourceHistory(mediaSource: this)
         .map((item) => item.mediaIdentifier)
+        .map((e) => e.replaceAll('file://', ''))
         .toList();
 
     Iterable<String>? filePaths = await FilesystemPicker.open(
@@ -247,8 +244,6 @@ class ReaderMokuroSource extends ReaderMediaSource {
       type: ReaderMediaType.instance,
       directory: Directory(path.dirname(filePath)),
     );
-
-    Clipboard.setData(ClipboardData(text: filePath));
 
     HeadlessInAppWebView webView = HeadlessInAppWebView(
       initialOptions: InAppWebViewGroupOptions(

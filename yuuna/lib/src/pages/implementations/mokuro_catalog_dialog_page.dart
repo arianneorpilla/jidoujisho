@@ -127,7 +127,7 @@ class _MokuroCatalogDialogPageState
         onTap: () async {
           Navigator.popUntil(context, (route) => route.isFirst);
 
-          Navigator.of(context).push(
+          await Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => MokuroCatalogBrowsePage(
                 item: null,

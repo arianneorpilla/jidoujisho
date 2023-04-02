@@ -76,14 +76,15 @@ abstract class QuickAction {
   /// initialisation step.
   Future<void> prepareResources() async {}
 
-  /// Get a custom enabled color that this action should have for a certain
-  /// condition in the application. By default, this is the foreground color.
-  Color getIconColor({
+  /// If non-null, sets a custom enabled color that this action should have for
+  /// a certain condition in the application. By default, this is the
+  /// foreground color.
+  Future<Color?> getIconColor({
     required BuildContext context,
     required AppModel appModel,
     required DictionaryHeading heading,
-  }) {
-    return Theme.of(context).appBarTheme.foregroundColor!;
+  }) async {
+    return null;
   }
 
   /// Execute the functionality of this action.

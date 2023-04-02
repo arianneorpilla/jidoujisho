@@ -612,6 +612,7 @@ class AppModel with ChangeNotifier {
   /// instead of this.
   void setCurrentMediaItem(MediaItem mediaItem) {
     _currentMediaItem = mediaItem;
+    _currentMediaSource = mediaItem.getMediaSource(appModel: this);
   }
 
   /// Get a mapping with a given mapping name.
@@ -1747,6 +1748,21 @@ class AppModel with ChangeNotifier {
       showAnkidroidApiMessage();
       rethrow;
     }
+  }
+
+  /// Given a value and a model name, checks if there are cards that have a
+  /// first field with a matching value.
+  Future<bool> checkForDuplicates(String key) async {
+    String model = lastSelectedMapping.model;
+
+    return await methodChannel.invokeMethod(
+      'checkForDuplicates',
+      <String, dynamic>{
+        'model': model,
+        'numFields': lastSelectedMapping.getExportFields().length,
+        'key': key,
+      },
+    );
   }
 
   /// Add a note with certain [creatorFieldValues] and a [mapping] of fields to

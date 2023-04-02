@@ -102,4 +102,18 @@ class CardCreatorAction extends QuickAction {
       }
     }
   }
+
+  @override
+  Future<Color?> getIconColor({
+    required BuildContext context,
+    required AppModel appModel,
+    required DictionaryHeading heading,
+  }) async {
+    bool hasDuplicates = await appModel.checkForDuplicates(heading.term);
+    if (hasDuplicates) {
+      return Colors.red;
+    } else {
+      return null;
+    }
+  }
 }
