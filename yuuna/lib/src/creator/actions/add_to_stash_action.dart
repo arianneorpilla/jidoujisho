@@ -21,19 +21,15 @@ class AddToStashAction extends QuickAction {
   static const String key = 'add_to_stash';
 
   @override
-  Color getIconColor({
+  Future<Color?> getIconColor({
     required BuildContext context,
     required AppModel appModel,
     required DictionaryHeading heading,
-  }) {
+  }) async {
     if (appModel.isTermInStash(heading.term)) {
-      return Theme.of(context).colorScheme.primary;
+      return Colors.red;
     } else {
-      return super.getIconColor(
-        context: context,
-        appModel: appModel,
-        heading: heading,
-      );
+      return null;
     }
   }
 

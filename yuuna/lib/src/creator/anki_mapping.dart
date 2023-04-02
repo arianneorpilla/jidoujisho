@@ -41,8 +41,8 @@ class AnkiMapping {
       label: standardProfileName,
       model: standardModelName,
       exportFieldKeys: [
-        SentenceField.key,
         TermField.key,
+        SentenceField.key,
         ReadingField.key,
         MeaningField.key,
         NotesField.key,
@@ -151,8 +151,8 @@ class AnkiMapping {
 
   /// Default fields to show upon opening the Card Creator.
   static const List<String> defaultCreatorFieldKeys = [
-    SentenceField.key,
     TermField.key,
+    SentenceField.key,
     ReadingField.key,
     MeaningField.key,
     NotesField.key,

@@ -3,33 +3,11 @@
 package app.lrorpilla.yuuna;
 
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.app.ShareCompat;
-import android.util.Log;
-import android.util.SparseBooleanArray;
-import android.view.ActionMode;
-import android.view.ActionProvider;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.SubMenu;
-import android.view.View;
-import android.widget.AbsListView;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
-import android.widget.Toast;
 import android.net.Uri;
 
-import androidx.annotation.NonNull;
-import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.MethodChannel;
 
@@ -42,19 +20,15 @@ import android.content.ContentResolver;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 
+import com.ichi2.anki.api.NoteInfo;
 import com.ryanheise.audioservice.AudioServiceActivity;
 import cl.puntito.simple_pip_mode.PipCallbackHelper;
 import android.content.res.Configuration;
-import android.view.accessibility.AccessibilityEvent;
 
 public class MainActivity extends AudioServiceActivity {
     private static final String ANKIDROID_CHANNEL = "app.lrorpilla.yuuna/anki";
@@ -103,8 +77,7 @@ public class MainActivity extends AudioServiceActivity {
         } else {
             modelId = api.addNewCustomModel("jidoujisho Yuuna",
                 new String[] {
-                    "Sentence",
-                    "Term",
+                    "Term", "Sentence",
                     "Reading",
                     "Meaning",
                     "Notes",
@@ -181,6 +154,14 @@ public class MainActivity extends AudioServiceActivity {
         }
     }
 
+    private boolean checkForDuplicates(String model, Integer numFields, String key) {
+        final AddContentApi api = new AddContentApi(context);
+        long modelId = mAnkiDroid.findModelIdByName(model, numFields);
+
+        List<NoteInfo> notes = api.findDuplicateNotes(modelId, key);
+        return !notes.isEmpty();
+    }
+
     private void addNote(String model, String deck, ArrayList<String> fields) {
         final AddContentApi api = new AddContentApi(context);
 
@@ -214,6 +195,8 @@ public class MainActivity extends AudioServiceActivity {
                 (call, result) -> {
                     final String model = call.argument("model");
                     final String deck = call.argument("deck");
+                    final String key = call.argument("key");
+                    final Integer numFields = call.argument("numFields");
                     final ArrayList<String> fields = call.argument("fields"); 
 
                     final String filename = call.argument("filename");
@@ -226,6 +209,9 @@ public class MainActivity extends AudioServiceActivity {
                         case "addNote":
                             addNote(model, deck, fields);
                             result.success("Added note");
+                            break;
+                        case "checkForDuplicates":
+                            result.success(checkForDuplicates(model, numFields, key));
                             break;
                         case "getDecks":
                             result.success(api.getDeckList());

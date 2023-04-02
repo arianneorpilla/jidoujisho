@@ -101,7 +101,7 @@ class _MokuroCatalogBrowsePageState
     return [
       buildGoBackButton(),
       const Space.small(),
-      buildBookmarkButton(),
+      buildCreateCatalogButton(),
       const Space.extraSmall(),
     ];
   }
@@ -114,7 +114,7 @@ class _MokuroCatalogBrowsePageState
           return const SizedBox.shrink();
         } else {
           return JidoujishoIconButton(
-            tooltip: t.back,
+            tooltip: t.create_catalog,
             icon: Icons.keyboard_return,
             onTap: _controller.goBack,
           );
@@ -123,9 +123,9 @@ class _MokuroCatalogBrowsePageState
     );
   }
 
-  Widget buildBookmarkButton() {
+  Widget buildCreateCatalogButton() {
     return JidoujishoIconButton(
-      tooltip: t.enhancements,
+      tooltip: t.create_catalog,
       icon: Icons.bookmark_add,
       onTap: () async {
         showDialog(
@@ -519,7 +519,7 @@ updatePage(state.page_idx)
   String javascriptToExecute = """
 /*jshint esversion: 6 */
 // yikes
-setInterval(saveHandler, 1000);
+setInterval(saveHandler, 2000);
 function saveHandler() {
  console.log(JSON.stringify({
 	    "jidoujisho-message-type": "save",

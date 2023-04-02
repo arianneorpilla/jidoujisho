@@ -352,7 +352,7 @@
     "no_catalogs_listed": "No catalogs listed",
     "go_back": "Go Back",
     "invalid_mokuro_file": "File is not a Mokuro generated HTML file.",
-
+    "create_catalog": "Create Catalog",
     "view_replies": {
         "reply": {
           "one": "SHOW $n REPLY",
