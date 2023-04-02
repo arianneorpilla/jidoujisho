@@ -132,9 +132,6 @@ dependencies:
   wakelock: ^0.6.1+2
   web_socket_channel: ^2.3.0
   youtube_explode_dart: ^1.12.4
-  zoom_widget: ^2.0.1
-  zoomable_photo_gallery: ^1.0.2+1
-
 dependency_overrides:
   ffi: ^2.0.0
   freezed_annotation: ^2.2.0 # Caused by spaces

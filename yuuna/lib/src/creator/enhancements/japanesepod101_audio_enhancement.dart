@@ -1,13 +1,12 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kana_kit/kana_kit.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
-import 'package:http/http.dart' as http;
 
 /// An enhancement for fetching audio from JapanesePod101.
 class JapanesePod101AudioEnhancement extends AudioEnhancement {
@@ -103,14 +102,16 @@ class JapanesePod101AudioEnhancement extends AudioEnhancement {
     }
 
     File file = File('$jpdAudioPath/$term-$reading.mp3');
-    http.Response request = await http.get(Uri.parse(audioUrl));
+    try {
+      File networkFile = await DefaultCacheManager().getSingleFile(audioUrl);
 
-    if (request.contentLength == 52288 || request.statusCode != 200) {
+      if (networkFile.readAsBytesSync().lengthInBytes == 52288) {
+        return null;
+      }
+      networkFile.copySync(file.path);
+    } catch (e) {
       return null;
     }
-
-    Uint8List bytes = request.bodyBytes;
-    file.writeAsBytesSync(bytes);
 
     return file;
   }

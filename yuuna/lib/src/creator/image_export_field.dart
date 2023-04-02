@@ -78,6 +78,12 @@ abstract class ImageExportField extends Field {
       return;
     }
 
+    if (creatorModel.scrollController.hasClients &&
+        cause == EnhancementTriggerCause.manual) {
+      creatorModel.scrollController
+          .jumpTo(creatorModel.scrollController.position.minScrollExtent);
+    }
+
     /// Show loading state.
     setSearching(
         appModel: appModel,

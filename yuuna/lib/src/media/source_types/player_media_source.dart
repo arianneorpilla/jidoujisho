@@ -89,8 +89,9 @@ abstract class PlayerMediaSource extends MediaSource {
   Future<List<NetworkToFileImage>> generateImages({
     required AppModel appModel,
     required MediaItem item,
-    required List<Subtitle>? subtitles,
-    required SubtitleOptions options,
+    List<Subtitle>? subtitles,
+    SubtitleOptions? options,
+    String? data,
   }) async {
     while (appModel.blockCreatorInitialMedia) {
       await Future.delayed(const Duration(seconds: 1), () {});
@@ -165,8 +166,9 @@ abstract class PlayerMediaSource extends MediaSource {
   Future<File?>? generateAudio({
     required AppModel appModel,
     required MediaItem item,
-    required List<Subtitle>? subtitles,
-    required SubtitleOptions options,
+    List<Subtitle>? subtitles,
+    SubtitleOptions? options,
+    String? data,
   }) async {
     while (appModel.blockCreatorInitialMedia) {
       await Future.delayed(const Duration(seconds: 1), () {});
@@ -204,7 +206,7 @@ abstract class PlayerMediaSource extends MediaSource {
       }
     }
 
-    Duration allowance = Duration(milliseconds: options.audioAllowance);
+    Duration allowance = Duration(milliseconds: options!.audioAllowance);
     Duration delay = Duration(milliseconds: options.subtitleDelay);
 
     if (subtitles == null && appModel.currentSubtitle.value != null) {

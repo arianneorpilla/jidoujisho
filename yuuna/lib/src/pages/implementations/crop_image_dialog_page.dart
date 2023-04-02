@@ -37,7 +37,10 @@ class _CropImageDialogPageState extends BasePageState<CropImageDialogPage> {
     return AlertDialog(
       contentPadding: Spacing.of(context).insets.all.normal,
       actionsPadding: Spacing.of(context).insets.horizontal.normal,
-      content: buildContent(),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: buildContent(),
+      ),
       actions: actions,
     );
   }

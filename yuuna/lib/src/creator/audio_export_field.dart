@@ -137,6 +137,12 @@ abstract class AudioExportField extends Field {
       return;
     }
 
+    if (creatorModel.scrollController.hasClients &&
+        cause == EnhancementTriggerCause.manual) {
+      creatorModel.scrollController
+          .jumpTo(creatorModel.scrollController.position.minScrollExtent);
+    }
+
     /// Show loading state.
     setSearching(
         appModel: appModel,
@@ -153,6 +159,14 @@ abstract class AudioExportField extends Field {
           file: file,
           searchTermUsed: searchTerm,
         );
+      } else {
+        if (cause == EnhancementTriggerCause.manual) {
+          Fluttertoast.showToast(
+            msg: t.audio_unavailable,
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+          );
+        }
       }
 
       _autoCannotOverride = newAutoCannotOverride;

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:network_to_file_image/network_to_file_image.dart';
@@ -112,9 +113,9 @@ class ImmersionKitEnhancement extends Enhancement {
             generateImages: () async {
               String imagePath = '${directory.path}/image';
               File imageFile = File(imagePath);
-              http.Response imageResponse =
-                  await http.get(Uri.parse(selection.first.imageUrl));
-              imageFile.writeAsBytesSync(imageResponse.bodyBytes);
+              File networkFile = await DefaultCacheManager()
+                  .getSingleFile(selection.first.imageUrl);
+              networkFile.copySync(imageFile.path);
 
               return [NetworkToFileImage(file: imageFile)];
             },
@@ -131,9 +132,9 @@ class ImmersionKitEnhancement extends Enhancement {
             generateAudio: () async {
               String audioPath = '${directory.path}/audio.mp3';
               File audioFile = File(audioPath);
-              http.Response audioResponse =
-                  await http.get(Uri.parse(selection.first.audioUrl));
-              audioFile.writeAsBytesSync(audioResponse.bodyBytes);
+              File networkFile = await DefaultCacheManager()
+                  .getSingleFile(selection.first.audioUrl);
+              networkFile.copySync(audioFile.path);
 
               return audioFile;
             },

@@ -1982,22 +1982,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.12.4"
-  zoom_widget:
-    dependency: "direct main"
-    description:
-      name: zoom_widget
-      sha256: "50fbaa460ffc938ca14c0077f8c9e5968c437897242d7f552dacff1bf3270225"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.1"
-  zoomable_photo_gallery:
-    dependency: "direct main"
-    description:
-      name: zoomable_photo_gallery
-      sha256: bb3208cfe707f189da78a8f234f7cd6bdddab20a6d33af46852a6107a55dce59
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.2+1"
 sdks:
   dart: ">=2.19.2 <3.0.0"
   flutter: ">=3.3.0"

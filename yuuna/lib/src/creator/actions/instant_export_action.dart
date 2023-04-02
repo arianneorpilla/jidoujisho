@@ -66,7 +66,6 @@ class InstantExportAction extends QuickAction {
             generateImages: () async {
               return mediaSource.generateImages(
                 appModel: appModel,
-                subtitles: null,
                 item: appModel.getCurrentMediaItem()!,
                 options: appModel.currentSubtitleOptions!.value,
               );
@@ -84,7 +83,6 @@ class InstantExportAction extends QuickAction {
             generateAudio: () async {
               return mediaSource.generateAudio(
                 appModel: appModel,
-                subtitles: null,
                 item: appModel.getCurrentMediaItem()!,
                 options: appModel.currentSubtitleOptions!.value,
               );

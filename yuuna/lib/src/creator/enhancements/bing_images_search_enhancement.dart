@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -11,7 +12,6 @@ import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
 import 'package:html/parser.dart' as parser;
 import 'package:html/dom.dart' as dom;
-import 'package:http/http.dart' as http;
 
 /// An enhancement used effectively as a shortcut for clearing the contents
 /// of a [CreatorModel] pertaining to a certain field.
@@ -30,6 +30,9 @@ class BingImagesSearchEnhancement extends ImageEnhancement {
   /// Used to identify this enhancement and to allow a constant value for the
   /// default mappings value of [AnkiMapping].
   static const String key = 'bing_images_search';
+
+  /// Used to store results that have already been found at runtime.
+  final Map<String, List<NetworkToFileImage>> _bingCache = {};
 
   @override
   Future<void> enhanceCreatorParams({
@@ -81,6 +84,10 @@ class BingImagesSearchEnhancement extends ImageEnhancement {
     required BuildContext context,
     String? searchTerm,
   }) async {
+    if (_bingCache[searchTerm!] != null) {
+      return _bingCache[searchTerm]!;
+    }
+
     List<NetworkToFileImage> images = [];
 
     bool webViewBusy = true;
@@ -122,8 +129,9 @@ class BingImagesSearchEnhancement extends ImageEnhancement {
             /// Instant export requires a file to already be written to the
             /// file system.
             if (i == 0) {
-              http.Response response = await http.get(Uri.parse(imageURL));
-              File(imagePath).writeAsBytesSync(response.bodyBytes);
+              File networkFile =
+                  await DefaultCacheManager().getSingleFile(imageURL);
+              networkFile.copySync(imagePath);
             }
             NetworkToFileImage image = NetworkToFileImage(
               url: imageURL,
@@ -140,6 +148,10 @@ class BingImagesSearchEnhancement extends ImageEnhancement {
 
     while (webViewBusy) {
       await Future.delayed(const Duration(milliseconds: 100), () {});
+    }
+
+    if (images.isNotEmpty) {
+      _bingCache[searchTerm] = images;
     }
 
     return images;

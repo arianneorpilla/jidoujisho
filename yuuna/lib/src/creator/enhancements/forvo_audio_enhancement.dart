@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -97,9 +97,9 @@ class ForvoAudioEnhancement extends AudioEnhancement {
         forvoAudioDir.createSync();
 
         File file = File('$forvoAudioPath/$index.mp3');
-        http.Response request = await http.get(Uri.parse(result.audioUrl));
-        Uint8List bytes = request.bodyBytes;
-        await file.writeAsBytes(bytes);
+        File networkFile =
+            await DefaultCacheManager().getSingleFile(result.audioUrl);
+        networkFile.copySync(file.path);
 
         await audioField.setAudio(
           appModel: appModel,
@@ -127,10 +127,9 @@ class ForvoAudioEnhancement extends AudioEnhancement {
             forvoAudioDir.createSync();
 
             File file = File('$forvoAudioPath/$index.mp3');
-            http.Response request =
-                await http.get(Uri.parse(results[index].audioUrl));
-            Uint8List bytes = request.bodyBytes;
-            await file.writeAsBytes(bytes);
+            File networkFile = await DefaultCacheManager()
+                .getSingleFile(results[index].audioUrl);
+            networkFile.copySync(file.path);
 
             await audioField.setAudio(
               appModel: appModel,
@@ -165,9 +164,13 @@ class ForvoAudioEnhancement extends AudioEnhancement {
         'jidoujisho-${DateFormat('yyyyMMddTkkmmss').format(DateTime.now())}';
 
     File file = File('$temporaryDirectoryPath/$temporaryFileName');
-    http.Response request = await http.get(Uri.parse(results[0].audioUrl));
-    Uint8List bytes = request.bodyBytes;
-    await file.writeAsBytes(bytes);
+    if (results.isEmpty) {
+      return null;
+    }
+
+    File networkFile =
+        await DefaultCacheManager().getSingleFile(results[0].audioUrl);
+    networkFile.copySync(file.path);
 
     return file;
   }

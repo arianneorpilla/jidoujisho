@@ -608,6 +608,12 @@ class AppModel with ChangeNotifier {
     }
   }
 
+  /// Manually flag that the app is now using a media item. Prefer [openMedia]
+  /// instead of this.
+  void setCurrentMediaItem(MediaItem mediaItem) {
+    _currentMediaItem = mediaItem;
+  }
+
   /// Get a mapping with a given mapping name.
   AnkiMapping? getMappingFromLabel(String label) {
     return _database.ankiMappings.where().labelEqualTo(label).findFirstSync();
@@ -2107,6 +2113,7 @@ class AppModel with ChangeNotifier {
     }
 
     mediaSource.clearCurrentSentence();
+    mediaSource.clearExtraData();
     await initialiseAudioHandler();
 
     _currentMediaSource = mediaSource;
@@ -2151,6 +2158,7 @@ class AppModel with ChangeNotifier {
     mediaSource.setShouldGenerateImage(value: true);
     mediaSource.setShouldGenerateAudio(value: true);
     mediaSource.clearCurrentSentence();
+    mediaSource.clearExtraData();
     _currentMediaSource = null;
     _currentMediaItem = null;
     _overrideDictionaryColor = null;

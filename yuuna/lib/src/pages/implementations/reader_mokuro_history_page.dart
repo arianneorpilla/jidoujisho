@@ -28,6 +28,17 @@ class _ReaderMokuroHistoryPageState<T extends HistoryReaderPage>
   ReaderMokuroSource get mediaSource => ReaderMokuroSource.instance;
 
   @override
+  void initState() {
+    super.initState();
+    mediaType.tabRefreshNotifier.addListener(refresh);
+  }
+
+  /// Refresh the page and respond to history changes.
+  void refresh() {
+    setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
     List<MediaItem> items = appModel
         .getMediaSourceHistory(mediaSource: mediaSource)
