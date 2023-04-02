@@ -51,7 +51,7 @@
     "dialog_record": "RECORD",
     "dialog_manage": "MANAGE",
     "dialog_stop": "STOP",
-    "dialog_add": "ADD",
+    "dialog_done": "DONE",
     "reset": "Reset",
     "dialog_launch_ankidroid": "LAUNCH ANKIDROID",
     "media_item_delete_confirmation":
@@ -352,6 +352,7 @@
     "no_catalogs_listed": "No catalogs listed",
     "go_back": "Go Back",
     "invalid_mokuro_file": "File is not a Mokuro generated HTML file.",
+
     "view_replies": {
         "reply": {
           "one": "SHOW $n REPLY",

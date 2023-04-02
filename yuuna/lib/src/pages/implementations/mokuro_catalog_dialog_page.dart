@@ -105,7 +105,7 @@ class _MokuroCatalogDialogPageState
       type: MaterialType.transparency,
       key: ValueKey(catalog.id),
       child: ListTile(
-        leading: const Icon(Icons.account_box),
+        leading: const Icon(Icons.bookmark),
         title: Row(
           children: [
             Expanded(
@@ -130,6 +130,7 @@ class _MokuroCatalogDialogPageState
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => MokuroCatalogBrowsePage(
+                item: null,
                 catalog: catalog,
               ),
             ),

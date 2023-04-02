@@ -123,6 +123,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
     _dictionaryResultNotifier.value = null;
     _popupPositionNotifier.value = false;
     appModel.currentMediaSource?.clearCurrentSentence();
+    appModel.currentMediaSource?.clearExtraData();
   }
 
   /// Build a dictionary showing the result with positioning.

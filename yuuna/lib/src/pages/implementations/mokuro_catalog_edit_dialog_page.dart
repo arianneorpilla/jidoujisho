@@ -89,7 +89,7 @@ class _MokuroCatalogEditDialogPageState
     MokuroCatalog catalog = MokuroCatalog(
       name: name,
       url: url,
-      order: appModel.nextCatalogOrder,
+      order: widget.catalog?.order ?? appModel.nextCatalogOrder,
       id: widget.catalog?.id,
     );
     if (appModel.catalogUrlHasDuplicate(catalog)) {

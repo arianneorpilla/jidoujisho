@@ -3,7 +3,7 @@
 /// Locales: 1
 /// Strings: 330
 ///
-/// Built on 2023-04-01 at 09:04 UTC
+/// Built on 2023-04-02 at 04:21 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -201,7 +201,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get dialog_record => 'RECORD';
 	String get dialog_manage => 'MANAGE';
 	String get dialog_stop => 'STOP';
-	String get dialog_add => 'ADD';
+	String get dialog_done => 'DONE';
 	String get reset => 'Reset';
 	String get dialog_launch_ankidroid => 'LAUNCH ANKIDROID';
 	String get media_item_delete_confirmation => 'This will clear this item from history. Are you sure you want to do this?';
@@ -551,7 +551,7 @@ extension on _StringsEn {
 			case 'dialog_record': return 'RECORD';
 			case 'dialog_manage': return 'MANAGE';
 			case 'dialog_stop': return 'STOP';
-			case 'dialog_add': return 'ADD';
+			case 'dialog_done': return 'DONE';
 			case 'reset': return 'Reset';
 			case 'dialog_launch_ankidroid': return 'LAUNCH ANKIDROID';
 			case 'media_item_delete_confirmation': return 'This will clear this item from history. Are you sure you want to do this?';

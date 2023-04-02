@@ -116,6 +116,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
                 item: appModel.getCurrentMediaItem()!,
                 subtitles: widget.subtitles,
                 options: appModel.currentSubtitleOptions!.value,
+                data: mediaSource.currentExtraData,
               );
             },
           );
@@ -141,6 +142,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
                 item: appModel.getCurrentMediaItem()!,
                 subtitles: widget.subtitles,
                 options: appModel.currentSubtitleOptions!.value,
+                data: mediaSource.currentExtraData,
               );
             },
           );
@@ -507,19 +509,17 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
     );
   }
 
-  final ScrollController _scrollController = ScrollController();
-
   Widget buildFields({required bool isPortrait}) {
     return RawScrollbar(
       thickness: 3,
       thumbVisibility: true,
-      controller: _scrollController,
+      controller: creatorModel.scrollController,
       child: Padding(
         padding: Spacing.of(context).insets.horizontal.small,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(
               parent: BouncingScrollPhysics()),
-          controller: _scrollController,
+          controller: creatorModel.scrollController,
           children: [
             if (isCardEditing && isPortrait) buildTopWidgets(),
             if (!isCardEditing) buildTutorialMessage(),

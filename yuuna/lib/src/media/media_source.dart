@@ -190,6 +190,24 @@ abstract class MediaSource {
     _currentSentence = '';
   }
 
+  /// This is used to hold data for generating images and audio.
+  String? get currentExtraData => _currentExtraData;
+  String? _currentExtraData;
+
+  /// Set extra export data. This should be simplified in the future and be
+  /// used as the main way of communicating parameters to the creator for
+  /// creating override images/audio information. There should not be media
+  /// source specific parameters for general functions like generating images
+  /// or audio.
+  void setExtraData(String value) {
+    _currentExtraData = value;
+  }
+
+  /// Clear extra export data.
+  void clearExtraData() {
+    _currentExtraData = null;
+  }
+
   /// Gets whether or not a media source should currently supply images.
   bool get shouldGenerateImage => _shouldGenerateImage;
   bool _shouldGenerateImage = true;
@@ -416,8 +434,9 @@ abstract class MediaSource {
   Future<List<NetworkToFileImage>> generateImages({
     required AppModel appModel,
     required MediaItem item,
-    required List<Subtitle>? subtitles,
-    required SubtitleOptions options,
+    List<Subtitle>? subtitles,
+    SubtitleOptions? options,
+    String? data,
   }) {
     throw UnimplementedError();
   }
@@ -427,8 +446,9 @@ abstract class MediaSource {
   Future<File?>? generateAudio({
     required AppModel appModel,
     required MediaItem item,
-    required List<Subtitle>? subtitles,
-    required SubtitleOptions options,
+    List<Subtitle>? subtitles,
+    SubtitleOptions? options,
+    String? data,
   }) {
     throw UnimplementedError();
   }

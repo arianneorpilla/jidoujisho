@@ -1,25 +1,23 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
+import 'package:network_to_file_image/network_to_file_image.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:subtitle/subtitle.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
 import 'package:path/path.dart' as path;
 import 'package:collection/collection.dart';
-
-/// A global [Provider] for generating payloads for Mokuro media items.
-final mokuroPayloadProvider =
-    FutureProvider.family<MokuroPayload, String>((ref, url) {
-  return ReaderMokuroSource.instance.generatePayload(url);
-});
 
 /// A media source that allows the user to read manga processed by Mokuro.
 class ReaderMokuroSource extends ReaderMediaSource {
@@ -33,6 +31,7 @@ class ReaderMokuroSource extends ReaderMediaSource {
           icon: Icons.dashboard_outlined,
           implementsSearch: false,
           implementsHistory: true,
+          overridesAutoImage: true,
         );
 
   /// Get the singleton instance of this media type.
@@ -80,7 +79,7 @@ class ReaderMokuroSource extends ReaderMediaSource {
   BaseSourcePage buildLaunchPage({
     MediaItem? item,
   }) {
-    return ReaderMokuroSourcePage(item: item);
+    return MokuroCatalogBrowsePage(item: item, catalog: null);
   }
 
   @override
@@ -95,10 +94,31 @@ class ReaderMokuroSource extends ReaderMediaSource {
     required AppModel appModel,
   }) {
     return [
+      buildTweaksButton(context: context, ref: ref, appModel: appModel),
       buildCatalogButton(context: context, ref: ref, appModel: appModel),
       buildOpenLinkButton(context: context, ref: ref, appModel: appModel),
       buildPickFileButton(context: context, ref: ref, appModel: appModel),
     ];
+  }
+
+  /// Tweaks bar action.
+  Widget buildTweaksButton(
+      {required BuildContext context,
+      required WidgetRef ref,
+      required AppModel appModel}) {
+    return FloatingSearchBarAction(
+      child: JidoujishoIconButton(
+        size: Theme.of(context).textTheme.titleLarge?.fontSize,
+        tooltip: t.tweaks,
+        icon: Icons.tune,
+        onTap: () {
+          showDialog(
+            context: context,
+            builder: (context) => const MokuroSettingsDialogPage(),
+          );
+        },
+      ),
+    );
   }
 
   /// Menu bar action.
@@ -148,11 +168,13 @@ class ReaderMokuroSource extends ReaderMediaSource {
                       Fluttertoast.showToast(msg: t.invalid_mokuro_file);
                       return;
                     } else {
-                      appModel.openMedia(
-                        item: item,
-                        context: context,
-                        ref: ref,
-                        mediaSource: this,
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => MokuroCatalogBrowsePage(
+                            item: item,
+                            catalog: null,
+                          ),
+                        ),
                       );
                     }
                   },
@@ -246,11 +268,13 @@ class ReaderMokuroSource extends ReaderMediaSource {
         if (item == null) {
           Fluttertoast.showToast(msg: t.invalid_mokuro_file);
         } else {
-          appModel.openMedia(
-            item: item,
-            context: context,
-            ref: ref,
-            mediaSource: this,
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => MokuroCatalogBrowsePage(
+                item: item,
+                catalog: null,
+              ),
+            ),
           );
         }
       },
@@ -321,148 +345,121 @@ bgImage.substring(5, bgImage.length - 2);
         Uri.parse(mediaIdentifier).resolve(relativeUrl).toString());
   }
 
-  /// From a URL from a [MediaItem], yields the payload to be used containing
-  /// all image details of a Mokuro HTML file.
-  Future<MokuroPayload> generatePayload(String mediaIdentifier) async {
-    bool webViewBusy = true;
+  /// Whether or not using the volume buttons in the Reader should turn the
+  /// page.
+  bool get volumePageTurningEnabled {
+    return getPreference<bool>(
+        key: 'volume_page_turning_enabled', defaultValue: true);
+  }
 
-    late InAppWebViewController _controller;
-
-    HeadlessInAppWebView webView = HeadlessInAppWebView(
-      initialOptions: InAppWebViewGroupOptions(
-        crossPlatform: InAppWebViewOptions(
-          allowFileAccessFromFileURLs: true,
-          allowUniversalAccessFromFileURLs: true,
-        ),
-      ),
-      initialUrlRequest: URLRequest(url: Uri.parse(mediaIdentifier)),
-      onWebViewCreated: (controller) {
-        _controller = controller;
-      },
-      onLoadError: (_, __, ___, ____) {
-        throw Exception('Load error occured');
-      },
-      onLoadHttpError: (_, __, ___, ____) {
-        throw Exception('Load error occured');
-      },
-      onLoadStop: (controller, url) async {
-        webViewBusy = false;
-      },
+  /// Toggles the volume page turning option.
+  void toggleVolumePageTurningEnabled() async {
+    await setPreference<bool>(
+      key: 'volume_page_turning_enabled',
+      value: !volumePageTurningEnabled,
     );
+  }
 
-    await webView.run();
-    while (webViewBusy) {
-      await Future.delayed(const Duration(milliseconds: 100));
+  /// Controls which direction is up or down for volume button page turning.
+  bool get volumePageTurningInverted {
+    return getPreference<bool>(
+        key: 'volume_page_turning_inverted', defaultValue: false);
+  }
+
+  /// Inverts the current volume button page turning direction preference.
+  void toggleVolumePageTurningInverted() async {
+    await setPreference<bool>(
+      key: 'volume_page_turning_inverted',
+      value: !volumePageTurningInverted,
+    );
+  }
+
+  /// Whether or not to add to extend the webpage beyond the navigation bar.
+  /// This may be helpful for devices that don't have difficulty accessing the
+  /// top bar (i.e. don't have a teardrop notch).
+  bool get extendPageBeyondNavigationBar {
+    return getPreference<bool>(
+        key: 'extend_page_beyond_navbar', defaultValue: false);
+  }
+
+  /// Toggles the extend navbar option.
+  void toggleExtendPageBeyondNavigationBar() async {
+    await setPreference<bool>(
+      key: 'extend_page_beyond_navbar',
+      value: !extendPageBeyondNavigationBar,
+    );
+  }
+
+  /// Whether the reader will highlight words on tap.
+  bool get highlightOnTap {
+    return getPreference<bool>(
+      key: 'highlight_on_tap',
+      defaultValue: true,
+    );
+  }
+
+  /// Toggles whether the reader will highlight words on tap.
+  void toggleHighlightOnTap() async {
+    await setPreference<bool>(
+      key: 'highlight_on_tap',
+      value: !highlightOnTap,
+    );
+  }
+
+  /// If this source is non-null, this will be used as the initial function
+  /// for the image field over the auto enhancement. Extra durations can be
+  /// invoked and defined when initially opening the creator, to call attention
+  /// to multiple durations to be used for image generation.
+  @override
+  Future<List<NetworkToFileImage>> generateImages({
+    required AppModel appModel,
+    required MediaItem item,
+    List<Subtitle>? subtitles,
+    SubtitleOptions? options,
+    String? data,
+  }) async {
+    List<NetworkToFileImage> imageFiles = [];
+    Directory appDirDoc = await getApplicationSupportDirectory();
+    String mokuroPreviewPath = '${appDirDoc.path}/mokuroImagePreview';
+    Directory mokuroPreviewDir = Directory(mokuroPreviewPath);
+    if (mokuroPreviewDir.existsSync()) {
+      mokuroPreviewDir.deleteSync(recursive: true);
+    }
+    mokuroPreviewDir.createSync();
+
+    String timestamp = DateFormat('yyyyMMddTkkmmss').format(DateTime.now());
+    Directory imageDir = Directory('$mokuroPreviewPath/$timestamp');
+    imageDir.createSync();
+
+    File file = appModel.getPreviewImageFile(mokuroPreviewDir, 0);
+
+    if (data != null) {
+      if (data.startsWith('file://')) {
+        String absolutePath = Uri.decodeFull(Uri.parse(item.mediaIdentifier)
+            .resolve(data.replaceFirst('file://', ''))
+            .toString());
+
+        File originalFile = File(absolutePath);
+        originalFile.copySync(file.path);
+
+        imageFiles.add(NetworkToFileImage(file: file));
+      } else {
+        String absolutePath = Uri.decodeFull(
+            Uri.parse(item.mediaIdentifier).resolve(data).toString());
+
+        File networkFile =
+            await DefaultCacheManager().getSingleFile(absolutePath);
+        networkFile.copySync(file.path);
+
+        imageFiles.add(
+          NetworkToFileImage(
+            url: data,
+            file: file,
+          ),
+        );
+      }
     }
 
-    String containersDataJson =
-        await _controller.evaluateJavascript(source: payloadJs);
-    List<Map<String, dynamic>> containersData =
-        List<Map<String, dynamic>>.from(jsonDecode(containersDataJson));
-
-    List<MokuroImage> images = containersData.map((containerData) {
-      String relativeUrl = containerData['relativeUrl'];
-      double height = double.parse(containerData['height'].toString());
-      double width = double.parse(containerData['width'].toString());
-      List<Map<String, dynamic>> blocksData =
-          List<Map<String, dynamic>>.from(containerData['blocks']);
-
-      List<MokuroBlock> blocks = blocksData.map((blockData) {
-        double height = double.parse(blockData['height'].toString());
-        double width = double.parse(blockData['width'].toString());
-        double left = double.parse(blockData['left'].toString());
-        double top = double.parse(blockData['top'].toString());
-        int zIndex = double.parse(blockData['z'].toString()).toInt();
-        double fontSize = double.parse(blockData['fontSize'].toString());
-        bool isVertical = blockData['isVertical'];
-        List<String> lines = List<String>.from(blockData['lines']);
-
-        return MokuroBlock(
-          isVertical: isVertical,
-          lines: lines,
-          fontSize: fontSize,
-          zIndex: zIndex,
-          rectangle: Rect.fromLTWH(left, top, width * 1.3, height * 1.3),
-        );
-      }).toList();
-
-      /// Higher z-index is priority to tap first.
-      blocks.sort((a, b) => a.zIndex.compareTo(b.zIndex));
-
-      String url = getImageUrl(
-        relativeUrl: relativeUrl,
-        mediaIdentifier: mediaIdentifier,
-      );
-      Size size = Size(width, height);
-
-      return MokuroImage(
-        url: url,
-        size: size,
-        blocks: blocks,
-      );
-    }).toList();
-
-    return MokuroPayload(images: images);
-  }
-
-  /// Used for getting payload data.
-  static String payloadJs = '''
-JSON.stringify([...document.body.getElementsByClassName('pageContainer')].map((g) => {
-  const backgroundImage = g.style.backgroundImage;
-  const relativeUrl = backgroundImage.substring(5, backgroundImage.length - 2);
-
-  return {
-    'relativeUrl': relativeUrl,
-    'height': parseFloat(g.style.height),
-    'width': parseFloat(g.style.width),
-    'blocks': [...g.getElementsByClassName('textBox')].map((e) => {
-      return {
-        'height': parseFloat(e.style.height),
-        'width': parseFloat(e.style.width),
-        'left': parseFloat(e.style.left),
-        'top': parseFloat(e.style.top),
-        'fontSize': parseFloat(e.style.fontSize),
-        'isVertical': e.style.writingMode.startsWith('vertical'),
-        'z': parseFloat(e.style.zIndex),
-        'lines': [...e.getElementsByTagName('p')].map((f) => f.textContent.trim()),
-      }
-    }),
-  }
-}));
-''';
-
-  /// Get the color of the background in the reader.
-  Color get backgroundColor {
-    int red = getPreference(
-      key: 'bg_red',
-      defaultValue: Colors.black.withOpacity(0).red,
-    );
-    int green = getPreference(
-      key: 'bg_green',
-      defaultValue: Colors.black.withOpacity(0).green,
-    );
-    int blue = getPreference(
-      key: 'bg_blue',
-      defaultValue: Colors.black.withOpacity(0).blue,
-    );
-
-    return Color.fromRGBO(red, green, blue, 1);
-  }
-
-  /// Set the color of the background in the reader.
-  void setBackgroundColor(Color color) {
-    setPreference(key: 'bg_red', value: color.red);
-    setPreference(key: 'bg_green', value: color.green);
-    setPreference(key: 'bg_blue', value: color.blue);
-  }
-
-  /// Get whether or not the reader is RTL or LTR.
-  bool get rightToLeft {
-    return getPreference(key: 'right_to_left', defaultValue: true);
-  }
-
-  /// Toggle right to left mode.
-  void toggleRightToLeft() {
-    setPreference(key: 'right_to_left', value: !rightToLeft);
+    return imageFiles;
   }
 }

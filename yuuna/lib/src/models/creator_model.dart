@@ -28,6 +28,9 @@ class CreatorModel with ChangeNotifier {
       _controllersByField;
   late final Map<Field, TextEditingController> _controllersByField;
 
+  /// Scroll controller for the Creator page.
+  final ScrollController scrollController = ScrollController();
+
   /// Prepare the [CreatorModel]'s final variables for use.
   void initialise() {
     _controllersByField = Map.unmodifiable(

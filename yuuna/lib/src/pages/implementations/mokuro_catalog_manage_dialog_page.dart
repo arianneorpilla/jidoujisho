@@ -44,7 +44,7 @@ class _MokuroCatalogManageDialogPageState
 
   List<Widget> get actions => [
         buildCreateButton(),
-        buildCloseButton(),
+        buildDoneButton(),
       ];
 
   Widget buildCreateButton() {
@@ -59,9 +59,9 @@ class _MokuroCatalogManageDialogPageState
     );
   }
 
-  Widget buildCloseButton() {
+  Widget buildDoneButton() {
     return TextButton(
-      child: Text(t.dialog_close),
+      child: Text(t.dialog_done),
       onPressed: () => Navigator.pop(context),
     );
   }
