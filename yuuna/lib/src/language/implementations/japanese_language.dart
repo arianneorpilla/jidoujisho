@@ -523,22 +523,6 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
         }
       }
 
-      if (params.maximumDictionaryTermsInResult > uniqueHeadingsById.length) {
-        if (i == 0) {
-          List<DictionaryHeading> startsWithToAdd = database.dictionaryHeadings
-              .where()
-              .termStartsWith(searchTerm)
-              .filter()
-              .entriesIsNotEmpty()
-              .sortByTermLength()
-              .findAllSync();
-
-          uniqueHeadingsById.addEntries(startsWithToAdd.map(
-            (heading) => MapEntry(heading.id, heading),
-          ));
-        }
-      }
-
       if (termExactResults.isNotEmpty && bestLength < partialTerm.length) {
         bestLength = partialTerm.length;
       }
@@ -556,6 +540,22 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
       if (termExactKatakanaResults.isNotEmpty &&
           bestLength < partialTerm.length) {
         bestLength = partialTerm.length;
+      }
+
+      if (params.maximumDictionaryTermsInResult > uniqueHeadingsById.length) {
+        if (i == 0) {
+          List<DictionaryHeading> startsWithToAdd = database.dictionaryHeadings
+              .where()
+              .termStartsWith(searchTerm)
+              .filter()
+              .entriesIsNotEmpty()
+              .sortByTermLength()
+              .findAllSync();
+
+          uniqueHeadingsById.addEntries(startsWithToAdd.map(
+            (heading) => MapEntry(heading.id, heading),
+          ));
+        }
       }
     }
   }

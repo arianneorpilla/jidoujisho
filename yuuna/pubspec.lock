@@ -636,8 +636,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: master
-      resolved-ref: b249c8cd078ebc9c62d957bc3b07cec8ba7328bf
+      ref: jidoujisho
+      resolved-ref: a304a8732efb872e42304b4c6ed957c88f7b7636
       url: "https://github.com/lrorpilla/flutter_chatgpt_api"
     source: git
     version: "1.1.0"

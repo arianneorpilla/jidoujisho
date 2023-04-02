@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:ui';
 
 /// Parameters that define a series of images and metadata about each image.

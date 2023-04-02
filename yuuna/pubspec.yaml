@@ -46,7 +46,7 @@ dependencies:
   flutter_chatgpt_api:
     git:
       url: https://github.com/lrorpilla/flutter_chatgpt_api
-      ref: master
+      ref: jidoujisho
   flutter_colorpicker: ^1.0.3
   flutter_exit_app: ^1.0.5
   flutter_fadein: ^2.0.0
