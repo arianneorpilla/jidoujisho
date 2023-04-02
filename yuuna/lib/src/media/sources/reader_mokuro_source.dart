@@ -26,7 +26,7 @@ class ReaderMokuroSource extends ReaderMediaSource {
           uniqueKey: 'reader_mokuro',
           sourceName: 'Mokuro',
           description:
-              'Read manga volmes pre-processed as a single HTML file via Mokuro.',
+              'Read manga volumes pre-processed as a single HTML file via Mokuro.',
           icon: Icons.dashboard_outlined,
           implementsSearch: false,
           implementsHistory: true,
@@ -263,13 +263,11 @@ class ReaderMokuroSource extends ReaderMediaSource {
         if (item == null) {
           Fluttertoast.showToast(msg: t.invalid_mokuro_file);
         } else {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => MokuroCatalogBrowsePage(
-                item: item,
-                catalog: null,
-              ),
-            ),
+          appModel.openMedia(
+            context: context,
+            item: item,
+            ref: ref,
+            mediaSource: this,
           );
         }
       },
@@ -429,10 +427,11 @@ bgImage.substring(5, bgImage.length - 2);
     File file = appModel.getPreviewImageFile(mokuroPreviewDir, 0);
 
     if (data != null) {
-      if (data.startsWith('file://')) {
-        String absolutePath = Uri.decodeFull(Uri.parse(item.mediaIdentifier)
-            .resolve(data.replaceFirst('file://', ''))
-            .toString());
+      if (item.mediaIdentifier.startsWith('file://')) {
+        String absolutePath = Uri.decodeFull(
+            Uri.parse(item.mediaIdentifier.replaceFirst('file://', ''))
+                .resolve(data)
+                .toString());
 
         File originalFile = File(absolutePath);
         originalFile.copySync(file.path);
