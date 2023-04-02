@@ -36,6 +36,7 @@ class _MokuroCatalogBrowsePageState
   late final ValueNotifier<bool> _isMokuroPageFoundNotifier;
 
   bool _controllerInitialised = false;
+
   late InAppWebViewController _controller;
   MediaItem? _mediaItem;
 
@@ -219,6 +220,7 @@ class _MokuroCatalogBrowsePageState
 
         if (_mediaItem != null) {
           await controller.evaluateJavascript(source: javascriptToExecute);
+          await updateOrientation();
           Future.delayed(const Duration(seconds: 1), _focusNode.requestFocus);
         }
       },
@@ -266,6 +268,7 @@ class _MokuroCatalogBrowsePageState
     if (orientation != lastOrientation) {
       if (_controllerInitialised) {
         clearDictionaryResult();
+        updateOrientation();
       }
       lastOrientation = orientation;
     }
@@ -404,7 +407,7 @@ class _MokuroCatalogBrowsePageState
         int x = messageJson['x'];
         int y = messageJson['y'];
         String sentence = messageJson['sentence'];
-        String imageUrl = messageJson['imageUrl'];
+        String? imageUrl = messageJson['imageUrl'];
 
         late JidoujishoPopupPosition position;
         if (MediaQuery.of(context).orientation == Orientation.portrait) {
@@ -500,6 +503,14 @@ class _MokuroCatalogBrowsePageState
       InAppWebViewController webViewController) async {
     String source = 'window.getSelection().removeAllRanges();';
     await webViewController.evaluateJavascript(source: source);
+  }
+
+  Future<void> updateOrientation() async {
+    await _controller.evaluateJavascript(source: '''
+state.singlePageView = ${MediaQuery.of(context).orientation == Orientation.portrait}
+saveState();
+updatePage(state.page_idx)
+''');
   }
 
   /// This is executed upon page load and change.

@@ -240,7 +240,7 @@ class _MokuroCatalogManageDialogPageState
     Widget alertDialog = AlertDialog(
       title: Text(catalog.name),
       content: Text(
-        t.catalog_name,
+        t.catalog_delete_confirmation,
       ),
       actions: <Widget>[
         TextButton(

@@ -199,7 +199,7 @@ abstract class MediaSource {
   /// creating override images/audio information. There should not be media
   /// source specific parameters for general functions like generating images
   /// or audio.
-  void setExtraData(String value) {
+  void setExtraData(String? value) {
     _currentExtraData = value;
   }
 
