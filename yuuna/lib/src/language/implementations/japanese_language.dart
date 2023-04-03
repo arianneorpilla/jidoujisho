@@ -398,6 +398,7 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
   } else {
     List<String> deinflectionsAlreadySearched = [];
 
+    bool startsWithAdded = false;
     for (int i = 0; i < searchTerm.length; i++) {
       String partialTerm = searchTerm.substring(0, searchTerm.length - i);
 
@@ -543,18 +544,40 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
       }
 
       if (params.maximumDictionaryTermsInResult > uniqueHeadingsById.length) {
-        if (i == 0) {
-          List<DictionaryHeading> startsWithToAdd = database.dictionaryHeadings
-              .where()
-              .termStartsWith(searchTerm)
-              .filter()
-              .entriesIsNotEmpty()
-              .sortByTermLength()
-              .findAllSync();
+        if (params.searchWithWildcards) {
+          if (i == 0) {
+            startsWithAdded = true;
 
-          uniqueHeadingsById.addEntries(startsWithToAdd.map(
-            (heading) => MapEntry(heading.id, heading),
-          ));
+            List<DictionaryHeading> startsWithToAdd = database
+                .dictionaryHeadings
+                .where()
+                .termStartsWith(searchTerm)
+                .filter()
+                .entriesIsNotEmpty()
+                .sortByTermLength()
+                .findAllSync();
+
+            uniqueHeadingsById.addEntries(startsWithToAdd.map(
+              (heading) => MapEntry(heading.id, heading),
+            ));
+          }
+        } else {
+          if (!startsWithAdded && uniqueHeadingsById.isNotEmpty) {
+            startsWithAdded = true;
+
+            List<DictionaryHeading> startsWithToAdd = database
+                .dictionaryHeadings
+                .where()
+                .termStartsWith(searchTerm)
+                .filter()
+                .entriesIsNotEmpty()
+                .sortByTermLength()
+                .findAllSync();
+
+            uniqueHeadingsById.addEntries(startsWithToAdd.map(
+              (heading) => MapEntry(heading.id, heading),
+            ));
+          }
         }
       }
     }
