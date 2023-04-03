@@ -160,8 +160,8 @@ class AnkiMapping {
 
   /// Default fields to show upon opening the Card Creator.
   static const List<String> defaultCreatorFieldKeys = [
-    TermField.key,
     SentenceField.key,
+    TermField.key,
     ReadingField.key,
     MeaningField.key,
     NotesField.key,

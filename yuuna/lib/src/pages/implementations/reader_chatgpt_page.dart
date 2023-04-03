@@ -186,11 +186,9 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
   }
 
   void onSubmitted(String input) async {
-    if (_isLoading) {
-      return;
-    }
-
-    _isLoading = true;
+    setState(() {
+      _isLoading = true;
+    });
 
     String text = input.trim();
     if (text.isEmpty) {

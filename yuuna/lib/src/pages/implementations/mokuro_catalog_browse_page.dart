@@ -4,7 +4,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:pretty_json/pretty_json.dart';
 import 'package:spaces/spaces.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:yuuna/media.dart';
@@ -387,11 +386,11 @@ class _MokuroCatalogBrowsePageState
     lastMessageTime = now;
 
     late Map<String, dynamic> messageJson;
+
     try {
       messageJson = jsonDecode(message.message);
     } catch (e) {
-      debugPrint(prettyJson(message.toJson()));
-
+      debugPrint(message.message);
       return;
     }
 
@@ -408,6 +407,7 @@ class _MokuroCatalogBrowsePageState
         int y = messageJson['y'];
         String sentence = messageJson['sentence'];
         String? imageUrl = messageJson['imageUrl'];
+        String nextLine = messageJson['nextLine'];
 
         late JidoujishoPopupPosition position;
         if (MediaQuery.of(context).orientation == Orientation.portrait) {
@@ -434,7 +434,7 @@ class _MokuroCatalogBrowsePageState
           bool isSpaceDelimited = appModel.targetLanguage.isSpaceDelimited;
 
           String searchTerm = appModel.targetLanguage.getSearchTermFromIndex(
-            text: text,
+            text: text.trimRight() + nextLine.trim(),
             index: index,
           );
           int whitespaceOffset =
@@ -535,6 +535,7 @@ function tapToSelect(e) {
         "x": e.clientX,
         "y": e.clientY,
         "sentence": "",
+        "nextLine": "",
 			}));
     return;
   }
@@ -547,6 +548,7 @@ function tapToSelect(e) {
         "x": e.clientX,
         "y": e.clientY,
         "sentence": "",
+        "nextLine": "",
 			}));
     return;
   }
@@ -570,6 +572,7 @@ function tapToSelect(e) {
         "x": e.clientX,
         "y": e.clientY,
         "sentence": "",
+        "nextLine": "",
 			}));
     return;
   }
@@ -652,6 +655,12 @@ function tapToSelect(e) {
     index = index - 1;
   }
 
+  var nextLine = "";
+  var nextElementSibling = e.target.nextElementSibling;
+
+  if (nextElementSibling) {
+    nextLine = nextElementSibling.textContent;
+  }
   
   var character = text[index];
   if (character) {
@@ -663,6 +672,7 @@ function tapToSelect(e) {
       "y": e.clientY,
       "sentence": sentence,
       "imageUrl": imageUrl,
+      "nextLine": nextLine,
     }));
     console.log(character);
   } else {
@@ -674,6 +684,7 @@ function tapToSelect(e) {
       "y": e.clientY,
       "sentence": sentence,
       "imageUrl": imageUrl,
+      "nextLine": nextLine,
     }));
   }
 }
@@ -743,7 +754,9 @@ function getSelectionText() {
     }
     return txt;
 };
+
 document.body.addEventListener('click', tapToSelect, true);
+
 document.head.insertAdjacentHTML('beforebegin', `
 <style>
 rt {
