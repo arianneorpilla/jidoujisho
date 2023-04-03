@@ -1,13 +1,4 @@
-import 'dart:io';
-
-import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:just_audio/just_audio.dart';
-import 'package:multi_value_listenable_builder/multi_value_listenable_builder.dart';
-import 'package:record_mp3/record_mp3.dart';
-import 'package:spaces/spaces.dart';
-import 'package:yuuna/i18n/strings.g.dart';
 import 'package:yuuna/pages.dart';
 
 /// Shows a bare loading circle.
@@ -29,6 +20,9 @@ class _LoadingPageState extends BasePageState<LoadingPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: buildLoading());
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: Scaffold(body: buildLoading()),
+    );
   }
 }
