@@ -155,28 +155,20 @@ class ReaderMokuroSource extends ReaderMediaSource {
             context: context,
             builder: (context) => MokuroLinkDialogPage(
               onRead: (url) async {
-                HeadlessInAppWebView webView = HeadlessInAppWebView(
-                  initialUrlRequest: URLRequest(url: url),
-                  onLoadStop: (controller, url) async {
-                    MediaItem? item = await generateMediaItemFromWebView(
-                      appModel: appModel,
-                      controller: controller,
-                    );
-                    if (item == null) {
-                      Fluttertoast.showToast(msg: t.invalid_mokuro_file);
-                      return;
-                    } else {
-                      appModel.openMedia(
-                        context: context,
-                        item: item,
-                        ref: ref,
-                        mediaSource: this,
-                      );
-                    }
-                  },
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => MokuroCatalogBrowsePage(
+                      item: null,
+                      catalog: MokuroCatalog(
+                        name: '',
+                        url: url.toString(),
+                        order: -1,
+                      ),
+                    ),
+                  ),
                 );
 
-                await webView.run();
+                Navigator.pop(context);
               },
             ),
           );

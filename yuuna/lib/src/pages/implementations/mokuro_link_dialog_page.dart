@@ -86,7 +86,6 @@ class _MokuroLinkDialogPageState extends BasePageState<MokuroLinkDialogPage> {
     Uri? uri = Uri.tryParse(_controller.text.trim());
     if (uri != null) {
       widget.onRead(uri);
-      Navigator.pop(context);
     }
   }
 }
