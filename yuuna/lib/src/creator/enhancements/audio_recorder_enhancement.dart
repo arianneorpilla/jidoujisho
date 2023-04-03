@@ -98,6 +98,6 @@ class AudioRecorderEnhancement extends AudioEnhancement {
     required String term,
     required String reading,
   }) async {
-    throw UnimplementedError();
+    return null;
   }
 }

@@ -70,12 +70,12 @@ class PickAudioEnhancement extends AudioEnhancement {
   }
 
   @override
-  Future<File> fetchAudio({
+  Future<File?> fetchAudio({
     required AppModel appModel,
     required BuildContext context,
     required String term,
     required String reading,
   }) async {
-    throw UnimplementedError();
+    return null;
   }
 }
