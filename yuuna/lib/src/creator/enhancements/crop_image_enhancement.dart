@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:network_to_file_image/network_to_file_image.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/pages.dart';
@@ -39,10 +41,22 @@ class CropImageEnhancement extends ImageEnhancement {
       return;
     }
 
+    Directory appDirDoc = await getApplicationSupportDirectory();
+    String cropImagePath = '${appDirDoc.path}/copyCrop';
+    Directory cropImageDir = Directory(cropImagePath);
+    if (cropImageDir.existsSync()) {
+      cropImageDir.deleteSync(recursive: true);
+    }
+    cropImageDir.createSync(recursive: true);
+
+    String timestamp = DateFormat('yyyyMMddTkkmmss').format(DateTime.now());
+    File copyFile = File('$cropImagePath/$timestamp');
+    imageFile.copySync(copyFile.path);
+
     await showDialog<File?>(
       context: context,
       builder: (context) => CropImageDialogPage(
-        imageFile: imageFile,
+        imageFile: copyFile,
         onCrop: (file) {
           imageField.setImages(
             cause: cause,

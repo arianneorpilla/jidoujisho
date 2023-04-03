@@ -519,7 +519,7 @@ updatePage(state.page_idx)
   String javascriptToExecute = """
 /*jshint esversion: 6 */
 // yikes
-setInterval(saveHandler, 2000);
+setInterval(saveHandler, 6000);
 function saveHandler() {
  console.log(JSON.stringify({
 	    "jidoujisho-message-type": "save",
