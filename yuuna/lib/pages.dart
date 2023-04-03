@@ -60,6 +60,7 @@ export 'src/pages/implementations/mokuro_catalog_edit_dialog_page.dart';
 export 'src/pages/implementations/mokuro_link_dialog_page.dart';
 export 'src/pages/implementations/mokuro_catalog_browse_page.dart';
 export 'src/pages/implementations/mokuro_settings_dialog_page.dart';
+export 'src/pages/implementations/loading_page.dart';
 
 export 'src/pages/base_page.dart';
 export 'src/pages/base_history_page.dart';

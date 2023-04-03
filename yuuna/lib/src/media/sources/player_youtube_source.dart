@@ -685,13 +685,33 @@ class PlayerYoutubeSource extends PlayerMediaSource {
     );
   }
 
+  /// Used to cache media identifiers that have had their channel IDs cached
+  /// manually if the author identifier is null.
+  final Map<String, String> _channelIdFetchedFromVideoCache = {};
+
   /// Launch a channel and view its videos in a page.
   Future<void> showChannelPage({
     required AppModel appModel,
     required BuildContext context,
     required MediaItem item,
   }) async {
-    String channelId = item.authorIdentifier!;
+    late String channelId;
+    if (item.authorIdentifier == null) {
+      String? fetchedId = _channelIdFetchedFromVideoCache[item.mediaIdentifier];
+      if (fetchedId != null) {
+        channelId = fetchedId;
+      } else {
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => const LoadingPage()));
+
+        Channel channel = await _channelClient.getByVideo(item.mediaIdentifier);
+        _channelIdFetchedFromVideoCache[item.mediaIdentifier] =
+            channel.id.value;
+        channelId = channel.id.value;
+      }
+    } else {
+      channelId = item.authorIdentifier!;
+    }
 
     PagingController<int, MediaItem>? pagingController =
         _pagingControllerCache[channelId];
