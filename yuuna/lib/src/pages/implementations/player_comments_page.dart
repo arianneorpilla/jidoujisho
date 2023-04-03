@@ -77,6 +77,15 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
     );
   }
 
+  /// Action upon selecting the Search option.
+  @override
+  void onSearch(String searchTerm) async {
+    await appModel.openRecursiveDictionarySearch(
+      searchTerm: searchTerm,
+      killOnPop: false,
+    );
+  }
+
   Widget buildBlur() {
     return BackdropFilter(
       filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),

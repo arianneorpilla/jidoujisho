@@ -1038,16 +1038,18 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           try {
             widget.source.setShouldGenerateAudio(value: false);
 
-            await Navigator.of(context).push(
-              PageRouteBuilder(
-                opaque: false,
-                pageBuilder: (context, _, __) =>
-                    PlayerCommentsPage(videoUrl: widget.item!.uniqueKey),
-                settings: RouteSettings(
-                  name: (PlayerCommentsPage).toString(),
+            await appModel.temporarilyDisableStatusBarHiding(action: () async {
+              await Navigator.of(context).push(
+                PageRouteBuilder(
+                  opaque: false,
+                  pageBuilder: (context, _, __) =>
+                      PlayerCommentsPage(videoUrl: widget.item!.uniqueKey),
+                  settings: RouteSettings(
+                    name: (PlayerCommentsPage).toString(),
+                  ),
                 ),
-              ),
-            );
+              );
+            });
           } finally {
             widget.source.setShouldGenerateAudio(value: true);
             widget.source

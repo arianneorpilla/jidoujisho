@@ -1566,6 +1566,21 @@ class AppModel with ChangeNotifier {
     return order;
   }
 
+  /// Override flag for when [isMediaOpen] is true but the status bar should
+  /// be kept open instead of closed.
+  bool get shouldHideStatusBarWhenInMedia => _shouldHideStatusBarWhenInMedia;
+  bool _shouldHideStatusBarWhenInMedia = true;
+
+  /// Override the flag for automatically disabling the status bar. Necessary
+  /// for some very specific edge cases and byproduct of letting global state
+  /// run its course. This is a band-aid solution.
+  Future<void> temporarilyDisableStatusBarHiding(
+      {required Future Function() action}) async {
+    _shouldHideStatusBarWhenInMedia = false;
+    await action.call();
+    _shouldHideStatusBarWhenInMedia = true;
+  }
+
   /// Requests for full external storage permissions. Required to handle video
   /// files and their subtitle files in the same directory.
   Future<void> requestExternalStoragePermissions() async {

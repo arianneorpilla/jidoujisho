@@ -30,7 +30,7 @@ class CardCreatorAction extends QuickAction {
       required AppModel appModel,
       required CreatorModel creatorModel,
       required DictionaryHeading heading}) async {
-    if (appModel.isMediaOpen) {
+    if (appModel.isMediaOpen && appModel.shouldHideStatusBarWhenInMedia) {
       await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
       await Future.delayed(const Duration(milliseconds: 5), () {});
     }
@@ -97,7 +97,7 @@ class CardCreatorAction extends QuickAction {
         creatorFieldValues: CreatorFieldValues(textValues: newTextFields),
       );
 
-      if (appModel.isMediaOpen) {
+      if (appModel.isMediaOpen && appModel.shouldHideStatusBarWhenInMedia) {
         await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
       }
     }

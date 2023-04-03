@@ -154,76 +154,83 @@ class _DictionaryTermActionsRow extends ConsumerWidget {
     AppModel appModel = ref.watch(appProvider);
     CreatorModel creatorModel = ref.watch(creatorProvider);
 
-    List<Widget> buttons = [];
+    ValueNotifier<bool> rowNotifier = ValueNotifier(true);
 
-    for (int i = 0; i < appModel.maximumQuickActions; i++) {
-      String? actionName = appModel.lastSelectedMapping.actions![i];
-      QuickAction? quickAction;
+    return ValueListenableBuilder(
+      valueListenable: rowNotifier,
+      builder: (_, __, ___) {
+        List<Widget> buttons = [];
+        for (int i = 0; i < appModel.maximumQuickActions; i++) {
+          String? actionName = appModel.lastSelectedMapping.actions![i];
+          QuickAction? quickAction;
 
-      if (actionName != null) {
-        quickAction = appModel.quickActions[actionName];
-      }
+          if (actionName != null) {
+            quickAction = appModel.quickActions[actionName];
+          }
 
-      late Widget button;
+          late Widget button;
 
-      if (quickAction == null) {
-        button = const SizedBox.shrink();
-      } else {
-        ValueNotifier<bool> notifier = ValueNotifier(true);
-        button = Padding(
-          padding: Spacing.of(context).insets.onlyLeft.semiSmall,
-          child: ValueListenableBuilder<bool>(
-            valueListenable: notifier,
-            builder: (context, _, child) {
-              return FutureBuilder<Color?>(
-                future: quickAction!.getIconColor(
-                  context: context,
-                  appModel: appModel,
-                  heading: heading,
-                ),
-                builder: (context, snapshot) {
-                  late Color enabledColor;
-                  Color defaultColor =
-                      appModel.isDarkMode ? Colors.white : Colors.black;
-                  enabledColor = snapshot.data ?? defaultColor;
+          if (quickAction == null) {
+            button = const SizedBox.shrink();
+          } else {
+            ValueNotifier<bool> buttonNotifier = ValueNotifier(true);
+            button = Padding(
+              padding: Spacing.of(context).insets.onlyLeft.semiSmall,
+              child: ValueListenableBuilder<bool>(
+                valueListenable: buttonNotifier,
+                builder: (context, _, child) {
+                  return FutureBuilder<Color?>(
+                    future: quickAction!.getIconColor(
+                      context: context,
+                      appModel: appModel,
+                      heading: heading,
+                    ),
+                    builder: (context, snapshot) {
+                      late Color enabledColor;
+                      Color defaultColor =
+                          appModel.isDarkMode ? Colors.white : Colors.black;
+                      enabledColor = snapshot.data ?? defaultColor;
 
-                  return JidoujishoIconButton(
-                    busy: true,
-                    enabledColor: enabledColor,
-                    shapeBorder: const RoundedRectangleBorder(),
-                    backgroundColor:
-                        Theme.of(context).brightness == Brightness.dark
-                            ? Colors.white.withOpacity(0.05)
-                            : Colors.black.withOpacity(0.05),
-                    size: Spacing.of(context).spaces.semiBig,
-                    tooltip: quickAction!.getLocalisedLabel(appModel),
-                    icon: quickAction.icon,
-                    onTap: () async {
-                      await quickAction!.executeAction(
-                        context: context,
-                        ref: ref,
-                        appModel: appModel,
-                        creatorModel: creatorModel,
-                        heading: heading,
+                      return JidoujishoIconButton(
+                        busy: true,
+                        enabledColor: enabledColor,
+                        shapeBorder: const RoundedRectangleBorder(),
+                        backgroundColor:
+                            Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white.withOpacity(0.05)
+                                : Colors.black.withOpacity(0.05),
+                        size: Spacing.of(context).spaces.semiBig,
+                        tooltip: quickAction!.getLocalisedLabel(appModel),
+                        icon: quickAction.icon,
+                        onTap: () async {
+                          await quickAction!.executeAction(
+                            context: context,
+                            ref: ref,
+                            appModel: appModel,
+                            creatorModel: creatorModel,
+                            heading: heading,
+                          );
+                          buttonNotifier.value = !buttonNotifier.value;
+                          rowNotifier.value = !rowNotifier.value;
+                        },
                       );
-                      notifier.value = !notifier.value;
                     },
                   );
                 },
-              );
-            },
-          ),
+              ),
+            );
+          }
+
+          buttons.add(button);
+        }
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: buttons.reversed.toList(),
         );
-      }
-
-      buttons.add(button);
-    }
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.end,
-      mainAxisSize: MainAxisSize.min,
-      children: buttons.reversed.toList(),
+      },
     );
   }
 }
