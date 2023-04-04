@@ -294,9 +294,6 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
           useOnDownloadStart: true,
         ),
         android: AndroidInAppWebViewOptions(
-          forceDark: appModel.isDarkMode
-              ? AndroidForceDark.FORCE_DARK_ON
-              : AndroidForceDark.FORCE_DARK_OFF,
           verticalScrollbarThumbColor: Colors.transparent,
           verticalScrollbarTrackColor: Colors.transparent,
           horizontalScrollbarThumbColor: Colors.transparent,
