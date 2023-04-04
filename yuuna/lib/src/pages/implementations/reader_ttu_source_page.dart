@@ -408,7 +408,9 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
           value: false,
         );
 
-        setDictionaryColors();
+        if (mediaSource.adaptTtuTheme) {
+          setDictionaryColors();
+        }
 
         await controller.evaluateJavascript(source: javascriptToExecute);
         Future.delayed(const Duration(seconds: 1), _focusNode.requestFocus);
@@ -416,7 +418,9 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
       onTitleChanged: (controller, title) async {
         await controller.evaluateJavascript(source: javascriptToExecute);
 
-        setDictionaryColors();
+        if (mediaSource.adaptTtuTheme) {
+          setDictionaryColors();
+        }
       },
       onDownloadStartRequest: onDownloadStartRequest,
     );

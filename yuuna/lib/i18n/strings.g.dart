@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 331
+/// Strings: 332
 ///
-/// Built on 2023-04-02 at 10:08 UTC
+/// Built on 2023-04-04 at 13:36 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -478,6 +478,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get go_back => 'Go Back';
 	String get invalid_mokuro_file => 'File is not a Mokuro generated HTML file.';
 	String get create_catalog => 'Create Catalog';
+	String get adapt_ttu_theme => 'Adapt dictionary popup to theme';
 	late final _StringsViewRepliesEn view_replies = _StringsViewRepliesEn._(_root);
 }
 
@@ -829,6 +830,7 @@ extension on _StringsEn {
 			case 'go_back': return 'Go Back';
 			case 'invalid_mokuro_file': return 'File is not a Mokuro generated HTML file.';
 			case 'create_catalog': return 'Create Catalog';
+			case 'adapt_ttu_theme': return 'Adapt dictionary popup to theme';
 			case 'view_replies.reply': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
 				one: 'SHOW ${n} REPLY',
 				other: 'SHOW ${n} REPLIES',

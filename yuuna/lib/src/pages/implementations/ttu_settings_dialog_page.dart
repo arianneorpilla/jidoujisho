@@ -66,6 +66,7 @@ class _DictionaryDialogPageState extends BasePageState {
               buildEnablePageTurningSwitch(),
               buildInvertPageTurningSwitch(),
               buildExtendPageSwitch(),
+              buildAdaptThemeSwitch(),
               const Space.small(),
               const JidoujishoDivider(),
               buildPageTurningSpeedField(),
@@ -143,6 +144,30 @@ class _DictionaryDialogPageState extends BasePageState {
               onChanged: (value) {
                 source.toggleExtendPageBeyondNavigationBar();
                 _notifier.value = source.extendPageBeyondNavigationBar;
+              },
+            );
+          },
+        )
+      ],
+    );
+  }
+
+  Widget buildAdaptThemeSwitch() {
+    ValueNotifier<bool> _notifier = ValueNotifier<bool>(source.adaptTtuTheme);
+
+    return Row(
+      children: [
+        Expanded(
+          child: Text(t.adapt_ttu_theme),
+        ),
+        ValueListenableBuilder<bool>(
+          valueListenable: _notifier,
+          builder: (_, value, __) {
+            return Switch(
+              value: value,
+              onChanged: (value) {
+                source.toggleAdaptTtuTheme();
+                _notifier.value = source.adaptTtuTheme;
               },
             );
           },

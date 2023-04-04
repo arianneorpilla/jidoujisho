@@ -353,6 +353,19 @@ class ReaderTtuSource extends ReaderMediaSource {
     );
   }
 
+  /// Whether or not the dictionary popup should adapt to the reader's theme.
+  bool get adaptTtuTheme {
+    return getPreference<bool>(key: 'adapt_ttu_theme', defaultValue: true);
+  }
+
+  /// Toggles whether dictionary popup should adapt to the reader's theme.
+  void toggleAdaptTtuTheme() async {
+    await setPreference<bool>(
+      key: 'adapt_ttu_theme',
+      value: !adaptTtuTheme,
+    );
+  }
+
   /// Controls the speed for volume button page turning.
   int get volumePageTurningSpeed {
     return getPreference<int>(

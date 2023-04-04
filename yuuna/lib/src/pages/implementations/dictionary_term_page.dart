@@ -188,7 +188,9 @@ class _DictionaryTermActionsRow extends ConsumerWidget {
                     builder: (context, snapshot) {
                       late Color enabledColor;
                       Color defaultColor =
-                          appModel.isDarkMode ? Colors.white : Colors.black;
+                          Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : Colors.black;
                       enabledColor = snapshot.data ?? defaultColor;
 
                       return JidoujishoIconButton(
