@@ -188,10 +188,15 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
           }
         }
         String? title = intent.extra?['title'];
+        int? position = intent.extra?['position'];
+        if (position != null) {
+          position = position ~/ 1000;
+        }
 
         launchNetworkMediaAction(
           videoUrl: intent.data ?? '',
           extra: jsonEncode(intent.extra ?? {}),
+          position: position,
           title: title,
         );
         return;
@@ -304,11 +309,13 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
   void launchNetworkMediaAction({
     required String videoUrl,
     required String extra,
+    int? position,
     String? title,
   }) async {
     MediaItem item = PlayerNetworkStreamSource.instance.getMediaItemFromUrl(
       videoUrl: videoUrl,
       extra: extra,
+      position: position,
       title: title,
     );
 

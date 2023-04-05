@@ -12,6 +12,7 @@ import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:multi_value_listenable_builder/multi_value_listenable_builder.dart';
+import 'package:receive_intent/receive_intent.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:spaces/spaces.dart';
 import 'package:subtitle/subtitle.dart';
@@ -424,6 +425,17 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   /// This updates the media item to its new position and duration and also
   /// persists the change in media history.
   void updateHistory() async {
+    if (source is PlayerNetworkStreamSource) {
+      ReceiveIntent.setResult(
+        kActivityResultOk,
+        action: 'is.xyz.mpv.MPVActivity.result',
+        data: {
+          'position': _positionNotifier.value.inMilliseconds,
+          'duration': _durationNotifier.value.inMilliseconds,
+        },
+      );
+    }
+
     if (!widget.useHistory) {
       return;
     }

@@ -74,6 +74,7 @@ class PlayerNetworkStreamSource extends PlayerMediaSource {
     required String videoUrl,
     String? extra,
     String? title,
+    int? position,
   }) {
     return MediaItem(
       title: title ?? videoUrl,
@@ -81,7 +82,7 @@ class PlayerNetworkStreamSource extends PlayerMediaSource {
       mediaSourceIdentifier: uniqueKey,
       mediaTypeIdentifier: mediaType.uniqueKey,
       extra: extra,
-      position: 0,
+      position: position ?? 0,
       duration: 0,
       canEdit: false,
       canDelete: false,
