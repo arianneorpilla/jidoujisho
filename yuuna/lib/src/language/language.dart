@@ -142,7 +142,15 @@ abstract class Language {
     if (matches.isEmpty) {
       return [text];
     }
-    return matches.map((match) => match.group(0) ?? '').toList();
+
+    List<String> sentences =
+        matches.map((match) => match.group(0) ?? '').toList();
+
+    if (matches.last.end != text.length) {
+      sentences.add(text.substring(matches.last.end));
+    }
+
+    return sentences;
   }
 
   /// The language and country code separated by a dash.

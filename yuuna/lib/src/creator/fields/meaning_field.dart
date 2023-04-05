@@ -103,9 +103,11 @@ class MeaningField extends Field {
         dictionaries.map((e) => MapEntry(e.name, e.order)));
 
     List<DictionaryEntry> entries = heading.entries.toList();
-    entries = [
-      ...entries.where((e) => dictionaryName == e.dictionary.value!.name)
-    ];
+    if (dictionaryName != null) {
+      entries = [
+        ...entries.where((e) => dictionaryName == e.dictionary.value!.name)
+      ];
+    }
     entries.sort((a, b) => dictionaryNamesByOrder[a.dictionary.value!.name]!
         .compareTo(dictionaryNamesByOrder[b.dictionary.value!.name]!));
 
