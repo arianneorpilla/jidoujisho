@@ -393,32 +393,6 @@ class _DictionaryDialogPageState extends BasePageState {
     );
   }
 
-  PopupMenuItem<VoidCallback> buildPopupItem({
-    required String label,
-    required Function() action,
-    IconData? icon,
-    Color? color,
-  }) {
-    return PopupMenuItem<VoidCallback>(
-      child: Row(
-        children: [
-          if (icon != null)
-            Icon(
-              icon,
-              size: textTheme.bodyMedium?.fontSize,
-              color: color,
-            ),
-          if (icon != null) const Space.normal(),
-          Text(
-            label,
-            style: TextStyle(color: color),
-          ),
-        ],
-      ),
-      value: action,
-    );
-  }
-
   void openDictionaryOptionsMenu(
       {required TapDownDetails details, required Dictionary dictionary}) async {
     RelativeRect position = RelativeRect.fromLTRB(
@@ -467,6 +441,32 @@ class _DictionaryDialogPageState extends BasePageState {
         color: theme.colorScheme.primary,
       ),
     ];
+  }
+
+  PopupMenuItem<VoidCallback> buildPopupItem({
+    required String label,
+    required Function() action,
+    IconData? icon,
+    Color? color,
+  }) {
+    return PopupMenuItem<VoidCallback>(
+      child: Row(
+        children: [
+          if (icon != null)
+            Icon(
+              icon,
+              size: textTheme.bodyMedium?.fontSize,
+              color: color,
+            ),
+          if (icon != null) const Space.normal(),
+          Text(
+            label,
+            style: TextStyle(color: color),
+          ),
+        ],
+      ),
+      value: action,
+    );
   }
 
   Widget buildImportDropdown() {

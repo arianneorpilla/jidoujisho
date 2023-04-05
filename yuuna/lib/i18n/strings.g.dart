@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 332
+/// Strings: 337
 ///
-/// Built on 2023-04-04 at 13:36 UTC
+/// Built on 2023-04-05 at 13:59 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -156,7 +156,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get back => 'Back';
 	String get search => 'Search';
 	String get search_ellipsis => 'Search...';
-	String get see_more => 'See More';
+	String get show_more => 'Show More';
 	String get show_menu => 'Show Menu';
 	String get stash => 'Stash';
 	String get pick_image => 'Pick Image';
@@ -479,6 +479,11 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get invalid_mokuro_file => 'File is not a Mokuro generated HTML file.';
 	String get create_catalog => 'Create Catalog';
 	String get adapt_ttu_theme => 'Adapt dictionary popup to theme';
+	String get sentence_picker => 'Sentence Picker';
+	String field_locked({required Object field}) => '${field} locked and will not clear on export while Creator is active.';
+	String field_unlocked({required Object field}) => '${field} unlocked and will clear on export.';
+	String get field_lock => 'Lock Field';
+	String get field_unlock => 'Unlock Field';
 	late final _StringsViewRepliesEn view_replies = _StringsViewRepliesEn._(_root);
 }
 
@@ -508,7 +513,7 @@ extension on _StringsEn {
 			case 'back': return 'Back';
 			case 'search': return 'Search';
 			case 'search_ellipsis': return 'Search...';
-			case 'see_more': return 'See More';
+			case 'show_more': return 'Show More';
 			case 'show_menu': return 'Show Menu';
 			case 'stash': return 'Stash';
 			case 'pick_image': return 'Pick Image';
@@ -831,6 +836,11 @@ extension on _StringsEn {
 			case 'invalid_mokuro_file': return 'File is not a Mokuro generated HTML file.';
 			case 'create_catalog': return 'Create Catalog';
 			case 'adapt_ttu_theme': return 'Adapt dictionary popup to theme';
+			case 'sentence_picker': return 'Sentence Picker';
+			case 'field_locked': return ({required Object field}) => '${field} locked and will not clear on export while Creator is active.';
+			case 'field_unlocked': return ({required Object field}) => '${field} unlocked and will clear on export.';
+			case 'field_lock': return 'Lock Field';
+			case 'field_unlock': return 'Unlock Field';
 			case 'view_replies.reply': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
 				one: 'SHOW ${n} REPLY',
 				other: 'SHOW ${n} REPLIES',

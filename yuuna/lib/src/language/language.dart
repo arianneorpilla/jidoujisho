@@ -138,6 +138,10 @@ abstract class Language {
     RegExp regex = RegExp(r'.{1,}?([。.」?？!！]+|\n)');
 
     Iterable<Match> matches = regex.allMatches(text);
+
+    if (matches.isEmpty) {
+      return [text];
+    }
     return matches.map((match) => match.group(0) ?? '').toList();
   }
 

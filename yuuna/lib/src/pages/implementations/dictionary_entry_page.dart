@@ -4,6 +4,7 @@ import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spaces/spaces.dart';
+import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/utils.dart';
@@ -57,7 +58,7 @@ class _DictionaryEntryPageState extends ConsumerState<DictionaryEntryPage> {
           iconPadding: EdgeInsets.zero,
           iconSize: Theme.of(context).textTheme.titleLarge?.fontSize,
           expandIcon: Icons.arrow_drop_down,
-          collapseIcon: Icons.arrow_drop_up,
+          collapseIcon: Icons.arrow_drop_down,
           iconColor: Theme.of(context).unselectedWidgetColor,
           headerAlignment: ExpandablePanelHeaderAlignment.center,
         ),
@@ -168,8 +169,88 @@ class _DictionaryEntryTagsWrap extends ConsumerWidget {
       })
     ];
 
+    Widget last = children.removeLast();
+
+    children.add(
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          last,
+          SizedBox(
+            height: 22,
+            width: 22,
+            child: PopupMenuButton<VoidCallback>(
+              surfaceTintColor: Colors.red,
+              iconSize: 16,
+              padding: EdgeInsets.zero,
+              icon: Icon(
+                Icons.more_vert,
+                color: Theme.of(context).unselectedWidgetColor,
+              ),
+              color: Theme.of(context).popupMenuTheme.color,
+              tooltip: t.show_more,
+              onSelected: (value) => value(),
+              itemBuilder: (context) => getMenuItems(
+                context: context,
+                dictionary: dictionary,
+                ref: ref,
+                heading: entry.heading.value!,
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+
     return Wrap(
       children: children,
     );
+  }
+
+  List<PopupMenuEntry<VoidCallback>> getMenuItems({
+    required BuildContext context,
+    required Dictionary dictionary,
+    required WidgetRef ref,
+    required DictionaryHeading heading,
+  }) {
+    AppModel appModel = ref.watch(appProvider);
+    CreatorModel creatorModel = ref.watch(creatorProvider);
+
+    List<QuickAction> filteredActions = appModel.lastSelectedMapping
+        .getActions(appModel: appModel)
+        .where((e) => e.showInSingleDictionary)
+        .toList();
+
+    return [
+      ...filteredActions.map((quickAction) {
+        return PopupMenuItem<VoidCallback>(
+          value: () async {
+            await quickAction.executeAction(
+              context: context,
+              ref: ref,
+              appModel: appModel,
+              creatorModel: creatorModel,
+              heading: heading,
+              dictionaryName: dictionary.name,
+            );
+
+            ref.refresh(quickActionColorProvider(heading));
+          },
+          child: Row(
+            children: [
+              Icon(
+                quickAction.icon,
+                size: Theme.of(context).textTheme.bodyMedium?.fontSize,
+              ),
+              const Space.normal(),
+              Text(
+                quickAction.getLocalisedLabel(appModel),
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    ];
   }
 }

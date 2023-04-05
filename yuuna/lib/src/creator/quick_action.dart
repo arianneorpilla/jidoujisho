@@ -16,6 +16,7 @@ abstract class QuickAction {
     required this.label,
     required this.description,
     required this.icon,
+    this.showInSingleDictionary = false,
   });
 
   /// A unique name that allows distinguishing this type from others,
@@ -33,6 +34,10 @@ abstract class QuickAction {
   /// An icon that will show the action if activated by the user in the
   /// quick menu.
   final IconData icon;
+
+  /// Whether or not to show this action in the single dictionary dropdown
+  /// options.
+  final bool showInSingleDictionary;
 
   /// Localisations for this action, where the key is a locale tag and
   /// the value is the [label] of the action. If the value for the current
@@ -80,7 +85,6 @@ abstract class QuickAction {
   /// a certain condition in the application. By default, this is the
   /// foreground color.
   Future<Color?> getIconColor({
-    required BuildContext context,
     required AppModel appModel,
     required DictionaryHeading heading,
   }) async {
@@ -94,5 +98,6 @@ abstract class QuickAction {
     required AppModel appModel,
     required CreatorModel creatorModel,
     required DictionaryHeading heading,
+    required String? dictionaryName,
   });
 }

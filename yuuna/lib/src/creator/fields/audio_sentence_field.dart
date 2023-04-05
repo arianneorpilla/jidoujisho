@@ -302,6 +302,7 @@ class AudioSentenceField extends AudioExportField {
     required CreatorModel creatorModel,
     required DictionaryHeading heading,
     required bool creatorJustLaunched,
+    required String? dictionaryName,
   }) {
     return null;
   }

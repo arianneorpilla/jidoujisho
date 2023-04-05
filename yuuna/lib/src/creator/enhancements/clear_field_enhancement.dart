@@ -27,6 +27,6 @@ class ClearFieldEnhancement extends Enhancement {
     required CreatorModel creatorModel,
     required EnhancementTriggerCause cause,
   }) async {
-    creatorModel.clearField(field);
+    creatorModel.clearField(field, overrideLocks: true);
   }
 }

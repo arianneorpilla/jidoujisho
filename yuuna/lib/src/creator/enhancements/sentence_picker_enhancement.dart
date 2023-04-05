@@ -8,9 +8,8 @@ import 'package:yuuna/utils.dart';
 /// An enhancement used to pick a sentence from text.
 class SentencePickerEnhancement extends Enhancement {
   /// Initialise this enhancement with the hardset parameters.
-  SentencePickerEnhancement()
+  SentencePickerEnhancement({required super.field})
       : super(
-          field: SentenceField.instance,
           uniqueKey: key,
           label: 'Sentence Picker',
           description: 'Pick sentences delimited by punctuation and spacing.',
@@ -46,7 +45,7 @@ class SentencePickerEnhancement extends Enhancement {
           .map((e) => e.trim())
           .toList(),
       onSelect: (selection) {
-        creatorModel.getFieldController(SentenceField.instance).text = selection
+        creatorModel.getFieldController(field).text = selection
             .join(appModel.targetLanguage.isSpaceDelimited ? ' ' : '')
             .trim();
       },

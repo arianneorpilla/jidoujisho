@@ -17,6 +17,7 @@ class CardCreatorAction extends QuickAction {
               'Create a card with the selected dictionary entry parameters and'
               ' edit before export.',
           icon: Icons.note_add,
+          showInSingleDictionary: true,
         );
 
   /// Used to identify this enhancement and to allow a constant value for the
@@ -24,12 +25,14 @@ class CardCreatorAction extends QuickAction {
   static const String key = 'card_creator';
 
   @override
-  Future<void> executeAction(
-      {required BuildContext context,
-      required WidgetRef ref,
-      required AppModel appModel,
-      required CreatorModel creatorModel,
-      required DictionaryHeading heading}) async {
+  Future<void> executeAction({
+    required BuildContext context,
+    required WidgetRef ref,
+    required AppModel appModel,
+    required CreatorModel creatorModel,
+    required DictionaryHeading heading,
+    required String? dictionaryName,
+  }) async {
     if (appModel.isMediaOpen && appModel.shouldHideStatusBarWhenInMedia) {
       await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
       await Future.delayed(const Duration(milliseconds: 5), () {});
@@ -45,6 +48,7 @@ class CardCreatorAction extends QuickAction {
           creatorModel: creatorModel,
           heading: heading,
           creatorJustLaunched: false,
+          dictionaryName: dictionaryName,
         );
 
         if (newTextField != null) {
@@ -71,9 +75,9 @@ class CardCreatorAction extends QuickAction {
         }
       }
 
-      Navigator.of(context).popUntil(
-        (route) => route.settings.name == (CreatorPage).toString(),
-      );
+      Navigator.of(context).popUntil((route) {
+        return route.settings.name == (CreatorPage).toString();
+      });
     } else {
       Map<Field, String> newTextFields = {};
       for (Field field in appModel.activeFields) {
@@ -84,6 +88,7 @@ class CardCreatorAction extends QuickAction {
           creatorModel: creatorModel,
           heading: heading,
           creatorJustLaunched: true,
+          dictionaryName: dictionaryName,
         );
 
         if (newTextField != null) {
@@ -105,7 +110,6 @@ class CardCreatorAction extends QuickAction {
 
   @override
   Future<Color?> getIconColor({
-    required BuildContext context,
     required AppModel appModel,
     required DictionaryHeading heading,
   }) async {

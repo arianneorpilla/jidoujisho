@@ -21,12 +21,14 @@ class CopyToClipboardAction extends QuickAction {
   static const String key = 'copy_to_clipboard';
 
   @override
-  Future<void> executeAction(
-      {required BuildContext context,
-      required WidgetRef ref,
-      required AppModel appModel,
-      required CreatorModel creatorModel,
-      required DictionaryHeading heading}) async {
+  Future<void> executeAction({
+    required BuildContext context,
+    required WidgetRef ref,
+    required AppModel appModel,
+    required CreatorModel creatorModel,
+    required DictionaryHeading heading,
+    required String? dictionaryName,
+  }) async {
     appModel.copyToClipboard(heading.term);
   }
 }

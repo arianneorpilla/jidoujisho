@@ -34,6 +34,7 @@ class CollapsedMeaningField extends Field {
     required CreatorModel creatorModel,
     required DictionaryHeading heading,
     required bool creatorJustLaunched,
+    required String? dictionaryName,
   }) {
     List<Dictionary> dictionaries = appModel.dictionaries;
 
@@ -46,11 +47,20 @@ class CollapsedMeaningField extends Field {
     Map<String, int> dictionaryNamesByOrder = Map<String, int>.fromEntries(
         dictionaries.map((e) => MapEntry(e.name, e.order)));
 
-    List<DictionaryEntry> collapsedEntries = heading.entries
-        .where((entry) =>
-            !dictionaryNamesByHidden[entry.dictionary.value!.name]! &&
-            dictionaryNamesByCollapsed[entry.dictionary.value!.name]!)
-        .toList();
+    late List<DictionaryEntry> collapsedEntries;
+    if (dictionaryName != null) {
+      collapsedEntries = heading.entries
+          .where((entry) =>
+              !dictionaryNamesByHidden[entry.dictionary.value!.name]! &&
+              dictionaryName != entry.dictionary.value!.name)
+          .toList();
+    } else {
+      collapsedEntries = heading.entries
+          .where((entry) =>
+              !dictionaryNamesByHidden[entry.dictionary.value!.name]! &&
+              dictionaryNamesByCollapsed[entry.dictionary.value!.name]!)
+          .toList();
+    }
 
     collapsedEntries.sort((a, b) =>
         dictionaryNamesByOrder[a.dictionary.value!.name]!

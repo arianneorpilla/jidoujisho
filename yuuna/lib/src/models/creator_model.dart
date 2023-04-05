@@ -27,6 +27,7 @@ class CreatorModel with ChangeNotifier {
   Map<Field, TextEditingController> get controllersByField =>
       _controllersByField;
   late final Map<Field, TextEditingController> _controllersByField;
+  late final Map<Field, ValueNotifier<bool>> _lockNotifiersByField;
 
   /// Scroll controller for the Creator page.
   final ScrollController scrollController = ScrollController();
@@ -36,6 +37,9 @@ class CreatorModel with ChangeNotifier {
     _controllersByField = Map.unmodifiable(
       {for (Field field in globalFields) field: TextEditingController()},
     );
+    _lockNotifiersByField = Map.unmodifiable(
+      {for (Field field in globalFields) field: ValueNotifier<bool>(false)},
+    );
   }
 
   /// Refresh state for the Card Creator.
@@ -44,9 +48,19 @@ class CreatorModel with ChangeNotifier {
   }
 
   /// Clear all fields and current context.
-  void clearAll() {
+  void clearAll({required bool overrideLocks}) {
+    if (overrideLocks) {
+      for (Field field in fieldsByKey.values) {
+        getLockedNotifier(field).value = false;
+      }
+    }
+
     for (Field field in fieldsByKey.values) {
-      clearField(field, notify: false);
+      clearField(
+        field,
+        notify: false,
+        overrideLocks: overrideLocks,
+      );
     }
 
     notifyListeners();
@@ -57,19 +71,42 @@ class CreatorModel with ChangeNotifier {
     return _controllersByField[field]!;
   }
 
-  /// Clear a controller for a particular field.
-  void clearField(Field field, {bool notify = true}) {
-    if (field is ImageExportField) {
-      field.clearFieldState(creatorModel: this);
-    } else if (field is AudioExportField) {
-      field.clearFieldState(creatorModel: this);
-    }
+  /// Get the [ValueNotifier] for a particular field.
+  ValueNotifier<bool> getLockedNotifier(Field field) {
+    return _lockNotifiersByField[field]!;
+  }
 
-    /// Need to clear the audio/image seed when that's implemented as well.
-    getFieldController(field).clear();
-    if (notify) {
-      notifyListeners();
+  /// Get the [TextEditingController] for a particular field.
+  void toggleLock(Field field) {
+    _lockNotifiersByField[field]!.value = !_lockNotifiersByField[field]!.value;
+  }
+
+  /// Clear a controller for a particular field.
+  void clearField(
+    Field field, {
+    bool overrideLocks = false,
+    bool notify = true,
+  }) {
+    if (isLocked(field) && !overrideLocks) {
+      return;
+    } else {
+      if (field is ImageExportField) {
+        field.clearFieldState(creatorModel: this);
+      } else if (field is AudioExportField) {
+        field.clearFieldState(creatorModel: this);
+      }
+
+      /// Need to clear the audio/image seed when that's implemented as well.
+      getFieldController(field).clear();
+      if (notify) {
+        notifyListeners();
+      }
     }
+  }
+
+  /// Whether or not a field is locked and should not be cleared on export.
+  bool isLocked(Field field) {
+    return _lockNotifiersByField[field]!.value;
   }
 
   /// Clone the [CreatorFieldValues]'s contents into the model.

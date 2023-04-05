@@ -119,6 +119,7 @@ class PitchAccentField extends Field {
     required CreatorModel creatorModel,
     required DictionaryHeading heading,
     required bool creatorJustLaunched,
+    required String? dictionaryName,
   }) {
     return getAllHtmlPitch(heading: heading);
   }

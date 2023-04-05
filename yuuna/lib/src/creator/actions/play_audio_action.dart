@@ -30,12 +30,14 @@ class PlayAudioAction extends QuickAction {
   static const String key = 'play_audio';
 
   @override
-  Future<void> executeAction(
-      {required BuildContext context,
-      required WidgetRef ref,
-      required AppModel appModel,
-      required CreatorModel creatorModel,
-      required DictionaryHeading heading}) async {
+  Future<void> executeAction({
+    required BuildContext context,
+    required WidgetRef ref,
+    required AppModel appModel,
+    required CreatorModel creatorModel,
+    required DictionaryHeading heading,
+    required String? dictionaryName,
+  }) async {
     _audioPlayer.stop();
 
     List<Enhancement> audioEnhancements = [];

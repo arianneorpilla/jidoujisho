@@ -33,6 +33,7 @@ class SentenceField extends Field {
     required CreatorModel creatorModel,
     required DictionaryHeading heading,
     required bool creatorJustLaunched,
+    required String? dictionaryName,
   }) {
     if (creatorJustLaunched) {
       return appModel.getCurrentSentence();

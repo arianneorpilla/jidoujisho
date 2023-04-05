@@ -14,8 +14,6 @@ import 'package:external_path/external_path.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_accessibility_service/accessibility_event.dart';
-import 'package:flutter_accessibility_service/flutter_accessibility_service.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_charset_detector/flutter_charset_detector.dart';
 import 'package:flutter_exit_app/flutter_exit_app.dart';
@@ -91,9 +89,22 @@ final appProvider = ChangeNotifierProvider<AppModel>((ref) {
   return AppModel();
 });
 
-/// A global [Provider] for listening to accessibility events in PIP mode.
-final accessibilityProvider = StreamProvider<AccessibilityEvent>((ref) {
-  return FlutterAccessibilityService.accessStream..asBroadcastStream();
+/// Provides color for all quick actions.
+final quickActionColorProvider = FutureProvider.autoDispose
+    .family<Map<String, Color?>, DictionaryHeading>((ref, heading) async {
+  AppModel appModel = ref.watch(appProvider);
+  List<Future<Color?>> futures = appModel.quickActions.values.map((e) async {
+    return e.getIconColor(
+      appModel: appModel,
+      heading: heading,
+    );
+  }).toList();
+
+  List<Color?> colors = await Future.wait(futures);
+  return Map<String, Color?>.fromEntries(
+      appModel.quickActions.values.mapIndexed((i, action) {
+    return MapEntry(action.uniqueKey, colors[i]);
+  }));
 });
 
 /// A global [Provider] for listening to search results in PIP mode.
@@ -811,6 +822,7 @@ class AppModel with ChangeNotifier {
       MeaningField.instance: [
         ClearFieldEnhancement(field: MeaningField.instance),
         TextSegmentationEnhancement(field: MeaningField.instance),
+        SentencePickerEnhancement(field: MeaningField.instance),
       ],
       ReadingField.instance: [
         ClearFieldEnhancement(field: ReadingField.instance),
@@ -818,7 +830,7 @@ class AppModel with ChangeNotifier {
       SentenceField.instance: [
         ClearFieldEnhancement(field: SentenceField.instance),
         TextSegmentationEnhancement(field: SentenceField.instance),
-        SentencePickerEnhancement(),
+        SentencePickerEnhancement(field: SentenceField.instance),
         OpenStashEnhancement(field: SentenceField.instance),
         PopFromStashEnhancement(field: SentenceField.instance),
       ],
@@ -846,14 +858,17 @@ class AppModel with ChangeNotifier {
       CollapsedMeaningField.instance: [
         ClearFieldEnhancement(field: CollapsedMeaningField.instance),
         TextSegmentationEnhancement(field: CollapsedMeaningField.instance),
+        SentencePickerEnhancement(field: CollapsedMeaningField.instance),
       ],
       ExpandedMeaningField.instance: [
         ClearFieldEnhancement(field: ExpandedMeaningField.instance),
         TextSegmentationEnhancement(field: ExpandedMeaningField.instance),
+        SentencePickerEnhancement(field: ExpandedMeaningField.instance),
       ],
       HiddenMeaningField.instance: [
         ClearFieldEnhancement(field: HiddenMeaningField.instance),
         TextSegmentationEnhancement(field: HiddenMeaningField.instance),
+        SentencePickerEnhancement(field: HiddenMeaningField.instance),
       ],
     };
 
@@ -2094,7 +2109,7 @@ class AppModel with ChangeNotifier {
     List<String> decks = await getDecks();
 
     CreatorModel creatorModel = ref.read(creatorProvider);
-    creatorModel.clearAll();
+    creatorModel.clearAll(overrideLocks: true);
     if (creatorFieldValues != null) {
       creatorModel.copyContext(creatorFieldValues);
     }

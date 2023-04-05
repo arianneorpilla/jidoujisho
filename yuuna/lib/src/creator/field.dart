@@ -73,6 +73,7 @@ abstract class Field {
     required CreatorModel creatorModel,
     required DictionaryHeading heading,
     required bool creatorJustLaunched,
+    required String? dictionaryName,
   }) {
     throw UnimplementedError(
       'Field must generate a value upon opening creator',

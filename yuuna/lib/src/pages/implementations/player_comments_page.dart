@@ -411,7 +411,8 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
                       style: const TextStyle(fontSize: 18),
                     ),
                   ),
-                  buildTextSegmentButton('${comment.author}:\n${comment.text}'),
+                  buildSentencePickerButton(
+                      '${comment.author}:\n${comment.text}'),
                   buildCardCreatorButton('${comment.author}:\n${comment.text}'),
                 ],
               ),
@@ -472,7 +473,7 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
     );
   }
 
-  Widget buildTextSegmentButton(String message) {
+  Widget buildSentencePickerButton(String message) {
     return Padding(
       padding: Spacing.of(context).insets.onlyLeft.semiSmall,
       child: JidoujishoIconButton(
@@ -481,31 +482,25 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
         backgroundColor:
             Theme.of(context).appBarTheme.foregroundColor?.withOpacity(0.1),
         size: Spacing.of(context).spaces.semiBig,
-        tooltip: t.text_segmentation,
-        icon: Icons.account_tree,
+        tooltip: t.sentence_picker,
+        icon: Icons.colorize,
         onTap: () async {
-          appModel.openTextSegmentationDialog(
-            sourceText: message,
-            onSearch: (selection, items) async {
-              source.setCurrentSentence(message);
-              await appModel.openRecursiveDictionarySearch(
-                searchTerm: selection,
-                killOnPop: false,
-              );
-              source.clearCurrentSentence();
-            },
-            onSelect: (selection, items) {
+          appModel.openExampleSentenceDialog(
+            exampleSentences: appModel.targetLanguage
+                .getSentences(message)
+                .map((e) => e.trim())
+                .toList(),
+            onSelect: (selection) {
               appModel.openCreator(
                 creatorFieldValues: CreatorFieldValues(
                   textValues: {
-                    TermField.instance: selection,
-                    SentenceField.instance: message,
+                    SentenceField.instance: selection.join(
+                        appModel.targetLanguage.isSpaceDelimited ? ' ' : ''),
                   },
                 ),
                 killOnPop: false,
                 ref: ref,
               );
-              Navigator.pop(context);
             },
           );
         },

@@ -149,7 +149,7 @@ class DictionaryTermPage extends ConsumerWidget {
   }
 }
 
-class _DictionaryTermActionsRow extends ConsumerWidget {
+class _DictionaryTermActionsRow extends ConsumerStatefulWidget {
   const _DictionaryTermActionsRow({
     required this.heading,
   });
@@ -158,89 +158,115 @@ class _DictionaryTermActionsRow extends ConsumerWidget {
   final DictionaryHeading heading;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _DictionaryTermActionsRowState();
+}
+
+class _DictionaryTermActionsRowState
+    extends ConsumerState<_DictionaryTermActionsRow> {
+  Map<String, Color?>? _lastColors;
+
+  @override
+  Widget build(BuildContext context) {
     AppModel appModel = ref.watch(appProvider);
     CreatorModel creatorModel = ref.watch(creatorProvider);
 
-    ValueNotifier<bool> rowNotifier = ValueNotifier(true);
+    AsyncValue<Map<String, Color?>> colors =
+        ref.watch(quickActionColorProvider(widget.heading));
+    Map<String, Color?> defaultColors = Map<String, Color?>.fromEntries(
+        appModel.quickActions.values.map((e) => MapEntry(e.uniqueKey, null)));
 
-    return ValueListenableBuilder(
-      valueListenable: rowNotifier,
-      builder: (_, __, ___) {
-        List<Widget> buttons = [];
-        for (int i = 0; i < appModel.maximumQuickActions; i++) {
-          String? actionName = appModel.lastSelectedMapping.actions![i];
-          QuickAction? quickAction;
+    _lastColors ??= defaultColors;
 
-          if (actionName != null) {
-            quickAction = appModel.quickActions[actionName];
-          }
-
-          late Widget button;
-
-          if (quickAction == null) {
-            button = const SizedBox.shrink();
-          } else {
-            ValueNotifier<bool> buttonNotifier = ValueNotifier(true);
-            button = Padding(
-              padding: Spacing.of(context).insets.onlyLeft.semiSmall,
-              child: ValueListenableBuilder<bool>(
-                valueListenable: buttonNotifier,
-                builder: (context, _, child) {
-                  return FutureBuilder<Color?>(
-                    future: quickAction!.getIconColor(
-                      context: context,
-                      appModel: appModel,
-                      heading: heading,
-                    ),
-                    builder: (context, snapshot) {
-                      late Color enabledColor;
-                      Color defaultColor =
-                          Theme.of(context).brightness == Brightness.dark
-                              ? Colors.white
-                              : Colors.black;
-                      enabledColor = snapshot.data ?? defaultColor;
-
-                      return JidoujishoIconButton(
-                        busy: true,
-                        enabledColor: enabledColor,
-                        shapeBorder: const RoundedRectangleBorder(),
-                        backgroundColor:
-                            Theme.of(context).brightness == Brightness.dark
-                                ? Colors.white.withOpacity(0.05)
-                                : Colors.black.withOpacity(0.05),
-                        size: Spacing.of(context).spaces.semiBig,
-                        tooltip: quickAction!.getLocalisedLabel(appModel),
-                        icon: quickAction.icon,
-                        onTap: () async {
-                          await quickAction!.executeAction(
-                            context: context,
-                            ref: ref,
-                            appModel: appModel,
-                            creatorModel: creatorModel,
-                            heading: heading,
-                          );
-                          buttonNotifier.value = !buttonNotifier.value;
-                          rowNotifier.value = !rowNotifier.value;
-                        },
-                      );
-                    },
-                  );
-                },
-              ),
-            );
-          }
-
-          buttons.add(button);
-        }
-
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.end,
-          mainAxisSize: MainAxisSize.min,
-          children: buttons.reversed.toList(),
+    return colors.when(
+      data: (colors) {
+        _lastColors = colors;
+        return buildRow(
+          context: context,
+          appModel: appModel,
+          creatorModel: creatorModel,
+          ref: ref,
+          colors: colors,
         );
       },
+      loading: () => buildRow(
+        context: context,
+        appModel: appModel,
+        creatorModel: creatorModel,
+        ref: ref,
+        colors: _lastColors!,
+      ),
+      error: (_, __) => buildRow(
+        context: context,
+        appModel: appModel,
+        creatorModel: creatorModel,
+        ref: ref,
+        colors: _lastColors!,
+      ),
+    );
+  }
+
+  Widget buildRow({
+    required BuildContext context,
+    required AppModel appModel,
+    required CreatorModel creatorModel,
+    required WidgetRef ref,
+    required Map<String, Color?> colors,
+  }) {
+    List<Widget> buttons = [];
+    for (int i = 0; i < appModel.maximumQuickActions; i++) {
+      String? actionName = appModel.lastSelectedMapping.actions![i];
+      QuickAction? quickAction;
+
+      if (actionName != null) {
+        quickAction = appModel.quickActions[actionName];
+      }
+      late Widget button;
+
+      if (quickAction == null) {
+        button = const SizedBox.shrink();
+      } else {
+        late Color enabledColor;
+        Color defaultColor = Theme.of(context).brightness == Brightness.dark
+            ? Colors.white
+            : Colors.black;
+        enabledColor = colors[quickAction.uniqueKey] ?? defaultColor;
+        button = Padding(
+          padding: Spacing.of(context).insets.onlyLeft.semiSmall,
+          child: JidoujishoIconButton(
+            busy: true,
+            enabledColor: enabledColor,
+            disabledColor: enabledColor.withOpacity(0.8),
+            shapeBorder: const RoundedRectangleBorder(),
+            backgroundColor: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white.withOpacity(0.05)
+                : Colors.black.withOpacity(0.05),
+            size: Spacing.of(context).spaces.semiBig,
+            tooltip: quickAction.getLocalisedLabel(appModel),
+            icon: quickAction.icon,
+            onTap: () async {
+              await quickAction!.executeAction(
+                context: context,
+                ref: ref,
+                appModel: appModel,
+                creatorModel: creatorModel,
+                heading: widget.heading,
+                dictionaryName: null,
+              );
+              ref.refresh(quickActionColorProvider(widget.heading));
+            },
+          ),
+        );
+      }
+
+      buttons.add(button);
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
+      children: buttons.reversed.toList(),
     );
   }
 }
@@ -425,7 +451,6 @@ class _DictionaryTermTopRow extends ConsumerWidget {
   /// The result made from a dictionary database search.
   final DictionaryHeading heading;
 
-  /// The result made fr
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     AppModel appModel = ref.watch(appProvider);
@@ -438,7 +463,9 @@ class _DictionaryTermTopRow extends ConsumerWidget {
             right: Spacing.of(context).spaces.small,
             bottom: Spacing.of(context).spaces.small,
           ),
-          child: _DictionaryTermActionsRow(heading: heading),
+          child: _DictionaryTermActionsRow(
+            heading: heading,
+          ),
         ),
         Floatable(
           float: FCFloat.start,

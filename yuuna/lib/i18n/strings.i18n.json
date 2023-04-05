@@ -6,7 +6,7 @@
     "back": "Back",
     "search": "Search",
     "search_ellipsis": "Search...",
-    "see_more": "See More",
+    "show_more": "Show More",
     "show_menu": "Show Menu",
     "stash": "Stash",
     "pick_image": "Pick Image",
@@ -354,6 +354,11 @@
     "invalid_mokuro_file": "File is not a Mokuro generated HTML file.",
     "create_catalog": "Create Catalog",
     "adapt_ttu_theme": "Adapt dictionary popup to theme",
+    "sentence_picker": "Sentence Picker",
+    "field_locked": "$field locked and will not clear on export while Creator is active.",
+    "field_unlocked": "$field unlocked and will clear on export.",
+    "field_lock": "Lock Field",
+    "field_unlock": "Unlock Field",
     "view_replies": {
         "reply": {
           "one": "SHOW $n REPLY",

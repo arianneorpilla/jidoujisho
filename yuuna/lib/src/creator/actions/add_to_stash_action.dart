@@ -22,7 +22,6 @@ class AddToStashAction extends QuickAction {
 
   @override
   Future<Color?> getIconColor({
-    required BuildContext context,
     required AppModel appModel,
     required DictionaryHeading heading,
   }) async {
@@ -34,12 +33,14 @@ class AddToStashAction extends QuickAction {
   }
 
   @override
-  Future<void> executeAction(
-      {required BuildContext context,
-      required WidgetRef ref,
-      required AppModel appModel,
-      required CreatorModel creatorModel,
-      required DictionaryHeading heading}) async {
+  Future<void> executeAction({
+    required BuildContext context,
+    required WidgetRef ref,
+    required AppModel appModel,
+    required CreatorModel creatorModel,
+    required DictionaryHeading heading,
+    required String? dictionaryName,
+  }) async {
     if (!appModel.isTermInStash(heading.term)) {
       appModel.addToStash(terms: [heading.term]);
     } else {

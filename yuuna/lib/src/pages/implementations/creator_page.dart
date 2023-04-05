@@ -53,7 +53,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
   Future<bool> onWillPop() async {
     if (isCardEditing) {
-      creatorModel.clearAll();
+      creatorModel.clearAll(overrideLocks: true);
     }
 
     if (widget.killOnPop) {
@@ -268,7 +268,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
         iconPadding: Spacing.of(context).insets.onlyRight.small,
         iconSize: Theme.of(context).textTheme.titleLarge?.fontSize,
         expandIcon: Icons.arrow_drop_down,
-        collapseIcon: Icons.arrow_drop_up,
+        collapseIcon: Icons.arrow_drop_down,
         iconColor: Theme.of(context).unselectedWidgetColor,
         headerAlignment: ExpandablePanelHeaderAlignment.center,
       ),
@@ -285,7 +285,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       mapping: appModel.lastSelectedMapping,
       deck: appModel.lastSelectedDeckName,
       onSuccess: () {
-        creatorModel.clearAll();
+        creatorModel.clearAll(overrideLocks: false);
 
         if (appModel.closeCreatorOnExport) {
           Navigator.pop(context);
@@ -656,7 +656,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
             ),
           ),
           onPressed: () async {
-            creatorModel.clearAll();
+            creatorModel.clearAll(overrideLocks: true);
             Navigator.pop(context);
           },
         ),
@@ -959,10 +959,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
         maxLines: field.maxLines,
         controller: creatorModel.getFieldController(field),
         decoration: InputDecoration(
-          prefixIcon: Icon(
-            field.icon,
-            size: textTheme.titleLarge?.fontSize,
-          ),
+          prefixIcon: buildPrefixIcon(field),
           suffixIcon: (mapping.enhancements![field.uniqueKey] ?? {}).isNotEmpty
               ? Padding(
                   padding: Spacing.of(context).insets.onlyRight.small,
@@ -981,6 +978,28 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
         selectionControls: selectionControls,
       );
     }
+  }
+
+  Widget buildPrefixIcon(Field field) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: creatorModel.getLockedNotifier(field),
+      builder: (context, locked, child) {
+        return JidoujishoIconButton(
+            tooltip: locked ? t.field_unlock : t.field_lock,
+            size: textTheme.titleLarge?.fontSize,
+            enabledColor: locked ? Colors.red : null,
+            icon: locked ? Icons.lock : field.icon,
+            onTap: () {
+              creatorModel.toggleLock(field);
+
+              Fluttertoast.showToast(
+                msg: locked
+                    ? t.field_unlocked(field: field.getLocalisedLabel(appModel))
+                    : t.field_locked(field: field.getLocalisedLabel(appModel)),
+              );
+            });
+      },
+    );
   }
 
   Widget buildAddTextField({

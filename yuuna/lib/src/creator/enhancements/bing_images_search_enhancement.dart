@@ -103,7 +103,9 @@ class BingImagesSearchEnhancement extends ImageEnhancement {
           String bingImagesPath = '${appDirDoc.path}/bingImages';
           Directory bingImagesDir = Directory(bingImagesPath);
           if (bingImagesDir.existsSync()) {
-            bingImagesDir.deleteSync(recursive: true);
+            if (_bingCache.isEmpty) {
+              bingImagesDir.deleteSync(recursive: true);
+            }
           }
           bingImagesDir.createSync();
 

@@ -21,12 +21,14 @@ class CharacterSearchAction extends QuickAction {
   static const String key = 'character_search';
 
   @override
-  Future<void> executeAction(
-      {required BuildContext context,
-      required WidgetRef ref,
-      required AppModel appModel,
-      required CreatorModel creatorModel,
-      required DictionaryHeading heading}) async {
+  Future<void> executeAction({
+    required BuildContext context,
+    required WidgetRef ref,
+    required AppModel appModel,
+    required CreatorModel creatorModel,
+    required DictionaryHeading heading,
+    required String? dictionaryName,
+  }) async {
     appModel.openTextSegmentationDialog(
       sourceText: heading.term,
       segmentedText: heading.term.characters.toList(),

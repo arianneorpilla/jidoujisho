@@ -15,6 +15,7 @@ class InstantExportAction extends QuickAction {
           description:
               'Export a card with the selected dictionary entry parameters.',
           icon: Icons.send,
+          showInSingleDictionary: true,
         );
 
   /// Used to identify this enhancement and to allow a constant value for the
@@ -22,12 +23,14 @@ class InstantExportAction extends QuickAction {
   static const String key = 'instant_export';
 
   @override
-  Future<void> executeAction(
-      {required BuildContext context,
-      required WidgetRef ref,
-      required AppModel appModel,
-      required CreatorModel creatorModel,
-      required DictionaryHeading heading}) async {
+  Future<void> executeAction({
+    required BuildContext context,
+    required WidgetRef ref,
+    required AppModel appModel,
+    required CreatorModel creatorModel,
+    required DictionaryHeading heading,
+    required String? dictionaryName,
+  }) async {
     CreatorModel creatorModel = ref.read(instantExportProvider);
 
     Map<Field, String> newTextFields = {};
@@ -39,6 +42,7 @@ class InstantExportAction extends QuickAction {
         creatorModel: creatorModel,
         heading: heading,
         creatorJustLaunched: true,
+        dictionaryName: dictionaryName,
       );
 
       if (newTextField != null) {
@@ -111,14 +115,13 @@ class InstantExportAction extends QuickAction {
       mapping: appModel.lastSelectedMapping,
       deck: appModel.lastSelectedDeckName,
       onSuccess: () {
-        creatorModel.clearAll();
+        creatorModel.clearAll(overrideLocks: true);
       },
     );
   }
 
   @override
   Future<Color?> getIconColor({
-    required BuildContext context,
     required AppModel appModel,
     required DictionaryHeading heading,
   }) async {
