@@ -72,6 +72,7 @@ class InstantExportAction extends QuickAction {
                 appModel: appModel,
                 item: appModel.getCurrentMediaItem()!,
                 options: appModel.currentSubtitleOptions!.value,
+                data: mediaSource.currentExtraData,
               );
             },
           );
