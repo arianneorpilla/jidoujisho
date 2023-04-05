@@ -722,14 +722,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.7"
-  flutter_process_text:
-    dependency: "direct main"
-    description:
-      name: flutter_process_text
-      sha256: "75cdff9d255ce892c766370824e28bbb95a7f93e99b6c4109ca694a6ef4d5681"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.2"
   flutter_reorderable_list:
     dependency: "direct main"
     description:
@@ -1432,19 +1424,12 @@ packages:
   receive_intent:
     dependency: "direct main"
     description:
-      name: receive_intent
-      sha256: "8e337eb3c021ba177cce615fda1f9353d733144f7b482c269a5c9c948ae595d9"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: jidoujisho
+      resolved-ref: "3854d07f8f4e9d5a78589639b18b5d454ddf54a0"
+      url: "https://github.com/lrorpilla/receive_intent"
+    source: git
     version: "0.2.3"
-  receive_sharing_intent:
-    dependency: "direct main"
-    description:
-      name: receive_sharing_intent
-      sha256: "912bebb551bce75a14098891fd750305b30d53eba0d61cc70cd9973be9866e8d"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.4.5"
   record_mp3:
     dependency: "direct main"
     description:
@@ -1789,6 +1774,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.4"
+  uri_to_file:
+    dependency: "direct main"
+    description:
+      name: uri_to_file
+      sha256: "84afd633b1492fc465c768141e1a29edd519061bf99935b6b4d0d5de8ec7c108"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
   url_launcher:
     dependency: "direct main"
     description:

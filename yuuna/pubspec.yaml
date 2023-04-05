@@ -57,7 +57,6 @@ dependencies:
       ref: jidoujisho
   flutter_launcher_icons: ^0.12.0
   flutter_native_splash: ^2.2.8
-  flutter_process_text: ^1.1.2
   flutter_reorderable_list: ^1.3.0
   flutter_riverpod: ^1.0.4
   flutter_staggered_grid_view: ^0.6.2
@@ -98,8 +97,10 @@ dependencies:
   pretty_json: ^2.0.0
   progress_indicators: ^1.0.0
   quiver: ^3.2.1
-  receive_intent: ^0.2.3
-  receive_sharing_intent: ^1.4.5
+  receive_intent:
+    git:
+      url: https://github.com/lrorpilla/receive_intent
+      ref: jidoujisho
   record_mp3: ^3.0.0
   remove_emoji: ^0.0.7
   reorderables: ^0.6.0
@@ -124,6 +125,7 @@ dependencies:
       ref: ff4a7900d66338c7322a7335f14714f7cb964b82
   system_info: ^1.0.1
   transparent_image: ^2.0.1
+  uri_to_file: ^0.2.0
   url_launcher: ^6.0.20
   ve_dart:
     git:

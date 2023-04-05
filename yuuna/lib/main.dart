@@ -3,17 +3,15 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:firebase_remote_config/firebase_remote_config.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_process_text/flutter_process_text.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:network_to_file_image/network_to_file_image.dart';
 import 'package:receive_intent/receive_intent.dart' as intents;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:spaces/spaces.dart';
+import 'package:uri_to_file/uri_to_file.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:yuuna/creator.dart';
@@ -68,9 +66,6 @@ void main() {
     final appModel = container.read(appProvider);
     await appModel.initialise();
 
-    /// For higher refresh rates.
-    GestureBinding.instance.resamplingEnabled = true;
-
     /// Start the application, specifying the [ProviderContainer] with the
     /// already initialised [AppModel].
     runApp(
@@ -105,58 +100,48 @@ class JidoujishoApp extends ConsumerStatefulWidget {
   ConsumerState<JidoujishoApp> createState() => _JidoujishoAppState();
 }
 
-class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
+class _JidoujishoAppState extends ConsumerState<JidoujishoApp>
+    with WidgetsBindingObserver {
   final navigatorKey = GlobalKey<NavigatorState>();
   bool _isMainIntent = false;
 
-  late final StreamSubscription _otherIntentsSubscription;
-  late final StreamSubscription _sharedTextSubscription;
-  late final StreamSubscription _sharedImageSubscription;
+  late final StreamSubscription _intentsSubscription;
 
   @override
   void initState() {
     super.initState();
-    FlutterProcessText.initialize(
-      showConfirmationToast: false,
-      showErrorToast: false,
-      showRefreshToast: false,
-    );
+
+    WidgetsBinding.instance.addObserver(this);
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       /// Receive all intents and parse them depending on which they are.
-      intents.ReceiveIntent.getInitialIntent().then(handleIntent);
+      intents.ReceiveIntent.getInitialIntent().then(
+        (intent) => handleIntent(
+          intent: intent,
+          isInitial: true,
+        ),
+      );
       // Attach a listener to the stream for receiving intents.
-      _otherIntentsSubscription =
-          intents.ReceiveIntent.receivedIntentStream.listen(handleIntent);
-
-      /// For receiving shared text when the app is in the background.
-      _sharedTextSubscription =
-          ReceiveSharingIntent.getTextStream().listen(textShareIntentAction);
-
-      // For sharing images when the app while the app is in the backgrfound.
-      _sharedImageSubscription =
-          ReceiveSharingIntent.getMediaStream().listen(imageShareIntentAction);
-
-      /// For receiving shared text when the app is initially launched.
-      ReceiveSharingIntent.getInitialText().then((text) {
-        if (text != null) {
-          textShareIntentAction(text);
-        }
-      });
-      // For sharing images when the app while the app is initially launched.
-      ReceiveSharingIntent.getInitialMedia().then(imageShareIntentAction);
+      _intentsSubscription = intents.ReceiveIntent.receivedIntentStream.listen(
+        (intent) => handleIntent(
+          intent: intent,
+          isInitial: false,
+        ),
+      );
     });
   }
 
   @override
   void dispose() {
-    _otherIntentsSubscription.cancel();
-    _sharedTextSubscription.cancel();
-    _sharedImageSubscription.cancel();
+    _intentsSubscription.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
-  void handleIntent(intents.Intent? intent) async {
+  void handleIntent({
+    required intents.Intent? intent,
+    required bool isInitial,
+  }) async {
     if (intent == null) {
       return;
     }
@@ -169,6 +154,28 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
           _isMainIntent = true;
         });
         return;
+      case 'android.intent.action.SEND_MULTIPLE':
+        List<String> contentUris =
+            List<String>.from(intent.extra!['android.intent.extra.STREAM']);
+        List<String> paths = [];
+        for (int i = 0; i < contentUris.length; i++) {
+          paths.add((await toFile(contentUris[i])).path);
+        }
+
+        imageShareIntentAction(paths);
+        break;
+      case 'android.intent.action.SEND':
+        String? data = intent.extra!['android.intent.extra.TEXT'];
+        if (data != null) {
+          textShareIntentAction(data);
+        } else {
+          String contentUri = intent.extra!['android.intent.extra.STREAM'];
+          String path = (await toFile(contentUri)).path;
+
+          imageShareIntentAction([path]);
+        }
+
+        break;
       case 'android.intent.action.PROCESS_TEXT':
         String data = intent.extra!['android.intent.extra.PROCESS_TEXT'];
         textContextMenuAction(data);
@@ -261,17 +268,17 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp> {
     }
   }
 
-  void imageShareIntentAction(List<SharedMediaFile> sharedMediaFiles) {
-    if (sharedMediaFiles.isEmpty) {
+  void imageShareIntentAction(List<String> paths) {
+    if (paths.isEmpty) {
       return;
     }
 
     appModel.openCreator(killOnPop: true, ref: ref);
 
-    List<NetworkToFileImage> images = sharedMediaFiles.map(
-      (sharedMediaFile) {
+    List<NetworkToFileImage> images = paths.map(
+      (path) {
         return NetworkToFileImage(
-          file: File(sharedMediaFile.path),
+          file: File(path),
         );
       },
     ).toList();

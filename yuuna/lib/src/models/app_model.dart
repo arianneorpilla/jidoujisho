@@ -18,6 +18,7 @@ import 'package:flutter_accessibility_service/accessibility_event.dart';
 import 'package:flutter_accessibility_service/flutter_accessibility_service.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_charset_detector/flutter_charset_detector.dart';
+import 'package:flutter_exit_app/flutter_exit_app.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -3136,5 +3137,11 @@ class AppModel with ChangeNotifier {
                 !frequency.dictionary.value!.isHidden(targetLanguage))
             .toList() ??
         [];
+  }
+
+  /// Safely shutdown and stop database operations.
+  void shutdown() async {
+    await _database.close();
+    FlutterExitApp.exitApp();
   }
 }

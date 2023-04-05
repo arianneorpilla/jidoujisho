@@ -98,7 +98,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
     switch (state) {
       case AppLifecycleState.resumed:
         _session.setActive(true);
@@ -117,8 +117,21 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         Wakelock.enable();
 
         break;
-      case AppLifecycleState.paused:
       case AppLifecycleState.inactive:
+        _session.setActive(false);
+        if (source is PlayerNetworkStreamSource) {
+          await ReceiveIntent.setResult(
+            kActivityResultOk,
+            action: 'is.xyz.mpv.MPVActivity.result',
+            data: {
+              'position': _positionNotifier.value.inMilliseconds,
+              'duration': _durationNotifier.value.inMilliseconds,
+            },
+          );
+          appModel.shutdown();
+        }
+        break;
+      case AppLifecycleState.paused:
       case AppLifecycleState.detached:
         _session.setActive(false);
         break;
