@@ -34,13 +34,21 @@ class HiddenMeaningField extends Field {
     required DictionaryHeading heading,
     required bool creatorJustLaunched,
   }) {
+    List<Dictionary> dictionaries = appModel.dictionaries;
+    Map<String, bool> dictionaryNamesByHidden = Map<String, bool>.fromEntries(
+        dictionaries
+            .map((e) => MapEntry(e.name, e.isHidden(appModel.targetLanguage))));
+    Map<String, int> dictionaryNamesByOrder = Map<String, int>.fromEntries(
+        dictionaries.map((e) => MapEntry(e.name, e.order)));
+
     List<DictionaryEntry> hiddenEntries = heading.entries
-        .where((entry) =>
-            !entry.dictionary.value!.isHidden(appModel.targetLanguage))
+        .where(
+            (entry) => dictionaryNamesByHidden[entry.dictionary.value!.name]!)
         .toList();
 
     hiddenEntries.sort((a, b) =>
-        a.dictionary.value!.order.compareTo(b.dictionary.value!.order));
+        dictionaryNamesByOrder[a.dictionary.value!.name]!
+            .compareTo(dictionaryNamesByOrder[b.dictionary.value!.name]!));
 
     return MeaningField.flattenMeanings(
         entries: hiddenEntries,

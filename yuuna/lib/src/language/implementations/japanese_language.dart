@@ -609,6 +609,11 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
 
   preloadResultSync(resultId);
 
+  List<Dictionary> dictionaries = database.dictionarys.where().findAllSync();
+
+  Map<String, int> dictionaryNamesByOrder = Map<String, int>.fromEntries(
+      dictionaries.map((e) => MapEntry(e.name, e.order)));
+
   headings.sort((a, b) {
     if (a.term == b.term ||
         (a.reading.isNotEmpty && b.reading.isNotEmpty) &&
@@ -627,9 +632,11 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
       List<DictionaryFrequency> aFrequencies = a.frequencies.toList();
       List<DictionaryFrequency> bFrequencies = b.frequencies.toList();
       aFrequencies.sort((a, b) =>
-          a.dictionary.value!.order.compareTo(b.dictionary.value!.order));
+          dictionaryNamesByOrder[a.dictionary.value!.name]!
+              .compareTo(dictionaryNamesByOrder[b.dictionary.value!.name]!));
       bFrequencies.sort((a, b) =>
-          a.dictionary.value!.order.compareTo(b.dictionary.value!.order));
+          dictionaryNamesByOrder[a.dictionary.value!.name]!
+              .compareTo(dictionaryNamesByOrder[b.dictionary.value!.name]!));
 
       Map<Dictionary, List<DictionaryFrequency>> aFrequenciesByDictionary =
           groupBy<DictionaryFrequency, Dictionary>(

@@ -159,13 +159,6 @@ class AppModel with ChangeNotifier {
   /// Used to notify dictionary widgets to dictionary menu changes.
   final ChangeNotifier dictionaryMenuNotifier = ChangeNotifier();
 
-  /// Search term for picture-in-picture mode.
-  String pipSearchTerm = '';
-
-  /// Allows checking if the app is currently in PIP mode.
-  bool get isPipMode => _isPipMode;
-  bool _isPipMode = false;
-
   /// For refreshing on dictionary result additions.
   void refreshDictionaryHistory() {
     dictionaryMenuNotifier.notifyListeners();
@@ -3143,61 +3136,5 @@ class AppModel with ChangeNotifier {
                 !frequency.dictionary.value!.isHidden(targetLanguage))
             .toList() ??
         [];
-  }
-
-  StreamSubscription<AccessibilityEvent>? _accessibilityStream;
-
-  /// Cancels the listener for OS accessibility events in PIP mode.
-  void cancelAccessibilityStream() async {
-    _isPipMode = false;
-    await _accessibilityStream?.cancel();
-    Restart.restartApp();
-  }
-
-  /// Switches the app to PIP mode.
-  void usePictureInPicture({required WidgetRef ref}) async {
-    bool permissionGranted =
-        await FlutterAccessibilityService.isAccessibilityPermissionEnabled();
-    if (!permissionGranted) {
-      Fluttertoast.showToast(
-        msg: t.accessibility,
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.BOTTOM,
-      );
-      await FlutterAccessibilityService.requestAccessibilityPermission();
-    }
-
-    ref.watch(pipSearchTermProvider.notifier).state = '';
-    ref.watch(pipSearchPositionProvider.notifier).state = 0;
-
-    _accessibilityStream =
-        FlutterAccessibilityService.accessStream.listen((event) {
-      bool shouldUpdateSearchTerm =
-          event.packageName == 'com.android.systemui' &&
-              event.contentChangeTypes.toString() ==
-                  'ContentChangeTypes.contentChangeTypeSubtree' &&
-              event.nodesText != null &&
-              event.nodesText!.length == 1 &&
-              !(event.isActive ?? false) &&
-              !(event.isFocused ?? false) &&
-              !(event.isPip ?? false);
-
-      if (shouldUpdateSearchTerm) {
-        String searchTerm = event.nodesText?.join().trim() ?? '';
-        if (ref.watch(pipSearchTermProvider.notifier).state != searchTerm) {
-          ref.watch(pipSearchTermProvider.notifier).state = searchTerm;
-          ref.watch(pipSearchPositionProvider.notifier).state = 0;
-        }
-      }
-    });
-
-    Navigator.push(
-      _navigatorKey.currentContext!,
-      MaterialPageRoute(
-        builder: (context) => const PipPage(),
-      ),
-    );
-
-    _isPipMode = true;
   }
 }

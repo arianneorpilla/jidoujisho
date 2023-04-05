@@ -96,9 +96,14 @@ class MeaningField extends Field {
     required DictionaryHeading heading,
     required bool creatorJustLaunched,
   }) {
+    List<Dictionary> dictionaries = appModel.dictionaries;
+
+    Map<String, int> dictionaryNamesByOrder = Map<String, int>.fromEntries(
+        dictionaries.map((e) => MapEntry(e.name, e.order)));
+
     List<DictionaryEntry> entries = heading.entries.toList();
-    entries.sort((a, b) =>
-        a.dictionary.value!.order.compareTo(b.dictionary.value!.order));
+    entries.sort((a, b) => dictionaryNamesByOrder[a.dictionary.value!.name]!
+        .compareTo(dictionaryNamesByOrder[b.dictionary.value!.name]!));
 
     return flattenMeanings(
       entries: entries,

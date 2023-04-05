@@ -105,6 +105,16 @@ class _DictionaryHistoryScrollableItemState
     List<DictionaryHeading> headings =
         result.headingIds.map((id) => headingsById[id]).whereNotNull().toList();
 
+    List<Dictionary> dictionaries = appModel.dictionaries;
+    Map<String, bool> dictionaryNamesByHidden = Map<String, bool>.fromEntries(
+        dictionaries
+            .map((e) => MapEntry(e.name, e.isHidden(appModel.targetLanguage))));
+    Map<String, bool> dictionaryNamesByCollapsed =
+        Map<String, bool>.fromEntries(dictionaries.map(
+            (e) => MapEntry(e.name, e.isCollapsed(appModel.targetLanguage))));
+    Map<String, int> dictionaryNamesByOrder = Map<String, int>.fromEntries(
+        dictionaries.map((e) => MapEntry(e.name, e.order)));
+
     final Map<DictionaryHeading, Map<Dictionary, ExpandableController>>
         expandableControllersByHeading = {};
     for (DictionaryHeading heading in headings) {
@@ -114,9 +124,7 @@ class _DictionaryHistoryScrollableItemState
         expandableControllersByHeading[heading]?.putIfAbsent(
           dictionary,
           () => ExpandableController(
-            initialExpanded: !dictionary.isCollapsed(
-              appModel.targetLanguage,
-            ),
+            initialExpanded: !dictionaryNamesByCollapsed[dictionary.name]!,
           ),
         );
       }
@@ -134,6 +142,8 @@ class _DictionaryHistoryScrollableItemState
       onSearch: widget.onSearch,
       onStash: widget.onStash,
       expandableControllers: expandableControllersByHeading[heading]!,
+      dictionaryNamesByHidden: dictionaryNamesByHidden,
+      dictionaryNamesByOrder: dictionaryNamesByOrder,
       footerWidget: headings.length > 1
           ? buildFooterWidget(result: result, length: headings.length)
           : null,

@@ -5,8 +5,8 @@ import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/pages.dart';
 
-/// Returns the widget for a [DictionarySearchResult] which returns a scrollable list
-/// of each [DictionaryEntry] in its mappings.
+/// Returns the widget for a [DictionarySearchResult] which returns a
+/// scrollable list of each [DictionaryEntry] in its mappings.
 class DictionaryResultPage extends BasePage {
   /// Create the widget of a [DictionarySearchResult].
   const DictionaryResultPage({
@@ -54,29 +54,7 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
   @override
   void initState() {
     super.initState();
-    appModelNoUpdate.dictionaryMenuNotifier.addListener(dumpCache);
-
     _scrollController = widget.scrollController ?? ScrollController();
-  }
-
-  void dumpCache() {
-    if (mounted) {
-      for (DictionaryHeading heading in widget.result.headings) {
-        for (DictionaryEntry entry in heading.entries) {
-          entry.dictionary.loadSync();
-        }
-        for (DictionaryFrequency frequency in heading.frequencies) {
-          frequency.dictionary.loadSync();
-        }
-        for (DictionaryPitch pitch in heading.pitches) {
-          pitch.dictionary.loadSync();
-        }
-      }
-    }
-
-    if (mounted) {
-      setState(() {});
-    }
   }
 
   late ScrollController _scrollController;
@@ -97,6 +75,16 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
     List<DictionaryHeading> headings =
         widget.result.headingIds.map((id) => headingsById[id]!).toList();
 
+    List<Dictionary> dictionaries = appModel.dictionaries;
+    Map<String, bool> dictionaryNamesByHidden = Map<String, bool>.fromEntries(
+        dictionaries
+            .map((e) => MapEntry(e.name, e.isHidden(appModel.targetLanguage))));
+    Map<String, bool> dictionaryNamesByCollapsed =
+        Map<String, bool>.fromEntries(dictionaries.map(
+            (e) => MapEntry(e.name, e.isCollapsed(appModel.targetLanguage))));
+    Map<String, int> dictionaryNamesByOrder = Map<String, int>.fromEntries(
+        dictionaries.map((e) => MapEntry(e.name, e.order)));
+
     for (DictionaryHeading heading in headings) {
       expandableControllersByHeading.putIfAbsent(heading, () => {});
       for (DictionaryEntry entry in heading.entries) {
@@ -104,7 +92,7 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
         expandableControllersByHeading[heading]?.putIfAbsent(
           dictionary,
           () => ExpandableController(
-            initialExpanded: !dictionary.isCollapsed(appModel.targetLanguage),
+            initialExpanded: !dictionaryNamesByCollapsed[dictionary.name]!,
           ),
         );
       }
@@ -144,6 +132,8 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
                         onStash: widget.onStash,
                         expandableControllers:
                             expandableControllersByHeading[heading]!,
+                        dictionaryNamesByHidden: dictionaryNamesByHidden,
+                        dictionaryNamesByOrder: dictionaryNamesByOrder,
                       ))
                   .toList(),
             ],

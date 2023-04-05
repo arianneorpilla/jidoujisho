@@ -20,6 +20,8 @@ class DictionaryTermPage extends ConsumerWidget {
     required this.onSearch,
     required this.onStash,
     required this.expandableControllers,
+    required this.dictionaryNamesByHidden,
+    required this.dictionaryNamesByOrder,
     required this.lastSelectedMapping,
     this.cardColor,
     this.opacity = 1,
@@ -39,6 +41,12 @@ class DictionaryTermPage extends ConsumerWidget {
   /// Controls expandables by dictionary name.
   final Map<Dictionary, ExpandableController> expandableControllers;
 
+  /// Lists whether a dictionary is hidden.
+  final Map<String, bool> dictionaryNamesByHidden;
+
+  /// Lists the order of dictionaries.
+  final Map<String, int> dictionaryNamesByOrder;
+
   /// Optional footer foor use in [DictionaryHistoryPage].
   final Widget? footerWidget;
 
@@ -56,16 +64,14 @@ class DictionaryTermPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     AppModel appModel = ref.watch(appProvider);
-    bool isPipMode = appModel.isPipMode;
 
     List<DictionaryEntry> entries = heading.entries
         .where(
-          (entry) => !entry.dictionary.value!.isHidden(appModel.targetLanguage),
-        )
+            (entry) => !dictionaryNamesByHidden[entry.dictionary.value!.name]!)
         .toList();
 
-    entries.sort((a, b) =>
-        a.dictionary.value!.order.compareTo(b.dictionary.value!.order));
+    entries.sort((a, b) => dictionaryNamesByOrder[a.dictionary.value!.name]!
+        .compareTo(dictionaryNamesByOrder[b.dictionary.value!.name]!));
 
     if (entries.isEmpty) {
       return const SliverPadding(padding: EdgeInsets.zero);
@@ -102,15 +108,17 @@ class DictionaryTermPage extends ConsumerWidget {
                     if (heading.tags.isNotEmpty)
                       _DictionaryTermTagsWrap(heading: heading),
                     const Space.normal(),
-                    _DictionaryTermFreqList(heading: heading),
+                    _DictionaryTermFreqList(
+                      heading: heading,
+                      dictionaryNamesByHidden: dictionaryNamesByHidden,
+                    ),
                   ],
                 ),
               ),
-              if (!isPipMode)
-                SliverPadding(
-                  padding: Spacing.of(context).insets.onlyBottom.normal,
-                  sliver: _DictionaryTermPitchList(heading: heading),
-                ),
+              SliverPadding(
+                padding: Spacing.of(context).insets.onlyBottom.normal,
+                sliver: _DictionaryTermPitchList(heading: heading),
+              ),
               SliverList(
                 delegate: SliverChildBuilderDelegate(
                   childCount: footerWidget != null
@@ -333,10 +341,14 @@ class _DictionaryTermPitchList extends ConsumerWidget {
 class _DictionaryTermFreqList extends ConsumerWidget {
   const _DictionaryTermFreqList({
     required this.heading,
+    required this.dictionaryNamesByHidden,
   });
 
   /// The result made from a dictionary database search.
   final DictionaryHeading heading;
+
+  /// Lists whether a dictionary is hidden.
+  final Map<String, bool> dictionaryNamesByHidden;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -344,7 +356,7 @@ class _DictionaryTermFreqList extends ConsumerWidget {
 
     List<DictionaryFrequency> frequencies = heading.frequencies
         .where((frequency) =>
-            !frequency.dictionary.value!.isHidden(appModel.targetLanguage))
+            !dictionaryNamesByHidden[frequency.dictionary.value!.name]!)
         .toList();
 
     frequencies += appModel.getNoReadingFrequencies(heading: heading);
@@ -419,16 +431,15 @@ class _DictionaryTermTopRow extends ConsumerWidget {
     AppModel appModel = ref.watch(appProvider);
     return FloatColumn(
       children: [
-        if (!appModel.isPipMode)
-          Floatable(
-            float: FCFloat.end,
-            padding: EdgeInsets.only(
-              top: Spacing.of(context).spaces.small,
-              right: Spacing.of(context).spaces.small,
-              bottom: Spacing.of(context).spaces.small,
-            ),
-            child: _DictionaryTermActionsRow(heading: heading),
+        Floatable(
+          float: FCFloat.end,
+          padding: EdgeInsets.only(
+            top: Spacing.of(context).spaces.small,
+            right: Spacing.of(context).spaces.small,
+            bottom: Spacing.of(context).spaces.small,
           ),
+          child: _DictionaryTermActionsRow(heading: heading),
+        ),
         Floatable(
           float: FCFloat.start,
           child: GestureDetector(
