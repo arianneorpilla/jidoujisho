@@ -121,7 +121,9 @@ class HistoryReaderPageState<T extends BaseHistoryPage>
                     (item.position / item.duration) == double.infinity ||
                     (item.position == 0 && item.duration == 0)
                 ? 0
-                : (item.position / item.duration),
+                : ((item.position / item.duration) > 0.97)
+                    ? 1
+                    : (item.position / item.duration),
             backgroundColor: Colors.white.withOpacity(0.6),
             valueColor: const AlwaysStoppedAnimation<Color>(Colors.red),
             minHeight: 2,

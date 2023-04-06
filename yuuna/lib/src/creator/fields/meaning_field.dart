@@ -99,10 +99,16 @@ class MeaningField extends Field {
   }) {
     List<Dictionary> dictionaries = appModel.dictionaries;
 
+    Map<String, bool> dictionaryNamesByHidden = Map<String, bool>.fromEntries(
+        dictionaries
+            .map((e) => MapEntry(e.name, e.isHidden(appModel.targetLanguage))));
     Map<String, int> dictionaryNamesByOrder = Map<String, int>.fromEntries(
         dictionaries.map((e) => MapEntry(e.name, e.order)));
 
-    List<DictionaryEntry> entries = heading.entries.toList();
+    List<DictionaryEntry> entries = heading.entries
+        .where(
+            (entry) => !dictionaryNamesByHidden[entry.dictionary.value!.name]!)
+        .toList();
     if (dictionaryName != null) {
       entries = [
         ...entries.where((e) => dictionaryName == e.dictionary.value!.name)
