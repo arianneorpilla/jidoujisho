@@ -29,7 +29,7 @@ class ProfilesDialogPage extends BasePage {
 
 class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
   final ScrollController _scrollController = ScrollController();
-  int _selectedOrder = 0;
+  int? _selectedOrder;
 
   @override
   void initState() {
@@ -121,8 +121,12 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
     );
   }
 
+  Map<AnkiMapping, ValueNotifier<bool>> _notifiersByMapping = {};
   Widget buildMappingList() {
     List<AnkiMapping> mappings = appModel.mappings;
+    _selectedOrder = appModel.lastSelectedMapping.order;
+
+    _notifiersByMapping = {};
 
     return RawScrollbar(
       thickness: 3,
@@ -132,7 +136,19 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
         scrollController: _scrollController,
         children: List.generate(
           mappings.length,
-          (index) => buildMappingTile(mappings[index]),
+          (index) {
+            AnkiMapping mapping = mappings[index];
+
+            _notifiersByMapping.putIfAbsent(
+              mapping,
+              () => ValueNotifier<bool>(mapping.order == _selectedOrder),
+            );
+
+            return buildMappingTile(
+              mapping,
+              _notifiersByMapping[mapping]!,
+            );
+          },
         ),
         onReorder: (oldIndex, newIndex) async {
           List<AnkiMapping> cloneMappings = [];
@@ -161,44 +177,59 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
     );
   }
 
-  Widget buildMappingTile(AnkiMapping mapping) {
-    return Material(
-      type: MaterialType.transparency,
+  Widget buildMappingTile(
+    AnkiMapping mapping,
+    ValueNotifier<bool> notifier,
+  ) {
+    return ValueListenableBuilder<bool>(
       key: ValueKey(mapping.label),
-      child: ListTile(
-        selected: appModel.lastSelectedMapping.label == mapping.label,
-        leading: const Icon(Icons.account_box),
-        title: Row(
-          children: [
-            Expanded(
-              child: Column(
-                children: [
-                  JidoujishoMarquee(
-                    text: mapping.label,
-                    style: TextStyle(fontSize: textTheme.bodyMedium?.fontSize),
+      valueListenable: notifier,
+      builder: (context, value, _) {
+        return Material(
+          type: MaterialType.transparency,
+          child: ListTile(
+            selected: appModel.lastSelectedMapping.label == mapping.label,
+            leading: const Icon(Icons.account_box),
+            title: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    children: [
+                      JidoujishoMarquee(
+                        text: mapping.label,
+                        style:
+                            TextStyle(fontSize: textTheme.bodyMedium?.fontSize),
+                      ),
+                      JidoujishoMarquee(
+                        text: mapping.model,
+                        style:
+                            TextStyle(fontSize: textTheme.bodySmall?.fontSize),
+                      ),
+                    ],
                   ),
-                  JidoujishoMarquee(
-                    text: mapping.model,
-                    style: TextStyle(fontSize: textTheme.bodySmall?.fontSize),
-                  ),
-                ],
-              ),
+                ),
+                if (_selectedOrder == mapping.order) const Space.normal(),
+                if (_selectedOrder == mapping.order)
+                  buildMappingTileTrailing(mapping.label)
+              ],
             ),
-            if (_selectedOrder == mapping.order) const Space.normal(),
-            if (_selectedOrder == mapping.order)
-              buildMappingTileTrailing(mapping.label)
-          ],
-        ),
-        onTap: () async {
-          appModel.setLastSelectedMapping(mapping);
-          updateSelectedOrder(mapping.order);
+            onTap: () async {
+              _selectedOrder = mapping.order;
+              appModel.setLastSelectedMapping(mapping, notify: false);
 
-          await appModel.validateSelectedMapping(
-            context: context,
-            mapping: mapping,
-          );
-        },
-      ),
+              for (int i = 0; i < _notifiersByMapping.length; i++) {
+                _notifiersByMapping.entries.elementAt(i).value.value = false;
+              }
+              notifier.value = true;
+
+              await appModel.validateSelectedMapping(
+                context: context,
+                mapping: mapping,
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -635,7 +666,6 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
     appModel.addMapping(newMapping);
     Navigator.pop(context);
 
-    _selectedOrder = mapping.order;
     setState(() {});
   }
 }

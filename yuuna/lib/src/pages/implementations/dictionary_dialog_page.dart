@@ -21,7 +21,7 @@ class DictionaryDialogPage extends BasePage {
 
 class _DictionaryDialogPageState extends BasePageState {
   final ScrollController _scrollController = ScrollController();
-  int _selectedOrder = 0;
+  int? _selectedOrder;
 
   @override
   Widget build(BuildContext context) {
@@ -191,7 +191,7 @@ class _DictionaryDialogPageState extends BasePageState {
             progressNotifier: progressNotifier,
             file: file,
             onImportSuccess: () {
-              _selectedOrder = appModel.dictionaries.length - 1;
+              _selectedOrder = appModel.dictionaries.last.order;
               setState(() {});
             },
           );
@@ -223,13 +223,6 @@ class _DictionaryDialogPageState extends BasePageState {
       child: Text(t.dialog_close),
       onPressed: () => Navigator.pop(context),
     );
-  }
-
-  void updateSelectedOrder(int? newIndex) {
-    if (newIndex != null) {
-      _selectedOrder = newIndex;
-      setState(() {});
-    }
   }
 
   Widget buildContent() {
@@ -275,17 +268,30 @@ class _DictionaryDialogPageState extends BasePageState {
     );
   }
 
+  Map<Dictionary, ValueNotifier<bool>> _notifiersByDictionary = {};
+
   Widget buildDictionaryList(List<Dictionary> dictionaries) {
+    _notifiersByDictionary = {};
+    _selectedOrder ??= dictionaries.firstOrNull?.order;
+
     return RawScrollbar(
       thickness: 3,
       thumbVisibility: true,
       controller: _scrollController,
       child: ReorderableColumn(
         scrollController: _scrollController,
-        children: List.generate(
-          dictionaries.length,
-          (index) => buildDictionaryTile(dictionaries[index]),
-        ),
+        children: List.generate(dictionaries.length, (index) {
+          Dictionary dictionary = dictionaries[index];
+
+          _notifiersByDictionary.putIfAbsent(
+            dictionaries[index],
+            () => ValueNotifier<bool>(dictionary.order == _selectedOrder),
+          );
+          return buildDictionaryTile(
+            dictionaries[index],
+            _notifiersByDictionary[dictionary]!,
+          );
+        }),
         onReorder: (oldIndex, newIndex) {
           List<Dictionary> cloneDictionaries = [];
           cloneDictionaries.addAll(dictionaries);
@@ -298,7 +304,7 @@ class _DictionaryDialogPageState extends BasePageState {
             dictionary.order = index;
           });
 
-          updateSelectedOrder(newIndex);
+          _selectedOrder = newIndex;
 
           appModel.updateDictionaryOrder(cloneDictionaries);
           setState(() {});
@@ -331,54 +337,67 @@ class _DictionaryDialogPageState extends BasePageState {
     }
   }
 
-  Widget buildDictionaryTile(Dictionary dictionary) {
+  Widget buildDictionaryTile(
+    Dictionary dictionary,
+    ValueNotifier<bool> notifier,
+  ) {
     DictionaryFormat dictionaryFormat =
         appModel.dictionaryFormats[dictionary.formatKey]!;
 
-    return Material(
-      type: MaterialType.transparency,
+    return ValueListenableBuilder<bool>(
       key: ValueKey(dictionary.name),
-      child: ListTile(
-        selected: _selectedOrder == dictionary.order,
-        leading: getIcon(
-          dictionary: dictionary,
-          dictionaryFormat: dictionaryFormat,
-        ),
-        title: Row(
-          children: [
-            Expanded(
-              child: Column(
-                children: [
-                  JidoujishoMarquee(
-                    text: dictionary.name,
-                    style: TextStyle(
-                      fontSize: textTheme.bodyMedium?.fontSize,
-                      color: dictionary.isHidden(appModel.targetLanguage)
-                          ? theme.unselectedWidgetColor
-                          : null,
-                    ),
-                  ),
-                  JidoujishoMarquee(
-                    text: dictionaryFormat.name,
-                    style: TextStyle(
-                      fontSize: textTheme.bodySmall?.fontSize,
-                      color: dictionary.isHidden(appModel.targetLanguage)
-                          ? theme.unselectedWidgetColor
-                          : null,
-                    ),
-                  ),
-                ],
-              ),
+      valueListenable: notifier,
+      builder: (context, value, _) {
+        return Material(
+          type: MaterialType.transparency,
+          child: ListTile(
+            selected: _selectedOrder == dictionary.order,
+            leading: getIcon(
+              dictionary: dictionary,
+              dictionaryFormat: dictionaryFormat,
             ),
-            if (_selectedOrder == dictionary.order) const Space.normal(),
-            if (_selectedOrder == dictionary.order)
-              buildDictionaryTileTrailing(dictionary)
-          ],
-        ),
-        onTap: () {
-          updateSelectedOrder(dictionary.order);
-        },
-      ),
+            title: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    children: [
+                      JidoujishoMarquee(
+                        text: dictionary.name,
+                        style: TextStyle(
+                          fontSize: textTheme.bodyMedium?.fontSize,
+                          color: dictionary.isHidden(appModel.targetLanguage)
+                              ? theme.unselectedWidgetColor
+                              : null,
+                        ),
+                      ),
+                      JidoujishoMarquee(
+                        text: dictionaryFormat.name,
+                        style: TextStyle(
+                          fontSize: textTheme.bodySmall?.fontSize,
+                          color: dictionary.isHidden(appModel.targetLanguage)
+                              ? theme.unselectedWidgetColor
+                              : null,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (_selectedOrder == dictionary.order) const Space.normal(),
+                if (_selectedOrder == dictionary.order)
+                  buildDictionaryTileTrailing(dictionary)
+              ],
+            ),
+            onTap: () {
+              _selectedOrder = dictionary.order;
+
+              for (int i = 0; i < _notifiersByDictionary.length; i++) {
+                _notifiersByDictionary.entries.elementAt(i).value.value = false;
+              }
+              notifier.value = true;
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -390,6 +409,32 @@ class _DictionaryDialogPageState extends BasePageState {
       onTapDown: (details) =>
           openDictionaryOptionsMenu(details: details, dictionary: dictionary),
       tooltip: t.show_options,
+    );
+  }
+
+  PopupMenuItem<VoidCallback> buildPopupItem({
+    required String label,
+    required Function() action,
+    IconData? icon,
+    Color? color,
+  }) {
+    return PopupMenuItem<VoidCallback>(
+      child: Row(
+        children: [
+          if (icon != null)
+            Icon(
+              icon,
+              size: textTheme.bodyMedium?.fontSize,
+              color: color,
+            ),
+          if (icon != null) const Space.normal(),
+          Text(
+            label,
+            style: TextStyle(color: color),
+          ),
+        ],
+      ),
+      value: action,
     );
   }
 
@@ -417,7 +462,10 @@ class _DictionaryDialogPageState extends BasePageState {
             : Icons.close_fullscreen,
         action: () {
           appModel.toggleDictionaryCollapsed(dictionary);
-          setState(() {});
+          _notifiersByDictionary[dictionary]!.value =
+              !_notifiersByDictionary[dictionary]!.value;
+          _notifiersByDictionary[dictionary]!.value =
+              !_notifiersByDictionary[dictionary]!.value;
         },
       ),
       buildPopupItem(
@@ -429,7 +477,10 @@ class _DictionaryDialogPageState extends BasePageState {
             : Icons.visibility_off,
         action: () {
           appModel.toggleDictionaryHidden(dictionary);
-          setState(() {});
+          _notifiersByDictionary[dictionary]!.value =
+              !_notifiersByDictionary[dictionary]!.value;
+          _notifiersByDictionary[dictionary]!.value =
+              !_notifiersByDictionary[dictionary]!.value;
         },
       ),
       buildPopupItem(
@@ -441,32 +492,6 @@ class _DictionaryDialogPageState extends BasePageState {
         color: theme.colorScheme.primary,
       ),
     ];
-  }
-
-  PopupMenuItem<VoidCallback> buildPopupItem({
-    required String label,
-    required Function() action,
-    IconData? icon,
-    Color? color,
-  }) {
-    return PopupMenuItem<VoidCallback>(
-      child: Row(
-        children: [
-          if (icon != null)
-            Icon(
-              icon,
-              size: textTheme.bodyMedium?.fontSize,
-              color: color,
-            ),
-          if (icon != null) const Space.normal(),
-          Text(
-            label,
-            style: TextStyle(color: color),
-          ),
-        ],
-      ),
-      value: action,
-    );
   }
 
   Widget buildImportDropdown() {

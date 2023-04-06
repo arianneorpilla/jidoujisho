@@ -657,6 +657,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.5"
+  flutter_expanded_tile:
+    dependency: "direct main"
+    description:
+      name: flutter_expanded_tile
+      sha256: "106e992ca20e168adc18ffeac8fbbc7ee84db62b670cc288d67132153114e035"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.7"
   flutter_fadein:
     dependency: "direct main"
     description:

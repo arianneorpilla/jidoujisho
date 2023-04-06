@@ -49,6 +49,7 @@ dependencies:
       ref: jidoujisho
   flutter_colorpicker: ^1.0.3
   flutter_exit_app: ^1.0.5
+  flutter_expanded_tile: ^0.3.7
   flutter_fadein: ^2.0.0
   flutter_ffmpeg: ^0.4.2
   flutter_inappwebview:

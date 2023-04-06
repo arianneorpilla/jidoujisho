@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
-import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_expanded_tile/flutter_expanded_tile.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
@@ -115,7 +115,7 @@ class _DictionaryHistoryScrollableItemState
     Map<String, int> dictionaryNamesByOrder = Map<String, int>.fromEntries(
         dictionaries.map((e) => MapEntry(e.name, e.order)));
 
-    final Map<DictionaryHeading, Map<Dictionary, ExpandableController>>
+    final Map<DictionaryHeading, Map<Dictionary, ExpandedTileController>>
         expandableControllersByHeading = {};
     for (DictionaryHeading heading in headings) {
       expandableControllersByHeading.putIfAbsent(heading, () => {});
@@ -123,8 +123,8 @@ class _DictionaryHistoryScrollableItemState
         Dictionary dictionary = entry.dictionary.value!;
         expandableControllersByHeading[heading]?.putIfAbsent(
           dictionary,
-          () => ExpandableController(
-            initialExpanded: !dictionaryNamesByCollapsed[dictionary.name]!,
+          () => ExpandedTileController(
+            isExpanded: !dictionaryNamesByCollapsed[dictionary.name]!,
           ),
         );
       }

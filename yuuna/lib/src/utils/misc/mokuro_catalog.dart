@@ -27,4 +27,10 @@ class MokuroCatalog {
   /// dictionaries.
   @Index(unique: true)
   int order;
+
+  @override
+  bool operator ==(Object other) => other is MokuroCatalog && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
 }

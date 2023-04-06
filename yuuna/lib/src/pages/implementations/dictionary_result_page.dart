@@ -1,5 +1,5 @@
-import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_expanded_tile/flutter_expanded_tile.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
@@ -59,7 +59,7 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
 
   late ScrollController _scrollController;
 
-  Map<DictionaryHeading, Map<Dictionary, ExpandableController>>
+  Map<DictionaryHeading, Map<Dictionary, ExpandedTileController>>
       expandableControllersByHeading = {};
 
   @override
@@ -91,8 +91,8 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
         Dictionary dictionary = entry.dictionary.value!;
         expandableControllersByHeading[heading]?.putIfAbsent(
           dictionary,
-          () => ExpandableController(
-            initialExpanded: !dictionaryNamesByCollapsed[dictionary.name]!,
+          () => ExpandedTileController(
+            isExpanded: !dictionaryNamesByCollapsed[dictionary.name]!,
           ),
         );
       }

@@ -19,7 +19,7 @@ class MokuroCatalogManageDialogPage extends BasePage {
 class _MokuroCatalogManageDialogPageState
     extends BasePageState<MokuroCatalogManageDialogPage> {
   final ScrollController _scrollController = ScrollController();
-  int _selectedOrder = 0;
+  int? _selectedOrder;
 
   @override
   Widget build(BuildContext context) {
@@ -85,8 +85,12 @@ class _MokuroCatalogManageDialogPageState
     );
   }
 
+  Map<MokuroCatalog, ValueNotifier<bool>> _notifiersByCatalog = {};
+
   Widget buildCatalogList() {
     List<MokuroCatalog> catalogs = appModel.mokuroCatalogs;
+    _notifiersByCatalog = {};
+    _selectedOrder ??= catalogs.firstOrNull?.order;
 
     if (catalogs.isEmpty) {
       return buildEmptyMessage();
@@ -98,10 +102,18 @@ class _MokuroCatalogManageDialogPageState
       controller: _scrollController,
       child: ReorderableColumn(
         scrollController: _scrollController,
-        children: List.generate(
-          catalogs.length,
-          (index) => buildCatalogTile(catalogs[index]),
-        ),
+        children: List.generate(catalogs.length, (index) {
+          MokuroCatalog catalog = catalogs[index];
+
+          _notifiersByCatalog.putIfAbsent(
+            catalogs[index],
+            () => ValueNotifier<bool>(catalog.order == _selectedOrder),
+          );
+          return buildCatalogTile(
+            catalogs[index],
+            _notifiersByCatalog[catalog]!,
+          );
+        }),
         onReorder: (oldIndex, newIndex) async {
           List<MokuroCatalog> cloneCatalogs = [];
           cloneCatalogs.addAll(catalogs);
@@ -123,38 +135,53 @@ class _MokuroCatalogManageDialogPageState
     );
   }
 
-  Widget buildCatalogTile(MokuroCatalog catalog) {
-    return Material(
-      type: MaterialType.transparency,
-      key: ValueKey(catalog.id),
-      child: ListTile(
-        selected: _selectedOrder == catalog.order,
-        leading: const Icon(Icons.bookmark),
-        title: Row(
-          children: [
-            Expanded(
-              child: Column(
-                children: [
-                  JidoujishoMarquee(
-                    text: catalog.name,
-                    style: TextStyle(fontSize: textTheme.bodyMedium?.fontSize),
+  Widget buildCatalogTile(
+    MokuroCatalog catalog,
+    ValueNotifier<bool> notifier,
+  ) {
+    return ValueListenableBuilder<bool>(
+      key: ValueKey(catalog.name),
+      valueListenable: notifier,
+      builder: (context, value, _) {
+        return Material(
+          type: MaterialType.transparency,
+          child: ListTile(
+            selected: _selectedOrder == catalog.order,
+            leading: const Icon(Icons.bookmark),
+            title: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    children: [
+                      JidoujishoMarquee(
+                        text: catalog.name,
+                        style:
+                            TextStyle(fontSize: textTheme.bodyMedium?.fontSize),
+                      ),
+                      JidoujishoMarquee(
+                        text: catalog.url,
+                        style:
+                            TextStyle(fontSize: textTheme.bodySmall?.fontSize),
+                      ),
+                    ],
                   ),
-                  JidoujishoMarquee(
-                    text: catalog.url,
-                    style: TextStyle(fontSize: textTheme.bodySmall?.fontSize),
-                  ),
-                ],
-              ),
+                ),
+                if (_selectedOrder == catalog.order) const Space.normal(),
+                if (_selectedOrder == catalog.order)
+                  buildCatalogTileTrailing(catalog)
+              ],
             ),
-            if (_selectedOrder == catalog.order) const Space.normal(),
-            if (_selectedOrder == catalog.order)
-              buildCatalogTileTrailing(catalog)
-          ],
-        ),
-        onTap: () async {
-          updateSelectedOrder(catalog.order);
-        },
-      ),
+            onTap: () async {
+              _selectedOrder = catalog.order;
+
+              for (int i = 0; i < _notifiersByCatalog.length; i++) {
+                _notifiersByCatalog.entries.elementAt(i).value.value = false;
+              }
+              notifier.value = true;
+            },
+          ),
+        );
+      },
     );
   }
 

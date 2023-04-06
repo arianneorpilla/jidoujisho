@@ -1174,9 +1174,12 @@ class AppModel with ChangeNotifier {
 
   /// Persist a new last selected model name. This is called when the user
   /// changes the selected model to map in the profiles menu.
-  Future<void> setLastSelectedMapping(AnkiMapping mapping) async {
+  Future<void> setLastSelectedMapping(AnkiMapping mapping,
+      {bool notify = true}) async {
     await _preferences.put('last_selected_mapping', mapping.label);
-    notifyListeners();
+    if (notify) {
+      notifyListeners();
+    }
   }
 
   /// Get the current home tab index. The order of the tab indexes are based on
@@ -1228,6 +1231,8 @@ class AppModel with ChangeNotifier {
         initialModel: initialModel,
       ),
     );
+
+    notifyListeners();
   }
 
   /// Start the process of importing a dictionary. This is called from the

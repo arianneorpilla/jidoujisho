@@ -401,4 +401,11 @@ class AnkiMapping {
 
     return actions;
   }
+
+  @override
+  bool operator ==(Object other) =>
+      other is AnkiMapping && label == other.label;
+
+  @override
+  int get hashCode => label.hashCode;
 }
