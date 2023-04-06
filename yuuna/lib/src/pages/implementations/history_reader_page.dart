@@ -93,7 +93,7 @@ class HistoryReaderPageState<T extends BaseHistoryPage>
                   item: item,
                 ),
                 alignment: Alignment.topCenter,
-                fit: BoxFit.fitWidth,
+                fit: BoxFit.fitHeight,
               ),
             ),
           ),
