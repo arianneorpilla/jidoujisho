@@ -78,7 +78,7 @@
 **jidoujisho** is a video player, reading aid, dictionary and card creation toolkit with features specifically helpful for language learners.
 * 📖 Tap and drag selection of subtitles and paragraphs allows for **instant dictionary lookups**
 * 🃏 **Export flashcards to AnkiDroid**, complete with image and audio of the current context
-* 📺 **Watch videos from a variety of sources**: local device storage, YouTube or stream from your Plex/Kodi library or a direct URL
+* 📺 **Watch videos from a variety of sources**: local device storage, YouTube or stream from your Jellyfin library or a direct URL
 * 📚 Read books anywhere and offline, via an **embedded, self-hosted ッツ Ebook Reader**
 * 🖼️ Read and mine manga pre-processed with **Mokuro**, and export or crop the current image
 * 🎶 Get lyrics and easily make **dictionary lookups for the current playing song** in your music app
@@ -167,6 +167,7 @@ A primer on the basics of the application is as follows.
 * 📚 Users may import their own <b><a href="https://foosoft.net/projects/yomichan/">Yomichan</a></b> custom dictionaries for offline use and instant lookups, <b><a href="https://foosoft.net/projects/yomichan/">some can be found here</a></b>
 * 🔮 Customise your workflow by trying out different **enhancements and quick actions**
 * 🈲 Monolingually transitioning? **Collapse your bilingual dictionaries by default**, and split your export fields between expanded and collapsed meanings.
+* 📡 You can use [**Jellyfin**](https://jellyfin.org/) to stream media from your PC, complete with progress tracking and external subtitle support 
 * 🖐️ **Double tap on a character** when reading a meaning to **quickly select it as a word and recursively search**
 * 📑 **External subtitles with the same name as the selected video file** will be loaded by default
 * 📰 You can get **example sentences** from Massif, Tatoeba or ImmersionKit if a sentence you find is too hard
@@ -176,7 +177,7 @@ A primer on the basics of the application is as follows.
 * 💬 **If your video has burned-in subtitles,** you may use the blur widget under player options to hide them
 * ✂️ Reading manga? You can **crop an image** before exporting a card
 * 🪡 **Limit export to a single dictionary** by selecting the button on the rightmost tag of a dictionary entry
-* 📜 **Tap on a field's icon** in the Card Creator to *lock the field**, which can be useful if exporting the same sentence multiple times 
+* 📜 **Tap on a field's icon** in the Card Creator to **lock the field**, which can be useful if exporting the same sentence multiple times 
 
 # 👥 Contribution and attribution
 
