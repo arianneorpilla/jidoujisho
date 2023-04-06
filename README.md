@@ -32,12 +32,9 @@
 
 
 ---
-<p align="center" style="margin:0"><b>Preview Release:
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.5-preview">2.5</a>
-</b></p>
 
 <p align="center" style="margin:0"><b>Latest Release:
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.4">2.4</a>
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.5">2.5</a>
 </b></p>
 
 <p align="center" style="margin:0"><b>Release Notes:</b><br>
@@ -73,7 +70,8 @@
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.1">2.1</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.2">2.2</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.3">2.3</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.4">2.4</a></b>
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.4">2.4</a> · 
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.5">2.5</a></b>
 </p>
 
 # 📱 Language learning in the palm of your hand
@@ -82,33 +80,35 @@
 * 🃏 **Export flashcards to AnkiDroid**, complete with image and audio of the current context
 * 📺 **Watch videos from a variety of sources**: local device storage, YouTube or stream from your Plex/Kodi library or a direct URL
 * 📚 Read books anywhere and offline, via an **embedded, self-hosted ッツ Ebook Reader**
+* 🖼️ Read and mine manga pre-processed with **Mokuro**, and export or crop the current image
 * 🎶 Get lyrics and easily make **dictionary lookups for the current playing song** in your music app
+* 🤖 **Interact with ChatGPT** in your target language to get grammar information, example sentences and more 
 * 📘 **Use Yomichan dictionaries** with pitch and frequency information, and selectively collapse and expand dictionaries by default
 * ⛏ **Frictionless sentence mining and flashcard creation workflow** with support for modular enhancements and automations
 
 # 🎞️ A glimpse of jidoujisho in action
 
 <p align="center" style="margin:0">
-  <img src="https://i.postimg.cc/L8LYkCVy/Screenshot-20230305-144013.png" width="32%">
-  <img src="https://i.postimg.cc/KcpMmgz5/Screenshot-20230305-144108.png" width="32%">
-  <img src="https://i.postimg.cc/3JW2GF66/Screenshot-20230305-144122.png" width="32%">
+   <img src="https://i.postimg.cc/Ls9Dv3FP/Screenshot-20230406-152827.png" width="24%">
+   <img src="https://i.postimg.cc/7ZDnYn6R/Screenshot-20230406-152649.png" width="24%">
+   <img src="https://i.postimg.cc/gJDPQDxP/Screenshot-20230406-152331.png" width="24%">
+   <img src="https://i.postimg.cc/26Jxkpbd/Screenshot-20230406-152042.png" width="24%">
 </p>
 <p align="center" style="margin:0">
-<img src="https://i.postimg.cc/MGVcDMZy/Screenshot-20230308-215737.png" width="24%">
-<img src="https://i.postimg.cc/4xr7VbGf/Screenshot-20230308-215808.png" width="24%">
-<img src="https://i.postimg.cc/XJhzbYy7/Screenshot-20230304-233104.png" width="24%">
-<img src="https://i.postimg.cc/qq5nFPPn/Screenshot-20230308-222130.png" width="24%">
+  <img src="https://i.postimg.cc/yxYnpYzP/Screenshot-20230406-153303.png" width="32%">
+  <img src="https://i.postimg.cc/TYbWMvYq/Screenshot-20230406-153149.png" width="32%">
+  <img src="https://i.postimg.cc/bNr3QJgY/Screenshot-20230406-153206.png" width="32%">
 </p>
 <p align="center" style="margin:0">
-  <img src="https://i.postimg.cc/mgFGnKzs/aaaafba.png" width="32%">
-  <img src="https://i.postimg.cc/nL3W3kFm/Screenshot-20230304-233201.png" width="32%">
-  <img src="https://i.postimg.cc/kgFzbCLf/Screenshot-20230305-014420.png" width="32%">
+<img src="https://i.postimg.cc/ryB97kLM/Screenshot-20230406-151738.png" width="24%">
+<img src="https://i.postimg.cc/qM2GT5kn/Screenshot-20230406-152244.png" width="24%">
+<img src="https://i.postimg.cc/WzCYHFwv/Screenshot-20230406-150912.png" width="24%">
+<img src="https://i.postimg.cc/1XfYBc6B/Screenshot-20230406-151040.png" width="24%">
 </p>
 <p align="center" style="margin:0">
-  <img src="https://i.postimg.cc/9Xp7K7db/Screenshot-20230308-215933.png" width="24%">
-  <img src="https://i.postimg.cc/SKpns6Cw/Screenshot-20230308-222919.png" width="24%">
-  <img src="https://i.postimg.cc/Hxd8SwLQ/Screenshot-20230308-223247.png" width="24%">
-  <img src="https://i.postimg.cc/YCF4MnG6/Screenshot-20230308-223209.png" width="24%">
+  <img src="https://i.postimg.cc/nLdLQp1m/Screenshot-20230406-155356.png" width="32%">
+  <img src="https://i.postimg.cc/8Ck55jLD/Screenshot-20230406-155243.png" width="32%">
+  <img src="https://i.postimg.cc/QtHdQw6y/Screenshot-20230406-155648.png" width="32%">
 </p>
 
 # ⚕️ Current state of the project
@@ -123,13 +123,15 @@ Please note that the development of the app switches between changes being imple
 
 ### 🚨 Supported Formats
 
-jidoujisho will take **video and audio formats as supported by VLC**. Subtitles may be embedded within the video being played and selected during playback. 
+jidoujisho will take **video and audio formats as supported by VLC**. Subtitles may be embedded within the video being played and selected during playback. If you have trouble with storage space on your device, you may use the app as an external player [**Jellyfin**](https://jellyfin.org/) and stream from your PC media library, complete with progress tracking and external subtitles support. 
 
 If you wish to use external subtitles, they may be in **SRT, ASS or SSA format** and you may import them during playback through the menu. You may switch between different audio and subtitle tracks. Image-based subtitles such as PGS are not currently supported.
 
 **YouTube subtitles** are taken from TimedText XML, which is only publicly exposed to videos that have closed captions. <b><a href="https://www.youtube.com/watch?v=mZ0sJQC8qkE">Here is a fair sample of</a> <a href="https://www.youtube.com/watch?v=X9zw0QF12Kc">YouTube videos with such subtitles</a> <a href="https://www.youtube.com/watch?v=t1yXDcuwzpY">showcasing some very practical application use cases.</a></b>
 
 **ッツ Ebook Reader** allows reading of books in **EPUB or HTMLZ** format.
+
+**Mokuro volumes** must be in HTML format, and have images in the relative directory.
 
 ### ☝️ Important Links
 
@@ -145,6 +147,7 @@ A primer on the basics of the application is as follows.
 * 📲 <a href="https://github.com/lrorpilla/jidoujisho/releases/"/>**Download and install the latest release**</a> onto your Android device
 * ⏯️ Watch a video with the *Player* selecting from your **local media library** or **picking a YouTube video**
 * 📚 Start a novel with the *Reader* to launch ッツ Ebook Reader to read an **EPUB** or **HTMLZ** file
+* 🖼️ Read pre-processed manga in HTML with the **Mokuro** media source
 * 📋 Select text with **tap to select** or **drag to select**
 * 📔 Pick a word for instant dictionary lookups, and open the **Card Creator** or use **Instant Export**
 * ↕️ You may **swipe vertically in the player to open the transcript** in the player, and pick a time or read subtitles
@@ -164,11 +167,16 @@ A primer on the basics of the application is as follows.
 * 📚 Users may import their own <b><a href="https://foosoft.net/projects/yomichan/">Yomichan</a></b> custom dictionaries for offline use and instant lookups, <b><a href="https://foosoft.net/projects/yomichan/">some can be found here</a></b>
 * 🔮 Customise your workflow by trying out different **enhancements and quick actions**
 * 🈲 Monolingually transitioning? **Collapse your bilingual dictionaries by default**, and split your export fields between expanded and collapsed meanings.
+* 🖐️ **Double tap on a character** when reading a meaning to **quickly select it as a word and recursively search**
 * 📑 **External subtitles with the same name as the selected video file** will be loaded by default
+* 📰 You can get **example sentences** from Massif, Tatoeba or ImmersionKit if a sentence you find is too hard
 * ⏲️ If your subtitles are off, you can **set the delay** or **pad the exported audio time with an allowance**
 * ✊ **Export a range of multiple subtitles** by holding onto a subtitle aside from the current one in the transcript
 * 📹 The quality closest to the **last selected quality** will be selected by default for YouTube videos
 * 💬 **If your video has burned-in subtitles,** you may use the blur widget under player options to hide them
+* ✂️ Reading manga? You can **crop an image** before exporting a card
+* 🪡 **Limit export to a single dictionary** by selecting the button on the rightmost tag of a dictionary entry
+* 📜 **Tap on a field's icon** in the Card Creator to *lock the field**, which can be useful if exporting the same sentence multiple times 
 
 # 👥 Contribution and attribution
 
