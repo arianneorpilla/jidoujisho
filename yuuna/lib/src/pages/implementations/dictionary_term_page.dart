@@ -1,6 +1,6 @@
+import 'package:expandable/expandable.dart';
 import 'package:float_column/float_column.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_expanded_tile/flutter_expanded_tile.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:spaces/spaces.dart';
@@ -39,7 +39,7 @@ class DictionaryTermPage extends ConsumerWidget {
   final Function(String) onStash;
 
   /// Controls expandables by dictionary name.
-  final Map<Dictionary, ExpandedTileController> expandableControllers;
+  final Map<Dictionary, ExpandableController> expandableControllers;
 
   /// Lists whether a dictionary is hidden.
   final Map<String, bool> dictionaryNamesByHidden;

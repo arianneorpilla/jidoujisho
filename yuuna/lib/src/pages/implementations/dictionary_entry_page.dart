@@ -1,7 +1,7 @@
 import 'dart:math';
 
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_expanded_tile/flutter_expanded_tile.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
@@ -31,7 +31,7 @@ class DictionaryEntryPage extends ConsumerStatefulWidget {
   final Function(String) onStash;
 
   /// Controller specific to a dictionary name.
-  final ExpandedTileController expandableController;
+  final ExpandableController expandableController;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -53,29 +53,20 @@ class _DictionaryEntryPageState extends ConsumerState<DictionaryEntryPage> {
         top: Spacing.of(context).spaces.extraSmall,
         bottom: Spacing.of(context).spaces.normal,
       ),
-      child: ExpandedTile(
-        theme: ExpandedTileThemeData(
-          headerRadius: 0,
-          contentRadius: 0,
-          headerColor: Colors.transparent,
-          headerSplashColor:
-              Theme.of(context).unselectedWidgetColor.withOpacity(0.2),
-          contentBackgroundColor: Colors.transparent,
-          titlePadding: EdgeInsets.zero,
-          headerPadding: EdgeInsets.zero,
-          contentPadding: EdgeInsets.zero,
-          leadingPadding: EdgeInsets.zero,
-          trailingPadding: EdgeInsets.zero,
-        ),
-        trailingRotation: 180,
-        trailing: Icon(
-          Icons.arrow_drop_down,
-          size: Theme.of(context).textTheme.titleLarge?.fontSize,
-          color: Theme.of(context).unselectedWidgetColor,
+      child: ExpandablePanel(
+        theme: ExpandableThemeData(
+          iconPadding: EdgeInsets.zero,
+          iconSize: Theme.of(context).textTheme.titleLarge?.fontSize,
+          iconRotationAngle: 0,
+          expandIcon: Icons.arrow_drop_down,
+          collapseIcon: Icons.arrow_drop_down,
+          iconColor: Theme.of(context).unselectedWidgetColor,
+          headerAlignment: ExpandablePanelHeaderAlignment.center,
         ),
         controller: widget.expandableController,
-        title: _DictionaryEntryTagsWrap(entry: widget.entry),
-        content: Padding(
+        header: _DictionaryEntryTagsWrap(entry: widget.entry),
+        collapsed: const SizedBox.shrink(),
+        expanded: Padding(
           padding: EdgeInsets.only(
             top: Spacing.of(context).spaces.small,
             left: Spacing.of(context).spaces.normal,

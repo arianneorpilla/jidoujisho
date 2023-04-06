@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_expanded_tile/flutter_expanded_tile.dart';
@@ -72,7 +73,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
   Color get inactiveTextColor => Theme.of(context).unselectedWidgetColor;
 
   /// For controlling collapsed fields.
-  late final ExpandedTileController expandableController;
+  late final ExpandableController expandableController;
 
   bool _creatorInitialised = false;
 
@@ -80,7 +81,8 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
   void initState() {
     super.initState();
 
-    expandableController = ExpandedTileController(isExpanded: !isCardEditing);
+    expandableController =
+        ExpandableController(initialExpanded: !isCardEditing);
   }
 
   Future<void> initialiseCreator() async {
@@ -262,29 +264,19 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       return const SizedBox.shrink();
     }
 
-    return ExpandedTile(
-      theme: ExpandedTileThemeData(
-        headerRadius: 0,
-        contentRadius: 0,
-        headerColor: Colors.transparent,
-        headerSplashColor:
-            Theme.of(context).unselectedWidgetColor.withOpacity(0.2),
-        contentBackgroundColor: Colors.transparent,
-        titlePadding: EdgeInsets.zero,
-        headerPadding: EdgeInsets.zero,
-        contentPadding: EdgeInsets.zero,
-        leadingPadding: EdgeInsets.zero,
-        trailingPadding: EdgeInsets.zero,
+    return ExpandablePanel(
+      theme: ExpandableThemeData(
+        iconPadding: Spacing.of(context).insets.onlyRight.small,
+        iconSize: Theme.of(context).textTheme.titleLarge?.fontSize,
+        expandIcon: Icons.arrow_drop_down,
+        collapseIcon: Icons.arrow_drop_down,
+        iconColor: Theme.of(context).unselectedWidgetColor,
+        headerAlignment: ExpandablePanelHeaderAlignment.center,
       ),
-      trailing: Icon(
-        Icons.arrow_drop_down,
-        size: Theme.of(context).textTheme.titleLarge?.fontSize,
-        color: Theme.of(context).unselectedWidgetColor,
-      ),
-      trailingRotation: 0,
       controller: expandableController,
-      title: buildCollapsableHeader(),
-      content: buildCollapsedTextFields(),
+      header: buildCollapsableHeader(),
+      collapsed: const SizedBox.shrink(),
+      expanded: buildCollapsedTextFields(),
     );
   }
 
