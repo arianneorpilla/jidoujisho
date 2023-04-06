@@ -123,7 +123,9 @@ Please note that the development of the app switches between changes being imple
 
 ### 🚨 Supported Formats
 
-jidoujisho will take **video and audio formats as supported by VLC**. Subtitles may be embedded within the video being played and selected during playback. If you have trouble with storage space on your device, you may use the app as an external player for [**Jellyfin**](https://jellyfin.org/) and stream from your PC media library, complete with progress tracking and external subtitles support. 
+jidoujisho will take **video and audio formats as supported by VLC**. Subtitles may be embedded within the video being played and selected during playback. 
+
+If you have trouble with storage space on your device, you may use the app as an external player for [**Jellyfin**](https://jellyfin.org/) and stream from your PC media library, complete with progress tracking and external subtitles support. 
 
 If you wish to use external subtitles, they may be in **SRT, ASS or SSA format** and you may import them during playback through the menu. You may switch between different audio and subtitle tracks. Image-based subtitles such as PGS are not currently supported.
 
