@@ -150,7 +150,7 @@ A primer on the basics of the application is as follows.
 * ⏯️ Watch a video with the *Player* selecting from your **local media library** or **picking a YouTube video**
 * 📚 Start a novel with the *Reader* to launch ッツ Ebook Reader to read an **EPUB** or **HTMLZ** file
 * 🖼️ Read pre-processed manga in HTML with the **Mokuro** media source
-* 📋 **Tap a word for instant dictionary lookups, and open the **Card Creator** or use **Instant Export**
+* 📋 **Tap a word** for instant dictionary lookups, and open the **Card Creator** or use **Instant Export**
 * ↕️ You may **swipe vertically in the player to open the transcript** in the player, and pick a time or read subtitles
 * ↔️ **Swipe horizontally** in the player to repeat the current subtitle audio
 
