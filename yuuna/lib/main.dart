@@ -48,7 +48,7 @@ void main() {
       'chatgpt_api_base_url': 'https://chat.openai.com/api',
       'chatgpt_backend_api_base_url': 'https://bypass.churchless.tech/api'
     });
-    await remoteConfig.fetchAndActivate();
+    remoteConfig.fetchAndActivate();
 
     /// Ensure the top and bottom bars are shown at launch and wake prevention
     /// is disabled if not reverted from entering a media source.
