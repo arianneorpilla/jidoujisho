@@ -39,7 +39,6 @@ class _ReaderChatgptLoginPageState extends BasePageState {
             forceDark: appModel.isDarkMode
                 ? AndroidForceDark.FORCE_DARK_ON
                 : AndroidForceDark.FORCE_DARK_OFF,
-            useHybridComposition: true,
           ),
         ),
         initialUrlRequest: URLRequest(

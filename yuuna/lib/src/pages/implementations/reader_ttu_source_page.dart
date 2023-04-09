@@ -294,7 +294,6 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
           useOnDownloadStart: true,
         ),
         android: AndroidInAppWebViewOptions(
-          useHybridComposition: true,
           verticalScrollbarThumbColor: Colors.transparent,
           verticalScrollbarTrackColor: Colors.transparent,
           horizontalScrollbarThumbColor: Colors.transparent,

@@ -181,7 +181,6 @@ class _MokuroCatalogBrowsePageState
         ),
         android: AndroidInAppWebViewOptions(
           initialScale: MediaQuery.of(context).size.width ~/ 1.5,
-          useHybridComposition: true,
         ),
       ),
       initialUrlRequest: URLRequest(
