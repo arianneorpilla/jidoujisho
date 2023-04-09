@@ -221,7 +221,7 @@ class _MokuroCatalogBrowsePageState
         if (_mediaItem != null) {
           await controller.evaluateJavascript(source: javascriptToExecute);
           await updateOrientation();
-          Future.delayed(const Duration(milliseconds: 100), () {
+          Future.delayed(const Duration(milliseconds: 300), () {
             controller.evaluateJavascript(source: 'zoomFitToScreen();');
           });
 
