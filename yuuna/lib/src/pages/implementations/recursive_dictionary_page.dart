@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
@@ -70,6 +69,10 @@ class _RecursiveDictionaryPageState
 
   @override
   Widget build(BuildContext context) {
+    if (!appModel.isDatabaseOpen) {
+      return const SizedBox.shrink();
+    }
+
     Color? backgroundColor = theme.colorScheme.background;
     if (appModel.overrideDictionaryColor != null && !_isCreatorOpen) {
       if ((appModel.overrideDictionaryTheme ?? theme).brightness ==
@@ -135,7 +138,7 @@ class _RecursiveDictionaryPageState
       onFocusChanged: (focused) {
         if (!focused) {
           if (widget.killOnPop) {
-            SystemNavigator.pop();
+            appModel.shutdown();
           } else {
             Navigator.pop(context);
           }
@@ -225,7 +228,7 @@ class _RecursiveDictionaryPageState
         icon: Icons.arrow_back,
         onTap: () async {
           if (widget.killOnPop) {
-            SystemNavigator.pop();
+            appModel.shutdown();
           } else {
             Navigator.pop(context);
           }

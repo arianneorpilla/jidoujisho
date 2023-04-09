@@ -534,6 +534,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           controller: _playerController,
           aspectRatio: 16 / 9,
           placeholder: buildLoading(),
+          virtualDisplay: false,
         ),
       ),
     );

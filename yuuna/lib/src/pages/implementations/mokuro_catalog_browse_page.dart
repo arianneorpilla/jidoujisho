@@ -181,6 +181,7 @@ class _MokuroCatalogBrowsePageState
         ),
         android: AndroidInAppWebViewOptions(
           initialScale: MediaQuery.of(context).size.width ~/ 1.5,
+          useHybridComposition: true,
         ),
       ),
       initialUrlRequest: URLRequest(
@@ -220,6 +221,10 @@ class _MokuroCatalogBrowsePageState
         if (_mediaItem != null) {
           await controller.evaluateJavascript(source: javascriptToExecute);
           await updateOrientation();
+          Future.delayed(const Duration(milliseconds: 100), () {
+            controller.evaluateJavascript(source: 'zoomFitToScreen();');
+          });
+
           Future.delayed(const Duration(seconds: 1), _focusNode.requestFocus);
         }
       },
@@ -509,7 +514,7 @@ class _MokuroCatalogBrowsePageState
     await _controller.evaluateJavascript(source: '''
 state.singlePageView = ${MediaQuery.of(context).orientation == Orientation.portrait}
 saveState();
-updatePage(state.page_idx)
+updatePage(state.page_idx);
 ''');
   }
 

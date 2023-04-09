@@ -2224,7 +2224,7 @@ class AppModel with ChangeNotifier {
     await _audioHandler?.stop();
 
     if (_shouldKillMediaOnPop) {
-      SystemNavigator.pop();
+      shutdown();
     }
   }
 
@@ -3158,6 +3158,10 @@ class AppModel with ChangeNotifier {
             .toList() ??
         [];
   }
+
+  /// Check if the database is still open or has the app been flagged to be
+  /// shutdown.
+  bool get isDatabaseOpen => _database.isOpen;
 
   /// Safely shutdown and stop database operations.
   void shutdown() async {

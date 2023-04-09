@@ -2,8 +2,6 @@ import 'dart:ui';
 
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_expanded_tile/flutter_expanded_tile.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:spaces/spaces.dart';
 import 'package:subtitle/subtitle.dart';
@@ -58,7 +56,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
     }
 
     if (widget.killOnPop) {
-      SystemNavigator.pop();
+      appModel.shutdown();
       return false;
     }
 
@@ -168,6 +166,10 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (!appModel.isDatabaseOpen) {
+      return const SizedBox.shrink();
+    }
+
     if (!_creatorInitialised && isCardEditing) {
       _creatorInitialised = true;
       initialiseCreator();
@@ -628,7 +630,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       icon: Icons.arrow_back,
       onTap: () {
         if (widget.killOnPop) {
-          SystemNavigator.pop();
+          appModel.shutdown();
         } else {
           Navigator.pop(context);
         }

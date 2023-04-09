@@ -91,6 +91,10 @@ class _HomePageState extends BasePageState<HomePage>
 
   @override
   Widget build(BuildContext context) {
+    if (!appModel.isDatabaseOpen) {
+      return const SizedBox.shrink();
+    }
+
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
