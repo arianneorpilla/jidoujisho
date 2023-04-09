@@ -104,6 +104,18 @@ class ImmersionKitEnhancement extends Enhancement {
         creatorModel.getFieldController(SentenceField.instance).text =
             selection.map((result) => result.text).join('\n\n');
 
+      },
+      onAppend: (selection) async {
+        if (selection.isEmpty) {
+          return;
+        }
+
+        String currentSentence =
+            creatorModel.getFieldController(SentenceField.instance).text;
+
+        creatorModel.getFieldController(SentenceField.instance).text =
+            '${currentSentence.trim()}\n\n${selection.map((result) => result.text).join('\n\n')}'
+                .trim();
         if (selection.first.imageUrl.isNotEmpty) {
           await ImageField.instance.setImages(
             cause: cause,
@@ -140,18 +152,6 @@ class ImmersionKitEnhancement extends Enhancement {
             },
           );
         }
-      },
-      onAppend: (selection) async {
-        if (selection.isEmpty) {
-          return;
-        }
-
-        String currentSentence =
-            creatorModel.getFieldController(SentenceField.instance).text;
-
-        creatorModel.getFieldController(SentenceField.instance).text =
-            '${currentSentence.trim()}\n\n${selection.map((result) => result.text).join('\n\n')}'
-                .trim();
       },
     );
   }
