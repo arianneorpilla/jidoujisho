@@ -10,14 +10,22 @@
 #     https://docs.fastlane.tools/plugins/available-plugins
 #
 
-# Uncomment thfe line if you want fastlane to automatically update itself
+# Uncomment the line if you want fastlane to automatically update itself
 # update_fastlane
 
 default_platform(:android)
 
 platform :android do
-  desc "Build APKs and rename with version number"
-  lane :test do
-    gradle(task: "test")
+  desc "Build APKs and rename with version number."
+  lane :apk do
+    jidoujisho_version = flutter_version()["version_name"].gsub(".", "_")
+    sh("flutter", "clean")
+    sh("flutter", "build", "apk", "--split-per-abi")
+    sh("mv", "../../build/app/outputs/flutter-apk/app-arm64-v8a-release.apk", "../../build/app/outputs/flutter-apk/jidoujisho_yuuna_#{jidoujisho_version}-arm64.apk")
+    puts("Renamed arm64 file to jidoujisho_yuuna_#{jidoujisho_version}-arm64.apk.")
+    sh("mv", "../../build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk", "../../build/app/outputs/flutter-apk/jidoujisho_yuuna_#{jidoujisho_version}-armeabi.apk")
+    puts("Renamed armeabi file to jidoujisho_yuuna_#{jidoujisho_version}-armeabi.apk.")
+    sh("mv", "../../build/app/outputs/flutter-apk/app-x86_64-release.apk", "../../build/app/outputs/flutter-apk/jidoujisho_yuuna_#{jidoujisho_version}-x86_64.apk")
+    puts("Renamed x86_64 file to jidoujisho_yuuna_#{jidoujisho_version}-x86_64.apk.")
   end
 end

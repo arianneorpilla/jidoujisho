@@ -1816,34 +1816,43 @@ class AppModel with ChangeNotifier {
 
     for (MapEntry<Field, File> entry
         in creatorFieldValues.imagesToExport.entries) {
+      Field field = entry.key;
+      File exportFile = entry.value;
       String timestamp =
           intl.DateFormat('yyyyMMddTkkmmss').format(DateTime.now());
       String preferredName = 'jidoujisho-$timestamp';
 
       String? imageFileName;
-      imageFileName = await addFileToMedia(
-        exportFile: entry.value,
-        preferredName: preferredName,
-        mimeType: 'image',
-      );
+      if (exportFile.existsSync()) {
+        imageFileName = await addFileToMedia(
+          exportFile: exportFile,
+          preferredName: preferredName,
+          mimeType: 'image',
+        );
 
-      exportedImages[entry.key] = imageFileName;
+        exportedImages[field] = imageFileName;
+      }
     }
 
     for (MapEntry<Field, File> entry
         in creatorFieldValues.audioToExport.entries) {
+      Field field = entry.key;
+      File exportFile = entry.value;
+
       String timestamp =
           intl.DateFormat('yyyyMMddTkkmmss').format(DateTime.now());
       String preferredName = 'jidoujisho-$timestamp';
 
       String? audioFileName;
-      audioFileName = await addFileToMedia(
-        exportFile: entry.value,
-        preferredName: preferredName,
-        mimeType: 'audio',
-      );
+      if (exportFile.existsSync()) {
+        audioFileName = await addFileToMedia(
+          exportFile: exportFile,
+          preferredName: preferredName,
+          mimeType: 'audio',
+        );
 
-      exportedAudio[entry.key] = audioFileName;
+        exportedAudio[field] = audioFileName;
+      }
     }
 
     String model = mapping.model;
