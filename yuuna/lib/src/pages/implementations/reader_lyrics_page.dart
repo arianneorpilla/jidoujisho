@@ -43,6 +43,7 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
       setState(() {});
     });
   }
+  
 
   @override
   Widget build(BuildContext context) {

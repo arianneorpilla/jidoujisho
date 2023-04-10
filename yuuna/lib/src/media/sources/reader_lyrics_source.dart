@@ -8,8 +8,6 @@ import 'package:nowplaying/nowplaying.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/pages.dart';
-import 'package:html/dom.dart' as dom;
-import 'package:html/parser.dart' as parser;
 import 'package:yuuna/src/pages/implementations/lyrics_dialog_page.dart';
 import 'package:yuuna/utils.dart';
 
@@ -34,7 +32,7 @@ class ReaderLyricsSource extends ReaderMediaSource {
           sourceName: 'Lyrics',
           description:
               'Allows fetching and highlighting lyrics of current played media '
-              'fetched from Google.',
+              'fetched from Google and Uta-Net.',
           icon: Icons.queue_music,
           implementsSearch: false,
           implementsHistory: false,
@@ -98,11 +96,6 @@ class ReaderLyricsSource extends ReaderMediaSource {
   }
 
   @override
-  Future<void> prepareResources() async {
-    NowPlaying.instance.start();
-  }
-
-  @override
   List<Widget> getActions({
     required BuildContext context,
     required WidgetRef ref,
@@ -120,7 +113,8 @@ class ReaderLyricsSource extends ReaderMediaSource {
 
   /// Get lyrics
   Future<JidoujishoLyrics> getLyrics(
-      JidoujishoLyricsParameters parameters) async {
+    JidoujishoLyricsParameters parameters,
+  ) async {
     String artist = Uri.encodeComponent(parameters.artist.trim());
     String title = Uri.encodeComponent(parameters.title.trim());
 
@@ -135,26 +129,23 @@ class ReaderLyricsSource extends ReaderMediaSource {
     bool webViewBusy = true;
 
     HeadlessInAppWebView webView = HeadlessInAppWebView(
-        initialUrlRequest: URLRequest(
-          url: Uri.parse(searchUrl),
-        ),
-        onLoadStop: (controller, uri) async {
-          dom.Document document = parser.parse(await controller.getHtml());
+      initialUrlRequest: URLRequest(
+        url: Uri.parse(searchUrl),
+      ),
+      onLoadStop: (controller, uri) async {
+        text = await controller.evaluateJavascript(source: '''
+[...document.getElementsByClassName('ujudUb')].map((e) => {
+    return e.innerText;                                                   
+}).join('\\n\\n');
+''');
 
-          List<dom.Element> elements =
-              document.querySelectorAll('[data-attrid*="lyrics"]');
+        if (text != null && text!.trim().isEmpty) {
+          text = null;
+        }
 
-          if (elements.isEmpty) {
-            text = null;
-          } else {
-            text = elements.first.innerHtml
-                .replaceAll(RegExp('<[^>]*>|&[^;]+;'), '\n')
-                .replaceAll('\n\n\n', '\n')
-                .trim();
-          }
-
-          webViewBusy = false;
-        });
+        webViewBusy = false;
+      },
+    );
 
     await webView.run();
 
@@ -169,6 +160,69 @@ class ReaderLyricsSource extends ReaderMediaSource {
           title: parameters.title,
         ),
       );
+    }
+
+    if (artist.isNotEmpty && text == null) {
+      String? firstResultUrl;
+      bool googleWebViewBusy = true;
+
+      HeadlessInAppWebView googleWebView = HeadlessInAppWebView(
+        initialOptions: InAppWebViewGroupOptions(
+          crossPlatform: InAppWebViewOptions(
+              userAgent:
+                  'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/111.0'),
+        ),
+        initialUrlRequest: URLRequest(
+          url: Uri.parse(
+              'https://google.com/search?q=$artist+$title+歌詞+site:uta-net.com'),
+        ),
+        onLoadStop: (controller, uri) async {
+          firstResultUrl = await controller.evaluateJavascript(
+              source:
+                  'document.querySelector(".yuRUbf:nth-of-type(1) > a").href');
+
+          googleWebViewBusy = false;
+        },
+      );
+
+      await googleWebView.run();
+
+      while (googleWebViewBusy) {
+        await Future.delayed(const Duration(milliseconds: 100), () {});
+      }
+
+      if (firstResultUrl != null) {
+        bool utanetWebViewBusy = true;
+        HeadlessInAppWebView utanetWebView = HeadlessInAppWebView(
+          initialOptions: InAppWebViewGroupOptions(
+            crossPlatform: InAppWebViewOptions(
+                userAgent:
+                    'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/111.0'),
+          ),
+          initialUrlRequest: URLRequest(
+            url: Uri.parse(firstResultUrl!),
+          ),
+          onLoadStop: (controller, uri) async {
+            text = await controller.evaluateJavascript(source: '''
+[...document.getElementsByTagName('h2')].map((e) => e.remove());
+var kashi = document.getElementsByClassName('row kashi')[0];
+kashi.children[0].children[0].innerText;
+''');
+
+            if (text != null && text!.trim().isEmpty) {
+              text = null;
+            }
+
+            utanetWebViewBusy = false;
+          },
+        );
+
+        await utanetWebView.run();
+
+        while (utanetWebViewBusy) {
+          await Future.delayed(const Duration(milliseconds: 100), () {});
+        }
+      }
     }
 
     /// Try again, but without an artist. This will probably be wrong. But it's
