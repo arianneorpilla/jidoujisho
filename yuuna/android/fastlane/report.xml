@@ -5,37 +5,37 @@
     
     
       
-      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.000221034">
+      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.000368716">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="1: flutter_version" time="0.001195373">
+      <testcase classname="fastlane.lanes" name="1: flutter_version" time="0.001280532">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="2: flutter clean" time="1.234170314">
+      <testcase classname="fastlane.lanes" name="2: flutter clean" time="0.548330733">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="3: flutter build apk --split-per-abi" time="167.955212452">
+      <testcase classname="fastlane.lanes" name="3: flutter build apk --split-per-abi" time="172.558397027">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="4: mv ../../build/app/outputs/flutter-apk/app-arm64-v8a-release.apk ../../build/app/outputs/flutter-apk/jidoujisho_yuuna_2_5_3-arm64.apk" time="0.000862287">
+      <testcase classname="fastlane.lanes" name="4: mv ../../build/app/outputs/flutter-apk/app-arm64-v8a-release.apk ../../build/app/outputs/flutter-apk/jidoujisho_yuuna_2_5_3-arm64.apk" time="0.001179831">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="5: mv ../../build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk ../../build/app/outputs/flutter-apk/jidoujisho_yuuna_2_5_3-armeabi.apk" time="0.000797205">
+      <testcase classname="fastlane.lanes" name="5: mv ../../build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk ../../build/app/outputs/flutter-apk/jidoujisho_yuuna_2_5_3-armeabi.apk" time="0.000694812">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="6: mv ../../build/app/outputs/flutter-apk/app-x86_64-release.apk ../../build/app/outputs/flutter-apk/jidoujisho_yuuna_2_5_3-x86_64.apk" time="0.000793225">
+      <testcase classname="fastlane.lanes" name="6: mv ../../build/app/outputs/flutter-apk/app-x86_64-release.apk ../../build/app/outputs/flutter-apk/jidoujisho_yuuna_2_5_3-x86_64.apk" time="0.000583471">
         
       </testcase>
     
