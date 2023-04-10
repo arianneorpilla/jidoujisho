@@ -1,7 +1,7 @@
 name: yuuna
 description: A full-featured immersion language learning suite for mobile.
 publish_to: 'none'
-version: 2.5.1+55
+version: 2.5.2+56
 environment:
   sdk: ">=2.17.0 <3.0.0"
 
@@ -52,6 +52,7 @@ dependencies:
   flutter_expanded_tile: ^0.3.7
   flutter_fadein: ^2.0.0
   flutter_ffmpeg: ^0.4.2
+  flutter_image_compress: ^1.1.3
   flutter_inappwebview:
     git:
       url: https://github.com/lrorpilla/flutter_inappwebview

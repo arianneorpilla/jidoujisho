@@ -17,6 +17,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_charset_detector/flutter_charset_detector.dart';
 import 'package:flutter_exit_app/flutter_exit_app.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -1701,6 +1702,14 @@ class AppModel with ChangeNotifier {
     return File(imagePath);
   }
 
+  /// Get the placeholder file to compress for image export.
+  File getImageCompressedFile({bool fallback = false}) {
+    String imagePath = path.join(
+        (fallback ? alternateExportDirectory : exportDirectory).path,
+        'compressedImage.jpg');
+    return File(imagePath);
+  }
+
   /// Get the file to be written to for audio export.
   File getAudioExportFile({bool fallback = false}) {
     String audioPath = path.join(
@@ -1818,6 +1827,7 @@ class AppModel with ChangeNotifier {
         in creatorFieldValues.imagesToExport.entries) {
       Field field = entry.key;
       File exportFile = entry.value;
+
       String timestamp =
           intl.DateFormat('yyyyMMddTkkmmss').format(DateTime.now());
       String preferredName = 'jidoujisho-$timestamp';
@@ -1919,7 +1929,25 @@ class AppModel with ChangeNotifier {
     }
 
     String destinationPath = destinationFile.path;
-    exportFile.copySync(destinationPath);
+    if (mimeType == 'image') {
+      File compressedFile = getImageCompressedFile(fallback: fallback);
+      if (compressedFile.existsSync()) {
+        compressedFile.deleteSync();
+      }
+      await FlutterImageCompress.compressAndGetFile(
+        exportFile.path,
+        compressedFile.path,
+        quality: 70,
+        keepExif: true,
+      );
+
+      debugPrint('Original image size: ${exportFile.lengthSync()} bytes');
+      debugPrint('Compressed image size: ${compressedFile.lengthSync()} bytes');
+
+      compressedFile.copySync(destinationPath);
+    } else {
+      exportFile.copySync(destinationPath);
+    }
 
     try {
       String response = await methodChannel.invokeMethod(
