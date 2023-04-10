@@ -17,6 +17,7 @@ class DictionaryEntryPage extends ConsumerStatefulWidget {
     required this.entry,
     required this.onSearch,
     required this.onStash,
+    required this.onShare,
     required this.expandableController,
     super.key,
   });
@@ -29,6 +30,9 @@ class DictionaryEntryPage extends ConsumerStatefulWidget {
 
   /// Action to be done upon selecting the stash option.
   final Function(String) onStash;
+
+  /// Action to be done upon selecting the stash option.
+  final Function(String) onShare;
 
   /// Controller specific to a dictionary name.
   final ExpandableController expandableController;
@@ -81,9 +85,8 @@ class _DictionaryEntryPageState extends ConsumerState<DictionaryEntryPage> {
             controller: _selectableTextController,
             selectionControls: JidoujishoTextSelectionControls(
               searchAction: widget.onSearch,
-              searchActionLabel: t.search,
               stashAction: widget.onStash,
-              stashActionLabel: t.stash,
+              shareAction: widget.onShare,
               allowCopy: true,
               allowSelectAll: true,
               allowCut: true,

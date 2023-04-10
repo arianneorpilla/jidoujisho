@@ -414,17 +414,6 @@ class _RecursiveDictionaryPageState
     return buildSearchResult();
   }
 
-  void onSearch(String searchTerm) {
-    appModel.openRecursiveDictionarySearch(
-      searchTerm: searchTerm,
-      killOnPop: false,
-    );
-  }
-
-  void onStash(String searchTerm) {
-    appModel.addToStash(terms: [searchTerm]);
-  }
-
   Widget buildSearchResult() {
     Color? cardColor;
     if (!_isCreatorOpen) {
@@ -435,6 +424,7 @@ class _RecursiveDictionaryPageState
       cardColor: cardColor,
       onSearch: onSearch,
       onStash: onStash,
+      onShare: onShare,
       result: _result!,
     );
   }

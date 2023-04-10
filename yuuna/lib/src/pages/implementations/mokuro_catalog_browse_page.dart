@@ -4,8 +4,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:spaces/spaces.dart';
 import 'package:wakelock/wakelock.dart';
+import 'package:yuuna/creator.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
@@ -173,18 +175,150 @@ class _MokuroCatalogBrowsePageState
     );
   }
 
+  /// Get the default context menu for sources that make use of embedded web
+  /// views.
+  ContextMenu get contextMenu => ContextMenu(
+        options: ContextMenuOptions(
+          hideDefaultSystemContextMenuItems: true,
+        ),
+        menuItems: [
+          searchMenuItem(),
+          stashMenuItem(),
+          copyMenuItem(),
+          shareMenuItem(),
+          creatorMenuItem(),
+        ],
+      );
+
+  /// Get the default context menu for sources that make use of embedded web
+  /// views.
+  ContextMenu get emptyContextMenu => ContextMenu(
+        options: ContextMenuOptions(
+          hideDefaultSystemContextMenuItems: true,
+        ),
+        menuItems: [],
+      );
+
+  ContextMenuItem searchMenuItem() {
+    return ContextMenuItem(
+      iosId: '1',
+      androidId: 1,
+      title: t.search,
+      action: searchMenuAction,
+    );
+  }
+
+  ContextMenuItem stashMenuItem() {
+    return ContextMenuItem(
+      iosId: '2',
+      androidId: 2,
+      title: t.stash,
+      action: stashMenuAction,
+    );
+  }
+
+  ContextMenuItem copyMenuItem() {
+    return ContextMenuItem(
+      iosId: '3',
+      androidId: 3,
+      title: t.copy,
+      action: copyMenuAction,
+    );
+  }
+
+  ContextMenuItem shareMenuItem() {
+    return ContextMenuItem(
+      iosId: '4',
+      androidId: 4,
+      title: t.share,
+      action: shareMenuAction,
+    );
+  }
+
+  ContextMenuItem creatorMenuItem() {
+    return ContextMenuItem(
+      iosId: '5',
+      androidId: 5,
+      title: t.creator,
+      action: creatorMenuAction,
+    );
+  }
+
+  void searchMenuAction() async {
+    String searchTerm = await getSelectedText();
+    _isRecursiveSearching = true;
+
+    await unselectWebViewTextSelection(_controller);
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    await Future.delayed(const Duration(milliseconds: 5), () {});
+    await appModel.openRecursiveDictionarySearch(
+      searchTerm: searchTerm,
+      killOnPop: false,
+    );
+    await Future.delayed(const Duration(milliseconds: 5), () {});
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
+    _isRecursiveSearching = false;
+    _focusNode.requestFocus();
+  }
+
+  void stashMenuAction() async {
+    String searchTerm = await getSelectedText();
+    appModel.addToStash(terms: [searchTerm]);
+    await unselectWebViewTextSelection(_controller);
+  }
+
+  void creatorMenuAction() async {
+    String searchTerm = await getSelectedText();
+
+    await unselectWebViewTextSelection(_controller);
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    await Future.delayed(const Duration(milliseconds: 5), () {});
+
+    await appModel.openCreator(
+      ref: ref,
+      killOnPop: false,
+      creatorFieldValues: CreatorFieldValues(
+        textValues: {
+          SentenceField.instance: searchTerm.replaceAll('\\n', '\n'),
+        },
+      ),
+    );
+
+    await Future.delayed(const Duration(milliseconds: 5), () {});
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
+    _focusNode.requestFocus();
+  }
+
+  void copyMenuAction() async {
+    String searchTerm = await getSelectedText();
+    Clipboard.setData(ClipboardData(text: searchTerm));
+    await unselectWebViewTextSelection(_controller);
+  }
+
+  void shareMenuAction() async {
+    String searchTerm = await getSelectedText();
+    Share.share(searchTerm);
+    await unselectWebViewTextSelection(_controller);
+  }
+
+  Future<String> getSelectedText() async {
+    return (await _controller.getSelectedText() ?? '')
+        .replaceAll('\\n', '\n')
+        .trim();
+  }
+
   Widget buildBody() {
     return InAppWebView(
       initialOptions: InAppWebViewGroupOptions(
-        crossPlatform: InAppWebViewOptions(
-          disableContextMenu: true,
-        ),
         android: AndroidInAppWebViewOptions(
           initialScale: MediaQuery.of(context).size.width ~/ 1.5,
         ),
       ),
       initialUrlRequest: URLRequest(
           url: Uri.parse(widget.catalog?.url ?? widget.item!.mediaIdentifier)),
+      contextMenu: contextMenu,
       onConsoleMessage: onConsoleMessage,
       onWebViewCreated: (controller) {
         _controller = controller;
@@ -239,7 +373,7 @@ class _MokuroCatalogBrowsePageState
   bool _isRecursiveSearching = false;
 
   @override
-  void onSearch(String searchTerm) async {
+  void onSearch(String searchTerm, {String? sentence = ''}) async {
     _isRecursiveSearching = true;
     if (appModel.isMediaOpen) {
       await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -352,10 +486,12 @@ class _MokuroCatalogBrowsePageState
     required int whitespaceOffset,
     required bool isSpaceDelimited,
   }) async {
+    await _controller.setContextMenu(emptyContextMenu);
     await _controller.evaluateJavascript(
       source:
           'selectTextForTextLength($cursorX, $cursorY, $offsetIndex, $length, $whitespaceOffset, $isSpaceDelimited);',
     );
+    await _controller.setContextMenu(contextMenu);
   }
 
   void saveMediaItem() async {

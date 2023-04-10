@@ -35,6 +35,7 @@ class _RecursiveDictionaryHistoryPageState
           result: widget.result,
           onSearch: onSearch,
           onStash: onStash,
+          onShare: onShare,
           updateHistory: false,
         ),
       ),
@@ -74,16 +75,5 @@ class _RecursiveDictionaryHistoryPageState
         Navigator.pop(context);
       },
     );
-  }
-
-  void onSearch(String searchTerm) {
-    appModel.openRecursiveDictionarySearch(
-      searchTerm: searchTerm,
-      killOnPop: false,
-    );
-  }
-
-  void onStash(String searchTerm) {
-    appModel.addToStash(terms: [searchTerm]);
   }
 }

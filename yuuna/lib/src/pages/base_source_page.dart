@@ -334,6 +334,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
       key: ValueKey(_dictionaryResultNotifier.value),
       onSearch: onSearch,
       onStash: onStash,
+      onShare: onShare,
       result: _dictionaryResultNotifier.value!,
       spaceBeforeFirstResult: false,
     );
@@ -353,7 +354,8 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
   DictionarySearchResult? get currentResult => _dictionaryResultNotifier.value;
 
   /// Action upon selecting the Search option.
-  void onSearch(String searchTerm) async {
+  @override
+  void onSearch(String searchTerm, {String? sentence = ''}) async {
     if (appModel.isMediaOpen) {
       await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
       await Future.delayed(const Duration(milliseconds: 5), () {});
@@ -369,6 +371,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
   }
 
   /// Action upon selecting the Stash option.
+  @override
   void onStash(String searchTerm) {
     appModel.addToStash(terms: [searchTerm]);
   }

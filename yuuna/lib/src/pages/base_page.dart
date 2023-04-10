@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/utils.dart';
@@ -41,10 +42,9 @@ class BasePageState<T extends BasePage> extends ConsumerState<T> {
   /// Get the selection controls for a [SelectableText].
   MaterialTextSelectionControls get selectionControls =>
       JidoujishoTextSelectionControls(
-        searchAction: onContextSearch,
-        searchActionLabel: t.search,
-        stashAction: onContextStash,
-        stashActionLabel: t.stash,
+        searchAction: onSearch,
+        stashAction: onStash,
+        shareAction: onShare,
         allowCopy: true,
         allowSelectAll: true,
         allowCut: true,
@@ -52,15 +52,20 @@ class BasePageState<T extends BasePage> extends ConsumerState<T> {
       );
 
   /// Action to perform upon using the Search context option.
-  void onContextSearch(String searchTerm, {String? sentence = ''}) async {
+  void onSearch(String searchTerm, {String? sentence = ''}) async {
     await appModel.openRecursiveDictionarySearch(
       searchTerm: searchTerm,
       killOnPop: false,
     );
   }
 
+  /// Action to perform upon using the Share context option.
+  void onShare(String searchTerm, {String? sentence = ''}) async {
+    Share.share(searchTerm);
+  }
+
   /// Action to perform upon using the Stash context option.
-  void onContextStash(String searchTerm) {
+  void onStash(String searchTerm) {
     appModel.addToStash(terms: [searchTerm]);
   }
 

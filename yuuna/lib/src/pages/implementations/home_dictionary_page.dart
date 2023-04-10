@@ -84,6 +84,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
         child: DictionaryHistoryPage(
           onSearch: onSearch,
           onStash: onStash,
+          onShare: onShare,
         ),
       ),
     );
@@ -411,21 +412,11 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     return buildSearchResult();
   }
 
-  void onSearch(String searchTerm) async {
-    await appModel.openRecursiveDictionarySearch(
-      searchTerm: searchTerm,
-      killOnPop: false,
-    );
-  }
-
-  void onStash(String searchTerm) {
-    appModel.addToStash(terms: [searchTerm]);
-  }
-
   Widget buildSearchResult() {
     return DictionaryResultPage(
       onSearch: onSearch,
       onStash: onStash,
+      onShare: onShare,
       result: _result!,
     );
   }

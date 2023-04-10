@@ -13,6 +13,7 @@ class DictionaryResultPage extends BasePage {
     required this.result,
     required this.onSearch,
     required this.onStash,
+    required this.onShare,
     this.cardColor,
     this.scrollController,
     this.opacity = 1,
@@ -29,6 +30,9 @@ class DictionaryResultPage extends BasePage {
 
   /// Action to be done upon selecting the stash option.
   final Function(String) onStash;
+
+  /// Action to be done upon selecting the share option.
+  final Function(String) onShare;
 
   /// Whether or not to update dictionary history upon viewing this result.
   final bool updateHistory;
@@ -130,6 +134,7 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
                         heading: heading,
                         onSearch: widget.onSearch,
                         onStash: widget.onStash,
+                        onShare: widget.onShare,
                         expandableControllers:
                             expandableControllersByHeading[heading]!,
                         dictionaryNamesByHidden: dictionaryNamesByHidden,

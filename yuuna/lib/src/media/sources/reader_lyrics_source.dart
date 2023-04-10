@@ -129,6 +129,11 @@ class ReaderLyricsSource extends ReaderMediaSource {
     bool webViewBusy = true;
 
     HeadlessInAppWebView webView = HeadlessInAppWebView(
+      initialOptions: InAppWebViewGroupOptions(
+        crossPlatform: InAppWebViewOptions(
+            userAgent:
+                'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/111.0'),
+      ),
       initialUrlRequest: URLRequest(
         url: Uri.parse(searchUrl),
       ),

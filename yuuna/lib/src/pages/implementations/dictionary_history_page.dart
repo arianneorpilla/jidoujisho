@@ -15,6 +15,7 @@ class DictionaryHistoryPage extends BasePage {
   const DictionaryHistoryPage({
     required this.onSearch,
     required this.onStash,
+    required this.onShare,
     super.key,
   });
 
@@ -23,6 +24,9 @@ class DictionaryHistoryPage extends BasePage {
 
   /// Action to be done upon selecting the stash option.
   final Function(String) onStash;
+
+  /// Action to be done upon selecting the stash option.
+  final Function(String) onShare;
 
   @override
   BasePageState<DictionaryHistoryPage> createState() =>
@@ -51,6 +55,7 @@ class _DictionaryHistoryPageState extends BasePageState<DictionaryHistoryPage> {
                 result: result,
                 onSearch: widget.onSearch,
                 onStash: widget.onStash,
+                onShare: widget.onShare,
                 lastSelectedMapping: lastSelectedMapping,
               ),
             )
@@ -65,6 +70,7 @@ class _DictionaryHistoryScrollableItem extends BasePage {
     required this.result,
     required this.onStash,
     required this.onSearch,
+    required this.onShare,
     required this.lastSelectedMapping,
   });
 
@@ -76,6 +82,9 @@ class _DictionaryHistoryScrollableItem extends BasePage {
 
   /// Action to be done upon selecting the stash option.
   final Function(String) onStash;
+
+  /// Action to be done upon selecting the stash option.
+  final Function(String) onShare;
 
   /// The current mapping.
   final AnkiMapping lastSelectedMapping;
@@ -141,6 +150,7 @@ class _DictionaryHistoryScrollableItemState
       heading: heading,
       onSearch: widget.onSearch,
       onStash: widget.onStash,
+      onShare: widget.onShare,
       expandableControllers: expandableControllersByHeading[heading]!,
       dictionaryNamesByHidden: dictionaryNamesByHidden,
       dictionaryNamesByOrder: dictionaryNamesByOrder,

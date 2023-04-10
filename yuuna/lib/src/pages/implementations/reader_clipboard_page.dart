@@ -238,11 +238,9 @@ class _ReaderClipboardPageState<ReaderClipboardPage>
   @override
   MaterialTextSelectionControls get selectionControls =>
       JidoujishoTextSelectionControls(
-        searchAction: onContextSearch,
-        searchActionLabel: t.search,
-        stashAction: onContextStash,
-        stashActionLabel: t.stash,
-        creatorActionLabel: t.creator,
+        searchAction: onSearch,
+        stashAction: onStash,
+        shareAction: onShare,
         creatorAction: creatorAction,
         allowCopy: true,
         allowSelectAll: false,

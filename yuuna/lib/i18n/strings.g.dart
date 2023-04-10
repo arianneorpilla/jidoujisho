@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 337
+/// Strings: 338
 ///
-/// Built on 2023-04-05 at 13:59 UTC
+/// Built on 2023-04-10 at 21:33 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -164,6 +164,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get copy => 'Copy';
 	String get clear => 'Clear';
 	String get creator => 'Creator';
+	String get share => 'Share';
 	String get resume_last_media => 'Resume Last Media';
 	String get change_source => 'Change Source';
 	String get launch_source => 'Launch Source';
@@ -521,6 +522,7 @@ extension on _StringsEn {
 			case 'copy': return 'Copy';
 			case 'clear': return 'Clear';
 			case 'creator': return 'Creator';
+			case 'share': return 'Share';
 			case 'resume_last_media': return 'Resume Last Media';
 			case 'change_source': return 'Change Source';
 			case 'launch_source': return 'Launch Source';

@@ -1,4 +1,8 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:yuuna/i18n/strings.g.dart';
 
 /// Used for handling text selection.
 typedef OffsetValue = void Function(int start, int end);
@@ -9,31 +13,31 @@ class JidoujishoTextSelectionControls extends MaterialTextSelectionControls {
   /// Define text selection controls with custom behaviour.
   JidoujishoTextSelectionControls({
     required this.searchAction,
-    required this.searchActionLabel,
     required this.stashAction,
-    required this.stashActionLabel,
+    required this.shareAction,
     required this.allowCopy,
     required this.allowCut,
     required this.allowPaste,
     required this.allowSelectAll,
+    this.handleColor,
     this.creatorAction,
-    this.creatorActionLabel,
   });
 
-  /// Localisation for the creator action.
+  /// Allows the text handles to be customized.
+  final Color? handleColor;
+
+  final TextSelectionControls _controls = Platform.isIOS
+      ? cupertinoTextSelectionControls
+      : materialTextSelectionControls;
+
+  /// Behaviour for the creator action.
   final Function(String)? creatorAction;
-
-  /// Localisation for the creator action.
-  final String? creatorActionLabel;
-
-  /// Localisation for the search action.
-  final String searchActionLabel;
 
   /// Behaviour for the search action.
   final Function(String) searchAction;
 
-  /// Localisation for the stash action.
-  final String stashActionLabel;
+  /// Behaviour for the share action.
+  final Function(String) shareAction;
 
   /// Behaviour for the stash action.
   final Function(String) stashAction;
@@ -52,6 +56,36 @@ class JidoujishoTextSelectionControls extends MaterialTextSelectionControls {
 
   static const double _kToolbarContentDistanceBelow = 20;
   static const double _kToolbarContentDistance = 8;
+
+  /// Wrap the given handle builder with the needed theme data for
+  /// each platform to modify the color.
+  Widget _wrapWithThemeData(Widget Function(BuildContext) builder) =>
+      Platform.isIOS
+          // ios handle uses the CupertinoTheme primary color, so override that.
+          ? CupertinoTheme(
+              data: CupertinoThemeData(primaryColor: handleColor),
+              child: Builder(builder: builder))
+          // material handle uses the selection handle color, so override that.
+          : TextSelectionTheme(
+              data: TextSelectionThemeData(selectionHandleColor: handleColor),
+              child: Builder(builder: builder));
+
+  @override
+  Widget buildHandle(
+          BuildContext context, TextSelectionHandleType type, double textHeight,
+          [VoidCallback? onTap]) =>
+      _wrapWithThemeData(
+          (context) => _controls.buildHandle(context, type, textHeight, onTap));
+
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    return _controls.getHandleAnchor(type, textLineHeight);
+  }
+
+  @override
+  Size getHandleSize(double textLineHeight) {
+    return _controls.getHandleSize(textLineHeight);
+  }
 
   /// Builder for material-style copy/paste text selection toolbar.
   @override
@@ -85,14 +119,16 @@ class JidoujishoTextSelectionControls extends MaterialTextSelectionControls {
       anchorAbove: anchorAbove,
       anchorBelow: anchorBelow,
       clipboardStatus: clipboardStatus!,
-      creatorAction: () {
-        creatorAction?.call(
-          delegate.textEditingValue.selection
-              .textInside(delegate.textEditingValue.text),
-        );
+      creatorAction: (creatorAction != null)
+          ? () {
+              creatorAction?.call(
+                delegate.textEditingValue.selection
+                    .textInside(delegate.textEditingValue.text),
+              );
 
-        delegate.hideToolbar();
-      },
+              delegate.hideToolbar();
+            }
+          : null,
       searchAction: () {
         searchAction(
           delegate.textEditingValue.selection
@@ -109,9 +145,14 @@ class JidoujishoTextSelectionControls extends MaterialTextSelectionControls {
 
         delegate.hideToolbar();
       },
-      searchActionLabel: searchActionLabel,
-      stashActionLabel: stashActionLabel,
-      creatorActionLabel: creatorActionLabel,
+      shareAction: () {
+        shareAction(
+          delegate.textEditingValue.selection
+              .textInside(delegate.textEditingValue.text),
+        );
+
+        delegate.hideToolbar();
+      },
       handleCopy: canCopy(delegate) && allowCopy
           ? () => handleCopy(delegate, clipboardStatus)
           : null,
@@ -134,11 +175,9 @@ class JidoujishoSelectionToolbar extends StatefulWidget {
     required this.anchorBelow,
     required this.clipboardStatus,
     required this.creatorAction,
-    required this.creatorActionLabel,
-    required this.searchActionLabel,
     required this.searchAction,
     required this.stashAction,
-    required this.stashActionLabel,
+    required this.shareAction,
     required this.handleCopy,
     required this.handleCut,
     required this.handlePaste,
@@ -155,20 +194,14 @@ class JidoujishoSelectionToolbar extends StatefulWidget {
   /// Current details on the clipboard.
   final ClipboardStatusNotifier clipboardStatus;
 
-  /// Localisation for the custom action.
-  final String searchActionLabel;
-
   /// Behaviour for the custom action.
   final Function() searchAction;
-
-  /// Localisation for the stash action.
-  final String stashActionLabel;
 
   /// Behaviour for the stash action.
   final Function() stashAction;
 
-  /// Localisation for the creator action.
-  final String? creatorActionLabel;
+  /// Behaviour for the share action.
+  final Function() shareAction;
 
   /// Behaviour for the creator action.
   final Function()? creatorAction;
@@ -233,11 +266,11 @@ class _JidoujishoSelectionToolbarState
         <_TextSelectionToolbarItemData>[
       _TextSelectionToolbarItemData(
         onPressed: widget.searchAction,
-        label: widget.searchActionLabel,
+        label: t.search,
       ),
       _TextSelectionToolbarItemData(
         onPressed: widget.stashAction,
-        label: widget.stashActionLabel,
+        label: t.stash,
       ),
       if (widget.handleCut != null)
         _TextSelectionToolbarItemData(
@@ -260,10 +293,14 @@ class _JidoujishoSelectionToolbarState
           label: localizations.selectAllButtonLabel,
           onPressed: widget.handleSelectAll,
         ),
-      if (widget.creatorAction != null && widget.creatorActionLabel != null)
+      _TextSelectionToolbarItemData(
+        onPressed: widget.shareAction,
+        label: t.share,
+      ),
+      if (widget.creatorAction != null)
         _TextSelectionToolbarItemData(
           onPressed: widget.creatorAction,
-          label: widget.creatorActionLabel!,
+          label: t.creator,
         ),
     ];
 

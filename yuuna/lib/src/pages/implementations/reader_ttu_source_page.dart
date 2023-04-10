@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:local_assets_server/local_assets_server.dart';
 import 'package:pretty_json/pretty_json.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/src/creator/creator_field_values.dart';
@@ -66,7 +67,7 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
   }
 
   @override
-  void onSearch(String searchTerm) async {
+  void onSearch(String searchTerm, {String? sentence = ''}) async {
     _isRecursiveSearching = true;
     if (appModel.isMediaOpen) {
       await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -590,8 +591,9 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
         menuItems: [
           searchMenuItem(),
           stashMenuItem(),
-          creatorMenuItem(),
           copyMenuItem(),
+          shareMenuItem(),
+          creatorMenuItem(),
         ],
       );
 
@@ -622,21 +624,30 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
     );
   }
 
-  ContextMenuItem creatorMenuItem() {
+  ContextMenuItem copyMenuItem() {
     return ContextMenuItem(
       iosId: '3',
       androidId: 3,
-      title: t.creator,
-      action: creatorMenuAction,
+      title: t.copy,
+      action: copyMenuAction,
     );
   }
 
-  ContextMenuItem copyMenuItem() {
+  ContextMenuItem shareMenuItem() {
     return ContextMenuItem(
       iosId: '4',
       androidId: 4,
-      title: t.copy,
-      action: copyMenuAction,
+      title: t.share,
+      action: shareMenuAction,
+    );
+  }
+
+  ContextMenuItem creatorMenuItem() {
+    return ContextMenuItem(
+      iosId: '5',
+      androidId: 5,
+      title: t.creator,
+      action: creatorMenuAction,
     );
   }
 
@@ -660,8 +671,8 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
 
   void stashMenuAction() async {
     String searchTerm = await getSelectedText();
-
     appModel.addToStash(terms: [searchTerm]);
+    await unselectWebViewTextSelection(_controller);
   }
 
   void creatorMenuAction() async {
@@ -690,6 +701,12 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
   void copyMenuAction() async {
     String searchTerm = await getSelectedText();
     Clipboard.setData(ClipboardData(text: searchTerm));
+    await unselectWebViewTextSelection(_controller);
+  }
+
+  void shareMenuAction() async {
+    String searchTerm = await getSelectedText();
+    Share.share(searchTerm);
     await unselectWebViewTextSelection(_controller);
   }
 

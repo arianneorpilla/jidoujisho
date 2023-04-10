@@ -244,13 +244,11 @@ class _ReaderWebsocketPageState
                       );
                       source.clearCurrentSentence();
                     },
-                    searchActionLabel: t.search,
-                    stashAction: onContextStash,
-                    stashActionLabel: t.stash,
+                    shareAction: onShare,
+                    stashAction: onStash,
                     creatorAction: (selection) async {
                       launchCreator(term: '', sentence: selection);
                     },
-                    creatorActionLabel: t.creator,
                     allowCopy: true,
                     allowSelectAll: false,
                     allowCut: true,
@@ -304,9 +302,6 @@ class _ReaderWebsocketPageState
       ),
     );
   }
-
-  @override
-  void onContextSearch(String searchTerm, {String? sentence}) async {}
 
   Widget buildCardCreatorButton(String message) {
     return Padding(

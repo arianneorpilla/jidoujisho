@@ -79,7 +79,7 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
 
   /// Action upon selecting the Search option.
   @override
-  void onSearch(String searchTerm) async {
+  void onSearch(String searchTerm, {String? sentence = ''}) async {
     await appModel.openRecursiveDictionarySearch(
       searchTerm: searchTerm,
       killOnPop: false,
@@ -395,13 +395,11 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
                           );
                           source.clearCurrentSentence();
                         },
-                        searchActionLabel: t.search,
-                        stashAction: onContextStash,
-                        stashActionLabel: t.stash,
+                        stashAction: onStash,
+                        shareAction: onShare,
                         creatorAction: (selection) async {
                           launchCreator(term: '', sentence: selection);
                         },
-                        creatorActionLabel: t.creator,
                         allowCopy: true,
                         allowSelectAll: false,
                         allowCut: true,
@@ -507,9 +505,6 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
       ),
     );
   }
-
-  @override
-  void onContextSearch(String searchTerm, {String? sentence}) async {}
 
   Widget buildCardCreatorButton(String message) {
     return Padding(

@@ -19,6 +19,7 @@ class DictionaryTermPage extends ConsumerWidget {
     required this.heading,
     required this.onSearch,
     required this.onStash,
+    required this.onShare,
     required this.expandableControllers,
     required this.dictionaryNamesByHidden,
     required this.dictionaryNamesByOrder,
@@ -37,6 +38,9 @@ class DictionaryTermPage extends ConsumerWidget {
 
   /// Action to be done upon selecting the stash option.
   final Function(String) onStash;
+
+  /// Action to be done upon selecting the share option.
+  final Function(String) onShare;
 
   /// Controls expandables by dictionary name.
   final Map<Dictionary, ExpandableController> expandableControllers;
@@ -135,6 +139,7 @@ class DictionaryTermPage extends ConsumerWidget {
                       entry: entry,
                       onSearch: onSearch,
                       onStash: onStash,
+                      onShare: onShare,
                       expandableController:
                           expandableControllers[entry.dictionary.value!]!,
                     );

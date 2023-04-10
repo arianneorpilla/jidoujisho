@@ -485,13 +485,11 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
                             );
                             source.clearCurrentSentence();
                           },
-                          searchActionLabel: t.search,
-                          stashAction: onContextStash,
-                          stashActionLabel: t.stash,
+                          stashAction: onStash,
+                          shareAction: onShare,
                           creatorAction: (selection) async {
                             launchCreator(term: '', sentence: selection);
                           },
-                          creatorActionLabel: t.creator,
                           allowCopy: true,
                           allowSelectAll: false,
                           allowCut: true,
@@ -545,9 +543,6 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
       ),
     );
   }
-
-  @override
-  void onContextSearch(String searchTerm, {String? sentence}) async {}
 
   Widget buildCardCreatorButton(String message) {
     return Padding(

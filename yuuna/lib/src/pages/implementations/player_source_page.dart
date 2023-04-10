@@ -1562,14 +1562,15 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   Widget buildSubtitleArea() {
     return ValueListenableBuilder<bool>(
       valueListenable: _isMenuHidden,
-      builder: (context, isMenuHidden, _) {
+      child: buildSubtitle(),
+      builder: (context, isMenuHidden, child) {
         return Align(
           alignment: Alignment.bottomCenter,
           child: Padding(
             padding: _isMenuHidden.value
                 ? const EdgeInsets.only(bottom: 20)
                 : const EdgeInsets.only(bottom: _menuHeight + 8),
-            child: buildSubtitle(),
+            child: child,
           ),
         );
       },
@@ -1630,7 +1631,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           textAlign: TextAlign.center,
           controller: _selectableTextController,
           focusNode: _dragToSelectFocusNode,
-          selectionControls: CustomColorSelectionHandle(Colors.transparent),
+          selectionControls: EmptyTextSelectionControls(),
           contextMenuBuilder: (_, __) {
             return const SizedBox.shrink();
           },
