@@ -306,6 +306,9 @@ class _MokuroCatalogBrowsePageState
   Future<String> getSelectedText() async {
     return (await _controller.getSelectedText() ?? '')
         .replaceAll('\\n', '\n')
+        .split('\n')
+        .map((e) => e.trim())
+        .join()
         .trim();
   }
 
