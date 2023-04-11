@@ -126,7 +126,7 @@ Please note that the development of the app switches between changes being imple
 - jidoujisho will take **video and audio formats as supported by VLC**. Subtitles may be embedded within the video being played and selected during playback. 
 - If you have trouble with storage space on your device, you may use the app as an external player for [**Jellyfin**](https://jellyfin.org/) and stream from your PC media library, complete with progress tracking and external subtitles support. 
 - If you wish to use external subtitles, they may be in **SRT, ASS or SSA format** and you may import them during playback through the menu. You may switch between different audio and subtitle tracks. Image-based subtitles such as PGS are not currently supported.
-- **YouTube subtitles** are taken from TimedText XML, which is only publicly exposed to videos that have closed captions. <b><a href="https://www.youtube.com/watch?v=mZ0sJQC8qkE">Here is a fair sample of</a> <a href="https://www.youtube.com/watch?v=X9zw0QF12Kc">YouTube videos with such subtitles</a> <a href="https://www.youtube.com/watch?v=t1yXDcuwzpY">showcasing some very practical application use cases.</a></b>
+- **Closed captions** and **auto-generated captions** are available when watching YouTube videos. **Users are strongly advised not to use automatic captions if they cannot reliably discern their correctness.** <b><a href="https://www.youtube.com/watch?v=mZ0sJQC8qkE">Here is a fair sample of</a> <a href="https://www.youtube.com/watch?v=X9zw0QF12Kc">YouTube videos with such subtitles</a> <a href="https://www.youtube.com/watch?v=t1yXDcuwzpY">showcasing some very practical application use cases.</a></b>
 - **ッツ Ebook Reader** allows reading of books in **EPUB or HTMLZ** format.
 - **Mokuro volumes** must be in HTML format, and have images in the relative directory.
 - Users may import <b><a href="https://foosoft.net/projects/yomichan/">Yomichan</a></b> dictionaries for Japanese, <b><a href="https://drive.google.com/drive/folders/1tTdLppnqMfVC5otPlX_cs4ixlIgjv_lH">some can be found here</a></b>. Note that Yomichan dictionaries using `structured-content` are currently unsupported.
@@ -164,7 +164,8 @@ A primer on the basics of the application is as follows.
 * 🇯🇵 Can't find Japanese subtitles for your media? Try finding what you need at <b><a href="https://kitsunekko.net">kitsunekko</a></b> or <b><a href="https://github.com/orgs/Nekomoekissaten-SUB/projects/1">Nekomoekisatten</a></b>
 * 🔮 Customise your workflow by trying out different **enhancements and quick actions**
 * 🈲 Monolingually transitioning? **Collapse your bilingual dictionaries by default**, and split your export fields between expanded and collapsed meanings.
-* 📡 You can use [**Jellyfin**](https://jellyfin.org/) to stream media from your PC, complete with progress tracking and external subtitle support 
+* 📡 You can use [**Jellyfin**](https://jellyfin.org/) to stream media from your PC, complete with progress tracking and external subtitle support
+* 🤖 Users may log into their OpenAI account and chat in various languages supported by ChatGPT.  **Users are advised not to heavily rely on an AI language model if they cannot accurately distinguish its correctness and accuracy.**
 * 🖐️ **Double tap on a character** when reading a meaning to **quickly select it as a word and recursively search**
 * 📑 **External subtitles with the same name as the selected video file** will be loaded by default
 * 📰 You can get **example sentences** from Massif, Tatoeba or ImmersionKit if a sentence you find is too hard
