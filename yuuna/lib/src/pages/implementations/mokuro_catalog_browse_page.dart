@@ -270,11 +270,13 @@ class _MokuroCatalogBrowsePageState
 
   void creatorMenuAction() async {
     String searchTerm = await getSelectedText();
+    String imageUrl = await getImageUrl();
 
     await unselectWebViewTextSelection(_controller);
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     await Future.delayed(const Duration(milliseconds: 5), () {});
 
+    mediaSource.setExtraData(imageUrl);
     await appModel.openCreator(
       ref: ref,
       killOnPop: false,
@@ -646,6 +648,14 @@ class _MokuroCatalogBrowsePageState
       InAppWebViewController webViewController) async {
     String source = 'window.getSelection().removeAllRanges();';
     await webViewController.evaluateJavascript(source: source);
+  }
+
+  Future<String> getImageUrl() async {
+    return await _controller.evaluateJavascript(source: '''
+var pageContainer = window.getSelection().anchorNode.parentElement.closest('.pageContainer');
+var backgroundStyle = pageContainer.style.backgroundImage;
+backgroundStyle.substring(5, backgroundStyle.length - 2);
+''');
   }
 
   Future<void> updateOrientation() async {
