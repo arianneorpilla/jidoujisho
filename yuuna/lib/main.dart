@@ -79,6 +79,7 @@ void main() {
     appModel.searchDictionary(
       searchTerm: appModel.targetLanguage.helloWorld,
       searchWithWildcards: false,
+      useCache: false,
     );
   }, (exception, stack) {
     /// Print error details to the console.

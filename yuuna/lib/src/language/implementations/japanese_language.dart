@@ -419,15 +419,23 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
       List<DictionaryHeading> termExactKatakanaResults = [];
 
       if (params.maximumDictionaryTermsInResult > uniqueHeadingsById.length) {
-        termExactResults = database.dictionaryHeadings
-            .where()
-            .termEqualTo(partialTerm)
-            .or()
-            .optional(partialTermIsKatakana,
-                (q) => q.termEqualTo(kanaKit.toHiragana(partialTerm)))
-            .filter()
-            .entriesIsNotEmpty()
-            .findAllSync();
+        /// If an exception is caught, skip the iteration entirely. Something
+        /// has gone wrong with building a query for this term and there is
+        /// no point continuing for the rest of the queries.
+        try {
+          termExactResults = database.dictionaryHeadings
+              .where()
+              .termEqualTo(partialTerm)
+              .or()
+              .optional(partialTermIsKatakana,
+                  (q) => q.termEqualTo(kanaKit.toHiragana(partialTerm)))
+              .filter()
+              .entriesIsNotEmpty()
+              .findAllSync();
+        } catch (e) {
+          await Future.delayed(const Duration(milliseconds: 200), () {});
+          continue;
+        }
 
         uniqueHeadingsById.addEntries(
           termExactResults.map(

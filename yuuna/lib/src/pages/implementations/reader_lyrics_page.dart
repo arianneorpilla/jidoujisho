@@ -341,6 +341,14 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
     );
 
     if (_currentSelection.isEmpty && character.trim().isNotEmpty) {
+      /// If we cut off at a lone surrogate, offset the index back by 1. The
+      /// selection meant to select the index before
+      RegExp loneSurrogate = RegExp(
+        '[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]',
+      );
+      if (index != 0 && text.substring(index).startsWith(loneSurrogate)) {
+        index = index - 1;
+      }
       bool isSpaceDelimited = appModel.targetLanguage.isSpaceDelimited;
       int whitespaceOffset = searchTerm.length - searchTerm.trimLeft().length;
       int offsetIndex =

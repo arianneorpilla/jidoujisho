@@ -79,6 +79,7 @@ class _HomePageState extends BasePageState<HomePage>
       appModel.searchDictionary(
         searchTerm: appModel.targetLanguage.helloWorld,
         searchWithWildcards: false,
+        useCache: false,
       );
     }
   }

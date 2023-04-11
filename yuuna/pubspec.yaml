@@ -1,7 +1,7 @@
 name: yuuna
 description: A full-featured immersion language learning suite for mobile.
 publish_to: 'none'
-version: 2.5.3+57
+version: 2.5.4+58
 environment:
   sdk: ">=2.17.0 <3.0.0"
 

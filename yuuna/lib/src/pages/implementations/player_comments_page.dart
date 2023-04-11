@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:remove_emoji/remove_emoji.dart';
 import 'package:spaces/spaces.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:yuuna/creator.dart';
@@ -288,6 +289,14 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
     );
 
     if (character.trim().isNotEmpty) {
+      /// If we cut off at a lone surrogate, offset the index back by 1. The
+      /// selection meant to select the index before
+      RegExp loneSurrogate = RegExp(
+        '[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]',
+      );
+      if (index != 0 && text.substring(index).startsWith(loneSurrogate)) {
+        index = index - 1;
+      }
       bool isSpaceDelimited = appModel.targetLanguage.isSpaceDelimited;
       int whitespaceOffset = searchTerm.length - searchTerm.trimLeft().length;
       int offsetIndex =
@@ -327,6 +336,7 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
     required Comment comment,
     bool headComment = false,
   }) {
+    String text = RemoveEmoji().removemoji(comment.text);
     final JidoujishoSelectableTextController controller =
         JidoujishoSelectableTextController();
     String videoChannelId = source.getChannelIdFromVideo(widget.videoUrl);
@@ -382,13 +392,13 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
                         children: getTextSpans(
                           controller: controller,
                           author: comment.author,
-                          text: comment.text,
+                          text: text,
                         ),
                       ),
                       selectionControls: JidoujishoTextSelectionControls(
                         searchAction: (selection) async {
-                          source.setCurrentSentence(
-                              '${comment.author}:\n${comment.text}');
+                          source
+                              .setCurrentSentence('${comment.author}:\n$text');
                           await appModel.openRecursiveDictionarySearch(
                             searchTerm: selection,
                             killOnPop: false,
@@ -409,9 +419,8 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
                       style: const TextStyle(fontSize: 18),
                     ),
                   ),
-                  buildSentencePickerButton(
-                      '${comment.author}:\n${comment.text}'),
-                  buildCardCreatorButton('${comment.author}:\n${comment.text}'),
+                  buildSentencePickerButton('${comment.author}:\n$text'),
+                  buildCardCreatorButton('${comment.author}:\n$text'),
                 ],
               ),
               const Space.normal(),

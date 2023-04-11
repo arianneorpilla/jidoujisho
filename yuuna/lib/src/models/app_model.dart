@@ -1473,17 +1473,20 @@ class AppModel with ChangeNotifier {
   Future<DictionarySearchResult> searchDictionary({
     required String searchTerm,
     required bool searchWithWildcards,
+    bool useCache = true,
   }) async {
-    if (_searchOperation != null) {
-      _searchOperation?.cancel(null);
-    }
-
-    if (_dictionarySearchCache[searchTerm] != null) {
+    if (_dictionarySearchCache[searchTerm] != null && useCache) {
       return _dictionarySearchCache[searchTerm]!;
     }
 
     searchTerm = searchTerm.replaceAll('\n', ' ');
-    searchTerm = _removeEmoji.removemoji(searchTerm);
+    searchTerm = _removeEmoji.removemoji(searchTerm, ' ', false);
+
+    /// Strip lone surrogates that may crash the search.
+    RegExp loneSurrogate = RegExp(
+      '[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]',
+    );
+    searchTerm = searchTerm.replaceAll(loneSurrogate, ' ');
 
     ReceivePort receivePort = ReceivePort();
     receivePort.listen((message) {
@@ -1510,7 +1513,6 @@ class AppModel with ChangeNotifier {
     _searchOperation =
         cancelable.compute(targetLanguage.prepareSearchResults, params);
     int? id = await _searchOperation?.value;
-    _searchOperation = null;
 
     if (id == null) {
       return DictionarySearchResult(searchTerm: searchTerm);
