@@ -165,7 +165,6 @@ A primer on the basics of the application is as follows.
 * 🔮 Customise your workflow by trying out different **enhancements and quick actions**
 * 🈲 Monolingually transitioning? **Collapse your bilingual dictionaries by default**, and split your export fields between expanded and collapsed meanings.
 * 📡 You can use [**Jellyfin**](https://jellyfin.org/) to stream media from your PC, complete with progress tracking and external subtitle support
-* 🤖 Users may log into their OpenAI account and chat in various languages supported by ChatGPT.  **Users are advised not to heavily rely on an AI language model if they cannot accurately distinguish its correctness and accuracy.**
 * 🖐️ **Double tap on a character** when reading a meaning to **quickly select it as a word and recursively search**
 * 📑 **External subtitles with the same name as the selected video file** will be loaded by default
 * 📰 You can get **example sentences** from Massif, Tatoeba or ImmersionKit if a sentence you find is too hard
@@ -175,7 +174,8 @@ A primer on the basics of the application is as follows.
 * 💬 **If your video has burned-in subtitles,** you may use the blur widget under player options to hide them
 * ✂️ Reading manga? You can **crop an image** before exporting a card
 * 🪡 **Limit export to a single dictionary** by selecting the button on the rightmost tag of a dictionary entry
-* 📜 **Tap on a field's icon** in the Card Creator to **lock the field**, which can be useful if exporting the same sentence multiple times 
+* 📜 **Tap on a field's icon** in the Card Creator to **lock the field**, which can be useful if exporting the same sentence multiple times
+* 🤖 Users may log into their OpenAI account and chat in various languages supported by ChatGPT.  **Users are advised not to heavily rely on an AI language model if they cannot accurately distinguish its correctness and accuracy.**
 
 # 👥 Contribution and attribution
 
