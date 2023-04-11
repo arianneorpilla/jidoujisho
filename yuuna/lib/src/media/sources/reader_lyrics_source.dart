@@ -115,6 +115,8 @@ class ReaderLyricsSource extends ReaderMediaSource {
   Future<JidoujishoLyrics> getLyrics(
     JidoujishoLyricsParameters parameters,
   ) async {
+    String userAgent =
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36';
     String artist = Uri.encodeComponent(parameters.artist.trim());
     String title = Uri.encodeComponent(parameters.title.trim());
 
@@ -131,8 +133,11 @@ class ReaderLyricsSource extends ReaderMediaSource {
     HeadlessInAppWebView webView = HeadlessInAppWebView(
       initialOptions: InAppWebViewGroupOptions(
         crossPlatform: InAppWebViewOptions(
-            userAgent:
-                'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/111.0'),
+          userAgent: userAgent,
+        ),
+        android: AndroidInAppWebViewOptions(
+          blockNetworkImage: true,
+        ),
       ),
       initialUrlRequest: URLRequest(
         url: Uri.parse(searchUrl),
@@ -174,12 +179,15 @@ class ReaderLyricsSource extends ReaderMediaSource {
       HeadlessInAppWebView googleWebView = HeadlessInAppWebView(
         initialOptions: InAppWebViewGroupOptions(
           crossPlatform: InAppWebViewOptions(
-              userAgent:
-                  'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/111.0'),
+            userAgent: userAgent,
+          ),
+          android: AndroidInAppWebViewOptions(
+            blockNetworkImage: true,
+          ),
         ),
         initialUrlRequest: URLRequest(
           url: Uri.parse(
-              'https://google.com/search?q=$artist+$title+歌詞+site:uta-net.com'),
+              'https://google.com/search?q=$artist+$title+歌詞+site:uta-net.com/song'),
         ),
         onLoadStop: (controller, uri) async {
           firstResultUrl = await controller.evaluateJavascript(
@@ -201,8 +209,11 @@ class ReaderLyricsSource extends ReaderMediaSource {
         HeadlessInAppWebView utanetWebView = HeadlessInAppWebView(
           initialOptions: InAppWebViewGroupOptions(
             crossPlatform: InAppWebViewOptions(
-                userAgent:
-                    'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/111.0'),
+              userAgent: userAgent,
+            ),
+            android: AndroidInAppWebViewOptions(
+              blockNetworkImage: true,
+            ),
           ),
           initialUrlRequest: URLRequest(
             url: Uri.parse(firstResultUrl!),

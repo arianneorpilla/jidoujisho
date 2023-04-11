@@ -98,6 +98,11 @@ class BingImagesSearchEnhancement extends ImageEnhancement {
             "https://www.bing.com/images/search?q=$searchTerm')",
           ),
         ),
+        initialOptions: InAppWebViewGroupOptions(
+          android: AndroidInAppWebViewOptions(
+            blockNetworkImage: true,
+          ),
+        ),
         onLoadStop: (controller, uri) async {
           Directory appDirDoc = await getApplicationSupportDirectory();
           String bingImagesPath = '${appDirDoc.path}/bingImages';
