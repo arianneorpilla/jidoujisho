@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nowplaying/nowplaying.dart';
+import 'package:remove_emoji/remove_emoji.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/media.dart';
@@ -265,6 +266,7 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
   final FocusNode _lyricsFocusNode = FocusNode(skipTraversal: true);
 
   Widget buildLyricsText(String text) {
+    text = RemoveEmoji().removemoji(text);
     return JidoujishoSelectableText.rich(
       TextSpan(children: getSubtitleSpans(text)),
       focusNode: _lyricsFocusNode,

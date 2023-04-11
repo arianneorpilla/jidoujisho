@@ -9,6 +9,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:progress_indicators/progress_indicators.dart';
+import 'package:remove_emoji/remove_emoji.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/media.dart';
@@ -443,6 +444,7 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
     required bool isBot,
     required bool isLoading,
   }) {
+    text = RemoveEmoji().removemoji(text);
     final JidoujishoSelectableTextController controller =
         JidoujishoSelectableTextController();
 

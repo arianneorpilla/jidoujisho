@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:remove_emoji/remove_emoji.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/media.dart';
@@ -103,6 +104,7 @@ class _ReaderClipboardPageState<ReaderClipboardPage>
   final FocusNode _focusNode = FocusNode(skipTraversal: true);
 
   Widget buildText(String text) {
+    text = RemoveEmoji().removemoji(text);
     return JidoujishoSelectableText.rich(
       TextSpan(children: getSubtitleSpans(text)),
       focusNode: _focusNode,

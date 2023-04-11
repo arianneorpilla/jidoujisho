@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:remove_emoji/remove_emoji.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/media.dart';
@@ -220,6 +221,7 @@ class _ReaderWebsocketPageState
   }
 
   Widget buildMessage(String message) {
+    message = RemoveEmoji().removemoji(message);
     final JidoujishoSelectableTextController controller =
         JidoujishoSelectableTextController();
 
