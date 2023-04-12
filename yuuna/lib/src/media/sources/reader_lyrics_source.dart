@@ -23,6 +23,11 @@ final lyricsPermissionsProvider = FutureProvider<bool>((ref) {
   return ReaderLyricsSource.instance.requestPermissions();
 });
 
+/// A global [Provider] for listening to track changes.
+final lyricsStreamProvider = StreamProvider<NowPlayingTrack>((ref) {
+  return NowPlaying.instance.stream;
+});
+
 /// A media source that allows the user to fetch lyrics from Google.
 class ReaderLyricsSource extends ReaderMediaSource {
   /// Define this media source.
@@ -71,6 +76,11 @@ class ReaderLyricsSource extends ReaderMediaSource {
   Stream<void> get overrideStream => _overrideController.stream;
   final StreamController<void> _overrideController =
       StreamController.broadcast();
+
+  @override
+  Future<void> prepareResources() async {
+    NowPlaying.instance.start();
+  }
 
   @override
   Future<void> onSearchBarTap({

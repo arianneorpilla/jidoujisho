@@ -108,9 +108,18 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
   }
 
   Widget buildTrackWhen() {
-    return StreamBuilder<NowPlayingTrack>(
-      stream: NowPlaying.instance.stream,
-      builder: (context, snapshot) {
+    final track = ref.watch(lyricsStreamProvider);
+
+    return track.when(
+      loading: buildNoCurrentMedia,
+      error: (error, stack) => buildError(
+        error: error,
+        stack: stack,
+        refresh: () {
+          ref.refresh(lyricsStreamProvider);
+        },
+      ),
+      data: (track) {
         if (source.isOverride) {
           return buildLyricsWhen(
             track: NowPlaying.instance.track,
@@ -121,11 +130,6 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
           );
         }
 
-        if (!snapshot.hasData || snapshot.hasError) {
-          return buildNoCurrentMedia();
-        }
-
-        NowPlayingTrack track = snapshot.data!;
         if (track.artist == null || track.title == null) {
           return buildNoCurrentMedia();
         }

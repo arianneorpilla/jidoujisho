@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -345,6 +346,10 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp>
       navigatorKey: appModel.navigatorKey,
       home: home,
       locale: locale,
+      localizationsDelegates: const [
+        JidoujishoLocalizationsDelegate(),
+      ],
+      supportedLocales: appModel.locales.values,
       themeMode: themeMode,
       theme: appModel.theme,
       darkTheme: appModel.darkTheme,
@@ -375,4 +380,31 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp>
 
   /// The current locale, dependent on the active target language.
   Locale get locale => appModel.targetLanguage.locale;
+}
+
+/// Used to override certain strings.
+class JidoujishoLocalizations extends DefaultMaterialLocalizations {
+  @override
+  String get licensesPageTitle => t.options_attribution;
+}
+
+/// Delegate for [JidoujishoLocalizations].
+class JidoujishoLocalizationsDelegate
+    extends LocalizationsDelegate<MaterialLocalizations> {
+  /// Initialise this delegate.
+  const JidoujishoLocalizationsDelegate();
+  @override
+  bool isSupported(Locale locale) {
+    return locale == const Locale('en', 'US');
+  }
+
+  @override
+  Future<JidoujishoLocalizations> load(Locale locale) {
+    assert(locale == const Locale('en', 'US'), 'Locale must be supported.');
+    return SynchronousFuture<JidoujishoLocalizations>(
+        JidoujishoLocalizations());
+  }
+
+  @override
+  bool shouldReload(JidoujishoLocalizationsDelegate old) => false;
 }

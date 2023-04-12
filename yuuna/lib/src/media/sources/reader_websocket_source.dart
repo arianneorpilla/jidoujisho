@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
-import 'package:nowplaying/nowplaying.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/models.dart';
@@ -87,11 +86,6 @@ class ReaderWebsocketSource extends ReaderMediaSource {
     MediaItem? item,
   }) {
     throw UnsupportedError('WebSocket source does not launch any page');
-  }
-
-  @override
-  Future<void> prepareResources() async {
-    NowPlaying.instance.start();
   }
 
   @override
