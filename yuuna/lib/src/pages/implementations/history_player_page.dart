@@ -72,7 +72,7 @@ class HistoryPlayerPageState<T extends HistoryPlayerPage>
       thickness: 3,
       controller: mediaType.scrollController,
       child: ListView.builder(
-        padding: const EdgeInsets.only(top: 48),
+        padding: const EdgeInsets.only(top: 56),
         controller: mediaType.scrollController,
         physics: const AlwaysScrollableScrollPhysics(
           parent: BouncingScrollPhysics(),
