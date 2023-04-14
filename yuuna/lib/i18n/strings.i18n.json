@@ -127,7 +127,7 @@
         "『jidoujisho Yuuna』 has been added to AnkiDroid as a new card type.\n\nSetups making use of a different card type or field order may be used by adding a new export profile.",
     "error_model_missing": "Missing card type",
     "error_model_missing_content":
-        "The corresponding card type of the currently selected profile is missing.\n\nThe standard profile has been selected in its place.",
+        "The corresponding card type of the currently selected profile is missing.\n\nThe profile will be deleted, and the standard profile has now been selected in its place.",
     "error_model_changed": "Card type changed",
     "error_model_changed_content":
         "The number of fields of the card type corresponding to the selected profile has changed.\n\nThe fields of the currently selected profile have been reset and will require reconfiguration.",
@@ -360,6 +360,7 @@
     "field_unlocked": "$field unlocked and will clear on export.",
     "field_lock": "Lock Field",
     "field_unlock": "Unlock Field",
+    "use_dark_theme": "Use dark theme",
     "view_replies": {
         "reply": {
           "one": "SHOW $n REPLY",

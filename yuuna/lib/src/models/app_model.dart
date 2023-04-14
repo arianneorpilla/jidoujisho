@@ -1415,7 +1415,7 @@ class AppModel with ChangeNotifier {
     dictionarySearchAgainNotifier.notifyListeners();
   }
 
-  /// Delete a selected mapping fromf the database.
+  /// Delete a selected mapping from the database.
   void deleteMapping(AnkiMapping mapping) async {
     _database.writeTxnSync(() {
       _database.ankiMappings.deleteSync(mapping.id!);
@@ -1672,7 +1672,7 @@ class AppModel with ChangeNotifier {
   }
 
   /// Adds the default 'jidoujisho Yuuna' model to the list of Anki card types.
-  void addDefaultModelIfMissing() async {
+  Future<void> addDefaultModelIfMissing() async {
     List<String> models = await getModelList();
     if (!models.contains(AnkiMapping.standardModelName)) {
       methodChannel.invokeMethod('addDefaultModel');
@@ -2086,7 +2086,7 @@ class AppModel with ChangeNotifier {
     required AnkiMapping mapping,
   }) async {
     /// Ensure that the following case never happens to the default profile.
-    addDefaultModelIfMissing();
+    await addDefaultModelIfMissing();
 
     bool newMappingModelExists = await profileModelExists(mapping);
 
@@ -2109,6 +2109,7 @@ class AppModel with ChangeNotifier {
       );
 
       await selectStandardProfile();
+      deleteMapping(mapping);
       return;
     }
 

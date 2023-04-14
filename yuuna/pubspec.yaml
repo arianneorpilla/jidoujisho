@@ -1,7 +1,7 @@
 name: yuuna
 description: A full-featured immersion language learning suite for mobile.
 publish_to: 'none'
-version: 2.5.5+60
+version: 2.5.6+61
 environment:
   sdk: ">=2.17.0 <3.0.0"
 
@@ -90,7 +90,10 @@ dependencies:
   mongol: ^4.0.0
   multi_value_listenable_builder: ^0.0.2
   network_to_file_image: ^4.0.1
-  nowplaying: ^2.0.6
+  nowplaying:
+    git: 
+      url: https://github.com/hnm-lab/nowplaying
+      ref: 290ee1097d67cafc50f3aba1ba5bba01e758d877
   package_info_plus: ^3.0.3
   path: ^1.8.2
   path_provider: ^2.0.13

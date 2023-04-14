@@ -21,7 +21,7 @@ class DictionarySearchResult {
   Id? id;
 
   /// Original search term used to make the result.
-  @Index(unique: true)
+  @Index(unique: true, replace: true)
   final String searchTerm;
 
   /// The best length found for the search term used for highlighting the

@@ -33,12 +33,25 @@ class SearchDictionaryEnhancement extends Enhancement {
     String searchTerm = creatorModel.getFieldController(field).text.trim();
 
     if (searchTerm.isEmpty) {
-      Fluttertoast.showToast(
-        msg: t.no_text_to_search,
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-      );
-      return;
+      Field fallbackField = SentenceField.instance;
+      searchTerm = creatorModel.getFieldController(fallbackField).text.trim();
+      if (searchTerm.isEmpty) {
+        Fluttertoast.showToast(
+          msg: t.no_text_to_search,
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+        );
+        return;
+      } else {
+        Fluttertoast.showToast(
+          msg: t.field_fallback_used(
+            field: field.getLocalisedLabel(appModel),
+            secondField: fallbackField.getLocalisedLabel(appModel),
+          ),
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+        );
+      }
     }
 
     appModel.openRecursiveDictionarySearch(

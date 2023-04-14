@@ -1200,10 +1200,11 @@ packages:
   nowplaying:
     dependency: "direct main"
     description:
-      name: nowplaying
-      sha256: "8469c1c20beb6134abec59658369411713680f2a37b02a316741db440011f707"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: "290ee1097d67cafc50f3aba1ba5bba01e758d877"
+      resolved-ref: "290ee1097d67cafc50f3aba1ba5bba01e758d877"
+      url: "https://github.com/hnm-lab/nowplaying"
+    source: git
     version: "2.0.6"
   octo_image:
     dependency: transitive

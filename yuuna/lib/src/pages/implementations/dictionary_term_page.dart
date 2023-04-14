@@ -241,7 +241,7 @@ class _DictionaryTermActionsRowState
           child: JidoujishoIconButton(
             busy: true,
             enabledColor: enabledColor,
-            disabledColor: enabledColor.withOpacity(0.8),
+            disabledColor: enabledColor.withOpacity(0.5),
             shapeBorder: const RoundedRectangleBorder(),
             backgroundColor: Theme.of(context).brightness == Brightness.dark
                 ? Colors.white.withOpacity(0.05)

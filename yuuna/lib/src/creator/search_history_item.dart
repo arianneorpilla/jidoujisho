@@ -23,7 +23,7 @@ class SearchHistoryItem {
   final String searchTerm;
 
   /// Enforces the uniqueness of a search term within its history type.
-  @Index(unique: true)
+  @Index(unique: true, replace: true)
   String get uniqueKey => '$historyKey/$searchTerm';
 
   /// A unique identifier for the purposes of database storage.

@@ -206,7 +206,7 @@ class AnkiMapping {
   Id? id;
 
   /// The name of this mapping.
-  @Index(unique: true)
+  @Index(unique: true, replace: true)
   final String label;
 
   /// The name of the model to use when exporting with this mapping.
@@ -265,7 +265,7 @@ class AnkiMapping {
 
   /// The order of this dictionary in terms of user sorting, relative to other
   /// dictionaries.
-  @Index(unique: true)
+  @Index(unique: true, replace: true)
   int order;
 
   /// Convert unique keys to fields.

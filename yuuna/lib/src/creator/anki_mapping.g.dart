@@ -47,38 +47,43 @@ const AnkiMappingSchema = CollectionSchema(
       name: r'exportMediaTags',
       type: IsarType.bool,
     ),
-    r'isExportFieldsEmpty': PropertySchema(
+    r'hashCode': PropertySchema(
       id: 6,
+      name: r'hashCode',
+      type: IsarType.long,
+    ),
+    r'isExportFieldsEmpty': PropertySchema(
+      id: 7,
       name: r'isExportFieldsEmpty',
       type: IsarType.bool,
     ),
     r'label': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'label',
       type: IsarType.string,
     ),
     r'model': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'model',
       type: IsarType.string,
     ),
     r'order': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'order',
       type: IsarType.long,
     ),
     r'prependDictionaryNames': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'prependDictionaryNames',
       type: IsarType.bool,
     ),
     r'tags': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'tags',
       type: IsarType.stringList,
     ),
     r'useBrTags': PropertySchema(
-      id: 12,
+      id: 13,
       name: r'useBrTags',
       type: IsarType.bool,
     )
@@ -93,7 +98,7 @@ const AnkiMappingSchema = CollectionSchema(
       id: 6902807635198700142,
       name: r'label',
       unique: true,
-      replace: false,
+      replace: true,
       properties: [
         IndexPropertySchema(
           name: r'label',
@@ -106,7 +111,7 @@ const AnkiMappingSchema = CollectionSchema(
       id: 5897270977454184057,
       name: r'order',
       unique: true,
-      replace: false,
+      replace: true,
       properties: [
         IndexPropertySchema(
           name: r'order',
@@ -179,13 +184,14 @@ void _ankiMappingSerialize(
   writer.writeString(offsets[3], object.enhancementsIsar);
   writer.writeStringList(offsets[4], object.exportFieldKeys);
   writer.writeBool(offsets[5], object.exportMediaTags);
-  writer.writeBool(offsets[6], object.isExportFieldsEmpty);
-  writer.writeString(offsets[7], object.label);
-  writer.writeString(offsets[8], object.model);
-  writer.writeLong(offsets[9], object.order);
-  writer.writeBool(offsets[10], object.prependDictionaryNames);
-  writer.writeStringList(offsets[11], object.tags);
-  writer.writeBool(offsets[12], object.useBrTags);
+  writer.writeLong(offsets[6], object.hashCode);
+  writer.writeBool(offsets[7], object.isExportFieldsEmpty);
+  writer.writeString(offsets[8], object.label);
+  writer.writeString(offsets[9], object.model);
+  writer.writeLong(offsets[10], object.order);
+  writer.writeBool(offsets[11], object.prependDictionaryNames);
+  writer.writeStringList(offsets[12], object.tags);
+  writer.writeBool(offsets[13], object.useBrTags);
 }
 
 AnkiMapping _ankiMappingDeserialize(
@@ -200,12 +206,12 @@ AnkiMapping _ankiMappingDeserialize(
     exportFieldKeys: reader.readStringOrNullList(offsets[4]) ?? [],
     exportMediaTags: reader.readBoolOrNull(offsets[5]),
     id: id,
-    label: reader.readString(offsets[7]),
-    model: reader.readString(offsets[8]),
-    order: reader.readLong(offsets[9]),
-    prependDictionaryNames: reader.readBoolOrNull(offsets[10]),
-    tags: reader.readStringList(offsets[11]) ?? [],
-    useBrTags: reader.readBoolOrNull(offsets[12]),
+    label: reader.readString(offsets[8]),
+    model: reader.readString(offsets[9]),
+    order: reader.readLong(offsets[10]),
+    prependDictionaryNames: reader.readBoolOrNull(offsets[11]),
+    tags: reader.readStringList(offsets[12]) ?? [],
+    useBrTags: reader.readBoolOrNull(offsets[13]),
   );
   object.actionsIsar = reader.readString(offsets[0]);
   object.enhancementsIsar = reader.readString(offsets[3]);
@@ -232,18 +238,20 @@ P _ankiMappingDeserializeProp<P>(
     case 5:
       return (reader.readBoolOrNull(offset)) as P;
     case 6:
-      return (reader.readBool(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 7:
-      return (reader.readString(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 8:
       return (reader.readString(offset)) as P;
     case 9:
-      return (reader.readLong(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 10:
-      return (reader.readBoolOrNull(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 11:
-      return (reader.readStringList(offset) ?? []) as P;
+      return (reader.readBoolOrNull(offset)) as P;
     case 12:
+      return (reader.readStringList(offset) ?? []) as P;
+    case 13:
       return (reader.readBoolOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1593,6 +1601,61 @@ extension AnkiMappingQueryFilter
     });
   }
 
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition> hashCodeEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'hashCode',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      hashCodeGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'hashCode',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition>
+      hashCodeLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'hashCode',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition> hashCodeBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'hashCode',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterFilterCondition> idIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -2318,6 +2381,18 @@ extension AnkiMappingQuerySortBy
     });
   }
 
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy> sortByHashCode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hashCode', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy> sortByHashCodeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hashCode', Sort.desc);
+    });
+  }
+
   QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy>
       sortByIsExportFieldsEmpty() {
     return QueryBuilder.apply(this, (query) {
@@ -2433,6 +2508,18 @@ extension AnkiMappingQuerySortThenBy
       thenByExportMediaTagsDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'exportMediaTags', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy> thenByHashCode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hashCode', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AnkiMapping, AnkiMapping, QAfterSortBy> thenByHashCodeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hashCode', Sort.desc);
     });
   }
 
@@ -2570,6 +2657,12 @@ extension AnkiMappingQueryWhereDistinct
     });
   }
 
+  QueryBuilder<AnkiMapping, AnkiMapping, QDistinct> distinctByHashCode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'hashCode');
+    });
+  }
+
   QueryBuilder<AnkiMapping, AnkiMapping, QDistinct>
       distinctByIsExportFieldsEmpty() {
     return QueryBuilder.apply(this, (query) {
@@ -2662,6 +2755,12 @@ extension AnkiMappingQueryProperty
   QueryBuilder<AnkiMapping, bool?, QQueryOperations> exportMediaTagsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'exportMediaTags');
+    });
+  }
+
+  QueryBuilder<AnkiMapping, int, QQueryOperations> hashCodeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'hashCode');
     });
   }
 

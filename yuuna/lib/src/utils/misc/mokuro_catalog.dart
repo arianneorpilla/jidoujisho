@@ -20,12 +20,12 @@ class MokuroCatalog {
   final String name;
 
   /// The URL pertaining to the catalog.
-  @Index(unique: true)
+  @Index(unique: true, replace: true)
   final String url;
 
   /// The order of this dictionary in terms of user sorting, relative to other
   /// dictionaries.
-  @Index(unique: true)
+  @Index(unique: true, replace: true)
   int order;
 
   @override

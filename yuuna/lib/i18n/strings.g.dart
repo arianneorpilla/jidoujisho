@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 338
+/// Strings: 339
 ///
-/// Built on 2023-04-12 at 02:11 UTC
+/// Built on 2023-04-14 at 17:08 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -270,7 +270,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get info_standard_model => 'Standard model added';
 	String get info_standard_model_content => '『jidoujisho Yuuna』 has been added to AnkiDroid as a new card type.\n\nSetups making use of a different card type or field order may be used by adding a new export profile.';
 	String get error_model_missing => 'Missing card type';
-	String get error_model_missing_content => 'The corresponding card type of the currently selected profile is missing.\n\nThe standard profile has been selected in its place.';
+	String get error_model_missing_content => 'The corresponding card type of the currently selected profile is missing.\n\nThe profile will be deleted, and the standard profile has now been selected in its place.';
 	String get error_model_changed => 'Card type changed';
 	String get error_model_changed_content => 'The number of fields of the card type corresponding to the selected profile has changed.\n\nThe fields of the currently selected profile have been reset and will require reconfiguration.';
 	String get creator_exporting_as => 'Creating card with profile';
@@ -485,6 +485,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String field_unlocked({required Object field}) => '${field} unlocked and will clear on export.';
 	String get field_lock => 'Lock Field';
 	String get field_unlock => 'Unlock Field';
+	String get use_dark_theme => 'Use dark theme';
 	late final _StringsViewRepliesEn view_replies = _StringsViewRepliesEn._(_root);
 }
 
@@ -628,7 +629,7 @@ extension on _StringsEn {
 			case 'info_standard_model': return 'Standard model added';
 			case 'info_standard_model_content': return '『jidoujisho Yuuna』 has been added to AnkiDroid as a new card type.\n\nSetups making use of a different card type or field order may be used by adding a new export profile.';
 			case 'error_model_missing': return 'Missing card type';
-			case 'error_model_missing_content': return 'The corresponding card type of the currently selected profile is missing.\n\nThe standard profile has been selected in its place.';
+			case 'error_model_missing_content': return 'The corresponding card type of the currently selected profile is missing.\n\nThe profile will be deleted, and the standard profile has now been selected in its place.';
 			case 'error_model_changed': return 'Card type changed';
 			case 'error_model_changed_content': return 'The number of fields of the card type corresponding to the selected profile has changed.\n\nThe fields of the currently selected profile have been reset and will require reconfiguration.';
 			case 'creator_exporting_as': return 'Creating card with profile';
@@ -843,6 +844,7 @@ extension on _StringsEn {
 			case 'field_unlocked': return ({required Object field}) => '${field} unlocked and will clear on export.';
 			case 'field_lock': return 'Lock Field';
 			case 'field_unlock': return 'Unlock Field';
+			case 'use_dark_theme': return 'Use dark theme';
 			case 'view_replies.reply': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
 				one: 'SHOW ${n} REPLY',
 				other: 'SHOW ${n} REPLIES',

@@ -87,11 +87,15 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   }
 
   @override
+  Future<void> onSourcePagePop() async {
+    await _playerController.stop();
+  }
+
+  @override
   void dispose() async {
     _playPauseSubscription?.cancel();
     WidgetsBinding.instance.removeObserver(this);
 
-    await _playerController.stop();
     await _playerController.dispose();
 
     super.dispose();

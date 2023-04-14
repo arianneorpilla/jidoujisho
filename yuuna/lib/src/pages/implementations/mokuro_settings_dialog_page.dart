@@ -55,6 +55,7 @@ class _DictionaryDialogPageState extends BasePageState {
               buildHighlightOnTapSwitch(),
               buildEnablePageTurningSwitch(),
               buildInvertPageTurningSwitch(),
+              buildUseDarkThemeSwitch(),
               buildExtendPageSwitch(),
             ],
           ),
@@ -105,6 +106,30 @@ class _DictionaryDialogPageState extends BasePageState {
               onChanged: (value) {
                 source.toggleVolumePageTurningInverted();
                 _notifier.value = source.volumePageTurningInverted;
+              },
+            );
+          },
+        )
+      ],
+    );
+  }
+
+  Widget buildUseDarkThemeSwitch() {
+    ValueNotifier<bool> _notifier = ValueNotifier<bool>(source.useDarkTheme);
+
+    return Row(
+      children: [
+        Expanded(
+          child: Text(t.use_dark_theme),
+        ),
+        ValueListenableBuilder<bool>(
+          valueListenable: _notifier,
+          builder: (_, value, __) {
+            return Switch(
+              value: value,
+              onChanged: (value) {
+                source.toggleUseDarkTheme();
+                _notifier.value = source.useDarkTheme;
               },
             );
           },

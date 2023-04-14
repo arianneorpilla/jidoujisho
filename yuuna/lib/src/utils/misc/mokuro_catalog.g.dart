@@ -17,18 +17,23 @@ const MokuroCatalogSchema = CollectionSchema(
   name: r'MokuroCatalog',
   id: 1045304690416343370,
   properties: {
-    r'name': PropertySchema(
+    r'hashCode': PropertySchema(
       id: 0,
+      name: r'hashCode',
+      type: IsarType.long,
+    ),
+    r'name': PropertySchema(
+      id: 1,
       name: r'name',
       type: IsarType.string,
     ),
     r'order': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'order',
       type: IsarType.long,
     ),
     r'url': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'url',
       type: IsarType.string,
     )
@@ -43,7 +48,7 @@ const MokuroCatalogSchema = CollectionSchema(
       id: -5756857009679432345,
       name: r'url',
       unique: true,
-      replace: false,
+      replace: true,
       properties: [
         IndexPropertySchema(
           name: r'url',
@@ -56,7 +61,7 @@ const MokuroCatalogSchema = CollectionSchema(
       id: 5897270977454184057,
       name: r'order',
       unique: true,
-      replace: false,
+      replace: true,
       properties: [
         IndexPropertySchema(
           name: r'order',
@@ -91,9 +96,10 @@ void _mokuroCatalogSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.name);
-  writer.writeLong(offsets[1], object.order);
-  writer.writeString(offsets[2], object.url);
+  writer.writeLong(offsets[0], object.hashCode);
+  writer.writeString(offsets[1], object.name);
+  writer.writeLong(offsets[2], object.order);
+  writer.writeString(offsets[3], object.url);
 }
 
 MokuroCatalog _mokuroCatalogDeserialize(
@@ -104,9 +110,9 @@ MokuroCatalog _mokuroCatalogDeserialize(
 ) {
   final object = MokuroCatalog(
     id: id,
-    name: reader.readString(offsets[0]),
-    order: reader.readLong(offsets[1]),
-    url: reader.readString(offsets[2]),
+    name: reader.readString(offsets[1]),
+    order: reader.readLong(offsets[2]),
+    url: reader.readString(offsets[3]),
   );
   return object;
 }
@@ -119,10 +125,12 @@ P _mokuroCatalogDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readString(offset)) as P;
-    case 1:
       return (reader.readLong(offset)) as P;
+    case 1:
+      return (reader.readString(offset)) as P;
     case 2:
+      return (reader.readLong(offset)) as P;
+    case 3:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -477,6 +485,62 @@ extension MokuroCatalogQueryWhere
 
 extension MokuroCatalogQueryFilter
     on QueryBuilder<MokuroCatalog, MokuroCatalog, QFilterCondition> {
+  QueryBuilder<MokuroCatalog, MokuroCatalog, QAfterFilterCondition>
+      hashCodeEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'hashCode',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<MokuroCatalog, MokuroCatalog, QAfterFilterCondition>
+      hashCodeGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'hashCode',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<MokuroCatalog, MokuroCatalog, QAfterFilterCondition>
+      hashCodeLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'hashCode',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<MokuroCatalog, MokuroCatalog, QAfterFilterCondition>
+      hashCodeBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'hashCode',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<MokuroCatalog, MokuroCatalog, QAfterFilterCondition> idIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -882,6 +946,19 @@ extension MokuroCatalogQueryLinks
 
 extension MokuroCatalogQuerySortBy
     on QueryBuilder<MokuroCatalog, MokuroCatalog, QSortBy> {
+  QueryBuilder<MokuroCatalog, MokuroCatalog, QAfterSortBy> sortByHashCode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hashCode', Sort.asc);
+    });
+  }
+
+  QueryBuilder<MokuroCatalog, MokuroCatalog, QAfterSortBy>
+      sortByHashCodeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hashCode', Sort.desc);
+    });
+  }
+
   QueryBuilder<MokuroCatalog, MokuroCatalog, QAfterSortBy> sortByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -921,6 +998,19 @@ extension MokuroCatalogQuerySortBy
 
 extension MokuroCatalogQuerySortThenBy
     on QueryBuilder<MokuroCatalog, MokuroCatalog, QSortThenBy> {
+  QueryBuilder<MokuroCatalog, MokuroCatalog, QAfterSortBy> thenByHashCode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hashCode', Sort.asc);
+    });
+  }
+
+  QueryBuilder<MokuroCatalog, MokuroCatalog, QAfterSortBy>
+      thenByHashCodeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hashCode', Sort.desc);
+    });
+  }
+
   QueryBuilder<MokuroCatalog, MokuroCatalog, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -972,6 +1062,12 @@ extension MokuroCatalogQuerySortThenBy
 
 extension MokuroCatalogQueryWhereDistinct
     on QueryBuilder<MokuroCatalog, MokuroCatalog, QDistinct> {
+  QueryBuilder<MokuroCatalog, MokuroCatalog, QDistinct> distinctByHashCode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'hashCode');
+    });
+  }
+
   QueryBuilder<MokuroCatalog, MokuroCatalog, QDistinct> distinctByName(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -998,6 +1094,12 @@ extension MokuroCatalogQueryProperty
   QueryBuilder<MokuroCatalog, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<MokuroCatalog, int, QQueryOperations> hashCodeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'hashCode');
     });
   }
 

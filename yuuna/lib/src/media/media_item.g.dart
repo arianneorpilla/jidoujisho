@@ -157,7 +157,7 @@ const MediaItemSchema = CollectionSchema(
       id: -866995956150369819,
       name: r'uniqueKey',
       unique: true,
-      replace: false,
+      replace: true,
       properties: [
         IndexPropertySchema(
           name: r'uniqueKey',

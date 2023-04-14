@@ -47,7 +47,7 @@ class MediaItem {
   Id? id;
 
   /// A unique identifier for the purposes of database storage.
-  @Index(unique: true)
+  @Index(unique: true, replace: true)
   String get uniqueKey => '$mediaSourceIdentifier/$mediaIdentifier';
 
   /// The media identifier of this item. Using this variable alone, a media

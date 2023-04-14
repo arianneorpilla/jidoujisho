@@ -317,6 +317,10 @@ class _MokuroCatalogBrowsePageState
   Widget buildBody() {
     return InAppWebView(
       initialOptions: InAppWebViewGroupOptions(
+        crossPlatform: InAppWebViewOptions(
+          verticalScrollBarEnabled: false,
+          horizontalScrollBarEnabled: false,
+        ),
         android: AndroidInAppWebViewOptions(
           initialScale: MediaQuery.of(context).size.width ~/ 1.5,
         ),
@@ -357,7 +361,11 @@ class _MokuroCatalogBrowsePageState
         }
 
         if (_mediaItem != null) {
+          if (mediaSource.useDarkTheme) {
+            await injectDarkTheme();
+          }
           await controller.evaluateJavascript(source: javascriptToExecute);
+
           await updateOrientation();
           Future.delayed(const Duration(milliseconds: 300), () {
             controller.evaluateJavascript(source: 'zoomFitToScreen();');
@@ -367,6 +375,18 @@ class _MokuroCatalogBrowsePageState
         }
       },
     );
+  }
+
+  Future<void> injectDarkTheme() async {
+    await _controller.evaluateJavascript(source: '''
+r.style.setProperty('--colorBackground', 'black')
+r.style.setProperty('--color1', '#1E1E1E');
+r.style.setProperty('--color2', 'gray');
+r.style.setProperty('--color3', 'white');
+document.getElementById('pageIdxInput').style.backgroundColor = 'black';
+document.getElementById('pageIdxInput').style.color = 'white';
+document.getElementById('pageIdxDisplay').style.color = 'white';
+''');
   }
 
   DateTime? lastMessageTime;
@@ -483,6 +503,11 @@ class _MokuroCatalogBrowsePageState
     );
   }
 
+  @override
+  Future<void> onSourcePagePop() async {
+    await saveMediaItem();
+  }
+
   Future<void> selectTextOnwards({
     required int cursorX,
     required int cursorY,
@@ -499,22 +524,26 @@ class _MokuroCatalogBrowsePageState
     await _controller.setContextMenu(contextMenu);
   }
 
-  void saveMediaItem() async {
-    String dataJson = await _controller.evaluateJavascript(
-        source: 'localStorage.getItem(storageKey);');
-    Map<String, dynamic> data = jsonDecode(dataJson);
+  Future<void> saveMediaItem() async {
+    try {
+      String dataJson = await _controller.evaluateJavascript(
+          source: 'localStorage.getItem(storageKey);');
+      Map<String, dynamic> data = jsonDecode(dataJson);
 
-    int page2Idx = int.tryParse(data['page2_idx'].toString()) ?? -1;
-    int pageIdx = int.tryParse(data['page_idx'].toString()) ?? -1;
+      int page2Idx = int.tryParse(data['page2_idx'].toString()) ?? -1;
+      int pageIdx = int.tryParse(data['page_idx'].toString()) ?? -1;
 
-    if (page2Idx != -1) {
-      _mediaItem!.position = page2Idx;
-      appModel.updateMediaItem(_mediaItem!);
-      return;
-    }
-    if (pageIdx != -1) {
-      _mediaItem!.position = pageIdx;
-      appModel.updateMediaItem(_mediaItem!);
+      if (page2Idx != -1) {
+        _mediaItem!.position = page2Idx;
+        appModel.updateMediaItem(_mediaItem!);
+        return;
+      }
+      if (pageIdx != -1) {
+        _mediaItem!.position = pageIdx;
+        appModel.updateMediaItem(_mediaItem!);
+      }
+    } catch (e) {
+      debugPrint('Invalid data in local storage.');
     }
   }
 

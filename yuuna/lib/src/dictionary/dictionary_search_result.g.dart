@@ -49,7 +49,7 @@ const DictionarySearchResultSchema = CollectionSchema(
       id: 6747083501682260651,
       name: r'searchTerm',
       unique: true,
-      replace: false,
+      replace: true,
       properties: [
         IndexPropertySchema(
           name: r'searchTerm',

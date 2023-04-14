@@ -71,6 +71,8 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
                 Navigator.pop(context, true);
               }
 
+              await onSourcePagePop();
+
               await appModel.closeMedia(
                 context: context,
                 ref: ref,
@@ -93,6 +95,9 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
         ) ??
         false;
   }
+
+  /// Action to perform within the source page upon closing the media.
+  Future<void> onSourcePagePop() async {}
 
   /// Perform a search with a given query and update the dictionary search
   /// result. The [position] parameter determines where the pop-up will

@@ -33,7 +33,7 @@ class Dictionary {
   ///
   /// Dictionary names are meant to be unique, meaning two dictionaries of the
   /// same name should not be allowed to be added in the database.
-  @Index(unique: true)
+  @Index(unique: true, replace: true)
   final String name;
 
   /// The unique key for the format that the dictionary was sourced from.

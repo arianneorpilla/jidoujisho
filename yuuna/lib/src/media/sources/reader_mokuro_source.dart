@@ -391,6 +391,22 @@ bgImage.substring(5, bgImage.length - 2);
     );
   }
 
+  /// Whether the reader will inject dark theme.
+  bool get useDarkTheme {
+    return getPreference<bool>(
+      key: 'use_dark_theme',
+      defaultValue: false,
+    );
+  }
+
+  /// Toggles whether to inject dark mode.
+  void toggleUseDarkTheme() async {
+    await setPreference<bool>(
+      key: 'use_dark_theme',
+      value: !useDarkTheme,
+    );
+  }
+
   /// If this source is non-null, this will be used as the initial function
   /// for the image field over the auto enhancement. Extra durations can be
   /// invoked and defined when initially opening the creator, to call attention

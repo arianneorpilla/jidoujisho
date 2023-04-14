@@ -58,7 +58,7 @@ const DictionarySchema = CollectionSchema(
       id: 879695947855722453,
       name: r'name',
       unique: true,
-      replace: false,
+      replace: true,
       properties: [
         IndexPropertySchema(
           name: r'name',
