@@ -2249,6 +2249,7 @@ class AppModel with ChangeNotifier {
     _overrideDictionaryColor = null;
     _overrideDictionaryTheme = null;
     blockCreatorInitialMedia = false;
+    isProcessingEmbeddedSubtitles = false;
     await Wakelock.disable();
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
@@ -3208,4 +3209,9 @@ class AppModel with ChangeNotifier {
     await _database.close();
     FlutterExitApp.exitApp();
   }
+
+  /// Flag for when the player is currently busy processing subtitles. Image
+  /// and audio export cannot be done when this flag is on, so a toast is
+  /// shown.
+  bool isProcessingEmbeddedSubtitles = false;
 }

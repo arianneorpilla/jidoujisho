@@ -298,6 +298,7 @@ abstract class Language {
     required BuildContext context,
     required AppModel appModel,
     required DictionaryHeading heading,
+    required Function(String) onSearch,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

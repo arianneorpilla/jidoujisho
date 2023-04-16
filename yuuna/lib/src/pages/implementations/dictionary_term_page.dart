@@ -107,6 +107,7 @@ class DictionaryTermPage extends ConsumerWidget {
                   [
                     _DictionaryTermTopRow(
                       heading: heading,
+                      onSearch: onSearch,
                     ),
                     if (heading.tags.isNotEmpty) const Space.normal(),
                     if (heading.tags.isNotEmpty)
@@ -451,10 +452,14 @@ class _DictionaryTermTagsWrap extends ConsumerWidget {
 class _DictionaryTermTopRow extends ConsumerWidget {
   const _DictionaryTermTopRow({
     required this.heading,
+    required this.onSearch,
   });
 
   /// The result made from a dictionary database search.
   final DictionaryHeading heading;
+
+  /// Action to be done upon selecting the search option.
+  final Function(String) onSearch;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -479,6 +484,7 @@ class _DictionaryTermTopRow extends ConsumerWidget {
               context: context,
               appModel: appModel,
               heading: heading,
+              onSearch: onSearch,
             ),
           ),
         ),

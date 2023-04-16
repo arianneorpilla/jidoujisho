@@ -87,15 +87,11 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   }
 
   @override
-  Future<void> onSourcePagePop() async {
-    await _playerController.stop();
-  }
-
-  @override
   void dispose() async {
     _playPauseSubscription?.cancel();
     WidgetsBinding.instance.removeObserver(this);
 
+    await _playerController.stop();
     await _playerController.dispose();
 
     super.dispose();
@@ -399,6 +395,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     if (controller.dataSourceType != DataSourceType.file) {
       return;
     }
+    appModel.isProcessingEmbeddedSubtitles = true;
 
     await SubtitleUtils.targetSubtitleFromVideo(
       file: File(controller.dataSource),
@@ -437,6 +434,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         _subtitleItemNotifier.value = !_subtitleItemNotifier.value;
       },
     );
+
+    appModel.isProcessingEmbeddedSubtitles = false;
   }
 
   /// This updates the media item to its new position and duration and also
@@ -1752,7 +1751,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     required int index,
   }) {
     /// If we cut off at a lone surrogate, offset the index back by 1. The
-    /// selection meant to select the index before
+    /// selection meant to select the index before.
     RegExp loneSurrogate = RegExp(
       '[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]',
     );

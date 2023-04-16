@@ -361,6 +361,7 @@
     "field_lock": "Lock Field",
     "field_unlock": "Unlock Field",
     "use_dark_theme": "Use dark theme",
+    "processing_embedded_subtitles": "Embedded subtitles are processing. Try again later.",
     "view_replies": {
         "reply": {
           "one": "SHOW $n REPLY",

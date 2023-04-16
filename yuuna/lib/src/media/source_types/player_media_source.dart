@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:network_to_file_image/network_to_file_image.dart';
 import 'package:path_provider/path_provider.dart';
@@ -97,6 +98,11 @@ abstract class PlayerMediaSource extends MediaSource {
       await Future.delayed(const Duration(seconds: 1), () {});
     }
 
+    if (appModel.isProcessingEmbeddedSubtitles) {
+      Fluttertoast.showToast(msg: t.processing_embedded_subtitles);
+      return [];
+    }
+
     if (subtitles == null && appModel.currentSubtitle.value != null) {
       subtitles ??= [appModel.currentSubtitle.value!];
     }
@@ -172,6 +178,10 @@ abstract class PlayerMediaSource extends MediaSource {
   }) async {
     while (appModel.blockCreatorInitialMedia) {
       await Future.delayed(const Duration(seconds: 1), () {});
+    }
+
+    if (appModel.isProcessingEmbeddedSubtitles) {
+      return null;
     }
 
     Directory appDirDoc = await getApplicationSupportDirectory();

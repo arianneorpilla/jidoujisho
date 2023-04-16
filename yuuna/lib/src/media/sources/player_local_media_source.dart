@@ -33,6 +33,11 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
   static final PlayerLocalMediaSource _instance =
       PlayerLocalMediaSource._privateConstructor();
 
+  /// Flag for when the player is currently busy processing subtitles. Image
+  /// and audio export cannot be done when this flag is on, so a toast is
+  /// shown.
+  bool isProcessingEmbeddedSubtitles = false;
+
   @override
   List<Widget> getActions({
     required BuildContext context,

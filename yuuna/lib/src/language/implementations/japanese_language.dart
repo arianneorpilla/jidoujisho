@@ -85,6 +85,7 @@ class JapaneseLanguage extends Language {
     required BuildContext context,
     required AppModel appModel,
     required DictionaryHeading heading,
+    required Function(String) onSearch,
   }) {
     /// Responsible for the underline on the heading term.
     TextStyle indexStyle(int index, String character) {
@@ -102,10 +103,7 @@ class JapaneseLanguage extends Language {
     /// on the heading term.
     void indexAction(int index, String character) {
       if (kanaKit.isKanji(character)) {
-        appModel.openRecursiveDictionarySearch(
-          searchTerm: character,
-          killOnPop: false,
-        );
+        onSearch(character);
       }
     }
 

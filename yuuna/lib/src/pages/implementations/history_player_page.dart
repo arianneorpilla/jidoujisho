@@ -113,6 +113,7 @@ class HistoryPlayerPageState<T extends HistoryPlayerPage>
           child: AspectRatio(
             aspectRatio: mediaSource.aspectRatio,
             child: FadeInImage(
+              key: UniqueKey(),
               placeholder: MemoryImage(kTransparentImage),
               imageErrorBuilder: (_, __, ___) {
                 if (item.extraUrl != null) {
