@@ -941,7 +941,12 @@ class AppModel with ChangeNotifier {
     File noMediaFile = File(noMediaFilePath);
 
     if (!jidoujishoDirectory.existsSync()) {
-      jidoujishoDirectory.createSync(recursive: true);
+      try {
+        jidoujishoDirectory.createSync(recursive: true);
+      } catch (e) {
+        debugPrint('Failed to create directory in DCIM.');
+        return prepareFallbackJidoujishoDirectory();
+      }
     }
     if (!noMediaFile.existsSync()) {
       noMediaFile.createSync();
