@@ -9,10 +9,14 @@ class IsolateParams {
   /// Base entity which allows messaging updates from other isolates.
   IsolateParams({
     required this.sendPort,
+    required this.directoryPath,
   });
 
   /// For communication with a [ReceivePort] for isolate updates.
   final SendPort sendPort;
+
+  /// Database directory path.
+  final String directoryPath;
 
   /// Send a message through the [sendPort].
   void send(Object? message) {
@@ -30,6 +34,7 @@ class PrepareDirectoryParams extends IsolateParams {
     required this.workingDirectory,
     required this.dictionaryFormat,
     required super.sendPort,
+    required super.directoryPath,
   });
 
   /// A file from which the contents must be put in working directory. This
@@ -60,6 +65,7 @@ class PrepareDictionaryParams extends IsolateParams {
     required this.workingDirectory,
     required this.useSlowImport,
     required super.sendPort,
+    required super.directoryPath,
   });
 
   /// The new dictionary to be added after the import is complete.
@@ -81,6 +87,7 @@ class DeleteDictionaryParams extends IsolateParams {
   /// isolate.
   DeleteDictionaryParams({
     required super.sendPort,
+    required super.directoryPath,
     this.dictionaryId,
   });
 
@@ -96,6 +103,7 @@ class UpdateDictionaryHistoryParams extends IsolateParams {
     required this.newPosition,
     required this.maximumDictionaryHistoryItems,
     required super.sendPort,
+    required super.directoryPath,
   });
 
   /// The result of a dictionary search to be added to history.
@@ -119,6 +127,7 @@ class DictionarySearchParams extends IsolateParams {
     required this.enabledDictionaryIds,
     required this.searchWithWildcards,
     required super.sendPort,
+    required super.directoryPath,
   });
 
   /// Primary search term, likely taken from context.

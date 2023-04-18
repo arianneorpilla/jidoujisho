@@ -139,6 +139,11 @@ class _AudioRecorderDialogPageState
               ),
             );
 
+            session.becomingNoisyEventStream.listen((event) async {
+              await _audioPlayer.pause();
+              session.setActive(false);
+            });
+
             if (playerState == null ||
                 playerState.processingState == ProcessingState.completed) {
               await _audioPlayer.seek(Duration.zero);

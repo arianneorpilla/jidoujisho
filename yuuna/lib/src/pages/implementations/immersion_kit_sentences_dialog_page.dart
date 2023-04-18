@@ -79,6 +79,11 @@ class _ImmersionKitSentencesDialogPageState
       ),
     );
 
+    session.becomingNoisyEventStream.listen((event) async {
+      await _audioPlayer.stop();
+      session.setActive(false);
+    });
+
     await _audioPlayer.stop();
     await _audioPlayer.setUrl(widget.exampleSentences[index].audioUrl);
     session.setActive(true);

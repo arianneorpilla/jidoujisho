@@ -101,6 +101,12 @@ class PlayAudioAction extends QuickAction {
               androidWillPauseWhenDucked: true,
             ),
           );
+
+          session.becomingNoisyEventStream.listen((event) async {
+            await _audioPlayer.stop();
+            session.setActive(false);
+          });
+
           session.setActive(true);
           await _audioPlayer.play();
           session.setActive(false);

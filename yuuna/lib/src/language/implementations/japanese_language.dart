@@ -301,6 +301,7 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
 
   final Isar database = await Isar.open(
     globalSchemas,
+    directory: params.directoryPath,
     maxSizeMiB: 8192,
   );
 

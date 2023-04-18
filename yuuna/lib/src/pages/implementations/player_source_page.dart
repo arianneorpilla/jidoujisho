@@ -279,6 +279,11 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     _session = await AudioSession.instance;
     await _session.configure(const AudioSessionConfiguration.music());
 
+    _session.becomingNoisyEventStream.listen((event) async {
+      await _playerController.pause();
+      _session.setActive(false);
+    });
+
     _session.setActive(true);
 
     setState(() {
