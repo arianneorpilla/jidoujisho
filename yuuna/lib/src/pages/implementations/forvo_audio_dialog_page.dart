@@ -72,6 +72,11 @@ class _ForvoAudioDialogPageState extends BasePageState<ForvoAudioDialogPage> {
       ),
     );
 
+    session.becomingNoisyEventStream.listen((event) async {
+      await _audioPlayer.stop();
+      session.setActive(false);
+    });
+
     await _audioPlayer.stop();
     await _audioPlayer.setUrl(widget.results[_notifier.value].audioUrl);
     session.setActive(true);

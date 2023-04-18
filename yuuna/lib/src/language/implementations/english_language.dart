@@ -48,6 +48,7 @@ Future<int?> prepareSearchResultsEnglishLanguage(
   final Lemmatizer lemmatizer = Lemmatizer();
   final Isar database = await Isar.open(
     globalSchemas,
+    directory: params.directoryPath,
     maxSizeMiB: 8192,
   );
 

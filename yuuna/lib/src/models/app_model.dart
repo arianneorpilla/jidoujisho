@@ -194,6 +194,10 @@ class AppModel with ChangeNotifier {
   Directory get appDirectory => _appDirectory;
   late final Directory _appDirectory;
 
+  /// Directory where database data is persisted.
+  Directory get databaseDirectory => _databaseDirectory;
+  late final Directory _databaseDirectory;
+
   /// Directory where browser cache data may be persisted.
   Directory get browserDirectory => _browserDirectory;
   late final Directory _browserDirectory;
@@ -980,12 +984,6 @@ class AppModel with ChangeNotifier {
     _preferences = await Hive.openBox('appModel');
     _dictionaryHistory = await Hive.openBox('dictionaryHistory');
 
-    /// Initialise persistent database.
-    _database = await Isar.open(
-      globalSchemas,
-      maxSizeMiB: 8192,
-    );
-
     /// Perform startup activities unnecessary to further initialisation here.
     await requestExternalStoragePermissions();
     await requestAnkidroidPermissions();
@@ -993,6 +991,7 @@ class AppModel with ChangeNotifier {
     /// These directories will commonly be accessed.
     _temporaryDirectory = await getTemporaryDirectory();
     _appDirectory = await getApplicationDocumentsDirectory();
+    _databaseDirectory = await getApplicationSupportDirectory();
     _browserDirectory = Directory(path.join(appDirectory.path, 'browser'));
     _thumbnailsDirectory =
         Directory(path.join(appDirectory.path, 'thumbnails'));
@@ -1012,6 +1011,13 @@ class AppModel with ChangeNotifier {
     if (_isarDirectory.existsSync()) {
       _isarDirectory.deleteSync(recursive: true);
     }
+
+    /// Initialise persistent database.
+    _database = await Isar.open(
+      globalSchemas,
+      directory: _databaseDirectory.path,
+      maxSizeMiB: 8192,
+    );
 
     /// Populate entities with key-value maps for constant time performance.
     /// This is not the initialisation step, which occurs below.
@@ -1286,6 +1292,7 @@ class AppModel with ChangeNotifier {
       PrepareDirectoryParams prepareDirectoryParams = PrepareDirectoryParams(
         file: file,
         charset: charset,
+        directoryPath: _databaseDirectory.path,
         workingDirectory: workingDirectory,
         dictionaryFormat: dictionaryFormat,
         sendPort: receivePort.sendPort,
@@ -1317,6 +1324,7 @@ class AppModel with ChangeNotifier {
       PrepareDictionaryParams prepareDictionaryParams = PrepareDictionaryParams(
         dictionary: dictionary,
         workingDirectory: workingDirectory,
+        directoryPath: _databaseDirectory.path,
         dictionaryFormat: dictionaryFormat,
         useSlowImport: useSlowImport,
         sendPort: receivePort.sendPort,
@@ -1388,6 +1396,7 @@ class AppModel with ChangeNotifier {
 
     ReceivePort receivePort = ReceivePort();
     DeleteDictionaryParams params = DeleteDictionaryParams(
+      directoryPath: _databaseDirectory.path,
       sendPort: receivePort.sendPort,
     );
 
@@ -1406,6 +1415,7 @@ class AppModel with ChangeNotifier {
     ReceivePort receivePort = ReceivePort();
     DeleteDictionaryParams params = DeleteDictionaryParams(
       dictionaryId: dictionary.id,
+      directoryPath: _databaseDirectory.path,
       sendPort: receivePort.sendPort,
     );
 
@@ -1495,6 +1505,7 @@ class AppModel with ChangeNotifier {
 
     DictionarySearchParams params = DictionarySearchParams(
       searchTerm: searchTerm,
+      directoryPath: _databaseDirectory.path,
       maximumDictionarySearchResults: maximumDictionarySearchResults,
       maximumDictionaryTermsInResult: maximumTerms,
       searchWithWildcards: searchWithWildcards,
@@ -2761,6 +2772,7 @@ class AppModel with ChangeNotifier {
     ReceivePort receivePort = ReceivePort();
     UpdateDictionaryHistoryParams params = UpdateDictionaryHistoryParams(
       resultId: result.id!,
+      directoryPath: _databaseDirectory.path,
       newPosition: newIndex,
       maximumDictionaryHistoryItems: maximumDictionaryHistoryItems,
       sendPort: receivePort.sendPort,
