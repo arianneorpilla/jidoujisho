@@ -631,9 +631,11 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
         return hasPopularTag;
       }
 
-      int popularityCompare = (b.popularitySum).compareTo(a.popularitySum);
-      if (popularityCompare != 0) {
-        return popularityCompare;
+      if (a.term != b.term) {
+        int popularityCompare = (b.popularitySum).compareTo(a.popularitySum);
+        if (popularityCompare != 0) {
+          return popularityCompare;
+        }
       }
 
       List<DictionaryFrequency> aFrequencies = a.frequencies.toList();
