@@ -133,7 +133,7 @@ Future<Map<DictionaryHeading, List<DictionaryEntry>>>
         }
       }
 
-      term = line;
+      term = line.trim();
     }
   }
 

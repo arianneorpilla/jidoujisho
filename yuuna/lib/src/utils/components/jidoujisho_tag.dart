@@ -60,14 +60,16 @@ class JidoujishoTag extends StatelessWidget {
                   size: Theme.of(context).textTheme.labelSmall?.fontSize,
                 ),
               if (icon != null) const Space.small(),
-              Text(
-                text,
-                style: Theme.of(context)
-                    .textTheme
-                    .labelSmall
-                    ?.copyWith(color: foregroundColor),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              Flexible(
+                child: Text(
+                  text,
+                  style: Theme.of(context)
+                      .textTheme
+                      .labelSmall
+                      ?.copyWith(color: foregroundColor),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
               if (trailingText != null) const Space.small(),
               if (trailingText != null)

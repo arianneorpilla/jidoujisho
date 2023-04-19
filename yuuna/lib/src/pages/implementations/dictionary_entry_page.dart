@@ -179,7 +179,7 @@ class _DictionaryEntryTagsWrap extends ConsumerWidget {
       Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          last,
+          Flexible(child: last),
           SizedBox(
             height: 22,
             width: 22,

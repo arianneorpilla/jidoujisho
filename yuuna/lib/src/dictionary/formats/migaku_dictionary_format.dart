@@ -67,7 +67,7 @@ Future<Map<DictionaryHeading, List<DictionaryEntry>>>
     for (dynamic item in items) {
       Map<String, dynamic> map = Map<String, dynamic>.from(item);
 
-      String term = map['term'] as String;
+      String term = (map['term'] as String).trim();
       String definition = map['definition'] as String;
 
       definition = definition

@@ -150,12 +150,6 @@ Future<int?> prepareSearchResultsEnglishLanguage(
       segments = segments.sublist(0, 20);
     }
 
-    segments = segments.map((e) => e.characters).flattened.toList();
-
-    if (segments.length > 50) {
-      segments = segments.sublist(0, 50);
-    }
-
     StringBuffer searchBuffer = StringBuffer();
 
     segments.forEachIndexed((index, word) {

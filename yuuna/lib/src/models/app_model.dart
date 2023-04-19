@@ -1289,7 +1289,8 @@ class AppModel with ChangeNotifier {
       /// of doing this, it's not good to do format-specific tweaks in a
       /// general function like this.
       if (dictionaryFormat.isTextFormat) {
-        Uint8List bytes = file.readAsBytesSync();
+        var randomAccessFile = file.openSync();
+        var bytes = randomAccessFile.readSync(100);
         DecodingResult result = await CharsetDetector.autoDecode(bytes);
         charset = result.charset;
       }
