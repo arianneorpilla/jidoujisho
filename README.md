@@ -84,7 +84,7 @@
 * 🕸️ **WebSocket support** allows convenient use alongside texthookers for visual novels, games and more
 * 🎶 Get lyrics and easily make **dictionary lookups for the current playing song** in your music app
 * 🤖 **Interact with ChatGPT** in your target language to get grammar information, example sentences and more 
-* 📘 **Use Yomichan dictionaries** with pitch and frequency information, and selectively collapse and expand dictionaries by default*
+* 📘 **Use Yomichan dictionaries** with pitch and frequency information, and selectively collapse and expand dictionaries by default
 * ⛏ **Frictionless sentence mining and flashcard creation workflow** with support for modular enhancements and automations
 
 # 🎞️ A glimpse of jidoujisho in action
