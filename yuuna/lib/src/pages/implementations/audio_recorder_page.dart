@@ -9,6 +9,7 @@ import 'package:record_mp3/record_mp3.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/i18n/strings.g.dart';
 import 'package:yuuna/pages.dart';
+import 'package:yuuna/src/utils/misc/jidoujisho_time_format.dart';
 
 /// The content of the dialog used for selecting segmented units of a source
 /// text.
@@ -188,21 +189,11 @@ class _AudioRecorderDialogPageState
             position = Duration.zero;
           }
 
-          if (position.inHours == 0) {
-            var strPosition = position.toString().split('.')[0];
-            return "${strPosition.split(':')[1]}:${strPosition.split(':')[2]}";
-          } else {
-            return position.toString().split('.')[0];
-          }
+          return JidoujishoTimeFormat.getVideoDurationText(position).trim();
         }
 
         String getDurationText() {
-          if (duration.inHours == 0) {
-            var strDuration = duration.toString().split('.')[0];
-            return "${strDuration.split(':')[1]}:${strDuration.split(':')[2]}";
-          } else {
-            return duration.toString().split('.')[0];
-          }
+          return JidoujishoTimeFormat.getVideoDurationText(duration).trim();
         }
 
         return Text(

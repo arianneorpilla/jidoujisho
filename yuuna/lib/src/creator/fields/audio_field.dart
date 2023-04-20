@@ -8,6 +8,7 @@ import 'package:multi_value_listenable_builder/multi_value_listenable_builder.da
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/models.dart';
+import 'package:yuuna/utils.dart';
 
 /// Returns audio information from context.
 class AudioField extends AudioExportField {
@@ -228,21 +229,11 @@ class AudioField extends AudioExportField {
             position = Duration.zero;
           }
 
-          if (position.inHours == 0) {
-            var strPosition = position.toString().split('.')[0];
-            return "${strPosition.split(':')[1]}:${strPosition.split(':')[2]}";
-          } else {
-            return position.toString().split('.')[0];
-          }
+          return JidoujishoTimeFormat.getVideoDurationText(position).trim();
         }
 
         String getDurationText() {
-          if (duration.inHours == 0) {
-            var strDuration = duration.toString().split('.')[0];
-            return "${strDuration.split(':')[1]}:${strDuration.split(':')[2]}";
-          } else {
-            return duration.toString().split('.')[0];
-          }
+          return JidoujishoTimeFormat.getVideoDurationText(duration).trim();
         }
 
         return Text(
