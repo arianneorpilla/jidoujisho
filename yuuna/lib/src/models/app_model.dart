@@ -1017,6 +1017,28 @@ class AppModel with ChangeNotifier {
       _isarDirectory.deleteSync(recursive: true);
     }
 
+    /// Inject non-Flutter licenses.
+    String ttuLicense =
+        await rootBundle.loadString('assets/licenses/ebook-reader.txt');
+    String veLicense = await rootBundle.loadString('assets/licenses/ve.txt');
+    String ipadicLicense =
+        await rootBundle.loadString('assets/licenses/ipadic.txt');
+    LicenseRegistry.addLicense(
+      () => Stream<LicenseEntry>.value(
+        LicenseEntryWithLineBreaks(<String>['ebook-reader'], ttuLicense),
+      ),
+    );
+    LicenseRegistry.addLicense(
+      () => Stream<LicenseEntry>.value(
+        LicenseEntryWithLineBreaks(<String>['ve'], veLicense),
+      ),
+    );
+    LicenseRegistry.addLicense(
+      () => Stream<LicenseEntry>.value(
+        LicenseEntryWithLineBreaks(<String>['ipadic'], ipadicLicense),
+      ),
+    );
+
     /// Initialise persistent database.
     _database = await Isar.open(
       globalSchemas,
