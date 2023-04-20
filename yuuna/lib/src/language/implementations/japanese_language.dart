@@ -674,6 +674,11 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
         if (freqSumCompare != 0) {
           return freqSumCompare;
         }
+
+        int popularityCompare = (b.popularitySum).compareTo(a.popularitySum);
+        if (popularityCompare != 0) {
+          return popularityCompare;
+        }
       }
 
       int entriesCompare = (b.entries.length).compareTo(a.entries.length);
