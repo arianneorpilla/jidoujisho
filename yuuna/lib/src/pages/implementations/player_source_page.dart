@@ -879,7 +879,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             position = duration;
           }
 
-          return JidoujishoTimeFormat.getVideoDurationText(position);
+          return JidoujishoTimeFormat.getVideoDurationText(position).trim();
         }
 
         String getDurationText() {
@@ -887,7 +887,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             duration = shadowingSubtitle.end + subtitleDelay + audioAllowance;
           }
 
-          return JidoujishoTimeFormat.getVideoDurationText(duration);
+          return JidoujishoTimeFormat.getVideoDurationText(duration).trim();
         }
 
         return Material(
