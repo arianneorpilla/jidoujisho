@@ -879,12 +879,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             position = duration;
           }
 
-          if (position.inHours == 0) {
-            var strPosition = position.toString().split('.')[0];
-            return "${strPosition.split(':')[1]}:${strPosition.split(':')[2]}";
-          } else {
-            return position.toString().split('.')[0];
-          }
+          return JidoujishoTimeFormat.getVideoDurationText(position);
         }
 
         String getDurationText() {
@@ -892,12 +887,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             duration = shadowingSubtitle.end + subtitleDelay + audioAllowance;
           }
 
-          if (duration.inHours == 0) {
-            var strDuration = duration.toString().split('.')[0];
-            return "${strDuration.split(':')[1]}:${strDuration.split(':')[2]}";
-          } else {
-            return duration.toString().split('.')[0];
-          }
+          return JidoujishoTimeFormat.getVideoDurationText(duration);
         }
 
         return Material(
