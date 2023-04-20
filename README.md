@@ -130,6 +130,7 @@ Please note that the development of the app switches between changes being imple
 - **Closed captions** and **auto-generated captions** are available when watching YouTube videos. **Users are strongly advised not to use automatic captions if they cannot reliably discern their correctness.** <b><a href="https://www.youtube.com/watch?v=mZ0sJQC8qkE">Here is a fair sample of</a> <a href="https://www.youtube.com/watch?v=X9zw0QF12Kc">YouTube videos with such subtitles</a> <a href="https://www.youtube.com/watch?v=t1yXDcuwzpY">showcasing some very practical application use cases.</a></b>
 - **ッツ Ebook Reader** allows reading of books in **EPUB or HTMLZ** format.
 - **Mokuro volumes** must be in HTML format, and have images in the relative directory.
+- If you are having issues with ッツ or Mokuro, **make sure your Android WebView is updated**.
 - Users may import <b><a href="https://foosoft.net/projects/yomichan/">Yomichan</a></b> dictionaries for Japanese, <b><a href="https://drive.google.com/drive/folders/1tTdLppnqMfVC5otPlX_cs4ixlIgjv_lH">some can be found here</a></b>. Note that Yomichan dictionaries using `structured-content` are currently unsupported.
 - Other supported formats include <b><a href="https://legacy.migaku.io/tools-guides/migaku-dictionary/manual/">Migaku</a></b> and <b><a href="http://lingvo.helpmax.net/en/troubleshooting/dsl-compiler/dsl-dictionary-structure/">DSL</b></a> dictionaries. 
 
