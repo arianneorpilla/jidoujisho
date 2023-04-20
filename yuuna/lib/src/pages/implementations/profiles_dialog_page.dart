@@ -1,3 +1,4 @@
+import 'package:change_notifier_builder/change_notifier_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:reorderables/reorderables.dart';
 import 'package:spaces/spaces.dart';
@@ -27,7 +28,8 @@ class ProfilesDialogPage extends BasePage {
   BasePageState createState() => _ProfilesDialogPageState();
 }
 
-class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
+class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage>
+    with ChangeNotifier {
   final ScrollController _scrollController = ScrollController();
   int? _selectedOrder;
 
@@ -355,6 +357,8 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
     );
   }
 
+  final _modelNotifier = ChangeNotifier();
+
   Widget buildImportDropdown() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -369,14 +373,17 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage> {
             ),
           ),
         ),
-        JidoujishoDropdown<String>(
-          options: widget.models,
-          initialOption: widget.initialModel,
-          generateLabel: (modelName) => modelName,
-          onChanged: (modelName) {
-            appModel.setLastSelectedModelName(modelName!);
-            setState(() {});
-          },
+        ChangeNotifierBuilder(
+          notifier: _modelNotifier,
+          builder: (_, __, ___) => JidoujishoDropdown<String>(
+            options: widget.models,
+            initialOption: widget.initialModel,
+            generateLabel: (modelName) => modelName,
+            onChanged: (modelName) {
+              appModel.setLastSelectedModelName(modelName!);
+              _modelNotifier.notifyListeners();
+            },
+          ),
         ),
       ],
     );

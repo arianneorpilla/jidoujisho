@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:change_notifier_builder/change_notifier_builder.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:reorderables/reorderables.dart';
@@ -19,7 +20,7 @@ class DictionaryDialogPage extends BasePage {
   BasePageState createState() => _DictionaryDialogPageState();
 }
 
-class _DictionaryDialogPageState extends BasePageState {
+class _DictionaryDialogPageState extends BasePageState with ChangeNotifier {
   final ScrollController _scrollController = ScrollController();
   int? _selectedOrder;
 
@@ -139,8 +140,9 @@ class _DictionaryDialogPageState extends BasePageState {
     return TextButton(
       child: Text(t.dialog_import),
       onPressed: () async {
-        /// A [ValueNotifier] that will update a message based on the progress of
-        /// the ongoing dictionary file import. See [DictionaryImportProgressPage].
+        /// A [ValueNotifier] that will update a message based on the progress
+        /// of the ongoing dictionary file import. See
+        /// [DictionaryImportProgressPage].
         ValueNotifier<String> progressNotifier =
             ValueNotifier<String>(t.import_start);
         ValueNotifier<int?> countNotifier = ValueNotifier<int?>(null);
@@ -494,6 +496,8 @@ class _DictionaryDialogPageState extends BasePageState {
     ];
   }
 
+  final _formatNotifier = ChangeNotifier();
+
   Widget buildImportDropdown() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -508,14 +512,17 @@ class _DictionaryDialogPageState extends BasePageState {
             ),
           ),
         ),
-        JidoujishoDropdown<DictionaryFormat>(
-          options: appModel.dictionaryFormats.values.toList(),
-          initialOption: appModel.lastSelectedDictionaryFormat,
-          generateLabel: (format) => format.name,
-          onChanged: (format) {
-            appModel.setLastSelectedDictionaryFormat(format!);
-            setState(() {});
-          },
+        ChangeNotifierBuilder(
+          notifier: _formatNotifier,
+          builder: (_, __, ___) => JidoujishoDropdown<DictionaryFormat>(
+            options: appModel.dictionaryFormats.values.toList(),
+            initialOption: appModel.lastSelectedDictionaryFormat,
+            generateLabel: (format) => format.name,
+            onChanged: (format) {
+              appModel.setLastSelectedDictionaryFormat(format!);
+              _formatNotifier.notifyListeners();
+            },
+          ),
         ),
       ],
     );

@@ -31,6 +31,12 @@ class _HomePageState extends BasePageState<HomePage>
   @override
   void initState() {
     super.initState();
+
+    /// Define the app icon for precaching so that it does not pop in.
+    appIcon = Image.asset(
+      'assets/meta/icon.png',
+    );
+
     WidgetsBinding.instance.addObserver(this);
 
     /// Populate and define the tabs and their respective content bodies based
@@ -46,11 +52,6 @@ class _HomePageState extends BasePageState<HomePage>
           label: t[mediaType.uniqueKey],
         ),
       ),
-    );
-
-    /// Define the app icon for precaching so that it does not pop in.
-    appIcon = Image.asset(
-      'assets/meta/icon.png',
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
