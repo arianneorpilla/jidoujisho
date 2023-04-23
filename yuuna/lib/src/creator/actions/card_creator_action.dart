@@ -33,11 +33,6 @@ class CardCreatorAction extends QuickAction {
     required DictionaryHeading heading,
     required String? dictionaryName,
   }) async {
-    if (appModel.isMediaOpen && appModel.shouldHideStatusBarWhenInMedia) {
-      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-      await Future.delayed(const Duration(milliseconds: 5), () {});
-    }
-
     if (appModel.isCreatorOpen) {
       Map<Field, String> newTextFields = {};
       for (Field field in appModel.activeFields) {
@@ -79,6 +74,11 @@ class CardCreatorAction extends QuickAction {
         return route.settings.name == (CreatorPage).toString();
       });
     } else {
+      if (appModel.isMediaOpen && appModel.shouldHideStatusBarWhenInMedia) {
+        await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+        await Future.delayed(const Duration(milliseconds: 5), () {});
+      }
+
       Map<Field, String> newTextFields = {};
       for (Field field in appModel.activeFields) {
         String? newTextField = field.onCreatorOpenAction(

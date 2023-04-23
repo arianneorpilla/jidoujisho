@@ -235,7 +235,9 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
   }) async {
     int startTime = item.position;
 
-    List<String> advancedParams = ['--start-time=$startTime'];
+    List<String> advancedParams = [
+      '--start-time=$startTime',
+    ];
     List<String> audioParams = [
       '--audio-language=${appModel.targetLanguage.languageCode},${appModel.appLocale.languageCode}',
       '--sub-track=99999'

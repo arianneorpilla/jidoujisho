@@ -228,9 +228,15 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     final futures = await Future.wait(
       [
         source.preparePlayerController(
-            appModel: appModel, ref: ref, item: widget.item!),
+          appModel: appModel,
+          ref: ref,
+          item: widget.item!,
+        ),
         source.prepareSubtitles(
-            appModel: appModel, ref: ref, item: widget.item!),
+          appModel: appModel,
+          ref: ref,
+          item: widget.item!,
+        ),
       ],
     );
 
@@ -299,6 +305,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     });
   }
 
+  double _lastAspectRatio = 1;
+
   /// This is called each time the player ticks.
   void listener() async {
     if (!mounted) {
@@ -310,6 +318,11 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       _durationNotifier.value = _playerController.value.duration;
       _playingNotifier.value = _playerController.value.isPlaying;
       _endedNotifier.value = _playerController.value.isEnded;
+
+      if (_playerController.value.aspectRatio != _lastAspectRatio) {
+        _lastAspectRatio = _playerController.value.aspectRatio;
+        setState(() {});
+      }
 
       if (_playingNotifier.value) {
         if (_notPlayingTimer == null) {
@@ -355,23 +368,20 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
       if (_shadowingSubtitle.value != null) {
         Duration allowance = audioAllowance;
-        if (_subtitleItem.controller.subtitles.isEmpty) {
-          if (allowance == Duration.zero) {
-            allowance = const Duration(seconds: 5);
-          }
+
+        if (allowance == Duration.zero) {
+          allowance = const Duration(seconds: 5);
         }
 
         if (_positionNotifier.value <
                 _shadowingSubtitle.value!.start -
                     subtitleDelay -
                     const Duration(seconds: 15) -
-                    audioAllowance ||
+                    allowance ||
             _positionNotifier.value >
-                _shadowingSubtitle.value!.end -
-                    subtitleDelay +
-                    audioAllowance) {
+                _shadowingSubtitle.value!.end - subtitleDelay + allowance) {
           _playerController.seekTo(
-              _shadowingSubtitle.value!.start + subtitleDelay - audioAllowance);
+              _shadowingSubtitle.value!.start + subtitleDelay - allowance);
           _bufferingNotifier.value = true;
         }
       }
@@ -538,11 +548,19 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       width: double.maxFinite,
       color: Colors.black,
       child: Center(
-        child: VlcPlayer(
-          controller: _playerController,
-          aspectRatio: 16 / 9,
-          placeholder: buildLoading(),
-          virtualDisplay: false,
+        child: Transform.scale(
+          scale: appModel.isStretchToFill
+              ? max(_playerController.value.aspectRatio,
+                      MediaQuery.of(context).size.aspectRatio) /
+                  min(_playerController.value.aspectRatio,
+                      MediaQuery.of(context).size.aspectRatio)
+              : 1,
+          child: VlcPlayer(
+            controller: _playerController,
+            aspectRatio: _playerController.value.aspectRatio,
+            placeholder: buildLoading(),
+            virtualDisplay: false,
+          ),
         ),
       ),
     );
@@ -580,36 +598,45 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
           await Future.delayed(const Duration(milliseconds: 5), () {});
 
-          await Navigator.push(
-            context,
-            PageRouteBuilder(
-              opaque: false,
-              pageBuilder: (context, _, __) => PlayerTranscriptPage(
-                title: widget.item!.title,
-                subtitles: _subtitleItem.controller.subtitles,
-                currentSubtitle: getNearestSubtitle(),
-                subtitleOptions: _subtitleOptionsNotifier.value,
-                onTap: (index) async {
-                  await Future.delayed(const Duration(milliseconds: 5), () {});
-                  await SystemChrome.setEnabledSystemUIMode(
-                      SystemUiMode.immersiveSticky);
-                  Navigator.pop(context);
-                  await _playerController.seekTo(
-                      _subtitleItem.controller.subtitles[index].start -
-                          subtitleDelay);
-                  _bufferingNotifier.value = true;
-                  _listeningSubtitle.value =
-                      _subtitleItem.controller.subtitles[index];
-                },
-                onLongPress: (index) async {
-                  Navigator.pop(context);
-                  exporting = true;
-                  await exportMultipleSubtitles(index);
-                  await dialogSmartResume();
-                },
-              ),
-            ),
-          );
+          try {
+            await appModel.temporarilyDisableStatusBarHiding(action: () async {
+              await Navigator.push(
+                context,
+                PageRouteBuilder(
+                  opaque: false,
+                  pageBuilder: (context, _, __) => PlayerTranscriptPage(
+                    title: widget.item!.title,
+                    subtitles: _subtitleItem.controller.subtitles,
+                    currentSubtitle: getNearestSubtitle(),
+                    subtitleOptions: _subtitleOptionsNotifier.value,
+                    alignMode: false,
+                    onTap: (index) async {
+                      await Future.delayed(
+                          const Duration(milliseconds: 5), () {});
+                      await SystemChrome.setEnabledSystemUIMode(
+                          SystemUiMode.immersiveSticky);
+                      Navigator.pop(context);
+                      await _playerController.seekTo(
+                          _subtitleItem.controller.subtitles[index].start -
+                              subtitleDelay);
+                      _bufferingNotifier.value = true;
+                      _listeningSubtitle.value =
+                          _subtitleItem.controller.subtitles[index];
+                    },
+                    onLongPress: (index) async {
+                      Navigator.pop(context);
+                      exporting = true;
+                      await exportMultipleSubtitles(index);
+                      await dialogSmartResume();
+                    },
+                  ),
+                ),
+              );
+            });
+          } finally {
+            widget.source
+                .setCurrentSentence(_currentSubtitle.value?.data ?? '');
+          }
 
           if (!exporting) {
             await dialogSmartResume();
@@ -883,8 +910,13 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         }
 
         String getDurationText() {
+          Duration allowance = audioAllowance;
+          if (allowance == Duration.zero) {
+            allowance = const Duration(seconds: 5);
+          }
+
           if (shadowingSubtitle != null) {
-            duration = shadowingSubtitle.end + subtitleDelay + audioAllowance;
+            duration = shadowingSubtitle.end + subtitleDelay + allowance;
           }
 
           return JidoujishoTimeFormat.getVideoDurationText(duration).trim();
@@ -1197,8 +1229,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
           await Future.delayed(const Duration(milliseconds: 5), () {});
 
-          await Navigator.push(
-            context,
+          await Navigator.of(context).push(
             PageRouteBuilder(
               opaque: false,
               pageBuilder: (context, _, __) => PlayerTranscriptPage(
@@ -1206,6 +1237,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                 subtitles: _subtitleItem.controller.subtitles,
                 currentSubtitle: getNearestSubtitle(),
                 subtitleOptions: _subtitleOptionsNotifier.value,
+                alignMode: true,
                 onTap: (index) async {
                   Navigator.pop(context);
                   Subtitle subtitle = _subtitleItem.controller.subtitles[index];
@@ -1424,7 +1456,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       options.add(option);
     }
 
-    options.add(JidoujishoBottomSheetOption(
+    options.add(
+      JidoujishoBottomSheetOption(
         label: getSubtitleLabel(
             item: _emptySubtitleItem, embeddedTracks: embeddedTracks),
         icon: Icons.subtitles_off_outlined,
@@ -1434,7 +1467,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           _currentSubtitle.value = null;
           widget.source.clearCurrentSentence();
           refreshSubtitleWidget();
-        }));
+        },
+      ),
+    );
 
     return options;
   }
@@ -1465,12 +1500,6 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   List<JidoujishoBottomSheetOption> getOptions() {
     List<JidoujishoBottomSheetOption> options = [
       JidoujishoBottomSheetOption(
-        label: t.player_option_shadowing,
-        icon: Icons.loop,
-        active: _shadowingSubtitle.value != null,
-        action: setShadowingSubtitle,
-      ),
-      JidoujishoBottomSheetOption(
         label: t.player_option_definition_focus,
         icon: appModel.isPlayerDefinitionFocusMode
             ? Icons.flash_on
@@ -1496,6 +1525,27 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             : Icons.stay_current_portrait,
         action: () async {
           appModel.togglePlayerOrientationPortrait();
+
+          Navigator.pop(context);
+          await appModel.openMedia(
+            context: context,
+            ref: ref,
+            mediaSource: widget.source,
+            item: widget.item!.copyWith(
+              position: _positionNotifier.value.inSeconds,
+              duration: _durationNotifier.value.inSeconds,
+            ),
+          );
+        },
+      ),
+      JidoujishoBottomSheetOption(
+        label: t.stretch_to_fill_screen,
+        icon: appModel.isStretchToFill
+            ? Icons.fit_screen
+            : Icons.fit_screen_outlined,
+        active: appModel.isStretchToFill,
+        action: () async {
+          appModel.toggleStretchToFill();
 
           Navigator.pop(context);
           await appModel.openMedia(

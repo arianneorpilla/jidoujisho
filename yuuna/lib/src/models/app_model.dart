@@ -3081,6 +3081,16 @@ class AppModel with ChangeNotifier {
         'player_orientation_portrait', !isPlayerOrientationPortrait);
   }
 
+  /// Get whether or not to stretch to fill screen.
+  bool get isStretchToFill {
+    return _preferences.get('stretch_to_fill_screen', defaultValue: false);
+  }
+
+  /// Toggle stretch to fill screen.
+  void toggleStretchToFill() async {
+    await _preferences.put('stretch_to_fill_screen', !isStretchToFill);
+  }
+
   /// Allows the player screen to listen to handler changes.
   Stream<void> get audioHandlerStream => _audioHandlerStreamController.stream;
   final StreamController<void> _audioHandlerStreamController =

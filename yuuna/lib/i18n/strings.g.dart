@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 340
+/// Strings: 341
 ///
-/// Built on 2023-04-16 at 05:44 UTC
+/// Built on 2023-04-23 at 05:07 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -486,6 +486,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get field_lock => 'Lock Field';
 	String get field_unlock => 'Unlock Field';
 	String get use_dark_theme => 'Use dark theme';
+	String get stretch_to_fill_screen => 'Stretch to Fill Screen';
 	String get processing_embedded_subtitles => 'Embedded subtitles are processing. Try again later.';
 	late final _StringsViewRepliesEn view_replies = _StringsViewRepliesEn._(_root);
 }
@@ -846,6 +847,7 @@ extension on _StringsEn {
 			case 'field_lock': return 'Lock Field';
 			case 'field_unlock': return 'Unlock Field';
 			case 'use_dark_theme': return 'Use dark theme';
+			case 'stretch_to_fill_screen': return 'Stretch to Fill Screen';
 			case 'processing_embedded_subtitles': return 'Embedded subtitles are processing. Try again later.';
 			case 'view_replies.reply': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
 				one: 'SHOW ${n} REPLY',

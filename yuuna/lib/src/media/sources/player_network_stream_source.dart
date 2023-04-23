@@ -136,7 +136,9 @@ class PlayerNetworkStreamSource extends PlayerMediaSource {
     String dataSource = item.mediaIdentifier;
     int startTime = item.position;
 
-    List<String> advancedParams = ['--start-time=$startTime'];
+    List<String> advancedParams = [
+      '--start-time=$startTime',
+    ];
     List<String> audioParams = [
       '--audio-language=${appModel.targetLanguage.languageCode},${appModel.appLocale.languageCode}',
       '--sub-track=99999',

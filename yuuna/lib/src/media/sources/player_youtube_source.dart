@@ -342,7 +342,9 @@ class PlayerYoutubeSource extends PlayerMediaSource {
 
     int startTime = item.position;
 
-    List<String> advancedParams = ['--start-time=$startTime'];
+    List<String> advancedParams = [
+      '--start-time=$startTime',
+    ];
     List<String> audioParams = [
       '--input-slave=$audioUrl',
       '--sub-track=99999',
