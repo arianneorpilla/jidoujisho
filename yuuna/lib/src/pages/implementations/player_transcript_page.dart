@@ -367,46 +367,56 @@ class _PlayerTranscriptPageState
                   children: [
                     const Space.extraBig(),
                     Expanded(
-                      child: JidoujishoSelectableText.rich(
-                        TextSpan(
-                          children: getTextSpans(
-                            controller: controller,
-                            subtitle: subtitle,
-                            text: subtitleText,
+                      child: Row(
+                        children: [
+                          Flexible(
+                            flex: 6,
+                            child: JidoujishoSelectableText.rich(
+                              TextSpan(
+                                children: getTextSpans(
+                                  controller: controller,
+                                  subtitle: subtitle,
+                                  text: subtitleText,
+                                ),
+                              ),
+                              enableInteractiveSelection: !widget.alignMode,
+                              selectionControls:
+                                  JidoujishoTextSelectionControls(
+                                searchAction: (selection) async {
+                                  (appModel.currentMediaSource
+                                          as PlayerMediaSource)
+                                      .setTranscriptSubtitle(subtitle);
+                                  appModel.currentMediaSource
+                                      ?.setCurrentSentence(subtitleText);
+                                  await appModel.openRecursiveDictionarySearch(
+                                    searchTerm: selection,
+                                    killOnPop: false,
+                                  );
+                                  appModel.currentMediaSource
+                                      ?.clearCurrentSentence();
+                                },
+                                stashAction: onStash,
+                                shareAction: onShare,
+                                creatorAction: (selection) async {
+                                  (appModel.currentMediaSource
+                                          as PlayerMediaSource)
+                                      .setTranscriptSubtitle(subtitle);
+                                  launchCreator(term: '', sentence: selection);
+                                },
+                                allowCopy: true,
+                                allowSelectAll: false,
+                                allowCut: true,
+                                allowPaste: true,
+                              ),
+                              controller: controller,
+                              style: style,
+                            ),
                           ),
-                        ),
-                        enableInteractiveSelection: !widget.alignMode,
-                        selectionControls: JidoujishoTextSelectionControls(
-                          searchAction: (selection) async {
-                            (appModel.currentMediaSource as PlayerMediaSource)
-                                .setTranscriptSubtitle(subtitle);
-                            appModel.currentMediaSource
-                                ?.setCurrentSentence(subtitleText);
-                            await appModel.openRecursiveDictionarySearch(
-                              searchTerm: selection,
-                              killOnPop: false,
-                            );
-                            appModel.currentMediaSource?.clearCurrentSentence();
-                          },
-                          stashAction: onStash,
-                          shareAction: onShare,
-                          creatorAction: (selection) async {
-                            (appModel.currentMediaSource as PlayerMediaSource)
-                                .setTranscriptSubtitle(subtitle);
-                            launchCreator(term: '', sentence: selection);
-                          },
-                          allowCopy: true,
-                          allowSelectAll: false,
-                          allowCut: true,
-                          allowPaste: true,
-                        ),
-                        controller: controller,
-                        style: style,
+                          const Spacer(),
+                        ],
                       ),
                     ),
-                    const Space.normal(),
-                    if (!widget.alignMode)
-                      buildSentencePickerButton(subtitleText, subtitle),
+                    if (!widget.alignMode) buildSeekButton(index),
                     if (!widget.alignMode)
                       buildCardCreatorButton(subtitleText, subtitle),
                     if (widget.alignMode) buildAlignButton(index),
@@ -431,9 +441,8 @@ class _PlayerTranscriptPageState
     );
   }
 
-  Widget buildSentencePickerButton(
-    String message,
-    Subtitle subtitle,
+  Widget buildSeekButton(
+    int index,
   ) {
     return Padding(
       padding: Spacing.of(context).insets.onlyLeft.semiSmall,
@@ -444,29 +453,9 @@ class _PlayerTranscriptPageState
             Theme.of(context).appBarTheme.foregroundColor?.withOpacity(0.1),
         size: Spacing.of(context).spaces.semiBig,
         tooltip: t.sentence_picker,
-        icon: Icons.colorize,
+        icon: Icons.play_arrow,
         onTap: () async {
-          appModel.openExampleSentenceDialog(
-            exampleSentences: appModel.targetLanguage
-                .getSentences(message)
-                .map((e) => e.trim())
-                .toList(),
-            onSelect: (selection) {
-              (appModel.currentMediaSource as PlayerMediaSource)
-                  .setTranscriptSubtitle(subtitle);
-
-              appModel.openCreator(
-                creatorFieldValues: CreatorFieldValues(
-                  textValues: {
-                    SentenceField.instance: selection.join(
-                        appModel.targetLanguage.isSpaceDelimited ? ' ' : ''),
-                  },
-                ),
-                killOnPop: false,
-                ref: ref,
-              );
-            },
-          );
+          widget.onTap?.call(index);
         },
       ),
     );
