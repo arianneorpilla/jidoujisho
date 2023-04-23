@@ -302,6 +302,15 @@ class _PlayerTranscriptPageState
           fontSize: widget.subtitleOptions.fontSize,
         );
 
+  @override
+  void clearDictionaryResult() {
+    super.clearDictionaryResult();
+    _lastTappedController?.clearSelection();
+    appModel.currentMediaSource?.clearCurrentSentence();
+    (appModel.currentMediaSource as PlayerMediaSource)
+        .clearTranscriptSubtitle();
+  }
+
   Widget buildSubtitles() {
     return ScrollablePositionedList.builder(
       padding: const EdgeInsets.only(bottom: 48),

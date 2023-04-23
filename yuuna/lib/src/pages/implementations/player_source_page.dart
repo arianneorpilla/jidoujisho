@@ -369,7 +369,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       if (_shadowingSubtitle.value != null) {
         Duration allowance = audioAllowance;
 
-        if (allowance == Duration.zero) {
+        if (allowance == Duration.zero &&
+            _subtitleItem.controller.subtitles.isEmpty) {
           allowance = const Duration(seconds: 5);
         }
 
@@ -622,6 +623,11 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                       _bufferingNotifier.value = true;
                       _listeningSubtitle.value =
                           _subtitleItem.controller.subtitles[index];
+
+                      if (_shadowingSubtitle.value != null) {
+                        _shadowingSubtitle.value =
+                            _subtitleItem.controller.subtitles[index];
+                      }
                     },
                     onLongPress: (index) async {
                       Navigator.pop(context);
@@ -912,7 +918,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
         String getDurationText() {
           Duration allowance = audioAllowance;
-          if (allowance == Duration.zero) {
+          if (allowance == Duration.zero &&
+              _subtitleItem.controller.subtitles.isEmpty) {
             allowance = const Duration(seconds: 5);
           }
 
