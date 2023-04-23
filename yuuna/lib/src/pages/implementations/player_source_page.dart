@@ -72,6 +72,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   final ValueNotifier<Subtitle?> _listeningSubtitle =
       ValueNotifier<Subtitle?>(null);
   final ValueNotifier<bool> _subtitleItemNotifier = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _transcriptOpenNotifier =
+      ValueNotifier<bool>(false);
 
   late final ValueNotifier<BlurOptions> _blurOptionsNotifier;
   late final ValueNotifier<SubtitleOptions> _subtitleOptionsNotifier;
@@ -599,6 +601,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
           await Future.delayed(const Duration(milliseconds: 5), () {});
 
+          _transcriptOpenNotifier.value = true;
+
           try {
             await appModel.temporarilyDisableStatusBarHiding(action: () async {
               await Navigator.push(
@@ -608,8 +612,11 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                   pageBuilder: (context, _, __) => PlayerTranscriptPage(
                     title: widget.item!.title,
                     subtitles: _subtitleItem.controller.subtitles,
-                    currentSubtitle: getNearestSubtitle(),
+                    currentSubtitle: _currentSubtitle,
                     subtitleOptions: _subtitleOptionsNotifier.value,
+                    controller: _playerController,
+                    nearestSubtitle: getNearestSubtitle(),
+                    playingNotifier: _playingNotifier,
                     alignMode: false,
                     onTap: (index) async {
                       await Future.delayed(
@@ -643,6 +650,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             (widget.source as PlayerMediaSource).clearTranscriptSubtitle();
             widget.source
                 .setCurrentSentence(_currentSubtitle.value?.data ?? '');
+            _transcriptOpenNotifier.value = false;
           }
 
           if (!exporting) {
@@ -857,10 +865,16 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       valueListenables: [
         _playingNotifier,
         _endedNotifier,
+        _transcriptOpenNotifier,
       ],
       builder: (context, values, _) {
         bool playing = values.elementAt(0);
         bool ended = values.elementAt(1);
+        bool transcriptOpen = values.elementAt(2);
+
+        if (transcriptOpen) {
+          return const SizedBox.shrink();
+        }
 
         return Center(
           child: AnimatedOpacity(
@@ -1237,13 +1251,18 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
           await Future.delayed(const Duration(milliseconds: 5), () {});
 
+          _transcriptOpenNotifier.value = true;
+
           await Navigator.of(context).push(
             PageRouteBuilder(
               opaque: false,
               pageBuilder: (context, _, __) => PlayerTranscriptPage(
                 title: widget.item!.title,
                 subtitles: _subtitleItem.controller.subtitles,
-                currentSubtitle: getNearestSubtitle(),
+                controller: _playerController,
+                playingNotifier: _playingNotifier,
+                nearestSubtitle: getNearestSubtitle(),
+                currentSubtitle: _currentSubtitle,
                 subtitleOptions: _subtitleOptionsNotifier.value,
                 alignMode: true,
                 onTap: (index) async {
@@ -1269,6 +1288,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               ),
             ),
           );
+
+          _transcriptOpenNotifier.value = false;
 
           await Future.delayed(const Duration(milliseconds: 5), () {});
           await SystemChrome.setEnabledSystemUIMode(
@@ -1640,13 +1661,15 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         _currentSubtitle,
         _listeningSubtitle,
         _playingNotifier,
+        _transcriptOpenNotifier,
       ],
       builder: (context, values, _) {
         Subtitle? currentSubtitle = values.elementAt(0);
         Subtitle? listeningSubtitle = values.elementAt(1);
         bool isPlaying = values.elementAt(2);
+        bool transcriptOpen = values.elementAt(3);
 
-        if (currentSubtitle == null) {
+        if (currentSubtitle == null || transcriptOpen) {
           return const SizedBox.shrink();
         }
 

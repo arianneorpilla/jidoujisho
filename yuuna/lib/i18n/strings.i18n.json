@@ -363,6 +363,8 @@
     "use_dark_theme": "Use dark theme",
     "stretch_to_fill_screen": "Stretch to Fill Screen",
     "processing_embedded_subtitles": "Embedded subtitles are processing. Try again later.",
+    "transcript_playback_mode": "Transcript Playback Mode",
+    "seek": "Seek",
     "view_replies": {
         "reply": {
           "one": "SHOW $n REPLY",

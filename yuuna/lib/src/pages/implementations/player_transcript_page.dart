@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:change_notifier_builder/change_notifier_builder.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:spaces/spaces.dart';
@@ -20,7 +22,10 @@ class PlayerTranscriptPage extends BaseSourcePage {
     required this.title,
     required this.subtitles,
     required this.currentSubtitle,
+    required this.nearestSubtitle,
     required this.subtitleOptions,
+    required this.controller,
+    required this.playingNotifier,
     required this.onTap,
     required this.onLongPress,
     required this.alignMode,
@@ -35,10 +40,19 @@ class PlayerTranscriptPage extends BaseSourcePage {
   final List<Subtitle> subtitles;
 
   /// Subtitle to be highlighted.
-  final Subtitle? currentSubtitle;
+  final ValueNotifier<Subtitle?> currentSubtitle;
+
+  /// Nearest subtitle if no initial subtitle.
+  final Subtitle? nearestSubtitle;
 
   /// Current subtitle options used in the player.
   final SubtitleOptions subtitleOptions;
+
+  /// Controller for the player.
+  final VlcPlayerController controller;
+
+  /// Notifier for whether or not the player is playing.
+  final ValueNotifier<bool> playingNotifier;
 
   /// Seek action.
   final FutureOr<void> Function(int)? onTap;
@@ -54,9 +68,7 @@ class PlayerTranscriptPage extends BaseSourcePage {
 }
 
 class _PlayerTranscriptPageState
-    extends BaseSourcePageState<PlayerTranscriptPage> {
-  int _selectedIndex = 0;
-
+    extends BaseSourcePageState<PlayerTranscriptPage> with ChangeNotifier {
   final ItemScrollController _itemScrollController = ItemScrollController();
   final ItemPositionsListener _itemPositionsListener =
       ItemPositionsListener.create();
@@ -64,13 +76,30 @@ class _PlayerTranscriptPageState
   @override
   void initState() {
     super.initState();
-    if (widget.currentSubtitle != null) {
-      _selectedIndex = widget.currentSubtitle!.index - 1;
-    }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).unfocus();
     });
+
+    widget.currentSubtitle.addListener(scrollTo);
+  }
+
+  @override
+  void dispose() {
+    widget.currentSubtitle.removeListener(scrollTo);
+    super.dispose();
+  }
+
+  void scrollTo() {
+    if (widget.currentSubtitle.value != null) {
+      int selectedIndex = widget.currentSubtitle.value!.index;
+      int scrollIndex = (selectedIndex - 2 > 0) ? selectedIndex - 2 : 0;
+
+      _itemScrollController.scrollTo(
+        index: scrollIndex,
+        duration: const Duration(milliseconds: 300),
+      );
+    }
   }
 
   @override
@@ -97,12 +126,68 @@ class _PlayerTranscriptPageState
     );
   }
 
+  final ChangeNotifier _playerModeNotifier = ChangeNotifier();
+
   PreferredSizeWidget? buildAppBar() {
     return AppBar(
       backgroundColor: Colors.transparent,
       leading: buildBackButton(),
       title: buildTitle(),
+      actions: [
+        if (!widget.alignMode) buildPlayPauseButton(),
+        if (!widget.alignMode) buildToggleButton(),
+        if (!widget.alignMode) const Space.normal(),
+      ],
       titleSpacing: 8,
+    );
+  }
+
+  Widget buildToggleButton() {
+    return ChangeNotifierBuilder(
+      notifier: _playerModeNotifier,
+      builder: (context, _, __) {
+        return JidoujishoIconButton(
+          enabledColor: appModel.isTranscriptPlayerMode ? Colors.red : null,
+          tooltip: t.transcript_playback_mode,
+          icon: Icons.playlist_play,
+          onTap: () async {
+            appModel.toggleTranscriptPlayerMode();
+            _playerModeNotifier.notifyListeners();
+
+            if (!appModel.isTranscriptPlayerMode) {
+              widget.controller.pause();
+            }
+          },
+        );
+      },
+    );
+  }
+
+  Widget buildPlayPauseButton() {
+    return ChangeNotifierBuilder(
+      notifier: _playerModeNotifier,
+      builder: (context, _, __) {
+        if (!appModel.isTranscriptPlayerMode) {
+          return const SizedBox.shrink();
+        }
+
+        return ValueListenableBuilder<bool>(
+          valueListenable: widget.playingNotifier,
+          builder: (context, playing, _) {
+            return JidoujishoIconButton(
+              tooltip: playing ? t.pause : t.play,
+              icon: playing ? Icons.pause : Icons.play_arrow,
+              onTap: () async {
+                if (playing) {
+                  widget.controller.pause();
+                } else {
+                  widget.controller.play();
+                }
+              },
+            );
+          },
+        );
+      },
     );
   }
 
@@ -272,6 +357,11 @@ class _PlayerTranscriptPageState
         offsetIndex,
         offsetIndex + length,
       );
+      if (searchTerm.isNotEmpty) {
+        if (appModel.isPlayerDefinitionFocusMode) {
+          dialogSmartPause();
+        }
+      }
 
       searchDictionaryResult(
         searchTerm: searchTerm,
@@ -309,15 +399,20 @@ class _PlayerTranscriptPageState
     appModel.currentMediaSource?.clearCurrentSentence();
     (appModel.currentMediaSource as PlayerMediaSource)
         .clearTranscriptSubtitle();
+    dialogSmartResume();
   }
 
   Widget buildSubtitles() {
+    int selectedIndex =
+        (widget.currentSubtitle.value ?? widget.nearestSubtitle)?.index ?? -1;
+    int initialScrollIndex = (selectedIndex - 2 > 0) ? selectedIndex - 2 : 0;
+
     return ScrollablePositionedList.builder(
       padding: const EdgeInsets.only(bottom: 48),
       physics: const BouncingScrollPhysics(),
       itemScrollController: _itemScrollController,
       itemPositionsListener: _itemPositionsListener,
-      initialScrollIndex: (_selectedIndex - 2 > 0) ? _selectedIndex - 2 : 0,
+      initialScrollIndex: initialScrollIndex,
       itemCount: widget.subtitles.length,
       itemBuilder: (context, index) {
         final JidoujishoSelectableTextController controller =
@@ -345,11 +440,37 @@ class _PlayerTranscriptPageState
 
         return Material(
           color: Colors.transparent,
-          child: ListTile(
-            selected: _selectedIndex == index,
-            selectedTileColor: Colors.red.withOpacity(0.15),
-            dense: true,
-            title: Column(
+          child: ValueListenableBuilder<Subtitle?>(
+            valueListenable: widget.currentSubtitle,
+            builder: (context, currentSubtitle, child) {
+              int selectedIndex = widget.currentSubtitle.value?.index ?? -1;
+
+              return ListTile(
+                selected: selectedIndex - 1 == index,
+                selectedTileColor: Colors.red.withOpacity(0.15),
+                dense: true,
+                title: child,
+                onTap: () async {
+                  if (appModel.isTranscriptPlayerMode && !widget.alignMode) {
+                    widget.controller.seekTo(subtitle.start);
+                    widget.controller.play();
+                    return;
+                  }
+                  if (widget.onTap != null) {
+                    await widget.onTap?.call(index);
+                  }
+                },
+                onLongPress: () async {
+                  if (appModel.isTranscriptPlayerMode && !widget.alignMode) {
+                    return;
+                  }
+                  if (widget.onLongPress != null) {
+                    await widget.onLongPress?.call(index);
+                  }
+                },
+              );
+            },
+            child: Column(
               children: [
                 const Space.small(),
                 Row(
@@ -425,7 +546,7 @@ class _PlayerTranscriptPageState
                         ],
                       ),
                     ),
-                    if (!widget.alignMode) buildSeekButton(index),
+                    if (!widget.alignMode) buildSeekButton(subtitle, index),
                     if (!widget.alignMode)
                       buildCardCreatorButton(subtitleText, subtitle),
                     if (widget.alignMode) buildAlignButton(index),
@@ -434,16 +555,6 @@ class _PlayerTranscriptPageState
                 const SizedBox(height: 6),
               ],
             ),
-            onTap: () async {
-              if (widget.onTap != null) {
-                await widget.onTap?.call(index);
-              }
-            },
-            onLongPress: () async {
-              if (widget.onLongPress != null) {
-                await widget.onLongPress?.call(index);
-              }
-            },
           ),
         );
       },
@@ -451,6 +562,7 @@ class _PlayerTranscriptPageState
   }
 
   Widget buildSeekButton(
+    Subtitle subtitle,
     int index,
   ) {
     return Padding(
@@ -461,9 +573,15 @@ class _PlayerTranscriptPageState
         backgroundColor:
             Theme.of(context).appBarTheme.foregroundColor?.withOpacity(0.1),
         size: Spacing.of(context).spaces.semiBig,
-        tooltip: t.sentence_picker,
-        icon: Icons.play_arrow,
+        tooltip: t.seek,
+        icon: Icons.play_circle_fill,
         onTap: () async {
+          if (appModel.isTranscriptPlayerMode && !widget.alignMode) {
+            widget.controller.seekTo(subtitle.start);
+            widget.controller.play();
+            return;
+          }
+
           widget.onTap?.call(index);
         },
       ),
@@ -534,5 +652,23 @@ class _PlayerTranscriptPageState
       searchTerm: searchTerm,
       killOnPop: false,
     );
+  }
+
+  bool _dialogSmartPaused = false;
+
+  /// This is called when opening dialogs such as the transcript and the
+  /// creator, where it is appropriate to pause the player.
+  Future<void> dialogSmartPause() async {
+    _dialogSmartPaused = true;
+    await widget.controller.pause();
+  }
+
+  /// Resumes the dialog only if smart paused. This is called when dialogs
+  /// are closed after being smart paused.
+  Future<void> dialogSmartResume({bool isSmartFocus = false}) async {
+    if (_dialogSmartPaused) {
+      _dialogSmartPaused = false;
+      await widget.controller.play();
+    }
   }
 }

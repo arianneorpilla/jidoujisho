@@ -3264,4 +3264,17 @@ class AppModel with ChangeNotifier {
   /// and audio export cannot be done when this flag is on, so a toast is
   /// shown.
   bool isProcessingEmbeddedSubtitles = false;
+
+  /// Get whether or not the transcript should show play/pause.
+  bool get isTranscriptPlayerMode {
+    return _preferences.get('is_transcript_player_mode', defaultValue: false);
+  }
+
+  /// Toggle transcript player mode.
+  void toggleTranscriptPlayerMode() async {
+    await _preferences.put(
+      'is_transcript_player_mode',
+      !isTranscriptPlayerMode,
+    );
+  }
 }
