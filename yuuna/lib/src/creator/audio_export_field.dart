@@ -123,6 +123,9 @@ abstract class AudioExportField extends Field {
     required Orientation orientation,
   });
 
+  /// Executed on close of the creator screen.
+  void onCreatorClose();
+
   /// Perform a function that generates a list of images and attempt a search
   /// with a given search term.
   Future<void> setAudio({

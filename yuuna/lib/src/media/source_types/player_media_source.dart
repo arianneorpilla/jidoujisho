@@ -82,6 +82,20 @@ abstract class PlayerMediaSource extends MediaSource {
     ]);
   }
 
+  /// The current selected subtitle in the transcript in order to generate
+  /// the right image.
+  Subtitle? _transcriptSubtitle;
+
+  /// Set the transcript subtitle.
+  void setTranscriptSubtitle(Subtitle subtitle) {
+    _transcriptSubtitle = subtitle;
+  }
+
+  /// Clear the transcript subtitle.
+  void clearTranscriptSubtitle() {
+    _transcriptSubtitle = null;
+  }
+
   /// If this source is non-null, this will be used as the initial function
   /// for the image field over the auto enhancement. Extra durations can be
   /// invoked and defined when initially opening the creator, to call attention
@@ -103,8 +117,14 @@ abstract class PlayerMediaSource extends MediaSource {
       return [];
     }
 
+    bool useCurrentTime = false;
+    if (subtitles == null && _transcriptSubtitle != null) {
+      subtitles = [_transcriptSubtitle!];
+    }
+
     if (subtitles == null && appModel.currentSubtitle.value != null) {
       subtitles ??= [appModel.currentSubtitle.value!];
+      useCurrentTime = true;
     }
 
     List<NetworkToFileImage> imageFiles = [];
@@ -135,7 +155,7 @@ abstract class PlayerMediaSource extends MediaSource {
       Duration currentTime = Duration(milliseconds: msMean);
 
       VlcPlayerController playerController = appModel.currentPlayerController!;
-      if (subtitles.length == 1) {
+      if (useCurrentTime) {
         currentTime = Duration(
             milliseconds: playerController.value.position.inMilliseconds);
       }
@@ -219,9 +239,14 @@ abstract class PlayerMediaSource extends MediaSource {
     Duration allowance = Duration(milliseconds: options!.audioAllowance);
     Duration delay = Duration(milliseconds: options.subtitleDelay);
 
+    if (subtitles == null && _transcriptSubtitle != null) {
+      subtitles = [_transcriptSubtitle!];
+    }
+
     if (subtitles == null && appModel.currentSubtitle.value != null) {
       subtitles ??= [appModel.currentSubtitle.value!];
     }
+
     Duration adjustedStart = subtitles!.first.start - delay - allowance;
     Duration adjustedEnd = subtitles.last.end - delay + allowance;
     timeStart = JidoujishoTimeFormat.getFfmpegTimestamp(adjustedStart);

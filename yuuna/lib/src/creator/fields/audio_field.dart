@@ -323,4 +323,11 @@ class AudioField extends AudioExportField {
 
     return buildAudioPlayer();
   }
+
+  // Executed on close of the creator screen.
+  @override
+  void onCreatorClose() async {
+    await _audioPlayer.stop();
+    await _audioPlayer.dispose();
+  }
 }

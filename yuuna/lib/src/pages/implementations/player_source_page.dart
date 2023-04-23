@@ -634,6 +634,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               );
             });
           } finally {
+            (widget.source as PlayerMediaSource).clearTranscriptSubtitle();
             widget.source
                 .setCurrentSentence(_currentSubtitle.value?.data ?? '');
           }

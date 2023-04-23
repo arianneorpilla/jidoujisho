@@ -8,6 +8,7 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:spaces/spaces.dart';
 import 'package:subtitle/subtitle.dart';
 import 'package:yuuna/creator.dart';
+import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
 import 'package:collection/collection.dart';
@@ -170,6 +171,7 @@ class _PlayerTranscriptPageState
 
   List<InlineSpan> getTextSpans({
     required JidoujishoSelectableTextController controller,
+    required Subtitle subtitle,
     required String text,
   }) {
     List<InlineSpan> spans = [];
@@ -183,6 +185,9 @@ class _PlayerTranscriptPageState
           recognizer: TapGestureRecognizer()
             ..onTapDown = (details) async {
               if (!widget.alignMode) {
+                (appModel.currentMediaSource as PlayerMediaSource)
+                    .setTranscriptSubtitle(subtitle);
+
                 onTapDown(
                   text: text,
                   character: character,
@@ -361,41 +366,48 @@ class _PlayerTranscriptPageState
                 Row(
                   children: [
                     const Space.extraBig(),
-                    JidoujishoSelectableText.rich(
-                      TextSpan(
-                        children: getTextSpans(
-                          controller: controller,
-                          text: subtitleText,
+                    Expanded(
+                      child: JidoujishoSelectableText.rich(
+                        TextSpan(
+                          children: getTextSpans(
+                            controller: controller,
+                            subtitle: subtitle,
+                            text: subtitleText,
+                          ),
                         ),
+                        enableInteractiveSelection: !widget.alignMode,
+                        selectionControls: JidoujishoTextSelectionControls(
+                          searchAction: (selection) async {
+                            (appModel.currentMediaSource as PlayerMediaSource)
+                                .setTranscriptSubtitle(subtitle);
+                            appModel.currentMediaSource
+                                ?.setCurrentSentence(subtitleText);
+                            await appModel.openRecursiveDictionarySearch(
+                              searchTerm: selection,
+                              killOnPop: false,
+                            );
+                            appModel.currentMediaSource?.clearCurrentSentence();
+                          },
+                          stashAction: onStash,
+                          shareAction: onShare,
+                          creatorAction: (selection) async {
+                            (appModel.currentMediaSource as PlayerMediaSource)
+                                .setTranscriptSubtitle(subtitle);
+                            launchCreator(term: '', sentence: selection);
+                          },
+                          allowCopy: true,
+                          allowSelectAll: false,
+                          allowCut: true,
+                          allowPaste: true,
+                        ),
+                        controller: controller,
+                        style: style,
                       ),
-                      enableInteractiveSelection: !widget.alignMode,
-                      selectionControls: JidoujishoTextSelectionControls(
-                        searchAction: (selection) async {
-                          appModel.currentMediaSource
-                              ?.setCurrentSentence(subtitleText);
-                          await appModel.openRecursiveDictionarySearch(
-                            searchTerm: selection,
-                            killOnPop: false,
-                          );
-                          appModel.currentMediaSource?.clearCurrentSentence();
-                        },
-                        stashAction: onStash,
-                        shareAction: onShare,
-                        creatorAction: (selection) async {
-                          launchCreator(term: '', sentence: selection);
-                        },
-                        allowCopy: true,
-                        allowSelectAll: false,
-                        allowCut: true,
-                        allowPaste: true,
-                      ),
-                      controller: controller,
-                      style: style,
                     ),
-                    const Spacer(),
                     if (!widget.alignMode)
-                      buildSentencePickerButton(subtitleText),
-                    if (!widget.alignMode) buildCardCreatorButton(subtitleText),
+                      buildSentencePickerButton(subtitleText, subtitle),
+                    if (!widget.alignMode)
+                      buildCardCreatorButton(subtitleText, subtitle),
                     if (widget.alignMode) buildAlignButton(index),
                   ],
                 ),
@@ -418,7 +430,10 @@ class _PlayerTranscriptPageState
     );
   }
 
-  Widget buildSentencePickerButton(String message) {
+  Widget buildSentencePickerButton(
+    String message,
+    Subtitle subtitle,
+  ) {
     return Padding(
       padding: Spacing.of(context).insets.onlyLeft.semiSmall,
       child: JidoujishoIconButton(
@@ -436,6 +451,9 @@ class _PlayerTranscriptPageState
                 .map((e) => e.trim())
                 .toList(),
             onSelect: (selection) {
+              (appModel.currentMediaSource as PlayerMediaSource)
+                  .setTranscriptSubtitle(subtitle);
+
               appModel.openCreator(
                 creatorFieldValues: CreatorFieldValues(
                   textValues: {
@@ -453,7 +471,10 @@ class _PlayerTranscriptPageState
     );
   }
 
-  Widget buildCardCreatorButton(String message) {
+  Widget buildCardCreatorButton(
+    String message,
+    Subtitle subtitle,
+  ) {
     return Padding(
       padding: Spacing.of(context).insets.onlyLeft.semiSmall,
       child: JidoujishoIconButton(
@@ -465,6 +486,9 @@ class _PlayerTranscriptPageState
         tooltip: t.card_creator,
         icon: Icons.note_add,
         onTap: () async {
+          (appModel.currentMediaSource as PlayerMediaSource)
+              .setTranscriptSubtitle(subtitle);
+
           launchCreator(term: '', sentence: message);
         },
       ),

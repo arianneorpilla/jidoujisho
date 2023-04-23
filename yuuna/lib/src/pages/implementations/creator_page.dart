@@ -83,6 +83,17 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
         ExpandableController(initialExpanded: !isCardEditing);
   }
 
+  @override
+  void dispose() {
+    for (Field field in appModel.activeFields) {
+      if (field is AudioExportField) {
+        field.onCreatorClose();
+      }
+    }
+
+    super.dispose();
+  }
+
   Future<void> initialiseCreator() async {
     appModel.validateSelectedMapping(
       context: context,
