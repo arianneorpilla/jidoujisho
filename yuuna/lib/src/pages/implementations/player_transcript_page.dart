@@ -404,6 +404,7 @@ class _PlayerTranscriptPageState
                         style: style,
                       ),
                     ),
+                    const Space.normal(),
                     if (!widget.alignMode)
                       buildSentencePickerButton(subtitleText, subtitle),
                     if (!widget.alignMode)
