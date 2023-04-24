@@ -380,7 +380,8 @@ class _PlayerTranscriptPageState
         offsetIndex + length,
       );
       if (searchTerm.isNotEmpty) {
-        if (appModel.isPlayerDefinitionFocusMode) {
+        if (appModel.isPlayerDefinitionFocusMode &&
+            appModel.isTranscriptPlayerMode) {
           dialogSmartPause();
         }
       }
@@ -421,7 +422,11 @@ class _PlayerTranscriptPageState
     appModel.currentMediaSource?.clearCurrentSentence();
     (appModel.currentMediaSource as PlayerMediaSource)
         .clearTranscriptSubtitle();
-    dialogSmartResume();
+
+    if (appModel.isPlayerDefinitionFocusMode &&
+        appModel.isTranscriptPlayerMode) {
+      dialogSmartResume();
+    }
   }
 
   Widget buildSubtitles() {
@@ -698,8 +703,10 @@ class _PlayerTranscriptPageState
   /// This is called when opening dialogs such as the transcript and the
   /// creator, where it is appropriate to pause the player.
   Future<void> dialogSmartPause() async {
-    _dialogSmartPaused = true;
-    await widget.controller.pause();
+    if (widget.controller.value.isPlaying) {
+      _dialogSmartPaused = true;
+      await widget.controller.pause();
+    }
   }
 
   /// Resumes the dialog only if smart paused. This is called when dialogs
