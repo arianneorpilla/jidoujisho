@@ -93,13 +93,15 @@ abstract class ImageExportField extends Field {
     try {
       List<NetworkToFileImage> images = await generateImages();
 
-      setSearchSuggestions(
-        appModel: appModel,
-        creatorModel: creatorModel,
-        images: images,
-        searchTermUsed: searchTerm,
-      );
-      _autoCannotOverride = newAutoCannotOverride;
+      if (images.isNotEmpty) {
+        setSearchSuggestions(
+          appModel: appModel,
+          creatorModel: creatorModel,
+          images: images,
+          searchTermUsed: searchTerm,
+        );
+        _autoCannotOverride = newAutoCannotOverride;
+      }
     } finally {
       /// Finish loading state.
       setSearching(

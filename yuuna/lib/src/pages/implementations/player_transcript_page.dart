@@ -6,6 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:multi_value_listenable_builder/multi_value_listenable_builder.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:spaces/spaces.dart';
 import 'package:subtitle/subtitle.dart';
@@ -26,6 +27,7 @@ class PlayerTranscriptPage extends BaseSourcePage {
     required this.subtitleOptions,
     required this.controller,
     required this.playingNotifier,
+    required this.endedNotifier,
     required this.transcriptBackgroundNotifier,
     required this.onTap,
     required this.onLongPress,
@@ -54,6 +56,9 @@ class PlayerTranscriptPage extends BaseSourcePage {
 
   /// Notifier for whether or not the player is playing.
   final ValueNotifier<bool> playingNotifier;
+
+  /// Notifier for whether or not the player has ended.
+  final ValueNotifier<bool> endedNotifier;
 
   /// Notifier for whether or not to show the transcript background.
   final ValueNotifier<bool> transcriptBackgroundNotifier;
@@ -193,9 +198,29 @@ class _PlayerTranscriptPageState
           return const SizedBox.shrink();
         }
 
-        return ValueListenableBuilder<bool>(
-          valueListenable: widget.playingNotifier,
-          builder: (context, playing, _) {
+        return MultiValueListenableBuilder(
+          valueListenables: [
+            widget.playingNotifier,
+            widget.endedNotifier,
+          ],
+          builder: (context, values, _) {
+            bool playing = values.elementAt(0);
+            bool ended = values.elementAt(1);
+
+            if (ended) {
+              return JidoujishoIconButton(
+                tooltip: t.replay,
+                icon: Icons.replay,
+                onTap: () async {
+                  await widget.controller.stop();
+                  await widget.controller.play();
+                  await Future.delayed(const Duration(seconds: 2), () async {
+                    await widget.controller.seekTo(Duration.zero);
+                  });
+                },
+              );
+            }
+
             return JidoujishoIconButton(
               tooltip: playing ? t.pause : t.play,
               icon: playing ? Icons.pause : Icons.play_arrow,
@@ -432,7 +457,9 @@ class _PlayerTranscriptPageState
   Widget buildSubtitles() {
     int selectedIndex =
         (widget.currentSubtitle.value ?? widget.nearestSubtitle)?.index ?? -1;
-    if (widget.subtitles.last.end <= widget.controller.value.position ||
+    if ((widget.subtitles.last.end -
+                Duration(milliseconds: widget.subtitleOptions.subtitleDelay)) <=
+            widget.controller.value.position ||
         widget.controller.value.isEnded) {
       selectedIndex = widget.subtitles.last.index;
     }
@@ -483,7 +510,10 @@ class _PlayerTranscriptPageState
                   (widget.currentSubtitle.value ?? widget.nearestSubtitle)
                           ?.index ??
                       -1;
-              if (widget.subtitles.last.end <=
+              if ((widget.subtitles.last.end -
+                          Duration(
+                              milliseconds:
+                                  widget.subtitleOptions.subtitleDelay)) <=
                       widget.controller.value.position ||
                   widget.controller.value.isEnded) {
                 selectedIndex = widget.subtitles.last.index;
@@ -496,7 +526,7 @@ class _PlayerTranscriptPageState
                 title: child,
                 onTap: () async {
                   if (appModel.isTranscriptPlayerMode && !widget.alignMode) {
-                    widget.controller.seekTo(subtitle.start);
+                    widget.controller.setTime(offsetStart.inMilliseconds);
                     widget.controller.play();
                     return;
                   }
@@ -590,7 +620,7 @@ class _PlayerTranscriptPageState
                         ],
                       ),
                     ),
-                    if (!widget.alignMode) buildSeekButton(subtitle, index),
+                    if (!widget.alignMode) buildSeekButton(offsetStart, index),
                     if (!widget.alignMode)
                       buildCardCreatorButton(subtitleText, subtitle),
                     if (widget.alignMode) buildAlignButton(index),
@@ -606,7 +636,7 @@ class _PlayerTranscriptPageState
   }
 
   Widget buildSeekButton(
-    Subtitle subtitle,
+    Duration offsetStart,
     int index,
   ) {
     return Padding(
@@ -621,8 +651,10 @@ class _PlayerTranscriptPageState
         icon: Icons.play_circle_fill,
         onTap: () async {
           if (appModel.isTranscriptPlayerMode && !widget.alignMode) {
-            widget.controller.seekTo(subtitle.start);
-            widget.controller.play();
+            await widget.controller.pause();
+            await widget.controller.seekTo(offsetStart);
+
+            await widget.controller.play();
             return;
           }
 
@@ -657,6 +689,8 @@ class _PlayerTranscriptPageState
   }
 
   void launchCreator({required String term, required String sentence}) async {
+    dialogSmartPause();
+
     await appModel.openCreator(
       creatorFieldValues: CreatorFieldValues(
         textValues: {
@@ -667,6 +701,8 @@ class _PlayerTranscriptPageState
       killOnPop: false,
       ref: ref,
     );
+
+    dialogSmartResume();
   }
 
   Widget buildAlignButton(int index) {

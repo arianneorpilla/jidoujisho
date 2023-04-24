@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_ffmpeg/ffmpeg_execution.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
@@ -173,14 +174,18 @@ abstract class PlayerMediaSource extends MediaSource {
       final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
       await _flutterFFmpeg.execute(command);
 
-      while (!imageFile.existsSync()) {
-        await Future.delayed(const Duration(milliseconds: 100));
+      String output = await FlutterFFmpegConfig().getLastCommandOutput();
+
+      if (!output.contains('Output file is empty, nothing was encoded')) {
+        while (!imageFile.existsSync()) {
+          await Future.delayed(const Duration(milliseconds: 100));
+        }
+
+        NetworkToFileImage networkToFileImage =
+            NetworkToFileImage(file: imageFile);
+
+        imageFiles.add(networkToFileImage);
       }
-
-      NetworkToFileImage networkToFileImage =
-          NetworkToFileImage(file: imageFile);
-
-      imageFiles.add(networkToFileImage);
     }
 
     return imageFiles;
@@ -211,10 +216,6 @@ abstract class PlayerMediaSource extends MediaSource {
       playerPreviewDir.deleteSync(recursive: true);
     }
     playerPreviewDir.createSync();
-
-    String timestamp = DateFormat('yyyyMMddTkkmmss').format(DateTime.now());
-    Directory imageDir = Directory('$playerPreviewPath/$timestamp');
-    imageDir.createSync();
 
     File audioFile = appModel.getAudioPreviewFile(playerPreviewDir);
     String outputPath = audioFile.path;

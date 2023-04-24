@@ -130,6 +130,22 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
               );
             },
           );
+
+          if (field.currentImageSuggestions == null ||
+              field.currentImageSuggestions!.isEmpty) {
+            Enhancement? enhancement = appModel.lastSelectedMapping
+                .getAutoFieldEnhancement(appModel: appModel, field: field);
+
+            if (enhancement != null) {
+              enhancement.enhanceCreatorParams(
+                context: context,
+                ref: ref,
+                appModel: appModel,
+                creatorModel: creatorModel,
+                cause: EnhancementTriggerCause.auto,
+              );
+            }
+          }
           continue;
         }
         if (field is AudioSentenceField && mediaSource.overridesAutoAudio) {

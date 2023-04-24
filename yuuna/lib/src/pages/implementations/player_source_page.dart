@@ -351,7 +351,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       if (regex.isNotEmpty) {
         sentence = sentence.replaceAll(RegExp(regex), '');
       }
-      widget.source.setCurrentSentence(sentence);
+
+      if (!_transcriptOpenNotifier.value) {
+        widget.source.setCurrentSentence(sentence);
+      }
 
       if (_currentSubtitle.value != newSubtitle) {
         // if (!_sliderBeingDragged &&
@@ -646,6 +649,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                     controller: _playerController,
                     nearestSubtitle: getNearestSubtitle(),
                     playingNotifier: _playingNotifier,
+                    endedNotifier: _endedNotifier,
                     transcriptBackgroundNotifier: _transcriptBackgroundNotifier,
                     alignMode: false,
                     onTap: (index) async {
@@ -1291,6 +1295,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                 subtitles: _subtitleItem.controller.subtitles,
                 controller: _playerController,
                 playingNotifier: _playingNotifier,
+                endedNotifier: _endedNotifier,
                 nearestSubtitle: getNearestSubtitle(),
                 currentSubtitle: _currentSubtitle,
                 subtitleOptions: _subtitleOptionsNotifier.value,
@@ -1943,7 +1948,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       if (regex.isNotEmpty) {
         sentence = sentence.replaceAll(RegExp(regex), '');
       }
-      widget.source.setCurrentSentence(sentence);
+
+      if (!_transcriptOpenNotifier.value) {
+        widget.source.setCurrentSentence(sentence);
+      }
     } else {
       widget.source.clearCurrentSentence();
     }
