@@ -26,6 +26,7 @@ class PlayerTranscriptPage extends BaseSourcePage {
     required this.subtitleOptions,
     required this.controller,
     required this.playingNotifier,
+    required this.transcriptBackgroundNotifier,
     required this.onTap,
     required this.onLongPress,
     required this.alignMode,
@@ -53,6 +54,9 @@ class PlayerTranscriptPage extends BaseSourcePage {
 
   /// Notifier for whether or not the player is playing.
   final ValueNotifier<bool> playingNotifier;
+
+  /// Notifier for whether or not to show the transcript background.
+  final ValueNotifier<bool> transcriptBackgroundNotifier;
 
   /// Seek action.
   final FutureOr<void> Function(int)? onTap;
@@ -135,10 +139,28 @@ class _PlayerTranscriptPageState
       title: buildTitle(),
       actions: [
         if (!widget.alignMode) buildPlayPauseButton(),
+        buildToggleBackgroundButton(),
         if (!widget.alignMode) buildToggleButton(),
-        if (!widget.alignMode) const Space.normal(),
+        const Space.normal(),
       ],
       titleSpacing: 8,
+    );
+  }
+
+  Widget buildToggleBackgroundButton() {
+    return ValueListenableBuilder<bool>(
+      valueListenable: widget.transcriptBackgroundNotifier,
+      builder: (context, isOpaque, __) {
+        return JidoujishoIconButton(
+          tooltip: t.toggle_transcript_background,
+          icon: isOpaque ? Icons.visibility : Icons.visibility_outlined,
+          onTap: () async {
+            appModel.toggleTranscriptOpaque();
+            widget.transcriptBackgroundNotifier.value =
+                appModel.isTranscriptOpaque;
+          },
+        );
+      },
     );
   }
 
@@ -405,6 +427,11 @@ class _PlayerTranscriptPageState
   Widget buildSubtitles() {
     int selectedIndex =
         (widget.currentSubtitle.value ?? widget.nearestSubtitle)?.index ?? -1;
+    if (widget.subtitles.last.end <= widget.controller.value.position ||
+        widget.controller.value.isEnded) {
+      selectedIndex = widget.subtitles.last.index;
+    }
+
     int initialScrollIndex = (selectedIndex - 2 > 0) ? selectedIndex - 2 : 0;
 
     return ScrollablePositionedList.builder(
@@ -413,8 +440,12 @@ class _PlayerTranscriptPageState
       itemScrollController: _itemScrollController,
       itemPositionsListener: _itemPositionsListener,
       initialScrollIndex: initialScrollIndex,
-      itemCount: widget.subtitles.length,
+      itemCount: widget.subtitles.length + 1,
       itemBuilder: (context, index) {
+        if (index == widget.subtitles.length) {
+          return SizedBox(height: MediaQuery.of(context).size.height * (2 / 3));
+        }
+
         final JidoujishoSelectableTextController controller =
             JidoujishoSelectableTextController();
 
@@ -443,7 +474,15 @@ class _PlayerTranscriptPageState
           child: ValueListenableBuilder<Subtitle?>(
             valueListenable: widget.currentSubtitle,
             builder: (context, currentSubtitle, child) {
-              int selectedIndex = widget.currentSubtitle.value?.index ?? -1;
+              int selectedIndex =
+                  (widget.currentSubtitle.value ?? widget.nearestSubtitle)
+                          ?.index ??
+                      -1;
+              if (widget.subtitles.last.end <=
+                      widget.controller.value.position ||
+                  widget.controller.value.isEnded) {
+                selectedIndex = widget.subtitles.last.index;
+              }
 
               return ListTile(
                 selected: selectedIndex - 1 == index,

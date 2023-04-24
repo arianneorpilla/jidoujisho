@@ -364,6 +364,7 @@
     "stretch_to_fill_screen": "Stretch to Fill Screen",
     "processing_embedded_subtitles": "Embedded subtitles are processing. Try again later.",
     "transcript_playback_mode": "Transcript Playback Mode",
+    "toggle_transcript_background": "Toggle Transcript Background",
     "seek": "Seek",
     "view_replies": {
         "reply": {

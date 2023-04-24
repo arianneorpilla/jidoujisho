@@ -3277,4 +3277,17 @@ class AppModel with ChangeNotifier {
       !isTranscriptPlayerMode,
     );
   }
+
+  /// Get whether or not the transcript should have a background.
+  bool get isTranscriptOpaque {
+    return _preferences.get('is_transcript_opaque', defaultValue: false);
+  }
+
+  /// Toggle transcript background.
+  void toggleTranscriptOpaque() async {
+    await _preferences.put(
+      'is_transcript_opaque',
+      !isTranscriptOpaque,
+    );
+  }
 }

@@ -74,6 +74,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   final ValueNotifier<bool> _subtitleItemNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _transcriptOpenNotifier =
       ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _transcriptBackgroundNotifier =
+      ValueNotifier<bool>(false);
 
   late final ValueNotifier<BlurOptions> _blurOptionsNotifier;
   late final ValueNotifier<SubtitleOptions> _subtitleOptionsNotifier;
@@ -244,6 +246,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
     _playerController = futures.elementAt(0) as VlcPlayerController;
     _subtitleItems = futures.elementAt(1) as List<SubtitleItem>;
+    _transcriptBackgroundNotifier.value = appModel.isTranscriptOpaque;
 
     if (_subtitleItems.isNotEmpty) {
       _subtitleItem = _subtitleItems.first;
@@ -539,6 +542,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               : EdgeInsets.zero,
           child: buildDictionary(),
         ),
+        buildTranscriptCover(),
       ],
     );
   }
@@ -569,6 +573,29 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     );
   }
 
+  /// This renders over the player to hide it if the transcript is set to be
+  /// opaque.
+  Widget buildTranscriptCover() {
+    return MultiValueListenableBuilder(
+      valueListenables: [
+        _transcriptBackgroundNotifier,
+        _transcriptOpenNotifier,
+      ],
+      builder: (context, transcriptOpen, _) {
+        return Visibility(
+          visible: _transcriptOpenNotifier.value &&
+              _transcriptBackgroundNotifier.value,
+          child: Container(
+            alignment: Alignment.center,
+            height: double.maxFinite,
+            width: double.maxFinite,
+            color: Colors.black,
+          ),
+        );
+      },
+    );
+  }
+
   /// This enables gestures for repeating the current subtitle
   /// and for showing the transcript.
   Widget buildGestureArea() {
@@ -596,7 +623,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       onVerticalDragEnd: (details) async {
         if (details.primaryVelocity!.abs() > 0) {
           bool exporting = false;
-          await dialogSmartPause();
+          if (!appModel.isTranscriptPlayerMode) {
+            await dialogSmartPause();
+          }
 
           await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
           await Future.delayed(const Duration(milliseconds: 5), () {});
@@ -617,6 +646,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                     controller: _playerController,
                     nearestSubtitle: getNearestSubtitle(),
                     playingNotifier: _playingNotifier,
+                    transcriptBackgroundNotifier: _transcriptBackgroundNotifier,
                     alignMode: false,
                     onTap: (index) async {
                       await Future.delayed(
@@ -1264,6 +1294,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                 nearestSubtitle: getNearestSubtitle(),
                 currentSubtitle: _currentSubtitle,
                 subtitleOptions: _subtitleOptionsNotifier.value,
+                transcriptBackgroundNotifier: _transcriptBackgroundNotifier,
                 alignMode: true,
                 onTap: (index) async {
                   Navigator.pop(context);

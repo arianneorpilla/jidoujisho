@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 343
+/// Strings: 344
 ///
-/// Built on 2023-04-23 at 13:43 UTC
+/// Built on 2023-04-24 at 08:36 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -489,6 +489,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get stretch_to_fill_screen => 'Stretch to Fill Screen';
 	String get processing_embedded_subtitles => 'Embedded subtitles are processing. Try again later.';
 	String get transcript_playback_mode => 'Transcript Playback Mode';
+	String get toggle_transcript_background => 'Toggle Transcript Background';
 	String get seek => 'Seek';
 	late final _StringsViewRepliesEn view_replies = _StringsViewRepliesEn._(_root);
 }
@@ -852,6 +853,7 @@ extension on _StringsEn {
 			case 'stretch_to_fill_screen': return 'Stretch to Fill Screen';
 			case 'processing_embedded_subtitles': return 'Embedded subtitles are processing. Try again later.';
 			case 'transcript_playback_mode': return 'Transcript Playback Mode';
+			case 'toggle_transcript_background': return 'Toggle Transcript Background';
 			case 'seek': return 'Seek';
 			case 'view_replies.reply': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
 				one: 'SHOW ${n} REPLY',
