@@ -48,7 +48,10 @@ class CreatorModel with ChangeNotifier {
   }
 
   /// Clear all fields and current context.
-  void clearAll({required bool overrideLocks}) {
+  void clearAll({
+    required bool overrideLocks,
+    required String savedTags,
+  }) {
     if (overrideLocks) {
       for (Field field in fieldsByKey.values) {
         getLockedNotifier(field).value = false;
@@ -58,6 +61,7 @@ class CreatorModel with ChangeNotifier {
     for (Field field in fieldsByKey.values) {
       clearField(
         field,
+        savedTags: savedTags,
         notify: false,
         overrideLocks: overrideLocks,
       );
@@ -84,6 +88,7 @@ class CreatorModel with ChangeNotifier {
   /// Clear a controller for a particular field.
   void clearField(
     Field field, {
+    required String savedTags,
     bool overrideLocks = false,
     bool notify = true,
   }) {
@@ -97,7 +102,11 @@ class CreatorModel with ChangeNotifier {
       }
 
       /// Need to clear the audio/image seed when that's implemented as well.
-      getFieldController(field).clear();
+      if (field is TagsField) {
+        getFieldController(field).text = savedTags;
+      } else {
+        getFieldController(field).clear();
+      }
       if (notify) {
         notifyListeners();
       }

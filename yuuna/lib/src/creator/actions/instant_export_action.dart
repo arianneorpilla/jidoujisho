@@ -116,7 +116,10 @@ class InstantExportAction extends QuickAction {
       mapping: appModel.lastSelectedMapping,
       deck: appModel.lastSelectedDeckName,
       onSuccess: () {
-        creatorModel.clearAll(overrideLocks: true);
+        creatorModel.clearAll(
+          overrideLocks: true,
+          savedTags: appModel.savedTags,
+        );
       },
     );
   }

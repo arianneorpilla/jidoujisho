@@ -52,7 +52,10 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
   Future<bool> onWillPop() async {
     if (isCardEditing) {
-      creatorModel.clearAll(overrideLocks: true);
+      creatorModel.clearAll(
+        overrideLocks: true,
+        savedTags: appModel.savedTags,
+      );
     }
 
     if (widget.killOnPop) {
@@ -315,7 +318,12 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       mapping: appModel.lastSelectedMapping,
       deck: appModel.lastSelectedDeckName,
       onSuccess: () {
-        creatorModel.clearAll(overrideLocks: false);
+        creatorModel.clearAll(
+          overrideLocks: false,
+          savedTags: appModel.savedTags,
+        );
+        creatorModel.getFieldController(TagsField.instance).text =
+            appModel.savedTags;
 
         if (appModel.closeCreatorOnExport) {
           Navigator.pop(context);
@@ -686,7 +694,10 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
             ),
           ),
           onPressed: () async {
-            creatorModel.clearAll(overrideLocks: true);
+            creatorModel.clearAll(
+              overrideLocks: true,
+              savedTags: appModel.savedTags,
+            );
             Navigator.pop(context);
           },
         ),

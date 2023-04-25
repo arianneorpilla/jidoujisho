@@ -2202,7 +2202,10 @@ class AppModel with ChangeNotifier {
     List<String> decks = await getDecks();
 
     CreatorModel creatorModel = ref.read(creatorProvider);
-    creatorModel.clearAll(overrideLocks: true);
+    creatorModel.clearAll(
+      overrideLocks: true,
+      savedTags: savedTags,
+    );
     if (creatorFieldValues != null) {
       creatorModel.copyContext(creatorFieldValues);
     }

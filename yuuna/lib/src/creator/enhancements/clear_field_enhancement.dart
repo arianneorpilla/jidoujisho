@@ -27,6 +27,10 @@ class ClearFieldEnhancement extends Enhancement {
     required CreatorModel creatorModel,
     required EnhancementTriggerCause cause,
   }) async {
-    creatorModel.clearField(field, overrideLocks: true);
+    creatorModel.clearField(
+      field,
+      overrideLocks: true,
+      savedTags: '',
+    );
   }
 }
