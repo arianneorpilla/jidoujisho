@@ -366,6 +366,7 @@
     "transcript_playback_mode": "Transcript Playback Mode",
     "toggle_transcript_background": "Toggle Transcript Background",
     "seek": "Seek",
+    "saved_tags": "Tags saved.",
     "view_replies": {
         "reply": {
           "one": "SHOW $n REPLY",

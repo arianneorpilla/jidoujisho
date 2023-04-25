@@ -35,6 +35,7 @@ export 'src/creator/enhancements/immersion_kit_enhancement.dart';
 export 'src/creator/enhancements/pick_audio_enhancement.dart';
 export 'src/creator/enhancements/audio_recorder_enhancement.dart';
 export 'src/creator/enhancements/text_segmentation_enhancement.dart';
+export 'src/creator/enhancements/save_tags_enhancement.dart';
 
 export 'src/creator/fields/sentence_field.dart';
 export 'src/creator/fields/meaning_field.dart';
@@ -52,3 +53,4 @@ export 'src/creator/enhancements/japanesepod101_audio_enhancement.dart';
 export 'src/creator/fields/collapsed_meaning_field.dart';
 export 'src/creator/fields/expanded_meaning_field.dart';
 export 'src/creator/fields/hidden_meaning_field.dart';
+export 'src/creator/fields/tags_field.dart';

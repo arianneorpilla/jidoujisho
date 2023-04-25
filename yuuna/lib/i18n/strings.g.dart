@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 344
+/// Strings: 345
 ///
-/// Built on 2023-04-24 at 08:36 UTC
+/// Built on 2023-04-24 at 23:46 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -491,6 +491,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get transcript_playback_mode => 'Transcript Playback Mode';
 	String get toggle_transcript_background => 'Toggle Transcript Background';
 	String get seek => 'Seek';
+	String get saved_tags => 'Tags saved.';
 	late final _StringsViewRepliesEn view_replies = _StringsViewRepliesEn._(_root);
 }
 
@@ -855,6 +856,7 @@ extension on _StringsEn {
 			case 'transcript_playback_mode': return 'Transcript Playback Mode';
 			case 'toggle_transcript_background': return 'Toggle Transcript Background';
 			case 'seek': return 'Seek';
+			case 'saved_tags': return 'Tags saved.';
 			case 'view_replies.reply': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
 				one: 'SHOW ${n} REPLY',
 				other: 'SHOW ${n} REPLIES',

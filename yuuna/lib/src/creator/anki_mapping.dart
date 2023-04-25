@@ -149,6 +149,10 @@ class AnkiMapping {
       AudioSentenceField.key: {
         0: ClearFieldEnhancement.key,
       },
+      TagsField.key: {
+        0: ClearFieldEnhancement.key,
+        1: SaveTagsEnhancement.key,
+      },
       ContextField.key: {0: ClearFieldEnhancement.key},
       PitchAccentField.key: {0: ClearFieldEnhancement.key},
       FuriganaField.key: {0: ClearFieldEnhancement.key},
@@ -172,6 +176,7 @@ class AnkiMapping {
 
   /// Default fields to show upon opening the Card Creator.
   static const List<String> defaultCreatorCollapsedFieldKeys = [
+    TagsField.key,
     FuriganaField.key,
     PitchAccentField.key,
   ];

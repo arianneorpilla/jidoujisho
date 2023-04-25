@@ -162,7 +162,7 @@ public class MainActivity extends AudioServiceActivity {
         return !notes.isEmpty();
     }
 
-    private void addNote(String model, String deck, ArrayList<String> fields) {
+    private void addNote(String model, String deck, ArrayList<String> fields, ArrayList<String> tags) {
         final AddContentApi api = new AddContentApi(context);
 
         long deckId;
@@ -174,9 +174,10 @@ public class MainActivity extends AudioServiceActivity {
 
         long modelId = mAnkiDroid.findModelIdByName(model, fields.size());
        
-        Set<String> tags = new HashSet<>(Arrays.asList("Yuuna"));
+        Set<String> allTags = new HashSet<>(Arrays.asList("Yuuna"));
+        allTags.addAll(tags);
 
-        api.addNote(modelId, deckId, fields.toArray(new String[fields.size()]), tags);
+        api.addNote(modelId, deckId, fields.toArray(new String[fields.size()]), allTags);
 
         System.out.println("Added note via flutter_ankidroid_api");
         System.out.println("Model: " + modelId);
@@ -198,6 +199,7 @@ public class MainActivity extends AudioServiceActivity {
                     final String key = call.argument("key");
                     final Integer numFields = call.argument("numFields");
                     final ArrayList<String> fields = call.argument("fields"); 
+                    final ArrayList<String> tags = call.argument("tags"); 
 
                     final String filename = call.argument("filename");
                     final String preferredName = call.argument("preferredName");
@@ -207,7 +209,7 @@ public class MainActivity extends AudioServiceActivity {
 
                     switch (call.method) {
                         case "addNote":
-                            addNote(model, deck, fields);
+                            addNote(model, deck, fields, tags);
                             result.success("Added note");
                             break;
                         case "checkForDuplicates":

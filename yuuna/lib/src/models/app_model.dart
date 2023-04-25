@@ -56,7 +56,7 @@ final List<CollectionSchema> globalSchemas = [
   MokuroCatalogSchema,
 ];
 
-/// A list of media types that the app will support at runtime.
+/// A list of fields that the app will support at runtime.
 final List<Field> globalFields = List<Field>.unmodifiable(
   [
     SentenceField.instance,
@@ -73,6 +73,7 @@ final List<Field> globalFields = List<Field>.unmodifiable(
     ExpandedMeaningField.instance,
     CollapsedMeaningField.instance,
     HiddenMeaningField.instance,
+    TagsField.instance,
   ],
 );
 
@@ -874,6 +875,10 @@ class AppModel with ChangeNotifier {
         ClearFieldEnhancement(field: HiddenMeaningField.instance),
         TextSegmentationEnhancement(field: HiddenMeaningField.instance),
         SentencePickerEnhancement(field: HiddenMeaningField.instance),
+      ],
+      TagsField.instance: [
+        ClearFieldEnhancement(field: TagsField.instance),
+        SaveTagsEnhancement(),
       ],
     };
 
@@ -1914,6 +1919,9 @@ class AppModel with ChangeNotifier {
       exportedAudio: exportedAudio,
     );
 
+    List<String> tags =
+        creatorFieldValues.textValues[TagsField.instance]?.split(' ') ?? [];
+
     try {
       await methodChannel.invokeMethod(
         'addNote',
@@ -1921,6 +1929,7 @@ class AppModel with ChangeNotifier {
           'deck': deck,
           'model': model,
           'fields': fields,
+          'tags': tags,
         },
       );
 
@@ -3289,5 +3298,15 @@ class AppModel with ChangeNotifier {
       'is_transcript_opaque',
       !isTranscriptOpaque,
     );
+  }
+
+  /// Get the saved value that the user has set for the [TagsField].
+  String get savedTags {
+    return _preferences.get('saved_tags', defaultValue: '');
+  }
+
+  /// Set the saved value that the user has set for the [TagsField].
+  void setSavedTags(String value) async {
+    await _preferences.put('saved_tags', value);
   }
 }
