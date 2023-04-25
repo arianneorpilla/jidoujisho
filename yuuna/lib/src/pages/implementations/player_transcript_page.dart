@@ -82,9 +82,22 @@ class _PlayerTranscriptPageState
   final ItemPositionsListener _itemPositionsListener =
       ItemPositionsListener.create();
 
+  late final int _initialScrollIndex;
+
   @override
   void initState() {
     super.initState();
+
+    int selectedIndex =
+        (widget.currentSubtitle.value ?? widget.nearestSubtitle)?.index ?? -1;
+    if ((widget.subtitles.last.end -
+                Duration(milliseconds: widget.subtitleOptions.subtitleDelay)) <=
+            widget.controller.value.position ||
+        widget.controller.value.isEnded) {
+      selectedIndex = widget.subtitles.last.index;
+    }
+    _selectedIndexNotifier.value ??= selectedIndex - 1;
+    _initialScrollIndex = (selectedIndex - 2 > 0) ? selectedIndex - 2 : 0;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).unfocus();
@@ -104,6 +117,7 @@ class _PlayerTranscriptPageState
       int selectedIndex = widget.currentSubtitle.value!.index;
       int scrollIndex = (selectedIndex - 2 > 0) ? selectedIndex - 2 : 0;
 
+      _selectedIndexNotifier.value = selectedIndex - 1;
       _itemScrollController.scrollTo(
         index: scrollIndex,
         duration: const Duration(milliseconds: 300),
@@ -454,28 +468,19 @@ class _PlayerTranscriptPageState
     }
   }
 
+  final ValueNotifier<int?> _selectedIndexNotifier = ValueNotifier<int?>(null);
+
   Widget buildSubtitles() {
-    int selectedIndex =
-        (widget.currentSubtitle.value ?? widget.nearestSubtitle)?.index ?? -1;
-    if ((widget.subtitles.last.end -
-                Duration(milliseconds: widget.subtitleOptions.subtitleDelay)) <=
-            widget.controller.value.position ||
-        widget.controller.value.isEnded) {
-      selectedIndex = widget.subtitles.last.index;
-    }
-
-    int initialScrollIndex = (selectedIndex - 2 > 0) ? selectedIndex - 2 : 0;
-
     return ScrollablePositionedList.builder(
       padding: const EdgeInsets.only(bottom: 48),
       physics: const BouncingScrollPhysics(),
       itemScrollController: _itemScrollController,
       itemPositionsListener: _itemPositionsListener,
-      initialScrollIndex: initialScrollIndex,
+      initialScrollIndex: _initialScrollIndex,
       itemCount: widget.subtitles.length + 1,
       itemBuilder: (context, index) {
         if (index == widget.subtitles.length) {
-          return SizedBox(height: MediaQuery.of(context).size.height * (2 / 3));
+          return SizedBox(height: MediaQuery.of(context).size.height * (1 / 2));
         }
 
         final JidoujishoSelectableTextController controller =
@@ -503,24 +508,11 @@ class _PlayerTranscriptPageState
 
         return Material(
           color: Colors.transparent,
-          child: ValueListenableBuilder<Subtitle?>(
-            valueListenable: widget.currentSubtitle,
+          child: ValueListenableBuilder<int?>(
+            valueListenable: _selectedIndexNotifier,
             builder: (context, currentSubtitle, child) {
-              int selectedIndex =
-                  (widget.currentSubtitle.value ?? widget.nearestSubtitle)
-                          ?.index ??
-                      -1;
-              if ((widget.subtitles.last.end -
-                          Duration(
-                              milliseconds:
-                                  widget.subtitleOptions.subtitleDelay)) <=
-                      widget.controller.value.position ||
-                  widget.controller.value.isEnded) {
-                selectedIndex = widget.subtitles.last.index;
-              }
-
               return ListTile(
-                selected: selectedIndex - 1 == index,
+                selected: _selectedIndexNotifier.value == index,
                 selectedTileColor: Colors.red.withOpacity(0.15),
                 dense: true,
                 title: child,
