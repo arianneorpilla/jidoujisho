@@ -1310,6 +1310,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                   _subtitleOptionsNotifier.value.subtitleDelay =
                       subtitle.start.inMilliseconds -
                           _positionNotifier.value.inMilliseconds;
+                  Fluttertoast.showToast(
+                    msg: t.subtitle_delay_set(
+                        ms: _subtitleOptionsNotifier.value.subtitleDelay),
+                  );
 
                   refreshSubtitleWidget();
                 },
@@ -1320,6 +1324,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                   _subtitleOptionsNotifier.value.subtitleDelay =
                       subtitle.start.inMilliseconds -
                           _positionNotifier.value.inMilliseconds;
+                  Fluttertoast.showToast(
+                    msg: t.subtitle_delay_set(
+                        ms: _subtitleOptionsNotifier.value.subtitleDelay),
+                  );
 
                   refreshSubtitleWidget();
                 },

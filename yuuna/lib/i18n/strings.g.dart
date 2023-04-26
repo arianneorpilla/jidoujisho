@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 349
+/// Strings: 350
 ///
-/// Built on 2023-04-26 at 11:06 UTC
+/// Built on 2023-04-26 at 12:10 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -496,6 +496,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get missing_api_key => 'API key not provided';
 	String get chatgpt_error => 'There was an error in getting a response from ChatGPT.';
 	String get api_key => 'API Key';
+	String subtitle_delay_set({required Object ms}) => 'Subtitle delay set to ${ms} ms.';
 	late final _StringsViewRepliesEn view_replies = _StringsViewRepliesEn._(_root);
 }
 
@@ -865,6 +866,7 @@ extension on _StringsEn {
 			case 'missing_api_key': return 'API key not provided';
 			case 'chatgpt_error': return 'There was an error in getting a response from ChatGPT.';
 			case 'api_key': return 'API Key';
+			case 'subtitle_delay_set': return ({required Object ms}) => 'Subtitle delay set to ${ms} ms.';
 			case 'view_replies.reply': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
 				one: 'SHOW ${n} REPLY',
 				other: 'SHOW ${n} REPLIES',

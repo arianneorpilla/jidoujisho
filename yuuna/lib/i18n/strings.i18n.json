@@ -372,6 +372,7 @@
     "missing_api_key": "API key not provided",
     "chatgpt_error": "There was an error in getting a response from ChatGPT.",
     "api_key": "API Key",
+    "subtitle_delay_set": "Subtitle delay set to $ms ms.",
     "view_replies": {
         "reply": {
           "one": "SHOW $n REPLY",
