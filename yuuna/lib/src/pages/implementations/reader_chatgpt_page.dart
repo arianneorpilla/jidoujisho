@@ -249,6 +249,22 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
 
         _scrollController.animateTo(_scrollController.position.minScrollExtent,
             duration: const Duration(milliseconds: 100), curve: Curves.linear);
+
+        String memory = _buffer.toString().trim();
+        Future.delayed(const Duration(seconds: 10), () {
+          if (memory.isNotEmpty &&
+              _buffer.toString().trim() == memory &&
+              _isLoading) {
+            _streamSubscription?.cancel();
+            _streamSubscription = null;
+
+            Fluttertoast.showToast(msg: t.error_chatgpt_response);
+
+            setState(() {
+              _isLoading = false;
+            });
+          }
+        });
       },
       onError: (error, stack) {
         debugPrint('$error');

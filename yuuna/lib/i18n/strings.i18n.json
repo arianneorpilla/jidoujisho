@@ -342,7 +342,7 @@
     "enter_message": "Enter message...",
     "clear_message_title": "Clear Messages",
     "clear_message_description": "This will clear all messages and start a new chat. Are you sure?",
-    "error_chatgpt_response": "Request failed or rate-limited. Try again later.",
+    "error_chatgpt_response": "Request failed or rate-limited. Try again shortly or check back later.",
     "pick_file": "Pick File",
     "open_url": "Open URL",
     "catalogs": "Catalogs",
