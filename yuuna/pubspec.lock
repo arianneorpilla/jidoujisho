@@ -218,6 +218,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.1"
+  chat_gpt_sdk:
+    dependency: "direct main"
+    description:
+      name: chat_gpt_sdk
+      sha256: "612c6199d7cd0f62197af742accd81c48441e7fbbe8131b43ca402c90063a52b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.1"
   checked_yaml:
     dependency: transitive
     description:
@@ -354,6 +362,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.0"
+  dio:
+    dependency: transitive
+    description:
+      name: dio
+      sha256: "0894a098594263fe1caaba3520e3016d8a855caeb010a882273189cca10f11e9"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.1.1"
   document_file_save_plus:
     dependency: "direct main"
     description:
@@ -523,30 +539,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.3.16"
-  firebase_remote_config:
-    dependency: "direct main"
-    description:
-      name: firebase_remote_config
-      sha256: "1f998632bdbf453101116bf41f020762aada0af8c8be14d5c74fc7863bc4f204"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.0.0"
-  firebase_remote_config_platform_interface:
-    dependency: transitive
-    description:
-      name: firebase_remote_config_platform_interface
-      sha256: "008f0830065e9d6532c575e0f464225c6e5d851136c795430ea2a37b97728f6e"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.2.0"
-  firebase_remote_config_web:
-    dependency: transitive
-    description:
-      name: firebase_remote_config_web
-      sha256: b01d23a111f1b33bc30b7c6b15db260a2000e1f9c336141556cf144d37a54396
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.2.0"
   fixnum:
     dependency: transitive
     description:
@@ -904,10 +896,10 @@ packages:
     dependency: transitive
     description:
       name: http_parser
-      sha256: db3060f22889f3d9d55f6a217565486737037eec3609f7f3eca4d0c67ee0d8a0
+      sha256: "2aa08ce0341cc9b354a498388e30986515406668dbcc4f7c950c3e715496693b"
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.1"
+    version: "4.0.2"
   image:
     dependency: transitive
     description:
@@ -1993,5 +1985,5 @@ packages:
     source: hosted
     version: "1.12.4"
 sdks:
-  dart: ">=2.19.2 <3.0.0"
+  dart: ">=2.19.3 <3.0.0"
   flutter: ">=3.3.0"

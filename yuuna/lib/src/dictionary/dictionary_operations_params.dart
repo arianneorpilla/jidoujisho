@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
 import 'package:flutter/foundation.dart';
 import 'package:yuuna/dictionary.dart';
+import 'package:yuuna/utils.dart';
 
 /// Base entity which allows messaging updates from other isolates.
 class IsolateParams {
@@ -64,6 +66,7 @@ class PrepareDictionaryParams extends IsolateParams {
     required this.dictionaryFormat,
     required this.workingDirectory,
     required this.useSlowImport,
+    required this.alertSendPort,
     required super.sendPort,
     required super.directoryPath,
   });
@@ -79,6 +82,15 @@ class PrepareDictionaryParams extends IsolateParams {
 
   /// Whether or not to use ACID-compliant importing.
   final bool useSlowImport;
+
+  /// For communication with a [ReceivePort] to show a dialog message to notify
+  /// the user of critical information relating to import.
+  final SendPort alertSendPort;
+
+  /// Send a message through the [sendPort].
+  void sendAlert({required String message}) {
+    alertSendPort.send(message);
+  }
 }
 
 /// For isolate communication purposes. Used for dictionary deletion.

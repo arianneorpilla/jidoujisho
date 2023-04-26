@@ -10,22 +10,6 @@ import 'package:yuuna/models.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
 
-/// A global [Provider] for getting necessary cookies.
-final accessCookieProvider = FutureProvider<Cookie?>((ref) {
-  return CookieManager.instance().getCookie(
-    url: Uri.parse('https://chat.openai.com/'),
-    name: '__Secure-next-auth.session-token',
-  );
-});
-
-/// A global [Provider] for getting necessary cookies.
-final clearanceCookieProvider = FutureProvider<Cookie?>((ref) {
-  return CookieManager.instance().getCookie(
-    url: Uri.parse('https://chat.openai.com/'),
-    name: 'cf_clearance',
-  );
-});
-
 /// A media source that allows the user to paste and select text.
 class ReaderChatgptSource extends ReaderMediaSource {
   /// Define this media source.
@@ -46,61 +30,18 @@ class ReaderChatgptSource extends ReaderMediaSource {
   static final ReaderChatgptSource _instance =
       ReaderChatgptSource._privateConstructor();
 
-  /// Used to get last chat details.
-  String? getLastMessageId() {
-    return getPreference<String?>(key: 'message_id', defaultValue: null);
+  /// Used to get the API key.
+  String? get apiKey {
+    return getPreference<String?>(key: 'openai_api_key', defaultValue: null);
   }
 
-  /// Used to get last chat details.
-  String? getLastConversationId() {
-    return getPreference<String?>(key: 'conversation_id', defaultValue: null);
-  }
-
-  /// Used to persist last chat details.
-  Future<void> setLastMessageId(String? value) async {
-    await setPreference(key: 'message_id', value: value);
-  }
-
-  /// Used to persist last chat details.
-  Future<void> setLastConversationId(String? value) async {
-    await setPreference(key: 'conversation_id', value: value);
+  /// Used to persist the API key.
+  Future<void> setApiKey(String? value) async {
+    await setPreference(key: 'openai_api_key', value: value);
   }
 
   /// Access token used for sending messages.
   String? messageAccessToken;
-
-  /// Used for preparing the actual access token used for sending messages.
-  /// This is different from the access token persisted in the cookies.
-  Future<void> prepareMessageAccessToken() async {
-    bool webViewBusy = true;
-
-    if (messageAccessToken == null) {
-      HeadlessInAppWebView webView = HeadlessInAppWebView(
-          initialOptions: InAppWebViewGroupOptions(
-            crossPlatform: InAppWebViewOptions(
-              userAgent:
-                  'Mozilla 5.0 (Linux; U; Android 13) Chrome/104.0.5112.99',
-            ),
-          ),
-          initialUrlRequest: URLRequest(
-            url: Uri.parse('https://chat.openai.com/api/auth/session'),
-          ),
-          onLoadStop: (controller, uri) async {
-            messageAccessToken = await controller.evaluateJavascript(
-                source: 'JSON.parse(document.body.textContent).accessToken;');
-
-            webViewBusy = false;
-          });
-
-      await webView.run();
-
-      while (webViewBusy) {
-        await Future.delayed(const Duration(milliseconds: 100), () {});
-      }
-
-      await webView.dispose();
-    }
-  }
 
   @override
   Future<void> onSearchBarTap({
@@ -128,28 +69,27 @@ class ReaderChatgptSource extends ReaderMediaSource {
         ref: ref,
         appModel: appModel,
       ),
-      buildLoginButton(context: context, ref: ref, appModel: appModel),
+      buildApiKeyButton(context: context, ref: ref, appModel: appModel),
     ];
   }
 
   /// Menu bar action.
-  Widget buildLoginButton(
+  Widget buildApiKeyButton(
       {required BuildContext context,
       required WidgetRef ref,
       required AppModel appModel}) {
     return FloatingSearchBarAction(
       child: JidoujishoIconButton(
         size: Theme.of(context).textTheme.titleLarge?.fontSize,
-        tooltip: t.login,
-        icon: Icons.login,
+        tooltip: t.api_key,
+        icon: Icons.key,
         onTap: () async {
-          await Navigator.of(context).push(
-            MaterialPageRoute(
-                builder: (context) => const ReaderChatgptLoginPage()),
+          await showDialog(
+            context: context,
+            builder: (context) => const ChatgptSettingsDialogPage(),
           );
 
-          ref.refresh(accessCookieProvider);
-          ref.refresh(clearanceCookieProvider);
+          appModel.refresh();
         },
       ),
     );
@@ -196,10 +136,7 @@ class ReaderChatgptSource extends ReaderMediaSource {
             ),
           ),
           onPressed: () async {
-            await setLastMessageId(null);
-            await setLastConversationId(null);
             appModel.clearMessages();
-
             appModel.refresh();
 
             Navigator.pop(context);

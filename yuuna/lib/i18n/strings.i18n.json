@@ -336,7 +336,7 @@
     "file_downloaded": "File downloaded: $name",
     "cfhange_sort_order": "Change Sort Order",
     "login": "Login",
-    "access_token_missing_expired": "Login token missing or expired",
+  
     "send": "Send",
     "no_messages": "Start a chat",
     "enter_message": "Enter message...",
@@ -344,7 +344,7 @@
     "clear_message_description": "This will clear all messages and start a new chat. Are you sure?",
     "error_chatgpt_response": "Failed to get a response. Request rate-limited or denied.",
     "error_chatgpt_expired": "Login token has expired. Please login again or solve a challenge.",
-    "pick_file": "Pick File",
+    "pick_file": "Pick Fifzle",
     "open_url": "Open URL",
     "catalogs": "Catalogs",
     "catalog_name": "Catalog Name",
@@ -367,6 +367,11 @@
     "toggle_transcript_background": "Toggle Transcript Background",
     "seek": "Seek",
     "saved_tags": "Tags saved.",
+    "structured_content_first": "$i definitions are unsupported and were omitted.",
+    "structured_content_second": "Consider a non-structured content version of this dictionary.",
+    "missing_api_key": "API key not provided",
+    "chatgpt_error": "There was an error in getting a response from ChatGPT.",
+    "api_key": "API Key",
     "view_replies": {
         "reply": {
           "one": "SHOW $n REPLY",

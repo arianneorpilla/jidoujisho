@@ -1297,6 +1297,13 @@ class AppModel with ChangeNotifier {
       progressNotifier.value = '$message';
     });
 
+    /// Used to show an [AlertDialog] if critical information needs to be
+    /// given to a user regarding the dictionary they are importing.
+    ReceivePort alertReceivePort = ReceivePort();
+    alertReceivePort.listen((message) {
+      Fluttertoast.showToast(msg: message.toString());
+    });
+
     /// If any [Exception] occurs, the process is aborted with a message as
     /// shown below. A dialog is shown to show the progress of the dictionary
     /// file import, with messages pertaining to the above [ValueNotifier].
@@ -1361,6 +1368,7 @@ class AppModel with ChangeNotifier {
         dictionaryFormat: dictionaryFormat,
         useSlowImport: useSlowImport,
         sendPort: receivePort.sendPort,
+        alertSendPort: alertReceivePort.sendPort,
       );
 
       await compute(depositDictionaryDataHelper, prepareDictionaryParams);

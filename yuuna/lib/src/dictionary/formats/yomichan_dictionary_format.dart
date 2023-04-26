@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_archive/flutter_archive.dart';
 import 'package:path/path.dart' as path;
 import 'package:yuuna/dictionary.dart';
-import 'package:yuuna/i18n/strings.g.dart';
+import 'package:yuuna/utils.dart';
 
 /// A dictionary format for archives following the latest Yomichan bank schema.
 /// Example dictionaries for this format may be downloaded from the Yomichan
@@ -65,6 +65,7 @@ Future<String> prepareNameYomichanFormat(PrepareDirectoryParams params) async {
 /// Top-level function for use in compute. See [DictionaryFormat] for details.
 Future<Map<DictionaryHeading, List<DictionaryEntry>>>
     prepareEntriesYomichanFormat(PrepareDictionaryParams params) async {
+  int structuredContentCount = 0;
   Map<DictionaryHeading, List<DictionaryEntry>> entriesByHeading = {};
 
   final List<FileSystemEntity> entities = params.workingDirectory.listSync();
@@ -90,8 +91,10 @@ Future<Map<DictionaryHeading, List<DictionaryEntry>>>
           definitions = meaningsList.map((e) {
             if (e is Map) {
               Map<String, dynamic> data = Map<String, dynamic>.from(e);
-              if (data['type'] == 'image' ||
-                  data['type'] == 'structured-content') {
+              if (data['type'] == 'image') {
+                return '';
+              } else if (data['type'] == 'structured-content') {
+                structuredContentCount++;
                 return '';
               } else {
                 return e.toString().trim();
@@ -182,6 +185,12 @@ Future<Map<DictionaryHeading, List<DictionaryEntry>>>
     if (entriesByHeading.isNotEmpty) {
       params.send(t.import_found_entry(count: entriesByHeading.length));
     }
+  }
+
+  if (structuredContentCount != 0) {
+    params.sendAlert(
+        message: t.structured_content_first(i: structuredContentCount));
+    params.sendAlert(message: t.structured_content_second);
   }
 
   return entriesByHeading;

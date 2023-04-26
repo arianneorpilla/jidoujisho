@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 345
+/// Strings: 349
 ///
-/// Built on 2023-04-24 at 23:46 UTC
+/// Built on 2023-04-26 at 11:06 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -461,7 +461,6 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String file_downloaded({required Object name}) => 'File downloaded: ${name}';
 	String get cfhange_sort_order => 'Change Sort Order';
 	String get login => 'Login';
-	String get access_token_missing_expired => 'Login token missing or expired';
 	String get send => 'Send';
 	String get no_messages => 'Start a chat';
 	String get enter_message => 'Enter message...';
@@ -469,7 +468,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get clear_message_description => 'This will clear all messages and start a new chat. Are you sure?';
 	String get error_chatgpt_response => 'Failed to get a response. Request rate-limited or denied.';
 	String get error_chatgpt_expired => 'Login token has expired. Please login again or solve a challenge.';
-	String get pick_file => 'Pick File';
+	String get pick_file => 'Pick Fifzle';
 	String get open_url => 'Open URL';
 	String get catalogs => 'Catalogs';
 	String get catalog_name => 'Catalog Name';
@@ -492,6 +491,11 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get toggle_transcript_background => 'Toggle Transcript Background';
 	String get seek => 'Seek';
 	String get saved_tags => 'Tags saved.';
+	String structured_content_first({required Object i}) => '${i} definitions are unsupported and were omitted.';
+	String get structured_content_second => 'Consider a non-structured content version of this dictionary.';
+	String get missing_api_key => 'API key not provided';
+	String get chatgpt_error => 'There was an error in getting a response from ChatGPT.';
+	String get api_key => 'API Key';
 	late final _StringsViewRepliesEn view_replies = _StringsViewRepliesEn._(_root);
 }
 
@@ -826,7 +830,6 @@ extension on _StringsEn {
 			case 'file_downloaded': return ({required Object name}) => 'File downloaded: ${name}';
 			case 'cfhange_sort_order': return 'Change Sort Order';
 			case 'login': return 'Login';
-			case 'access_token_missing_expired': return 'Login token missing or expired';
 			case 'send': return 'Send';
 			case 'no_messages': return 'Start a chat';
 			case 'enter_message': return 'Enter message...';
@@ -834,7 +837,7 @@ extension on _StringsEn {
 			case 'clear_message_description': return 'This will clear all messages and start a new chat. Are you sure?';
 			case 'error_chatgpt_response': return 'Failed to get a response. Request rate-limited or denied.';
 			case 'error_chatgpt_expired': return 'Login token has expired. Please login again or solve a challenge.';
-			case 'pick_file': return 'Pick File';
+			case 'pick_file': return 'Pick Fifzle';
 			case 'open_url': return 'Open URL';
 			case 'catalogs': return 'Catalogs';
 			case 'catalog_name': return 'Catalog Name';
@@ -857,6 +860,11 @@ extension on _StringsEn {
 			case 'toggle_transcript_background': return 'Toggle Transcript Background';
 			case 'seek': return 'Seek';
 			case 'saved_tags': return 'Tags saved.';
+			case 'structured_content_first': return ({required Object i}) => '${i} definitions are unsupported and were omitted.';
+			case 'structured_content_second': return 'Consider a non-structured content version of this dictionary.';
+			case 'missing_api_key': return 'API key not provided';
+			case 'chatgpt_error': return 'There was an error in getting a response from ChatGPT.';
+			case 'api_key': return 'API Key';
 			case 'view_replies.reply': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
 				one: 'SHOW ${n} REPLY',
 				other: 'SHOW ${n} REPLIES',

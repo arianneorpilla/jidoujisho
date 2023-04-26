@@ -1,12 +1,9 @@
 import 'dart:math';
 
+import 'package:chat_gpt_sdk/chat_gpt_sdk.dart';
 import 'package:collection/collection.dart';
-import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chatgpt_api/flutter_chatgpt_api.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:remove_emoji/remove_emoji.dart';
@@ -42,7 +39,7 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
   Orientation? _lastOrientation;
   bool _isLoading = false;
 
-  ChatGPTApi? _api;
+  late OpenAI _openAI;
 
   final ValueNotifier<String> _progressNotifier = ValueNotifier<String>('');
 
@@ -59,61 +56,45 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
       _lastOrientation = orientation;
     }
 
-    return ref.watch(accessCookieProvider).when(
-          data: (accessCookie) {
-            return ref.watch(clearanceCookieProvider).when(
-                  data: (clearanceCookie) {
-                    if (accessCookie == null || clearanceCookie == null) {
-                      return buildNoAccessToken();
-                    } else {
-                      _api ??= ChatGPTApi(
-                        sessionToken: accessCookie.value,
-                        clearanceToken: clearanceCookie.value,
-                        apiBaseUrl: FirebaseRemoteConfig.instance
-                            .getString('chatgpt_api_base_url'),
-                        backendApiBaseUrl: FirebaseRemoteConfig.instance
-                            .getString('chatgpt_backend_api_base_url'),
-                      );
+    if (source.apiKey == null || source.apiKey!.trim().isEmpty) {
+      return buildNoApiKey();
+    } else {
+      _openAI = OpenAI.instance.build(
+        token: source.apiKey,
+        baseOption: HttpSetup(
+          receiveTimeout: const Duration(seconds: 5),
+        ),
+        isLog: true,
+      );
 
-                      source.prepareMessageAccessToken();
-
-                      return Column(
-                        children: [
-                          Expanded(
-                            child: Stack(
-                              children: [
-                                if (appModel.messages.isEmpty)
-                                  buildEmpty()
-                                else
-                                  GestureDetector(
-                                    onTap: clearDictionaryResult,
-                                    child: buildMessageBuilder(),
-                                  ),
-                                Column(
-                                  children: [
-                                    const Space.extraBig(),
-                                    Expanded(
-                                      child: buildDictionary(),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          buildTextField(),
-                          SizedBox(height: getBottomInsets() * 0.85)
-                        ],
-                      );
-                    }
-                  },
-                  error: (error, stack) =>
-                      buildError(error: error, stack: stack),
-                  loading: buildLoading,
-                );
-          },
-          error: (error, stack) => buildError(error: error, stack: stack),
-          loading: buildLoading,
-        );
+      return Column(
+        children: [
+          Expanded(
+            child: Stack(
+              children: [
+                if (appModel.messages.isEmpty)
+                  buildEmpty()
+                else
+                  GestureDetector(
+                    onTap: clearDictionaryResult,
+                    child: buildMessageBuilder(),
+                  ),
+                Column(
+                  children: [
+                    const Space.extraBig(),
+                    Expanded(
+                      child: buildDictionary(),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          buildTextField(),
+          SizedBox(height: getBottomInsets() * 0.85)
+        ],
+      );
+    }
   }
 
   Widget buildEmpty() {
@@ -186,6 +167,15 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
     }
   }
 
+  List<Map<String, String>> get messages {
+    return appModel.messages
+        .map((item) => {
+              'role': item.isBot ? 'assistant' : 'user',
+              'content': item.message,
+            })
+        .toList();
+  }
+
   void onSubmitted(String input) async {
     setState(() {
       _isLoading = true;
@@ -196,86 +186,76 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
       return;
     }
 
-    try {
-      await source.prepareMessageAccessToken();
-      source.messageAccessToken!;
+    _controller.clear();
+    _progressNotifier.value = '';
 
-      _controller.clear();
-      _progressNotifier.value = '';
-
-      setState(() {
-        appModel.addMessage(
-          MessageItem.fromChatMessage(
-            ChatMessage(
-              text: text,
-              chatMessageType: ChatMessageType.user,
-            ),
-          ),
-        );
-      });
-
-      Future.delayed(const Duration(milliseconds: 100), scrollToBottom);
-
-      final response = await _api!.sendMessage(
-        accessToken: source.messageAccessToken!,
-        message: text,
-        onProgress: (progress) {
-          _progressNotifier.value = progress.message;
-          _scrollController.animateTo(
-              _scrollController.position.minScrollExtent,
-              duration: const Duration(milliseconds: 100),
-              curve: Curves.linear);
-        },
-        conversationId: source.getLastConversationId(),
-        parentMessageId: source.getLastMessageId(),
-      );
-
-      await source.setLastConversationId(response.conversationId);
-      await source.setLastMessageId(response.messageId);
-
+    setState(() {
       appModel.addMessage(
-        MessageItem.fromChatMessage(
-          ChatMessage(
-            text: response.message.trim(),
-            chatMessageType: ChatMessageType.bot,
-          ),
+        MessageItem(
+          message: text,
+          isBot: false,
         ),
       );
-    } catch (e) {
-      if (source.messageAccessToken == null) {
-        Fluttertoast.showToast(msg: t.error_chatgpt_expired);
+    });
 
-        CookieManager.instance().deleteCookies(
-          url: Uri.parse('https://chat.openai.com/'),
-          domain: 'openai.com',
-        );
+    Future.delayed(const Duration(milliseconds: 100), scrollToBottom);
 
-        ref.refresh(accessCookieProvider);
-        ref.refresh(clearanceCookieProvider);
+    StringBuffer buffer = StringBuffer();
+    int? responseIndex;
 
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const ReaderChatgptLoginPage(),
+    final chatComplete = _openAI.onChatCompletionSSE(
+      request: ChatCompleteText(
+        model: ChatModel.chatGptTurbo0301Model,
+        messages: messages,
+        maxToken: 2048,
+      ),
+    );
+
+    chatComplete.listen(
+      (data) {
+        if (responseIndex != data.choices.lastOrNull?.index) {
+          responseIndex = data.choices.lastOrNull?.index;
+          buffer.clear();
+        }
+
+        buffer.write(data.choices.lastOrNull?.message?.content);
+        _progressNotifier.value = buffer.toString();
+
+        _scrollController.animateTo(_scrollController.position.minScrollExtent,
+            duration: const Duration(milliseconds: 100), curve: Curves.linear);
+      },
+      onError: (error, stack) {
+        debugPrint('$error');
+        debugPrint('$stack');
+
+        Fluttertoast.showToast(msg: t.error_chatgpt_response);
+
+        setState(() {
+          _isLoading = false;
+        });
+      },
+      onDone: () {
+        appModel.addMessage(
+          MessageItem(
+            message: buffer.toString(),
+            isBot: true,
           ),
         );
-      } else {
-        Fluttertoast.showToast(msg: t.error_chatgpt_response);
-      }
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
 
-      Future.delayed(const Duration(milliseconds: 300), scrollToBottom);
-    }
+        setState(() {
+          _isLoading = false;
+        });
+
+        Future.delayed(const Duration(milliseconds: 300), scrollToBottom);
+      },
+    );
   }
 
-  Widget buildNoAccessToken() {
+  Widget buildNoApiKey() {
     return Center(
       child: JidoujishoPlaceholderMessage(
         icon: Icons.login,
-        message: t.access_token_missing_expired,
+        message: t.missing_api_key,
       ),
     );
   }

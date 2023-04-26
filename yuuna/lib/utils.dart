@@ -37,5 +37,6 @@ export 'src/utils/misc/jidoujisho_selectable_region.dart';
 export 'src/utils/misc/message_item.dart';
 export 'src/utils/misc/mokuro_catalog.dart';
 export 'src/utils/misc/mokuro_payload.dart';
+export 'src/utils/misc/dialog_content.dart';
 
 export 'src/utils/firebase_options.dart';
