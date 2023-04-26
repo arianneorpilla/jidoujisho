@@ -1,9 +1,13 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:chat_gpt_sdk/chat_gpt_sdk.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_gpt_tokenizer/flutter_gpt_tokenizer.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:remove_emoji/remove_emoji.dart';
@@ -119,6 +123,9 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
     return Padding(
       padding: Spacing.of(context).insets.all.normal,
       child: TextField(
+        inputFormatters: [
+          LengthLimitingTextInputFormatter(300),
+        ],
         controller: _controller,
         keyboardType: TextInputType.multiline,
         maxLines: null,
@@ -167,8 +174,23 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
     }
   }
 
-  List<Map<String, String>> get messages {
-    return appModel.messages
+  Future<List<Map<String, String>>> getMessages() async {
+    List<MessageItem> messageItems =
+        appModel.messages.sublist(max(0, appModel.messages.length - 20));
+
+    while (messageItems.isNotEmpty &&
+        4096 <
+            await Tokenizer().count(
+                jsonEncode(getMessagesFromList(messageItems)),
+                modelName: 'gpt-3.5-turbo')) {
+      messageItems.removeAt(0);
+    }
+
+    return getMessagesFromList(messageItems);
+  }
+
+  List<Map<String, String>> getMessagesFromList(List<MessageItem> items) {
+    return items
         .map((item) => {
               'role': item.isBot ? 'assistant' : 'user',
               'content': item.message,
@@ -176,17 +198,22 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
         .toList();
   }
 
+  final _buffer = StringBuffer();
+  StreamSubscription? _streamSubscription;
+
   void onSubmitted(String input) async {
+    String text = input.trim();
+    if (text.isEmpty) {
+      _controller.clear();
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
 
-    String text = input.trim();
-    if (text.isEmpty) {
-      return;
-    }
-
     _controller.clear();
+    _buffer.clear();
     _progressNotifier.value = '';
 
     setState(() {
@@ -200,26 +227,25 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
 
     Future.delayed(const Duration(milliseconds: 100), scrollToBottom);
 
-    StringBuffer buffer = StringBuffer();
     int? responseIndex;
 
     final chatComplete = _openAI.onChatCompletionSSE(
       request: ChatCompleteText(
         model: ChatModel.chatGptTurbo0301Model,
-        messages: messages,
-        maxToken: 2048,
+        messages: await getMessages(),
+        maxToken: 1500,
       ),
     );
 
-    chatComplete.listen(
+    _streamSubscription = chatComplete.listen(
       (data) {
         if (responseIndex != data.choices.lastOrNull?.index) {
           responseIndex = data.choices.lastOrNull?.index;
-          buffer.clear();
+          _buffer.clear();
         }
 
-        buffer.write(data.choices.lastOrNull?.message?.content);
-        _progressNotifier.value = buffer.toString();
+        _buffer.write(data.choices.lastOrNull?.message?.content);
+        _progressNotifier.value = _buffer.toString();
 
         _scrollController.animateTo(_scrollController.position.minScrollExtent,
             duration: const Duration(milliseconds: 100), curve: Curves.linear);
@@ -234,21 +260,26 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
           _isLoading = false;
         });
       },
-      onDone: () {
-        appModel.addMessage(
-          MessageItem(
-            message: buffer.toString(),
-            isBot: true,
-          ),
-        );
-
-        setState(() {
-          _isLoading = false;
-        });
-
-        Future.delayed(const Duration(milliseconds: 300), scrollToBottom);
-      },
+      onDone: addBotMessage,
     );
+  }
+
+  void addBotMessage() {
+    _streamSubscription?.cancel();
+    _streamSubscription = null;
+
+    appModel.addMessage(
+      MessageItem(
+        message: _buffer.toString(),
+        isBot: true,
+      ),
+    );
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    Future.delayed(const Duration(milliseconds: 300), scrollToBottom);
   }
 
   Widget buildNoApiKey() {

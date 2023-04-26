@@ -3,7 +3,7 @@
 /// Locales: 1
 /// Strings: 350
 ///
-/// Built on 2023-04-26 at 12:10 UTC
+/// Built on 2023-04-26 at 14:37 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -466,9 +466,8 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get enter_message => 'Enter message...';
 	String get clear_message_title => 'Clear Messages';
 	String get clear_message_description => 'This will clear all messages and start a new chat. Are you sure?';
-	String get error_chatgpt_response => 'Failed to get a response. Request rate-limited or denied.';
-	String get error_chatgpt_expired => 'Login token has expired. Please login again or solve a challenge.';
-	String get pick_file => 'Pick Fifzle';
+	String get error_chatgpt_response => 'Request failed or rate-limited. Try again later.';
+	String get pick_file => 'Pick File';
 	String get open_url => 'Open URL';
 	String get catalogs => 'Catalogs';
 	String get catalog_name => 'Catalog Name';
@@ -497,6 +496,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get chatgpt_error => 'There was an error in getting a response from ChatGPT.';
 	String get api_key => 'API Key';
 	String subtitle_delay_set({required Object ms}) => 'Subtitle delay set to ${ms} ms.';
+	String get cancel => 'Cancel';
 	late final _StringsViewRepliesEn view_replies = _StringsViewRepliesEn._(_root);
 }
 
@@ -836,9 +836,8 @@ extension on _StringsEn {
 			case 'enter_message': return 'Enter message...';
 			case 'clear_message_title': return 'Clear Messages';
 			case 'clear_message_description': return 'This will clear all messages and start a new chat. Are you sure?';
-			case 'error_chatgpt_response': return 'Failed to get a response. Request rate-limited or denied.';
-			case 'error_chatgpt_expired': return 'Login token has expired. Please login again or solve a challenge.';
-			case 'pick_file': return 'Pick Fifzle';
+			case 'error_chatgpt_response': return 'Request failed or rate-limited. Try again later.';
+			case 'pick_file': return 'Pick File';
 			case 'open_url': return 'Open URL';
 			case 'catalogs': return 'Catalogs';
 			case 'catalog_name': return 'Catalog Name';
@@ -867,6 +866,7 @@ extension on _StringsEn {
 			case 'chatgpt_error': return 'There was an error in getting a response from ChatGPT.';
 			case 'api_key': return 'API Key';
 			case 'subtitle_delay_set': return ({required Object ms}) => 'Subtitle delay set to ${ms} ms.';
+			case 'cancel': return 'Cancel';
 			case 'view_replies.reply': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
 				one: 'SHOW ${n} REPLY',
 				other: 'SHOW ${n} REPLIES',

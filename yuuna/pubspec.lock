@@ -106,6 +106,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.1"
+  build_cli_annotations:
+    dependency: transitive
+    description:
+      name: build_cli_annotations
+      sha256: b59d2769769efd6c9ff6d4c4cede0be115a566afc591705c2040b707534b1172
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   build_config:
     dependency: transitive
     description:
@@ -274,6 +282,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.17.0"
+  colorize:
+    dependency: transitive
+    description:
+      name: colorize
+      sha256: "584746cd6ba1cba0633b6720f494fe6f9601c4170f0666c1579d2aa2a61071ba"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
   convert:
     dependency: transitive
     description:
@@ -673,6 +689,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.4.2"
+  flutter_gpt_tokenizer:
+    dependency: "direct main"
+    description:
+      name: flutter_gpt_tokenizer
+      sha256: dfb96231b76641e661703abb9150d16abbabdcfd2f4ece5aa5b63237333a55dd
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   flutter_hooks:
     dependency: transitive
     description:
@@ -746,6 +770,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.4"
+  flutter_rust_bridge:
+    dependency: transitive
+    description:
+      name: flutter_rust_bridge
+      sha256: "83d4b4d2847e438eb647437c14d780f293dc2407f04854b227c18af2e6426eab"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.75.1"
   flutter_staggered_grid_view:
     dependency: "direct main"
     description:
@@ -836,6 +868,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.3"
+  gpt_tokenizer:
+    dependency: transitive
+    description:
+      name: gpt_tokenizer
+      sha256: "8d4b250ffd16b743526005fdffb28e8285e5ed0db0a0c61720359cc20897b006"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   graphs:
     dependency: transitive
     description:
@@ -1250,10 +1290,10 @@ packages:
     dependency: "direct main"
     description:
       name: path_provider
-      sha256: "04890b994ee89bfa80bf3080bfec40d5a92c5c7a785ebb02c13084a099d2b6f9"
+      sha256: c7edf82217d4b2952b2129a61d3ad60f1075b9299e629e149a8d2e39c2e6aad4
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.13"
+    version: "2.0.14"
   path_provider_android:
     dependency: transitive
     description:
@@ -1422,6 +1462,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.1"
+  puppeteer:
+    dependency: transitive
+    description:
+      name: puppeteer
+      sha256: a1c40c0c341dc1d8d6c318d6cadc7859d40391e1f4553aa31a372a1b13f8e9c0
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.15.0"
   quiver:
     dependency: "direct main"
     description:
@@ -1560,6 +1608,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.2"
+  shelf_static:
+    dependency: transitive
+    description:
+      name: shelf_static
+      sha256: e792b76b96a36d4a41b819da593aff4bdd413576b3ba6150df5d8d9996d2e74c
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.1"
   shelf_web_socket:
     dependency: transitive
     description:
@@ -1763,10 +1819,10 @@ packages:
     dependency: transitive
     description:
       name: tuple
-      sha256: fe3ae4f0dca3f9aac0888e2e0d117b642ce283a82d7017b54136290c0a3b0dd3
+      sha256: "0ea99cd2f9352b2586583ab2ce6489d1f95a5f6de6fb9492faaf97ae2060f0aa"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.0"
+    version: "2.0.1"
   typed_data:
     dependency: transitive
     description:
