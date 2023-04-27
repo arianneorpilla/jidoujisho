@@ -107,18 +107,20 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       case AppLifecycleState.resumed:
         _session.setActive(true);
 
-        if (appModelNoUpdate.isPlayerOrientationPortrait) {
-          SystemChrome.setPreferredOrientations([
-            DeviceOrientation.portraitUp,
-          ]);
-        } else {
-          SystemChrome.setPreferredOrientations([
-            DeviceOrientation.landscapeLeft,
-            DeviceOrientation.landscapeRight,
-          ]);
-        }
+        if (mounted) {
+          if (appModelNoUpdate.isPlayerOrientationPortrait) {
+            SystemChrome.setPreferredOrientations([
+              DeviceOrientation.portraitUp,
+            ]);
+          } else {
+            SystemChrome.setPreferredOrientations([
+              DeviceOrientation.landscapeLeft,
+              DeviceOrientation.landscapeRight,
+            ]);
+          }
 
-        Wakelock.enable();
+          Wakelock.enable();
+        }
 
         break;
       case AppLifecycleState.inactive:
@@ -264,6 +266,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     appModel.blockCreatorInitialMedia = true;
 
     _playerController.addOnInitListener(() async {
+      if (!mounted) {
+        return;
+      }
+
       initialiseEmbeddedSubtitles(_playerController);
 
       Future.delayed(const Duration(seconds: 5), () {
@@ -271,17 +277,19 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       });
     });
 
-    if (appModelNoUpdate.isPlayerOrientationPortrait) {
-      await SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-      ]);
-    } else {
-      await SystemChrome.setPreferredOrientations([
-        DeviceOrientation.landscapeLeft,
-        DeviceOrientation.landscapeRight,
-      ]);
+    if (mounted) {
+      if (appModelNoUpdate.isPlayerOrientationPortrait) {
+        await SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+        ]);
+      } else {
+        await SystemChrome.setPreferredOrientations([
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight,
+        ]);
+      }
+      await Wakelock.enable();
     }
-    await Wakelock.enable();
 
     _playPauseSubscription = appModel.audioHandlerStream.listen((_) {
       playPause();
@@ -610,9 +618,12 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           Subtitle? nearestSubtitle = getNearestSubtitle();
 
           _listeningSubtitle.value = nearestSubtitle;
-          await _playerController
-              .seekTo(nearestSubtitle!.start - subtitleDelay);
-          _bufferingNotifier.value = true;
+
+          if (nearestSubtitle != null) {
+            await _playerController
+                .seekTo(nearestSubtitle.start - subtitleDelay);
+            _bufferingNotifier.value = true;
+          }
         }
       },
       onHorizontalDragEnd: (dragEndDetails) async {
@@ -620,9 +631,12 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           Subtitle? nearestSubtitle = getNearestSubtitle();
 
           _listeningSubtitle.value = nearestSubtitle;
-          await _playerController
-              .seekTo(nearestSubtitle!.start - subtitleDelay);
-          _bufferingNotifier.value = true;
+
+          if (nearestSubtitle != null) {
+            await _playerController
+                .seekTo(nearestSubtitle.start - subtitleDelay);
+            _bufferingNotifier.value = true;
+          }
         }
       },
       onVerticalDragEnd: (details) async {
@@ -1599,6 +1613,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             ? Icons.stay_current_landscape
             : Icons.stay_current_portrait,
         action: () async {
+          await _playerController.stop();
+
           appModel.togglePlayerOrientationPortrait();
 
           Navigator.pop(context);
@@ -1620,6 +1636,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             : Icons.fit_screen_outlined,
         active: appModel.isStretchToFill,
         action: () async {
+          await _playerController.stop();
+
           appModel.toggleStretchToFill();
 
           Navigator.pop(context);

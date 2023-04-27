@@ -100,7 +100,3 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation 'com.github.ankidroid:Anki-Android:api-v1.1.0'
 }
-
-// This must appear at the bottom of the file
-apply plugin: 'com.google.gms.google-services'
-apply plugin: 'com.google.firebase.crashlytics'
