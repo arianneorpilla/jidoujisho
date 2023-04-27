@@ -1,9 +1,8 @@
-import 'package:flutter_chatgpt_api/flutter_chatgpt_api.dart';
 import 'package:isar/isar.dart';
 
 part 'message_item.g.dart';
 
-/// Used to allow persistence of [ChatMessage].
+/// Used to allow persistence of a message from ChatGPT.
 @Collection()
 class MessageItem {
   /// Initialise this object.
@@ -12,14 +11,6 @@ class MessageItem {
     required this.isBot,
     this.id,
   });
-
-  /// Converts [ChatMessage] to [MessageItem].
-  factory MessageItem.fromChatMessage(ChatMessage message) {
-    return MessageItem(
-      message: message.text,
-      isBot: message.chatMessageType == ChatMessageType.bot,
-    );
-  }
 
   /// Used for database purposes.
   Id? id;

@@ -734,6 +734,7 @@ class _JidoujishoSelectableTextState extends State<JidoujishoSelectableText>
       case TargetPlatform.iOS:
         final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
         forcePressEnabled = true;
+        // ignore: deprecated_member_use
         textSelectionControls ??= cupertinoTextSelectionHandleControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
@@ -750,6 +751,7 @@ class _JidoujishoSelectableTextState extends State<JidoujishoSelectableText>
       case TargetPlatform.macOS:
         final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
         forcePressEnabled = false;
+        // ignore: deprecated_member_use
         textSelectionControls ??= cupertinoDesktopTextSelectionHandleControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
@@ -766,6 +768,7 @@ class _JidoujishoSelectableTextState extends State<JidoujishoSelectableText>
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         forcePressEnabled = false;
+        // ignore: deprecated_member_use
         textSelectionControls ??= materialTextSelectionHandleControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
@@ -779,6 +782,8 @@ class _JidoujishoSelectableTextState extends State<JidoujishoSelectableText>
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         forcePressEnabled = false;
+
+        // ignore: deprecated_member_use
         textSelectionControls ??= desktopTextSelectionHandleControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
@@ -805,6 +810,7 @@ class _JidoujishoSelectableTextState extends State<JidoujishoSelectableText>
         key: editableTextKey,
         style: effectiveTextStyle,
         readOnly: true,
+        // ignore: deprecated_member_use, deprecated_member_use_from_same_package
         toolbarOptions: widget.toolbarOptions,
         textWidthBasis:
             widget.textWidthBasis ?? defaultTextStyle.textWidthBasis,

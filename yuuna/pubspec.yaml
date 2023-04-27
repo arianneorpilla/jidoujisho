@@ -10,7 +10,7 @@ dependencies:
   audio_session: ^0.1.13
   blurrycontainer:
     git:
-      url: https://github.com/Krish-Ideausher/blurry_container/
+      url: https://github.com/lrorpilla/blurry_container/
       ref: fb26dd1fa81edeb048b14703f1c1f28e93ee43d0
   cached_network_image: ^3.2.3
   cancelable_compute: ^1.3.0
@@ -43,10 +43,6 @@ dependencies:
   flutter_archive: ^5.0.0
   flutter_cache_manager: ^3.3.0
   flutter_charset_detector: ^1.0.2
-  flutter_chatgpt_api:
-    git:
-      url: https://github.com/lrorpilla/flutter_chatgpt_api
-      ref: jidoujisho
   flutter_colorpicker: ^1.0.3
   flutter_exit_app: ^1.0.5
   flutter_expanded_tile: ^0.3.7
@@ -93,7 +89,7 @@ dependencies:
   network_to_file_image: ^4.0.1
   nowplaying:
     git: 
-      url: https://github.com/hnm-lab/nowplaying
+      url: https://github.com/lrorpilla/nowplaying
       ref: 290ee1097d67cafc50f3aba1ba5bba01e758d877
   package_info_plus: ^3.0.3
   path: ^1.8.2
@@ -123,7 +119,7 @@ dependencies:
   sliver_tools: ^0.2.9
   spaces:
     git:
-      url: https://github.com/triskell/spaces
+      url: https://github.com/lrorpilla/spaces
       ref: master
   subtitle:
     git:

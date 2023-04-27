@@ -87,7 +87,7 @@ packages:
       path: "."
       ref: fb26dd1fa81edeb048b14703f1c1f28e93ee43d0
       resolved-ref: fb26dd1fa81edeb048b14703f1c1f28e93ee43d0
-      url: "https://github.com/Krish-Ideausher/blurry_container/"
+      url: "https://github.com/lrorpilla/blurry_container/"
     source: git
     version: "0.0.2"
   boolean_selector:
@@ -640,15 +640,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
-  flutter_chatgpt_api:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: jidoujisho
-      resolved-ref: a304a8732efb872e42304b4c6ed957c88f7b7636
-      url: "https://github.com/lrorpilla/flutter_chatgpt_api"
-    source: git
-    version: "1.1.0"
   flutter_colorpicker:
     dependency: "direct main"
     description:
@@ -1235,7 +1226,7 @@ packages:
       path: "."
       ref: "290ee1097d67cafc50f3aba1ba5bba01e758d877"
       resolved-ref: "290ee1097d67cafc50f3aba1ba5bba01e758d877"
-      url: "https://github.com/hnm-lab/nowplaying"
+      url: "https://github.com/lrorpilla/nowplaying"
     source: git
     version: "2.0.6"
   octo_image:
