@@ -1,0 +1,12 @@
+<b>jidoujisho</b> is a video player, reading aid, dictionary and card creation toolkit with features specifically helpful for language learners.
+<br><br>
+<li> 📖 Tap and drag selection of subtitles and paragraphs allows for <b>instant dictionary lookups</b></li>
+<li> 🃏 <b>Export flashcards to AnkiDroid</b>, complete with image and audio of the current context</li>
+<li> 📺 <b>Watch videos or listen to audio with subtitles</b> from local device storage, YouTube or stream from a Jellyfin library or a direct URL</li>
+<li> 📚 Read books anywhere and offline, via an <b>embedded, self-hosted ッツ Ebook Reader</b></li>
+<li> 🖼️ Read and mine manga pre-processed with <b>Mokuro</b>, and export or crop the current image</li>
+<li> 🕸️ <b>WebSocket support</b> allows convenient use alongside texthookers for visual novels, games and more</li>
+<li> 🎶 Get lyrics and easily make <b>dictionary lookups for the current playing song</b> in your music app</li>
+<li> 🤖 <b>Interact with ChatGPT</b> in your target language to get grammar information, example sentences and more</li>
+<li> 📘 <b>Use Yomichan dictionaries</b> with pitch and frequency information, and selectively</li> collapse and expand dictionaries by default</li>
+<li> ⛏ <b>Frictionless sentence mining and flashcard creation workflow</b> with support for modular enhancements and automations</li>
