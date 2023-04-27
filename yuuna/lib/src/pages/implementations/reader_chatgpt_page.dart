@@ -216,8 +216,10 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
     _buffer.clear();
     _progressNotifier.value = '';
 
+    late int userMessageId;
+
     setState(() {
-      appModel.addMessage(
+      userMessageId = appModel.addMessage(
         MessageItem(
           message: text,
           isBot: false,
@@ -255,6 +257,7 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
           if (memory.isNotEmpty &&
               _buffer.toString().trim() == memory &&
               _isLoading) {
+            appModel.removeMessage(userMessageId);
             _streamSubscription?.cancel();
             _streamSubscription = null;
 
@@ -263,10 +266,13 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
             setState(() {
               _isLoading = false;
             });
+
+            _controller.text = input;
           }
         });
       },
       onError: (error, stack) {
+        appModel.removeMessage(userMessageId);
         debugPrint('$error');
         debugPrint('$stack');
 
@@ -275,6 +281,8 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
         setState(() {
           _isLoading = false;
         });
+
+        _controller.text = input;
       },
       onDone: addBotMessage,
     );

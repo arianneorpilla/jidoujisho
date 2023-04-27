@@ -308,9 +308,19 @@ class AppModel with ChangeNotifier {
       _database.messageItems.where().findAllSync();
 
   /// Adds a message to the  log for the [ReaderChatgptSource].
-  void addMessage(MessageItem message) {
+  int addMessage(MessageItem message) {
+    late int id;
     _database.writeTxnSync(() {
-      _database.messageItems.putSync(message);
+      id = _database.messageItems.putSync(message);
+    });
+
+    return id;
+  }
+
+  /// Removes the last message from the log for the [ReaderChatgptSource].
+  void removeMessage(int id) {
+    _database.writeTxnSync(() {
+      _database.messageItems.deleteSync(id);
     });
   }
 

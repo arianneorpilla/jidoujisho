@@ -3,7 +3,7 @@
 /// Locales: 1
 /// Strings: 350
 ///
-/// Built on 2023-04-26 at 14:37 UTC
+/// Built on 2023-04-26 at 16:22 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -466,7 +466,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get enter_message => 'Enter message...';
 	String get clear_message_title => 'Clear Messages';
 	String get clear_message_description => 'This will clear all messages and start a new chat. Are you sure?';
-	String get error_chatgpt_response => 'Request failed or rate-limited. Try again later.';
+	String get error_chatgpt_response => 'Request failed or rate-limited. Try again shortly or check back later.';
 	String get pick_file => 'Pick File';
 	String get open_url => 'Open URL';
 	String get catalogs => 'Catalogs';
@@ -836,7 +836,7 @@ extension on _StringsEn {
 			case 'enter_message': return 'Enter message...';
 			case 'clear_message_title': return 'Clear Messages';
 			case 'clear_message_description': return 'This will clear all messages and start a new chat. Are you sure?';
-			case 'error_chatgpt_response': return 'Request failed or rate-limited. Try again later.';
+			case 'error_chatgpt_response': return 'Request failed or rate-limited. Try again shortly or check back later.';
 			case 'pick_file': return 'Pick File';
 			case 'open_url': return 'Open URL';
 			case 'catalogs': return 'Catalogs';

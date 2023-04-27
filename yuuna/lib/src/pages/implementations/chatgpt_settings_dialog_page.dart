@@ -71,7 +71,7 @@ class _ChatgptSettingsDialogPageState extends BasePageState {
   Widget buildApiKeyField() {
     return TextField(
       onChanged: (value) {
-        ReaderChatgptSource.instance.setApiKey(value);
+        ReaderChatgptSource.instance.setApiKey(value.trim());
       },
       controller: _apiKeyController,
       decoration: InputDecoration(
