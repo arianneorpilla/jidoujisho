@@ -117,7 +117,7 @@ const DictionaryHeadingSchema = CollectionSchema(
   getId: _dictionaryHeadingGetId,
   getLinks: _dictionaryHeadingGetLinks,
   attach: _dictionaryHeadingAttach,
-  version: '3.1.0',
+  version: '3.1.0+1',
 );
 
 int _dictionaryHeadingEstimateSize(

@@ -172,7 +172,7 @@ const MediaItemSchema = CollectionSchema(
   getId: _mediaItemGetId,
   getLinks: _mediaItemGetLinks,
   attach: _mediaItemAttach,
-  version: '3.1.0',
+  version: '3.1.0+1',
 );
 
 int _mediaItemEstimateSize(

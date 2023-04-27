@@ -71,7 +71,7 @@ const DictionarySearchResultSchema = CollectionSchema(
   getId: _dictionarySearchResultGetId,
   getLinks: _dictionarySearchResultGetLinks,
   attach: _dictionarySearchResultAttach,
-  version: '3.1.0',
+  version: '3.1.0+1',
 );
 
 int _dictionarySearchResultEstimateSize(

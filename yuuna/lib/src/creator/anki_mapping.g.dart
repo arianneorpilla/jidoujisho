@@ -126,7 +126,7 @@ const AnkiMappingSchema = CollectionSchema(
   getId: _ankiMappingGetId,
   getLinks: _ankiMappingGetLinks,
   attach: _ankiMappingAttach,
-  version: '3.1.0',
+  version: '3.1.0+1',
 );
 
 int _ankiMappingEstimateSize(

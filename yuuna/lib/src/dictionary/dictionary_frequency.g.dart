@@ -58,7 +58,7 @@ const DictionaryFrequencySchema = CollectionSchema(
   getId: _dictionaryFrequencyGetId,
   getLinks: _dictionaryFrequencyGetLinks,
   attach: _dictionaryFrequencyAttach,
-  version: '3.1.0',
+  version: '3.1.0+1',
 );
 
 int _dictionaryFrequencyEstimateSize(

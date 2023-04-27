@@ -52,7 +52,7 @@ const DictionaryPitchSchema = CollectionSchema(
   getId: _dictionaryPitchGetId,
   getLinks: _dictionaryPitchGetLinks,
   attach: _dictionaryPitchAttach,
-  version: '3.1.0',
+  version: '3.1.0+1',
 );
 
 int _dictionaryPitchEstimateSize(

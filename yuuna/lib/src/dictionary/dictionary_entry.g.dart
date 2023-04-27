@@ -97,7 +97,7 @@ const DictionaryEntrySchema = CollectionSchema(
   getId: _dictionaryEntryGetId,
   getLinks: _dictionaryEntryGetLinks,
   attach: _dictionaryEntryAttach,
-  version: '3.1.0',
+  version: '3.1.0+1',
 );
 
 int _dictionaryEntryEstimateSize(

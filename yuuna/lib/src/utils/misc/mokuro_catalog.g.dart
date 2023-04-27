@@ -76,7 +76,7 @@ const MokuroCatalogSchema = CollectionSchema(
   getId: _mokuroCatalogGetId,
   getLinks: _mokuroCatalogGetLinks,
   attach: _mokuroCatalogAttach,
-  version: '3.1.0',
+  version: '3.1.0+1',
 );
 
 int _mokuroCatalogEstimateSize(

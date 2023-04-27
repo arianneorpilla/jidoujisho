@@ -39,7 +39,7 @@ const MessageItemSchema = CollectionSchema(
   getId: _messageItemGetId,
   getLinks: _messageItemGetLinks,
   attach: _messageItemAttach,
-  version: '3.1.0',
+  version: '3.1.0+1',
 );
 
 int _messageItemEstimateSize(

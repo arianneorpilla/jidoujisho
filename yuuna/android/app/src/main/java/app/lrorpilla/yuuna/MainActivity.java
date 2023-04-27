@@ -27,7 +27,6 @@ import java.io.File;
 
 import com.ichi2.anki.api.NoteInfo;
 import com.ryanheise.audioservice.AudioServiceActivity;
-import cl.puntito.simple_pip_mode.PipCallbackHelper;
 import android.content.res.Configuration;
 
 public class MainActivity extends AudioServiceActivity {
@@ -52,11 +51,6 @@ public class MainActivity extends AudioServiceActivity {
         return (deckId != null);
     }
 
-    @Override
-    public void onPictureInPictureModeChanged(boolean active, Configuration newConfig) {
-        callbackHelper.onPictureInPictureModeChanged(active);
-    }
-
     private boolean modelExists(String model) {
         Long deckId = mAnkiDroid.findModelIdByName(model, 8);
         return (deckId != null);
@@ -77,7 +71,8 @@ public class MainActivity extends AudioServiceActivity {
         } else {
             modelId = api.addNewCustomModel("jidoujisho Yuuna",
                 new String[] {
-                    "Term", "Sentence",
+                    "Term", 
+                    "Sentence",
                     "Reading",
                     "Meaning",
                     "Notes",
@@ -184,12 +179,9 @@ public class MainActivity extends AudioServiceActivity {
         System.out.println("Deck: " + deckId);
     }
 
-    private final PipCallbackHelper callbackHelper = new PipCallbackHelper();
-
     @Override
     public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
         super.configureFlutterEngine(flutterEngine);
-        callbackHelper.configureFlutterEngine(flutterEngine);
 
         new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), ANKIDROID_CHANNEL)
             .setMethodCallHandler(
