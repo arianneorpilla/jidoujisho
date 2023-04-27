@@ -78,7 +78,7 @@
 **jidoujisho** is a video player, reading aid, dictionary and card creation toolkit with features specifically helpful for language learners.
 * 📖 Tap and drag selection of subtitles and paragraphs allows for **instant dictionary lookups**
 * 🃏 **Export flashcards to AnkiDroid**, complete with image and audio of the current context
-* 📺 **Watch videos from a variety of sources**: local device storage, YouTube or stream from your Jellyfin library or a direct URL
+* 📺 **Watch videos or listen to audio with subtitles** from local device storage, YouTube or stream from a Jellyfin library or a direct URL
 * 📚 Read books anywhere and offline, via an **embedded, self-hosted ッツ Ebook Reader**
 * 🖼️ Read and mine manga pre-processed with **Mokuro**, and export or crop the current image
 * 🕸️ **WebSocket support** allows convenient use alongside texthookers for visual novels, games and more
@@ -176,6 +176,7 @@ A primer on the basics of the application is as follows.
 * 📹 The quality closest to the **last selected quality** will be selected by default for YouTube videos
 * 💬 **If your video has burned-in subtitles,** you may use the blur widget under player options to hide them
 * ✂️ Reading manga? You can **crop an image** before exporting a card
+* 🎧 **Listening to an audiobook?** You can auto-align subtitles during playback by opening the transcript and clicking on the upper-right icon
 * 🪡 **Limit export to a single dictionary** by selecting the button on the rightmost tag of a dictionary entry
 * 📜 **Tap on a field's icon** in the Card Creator to **lock the field**, which can be useful if exporting the same sentence multiple times
 * 🤖 Users may log into their OpenAI account and chat in various languages supported by ChatGPT.  **Users are advised not to heavily rely on an AI language model if they cannot accurately distinguish its correctness and accuracy.**

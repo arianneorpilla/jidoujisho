@@ -5,11 +5,10 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:network_to_file_image/network_to_file_image.dart';
 import 'package:receive_intent/receive_intent.dart' as intents;
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:spaces/spaces.dart';
 import 'package:uri_to_file/uri_to_file.dart';
 import 'package:wakelock/wakelock.dart';
@@ -30,9 +29,18 @@ void main() {
     /// starting the application.
     WidgetsFlutterBinding.ensureInitialized();
 
-    /// Initialise Firebase to allow for Crashlytics error reporting.
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
+    /// Initialise local file-based logging.
+    await FlutterLogs.initLogs(
+      logLevelsEnabled: [
+        LogLevel.INFO,
+        LogLevel.WARNING,
+        LogLevel.ERROR,
+        LogLevel.SEVERE
+      ],
+      timeStampFormat: TimeStampFormat.TIME_FORMAT_READABLE,
+      directoryStructure: DirectoryStructure.FOR_DATE,
+      logTypesEnabled: ['device', 'network', 'errors'],
+      logFileExtension: LogFileExtension.LOG,
     );
 
     /// Ensure the top and bottom bars are shown at launch and wake prevention
@@ -71,8 +79,8 @@ void main() {
     final details = FlutterErrorDetails(exception: exception, stack: stack);
     FlutterError.dumpErrorToConsole(details);
 
-    /// Send error details to Crashlytics for developer debugging purposes.
-    FirebaseCrashlytics.instance.recordError(exception, stack);
+    /// Log the error.
+    FlutterLogs.logError('jidoujisho', 'Error', details.toString());
   });
 }
 
