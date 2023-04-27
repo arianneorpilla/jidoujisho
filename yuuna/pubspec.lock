@@ -1682,7 +1682,7 @@ packages:
       path: "."
       ref: master
       resolved-ref: b6a1387abaafd36e94e9290806a00a53ca89683f
-      url: "https://github.com/triskell/spaces"
+      url: "https://github.com/lrorpilla/spaces"
     source: git
     version: "0.5.0"
   sqflite:
