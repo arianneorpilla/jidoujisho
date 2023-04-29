@@ -26,15 +26,32 @@ class _MokuroCatalogManageDialogPageState
     return AlertDialog(
       contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
           ? Spacing.of(context).insets.exceptBottom.big
-          : Spacing.of(context).insets.exceptBottom.normal,
+          : Spacing.of(context).insets.exceptBottom.normal.copyWith(
+                left: Spacing.of(context).spaces.semiBig,
+                right: Spacing.of(context).spaces.semiBig,
+              ),
+      actionsPadding: Spacing.of(context).insets.exceptBottom.normal.copyWith(
+            left: Spacing.of(context).spaces.normal,
+            right: Spacing.of(context).spaces.normal,
+            bottom: Spacing.of(context).spaces.normal,
+            top: Spacing.of(context).spaces.extraSmall,
+          ),
       content: SizedBox(
         width: double.maxFinite,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              buildCatalogList(),
-            ],
+        child: RawScrollbar(
+          thickness: 3,
+          thumbVisibility: true,
+          controller: _scrollController,
+          child: Padding(
+            padding: Spacing.of(context).insets.onlyRight.normal,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  buildCatalogList(),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -96,42 +113,37 @@ class _MokuroCatalogManageDialogPageState
       return buildEmptyMessage();
     }
 
-    return RawScrollbar(
-      thickness: 3,
-      thumbVisibility: true,
-      controller: _scrollController,
-      child: ReorderableColumn(
-        scrollController: _scrollController,
-        children: List.generate(catalogs.length, (index) {
-          MokuroCatalog catalog = catalogs[index];
+    return ReorderableColumn(
+      scrollController: _scrollController,
+      children: List.generate(catalogs.length, (index) {
+        MokuroCatalog catalog = catalogs[index];
 
-          _notifiersByCatalog.putIfAbsent(
-            catalogs[index],
-            () => ValueNotifier<bool>(catalog.order == _selectedOrder),
-          );
-          return buildCatalogTile(
-            catalogs[index],
-            _notifiersByCatalog[catalog]!,
-          );
-        }),
-        onReorder: (oldIndex, newIndex) async {
-          List<MokuroCatalog> cloneCatalogs = [];
-          cloneCatalogs.addAll(catalogs);
+        _notifiersByCatalog.putIfAbsent(
+          catalogs[index],
+          () => ValueNotifier<bool>(catalog.order == _selectedOrder),
+        );
+        return buildCatalogTile(
+          catalogs[index],
+          _notifiersByCatalog[catalog]!,
+        );
+      }),
+      onReorder: (oldIndex, newIndex) async {
+        List<MokuroCatalog> cloneCatalogs = [];
+        cloneCatalogs.addAll(catalogs);
 
-          MokuroCatalog item = cloneCatalogs[oldIndex];
-          cloneCatalogs.remove(item);
-          cloneCatalogs.insert(newIndex, item);
+        MokuroCatalog item = cloneCatalogs[oldIndex];
+        cloneCatalogs.remove(item);
+        cloneCatalogs.insert(newIndex, item);
 
-          cloneCatalogs.forEachIndexed((index, mapping) {
-            mapping.order = index;
-          });
+        cloneCatalogs.forEachIndexed((index, mapping) {
+          mapping.order = index;
+        });
 
-          updateSelectedOrder(newIndex);
+        updateSelectedOrder(newIndex);
 
-          appModel.updateCatalogsOrder(cloneCatalogs);
-          setState(() {});
-        },
-      ),
+        appModel.updateCatalogsOrder(cloneCatalogs);
+        setState(() {});
+      },
     );
   }
 

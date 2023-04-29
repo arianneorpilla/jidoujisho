@@ -23,15 +23,32 @@ class _MokuroCatalogDialogPageState
     return AlertDialog(
       contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
           ? Spacing.of(context).insets.exceptBottom.big
-          : Spacing.of(context).insets.exceptBottom.normal,
+          : Spacing.of(context).insets.exceptBottom.normal.copyWith(
+                left: Spacing.of(context).spaces.semiBig,
+                right: Spacing.of(context).spaces.semiBig,
+              ),
+      actionsPadding: Spacing.of(context).insets.exceptBottom.normal.copyWith(
+            left: Spacing.of(context).spaces.normal,
+            right: Spacing.of(context).spaces.normal,
+            bottom: Spacing.of(context).spaces.normal,
+            top: Spacing.of(context).spaces.extraSmall,
+          ),
       content: SizedBox(
         width: double.maxFinite,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              buildCatalogList(),
-            ],
+        child: RawScrollbar(
+          thickness: 3,
+          thumbVisibility: true,
+          controller: _scrollController,
+          child: Padding(
+            padding: Spacing.of(context).insets.onlyRight.normal,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  buildCatalogList(),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -84,17 +101,12 @@ class _MokuroCatalogDialogPageState
       return buildEmptyMessage();
     }
 
-    return RawScrollbar(
-      thickness: 3,
-      thumbVisibility: true,
-      controller: _scrollController,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: List.generate(
-          catalogs.length,
-          (index) => buildCatalogTile(
-            catalogs[index],
-          ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(
+        catalogs.length,
+        (index) => buildCatalogTile(
+          catalogs[index],
         ),
       ),
     );

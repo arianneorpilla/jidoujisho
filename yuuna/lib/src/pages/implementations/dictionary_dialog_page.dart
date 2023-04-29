@@ -29,7 +29,16 @@ class _DictionaryDialogPageState extends BasePageState with ChangeNotifier {
     return AlertDialog(
       contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
           ? Spacing.of(context).insets.exceptBottom.big
-          : Spacing.of(context).insets.exceptBottom.normal,
+          : Spacing.of(context).insets.exceptBottom.normal.copyWith(
+                left: Spacing.of(context).spaces.semiBig,
+                right: Spacing.of(context).spaces.semiBig,
+              ),
+      actionsPadding: Spacing.of(context).insets.exceptBottom.normal.copyWith(
+            left: Spacing.of(context).spaces.normal,
+            right: Spacing.of(context).spaces.normal,
+            bottom: Spacing.of(context).spaces.normal,
+            top: Spacing.of(context).spaces.extraSmall,
+          ),
       content: buildContent(),
       actions: actions,
     );
@@ -237,21 +246,26 @@ class _DictionaryDialogPageState extends BasePageState with ChangeNotifier {
         thickness: 3,
         thumbVisibility: true,
         controller: contentController,
-        child: SingleChildScrollView(
-          controller: contentController,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (dictionaries.isEmpty)
-                buildEmptyMessage()
-              else
-                Flexible(
-                  child: buildDictionaryList(dictionaries),
-                ),
-              const JidoujishoDivider(),
-              buildImportDropdown(),
-              buildSlowImportSwitch(),
-            ],
+        child: Padding(
+          padding: contentController.hasClients
+              ? Spacing.of(context).insets.onlyRight.normal
+              : EdgeInsets.zero,
+          child: SingleChildScrollView(
+            controller: contentController,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (dictionaries.isEmpty)
+                  buildEmptyMessage()
+                else
+                  Flexible(
+                    child: buildDictionaryList(dictionaries),
+                  ),
+                const JidoujishoDivider(),
+                buildImportDropdown(),
+                buildSlowImportSwitch(),
+              ],
+            ),
           ),
         ),
       ),

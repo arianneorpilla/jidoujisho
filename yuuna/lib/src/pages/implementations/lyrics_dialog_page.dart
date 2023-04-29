@@ -41,7 +41,18 @@ class _LyricsDialogPageState extends BasePageState<LyricsDialogPage> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      contentPadding: Spacing.of(context).insets.all.big,
+      contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
+          ? Spacing.of(context).insets.exceptBottom.big
+          : Spacing.of(context).insets.exceptBottom.normal.copyWith(
+                left: Spacing.of(context).spaces.semiBig,
+                right: Spacing.of(context).spaces.semiBig,
+              ),
+      actionsPadding: Spacing.of(context).insets.exceptBottom.normal.copyWith(
+            left: Spacing.of(context).spaces.normal,
+            right: Spacing.of(context).spaces.normal,
+            bottom: Spacing.of(context).spaces.normal,
+            top: Spacing.of(context).spaces.extraSmall,
+          ),
       content: buildContent(),
       actions: actions,
     );
@@ -50,41 +61,48 @@ class _LyricsDialogPageState extends BasePageState<LyricsDialogPage> {
   List<Widget> get actions => [buildSearchButton()];
 
   Widget buildContent() {
-    return SingleChildScrollView(
-      child: SizedBox(
-        width: MediaQuery.of(context).size.width * (1 / 3),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              autofocus: true,
-              controller: _titleController,
-              decoration: InputDecoration(
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                labelText: t.lyrics_title,
-                suffixIcon: JidoujishoIconButton(
-                  size: 18,
-                  tooltip: t.clear,
-                  onTap: _titleController.clear,
-                  icon: Icons.clear,
+    ScrollController scrollController = ScrollController();
+    return RawScrollbar(
+      thickness: 3,
+      thumbVisibility: true,
+      controller: scrollController,
+      child: SingleChildScrollView(
+        controller: scrollController,
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width * (1 / 3),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                autofocus: true,
+                controller: _titleController,
+                decoration: InputDecoration(
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                  labelText: t.lyrics_title,
+                  suffixIcon: JidoujishoIconButton(
+                    size: 18,
+                    tooltip: t.clear,
+                    onTap: _titleController.clear,
+                    icon: Icons.clear,
+                  ),
                 ),
               ),
-            ),
-            TextField(
-              controller: _artistController,
-              decoration: InputDecoration(
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                labelText: t.lyrics_artist,
-                suffixIcon: JidoujishoIconButton(
-                  size: 18,
-                  tooltip: t.clear,
-                  onTap: _artistController.clear,
-                  icon: Icons.clear,
+              TextField(
+                controller: _artistController,
+                decoration: InputDecoration(
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                  labelText: t.lyrics_artist,
+                  suffixIcon: JidoujishoIconButton(
+                    size: 18,
+                    tooltip: t.clear,
+                    onTap: _artistController.clear,
+                    icon: Icons.clear,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 10),
-          ],
+              const SizedBox(height: 10),
+            ],
+          ),
         ),
       ),
     );

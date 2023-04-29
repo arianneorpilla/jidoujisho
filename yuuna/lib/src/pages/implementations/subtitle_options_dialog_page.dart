@@ -30,6 +30,9 @@ class _SubtitleOptionsDialogPage
   late final TextEditingController _fontSizeController;
   late final TextEditingController _fontNameController;
   late final TextEditingController _regexFilterController;
+  late final TextEditingController _opacityController;
+  late final TextEditingController _widthController;
+  late final TextEditingController _blurController;
 
   @override
   void initState() {
@@ -45,201 +48,285 @@ class _SubtitleOptionsDialogPage
     _fontNameController = TextEditingController(text: _options.fontName.trim());
     _regexFilterController =
         TextEditingController(text: _options.regexFilter.trim());
+    _opacityController = TextEditingController(
+        text: _options.subtitleBackgroundOpacity.toString());
+    _widthController =
+        TextEditingController(text: _options.subtitleOutlineWidth.toString());
+    _blurController = TextEditingController(
+        text: _options.subtitleBackgroundBlurRadius.toString());
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      contentPadding: Spacing.of(context).insets.all.big,
+      contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
+          ? Spacing.of(context).insets.exceptBottom.big
+          : Spacing.of(context).insets.exceptBottom.normal.copyWith(
+                left: Spacing.of(context).spaces.semiBig,
+                right: Spacing.of(context).spaces.semiBig,
+              ),
+      actionsPadding: Spacing.of(context).insets.exceptBottom.normal.copyWith(
+            left: Spacing.of(context).spaces.normal,
+            right: Spacing.of(context).spaces.normal,
+            bottom: Spacing.of(context).spaces.normal,
+            top: Spacing.of(context).spaces.extraSmall,
+          ),
       content: buildContent(),
       actions: actions,
     );
   }
 
   Widget buildContent() {
-    return SingleChildScrollView(
-      child: SizedBox(
-        width: MediaQuery.of(context).size.width * (1 / 3),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _delayController,
-              keyboardType: const TextInputType.numberWithOptions(
-                signed: true,
-              ),
-              decoration: InputDecoration(
-                  floatingLabelBehavior: FloatingLabelBehavior.always,
-                  labelText: t.player_option_subtitle_delay,
-                  suffixIcon: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Space.normal(),
-                      JidoujishoIconButton(
-                        size: 18,
-                        tooltip: t.decrease,
-                        onTap: () async {
-                          _delayController.text =
-                              ((int.tryParse(_delayController.text) ??
-                                          _options.subtitleDelay) -
-                                      100)
-                                  .toString();
-                          FocusScope.of(context).unfocus();
-                        },
-                        icon: Icons.remove,
-                      ),
-                      JidoujishoIconButton(
-                        size: 18,
-                        tooltip: t.increase,
-                        onTap: () async {
-                          _delayController.text =
-                              ((int.tryParse(_delayController.text) ??
-                                          _options.subtitleDelay) +
-                                      100)
-                                  .toString();
-                          FocusScope.of(context).unfocus();
-                        },
-                        icon: Icons.add,
-                      ),
-                      JidoujishoIconButton(
-                        size: 18,
-                        tooltip: t.reset,
-                        onTap: () async {
-                          _delayController.text = '0';
-                          FocusScope.of(context).unfocus();
-                        },
-                        icon: Icons.undo,
-                      ),
-                    ],
+    ScrollController scrollController = ScrollController();
+    return RawScrollbar(
+      thickness: 3,
+      thumbVisibility: true,
+      controller: scrollController,
+      child: Padding(
+        padding: Spacing.of(context).insets.onlyRight.normal,
+        child: SingleChildScrollView(
+          controller: scrollController,
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * (1 / 3),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: _delayController,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    signed: true,
                   ),
-                  suffixText: t.unit_milliseconds),
-            ),
-            TextField(
-              controller: _allowanceController,
-              keyboardType: const TextInputType.numberWithOptions(
-                signed: true,
-              ),
-              decoration: InputDecoration(
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                labelText: t.player_option_audio_allowance,
-                suffixIcon: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Space.normal(),
-                    JidoujishoIconButton(
-                      size: 18,
-                      tooltip: t.decrease,
-                      onTap: () async {
-                        _allowanceController.text =
-                            ((int.tryParse(_allowanceController.text) ??
-                                        _options.audioAllowance) -
-                                    100)
-                                .toString();
-                        FocusScope.of(context).unfocus();
-                      },
-                      icon: Icons.remove,
+                  decoration: InputDecoration(
+                      floatingLabelBehavior: FloatingLabelBehavior.always,
+                      labelText: t.player_option_subtitle_delay,
+                      suffixIcon: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Space.normal(),
+                          JidoujishoIconButton(
+                            size: 18,
+                            tooltip: t.decrease,
+                            onTap: () async {
+                              _delayController.text =
+                                  ((int.tryParse(_delayController.text) ??
+                                              _options.subtitleDelay) -
+                                          100)
+                                      .toString();
+                              FocusScope.of(context).unfocus();
+                            },
+                            icon: Icons.remove,
+                          ),
+                          JidoujishoIconButton(
+                            size: 18,
+                            tooltip: t.increase,
+                            onTap: () async {
+                              _delayController.text =
+                                  ((int.tryParse(_delayController.text) ??
+                                              _options.subtitleDelay) +
+                                          100)
+                                      .toString();
+                              FocusScope.of(context).unfocus();
+                            },
+                            icon: Icons.add,
+                          ),
+                          JidoujishoIconButton(
+                            size: 18,
+                            tooltip: t.reset,
+                            onTap: () async {
+                              _delayController.text = '0';
+                              FocusScope.of(context).unfocus();
+                            },
+                            icon: Icons.undo,
+                          ),
+                        ],
+                      ),
+                      suffixText: t.unit_milliseconds),
+                ),
+                TextField(
+                  controller: _allowanceController,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    signed: true,
+                  ),
+                  decoration: InputDecoration(
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                    labelText: t.player_option_audio_allowance,
+                    suffixIcon: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Space.normal(),
+                        JidoujishoIconButton(
+                          size: 18,
+                          tooltip: t.decrease,
+                          onTap: () async {
+                            _allowanceController.text =
+                                ((int.tryParse(_allowanceController.text) ??
+                                            _options.audioAllowance) -
+                                        100)
+                                    .toString();
+                            FocusScope.of(context).unfocus();
+                          },
+                          icon: Icons.remove,
+                        ),
+                        JidoujishoIconButton(
+                          size: 18,
+                          tooltip: t.increase,
+                          onTap: () async {
+                            _allowanceController.text =
+                                ((int.tryParse(_allowanceController.text) ??
+                                            _options.audioAllowance) +
+                                        100)
+                                    .toString();
+                            FocusScope.of(context).unfocus();
+                          },
+                          icon: Icons.add,
+                        ),
+                        JidoujishoIconButton(
+                          size: 18,
+                          tooltip: t.reset,
+                          onTap: () async {
+                            _allowanceController.text = '0';
+                            FocusScope.of(context).unfocus();
+                          },
+                          icon: Icons.undo,
+                        ),
+                      ],
                     ),
-                    JidoujishoIconButton(
-                      size: 18,
-                      tooltip: t.increase,
-                      onTap: () async {
-                        _allowanceController.text =
-                            ((int.tryParse(_allowanceController.text) ??
-                                        _options.audioAllowance) +
-                                    100)
-                                .toString();
-                        FocusScope.of(context).unfocus();
-                      },
-                      icon: Icons.add,
-                    ),
-                    JidoujishoIconButton(
+                    suffixText: t.unit_milliseconds,
+                  ),
+                ),
+                TextField(
+                  controller: _fontSizeController,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: InputDecoration(
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                    labelText: t.player_option_font_size,
+                    suffixIcon: JidoujishoIconButton(
                       size: 18,
                       tooltip: t.reset,
                       onTap: () async {
-                        _allowanceController.text = '0';
+                        _fontSizeController.text = '20.0';
                         FocusScope.of(context).unfocus();
                       },
                       icon: Icons.undo,
                     ),
-                  ],
+                    suffixText: t.unit_pixels,
+                  ),
                 ),
-                suffixText: t.unit_milliseconds,
-              ),
-            ),
-            TextField(
-              controller: _fontNameController,
-              decoration: InputDecoration(
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                labelText: t.player_option_font_name,
-                suffixIcon: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    JidoujishoIconButton(
+                TextField(
+                  controller: _widthController,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: InputDecoration(
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                    labelText: t.player_option_outline_width,
+                    suffixIcon: JidoujishoIconButton(
                       size: 18,
                       tooltip: t.reset,
                       onTap: () async {
-                        /// Language Customizable
-                        if (appModel.targetLanguage is JapaneseLanguage) {
-                          launchUrlString(
-                              'https://fonts.google.com/?subset=japanese');
-                        }
-                        launchUrlString('https://fonts.google.com/');
-                      },
-                      icon: Icons.font_download,
-                    ),
-                    JidoujishoIconButton(
-                      size: 18,
-                      tooltip: t.reset,
-                      onTap: () async {
-                        _fontNameController.text = '';
+                        _widthController.text = '0';
                         FocusScope.of(context).unfocus();
                       },
                       icon: Icons.undo,
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-            TextField(
-              controller: _fontSizeController,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              decoration: InputDecoration(
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                labelText: t.player_option_font_size,
-                suffixIcon: JidoujishoIconButton(
-                  size: 18,
-                  tooltip: t.reset,
-                  onTap: () async {
-                    _fontSizeController.text = '20.0';
-                    FocusScope.of(context).unfocus();
-                  },
-                  icon: Icons.undo,
+                TextField(
+                  controller: _blurController,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: InputDecoration(
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                    labelText: t.player_option_subtitle_background_blur_radius,
+                    suffixIcon: JidoujishoIconButton(
+                      size: 18,
+                      tooltip: t.reset,
+                      onTap: () async {
+                        _blurController.text = '0';
+                        FocusScope.of(context).unfocus();
+                      },
+                      icon: Icons.undo,
+                    ),
+                  ),
                 ),
-                suffixText: t.unit_pixels,
-              ),
-            ),
-            TextField(
-              controller: _regexFilterController,
-              keyboardType: TextInputType.text,
-              decoration: InputDecoration(
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                labelText: t.player_option_regex_filter,
-                suffixIcon: JidoujishoIconButton(
-                  size: 18,
-                  tooltip: t.reset,
-                  onTap: () async {
-                    _regexFilterController.clear();
-                    FocusScope.of(context).unfocus();
-                  },
-                  icon: Icons.undo,
+                TextField(
+                  controller: _opacityController,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: InputDecoration(
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                    labelText: t.player_option_subtitle_background_opacity,
+                    suffixIcon: JidoujishoIconButton(
+                      size: 18,
+                      tooltip: t.reset,
+                      onTap: () async {
+                        _opacityController.text = '0';
+                        FocusScope.of(context).unfocus();
+                      },
+                      icon: Icons.undo,
+                    ),
+                  ),
                 ),
-              ),
+                TextField(
+                  controller: _fontNameController,
+                  decoration: InputDecoration(
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                    labelText: t.player_option_font_name,
+                    suffixIcon: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        JidoujishoIconButton(
+                          size: 18,
+                          tooltip: t.google_fonts,
+                          onTap: () async {
+                            /// Language Customizable
+                            if (appModel.targetLanguage is JapaneseLanguage) {
+                              launchUrlString(
+                                  'https://fonts.google.com/?subset=japanese');
+                            }
+                            launchUrlString('https://fonts.google.com/');
+                          },
+                          icon: Icons.font_download,
+                        ),
+                        JidoujishoIconButton(
+                          size: 18,
+                          tooltip: t.reset,
+                          onTap: () async {
+                            _fontNameController.text = '';
+                            FocusScope.of(context).unfocus();
+                          },
+                          icon: Icons.undo,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                TextField(
+                  controller: _regexFilterController,
+                  keyboardType: TextInputType.text,
+                  decoration: InputDecoration(
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                    labelText: t.player_option_regex_filter,
+                    suffixIcon: JidoujishoIconButton(
+                      size: 18,
+                      tooltip: t.reset,
+                      onTap: () async {
+                        _regexFilterController.clear();
+                        FocusScope.of(context).unfocus();
+                      },
+                      icon: Icons.undo,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+              ],
             ),
-            const SizedBox(height: 10),
-          ],
+          ),
         ),
       ),
     );
@@ -258,7 +345,25 @@ class _SubtitleOptionsDialogPage
     String newFontName = _fontNameController.text.trim();
     String newRegexFilter = _regexFilterController.text.trim();
 
-    if (newDelay != null && newAllowance != null && newFontSize != null) {
+    String opacityText = _opacityController.text;
+    double? newOpacity = double.tryParse(opacityText);
+
+    String widthText = _widthController.text;
+    double? newWidth = double.tryParse(widthText);
+
+    String blurText = _blurController.text;
+    double? newBlur = double.tryParse(blurText);
+
+    if (newDelay != null &&
+        newAllowance != null &&
+        newFontSize != null &&
+        newOpacity != null &&
+        newWidth != null &&
+        newBlur != null &&
+        (newOpacity <= 1 && newOpacity >= 0) &&
+        newFontSize >= 0 &&
+        newWidth >= 0 &&
+        newBlur >= 0) {
       RegExp(newRegexFilter);
       try {
         GoogleFonts.getFont(newFontName);
@@ -273,6 +378,9 @@ class _SubtitleOptionsDialogPage
       subtitleOptions.regexFilter = newRegexFilter;
       subtitleOptions.fontName = newFontName;
       subtitleOptions.fontSize = newFontSize;
+      subtitleOptions.subtitleBackgroundOpacity = newOpacity;
+      subtitleOptions.subtitleOutlineWidth = newWidth;
+      subtitleOptions.subtitleBackgroundBlurRadius = newBlur;
 
       widget.notifier.value = subtitleOptions;
 

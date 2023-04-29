@@ -298,9 +298,6 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
 
   void showDeleteSearchHistoryPrompt() async {
     Widget alertDialog = AlertDialog(
-      contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
-          ? Spacing.of(context).insets.exceptBottom.big
-          : Spacing.of(context).insets.exceptBottom.normal,
       title: Text(t.clear_search_title),
       content: Text(
         t.clear_search_description,
@@ -337,9 +334,6 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
 
   void showDeleteDictionaryHistoryPrompt() async {
     Widget alertDialog = AlertDialog(
-      contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
-          ? Spacing.of(context).insets.exceptBottom.big
-          : Spacing.of(context).insets.exceptBottom.normal,
       title: Text(t.clear_dictionary_title),
       content: Text(
         t.clear_dictionary_description,

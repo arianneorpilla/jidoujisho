@@ -145,9 +145,6 @@ class ReaderWebsocketSource extends ReaderMediaSource {
       required WidgetRef ref,
       required AppModel appModel}) async {
     Widget alertDialog = AlertDialog(
-      contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
-          ? Spacing.of(context).insets.exceptBottom.big
-          : Spacing.of(context).insets.exceptBottom.normal,
       title: Text(t.clear_text_title),
       content: Text(t.clear_text_description),
       actions: <Widget>[
@@ -184,9 +181,6 @@ class ReaderWebsocketSource extends ReaderMediaSource {
       required WidgetRef ref,
       required AppModel appModel}) async {
     Widget alertDialog = AlertDialog(
-      contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
-          ? Spacing.of(context).insets.exceptBottom.big
-          : Spacing.of(context).insets.exceptBottom.normal,
       title: Text(t.close_connection_title),
       content: Text(
         t.close_connection_description,

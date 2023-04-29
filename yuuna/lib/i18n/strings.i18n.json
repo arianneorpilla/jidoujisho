@@ -237,17 +237,20 @@
     "player_option_text_filter": "Use Regular Expression Filter",
     "player_option_blur_preferences": "Blur Widget Preferences",
     "player_option_blur_use": "Use Blur Widget",
-    "player_option_blur_radius": "Blur Radius",
+    "player_option_blur_radius": "Blur radius",
     "player_option_blur_options": "Set Blur Widget Color and Bluriness",
     "player_option_blur_reset": "Reset Blur Widget Size and Position",
     "player_align_subtitle_transcript": "Align Subtitle with Transcript",
     "player_option_subtitle_appearance": "Subtitle Timing and Appearance",
     "player_option_load_subtitles": "Load External Subtitles",
-    "player_option_subtitle_delay": "Subtitle Delay",
-    "player_option_audio_allowance": "Audio Allowance",
-    "player_option_font_name": "Font Name",
-    "player_option_font_size": "Font Size",
-    "player_option_regex_filter": "Regular Expression Filter",
+    "player_option_subtitle_delay": "Subtitle delay",
+    "player_option_audio_allowance": "Audio allowance",
+    "player_option_font_name": "Subtitle font name",
+    "player_option_font_size": "Subtitle font size",
+    "player_option_regex_filter": "Regular expression filter",
+    "player_option_subtitle_background_opacity": "Subtitle background opacity",
+    "player_option_subtitle_background_blur_radius": "Subtitle background blur radius",
+    "player_option_outline_width": "Subtitle outline width",
     "player_subtitles_transcript_empty": "Transcript is empty.",
     "player_prepare_export": "Preparing card...",
     "player_change_player_orientation": "Change Player Orientation",
@@ -374,12 +377,14 @@
     "subtitle_delay_set": "Subtitle delay set to $ms ms.",
     "cancel": "Cancel",
     "server_port_in_use": "Local server port already in use",
+    "google_fonts": "Google Fonts",
     "retrying_in": {
         "seconds": {
           "one": "Retrying in $n second...",
           "other": "Retrying in $n seconds..."
         }
       },
+    
     "view_replies": {
         "reply": {
           "one": "SHOW $n REPLY",

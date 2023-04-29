@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
@@ -29,7 +30,16 @@ class _ChatgptSettingsDialogPageState extends BasePageState {
     return AlertDialog(
       contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
           ? Spacing.of(context).insets.exceptBottom.big
-          : Spacing.of(context).insets.exceptBottom.normal,
+          : Spacing.of(context).insets.exceptBottom.normal.copyWith(
+                left: Spacing.of(context).spaces.semiBig,
+                right: Spacing.of(context).spaces.semiBig,
+              ),
+      actionsPadding: Spacing.of(context).insets.exceptBottom.normal.copyWith(
+            left: Spacing.of(context).spaces.normal,
+            right: Spacing.of(context).spaces.normal,
+            bottom: Spacing.of(context).spaces.normal,
+            top: Spacing.of(context).spaces.extraSmall,
+          ),
       content: buildContent(),
       actions: actions,
     );
@@ -49,12 +59,12 @@ class _ChatgptSettingsDialogPageState extends BasePageState {
   Widget buildContent() {
     ScrollController contentController = ScrollController();
 
-    return SizedBox(
-      width: double.maxFinite,
-      child: RawScrollbar(
-        thickness: 3,
-        thumbVisibility: true,
-        controller: contentController,
+    return RawScrollbar(
+      thickness: 3,
+      thumbVisibility: true,
+      controller: contentController,
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width * (1 / 3),
         child: SingleChildScrollView(
           controller: contentController,
           child: Column(
@@ -77,6 +87,18 @@ class _ChatgptSettingsDialogPageState extends BasePageState {
       decoration: InputDecoration(
         floatingLabelBehavior: FloatingLabelBehavior.always,
         labelText: t.api_key,
+        suffixIcon: JidoujishoIconButton(
+          icon: Icons.paste,
+          size: 18,
+          tooltip: t.paste,
+          onTap: () async {
+            String text = (await Clipboard.getData('text/plain'))?.text ?? '';
+            if (text.trim().isNotEmpty) {
+              _apiKeyController.text = text.trim();
+            }
+            FocusScope.of(context).unfocus();
+          },
+        ),
       ),
     );
   }

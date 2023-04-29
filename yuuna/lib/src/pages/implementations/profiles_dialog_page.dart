@@ -50,7 +50,16 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage>
     return AlertDialog(
       contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
           ? Spacing.of(context).insets.exceptBottom.big
-          : Spacing.of(context).insets.exceptBottom.normal,
+          : Spacing.of(context).insets.exceptBottom.normal.copyWith(
+                left: Spacing.of(context).spaces.semiBig,
+                right: Spacing.of(context).spaces.semiBig,
+              ),
+      actionsPadding: Spacing.of(context).insets.exceptBottom.normal.copyWith(
+            left: Spacing.of(context).spaces.normal,
+            right: Spacing.of(context).spaces.normal,
+            bottom: Spacing.of(context).spaces.normal,
+            top: Spacing.of(context).spaces.extraSmall,
+          ),
       content: buildContent(),
       actions: actions,
     );
@@ -108,17 +117,31 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage>
   }
 
   Widget buildContent() {
+    ScrollController contentController = ScrollController();
     return SizedBox(
       width: double.maxFinite,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Flexible(
-            child: buildMappingList(),
+      child: RawScrollbar(
+        thickness: 3,
+        thumbVisibility: true,
+        controller: contentController,
+        child: Padding(
+          padding: contentController.hasClients
+              ? Spacing.of(context).insets.onlyRight.normal
+              : EdgeInsets.zero,
+          child: SingleChildScrollView(
+            controller: contentController,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: buildMappingList(),
+                ),
+                const JidoujishoDivider(),
+                buildImportDropdown(),
+              ],
+            ),
           ),
-          const JidoujishoDivider(),
-          buildImportDropdown(),
-        ],
+        ),
       ),
     );
   }
@@ -134,47 +157,50 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage>
       thickness: 3,
       thumbVisibility: true,
       controller: _scrollController,
-      child: ReorderableColumn(
-        scrollController: _scrollController,
-        children: List.generate(
-          mappings.length,
-          (index) {
-            AnkiMapping mapping = mappings[index];
+      child: Padding(
+        padding: Spacing.of(context).insets.onlyRight.normal,
+        child: ReorderableColumn(
+          scrollController: _scrollController,
+          children: List.generate(
+            mappings.length,
+            (index) {
+              AnkiMapping mapping = mappings[index];
 
-            _notifiersByMapping.putIfAbsent(
-              mapping,
-              () => ValueNotifier<bool>(mapping.order == _selectedOrder),
-            );
+              _notifiersByMapping.putIfAbsent(
+                mapping,
+                () => ValueNotifier<bool>(mapping.order == _selectedOrder),
+              );
 
-            return buildMappingTile(
-              mapping,
-              _notifiersByMapping[mapping]!,
+              return buildMappingTile(
+                mapping,
+                _notifiersByMapping[mapping]!,
+              );
+            },
+          ),
+          onReorder: (oldIndex, newIndex) async {
+            List<AnkiMapping> cloneMappings = [];
+            cloneMappings.addAll(mappings);
+
+            AnkiMapping item = cloneMappings[oldIndex];
+            cloneMappings.remove(item);
+            cloneMappings.insert(newIndex, item);
+
+            cloneMappings.forEachIndexed((index, mapping) {
+              mapping.order = index;
+            });
+
+            appModel.setLastSelectedMapping(item);
+            updateSelectedOrder(newIndex);
+
+            appModel.updateMappingsOrder(cloneMappings);
+            setState(() {});
+
+            await appModel.validateSelectedMapping(
+              context: context,
+              mapping: item,
             );
           },
         ),
-        onReorder: (oldIndex, newIndex) async {
-          List<AnkiMapping> cloneMappings = [];
-          cloneMappings.addAll(mappings);
-
-          AnkiMapping item = cloneMappings[oldIndex];
-          cloneMappings.remove(item);
-          cloneMappings.insert(newIndex, item);
-
-          cloneMappings.forEachIndexed((index, mapping) {
-            mapping.order = index;
-          });
-
-          appModel.setLastSelectedMapping(item);
-          updateSelectedOrder(newIndex);
-
-          appModel.updateMappingsOrder(cloneMappings);
-          setState(() {});
-
-          await appModel.validateSelectedMapping(
-            context: context,
-            mapping: item,
-          );
-        },
       ),
     );
   }
@@ -402,27 +428,30 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage>
         thickness: 3,
         thumbVisibility: true,
         controller: contentController,
-        child: SingleChildScrollView(
-          controller: contentController,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              buildMappingNameFormField(controller: controller),
-              const Space.normal(),
-              Flexible(
-                child: buildMappingFieldDropdowns(
-                  modelFields: modelFields,
-                  mappingClone: mappingClone,
+        child: Padding(
+          padding: Spacing.of(context).insets.onlyRight.normal,
+          child: SingleChildScrollView(
+            controller: contentController,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                buildMappingNameFormField(controller: controller),
+                const Space.normal(),
+                Flexible(
+                  child: buildMappingFieldDropdowns(
+                    modelFields: modelFields,
+                    mappingClone: mappingClone,
+                  ),
                 ),
-              ),
-              const Space.normal(),
-              buildWrapImageAudio(mappingClone: mappingClone),
-              const Space.small(),
-              buildUseBrTags(mappingClone: mappingClone),
-              const Space.small(),
-              buildPrependDictionaryNames(mappingClone: mappingClone),
-            ],
+                const Space.normal(),
+                buildWrapImageAudio(mappingClone: mappingClone),
+                const Space.small(),
+                buildUseBrTags(mappingClone: mappingClone),
+                const Space.small(),
+                buildPrependDictionaryNames(mappingClone: mappingClone),
+              ],
+            ),
           ),
         ),
       ),
@@ -576,7 +605,16 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage>
     Widget alertDialog = AlertDialog(
       contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
           ? Spacing.of(context).insets.exceptBottom.big
-          : Spacing.of(context).insets.exceptBottom.normal,
+          : Spacing.of(context).insets.exceptBottom.normal.copyWith(
+                left: Spacing.of(context).spaces.semiBig,
+                right: Spacing.of(context).spaces.semiBig,
+              ),
+      actionsPadding: Spacing.of(context).insets.exceptBottom.normal.copyWith(
+            left: Spacing.of(context).spaces.normal,
+            right: Spacing.of(context).spaces.normal,
+            bottom: Spacing.of(context).spaces.normal,
+            top: Spacing.of(context).spaces.extraSmall,
+          ),
       content: buildEditContent(
         modelFields: modelFields,
         mappingClone: mappingClone,

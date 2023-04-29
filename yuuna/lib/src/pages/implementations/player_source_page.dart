@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:audio_session/audio_session.dart';
 import 'package:collection/collection.dart';
@@ -95,8 +96,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     _playPauseSubscription?.cancel();
     WidgetsBinding.instance.removeObserver(this);
 
-    await _playerController.stop();
-    await _playerController.dispose();
+    _playerController.stop();
+    _playerController.dispose();
 
     super.dispose();
   }
@@ -1326,8 +1327,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                           _positionNotifier.value.inMilliseconds;
                   Fluttertoast.showToast(
                     msg: t.subtitle_delay_set(
-                      ms: _subtitleOptionsNotifier.value.subtitleDelay,
-                    ),
+                        ms: _subtitleOptionsNotifier.value.subtitleDelay),
                   );
 
                   refreshSubtitleWidget();
@@ -1759,28 +1759,46 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
   /// This renders the subtitle with a [SelectableText] widget.
   Widget tapToSelectSubtitle(String subtitleText) {
-    return Stack(
-      alignment: Alignment.bottomCenter,
-      children: <Widget>[
-        JidoujishoSelectableText.rich(
-          TextSpan(children: getSubtitleOutlineSpans(subtitleText)),
-          textAlign: TextAlign.center,
-          contextMenuBuilder: (_, __) {
-            return const SizedBox.shrink();
-          },
-          enableInteractiveSelection: false,
+    double blurRadius =
+        _subtitleOptionsNotifier.value.subtitleBackgroundBlurRadius;
+    return ClipRRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: blurRadius, sigmaY: blurRadius),
+        child: Container(
+          color: Colors.black.withOpacity(
+            _subtitleOptionsNotifier.value.subtitleBackgroundOpacity,
+          ),
+          padding: EdgeInsets.only(
+            top: Spacing.of(context).spaces.small * 0.6,
+            bottom: Spacing.of(context).spaces.extraSmall,
+            left: Spacing.of(context).spaces.small,
+            right: Spacing.of(context).spaces.small * 0.4,
+          ),
+          child: Stack(
+            alignment: Alignment.bottomCenter,
+            children: <Widget>[
+              JidoujishoSelectableText.rich(
+                TextSpan(children: getSubtitleOutlineSpans(subtitleText)),
+                textAlign: TextAlign.center,
+                contextMenuBuilder: (_, __) {
+                  return const SizedBox.shrink();
+                },
+                enableInteractiveSelection: false,
+              ),
+              JidoujishoSelectableText.rich(
+                TextSpan(children: getSubtitleSpans(subtitleText)),
+                textAlign: TextAlign.center,
+                controller: _selectableTextController,
+                focusNode: _dragToSelectFocusNode,
+                selectionControls: EmptyTextSelectionControls(),
+                contextMenuBuilder: (_, __) {
+                  return const SizedBox.shrink();
+                },
+              ),
+            ],
+          ),
         ),
-        JidoujishoSelectableText.rich(
-          TextSpan(children: getSubtitleSpans(subtitleText)),
-          textAlign: TextAlign.center,
-          controller: _selectableTextController,
-          focusNode: _dragToSelectFocusNode,
-          selectionControls: EmptyTextSelectionControls(),
-          contextMenuBuilder: (_, __) {
-            return const SizedBox.shrink();
-          },
-        ),
-      ],
+      ),
     );
   }
 
@@ -1854,8 +1872,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   /// Subtitle paint style.
   Paint get subtitlePaintStyle => Paint()
     ..style = PaintingStyle.stroke
-    ..strokeWidth = 3
-    ..color = Colors.black.withOpacity(0.75);
+    ..strokeWidth = _subtitleOptionsNotifier.value.subtitleOutlineWidth
+    ..color = Colors.black.withOpacity(
+        _subtitleOptionsNotifier.value.subtitleOutlineWidth == 0 ? 0 : 0.75);
 
   /// Subtitle outline text style.
   ///

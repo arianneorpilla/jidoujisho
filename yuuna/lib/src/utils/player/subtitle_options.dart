@@ -6,7 +6,10 @@ class SubtitleOptions {
     required this.subtitleDelay,
     required this.fontSize,
     required this.fontName,
+    required this.subtitleBackgroundOpacity,
     required this.regexFilter,
+    required this.subtitleOutlineWidth,
+    required this.subtitleBackgroundBlurRadius,
   });
 
   /// Audio allowance, used for audio export, in milliseconds.
@@ -20,6 +23,15 @@ class SubtitleOptions {
 
   /// Name of the font preferred for the subtitle.
   String fontName;
+
+  /// Subtitle background blur radius.
+  double subtitleBackgroundBlurRadius;
+
+  /// Subtitle background opacity.
+  double subtitleBackgroundOpacity;
+
+  /// Subtitle outline width.
+  double subtitleOutlineWidth;
 
   /// Regex filter used for the subtitle.
   String regexFilter;

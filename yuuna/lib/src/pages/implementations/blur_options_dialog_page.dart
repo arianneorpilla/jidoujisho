@@ -32,49 +32,69 @@ class _BlurOptionsDialogPageState extends BasePageState<BlurOptionsDialogPage> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      scrollable: true,
-      contentPadding: Spacing.of(context).insets.all.big,
+      contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
+          ? Spacing.of(context).insets.exceptBottom.big
+          : Spacing.of(context).insets.exceptBottom.normal.copyWith(
+                left: Spacing.of(context).spaces.semiBig,
+                right: Spacing.of(context).spaces.semiBig,
+              ),
+      actionsPadding: Spacing.of(context).insets.exceptBottom.normal.copyWith(
+            left: Spacing.of(context).spaces.normal,
+            right: Spacing.of(context).spaces.normal,
+            bottom: Spacing.of(context).spaces.normal,
+            top: Spacing.of(context).spaces.extraSmall,
+          ),
       content: buildContent(),
       actions: actions,
     );
   }
 
   Widget buildContent() {
-    return SingleChildScrollView(
-      child: SizedBox(
-        width: MediaQuery.of(context).size.width * (3 / 4),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ColorPicker(
-              pickerColor: _pendingColor,
-              onColorChanged: (color) async {
-                _pendingColor = color;
-              },
-              colorPickerWidth: 200,
-              pickerAreaHeightPercent: 0.8,
-            ),
-            TextField(
-              controller: _blurrinessController,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              decoration: InputDecoration(
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                suffixText: t.unit_pixels,
-                suffixIcon: JidoujishoIconButton(
-                  tooltip: t.reset,
-                  size: 18,
-                  onTap: () async {
-                    _blurrinessController.text = '5.0';
-                    FocusScope.of(context).unfocus();
+    ScrollController scrollController = ScrollController();
+    return RawScrollbar(
+      thickness: 3,
+      thumbVisibility: true,
+      controller: scrollController,
+      child: Padding(
+        padding: Spacing.of(context).insets.onlyRight.normal,
+        child: SingleChildScrollView(
+          controller: scrollController,
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * (3 / 4),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ColorPicker(
+                  pickerColor: _pendingColor,
+                  onColorChanged: (color) async {
+                    _pendingColor = color;
                   },
-                  icon: Icons.undo,
+                  colorPickerWidth: 200,
+                  pickerAreaHeightPercent: 0.8,
                 ),
-                labelText: t.player_option_blur_radius,
-              ),
+                TextField(
+                  controller: _blurrinessController,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: InputDecoration(
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                    suffixText: t.unit_pixels,
+                    suffixIcon: JidoujishoIconButton(
+                      tooltip: t.reset,
+                      size: 18,
+                      onTap: () async {
+                        _blurrinessController.text = '5.0';
+                        FocusScope.of(context).unfocus();
+                      },
+                      icon: Icons.undo,
+                    ),
+                    labelText: t.player_option_blur_radius,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

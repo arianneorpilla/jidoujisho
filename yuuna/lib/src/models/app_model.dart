@@ -2299,6 +2299,7 @@ class AppModel with ChangeNotifier {
       _currentMediaItem = item;
     }
 
+    _currentSubtitleOptions = ValueNotifier(subtitleOptions);
     _overrideDictionaryColor = null;
     _overrideDictionaryTheme = null;
 
@@ -2346,9 +2347,6 @@ class AppModel with ChangeNotifier {
     await Wakelock.disable();
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
-    mediaSource.mediaType.refreshTab();
-    DictionaryMediaType.instance.refreshTab();
-
     await mediaSource.onSourceExit(
       appModel: this,
       context: context,
@@ -2360,6 +2358,9 @@ class AppModel with ChangeNotifier {
     if (_shouldKillMediaOnPop) {
       shutdown();
     }
+
+    mediaSource.mediaType.refreshTab();
+    DictionaryMediaType.instance.refreshTab();
   }
 
   /// A helper function for opening the creator from any page in the
@@ -3071,24 +3072,23 @@ class AppModel with ChangeNotifier {
     String fontName = _preferences
         .get('font_name/${targetLanguage.languageCode}', defaultValue: '');
     String regexFilter = _preferences.get('regex_filter', defaultValue: '');
+    double subtitleBackgroundOpacity =
+        _preferences.get('subtitle_background_opacity', defaultValue: 0.0);
+    double subtitleOutlineWidth =
+        _preferences.get('subtitle_outline_width', defaultValue: 3.0);
+    double subtitleBackgroundBlurRadius =
+        _preferences.get('subtitle_background_blur_radius', defaultValue: 0.0);
 
     return SubtitleOptions(
       audioAllowance: audioAllowance,
       subtitleDelay: subtitleDelay,
+      subtitleBackgroundOpacity: subtitleBackgroundOpacity,
+      subtitleBackgroundBlurRadius: subtitleBackgroundBlurRadius,
       fontSize: fontSize,
       fontName: fontName,
       regexFilter: regexFilter,
+      subtitleOutlineWidth: subtitleOutlineWidth,
     );
-  }
-
-  /// Gets the last used audio index of a given media item.
-  int getMediaItemPreferredAudioIndex(MediaItem item) {
-    return _preferences.get('audio_index/${item.uniqueKey}', defaultValue: 0);
-  }
-
-  /// Sets the last used audio index of a given media item.
-  void setMediaItemPreferredAudioIndex(MediaItem item, int index) {
-    _preferences.put('audio_index/${item.uniqueKey}', index);
   }
 
   /// Set the subtitle options used in the player.
@@ -3099,6 +3099,21 @@ class AppModel with ChangeNotifier {
     _preferences.put(
         'font_name/${targetLanguage.languageCode}', options.fontName);
     _preferences.put('regex_filter', options.regexFilter);
+    _preferences.put(
+        'subtitle_background_opacity', options.subtitleBackgroundOpacity);
+    _preferences.put('subtitle_outline_width', options.subtitleOutlineWidth);
+    _preferences.put('subtitle_background_blur_radius',
+        options.subtitleBackgroundBlurRadius);
+  }
+
+  /// Gets the last used audio index of a given media item.
+  int getMediaItemPreferredAudioIndex(MediaItem item) {
+    return _preferences.get('audio_index/${item.uniqueKey}', defaultValue: 0);
+  }
+
+  /// Sets the last used audio index of a given media item.
+  void setMediaItemPreferredAudioIndex(MediaItem item, int index) {
+    _preferences.put('audio_index/${item.uniqueKey}', index);
   }
 
   /// Get definition focus mode for player.

@@ -121,9 +121,6 @@ class ReaderChatgptSource extends ReaderMediaSource {
       required WidgetRef ref,
       required AppModel appModel}) async {
     Widget alertDialog = AlertDialog(
-      contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
-          ? Spacing.of(context).insets.exceptBottom.big
-          : Spacing.of(context).insets.exceptBottom.normal,
       title: Text(t.clear_message_title),
       content: Text(t.clear_message_description),
       actions: <Widget>[

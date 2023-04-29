@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 353
+/// Strings: 357
 ///
-/// Built on 2023-04-29 at 07:24 UTC
+/// Built on 2023-04-29 at 09:08 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -368,17 +368,20 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get player_option_text_filter => 'Use Regular Expression Filter';
 	String get player_option_blur_preferences => 'Blur Widget Preferences';
 	String get player_option_blur_use => 'Use Blur Widget';
-	String get player_option_blur_radius => 'Blur Radius';
+	String get player_option_blur_radius => 'Blur radius';
 	String get player_option_blur_options => 'Set Blur Widget Color and Bluriness';
 	String get player_option_blur_reset => 'Reset Blur Widget Size and Position';
 	String get player_align_subtitle_transcript => 'Align Subtitle with Transcript';
 	String get player_option_subtitle_appearance => 'Subtitle Timing and Appearance';
 	String get player_option_load_subtitles => 'Load External Subtitles';
-	String get player_option_subtitle_delay => 'Subtitle Delay';
-	String get player_option_audio_allowance => 'Audio Allowance';
-	String get player_option_font_name => 'Font Name';
-	String get player_option_font_size => 'Font Size';
-	String get player_option_regex_filter => 'Regular Expression Filter';
+	String get player_option_subtitle_delay => 'Subtitle delay';
+	String get player_option_audio_allowance => 'Audio allowance';
+	String get player_option_font_name => 'Subtitle font name';
+	String get player_option_font_size => 'Subtitle font size';
+	String get player_option_regex_filter => 'Regular expression filter';
+	String get player_option_subtitle_background_opacity => 'Subtitle background opacity';
+	String get player_option_subtitle_background_blur_radius => 'Subtitle background blur radius';
+	String get player_option_outline_width => 'Subtitle outline width';
 	String get player_subtitles_transcript_empty => 'Transcript is empty.';
 	String get player_prepare_export => 'Preparing card...';
 	String get player_change_player_orientation => 'Change Player Orientation';
@@ -498,6 +501,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String subtitle_delay_set({required Object ms}) => 'Subtitle delay set to ${ms} ms.';
 	String get cancel => 'Cancel';
 	String get server_port_in_use => 'Local server port already in use';
+	String get google_fonts => 'Google Fonts';
 	late final _StringsRetryingInEn retrying_in = _StringsRetryingInEn._(_root);
 	late final _StringsViewRepliesEn view_replies = _StringsViewRepliesEn._(_root);
 }
@@ -753,17 +757,20 @@ extension on _StringsEn {
 			case 'player_option_text_filter': return 'Use Regular Expression Filter';
 			case 'player_option_blur_preferences': return 'Blur Widget Preferences';
 			case 'player_option_blur_use': return 'Use Blur Widget';
-			case 'player_option_blur_radius': return 'Blur Radius';
+			case 'player_option_blur_radius': return 'Blur radius';
 			case 'player_option_blur_options': return 'Set Blur Widget Color and Bluriness';
 			case 'player_option_blur_reset': return 'Reset Blur Widget Size and Position';
 			case 'player_align_subtitle_transcript': return 'Align Subtitle with Transcript';
 			case 'player_option_subtitle_appearance': return 'Subtitle Timing and Appearance';
 			case 'player_option_load_subtitles': return 'Load External Subtitles';
-			case 'player_option_subtitle_delay': return 'Subtitle Delay';
-			case 'player_option_audio_allowance': return 'Audio Allowance';
-			case 'player_option_font_name': return 'Font Name';
-			case 'player_option_font_size': return 'Font Size';
-			case 'player_option_regex_filter': return 'Regular Expression Filter';
+			case 'player_option_subtitle_delay': return 'Subtitle delay';
+			case 'player_option_audio_allowance': return 'Audio allowance';
+			case 'player_option_font_name': return 'Subtitle font name';
+			case 'player_option_font_size': return 'Subtitle font size';
+			case 'player_option_regex_filter': return 'Regular expression filter';
+			case 'player_option_subtitle_background_opacity': return 'Subtitle background opacity';
+			case 'player_option_subtitle_background_blur_radius': return 'Subtitle background blur radius';
+			case 'player_option_outline_width': return 'Subtitle outline width';
 			case 'player_subtitles_transcript_empty': return 'Transcript is empty.';
 			case 'player_prepare_export': return 'Preparing card...';
 			case 'player_change_player_orientation': return 'Change Player Orientation';
@@ -883,6 +890,7 @@ extension on _StringsEn {
 			case 'subtitle_delay_set': return ({required Object ms}) => 'Subtitle delay set to ${ms} ms.';
 			case 'cancel': return 'Cancel';
 			case 'server_port_in_use': return 'Local server port already in use';
+			case 'google_fonts': return 'Google Fonts';
 			case 'retrying_in.seconds': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
 				one: 'Retrying in ${n} second...',
 				other: 'Retrying in ${n} seconds...',
