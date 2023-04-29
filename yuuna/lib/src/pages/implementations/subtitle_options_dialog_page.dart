@@ -138,6 +138,7 @@ class _SubtitleOptionsDialogPage
                             },
                             icon: Icons.undo,
                           ),
+                          SizedBox(width: 8),
                         ],
                       ),
                       suffixText: t.unit_milliseconds),
@@ -189,6 +190,7 @@ class _SubtitleOptionsDialogPage
                           },
                           icon: Icons.undo,
                         ),
+                        SizedBox(width: 8),
                       ],
                     ),
                     suffixText: t.unit_milliseconds,
@@ -226,7 +228,7 @@ class _SubtitleOptionsDialogPage
                       size: 18,
                       tooltip: t.reset,
                       onTap: () async {
-                        _widthController.text = '0';
+                        _widthController.text = '3.0';
                         FocusScope.of(context).unfocus();
                       },
                       icon: Icons.undo,
@@ -245,7 +247,7 @@ class _SubtitleOptionsDialogPage
                       size: 18,
                       tooltip: t.reset,
                       onTap: () async {
-                        _blurController.text = '0';
+                        _blurController.text = '0.0';
                         FocusScope.of(context).unfocus();
                       },
                       icon: Icons.undo,
@@ -264,7 +266,7 @@ class _SubtitleOptionsDialogPage
                       size: 18,
                       tooltip: t.reset,
                       onTap: () async {
-                        _opacityController.text = '0';
+                        _opacityController.text = '0.0';
                         FocusScope.of(context).unfocus();
                       },
                       icon: Icons.undo,
@@ -302,6 +304,7 @@ class _SubtitleOptionsDialogPage
                           },
                           icon: Icons.undo,
                         ),
+                        SizedBox(width: 8),
                       ],
                     ),
                   ),
