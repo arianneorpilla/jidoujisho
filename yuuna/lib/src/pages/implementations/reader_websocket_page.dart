@@ -31,6 +31,14 @@ class _ReaderWebsocketPageState
   ReaderWebsocketSource get source => ReaderWebsocketSource.instance;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).unfocus();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: clearDictionaryResult,

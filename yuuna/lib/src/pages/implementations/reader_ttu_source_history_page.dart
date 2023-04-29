@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_assets_server/local_assets_server.dart';
@@ -29,22 +32,53 @@ class _ReaderTtuSourceHistoryPageState<T extends HistoryReaderPage>
   @override
   ReaderTtuSource get mediaSource => ReaderTtuSource.instance;
 
+  final ValueNotifier<int> _tryAgainCountdownNotifier = ValueNotifier(0);
+  Timer? _timer;
+
   @override
   Widget build(BuildContext context) {
     AsyncValue<LocalAssetsServer> server =
         ref.watch(ttuServerProvider(appModel.targetLanguage));
 
     return server.when(
-      data: buildData,
-      loading: buildLoading,
-      error: (error, stack) => buildError(
-        error: error,
-        stack: stack,
-        refresh: () {
-          ref.refresh(ttuServerProvider(appModel.targetLanguage));
-        },
-      ),
-    );
+        data: buildData,
+        loading: buildLoading,
+        error: (error, stack) {
+          if (_tryAgainCountdownNotifier.value == 0) {
+            _tryAgainCountdownNotifier.value = 5;
+          }
+
+          if (error is SocketException) {
+            _timer ??= Timer.periodic(const Duration(seconds: 1), (_) {
+              _tryAgainCountdownNotifier.value -= 1;
+              if (_tryAgainCountdownNotifier.value <= 0) {
+                ref.refresh(ttuServerProvider(appModel.targetLanguage));
+                _timer?.cancel();
+                _timer = null;
+              }
+            });
+
+            return Center(
+              child: ValueListenableBuilder<int>(
+                valueListenable: _tryAgainCountdownNotifier,
+                builder: (_, __, ___) => JidoujishoPlaceholderMessage(
+                  icon: Icons.lan,
+                  message: '${t.server_port_in_use}\n${t.retrying_in.seconds(
+                    n: _tryAgainCountdownNotifier.value,
+                  )}',
+                ),
+              ),
+            );
+          }
+
+          return buildError(
+            error: error,
+            stack: stack,
+            refresh: () {
+              ref.refresh(ttuServerProvider(appModel.targetLanguage));
+            },
+          );
+        });
   }
 
   Widget buildData(LocalAssetsServer server) {

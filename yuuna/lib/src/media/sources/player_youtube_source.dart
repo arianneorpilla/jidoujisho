@@ -342,8 +342,17 @@ class PlayerYoutubeSource extends PlayerMediaSource {
 
     int startTime = item.position;
 
+    List<String> videoParams = [
+      VlcVideoOptions.dropLateFrames(false),
+      VlcVideoOptions.skipFrames(false),
+    ];
     List<String> advancedParams = [
       '--start-time=$startTime',
+      VlcAdvancedOptions.networkCaching(20000),
+    ];
+    List<String> soutParams = [
+      '--start-time=$startTime',
+      VlcStreamOutputOptions.soutMuxCaching(20000),
     ];
     List<String> audioParams = [
       '--input-slave=$audioUrl',
@@ -355,6 +364,8 @@ class PlayerYoutubeSource extends PlayerMediaSource {
       options: VlcPlayerOptions(
         advanced: VlcAdvancedOptions(advancedParams),
         audio: VlcAudioOptions(audioParams),
+        sout: VlcStreamOutputOptions(soutParams),
+        video: VlcVideoOptions(videoParams),
       ),
     );
   }

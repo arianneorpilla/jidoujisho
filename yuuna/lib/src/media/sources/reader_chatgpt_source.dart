@@ -88,7 +88,7 @@ class ReaderChatgptSource extends ReaderMediaSource {
             builder: (context) => const ChatgptSettingsDialogPage(),
           );
 
-          appModel.refresh();
+          mediaType.refreshTab();
         },
       ),
     );
@@ -135,10 +135,9 @@ class ReaderChatgptSource extends ReaderMediaSource {
             ),
           ),
           onPressed: () async {
-            appModel.clearMessages();
-            appModel.refresh();
-
             Navigator.pop(context);
+            appModel.clearMessages();
+            mediaType.refreshTab();
           },
         ),
         TextButton(

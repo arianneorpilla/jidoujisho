@@ -136,8 +136,17 @@ class PlayerNetworkStreamSource extends PlayerMediaSource {
     String dataSource = item.mediaIdentifier;
     int startTime = item.position;
 
+    List<String> videoParams = [
+      VlcVideoOptions.dropLateFrames(false),
+      VlcVideoOptions.skipFrames(false),
+    ];
     List<String> advancedParams = [
       '--start-time=$startTime',
+      VlcAdvancedOptions.networkCaching(20000),
+    ];
+    List<String> soutParams = [
+      '--start-time=$startTime',
+      VlcStreamOutputOptions.soutMuxCaching(20000),
     ];
     List<String> audioParams = [
       '--audio-language=${appModel.targetLanguage.languageCode},${appModel.appLocale.languageCode}',
@@ -149,6 +158,8 @@ class PlayerNetworkStreamSource extends PlayerMediaSource {
       options: VlcPlayerOptions(
         advanced: VlcAdvancedOptions(advancedParams),
         audio: VlcAudioOptions(audioParams),
+        sout: VlcStreamOutputOptions(soutParams),
+        video: VlcVideoOptions(videoParams),
       ),
     );
   }

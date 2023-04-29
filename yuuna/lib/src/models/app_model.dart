@@ -948,26 +948,26 @@ class AppModel with ChangeNotifier {
     String publicDirectory =
         await ExternalPath.getExternalStoragePublicDirectory(
             ExternalPath.DIRECTORY_DCIM);
-    String directoryPath = path.join(publicDirectory, 'jidoujisho');
-    String noMediaFilePath =
-        path.join(publicDirectory, 'jidoujisho', '.nomedia');
+    try {
+      String directoryPath = path.join(publicDirectory, 'jidoujisho');
+      String noMediaFilePath =
+          path.join(publicDirectory, 'jidoujisho', '.nomedia');
 
-    Directory jidoujishoDirectory = Directory(directoryPath);
-    File noMediaFile = File(noMediaFilePath);
+      Directory jidoujishoDirectory = Directory(directoryPath);
+      File noMediaFile = File(noMediaFilePath);
 
-    if (!jidoujishoDirectory.existsSync()) {
-      try {
+      if (!jidoujishoDirectory.existsSync()) {
         jidoujishoDirectory.createSync(recursive: true);
-      } catch (e) {
-        debugPrint('Failed to create directory in DCIM.');
-        return prepareFallbackJidoujishoDirectory();
       }
-    }
-    if (!noMediaFile.existsSync()) {
-      noMediaFile.createSync();
-    }
+      if (!noMediaFile.existsSync()) {
+        noMediaFile.createSync();
+      }
 
-    return jidoujishoDirectory;
+      return jidoujishoDirectory;
+    } catch (e) {
+      debugPrint('Failed to create directory in DCIM.');
+      return prepareFallbackJidoujishoDirectory();
+    }
   }
 
   /// Return the app external directory found in the internal app directory.
@@ -989,6 +989,31 @@ class AppModel with ChangeNotifier {
     }
 
     return jidoujishoDirectory;
+  }
+
+  /// Preloads the app icon so that there is no pop-in.
+  final Image appIcon = Image.asset(
+    'assets/meta/icon.png',
+  );
+
+  /// Injects licenses to be displayed in the licenses page that aren't
+  /// pre-included by Flutter upon compilation but are included as assets.
+  Future<void> injectAssetLicenses() async {
+    final packageNames = [
+      'ebook-reader',
+      'ipadic',
+      've',
+    ];
+
+    for (String packageName in packageNames) {
+      String licenseText =
+          await rootBundle.loadString('assets/licenses/$packageName.txt');
+      LicenseRegistry.addLicense(
+        () => Stream<LicenseEntry>.value(
+          LicenseEntryWithLineBreaks(<String>[packageName], licenseText),
+        ),
+      );
+    }
   }
 
   /// Prepare application data and state to be ready of use upon starting up
@@ -1026,40 +1051,9 @@ class AppModel with ChangeNotifier {
     hiveDirectory.createSync();
     dictionaryImportWorkingDirectory.createSync();
 
-    /// Old directory, cleared for legacy purposes.
-    _isarDirectory = Directory(path.join(appDirectory.path, 'isar'));
-    if (_isarDirectory.existsSync()) {
-      _isarDirectory.deleteSync(recursive: true);
-    }
-
-    /// Inject non-Flutter licenses.
-    String ttuLicense =
-        await rootBundle.loadString('assets/licenses/ebook-reader.txt');
-    String veLicense = await rootBundle.loadString('assets/licenses/ve.txt');
-    String ipadicLicense =
-        await rootBundle.loadString('assets/licenses/ipadic.txt');
-    LicenseRegistry.addLicense(
-      () => Stream<LicenseEntry>.value(
-        LicenseEntryWithLineBreaks(<String>['ebook-reader'], ttuLicense),
-      ),
-    );
-    LicenseRegistry.addLicense(
-      () => Stream<LicenseEntry>.value(
-        LicenseEntryWithLineBreaks(<String>['ve'], veLicense),
-      ),
-    );
-    LicenseRegistry.addLicense(
-      () => Stream<LicenseEntry>.value(
-        LicenseEntryWithLineBreaks(<String>['ipadic'], ipadicLicense),
-      ),
-    );
-
-    /// Initialise persistent database.
-    _database = await Isar.open(
-      globalSchemas,
-      directory: _databaseDirectory.path,
-      maxSizeMiB: 8192,
-    );
+    /// Inject open source licenses for non-Flutter dependencies that are
+    /// included as assets.
+    await injectAssetLicenses();
 
     /// Populate entities with key-value maps for constant time performance.
     /// This is not the initialisation step, which occurs below.
@@ -1096,6 +1090,33 @@ class AppModel with ChangeNotifier {
         await source.initialise();
       }
     }
+
+    /// Initialise persistent database.
+    _database = await Isar.open(
+      globalSchemas,
+      directory: _databaseDirectory.path,
+      maxSizeMiB: 8192,
+    );
+
+    /// Preloads the search database in memory.
+    searchDictionary(
+      searchTerm: targetLanguage.helloWorld,
+      searchWithWildcards: false,
+      useCache: false,
+    ).then((_) {
+      /// Preloads for wildcard searches.
+      searchDictionary(
+        searchTerm: '${targetLanguage.helloWorld.substring(0, 1)}?',
+        searchWithWildcards: true,
+        useCache: false,
+      ).then((_) {
+        searchDictionary(
+          searchTerm: '${targetLanguage.helloWorld.substring(0, 1)}*',
+          searchWithWildcards: true,
+          useCache: false,
+        );
+      });
+    });
   }
 
   /// Get whether or not the current theme is dark mode.
@@ -1311,7 +1332,10 @@ class AppModel with ChangeNotifier {
     /// given to a user regarding the dictionary they are importing.
     ReceivePort alertReceivePort = ReceivePort();
     alertReceivePort.listen((message) {
-      Fluttertoast.showToast(msg: message.toString());
+      Fluttertoast.showToast(
+        msg: message.toString(),
+        toastLength: Toast.LENGTH_LONG,
+      );
     });
 
     /// If any [Exception] occurs, the process is aborted with a message as

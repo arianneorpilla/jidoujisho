@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 350
+/// Strings: 353
 ///
-/// Built on 2023-04-26 at 16:22 UTC
+/// Built on 2023-04-29 at 07:24 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -466,7 +466,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get enter_message => 'Enter message...';
 	String get clear_message_title => 'Clear Messages';
 	String get clear_message_description => 'This will clear all messages and start a new chat. Are you sure?';
-	String get error_chatgpt_response => 'Request failed or rate-limited. Try again shortly or check back later.';
+	String get error_chatgpt_response => 'Request failed or rate-limited. Try again shortly or check your usage limits.';
 	String get pick_file => 'Pick File';
 	String get open_url => 'Open URL';
 	String get catalogs => 'Catalogs';
@@ -497,7 +497,22 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get api_key => 'API Key';
 	String subtitle_delay_set({required Object ms}) => 'Subtitle delay set to ${ms} ms.';
 	String get cancel => 'Cancel';
+	String get server_port_in_use => 'Local server port already in use';
+	late final _StringsRetryingInEn retrying_in = _StringsRetryingInEn._(_root);
 	late final _StringsViewRepliesEn view_replies = _StringsViewRepliesEn._(_root);
+}
+
+// Path: retrying_in
+class _StringsRetryingInEn {
+	_StringsRetryingInEn._(this._root);
+
+	final _StringsEn _root; // ignore: unused_field
+
+	// Translations
+	String seconds({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: 'Retrying in ${n} second...',
+		other: 'Retrying in ${n} seconds...',
+	);
 }
 
 // Path: view_replies
@@ -836,7 +851,7 @@ extension on _StringsEn {
 			case 'enter_message': return 'Enter message...';
 			case 'clear_message_title': return 'Clear Messages';
 			case 'clear_message_description': return 'This will clear all messages and start a new chat. Are you sure?';
-			case 'error_chatgpt_response': return 'Request failed or rate-limited. Try again shortly or check back later.';
+			case 'error_chatgpt_response': return 'Request failed or rate-limited. Try again shortly or check your usage limits.';
 			case 'pick_file': return 'Pick File';
 			case 'open_url': return 'Open URL';
 			case 'catalogs': return 'Catalogs';
@@ -867,6 +882,11 @@ extension on _StringsEn {
 			case 'api_key': return 'API Key';
 			case 'subtitle_delay_set': return ({required Object ms}) => 'Subtitle delay set to ${ms} ms.';
 			case 'cancel': return 'Cancel';
+			case 'server_port_in_use': return 'Local server port already in use';
+			case 'retrying_in.seconds': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+				one: 'Retrying in ${n} second...',
+				other: 'Retrying in ${n} seconds...',
+			);
 			case 'view_replies.reply': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
 				one: 'SHOW ${n} REPLY',
 				other: 'SHOW ${n} REPLIES',

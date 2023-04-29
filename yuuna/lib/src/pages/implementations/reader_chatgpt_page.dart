@@ -50,6 +50,9 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).unfocus();
+    });
   }
 
   @override

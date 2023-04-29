@@ -1326,7 +1326,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                           _positionNotifier.value.inMilliseconds;
                   Fluttertoast.showToast(
                     msg: t.subtitle_delay_set(
-                        ms: _subtitleOptionsNotifier.value.subtitleDelay),
+                      ms: _subtitleOptionsNotifier.value.subtitleDelay,
+                    ),
                   );
 
                   refreshSubtitleWidget();

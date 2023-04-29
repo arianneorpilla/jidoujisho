@@ -33,6 +33,12 @@ class _ReaderMokuroHistoryPageState<T extends HistoryReaderPage>
     mediaType.tabRefreshNotifier.addListener(refresh);
   }
 
+  @override
+  void dispose() {
+    mediaType.tabRefreshNotifier.removeListener(refresh);
+    super.dispose();
+  }
+
   /// Refresh the page and respond to history changes.
   void refresh() {
     setState(() {});

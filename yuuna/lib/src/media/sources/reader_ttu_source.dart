@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_assets_server/local_assets_server.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
@@ -22,7 +24,10 @@ final ttuServerProvider =
 /// A global [Provider] for getting ッツ Ebook Reader books from IndexedDB.
 final ttuBooksProvider =
     FutureProvider.family<List<MediaItem>, Language>((ref, language) {
-  return ReaderTtuSource.instance.getBooksHistory(language);
+  return ReaderTtuSource.instance.getBooksHistory(
+    appModel: ref.watch(appProvider),
+    language: language,
+  );
 });
 
 /// A media source that allows the user to read from ッツ Ebook Reader.
@@ -55,6 +60,25 @@ class ReaderTtuSource extends ReaderMediaSource {
     required WidgetRef ref,
   }) async {
     ref.refresh(ttuBooksProvider(appModel.targetLanguage));
+    // await exportBackup(appModel: appModel);
+  }
+
+  /// Import persisted backup data back to IndexedDB if it exists.
+  Future<void> importBackup({
+    required InAppWebViewController controller,
+    required Language language,
+    required String data,
+  }) async {
+    FlutterLogs.logInfo(
+      mediaType.uniqueKey,
+      uniqueKey,
+      'Restored IndexedDB.',
+    );
+  }
+
+  /// Get the IndexedDB backup key for a language
+  String getIndexedDBKey(Language language) {
+    return 'idb_${getPortForLanguage(language)}';
   }
 
   /// Get the port for the current language. This port should ideally not conflict but should remain the same for
@@ -70,18 +94,34 @@ class ReaderTtuSource extends ReaderMediaSource {
     throw UnimplementedError();
   }
 
+  /// Used to delay the serve if the server failed to launch last time. Makes
+  /// retry look better for port conflicts.
+  bool _lastServeFailed = false;
+
   /// For serving the reader assets locally.
   Future<LocalAssetsServer> serveLocalAssets(Language language) async {
-    final server = LocalAssetsServer(
-      address: InternetAddress.loopbackIPv4,
-      port: getPortForLanguage(language),
-      assetsBasePath: 'assets/ttu-ebook-reader',
-      logger: const DebugLogger(),
-    );
+    int port = getPortForLanguage(language);
 
-    await server.serve();
+    if (_lastServeFailed) {
+      await Future.delayed(const Duration(seconds: 1));
+    }
 
-    return server;
+    try {
+      _lastServeFailed = false;
+      final server = LocalAssetsServer(
+        address: InternetAddress.loopbackIPv4,
+        port: port,
+        assetsBasePath: 'assets/ttu-ebook-reader',
+        logger: const DebugLogger(),
+      );
+
+      await server.serve();
+
+      return server;
+    } catch (e) {
+      _lastServeFailed = true;
+      rethrow;
+    }
   }
 
   @override
@@ -207,40 +247,69 @@ class ReaderTtuSource extends ReaderMediaSource {
     return const ReaderTtuSourceHistoryPage();
   }
 
-  /// Get the first time key for a certain language.
-  String getFirstTimeKey(Language language) {
-    return 'firstTime_${getPortForLanguage(language)}';
-  }
-
   /// Fetch JSON for all books in IndexedDB.
-  Future<List<MediaItem>> getBooksHistory(Language language) async {
-    if (getPreference(key: getFirstTimeKey(language), defaultValue: true)) {
-      return [];
-    }
-
-    int port = getPortForLanguage(language);
+  Future<List<MediaItem>> getBooksHistory({
+    required AppModel appModel,
+    required Language language,
+    bool recursive = false,
+  }) async {
+    int port = getPortForLanguage(appModel.targetLanguage);
 
     List<MediaItem>? items;
+
     HeadlessInAppWebView webView = HeadlessInAppWebView(
-      initialUrlRequest: URLRequest(url: Uri.parse('http://localhost:$port/')),
+      initialUrlRequest: URLRequest(
+        url: Uri.parse('http://localhost:$port/'),
+      ),
       onLoadStop: (controller, url) async {
         controller.evaluateJavascript(source: getHistoryJs);
       },
-      onConsoleMessage: (controller, message) {
-        late Map<String, dynamic> messageJson;
-        messageJson = jsonDecode(message.message);
+      onConsoleMessage: (controller, message) async {
+        try {
+          Map<String, dynamic> messageJson = jsonDecode(message.message);
 
-        if (messageJson['messageType'] != null) {
-          try {
-            items = getItemsFromJson(messageJson, port);
-          } catch (error, stack) {
-            items = [];
-            debugPrint('$error');
-            debugPrint('$stack');
+          if (messageJson['messageType'] != null) {
+            switch (messageJson['messageType']) {
+              case 'history':
+                try {
+                  items = getItemsFromJson(messageJson, port);
+                } catch (error, stack) {
+                  items = [];
+                  debugPrint('$error');
+                  debugPrint('$stack');
+                }
+                break;
+              case 'empty':
+                if (appModel.isDarkMode) {
+                  await controller.evaluateJavascript(
+                      source:
+                          'javascript:window.localStorage.setItem("theme", "black-theme")');
+                }
+
+                if (!appModel.targetLanguage.preferVerticalReading) {
+                  await controller.evaluateJavascript(
+                      source:
+                          'javascript:window.localStorage.setItem("writingMode", "horizontal-tb")');
+                  await controller.evaluateJavascript(
+                      source:
+                          'javascript:window.localStorage.setItem("fontSize", 16)');
+                  await controller.evaluateJavascript(
+                      source:
+                          'javascript:window.localStorage.setItem("firstDimensionMargin", 24)');
+                } else {
+                  await controller.evaluateJavascript(
+                      source:
+                          'javascript:window.localStorage.setItem("fontSize", 24)');
+                }
+
+                items = [];
+                break;
+              case 'error':
+                items = [];
+                break;
+            }
           }
-        } else {
-          debugPrint(message.message);
-        }
+        } on FormatException catch (_) {}
       },
     );
 
@@ -266,7 +335,7 @@ class ReaderTtuSource extends ReaderMediaSource {
         Map<int, Map<String, dynamic>>.fromEntries(
             bookmarks.map((e) => MapEntry(e['dataId'] as int, e)));
 
-    List<MediaItem> items = datas.mapIndexed((index, data) {
+    List<MapEntry<int, MediaItem>> itemsById = datas.mapIndexed((index, data) {
       int position = 0;
       int duration = 1;
 
@@ -292,20 +361,30 @@ class ReaderTtuSource extends ReaderMediaSource {
         base64Image = null;
       }
 
-      return MediaItem(
-        mediaIdentifier: 'http://localhost:$port/b.html?id=$id&?title=$title',
-        title: title,
-        base64Image: base64Image,
-        mediaTypeIdentifier: ReaderTtuSource.instance.mediaType.uniqueKey,
-        mediaSourceIdentifier: ReaderTtuSource.instance.uniqueKey,
-        position: position,
-        duration: duration,
-        canDelete: false,
-        canEdit: true,
+      return MapEntry(
+        index,
+        MediaItem(
+          mediaIdentifier: 'http://localhost:$port/b.html?id=$id&?title=$title',
+          title: title,
+          base64Image: base64Image,
+          mediaTypeIdentifier: ReaderTtuSource.instance.mediaType.uniqueKey,
+          mediaSourceIdentifier: ReaderTtuSource.instance.uniqueKey,
+          position: position,
+          duration: duration,
+          canDelete: false,
+          canEdit: true,
+        ),
       );
     }).toList();
 
-    return items;
+    List<int> lastOpens = datas.mapIndexed((index, data) {
+      return data['lastBookOpen'] as int? ?? 0;
+    }).toList();
+
+    itemsById.sort((a, b) => lastOpens[b.key].compareTo(lastOpens[a.key]));
+    List<MediaItem> itemsByLastOpened = itemsById.map((e) => e.value).toList();
+
+    return itemsByLastOpened;
   }
 
   /// Whether or not using the volume buttons in the Reader should turn the
@@ -398,98 +477,212 @@ class ReaderTtuSource extends ReaderMediaSource {
 
   /// Used to fetch JSON for all books in IndexedDB.
   static const String getHistoryJs = '''
-var bookmarkJson = JSON.stringify([]);
-var dataJson = JSON.stringify([]);
-var lastItemJson = JSON.stringify([]);
+indexedDB.databases().then((databases) => {
+  if (databases.length > 0) {
+    var bookmarkJson = JSON.stringify([]);
+    var dataJson = JSON.stringify([]);
+    var lastItemJson = JSON.stringify([]);
 
-var blobToBase64 = function(blob) {
-	return new Promise(resolve => {
-		let reader = new FileReader();
-		reader.onload = function() {
-			let dataUrl = reader.result;
-			resolve(dataUrl);
-		};
-		reader.readAsDataURL(blob);
-	});
-}
+    var blobToBase64 = function(blob) {
+      return new Promise(resolve => {
+        let reader = new FileReader();
+        reader.onload = function() {
+          let dataUrl = reader.result;
+          resolve(dataUrl);
+        };
+        reader.readAsDataURL(blob);
+      });
+    }
 
-function getAllFromIDBStore(storeName) {
-  return new Promise(
-    function(resolve, reject) {
-      var dbRequest = indexedDB.open("books");
+    function getAllFromIDBStore(storeName) {
+      return new Promise(
+        function(resolve, reject) {
+          var dbRequest = indexedDB.open("books");
 
-      dbRequest.onerror = function(event) {
-        reject(Error("Error opening DB"));
-      };
-
-      dbRequest.onupgradeneeded = function(event) {
-        reject(Error('Not found'));
-      };
-
-      dbRequest.onsuccess = function(event) {
-        var database = event.target.result;
-
-        try {
-          var transaction = database.transaction([storeName], 'readwrite');
-          var objectStore;
-          try {
-            objectStore = transaction.objectStore(storeName);
-          } catch (e) {
-            reject(Error('Error getting objects'));
-          }
-
-          var objectRequest = objectStore.getAll();
-
-          objectRequest.onerror = function(event) {
-            reject(Error('Error getting objects'));
+          dbRequest.onerror = function(event) {
+            reject(Error("Error opening DB"));
           };
 
-          objectRequest.onsuccess = function(event) {
-            if (objectRequest.result) resolve(objectRequest.result);
-            else reject(Error('Objects not found'));
-          }; 
-        } catch (e) {
-          reject(Error('Error getting objects'));
+          dbRequest.onupgradeneeded = function(event) {
+            reject(Error('Not found'));
+          };
+
+          dbRequest.onsuccess = function(event) {
+            var database = event.target.result;
+
+            try {
+              var transaction = database.transaction([storeName], 'readwrite');
+              var objectStore;
+              try {
+                objectStore = transaction.objectStore(storeName);
+              } catch (e) {
+                reject(Error('Error getting objects'));
+              }
+
+              var objectRequest = objectStore.getAll();
+
+              objectRequest.onerror = function(event) {
+                reject(Error('Error getting objects'));
+              };
+
+              objectRequest.onsuccess = function(event) {
+                if (objectRequest.result) resolve(objectRequest.result);
+                else reject(Error('Objects not found'));
+              }; 
+            } catch (e) {
+              console.log(JSON.stringify({messageType: "error", error: e.name}));
+              reject(Error('Error getting objects'));
+            }
+          };
         }
-      };
+      );
     }
-  );
-}
 
-async function getTtuData() {
-  try {
-    items = await getAllFromIDBStore("data");
-    await Promise.all(items.map(async (item) => {
+    async function getTtuData() {
       try {
-        item["coverImage"] = await blobToBase64(item["coverImage"]);
-      } catch (e) {}
-    }));
-    
-    dataJson = JSON.stringify(items);
-  } catch (e) {
-    dataJson = JSON.stringify([]);
-  }
+        items = await getAllFromIDBStore("data");
+        await Promise.all(items.map(async (item) => {
+          try {
+            item["coverImage"] = await blobToBase64(item["coverImage"]);
+          } catch (e) {}
+        }));
+        
+        dataJson = JSON.stringify(items);
+      } catch (e) {
+        dataJson = JSON.stringify([]);
+      }
 
-  try {
-    bookmarkJson = JSON.stringify(await getAllFromIDBStore("bookmark"));
-  } catch (e) {
-    bookmarkJson = JSON.stringify([]);
-  }
+      try {
+        bookmarkJson = JSON.stringify(await getAllFromIDBStore("bookmark"));
+      } catch (e) {
+        bookmarkJson = JSON.stringify([]);
+      }
+      
+      try {
+        lastItemJson = JSON.stringify(await getAllFromIDBStore("lastItem"));
+      } catch (e) {
+        lastItemJson = JSON.stringify([]);
+      }
+
+      console.log(JSON.stringify({messageType: "history", lastItem: lastItemJson, bookmark: bookmarkJson, data: dataJson}));
+    }
+
+    try {
+      getTtuData();
+    } catch (e) {
+      console.log(JSON.stringify({messageType: "history", lastItem: lastItemJson, bookmark: bookmarkJson, data: dataJson}));
+    }
+  } else {
   
-  try {
-    lastItemJson = JSON.stringify(await getAllFromIDBStore("lastItem"));
-  } catch (e) {
-    lastItemJson = JSON.stringify([]);
+    console.log(JSON.stringify({messageType: "empty"}));
+    
   }
+});
+''';
 
-  console.log(JSON.stringify({messageType: "history", lastItem: lastItemJson, bookmark: bookmarkJson, data: dataJson}));
-}
+  /// Used to fetch JSON for all books in IndexedDB.
+  static const String get = '''
+indexedDB.databases().then((databases) => {
+  if (databases.length > 0) {
+    var bookmarkJson = JSON.stringify([]);
+    var dataJson = JSON.stringify([]);
+    var lastItemJson = JSON.stringify([]);
 
-try {
-  getTtuData();
-} catch (e) {
-  console.log(JSON.stringify({messageType: "history", lastItem: lastItemJson, bookmark: bookmarkJson, data: dataJson}));
-}
+    var blobToBase64 = function(blob) {
+      return new Promise(resolve => {
+        let reader = new FileReader();
+        reader.onload = function() {
+          let dataUrl = reader.result;
+          resolve(dataUrl);
+        };
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    function getAllFromIDBStore(storeName) {
+      return new Promise(
+        function(resolve, reject) {
+          var dbRequest = indexedDB.open("books");
+
+          dbRequest.onerror = function(event) {
+            reject(Error("Error opening DB"));
+          };
+
+          dbRequest.onupgradeneeded = function(event) {
+            reject(Error('Not found'));
+          };
+
+          dbRequest.onsuccess = function(event) {
+            var database = event.target.result;
+
+            try {
+              var transaction = database.transaction([storeName], 'readwrite');
+              var objectStore;
+              try {
+                objectStore = transaction.objectStore(storeName);
+              } catch (e) {
+                reject(Error('Error getting objects'));
+              }
+
+              var objectRequest = objectStore.getAll();
+
+              objectRequest.onerror = function(event) {
+                reject(Error('Error getting objects'));
+              };
+
+              objectRequest.onsuccess = function(event) {
+                if (objectRequest.result) resolve(objectRequest.result);
+                else reject(Error('Objects not found'));
+              }; 
+            } catch (e) {
+              console.log(JSON.stringify({messageType: "error", error: e.name}));
+              reject(Error('Error getting objects'));
+            }
+          };
+        }
+      );
+    }
+
+    async function getTtuData() {
+      try {
+        items = await getAllFromIDBStore("data");
+        await Promise.all(items.map(async (item) => {
+          try {
+            item["coverImage"] = await blobToBase64(item["coverImage"]);
+          } catch (e) {}
+        }));
+        
+        dataJson = JSON.stringify(items);
+      } catch (e) {
+        dataJson = JSON.stringify([]);
+      }
+
+      try {
+        bookmarkJson = JSON.stringify(await getAllFromIDBStore("bookmark"));
+      } catch (e) {
+        bookmarkJson = JSON.stringify([]);
+      }
+      
+      try {
+        lastItemJson = JSON.stringify(await getAllFromIDBStore("lastItem"));
+      } catch (e) {
+        lastItemJson = JSON.stringify([]);
+      }
+
+      console.log(JSON.stringify({messageType: "history", lastItem: lastItemJson, bookmark: bookmarkJson, data: dataJson}));
+    }
+
+    try {
+      getTtuData();
+    } catch (e) {
+      console.log(JSON.stringify({messageType: "history", lastItem: lastItemJson, bookmark: bookmarkJson, data: dataJson}));
+    }
+  } else {
+  
+    console.log(JSON.stringify({messageType: "empty"}));
+    
+  }
+});
 ''';
 
   /// This ensures that the internal version included with the app always uses

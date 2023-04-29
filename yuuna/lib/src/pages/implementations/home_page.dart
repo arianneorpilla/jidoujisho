@@ -11,7 +11,9 @@ import 'package:yuuna/utils.dart';
 /// an [AppBar] and a [BottomNavigationBar].
 class HomePage extends BasePage {
   /// Construct an instance of the [HomePage].
-  const HomePage({super.key});
+  const HomePage({
+    super.key,
+  });
 
   @override
   BasePageState<HomePage> createState() => _HomePageState();
@@ -24,18 +26,12 @@ class _HomePageState extends BasePageState<HomePage>
 
   String get appName => appModel.packageInfo.appName;
   String get appVersion => appModel.packageInfo.version;
-  late final Image appIcon;
 
   int get currentHomeTabIndex => appModel.currentHomeTabIndex;
 
   @override
   void initState() {
     super.initState();
-
-    /// Define the app icon for precaching so that it does not pop in.
-    appIcon = Image.asset(
-      'assets/meta/icon.png',
-    );
 
     WidgetsBinding.instance.addObserver(this);
 
@@ -86,12 +82,6 @@ class _HomePageState extends BasePageState<HomePage>
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    precacheImage(appIcon.image, context);
-  }
-
-  @override
   Widget build(BuildContext context) {
     if (!appModel.isDatabaseOpen) {
       return const SizedBox.shrink();
@@ -102,7 +92,9 @@ class _HomePageState extends BasePageState<HomePage>
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: buildAppBar(),
-        body: buildBody(),
+        body: SafeArea(
+          child: buildBody(),
+        ),
         bottomNavigationBar: buildBottomNavigationBar(),
       ),
     );
@@ -117,7 +109,7 @@ class _HomePageState extends BasePageState<HomePage>
     );
   }
 
-  Widget? buildBody() {
+  Widget buildBody() {
     return IndexedStack(
       index: currentHomeTabIndex,
       children: mediaTypeBodies,
@@ -164,10 +156,10 @@ class _HomePageState extends BasePageState<HomePage>
   Widget? buildLeading() {
     return ChangeNotifierBuilder(
       notifier: appModel.incognitoNotifier,
-      builder: (context, notifier, widget) {
+      builder: (context, notifier, _) {
         return Padding(
           padding: Spacing.of(context).insets.onlyLeft.normal,
-          child: appIcon,
+          child: Image.asset('assets/meta/icon.png'),
         );
       },
     );

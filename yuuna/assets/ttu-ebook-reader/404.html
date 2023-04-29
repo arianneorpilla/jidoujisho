@@ -24,35 +24,28 @@
     <meta name="theme-color" content="#37474f" />
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#37474f" />
     <meta http-equiv="content-security-policy" content="">
-		<link rel="modulepreload" href="/_app/immutable/entry/start.dc8c5fd8.js">
-		<link rel="modulepreload" href="/_app/immutable/chunks/index.a1b1e1bc.js">
-		<link rel="modulepreload" href="/_app/immutable/chunks/singletons.e193b7a2.js">
-		<link rel="modulepreload" href="/_app/immutable/entry/app.ae166eb4.js">
+		<link rel="modulepreload" href="/_app/immutable/start-31285994.js">
+		<link rel="modulepreload" href="/_app/immutable/chunks/index-be8ea2fc.js">
+		<link rel="modulepreload" href="/_app/immutable/chunks/singletons-6176161c.js">
+		<script>
+			if ('serviceWorker' in navigator) {
+				addEventListener('load', function () {
+					navigator.serviceWorker.register('/service-worker.js');
+				});
+			}
+		</script>
   </head>
   <body class="h-full w-full break-words font-sans">
     <div class="h-full w-full">
-			<script>
-				{
-					__sveltekit_fwr1me = {
-						env: {},
-						base: "",
-						element: document.currentScript.parentElement
-					};
+		<script type="module" data-sveltekit-hydrate="45h">
+			import { start } from "/_app/immutable/start-31285994.js";
 
-					Promise.all([
-						import("/_app/immutable/entry/start.dc8c5fd8.js"),
-						import("/_app/immutable/entry/app.ae166eb4.js")
-					]).then(([kit, app]) => {
-						kit.start(app, __sveltekit_fwr1me.element);
-					});
-
-					if ('serviceWorker' in navigator) {
-						addEventListener('load', function () {
-							navigator.serviceWorker.register('/service-worker.js');
-						});
-					}
-				}
-			</script>
-		</div>
+			start({
+				env: {},
+				paths: {"base":"","assets":""},
+				target: document.querySelector('[data-sveltekit-hydrate="45h"]').parentNode,
+				version: "1682741589948"
+			});
+		</script></div>
   </body>
 </html>

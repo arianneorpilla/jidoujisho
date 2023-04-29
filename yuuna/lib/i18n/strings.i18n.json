@@ -342,7 +342,7 @@
     "enter_message": "Enter message...",
     "clear_message_title": "Clear Messages",
     "clear_message_description": "This will clear all messages and start a new chat. Are you sure?",
-    "error_chatgpt_response": "Request failed or rate-limited. Try again shortly or check back later.",
+    "error_chatgpt_response": "Request failed or rate-limited. Try again shortly or check your usage limits.",
     "pick_file": "Pick File",
     "open_url": "Open URL",
     "catalogs": "Catalogs",
@@ -373,6 +373,13 @@
     "api_key": "API Key",
     "subtitle_delay_set": "Subtitle delay set to $ms ms.",
     "cancel": "Cancel",
+    "server_port_in_use": "Local server port already in use",
+    "retrying_in": {
+        "seconds": {
+          "one": "Retrying in $n second...",
+          "other": "Retrying in $n seconds..."
+        }
+      },
     "view_replies": {
         "reply": {
           "one": "SHOW $n REPLY",

@@ -22,6 +22,7 @@ dependencies:
   copy_with_extension: ^5.0.2
   crop_image: ^1.0.4
   device_info_plus: ^8.1.0
+  dio: ^5.1.1
   document_file_save_plus: ^2.0.0
   expandable: ^5.0.1
   external_app_launcher: ^2.0.2
@@ -30,7 +31,7 @@ dependencies:
   filesystem_picker:
     git:
       url: https://github.com/lrorpilla/filesystem_picker
-      ref: c0f132e44d2b5387b4babf8a09b7caf257259313
+      ref: 9b8efe11472314add1e5c590120111c82697a7f4
       path: package
   float_column: ^1.4.1
   flutter:
@@ -156,7 +157,12 @@ flutter:
     - assets/ttu-ebook-reader/_app/immutable/
     - assets/ttu-ebook-reader/_app/immutable/assets/
     - assets/ttu-ebook-reader/_app/immutable/chunks/
-    - assets/ttu-ebook-reader/_app/immutable/entry/
+    - assets/ttu-ebook-reader/_app/immutable/components/
+    - assets/ttu-ebook-reader/_app/immutable/components/pages/
+    - assets/ttu-ebook-reader/_app/immutable/components/pages/auth/
+    - assets/ttu-ebook-reader/_app/immutable/components/pages/b/
+    - assets/ttu-ebook-reader/_app/immutable/components/pages/manage/
+    - assets/ttu-ebook-reader/_app/immutable/components/pages/settings/
     - assets/ttu-ebook-reader/auth/
     - assets/ttu-ebook-reader/b/
     - assets/ttu-ebook-reader/fonts/

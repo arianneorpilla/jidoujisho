@@ -27,7 +27,7 @@ void main() {
   runZonedGuarded<Future<void>>(() async {
     /// Necessary to initialise Flutter when running native code before
     /// starting the application.
-    WidgetsFlutterBinding.ensureInitialized();
+    final binding = WidgetsFlutterBinding.ensureInitialized();
 
     /// Initialise local file-based logging.
     await FlutterLogs.initLogs(
@@ -37,16 +37,24 @@ void main() {
         LogLevel.ERROR,
         LogLevel.SEVERE
       ],
-      timeStampFormat: TimeStampFormat.TIME_FORMAT_READABLE,
+      timeStampFormat: TimeStampFormat.DATE_FORMAT_1,
       directoryStructure: DirectoryStructure.FOR_DATE,
       logTypesEnabled: ['device', 'network', 'errors'],
       logFileExtension: LogFileExtension.LOG,
     );
 
+    /// Ensure no pop-in for the app icon.
+    binding.addPostFrameCallback((_) async {
+      final context = binding.renderViewElement;
+      if (context != null) {
+        precacheImage(const AssetImage('assets/meta/icon.png'), context);
+      }
+    });
+
     /// Ensure the top and bottom bars are shown at launch and wake prevention
     /// is disabled if not reverted from entering a media source.
-    await Wakelock.disable();
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    Wakelock.disable();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.landscapeLeft,
@@ -67,17 +75,9 @@ void main() {
         child: const JidoujishoApp(),
       ),
     );
-
-    /// Pre-load and make the first user search faster.
-    appModel.searchDictionary(
-      searchTerm: appModel.targetLanguage.helloWorld,
-      searchWithWildcards: false,
-      useCache: false,
-    );
   }, (exception, stack) {
     /// Print error details to the console.
     final details = FlutterErrorDetails(exception: exception, stack: stack);
-    FlutterError.dumpErrorToConsole(details);
 
     /// Log the error.
     FlutterLogs.logError('jidoujisho', 'Error', details.toString());
@@ -359,7 +359,7 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp>
   /// Responsible for managing global app-wide state.
   AppModel get appModel => ref.watch(appProvider);
 
-  /// Responsible for managing global app-wide state.
+  /// Responsible for managing card creator state.
   CreatorModel get creatorModel => ref.watch(creatorProvider);
 
   /// The application will open to this page upon startup.

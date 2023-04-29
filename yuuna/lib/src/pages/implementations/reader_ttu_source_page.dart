@@ -375,40 +375,7 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
           action: ServerTrustAuthResponseAction.PROCEED,
         );
       },
-      onLoadStart: (controller, url) async {
-        if (mediaSource.getPreference<bool>(
-          key: mediaSource.getFirstTimeKey(appModel.targetLanguage),
-          defaultValue: true,
-        )) {
-          if (appModel.isDarkMode) {
-            await controller.evaluateJavascript(
-                source:
-                    'javascript:window.localStorage.setItem("theme", "black-theme")');
-          }
-
-          if (!appModel.targetLanguage.preferVerticalReading) {
-            await controller.evaluateJavascript(
-                source:
-                    'javascript:window.localStorage.setItem("writingMode", "horizontal-tb")');
-            await controller.evaluateJavascript(
-                source:
-                    'javascript:window.localStorage.setItem("fontSize", 16)');
-            await controller.evaluateJavascript(
-                source:
-                    'javascript:window.localStorage.setItem("firstDimensionMargin", 24)');
-          } else {
-            await controller.evaluateJavascript(
-                source:
-                    'javascript:window.localStorage.setItem("fontSize", 24)');
-          }
-        }
-      },
       onLoadStop: (controller, uri) async {
-        await mediaSource.setPreference(
-          key: mediaSource.getFirstTimeKey(appModel.targetLanguage),
-          value: false,
-        );
-
         if (mediaSource.adaptTtuTheme) {
           setDictionaryColors();
         }

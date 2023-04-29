@@ -24,19 +24,25 @@
     <meta name="theme-color" content="#37474f" />
     <link rel="mask-icon" href="./safari-pinned-tab.svg" color="#37474f" />
     <meta http-equiv="content-security-policy" content="">
-		<link href="./_app/immutable/assets/_layout.5299ac93.css" rel="stylesheet">
-		<link href="./_app/immutable/assets/store.ad073191.css" rel="stylesheet">
-		<link rel="modulepreload" href="./_app/immutable/entry/start.dc8c5fd8.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/index.a1b1e1bc.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/singletons.e193b7a2.js">
-		<link rel="modulepreload" href="./_app/immutable/entry/app.ae166eb4.js">
-		<link rel="modulepreload" href="./_app/immutable/entry/_layout.svelte.3dc72465.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/stores.78f67f71.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/store.16eecc84.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/error-handler.2c73d00e.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/fonts.37c28be2.js">
-		<link rel="modulepreload" href="./_app/immutable/entry/_page.svelte.a86f0bdd.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/format-page-title.f8574fd6.js"><title>Home | ッツ Ebook Reader</title><!-- HEAD_svelte-1h7w4y4_START --><meta name="robots" content="index,follow"><meta name="googlebot" content="index,follow"><meta name="description" content="Online e-book reader that supports Yomichan"><link rel="canonical" href="https://reader.ttsu.app"><meta property="og:url" content="https://reader.ttsu.app">
+		<link href="./_app/immutable/assets/_layout-458bc673.css" rel="stylesheet">
+		<link href="./_app/immutable/assets/store-ad073191.css" rel="stylesheet">
+		<link rel="modulepreload" href="./_app/immutable/start-31285994.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/index-be8ea2fc.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/singletons-6176161c.js">
+		<link rel="modulepreload" href="./_app/immutable/components/pages/_layout.svelte-9a3342ae.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/stores-6a6870f3.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/store-fb60485f.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/error-handler-df8dffd6.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/fonts-e5a631ed.js">
+		<link rel="modulepreload" href="./_app/immutable/components/pages/_page.svelte-a2e11aab.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/format-page-title-2ca75b98.js">
+		<script>
+			if ('serviceWorker' in navigator) {
+				addEventListener('load', function () {
+					navigator.serviceWorker.register('./service-worker.js');
+				});
+			}
+		</script><title>Home | ッツ Ebook Reader</title><!-- HEAD_svelte-1h7w4y4_START --><meta name="robots" content="index,follow"><meta name="googlebot" content="index,follow"><meta name="description" content="Online e-book reader that supports Yomichan"><link rel="canonical" href="https://reader.ttsu.app"><meta property="og:url" content="https://reader.ttsu.app">
 
     <meta property="og:type" content="website">
       
@@ -75,36 +81,21 @@
 
 
 
-			
-			<script>
-				{
-					__sveltekit_fwr1me = {
-						env: {},
-						base: new URL(".", location).pathname.slice(0, -1),
-						element: document.currentScript.parentElement
-					};
+		<script type="module" data-sveltekit-hydrate="4kgkyk">
+			import { start } from "./_app/immutable/start-31285994.js";
 
-					const data = [{"type":"data","data":null,"uses":{}},null];
-
-					Promise.all([
-						import("./_app/immutable/entry/start.dc8c5fd8.js"),
-						import("./_app/immutable/entry/app.ae166eb4.js")
-					]).then(([kit, app]) => {
-						kit.start(app, __sveltekit_fwr1me.element, {
-							node_ids: [0, 2],
-							data,
-							form: null,
-							error: null
-						});
-					});
-
-					if ('serviceWorker' in navigator) {
-						addEventListener('load', function () {
-							navigator.serviceWorker.register('./service-worker.js');
-						});
-					}
+			start({
+				env: {},
+				paths: {"base":"","assets":""},
+				target: document.querySelector('[data-sveltekit-hydrate="4kgkyk"]').parentNode,
+				version: "1682741589948",
+				hydrate: {
+					node_ids: [0, 2],
+					data: [{type:"data",data:null,uses:{}},null],
+					form: null
 				}
-			</script>
-		</div>
+			});
+		</script>
+	</div>
   </body>
 </html>
