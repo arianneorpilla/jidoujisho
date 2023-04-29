@@ -124,17 +124,22 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage>
         thickness: 3,
         thumbVisibility: true,
         controller: contentController,
-        child: SingleChildScrollView(
-          controller: contentController,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(
-                child: buildMappingList(),
-              ),
-              const JidoujishoDivider(),
-              buildImportDropdown(),
-            ],
+        child: Padding(
+          padding: contentController.hasClients
+              ? Spacing.of(context).insets.onlyRight.normal
+              : EdgeInsets.zero,
+          child: SingleChildScrollView(
+            controller: contentController,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: buildMappingList(),
+                ),
+                const JidoujishoDivider(),
+                buildImportDropdown(),
+              ],
+            ),
           ),
         ),
       ),
@@ -152,50 +157,47 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage>
       thickness: 3,
       thumbVisibility: true,
       controller: _scrollController,
-      child: Padding(
-        padding: Spacing.of(context).insets.onlyRight.normal,
-        child: ReorderableColumn(
-          scrollController: _scrollController,
-          children: List.generate(
-            mappings.length,
-            (index) {
-              AnkiMapping mapping = mappings[index];
+      child: ReorderableColumn(
+        scrollController: _scrollController,
+        children: List.generate(
+          mappings.length,
+          (index) {
+            AnkiMapping mapping = mappings[index];
 
-              _notifiersByMapping.putIfAbsent(
-                mapping,
-                () => ValueNotifier<bool>(mapping.order == _selectedOrder),
-              );
+            _notifiersByMapping.putIfAbsent(
+              mapping,
+              () => ValueNotifier<bool>(mapping.order == _selectedOrder),
+            );
 
-              return buildMappingTile(
-                mapping,
-                _notifiersByMapping[mapping]!,
-              );
-            },
-          ),
-          onReorder: (oldIndex, newIndex) async {
-            List<AnkiMapping> cloneMappings = [];
-            cloneMappings.addAll(mappings);
-
-            AnkiMapping item = cloneMappings[oldIndex];
-            cloneMappings.remove(item);
-            cloneMappings.insert(newIndex, item);
-
-            cloneMappings.forEachIndexed((index, mapping) {
-              mapping.order = index;
-            });
-
-            appModel.setLastSelectedMapping(item);
-            updateSelectedOrder(newIndex);
-
-            appModel.updateMappingsOrder(cloneMappings);
-            setState(() {});
-
-            await appModel.validateSelectedMapping(
-              context: context,
-              mapping: item,
+            return buildMappingTile(
+              mapping,
+              _notifiersByMapping[mapping]!,
             );
           },
         ),
+        onReorder: (oldIndex, newIndex) async {
+          List<AnkiMapping> cloneMappings = [];
+          cloneMappings.addAll(mappings);
+
+          AnkiMapping item = cloneMappings[oldIndex];
+          cloneMappings.remove(item);
+          cloneMappings.insert(newIndex, item);
+
+          cloneMappings.forEachIndexed((index, mapping) {
+            mapping.order = index;
+          });
+
+          appModel.setLastSelectedMapping(item);
+          updateSelectedOrder(newIndex);
+
+          appModel.updateMappingsOrder(cloneMappings);
+          setState(() {});
+
+          await appModel.validateSelectedMapping(
+            context: context,
+            mapping: item,
+          );
+        },
       ),
     );
   }
