@@ -42,15 +42,12 @@ class _MokuroCatalogManageDialogPageState
           thickness: 3,
           thumbVisibility: true,
           controller: _scrollController,
-          child: Padding(
-            padding: Spacing.of(context).insets.onlyRight.normal,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  buildCatalogList(),
-                ],
-              ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                buildCatalogList(),
+              ],
             ),
           ),
         ),
