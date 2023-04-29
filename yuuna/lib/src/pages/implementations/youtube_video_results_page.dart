@@ -17,7 +17,7 @@ class YoutubeVideoResultsPage extends HistoryPlayerPage {
   /// Title to show under the page. Can be a search term or a channel ID.
   final String title;
 
-  /// Used for infinite scroll pagination.
+  /// Used fosr infinite scroll pagination.
   final PagingController<int, MediaItem> pagingController;
 
   /// Whether or not to show an app bar.

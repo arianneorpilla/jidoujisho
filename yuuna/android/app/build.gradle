@@ -52,10 +52,13 @@ android {
 
     buildTypes {
       release {
-         minifyEnabled true       
+         minifyEnabled true
+         signingConfig signingConfigs.debug
       }
 
-      debug {}
+      debug {
+        
+      }
    }
 
     packagingOptions {

@@ -41,9 +41,6 @@ class _MediaItemDialogPageState extends BasePageState<MediaItemDialogPage> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
-          ? Spacing.of(context).insets.all.big
-          : Spacing.of(context).insets.all.normal,
       title: buildTitle(),
       content: buildContent(),
       actions: actions,
