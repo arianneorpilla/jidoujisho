@@ -124,22 +124,17 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage>
         thickness: 3,
         thumbVisibility: true,
         controller: contentController,
-        child: Padding(
-          padding: contentController.hasClients
-              ? Spacing.of(context).insets.onlyRight.normal
-              : EdgeInsets.zero,
-          child: SingleChildScrollView(
-            controller: contentController,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Flexible(
-                  child: buildMappingList(),
-                ),
-                const JidoujishoDivider(),
-                buildImportDropdown(),
-              ],
-            ),
+        child: SingleChildScrollView(
+          controller: contentController,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: buildMappingList(),
+              ),
+              const JidoujishoDivider(),
+              buildImportDropdown(),
+            ],
           ),
         ),
       ),
