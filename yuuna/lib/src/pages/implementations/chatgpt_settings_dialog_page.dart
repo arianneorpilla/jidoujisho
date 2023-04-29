@@ -87,18 +87,6 @@ class _ChatgptSettingsDialogPageState extends BasePageState {
       decoration: InputDecoration(
         floatingLabelBehavior: FloatingLabelBehavior.always,
         labelText: t.api_key,
-        suffixIcon: JidoujishoIconButton(
-          icon: Icons.paste,
-          size: 18,
-          tooltip: t.paste,
-          onTap: () async {
-            String text = (await Clipboard.getData('text/plain'))?.text ?? '';
-            if (text.trim().isNotEmpty) {
-              _apiKeyController.text = text.trim();
-            }
-            FocusScope.of(context).unfocus();
-          },
-        ),
       ),
     );
   }
