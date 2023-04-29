@@ -652,6 +652,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
           _transcriptOpenNotifier.value = true;
 
+          _menuHideTimer?.cancel();
+          _isMenuHidden.value = true;
+
           try {
             await appModel.temporarilyDisableStatusBarHiding(action: () async {
               await Navigator.push(
@@ -880,7 +883,6 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                     ? t.pause
                     : t.play,
             onTap: () async {
-              cancelHideTimer();
               await playPause();
             },
           ),
@@ -2037,33 +2039,41 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
     if (_playerController.value.isPlaying) {
       _playPauseAnimationController.reverse();
-      startHideTimer();
+      _menuHideTimer?.cancel();
+      _isMenuHidden.value = false;
 
       await _playerController.pause();
       _session.setActive(false);
     } else {
-      cancelHideTimer();
-
       if (!_playerController.value.isInitialized) {
         _playerController.initialize().then((_) async {
           await _playerController.play();
           _session.setActive(true);
           _playPauseAnimationController.forward();
+
+          _menuHideTimer?.cancel();
+          _isMenuHidden.value = true;
         });
       } else {
         _playPauseAnimationController.forward();
-
-        await _playerController.play();
-        _session.setActive(true);
 
         if (isFinished) {
           await _playerController.stop();
           await _playerController.play();
           _session.setActive(true);
           await Future.delayed(const Duration(seconds: 2), () async {
+            cancelHideTimer();
+            startHideTimer();
+
             await _playerController.seekTo(Duration.zero);
             _bufferingNotifier.value = true;
           });
+        } else {
+          cancelHideTimer();
+          startHideTimer();
+
+          await _playerController.play();
+          _session.setActive(true);
         }
       }
     }
