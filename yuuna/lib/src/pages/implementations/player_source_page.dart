@@ -770,7 +770,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               _bufferingNotifier.value = true;
               _listeningSubtitle.value = getNearestSubtitle();
 
-              startHideTimer();
+              if (_playingNotifier.value) {
+                startHideTimer();
+              }
             },
             child: const SizedBox.expand(
               child: ColoredBox(
@@ -789,7 +791,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               _bufferingNotifier.value = true;
               _listeningSubtitle.value = getNearestSubtitle();
 
-              startHideTimer();
+              if (_playingNotifier.value) {
+                startHideTimer();
+              }
             },
             child: const SizedBox.expand(
               child: ColoredBox(
@@ -1059,7 +1063,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               cancelHideTimer();
             },
             onChangeEnd: (value) {
-              startHideTimer();
+              if (_playingNotifier.value) {
+                startHideTimer();
+              }
               _bufferingNotifier.value = true;
             },
             onChanged: validPosition
@@ -2026,7 +2032,11 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     _menuHideTimer?.cancel();
     _isMenuHidden.value = !_isMenuHidden.value;
     if (!_isMenuHidden.value) {
-      startHideTimer();
+      Future.delayed(const Duration(seconds: 3), () {
+        if (_playingNotifier.value) {
+          _isMenuHidden.value = true;
+        }
+      });
     }
   }
 
@@ -2062,15 +2072,15 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           await _playerController.play();
           _session.setActive(true);
           await Future.delayed(const Duration(seconds: 2), () async {
-            cancelHideTimer();
-            startHideTimer();
+            _menuHideTimer?.cancel();
+            _isMenuHidden.value = true;
 
             await _playerController.seekTo(Duration.zero);
             _bufferingNotifier.value = true;
           });
         } else {
-          cancelHideTimer();
-          startHideTimer();
+          _menuHideTimer?.cancel();
+          _isMenuHidden.value = true;
 
           await _playerController.play();
           _session.setActive(true);
@@ -2124,6 +2134,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   /// creator, where it is appropriate to pause the player.
   Future<void> dialogSmartPause() async {
     if (_playerController.value.isPlaying) {
+      _menuHideTimer?.cancel();
       _dialogSmartPaused = true;
       await _playerController.pause();
       _session.setActive(false);
@@ -2144,6 +2155,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     }
 
     if (_dialogSmartPaused) {
+      _menuHideTimer?.cancel();
+      _isMenuHidden.value = true;
+
       await _playerController.play();
       _session.setActive(true);
     }
