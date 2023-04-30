@@ -770,8 +770,12 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               _bufferingNotifier.value = true;
               _listeningSubtitle.value = getNearestSubtitle();
 
-              if (_playingNotifier.value) {
-                startHideTimer();
+              if (!_isMenuHidden.value) {
+                Future.delayed(const Duration(seconds: 3), () {
+                  if (_playingNotifier.value) {
+                    _isMenuHidden.value = true;
+                  }
+                });
               }
             },
             child: const SizedBox.expand(
@@ -791,8 +795,12 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               _bufferingNotifier.value = true;
               _listeningSubtitle.value = getNearestSubtitle();
 
-              if (_playingNotifier.value) {
-                startHideTimer();
+              if (!_isMenuHidden.value) {
+                Future.delayed(const Duration(seconds: 3), () {
+                  if (_playingNotifier.value) {
+                    _isMenuHidden.value = true;
+                  }
+                });
               }
             },
             child: const SizedBox.expand(
@@ -1063,8 +1071,12 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               cancelHideTimer();
             },
             onChangeEnd: (value) {
-              if (_playingNotifier.value) {
-                startHideTimer();
+              if (!_isMenuHidden.value) {
+                Future.delayed(const Duration(seconds: 3), () {
+                  if (_playingNotifier.value) {
+                    _isMenuHidden.value = true;
+                  }
+                });
               }
               _bufferingNotifier.value = true;
             },
