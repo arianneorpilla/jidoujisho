@@ -190,9 +190,12 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
   /// Hide the dictionary and dispose of the current result.
   @override
-  void clearDictionaryResult() {
+  void clearDictionaryResult({bool hideInstantly = true}) {
     if (appModel.isPlayerDefinitionFocusMode) {
-      dialogSmartResume(isSmartFocus: true);
+      dialogSmartResume(
+        isSmartFocus: true,
+        hideInstantly: hideInstantly,
+      );
     }
 
     _selectableTextController.clearSelection();
@@ -771,7 +774,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               _listeningSubtitle.value = getNearestSubtitle();
 
               if (!_isMenuHidden.value) {
-                Future.delayed(const Duration(seconds: 3), () {
+                _menuHideTimer = Timer(const Duration(seconds: 3), () {
                   if (_playingNotifier.value) {
                     _isMenuHidden.value = true;
                   }
@@ -796,7 +799,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               _listeningSubtitle.value = getNearestSubtitle();
 
               if (!_isMenuHidden.value) {
-                Future.delayed(const Duration(seconds: 3), () {
+                _menuHideTimer = Timer(const Duration(seconds: 3), () {
                   if (_playingNotifier.value) {
                     _isMenuHidden.value = true;
                   }
@@ -1072,7 +1075,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             },
             onChangeEnd: (value) {
               if (!_isMenuHidden.value) {
-                Future.delayed(const Duration(seconds: 3), () {
+                _menuHideTimer = Timer(const Duration(seconds: 3), () {
                   if (_playingNotifier.value) {
                     _isMenuHidden.value = true;
                   }
@@ -1858,7 +1861,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             _selectableTextController.selection.end > index;
 
     if (wholeWordCondition && currentResult != null) {
-      clearDictionaryResult();
+      clearDictionaryResult(hideInstantly: false);
       return;
     } else {
       String searchTerm = appModel.targetLanguage.getSearchTermFromIndex(
@@ -2044,7 +2047,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     _menuHideTimer?.cancel();
     _isMenuHidden.value = !_isMenuHidden.value;
     if (!_isMenuHidden.value) {
-      Future.delayed(const Duration(seconds: 3), () {
+      _menuHideTimer = Timer(const Duration(seconds: 3), () {
         if (_playingNotifier.value) {
           _isMenuHidden.value = true;
         }
@@ -2155,7 +2158,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
   /// Resumes the dialog only if smart paused. This is called when dialogs
   /// are closed after being smart paused.
-  Future<void> dialogSmartResume({bool isSmartFocus = false}) async {
+  Future<void> dialogSmartResume({
+    bool isSmartFocus = false,
+    bool hideInstantly = true,
+  }) async {
     _autoPauseFlag = false;
 
     if (_dialogSmartFocusFlag && !isSmartFocus) {
@@ -2167,8 +2173,16 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     }
 
     if (_dialogSmartPaused) {
-      _menuHideTimer?.cancel();
-      _isMenuHidden.value = true;
+      if (hideInstantly) {
+        _menuHideTimer?.cancel();
+        _isMenuHidden.value = true;
+      } else {
+        _menuHideTimer = Timer(const Duration(seconds: 3), () {
+          if (_playingNotifier.value) {
+            _isMenuHidden.value = true;
+          }
+        });
+      }
 
       await _playerController.play();
       _session.setActive(true);
