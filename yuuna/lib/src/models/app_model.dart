@@ -185,6 +185,9 @@ class AppModel with ChangeNotifier {
   /// grayscale.
   final ChangeNotifier incognitoNotifier = ChangeNotifier();
 
+  /// Notifies app to stop showing any screens.
+  final ChangeNotifier databaseCloseNotifier = ChangeNotifier();
+
   /// These directories are prepared at startup in order to reduce redundancy
   /// in actual runtime.
   /// Directory where data that may be dumped is stored.
@@ -2355,12 +2358,13 @@ class AppModel with ChangeNotifier {
 
     await _audioHandler?.stop();
 
-    if (_shouldKillMediaOnPop) {
-      shutdown();
-    }
-
     mediaSource.mediaType.refreshTab();
     DictionaryMediaType.instance.refreshTab();
+
+    if (_shouldKillMediaOnPop) {
+      databaseCloseNotifier.notifyListeners();
+      shutdown();
+    }
   }
 
   /// A helper function for opening the creator from any page in the

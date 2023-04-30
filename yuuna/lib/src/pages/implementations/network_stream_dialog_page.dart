@@ -33,7 +33,18 @@ class _NetworkStreamDialogPageState
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      contentPadding: Spacing.of(context).insets.all.big,
+      contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
+          ? Spacing.of(context).insets.exceptBottom.big
+          : Spacing.of(context).insets.exceptBottom.normal.copyWith(
+                left: Spacing.of(context).spaces.semiBig,
+                right: Spacing.of(context).spaces.semiBig,
+              ),
+      actionsPadding: Spacing.of(context).insets.exceptBottom.normal.copyWith(
+            left: Spacing.of(context).spaces.normal,
+            right: Spacing.of(context).spaces.normal,
+            bottom: Spacing.of(context).spaces.normal,
+            top: Spacing.of(context).spaces.extraSmall,
+          ),
       content: buildContent(),
       actions: actions,
     );
@@ -42,31 +53,38 @@ class _NetworkStreamDialogPageState
   List<Widget> get actions => [buildPlayButton()];
 
   Widget buildContent() {
-    return SingleChildScrollView(
-      child: SizedBox(
-        width: MediaQuery.of(context).size.width * (2 / 3),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              autofocus: true,
-              controller: _controller,
-              decoration: InputDecoration(
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                suffixIcon: JidoujishoIconButton(
-                  size: 18,
-                  tooltip: t.paste,
-                  onTap: () async {
-                    _controller.text =
-                        (await Clipboard.getData('text/plain'))?.text ?? '';
-                  },
-                  icon: Icons.paste,
+    ScrollController scrollController = ScrollController();
+
+    return RawScrollbar(
+      thickness: 3,
+      thumbVisibility: true,
+      controller: scrollController,
+      child: SingleChildScrollView(
+        controller: scrollController,
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width * (1 / 3),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                autofocus: true,
+                controller: _controller,
+                decoration: InputDecoration(
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                  suffixIcon: JidoujishoIconButton(
+                    size: 18,
+                    tooltip: t.paste,
+                    onTap: () async {
+                      _controller.text =
+                          (await Clipboard.getData('text/plain'))?.text ?? '';
+                    },
+                    icon: Icons.paste,
+                  ),
+                  labelText: t.stream_url,
                 ),
-                labelText: t.stream_url,
               ),
-            ),
-            const SizedBox(height: 10),
-          ],
+            ],
+          ),
         ),
       ),
     );

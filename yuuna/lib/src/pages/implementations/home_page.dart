@@ -34,6 +34,7 @@ class _HomePageState extends BasePageState<HomePage>
     super.initState();
 
     WidgetsBinding.instance.addObserver(this);
+    appModelNoUpdate.databaseCloseNotifier.addListener(refresh);
 
     /// Populate and define the tabs and their respective content bodies based
     /// on the media types specified and ordered by [AppModel]. As [ref.watch]
@@ -61,9 +62,14 @@ class _HomePageState extends BasePageState<HomePage>
     });
   }
 
+  void refresh() {
+    setState(() {});
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    appModelNoUpdate.databaseCloseNotifier.removeListener(refresh);
     super.dispose();
   }
 

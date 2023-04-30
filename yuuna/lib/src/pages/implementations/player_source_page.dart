@@ -281,7 +281,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       });
     });
 
-    if (mounted) {
+    if (mounted && appModel.isMediaOpen) {
       if (appModelNoUpdate.isPlayerOrientationPortrait) {
         await SystemChrome.setPreferredOrientations([
           DeviceOrientation.portraitUp,

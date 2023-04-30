@@ -408,7 +408,11 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
       return;
     }
 
-    source.setCurrentSentence(text);
+    String sentence = appModel.targetLanguage.getSentenceFromParagraph(
+      paragraph: text,
+      index: index,
+    );
+    source.setCurrentSentence(sentence);
 
     double x = details.globalPosition.dx;
     double y = details.globalPosition.dy;
