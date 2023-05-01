@@ -432,7 +432,7 @@ bgImage.substring(5, bgImage.length - 2);
     Directory imageDir = Directory('$mokuroPreviewPath/$timestamp');
     imageDir.createSync();
 
-    File file = appModel.getPreviewImageFile(mokuroPreviewDir, 0);
+    File file = appModel.getPreviewImageFile(imageDir, 0);
 
     if (data != null) {
       if (item.mediaIdentifier.startsWith('file://')) {
