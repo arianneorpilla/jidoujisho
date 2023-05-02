@@ -34,7 +34,7 @@
 ---
 
 <p align="center" style="margin:0"><b>Latest Release:
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.6.0">2.6.0</a>
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.6.1">2.6.1</a>
 </b></p>
 
 <p align="center" style="margin:0"><b>Release Notes:</b><br>
