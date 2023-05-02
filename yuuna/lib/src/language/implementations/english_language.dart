@@ -148,19 +148,60 @@ Future<int?> prepareSearchResultsEnglishLanguage(
     List<String> segments = searchTerm.splitWithDelim(RegExp('[ -\']'));
 
     if (segments.length > 20) {
-      segments = segments.sublist(0, 20);
+      segments = segments.sublist(0, 10);
+    }
+    if (segments.length >= 3) {
+      String firstWord = segments.removeAt(0);
+      String secondWord = segments.removeAt(0);
+      String thirdWord = segments.removeAt(0);
+      segments = [
+        if (firstWord.length > 3)
+          if (firstWord.split('').length > 3) ...[
+            firstWord.substring(0, firstWord.length - 3),
+            firstWord[firstWord.length - 3],
+            firstWord[firstWord.length - 2],
+            firstWord[firstWord.length - 1],
+          ] else
+            ...firstWord.split('')
+        else
+          firstWord,
+        if (secondWord.length > 3)
+          if (secondWord.split('').length > 3) ...[
+            secondWord.substring(0, secondWord.length - 3),
+            secondWord[secondWord.length - 3],
+            secondWord[secondWord.length - 2],
+            secondWord[secondWord.length - 1],
+          ] else
+            ...secondWord.split('')
+        else
+          secondWord,
+        if (thirdWord.length > 3)
+          if (thirdWord.split('').length > 3) ...[
+            thirdWord.substring(0, thirdWord.length - 3),
+            thirdWord[thirdWord.length - 3],
+            thirdWord[thirdWord.length - 2],
+            thirdWord[thirdWord.length - 1],
+          ] else
+            ...thirdWord.split('')
+        else
+          thirdWord,
+      ];
+    } else {
+      String firstWord = segments.removeAt(0);
+      segments = [
+        if (firstWord.length >= 3) ...firstWord.split('') else firstWord,
+      ];
     }
 
-    StringBuffer searchBuffer = StringBuffer();
+    for (int i = 0; i < segments.length; i++) {
+      String partialTerm = segments
+          .sublist(0, segments.length - i)
+          .join()
+          .replaceAll(RegExp('[^a-zA-Z -]'), '');
 
-    segments.forEachIndexed((index, word) {
-      searchBuffer.write(word);
-      if (word == ' ') {
-        return;
+      if (partialTerm.endsWith(' ')) {
+        continue;
       }
-
-      String partialTerm =
-          searchBuffer.toString().replaceAll(RegExp('[^a-zA-Z -]'), '');
 
       List<String> possibleDeinflections = lemmatizer
           .lemmas(partialTerm)
@@ -171,6 +212,7 @@ Future<int?> prepareSearchResultsEnglishLanguage(
 
       List<DictionaryHeading> termExactResults = [];
       List<DictionaryHeading> termDeinflectedResults = [];
+      List<DictionaryHeading> termStartsWithResults = [];
 
       termExactResults = database.dictionaryHeadings
           .where(sort: Sort.desc)
@@ -187,13 +229,14 @@ Future<int?> prepareSearchResultsEnglishLanguage(
             .findAllSync();
       }
 
-      List<DictionaryHeading> termStartsWithResults = database
-          .dictionaryHeadings
-          .where()
-          .termStartsWith(partialTerm)
-          .sortByTermLength()
-          .limit(limit())
-          .findAllSync();
+      if (partialTerm.length >= 3) {
+        termStartsWithResults = database.dictionaryHeadings
+            .where()
+            .termStartsWith(partialTerm)
+            .sortByTermLength()
+            .limit(limit())
+            .findAllSync();
+      }
 
       if (termExactResults.isNotEmpty) {
         termExactResultsByLength[partialTerm.length] = termExactResults;
@@ -209,16 +252,9 @@ Future<int?> prepareSearchResultsEnglishLanguage(
             termStartsWithResults;
         bestLength = partialTerm.length;
       }
-    });
+    }
 
     for (int length = searchTerm.length; length > 0; length--) {
-      List<MapEntry<int, DictionaryHeading>> startsWithHeadingsToAdd = [
-        ...(termStartsWithResultsByLength[length] ?? [])
-            .map((heading) => MapEntry(heading.id, heading)),
-      ];
-
-      uniqueHeadingsById.addEntries(startsWithHeadingsToAdd);
-
       List<MapEntry<int, DictionaryHeading>> exactHeadingsToAdd = [
         ...(termExactResultsByLength[length] ?? [])
             .map((heading) => MapEntry(heading.id, heading)),
@@ -231,6 +267,13 @@ Future<int?> prepareSearchResultsEnglishLanguage(
 
       uniqueHeadingsById.addEntries(exactHeadingsToAdd);
       uniqueHeadingsById.addEntries(deinflectedHeadingsToAdd);
+
+      List<MapEntry<int, DictionaryHeading>> startsWithHeadingsToAdd = [
+        ...(termStartsWithResultsByLength[length] ?? [])
+            .map((heading) => MapEntry(heading.id, heading)),
+      ];
+
+      uniqueHeadingsById.addEntries(startsWithHeadingsToAdd);
     }
   }
 

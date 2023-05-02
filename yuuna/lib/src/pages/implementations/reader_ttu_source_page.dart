@@ -955,18 +955,6 @@ function selectTextForTextLength(x, y, index, length, whitespaceOffset, isSpaceD
 
   var adjustIndex = false;
 
-  if (isSpaceDelimited) {
-    const range = new Range();
-    range.setStart(offsetNode, index);
-    range.setEnd(offsetNode, index);
-    range.expand("word")
-
-    var selection = window.getSelection();
-    selection.removeAllRanges();
-    selection.addRange(range);
-    return;
-  } 
-
   if (!!offsetNode && offsetNode.nodeType === Node.TEXT_NODE && offset) {
       const range = new Range();
       range.setStart(offsetNode, offset - 1);
@@ -1067,7 +1055,11 @@ function selectTextForTextLength(x, y, index, length, whitespaceOffset, isSpaceD
 
   const range = new Range();
   range.setStart(offsetNode, result.startOffset - adjustIndex + whitespaceOffset);
-  range.setEnd(lastNode, endOffset);
+  if (isSpaceDelimited) {
+    range.expand("word");
+  } else {
+    range.setEnd(lastNode, endOffset);
+  }
   
   var selection = window.getSelection();
   selection.removeAllRanges();
