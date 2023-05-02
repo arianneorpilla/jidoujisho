@@ -155,6 +155,9 @@ Future<int?> prepareSearchResultsEnglishLanguage(
 
     segments.forEachIndexed((index, word) {
       searchBuffer.write(word);
+      if (word == ' ') {
+        return;
+      }
 
       String partialTerm =
           searchBuffer.toString().replaceAll(RegExp('[^a-zA-Z -]'), '');
@@ -209,6 +212,13 @@ Future<int?> prepareSearchResultsEnglishLanguage(
     });
 
     for (int length = searchTerm.length; length > 0; length--) {
+      List<MapEntry<int, DictionaryHeading>> startsWithHeadingsToAdd = [
+        ...(termStartsWithResultsByLength[length] ?? [])
+            .map((heading) => MapEntry(heading.id, heading)),
+      ];
+
+      uniqueHeadingsById.addEntries(startsWithHeadingsToAdd);
+
       List<MapEntry<int, DictionaryHeading>> exactHeadingsToAdd = [
         ...(termExactResultsByLength[length] ?? [])
             .map((heading) => MapEntry(heading.id, heading)),
@@ -221,15 +231,6 @@ Future<int?> prepareSearchResultsEnglishLanguage(
 
       uniqueHeadingsById.addEntries(exactHeadingsToAdd);
       uniqueHeadingsById.addEntries(deinflectedHeadingsToAdd);
-    }
-
-    for (int length = 0; length < searchTerm.length; length++) {
-      List<MapEntry<int, DictionaryHeading>> startsWithHeadingsToAdd = [
-        ...(termStartsWithResultsByLength[length] ?? [])
-            .map((heading) => MapEntry(heading.id, heading)),
-      ];
-
-      uniqueHeadingsById.addEntries(startsWithHeadingsToAdd);
     }
   }
 
