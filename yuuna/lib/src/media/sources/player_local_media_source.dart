@@ -267,6 +267,9 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     required MediaItem item,
   }) async {
     int startTime = item.position;
+    if (item.duration - item.position < 60) {
+      startTime = 0;
+    }
 
     List<String> videoParams = [
       VlcVideoOptions.dropLateFrames(false),

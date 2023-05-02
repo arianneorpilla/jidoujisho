@@ -219,13 +219,16 @@ Future<int?> prepareSearchResultsEnglishLanguage(
             .map((entry) => MapEntry(entry.id, entry)),
       ];
 
+      uniqueHeadingsById.addEntries(exactHeadingsToAdd);
+      uniqueHeadingsById.addEntries(deinflectedHeadingsToAdd);
+    }
+
+    for (int length = 0; length < searchTerm.length; length++) {
       List<MapEntry<int, DictionaryHeading>> startsWithHeadingsToAdd = [
         ...(termStartsWithResultsByLength[length] ?? [])
             .map((heading) => MapEntry(heading.id, heading)),
       ];
 
-      uniqueHeadingsById.addEntries(exactHeadingsToAdd);
-      uniqueHeadingsById.addEntries(deinflectedHeadingsToAdd);
       uniqueHeadingsById.addEntries(startsWithHeadingsToAdd);
     }
   }

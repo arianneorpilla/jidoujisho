@@ -257,7 +257,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     if (_subtitleItems.isNotEmpty) {
       _subtitleItem = _subtitleItems.first;
     }
-    await _subtitleItem.controller.initial();
+    if (!_subtitleItem.controller.initialized) {
+      await _subtitleItem.controller.initial();
+    }
 
     _blurOptionsNotifier = ValueNotifier<BlurOptions>(appModel.blurOptions);
 

@@ -107,6 +107,10 @@ class AnkiMapping {
       AudioSentenceField.key: {
         0: ClearFieldEnhancement.key,
       },
+      TagsField.key: {
+        0: ClearFieldEnhancement.key,
+        1: SaveTagsEnhancement.key,
+      },
       ContextField.key: {0: ClearFieldEnhancement.key},
       PitchAccentField.key: {0: ClearFieldEnhancement.key},
       FuriganaField.key: {0: ClearFieldEnhancement.key},

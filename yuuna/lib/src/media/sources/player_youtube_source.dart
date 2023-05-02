@@ -99,6 +99,7 @@ class PlayerYoutubeSource extends PlayerMediaSource {
   final Map<Comment, PagingController<int, Comment>> _repliesPagingCache =
       <Comment, PagingController<int, Comment>>{};
   final Map<String, Channel> _channelCache = {};
+  final Map<String, SubtitleController> _subtitleControllerCache = {};
 
   @override
   Future<void> prepareResources() async {
@@ -341,6 +342,9 @@ class PlayerYoutubeSource extends PlayerMediaSource {
     String audioUrl = await getAudioUrl(item, dataSource);
 
     int startTime = item.position;
+    if (item.duration - item.position < 60) {
+      startTime = 0;
+    }
 
     List<String> videoParams = [
       VlcVideoOptions.dropLateFrames(false),
@@ -445,13 +449,19 @@ class PlayerYoutubeSource extends PlayerMediaSource {
     return subtitlesList.mapIndexed((index, subtitles) {
       String metadata = metadataList[index];
 
-      return SubtitleItem(
-        controller: SubtitleController(
+      _subtitleControllerCache.putIfAbsent(
+        subtitles,
+        () => SubtitleController(
           provider: SubtitleProvider.fromString(
             data: subtitles,
             type: SubtitleType.vtt,
           ),
         ),
+      );
+      SubtitleController controller = _subtitleControllerCache[subtitles]!;
+
+      return SubtitleItem(
+        controller: controller,
         metadata: metadata,
         type: SubtitleItemType.webSubtitle,
       );

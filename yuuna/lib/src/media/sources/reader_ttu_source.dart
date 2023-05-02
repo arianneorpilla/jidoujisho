@@ -280,12 +280,6 @@ class ReaderTtuSource extends ReaderMediaSource {
                 }
                 break;
               case 'empty':
-                if (appModel.isDarkMode) {
-                  await controller.evaluateJavascript(
-                      source:
-                          'javascript:window.localStorage.setItem("theme", "black-theme")');
-                }
-
                 if (!appModel.targetLanguage.preferVerticalReading) {
                   await controller.evaluateJavascript(
                       source:
@@ -293,9 +287,6 @@ class ReaderTtuSource extends ReaderMediaSource {
                   await controller.evaluateJavascript(
                       source:
                           'javascript:window.localStorage.setItem("fontSize", 16)');
-                  await controller.evaluateJavascript(
-                      source:
-                          'javascript:window.localStorage.setItem("firstDimensionMargin", 24)');
                 } else {
                   await controller.evaluateJavascript(
                       source:
