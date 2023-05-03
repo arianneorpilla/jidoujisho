@@ -326,7 +326,11 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
             appModel.savedTags;
 
         if (appModel.closeCreatorOnExport) {
-          Navigator.pop(context);
+          if (widget.killOnPop) {
+            appModel.shutdown();
+          } else {
+            Navigator.pop(context);
+          }
         }
       },
     );

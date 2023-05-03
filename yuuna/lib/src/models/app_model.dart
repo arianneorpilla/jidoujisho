@@ -2275,10 +2275,6 @@ class AppModel with ChangeNotifier {
     );
 
     _isCreatorOpen = false;
-
-    if (killOnPop) {
-      shutdown();
-    }
   }
 
   /// Whether or not the media item should be killed upon exit.
@@ -2366,7 +2362,6 @@ class AppModel with ChangeNotifier {
     DictionaryMediaType.instance.refreshTab();
 
     if (_shouldKillMediaOnPop) {
-      databaseCloseNotifier.notifyListeners();
       shutdown();
     }
   }
@@ -3333,6 +3328,7 @@ class AppModel with ChangeNotifier {
 
   /// Safely shutdown and stop database operations.
   void shutdown() async {
+    databaseCloseNotifier.notifyListeners();
     await _database.close();
     FlutterExitApp.exitApp();
   }
