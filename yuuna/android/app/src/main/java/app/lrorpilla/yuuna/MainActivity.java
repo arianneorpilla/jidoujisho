@@ -87,62 +87,13 @@ public class MainActivity extends AudioServiceActivity {
                 new String[] {
                     "jidoujisho Yuuna"
                 },
-                new String[] {"<div id=\"word\">{{Term}}</div><hr><p id=\"sentence\">{{Sentence}}"},
-                    new String[] {"<div id=\"word\">{{Term}}</div><hr><p id=\"sentence\">{{Sentence}}</p><br>{{#Term Audio}}{{Term Audio}}{{/Term Audio}}{{#Sentence Audio}}<br>{{Sentence Audio}}{{/Sentence Audio}}{{#Image}}<div class=\"image\">{{Image}}</div>{{/Image}}{{#Pitch Accent}}<br>{{Pitch Accent}}<br>{{/Pitch Accent}}<br><h2 id=\"word\">{{furigana:Furigana}}</h2><br>{{#Meaning}}<p><small id=\"meaning\">{{Meaning}}</p </small><br>{{/Meaning}}{{#Expanded Meaning}}<p><small id=\"meaning\">{{Expanded Meaning}}</small></p>{{/Expanded Meaning}}<br>{{#Collapsed Meaning}}<details><summary></summary><br><p><small id=\"meaning\">{{Collapsed Meaning}}</small></p><br></details>{{/Collapsed Meaning}}"},
-                            "p {\n" +
-                            "    margin: 0px\n" +
-                            "}\n" +
-                            "\n" +
-                            "h2 {\n" +
-                            "    margin: 0px\n" +
-                            "}\n" +
-                            "\n" +
-                            "small {\n" +
-                            "    margin: 0px\n" +
-                            "}\n" +
-                            "\n" +
-                            ".card {\n" +
-                            "  font-family: arial;\n" +
-                            "  font-size: 20px;\n" +
-                            "  text-align: center;\n" +
-                            "  color: black;\n" +
-                            "  background-color: white;\n" +
-                            "  white-space: pre-line;\n" +
-                            "}\n" +
-                            "\n" +
-                            "#sentence {\n" +
-                            "    font-size: 30px\n" +
-                            "}\n" +
-                            "\n" +
-                            ".context.night_mode {\n" + 
-                            "    text-decoration: none;\n" +
-                            "    color: red;\n" +
-                            "}\n" +
-                            ".context {\n" +
-                            "    text-decoration: none;\n" +
-                            "    color: red;\n" +
-                            "}\n" +
-                            "\n" +
-                            ".image img {\n" +
-                            "  position: static;\n" +
-                            "  height: auto;\n" +
-                            "  width: auto;\n" +
-                            "  max-height: 250px;\n" +
-                            "}\n" +
-                            ".pitch{\n" +
-                            "  border-top: solid red 2px;\n" +
-                            "  padding-top: 1px;\n" +
-                            "}\n" +
-                            "\n" +
-                            ".pitch_end{\n" +
-                            "  border-color: red;\n" +
-                            "  border-right: solid red 2px;\n" +
-                            "  border-top: solid red 2px;  \n" +
-                            "  line-height: 1px;\n" +
-                            "  margin-right: 1px;\n" +
-                            "  padding-right: 1px;\n" +
-                            "  padding-top:1px;\n" +
-                            "}",
+                new String[] {
+                    "<div id=\"word\">{{Term}}</div>"
+                },
+                new String[] {
+                    "<div id=\"word\">{{furigana:Furigana}}</div>{{#Pitch Accent}}{{Pitch Accent}}{{/Pitch Accent}}\n{{#Meaning}}<p><small>{{furigana:Meaning}}</small></p>{{/Meaning}}\n{{#Expanded Meaning}}<p><small>{{furigana:Expanded Meaning}}</small></p>{{/Expanded Meaning}}{{#Collapsed Meaning}}<details><summary></summary><p><small>{{furigana:Collapsed Meaning}}</small></p></details><br>\n{{/Collapsed Meaning}}\n{{#Image}}<div class=\"image\">{{Image}}</div>{{/Image}}\n{{#Term Audio}}{{Term Audio}}{{/Term Audio}}{{#Sentence Audio}}{{Sentence Audio}}{{/Sentence Audio}}<br><div id=\"sentence\">{{Sentence}}</div>"
+                },
+                ".card {\n  font-family: \"Helvetica Neue\", Arial, sans-serif;\n  font-size: 16px;\n  text-align: center;\n  color: #333333;\n  background-color: #F6F6F6;\n  border-radius: 12px;\n  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);\n  padding: 24px;\n  margin: 12px;\n  border: 1px solid #D9D9D9;\n}\n\n#word {\n  font-size: 30px;\n  font-weight: bold;\n  margin-bottom: 16px;\n}\n\n.details-summary {\n  cursor: pointer;\n  font-size: 16px;\n  text-shadow: 1px 1px #ffffff;\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  margin-bottom: 16px;\n}\n\n.details-summary:hover {\n  color: #6495ED;\n}\n\n.details-summary:hover .arrow {\n  transform: translateX(4px);\n}\n\n.arrow {\n  fill: #777777;\n  transition: transform 0.2s ease-in-out;\n  margin-right: 8px;\n}\n\n.image img {\n  max-width: 100%;\n  height: auto;\n  border-radius: 12px;\n  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);\n  margin-top: 16px;\n  margin-bottom: 16px;\n  transition: transform 0.2s ease-in-out;\n}\n\n.image:hover img {\n  transform: scale(1.05);\n}\n\n.furigana {\n  font-size: 22px;\n  font-weight: bold;\n  line-height: 1.4;\n  margin-bottom: 16px;\n  text-shadow: 1px 1px #ffffff;\n}\n\n.meaning {\n  font-size: 18px;\n  line-height: 1.6;\n  margin-bottom: 16px;\n  text-shadow: 1px 1px #ffffff;\n}\n\n#sentence {\n  font-size: 20px;\n  line-height: 1.6;\n  margin-top: 8px;\n  margin-bottom: 8px;\n} \n\n.pitch{\n  border-top: solid red 2px;\n  padding-top: 1px;\n}\n\n.pitch_end{\n  border-color: red;\n  border-right: solid red 2px;\n  border-top: solid red 2px;  \n  line-height: 1px;\n  margin-right: 1px;\n  padding-right: 1px;\n  padding-top:1px;\n}",
                     null,
                     null
                     );

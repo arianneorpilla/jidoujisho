@@ -2275,6 +2275,10 @@ class AppModel with ChangeNotifier {
     );
 
     _isCreatorOpen = false;
+
+    if (killOnPop) {
+      shutdown();
+    }
   }
 
   /// Whether or not the media item should be killed upon exit.

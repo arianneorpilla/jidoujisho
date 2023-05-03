@@ -61,7 +61,7 @@ class AnkiMapping {
       enhancements: defaultEnhancementsByLanguage[language.languageCountryCode],
       actions: defaultActionsByLanguage[language.languageCountryCode],
       exportMediaTags: true,
-      useBrTags: false,
+      useBrTags: true,
       prependDictionaryNames: true,
     );
   }
