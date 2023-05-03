@@ -60,7 +60,7 @@ class AnkiMapping {
       tags: [standardModelName],
       enhancements: defaultEnhancementsByLanguage[language.languageCountryCode],
       actions: defaultActionsByLanguage[language.languageCountryCode],
-      exportMediaTags: false,
+      exportMediaTags: true,
       useBrTags: false,
       prependDictionaryNames: true,
     );
