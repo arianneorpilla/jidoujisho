@@ -224,6 +224,7 @@ class _SubtitleOptionsDialogPage
                   decoration: InputDecoration(
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                     labelText: t.player_option_outline_width,
+                    suffixText: t.unit_pixels,
                     suffixIcon: JidoujishoIconButton(
                       size: 18,
                       tooltip: t.reset,
@@ -243,6 +244,7 @@ class _SubtitleOptionsDialogPage
                   decoration: InputDecoration(
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                     labelText: t.player_option_subtitle_background_blur_radius,
+                    suffixText: t.unit_pixels,
                     suffixIcon: JidoujishoIconButton(
                       size: 18,
                       tooltip: t.reset,
