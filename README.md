@@ -33,11 +33,11 @@
 
 ---
 
-<p align="center" style="margin:0"><b>Latest Release:
+<p align="center" style="margin:0"><b>✨ Latest Release:
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.6.3">2.6.3</a>
 </b></p>
 
-<p align="center" style="margin:0"><b>Release Notes:</b><br>
+<p align="center" style="margin:0"><b>🗒️ Release Notes:</b><br>
 <i>(Legacy)</i> <b><a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.3.0-beta">0.3</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.4-beta">0.4</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.5.2-beta">0.5</a> · 
@@ -74,6 +74,21 @@
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.5">2.5</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.6.0">2.6</a></b>
 </p>
+
+<b>
+<p align="center" style="margin:0"><b>📚 Wiki:</b><br>
+  <a href="https://github.com/lrorpilla/jidoujisho/wiki">🏠 Home</a> · 
+  <a href="https://github.com/lrorpilla/jidoujisho/wiki/1.-FAQ">❓ FAQ</a> · 
+  <a href="https://github.com/lrorpilla/jidoujisho/wiki/2.-Troubleshooting">🛠️ Troubleshooting</a> · 
+  <a href="https://github.com/lrorpilla/jidoujisho/wiki/3.-Getting-Started">🚀 Getting Started</a> ·
+  <a href="https://github.com/lrorpilla/jidoujisho/wiki/4.-Flashcard-Creation">🎴 Flashcard Creation</a> ·
+  <a href="https://github.com/lrorpilla/jidoujisho/wiki/5.-Workflow-Setup">🧰 Workflow Setup</a> · 
+  <a href="https://github.com/lrorpilla/jidoujisho/wiki/6.-Viewing-Media">📼 Viewing Media</a> · 
+  <a href="https://github.com/lrorpilla/jidoujisho/wiki/7.-Tips-and-Tricks">💡 Tips and Tricks</a> · 
+  <a href="https://github.com/lrorpilla/jidoujisho/wiki/8.-Development">🧑‍💻 Development</a> · 
+  <a href="https://github.com/lrorpilla/jidoujisho/wiki/9.-Contribution">👥 Contribution</a>
+</p>
+</b>
 
 # 📱 Language learning in the palm of your hand
 **jidoujisho** is a video player, reading aid, dictionary and card creation toolkit with features specifically helpful for language learners.
