@@ -347,10 +347,10 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
             ),
           ),
           onPressed: () async {
-            appModel.clearDictionaryHistory();
+            Navigator.pop(context);
+            await appModel.clearDictionaryHistory();
 
             setState(() {});
-            Navigator.pop(context);
           },
         ),
         TextButton(

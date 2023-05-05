@@ -1,11 +1,12 @@
 name: yuuna
 description: A full-featured immersion language learning suite for mobile.
 publish_to: 'none'
-version: 2.6.2+74
+version: 2.6.3+75
 environment:
   sdk: ">=2.17.0 <3.0.0"
 
 dependencies:
+  android_physical_buttons: ^0.1.0
   audio_service: ^0.18.9
   audio_session: ^0.1.13
   blurrycontainer:

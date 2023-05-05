@@ -480,6 +480,12 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
             .entriesIsNotEmpty()
             .findAllSync();
 
+        for (DictionaryHeading result in termDeinflectedResults) {
+          result.entries.loadSync();
+        }
+        termDeinflectedResults
+            .sort((a, b) => b.popularitySum.compareTo(a.popularitySum));
+
         uniqueHeadingsById.addEntries(
           termDeinflectedResults.map(
             (heading) => MapEntry(heading.id, heading),

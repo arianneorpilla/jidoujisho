@@ -328,9 +328,9 @@ class AppModel with ChangeNotifier {
   }
 
   /// Clears the message log for the [ReaderChatgptSource].
-  void clearMessages() {
-    _database.writeTxnSync(() {
-      _database.messageItems.clearSync();
+  Future<void> clearMessages() async {
+    await _database.writeTxn(() async {
+      await _database.messageItems.clear();
     });
   }
 
@@ -2869,8 +2869,8 @@ class AppModel with ChangeNotifier {
   /// Clear the entire dictionary history. This must be performed when a
   /// dictionary is deleted, otherwise history data cannot be viewed without
   /// the necessary dictionary metadata.
-  void clearDictionaryHistory() async {
-    _dictionaryHistory.clear();
+  Future<void> clearDictionaryHistory() async {
+    await _dictionaryHistory.clear();
 
     dictionaryEntriesNotifier.notifyListeners();
   }
