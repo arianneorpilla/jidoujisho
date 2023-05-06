@@ -39,16 +39,16 @@
 
 <b>
 <p align="center" style="margin:0"><b>📚 Wiki:</b><br>
-  <a href="https://github.com/lrorpilla/jidoujisho/wiki">🏠 Home</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/wiki/1.-FAQ">❓ FAQ</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/wiki/2.-Troubleshooting">🛠️ Troubleshooting</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/wiki/3.-Getting-Started">🚀 Getting Started</a> ·
-  <a href="https://github.com/lrorpilla/jidoujisho/wiki/4.-Flashcard-Creation">🎴 Flashcard Creation</a> ·
-  <a href="https://github.com/lrorpilla/jidoujisho/wiki/5.-Workflow-Setup">🧰 Workflow Setup</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/wiki/6.-Viewing-Media">💽 Viewing Media</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/wiki/7.-Tips-and-Tricks">💡 Tips and Tricks</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/wiki/8.-Development">🧑‍💻 Development</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/wiki/9.-Contribution">👥 Contribution</a>
+  🏠 <a href="https://github.com/lrorpilla/jidoujisho/wiki">Home</a> · 
+  ❓ <a href="https://github.com/lrorpilla/jidoujisho/wiki/1.-FAQ">FAQ</a> · 
+  🩺 <a href="https://github.com/lrorpilla/jidoujisho/wiki/2.-Troubleshooting">Troubleshooting</a> · 
+  🚀 <a href="https://github.com/lrorpilla/jidoujisho/wiki/3.-Getting-Started">Getting Started</a> ·
+  🃏 <a href="https://github.com/lrorpilla/jidoujisho/wiki/4.-Flashcard-Creation">Flashcard Creation</a> ·
+  🗃️ <a href="https://github.com/lrorpilla/jidoujisho/wiki/5.-Workflow-Setup">Workflow Setup</a> · 
+  🎥 <a href="https://github.com/lrorpilla/jidoujisho/wiki/6.-Viewing-Media">Viewing Media</a> · 
+  💡 <a href="https://github.com/lrorpilla/jidoujisho/wiki/7.-Tips-and-Tricks">Tips and Tricks</a> · 
+  🧑‍💻 <a href="https://github.com/lrorpilla/jidoujisho/wiki/8.-Development">Development</a> · 
+  👥 <a href="https://github.com/lrorpilla/jidoujisho/wiki/9.-Contribution">Contribution</a>
 </p>
 </b>
 
