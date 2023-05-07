@@ -91,12 +91,17 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     WidgetsBinding.instance.addObserver(this);
   }
 
+  /// Action to perform within the source page upon closing the media.
+  @override
+  Future<void> onSourcePagePop() async {
+    await _playerController.stop();
+  }
+
   @override
   void dispose() async {
     _playPauseSubscription?.cancel();
     WidgetsBinding.instance.removeObserver(this);
 
-    _playerController.stop();
     _playerController.dispose();
 
     super.dispose();
@@ -1137,6 +1142,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             context: context,
             ref: ref,
             pushReplacement: true,
+            onFileSelected: (path) async {
+              await _playerController.stop();
+            },
           );
 
           if (mounted) {
@@ -1246,6 +1254,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           source.setPreferredQuality(quality);
 
           if (!active) {
+            await _playerController.stop();
+
             appModel.openMedia(
               mediaSource: source,
               context: context,

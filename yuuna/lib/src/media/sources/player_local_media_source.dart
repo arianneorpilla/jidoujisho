@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
@@ -107,6 +108,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     required AppModel appModel,
     required WidgetRef ref,
     required bool pushReplacement,
+    FutureOr Function(String)? onFileSelected,
   }) async {
     List<Directory> rootDirectories =
         await appModel.getFilePickerDirectoriesForMediaType(mediaType);
@@ -135,6 +137,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     }
 
     String filePath = filePaths.first;
+    await onFileSelected?.call(filePath);
     appModel.setLastPickedDirectory(
       type: PlayerMediaType.instance,
       directory: Directory(path.dirname(filePath)),

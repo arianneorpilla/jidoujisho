@@ -67,11 +67,11 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
               ),
             ),
             onPressed: () async {
+              await onSourcePagePop();
+
               if (mounted) {
                 Navigator.pop(context, true);
               }
-
-              await onSourcePagePop();
 
               await appModel.closeMedia(
                 context: context,
