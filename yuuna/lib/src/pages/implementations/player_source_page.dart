@@ -1139,11 +1139,13 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             pushReplacement: true,
           );
 
-          await Future.delayed(const Duration(milliseconds: 5), () {});
-          await SystemChrome.setEnabledSystemUIMode(
-              SystemUiMode.immersiveSticky);
+          if (mounted) {
+            await Future.delayed(const Duration(milliseconds: 5), () {});
+            await SystemChrome.setEnabledSystemUIMode(
+                SystemUiMode.immersiveSticky);
 
-          dialogSmartResume();
+            dialogSmartResume();
+          }
         },
       ),
     );

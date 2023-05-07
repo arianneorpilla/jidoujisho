@@ -17,14 +17,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.7.1"
-  android_physical_buttons:
-    dependency: "direct main"
-    description:
-      name: android_physical_buttons
-      sha256: e226bcab51c1748a4a01a4a11b4857f568758c75a8779374be5a6ecfd61b7420
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.0"
   archive:
     dependency: transitive
     description:
