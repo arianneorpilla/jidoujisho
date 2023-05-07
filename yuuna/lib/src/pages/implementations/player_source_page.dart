@@ -1651,15 +1651,15 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             ? Icons.stay_current_landscape
             : Icons.stay_current_portrait,
         action: () async {
-          await _playerController.stop();
-
           appModel.togglePlayerOrientationPortrait();
 
-          Navigator.pop(context);
+          await _playerController.stop();
+
           await appModel.openMedia(
             context: context,
             ref: ref,
             mediaSource: widget.source,
+            pushReplacement: true,
             item: widget.item!.copyWith(
               position: _positionNotifier.value.inSeconds,
               duration: _durationNotifier.value.inSeconds,
@@ -1674,15 +1674,15 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             : Icons.fit_screen_outlined,
         active: appModel.isStretchToFill,
         action: () async {
-          await _playerController.stop();
-
           appModel.toggleStretchToFill();
 
-          Navigator.pop(context);
+          await _playerController.stop();
+
           await appModel.openMedia(
             context: context,
             ref: ref,
             mediaSource: widget.source,
+            pushReplacement: true,
             item: widget.item!.copyWith(
               position: _positionNotifier.value.inSeconds,
               duration: _durationNotifier.value.inSeconds,
