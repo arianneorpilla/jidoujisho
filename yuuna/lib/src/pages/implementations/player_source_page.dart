@@ -620,117 +620,129 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     );
   }
 
+  bool _dragHorizontal = false;
+  bool _dragVertical = false;
+
   /// This enables gestures for repeating the current subtitle
   /// and for showing the transcript.
   Widget buildGestureArea() {
     return GestureDetector(
-      onHorizontalDragUpdate: (details) async {
-        if (details.delta.dx.abs() > 20) {
-          Subtitle? nearestSubtitle = getNearestSubtitle();
-
-          _listeningSubtitle.value = nearestSubtitle;
-
-          if (nearestSubtitle != null) {
-            await _playerController
-                .seekTo(nearestSubtitle.start - subtitleDelay);
-            _bufferingNotifier.value = true;
-          }
-        }
-      },
-      onHorizontalDragEnd: (dragEndDetails) async {
-        if (dragEndDetails.primaryVelocity!.abs() > 0) {
-          Subtitle? nearestSubtitle = getNearestSubtitle();
-
-          _listeningSubtitle.value = nearestSubtitle;
-
-          if (nearestSubtitle != null) {
-            await _playerController
-                .seekTo(nearestSubtitle.start - subtitleDelay);
-            _bufferingNotifier.value = true;
-          }
-        }
-      },
-      onVerticalDragEnd: (details) async {
-        if (details.primaryVelocity!.abs() > 0) {
-          bool exporting = false;
-          if (!appModel.isTranscriptPlayerMode) {
-            await dialogSmartPause();
-          }
-
-          await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-          await Future.delayed(const Duration(milliseconds: 5), () {});
-
-          _transcriptOpenNotifier.value = true;
-
-          _menuHideTimer?.cancel();
-          _isMenuHidden.value = true;
-
-          try {
-            await appModel.temporarilyDisableStatusBarHiding(action: () async {
-              await Navigator.push(
-                context,
-                PageRouteBuilder(
-                  opaque: false,
-                  pageBuilder: (context, _, __) => PlayerTranscriptPage(
-                    title: widget.item!.title,
-                    subtitles: _subtitleItem.controller.subtitles,
-                    currentSubtitle: _currentSubtitle,
-                    subtitleOptions: _subtitleOptionsNotifier.value,
-                    controller: _playerController,
-                    nearestSubtitle: getNearestSubtitle(),
-                    playingNotifier: _playingNotifier,
-                    endedNotifier: _endedNotifier,
-                    transcriptBackgroundNotifier: _transcriptBackgroundNotifier,
-                    alignMode: false,
-                    onTap: (index) async {
-                      await Future.delayed(
-                          const Duration(milliseconds: 5), () {});
-                      await SystemChrome.setEnabledSystemUIMode(
-                          SystemUiMode.immersiveSticky);
-                      Navigator.pop(context);
-                      await _playerController.seekTo(
-                          _subtitleItem.controller.subtitles[index].start -
-                              subtitleDelay);
-                      _bufferingNotifier.value = true;
-                      _listeningSubtitle.value =
-                          _subtitleItem.controller.subtitles[index];
-
-                      if (_shadowingSubtitle.value != null) {
-                        _shadowingSubtitle.value =
-                            _subtitleItem.controller.subtitles[index];
-                      }
-                    },
-                    onLongPress: (index) async {
-                      Navigator.pop(context);
-                      exporting = true;
-                      await exportMultipleSubtitles(index);
-                      await dialogSmartResume();
-                    },
-                  ),
-                ),
-              );
-            });
-          } finally {
-            (widget.source as PlayerMediaSource).clearTranscriptSubtitle();
-            widget.source
-                .setCurrentSentence(_currentSubtitle.value?.data ?? '');
-            _transcriptOpenNotifier.value = false;
-          }
-
-          if (!exporting) {
-            await dialogSmartResume();
-            await Future.delayed(const Duration(milliseconds: 5), () {});
-            await SystemChrome.setEnabledSystemUIMode(
-                SystemUiMode.immersiveSticky);
-          }
-        }
-      },
+      child: buildScrubDetectors(),
       onTap: () {
         SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
         toggleMenuVisibility();
       },
-      child: buildScrubDetectors(),
+      onHorizontalDragStart: (details) {
+        _dragHorizontal = false;
+      },
+      onHorizontalDragUpdate: (details) async {
+        if (details.delta.dx.abs() > 20) {
+          _dragHorizontal = true;
+        }
+      },
+      onHorizontalDragEnd: (details) async {
+        if (_dragHorizontal) {
+          _dragHorizontal = false;
+          repeatCurrentSubtitle();
+        }
+      },
+      onVerticalDragStart: (details) {
+        _dragVertical = false;
+      },
+      onVerticalDragUpdate: (details) async {
+        if (details.delta.dy.abs() > 20) {
+          _dragVertical = true;
+        }
+      },
+      onVerticalDragEnd: (details) {
+        if (_dragVertical) {
+          _dragVertical = false;
+          openTranscript();
+        }
+      },
     );
+  }
+
+  Future<void> repeatCurrentSubtitle() async {
+    Subtitle? nearestSubtitle = getNearestSubtitle();
+
+    _listeningSubtitle.value = nearestSubtitle;
+
+    if (nearestSubtitle != null) {
+      await _playerController.seekTo(nearestSubtitle.start - subtitleDelay);
+      _bufferingNotifier.value = true;
+    }
+  }
+
+  Future<void> openTranscript() async {
+    bool exporting = false;
+    if (!appModel.isTranscriptPlayerMode) {
+      await dialogSmartPause();
+    }
+
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    await Future.delayed(const Duration(milliseconds: 5), () {});
+
+    _transcriptOpenNotifier.value = true;
+
+    _menuHideTimer?.cancel();
+    _isMenuHidden.value = true;
+
+    try {
+      await appModel.temporarilyDisableStatusBarHiding(action: () async {
+        await Navigator.push(
+          context,
+          PageRouteBuilder(
+            opaque: false,
+            pageBuilder: (context, _, __) => PlayerTranscriptPage(
+              title: widget.item!.title,
+              subtitles: _subtitleItem.controller.subtitles,
+              currentSubtitle: _currentSubtitle,
+              subtitleOptions: _subtitleOptionsNotifier.value,
+              controller: _playerController,
+              nearestSubtitle: getNearestSubtitle(),
+              playingNotifier: _playingNotifier,
+              endedNotifier: _endedNotifier,
+              transcriptBackgroundNotifier: _transcriptBackgroundNotifier,
+              alignMode: false,
+              onTap: (index) async {
+                await Future.delayed(const Duration(milliseconds: 5), () {});
+                await SystemChrome.setEnabledSystemUIMode(
+                    SystemUiMode.immersiveSticky);
+                Navigator.pop(context);
+                await _playerController.seekTo(
+                    _subtitleItem.controller.subtitles[index].start -
+                        subtitleDelay);
+                _bufferingNotifier.value = true;
+                _listeningSubtitle.value =
+                    _subtitleItem.controller.subtitles[index];
+
+                if (_shadowingSubtitle.value != null) {
+                  _shadowingSubtitle.value =
+                      _subtitleItem.controller.subtitles[index];
+                }
+              },
+              onLongPress: (index) async {
+                Navigator.pop(context);
+                exporting = true;
+                await exportMultipleSubtitles(index);
+                await dialogSmartResume();
+              },
+            ),
+          ),
+        );
+      });
+    } finally {
+      (widget.source as PlayerMediaSource).clearTranscriptSubtitle();
+      widget.source.setCurrentSentence(_currentSubtitle.value?.data ?? '');
+      _transcriptOpenNotifier.value = false;
+    }
+
+    if (!exporting) {
+      await dialogSmartResume();
+      await Future.delayed(const Duration(milliseconds: 5), () {});
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    }
   }
 
   /// This allows export of multiple subtitles as one sentence and
