@@ -94,7 +94,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   /// Action to perform within the source page upon closing the media.
   @override
   Future<void> onSourcePagePop() async {
-    if (_playerInitialised) {
+    if (_playerController.value.isInitialized) {
       await _playerController.stop();
     }
   }
