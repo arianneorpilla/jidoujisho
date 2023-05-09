@@ -94,7 +94,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   /// Action to perform within the source page upon closing the media.
   @override
   Future<void> onSourcePagePop() async {
-    if (_playerController.value.isInitialized) {
+    if (_playerInitialised) {
       await _playerController.stop();
     }
   }
@@ -220,8 +220,6 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     appModel.currentMediaPauseStream.listen((event) {
       dialogSmartPause();
     });
-
-    _playerInitialised = true;
 
     _emptySubtitleItem = SubtitleItem(
       controller: SubtitleController(
