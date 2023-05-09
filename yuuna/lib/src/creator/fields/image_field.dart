@@ -1,4 +1,5 @@
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:change_notifier_builder/change_notifier_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:progress_indicators/progress_indicators.dart';
@@ -119,59 +120,62 @@ class ImageField extends ImageExportField {
     required int itemCount,
     required AppModel appModel,
   }) {
-    CarouselController controller = CarouselController();
-
-    return CarouselSlider.builder(
-      itemCount: itemCount + 1,
-      carouselController: controller,
-      options: CarouselOptions(
-        enlargeStrategy: CenterPageEnlargeStrategy.zoom,
-        enlargeCenterPage: true,
-        viewportFraction: 0.75,
-        initialPage: indexNotifier.value,
-        onPageChanged: (index, reason) {
-          if (index == itemCount) {
-            indexNotifier.value = -1;
-            setSelectedSearchSuggestion(index: -1);
-          } else {
-            indexNotifier.value = index;
-            setSelectedSearchSuggestion(index: index);
-          }
-        },
-      ),
-      itemBuilder: (context, index, realIndex) {
-        if (index == itemCount) {
-          return Container(
-            color: appModel.isDarkMode ? Colors.white10 : Colors.black12,
-          );
-        }
-
-        OverlayEntry? popup;
-        ImageProvider<Object> image = currentImageSuggestions![index];
-
-        return GestureDetector(
-          onLongPress: () {
-            if (index != indexNotifier.value) {
-              return;
+    return ChangeNotifierBuilder(
+      notifier: carouselNotifier,
+      builder: (_, __, ___) {
+        return CarouselSlider.builder(
+          key: carouselKey,
+          itemCount: itemCount + 1,
+          options: CarouselOptions(
+            enlargeStrategy: CenterPageEnlargeStrategy.zoom,
+            enlargeCenterPage: true,
+            viewportFraction: 0.75,
+            initialPage: indexNotifier.value,
+            onPageChanged: (index, reason) {
+              if (index == itemCount) {
+                indexNotifier.value = -1;
+                setSelectedSearchSuggestion(index: -1);
+              } else {
+                indexNotifier.value = index;
+                setSelectedSearchSuggestion(index: index);
+              }
+            },
+          ),
+          itemBuilder: (context, index, realIndex) {
+            if (index == itemCount) {
+              return Container(
+                color: appModel.isDarkMode ? Colors.white10 : Colors.black12,
+              );
             }
-            popup = OverlayEntry(
-              builder: (context) => ColoredBox(
-                color: Colors.black.withOpacity(0.5),
-                child: buildImage(image: image, fit: BoxFit.contain),
+
+            OverlayEntry? popup;
+            ImageProvider<Object> image = currentImageSuggestions![index];
+
+            return GestureDetector(
+              onLongPress: () {
+                if (index != indexNotifier.value) {
+                  return;
+                }
+                popup = OverlayEntry(
+                  builder: (context) => ColoredBox(
+                    color: Colors.black.withOpacity(0.5),
+                    child: buildImage(image: image, fit: BoxFit.contain),
+                  ),
+                );
+                Overlay.of(context).insert(popup!);
+              },
+              onLongPressEnd: (details) {
+                popup?.remove();
+              },
+              child: Padding(
+                padding: Spacing.of(context).insets.horizontal.small,
+                child: buildImage(
+                  image: currentImageSuggestions![index],
+                  fit: BoxFit.fitHeight,
+                ),
               ),
             );
-            Overlay.of(context).insert(popup!);
           },
-          onLongPressEnd: (details) {
-            popup?.remove();
-          },
-          child: Padding(
-            padding: Spacing.of(context).insets.horizontal.small,
-            child: buildImage(
-              image: currentImageSuggestions![index],
-              fit: BoxFit.fitHeight,
-            ),
-          ),
         );
       },
     );

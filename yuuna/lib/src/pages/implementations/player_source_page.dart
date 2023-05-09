@@ -650,7 +650,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         _dragVertical = false;
       },
       onVerticalDragUpdate: (details) async {
-        if (details.delta.dy.abs() > 20) {
+        if (details.delta.dy.abs() > 10) {
           _dragVertical = true;
         }
       },

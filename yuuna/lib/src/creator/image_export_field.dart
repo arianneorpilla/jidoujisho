@@ -9,7 +9,7 @@ import 'package:yuuna/utils.dart';
 /// A special kind of field that has a special widget at the top of the creator.
 /// For example, the audio field has a media player that can be controlled
 /// based on its values.
-abstract class ImageExportField extends Field {
+abstract class ImageExportField extends Field with ChangeNotifier {
   /// Initialise this field with the predetermined and hardset values.
   ImageExportField({
     required super.uniqueKey,
@@ -84,6 +84,8 @@ abstract class ImageExportField extends Field {
           .jumpTo(creatorModel.scrollController.position.minScrollExtent);
     }
 
+    carouselKey = UniqueKey();
+
     /// Show loading state.
     setSearching(
         appModel: appModel,
@@ -150,6 +152,7 @@ abstract class ImageExportField extends Field {
     _currentSearchTerm = searchTermUsed;
     _isSearching = false;
     creatorModel.refresh();
+    carouselNotifier.notifyListeners();
   }
 
   /// Change the index of the selected search suggestion and update the state
@@ -214,4 +217,10 @@ abstract class ImageExportField extends Field {
     required CreatorModel creatorModel,
     required Orientation orientation,
   });
+
+  /// For setting carousel item position.
+  ChangeNotifier carouselNotifier = ChangeNotifier();
+
+  /// For setting carousel item position.
+  UniqueKey carouselKey = UniqueKey();
 }
