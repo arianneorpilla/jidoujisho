@@ -398,7 +398,7 @@ class _DictionaryDialogPageState extends BasePageState with ChangeNotifier {
                     ],
                   ),
                 ),
-                if (_selectedOrder == dictionary.order) const Space.normal(),
+                const Space.normal(),
                 if (_selectedOrder == dictionary.order)
                   buildDictionaryTileTrailing(dictionary)
               ],
@@ -418,13 +418,29 @@ class _DictionaryDialogPageState extends BasePageState with ChangeNotifier {
   }
 
   Widget buildDictionaryTileTrailing(Dictionary dictionary) {
-    return JidoujishoIconButton(
-      padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(),
-      icon: Icons.more_vert,
-      onTapDown: (details) =>
-          openDictionaryOptionsMenu(details: details, dictionary: dictionary),
-      tooltip: t.show_options,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: Material(
+        color: Colors.transparent,
+        child: PopupMenuButton<VoidCallback>(
+          splashRadius: 20,
+          padding: EdgeInsets.zero,
+          tooltip: t.show_options,
+          child: Container(
+            height: 30,
+            width: 30,
+            alignment: Alignment.center,
+            child: Icon(
+              Icons.more_vert,
+              color: theme.iconTheme.color,
+              size: 24,
+            ),
+          ),
+          color: Theme.of(context).popupMenuTheme.color,
+          onSelected: (value) => value(),
+          itemBuilder: (context) => getMenuItems(dictionary),
+        ),
+      ),
     );
   }
 

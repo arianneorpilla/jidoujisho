@@ -259,15 +259,28 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage>
   }
 
   Widget buildMappingTileTrailing(String label) {
-    return JidoujishoIconButton(
-      padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(),
-      icon: Icons.more_vert,
-      onTapDown: (details) => openMappingOptionsMenu(
-        details: details,
-        label: label,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: Material(
+        color: Colors.transparent,
+        child: PopupMenuButton<VoidCallback>(
+            splashRadius: 20,
+            padding: EdgeInsets.zero,
+            tooltip: t.show_options,
+            child: Container(
+              height: 30,
+              width: 30,
+              alignment: Alignment.center,
+              child: Icon(
+                Icons.more_vert,
+                color: theme.iconTheme.color,
+                size: 24,
+              ),
+            ),
+            color: Theme.of(context).popupMenuTheme.color,
+            onSelected: (value) => value(),
+            itemBuilder: (context) => getMenuItems(label)),
       ),
-      tooltip: t.show_options,
     );
   }
 

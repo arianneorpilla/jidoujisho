@@ -3364,6 +3364,19 @@ class AppModel with ChangeNotifier {
     );
   }
 
+  /// Get whether or not subtitle timings are shown.
+  bool get subtitleTimingsShown {
+    return _preferences.get('subtitle_timings_shown', defaultValue: true);
+  }
+
+  /// Toggle subtitle timings shown.
+  void toggleSubtitleTimingsShown() async {
+    await _preferences.put(
+      'subtitle_timings_shown',
+      !subtitleTimingsShown,
+    );
+  }
+
   /// Get the saved value that the user has set for the [TagsField].
   String get savedTags {
     return _preferences.get('saved_tags', defaultValue: '');

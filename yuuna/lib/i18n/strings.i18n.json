@@ -46,6 +46,7 @@
     "dialog_save": "SAVE",
     "dialog_set": "SET",
     "dialog_channel": "CHANNEL",
+    "dialog_directory": "DIRECTORY",
     "dialog_crop": "CROP",
     "dialog_connect": "CONNECT",
     "dialog_append": "APPEND",
@@ -378,13 +379,18 @@
     "cancel": "Cancel",
     "server_port_in_use": "Local server port already in use",
     "google_fonts": "Google Fonts",
+    "video_show": "Show video",
+    "video_hide": "Hide video",
+    "subtitle_timing_show": "Show subtitle timing",
+    "subtitle_timing_hide": "Hide subtitle timing",
+    "find_next": "Find Next",
+    "find_previous": "Find Previous",
     "retrying_in": {
         "seconds": {
           "one": "Retrying in $n second...",
           "other": "Retrying in $n seconds..."
         }
       },
-    
     "view_replies": {
         "reply": {
           "one": "SHOW $n REPLY",

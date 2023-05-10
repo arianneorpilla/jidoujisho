@@ -89,21 +89,37 @@ class PitchAccentField extends Field {
   }
 
   /// Returns Furigana for multiple [DictionaryPitch].
-  static String getAllHtmlPitch({required DictionaryHeading heading}) {
-    if (heading.pitches.isEmpty) {
+  static String getAllHtmlPitch(
+      {required AppModel appModel, required DictionaryHeading heading}) {
+    List<Dictionary> dictionaries = appModel.dictionaries;
+
+    Map<String, bool> dictionaryNamesByHidden = Map<String, bool>.fromEntries(
+        dictionaries
+            .map((e) => MapEntry(e.name, e.isHidden(appModel.targetLanguage))));
+    Map<String, int> dictionaryNamesByOrder = Map<String, int>.fromEntries(
+        dictionaries.map((e) => MapEntry(e.name, e.order)));
+
+    List<DictionaryPitch> pitches = heading.pitches
+        .where(
+            (entry) => !dictionaryNamesByHidden[entry.dictionary.value!.name]!)
+        .toList();
+    pitches.sort((a, b) => dictionaryNamesByOrder[a.dictionary.value!.name]!
+        .compareTo(dictionaryNamesByOrder[b.dictionary.value!.name]!));
+
+    if (pitches.isEmpty) {
       return '';
     }
 
     StringBuffer html = StringBuffer();
 
-    heading.pitches.forEachIndexed((index, pitch) {
+    pitches.forEachIndexed((index, pitch) {
       html.write(
         getHtmlPitch(
           reading: heading.reading,
           downstep: pitch.downstep,
         ),
       );
-      if (index != heading.pitches.length - 1) {
+      if (index != pitches.length - 1) {
         html.write('<br>');
       }
     });
@@ -121,6 +137,9 @@ class PitchAccentField extends Field {
     required bool creatorJustLaunched,
     required String? dictionaryName,
   }) {
-    return getAllHtmlPitch(heading: heading);
+    return getAllHtmlPitch(
+      appModel: appModel,
+      heading: heading,
+    );
   }
 }

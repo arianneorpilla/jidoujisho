@@ -184,7 +184,6 @@ class _DictionaryEntryTagsWrap extends ConsumerWidget {
             height: 22,
             width: 22,
             child: PopupMenuButton<VoidCallback>(
-              surfaceTintColor: Colors.red,
               iconSize: 16,
               padding: EdgeInsets.zero,
               icon: Icon(
@@ -192,7 +191,7 @@ class _DictionaryEntryTagsWrap extends ConsumerWidget {
                 color: Theme.of(context).unselectedWidgetColor,
               ),
               color: Theme.of(context).popupMenuTheme.color,
-              tooltip: t.show_more,
+              tooltip: t.show_options,
               onSelected: (value) => value(),
               itemBuilder: (context) => getMenuItems(
                 context: context,

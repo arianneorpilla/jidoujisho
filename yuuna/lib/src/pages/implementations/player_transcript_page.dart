@@ -5,7 +5,9 @@ import 'package:change_notifier_builder/change_notifier_builder.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:multi_value_listenable_builder/multi_value_listenable_builder.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:spaces/spaces.dart';
@@ -83,27 +85,31 @@ class _PlayerTranscriptPageState
       ItemPositionsListener.create();
 
   late final int _initialScrollIndex;
+  final _searchNotifier = ValueNotifier<bool>(false);
 
   @override
   void initState() {
     super.initState();
 
-    int selectedIndex =
-        (widget.currentSubtitle.value ?? widget.nearestSubtitle)?.index ?? -1;
-    if ((widget.subtitles.last.end -
-                Duration(milliseconds: widget.subtitleOptions.subtitleDelay)) <=
-            widget.controller.value.position ||
-        widget.controller.value.isEnded) {
-      selectedIndex = widget.subtitles.last.index;
+    if (widget.subtitles.isNotEmpty) {
+      int selectedIndex =
+          (widget.currentSubtitle.value ?? widget.nearestSubtitle)?.index ?? -1;
+      if ((widget.subtitles.last.end -
+                  Duration(
+                      milliseconds: widget.subtitleOptions.subtitleDelay)) <=
+              widget.controller.value.position ||
+          widget.controller.value.isEnded) {
+        selectedIndex = widget.subtitles.last.index;
+      }
+      _selectedIndexNotifier.value ??= selectedIndex - 1;
+      _initialScrollIndex = (selectedIndex - 2 > 0) ? selectedIndex - 2 : 0;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        FocusScope.of(context).unfocus();
+      });
+
+      widget.currentSubtitle.addListener(scrollTo);
     }
-    _selectedIndexNotifier.value ??= selectedIndex - 1;
-    _initialScrollIndex = (selectedIndex - 2 > 0) ? selectedIndex - 2 : 0;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      FocusScope.of(context).unfocus();
-    });
-
-    widget.currentSubtitle.addListener(scrollTo);
   }
 
   @override
@@ -140,6 +146,7 @@ class _PlayerTranscriptPageState
                   onTap: clearDictionaryResult,
                   child: buildBody(),
                 ),
+                buildSearchBar(),
                 buildDictionary(),
               ],
             ),
@@ -158,7 +165,8 @@ class _PlayerTranscriptPageState
       title: buildTitle(),
       actions: [
         if (!widget.alignMode) buildPlayPauseButton(),
-        buildToggleBackgroundButton(),
+        buildOptionsButton(),
+        if (widget.subtitles.isNotEmpty) buildToggleSearchButton(),
         if (!widget.alignMode) buildToggleButton(),
         const Space.normal(),
       ],
@@ -166,17 +174,203 @@ class _PlayerTranscriptPageState
     );
   }
 
-  Widget buildToggleBackgroundButton() {
+  final FloatingSearchBarController _searchController =
+      FloatingSearchBarController();
+
+  Widget buildSearchBar() {
     return ValueListenableBuilder<bool>(
-      valueListenable: widget.transcriptBackgroundNotifier,
-      builder: (context, isOpaque, __) {
+      valueListenable: _searchNotifier,
+      builder: (_, value, __) {
+        if (!value) {
+          return const SizedBox.shrink();
+        }
+
+        return FloatingSearchBar(
+          hint: t.search_ellipsis,
+          controller: _searchController,
+          builder: (_, __) => const SizedBox.shrink(),
+          borderRadius: BorderRadius.zero,
+          elevation: 0,
+          backgroundColor: appModel.isDarkMode
+              ? const Color.fromARGB(255, 30, 30, 30)
+              : const Color.fromARGB(255, 229, 229, 229),
+          backdropColor: Colors.transparent,
+          accentColor: theme.colorScheme.primary,
+          scrollPadding: const EdgeInsets.only(top: 6, bottom: 56),
+          transitionDuration: Duration.zero,
+          margins: const EdgeInsets.symmetric(horizontal: 6),
+          width: double.maxFinite,
+          transition: SlideFadeFloatingSearchBarTransition(),
+          automaticallyImplyBackButton: false,
+          onFocusChanged: (focused) {
+            if (!focused) {
+              _searchNotifier.value = false;
+            }
+          },
+          textInputAction: TextInputAction.done,
+          leadingActions: const [
+            Icon(Icons.search, size: 20),
+          ],
+          actions: [
+            buildFindPrevious(),
+            buildFindNext(),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget buildFindNext() {
+    return FloatingSearchBarAction(
+      showIfOpened: true,
+      child: JidoujishoIconButton(
+        size: textTheme.titleLarge?.fontSize,
+        tooltip: t.find_next,
+        icon: Icons.keyboard_arrow_down,
+        onTap: () => searchSubtitle(reversed: false),
+      ),
+    );
+  }
+
+  Widget buildFindPrevious() {
+    return FloatingSearchBarAction(
+      showIfOpened: true,
+      child: JidoujishoIconButton(
+        size: textTheme.titleLarge?.fontSize,
+        tooltip: t.find_previous,
+        icon: Icons.keyboard_arrow_up,
+        onTap: () => searchSubtitle(reversed: true),
+      ),
+    );
+  }
+
+  void searchSubtitle({
+    required bool reversed,
+  }) {
+    FocusScope.of(context).unfocus();
+
+    String query = _searchController.query.trim();
+    if (query.isEmpty) {
+      return;
+    }
+
+    int index = _selectedIndexNotifier.value ?? 0;
+    List<Subtitle> subtitlesToSearch = reversed
+        ? [
+            ...widget.subtitles.sublist(0, index).reversed,
+            ...widget.subtitles.sublist(index + 1).reversed,
+          ]
+        : [
+            ...widget.subtitles.sublist(index + 1),
+            ...widget.subtitles.sublist(0, index),
+          ];
+
+    Subtitle? subtitle = subtitlesToSearch
+        .firstWhereOrNull((subtitle) => subtitle.data.contains(query));
+    if (subtitle != null) {
+      widget.currentSubtitle.value = subtitle;
+      Duration offsetStart = subtitle.start -
+          Duration(milliseconds: widget.subtitleOptions.subtitleDelay);
+
+      widget.controller.seekTo(offsetStart);
+    } else {
+      Fluttertoast.showToast(msg: t.no_search_results);
+    }
+  }
+
+  Widget buildOptionsButton() {
+    return PopupMenuButton<VoidCallback>(
+      splashRadius: 20,
+      padding: EdgeInsets.zero,
+      tooltip: t.switch_profiles,
+      icon: Icon(
+        Icons.display_settings,
+        color: theme.iconTheme.color,
+        size: 24,
+      ),
+      color: Theme.of(context).popupMenuTheme.color,
+      onSelected: (value) => value(),
+      itemBuilder: (context) => getOptionsItems(),
+    );
+  }
+
+  List<PopupMenuItem<VoidCallback>> getOptionsItems() {
+    return [
+      buildPopupItem(
+        label: appModel.isTranscriptOpaque ? t.video_show : t.video_hide,
+        icon: appModel.isTranscriptOpaque
+            ? Icons.visibility
+            : Icons.visibility_off_outlined,
+        action: () {
+          appModel.toggleTranscriptOpaque();
+          widget.transcriptBackgroundNotifier.value =
+              appModel.isTranscriptOpaque;
+        },
+      ),
+      buildPopupItem(
+        label: appModel.subtitleTimingsShown
+            ? t.subtitle_timing_hide
+            : t.subtitle_timing_show,
+        icon: appModel.subtitleTimingsShown
+            ? Icons.timer_off_outlined
+            : Icons.timer,
+        action: () {
+          appModel.toggleSubtitleTimingsShown();
+          _itemScrollController.jumpTo(
+            index: max((widget.currentSubtitle.value?.index ?? 0) - 2, 0),
+          );
+          setState(() {});
+        },
+      ),
+    ];
+  }
+
+  PopupMenuItem<VoidCallback> buildPopupItem({
+    required String label,
+    required Function() action,
+    IconData? icon,
+    Color? color,
+  }) {
+    return PopupMenuItem<VoidCallback>(
+      child: Row(
+        children: [
+          if (icon != null)
+            Icon(
+              icon,
+              size: textTheme.bodyMedium?.fontSize,
+              color: color,
+            ),
+          if (icon != null) const Space.normal(),
+          Text(
+            label,
+            style: TextStyle(color: color),
+          ),
+        ],
+      ),
+      value: action,
+    );
+  }
+
+  Widget buildToggleSearchButton() {
+    return ValueListenableBuilder<bool>(
+      valueListenable: _searchNotifier,
+      builder: (context, value, __) {
         return JidoujishoIconButton(
-          tooltip: t.toggle_transcript_background,
-          icon: isOpaque ? Icons.visibility : Icons.visibility_outlined,
+          tooltip: t.search,
+          enabledColor: value ? Colors.red : null,
+          icon: Icons.search,
           onTap: () async {
-            appModel.toggleTranscriptOpaque();
-            widget.transcriptBackgroundNotifier.value =
-                appModel.isTranscriptOpaque;
+            bool newValue = !_searchNotifier.value;
+
+            _searchController.clear();
+            _searchNotifier.value = newValue;
+
+            clearDictionaryResult();
+
+            Future.delayed(
+              const Duration(milliseconds: 50),
+              _searchController.open,
+            );
           },
         );
       },
@@ -539,25 +733,26 @@ class _PlayerTranscriptPageState
             child: Column(
               children: [
                 const Space.small(),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.textsms_outlined,
-                      size: 12,
-                      color: Colors.red,
-                    ),
-                    const Space.semiBig(),
-                    Text(
-                      subtitleDuration,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: durationColor,
+                if (appModel.subtitleTimingsShown)
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.textsms_outlined,
+                        size: 12,
+                        color: Colors.red,
                       ),
-                    ),
-                    const Space.small(),
-                  ],
-                ),
+                      const Space.semiBig(),
+                      Text(
+                        subtitleDuration,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: durationColor,
+                        ),
+                      ),
+                      const Space.small(),
+                    ],
+                  ),
                 const Space.small(),
                 Row(
                   children: [

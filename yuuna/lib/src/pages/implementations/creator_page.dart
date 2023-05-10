@@ -1079,7 +1079,6 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
         buildSearchClearButton(),
         const Space.small(),
         buildManageEnhancementsButton(),
-        const Space.small(),
         buildSwitchProfilesButton(),
         const Space.extraSmall(),
       ];
@@ -1087,11 +1086,18 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
   }
 
   Widget buildSwitchProfilesButton() {
-    return JidoujishoIconButton(
-      key: _profileMenuKey,
+    return PopupMenuButton<VoidCallback>(
+      splashRadius: 20,
+      padding: EdgeInsets.zero,
       tooltip: t.switch_profiles,
-      icon: Icons.switch_account,
-      onTapDown: openProfilesMenu,
+      icon: Icon(
+        Icons.switch_account,
+        color: theme.iconTheme.color,
+        size: 24,
+      ),
+      color: Theme.of(context).popupMenuTheme.color,
+      onSelected: (value) => value(),
+      itemBuilder: (context) => getProfileItems(),
     );
   }
 

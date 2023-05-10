@@ -41,7 +41,9 @@ class _YoutubeVideoResultsPageState
       resizeToAvoidBottomInset: false,
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: widget.showAppBar ? buildAppBar() : null,
-      body: buildBody(),
+      body: SafeArea(
+        child: buildBody(),
+      ),
     );
   }
 

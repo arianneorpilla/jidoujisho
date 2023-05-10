@@ -28,40 +28,41 @@ abstract class BaseMediaSearchBarState<T extends BaseMediaSearchBar>
   @override
   Widget build(BuildContext context) {
     return FloatingSearchBar(
-        isScrollControlled: true,
-        hint: mediaSource.getLocalisedSourceName(appModel),
-        controller: mediaType.floatingSearchBarController,
-        onSubmitted: onSubmitted,
-        onQueryChanged: onQueryChanged,
-        builder: buildFloatingSearchBody,
-        borderRadius: BorderRadius.zero,
-        elevation: 0,
-        backgroundColor: appModel.isDarkMode
-            ? const Color.fromARGB(255, 30, 30, 30)
-            : const Color.fromARGB(255, 229, 229, 229),
-        backdropColor: appModel.isDarkMode ? Colors.black : Colors.white,
-        accentColor: theme.colorScheme.primary,
-        scrollPadding: const EdgeInsets.only(top: 6, bottom: 56),
-        transitionDuration: Duration.zero,
-        margins: const EdgeInsets.symmetric(horizontal: 6),
-        progress: _isSearching,
-        width: double.maxFinite,
-        transition: SlideFadeFloatingSearchBarTransition(),
-        automaticallyImplyBackButton: false,
-        onFocusChanged: (focused) => onFocusChanged(focused: focused),
-        leadingActions: [
-          buildChangeSourceButton(),
-          buildBackButton(),
-        ],
-        actions: [
-          buildSearchClearButton(),
-          ...mediaSource.getActions(
-            context: context,
-            ref: ref,
-            appModel: appModel,
-          ),
-          buildSearchButton(),
-        ]);
+      isScrollControlled: true,
+      hint: mediaSource.getLocalisedSourceName(appModel),
+      controller: mediaType.floatingSearchBarController,
+      onSubmitted: onSubmitted,
+      onQueryChanged: onQueryChanged,
+      builder: buildFloatingSearchBody,
+      borderRadius: BorderRadius.zero,
+      elevation: 0,
+      backgroundColor: appModel.isDarkMode
+          ? const Color.fromARGB(255, 30, 30, 30)
+          : const Color.fromARGB(255, 229, 229, 229),
+      backdropColor: appModel.isDarkMode ? Colors.black : Colors.white,
+      accentColor: theme.colorScheme.primary,
+      scrollPadding: const EdgeInsets.only(top: 6, bottom: 56),
+      transitionDuration: Duration.zero,
+      margins: const EdgeInsets.symmetric(horizontal: 6),
+      progress: _isSearching,
+      width: double.maxFinite,
+      transition: SlideFadeFloatingSearchBarTransition(),
+      automaticallyImplyBackButton: false,
+      onFocusChanged: (focused) => onFocusChanged(focused: focused),
+      leadingActions: [
+        buildChangeSourceButton(),
+        buildBackButton(),
+      ],
+      actions: [
+        buildSearchClearButton(),
+        ...mediaSource.getActions(
+          context: context,
+          ref: ref,
+          appModel: appModel,
+        ),
+        buildSearchButton(),
+      ],
+    );
   }
 
   /// Called when the user has submitted the search query.

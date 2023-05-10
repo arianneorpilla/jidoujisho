@@ -100,6 +100,16 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
         '-ss $timestamp -y -i "$inputPath" -frames:v 1 -q:v 2 "$targetPath"';
 
     await _flutterFFmpeg.execute(command);
+    String output = await FlutterFFmpegConfig().getLastCommandOutput();
+
+    if (output.contains('Output file is empty, nothing was encoded')) {
+      String timestamp =
+          JidoujishoTimeFormat.getFfmpegTimestamp(const Duration(seconds: 1));
+
+      String command =
+          '-ss $timestamp -y -i "$inputPath" -frames:v 1 -q:v 2 "$targetPath"';
+      await _flutterFFmpeg.execute(command);
+    }
   }
 
   /// Pick a video file with a built-in file picker.
@@ -108,10 +118,18 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     required AppModel appModel,
     required WidgetRef ref,
     required bool pushReplacement,
+    Directory? directory,
     FutureOr Function(String)? onFileSelected,
   }) async {
     List<Directory> rootDirectories =
         await appModel.getFilePickerDirectoriesForMediaType(mediaType);
+
+    if (directory != null) {
+      if (rootDirectories.isNotEmpty &&
+          rootDirectories.first.path != directory.path) {
+        rootDirectories.insert(0, directory);
+      }
+    }
 
     List<String> usedFiles = appModel
         .getMediaSourceHistory(mediaSource: this)
@@ -288,7 +306,8 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     ];
     List<String> audioParams = [
       '--audio-language=${appModel.targetLanguage.languageCode},${appModel.appLocale.languageCode}',
-      '--sub-track=99999'
+      '--sub-track=99999',
+      '--aout=opensles',
     ];
 
     return VlcPlayerController.file(
@@ -339,5 +358,10 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     }
 
     return items;
+  }
+
+  @override
+  String getDisplaySubtitleFromMediaItem(MediaItem item) {
+    return path.dirname(item.mediaIdentifier);
   }
 }

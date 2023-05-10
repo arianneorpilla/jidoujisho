@@ -151,6 +151,7 @@ class PlayerNetworkStreamSource extends PlayerMediaSource {
     List<String> audioParams = [
       '--audio-language=${appModel.targetLanguage.languageCode},${appModel.appLocale.languageCode}',
       '--sub-track=99999',
+      '--aout=opensles',
     ];
 
     return VlcPlayerController.network(

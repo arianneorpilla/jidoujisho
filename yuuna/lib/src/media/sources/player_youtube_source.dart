@@ -361,6 +361,7 @@ class PlayerYoutubeSource extends PlayerMediaSource {
     List<String> audioParams = [
       '--input-slave=$audioUrl',
       '--sub-track=99999',
+      '--aout=opensles',
     ];
 
     return VlcPlayerController.network(

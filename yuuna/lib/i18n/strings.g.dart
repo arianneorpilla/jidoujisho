@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 357
+/// Strings: 364
 ///
-/// Built on 2023-04-29 at 09:08 UTC
+/// Built on 2023-05-10 at 09:34 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -196,6 +196,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get dialog_save => 'SAVE';
 	String get dialog_set => 'SET';
 	String get dialog_channel => 'CHANNEL';
+	String get dialog_directory => 'DIRECTORY';
 	String get dialog_crop => 'CROP';
 	String get dialog_connect => 'CONNECT';
 	String get dialog_append => 'APPEND';
@@ -502,6 +503,12 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get cancel => 'Cancel';
 	String get server_port_in_use => 'Local server port already in use';
 	String get google_fonts => 'Google Fonts';
+	String get video_show => 'Show video';
+	String get video_hide => 'Hide video';
+	String get subtitle_timing_show => 'Show subtitle timing';
+	String get subtitle_timing_hide => 'Hide subtitle timing';
+	String get find_next => 'Find Next';
+	String get find_previous => 'Find Previous';
 	late final _StringsRetryingInEn retrying_in = _StringsRetryingInEn._(_root);
 	late final _StringsViewRepliesEn view_replies = _StringsViewRepliesEn._(_root);
 }
@@ -585,6 +592,7 @@ extension on _StringsEn {
 			case 'dialog_save': return 'SAVE';
 			case 'dialog_set': return 'SET';
 			case 'dialog_channel': return 'CHANNEL';
+			case 'dialog_directory': return 'DIRECTORY';
 			case 'dialog_crop': return 'CROP';
 			case 'dialog_connect': return 'CONNECT';
 			case 'dialog_append': return 'APPEND';
@@ -891,6 +899,12 @@ extension on _StringsEn {
 			case 'cancel': return 'Cancel';
 			case 'server_port_in_use': return 'Local server port already in use';
 			case 'google_fonts': return 'Google Fonts';
+			case 'video_show': return 'Show video';
+			case 'video_hide': return 'Hide video';
+			case 'subtitle_timing_show': return 'Show subtitle timing';
+			case 'subtitle_timing_hide': return 'Hide subtitle timing';
+			case 'find_next': return 'Find Next';
+			case 'find_previous': return 'Find Previous';
 			case 'retrying_in.seconds': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
 				one: 'Retrying in ${n} second...',
 				other: 'Retrying in ${n} seconds...',

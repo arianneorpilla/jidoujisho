@@ -28,9 +28,6 @@ class _RecursiveDictionaryHistoryPageState
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: buildAppBar(),
       body: SafeArea(
-        left: false,
-        top: false,
-        right: false,
         child: DictionaryResultPage(
           result: widget.result,
           onSearch: onSearch,

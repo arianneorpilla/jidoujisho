@@ -462,8 +462,8 @@ packages:
     dependency: "direct main"
     description:
       path: package
-      ref: "9b8efe11472314add1e5c590120111c82697a7f4"
-      resolved-ref: "9b8efe11472314add1e5c590120111c82697a7f4"
+      ref: "6c4a39fefad621c8096c277cf275750cad9d8cd0"
+      resolved-ref: "6c4a39fefad621c8096c277cf275750cad9d8cd0"
       url: "https://github.com/lrorpilla/filesystem_picker"
     source: git
     version: "2.0.0-nullsafety.0"

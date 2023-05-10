@@ -194,9 +194,7 @@ class _HomePageState extends BasePageState<HomePage>
   List<Widget> buildActions() {
     return [
       buildCreatorButton(),
-      const Space.small(),
       buildShowMenuButton(),
-      const Space.extraSmall(),
     ];
   }
 
@@ -221,12 +219,18 @@ class _HomePageState extends BasePageState<HomePage>
   }
 
   Widget buildShowMenuButton() {
-    return JidoujishoIconButton(
+    return PopupMenuButton<VoidCallback>(
+      splashRadius: 20,
+      padding: EdgeInsets.zero,
       tooltip: t.show_menu,
-      icon: Icons.more_vert,
-      onTapDown: (details) async {
-        openMenu(details);
-      },
+      icon: Icon(
+        Icons.more_vert,
+        color: theme.iconTheme.color,
+        size: 24,
+      ),
+      color: Theme.of(context).popupMenuTheme.color,
+      onSelected: (value) => value(),
+      itemBuilder: (context) => getMenuItems(),
     );
   }
 

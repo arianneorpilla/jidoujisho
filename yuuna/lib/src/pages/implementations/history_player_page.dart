@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
+import 'package:path/path.dart' as path;
 
 /// A default page for a [PlayerMediaSource]'s tab body content when selected
 /// as a source in the main menu.
@@ -237,12 +240,9 @@ class HistoryPlayerPageState<T extends HistoryPlayerPage>
   @override
   List<Widget> extraActions(MediaItem item) {
     MediaSource source = item.getMediaSource(appModel: appModel);
-    if (source is! PlayerYoutubeSource) {
-      return [];
-    }
-
     return [
-      buildChannelButton(item),
+      if (source is PlayerYoutubeSource) buildChannelButton(item),
+      if (source is PlayerLocalMediaSource) buildDirectoryButton(item),
     ];
   }
 
@@ -256,12 +256,37 @@ class HistoryPlayerPageState<T extends HistoryPlayerPage>
     );
   }
 
+  /// Directory button for local videos.
+  Widget buildDirectoryButton(MediaItem item) {
+    return TextButton(
+      child: Text(
+        t.dialog_directory,
+      ),
+      onPressed: () => executeDirectory(item),
+    );
+  }
+
   /// Goes to Channel page for a YouTube video.
   void executeChannel(MediaItem item) async {
     await PlayerYoutubeSource.instance.showChannelPage(
       appModel: appModel,
       context: context,
       item: item,
+    );
+  }
+
+  /// Opens file picker with directory.
+  void executeDirectory(MediaItem item) async {
+    Navigator.pop(context);
+
+    await PlayerLocalMediaSource.instance.pickVideoFile(
+      appModel: appModel,
+      context: context,
+      ref: ref,
+      pushReplacement: false,
+      directory: Directory(
+        path.dirname(item.mediaIdentifier),
+      ),
     );
   }
 }

@@ -1,7 +1,7 @@
 name: yuuna
 description: A full-featured immersion language learning suite for mobile.
 publish_to: 'none'
-version: 2.6.5+78
+version: 2.6.6+80
 environment:
   sdk: ">=2.17.0 <3.0.0"
 
@@ -31,7 +31,7 @@ dependencies:
   filesystem_picker:
     git:
       url: https://github.com/lrorpilla/filesystem_picker
-      ref: 9b8efe11472314add1e5c590120111c82697a7f4
+      ref: 6c4a39fefad621c8096c277cf275750cad9d8cd0
       path: package
   float_column: ^1.4.1
   flutter:

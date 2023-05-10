@@ -485,14 +485,16 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   /// persists the change in media history.
   void updateHistory() async {
     if (source is PlayerNetworkStreamSource) {
-      ReceiveIntent.setResult(
-        kActivityResultOk,
-        action: 'is.xyz.mpv.MPVActivity.result',
-        data: {
-          'position': _positionNotifier.value.inMilliseconds,
-          'duration': _durationNotifier.value.inMilliseconds,
-        },
-      );
+      if (_positionNotifier.value.inMilliseconds != 0) {
+        ReceiveIntent.setResult(
+          kActivityResultOk,
+          action: 'is.xyz.mpv.MPVActivity.result',
+          data: {
+            'position': _positionNotifier.value.inMilliseconds,
+            'duration': _durationNotifier.value.inMilliseconds,
+          },
+        );
+      }
     }
 
     if (!widget.useHistory) {
@@ -650,7 +652,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         _dragVertical = false;
       },
       onVerticalDragUpdate: (details) async {
-        if (details.delta.dy.abs() > 10) {
+        if (details.delta.dy.abs() > 5) {
           _dragVertical = true;
         }
       },
@@ -720,6 +722,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                 if (_shadowingSubtitle.value != null) {
                   _shadowingSubtitle.value =
                       _subtitleItem.controller.subtitles[index];
+                }
+
+                if (!_playingNotifier.value) {
+                  _playerController.play();
                 }
               },
               onLongPress: (index) async {
