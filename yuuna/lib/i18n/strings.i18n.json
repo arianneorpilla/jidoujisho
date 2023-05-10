@@ -381,8 +381,8 @@
     "google_fonts": "Google Fonts",
     "video_show": "Show video",
     "video_hide": "Hide video",
-    "subtitle_timing_show": "Show subtitle timing",
-    "subtitle_timing_hide": "Hide subtitle timing",
+    "subtitle_timing_show": "Show subtitle timings",
+    "subtitle_timing_hide": "Hide subtitle timings",
     "find_next": "Find Next",
     "find_previous": "Find Previous",
     "retrying_in": {
