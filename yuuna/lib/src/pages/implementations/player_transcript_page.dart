@@ -185,36 +185,39 @@ class _PlayerTranscriptPageState
           return const SizedBox.shrink();
         }
 
-        return FloatingSearchBar(
-          hint: t.search_ellipsis,
-          controller: _searchController,
-          builder: (_, __) => const SizedBox.shrink(),
-          borderRadius: BorderRadius.zero,
-          elevation: 0,
-          backgroundColor: appModel.isDarkMode
-              ? const Color.fromARGB(255, 30, 30, 30)
-              : const Color.fromARGB(255, 229, 229, 229),
-          backdropColor: Colors.transparent,
-          accentColor: theme.colorScheme.primary,
-          scrollPadding: const EdgeInsets.only(top: 6, bottom: 56),
-          transitionDuration: Duration.zero,
-          margins: const EdgeInsets.symmetric(horizontal: 6),
-          width: double.maxFinite,
-          transition: SlideFadeFloatingSearchBarTransition(),
-          automaticallyImplyBackButton: false,
-          onFocusChanged: (focused) {
-            if (!focused) {
-              _searchNotifier.value = false;
-            }
-          },
-          textInputAction: TextInputAction.done,
-          leadingActions: const [
-            Icon(Icons.search, size: 20),
-          ],
-          actions: [
-            buildFindPrevious(),
-            buildFindNext(),
-          ],
+        return SizedBox(
+          height: 48,
+          child: FloatingSearchBar(
+            hint: t.search_ellipsis,
+            controller: _searchController,
+            builder: (_, __) => const SizedBox.shrink(),
+            borderRadius: BorderRadius.zero,
+            elevation: 0,
+            backgroundColor: appModel.isDarkMode
+                ? const Color.fromARGB(255, 30, 30, 30)
+                : const Color.fromARGB(255, 229, 229, 229),
+            backdropColor: Colors.transparent,
+            accentColor: theme.colorScheme.primary,
+            scrollPadding: const EdgeInsets.only(top: 6, bottom: 56),
+            transitionDuration: Duration.zero,
+            margins: const EdgeInsets.symmetric(horizontal: 6),
+            width: double.maxFinite,
+            transition: SlideFadeFloatingSearchBarTransition(),
+            automaticallyImplyBackButton: false,
+            onFocusChanged: (focused) {
+              if (!focused) {
+                _searchNotifier.value = false;
+              }
+            },
+            textInputAction: TextInputAction.done,
+            leadingActions: const [
+              Icon(Icons.search, size: 20),
+            ],
+            actions: [
+              buildFindPrevious(),
+              buildFindNext(),
+            ],
+          ),
         );
       },
     );
