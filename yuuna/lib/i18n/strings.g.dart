@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 364
+/// Strings: 366
 ///
-/// Built on 2023-05-10 at 10:54 UTC
+/// Built on 2023-05-10 at 12:48 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -509,6 +509,8 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get subtitle_timing_hide => 'Hide subtitle timings';
 	String get find_next => 'Find Next';
 	String get find_previous => 'Find Previous';
+	String get shadowing_mode => 'Shadowing Mode';
+	String get display_settings => 'Display Settings';
 	late final _StringsRetryingInEn retrying_in = _StringsRetryingInEn._(_root);
 	late final _StringsViewRepliesEn view_replies = _StringsViewRepliesEn._(_root);
 }
@@ -905,6 +907,8 @@ extension on _StringsEn {
 			case 'subtitle_timing_hide': return 'Hide subtitle timings';
 			case 'find_next': return 'Find Next';
 			case 'find_previous': return 'Find Previous';
+			case 'shadowing_mode': return 'Shadowing Mode';
+			case 'display_settings': return 'Display Settings';
 			case 'retrying_in.seconds': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
 				one: 'Retrying in ${n} second...',
 				other: 'Retrying in ${n} seconds...',

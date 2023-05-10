@@ -285,7 +285,7 @@ class _PlayerTranscriptPageState
     return PopupMenuButton<VoidCallback>(
       splashRadius: 20,
       padding: EdgeInsets.zero,
-      tooltip: t.switch_profiles,
+      tooltip: t.display_settings,
       icon: Icon(
         Icons.display_settings,
         color: theme.iconTheme.color,

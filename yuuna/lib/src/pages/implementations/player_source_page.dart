@@ -1040,18 +1040,21 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         return Material(
           color: Colors.transparent,
           child: InkWell(
-            child: Container(
-              alignment: Alignment.center,
-              height: _menuHeight,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Text(
-                '${getPositionText()} / ${getDurationText()}',
-                style: TextStyle(
-                  color: (shadowingSubtitle != null)
-                      ? Colors.red
-                      : appModel.isDarkMode
-                          ? Colors.white
-                          : Colors.black,
+            child: Tooltip(
+              message: t.shadowing_mode,
+              child: Container(
+                alignment: Alignment.center,
+                height: _menuHeight,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  '${getPositionText()} / ${getDurationText()}',
+                  style: TextStyle(
+                    color: (shadowingSubtitle != null)
+                        ? Colors.red
+                        : appModel.isDarkMode
+                            ? Colors.white
+                            : Colors.black,
+                  ),
                 ),
               ),
             ),

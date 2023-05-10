@@ -385,6 +385,8 @@
     "subtitle_timing_hide": "Hide subtitle timings",
     "find_next": "Find Next",
     "find_previous": "Find Previous",
+    "shadowing_mode": "Shadowing Mode",
+    "display_settings": "Display Settings",
     "retrying_in": {
         "seconds": {
           "one": "Retrying in $n second...",
