@@ -759,7 +759,7 @@ class _PlayerTranscriptPageState
                 const Space.small(),
                 Row(
                   children: [
-                    const Space.extraBig(),
+                    const Space.normal(),
                     Expanded(
                       child: Row(
                         children: [
