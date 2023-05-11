@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="utils library API docs, for the Dart programming language.">
+  <title>utils library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../index.html">yuuna</a></li>
+    <li class="self-crumb">utils library</li>
+  </ol>
+  <div class="self-name">utils</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span class="material-symbols-outlined">
+        brightness_4
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+  <div id="dartdoc-main-content" class="main-content">
+    
+      <div>
+<h1><span class="kind-library">utils</span> library 
+    <a href="https://dart.dev/null-safety" class="feature feature-null-safety" title="Supports the null safety language feature.">Null safety</a>
+ 
+</h1></div>
+
+    
+
+
+    <section class="summary offset-anchor" id="classes">
+      <h2>Classes</h2>
+
+      <dl>
+        <dt id="AppLocaleUtils">
+  <span class="name "><a href="../i18n_strings.g/AppLocaleUtils-class.html">AppLocaleUtils</a></span> 
+
+</dt>
+<dd>
+  Provides utility functions without any side effects.
+</dd>
+
+        <dt id="BaseAppLocale">
+  <span class="name "><a href="https://pub.dev/documentation/slang/3.13.0/api_locale/BaseAppLocale-class.html">BaseAppLocale</a><span class="signature">&lt;<wbr><span class="type-parameter">E extends <a href="https://pub.dev/documentation/slang/3.13.0/api_locale/BaseAppLocale-class.html">BaseAppLocale</a><span class="signature">&lt;<wbr><span class="type-parameter">E</span>, <span class="type-parameter">T</span>&gt;</span></span>, <span class="type-parameter">T extends <a href="https://pub.dev/documentation/slang/3.13.0/api_locale/BaseTranslations-class.html">BaseTranslations</a><span class="signature">&lt;<wbr><span class="type-parameter">E</span>, <span class="type-parameter">T</span>&gt;</span></span>&gt;</span></span> 
+
+</dt>
+<dd>
+  Similar to flutter locale
+but available without any flutter dependencies
+</dd>
+
+        <dt id="BaseAppLocaleUtils">
+  <span class="name "><a href="https://pub.dev/documentation/slang/3.13.0/api_singleton/BaseAppLocaleUtils-class.html">BaseAppLocaleUtils</a><span class="signature">&lt;<wbr><span class="type-parameter">E extends <a href="https://pub.dev/documentation/slang/3.13.0/api_locale/BaseAppLocale-class.html">BaseAppLocale</a><span class="signature">&lt;<wbr><span class="type-parameter">E</span>, <span class="type-parameter">T</span>&gt;</span></span>, <span class="type-parameter">T extends <a href="https://pub.dev/documentation/slang/3.13.0/api_locale/BaseTranslations-class.html">BaseTranslations</a><span class="signature">&lt;<wbr><span class="type-parameter">E</span>, <span class="type-parameter">T</span>&gt;</span></span>&gt;</span></span> 
+
+</dt>
+<dd>
+  Provides utility functions without any side effects.
+</dd>
+
+        <dt id="BaseFlutterLocaleSettings">
+  <span class="name "><a href="https://pub.dev/documentation/slang_flutter/3.13.0/slang_flutter/BaseFlutterLocaleSettings-class.html">BaseFlutterLocaleSettings</a><span class="signature">&lt;<wbr><span class="type-parameter">E extends <a href="https://pub.dev/documentation/slang/3.13.0/api_locale/BaseAppLocale-class.html">BaseAppLocale</a><span class="signature">&lt;<wbr><span class="type-parameter">E</span>, <span class="type-parameter">T</span>&gt;</span></span>, <span class="type-parameter">T extends <a href="https://pub.dev/documentation/slang/3.13.0/api_locale/BaseTranslations-class.html">BaseTranslations</a><span class="signature">&lt;<wbr><span class="type-parameter">E</span>, <span class="type-parameter">T</span>&gt;</span></span>&gt;</span></span> 
+
+</dt>
+<dd>
+  Similar to <a href="https://pub.dev/documentation/slang/3.13.0/api_singleton/BaseLocaleSettings-class.html">BaseLocaleSettings</a> but allows for specific overwrites
+e.g. setLocale now also updates the provider
+</dd>
+
+        <dt id="BaseLocaleSettings">
+  <span class="name "><a href="https://pub.dev/documentation/slang/3.13.0/api_singleton/BaseLocaleSettings-class.html">BaseLocaleSettings</a><span class="signature">&lt;<wbr><span class="type-parameter">E extends <a href="https://pub.dev/documentation/slang/3.13.0/api_locale/BaseAppLocale-class.html">BaseAppLocale</a><span class="signature">&lt;<wbr><span class="type-parameter">E</span>, <span class="type-parameter">T</span>&gt;</span></span>, <span class="type-parameter">T extends <a href="https://pub.dev/documentation/slang/3.13.0/api_locale/BaseTranslations-class.html">BaseTranslations</a><span class="signature">&lt;<wbr><span class="type-parameter">E</span>, <span class="type-parameter">T</span>&gt;</span></span>&gt;</span></span> 
+
+</dt>
+<dd>
+  
+</dd>
+
+        <dt id="BaseTranslationProvider">
+  <span class="name "><a href="https://pub.dev/documentation/slang_flutter/3.13.0/slang_flutter/BaseTranslationProvider-class.html">BaseTranslationProvider</a><span class="signature">&lt;<wbr><span class="type-parameter">E extends <a href="https://pub.dev/documentation/slang/3.13.0/api_locale/BaseAppLocale-class.html">BaseAppLocale</a><span class="signature">&lt;<wbr><span class="type-parameter">E</span>, <span class="type-parameter">T</span>&gt;</span></span>, <span class="type-parameter">T extends <a href="https://pub.dev/documentation/slang/3.13.0/api_locale/BaseTranslations-class.html">BaseTranslations</a><span class="signature">&lt;<wbr><span class="type-parameter">E</span>, <span class="type-parameter">T</span>&gt;</span></span>&gt;</span></span> 
+
+</dt>
+<dd>
+  
+</dd>
+
+        <dt id="BaseTranslations">
+  <span class="name "><a href="https://pub.dev/documentation/slang/3.13.0/api_locale/BaseTranslations-class.html">BaseTranslations</a><span class="signature">&lt;<wbr><span class="type-parameter">E extends <a href="https://pub.dev/documentation/slang/3.13.0/api_locale/BaseAppLocale-class.html">BaseAppLocale</a><span class="signature">&lt;<wbr><span class="type-parameter">E</span>, <span class="type-parameter">T</span>&gt;</span></span>, <span class="type-parameter">T extends <a href="https://pub.dev/documentation/slang/3.13.0/api_locale/BaseTranslations-class.html">BaseTranslations</a><span class="signature">&lt;<wbr><span class="type-parameter">E</span>, <span class="type-parameter">T</span>&gt;</span></span>&gt;</span></span> 
+
+</dt>
+<dd>
+  Root translation class of ONE locale
+Entry point for every translation
+</dd>
+
+        <dt id="BlurOptions">
+  <span class="name "><a href="../utils/BlurOptions-class.html">BlurOptions</a></span> 
+
+</dt>
+<dd>
+  Settings that are persisted for the blur widget used in the player.
+</dd>
+
+        <dt id="CacheImageProvider">
+  <span class="name "><a href="../utils/CacheImageProvider-class.html">CacheImageProvider</a></span> 
+
+</dt>
+<dd>
+  <a href="https://stackoverflow.com/questions/67963713/how-to-cache-memory-image-using-image-memory-or-memoryimage-flutter">https://stackoverflow.com/questions/67963713/how-to-cache-memory-image-using-image-memory-or-memoryimage-flutter</a>
+<a href="https://gist.github.com/darmawan01/9be266df44594ea59f07032e325ffa3b">https://gist.github.com/darmawan01/9be266df44594ea59f07032e325ffa3b</a>
+</dd>
+
+        <dt id="DialogContent">
+  <span class="name "><a href="../utils/DialogContent-class.html">DialogContent</a></span> 
+
+</dt>
+<dd>
+  Text information to show in a dialog.
+</dd>
+
+        <dt id="EnhancementsConverter">
+  <span class="name "><a href="../utils/EnhancementsConverter-class.html">EnhancementsConverter</a></span> 
+
+</dt>
+<dd>
+  A type converter for a general purpose key-value map for conversion to a
+primitive compatible with Isar.
+</dd>
+
+        <dt id="FakeAppLocale">
+  <span class="name "><a href="https://pub.dev/documentation/slang/3.13.0/api_locale/FakeAppLocale-class.html">FakeAppLocale</a></span> 
+
+</dt>
+<dd>
+  
+</dd>
+
+        <dt id="FakeTranslations">
+  <span class="name "><a href="https://pub.dev/documentation/slang/3.13.0/api_locale/FakeTranslations-class.html">FakeTranslations</a></span> 
+
+</dt>
+<dd>
+  
+</dd>
+
+        <dt id="ImmutableStringMapConverter">
+  <span class="name "><a href="../utils/ImmutableStringMapConverter-class.html">ImmutableStringMapConverter</a></span> 
+
+</dt>
+<dd>
+  A type converter for a general purpose key-value map for conversion to a
+primitive compatible with Isar.
+</dd>
+
+        <dt id="InheritedLocaleData">
+  <span class="name "><a href="https://pub.dev/documentation/slang_flutter/3.13.0/slang_flutter/InheritedLocaleData-class.html">InheritedLocaleData</a><span class="signature">&lt;<wbr><span class="type-parameter">E extends <a href="https://pub.dev/documentation/slang/3.13.0/api_locale/BaseAppLocale-class.html">BaseAppLocale</a><span class="signature">&lt;<wbr><span class="type-parameter">E</span>, <span class="type-parameter">T</span>&gt;</span></span>, <span class="type-parameter">T extends <a href="https://pub.dev/documentation/slang/3.13.0/api_locale/BaseTranslations-class.html">BaseTranslations</a><span class="signature">&lt;<wbr><span class="type-parameter">E</span>, <span class="type-parameter">T</span>&gt;</span></span>&gt;</span></span> 
+
+</dt>
+<dd>
+  
+</dd>
+
+        <dt id="JidoujishoAudioHandler">
+  <span class="name "><a href="../utils/JidoujishoAudioHandler-class.html">JidoujishoAudioHandler</a></span> 
+
+</dt>
+<dd>
+  Enables play/pause button to be used with the app.
+</dd>
+
+        <dt id="JidoujishoBottomSheet">
+  <span class="name "><a href="../utils/JidoujishoBottomSheet-class.html">JidoujishoBottomSheet</a></span> 
+
+</dt>
+<dd>
+  
+</dd>
+
+        <dt id="JidoujishoBottomSheetOption">
+  <span class="name "><a href="../utils/JidoujishoBottomSheetOption-class.html">JidoujishoBottomSheetOption</a></span> 
+
+</dt>
+<dd>
+  An option to show in a bottom sheet.
+</dd>
+
+        <dt id="JidoujishoColor">
+  <span class="name "><a href="../utils/JidoujishoColor-class.html">JidoujishoColor</a></span> 
+
+</dt>
+<dd>
+  A class for holding values related to color. Ideally, the application
+should handle all colors with enums stored in this class.
+</dd>
+
+        <dt id="JidoujishoDivider">
+  <span class="name "><a href="../utils/JidoujishoDivider-class.html">JidoujishoDivider</a></span> 
+
+</dt>
+<dd>
+  A standard theme divider for use across the applicaton.
+</dd>
+
+        <dt id="JidoujishoDropdown">
+  <span class="name "><a href="../utils/JidoujishoDropdown-class.html">JidoujishoDropdown</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span></span> 
+
+</dt>
+<dd>
+  A helper for creating a <a href="https://api.flutter.dev/flutter/material/DropdownButton-class.html">DropdownButton</a> styled for the application.
+</dd>
+
+        <dt id="JidoujishoIconButton">
+  <span class="name "><a href="../utils/JidoujishoIconButton-class.html">JidoujishoIconButton</a></span> 
+
+</dt>
+<dd>
+  A button that can be set as busy. When busy, the icon is faded out when its
+<a href="../utils/JidoujishoIconButton/onTap.html">onTap</a> action is on-going and processing, which can be used to
+indicate when a button cannot be pressed once its click action has been
+executed and is busy.
+</dd>
+
+        <dt id="JidoujishoListTile">
+  <span class="name "><a href="../utils/JidoujishoListTile-class.html">JidoujishoListTile</a></span> 
+
+</dt>
+<dd>
+  Used for various dialogs, such as the dictionary, profiles and enhancements
+menus. Used for listing, selecting and reordering items.
+</dd>
+
+        <dt id="JidoujishoLocalisations">
+  <span class="name "><a href="../utils/JidoujishoLocalisations-class.html">JidoujishoLocalisations</a></span> 
+
+</dt>
+<dd>
+  A dedicated store for localised strings for different supported app
+languages.
+</dd>
+
+        <dt id="JidoujishoLyrics">
+  <span class="name "><a href="../utils/JidoujishoLyrics-class.html">JidoujishoLyrics</a></span> 
+
+</dt>
+<dd>
+  Used for searching lyrics.
+</dd>
+
+        <dt id="JidoujishoLyricsParameters">
+  <span class="name "><a href="../utils/JidoujishoLyricsParameters-class.html">JidoujishoLyricsParameters</a></span> 
+
+</dt>
+<dd>
+  Used for searching lyrics.
+</dd>
+
+        <dt id="JidoujishoMarquee">
+  <span class="name "><a href="../utils/JidoujishoMarquee-class.html">JidoujishoMarquee</a></span> 
+
+</dt>
+<dd>
+  Wrapper for a Marquee that only displays the Marquee effect only when there
+is insufficient space, and not all the time. Taken directly from:
+<a href="https://gist.github.com/rtybanana/2b0639052cd5bfd701b8d892f2d1088b">https://gist.github.com/rtybanana/2b0639052cd5bfd701b8d892f2d1088b</a>
+<a href="https://github.com/MarcelGarus/marquee/issues/36">https://github.com/MarcelGarus/marquee/issues/36</a>
+</dd>
+
+        <dt id="JidoujishoPlaceholderMessage">
+  <span class="name "><a href="../utils/JidoujishoPlaceholderMessage-class.html">JidoujishoPlaceholderMessage</a></span> 
+
+</dt>
+<dd>
+  Used to show information or error messages across the application.
+For example, this is used for the empty placeholder messages on the home
+tabs when there are no media item entries in them.
+</dd>
+
+        <dt id="JidoujishoSearchHistory">
+  <span class="name "><a href="../utils/JidoujishoSearchHistory-class.html">JidoujishoSearchHistory</a></span> 
+
+</dt>
+<dd>
+  Used in a floating search bar body for showing search history items for
+a certain collection named <a href="../utils/JidoujishoSearchHistory/uniqueKey.html">uniqueKey</a>.
+</dd>
+
+        <dt id="JidoujishoSelectableText">
+  <span class="name "><a href="../utils/JidoujishoSelectableText-class.html">JidoujishoSelectableText</a></span> 
+
+</dt>
+<dd>
+  A run of selectable text with a single style.
+</dd>
+
+        <dt id="JidoujishoSelectableTextController">
+  <span class="name "><a href="../utils/JidoujishoSelectableTextController-class.html">JidoujishoSelectableTextController</a></span> 
+
+</dt>
+<dd>
+  A class to handle text selection programmatically for the <a href="../utils/JidoujishoSelectableText-class.html">JidoujishoSelectableText</a>
+widget.
+</dd>
+
+        <dt id="JidoujishoSelectionToolbar">
+  <span class="name "><a href="../utils/JidoujishoSelectionToolbar-class.html">JidoujishoSelectionToolbar</a></span> 
+
+</dt>
+<dd>
+  A toolbar that allows a custom button to be shown when selecting text.
+</dd>
+
+        <dt id="JidoujishoTag">
+  <span class="name "><a href="../utils/JidoujishoTag-class.html">JidoujishoTag</a></span> 
+
+</dt>
+<dd>
+  A tag that can be clicked on for more information. Used in dictionary
+entries to indicate information about a definition or term.
+</dd>
+
+        <dt id="JidoujishoTappableText">
+  <span class="name "><a href="../utils/JidoujishoTappableText-class.html">JidoujishoTappableText</a></span> 
+
+</dt>
+<dd>
+  Text that can be reselected and resizes to the text selection to the best
+dictionary match.
+</dd>
+
+        <dt id="JidoujishoTextSelectionControls">
+  <span class="name "><a href="../utils/JidoujishoTextSelectionControls-class.html">JidoujishoTextSelectionControls</a></span> 
+
+</dt>
+<dd>
+  Defined on <a href="https://api.flutter.dev/flutter/material/SelectableText-class.html">SelectableText</a> objects to allow for a custom action when
+selecting text.
+</dd>
+
+        <dt id="JidoujishoTimeFormat">
+  <span class="name "><a href="../utils/JidoujishoTimeFormat-class.html">JidoujishoTimeFormat</a></span> 
+
+</dt>
+<dd>
+  Used for formatting time-related strings.
+</dd>
+
+        <dt id="LocaleSettings">
+  <span class="name "><a href="../i18n_strings.g/LocaleSettings-class.html">LocaleSettings</a></span> 
+
+</dt>
+<dd>
+  Manages all translation instances and the current locale
+</dd>
+
+        <dt id="ManipulatingBall">
+  <span class="name "><a href="../utils/ManipulatingBall-class.html">ManipulatingBall</a></span> 
+
+</dt>
+<dd>
+  Used for balls used to resize the <a href="../utils/ResizeableWidget-class.html">ResizeableWidget</a>.
+</dd>
+
+        <dt id="MediaItemConverter">
+  <span class="name "><a href="../utils/MediaItemConverter-class.html">MediaItemConverter</a></span> 
+
+</dt>
+<dd>
+  A type converter for <a href="../media/MediaItem-class.html">MediaItem</a>.
+</dd>
+
+        <dt id="MessageItem">
+  <span class="name "><a href="../utils/MessageItem-class.html">MessageItem</a></span> 
+
+</dt>
+<dd>
+  Used to allow persistence of a message from ChatGPT.
+</dd>
+
+        <dt id="MokuroBlock">
+  <span class="name "><a href="../utils/MokuroBlock-class.html">MokuroBlock</a></span> 
+
+</dt>
+<dd>
+  Coordinate information for a single group of text that can have multiple
+lines.
+</dd>
+
+        <dt id="MokuroCatalog">
+  <span class="name "><a href="../utils/MokuroCatalog-class.html">MokuroCatalog</a></span> 
+
+</dt>
+<dd>
+  Used to persist online catalogs of Mokuro manga.
+</dd>
+
+        <dt id="MokuroImage">
+  <span class="name "><a href="../utils/MokuroImage-class.html">MokuroImage</a></span> 
+
+</dt>
+<dd>
+  Contains all information needed to render an image, including any text
+coordinate information and the display image itself.
+</dd>
+
+        <dt id="MokuroPayload">
+  <span class="name "><a href="../utils/MokuroPayload-class.html">MokuroPayload</a></span> 
+
+</dt>
+<dd>
+  Parameters that define a series of images and metadata about each image.
+</dd>
+
+        <dt id="PlayerPayload">
+  <span class="name "><a href="../utils/PlayerPayload-class.html">PlayerPayload</a></span> 
+
+</dt>
+<dd>
+  A class that bundles together necessary entities for using the player.
+</dd>
+
+        <dt id="PluralResolvers">
+  <span class="name "><a href="https://pub.dev/documentation/slang/3.13.0/api_pluralization/PluralResolvers-class.html">PluralResolvers</a></span> 
+
+</dt>
+<dd>
+  Default plural resolvers
+</dd>
+
+        <dt id="QuickActionsConverter">
+  <span class="name "><a href="../utils/QuickActionsConverter-class.html">QuickActionsConverter</a></span> 
+
+</dt>
+<dd>
+  A type converter for a general purpose key-value map for conversion to a
+primitive compatible with Isar.
+</dd>
+
+        <dt id="ResizeableWidget">
+  <span class="name "><a href="../utils/ResizeableWidget-class.html">ResizeableWidget</a></span> 
+
+</dt>
+<dd>
+  Blur widget used in the player.
+</dd>
+
+        <dt id="RichPluralResolvers">
+  <span class="name "><a href="https://pub.dev/documentation/slang_flutter/3.13.0/slang_flutter/RichPluralResolvers-class.html">RichPluralResolvers</a></span> 
+
+</dt>
+<dd>
+  Rich plural resolvers
+</dd>
+
+        <dt id="SubtitleItem">
+  <span class="name "><a href="../utils/SubtitleItem-class.html">SubtitleItem</a></span> 
+
+</dt>
+<dd>
+  Represents subtitles that can be used in the player.
+</dd>
+
+        <dt id="SubtitleOptions">
+  <span class="name "><a href="../utils/SubtitleOptions-class.html">SubtitleOptions</a></span> 
+
+</dt>
+<dd>
+  Settings that are persisted for the blur widget used in the player.
+</dd>
+
+        <dt id="SubtitleUtils">
+  <span class="name "><a href="../utils/SubtitleUtils-class.html">SubtitleUtils</a></span> 
+
+</dt>
+<dd>
+  A class for calling subtitle utility functions.
+</dd>
+
+        <dt id="TranslationMetadata">
+  <span class="name "><a href="https://pub.dev/documentation/slang/3.13.0/api_locale/TranslationMetadata-class.html">TranslationMetadata</a><span class="signature">&lt;<wbr><span class="type-parameter">E extends <a href="https://pub.dev/documentation/slang/3.13.0/api_locale/BaseAppLocale-class.html">BaseAppLocale</a><span class="signature">&lt;<wbr><span class="type-parameter">E</span>, <span class="type-parameter">T</span>&gt;</span></span>, <span class="type-parameter">T extends <a href="https://pub.dev/documentation/slang/3.13.0/api_locale/BaseTranslations-class.html">BaseTranslations</a><span class="signature">&lt;<wbr><span class="type-parameter">E</span>, <span class="type-parameter">T</span>&gt;</span></span>&gt;</span></span> 
+
+</dt>
+<dd>
+  Metadata instance hold by the root translation class.
+</dd>
+
+        <dt id="TranslationOverridesFlutter">
+  <span class="name "><a href="https://pub.dev/documentation/slang_flutter/3.13.0/slang_flutter/TranslationOverridesFlutter-class.html">TranslationOverridesFlutter</a></span> 
+
+</dt>
+<dd>
+  
+</dd>
+
+        <dt id="TranslationProvider">
+  <span class="name "><a href="../i18n_strings.g/TranslationProvider-class.html">TranslationProvider</a></span> 
+
+</dt>
+<dd>
+  The provider for method B
+</dd>
+
+        <dt id="Translations">
+  <span class="name "><a href="../i18n_strings.g/Translations-class.html">Translations</a></span> 
+
+</dt>
+<dd>
+  Method B: Advanced
+</dd>
+
+      </dl>
+    </section>
+
+
+    <section class="summary offset-anchor" id="extensions">
+      <h2>Extensions</h2>
+
+      <dl>
+        <dt id="AppLocaleUtilsExt">
+    <span class="name "><a href="https://pub.dev/documentation/slang/3.13.0/api_singleton/AppLocaleUtilsExt.html">AppLocaleUtilsExt</a></span> 
+
+</dt>
+<dd>
+    
+</dd>
+
+
+        <dt id="BuildContextTranslationsExtension">
+    <span class="name "><a href="../i18n_strings.g/BuildContextTranslationsExtension.html">BuildContextTranslationsExtension</a></span> 
+
+</dt>
+<dd>
+    Method B shorthand via <a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a> extension method.
+Configurable via 'translate_var'.
+</dd>
+
+
+        <dt id="ExtAppLocale">
+    <span class="name "><a href="https://pub.dev/documentation/slang_flutter/3.13.0/slang_flutter/ExtAppLocale.html">ExtAppLocale</a></span> 
+
+</dt>
+<dd>
+    
+</dd>
+
+
+        <dt id="ExtAppLocaleUtils">
+    <span class="name "><a href="https://pub.dev/documentation/slang_flutter/3.13.0/slang_flutter/ExtAppLocaleUtils.html">ExtAppLocaleUtils</a></span> 
+
+</dt>
+<dd>
+    
+</dd>
+
+
+        <dt id="ExtBaseLocaleSettings">
+    <span class="name "><a href="https://pub.dev/documentation/slang_flutter/3.13.0/slang_flutter/ExtBaseLocaleSettings.html">ExtBaseLocaleSettings</a></span> 
+
+</dt>
+<dd>
+    
+</dd>
+
+
+        <dt id="GetMessageItemCollection">
+    <span class="name "><a href="../utils/GetMessageItemCollection.html">GetMessageItemCollection</a></span> 
+
+</dt>
+<dd>
+    
+</dd>
+
+
+        <dt id="GetMokuroCatalogCollection">
+    <span class="name "><a href="../utils/GetMokuroCatalogCollection.html">GetMokuroCatalogCollection</a></span> 
+
+</dt>
+<dd>
+    
+</dd>
+
+
+        <dt id="LocaleSettingsExt">
+    <span class="name "><a href="https://pub.dev/documentation/slang/3.13.0/api_singleton/LocaleSettingsExt.html">LocaleSettingsExt</a></span> 
+
+</dt>
+<dd>
+    
+</dd>
+
+
+        <dt id="MessageItemQueryFilter">
+    <span class="name "><a href="../utils/MessageItemQueryFilter.html">MessageItemQueryFilter</a></span> 
+
+</dt>
+<dd>
+    
+</dd>
+
+
+        <dt id="MessageItemQueryLinks">
+    <span class="name "><a href="../utils/MessageItemQueryLinks.html">MessageItemQueryLinks</a></span> 
+
+</dt>
+<dd>
+    
+</dd>
+
+
+        <dt id="MessageItemQueryObject">
+    <span class="name "><a href="../utils/MessageItemQueryObject.html">MessageItemQueryObject</a></span> 
+
+</dt>
+<dd>
+    
+</dd>
+
+
+        <dt id="MessageItemQueryProperty">
+    <span class="name "><a href="../utils/MessageItemQueryProperty.html">MessageItemQueryProperty</a></span> 
+
+</dt>
+<dd>
+    
+</dd>
+
+
+        <dt id="MessageItemQuerySortBy">
+    <span class="name "><a href="../utils/MessageItemQuerySortBy.html">MessageItemQuerySortBy</a></span> 
+
+</dt>
+<dd>
+    
+</dd>
+
+
+        <dt id="MessageItemQuerySortThenBy">
+    <span class="name "><a href="../utils/MessageItemQuerySortThenBy.html">MessageItemQuerySortThenBy</a></span> 
+
+</dt>
+<dd>
+    
+</dd>
+
+
+        <dt id="MessageItemQueryWhere">
+    <span class="name "><a href="../utils/MessageItemQueryWhere.html">MessageItemQueryWhere</a></span> 
+
+</dt>
+<dd>
+    
+</dd>
+
+
+        <dt id="MessageItemQueryWhereDistinct">
+    <span class="name "><a href="../utils/MessageItemQueryWhereDistinct.html">MessageItemQueryWhereDistinct</a></span> 
+
+</dt>
+<dd>
+    
+</dd>
+
+
+        <dt id="MessageItemQueryWhereSort">
+    <span class="name "><a href="../utils/MessageItemQueryWhereSort.html">MessageItemQueryWhereSort</a></span> 
+
+</dt>
+<dd>
+    
+</dd>
+
+
+        <dt id="MokuroCatalogByIndex">
+    <span class="name "><a href="../utils/MokuroCatalogByIndex.html">MokuroCatalogByIndex</a></span> 
+
+</dt>
+<dd>
+    
+</dd>
+
+
+        <dt id="MokuroCatalogQueryFilter">
+    <span class="name "><a href="../utils/MokuroCatalogQueryFilter.html">MokuroCatalogQueryFilter</a></span> 
+
+</dt>
+<dd>
+    
+</dd>
+
+
+        <dt id="MokuroCatalogQueryLinks">
+    <span class="name "><a href="../utils/MokuroCatalogQueryLinks.html">MokuroCatalogQueryLinks</a></span> 
+
+</dt>
+<dd>
+    
+</dd>
+
+
+        <dt id="MokuroCatalogQueryObject">
+    <span class="name "><a href="../utils/MokuroCatalogQueryObject.html">MokuroCatalogQueryObject</a></span> 
+
+</dt>
+<dd>
+    
+</dd>
+
+
+        <dt id="MokuroCatalogQueryProperty">
+    <span class="name "><a href="../utils/MokuroCatalogQueryProperty.html">MokuroCatalogQueryProperty</a></span> 
+
+</dt>
+<dd>
+    
+</dd>
+
+
+        <dt id="MokuroCatalogQuerySortBy">
+    <span class="name "><a href="../utils/MokuroCatalogQuerySortBy.html">MokuroCatalogQuerySortBy</a></span> 
+
+</dt>
+<dd>
+    
+</dd>
+
+
+        <dt id="MokuroCatalogQuerySortThenBy">
+    <span class="name "><a href="../utils/MokuroCatalogQuerySortThenBy.html">MokuroCatalogQuerySortThenBy</a></span> 
+
+</dt>
+<dd>
+    
+</dd>
+
+
+        <dt id="MokuroCatalogQueryWhere">
+    <span class="name "><a href="../utils/MokuroCatalogQueryWhere.html">MokuroCatalogQueryWhere</a></span> 
+
+</dt>
+<dd>
+    
+</dd>
+
+
+        <dt id="MokuroCatalogQueryWhereDistinct">
+    <span class="name "><a href="../utils/MokuroCatalogQueryWhereDistinct.html">MokuroCatalogQueryWhereDistinct</a></span> 
+
+</dt>
+<dd>
+    
+</dd>
+
+
+        <dt id="MokuroCatalogQueryWhereSort">
+    <span class="name "><a href="../utils/MokuroCatalogQueryWhereSort.html">MokuroCatalogQueryWhereSort</a></span> 
+
+</dt>
+<dd>
+    
+</dd>
+
+
+        <dt id="VideoQualityIcon">
+    <span class="name "><a href="../utils/VideoQualityIcon.html">VideoQualityIcon</a></span> 
+
+</dt>
+<dd>
+    Extension for the <a href="https://pub.dev/documentation/youtube_explode_dart/1.12.4/youtube_explode/VideoQuality.html">VideoQuality</a> class.
+</dd>
+
+
+      </dl>
+    </section>
+
+    <section class="summary offset-anchor" id="constants">
+      <h2>Constants</h2>
+
+      <dl class="properties">
+        <dt id="iOSHorizontalOffset" class="constant">
+    <span class="name "><a href="../utils/iOSHorizontalOffset-constant.html">iOSHorizontalOffset</a></span>
+  <span class="signature">&#8594; const <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>
+  
+
+</dt>
+<dd>
+  An eyeballed value that moves the cursor slightly left of where it is
+rendered for text on Android so its positioning more accurately matches the
+native iOS text cursor positioning.
+  
+
+    <div>
+      <span class="signature"><code>-2</code></span>
+    </div>
+</dd>
+
+        <dt id="MessageItemSchema" class="constant">
+    <span class="name "><a href="../utils/MessageItemSchema-constant.html">MessageItemSchema</a></span>
+  <span class="signature">&#8594; const <a href="https://pub.dev/documentation/isar/3.1.0+1/isar/CollectionSchema-class.html">CollectionSchema</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../utils/MessageItem-class.html">MessageItem</a></span>&gt;</span></span>
+  
+
+</dt>
+<dd>
+  
+  
+
+    <div>
+      <span class="signature"><code>CollectionSchema(name: r&#39;MessageItem&#39;, id: -5146512751102916430, properties: {r&#39;isBot&#39; : PropertySchema(id: 0, name: r&#39;isBot&#39;, type: IsarType.bool), r&#39;message&#39; : Proper…</code></span>
+    </div>
+</dd>
+
+        <dt id="MokuroCatalogSchema" class="constant">
+    <span class="name "><a href="../utils/MokuroCatalogSchema-constant.html">MokuroCatalogSchema</a></span>
+  <span class="signature">&#8594; const <a href="https://pub.dev/documentation/isar/3.1.0+1/isar/CollectionSchema-class.html">CollectionSchema</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../utils/MokuroCatalog-class.html">MokuroCatalog</a></span>&gt;</span></span>
+  
+
+</dt>
+<dd>
+  
+  
+
+    <div>
+      <span class="signature"><code>CollectionSchema(name: r&#39;MokuroCatalog&#39;, id: 1045304690416343370, properties: {r&#39;hashCode&#39; : PropertySchema(id: 0, name: r&#39;hashCode&#39;, type: IsarType.long), r&#39;name&#39; : Pr…</code></span>
+    </div>
+</dd>
+
+      </dl>
+    </section>
+
+    <section class="summary offset-anchor" id="properties">
+      <h2>Properties</h2>
+
+      <dl class="properties">
+        <dt id="t" class="property">
+  <span class="name"><a href="../i18n_strings.g/t.html">t</a></span>
+  <span class="signature">&#8594; _StringsEn</span> 
+
+</dt>
+<dd>
+  Method A: Simple
+  <div class="features"><span class="feature">read-only</span></div>
+
+</dd>
+
+      </dl>
+    </section>
+
+
+    <section class="summary offset-anchor" id="enums">
+      <h2>Enums</h2>
+
+      <dl>
+        <dt id="AppLocale">
+  <span class="name "><a href="../i18n_strings.g/AppLocale.html">AppLocale</a></span> 
+
+</dt>
+<dd>
+  Supported locales, see extension methods below.
+</dd>
+
+        <dt id="JidoujishoPopupPosition">
+  <span class="name "><a href="../utils/JidoujishoPopupPosition.html">JidoujishoPopupPosition</a></span> 
+
+</dt>
+<dd>
+  Configurations for how the dictionary pop-up may be shown.
+</dd>
+
+        <dt id="SubtitleItemType">
+  <span class="name "><a href="../utils/SubtitleItemType.html">SubtitleItemType</a></span> 
+
+</dt>
+<dd>
+  Differentiates different types of <a href="../utils/SubtitleItem-class.html">SubtitleItem</a>.
+</dd>
+
+      </dl>
+    </section>
+
+    <section class="summary offset-anchor" id="typedefs">
+      <h2>Typedefs</h2>
+
+      <dl>
+          
+  <dt id="InlineSpanBuilder" class="callable">
+    <span class="name"><a href="https://pub.dev/documentation/slang_flutter/3.13.0/slang_flutter/InlineSpanBuilder.html">InlineSpanBuilder</a></span><span class="signature">
+      <span class="returntype parameter">= <a href="https://api.flutter.dev/flutter/painting/InlineSpan-class.html">InlineSpan</a> Function<span class="signature">(<span class="parameter" id="param-"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span></span>)</span></span>
+    </span>
+    
+
+  </dt>
+  <dd>
+    
+    
+
+  </dd>
+
+          
+  <dt id="OffsetValue" class="callable">
+    <span class="name"><a href="../utils/OffsetValue.html">OffsetValue</a></span><span class="signature">
+      <span class="returntype parameter">= void Function<span class="signature">(<span class="parameter" id="param-start"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">start</span>, </span><span class="parameter" id="param-end"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">end</span></span>)</span></span>
+    </span>
+    
+
+  </dt>
+  <dd>
+    Used for handling text selection.
+    
+
+  </dd>
+
+          
+  <dt id="PluralResolver" class="callable">
+    <span class="name"><a href="https://pub.dev/documentation/slang/3.13.0/api_pluralization/PluralResolver.html">PluralResolver</a></span><span class="signature">
+      <span class="returntype parameter">= <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a> Function<span class="signature">(<span class="parameter" id="param-n"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/num-class.html">num</a></span> <span class="parameter-name">n</span>, </span><span class="parameter" id="param-few">{<span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">few</span>, </span><span class="parameter" id="param-many"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">many</span>, </span><span class="parameter" id="param-one"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">one</span>, </span><span class="parameter" id="param-other"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">other</span>, </span><span class="parameter" id="param-two"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">two</span>, </span><span class="parameter" id="param-zero"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">zero</span>}</span>)</span></span>
+    </span>
+    
+
+  </dt>
+  <dd>
+    Selects the correct string depending on <code>n</code>
+    
+
+  </dd>
+
+          
+  <dt id="TranslationBuilder" class="callable">
+    <span class="name"><a href="https://pub.dev/documentation/slang/3.13.0/api_locale/TranslationBuilder.html">TranslationBuilder</a></span>&lt;<wbr><span class="type-parameter">E extends <a href="https://pub.dev/documentation/slang/3.13.0/api_locale/BaseAppLocale-class.html">BaseAppLocale</a><span class="signature">&lt;<wbr><span class="type-parameter">E</span>, <span class="type-parameter">T</span>&gt;</span></span>, <span class="type-parameter">T extends <a href="https://pub.dev/documentation/slang/3.13.0/api_locale/BaseTranslations-class.html">BaseTranslations</a><span class="signature">&lt;<wbr><span class="type-parameter">E</span>, <span class="type-parameter">T</span>&gt;</span></span>&gt;<span class="signature">
+      <span class="returntype parameter">= T Function<span class="signature">(<span class="parameter" id="param-cardinalResolver">{<span class="type-annotation"><a href="https://pub.dev/documentation/slang/3.13.0/api_pluralization/PluralResolver.html">PluralResolver</a>?</span> <span class="parameter-name">cardinalResolver</span>, </span><span class="parameter" id="param-ordinalResolver"><span class="type-annotation"><a href="https://pub.dev/documentation/slang/3.13.0/api_pluralization/PluralResolver.html">PluralResolver</a>?</span> <span class="parameter-name">ordinalResolver</span>, </span><span class="parameter" id="param-overrides"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter"><a href="https://pub.dev/documentation/slang/3.13.0/builder_model_node/Node-class.html">Node</a></span>&gt;</span>?</span> <span class="parameter-name">overrides</span>}</span>)</span></span>
+    </span>
+    
+
+  </dt>
+  <dd>
+    Returns a new translation instance
+    
+
+  </dd>
+
+      </dl>
+    </section>
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+  <li><a href="../index.html">yuuna</a></li>
+  <li class="self-crumb">utils library</li>
+</ol>
+
+
+    <h5><span class="package-name">yuuna</span> <span class="package-kind">package</span></h5>
+    <ol>
+      <li class="section-title">Libraries</li>
+      <li><a href="../creator/creator-library.html">creator</a></li>
+      <li><a href="../dictionary/dictionary-library.html">dictionary</a></li>
+      <li><a href="../language/language-library.html">language</a></li>
+      <li><a href="../main/main-library.html">main</a></li>
+      <li><a href="../media/media-library.html">media</a></li>
+      <li><a href="../models/models-library.html">models</a></li>
+      <li><a href="../pages/pages-library.html">pages</a></li>
+      <li><a href="../i18n_strings.g/i18n_strings.g-library.html">strings.g</a></li>
+      <li><a href="../utils/utils-library.html">utils</a></li>
+</ol>
+
+  </div>
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+    <h5>utils library</h5>
+    <ol>
+      <li class="section-title"><a href="../utils/utils-library.html#classes">Classes</a></li>
+        <li><a href="../i18n_strings.g/AppLocaleUtils-class.html">AppLocaleUtils</a></li>
+        <li><a href="https://pub.dev/documentation/slang/3.13.0/api_locale/BaseAppLocale-class.html">BaseAppLocale</a></li>
+        <li><a href="https://pub.dev/documentation/slang/3.13.0/api_singleton/BaseAppLocaleUtils-class.html">BaseAppLocaleUtils</a></li>
+        <li><a href="https://pub.dev/documentation/slang_flutter/3.13.0/slang_flutter/BaseFlutterLocaleSettings-class.html">BaseFlutterLocaleSettings</a></li>
+        <li><a href="https://pub.dev/documentation/slang/3.13.0/api_singleton/BaseLocaleSettings-class.html">BaseLocaleSettings</a></li>
+        <li><a href="https://pub.dev/documentation/slang_flutter/3.13.0/slang_flutter/BaseTranslationProvider-class.html">BaseTranslationProvider</a></li>
+        <li><a href="https://pub.dev/documentation/slang/3.13.0/api_locale/BaseTranslations-class.html">BaseTranslations</a></li>
+        <li><a href="../utils/BlurOptions-class.html">BlurOptions</a></li>
+        <li><a href="../utils/CacheImageProvider-class.html">CacheImageProvider</a></li>
+        <li><a href="../utils/DialogContent-class.html">DialogContent</a></li>
+        <li><a href="../utils/EnhancementsConverter-class.html">EnhancementsConverter</a></li>
+        <li><a href="https://pub.dev/documentation/slang/3.13.0/api_locale/FakeAppLocale-class.html">FakeAppLocale</a></li>
+        <li><a href="https://pub.dev/documentation/slang/3.13.0/api_locale/FakeTranslations-class.html">FakeTranslations</a></li>
+        <li><a href="../utils/ImmutableStringMapConverter-class.html">ImmutableStringMapConverter</a></li>
+        <li><a href="https://pub.dev/documentation/slang_flutter/3.13.0/slang_flutter/InheritedLocaleData-class.html">InheritedLocaleData</a></li>
+        <li><a href="../utils/JidoujishoAudioHandler-class.html">JidoujishoAudioHandler</a></li>
+        <li><a href="../utils/JidoujishoBottomSheet-class.html">JidoujishoBottomSheet</a></li>
+        <li><a href="../utils/JidoujishoBottomSheetOption-class.html">JidoujishoBottomSheetOption</a></li>
+        <li><a href="../utils/JidoujishoColor-class.html">JidoujishoColor</a></li>
+        <li><a href="../utils/JidoujishoDivider-class.html">JidoujishoDivider</a></li>
+        <li><a href="../utils/JidoujishoDropdown-class.html">JidoujishoDropdown</a></li>
+        <li><a href="../utils/JidoujishoIconButton-class.html">JidoujishoIconButton</a></li>
+        <li><a href="../utils/JidoujishoListTile-class.html">JidoujishoListTile</a></li>
+        <li><a href="../utils/JidoujishoLocalisations-class.html">JidoujishoLocalisations</a></li>
+        <li><a href="../utils/JidoujishoLyrics-class.html">JidoujishoLyrics</a></li>
+        <li><a href="../utils/JidoujishoLyricsParameters-class.html">JidoujishoLyricsParameters</a></li>
+        <li><a href="../utils/JidoujishoMarquee-class.html">JidoujishoMarquee</a></li>
+        <li><a href="../utils/JidoujishoPlaceholderMessage-class.html">JidoujishoPlaceholderMessage</a></li>
+        <li><a href="../utils/JidoujishoSearchHistory-class.html">JidoujishoSearchHistory</a></li>
+        <li><a href="../utils/JidoujishoSelectableText-class.html">JidoujishoSelectableText</a></li>
+        <li><a href="../utils/JidoujishoSelectableTextController-class.html">JidoujishoSelectableTextController</a></li>
+        <li><a href="../utils/JidoujishoSelectionToolbar-class.html">JidoujishoSelectionToolbar</a></li>
+        <li><a href="../utils/JidoujishoTag-class.html">JidoujishoTag</a></li>
+        <li><a href="../utils/JidoujishoTappableText-class.html">JidoujishoTappableText</a></li>
+        <li><a href="../utils/JidoujishoTextSelectionControls-class.html">JidoujishoTextSelectionControls</a></li>
+        <li><a href="../utils/JidoujishoTimeFormat-class.html">JidoujishoTimeFormat</a></li>
+        <li><a href="../i18n_strings.g/LocaleSettings-class.html">LocaleSettings</a></li>
+        <li><a href="../utils/ManipulatingBall-class.html">ManipulatingBall</a></li>
+        <li><a href="../utils/MediaItemConverter-class.html">MediaItemConverter</a></li>
+        <li><a href="../utils/MessageItem-class.html">MessageItem</a></li>
+        <li><a href="../utils/MokuroBlock-class.html">MokuroBlock</a></li>
+        <li><a href="../utils/MokuroCatalog-class.html">MokuroCatalog</a></li>
+        <li><a href="../utils/MokuroImage-class.html">MokuroImage</a></li>
+        <li><a href="../utils/MokuroPayload-class.html">MokuroPayload</a></li>
+        <li><a href="../utils/PlayerPayload-class.html">PlayerPayload</a></li>
+        <li><a href="https://pub.dev/documentation/slang/3.13.0/api_pluralization/PluralResolvers-class.html">PluralResolvers</a></li>
+        <li><a href="../utils/QuickActionsConverter-class.html">QuickActionsConverter</a></li>
+        <li><a href="../utils/ResizeableWidget-class.html">ResizeableWidget</a></li>
+        <li><a href="https://pub.dev/documentation/slang_flutter/3.13.0/slang_flutter/RichPluralResolvers-class.html">RichPluralResolvers</a></li>
+        <li><a href="../utils/SubtitleItem-class.html">SubtitleItem</a></li>
+        <li><a href="../utils/SubtitleOptions-class.html">SubtitleOptions</a></li>
+        <li><a href="../utils/SubtitleUtils-class.html">SubtitleUtils</a></li>
+        <li><a href="https://pub.dev/documentation/slang/3.13.0/api_locale/TranslationMetadata-class.html">TranslationMetadata</a></li>
+        <li><a href="https://pub.dev/documentation/slang_flutter/3.13.0/slang_flutter/TranslationOverridesFlutter-class.html">TranslationOverridesFlutter</a></li>
+        <li><a href="../i18n_strings.g/TranslationProvider-class.html">TranslationProvider</a></li>
+        <li><a href="../i18n_strings.g/Translations-class.html">Translations</a></li>
+
+      <li class="section-title"><a href="../utils/utils-library.html#extensions">Extensions</a></li>
+        <li><a href="https://pub.dev/documentation/slang/3.13.0/api_singleton/AppLocaleUtilsExt.html">AppLocaleUtilsExt</a></li>
+        <li><a href="../i18n_strings.g/BuildContextTranslationsExtension.html">BuildContextTranslationsExtension</a></li>
+        <li><a href="https://pub.dev/documentation/slang_flutter/3.13.0/slang_flutter/ExtAppLocale.html">ExtAppLocale</a></li>
+        <li><a href="https://pub.dev/documentation/slang_flutter/3.13.0/slang_flutter/ExtAppLocaleUtils.html">ExtAppLocaleUtils</a></li>
+        <li><a href="https://pub.dev/documentation/slang_flutter/3.13.0/slang_flutter/ExtBaseLocaleSettings.html">ExtBaseLocaleSettings</a></li>
+        <li><a href="../utils/GetMessageItemCollection.html">GetMessageItemCollection</a></li>
+        <li><a href="../utils/GetMokuroCatalogCollection.html">GetMokuroCatalogCollection</a></li>
+        <li><a href="https://pub.dev/documentation/slang/3.13.0/api_singleton/LocaleSettingsExt.html">LocaleSettingsExt</a></li>
+        <li><a href="../utils/MessageItemQueryFilter.html">MessageItemQueryFilter</a></li>
+        <li><a href="../utils/MessageItemQueryLinks.html">MessageItemQueryLinks</a></li>
+        <li><a href="../utils/MessageItemQueryObject.html">MessageItemQueryObject</a></li>
+        <li><a href="../utils/MessageItemQueryProperty.html">MessageItemQueryProperty</a></li>
+        <li><a href="../utils/MessageItemQuerySortBy.html">MessageItemQuerySortBy</a></li>
+        <li><a href="../utils/MessageItemQuerySortThenBy.html">MessageItemQuerySortThenBy</a></li>
+        <li><a href="../utils/MessageItemQueryWhere.html">MessageItemQueryWhere</a></li>
+        <li><a href="../utils/MessageItemQueryWhereDistinct.html">MessageItemQueryWhereDistinct</a></li>
+        <li><a href="../utils/MessageItemQueryWhereSort.html">MessageItemQueryWhereSort</a></li>
+        <li><a href="../utils/MokuroCatalogByIndex.html">MokuroCatalogByIndex</a></li>
+        <li><a href="../utils/MokuroCatalogQueryFilter.html">MokuroCatalogQueryFilter</a></li>
+        <li><a href="../utils/MokuroCatalogQueryLinks.html">MokuroCatalogQueryLinks</a></li>
+        <li><a href="../utils/MokuroCatalogQueryObject.html">MokuroCatalogQueryObject</a></li>
+        <li><a href="../utils/MokuroCatalogQueryProperty.html">MokuroCatalogQueryProperty</a></li>
+        <li><a href="../utils/MokuroCatalogQuerySortBy.html">MokuroCatalogQuerySortBy</a></li>
+        <li><a href="../utils/MokuroCatalogQuerySortThenBy.html">MokuroCatalogQuerySortThenBy</a></li>
+        <li><a href="../utils/MokuroCatalogQueryWhere.html">MokuroCatalogQueryWhere</a></li>
+        <li><a href="../utils/MokuroCatalogQueryWhereDistinct.html">MokuroCatalogQueryWhereDistinct</a></li>
+        <li><a href="../utils/MokuroCatalogQueryWhereSort.html">MokuroCatalogQueryWhereSort</a></li>
+        <li><a href="../utils/VideoQualityIcon.html">VideoQualityIcon</a></li>
+
+
+      <li class="section-title"><a href="../utils/utils-library.html#constants">Constants</a></li>
+        <li><a href="../utils/iOSHorizontalOffset-constant.html">iOSHorizontalOffset</a></li>
+        <li><a href="../utils/MessageItemSchema-constant.html">MessageItemSchema</a></li>
+        <li><a href="../utils/MokuroCatalogSchema-constant.html">MokuroCatalogSchema</a></li>
+
+      <li class="section-title"><a href="../utils/utils-library.html#properties">Properties</a></li>
+        <li><a href="../i18n_strings.g/t.html">t</a></li>
+
+
+      <li class="section-title"><a href="../utils/utils-library.html#enums">Enums</a></li>
+        <li><a href="../i18n_strings.g/AppLocale.html">AppLocale</a></li>
+        <li><a href="../utils/JidoujishoPopupPosition.html">JidoujishoPopupPosition</a></li>
+        <li><a href="../utils/SubtitleItemType.html">SubtitleItemType</a></li>
+
+      <li class="section-title"><a href="../utils/utils-library.html#typedefs">Typedefs</a></li>
+        <li><a href="https://pub.dev/documentation/slang_flutter/3.13.0/slang_flutter/InlineSpanBuilder.html">InlineSpanBuilder</a></li>
+        <li><a href="../utils/OffsetValue.html">OffsetValue</a></li>
+        <li><a href="https://pub.dev/documentation/slang/3.13.0/api_pluralization/PluralResolver.html">PluralResolver</a></li>
+        <li><a href="https://pub.dev/documentation/slang/3.13.0/api_locale/TranslationBuilder.html">TranslationBuilder</a></li>
+
+</ol>
+
+  </div><!--/sidebar-offcanvas-right-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    yuuna
+      2.6.7+81
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+

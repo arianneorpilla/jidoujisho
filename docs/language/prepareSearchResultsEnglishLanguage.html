@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the prepareSearchResultsEnglishLanguage function from the language library, for the Dart programming language.">
+  <title>prepareSearchResultsEnglishLanguage function - language library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../index.html">yuuna</a></li>
+    <li><a href="../language/language-library.html">language</a></li>
+    <li class="self-crumb">prepareSearchResultsEnglishLanguage function</li>
+  </ol>
+  <div class="self-name">prepareSearchResultsEnglishLanguage</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span class="material-symbols-outlined">
+        brightness_4
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+  <div id="dartdoc-main-content" class="main-content">
+      <div>
+<h1><span class="kind-function">prepareSearchResultsEnglishLanguage</span> function 
+    <a href="https://dart.dev/null-safety" class="feature feature-null-safety" title="Supports the null safety language feature.">Null safety</a>
+ 
+</h1></div>
+
+    <section class="multi-line-signature">
+        
+
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span>&gt;</span></span>
+<span class="name ">prepareSearchResultsEnglishLanguage</span>(<wbr><ol class="parameter-list"><li><span class="parameter" id="prepareSearchResultsEnglishLanguage-param-params"><span class="type-annotation"><a href="../dictionary/DictionarySearchParams-class.html">DictionarySearchParams</a></span> <span class="parameter-name">params</span></span></li>
+</ol>)
+
+        
+
+    </section>
+    
+<section class="desc markdown">
+  <p>Top-level function for use in compute. See <a href="../language/Language-class.html">Language</a> for details.</p>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">Future&lt;int?&gt; prepareSearchResultsEnglishLanguage(
+    DictionarySearchParams params) async {
+  final Lemmatizer lemmatizer = Lemmatizer();
+  final Isar database = await Isar.open(
+    globalSchemas,
+    directory: params.directoryPath,
+    maxSizeMiB: 8192,
+  );
+
+  int bestLength = 0;
+  String searchTerm = params.searchTerm.toLowerCase().trim();
+
+  &#47;&#47;&#47; Handles contractions well enough.
+  searchTerm = searchTerm
+      .replaceAll(&#39;won\&#39;t&#39;, &#39;will not&#39;)
+      .replaceAll(&#39;can\&#39;t&#39;, &#39;cannot&#39;)
+      .replaceAll(&#39;i\&#39;m&#39;, &#39;i am&#39;)
+      .replaceAll(&#39;ain\&#39;t&#39;, &#39;is not&#39;)
+      .replaceAll(&#39;\&#39;ll&#39;, &#39; will&#39;)
+      .replaceAll(&#39;n\&#39;t&#39;, &#39; not&#39;)
+      .replaceAll(&#39;\&#39;ve&#39;, &#39; have&#39;)
+      .replaceAll(&#39;\&#39;s&#39;, &#39; is&#39;)
+      .replaceAll(&#39;\&#39;re&#39;, &#39; are&#39;)
+      .replaceAll(&#39;\&#39;d&#39;, &#39; would&#39;)
+      .replaceAll(&#39;won’t&#39;, &#39;will not&#39;)
+      .replaceAll(&#39;can’t&#39;, &#39;cannot&#39;)
+      .replaceAll(&#39;i’m&#39;, &#39;i am&#39;)
+      .replaceAll(&#39;ain’t&#39;, &#39;is not&#39;)
+      .replaceAll(&#39;’ll&#39;, &#39; will&#39;)
+      .replaceAll(&#39;n’t&#39;, &#39; not&#39;)
+      .replaceAll(&#39;’ve&#39;, &#39; have&#39;)
+      .replaceAll(&#39;’s&#39;, &#39; is&#39;)
+      .replaceAll(&#39;’re&#39;, &#39; are&#39;)
+      .replaceAll(&#39;’d&#39;, &#39; would&#39;);
+
+  if (searchTerm.isEmpty) {
+    return null;
+  }
+
+  int maximumHeadings = params.maximumDictionarySearchResults;
+
+  Map&lt;int, DictionaryHeading&gt; uniqueHeadingsById = {};
+
+  int limit() {
+    return maximumHeadings - uniqueHeadingsById.length;
+  }
+
+  bool shouldSearchWildcards = params.searchWithWildcards &amp;&amp;
+      (searchTerm.contains(&#39;*&#39;) || searchTerm.contains(&#39;?&#39;));
+
+  if (shouldSearchWildcards) {
+    bool noExactMatches = database.dictionaryHeadings
+        .where()
+        .termEqualTo(searchTerm)
+        .isEmptySync();
+
+    if (noExactMatches) {
+      String matchesTerm = searchTerm;
+
+      List&lt;DictionaryHeading&gt; termMatchHeadings = [];
+
+      bool questionMarkOnly = !matchesTerm.contains(&#39;*&#39;);
+      String noAsterisks = searchTerm
+          .replaceAll(&#39;※&#39;, &#39;*&#39;)
+          .replaceAll(&#39;？&#39;, &#39;?&#39;)
+          .replaceAll(&#39;*&#39;, &#39;&#39;);
+
+      if (params.maximumDictionaryTermsInResult &gt; uniqueHeadingsById.length) {
+        if (questionMarkOnly) {
+          termMatchHeadings = database.dictionaryHeadings
+              .where()
+              .termLengthEqualTo(searchTerm.length)
+              .filter()
+              .termMatches(matchesTerm, caseSensitive: false)
+              .and()
+              .entriesIsNotEmpty()
+              .limit(maximumHeadings - uniqueHeadingsById.length)
+              .findAllSync();
+        } else {
+          termMatchHeadings = database.dictionaryHeadings
+              .where()
+              .termLengthGreaterThan(noAsterisks.length, include: true)
+              .filter()
+              .termMatches(matchesTerm, caseSensitive: false)
+              .and()
+              .entriesIsNotEmpty()
+              .limit(maximumHeadings - uniqueHeadingsById.length)
+              .findAllSync();
+        }
+      }
+
+      uniqueHeadingsById.addEntries(
+        termMatchHeadings.map(
+          (heading) =&gt; MapEntry(heading.id, heading),
+        ),
+      );
+    }
+  } else {
+    Map&lt;int, List&lt;DictionaryHeading&gt;&gt; termExactResultsByLength = {};
+    Map&lt;int, List&lt;DictionaryHeading&gt;&gt; termDeinflectedResultsByLength = {};
+    Map&lt;int, List&lt;DictionaryHeading&gt;&gt; termStartsWithResultsByLength = {};
+
+    List&lt;String&gt; segments = searchTerm.splitWithDelim(RegExp(&#39;[ -\&#39;]&#39;));
+
+    if (segments.length &gt; 20) {
+      segments = segments.sublist(0, 10);
+    }
+    if (segments.length &gt;= 3) {
+      String firstWord = segments.removeAt(0);
+      String secondWord = segments.removeAt(0);
+      String thirdWord = segments.removeAt(0);
+      segments = [
+        if (firstWord.length &gt; 3)
+          if (firstWord.split(&#39;&#39;).length &gt; 3) ...[
+            firstWord.substring(0, firstWord.length - 3),
+            firstWord[firstWord.length - 3],
+            firstWord[firstWord.length - 2],
+            firstWord[firstWord.length - 1],
+          ] else
+            ...firstWord.split(&#39;&#39;)
+        else
+          firstWord,
+        if (secondWord.length &gt; 3)
+          if (secondWord.split(&#39;&#39;).length &gt; 3) ...[
+            secondWord.substring(0, secondWord.length - 3),
+            secondWord[secondWord.length - 3],
+            secondWord[secondWord.length - 2],
+            secondWord[secondWord.length - 1],
+          ] else
+            ...secondWord.split(&#39;&#39;)
+        else
+          secondWord,
+        if (thirdWord.length &gt; 3)
+          if (thirdWord.split(&#39;&#39;).length &gt; 3) ...[
+            thirdWord.substring(0, thirdWord.length - 3),
+            thirdWord[thirdWord.length - 3],
+            thirdWord[thirdWord.length - 2],
+            thirdWord[thirdWord.length - 1],
+          ] else
+            ...thirdWord.split(&#39;&#39;)
+        else
+          thirdWord,
+      ];
+    } else {
+      String firstWord = segments.removeAt(0);
+      segments = [
+        if (firstWord.length &gt;= 3) ...firstWord.split(&#39;&#39;) else firstWord,
+      ];
+    }
+
+    for (int i = 0; i &lt; segments.length; i++) {
+      String partialTerm = segments
+          .sublist(0, segments.length - i)
+          .join()
+          .replaceAll(RegExp(&#39;[^a-zA-Z -]&#39;), &#39;&#39;);
+
+      if (partialTerm.endsWith(&#39; &#39;)) {
+        continue;
+      }
+
+      List&lt;String&gt; possibleDeinflections = lemmatizer
+          .lemmas(partialTerm)
+          .map((lemma) =&gt; lemma.lemmas)
+          .flattened
+          .where((e) =&gt; e.isNotEmpty)
+          .toList();
+
+      List&lt;DictionaryHeading&gt; termExactResults = [];
+      List&lt;DictionaryHeading&gt; termDeinflectedResults = [];
+      List&lt;DictionaryHeading&gt; termStartsWithResults = [];
+
+      termExactResults = database.dictionaryHeadings
+          .where(sort: Sort.desc)
+          .termEqualTo(partialTerm)
+          .limit(limit())
+          .findAllSync();
+
+      if (possibleDeinflections.isNotEmpty) {
+        termDeinflectedResults = database.dictionaryHeadings
+            .where()
+            .anyOf&lt;String, String&gt;(
+                possibleDeinflections, (q, term) =&gt; q.termEqualTo(term))
+            .limit(limit())
+            .findAllSync();
+      }
+
+      if (partialTerm.length &gt;= 3) {
+        termStartsWithResults = database.dictionaryHeadings
+            .where()
+            .termStartsWith(partialTerm)
+            .sortByTermLength()
+            .limit(limit())
+            .findAllSync();
+      }
+
+      if (termExactResults.isNotEmpty) {
+        termExactResultsByLength[partialTerm.length] = termExactResults;
+        bestLength = partialTerm.length;
+      }
+      if (termDeinflectedResults.isNotEmpty) {
+        termDeinflectedResultsByLength[partialTerm.length] =
+            termDeinflectedResults;
+        bestLength = partialTerm.length;
+      }
+      if (termStartsWithResults.isNotEmpty) {
+        termStartsWithResultsByLength[partialTerm.length] =
+            termStartsWithResults;
+        bestLength = partialTerm.length;
+      }
+    }
+
+    for (int length = searchTerm.length; length &gt; 0; length--) {
+      List&lt;MapEntry&lt;int, DictionaryHeading&gt;&gt; exactHeadingsToAdd = [
+        ...(termExactResultsByLength[length] ?? [])
+            .map((heading) =&gt; MapEntry(heading.id, heading)),
+      ];
+
+      List&lt;MapEntry&lt;int, DictionaryHeading&gt;&gt; deinflectedHeadingsToAdd = [
+        ...(termDeinflectedResultsByLength[length] ?? [])
+            .map((entry) =&gt; MapEntry(entry.id, entry)),
+      ];
+
+      uniqueHeadingsById.addEntries(exactHeadingsToAdd);
+      uniqueHeadingsById.addEntries(deinflectedHeadingsToAdd);
+
+      List&lt;MapEntry&lt;int, DictionaryHeading&gt;&gt; startsWithHeadingsToAdd = [
+        ...(termStartsWithResultsByLength[length] ?? [])
+            .map((heading) =&gt; MapEntry(heading.id, heading)),
+      ];
+
+      uniqueHeadingsById.addEntries(startsWithHeadingsToAdd);
+    }
+  }
+
+  List&lt;DictionaryHeading&gt; headings =
+      uniqueHeadingsById.values.where((e) =&gt; e.entries.isNotEmpty).toList();
+
+  if (headings.isEmpty) {
+    return null;
+  }
+
+  DictionarySearchResult unsortedResult = DictionarySearchResult(
+    searchTerm: searchTerm,
+    bestLength: bestLength,
+  );
+  unsortedResult.headings.addAll(headings);
+
+  late int resultId;
+  database.writeTxnSync(() async {
+    database.dictionarySearchResults.deleteBySearchTermSync(searchTerm);
+    resultId = database.dictionarySearchResults.putSync(unsortedResult);
+  });
+
+  preloadResultSync(resultId);
+
+  headings = headings.sublist(
+      0, min(headings.length, params.maximumDictionaryTermsInResult));
+  List&lt;int&gt; headingIds = headings.map((e) =&gt; e.id).toList();
+
+  DictionarySearchResult result = DictionarySearchResult(
+    id: resultId,
+    searchTerm: searchTerm,
+    bestLength: bestLength,
+    headingIds: headingIds,
+  );
+
+  database.writeTxnSync(() async {
+    resultId = database.dictionarySearchResults.putSync(result);
+
+    int countInSameHistory = database.dictionarySearchResults.countSync();
+
+    if (params.maximumDictionarySearchResults &lt; countInSameHistory) {
+      int surplus = countInSameHistory - params.maximumDictionarySearchResults;
+      database.dictionarySearchResults
+          .where()
+          .limit(surplus)
+          .build()
+          .deleteAllSync();
+    }
+  });
+
+  return resultId;
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+  <li><a href="../index.html">yuuna</a></li>
+  <li><a href="../language/language-library.html">language</a></li>
+  <li class="self-crumb">prepareSearchResultsEnglishLanguage function</li>
+</ol>
+
+
+    <h5>language library</h5>
+    <ol>
+      <li class="section-title"><a href="../language/language-library.html#classes">Classes</a></li>
+        <li><a href="../language/Deinflection-class.html">Deinflection</a></li>
+        <li><a href="../language/Deinflector-class.html">Deinflector</a></li>
+        <li><a href="../language/DeinflectRule-class.html">DeinflectRule</a></li>
+        <li><a href="../language/EnglishLanguage-class.html">EnglishLanguage</a></li>
+        <li><a href="../language/FuriganaDistributionGroup-class.html">FuriganaDistributionGroup</a></li>
+        <li><a href="../language/JapaneseLanguage-class.html">JapaneseLanguage</a></li>
+        <li><a href="../language/Language-class.html">Language</a></li>
+        <li><a href="../language/LanguageUtils-class.html">LanguageUtils</a></li>
+        <li><a href="../language/NormalizedReason-class.html">NormalizedReason</a></li>
+        <li><a href="../language/Variant-class.html">Variant</a></li>
+
+      <li class="section-title"><a href="../language/language-library.html#extensions">Extensions</a></li>
+        <li><a href="../language/RegExpExtension.html">RegExpExtension</a></li>
+        <li><a href="../language/StringExtension.html">StringExtension</a></li>
+
+
+
+      <li class="section-title"><a href="../language/language-library.html#properties">Properties</a></li>
+        <li><a href="../language/deinflectRules.html">deinflectRules</a></li>
+
+      <li class="section-title"><a href="../language/language-library.html#functions">Functions</a></li>
+        <li><a href="../language/prepareSearchResultsEnglishLanguage.html">prepareSearchResultsEnglishLanguage</a></li>
+        <li><a href="../language/prepareSearchResultsJapaneseLanguage.html">prepareSearchResultsJapaneseLanguage</a></li>
+        <li><a href="../language/prepareSearchResultsStandard.html">prepareSearchResultsStandard</a></li>
+
+
+
+</ol>
+
+  </div><!--/.sidebar-offcanvas-left-->
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    yuuna
+      2.6.7+81
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+

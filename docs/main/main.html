@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the main function from the main library, for the Dart programming language.">
+  <title>main function - main library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../index.html">yuuna</a></li>
+    <li><a href="../main/main-library.html">main</a></li>
+    <li class="self-crumb">main function</li>
+  </ol>
+  <div class="self-name">main</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span class="material-symbols-outlined">
+        brightness_4
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+  <div id="dartdoc-main-content" class="main-content">
+      <div>
+<h1><span class="kind-function">main</span> function 
+    <a href="https://dart.dev/null-safety" class="feature feature-null-safety" title="Supports the null safety language feature.">Null safety</a>
+ 
+</h1></div>
+
+    <section class="multi-line-signature">
+        
+
+<span class="returntype">void</span>
+<span class="name ">main</span>(<wbr>)
+
+        
+
+    </section>
+    
+<section class="desc markdown">
+  <p>Application execution starts here.</p>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">void main() {
+  &#47;&#47;&#47; Run and handle an error zone to customise the action performed upon
+  &#47;&#47;&#47; an error or exception. This allows for error logging for debug purposes
+  &#47;&#47;&#47; as well as communicating errors to Crashlytics if enabled.
+  runZonedGuarded&lt;Future&lt;void&gt;&gt;(() async {
+    &#47;&#47;&#47; Necessary to initialise Flutter when running native code before
+    &#47;&#47;&#47; starting the application.
+    final binding = WidgetsFlutterBinding.ensureInitialized();
+
+    &#47;&#47;&#47; Initialise local file-based logging.
+    await FlutterLogs.initLogs(
+      logLevelsEnabled: [
+        LogLevel.INFO,
+        LogLevel.WARNING,
+        LogLevel.ERROR,
+        LogLevel.SEVERE
+      ],
+      timeStampFormat: TimeStampFormat.DATE_FORMAT_1,
+      directoryStructure: DirectoryStructure.FOR_DATE,
+      logTypesEnabled: [&#39;device&#39;, &#39;network&#39;, &#39;errors&#39;],
+      logFileExtension: LogFileExtension.LOG,
+    );
+
+    &#47;&#47;&#47; Ensure no pop-in for the app icon.
+    binding.addPostFrameCallback((_) async {
+      final context = binding.renderViewElement;
+      if (context != null) {
+        precacheImage(const AssetImage(&#39;assets&#47;meta&#47;icon.png&#39;), context);
+      }
+    });
+
+    &#47;&#47;&#47; Ensure the top and bottom bars are shown at launch and wake prevention
+    &#47;&#47;&#47; is disabled if not reverted from entering a media source.
+    Wakelock.disable();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+
+    &#47;&#47;&#47; Used in order to access and initialise an [AppModel] without requiring
+    &#47;&#47;&#47; a [WidgetRef].
+    final container = ProviderContainer();
+    final appModel = container.read(appProvider);
+    await appModel.initialise();
+
+    &#47;&#47;&#47; Start the application, specifying the [ProviderContainer] with the
+    &#47;&#47;&#47; already initialised [AppModel].
+    runApp(
+      UncontrolledProviderScope(
+        container: container,
+        child: const JidoujishoApp(),
+      ),
+    );
+  }, (exception, stack) {
+    &#47;&#47;&#47; Printror details to the console.
+    final details = FlutterErrorDetails(exception: exception, stack: stack);
+
+    &#47;&#47;&#47; Log the error.
+    FlutterLogs.logError(&#39;jidoujisho&#39;, &#39;Error&#39;, details.toString());
+  });
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+  <li><a href="../index.html">yuuna</a></li>
+  <li><a href="../main/main-library.html">main</a></li>
+  <li class="self-crumb">main function</li>
+</ol>
+
+
+    <h5>main library</h5>
+    <ol>
+      <li class="section-title"><a href="../main/main-library.html#classes">Classes</a></li>
+        <li><a href="../main/JidoujishoApp-class.html">JidoujishoApp</a></li>
+        <li><a href="../main/JidoujishoLocalizations-class.html">JidoujishoLocalizations</a></li>
+        <li><a href="../main/JidoujishoLocalizationsDelegate-class.html">JidoujishoLocalizationsDelegate</a></li>
+
+
+
+
+
+      <li class="section-title"><a href="../main/main-library.html#functions">Functions</a></li>
+        <li><a href="../main/main.html">main</a></li>
+
+
+
+</ol>
+
+  </div><!--/.sidebar-offcanvas-left-->
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    yuuna
+      2.6.7+81
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+

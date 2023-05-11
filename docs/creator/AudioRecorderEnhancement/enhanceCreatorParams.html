@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the enhanceCreatorParams method from the AudioRecorderEnhancement class, for the Dart programming language.">
+  <title>enhanceCreatorParams method - AudioRecorderEnhancement class - creator library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">yuuna</a></li>
+    <li><a href="../../creator/creator-library.html">creator</a></li>
+    <li><a href="../../creator/AudioRecorderEnhancement-class.html">AudioRecorderEnhancement</a></li>
+    <li class="self-crumb">enhanceCreatorParams method</li>
+  </ol>
+  <div class="self-name">enhanceCreatorParams</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span class="material-symbols-outlined">
+        brightness_4
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+  <div id="dartdoc-main-content" class="main-content">
+      <div>
+<h1><span class="kind-method">enhanceCreatorParams</span> method 
+    <a href="https://dart.dev/null-safety" class="feature feature-null-safety" title="Supports the null safety language feature.">Null safety</a>
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+  <div>
+    <ol class="annotation-list">
+        <li>@<a href="https://api.flutter.dev/flutter/dart-core/override-constant.html">override</a></li>
+    </ol>
+  </div>
+
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+<span class="name ">enhanceCreatorParams</span>(<wbr><ol class="parameter-list"><li><span class="parameter" id="enhanceCreatorParams-param-context">{<span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a></span> <span class="parameter-name">context</span>, </span></li>
+<li><span class="parameter" id="enhanceCreatorParams-param-ref"><span>required</span> <span class="type-annotation"><a href="https://pub.dev/documentation/flutter_riverpod/1.0.4/flutter_riverpod/WidgetRef-class.html">WidgetRef</a></span> <span class="parameter-name">ref</span>, </span></li>
+<li><span class="parameter" id="enhanceCreatorParams-param-appModel"><span>required</span> <span class="type-annotation"><a href="../../models/AppModel-class.html">AppModel</a></span> <span class="parameter-name">appModel</span>, </span></li>
+<li><span class="parameter" id="enhanceCreatorParams-param-creatorModel"><span>required</span> <span class="type-annotation"><a href="../../models/CreatorModel-class.html">CreatorModel</a></span> <span class="parameter-name">creatorModel</span>, </span></li>
+<li><span class="parameter" id="enhanceCreatorParams-param-cause"><span>required</span> <span class="type-annotation"><a href="../../creator/EnhancementTriggerCause.html">EnhancementTriggerCause</a></span> <span class="parameter-name">cause</span>}</span></li>
+</ol>)
+
+      <div class="features"><span class="feature">override</span></div>
+
+    </section>
+    
+<section class="desc markdown">
+  <p>Perform a change to the <a href="../../models/CreatorModel-class.html">CreatorModel</a>, executing the functionality of
+this enhancement. An <a href="../../creator/EnhancementTriggerCause.html">EnhancementTriggerCause</a> may be used to modify the
+behavior of the enhancement's function depending on whether the
+enhancement is being executed on auto, manual or cascade modes.</p>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">@override
+Future&lt;void&gt; enhanceCreatorParams({
+  required BuildContext context,
+  required WidgetRef ref,
+  required AppModel appModel,
+  required CreatorModel creatorModel,
+  required EnhancementTriggerCause cause,
+}) async {
+  AudioExportField audioField = field as AudioExportField;
+
+  bool permissionGranted = await Permission.microphone.isGranted;
+  if (!permissionGranted) {
+    await Permission.microphone.request();
+  } else {
+    Directory appDirDoc = await getApplicationSupportDirectory();
+    String tempAudioPath =
+        &#39;${appDirDoc.path}&#47;${field.uniqueKey}&#47;audioRecorderTemp&#39;;
+    Directory tempAudioDirectory = Directory(tempAudioPath);
+
+    String tempTimestamp =
+        DateFormat(&#39;yyyyMMddTkkmmss&#39;).format(DateTime.now());
+
+    Directory tempTimestampDirectory =
+        Directory(&#39;$tempAudioPath&#47;$tempTimestamp&#39;);
+    tempTimestampDirectory.createSync(recursive: true);
+    String tempFilePath = &#39;${tempTimestampDirectory.path}&#47;audio.mp3&#39;;
+
+    await showDialog&lt;File?&gt;(
+      context: context,
+      builder: (context) =&gt; AudioRecorderDialogPage(
+        filePath: tempFilePath,
+        onSave: (tempFile) {
+          String audioRecorderPath =
+              &#39;${appDirDoc.path}&#47;${field.uniqueKey}&#47;audioRecorder&#39;;
+          Directory audioRecorderDirectory = Directory(audioRecorderPath);
+          if (audioRecorderDirectory.existsSync()) {
+            audioRecorderDirectory.deleteSync(recursive: true);
+          }
+          audioRecorderDirectory.createSync(recursive: true);
+
+          String finalTimestamp =
+              DateFormat(&#39;yyyyMMddTkkmmss&#39;).format(DateTime.now());
+          Directory finalTimestampDirectory =
+              Directory(&#39;$audioRecorderPath&#47;$finalTimestamp&#39;);
+          String finalFilePath = &#39;${finalTimestampDirectory.path}&#47;audio.mp3&#39;;
+
+          finalTimestampDirectory.createSync(recursive: true);
+          tempFile.copySync(finalFilePath);
+
+          tempAudioDirectory.deleteSync(recursive: true);
+
+          audioField.setAudio(
+            cause: cause,
+            appModel: appModel,
+            creatorModel: creatorModel,
+            newAutoCannotOverride: false,
+            generateAudio: () async {
+              return File(finalFilePath);
+            },
+          );
+        },
+      ),
+    );
+  }
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+  <li><a href="../../index.html">yuuna</a></li>
+  <li><a href="../../creator/creator-library.html">creator</a></li>
+  <li><a href="../../creator/AudioRecorderEnhancement-class.html">AudioRecorderEnhancement</a></li>
+  <li class="self-crumb">enhanceCreatorParams method</li>
+</ol>
+
+
+    <h5>AudioRecorderEnhancement class</h5>
+    <ol>
+
+        <li class="section-title"><a href="../../creator/AudioRecorderEnhancement-class.html#constructors">Constructors</a></li>
+          <li><a href="../../creator/AudioRecorderEnhancement/AudioRecorderEnhancement.html">AudioRecorderEnhancement</a></li>
+
+
+        <li class="section-title inherited">
+          <a href="../../creator/AudioRecorderEnhancement-class.html#instance-properties">Properties</a>
+        </li>
+          <li class="inherited"><a href="../../creator/Enhancement/description.html">description</a></li>
+          <li class="inherited"><a href="../../creator/Enhancement/descriptionLocalisation.html">descriptionLocalisation</a></li>
+          <li class="inherited"><a href="../../creator/Enhancement/field.html">field</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></li>
+          <li class="inherited"><a href="../../creator/Enhancement/icon.html">icon</a></li>
+          <li class="inherited"><a href="../../creator/Enhancement/label.html">label</a></li>
+          <li class="inherited"><a href="../../creator/Enhancement/labelLocalisation.html">labelLocalisation</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></li>
+          <li class="inherited"><a href="../../creator/Enhancement/uniqueKey.html">uniqueKey</a></li>
+
+        <li class="section-title"><a href="../../creator/AudioRecorderEnhancement-class.html#instance-methods">Methods</a></li>
+          <li><a href="../../creator/AudioRecorderEnhancement/enhanceCreatorParams.html">enhanceCreatorParams</a></li>
+          <li><a href="../../creator/AudioRecorderEnhancement/fetchAudio.html">fetchAudio</a></li>
+          <li class="inherited"><a href="../../creator/Enhancement/getLocalisedDescription.html">getLocalisedDescription</a></li>
+          <li class="inherited"><a href="../../creator/Enhancement/getLocalisedLabel.html">getLocalisedLabel</a></li>
+          <li class="inherited"><a href="../../creator/Enhancement/initialise.html">initialise</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></li>
+          <li class="inherited"><a href="../../creator/Enhancement/prepareResources.html">prepareResources</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/toString.html">toString</a></li>
+
+        <li class="section-title inherited"><a href="../../creator/AudioRecorderEnhancement-class.html#operators">Operators</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/operator_equals.html">operator ==</a></li>
+
+
+
+
+        <li class="section-title"><a href="../../creator/AudioRecorderEnhancement-class.html#constants">Constants</a></li>
+          <li><a href="../../creator/AudioRecorderEnhancement/key-constant.html">key</a></li>
+</ol>
+
+  </div><!--/.sidebar-offcanvas-->
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    yuuna
+      2.6.7+81
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+

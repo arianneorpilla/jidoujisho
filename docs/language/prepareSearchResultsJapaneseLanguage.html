@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the prepareSearchResultsJapaneseLanguage function from the language library, for the Dart programming language.">
+  <title>prepareSearchResultsJapaneseLanguage function - language library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../index.html">yuuna</a></li>
+    <li><a href="../language/language-library.html">language</a></li>
+    <li class="self-crumb">prepareSearchResultsJapaneseLanguage function</li>
+  </ol>
+  <div class="self-name">prepareSearchResultsJapaneseLanguage</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span class="material-symbols-outlined">
+        brightness_4
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+  <div id="dartdoc-main-content" class="main-content">
+      <div>
+<h1><span class="kind-function">prepareSearchResultsJapaneseLanguage</span> function 
+    <a href="https://dart.dev/null-safety" class="feature feature-null-safety" title="Supports the null safety language feature.">Null safety</a>
+ 
+</h1></div>
+
+    <section class="multi-line-signature">
+        
+
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span>&gt;</span></span>
+<span class="name ">prepareSearchResultsJapaneseLanguage</span>(<wbr><ol class="parameter-list"><li><span class="parameter" id="prepareSearchResultsJapaneseLanguage-param-params"><span class="type-annotation"><a href="../dictionary/DictionarySearchParams-class.html">DictionarySearchParams</a></span> <span class="parameter-name">params</span></span></li>
+</ol>)
+
+        
+
+    </section>
+    
+<section class="desc markdown">
+  <p>Top-level function for use in compute. See <a href="../language/Language-class.html">Language</a> for details.
+Credits to Matthew Chan for their port of the Yomichan parser to Dart.
+Top-level function for use in compute. See <a href="../language/Language-class.html">Language</a> for details.
+Credits to Matthew Chan for their port of the Yomichan parser to Dart.</p>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">Future&lt;int?&gt; prepareSearchResultsJapaneseLanguage(
+    DictionarySearchParams params) async {
+  int bestLength = 0;
+  String searchTerm = params.searchTerm.trim();
+  const KanaKit kanaKit = KanaKit();
+  if (kanaKit.isRomaji(searchTerm)) {
+    searchTerm = kanaKit.toHiragana(searchTerm);
+  }
+
+  if (searchTerm.length &gt; 20) {
+    searchTerm = searchTerm.substring(0, 20);
+  }
+
+  int maximumHeadings = params.maximumDictionarySearchResults;
+
+  if (searchTerm.isEmpty) {
+    return null;
+  }
+
+  final Isar database = await Isar.open(
+    globalSchemas,
+    directory: params.directoryPath,
+    maxSizeMiB: 8192,
+  );
+
+  Map&lt;int, DictionaryHeading&gt; uniqueHeadingsById = {};
+
+  int limit() {
+    return maximumHeadings - uniqueHeadingsById.length;
+  }
+
+  bool shouldSearchWildcards = params.searchWithWildcards &amp;&amp;
+      (searchTerm.contains(&#39;※&#39;) ||
+          searchTerm.contains(&#39;？&#39;) ||
+          searchTerm.contains(&#39;*&#39;) ||
+          searchTerm.contains(&#39;?&#39;));
+
+  if (shouldSearchWildcards) {
+    bool noExactMatches = database.dictionaryHeadings
+        .where()
+        .termEqualTo(searchTerm)
+        .isEmptySync();
+
+    if (noExactMatches) {
+      String matchesTerm = searchTerm
+          .replaceAll(&#39;※&#39;, &#39;*&#39;)
+          .replaceAll(&#39;？&#39;, &#39;?&#39;)
+          .replaceAll(&#39;?&#39;, &#39;???&#39;);
+
+      List&lt;DictionaryHeading&gt; termMatchHeadings = [];
+      List&lt;DictionaryHeading&gt; readingMatchHeadings = [];
+      String withoutWildcards =
+          matchesTerm.replaceAll(&#39;?&#39;, &#39;&#39;).replaceAll(&#39;*&#39;, &#39;&#39;);
+      bool matchTermIsKana = kanaKit.isKana(withoutWildcards);
+      bool matchTermIsKatakana = kanaKit.isKatakana(withoutWildcards);
+
+      bool questionMarkOnly = !matchesTerm.contains(&#39;*&#39;);
+      String noAsterisks = searchTerm
+          .replaceAll(&#39;※&#39;, &#39;*&#39;)
+          .replaceAll(&#39;？&#39;, &#39;?&#39;)
+          .replaceAll(&#39;*&#39;, &#39;&#39;);
+
+      if (params.maximumDictionaryTermsInResult &gt; uniqueHeadingsById.length) {
+        if (questionMarkOnly) {
+          termMatchHeadings = database.dictionaryHeadings
+              .where()
+              .termLengthEqualTo(searchTerm.length)
+              .filter()
+              .termMatches(matchesTerm, caseSensitive: false)
+              .and()
+              .entriesIsNotEmpty()
+              .limit(maximumHeadings - uniqueHeadingsById.length)
+              .findAllSync();
+        } else {
+          termMatchHeadings = database.dictionaryHeadings
+              .where()
+              .termLengthGreaterThan(noAsterisks.length, include: true)
+              .filter()
+              .termMatches(matchesTerm, caseSensitive: false)
+              .and()
+              .entriesIsNotEmpty()
+              .limit(maximumHeadings - uniqueHeadingsById.length)
+              .findAllSync();
+        }
+      }
+
+      uniqueHeadingsById.addEntries(
+        termMatchHeadings.map(
+          (heading) =&gt; MapEntry(heading.id, heading),
+        ),
+      );
+
+      if (params.maximumDictionaryTermsInResult &gt; uniqueHeadingsById.length) {
+        if (matchTermIsKana) {
+          readingMatchHeadings = database.dictionaryHeadings
+              .where()
+              .filter()
+              .entriesIsNotEmpty()
+              .readingMatches(matchesTerm)
+              .or()
+              .optional(matchTermIsKatakana,
+                  (q) =&gt; q.readingMatches(kanaKit.toHiragana(matchesTerm)))
+              .and()
+              .entriesIsNotEmpty()
+              .findAllSync();
+
+          uniqueHeadingsById.addEntries(
+            readingMatchHeadings.map(
+              (heading) =&gt; MapEntry(heading.id, heading),
+            ),
+          );
+        }
+      }
+    }
+  } else {
+    List&lt;String&gt; deinflectionsAlreadySearched = [];
+
+    bool startsWithAdded = false;
+    for (int i = 0; i &lt; searchTerm.length; i++) {
+      String partialTerm = searchTerm.substring(0, searchTerm.length - i);
+
+      bool partialTermIsKana = kanaKit.isKana(partialTerm);
+      bool partialTermIsHiragana = kanaKit.isHiragana(partialTerm);
+      bool partialTermIsKatakana = kanaKit.isKatakana(partialTerm);
+
+      List&lt;String&gt; possibleDeinflections = Deinflector.deinflect(partialTerm)
+          .map((e) =&gt; e.term)
+          .where((e) =&gt; !deinflectionsAlreadySearched.contains(e))
+          .toList();
+      possibleDeinflections.toSet().addAll(deinflectionsAlreadySearched);
+
+      List&lt;DictionaryHeading&gt; termExactResults = [];
+      List&lt;DictionaryHeading&gt; termDeinflectedResults = [];
+      List&lt;DictionaryHeading&gt; readingExactResults = [];
+      List&lt;DictionaryHeading&gt; readingDeinflectedResults = [];
+      List&lt;DictionaryHeading&gt; termExactKatakanaResults = [];
+
+      if (params.maximumDictionaryTermsInResult &gt; uniqueHeadingsById.length) {
+        &#47;&#47;&#47; If an exception is caught, skip the iteration entirely. Something
+        &#47;&#47;&#47; has gone wrong with building a query for this term and there is
+        &#47;&#47;&#47; no point continuing for the rest of the queries.
+        try {
+          termExactResults = database.dictionaryHeadings
+              .where()
+              .termEqualTo(partialTerm)
+              .or()
+              .optional(partialTermIsKatakana,
+                  (q) =&gt; q.termEqualTo(kanaKit.toHiragana(partialTerm)))
+              .filter()
+              .entriesIsNotEmpty()
+              .findAllSync();
+        } catch (e) {
+          await Future.delayed(const Duration(milliseconds: 200), () {});
+          continue;
+        }
+
+        uniqueHeadingsById.addEntries(
+          termExactResults.map(
+            (heading) =&gt; MapEntry(heading.id, heading),
+          ),
+        );
+      }
+
+      if (params.maximumDictionaryTermsInResult &gt; uniqueHeadingsById.length) {
+        if (partialTermIsKana) {
+          readingExactResults = database.dictionaryHeadings
+              .where()
+              .readingEqualTo(partialTerm)
+              .or()
+              .optional(partialTermIsKatakana,
+                  (q) =&gt; q.readingEqualTo(kanaKit.toHiragana(partialTerm)))
+              .filter()
+              .entriesIsNotEmpty()
+              .findAllSync();
+
+          uniqueHeadingsById.addEntries(
+            readingExactResults.map(
+              (heading) =&gt; MapEntry(heading.id, heading),
+            ),
+          );
+        }
+      }
+
+      if (params.maximumDictionaryTermsInResult &gt; uniqueHeadingsById.length) {
+        termDeinflectedResults = database.dictionaryHeadings
+            .where()
+            .anyOf&lt;String, String&gt;(
+                possibleDeinflections, (q, term) =&gt; q.termEqualTo(term))
+            .or()
+            .optional(
+                partialTermIsKatakana,
+                (q) =&gt; q.anyOf&lt;String, String&gt;(
+                    Deinflector.deinflect(kanaKit.toHiragana(partialTerm))
+                        .map((e) =&gt; e.term)
+                        .toList(),
+                    (q, term) =&gt; q.termEqualTo(term)))
+            .filter()
+            .entriesIsNotEmpty()
+            .findAllSync();
+
+        for (DictionaryHeading result in termDeinflectedResults) {
+          result.entries.loadSync();
+        }
+        termDeinflectedResults
+            .sort((a, b) =&gt; b.popularitySum.compareTo(a.popularitySum));
+
+        uniqueHeadingsById.addEntries(
+          termDeinflectedResults.map(
+            (heading) =&gt; MapEntry(heading.id, heading),
+          ),
+        );
+      }
+
+      if (params.maximumDictionaryTermsInResult &gt; uniqueHeadingsById.length) {
+        if (partialTermIsKana) {
+          readingDeinflectedResults = database.dictionaryHeadings
+              .where()
+              .anyOf&lt;String, String&gt;(possibleDeinflections,
+                  (q, reading) =&gt; q.readingEqualTo(reading))
+              .or()
+              .optional(
+                  partialTermIsKatakana,
+                  (q) =&gt; q.anyOf&lt;String, String&gt;(
+                      Deinflector.deinflect(kanaKit.toHiragana(partialTerm))
+                          .map((e) =&gt; e.term)
+                          .toList(),
+                      (q, term) =&gt; q.readingEqualTo(term)))
+              .filter()
+              .entriesIsNotEmpty()
+              .limit(limit())
+              .findAllSync();
+
+          uniqueHeadingsById.addEntries(
+            readingDeinflectedResults.map(
+              (heading) =&gt; MapEntry(heading.id, heading),
+            ),
+          );
+        }
+      }
+
+      if (params.maximumDictionaryTermsInResult &gt; uniqueHeadingsById.length) {
+        if (partialTermIsHiragana) {
+          termExactKatakanaResults = database.dictionaryHeadings
+              .where()
+              .termEqualTo(kanaKit.toKatakana(partialTerm))
+              .filter()
+              .entriesIsNotEmpty()
+              .findAllSync();
+
+          uniqueHeadingsById.addEntries(
+            termExactKatakanaResults.map(
+              (heading) =&gt; MapEntry(heading.id, heading),
+            ),
+          );
+        }
+      }
+
+      if (termExactResults.isNotEmpty &amp;&amp; bestLength &lt; partialTerm.length) {
+        bestLength = partialTerm.length;
+      }
+      if (termDeinflectedResults.isNotEmpty &amp;&amp;
+          bestLength &lt; partialTerm.length) {
+        bestLength = partialTerm.length;
+      }
+      if (readingExactResults.isNotEmpty &amp;&amp; bestLength &lt; partialTerm.length) {
+        bestLength = partialTerm.length;
+      }
+      if (readingDeinflectedResults.isNotEmpty &amp;&amp;
+          bestLength &lt; partialTerm.length) {
+        bestLength = partialTerm.length;
+      }
+      if (termExactKatakanaResults.isNotEmpty &amp;&amp;
+          bestLength &lt; partialTerm.length) {
+        bestLength = partialTerm.length;
+      }
+
+      if (params.maximumDictionaryTermsInResult &gt; uniqueHeadingsById.length) {
+        if (params.searchWithWildcards) {
+          if (i == 0) {
+            startsWithAdded = true;
+
+            List&lt;DictionaryHeading&gt; startsWithToAdd = database
+                .dictionaryHeadings
+                .where()
+                .termStartsWith(searchTerm)
+                .filter()
+                .entriesIsNotEmpty()
+                .sortByTermLength()
+                .findAllSync();
+
+            uniqueHeadingsById.addEntries(startsWithToAdd.map(
+              (heading) =&gt; MapEntry(heading.id, heading),
+            ));
+          }
+        } else {
+          if (!startsWithAdded &amp;&amp; uniqueHeadingsById.isNotEmpty) {
+            startsWithAdded = true;
+
+            List&lt;DictionaryHeading&gt; startsWithToAdd = database
+                .dictionaryHeadings
+                .where()
+                .termStartsWith(searchTerm)
+                .filter()
+                .entriesIsNotEmpty()
+                .sortByTermLength()
+                .findAllSync();
+
+            uniqueHeadingsById.addEntries(startsWithToAdd.map(
+              (heading) =&gt; MapEntry(heading.id, heading),
+            ));
+          }
+        }
+      }
+    }
+  }
+
+  List&lt;DictionaryHeading&gt; headings =
+      uniqueHeadingsById.values.where((e) =&gt; e.entries.isNotEmpty).toList();
+  Map&lt;DictionaryHeading, int&gt; headingOrders = Map.fromEntries(
+    headings.mapIndexed(
+      (index, id) =&gt; MapEntry(headings[index], index),
+    ),
+  );
+
+  if (headings.isEmpty) {
+    return null;
+  }
+
+  DictionarySearchResult unsortedResult = DictionarySearchResult(
+    searchTerm: searchTerm,
+    bestLength: bestLength,
+  );
+  unsortedResult.headings.addAll(headings);
+
+  late int resultId;
+  database.writeTxnSync(() async {
+    database.dictionarySearchResults.deleteBySearchTermSync(searchTerm);
+    resultId = database.dictionarySearchResults.putSync(unsortedResult);
+  });
+
+  preloadResultSync(resultId);
+
+  List&lt;Dictionary&gt; dictionaries = database.dictionarys.where().findAllSync();
+
+  Map&lt;String, int&gt; dictionaryNamesByOrder = Map&lt;String, int&gt;.fromEntries(
+      dictionaries.map((e) =&gt; MapEntry(e.name, e.order)));
+
+  headings.sort((a, b) {
+    if (a.term == b.term ||
+        (a.reading.isNotEmpty &amp;&amp; b.reading.isNotEmpty) &amp;&amp;
+            a.reading == b.reading) {
+      int hasPopularTag = (a.tags.any((e) =&gt; e.name == &#39;P&#39;) ? -1 : 1)
+          .compareTo(b.tags.any((e) =&gt; e.name == &#39;P&#39;) ? -1 : 1);
+      if (hasPopularTag != 0) {
+        return hasPopularTag;
+      }
+
+      if (a.term != b.term) {
+        int popularityCompare = (b.popularitySum).compareTo(a.popularitySum);
+        if (popularityCompare != 0) {
+          return popularityCompare;
+        }
+      }
+
+      List&lt;DictionaryFrequency&gt; aFrequencies = a.frequencies.toList();
+      List&lt;DictionaryFrequency&gt; bFrequencies = b.frequencies.toList();
+      aFrequencies.sort((a, b) =&gt;
+          dictionaryNamesByOrder[a.dictionary.value!.name]!
+              .compareTo(dictionaryNamesByOrder[b.dictionary.value!.name]!));
+      bFrequencies.sort((a, b) =&gt;
+          dictionaryNamesByOrder[a.dictionary.value!.name]!
+              .compareTo(dictionaryNamesByOrder[b.dictionary.value!.name]!));
+
+      Map&lt;Dictionary, List&lt;DictionaryFrequency&gt;&gt; aFrequenciesByDictionary =
+          groupBy&lt;DictionaryFrequency, Dictionary&gt;(
+              aFrequencies, (frequency) =&gt; frequency.dictionary.value!);
+      Map&lt;Dictionary, List&lt;DictionaryFrequency&gt;&gt; bFrequenciesByDictionary =
+          groupBy&lt;DictionaryFrequency, Dictionary&gt;(
+              bFrequencies, (frequency) =&gt; frequency.dictionary.value!);
+      Map&lt;Dictionary, double&gt; aValues = aFrequenciesByDictionary
+          .map((k, v) =&gt; MapEntry(k, v.map((e) =&gt; e.value).max));
+      Map&lt;Dictionary, double&gt; bValues = bFrequenciesByDictionary
+          .map((k, v) =&gt; MapEntry(k, v.map((e) =&gt; e.value).max));
+
+      Set&lt;Dictionary&gt; sharedDictionaries =
+          aValues.keys.toSet().intersection(bValues.keys.toSet());
+
+      if (sharedDictionaries.isNotEmpty) {
+        for (Dictionary dictionary in sharedDictionaries) {
+          int freqCompare =
+              bValues[dictionary]!.compareTo(aValues[dictionary]!);
+          if (freqCompare != 0) {
+            return freqCompare;
+          }
+        }
+      } else {
+        int freqSumCompare = (bValues.values.sum).compareTo(aValues.values.sum);
+        if (freqSumCompare != 0) {
+          return freqSumCompare;
+        }
+
+        int popularityCompare = (b.popularitySum).compareTo(a.popularitySum);
+        if (popularityCompare != 0) {
+          return popularityCompare;
+        }
+      }
+
+      int entriesCompare = (b.entries.length).compareTo(a.entries.length);
+      if (entriesCompare != 0) {
+        return entriesCompare;
+      }
+    }
+
+    return headingOrders[a]!.compareTo(headingOrders[b]!);
+  });
+
+  &#47;&#47;&#47; Prioritise kanji match.
+  if (searchTerm.length == 1 &amp;&amp; kanaKit.isKanji(searchTerm)) {
+    DictionaryHeading? heading = database.dictionaryHeadings
+        .getSync(DictionaryHeading.hash(term: searchTerm, reading: &#39;&#39;));
+    if (heading != null &amp;&amp; heading.entries.isNotEmpty) {
+      headings.remove(heading);
+      headings.insert(0, heading);
+    }
+  }
+
+  headings = headings.sublist(
+      0, min(headings.length, params.maximumDictionaryTermsInResult));
+
+  List&lt;int&gt; headingIds = headings.map((e) =&gt; e.id).toList();
+
+  DictionarySearchResult result = DictionarySearchResult(
+    id: resultId,
+    searchTerm: searchTerm,
+    bestLength: bestLength,
+    headingIds: headingIds,
+  );
+
+  database.writeTxnSync(() async {
+    resultId = database.dictionarySearchResults.putSync(result);
+
+    int countInSameHistory = database.dictionarySearchResults.countSync();
+
+    if (params.maximumDictionarySearchResults &lt; countInSameHistory) {
+      int surplus = countInSameHistory - params.maximumDictionarySearchResults;
+      database.dictionarySearchResults
+          .where()
+          .limit(surplus)
+          .build()
+          .deleteAllSync();
+    }
+  });
+
+  return resultId;
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+  <li><a href="../index.html">yuuna</a></li>
+  <li><a href="../language/language-library.html">language</a></li>
+  <li class="self-crumb">prepareSearchResultsJapaneseLanguage function</li>
+</ol>
+
+
+    <h5>language library</h5>
+    <ol>
+      <li class="section-title"><a href="../language/language-library.html#classes">Classes</a></li>
+        <li><a href="../language/Deinflection-class.html">Deinflection</a></li>
+        <li><a href="../language/Deinflector-class.html">Deinflector</a></li>
+        <li><a href="../language/DeinflectRule-class.html">DeinflectRule</a></li>
+        <li><a href="../language/EnglishLanguage-class.html">EnglishLanguage</a></li>
+        <li><a href="../language/FuriganaDistributionGroup-class.html">FuriganaDistributionGroup</a></li>
+        <li><a href="../language/JapaneseLanguage-class.html">JapaneseLanguage</a></li>
+        <li><a href="../language/Language-class.html">Language</a></li>
+        <li><a href="../language/LanguageUtils-class.html">LanguageUtils</a></li>
+        <li><a href="../language/NormalizedReason-class.html">NormalizedReason</a></li>
+        <li><a href="../language/Variant-class.html">Variant</a></li>
+
+      <li class="section-title"><a href="../language/language-library.html#extensions">Extensions</a></li>
+        <li><a href="../language/RegExpExtension.html">RegExpExtension</a></li>
+        <li><a href="../language/StringExtension.html">StringExtension</a></li>
+
+
+
+      <li class="section-title"><a href="../language/language-library.html#properties">Properties</a></li>
+        <li><a href="../language/deinflectRules.html">deinflectRules</a></li>
+
+      <li class="section-title"><a href="../language/language-library.html#functions">Functions</a></li>
+        <li><a href="../language/prepareSearchResultsEnglishLanguage.html">prepareSearchResultsEnglishLanguage</a></li>
+        <li><a href="../language/prepareSearchResultsJapaneseLanguage.html">prepareSearchResultsJapaneseLanguage</a></li>
+        <li><a href="../language/prepareSearchResultsStandard.html">prepareSearchResultsStandard</a></li>
+
+
+
+</ol>
+
+  </div><!--/.sidebar-offcanvas-left-->
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    yuuna
+      2.6.7+81
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+

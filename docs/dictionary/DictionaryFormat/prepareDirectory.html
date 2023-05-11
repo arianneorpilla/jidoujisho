@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the prepareDirectory property from the DictionaryFormat class, for the Dart programming language.">
+  <title>prepareDirectory property - DictionaryFormat class - dictionary library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">yuuna</a></li>
+    <li><a href="../../dictionary/dictionary-library.html">dictionary</a></li>
+    <li><a href="../../dictionary/DictionaryFormat-class.html">DictionaryFormat</a></li>
+    <li class="self-crumb">prepareDirectory property</li>
+  </ol>
+  <div class="self-name">prepareDirectory</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span class="material-symbols-outlined">
+        brightness_4
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+  <div id="dartdoc-main-content" class="main-content">
+      <div>
+<h1><span class="kind-property">prepareDirectory</span> property 
+    <a href="https://dart.dev/null-safety" class="feature feature-null-safety" title="Supports the null safety language feature.">Null safety</a>
+</h1></div>
+
+        <section class="multi-line-signature">
+          
+          <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span> Function<span class="signature">(<span class="parameter" id="param-params"><span class="type-annotation"><a href="../../dictionary/PrepareDirectoryParams-class.html">PrepareDirectoryParams</a></span> <span class="parameter-name">params</span></span>)</span>
+          <span class="name ">prepareDirectory</span>
+          <div class="features"><span class="feature">read / write</span></div>
+
+        </section>
+        
+<section class="desc markdown">
+  <p><code>IMPORTANT</code>: The following parameters below point to functions defined in
+the top-level, not within the inheriting class. They are meant to be
+defined in the constructor -- the actual functions to be executed are
+outside of the class, placed preferably at the bottom of the inheriting
+format class. This is because these functions should not block the UI
+isolate and must be top-level in order to do so.
+Given a <a href="https://api.flutter.dev/flutter/dart-io/File-class.html">File</a>, prepare files to be accessible in a working <a href="https://api.flutter.dev/flutter/dart-io/Directory-class.html">Directory</a>
+such that it will be possible to make relative commands (in the
+directory) to be able to get a dictionary's name, its entries and
+other related metadata that will be useful for preservation.</p>
+<p>For many formats, this will likely be a ZIP extraction operation. A
+given parameter is where the final working directory should be, and where
+zthe rest of the operations will be performed.</p>
+<p>See <a href="../../dictionary/PrepareDirectoryParams-class.html">PrepareDirectoryParams</a> for how to work with the individual input
+parameters.</p>
+</section>
+
+        
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">&#47;&#47;&#47; Given a [File], prepare files to be accessible in a working [Directory]
+&#47;&#47;&#47; such that it will be possible to make relative commands (in the
+&#47;&#47;&#47; directory) to be able to get a dictionary&#39;s name, its entries and
+&#47;&#47;&#47; other related metadata that will be useful for preservation.
+&#47;&#47;&#47;
+&#47;&#47;&#47; For many formats, this will likely be a ZIP extraction operation. A
+&#47;&#47;&#47; given parameter is where the final working directory should be, and where
+&#47;&#47;&#47; zthe rest of the operations will be performed.
+&#47;&#47;&#47;
+&#47;&#47;&#47; See [PrepareDirectoryParams] for how to work with the individual input
+&#47;&#47;&#47; parameters.
+Future&lt;void&gt; Function(PrepareDirectoryParams params) prepareDirectory;</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+  <li><a href="../../index.html">yuuna</a></li>
+  <li><a href="../../dictionary/dictionary-library.html">dictionary</a></li>
+  <li><a href="../../dictionary/DictionaryFormat-class.html">DictionaryFormat</a></li>
+  <li class="self-crumb">prepareDirectory property</li>
+</ol>
+
+
+    <h5>DictionaryFormat class</h5>
+    <ol>
+
+        <li class="section-title"><a href="../../dictionary/DictionaryFormat-class.html#constructors">Constructors</a></li>
+          <li><a href="../../dictionary/DictionaryFormat/DictionaryFormat.html">DictionaryFormat</a></li>
+
+
+        <li class="section-title">
+          <a href="../../dictionary/DictionaryFormat-class.html#instance-properties">Properties</a>
+        </li>
+          <li><a href="../../dictionary/DictionaryFormat/allowedExtensions.html">allowedExtensions</a></li>
+          <li><a href="../../dictionary/DictionaryFormat/fileType.html">fileType</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></li>
+          <li><a href="../../dictionary/DictionaryFormat/icon.html">icon</a></li>
+          <li><a href="../../dictionary/DictionaryFormat/isTextFormat.html">isTextFormat</a></li>
+          <li><a href="../../dictionary/DictionaryFormat/name.html">name</a></li>
+          <li><a href="../../dictionary/DictionaryFormat/prepareDirectory.html">prepareDirectory</a></li>
+          <li><a href="../../dictionary/DictionaryFormat/prepareEntries.html">prepareEntries</a></li>
+          <li><a href="../../dictionary/DictionaryFormat/prepareFrequencies.html">prepareFrequencies</a></li>
+          <li><a href="../../dictionary/DictionaryFormat/prepareName.html">prepareName</a></li>
+          <li><a href="../../dictionary/DictionaryFormat/preparePitches.html">preparePitches</a></li>
+          <li><a href="../../dictionary/DictionaryFormat/prepareTags.html">prepareTags</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></li>
+          <li><a href="../../dictionary/DictionaryFormat/uniqueKey.html">uniqueKey</a></li>
+
+        <li class="section-title inherited"><a href="../../dictionary/DictionaryFormat-class.html#instance-methods">Methods</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/toString.html">toString</a></li>
+
+        <li class="section-title inherited"><a href="../../dictionary/DictionaryFormat-class.html#operators">Operators</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/operator_equals.html">operator ==</a></li>
+
+
+
+
+</ol>
+
+  </div><!--/.sidebar-offcanvas-->
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    yuuna
+      2.6.7+81
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+

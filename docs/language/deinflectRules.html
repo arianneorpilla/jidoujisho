@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the deinflectRules property from the language library, for the Dart programming language.">
+  <title>deinflectRules property - language library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../index.html">yuuna</a></li>
+    <li><a href="../language/language-library.html">language</a></li>
+    <li class="self-crumb">deinflectRules property</li>
+  </ol>
+  <div class="self-name">deinflectRules</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span class="material-symbols-outlined">
+        brightness_4
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+  <div id="dartdoc-main-content" class="main-content">
+      <div>
+<h1><span class="kind-top-level-property">deinflectRules</span> top-level property 
+    <a href="https://dart.dev/null-safety" class="feature feature-null-safety" title="Supports the null safety language feature.">Null safety</a>
+ 
+</h1></div>
+
+        <section class="multi-line-signature">
+          
+          <a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../language/DeinflectRule-class.html">DeinflectRule</a></span>&gt;</span></span>&gt;</span>
+          <span class="name ">deinflectRules</span>
+          <div class="features"><span class="feature">read / write</span></div>
+
+        </section>
+        
+<section class="desc markdown">
+  <p><a href="https://github.com/FooSoft/yomichan/blob/master/ext/data/deinflect.json">https://github.com/FooSoft/yomichan/blob/master/ext/data/deinflect.json</a></p>
+</section>
+
+        
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">Map&lt;String, List&lt;DeinflectRule&gt;&gt; deinflectRules = {
+  &#39;-ba&#39;: [
+    DeinflectRule(
+        kanaIn: &#39;ければ&#39;, kanaOut: &#39;い&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(kanaIn: &#39;えば&#39;, kanaOut: &#39;う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;けば&#39;, kanaOut: &#39;く&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;げば&#39;, kanaOut: &#39;ぐ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;せば&#39;, kanaOut: &#39;す&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;てば&#39;, kanaOut: &#39;つ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ねば&#39;, kanaOut: &#39;ぬ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;べば&#39;, kanaOut: &#39;ぶ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;めば&#39;, kanaOut: &#39;む&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;れば&#39;,
+        kanaOut: &#39;る&#39;,
+        rulesIn: [],
+        rulesOut: [&#39;v1&#39;, &#39;v5&#39;, &#39;vk&#39;, &#39;vs&#39;, &#39;vz&#39;]),
+  ],
+  &#39;-chau&#39;: [
+    DeinflectRule(
+        kanaIn: &#39;ちゃう&#39;, kanaOut: &#39;る&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;いじゃう&#39;, kanaOut: &#39;ぐ&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;いちゃう&#39;, kanaOut: &#39;く&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;しちゃう&#39;, kanaOut: &#39;す&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;っちゃう&#39;, kanaOut: &#39;う&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;っちゃう&#39;, kanaOut: &#39;く&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;っちゃう&#39;, kanaOut: &#39;つ&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;っちゃう&#39;, kanaOut: &#39;る&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;んじゃう&#39;, kanaOut: &#39;ぬ&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;んじゃう&#39;, kanaOut: &#39;ぶ&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;んじゃう&#39;, kanaOut: &#39;む&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;じちゃう&#39;, kanaOut: &#39;ずる&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;vz&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;しちゃう&#39;, kanaOut: &#39;する&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;為ちゃう&#39;, kanaOut: &#39;為る&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;きちゃう&#39;, kanaOut: &#39;くる&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;来ちゃう&#39;, kanaOut: &#39;来る&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;來ちゃう&#39;, kanaOut: &#39;來る&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;vk&#39;]),
+  ],
+  &#39;-chimau&#39;: [
+    DeinflectRule(
+        kanaIn: &#39;ちまう&#39;, kanaOut: &#39;る&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;いじまう&#39;, kanaOut: &#39;ぐ&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;いちまう&#39;, kanaOut: &#39;く&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;しちまう&#39;, kanaOut: &#39;す&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;っちまう&#39;, kanaOut: &#39;う&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;っちまう&#39;, kanaOut: &#39;く&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;っちまう&#39;, kanaOut: &#39;つ&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;っちまう&#39;, kanaOut: &#39;る&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;んじまう&#39;, kanaOut: &#39;ぬ&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;んじまう&#39;, kanaOut: &#39;ぶ&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;んじまう&#39;, kanaOut: &#39;む&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;じちまう&#39;, kanaOut: &#39;ずる&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;vz&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;しちまう&#39;, kanaOut: &#39;する&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;為ちまう&#39;, kanaOut: &#39;為る&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;きちまう&#39;, kanaOut: &#39;くる&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;来ちまう&#39;, kanaOut: &#39;来る&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;來ちまう&#39;, kanaOut: &#39;來る&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;vk&#39;]),
+  ],
+  &#39;-shimau&#39;: [
+    DeinflectRule(
+        kanaIn: &#39;てしまう&#39;, kanaOut: &#39;て&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;iru&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;でしまう&#39;, kanaOut: &#39;で&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;iru&#39;]),
+  ],
+  &#39;-nasai&#39;: [
+    DeinflectRule(kanaIn: &#39;なさい&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;いなさい&#39;, kanaOut: &#39;う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;きなさい&#39;, kanaOut: &#39;く&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ぎなさい&#39;, kanaOut: &#39;ぐ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;しなさい&#39;, kanaOut: &#39;す&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ちなさい&#39;, kanaOut: &#39;つ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;になさい&#39;, kanaOut: &#39;ぬ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;びなさい&#39;, kanaOut: &#39;ぶ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;みなさい&#39;, kanaOut: &#39;む&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;りなさい&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;じなさい&#39;, kanaOut: &#39;ずる&#39;, rulesIn: [], rulesOut: [&#39;vz&#39;]),
+    DeinflectRule(kanaIn: &#39;しなさい&#39;, kanaOut: &#39;する&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(kanaIn: &#39;為なさい&#39;, kanaOut: &#39;為る&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(kanaIn: &#39;きなさい&#39;, kanaOut: &#39;くる&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;来なさい&#39;, kanaOut: &#39;来る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;來なさい&#39;, kanaOut: &#39;來る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+  ],
+  &#39;-sou&#39;: [
+    DeinflectRule(kanaIn: &#39;そう&#39;, kanaOut: &#39;い&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(kanaIn: &#39;そう&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;いそう&#39;, kanaOut: &#39;う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;きそう&#39;, kanaOut: &#39;く&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ぎそう&#39;, kanaOut: &#39;ぐ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;しそう&#39;, kanaOut: &#39;す&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ちそう&#39;, kanaOut: &#39;つ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;にそう&#39;, kanaOut: &#39;ぬ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;びそう&#39;, kanaOut: &#39;ぶ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;みそう&#39;, kanaOut: &#39;む&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;りそう&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;じそう&#39;, kanaOut: &#39;ずる&#39;, rulesIn: [], rulesOut: [&#39;vz&#39;]),
+    DeinflectRule(kanaIn: &#39;しそう&#39;, kanaOut: &#39;する&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(kanaIn: &#39;為そう&#39;, kanaOut: &#39;為る&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(kanaIn: &#39;きそう&#39;, kanaOut: &#39;くる&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;来そう&#39;, kanaOut: &#39;来る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;來そう&#39;, kanaOut: &#39;來る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+  ],
+  &#39;-sugiru&#39;: [
+    DeinflectRule(
+        kanaIn: &#39;すぎる&#39;, kanaOut: &#39;い&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;すぎる&#39;, kanaOut: &#39;る&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;いすぎる&#39;, kanaOut: &#39;う&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;きすぎる&#39;, kanaOut: &#39;く&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;ぎすぎる&#39;, kanaOut: &#39;ぐ&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;しすぎる&#39;, kanaOut: &#39;す&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;ちすぎる&#39;, kanaOut: &#39;つ&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;にすぎる&#39;, kanaOut: &#39;ぬ&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;びすぎる&#39;, kanaOut: &#39;ぶ&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;みすぎる&#39;, kanaOut: &#39;む&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;りすぎる&#39;, kanaOut: &#39;る&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;じすぎる&#39;, kanaOut: &#39;ずる&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vz&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;しすぎる&#39;, kanaOut: &#39;する&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;為すぎる&#39;, kanaOut: &#39;為る&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;きすぎる&#39;, kanaOut: &#39;くる&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;来すぎる&#39;, kanaOut: &#39;来る&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;來すぎる&#39;, kanaOut: &#39;來る&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vk&#39;]),
+  ],
+  &#39;-tai&#39;: [
+    DeinflectRule(
+        kanaIn: &#39;たい&#39;, kanaOut: &#39;る&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;いたい&#39;, kanaOut: &#39;う&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;きたい&#39;, kanaOut: &#39;く&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;ぎたい&#39;, kanaOut: &#39;ぐ&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;したい&#39;, kanaOut: &#39;す&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;ちたい&#39;, kanaOut: &#39;つ&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;にたい&#39;, kanaOut: &#39;ぬ&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;びたい&#39;, kanaOut: &#39;ぶ&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;みたい&#39;, kanaOut: &#39;む&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;りたい&#39;, kanaOut: &#39;る&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;じたい&#39;, kanaOut: &#39;ずる&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;vz&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;したい&#39;, kanaOut: &#39;する&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;為たい&#39;, kanaOut: &#39;為る&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;きたい&#39;, kanaOut: &#39;くる&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;来たい&#39;, kanaOut: &#39;来る&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;來たい&#39;, kanaOut: &#39;來る&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;vk&#39;]),
+  ],
+  &#39;-tara&#39;: [
+    DeinflectRule(
+        kanaIn: &#39;かったら&#39;, kanaOut: &#39;い&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(kanaIn: &#39;たら&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;いたら&#39;, kanaOut: &#39;く&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;いだら&#39;, kanaOut: &#39;ぐ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;したら&#39;, kanaOut: &#39;す&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ったら&#39;, kanaOut: &#39;う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ったら&#39;, kanaOut: &#39;つ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ったら&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;んだら&#39;, kanaOut: &#39;ぬ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;んだら&#39;, kanaOut: &#39;ぶ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;んだら&#39;, kanaOut: &#39;む&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;じたら&#39;, kanaOut: &#39;ずる&#39;, rulesIn: [], rulesOut: [&#39;vz&#39;]),
+    DeinflectRule(kanaIn: &#39;したら&#39;, kanaOut: &#39;する&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(kanaIn: &#39;為たら&#39;, kanaOut: &#39;為る&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(kanaIn: &#39;きたら&#39;, kanaOut: &#39;くる&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;来たら&#39;, kanaOut: &#39;来る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;來たら&#39;, kanaOut: &#39;來る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;いったら&#39;, kanaOut: &#39;いく&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;おうたら&#39;, kanaOut: &#39;おう&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;こうたら&#39;, kanaOut: &#39;こう&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;そうたら&#39;, kanaOut: &#39;そう&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;とうたら&#39;, kanaOut: &#39;とう&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;行ったら&#39;, kanaOut: &#39;行く&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;逝ったら&#39;, kanaOut: &#39;逝く&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;往ったら&#39;, kanaOut: &#39;往く&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;請うたら&#39;, kanaOut: &#39;請う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;乞うたら&#39;, kanaOut: &#39;乞う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;恋うたら&#39;, kanaOut: &#39;恋う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;問うたら&#39;, kanaOut: &#39;問う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;負うたら&#39;, kanaOut: &#39;負う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;沿うたら&#39;, kanaOut: &#39;沿う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;添うたら&#39;, kanaOut: &#39;添う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;副うたら&#39;, kanaOut: &#39;副う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;厭うたら&#39;, kanaOut: &#39;厭う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;のたもうたら&#39;, kanaOut: &#39;のたまう&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+  ],
+  &#39;-tari&#39;: [
+    DeinflectRule(
+        kanaIn: &#39;かったり&#39;, kanaOut: &#39;い&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(kanaIn: &#39;たり&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;いたり&#39;, kanaOut: &#39;く&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;いだり&#39;, kanaOut: &#39;ぐ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;したり&#39;, kanaOut: &#39;す&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ったり&#39;, kanaOut: &#39;う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ったり&#39;, kanaOut: &#39;つ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ったり&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;んだり&#39;, kanaOut: &#39;ぬ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;んだり&#39;, kanaOut: &#39;ぶ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;んだり&#39;, kanaOut: &#39;む&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;じたり&#39;, kanaOut: &#39;ずる&#39;, rulesIn: [], rulesOut: [&#39;vz&#39;]),
+    DeinflectRule(kanaIn: &#39;したり&#39;, kanaOut: &#39;する&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(kanaIn: &#39;為たり&#39;, kanaOut: &#39;為る&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(kanaIn: &#39;きたり&#39;, kanaOut: &#39;くる&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;来たり&#39;, kanaOut: &#39;来る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;來たり&#39;, kanaOut: &#39;來る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;いったり&#39;, kanaOut: &#39;いく&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;おうたり&#39;, kanaOut: &#39;おう&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;こうたり&#39;, kanaOut: &#39;こう&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;そうたり&#39;, kanaOut: &#39;そう&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;とうたり&#39;, kanaOut: &#39;とう&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;行ったり&#39;, kanaOut: &#39;行く&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;逝ったり&#39;, kanaOut: &#39;逝く&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;往ったり&#39;, kanaOut: &#39;往く&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;請うたり&#39;, kanaOut: &#39;請う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;乞うたり&#39;, kanaOut: &#39;乞う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;恋うたり&#39;, kanaOut: &#39;恋う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;問うたり&#39;, kanaOut: &#39;問う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;負うたり&#39;, kanaOut: &#39;負う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;沿うたり&#39;, kanaOut: &#39;沿う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;添うたり&#39;, kanaOut: &#39;添う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;副うたり&#39;, kanaOut: &#39;副う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;厭うたり&#39;, kanaOut: &#39;厭う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;のたもうたり&#39;, kanaOut: &#39;のたまう&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+  ],
+  &#39;-te&#39;: [
+    DeinflectRule(
+        kanaIn: &#39;くて&#39;, kanaOut: &#39;い&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;て&#39;, kanaOut: &#39;る&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;いて&#39;, kanaOut: &#39;く&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;いで&#39;, kanaOut: &#39;ぐ&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;して&#39;, kanaOut: &#39;す&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;って&#39;, kanaOut: &#39;う&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;って&#39;, kanaOut: &#39;つ&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;って&#39;, kanaOut: &#39;る&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;んで&#39;, kanaOut: &#39;ぬ&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;んで&#39;, kanaOut: &#39;ぶ&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;んで&#39;, kanaOut: &#39;む&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;じて&#39;, kanaOut: &#39;ずる&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;vz&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;して&#39;, kanaOut: &#39;する&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;為て&#39;, kanaOut: &#39;為る&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;きて&#39;, kanaOut: &#39;くる&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;来て&#39;, kanaOut: &#39;来る&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;來て&#39;, kanaOut: &#39;來る&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;いって&#39;, kanaOut: &#39;いく&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;おうて&#39;, kanaOut: &#39;おう&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;こうて&#39;, kanaOut: &#39;こう&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;そうて&#39;, kanaOut: &#39;そう&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;とうて&#39;, kanaOut: &#39;とう&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;行って&#39;, kanaOut: &#39;行く&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;逝って&#39;, kanaOut: &#39;逝く&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;往って&#39;, kanaOut: &#39;往く&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;請うて&#39;, kanaOut: &#39;請う&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;乞うて&#39;, kanaOut: &#39;乞う&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;恋うて&#39;, kanaOut: &#39;恋う&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;問うて&#39;, kanaOut: &#39;問う&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;負うて&#39;, kanaOut: &#39;負う&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;沿うて&#39;, kanaOut: &#39;沿う&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;添うて&#39;, kanaOut: &#39;添う&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;副うて&#39;, kanaOut: &#39;副う&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;厭うて&#39;, kanaOut: &#39;厭う&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;のたもうて&#39;, kanaOut: &#39;のたまう&#39;, rulesIn: [&#39;iru&#39;], rulesOut: [&#39;v5&#39;]),
+  ],
+  &#39;-zu&#39;: [
+    DeinflectRule(kanaIn: &#39;ず&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;かず&#39;, kanaOut: &#39;く&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;がず&#39;, kanaOut: &#39;ぐ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;さず&#39;, kanaOut: &#39;す&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;たず&#39;, kanaOut: &#39;つ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;なず&#39;, kanaOut: &#39;ぬ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ばず&#39;, kanaOut: &#39;ぶ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;まず&#39;, kanaOut: &#39;む&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;らず&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;わず&#39;, kanaOut: &#39;う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ぜず&#39;, kanaOut: &#39;ずる&#39;, rulesIn: [], rulesOut: [&#39;vz&#39;]),
+    DeinflectRule(kanaIn: &#39;せず&#39;, kanaOut: &#39;する&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(kanaIn: &#39;為ず&#39;, kanaOut: &#39;為る&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(kanaIn: &#39;こず&#39;, kanaOut: &#39;くる&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;来ず&#39;, kanaOut: &#39;来る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;來ず&#39;, kanaOut: &#39;來る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+  ],
+  &#39;-nu&#39;: [
+    DeinflectRule(kanaIn: &#39;ぬ&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;かぬ&#39;, kanaOut: &#39;く&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;がぬ&#39;, kanaOut: &#39;ぐ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;さぬ&#39;, kanaOut: &#39;す&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;たぬ&#39;, kanaOut: &#39;つ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;なぬ&#39;, kanaOut: &#39;ぬ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ばぬ&#39;, kanaOut: &#39;ぶ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;まぬ&#39;, kanaOut: &#39;む&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;らぬ&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;わぬ&#39;, kanaOut: &#39;う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ぜぬ&#39;, kanaOut: &#39;ずる&#39;, rulesIn: [], rulesOut: [&#39;vz&#39;]),
+    DeinflectRule(kanaIn: &#39;せぬ&#39;, kanaOut: &#39;する&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(kanaIn: &#39;為ぬ&#39;, kanaOut: &#39;為る&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(kanaIn: &#39;こぬ&#39;, kanaOut: &#39;くる&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;来ぬ&#39;, kanaOut: &#39;来る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;來ぬ&#39;, kanaOut: &#39;來る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+  ],
+  &#39;adv&#39;: [
+    DeinflectRule(kanaIn: &#39;く&#39;, kanaOut: &#39;い&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+  ],
+  &#39;causative&#39;: [
+    DeinflectRule(
+        kanaIn: &#39;させる&#39;, kanaOut: &#39;る&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;かせる&#39;, kanaOut: &#39;く&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;がせる&#39;, kanaOut: &#39;ぐ&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;させる&#39;, kanaOut: &#39;す&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;たせる&#39;, kanaOut: &#39;つ&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;なせる&#39;, kanaOut: &#39;ぬ&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;ばせる&#39;, kanaOut: &#39;ぶ&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;ませる&#39;, kanaOut: &#39;む&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;らせる&#39;, kanaOut: &#39;る&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;わせる&#39;, kanaOut: &#39;う&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;じさせる&#39;, kanaOut: &#39;ずる&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vz&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;ぜさせる&#39;, kanaOut: &#39;ずる&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vz&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;させる&#39;, kanaOut: &#39;する&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;為せる&#39;, kanaOut: &#39;為る&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;せさせる&#39;, kanaOut: &#39;する&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;為させる&#39;, kanaOut: &#39;為る&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;こさせる&#39;, kanaOut: &#39;くる&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;来させる&#39;, kanaOut: &#39;来る&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;來させる&#39;, kanaOut: &#39;來る&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vk&#39;]),
+  ],
+  &#39;imperative&#39;: [
+    DeinflectRule(kanaIn: &#39;ろ&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;よ&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;え&#39;, kanaOut: &#39;う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;け&#39;, kanaOut: &#39;く&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;げ&#39;, kanaOut: &#39;ぐ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;せ&#39;, kanaOut: &#39;す&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;て&#39;, kanaOut: &#39;つ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ね&#39;, kanaOut: &#39;ぬ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;べ&#39;, kanaOut: &#39;ぶ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;め&#39;, kanaOut: &#39;む&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;れ&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;じろ&#39;, kanaOut: &#39;ずる&#39;, rulesIn: [], rulesOut: [&#39;vz&#39;]),
+    DeinflectRule(kanaIn: &#39;ぜよ&#39;, kanaOut: &#39;ずる&#39;, rulesIn: [], rulesOut: [&#39;vz&#39;]),
+    DeinflectRule(kanaIn: &#39;しろ&#39;, kanaOut: &#39;する&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(kanaIn: &#39;せよ&#39;, kanaOut: &#39;する&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(kanaIn: &#39;為ろ&#39;, kanaOut: &#39;為る&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(kanaIn: &#39;為よ&#39;, kanaOut: &#39;為る&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(kanaIn: &#39;こい&#39;, kanaOut: &#39;くる&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;来い&#39;, kanaOut: &#39;来る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;來い&#39;, kanaOut: &#39;來る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+  ],
+  &#39;imperative negative&#39;: [
+    DeinflectRule(
+        kanaIn: &#39;な&#39;,
+        kanaOut: &#39;&#39;,
+        rulesIn: [],
+        rulesOut: [&#39;v1&#39;, &#39;v5&#39;, &#39;vk&#39;, &#39;vs&#39;, &#39;vz&#39;]),
+  ],
+  &#39;masu stem&#39;: [
+    DeinflectRule(kanaIn: &#39;い&#39;, kanaOut: &#39;いる&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;え&#39;, kanaOut: &#39;える&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;き&#39;, kanaOut: &#39;きる&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;ぎ&#39;, kanaOut: &#39;ぎる&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;け&#39;, kanaOut: &#39;ける&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;げ&#39;, kanaOut: &#39;げる&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;じ&#39;, kanaOut: &#39;じる&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;せ&#39;, kanaOut: &#39;せる&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;ぜ&#39;, kanaOut: &#39;ぜる&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;ち&#39;, kanaOut: &#39;ちる&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;て&#39;, kanaOut: &#39;てる&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;で&#39;, kanaOut: &#39;でる&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;に&#39;, kanaOut: &#39;にる&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;ね&#39;, kanaOut: &#39;ねる&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;ひ&#39;, kanaOut: &#39;ひる&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;び&#39;, kanaOut: &#39;びる&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;へ&#39;, kanaOut: &#39;へる&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;べ&#39;, kanaOut: &#39;べる&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;み&#39;, kanaOut: &#39;みる&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;め&#39;, kanaOut: &#39;める&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;り&#39;, kanaOut: &#39;りる&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;れ&#39;, kanaOut: &#39;れる&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;い&#39;, kanaOut: &#39;う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;き&#39;, kanaOut: &#39;く&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ぎ&#39;, kanaOut: &#39;ぐ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;し&#39;, kanaOut: &#39;す&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ち&#39;, kanaOut: &#39;つ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;に&#39;, kanaOut: &#39;ぬ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;び&#39;, kanaOut: &#39;ぶ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;み&#39;, kanaOut: &#39;む&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;り&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;き&#39;, kanaOut: &#39;くる&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;来&#39;, kanaOut: &#39;来る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;來&#39;, kanaOut: &#39;來る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+  ],
+  &#39;negative&#39;: [
+    DeinflectRule(
+        kanaIn: &#39;くない&#39;, kanaOut: &#39;い&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;ない&#39;, kanaOut: &#39;る&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;かない&#39;, kanaOut: &#39;く&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;がない&#39;, kanaOut: &#39;ぐ&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;さない&#39;, kanaOut: &#39;す&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;たない&#39;, kanaOut: &#39;つ&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;なない&#39;, kanaOut: &#39;ぬ&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;ばない&#39;, kanaOut: &#39;ぶ&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;まない&#39;, kanaOut: &#39;む&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;らない&#39;, kanaOut: &#39;る&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;わない&#39;, kanaOut: &#39;う&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;じない&#39;, kanaOut: &#39;ずる&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;vz&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;しない&#39;, kanaOut: &#39;する&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;為ない&#39;, kanaOut: &#39;為る&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;こない&#39;, kanaOut: &#39;くる&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;来ない&#39;, kanaOut: &#39;来る&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;來ない&#39;, kanaOut: &#39;來る&#39;, rulesIn: [&#39;adj-i&#39;], rulesOut: [&#39;vk&#39;]),
+  ],
+  &#39;noun&#39;: [
+    DeinflectRule(kanaIn: &#39;さ&#39;, kanaOut: &#39;い&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+  ],
+  &#39;passive&#39;: [
+    DeinflectRule(
+        kanaIn: &#39;かれる&#39;, kanaOut: &#39;く&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;がれる&#39;, kanaOut: &#39;ぐ&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;される&#39;, kanaOut: &#39;す&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;たれる&#39;, kanaOut: &#39;つ&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;なれる&#39;, kanaOut: &#39;ぬ&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;ばれる&#39;, kanaOut: &#39;ぶ&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;まれる&#39;, kanaOut: &#39;む&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;われる&#39;, kanaOut: &#39;う&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;られる&#39;, kanaOut: &#39;る&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;じされる&#39;, kanaOut: &#39;ずる&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vz&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;ぜされる&#39;, kanaOut: &#39;ずる&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vz&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;される&#39;, kanaOut: &#39;する&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;為れる&#39;, kanaOut: &#39;為る&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;こられる&#39;, kanaOut: &#39;くる&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;来られる&#39;, kanaOut: &#39;来る&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;來られる&#39;, kanaOut: &#39;來る&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vk&#39;]),
+  ],
+  &#39;past&#39;: [
+    DeinflectRule(
+        kanaIn: &#39;かった&#39;, kanaOut: &#39;い&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(kanaIn: &#39;た&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;いた&#39;, kanaOut: &#39;く&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;いだ&#39;, kanaOut: &#39;ぐ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;した&#39;, kanaOut: &#39;す&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;った&#39;, kanaOut: &#39;う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;った&#39;, kanaOut: &#39;つ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;った&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;んだ&#39;, kanaOut: &#39;ぬ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;んだ&#39;, kanaOut: &#39;ぶ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;んだ&#39;, kanaOut: &#39;む&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;じた&#39;, kanaOut: &#39;ずる&#39;, rulesIn: [], rulesOut: [&#39;vz&#39;]),
+    DeinflectRule(kanaIn: &#39;した&#39;, kanaOut: &#39;する&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(kanaIn: &#39;為た&#39;, kanaOut: &#39;為る&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(kanaIn: &#39;きた&#39;, kanaOut: &#39;くる&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;来た&#39;, kanaOut: &#39;来る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;來た&#39;, kanaOut: &#39;來る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;いった&#39;, kanaOut: &#39;いく&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;おうた&#39;, kanaOut: &#39;おう&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;こうた&#39;, kanaOut: &#39;こう&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;そうた&#39;, kanaOut: &#39;そう&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;とうた&#39;, kanaOut: &#39;とう&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;行った&#39;, kanaOut: &#39;行く&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;逝った&#39;, kanaOut: &#39;逝く&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;往った&#39;, kanaOut: &#39;往く&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;請うた&#39;, kanaOut: &#39;請う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;乞うた&#39;, kanaOut: &#39;乞う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;恋うた&#39;, kanaOut: &#39;恋う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;問うた&#39;, kanaOut: &#39;問う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;負うた&#39;, kanaOut: &#39;負う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;沿うた&#39;, kanaOut: &#39;沿う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;添うた&#39;, kanaOut: &#39;添う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;副うた&#39;, kanaOut: &#39;副う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;厭うた&#39;, kanaOut: &#39;厭う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;のたもうた&#39;, kanaOut: &#39;のたまう&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+  ],
+  &#39;polite&#39;: [
+    DeinflectRule(kanaIn: &#39;ます&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;います&#39;, kanaOut: &#39;う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;きます&#39;, kanaOut: &#39;く&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ぎます&#39;, kanaOut: &#39;ぐ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;します&#39;, kanaOut: &#39;す&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ちます&#39;, kanaOut: &#39;つ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;にます&#39;, kanaOut: &#39;ぬ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;びます&#39;, kanaOut: &#39;ぶ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;みます&#39;, kanaOut: &#39;む&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ります&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;じます&#39;, kanaOut: &#39;ずる&#39;, rulesIn: [], rulesOut: [&#39;vz&#39;]),
+    DeinflectRule(kanaIn: &#39;します&#39;, kanaOut: &#39;する&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(kanaIn: &#39;為ます&#39;, kanaOut: &#39;為る&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(kanaIn: &#39;きます&#39;, kanaOut: &#39;くる&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;来ます&#39;, kanaOut: &#39;来る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;來ます&#39;, kanaOut: &#39;來る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+  ],
+  &#39;polite negative&#39;: [
+    DeinflectRule(
+        kanaIn: &#39;くありません&#39;, kanaOut: &#39;い&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(kanaIn: &#39;ません&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;いません&#39;, kanaOut: &#39;う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;きません&#39;, kanaOut: &#39;く&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ぎません&#39;, kanaOut: &#39;ぐ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;しません&#39;, kanaOut: &#39;す&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ちません&#39;, kanaOut: &#39;つ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;にません&#39;, kanaOut: &#39;ぬ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;びません&#39;, kanaOut: &#39;ぶ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;みません&#39;, kanaOut: &#39;む&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;りません&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;じません&#39;, kanaOut: &#39;ずる&#39;, rulesIn: [], rulesOut: [&#39;vz&#39;]),
+    DeinflectRule(kanaIn: &#39;しません&#39;, kanaOut: &#39;する&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(kanaIn: &#39;為ません&#39;, kanaOut: &#39;為る&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(kanaIn: &#39;きません&#39;, kanaOut: &#39;くる&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;来ません&#39;, kanaOut: &#39;来る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;來ません&#39;, kanaOut: &#39;來る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+  ],
+  &#39;polite past&#39;: [
+    DeinflectRule(kanaIn: &#39;ました&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;いました&#39;, kanaOut: &#39;う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;きました&#39;, kanaOut: &#39;く&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ぎました&#39;, kanaOut: &#39;ぐ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;しました&#39;, kanaOut: &#39;す&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ちました&#39;, kanaOut: &#39;つ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;にました&#39;, kanaOut: &#39;ぬ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;びました&#39;, kanaOut: &#39;ぶ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;みました&#39;, kanaOut: &#39;む&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;りました&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;じました&#39;, kanaOut: &#39;ずる&#39;, rulesIn: [], rulesOut: [&#39;vz&#39;]),
+    DeinflectRule(kanaIn: &#39;しました&#39;, kanaOut: &#39;する&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(kanaIn: &#39;為ました&#39;, kanaOut: &#39;為る&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(kanaIn: &#39;きました&#39;, kanaOut: &#39;くる&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;来ました&#39;, kanaOut: &#39;来る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;來ました&#39;, kanaOut: &#39;來る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+  ],
+  &#39;polite past negative&#39;: [
+    DeinflectRule(
+        kanaIn: &#39;くありませんでした&#39;, kanaOut: &#39;い&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;ませんでした&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;いませんでした&#39;, kanaOut: &#39;う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;きませんでした&#39;, kanaOut: &#39;く&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;ぎませんでした&#39;, kanaOut: &#39;ぐ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;しませんでした&#39;, kanaOut: &#39;す&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;ちませんでした&#39;, kanaOut: &#39;つ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;にませんでした&#39;, kanaOut: &#39;ぬ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;びませんでした&#39;, kanaOut: &#39;ぶ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;みませんでした&#39;, kanaOut: &#39;む&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;りませんでした&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;じませんでした&#39;, kanaOut: &#39;ずる&#39;, rulesIn: [], rulesOut: [&#39;vz&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;しませんでした&#39;, kanaOut: &#39;する&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;為ませんでした&#39;, kanaOut: &#39;為る&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;きませんでした&#39;, kanaOut: &#39;くる&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;来ませんでした&#39;, kanaOut: &#39;来る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;來ませんでした&#39;, kanaOut: &#39;來る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+  ],
+  &#39;polite volitional&#39;: [
+    DeinflectRule(kanaIn: &#39;ましょう&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;いましょう&#39;, kanaOut: &#39;う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;きましょう&#39;, kanaOut: &#39;く&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ぎましょう&#39;, kanaOut: &#39;ぐ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;しましょう&#39;, kanaOut: &#39;す&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ちましょう&#39;, kanaOut: &#39;つ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;にましょう&#39;, kanaOut: &#39;ぬ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;びましょう&#39;, kanaOut: &#39;ぶ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;みましょう&#39;, kanaOut: &#39;む&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;りましょう&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;じましょう&#39;, kanaOut: &#39;ずる&#39;, rulesIn: [], rulesOut: [&#39;vz&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;しましょう&#39;, kanaOut: &#39;する&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;為ましょう&#39;, kanaOut: &#39;為る&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;きましょう&#39;, kanaOut: &#39;くる&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;来ましょう&#39;, kanaOut: &#39;来る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;來ましょう&#39;, kanaOut: &#39;來る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+  ],
+  &#39;potential&#39;: [
+    DeinflectRule(
+        kanaIn: &#39;れる&#39;, kanaOut: &#39;る&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v1&#39;, &#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;える&#39;, kanaOut: &#39;う&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;ける&#39;, kanaOut: &#39;く&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;げる&#39;, kanaOut: &#39;ぐ&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;せる&#39;, kanaOut: &#39;す&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;てる&#39;, kanaOut: &#39;つ&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;ねる&#39;, kanaOut: &#39;ぬ&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;べる&#39;, kanaOut: &#39;ぶ&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;める&#39;, kanaOut: &#39;む&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;これる&#39;, kanaOut: &#39;くる&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;来れる&#39;, kanaOut: &#39;来る&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;來れる&#39;, kanaOut: &#39;來る&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vk&#39;]),
+  ],
+  &#39;potential or passive&#39;: [
+    DeinflectRule(
+        kanaIn: &#39;られる&#39;, kanaOut: &#39;る&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;ざれる&#39;, kanaOut: &#39;ずる&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vz&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;ぜられる&#39;, kanaOut: &#39;ずる&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vz&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;せられる&#39;, kanaOut: &#39;する&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;為られる&#39;, kanaOut: &#39;為る&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;こられる&#39;, kanaOut: &#39;くる&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;来られる&#39;, kanaOut: &#39;来る&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;來られる&#39;, kanaOut: &#39;來る&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;vk&#39;]),
+  ],
+  &#39;volitional&#39;: [
+    DeinflectRule(kanaIn: &#39;よう&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(kanaIn: &#39;おう&#39;, kanaOut: &#39;う&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;こう&#39;, kanaOut: &#39;く&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ごう&#39;, kanaOut: &#39;ぐ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;そう&#39;, kanaOut: &#39;す&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;とう&#39;, kanaOut: &#39;つ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;のう&#39;, kanaOut: &#39;ぬ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ぼう&#39;, kanaOut: &#39;ぶ&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;もう&#39;, kanaOut: &#39;む&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;ろう&#39;, kanaOut: &#39;る&#39;, rulesIn: [], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(kanaIn: &#39;じよう&#39;, kanaOut: &#39;ずる&#39;, rulesIn: [], rulesOut: [&#39;vz&#39;]),
+    DeinflectRule(kanaIn: &#39;しよう&#39;, kanaOut: &#39;する&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(kanaIn: &#39;為よう&#39;, kanaOut: &#39;為る&#39;, rulesIn: [], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(kanaIn: &#39;こよう&#39;, kanaOut: &#39;くる&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;来よう&#39;, kanaOut: &#39;来る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(kanaIn: &#39;來よう&#39;, kanaOut: &#39;來る&#39;, rulesIn: [], rulesOut: [&#39;vk&#39;]),
+  ],
+  &#39;causative passive&#39;: [
+    DeinflectRule(
+        kanaIn: &#39;かされる&#39;, kanaOut: &#39;く&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;がされる&#39;, kanaOut: &#39;ぐ&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;たされる&#39;, kanaOut: &#39;つ&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;なされる&#39;, kanaOut: &#39;ぬ&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;ばされる&#39;, kanaOut: &#39;ぶ&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;まされる&#39;, kanaOut: &#39;む&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;らされる&#39;, kanaOut: &#39;る&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;わされる&#39;, kanaOut: &#39;う&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;v5&#39;]),
+  ],
+  &#39;-toku&#39;: [
+    DeinflectRule(
+        kanaIn: &#39;とく&#39;, kanaOut: &#39;る&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v1&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;いとく&#39;, kanaOut: &#39;く&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;いどく&#39;, kanaOut: &#39;ぐ&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;しとく&#39;, kanaOut: &#39;す&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;っとく&#39;, kanaOut: &#39;う&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;っとく&#39;, kanaOut: &#39;つ&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;っとく&#39;, kanaOut: &#39;る&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;んどく&#39;, kanaOut: &#39;ぬ&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;んどく&#39;, kanaOut: &#39;ぶ&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;んどく&#39;, kanaOut: &#39;む&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;v5&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;じとく&#39;, kanaOut: &#39;ずる&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;vz&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;しとく&#39;, kanaOut: &#39;する&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;為とく&#39;, kanaOut: &#39;為る&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;vs&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;きとく&#39;, kanaOut: &#39;くる&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;来とく&#39;, kanaOut: &#39;来る&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;vk&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;來とく&#39;, kanaOut: &#39;來る&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;vk&#39;]),
+  ],
+  &#39;progressive or perfect&#39;: [
+    DeinflectRule(
+        kanaIn: &#39;ている&#39;, kanaOut: &#39;て&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;iru&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;ておる&#39;, kanaOut: &#39;て&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;iru&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;てる&#39;, kanaOut: &#39;て&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;iru&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;でいる&#39;, kanaOut: &#39;で&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;iru&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;でおる&#39;, kanaOut: &#39;で&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;iru&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;でる&#39;, kanaOut: &#39;で&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;iru&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;とる&#39;, kanaOut: &#39;て&#39;, rulesIn: [&#39;v5&#39;], rulesOut: [&#39;iru&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;ないでいる&#39;, kanaOut: &#39;ない&#39;, rulesIn: [&#39;v1&#39;], rulesOut: [&#39;adj-i&#39;]),
+  ],
+  &#39;-ki&#39;: [
+    DeinflectRule(kanaIn: &#39;き&#39;, kanaOut: &#39;い&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+  ],
+  &#39;-ge&#39;: [
+    DeinflectRule(
+        kanaIn: &#39;しげ&#39;, kanaOut: &#39;しい&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+  ],
+  &#39;-e&#39;: [
+    DeinflectRule(
+        kanaIn: &#39;ねえ&#39;, kanaOut: &#39;ない&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;めえ&#39;, kanaOut: &#39;むい&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;みい&#39;, kanaOut: &#39;むい&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;ちぇえ&#39;, kanaOut: &#39;つい&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;ちい&#39;, kanaOut: &#39;つい&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;せえ&#39;, kanaOut: &#39;すい&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;ええ&#39;, kanaOut: &#39;いい&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;ええ&#39;, kanaOut: &#39;わい&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;ええ&#39;, kanaOut: &#39;よい&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;いぇえ&#39;, kanaOut: &#39;よい&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;うぇえ&#39;, kanaOut: &#39;わい&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;けえ&#39;, kanaOut: &#39;かい&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;げえ&#39;, kanaOut: &#39;がい&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;げえ&#39;, kanaOut: &#39;ごい&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;せえ&#39;, kanaOut: &#39;さい&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;めえ&#39;, kanaOut: &#39;まい&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;ぜえ&#39;, kanaOut: &#39;ずい&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;っぜえ&#39;, kanaOut: &#39;ずい&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;れえ&#39;, kanaOut: &#39;らい&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;れえ&#39;, kanaOut: &#39;らい&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;ちぇえ&#39;, kanaOut: &#39;ちゃい&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;でえ&#39;, kanaOut: &#39;どい&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;れえ&#39;, kanaOut: &#39;れい&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+    DeinflectRule(
+        kanaIn: &#39;べえ&#39;, kanaOut: &#39;ばい&#39;, rulesIn: [], rulesOut: [&#39;adj-i&#39;]),
+  ],
+};</code></pre>
+</section>
+
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+  <li><a href="../index.html">yuuna</a></li>
+  <li><a href="../language/language-library.html">language</a></li>
+  <li class="self-crumb">deinflectRules property</li>
+</ol>
+
+
+    <h5>language library</h5>
+    <ol>
+      <li class="section-title"><a href="../language/language-library.html#classes">Classes</a></li>
+        <li><a href="../language/Deinflection-class.html">Deinflection</a></li>
+        <li><a href="../language/Deinflector-class.html">Deinflector</a></li>
+        <li><a href="../language/DeinflectRule-class.html">DeinflectRule</a></li>
+        <li><a href="../language/EnglishLanguage-class.html">EnglishLanguage</a></li>
+        <li><a href="../language/FuriganaDistributionGroup-class.html">FuriganaDistributionGroup</a></li>
+        <li><a href="../language/JapaneseLanguage-class.html">JapaneseLanguage</a></li>
+        <li><a href="../language/Language-class.html">Language</a></li>
+        <li><a href="../language/LanguageUtils-class.html">LanguageUtils</a></li>
+        <li><a href="../language/NormalizedReason-class.html">NormalizedReason</a></li>
+        <li><a href="../language/Variant-class.html">Variant</a></li>
+
+      <li class="section-title"><a href="../language/language-library.html#extensions">Extensions</a></li>
+        <li><a href="../language/RegExpExtension.html">RegExpExtension</a></li>
+        <li><a href="../language/StringExtension.html">StringExtension</a></li>
+
+
+
+      <li class="section-title"><a href="../language/language-library.html#properties">Properties</a></li>
+        <li><a href="../language/deinflectRules.html">deinflectRules</a></li>
+
+      <li class="section-title"><a href="../language/language-library.html#functions">Functions</a></li>
+        <li><a href="../language/prepareSearchResultsEnglishLanguage.html">prepareSearchResultsEnglishLanguage</a></li>
+        <li><a href="../language/prepareSearchResultsJapaneseLanguage.html">prepareSearchResultsJapaneseLanguage</a></li>
+        <li><a href="../language/prepareSearchResultsStandard.html">prepareSearchResultsStandard</a></li>
+
+
+
+</ol>
+
+  </div><!--/.sidebar-offcanvas-left-->
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    yuuna
+      2.6.7+81
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+

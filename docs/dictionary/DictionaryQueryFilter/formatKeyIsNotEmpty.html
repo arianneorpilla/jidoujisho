@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the formatKeyIsNotEmpty method from the DictionaryQueryFilter extension, for the Dart programming language.">
+  <title>formatKeyIsNotEmpty method - DictionaryQueryFilter extension - dictionary library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">yuuna</a></li>
+    <li><a href="../../dictionary/dictionary-library.html">dictionary</a></li>
+    <li><a href="../../dictionary/DictionaryQueryFilter.html">DictionaryQueryFilter</a></li>
+    <li class="self-crumb">formatKeyIsNotEmpty method</li>
+  </ol>
+  <div class="self-name">formatKeyIsNotEmpty</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span class="material-symbols-outlined">
+        brightness_4
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+  <div id="dartdoc-main-content" class="main-content">
+      <div>
+<h1><span class="kind-method">formatKeyIsNotEmpty</span> method 
+    <a href="https://dart.dev/null-safety" class="feature feature-null-safety" title="Supports the null safety language feature.">Null safety</a>
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+
+<span class="returntype"><a href="https://pub.dev/documentation/isar/3.1.0+1/isar/QueryBuilder-class.html">QueryBuilder</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../dictionary/Dictionary-class.html">Dictionary</a></span>, <span class="type-parameter"><a href="../../dictionary/Dictionary-class.html">Dictionary</a></span>, <span class="type-parameter">QAfterFilterCondition</span>&gt;</span></span>
+<span class="name ">formatKeyIsNotEmpty</span>(<wbr>)
+
+      
+
+    </section>
+    
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">QueryBuilder&lt;Dictionary, Dictionary, QAfterFilterCondition&gt;
+    formatKeyIsNotEmpty() {
+  return QueryBuilder.apply(this, (query) {
+    return query.addFilterCondition(FilterCondition.greaterThan(
+      property: r&#39;formatKey&#39;,
+      value: &#39;&#39;,
+    ));
+  });
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+  <li><a href="../../index.html">yuuna</a></li>
+  <li><a href="../../dictionary/dictionary-library.html">dictionary</a></li>
+  <li><a href="../../dictionary/DictionaryQueryFilter.html">DictionaryQueryFilter</a></li>
+  <li class="self-crumb">formatKeyIsNotEmpty method</li>
+</ol>
+
+
+    <h5>DictionaryQueryFilter extension</h5>
+    <ol>
+
+
+
+
+
+        <li class="section-title"><a href="../../dictionary/DictionaryQueryFilter.html#instance-methods">Methods</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/collapsedLanguagesElementBetween.html">collapsedLanguagesElementBetween</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/collapsedLanguagesElementContains.html">collapsedLanguagesElementContains</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/collapsedLanguagesElementEndsWith.html">collapsedLanguagesElementEndsWith</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/collapsedLanguagesElementEqualTo.html">collapsedLanguagesElementEqualTo</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/collapsedLanguagesElementGreaterThan.html">collapsedLanguagesElementGreaterThan</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/collapsedLanguagesElementIsEmpty.html">collapsedLanguagesElementIsEmpty</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/collapsedLanguagesElementIsNotEmpty.html">collapsedLanguagesElementIsNotEmpty</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/collapsedLanguagesElementLessThan.html">collapsedLanguagesElementLessThan</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/collapsedLanguagesElementMatches.html">collapsedLanguagesElementMatches</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/collapsedLanguagesElementStartsWith.html">collapsedLanguagesElementStartsWith</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/collapsedLanguagesIsEmpty.html">collapsedLanguagesIsEmpty</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/collapsedLanguagesIsNotEmpty.html">collapsedLanguagesIsNotEmpty</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/collapsedLanguagesLengthBetween.html">collapsedLanguagesLengthBetween</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/collapsedLanguagesLengthEqualTo.html">collapsedLanguagesLengthEqualTo</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/collapsedLanguagesLengthGreaterThan.html">collapsedLanguagesLengthGreaterThan</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/collapsedLanguagesLengthLessThan.html">collapsedLanguagesLengthLessThan</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/formatKeyBetween.html">formatKeyBetween</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/formatKeyContains.html">formatKeyContains</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/formatKeyEndsWith.html">formatKeyEndsWith</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/formatKeyEqualTo.html">formatKeyEqualTo</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/formatKeyGreaterThan.html">formatKeyGreaterThan</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/formatKeyIsEmpty.html">formatKeyIsEmpty</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/formatKeyIsNotEmpty.html">formatKeyIsNotEmpty</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/formatKeyLessThan.html">formatKeyLessThan</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/formatKeyMatches.html">formatKeyMatches</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/formatKeyStartsWith.html">formatKeyStartsWith</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/hashCodeBetween.html">hashCodeBetween</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/hashCodeEqualTo.html">hashCodeEqualTo</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/hashCodeGreaterThan.html">hashCodeGreaterThan</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/hashCodeLessThan.html">hashCodeLessThan</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/hiddenLanguagesElementBetween.html">hiddenLanguagesElementBetween</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/hiddenLanguagesElementContains.html">hiddenLanguagesElementContains</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/hiddenLanguagesElementEndsWith.html">hiddenLanguagesElementEndsWith</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/hiddenLanguagesElementEqualTo.html">hiddenLanguagesElementEqualTo</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/hiddenLanguagesElementGreaterThan.html">hiddenLanguagesElementGreaterThan</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/hiddenLanguagesElementIsEmpty.html">hiddenLanguagesElementIsEmpty</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/hiddenLanguagesElementIsNotEmpty.html">hiddenLanguagesElementIsNotEmpty</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/hiddenLanguagesElementLessThan.html">hiddenLanguagesElementLessThan</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/hiddenLanguagesElementMatches.html">hiddenLanguagesElementMatches</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/hiddenLanguagesElementStartsWith.html">hiddenLanguagesElementStartsWith</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/hiddenLanguagesIsEmpty.html">hiddenLanguagesIsEmpty</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/hiddenLanguagesIsNotEmpty.html">hiddenLanguagesIsNotEmpty</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/hiddenLanguagesLengthBetween.html">hiddenLanguagesLengthBetween</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/hiddenLanguagesLengthEqualTo.html">hiddenLanguagesLengthEqualTo</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/hiddenLanguagesLengthGreaterThan.html">hiddenLanguagesLengthGreaterThan</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/hiddenLanguagesLengthLessThan.html">hiddenLanguagesLengthLessThan</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/idBetween.html">idBetween</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/idEqualTo.html">idEqualTo</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/idGreaterThan.html">idGreaterThan</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/idLessThan.html">idLessThan</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/nameBetween.html">nameBetween</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/nameContains.html">nameContains</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/nameEndsWith.html">nameEndsWith</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/nameEqualTo.html">nameEqualTo</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/nameGreaterThan.html">nameGreaterThan</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/nameIsEmpty.html">nameIsEmpty</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/nameIsNotEmpty.html">nameIsNotEmpty</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/nameLessThan.html">nameLessThan</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/nameMatches.html">nameMatches</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/nameStartsWith.html">nameStartsWith</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/orderBetween.html">orderBetween</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/orderEqualTo.html">orderEqualTo</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/orderGreaterThan.html">orderGreaterThan</a></li>
+          <li><a href="../../dictionary/DictionaryQueryFilter/orderLessThan.html">orderLessThan</a></li>
+
+
+
+
+</ol>
+
+  </div><!--/.sidebar-offcanvas-->
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    yuuna
+      2.6.7+81
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the getPitchWidget method from the JapaneseLanguage class, for the Dart programming language.">
+  <title>getPitchWidget method - JapaneseLanguage class - language library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">yuuna</a></li>
+    <li><a href="../../language/language-library.html">language</a></li>
+    <li><a href="../../language/JapaneseLanguage-class.html">JapaneseLanguage</a></li>
+    <li class="self-crumb">getPitchWidget method</li>
+  </ol>
+  <div class="self-name">getPitchWidget</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span class="material-symbols-outlined">
+        brightness_4
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+  <div id="dartdoc-main-content" class="main-content">
+      <div>
+<h1><span class="kind-method">getPitchWidget</span> method 
+    <a href="https://dart.dev/null-safety" class="feature feature-null-safety" title="Supports the null safety language feature.">Null safety</a>
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+  <div>
+    <ol class="annotation-list">
+        <li>@<a href="https://api.flutter.dev/flutter/dart-core/override-constant.html">override</a></li>
+    </ol>
+  </div>
+
+<span class="returntype"><a href="https://api.flutter.dev/flutter/widgets/Widget-class.html">Widget</a></span>
+<span class="name ">getPitchWidget</span>(<wbr><ol class="parameter-list"><li><span class="parameter" id="getPitchWidget-param-appModel">{<span>required</span> <span class="type-annotation"><a href="../../models/AppModel-class.html">AppModel</a></span> <span class="parameter-name">appModel</span>, </span></li>
+<li><span class="parameter" id="getPitchWidget-param-context"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a></span> <span class="parameter-name">context</span>, </span></li>
+<li><span class="parameter" id="getPitchWidget-param-reading"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">reading</span>, </span></li>
+<li><span class="parameter" id="getPitchWidget-param-downstep"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">downstep</span>}</span></li>
+</ol>)
+
+      <div class="features"><span class="feature">override</span></div>
+
+    </section>
+    
+<section class="desc markdown">
+  <p>Some languages may have custom widgets for generating pronunciation
+diagrams.</p>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">@override
+Widget getPitchWidget({
+  required AppModel appModel,
+  required BuildContext context,
+  required String reading,
+  required int downstep,
+}) {
+  List&lt;Widget&gt; listWidgets = [];
+
+  Color color = Theme.of(context).brightness == Brightness.dark
+      ? Colors.white
+      : Colors.black;
+
+  Widget getAccentTop(String text) {
+    return Container(
+      padding: const EdgeInsets.only(top: 1),
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(color: color),
+        ),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: color,
+          fontSize: appModel.dictionaryFontSize,
+        ),
+      ),
+    );
+  }
+
+  Widget getAccentEnd(String text) {
+    return Container(
+      padding: const EdgeInsets.only(top: 1),
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(color: color),
+          right: BorderSide(color: color),
+        ),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: color,
+          fontSize: appModel.dictionaryFontSize,
+        ),
+      ),
+    );
+  }
+
+  Widget getAccentNone(String text) {
+    return Container(
+      padding: const EdgeInsets.only(top: 1),
+      decoration: const BoxDecoration(
+        border: Border(
+          top: BorderSide(color: Colors.transparent),
+        ),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: color,
+          fontSize: appModel.dictionaryFontSize,
+        ),
+      ),
+    );
+  }
+
+  List&lt;String&gt; moras = [];
+  for (int i = 0; i &lt; reading.length; i++) {
+    String current = reading[i];
+    String? next;
+    if (i + 1 &lt; reading.length) {
+      next = reading[i + 1];
+    }
+
+    if (next != null &amp;&amp; &#39;ゃゅょぁぃぅぇぉャュョァィゥェォ&#39;.contains(next)) {
+      moras.add(current + next);
+      i += 1;
+      continue;
+    } else {
+      moras.add(current);
+    }
+  }
+
+  if (downstep == 0) {
+    for (int i = 0; i &lt; moras.length; i++) {
+      if (i == 0) {
+        listWidgets.add(getAccentNone(moras[i]));
+      } else {
+        listWidgets.add(getAccentTop(moras[i]));
+      }
+    }
+  } else {
+    for (int i = 0; i &lt; moras.length; i++) {
+      if (i == 0 &amp;&amp; i != downstep - 1) {
+        listWidgets.add(getAccentNone(moras[i]));
+      } else if (i &lt; downstep - 1) {
+        listWidgets.add(getAccentTop(moras[i]));
+      } else if (i == downstep - 1) {
+        listWidgets.add(getAccentEnd(moras[i]));
+      } else {
+        listWidgets.add(getAccentNone(moras[i]));
+      }
+    }
+  }
+
+  listWidgets.add(
+    Text(
+      &#39; [$downstep]  &#39;,
+      style: TextStyle(
+        color: color,
+        fontSize: appModel.dictionaryFontSize,
+      ),
+    ),
+  );
+
+  Widget widget = Wrap(
+    crossAxisAlignment: WrapCrossAlignment.end,
+    children: listWidgets,
+  );
+
+  return widget;
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+  <li><a href="../../index.html">yuuna</a></li>
+  <li><a href="../../language/language-library.html">language</a></li>
+  <li><a href="../../language/JapaneseLanguage-class.html">JapaneseLanguage</a></li>
+  <li class="self-crumb">getPitchWidget method</li>
+</ol>
+
+
+    <h5>JapaneseLanguage class</h5>
+    <ol>
+
+
+
+        <li class="section-title">
+          <a href="../../language/JapaneseLanguage-class.html#instance-properties">Properties</a>
+        </li>
+          <li class="inherited"><a href="../../language/Language/countryCode.html">countryCode</a></li>
+          <li class="inherited"><a href="../../language/Language/defaultFontFamily.html">defaultFontFamily</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></li>
+          <li class="inherited"><a href="../../language/Language/helloWorld.html">helloWorld</a></li>
+          <li class="inherited"><a href="../../language/Language/indexMaxDistance.html">indexMaxDistance</a></li>
+          <li class="inherited"><a href="../../language/Language/isSpaceDelimited.html">isSpaceDelimited</a></li>
+          <li class="inherited"><a href="../../language/Language/languageCode.html">languageCode</a></li>
+          <li class="inherited"><a href="../../language/Language/languageCountryCode.html">languageCountryCode</a></li>
+          <li class="inherited"><a href="../../language/Language/languageName.html">languageName</a></li>
+          <li class="inherited"><a href="../../language/Language/locale.html">locale</a></li>
+          <li class="inherited"><a href="../../language/Language/preferVerticalReading.html">preferVerticalReading</a></li>
+          <li class="inherited"><a href="../../language/Language/prepareSearchResults.html">prepareSearchResults</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></li>
+          <li><a href="../../language/JapaneseLanguage/segmentsCache.html">segmentsCache</a></li>
+          <li class="inherited"><a href="../../language/Language/standardFormat.html">standardFormat</a></li>
+          <li class="inherited"><a href="../../language/Language/textBaseline.html">textBaseline</a></li>
+          <li class="inherited"><a href="../../language/Language/textDirection.html">textDirection</a></li>
+          <li class="inherited"><a href="../../language/Language/threeLetterCode.html">threeLetterCode</a></li>
+
+        <li class="section-title"><a href="../../language/JapaneseLanguage-class.html#instance-methods">Methods</a></li>
+          <li><a href="../../language/JapaneseLanguage/fetchFurigana.html">fetchFurigana</a></li>
+          <li><a href="../../language/JapaneseLanguage/getPitchWidget.html">getPitchWidget</a></li>
+          <li class="inherited"><a href="../../language/Language/getSearchTermFromIndex.html">getSearchTermFromIndex</a></li>
+          <li class="inherited"><a href="../../language/Language/getSentenceFromParagraph.html">getSentenceFromParagraph</a></li>
+          <li class="inherited"><a href="../../language/Language/getSentences.html">getSentences</a></li>
+          <li class="inherited"><a href="../../language/Language/getStartingIndex.html">getStartingIndex</a></li>
+          <li><a href="../../language/JapaneseLanguage/getTermReadingOverrideWidget.html">getTermReadingOverrideWidget</a></li>
+          <li class="inherited"><a href="../../language/Language/initialise.html">initialise</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></li>
+          <li><a href="../../language/JapaneseLanguage/prepareResources.html">prepareResources</a></li>
+          <li><a href="../../language/JapaneseLanguage/textToWords.html">textToWords</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/toString.html">toString</a></li>
+          <li class="inherited"><a href="../../language/Language/wordFromIndex.html">wordFromIndex</a></li>
+
+        <li class="section-title inherited"><a href="../../language/JapaneseLanguage-class.html#operators">Operators</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/operator_equals.html">operator ==</a></li>
+
+
+        <li class="section-title"><a href="../../language/JapaneseLanguage-class.html#static-properties">Static properties</a></li>
+          <li><a href="../../language/JapaneseLanguage/instance.html">instance</a></li>
+          <li><a href="../../language/JapaneseLanguage/kanaKit.html">kanaKit</a></li>
+          <li><a href="../../language/JapaneseLanguage/mecab.html">mecab</a></li>
+
+
+</ol>
+
+  </div><!--/.sidebar-offcanvas-->
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    yuuna
+      2.6.7+81
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+

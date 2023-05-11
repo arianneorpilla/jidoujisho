@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the JidoujishoAudioHandler class from the utils library, for the Dart programming language.">
+  <title>JidoujishoAudioHandler class - utils library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../index.html">yuuna</a></li>
+    <li><a href="../utils/utils-library.html">utils</a></li>
+    <li class="self-crumb">JidoujishoAudioHandler class</li>
+  </ol>
+  <div class="self-name">JidoujishoAudioHandler</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span class="material-symbols-outlined">
+        brightness_4
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+  <div id="dartdoc-main-content" class="main-content">
+      <div>
+<h1><span class="kind-class">JidoujishoAudioHandler</span> class 
+    <a href="https://dart.dev/null-safety" class="feature feature-null-safety" title="Supports the null safety language feature.">Null safety</a>
+ 
+</h1></div>
+
+    
+<section class="desc markdown">
+  <p>Enables play/pause button to be used with the app.</p>
+</section>
+
+
+    <section>
+      <dl class="dl-horizontal">
+        
+  <dt>Inheritance</dt>
+  <dd>
+    <ul class="gt-separated dark clazz-relationships">
+      <li><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></li>
+        <li><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/AudioHandler-class.html">AudioHandler</a></li>
+        <li><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler-class.html">BaseAudioHandler</a></li>
+      <li>JidoujishoAudioHandler</li>
+    </ul>
+  </dd>
+
+        
+        
+
+
+
+        
+
+
+      </dl>
+    </section>
+
+    
+  <section class="summary offset-anchor" id="constructors">
+    <h2>Constructors</h2>
+
+    <dl class="constructor-summary-list">
+        <dt id="JidoujishoAudioHandler" class="callable">
+          <span class="name"><a href="../utils/JidoujishoAudioHandler/JidoujishoAudioHandler.html">JidoujishoAudioHandler</a></span><span class="signature">(<span class="parameter" id="-param-onPlayPause">{<span>required</span> <span class="type-annotation">dynamic</span> <span class="parameter-name">onPlayPause</span>()}</span>)</span>
+        </dt>
+        <dd>
+          Define this handler.
+        </dd>
+    </dl>
+  </section>
+
+    <section class="summary offset-anchor" id="instance-properties">
+      <h2>Properties</h2>
+
+      <dl class="properties">
+        <dt id="androidPlaybackInfo" class="property inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/androidPlaybackInfo.html">androidPlaybackInfo</a></span>
+  <span class="signature">&#8594; <a href="https://pub.dev/documentation/rxdart/0.27.5/rx/BehaviorSubject-class.html">BehaviorSubject</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/AndroidPlaybackInfo-class.html">AndroidPlaybackInfo</a></span>&gt;</span></span> 
+
+</dt>
+<dd class="inherited">
+  A controller for broadcasting the current <code>AndroidPlaybackInfo</code> to the app's UI,
+media notification and other clients. Example usage:
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="customEvent" class="property inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/customEvent.html">customEvent</a></span>
+  <span class="signature">&#8594; <a href="https://pub.dev/documentation/rxdart/0.27.5/rx/PublishSubject-class.html">PublishSubject</a></span> 
+
+</dt>
+<dd class="inherited">
+  A controller for broadcasting a custom event to the app's UI.
+A shorthand for the event stream is <a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/customEvent.html">customEvent</a>.
+Example usage:
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="customState" class="property inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/customState.html">customState</a></span>
+  <span class="signature">&#8594; <a href="https://pub.dev/documentation/rxdart/0.27.5/rx/BehaviorSubject-class.html">BehaviorSubject</a></span> 
+
+</dt>
+<dd class="inherited">
+  A controller for broadcasting the current custom state to the app's UI.
+Example usage:
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="hashCode" class="property inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> 
+
+</dt>
+<dd class="inherited">
+  The hash code for this object.
+  <div class="features"><span class="feature">read-only</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="mediaItem" class="property inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/mediaItem.html">mediaItem</a></span>
+  <span class="signature">&#8594; <a href="https://pub.dev/documentation/rxdart/0.27.5/rx/BehaviorSubject-class.html">BehaviorSubject</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/MediaItem-class.html">MediaItem</a>?</span>&gt;</span></span> 
+
+</dt>
+<dd class="inherited">
+  A controller for broadcasting the current media item to the app's UI,
+media notification and other clients. Example usage:
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="onPlayPause" class="property">
+  <span class="name"><a href="../utils/JidoujishoAudioHandler/onPlayPause.html">onPlayPause</a></span>
+  <span class="signature">&#8594; dynamic Function<span class="signature">()</span></span> 
+
+</dt>
+<dd>
+  Called during play/pause.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="playbackState" class="property inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/playbackState.html">playbackState</a></span>
+  <span class="signature">&#8594; <a href="https://pub.dev/documentation/rxdart/0.27.5/rx/BehaviorSubject-class.html">BehaviorSubject</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/PlaybackState-class.html">PlaybackState</a></span>&gt;</span></span> 
+
+</dt>
+<dd class="inherited">
+  A controller for broadcasting the current <code>PlaybackState</code> to the app's UI,
+media notification and other clients. Example usage:
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="queue" class="property inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/queue.html">queue</a></span>
+  <span class="signature">&#8594; <a href="https://pub.dev/documentation/rxdart/0.27.5/rx/BehaviorSubject-class.html">BehaviorSubject</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/MediaItem-class.html">MediaItem</a></span>&gt;</span></span>&gt;</span></span> 
+
+</dt>
+<dd class="inherited">
+  A controller for broadcasting the current queue to the app's UI, media
+notification and other clients. Example usage:
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="queueTitle" class="property inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/queueTitle.html">queueTitle</a></span>
+  <span class="signature">&#8594; <a href="https://pub.dev/documentation/rxdart/0.27.5/rx/BehaviorSubject-class.html">BehaviorSubject</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span></span> 
+
+</dt>
+<dd class="inherited">
+  A controller for broadcasting the current queue title to the app's UI, media
+notification and other clients. Example usage:
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="ratingStyle" class="property inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/ratingStyle.html">ratingStyle</a></span>
+  <span class="signature">&#8594; <a href="https://pub.dev/documentation/rxdart/0.27.5/rx/BehaviorSubject-class.html">BehaviorSubject</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/RatingStyle.html">RatingStyle</a></span>&gt;</span></span> 
+
+</dt>
+<dd class="inherited">
+  A controller for broadcasting the current rating style to the app's UI,
+media notification and other clients. Example usage:
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="runtimeType" class="property inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a></span> 
+
+</dt>
+<dd class="inherited">
+  A representation of the runtime type of the object.
+  <div class="features"><span class="feature">read-only</span><span class="feature">inherited</span></div>
+
+</dd>
+
+      </dl>
+    </section>
+
+    
+  <section
+      class="summary offset-anchor"
+      id="instance-methods">
+    <h2>Methods</h2>
+    <dl class="callables">
+        <dt id="addQueueItem" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/addQueueItem.html">addQueueItem</a></span><span class="signature">(<wbr><span class="parameter" id="addQueueItem-param-mediaItem"><span class="type-annotation"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/MediaItem-class.html">MediaItem</a></span> <span class="parameter-name">mediaItem</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Add <code>mediaItem</code> to the queue.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="addQueueItems" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/addQueueItems.html">addQueueItems</a></span><span class="signature">(<wbr><span class="parameter" id="addQueueItems-param-mediaItems"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/MediaItem-class.html">MediaItem</a></span>&gt;</span></span> <span class="parameter-name">mediaItems</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Add <code>mediaItems</code> to the queue.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="androidAdjustRemoteVolume" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/androidAdjustRemoteVolume.html">androidAdjustRemoteVolume</a></span><span class="signature">(<wbr><span class="parameter" id="androidAdjustRemoteVolume-param-direction"><span class="type-annotation"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/AndroidVolumeDirection-class.html">AndroidVolumeDirection</a></span> <span class="parameter-name">direction</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Adjust the remote volume on Android. This works only when using
+<a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/RemoteAndroidPlaybackInfo-class.html">RemoteAndroidPlaybackInfo</a>.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="androidSetRemoteVolume" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/androidSetRemoteVolume.html">androidSetRemoteVolume</a></span><span class="signature">(<wbr><span class="parameter" id="androidSetRemoteVolume-param-volumeIndex"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">volumeIndex</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Set the remote volume on Android. This works only when using
+<a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/RemoteAndroidPlaybackInfo-class.html">RemoteAndroidPlaybackInfo</a>.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="click" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/click.html">click</a></span><span class="signature">(<wbr><span class="parameter" id="click-param-button">[<span class="type-annotation"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/MediaButton.html">MediaButton</a></span> <span class="parameter-name">button</span> = <span class="default-value">MediaButton.media</span>]</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Process a headset button click, where <code>button</code> defaults to
+<a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/MediaButton.html">MediaButton.media</a>.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="customAction" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/customAction.html">customAction</a></span><span class="signature">(<wbr><span class="parameter" id="customAction-param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span>, </span><span class="parameter" id="customAction-param-extras">[<span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span>?</span> <span class="parameter-name">extras</span>]</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  A mechanism to support app-specific actions.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="fastForward" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/fastForward.html">fastForward</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Jump forward by <a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/AudioServiceConfig/fastForwardInterval.html">AudioServiceConfig.fastForwardInterval</a>.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="getChildren" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/getChildren.html">getChildren</a></span><span class="signature">(<wbr><span class="parameter" id="getChildren-param-parentMediaId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">parentMediaId</span>, </span><span class="parameter" id="getChildren-param-options">[<span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span>?</span> <span class="parameter-name">options</span>]</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/MediaItem-class.html">MediaItem</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Get the children of a parent media item.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="getMediaItem" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/getMediaItem.html">getMediaItem</a></span><span class="signature">(<wbr><span class="parameter" id="getMediaItem-param-mediaId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">mediaId</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/MediaItem-class.html">MediaItem</a>?</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Get a particular media item.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="insertQueueItem" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/insertQueueItem.html">insertQueueItem</a></span><span class="signature">(<wbr><span class="parameter" id="insertQueueItem-param-index"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">index</span>, </span><span class="parameter" id="insertQueueItem-param-mediaItem"><span class="type-annotation"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/MediaItem-class.html">MediaItem</a></span> <span class="parameter-name">mediaItem</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Insert <code>mediaItem</code> into the queue at position <code>index</code>.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="noSuchMethod" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></span><span class="signature">(<wbr><span class="parameter" id="noSuchMethod-param-invocation"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Invocation-class.html">Invocation</a></span> <span class="parameter-name">invocation</span></span>)
+    <span class="returntype parameter">&#8594; dynamic</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Invoked when a non-existent method or property is accessed.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="onNotificationDeleted" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/onNotificationDeleted.html">onNotificationDeleted</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Handle the notification being swiped away (Android).
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="onTaskRemoved" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/onTaskRemoved.html">onTaskRemoved</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Handle the task being swiped away in the task manager (Android).
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="pause" class="callable">
+  <span class="name"><a href="../utils/JidoujishoAudioHandler/pause.html">pause</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Handles pause request.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="play" class="callable">
+  <span class="name"><a href="../utils/JidoujishoAudioHandler/play.html">play</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Handles play request.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="playFromMediaId" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/playFromMediaId.html">playFromMediaId</a></span><span class="signature">(<wbr><span class="parameter" id="playFromMediaId-param-mediaId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">mediaId</span>, </span><span class="parameter" id="playFromMediaId-param-extras">[<span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span>?</span> <span class="parameter-name">extras</span>]</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Play a specific media item.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="playFromSearch" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/playFromSearch.html">playFromSearch</a></span><span class="signature">(<wbr><span class="parameter" id="playFromSearch-param-query"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">query</span>, </span><span class="parameter" id="playFromSearch-param-extras">[<span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span>?</span> <span class="parameter-name">extras</span>]</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Begin playback from a search query.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="playFromUri" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/playFromUri.html">playFromUri</a></span><span class="signature">(<wbr><span class="parameter" id="playFromUri-param-uri"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Uri-class.html">Uri</a></span> <span class="parameter-name">uri</span>, </span><span class="parameter" id="playFromUri-param-extras">[<span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span>?</span> <span class="parameter-name">extras</span>]</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Play a media item represented by a Uri.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="playMediaItem" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/playMediaItem.html">playMediaItem</a></span><span class="signature">(<wbr><span class="parameter" id="playMediaItem-param-mediaItem"><span class="type-annotation"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/MediaItem-class.html">MediaItem</a></span> <span class="parameter-name">mediaItem</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Play a specific media item.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="prepare" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/prepare.html">prepare</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Prepare media items for playback.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="prepareFromMediaId" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/prepareFromMediaId.html">prepareFromMediaId</a></span><span class="signature">(<wbr><span class="parameter" id="prepareFromMediaId-param-mediaId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">mediaId</span>, </span><span class="parameter" id="prepareFromMediaId-param-extras">[<span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span>?</span> <span class="parameter-name">extras</span>]</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Prepare a specific media item for playback.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="prepareFromSearch" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/prepareFromSearch.html">prepareFromSearch</a></span><span class="signature">(<wbr><span class="parameter" id="prepareFromSearch-param-query"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">query</span>, </span><span class="parameter" id="prepareFromSearch-param-extras">[<span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span>?</span> <span class="parameter-name">extras</span>]</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Prepare playback from a search query.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="prepareFromUri" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/prepareFromUri.html">prepareFromUri</a></span><span class="signature">(<wbr><span class="parameter" id="prepareFromUri-param-uri"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Uri-class.html">Uri</a></span> <span class="parameter-name">uri</span>, </span><span class="parameter" id="prepareFromUri-param-extras">[<span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span>?</span> <span class="parameter-name">extras</span>]</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Prepare a media item represented by a Uri for playback.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="removeQueueItem" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/removeQueueItem.html">removeQueueItem</a></span><span class="signature">(<wbr><span class="parameter" id="removeQueueItem-param-mediaItem"><span class="type-annotation"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/MediaItem-class.html">MediaItem</a></span> <span class="parameter-name">mediaItem</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Remove <code>mediaItem</code> from the queue.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="removeQueueItemAt" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/removeQueueItemAt.html">removeQueueItemAt</a></span><span class="signature">(<wbr><span class="parameter" id="removeQueueItemAt-param-index"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">index</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Remove media item from the queue at the specified <code>index</code>.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="rewind" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/rewind.html">rewind</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Jump backward by <a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/AudioServiceConfig/rewindInterval.html">AudioServiceConfig.rewindInterval</a>. Note: this value
+must be positive.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="search" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/search.html">search</a></span><span class="signature">(<wbr><span class="parameter" id="search-param-query"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">query</span>, </span><span class="parameter" id="search-param-extras">[<span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span>?</span> <span class="parameter-name">extras</span>]</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/MediaItem-class.html">MediaItem</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Search for media items.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="seek" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/seek.html">seek</a></span><span class="signature">(<wbr><span class="parameter" id="seek-param-position"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a></span> <span class="parameter-name">position</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Seek to <code>position</code>.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="seekBackward" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/seekBackward.html">seekBackward</a></span><span class="signature">(<wbr><span class="parameter" id="seekBackward-param-begin"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">begin</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Begin or end seeking backward continuously.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="seekForward" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/seekForward.html">seekForward</a></span><span class="signature">(<wbr><span class="parameter" id="seekForward-param-begin"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">begin</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Begin or end seeking forward continuously.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="setCaptioningEnabled" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/setCaptioningEnabled.html">setCaptioningEnabled</a></span><span class="signature">(<wbr><span class="parameter" id="setCaptioningEnabled-param-enabled"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">enabled</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Set whether captioning is enabled.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="setRating" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/setRating.html">setRating</a></span><span class="signature">(<wbr><span class="parameter" id="setRating-param-rating"><span class="type-annotation"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/Rating-class.html">Rating</a></span> <span class="parameter-name">rating</span>, </span><span class="parameter" id="setRating-param-extras">[<span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span>?</span> <span class="parameter-name">extras</span>]</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Set the rating.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="setRepeatMode" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/setRepeatMode.html">setRepeatMode</a></span><span class="signature">(<wbr><span class="parameter" id="setRepeatMode-param-repeatMode"><span class="type-annotation"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/AudioServiceRepeatMode.html">AudioServiceRepeatMode</a></span> <span class="parameter-name">repeatMode</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Set the repeat mode.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="setShuffleMode" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/setShuffleMode.html">setShuffleMode</a></span><span class="signature">(<wbr><span class="parameter" id="setShuffleMode-param-shuffleMode"><span class="type-annotation"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/AudioServiceShuffleMode.html">AudioServiceShuffleMode</a></span> <span class="parameter-name">shuffleMode</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Set the shuffle mode.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="setSpeed" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/setSpeed.html">setSpeed</a></span><span class="signature">(<wbr><span class="parameter" id="setSpeed-param-speed"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="parameter-name">speed</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Set the playback speed.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="skipToNext" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/skipToNext.html">skipToNext</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Skip to the next item in the queue.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="skipToPrevious" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/skipToPrevious.html">skipToPrevious</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Skip to the previous item in the queue.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="skipToQueueItem" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/skipToQueueItem.html">skipToQueueItem</a></span><span class="signature">(<wbr><span class="parameter" id="skipToQueueItem-param-index"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">index</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Skip to a queue item.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="stop" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/stop.html">stop</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Stop playback and release resources.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="subscribeToChildren" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/subscribeToChildren.html">subscribeToChildren</a></span><span class="signature">(<wbr><span class="parameter" id="subscribeToChildren-param-parentMediaId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">parentMediaId</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://pub.dev/documentation/rxdart/0.27.5/rx/ValueStream-class.html">ValueStream</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Get a value stream that emits service-specific options to send to the
+client whenever the children under the specified parent change. The
+emitted options may contain information about what changed. A client that
+is subscribed to this stream should call <a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/getChildren.html">getChildren</a> to obtain the
+changed children.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="toString" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/toString.html">toString</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  A string representation of this object.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="updateMediaItem" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/updateMediaItem.html">updateMediaItem</a></span><span class="signature">(<wbr><span class="parameter" id="updateMediaItem-param-mediaItem"><span class="type-annotation"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/MediaItem-class.html">MediaItem</a></span> <span class="parameter-name">mediaItem</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Update the properties of <code>mediaItem</code>.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="updateQueue" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/updateQueue.html">updateQueue</a></span><span class="signature">(<wbr><span class="parameter" id="updateQueue-param-queue"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/MediaItem-class.html">MediaItem</a></span>&gt;</span></span> <span class="parameter-name">queue</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Update to the queue to <code>queue</code>.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor inherited"
+      id="operators">
+    <h2>Operators</h2>
+    <dl class="callables">
+        <dt id="operator ==" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/operator_equals.html">operator ==</a></span><span class="signature">(<wbr><span class="parameter" id="==-param-other"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">other</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  The equality operator.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+    
+    
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+  <li><a href="../index.html">yuuna</a></li>
+  <li><a href="../utils/utils-library.html">utils</a></li>
+  <li class="self-crumb">JidoujishoAudioHandler class</li>
+</ol>
+
+
+    <h5>utils library</h5>
+    <ol>
+      <li class="section-title"><a href="../utils/utils-library.html#classes">Classes</a></li>
+        <li><a href="../i18n_strings.g/AppLocaleUtils-class.html">AppLocaleUtils</a></li>
+        <li><a href="https://pub.dev/documentation/slang/3.13.0/api_locale/BaseAppLocale-class.html">BaseAppLocale</a></li>
+        <li><a href="https://pub.dev/documentation/slang/3.13.0/api_singleton/BaseAppLocaleUtils-class.html">BaseAppLocaleUtils</a></li>
+        <li><a href="https://pub.dev/documentation/slang_flutter/3.13.0/slang_flutter/BaseFlutterLocaleSettings-class.html">BaseFlutterLocaleSettings</a></li>
+        <li><a href="https://pub.dev/documentation/slang/3.13.0/api_singleton/BaseLocaleSettings-class.html">BaseLocaleSettings</a></li>
+        <li><a href="https://pub.dev/documentation/slang_flutter/3.13.0/slang_flutter/BaseTranslationProvider-class.html">BaseTranslationProvider</a></li>
+        <li><a href="https://pub.dev/documentation/slang/3.13.0/api_locale/BaseTranslations-class.html">BaseTranslations</a></li>
+        <li><a href="../utils/BlurOptions-class.html">BlurOptions</a></li>
+        <li><a href="../utils/CacheImageProvider-class.html">CacheImageProvider</a></li>
+        <li><a href="../utils/DialogContent-class.html">DialogContent</a></li>
+        <li><a href="../utils/EnhancementsConverter-class.html">EnhancementsConverter</a></li>
+        <li><a href="https://pub.dev/documentation/slang/3.13.0/api_locale/FakeAppLocale-class.html">FakeAppLocale</a></li>
+        <li><a href="https://pub.dev/documentation/slang/3.13.0/api_locale/FakeTranslations-class.html">FakeTranslations</a></li>
+        <li><a href="../utils/ImmutableStringMapConverter-class.html">ImmutableStringMapConverter</a></li>
+        <li><a href="https://pub.dev/documentation/slang_flutter/3.13.0/slang_flutter/InheritedLocaleData-class.html">InheritedLocaleData</a></li>
+        <li><a href="../utils/JidoujishoAudioHandler-class.html">JidoujishoAudioHandler</a></li>
+        <li><a href="../utils/JidoujishoBottomSheet-class.html">JidoujishoBottomSheet</a></li>
+        <li><a href="../utils/JidoujishoBottomSheetOption-class.html">JidoujishoBottomSheetOption</a></li>
+        <li><a href="../utils/JidoujishoColor-class.html">JidoujishoColor</a></li>
+        <li><a href="../utils/JidoujishoDivider-class.html">JidoujishoDivider</a></li>
+        <li><a href="../utils/JidoujishoDropdown-class.html">JidoujishoDropdown</a></li>
+        <li><a href="../utils/JidoujishoIconButton-class.html">JidoujishoIconButton</a></li>
+        <li><a href="../utils/JidoujishoListTile-class.html">JidoujishoListTile</a></li>
+        <li><a href="../utils/JidoujishoLocalisations-class.html">JidoujishoLocalisations</a></li>
+        <li><a href="../utils/JidoujishoLyrics-class.html">JidoujishoLyrics</a></li>
+        <li><a href="../utils/JidoujishoLyricsParameters-class.html">JidoujishoLyricsParameters</a></li>
+        <li><a href="../utils/JidoujishoMarquee-class.html">JidoujishoMarquee</a></li>
+        <li><a href="../utils/JidoujishoPlaceholderMessage-class.html">JidoujishoPlaceholderMessage</a></li>
+        <li><a href="../utils/JidoujishoSearchHistory-class.html">JidoujishoSearchHistory</a></li>
+        <li><a href="../utils/JidoujishoSelectableText-class.html">JidoujishoSelectableText</a></li>
+        <li><a href="../utils/JidoujishoSelectableTextController-class.html">JidoujishoSelectableTextController</a></li>
+        <li><a href="../utils/JidoujishoSelectionToolbar-class.html">JidoujishoSelectionToolbar</a></li>
+        <li><a href="../utils/JidoujishoTag-class.html">JidoujishoTag</a></li>
+        <li><a href="../utils/JidoujishoTappableText-class.html">JidoujishoTappableText</a></li>
+        <li><a href="../utils/JidoujishoTextSelectionControls-class.html">JidoujishoTextSelectionControls</a></li>
+        <li><a href="../utils/JidoujishoTimeFormat-class.html">JidoujishoTimeFormat</a></li>
+        <li><a href="../i18n_strings.g/LocaleSettings-class.html">LocaleSettings</a></li>
+        <li><a href="../utils/ManipulatingBall-class.html">ManipulatingBall</a></li>
+        <li><a href="../utils/MediaItemConverter-class.html">MediaItemConverter</a></li>
+        <li><a href="../utils/MessageItem-class.html">MessageItem</a></li>
+        <li><a href="../utils/MokuroBlock-class.html">MokuroBlock</a></li>
+        <li><a href="../utils/MokuroCatalog-class.html">MokuroCatalog</a></li>
+        <li><a href="../utils/MokuroImage-class.html">MokuroImage</a></li>
+        <li><a href="../utils/MokuroPayload-class.html">MokuroPayload</a></li>
+        <li><a href="../utils/PlayerPayload-class.html">PlayerPayload</a></li>
+        <li><a href="https://pub.dev/documentation/slang/3.13.0/api_pluralization/PluralResolvers-class.html">PluralResolvers</a></li>
+        <li><a href="../utils/QuickActionsConverter-class.html">QuickActionsConverter</a></li>
+        <li><a href="../utils/ResizeableWidget-class.html">ResizeableWidget</a></li>
+        <li><a href="https://pub.dev/documentation/slang_flutter/3.13.0/slang_flutter/RichPluralResolvers-class.html">RichPluralResolvers</a></li>
+        <li><a href="../utils/SubtitleItem-class.html">SubtitleItem</a></li>
+        <li><a href="../utils/SubtitleOptions-class.html">SubtitleOptions</a></li>
+        <li><a href="../utils/SubtitleUtils-class.html">SubtitleUtils</a></li>
+        <li><a href="https://pub.dev/documentation/slang/3.13.0/api_locale/TranslationMetadata-class.html">TranslationMetadata</a></li>
+        <li><a href="https://pub.dev/documentation/slang_flutter/3.13.0/slang_flutter/TranslationOverridesFlutter-class.html">TranslationOverridesFlutter</a></li>
+        <li><a href="../i18n_strings.g/TranslationProvider-class.html">TranslationProvider</a></li>
+        <li><a href="../i18n_strings.g/Translations-class.html">Translations</a></li>
+
+      <li class="section-title"><a href="../utils/utils-library.html#extensions">Extensions</a></li>
+        <li><a href="https://pub.dev/documentation/slang/3.13.0/api_singleton/AppLocaleUtilsExt.html">AppLocaleUtilsExt</a></li>
+        <li><a href="../i18n_strings.g/BuildContextTranslationsExtension.html">BuildContextTranslationsExtension</a></li>
+        <li><a href="https://pub.dev/documentation/slang_flutter/3.13.0/slang_flutter/ExtAppLocale.html">ExtAppLocale</a></li>
+        <li><a href="https://pub.dev/documentation/slang_flutter/3.13.0/slang_flutter/ExtAppLocaleUtils.html">ExtAppLocaleUtils</a></li>
+        <li><a href="https://pub.dev/documentation/slang_flutter/3.13.0/slang_flutter/ExtBaseLocaleSettings.html">ExtBaseLocaleSettings</a></li>
+        <li><a href="../utils/GetMessageItemCollection.html">GetMessageItemCollection</a></li>
+        <li><a href="../utils/GetMokuroCatalogCollection.html">GetMokuroCatalogCollection</a></li>
+        <li><a href="https://pub.dev/documentation/slang/3.13.0/api_singleton/LocaleSettingsExt.html">LocaleSettingsExt</a></li>
+        <li><a href="../utils/MessageItemQueryFilter.html">MessageItemQueryFilter</a></li>
+        <li><a href="../utils/MessageItemQueryLinks.html">MessageItemQueryLinks</a></li>
+        <li><a href="../utils/MessageItemQueryObject.html">MessageItemQueryObject</a></li>
+        <li><a href="../utils/MessageItemQueryProperty.html">MessageItemQueryProperty</a></li>
+        <li><a href="../utils/MessageItemQuerySortBy.html">MessageItemQuerySortBy</a></li>
+        <li><a href="../utils/MessageItemQuerySortThenBy.html">MessageItemQuerySortThenBy</a></li>
+        <li><a href="../utils/MessageItemQueryWhere.html">MessageItemQueryWhere</a></li>
+        <li><a href="../utils/MessageItemQueryWhereDistinct.html">MessageItemQueryWhereDistinct</a></li>
+        <li><a href="../utils/MessageItemQueryWhereSort.html">MessageItemQueryWhereSort</a></li>
+        <li><a href="../utils/MokuroCatalogByIndex.html">MokuroCatalogByIndex</a></li>
+        <li><a href="../utils/MokuroCatalogQueryFilter.html">MokuroCatalogQueryFilter</a></li>
+        <li><a href="../utils/MokuroCatalogQueryLinks.html">MokuroCatalogQueryLinks</a></li>
+        <li><a href="../utils/MokuroCatalogQueryObject.html">MokuroCatalogQueryObject</a></li>
+        <li><a href="../utils/MokuroCatalogQueryProperty.html">MokuroCatalogQueryProperty</a></li>
+        <li><a href="../utils/MokuroCatalogQuerySortBy.html">MokuroCatalogQuerySortBy</a></li>
+        <li><a href="../utils/MokuroCatalogQuerySortThenBy.html">MokuroCatalogQuerySortThenBy</a></li>
+        <li><a href="../utils/MokuroCatalogQueryWhere.html">MokuroCatalogQueryWhere</a></li>
+        <li><a href="../utils/MokuroCatalogQueryWhereDistinct.html">MokuroCatalogQueryWhereDistinct</a></li>
+        <li><a href="../utils/MokuroCatalogQueryWhereSort.html">MokuroCatalogQueryWhereSort</a></li>
+        <li><a href="../utils/VideoQualityIcon.html">VideoQualityIcon</a></li>
+
+
+      <li class="section-title"><a href="../utils/utils-library.html#constants">Constants</a></li>
+        <li><a href="../utils/iOSHorizontalOffset-constant.html">iOSHorizontalOffset</a></li>
+        <li><a href="../utils/MessageItemSchema-constant.html">MessageItemSchema</a></li>
+        <li><a href="../utils/MokuroCatalogSchema-constant.html">MokuroCatalogSchema</a></li>
+
+      <li class="section-title"><a href="../utils/utils-library.html#properties">Properties</a></li>
+        <li><a href="../i18n_strings.g/t.html">t</a></li>
+
+
+      <li class="section-title"><a href="../utils/utils-library.html#enums">Enums</a></li>
+        <li><a href="../i18n_strings.g/AppLocale.html">AppLocale</a></li>
+        <li><a href="../utils/JidoujishoPopupPosition.html">JidoujishoPopupPosition</a></li>
+        <li><a href="../utils/SubtitleItemType.html">SubtitleItemType</a></li>
+
+      <li class="section-title"><a href="../utils/utils-library.html#typedefs">Typedefs</a></li>
+        <li><a href="https://pub.dev/documentation/slang_flutter/3.13.0/slang_flutter/InlineSpanBuilder.html">InlineSpanBuilder</a></li>
+        <li><a href="../utils/OffsetValue.html">OffsetValue</a></li>
+        <li><a href="https://pub.dev/documentation/slang/3.13.0/api_pluralization/PluralResolver.html">PluralResolver</a></li>
+        <li><a href="https://pub.dev/documentation/slang/3.13.0/api_locale/TranslationBuilder.html">TranslationBuilder</a></li>
+
+</ol>
+
+  </div>
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+    <ol>
+
+        <li class="section-title"><a href="../utils/JidoujishoAudioHandler-class.html#constructors">Constructors</a></li>
+          <li><a href="../utils/JidoujishoAudioHandler/JidoujishoAudioHandler.html">JidoujishoAudioHandler</a></li>
+
+
+        <li class="section-title">
+          <a href="../utils/JidoujishoAudioHandler-class.html#instance-properties">Properties</a>
+        </li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/androidPlaybackInfo.html">androidPlaybackInfo</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/customEvent.html">customEvent</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/customState.html">customState</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/mediaItem.html">mediaItem</a></li>
+          <li><a href="../utils/JidoujishoAudioHandler/onPlayPause.html">onPlayPause</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/playbackState.html">playbackState</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/queue.html">queue</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/queueTitle.html">queueTitle</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/ratingStyle.html">ratingStyle</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></li>
+
+        <li class="section-title"><a href="../utils/JidoujishoAudioHandler-class.html#instance-methods">Methods</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/addQueueItem.html">addQueueItem</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/addQueueItems.html">addQueueItems</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/androidAdjustRemoteVolume.html">androidAdjustRemoteVolume</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/androidSetRemoteVolume.html">androidSetRemoteVolume</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/click.html">click</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/customAction.html">customAction</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/fastForward.html">fastForward</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/getChildren.html">getChildren</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/getMediaItem.html">getMediaItem</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/insertQueueItem.html">insertQueueItem</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/onNotificationDeleted.html">onNotificationDeleted</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/onTaskRemoved.html">onTaskRemoved</a></li>
+          <li><a href="../utils/JidoujishoAudioHandler/pause.html">pause</a></li>
+          <li><a href="../utils/JidoujishoAudioHandler/play.html">play</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/playFromMediaId.html">playFromMediaId</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/playFromSearch.html">playFromSearch</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/playFromUri.html">playFromUri</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/playMediaItem.html">playMediaItem</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/prepare.html">prepare</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/prepareFromMediaId.html">prepareFromMediaId</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/prepareFromSearch.html">prepareFromSearch</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/prepareFromUri.html">prepareFromUri</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/removeQueueItem.html">removeQueueItem</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/removeQueueItemAt.html">removeQueueItemAt</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/rewind.html">rewind</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/search.html">search</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/seek.html">seek</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/seekBackward.html">seekBackward</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/seekForward.html">seekForward</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/setCaptioningEnabled.html">setCaptioningEnabled</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/setRating.html">setRating</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/setRepeatMode.html">setRepeatMode</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/setShuffleMode.html">setShuffleMode</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/setSpeed.html">setSpeed</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/skipToNext.html">skipToNext</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/skipToPrevious.html">skipToPrevious</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/skipToQueueItem.html">skipToQueueItem</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/stop.html">stop</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/subscribeToChildren.html">subscribeToChildren</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/toString.html">toString</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/updateMediaItem.html">updateMediaItem</a></li>
+          <li class="inherited"><a href="https://pub.dev/documentation/audio_service/0.18.9/audio_service/BaseAudioHandler/updateQueue.html">updateQueue</a></li>
+
+        <li class="section-title inherited"><a href="../utils/JidoujishoAudioHandler-class.html#operators">Operators</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/operator_equals.html">operator ==</a></li>
+
+
+
+
+</ol>
+
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    yuuna
+      2.6.7+81
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+

@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the PlayerNetworkStreamSource class from the media library, for the Dart programming language.">
+  <title>PlayerNetworkStreamSource class - media library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../index.html">yuuna</a></li>
+    <li><a href="../media/media-library.html">media</a></li>
+    <li class="self-crumb">PlayerNetworkStreamSource class</li>
+  </ol>
+  <div class="self-name">PlayerNetworkStreamSource</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span class="material-symbols-outlined">
+        brightness_4
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+  <div id="dartdoc-main-content" class="main-content">
+      <div>
+<h1><span class="kind-class">PlayerNetworkStreamSource</span> class 
+    <a href="https://dart.dev/null-safety" class="feature feature-null-safety" title="Supports the null safety language feature.">Null safety</a>
+ 
+</h1></div>
+
+    
+<section class="desc markdown">
+  <p>A media source that allows the user to stream video from a URL.</p>
+</section>
+
+
+    <section>
+      <dl class="dl-horizontal">
+        
+  <dt>Inheritance</dt>
+  <dd>
+    <ul class="gt-separated dark clazz-relationships">
+      <li><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></li>
+        <li><a href="../media/MediaSource-class.html">MediaSource</a></li>
+        <li><a href="../media/PlayerMediaSource-class.html">PlayerMediaSource</a></li>
+      <li>PlayerNetworkStreamSource</li>
+    </ul>
+  </dd>
+
+        
+        
+
+
+
+        
+
+
+      </dl>
+    </section>
+
+    
+
+    <section class="summary offset-anchor inherited" id="instance-properties">
+      <h2>Properties</h2>
+
+      <dl class="properties">
+        <dt id="aspectRatio" class="property inherited">
+  <span class="name"><a href="../media/PlayerMediaSource/aspectRatio.html">aspectRatio</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> 
+
+</dt>
+<dd class="inherited">
+  Aspect ratio of media items.
+  <div class="features"><span class="feature">read-only</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="currentExtraData" class="property inherited">
+  <span class="name"><a href="../media/MediaSource/currentExtraData.html">currentExtraData</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> 
+
+</dt>
+<dd class="inherited">
+  This is used to hold data for generating images and audio.
+  <div class="features"><span class="feature">read-only</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="currentMediaItem" class="property inherited">
+  <span class="name"><a href="../media/MediaSource/currentMediaItem.html">currentMediaItem</a></span>
+  <span class="signature">&#8594; <a href="../media/MediaItem-class.html">MediaItem</a></span> 
+
+</dt>
+<dd class="inherited">
+  Supplies a media item that can be used for tracking and updating history,
+as well as generating video and audio with timestamp information. This
+should be uniquely implemented for each source. Some sources may want
+to generate their media item based on current playback information or
+progress.
+  <div class="features"><span class="feature">read-only</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="currentSentence" class="property inherited">
+  <span class="name"><a href="../media/MediaSource/currentSentence.html">currentSentence</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> 
+
+</dt>
+<dd class="inherited">
+  Supplies a sentence that can be used for the sentence field when making
+a card while this source is active. Can be set with <a href="../media/MediaSource/setCurrentSentence.html">setCurrentSentence</a>
+and <a href="../media/MediaSource/clearCurrentSentence.html">clearCurrentSentence</a> in a source page.
+  <div class="features"><span class="feature">read-only</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="description" class="property inherited">
+  <span class="name"><a href="../media/MediaSource/description.html">description</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> 
+
+</dt>
+<dd class="inherited">
+  A longer description of what the source can do, or details left by or
+regarding the developer.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="descriptionLocalisation" class="property inherited">
+  <span class="name"><a href="../media/MediaSource/descriptionLocalisation.html">descriptionLocalisation</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span></span> 
+
+</dt>
+<dd class="inherited">
+  Localisations for this source, where the key is a locale tag and
+the value is the <a href="../media/MediaSource/description.html">description</a> of the enhancement. If the value for the
+current locale is non-null, it will be used instead of <a href="../media/MediaSource/description.html">description</a>.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="hashCode" class="property inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> 
+
+</dt>
+<dd class="inherited">
+  The hash code for this object.
+  <div class="features"><span class="feature">read-only</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="icon" class="property inherited">
+  <span class="name"><a href="../media/MediaSource/icon.html">icon</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/widgets/IconData-class.html">IconData</a></span> 
+
+</dt>
+<dd class="inherited">
+  An icon that will show the enhancement if activated by the user in the
+quick menu.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="implementsHistory" class="property inherited">
+  <span class="name"><a href="../media/MediaSource/implementsHistory.html">implementsHistory</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> 
+
+</dt>
+<dd class="inherited">
+  Whether or not this media source allows adding items to media history.
+Note that some media sources produce a history of media items but do
+not require this to be set true. For example, the reader fetches its
+history from a source other than the actual internal media history
+system provided by the media source framework. In such cases, this
+should be set as false. Setting this as true results to a media item
+being added to history when media is opened.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="implementsSearch" class="property inherited">
+  <span class="name"><a href="../media/MediaSource/implementsSearch.html">implementsSearch</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> 
+
+</dt>
+<dd class="inherited">
+  Whether or not this media source has a search function. If false, this
+media source will have an action executed by <a href="../media/PlayerNetworkStreamSource/onSearchBarTap.html">onSearchBarTap</a>.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="mediaType" class="property inherited">
+  <span class="name"><a href="../media/MediaSource/mediaType.html">mediaType</a></span>
+  <span class="signature">&#8594; <a href="../media/MediaType-class.html">MediaType</a></span> 
+
+</dt>
+<dd class="inherited">
+  The media type that this source is for.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="overridesAutoAudio" class="property inherited">
+  <span class="name"><a href="../media/MediaSource/overridesAutoAudio.html">overridesAutoAudio</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> 
+
+</dt>
+<dd class="inherited">
+  Whether or not a media source overrides the auto audio enhancement.
+See <a href="../media/PlayerMediaSource/generateAudio.html">generateAudio</a>.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="overridesAutoImage" class="property inherited">
+  <span class="name"><a href="../media/MediaSource/overridesAutoImage.html">overridesAutoImage</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> 
+
+</dt>
+<dd class="inherited">
+  Whether or not a media source overrides the auto image enhancement.
+See <a href="../media/PlayerMediaSource/generateImages.html">generateImages</a>.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="runtimeType" class="property inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a></span> 
+
+</dt>
+<dd class="inherited">
+  A representation of the runtime type of the object.
+  <div class="features"><span class="feature">read-only</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="shouldGenerateAudio" class="property inherited">
+  <span class="name"><a href="../media/MediaSource/shouldGenerateAudio.html">shouldGenerateAudio</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> 
+
+</dt>
+<dd class="inherited">
+  Gets whether or not a media source should currently supply audio.
+  <div class="features"><span class="feature">read-only</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="shouldGenerateImage" class="property inherited">
+  <span class="name"><a href="../media/MediaSource/shouldGenerateImage.html">shouldGenerateImage</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> 
+
+</dt>
+<dd class="inherited">
+  Gets whether or not a media source should currently supply images.
+  <div class="features"><span class="feature">read-only</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="sourceName" class="property inherited">
+  <span class="name"><a href="../media/MediaSource/sourceName.html">sourceName</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> 
+
+</dt>
+<dd class="inherited">
+  Name of the source that very shortly describes what it does.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="sourceNameLocalisatiton" class="property inherited">
+  <span class="name"><a href="../media/MediaSource/sourceNameLocalisatiton.html">sourceNameLocalisatiton</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span></span> 
+
+</dt>
+<dd class="inherited">
+  Localisations for this source, where the key is a locale tag and
+the value is the <a href="../media/MediaSource/sourceName.html">sourceName</a> of the source. If the value for the current
+locale is non-null, it will be used instead of <a href="../media/MediaSource/sourceName.html">sourceName</a>.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="uniqueKey" class="property inherited">
+  <span class="name"><a href="../media/MediaSource/uniqueKey.html">uniqueKey</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> 
+
+</dt>
+<dd class="inherited">
+  A unique name that allows distinguishing this type from others,
+particularly for the purposes of differentiating between persistent
+settings keys.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+      </dl>
+    </section>
+
+    
+  <section
+      class="summary offset-anchor"
+      id="instance-methods">
+    <h2>Methods</h2>
+    <dl class="callables">
+        <dt id="buildBar" class="callable inherited">
+  <span class="name"><a href="../media/MediaSource/buildBar.html">buildBar</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="../pages/BaseMediaSearchBar-class.html">BaseMediaSearchBar</a>?</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Used to override the search bar if needed by a source that implements search.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="buildHistoryPage" class="callable inherited">
+  <span class="name"><a href="../media/PlayerMediaSource/buildHistoryPage.html">buildHistoryPage</a></span><span class="signature">(<wbr><span class="parameter" id="buildHistoryPage-param-item">{<span class="type-annotation"><a href="../media/MediaItem-class.html">MediaItem</a>?</span> <span class="parameter-name">item</span>}</span>)
+    <span class="returntype parameter">&#8594; <a href="../pages/BasePage-class.html">BasePage</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  The body widget to show in the tab when this source's media type and this
+source is selected.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="buildLaunchPage" class="callable">
+  <span class="name"><a href="../media/PlayerNetworkStreamSource/buildLaunchPage.html">buildLaunchPage</a></span><span class="signature">(<wbr><span class="parameter" id="buildLaunchPage-param-item">{<span class="type-annotation"><a href="../media/MediaItem-class.html">MediaItem</a>?</span> <span class="parameter-name">item</span>}</span>)
+    <span class="returntype parameter">&#8594; <a href="../pages/BaseSourcePage-class.html">BaseSourcePage</a></span>
+  </span>
+  
+
+</dt>
+<dd>
+  The widget to show when this source is launched. An optional <a href="../media/MediaItem-class.html">MediaItem</a>
+can be supplied as a launch parameter.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="clearCurrentSentence" class="callable inherited">
+  <span class="name"><a href="../media/MediaSource/clearCurrentSentence.html">clearCurrentSentence</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Clear the current sentence.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="clearExtraData" class="callable inherited">
+  <span class="name"><a href="../media/MediaSource/clearExtraData.html">clearExtraData</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Clear extra export data.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="clearOverrideValues" class="callable inherited">
+  <span class="name"><a href="../media/MediaSource/clearOverrideValues.html">clearOverrideValues</a></span><span class="signature">(<wbr><span class="parameter" id="clearOverrideValues-param-appModel">{<span>required</span> <span class="type-annotation"><a href="../models/AppModel-class.html">AppModel</a></span> <span class="parameter-name">appModel</span>, </span><span class="parameter" id="clearOverrideValues-param-item"><span>required</span> <span class="type-annotation"><a href="../media/MediaItem-class.html">MediaItem</a></span> <span class="parameter-name">item</span>}</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Used to clear override values of a <a href="../media/MediaItem-class.html">MediaItem</a> upon deletion.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="clearTranscriptSubtitle" class="callable inherited">
+  <span class="name"><a href="../media/PlayerMediaSource/clearTranscriptSubtitle.html">clearTranscriptSubtitle</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Clear the transcript subtitle.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="deletePreference" class="callable inherited">
+  <span class="name"><a href="../media/MediaSource/deletePreference.html">deletePreference</a></span><span class="signature">(<wbr><span class="parameter" id="deletePreference-param-key">{<span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">key</span>}</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Set the preference for a certain parameter <code>key</code> for this source.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="generateAudio" class="callable inherited">
+  <span class="name"><a href="../media/PlayerMediaSource/generateAudio.html">generateAudio</a></span><span class="signature">(<wbr><span class="parameter" id="generateAudio-param-appModel">{<span>required</span> <span class="type-annotation"><a href="../models/AppModel-class.html">AppModel</a></span> <span class="parameter-name">appModel</span>, </span><span class="parameter" id="generateAudio-param-item"><span>required</span> <span class="type-annotation"><a href="../media/MediaItem-class.html">MediaItem</a></span> <span class="parameter-name">item</span>, </span><span class="parameter" id="generateAudio-param-subtitles"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter">Subtitle</span>&gt;</span>?</span> <span class="parameter-name">subtitles</span>, </span><span class="parameter" id="generateAudio-param-options"><span class="type-annotation"><a href="../utils/SubtitleOptions-class.html">SubtitleOptions</a>?</span> <span class="parameter-name">options</span>, </span><span class="parameter" id="generateAudio-param-data"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">data</span>}</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-io/File-class.html">File</a>?</span>&gt;</span>?</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  If this source is non-null, this will be used as the initial function
+for the audio field over the auto enhancement.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="generateImages" class="callable inherited">
+  <span class="name"><a href="../media/PlayerMediaSource/generateImages.html">generateImages</a></span><span class="signature">(<wbr><span class="parameter" id="generateImages-param-appModel">{<span>required</span> <span class="type-annotation"><a href="../models/AppModel-class.html">AppModel</a></span> <span class="parameter-name">appModel</span>, </span><span class="parameter" id="generateImages-param-item"><span>required</span> <span class="type-annotation"><a href="../media/MediaItem-class.html">MediaItem</a></span> <span class="parameter-name">item</span>, </span><span class="parameter" id="generateImages-param-subtitles"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter">Subtitle</span>&gt;</span>?</span> <span class="parameter-name">subtitles</span>, </span><span class="parameter" id="generateImages-param-options"><span class="type-annotation"><a href="../utils/SubtitleOptions-class.html">SubtitleOptions</a>?</span> <span class="parameter-name">options</span>, </span><span class="parameter" id="generateImages-param-data"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">data</span>}</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/network_to_file_image/4.0.1/network_to_file_image/NetworkToFileImage-class.html">NetworkToFileImage</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  If this source is non-null, this will be used as the initial function
+for the image field over the auto enhancement. Extra durations can be
+invoked and defined when initially opening the creator, to call attention
+to multiple durations to be used for image generation.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="generateSearchSuggestions" class="callable inherited">
+  <span class="name"><a href="../media/MediaSource/generateSearchSuggestions.html">generateSearchSuggestions</a></span><span class="signature">(<wbr><span class="parameter" id="generateSearchSuggestions-param-searchTerm"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">searchTerm</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Given a search term, this source may give search suggestions. If the
+empty list is returned, then search history will be shown instead.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="getActions" class="callable">
+  <span class="name"><a href="../media/PlayerNetworkStreamSource/getActions.html">getActions</a></span><span class="signature">(<wbr><span class="parameter" id="getActions-param-context">{<span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a></span> <span class="parameter-name">context</span>, </span><span class="parameter" id="getActions-param-ref"><span>required</span> <span class="type-annotation"><a href="https://pub.dev/documentation/flutter_riverpod/1.0.4/flutter_riverpod/WidgetRef-class.html">WidgetRef</a></span> <span class="parameter-name">ref</span>, </span><span class="parameter" id="getActions-param-appModel"><span>required</span> <span class="type-annotation"><a href="../models/AppModel-class.html">AppModel</a></span> <span class="parameter-name">appModel</span>}</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/widgets/Widget-class.html">Widget</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Get the floating search bar actions of this source when it is the active
+source being displayed on its respective media type tab.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="getDisplaySubtitleFromMediaItem" class="callable inherited">
+  <span class="name"><a href="../media/MediaSource/getDisplaySubtitleFromMediaItem.html">getDisplaySubtitleFromMediaItem</a></span><span class="signature">(<wbr><span class="parameter" id="getDisplaySubtitleFromMediaItem-param-item"><span class="type-annotation"><a href="../media/MediaItem-class.html">MediaItem</a></span> <span class="parameter-name">item</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Given a <a href="../media/MediaItem-class.html">MediaItem</a>, return its subtitle. Some media items may allow
+overriding of values for display purposes. If a source does this,
+override this function.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="getDisplayThumbnailFromMediaItem" class="callable inherited">
+  <span class="name"><a href="../media/MediaSource/getDisplayThumbnailFromMediaItem.html">getDisplayThumbnailFromMediaItem</a></span><span class="signature">(<wbr><span class="parameter" id="getDisplayThumbnailFromMediaItem-param-appModel">{<span>required</span> <span class="type-annotation"><a href="../models/AppModel-class.html">AppModel</a></span> <span class="parameter-name">appModel</span>, </span><span class="parameter" id="getDisplayThumbnailFromMediaItem-param-item"><span>required</span> <span class="type-annotation"><a href="../media/MediaItem-class.html">MediaItem</a></span> <span class="parameter-name">item</span>, </span><span class="parameter" id="getDisplayThumbnailFromMediaItem-param-fallbackUrl"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">fallbackUrl</span>, </span><span class="parameter" id="getDisplayThumbnailFromMediaItem-param-noOverride"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">noOverride</span> = <span class="default-value">false</span>}</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/painting/ImageProvider-class.html">ImageProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Given a <a href="../media/MediaItem-class.html">MediaItem</a>, return its thumbnail. Some media items may allow
+overriding of values for display purposes.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="getDisplayTitleFromMediaItem" class="callable inherited">
+  <span class="name"><a href="../media/MediaSource/getDisplayTitleFromMediaItem.html">getDisplayTitleFromMediaItem</a></span><span class="signature">(<wbr><span class="parameter" id="getDisplayTitleFromMediaItem-param-item"><span class="type-annotation"><a href="../media/MediaItem-class.html">MediaItem</a></span> <span class="parameter-name">item</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Given a <a href="../media/MediaItem-class.html">MediaItem</a>, return its title. Some media items may allow
+overriding of values for display purposes. If a source does this,
+override this function.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="getLocalisedDescription" class="callable inherited">
+  <span class="name"><a href="../media/MediaSource/getLocalisedDescription.html">getLocalisedDescription</a></span><span class="signature">(<wbr><span class="parameter" id="getLocalisedDescription-param-appModel"><span class="type-annotation"><a href="../models/AppModel-class.html">AppModel</a></span> <span class="parameter-name">appModel</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Get the best localisation for the description of this media source. If
+there is no localisation, the fallback is <a href="../media/MediaSource/description.html">description</a>.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="getLocalisedSourceName" class="callable inherited">
+  <span class="name"><a href="../media/MediaSource/getLocalisedSourceName.html">getLocalisedSourceName</a></span><span class="signature">(<wbr><span class="parameter" id="getLocalisedSourceName-param-appModel"><span class="type-annotation"><a href="../models/AppModel-class.html">AppModel</a></span> <span class="parameter-name">appModel</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Get the best localisation for the label of this media source. If there
+is no localisation, the fallback is <a href="../media/MediaSource/sourceName.html">sourceName</a>.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="getMediaItemFromUrl" class="callable">
+  <span class="name"><a href="../media/PlayerNetworkStreamSource/getMediaItemFromUrl.html">getMediaItemFromUrl</a></span><span class="signature">(<wbr><span class="parameter" id="getMediaItemFromUrl-param-videoUrl">{<span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">videoUrl</span>, </span><span class="parameter" id="getMediaItemFromUrl-param-extra"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">extra</span>, </span><span class="parameter" id="getMediaItemFromUrl-param-title"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">title</span>, </span><span class="parameter" id="getMediaItemFromUrl-param-position"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">position</span>}</span>)
+    <span class="returntype parameter">&#8594; <a href="../media/MediaItem-class.html">MediaItem</a></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Produce media item from URL.
+  
+
+</dd>
+
+        <dt id="getOverrideThumbnailFilename" class="callable inherited">
+  <span class="name"><a href="../media/MediaSource/getOverrideThumbnailFilename.html">getOverrideThumbnailFilename</a></span><span class="signature">(<wbr><span class="parameter" id="getOverrideThumbnailFilename-param-appModel">{<span>required</span> <span class="type-annotation"><a href="../models/AppModel-class.html">AppModel</a></span> <span class="parameter-name">appModel</span>, </span><span class="parameter" id="getOverrideThumbnailFilename-param-item"><span>required</span> <span class="type-annotation"><a href="../media/MediaItem-class.html">MediaItem</a></span> <span class="parameter-name">item</span>}</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  The map value used to store the override thumbnail of an item.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="getOverrideThumbnailFromMediaItem" class="callable inherited">
+  <span class="name"><a href="../media/MediaSource/getOverrideThumbnailFromMediaItem.html">getOverrideThumbnailFromMediaItem</a></span><span class="signature">(<wbr><span class="parameter" id="getOverrideThumbnailFromMediaItem-param-appModel">{<span>required</span> <span class="type-annotation"><a href="../models/AppModel-class.html">AppModel</a></span> <span class="parameter-name">appModel</span>, </span><span class="parameter" id="getOverrideThumbnailFromMediaItem-param-item"><span>required</span> <span class="type-annotation"><a href="../media/MediaItem-class.html">MediaItem</a></span> <span class="parameter-name">item</span>}</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/painting/ImageProvider-class.html">ImageProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span>&gt;</span>?</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Given a <a href="../media/MediaItem-class.html">MediaItem</a>, return its override display thumbnail.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="getOverrideTitleFromMediaItem" class="callable inherited">
+  <span class="name"><a href="../media/MediaSource/getOverrideTitleFromMediaItem.html">getOverrideTitleFromMediaItem</a></span><span class="signature">(<wbr><span class="parameter" id="getOverrideTitleFromMediaItem-param-item"><span class="type-annotation"><a href="../media/MediaItem-class.html">MediaItem</a></span> <span class="parameter-name">item</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Given a <a href="../media/MediaItem-class.html">MediaItem</a>, return its override display title.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="getOverrideTitleKey" class="callable inherited">
+  <span class="name"><a href="../media/MediaSource/getOverrideTitleKey.html">getOverrideTitleKey</a></span><span class="signature">(<wbr><span class="parameter" id="getOverrideTitleKey-param-item"><span class="type-annotation"><a href="../media/MediaItem-class.html">MediaItem</a></span> <span class="parameter-name">item</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  The map key used to store the override title of an item.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="getPreference" class="callable inherited">
+  <span class="name"><a href="../media/MediaSource/getPreference.html">getPreference</a></span><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="getPreference-param-key">{<span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">key</span>, </span><span class="parameter" id="getPreference-param-defaultValue"><span>required</span> <span class="type-annotation">T</span> <span class="parameter-name">defaultValue</span>}</span>)
+    <span class="returntype parameter">&#8594; T</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Get the preference value for a certain parameter <code>key</code> for this source.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="getThumbnailUri" class="callable inherited">
+  <span class="name"><a href="../media/MediaSource/getThumbnailUri.html">getThumbnailUri</a></span><span class="signature">(<wbr><span class="parameter" id="getThumbnailUri-param-appModel">{<span>required</span> <span class="type-annotation"><a href="../models/AppModel-class.html">AppModel</a></span> <span class="parameter-name">appModel</span>, </span><span class="parameter" id="getThumbnailUri-param-item"><span>required</span> <span class="type-annotation"><a href="../media/MediaItem-class.html">MediaItem</a></span> <span class="parameter-name">item</span>, </span><span class="parameter" id="getThumbnailUri-param-noOverride"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">noOverride</span> = <span class="default-value">false</span>}</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Given a <a href="../media/MediaItem-class.html">MediaItem</a>, return its thumbnail. Some media items may allow
+overriding of values for display purposes.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="initialise" class="callable inherited">
+  <span class="name"><a href="../media/MediaSource/initialise.html">initialise</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  This function is run at startup. It is not called again if already run.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="noSuchMethod" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></span><span class="signature">(<wbr><span class="parameter" id="noSuchMethod-param-invocation"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Invocation-class.html">Invocation</a></span> <span class="parameter-name">invocation</span></span>)
+    <span class="returntype parameter">&#8594; dynamic</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Invoked when a non-existent method or property is accessed.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="onMediaItemClear" class="callable inherited">
+  <span class="name"><a href="../media/MediaSource/onMediaItemClear.html">onMediaItemClear</a></span><span class="signature">(<wbr><span class="parameter" id="onMediaItemClear-param-item"><span class="type-annotation"><a href="../media/MediaItem-class.html">MediaItem</a></span> <span class="parameter-name">item</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  This function can be used to clean up resources associated with a
+media item upon clearing it.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="onSearchBarTap" class="callable">
+  <span class="name"><a href="../media/PlayerNetworkStreamSource/onSearchBarTap.html">onSearchBarTap</a></span><span class="signature">(<wbr><span class="parameter" id="onSearchBarTap-param-context">{<span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a></span> <span class="parameter-name">context</span>, </span><span class="parameter" id="onSearchBarTap-param-ref"><span>required</span> <span class="type-annotation"><a href="https://pub.dev/documentation/flutter_riverpod/1.0.4/flutter_riverpod/WidgetRef-class.html">WidgetRef</a></span> <span class="parameter-name">ref</span>, </span><span class="parameter" id="onSearchBarTap-param-appModel"><span>required</span> <span class="type-annotation"><a href="../models/AppModel-class.html">AppModel</a></span> <span class="parameter-name">appModel</span>}</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  If this is not null, this action is executed when the user taps on the
+search bar. Sources that do not have a search action should have this
+defined.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="onSourceExit" class="callable inherited">
+  <span class="name"><a href="../media/PlayerMediaSource/onSourceExit.html">onSourceExit</a></span><span class="signature">(<wbr><span class="parameter" id="onSourceExit-param-appModel">{<span>required</span> <span class="type-annotation"><a href="../models/AppModel-class.html">AppModel</a></span> <span class="parameter-name">appModel</span>, </span><span class="parameter" id="onSourceExit-param-context"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a></span> <span class="parameter-name">context</span>, </span><span class="parameter" id="onSourceExit-param-ref"><span>required</span> <span class="type-annotation"><a href="https://pub.dev/documentation/flutter_riverpod/1.0.4/flutter_riverpod/WidgetRef-class.html">WidgetRef</a></span> <span class="parameter-name">ref</span>}</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Executed when this media source is closed. Perform this step to clean up
+resources or refresh media history.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="prepareMediaResources" class="callable inherited">
+  <span class="name"><a href="../media/PlayerMediaSource/prepareMediaResources.html">prepareMediaResources</a></span><span class="signature">(<wbr><span class="parameter" id="prepareMediaResources-param-appModel">{<span>required</span> <span class="type-annotation"><a href="../models/AppModel-class.html">AppModel</a></span> <span class="parameter-name">appModel</span>, </span><span class="parameter" id="prepareMediaResources-param-ref"><span>required</span> <span class="type-annotation"><a href="https://pub.dev/documentation/flutter_riverpod/1.0.4/flutter_riverpod/WidgetRef-class.html">WidgetRef</a></span> <span class="parameter-name">ref</span>, </span><span class="parameter" id="prepareMediaResources-param-item"><span>required</span> <span class="type-annotation"><a href="../media/MediaItem-class.html">MediaItem</a></span> <span class="parameter-name">item</span>}</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  It may be useful to do multiple operations at the same time, so this
+is used before preparing the controller and subtitles.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="preparePlayerController" class="callable">
+  <span class="name"><a href="../media/PlayerNetworkStreamSource/preparePlayerController.html">preparePlayerController</a></span><span class="signature">(<wbr><span class="parameter" id="preparePlayerController-param-appModel">{<span>required</span> <span class="type-annotation"><a href="../models/AppModel-class.html">AppModel</a></span> <span class="parameter-name">appModel</span>, </span><span class="parameter" id="preparePlayerController-param-ref"><span>required</span> <span class="type-annotation"><a href="https://pub.dev/documentation/flutter_riverpod/1.0.4/flutter_riverpod/WidgetRef-class.html">WidgetRef</a></span> <span class="parameter-name">ref</span>, </span><span class="parameter" id="preparePlayerController-param-item"><span>required</span> <span class="type-annotation"><a href="../media/MediaItem-class.html">MediaItem</a></span> <span class="parameter-name">item</span>}</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">VlcPlayerController</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Get the player controller to be used when a media item is loaded up,
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="prepareResources" class="callable inherited">
+  <span class="name"><a href="../media/MediaSource/prepareResources.html">prepareResources</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  If a media source requires resources to function, they can be prepared
+here and this function will be run once only at runtime during the
+initialisation step.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="prepareSubtitles" class="callable">
+  <span class="name"><a href="../media/PlayerNetworkStreamSource/prepareSubtitles.html">prepareSubtitles</a></span><span class="signature">(<wbr><span class="parameter" id="prepareSubtitles-param-appModel">{<span>required</span> <span class="type-annotation"><a href="../models/AppModel-class.html">AppModel</a></span> <span class="parameter-name">appModel</span>, </span><span class="parameter" id="prepareSubtitles-param-ref"><span>required</span> <span class="type-annotation"><a href="https://pub.dev/documentation/flutter_riverpod/1.0.4/flutter_riverpod/WidgetRef-class.html">WidgetRef</a></span> <span class="parameter-name">ref</span>, </span><span class="parameter" id="prepareSubtitles-param-item"><span>required</span> <span class="type-annotation"><a href="../media/MediaItem-class.html">MediaItem</a></span> <span class="parameter-name">item</span>}</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../utils/SubtitleItem-class.html">SubtitleItem</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Get the player controller to be used when a media item is loaded up,
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="searchMediaItems" class="callable inherited">
+  <span class="name"><a href="../media/MediaSource/searchMediaItems.html">searchMediaItems</a></span><span class="signature">(<wbr><span class="parameter" id="searchMediaItems-param-context">{<span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a></span> <span class="parameter-name">context</span>, </span><span class="parameter" id="searchMediaItems-param-searchTerm"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">searchTerm</span>, </span><span class="parameter" id="searchMediaItems-param-pageKey"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">pageKey</span>}</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../media/MediaItem-class.html">MediaItem</a></span>&gt;</span>?</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  This returns a list of <a href="../media/MediaItem-class.html">MediaItem</a>, and is performed to search the media
+source for items.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="setCurrentSentence" class="callable inherited">
+  <span class="name"><a href="../media/MediaSource/setCurrentSentence.html">setCurrentSentence</a></span><span class="signature">(<wbr><span class="parameter" id="setCurrentSentence-param-sentence"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">sentence</span></span>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Update the current sentence.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="setExtraData" class="callable inherited">
+  <span class="name"><a href="../media/MediaSource/setExtraData.html">setExtraData</a></span><span class="signature">(<wbr><span class="parameter" id="setExtraData-param-value"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">value</span></span>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Set extra export data. This should be simplified in the future and be
+used as the main way of communicating parameters to the creator for
+creating override images/audio information. There should not be media
+source specific parameters for general functions like generating images
+or audio.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="setOverrideThumbnailFromMediaItem" class="callable inherited">
+  <span class="name"><a href="../media/MediaSource/setOverrideThumbnailFromMediaItem.html">setOverrideThumbnailFromMediaItem</a></span><span class="signature">(<wbr><span class="parameter" id="setOverrideThumbnailFromMediaItem-param-appModel">{<span>required</span> <span class="type-annotation"><a href="../models/AppModel-class.html">AppModel</a></span> <span class="parameter-name">appModel</span>, </span><span class="parameter" id="setOverrideThumbnailFromMediaItem-param-item"><span>required</span> <span class="type-annotation"><a href="../media/MediaItem-class.html">MediaItem</a></span> <span class="parameter-name">item</span>, </span><span class="parameter" id="setOverrideThumbnailFromMediaItem-param-file"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-io/File-class.html">File</a>?</span> <span class="parameter-name">file</span>}</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Given a <a href="../media/MediaItem-class.html">MediaItem</a>, set its override display thumbnail. If null, this
+deletes the override thumbnail.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="setOverrideTitleFromMediaItem" class="callable inherited">
+  <span class="name"><a href="../media/MediaSource/setOverrideTitleFromMediaItem.html">setOverrideTitleFromMediaItem</a></span><span class="signature">(<wbr><span class="parameter" id="setOverrideTitleFromMediaItem-param-item">{<span>required</span> <span class="type-annotation"><a href="../media/MediaItem-class.html">MediaItem</a></span> <span class="parameter-name">item</span>, </span><span class="parameter" id="setOverrideTitleFromMediaItem-param-title"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">title</span>}</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Given a <a href="../media/MediaItem-class.html">MediaItem</a>, set its override display title. If the title is
+blank, the override title is cleared.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="setPreference" class="callable inherited">
+  <span class="name"><a href="../media/MediaSource/setPreference.html">setPreference</a></span><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="setPreference-param-key">{<span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">key</span>, </span><span class="parameter" id="setPreference-param-value"><span>required</span> <span class="type-annotation">T</span> <span class="parameter-name">value</span>}</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Set the preference <code>value</code> for a certain parameter <code>key</code> for this source.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="setShouldGenerateAudio" class="callable inherited">
+  <span class="name"><a href="../media/MediaSource/setShouldGenerateAudio.html">setShouldGenerateAudio</a></span><span class="signature">(<wbr><span class="parameter" id="setShouldGenerateAudio-param-value">{<span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">value</span>}</span>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Controls whether or not a media source should currently supply audio.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="setShouldGenerateImage" class="callable inherited">
+  <span class="name"><a href="../media/MediaSource/setShouldGenerateImage.html">setShouldGenerateImage</a></span><span class="signature">(<wbr><span class="parameter" id="setShouldGenerateImage-param-value">{<span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">value</span>}</span>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Controls whether or not a media source should currently supply images.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="setTranscriptSubtitle" class="callable inherited">
+  <span class="name"><a href="../media/PlayerMediaSource/setTranscriptSubtitle.html">setTranscriptSubtitle</a></span><span class="signature">(<wbr><span class="parameter" id="setTranscriptSubtitle-param-subtitle"><span class="type-annotation">Subtitle</span> <span class="parameter-name">subtitle</span></span>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Set the transcript subtitle.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="showStreamDialog" class="callable">
+  <span class="name"><a href="../media/PlayerNetworkStreamSource/showStreamDialog.html">showStreamDialog</a></span><span class="signature">(<wbr><span class="parameter" id="showStreamDialog-param-context">{<span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a></span> <span class="parameter-name">context</span>, </span><span class="parameter" id="showStreamDialog-param-ref"><span>required</span> <span class="type-annotation"><a href="https://pub.dev/documentation/flutter_riverpod/1.0.4/flutter_riverpod/WidgetRef-class.html">WidgetRef</a></span> <span class="parameter-name">ref</span>, </span><span class="parameter" id="showStreamDialog-param-appModel"><span>required</span> <span class="type-annotation"><a href="../models/AppModel-class.html">AppModel</a></span> <span class="parameter-name">appModel</span>}</span>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Shows the dialog where the user can enter a link.
+  
+
+</dd>
+
+        <dt id="toString" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/toString.html">toString</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  A string representation of this object.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor inherited"
+      id="operators">
+    <h2>Operators</h2>
+    <dl class="callables">
+        <dt id="operator ==" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/operator_equals.html">operator ==</a></span><span class="signature">(<wbr><span class="parameter" id="==-param-other"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">other</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  The equality operator.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+  <section class="summary offset-anchor" id="static-properties">
+    <h2>Static Properties</h2>
+
+    <dl class="properties">
+        <dt id="instance" class="property">
+  <span class="name"><a href="../media/PlayerNetworkStreamSource/instance.html">instance</a></span>
+  <span class="signature">&#8594; <a href="../media/PlayerNetworkStreamSource-class.html">PlayerNetworkStreamSource</a></span> 
+
+</dt>
+<dd>
+  Get the singleton instance of this media type.
+  <div class="features"><span class="feature">read-only</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+    
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+  <li><a href="../index.html">yuuna</a></li>
+  <li><a href="../media/media-library.html">media</a></li>
+  <li class="self-crumb">PlayerNetworkStreamSource class</li>
+</ol>
+
+
+    <h5>media library</h5>
+    <ol>
+      <li class="section-title"><a href="../media/media-library.html#classes">Classes</a></li>
+        <li><a href="../media/ComputeManifestParams-class.html">ComputeManifestParams</a></li>
+        <li><a href="../media/DictionaryMediaType-class.html">DictionaryMediaType</a></li>
+        <li><a href="../media/MediaItem-class.html">MediaItem</a></li>
+        <li><a href="../media/MediaSource-class.html">MediaSource</a></li>
+        <li><a href="../media/MediaType-class.html">MediaType</a></li>
+        <li><a href="../media/PlayerLocalMediaSource-class.html">PlayerLocalMediaSource</a></li>
+        <li><a href="../media/PlayerMediaSource-class.html">PlayerMediaSource</a></li>
+        <li><a href="../media/PlayerMediaType-class.html">PlayerMediaType</a></li>
+        <li><a href="../media/PlayerNetworkStreamSource-class.html">PlayerNetworkStreamSource</a></li>
+        <li><a href="../media/PlayerYoutubeSource-class.html">PlayerYoutubeSource</a></li>
+        <li><a href="../media/ReaderChatgptSource-class.html">ReaderChatgptSource</a></li>
+        <li><a href="../media/ReaderClipboardSource-class.html">ReaderClipboardSource</a></li>
+        <li><a href="../media/ReaderLyricsSource-class.html">ReaderLyricsSource</a></li>
+        <li><a href="../media/ReaderMediaSource-class.html">ReaderMediaSource</a></li>
+        <li><a href="../media/ReaderMediaType-class.html">ReaderMediaType</a></li>
+        <li><a href="../media/ReaderMokuroSource-class.html">ReaderMokuroSource</a></li>
+        <li><a href="../media/ReaderTtuSource-class.html">ReaderTtuSource</a></li>
+        <li><a href="../media/ReaderWebsocketSource-class.html">ReaderWebsocketSource</a></li>
+        <li><a href="../media/VideoManifest-class.html">VideoManifest</a></li>
+        <li><a href="../media/ViewerCameraSource-class.html">ViewerCameraSource</a></li>
+        <li><a href="../media/ViewerMediaSource-class.html">ViewerMediaSource</a></li>
+        <li><a href="../media/ViewerMediaType-class.html">ViewerMediaType</a></li>
+
+      <li class="section-title"><a href="../media/media-library.html#extensions">Extensions</a></li>
+        <li><a href="../media/GetMediaItemCollection.html">GetMediaItemCollection</a></li>
+        <li><a href="../media/MediaItemByIndex.html">MediaItemByIndex</a></li>
+        <li><a href="../media/MediaItemQueryFilter.html">MediaItemQueryFilter</a></li>
+        <li><a href="../media/MediaItemQueryLinks.html">MediaItemQueryLinks</a></li>
+        <li><a href="../media/MediaItemQueryObject.html">MediaItemQueryObject</a></li>
+        <li><a href="../media/MediaItemQueryProperty.html">MediaItemQueryProperty</a></li>
+        <li><a href="../media/MediaItemQuerySortBy.html">MediaItemQuerySortBy</a></li>
+        <li><a href="../media/MediaItemQuerySortThenBy.html">MediaItemQuerySortThenBy</a></li>
+        <li><a href="../media/MediaItemQueryWhere.html">MediaItemQueryWhere</a></li>
+        <li><a href="../media/MediaItemQueryWhereDistinct.html">MediaItemQueryWhereDistinct</a></li>
+        <li><a href="../media/MediaItemQueryWhereSort.html">MediaItemQueryWhereSort</a></li>
+
+
+      <li class="section-title"><a href="../media/media-library.html#constants">Constants</a></li>
+        <li><a href="../media/MediaItemSchema-constant.html">MediaItemSchema</a></li>
+
+      <li class="section-title"><a href="../media/media-library.html#properties">Properties</a></li>
+        <li><a href="../media/channelProvider.html">channelProvider</a></li>
+        <li><a href="../media/clipboardProvider.html">clipboardProvider</a></li>
+        <li><a href="../media/commentsProvider.html">commentsProvider</a></li>
+        <li><a href="../media/lyricsPermissionsProvider.html">lyricsPermissionsProvider</a></li>
+        <li><a href="../media/lyricsProvider.html">lyricsProvider</a></li>
+        <li><a href="../media/lyricsStreamProvider.html">lyricsStreamProvider</a></li>
+        <li><a href="../media/repliesProvider.html">repliesProvider</a></li>
+        <li><a href="../media/ttuBooksProvider.html">ttuBooksProvider</a></li>
+        <li><a href="../media/ttuServerProvider.html">ttuServerProvider</a></li>
+        <li><a href="../media/vttRegex.html">vttRegex</a></li>
+
+      <li class="section-title"><a href="../media/media-library.html#functions">Functions</a></li>
+        <li><a href="../media/computeCaptionsManifest.html">computeCaptionsManifest</a></li>
+        <li><a href="../media/computeChannel.html">computeChannel</a></li>
+        <li><a href="../media/computeCommentsList.html">computeCommentsList</a></li>
+        <li><a href="../media/computeManifests.html">computeManifests</a></li>
+
+
+
+</ol>
+
+  </div>
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+    <ol>
+
+
+
+        <li class="section-title inherited">
+          <a href="../media/PlayerNetworkStreamSource-class.html#instance-properties">Properties</a>
+        </li>
+          <li class="inherited"><a href="../media/PlayerMediaSource/aspectRatio.html">aspectRatio</a></li>
+          <li class="inherited"><a href="../media/MediaSource/currentExtraData.html">currentExtraData</a></li>
+          <li class="inherited"><a href="../media/MediaSource/currentMediaItem.html">currentMediaItem</a></li>
+          <li class="inherited"><a href="../media/MediaSource/currentSentence.html">currentSentence</a></li>
+          <li class="inherited"><a href="../media/MediaSource/description.html">description</a></li>
+          <li class="inherited"><a href="../media/MediaSource/descriptionLocalisation.html">descriptionLocalisation</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></li>
+          <li class="inherited"><a href="../media/MediaSource/icon.html">icon</a></li>
+          <li class="inherited"><a href="../media/MediaSource/implementsHistory.html">implementsHistory</a></li>
+          <li class="inherited"><a href="../media/MediaSource/implementsSearch.html">implementsSearch</a></li>
+          <li class="inherited"><a href="../media/MediaSource/mediaType.html">mediaType</a></li>
+          <li class="inherited"><a href="../media/MediaSource/overridesAutoAudio.html">overridesAutoAudio</a></li>
+          <li class="inherited"><a href="../media/MediaSource/overridesAutoImage.html">overridesAutoImage</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></li>
+          <li class="inherited"><a href="../media/MediaSource/shouldGenerateAudio.html">shouldGenerateAudio</a></li>
+          <li class="inherited"><a href="../media/MediaSource/shouldGenerateImage.html">shouldGenerateImage</a></li>
+          <li class="inherited"><a href="../media/MediaSource/sourceName.html">sourceName</a></li>
+          <li class="inherited"><a href="../media/MediaSource/sourceNameLocalisatiton.html">sourceNameLocalisatiton</a></li>
+          <li class="inherited"><a href="../media/MediaSource/uniqueKey.html">uniqueKey</a></li>
+
+        <li class="section-title"><a href="../media/PlayerNetworkStreamSource-class.html#instance-methods">Methods</a></li>
+          <li class="inherited"><a href="../media/MediaSource/buildBar.html">buildBar</a></li>
+          <li class="inherited"><a href="../media/PlayerMediaSource/buildHistoryPage.html">buildHistoryPage</a></li>
+          <li><a href="../media/PlayerNetworkStreamSource/buildLaunchPage.html">buildLaunchPage</a></li>
+          <li class="inherited"><a href="../media/MediaSource/clearCurrentSentence.html">clearCurrentSentence</a></li>
+          <li class="inherited"><a href="../media/MediaSource/clearExtraData.html">clearExtraData</a></li>
+          <li class="inherited"><a href="../media/MediaSource/clearOverrideValues.html">clearOverrideValues</a></li>
+          <li class="inherited"><a href="../media/PlayerMediaSource/clearTranscriptSubtitle.html">clearTranscriptSubtitle</a></li>
+          <li class="inherited"><a href="../media/MediaSource/deletePreference.html">deletePreference</a></li>
+          <li class="inherited"><a href="../media/PlayerMediaSource/generateAudio.html">generateAudio</a></li>
+          <li class="inherited"><a href="../media/PlayerMediaSource/generateImages.html">generateImages</a></li>
+          <li class="inherited"><a href="../media/MediaSource/generateSearchSuggestions.html">generateSearchSuggestions</a></li>
+          <li><a href="../media/PlayerNetworkStreamSource/getActions.html">getActions</a></li>
+          <li class="inherited"><a href="../media/MediaSource/getDisplaySubtitleFromMediaItem.html">getDisplaySubtitleFromMediaItem</a></li>
+          <li class="inherited"><a href="../media/MediaSource/getDisplayThumbnailFromMediaItem.html">getDisplayThumbnailFromMediaItem</a></li>
+          <li class="inherited"><a href="../media/MediaSource/getDisplayTitleFromMediaItem.html">getDisplayTitleFromMediaItem</a></li>
+          <li class="inherited"><a href="../media/MediaSource/getLocalisedDescription.html">getLocalisedDescription</a></li>
+          <li class="inherited"><a href="../media/MediaSource/getLocalisedSourceName.html">getLocalisedSourceName</a></li>
+          <li><a href="../media/PlayerNetworkStreamSource/getMediaItemFromUrl.html">getMediaItemFromUrl</a></li>
+          <li class="inherited"><a href="../media/MediaSource/getOverrideThumbnailFilename.html">getOverrideThumbnailFilename</a></li>
+          <li class="inherited"><a href="../media/MediaSource/getOverrideThumbnailFromMediaItem.html">getOverrideThumbnailFromMediaItem</a></li>
+          <li class="inherited"><a href="../media/MediaSource/getOverrideTitleFromMediaItem.html">getOverrideTitleFromMediaItem</a></li>
+          <li class="inherited"><a href="../media/MediaSource/getOverrideTitleKey.html">getOverrideTitleKey</a></li>
+          <li class="inherited"><a href="../media/MediaSource/getPreference.html">getPreference</a></li>
+          <li class="inherited"><a href="../media/MediaSource/getThumbnailUri.html">getThumbnailUri</a></li>
+          <li class="inherited"><a href="../media/MediaSource/initialise.html">initialise</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></li>
+          <li class="inherited"><a href="../media/MediaSource/onMediaItemClear.html">onMediaItemClear</a></li>
+          <li><a href="../media/PlayerNetworkStreamSource/onSearchBarTap.html">onSearchBarTap</a></li>
+          <li class="inherited"><a href="../media/PlayerMediaSource/onSourceExit.html">onSourceExit</a></li>
+          <li class="inherited"><a href="../media/PlayerMediaSource/prepareMediaResources.html">prepareMediaResources</a></li>
+          <li><a href="../media/PlayerNetworkStreamSource/preparePlayerController.html">preparePlayerController</a></li>
+          <li class="inherited"><a href="../media/MediaSource/prepareResources.html">prepareResources</a></li>
+          <li><a href="../media/PlayerNetworkStreamSource/prepareSubtitles.html">prepareSubtitles</a></li>
+          <li class="inherited"><a href="../media/MediaSource/searchMediaItems.html">searchMediaItems</a></li>
+          <li class="inherited"><a href="../media/MediaSource/setCurrentSentence.html">setCurrentSentence</a></li>
+          <li class="inherited"><a href="../media/MediaSource/setExtraData.html">setExtraData</a></li>
+          <li class="inherited"><a href="../media/MediaSource/setOverrideThumbnailFromMediaItem.html">setOverrideThumbnailFromMediaItem</a></li>
+          <li class="inherited"><a href="../media/MediaSource/setOverrideTitleFromMediaItem.html">setOverrideTitleFromMediaItem</a></li>
+          <li class="inherited"><a href="../media/MediaSource/setPreference.html">setPreference</a></li>
+          <li class="inherited"><a href="../media/MediaSource/setShouldGenerateAudio.html">setShouldGenerateAudio</a></li>
+          <li class="inherited"><a href="../media/MediaSource/setShouldGenerateImage.html">setShouldGenerateImage</a></li>
+          <li class="inherited"><a href="../media/PlayerMediaSource/setTranscriptSubtitle.html">setTranscriptSubtitle</a></li>
+          <li><a href="../media/PlayerNetworkStreamSource/showStreamDialog.html">showStreamDialog</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/toString.html">toString</a></li>
+
+        <li class="section-title inherited"><a href="../media/PlayerNetworkStreamSource-class.html#operators">Operators</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/operator_equals.html">operator ==</a></li>
+
+
+        <li class="section-title"><a href="../media/PlayerNetworkStreamSource-class.html#static-properties">Static properties</a></li>
+          <li><a href="../media/PlayerNetworkStreamSource/instance.html">instance</a></li>
+
+
+</ol>
+
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    yuuna
+      2.6.7+81
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+

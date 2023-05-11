@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the base64ImageBetween method from the MediaItemQueryFilter extension, for the Dart programming language.">
+  <title>base64ImageBetween method - MediaItemQueryFilter extension - media library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">yuuna</a></li>
+    <li><a href="../../media/media-library.html">media</a></li>
+    <li><a href="../../media/MediaItemQueryFilter.html">MediaItemQueryFilter</a></li>
+    <li class="self-crumb">base64ImageBetween method</li>
+  </ol>
+  <div class="self-name">base64ImageBetween</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span class="material-symbols-outlined">
+        brightness_4
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+  <div id="dartdoc-main-content" class="main-content">
+      <div>
+<h1><span class="kind-method">base64ImageBetween</span> method 
+    <a href="https://dart.dev/null-safety" class="feature feature-null-safety" title="Supports the null safety language feature.">Null safety</a>
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+
+<span class="returntype"><a href="https://pub.dev/documentation/isar/3.1.0+1/isar/QueryBuilder-class.html">QueryBuilder</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../media/MediaItem-class.html">MediaItem</a></span>, <span class="type-parameter"><a href="../../media/MediaItem-class.html">MediaItem</a></span>, <span class="type-parameter">QAfterFilterCondition</span>&gt;</span></span>
+<span class="name ">base64ImageBetween</span>(<wbr><ol class="parameter-list"><li><span class="parameter" id="base64ImageBetween-param-lower"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">lower</span>, </span></li>
+<li><span class="parameter" id="base64ImageBetween-param-upper"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">upper</span>, </span></li>
+<li><span class="parameter" id="base64ImageBetween-param-includeLower">{<span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">includeLower</span> = <span class="default-value">true</span>, </span></li>
+<li><span class="parameter" id="base64ImageBetween-param-includeUpper"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">includeUpper</span> = <span class="default-value">true</span>, </span></li>
+<li><span class="parameter" id="base64ImageBetween-param-caseSensitive"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">caseSensitive</span> = <span class="default-value">true</span>}</span></li>
+</ol>)
+
+      
+
+    </section>
+    
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">QueryBuilder&lt;MediaItem, MediaItem, QAfterFilterCondition&gt; base64ImageBetween(
+  String? lower,
+  String? upper, {
+  bool includeLower = true,
+  bool includeUpper = true,
+  bool caseSensitive = true,
+}) {
+  return QueryBuilder.apply(this, (query) {
+    return query.addFilterCondition(FilterCondition.between(
+      property: r&#39;base64Image&#39;,
+      lower: lower,
+      includeLower: includeLower,
+      upper: upper,
+      includeUpper: includeUpper,
+      caseSensitive: caseSensitive,
+    ));
+  });
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+  <li><a href="../../index.html">yuuna</a></li>
+  <li><a href="../../media/media-library.html">media</a></li>
+  <li><a href="../../media/MediaItemQueryFilter.html">MediaItemQueryFilter</a></li>
+  <li class="self-crumb">base64ImageBetween method</li>
+</ol>
+
+
+    <h5>MediaItemQueryFilter extension</h5>
+    <ol>
+
+
+
+
+
+        <li class="section-title"><a href="../../media/MediaItemQueryFilter.html#instance-methods">Methods</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/audioUrlBetween.html">audioUrlBetween</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/audioUrlContains.html">audioUrlContains</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/audioUrlEndsWith.html">audioUrlEndsWith</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/audioUrlEqualTo.html">audioUrlEqualTo</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/audioUrlGreaterThan.html">audioUrlGreaterThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/audioUrlIsEmpty.html">audioUrlIsEmpty</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/audioUrlIsNotEmpty.html">audioUrlIsNotEmpty</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/audioUrlIsNotNull.html">audioUrlIsNotNull</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/audioUrlIsNull.html">audioUrlIsNull</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/audioUrlLessThan.html">audioUrlLessThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/audioUrlMatches.html">audioUrlMatches</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/audioUrlStartsWith.html">audioUrlStartsWith</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/authorBetween.html">authorBetween</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/authorContains.html">authorContains</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/authorEndsWith.html">authorEndsWith</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/authorEqualTo.html">authorEqualTo</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/authorGreaterThan.html">authorGreaterThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/authorIdentifierBetween.html">authorIdentifierBetween</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/authorIdentifierContains.html">authorIdentifierContains</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/authorIdentifierEndsWith.html">authorIdentifierEndsWith</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/authorIdentifierEqualTo.html">authorIdentifierEqualTo</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/authorIdentifierGreaterThan.html">authorIdentifierGreaterThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/authorIdentifierIsEmpty.html">authorIdentifierIsEmpty</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/authorIdentifierIsNotEmpty.html">authorIdentifierIsNotEmpty</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/authorIdentifierIsNotNull.html">authorIdentifierIsNotNull</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/authorIdentifierIsNull.html">authorIdentifierIsNull</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/authorIdentifierLessThan.html">authorIdentifierLessThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/authorIdentifierMatches.html">authorIdentifierMatches</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/authorIdentifierStartsWith.html">authorIdentifierStartsWith</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/authorIsEmpty.html">authorIsEmpty</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/authorIsNotEmpty.html">authorIsNotEmpty</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/authorIsNotNull.html">authorIsNotNull</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/authorIsNull.html">authorIsNull</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/authorLessThan.html">authorLessThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/authorMatches.html">authorMatches</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/authorStartsWith.html">authorStartsWith</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/base64ImageBetween.html">base64ImageBetween</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/base64ImageContains.html">base64ImageContains</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/base64ImageEndsWith.html">base64ImageEndsWith</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/base64ImageEqualTo.html">base64ImageEqualTo</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/base64ImageGreaterThan.html">base64ImageGreaterThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/base64ImageIsEmpty.html">base64ImageIsEmpty</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/base64ImageIsNotEmpty.html">base64ImageIsNotEmpty</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/base64ImageIsNotNull.html">base64ImageIsNotNull</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/base64ImageIsNull.html">base64ImageIsNull</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/base64ImageLessThan.html">base64ImageLessThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/base64ImageMatches.html">base64ImageMatches</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/base64ImageStartsWith.html">base64ImageStartsWith</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/canDeleteEqualTo.html">canDeleteEqualTo</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/canEditEqualTo.html">canEditEqualTo</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/durationBetween.html">durationBetween</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/durationEqualTo.html">durationEqualTo</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/durationGreaterThan.html">durationGreaterThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/durationLessThan.html">durationLessThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/extraBetween.html">extraBetween</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/extraContains.html">extraContains</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/extraEndsWith.html">extraEndsWith</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/extraEqualTo.html">extraEqualTo</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/extraGreaterThan.html">extraGreaterThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/extraIsEmpty.html">extraIsEmpty</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/extraIsNotEmpty.html">extraIsNotEmpty</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/extraIsNotNull.html">extraIsNotNull</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/extraIsNull.html">extraIsNull</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/extraLessThan.html">extraLessThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/extraMatches.html">extraMatches</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/extraStartsWith.html">extraStartsWith</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/extraUrlBetween.html">extraUrlBetween</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/extraUrlContains.html">extraUrlContains</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/extraUrlEndsWith.html">extraUrlEndsWith</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/extraUrlEqualTo.html">extraUrlEqualTo</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/extraUrlGreaterThan.html">extraUrlGreaterThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/extraUrlIsEmpty.html">extraUrlIsEmpty</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/extraUrlIsNotEmpty.html">extraUrlIsNotEmpty</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/extraUrlIsNotNull.html">extraUrlIsNotNull</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/extraUrlIsNull.html">extraUrlIsNull</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/extraUrlLessThan.html">extraUrlLessThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/extraUrlMatches.html">extraUrlMatches</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/extraUrlStartsWith.html">extraUrlStartsWith</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/hashCodeBetween.html">hashCodeBetween</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/hashCodeEqualTo.html">hashCodeEqualTo</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/hashCodeGreaterThan.html">hashCodeGreaterThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/hashCodeLessThan.html">hashCodeLessThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/idBetween.html">idBetween</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/idEqualTo.html">idEqualTo</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/idGreaterThan.html">idGreaterThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/idIsNotNull.html">idIsNotNull</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/idIsNull.html">idIsNull</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/idLessThan.html">idLessThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/imageUrlBetween.html">imageUrlBetween</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/imageUrlContains.html">imageUrlContains</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/imageUrlEndsWith.html">imageUrlEndsWith</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/imageUrlEqualTo.html">imageUrlEqualTo</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/imageUrlGreaterThan.html">imageUrlGreaterThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/imageUrlIsEmpty.html">imageUrlIsEmpty</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/imageUrlIsNotEmpty.html">imageUrlIsNotEmpty</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/imageUrlIsNotNull.html">imageUrlIsNotNull</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/imageUrlIsNull.html">imageUrlIsNull</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/imageUrlLessThan.html">imageUrlLessThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/imageUrlMatches.html">imageUrlMatches</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/imageUrlStartsWith.html">imageUrlStartsWith</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaIdentifierBetween.html">mediaIdentifierBetween</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaIdentifierContains.html">mediaIdentifierContains</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaIdentifierEndsWith.html">mediaIdentifierEndsWith</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaIdentifierEqualTo.html">mediaIdentifierEqualTo</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaIdentifierGreaterThan.html">mediaIdentifierGreaterThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaIdentifierIsEmpty.html">mediaIdentifierIsEmpty</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaIdentifierIsNotEmpty.html">mediaIdentifierIsNotEmpty</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaIdentifierLessThan.html">mediaIdentifierLessThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaIdentifierMatches.html">mediaIdentifierMatches</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaIdentifierStartsWith.html">mediaIdentifierStartsWith</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaSourceIdentifierBetween.html">mediaSourceIdentifierBetween</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaSourceIdentifierContains.html">mediaSourceIdentifierContains</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaSourceIdentifierEndsWith.html">mediaSourceIdentifierEndsWith</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaSourceIdentifierEqualTo.html">mediaSourceIdentifierEqualTo</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaSourceIdentifierGreaterThan.html">mediaSourceIdentifierGreaterThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaSourceIdentifierIsEmpty.html">mediaSourceIdentifierIsEmpty</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaSourceIdentifierIsNotEmpty.html">mediaSourceIdentifierIsNotEmpty</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaSourceIdentifierLessThan.html">mediaSourceIdentifierLessThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaSourceIdentifierMatches.html">mediaSourceIdentifierMatches</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaSourceIdentifierStartsWith.html">mediaSourceIdentifierStartsWith</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaTypeIdentifierBetween.html">mediaTypeIdentifierBetween</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaTypeIdentifierContains.html">mediaTypeIdentifierContains</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaTypeIdentifierEndsWith.html">mediaTypeIdentifierEndsWith</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaTypeIdentifierEqualTo.html">mediaTypeIdentifierEqualTo</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaTypeIdentifierGreaterThan.html">mediaTypeIdentifierGreaterThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaTypeIdentifierIsEmpty.html">mediaTypeIdentifierIsEmpty</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaTypeIdentifierIsNotEmpty.html">mediaTypeIdentifierIsNotEmpty</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaTypeIdentifierLessThan.html">mediaTypeIdentifierLessThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaTypeIdentifierMatches.html">mediaTypeIdentifierMatches</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/mediaTypeIdentifierStartsWith.html">mediaTypeIdentifierStartsWith</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/positionBetween.html">positionBetween</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/positionEqualTo.html">positionEqualTo</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/positionGreaterThan.html">positionGreaterThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/positionLessThan.html">positionLessThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/sourceMetadataBetween.html">sourceMetadataBetween</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/sourceMetadataContains.html">sourceMetadataContains</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/sourceMetadataEndsWith.html">sourceMetadataEndsWith</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/sourceMetadataEqualTo.html">sourceMetadataEqualTo</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/sourceMetadataGreaterThan.html">sourceMetadataGreaterThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/sourceMetadataIsEmpty.html">sourceMetadataIsEmpty</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/sourceMetadataIsNotEmpty.html">sourceMetadataIsNotEmpty</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/sourceMetadataIsNotNull.html">sourceMetadataIsNotNull</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/sourceMetadataIsNull.html">sourceMetadataIsNull</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/sourceMetadataLessThan.html">sourceMetadataLessThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/sourceMetadataMatches.html">sourceMetadataMatches</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/sourceMetadataStartsWith.html">sourceMetadataStartsWith</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/titleBetween.html">titleBetween</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/titleContains.html">titleContains</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/titleEndsWith.html">titleEndsWith</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/titleEqualTo.html">titleEqualTo</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/titleGreaterThan.html">titleGreaterThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/titleIsEmpty.html">titleIsEmpty</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/titleIsNotEmpty.html">titleIsNotEmpty</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/titleLessThan.html">titleLessThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/titleMatches.html">titleMatches</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/titleStartsWith.html">titleStartsWith</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/uniqueKeyBetween.html">uniqueKeyBetween</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/uniqueKeyContains.html">uniqueKeyContains</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/uniqueKeyEndsWith.html">uniqueKeyEndsWith</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/uniqueKeyEqualTo.html">uniqueKeyEqualTo</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/uniqueKeyGreaterThan.html">uniqueKeyGreaterThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/uniqueKeyIsEmpty.html">uniqueKeyIsEmpty</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/uniqueKeyIsNotEmpty.html">uniqueKeyIsNotEmpty</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/uniqueKeyLessThan.html">uniqueKeyLessThan</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/uniqueKeyMatches.html">uniqueKeyMatches</a></li>
+          <li><a href="../../media/MediaItemQueryFilter/uniqueKeyStartsWith.html">uniqueKeyStartsWith</a></li>
+
+
+
+
+</ol>
+
+  </div><!--/.sidebar-offcanvas-->
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    yuuna
+      2.6.7+81
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+

@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the DictionarySearchParams class from the dictionary library, for the Dart programming language.">
+  <title>DictionarySearchParams class - dictionary library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../index.html">yuuna</a></li>
+    <li><a href="../dictionary/dictionary-library.html">dictionary</a></li>
+    <li class="self-crumb">DictionarySearchParams class</li>
+  </ol>
+  <div class="self-name">DictionarySearchParams</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span class="material-symbols-outlined">
+        brightness_4
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+  <div id="dartdoc-main-content" class="main-content">
+      <div>
+<h1><span class="kind-class">DictionarySearchParams</span> class 
+    <a href="https://dart.dev/null-safety" class="feature feature-null-safety" title="Supports the null safety language feature.">Null safety</a>
+ 
+</h1></div>
+
+    
+<section class="desc markdown">
+  <p>For isolate communication purposes. Used for dictionary search.</p>
+</section>
+
+
+    <section>
+      <dl class="dl-horizontal">
+        
+  <dt>Inheritance</dt>
+  <dd>
+    <ul class="gt-separated dark clazz-relationships">
+      <li><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></li>
+        <li><a href="../dictionary/IsolateParams-class.html">IsolateParams</a></li>
+      <li>DictionarySearchParams</li>
+    </ul>
+  </dd>
+
+        
+        
+
+
+
+        
+
+
+      </dl>
+    </section>
+
+    
+  <section class="summary offset-anchor" id="constructors">
+    <h2>Constructors</h2>
+
+    <dl class="constructor-summary-list">
+        <dt id="DictionarySearchParams" class="callable">
+          <span class="name"><a href="../dictionary/DictionarySearchParams/DictionarySearchParams.html">DictionarySearchParams</a></span><span class="signature">(<span class="parameter" id="-param-searchTerm">{<span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">searchTerm</span>, </span><span class="parameter" id="-param-maximumDictionarySearchResults"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">maximumDictionarySearchResults</span>, </span><span class="parameter" id="-param-maximumDictionaryTermsInResult"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">maximumDictionaryTermsInResult</span>, </span><span class="parameter" id="-param-enabledDictionaryIds"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span> <span class="parameter-name">enabledDictionaryIds</span>, </span><span class="parameter" id="-param-searchWithWildcards"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">searchWithWildcards</span>, </span><span class="parameter" id="-param-sendPort"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-isolate/SendPort-class.html">SendPort</a></span> <span class="parameter-name">sendPort</span>, </span><span class="parameter" id="-param-directoryPath"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">directoryPath</span>}</span>)</span>
+        </dt>
+        <dd>
+          Prepare parameters needed for searching the dictionary database from a
+separate isolate.
+        </dd>
+    </dl>
+  </section>
+
+    <section class="summary offset-anchor" id="instance-properties">
+      <h2>Properties</h2>
+
+      <dl class="properties">
+        <dt id="directoryPath" class="property inherited">
+  <span class="name"><a href="../dictionary/IsolateParams/directoryPath.html">directoryPath</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> 
+
+</dt>
+<dd class="inherited">
+  Database directory path.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="enabledDictionaryIds" class="property">
+  <span class="name"><a href="../dictionary/DictionarySearchParams/enabledDictionaryIds.html">enabledDictionaryIds</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span> 
+
+</dt>
+<dd>
+  IDs of dictionaries that are not disabled.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="hashCode" class="property">
+  <span class="name"><a href="../dictionary/DictionarySearchParams/hashCode.html">hashCode</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> 
+
+</dt>
+<dd>
+  The hash code for this object.
+  <div class="features"><span class="feature">read-only</span><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="maximumDictionarySearchResults" class="property">
+  <span class="name"><a href="../dictionary/DictionarySearchParams/maximumDictionarySearchResults.html">maximumDictionarySearchResults</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> 
+
+</dt>
+<dd>
+  Maximum number of items that can be in dictionary history.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="maximumDictionaryTermsInResult" class="property">
+  <span class="name"><a href="../dictionary/DictionarySearchParams/maximumDictionaryTermsInResult.html">maximumDictionaryTermsInResult</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> 
+
+</dt>
+<dd>
+  Maximum number of headwords in a returned dictionary result.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="runtimeType" class="property inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a></span> 
+
+</dt>
+<dd class="inherited">
+  A representation of the runtime type of the object.
+  <div class="features"><span class="feature">read-only</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="searchTerm" class="property">
+  <span class="name"><a href="../dictionary/DictionarySearchParams/searchTerm.html">searchTerm</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> 
+
+</dt>
+<dd>
+  Primary search term, likely taken from context.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="searchWithWildcards" class="property">
+  <span class="name"><a href="../dictionary/DictionarySearchParams/searchWithWildcards.html">searchWithWildcards</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> 
+
+</dt>
+<dd>
+  Whether or not this search performs a wildcard search.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="sendPort" class="property inherited">
+  <span class="name"><a href="../dictionary/IsolateParams/sendPort.html">sendPort</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-isolate/SendPort-class.html">SendPort</a></span> 
+
+</dt>
+<dd class="inherited">
+  For communication with a <a href="https://api.flutter.dev/flutter/dart-isolate/ReceivePort-class.html">ReceivePort</a> for isolate updates.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+      </dl>
+    </section>
+
+    
+  <section
+      class="summary offset-anchor inherited"
+      id="instance-methods">
+    <h2>Methods</h2>
+    <dl class="callables">
+        <dt id="noSuchMethod" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></span><span class="signature">(<wbr><span class="parameter" id="noSuchMethod-param-invocation"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Invocation-class.html">Invocation</a></span> <span class="parameter-name">invocation</span></span>)
+    <span class="returntype parameter">&#8594; dynamic</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Invoked when a non-existent method or property is accessed.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="send" class="callable inherited">
+  <span class="name"><a href="../dictionary/IsolateParams/send.html">send</a></span><span class="signature">(<wbr><span class="parameter" id="send-param-message"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a>?</span> <span class="parameter-name">message</span></span>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Send a message through the <a href="../dictionary/IsolateParams/sendPort.html">sendPort</a>.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="toString" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/toString.html">toString</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  A string representation of this object.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor"
+      id="operators">
+    <h2>Operators</h2>
+    <dl class="callables">
+        <dt id="operator ==" class="callable">
+  <span class="name"><a href="../dictionary/DictionarySearchParams/operator_equals.html">operator ==</a></span><span class="signature">(<wbr><span class="parameter" id="==-param-other"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">other</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  </span>
+  
+
+</dt>
+<dd>
+  The equality operator.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+    
+    
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+  <li><a href="../index.html">yuuna</a></li>
+  <li><a href="../dictionary/dictionary-library.html">dictionary</a></li>
+  <li class="self-crumb">DictionarySearchParams class</li>
+</ol>
+
+
+    <h5>dictionary library</h5>
+    <ol>
+      <li class="section-title"><a href="../dictionary/dictionary-library.html#classes">Classes</a></li>
+        <li><a href="../dictionary/AbbyyLingvoFormat-class.html">AbbyyLingvoFormat</a></li>
+        <li><a href="../dictionary/DeleteDictionaryParams-class.html">DeleteDictionaryParams</a></li>
+        <li><a href="../dictionary/Dictionary-class.html">Dictionary</a></li>
+        <li><a href="../dictionary/DictionaryEntry-class.html">DictionaryEntry</a></li>
+        <li><a href="../dictionary/DictionaryFormat-class.html">DictionaryFormat</a></li>
+        <li><a href="../dictionary/DictionaryFrequency-class.html">DictionaryFrequency</a></li>
+        <li><a href="../dictionary/DictionaryHeading-class.html">DictionaryHeading</a></li>
+        <li><a href="../dictionary/DictionaryPitch-class.html">DictionaryPitch</a></li>
+        <li><a href="../dictionary/DictionarySearchParams-class.html">DictionarySearchParams</a></li>
+        <li><a href="../dictionary/DictionarySearchResult-class.html">DictionarySearchResult</a></li>
+        <li><a href="../dictionary/DictionaryTag-class.html">DictionaryTag</a></li>
+        <li><a href="../dictionary/IsolateParams-class.html">IsolateParams</a></li>
+        <li><a href="../dictionary/MigakuFormat-class.html">MigakuFormat</a></li>
+        <li><a href="../dictionary/PrepareDictionaryParams-class.html">PrepareDictionaryParams</a></li>
+        <li><a href="../dictionary/PrepareDirectoryParams-class.html">PrepareDirectoryParams</a></li>
+        <li><a href="../dictionary/UpdateDictionaryHistoryParams-class.html">UpdateDictionaryHistoryParams</a></li>
+        <li><a href="../dictionary/YomichanFormat-class.html">YomichanFormat</a></li>
+
+      <li class="section-title"><a href="../dictionary/dictionary-library.html#extensions">Extensions</a></li>
+        <li><a href="../dictionary/DictionaryByIndex.html">DictionaryByIndex</a></li>
+        <li><a href="../dictionary/DictionaryEntryQueryFilter.html">DictionaryEntryQueryFilter</a></li>
+        <li><a href="../dictionary/DictionaryEntryQueryLinks.html">DictionaryEntryQueryLinks</a></li>
+        <li><a href="../dictionary/DictionaryEntryQueryObject.html">DictionaryEntryQueryObject</a></li>
+        <li><a href="../dictionary/DictionaryEntryQueryProperty.html">DictionaryEntryQueryProperty</a></li>
+        <li><a href="../dictionary/DictionaryEntryQuerySortBy.html">DictionaryEntryQuerySortBy</a></li>
+        <li><a href="../dictionary/DictionaryEntryQuerySortThenBy.html">DictionaryEntryQuerySortThenBy</a></li>
+        <li><a href="../dictionary/DictionaryEntryQueryWhere.html">DictionaryEntryQueryWhere</a></li>
+        <li><a href="../dictionary/DictionaryEntryQueryWhereDistinct.html">DictionaryEntryQueryWhereDistinct</a></li>
+        <li><a href="../dictionary/DictionaryEntryQueryWhereSort.html">DictionaryEntryQueryWhereSort</a></li>
+        <li><a href="../dictionary/DictionaryFrequencyQueryFilter.html">DictionaryFrequencyQueryFilter</a></li>
+        <li><a href="../dictionary/DictionaryFrequencyQueryLinks.html">DictionaryFrequencyQueryLinks</a></li>
+        <li><a href="../dictionary/DictionaryFrequencyQueryObject.html">DictionaryFrequencyQueryObject</a></li>
+        <li><a href="../dictionary/DictionaryFrequencyQueryProperty.html">DictionaryFrequencyQueryProperty</a></li>
+        <li><a href="../dictionary/DictionaryFrequencyQuerySortBy.html">DictionaryFrequencyQuerySortBy</a></li>
+        <li><a href="../dictionary/DictionaryFrequencyQuerySortThenBy.html">DictionaryFrequencyQuerySortThenBy</a></li>
+        <li><a href="../dictionary/DictionaryFrequencyQueryWhere.html">DictionaryFrequencyQueryWhere</a></li>
+        <li><a href="../dictionary/DictionaryFrequencyQueryWhereDistinct.html">DictionaryFrequencyQueryWhereDistinct</a></li>
+        <li><a href="../dictionary/DictionaryFrequencyQueryWhereSort.html">DictionaryFrequencyQueryWhereSort</a></li>
+        <li><a href="../dictionary/DictionaryHeadingQueryFilter.html">DictionaryHeadingQueryFilter</a></li>
+        <li><a href="../dictionary/DictionaryHeadingQueryLinks.html">DictionaryHeadingQueryLinks</a></li>
+        <li><a href="../dictionary/DictionaryHeadingQueryObject.html">DictionaryHeadingQueryObject</a></li>
+        <li><a href="../dictionary/DictionaryHeadingQueryProperty.html">DictionaryHeadingQueryProperty</a></li>
+        <li><a href="../dictionary/DictionaryHeadingQuerySortBy.html">DictionaryHeadingQuerySortBy</a></li>
+        <li><a href="../dictionary/DictionaryHeadingQuerySortThenBy.html">DictionaryHeadingQuerySortThenBy</a></li>
+        <li><a href="../dictionary/DictionaryHeadingQueryWhere.html">DictionaryHeadingQueryWhere</a></li>
+        <li><a href="../dictionary/DictionaryHeadingQueryWhereDistinct.html">DictionaryHeadingQueryWhereDistinct</a></li>
+        <li><a href="../dictionary/DictionaryHeadingQueryWhereSort.html">DictionaryHeadingQueryWhereSort</a></li>
+        <li><a href="../dictionary/DictionaryPitchQueryFilter.html">DictionaryPitchQueryFilter</a></li>
+        <li><a href="../dictionary/DictionaryPitchQueryLinks.html">DictionaryPitchQueryLinks</a></li>
+        <li><a href="../dictionary/DictionaryPitchQueryObject.html">DictionaryPitchQueryObject</a></li>
+        <li><a href="../dictionary/DictionaryPitchQueryProperty.html">DictionaryPitchQueryProperty</a></li>
+        <li><a href="../dictionary/DictionaryPitchQuerySortBy.html">DictionaryPitchQuerySortBy</a></li>
+        <li><a href="../dictionary/DictionaryPitchQuerySortThenBy.html">DictionaryPitchQuerySortThenBy</a></li>
+        <li><a href="../dictionary/DictionaryPitchQueryWhere.html">DictionaryPitchQueryWhere</a></li>
+        <li><a href="../dictionary/DictionaryPitchQueryWhereDistinct.html">DictionaryPitchQueryWhereDistinct</a></li>
+        <li><a href="../dictionary/DictionaryPitchQueryWhereSort.html">DictionaryPitchQueryWhereSort</a></li>
+        <li><a href="../dictionary/DictionaryQueryFilter.html">DictionaryQueryFilter</a></li>
+        <li><a href="../dictionary/DictionaryQueryLinks.html">DictionaryQueryLinks</a></li>
+        <li><a href="../dictionary/DictionaryQueryObject.html">DictionaryQueryObject</a></li>
+        <li><a href="../dictionary/DictionaryQueryProperty.html">DictionaryQueryProperty</a></li>
+        <li><a href="../dictionary/DictionaryQuerySortBy.html">DictionaryQuerySortBy</a></li>
+        <li><a href="../dictionary/DictionaryQuerySortThenBy.html">DictionaryQuerySortThenBy</a></li>
+        <li><a href="../dictionary/DictionaryQueryWhere.html">DictionaryQueryWhere</a></li>
+        <li><a href="../dictionary/DictionaryQueryWhereDistinct.html">DictionaryQueryWhereDistinct</a></li>
+        <li><a href="../dictionary/DictionaryQueryWhereSort.html">DictionaryQueryWhereSort</a></li>
+        <li><a href="../dictionary/DictionarySearchResultByIndex.html">DictionarySearchResultByIndex</a></li>
+        <li><a href="../dictionary/DictionarySearchResultQueryFilter.html">DictionarySearchResultQueryFilter</a></li>
+        <li><a href="../dictionary/DictionarySearchResultQueryLinks.html">DictionarySearchResultQueryLinks</a></li>
+        <li><a href="../dictionary/DictionarySearchResultQueryObject.html">DictionarySearchResultQueryObject</a></li>
+        <li><a href="../dictionary/DictionarySearchResultQueryProperty.html">DictionarySearchResultQueryProperty</a></li>
+        <li><a href="../dictionary/DictionarySearchResultQuerySortBy.html">DictionarySearchResultQuerySortBy</a></li>
+        <li><a href="../dictionary/DictionarySearchResultQuerySortThenBy.html">DictionarySearchResultQuerySortThenBy</a></li>
+        <li><a href="../dictionary/DictionarySearchResultQueryWhere.html">DictionarySearchResultQueryWhere</a></li>
+        <li><a href="../dictionary/DictionarySearchResultQueryWhereDistinct.html">DictionarySearchResultQueryWhereDistinct</a></li>
+        <li><a href="../dictionary/DictionarySearchResultQueryWhereSort.html">DictionarySearchResultQueryWhereSort</a></li>
+        <li><a href="../dictionary/DictionaryTagQueryFilter.html">DictionaryTagQueryFilter</a></li>
+        <li><a href="../dictionary/DictionaryTagQueryLinks.html">DictionaryTagQueryLinks</a></li>
+        <li><a href="../dictionary/DictionaryTagQueryObject.html">DictionaryTagQueryObject</a></li>
+        <li><a href="../dictionary/DictionaryTagQueryProperty.html">DictionaryTagQueryProperty</a></li>
+        <li><a href="../dictionary/DictionaryTagQuerySortBy.html">DictionaryTagQuerySortBy</a></li>
+        <li><a href="../dictionary/DictionaryTagQuerySortThenBy.html">DictionaryTagQuerySortThenBy</a></li>
+        <li><a href="../dictionary/DictionaryTagQueryWhere.html">DictionaryTagQueryWhere</a></li>
+        <li><a href="../dictionary/DictionaryTagQueryWhereDistinct.html">DictionaryTagQueryWhereDistinct</a></li>
+        <li><a href="../dictionary/DictionaryTagQueryWhereSort.html">DictionaryTagQueryWhereSort</a></li>
+        <li><a href="../dictionary/GetDictionaryCollection.html">GetDictionaryCollection</a></li>
+        <li><a href="../dictionary/GetDictionaryEntryCollection.html">GetDictionaryEntryCollection</a></li>
+        <li><a href="../dictionary/GetDictionaryFrequencyCollection.html">GetDictionaryFrequencyCollection</a></li>
+        <li><a href="../dictionary/GetDictionaryHeadingCollection.html">GetDictionaryHeadingCollection</a></li>
+        <li><a href="../dictionary/GetDictionaryPitchCollection.html">GetDictionaryPitchCollection</a></li>
+        <li><a href="../dictionary/GetDictionarySearchResultCollection.html">GetDictionarySearchResultCollection</a></li>
+        <li><a href="../dictionary/GetDictionaryTagCollection.html">GetDictionaryTagCollection</a></li>
+
+
+      <li class="section-title"><a href="../dictionary/dictionary-library.html#constants">Constants</a></li>
+        <li><a href="../dictionary/DictionaryEntrySchema-constant.html">DictionaryEntrySchema</a></li>
+        <li><a href="../dictionary/DictionaryFrequencySchema-constant.html">DictionaryFrequencySchema</a></li>
+        <li><a href="../dictionary/DictionaryHeadingSchema-constant.html">DictionaryHeadingSchema</a></li>
+        <li><a href="../dictionary/DictionaryPitchSchema-constant.html">DictionaryPitchSchema</a></li>
+        <li><a href="../dictionary/DictionarySchema-constant.html">DictionarySchema</a></li>
+        <li><a href="../dictionary/DictionarySearchResultSchema-constant.html">DictionarySearchResultSchema</a></li>
+        <li><a href="../dictionary/DictionaryTagSchema-constant.html">DictionaryTagSchema</a></li>
+
+
+      <li class="section-title"><a href="../dictionary/dictionary-library.html#functions">Functions</a></li>
+        <li><a href="../dictionary/deleteDictionariesHelper.html">deleteDictionariesHelper</a></li>
+        <li><a href="../dictionary/deleteDictionaryHelper.html">deleteDictionaryHelper</a></li>
+        <li><a href="../dictionary/depositDictionaryDataHelper.html">depositDictionaryDataHelper</a></li>
+        <li><a href="../dictionary/fastHash.html">fastHash</a></li>
+        <li><a href="../dictionary/preloadResultSync.html">preloadResultSync</a></li>
+        <li><a href="../dictionary/prepareDirectoryAbbyyLingvoFormat.html">prepareDirectoryAbbyyLingvoFormat</a></li>
+        <li><a href="../dictionary/prepareDirectoryMigakuFormat.html">prepareDirectoryMigakuFormat</a></li>
+        <li><a href="../dictionary/prepareDirectoryYomichanFormat.html">prepareDirectoryYomichanFormat</a></li>
+        <li><a href="../dictionary/prepareEntriesAbbyyLingvoFormat.html">prepareEntriesAbbyyLingvoFormat</a></li>
+        <li><a href="../dictionary/prepareEntriesMigakuFormat.html">prepareEntriesMigakuFormat</a></li>
+        <li><a href="../dictionary/prepareEntriesYomichanFormat.html">prepareEntriesYomichanFormat</a></li>
+        <li><a href="../dictionary/prepareFrequenciesAbbyyLingvoFormat.html">prepareFrequenciesAbbyyLingvoFormat</a></li>
+        <li><a href="../dictionary/prepareFrequenciesMigakuFormat.html">prepareFrequenciesMigakuFormat</a></li>
+        <li><a href="../dictionary/prepareFrequenciesYomichanFormat.html">prepareFrequenciesYomichanFormat</a></li>
+        <li><a href="../dictionary/prepareNameAbbyyLingvoFormat.html">prepareNameAbbyyLingvoFormat</a></li>
+        <li><a href="../dictionary/prepareNameMigakuFormat.html">prepareNameMigakuFormat</a></li>
+        <li><a href="../dictionary/prepareNameYomichanFormat.html">prepareNameYomichanFormat</a></li>
+        <li><a href="../dictionary/preparePitchesAbbyyLingvoFormat.html">preparePitchesAbbyyLingvoFormat</a></li>
+        <li><a href="../dictionary/preparePitchesMigakuFormat.html">preparePitchesMigakuFormat</a></li>
+        <li><a href="../dictionary/preparePitchesYomichanFormat.html">preparePitchesYomichanFormat</a></li>
+        <li><a href="../dictionary/prepareTagsAbbyyLingvoFormat.html">prepareTagsAbbyyLingvoFormat</a></li>
+        <li><a href="../dictionary/prepareTagsMigakuFormat.html">prepareTagsMigakuFormat</a></li>
+        <li><a href="../dictionary/prepareTagsYomichanFormat.html">prepareTagsYomichanFormat</a></li>
+        <li><a href="../dictionary/updateDictionaryHistoryHelper.html">updateDictionaryHistoryHelper</a></li>
+
+
+
+</ol>
+
+  </div>
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+    <ol>
+
+        <li class="section-title"><a href="../dictionary/DictionarySearchParams-class.html#constructors">Constructors</a></li>
+          <li><a href="../dictionary/DictionarySearchParams/DictionarySearchParams.html">DictionarySearchParams</a></li>
+
+
+        <li class="section-title">
+          <a href="../dictionary/DictionarySearchParams-class.html#instance-properties">Properties</a>
+        </li>
+          <li class="inherited"><a href="../dictionary/IsolateParams/directoryPath.html">directoryPath</a></li>
+          <li><a href="../dictionary/DictionarySearchParams/enabledDictionaryIds.html">enabledDictionaryIds</a></li>
+          <li><a href="../dictionary/DictionarySearchParams/hashCode.html">hashCode</a></li>
+          <li><a href="../dictionary/DictionarySearchParams/maximumDictionarySearchResults.html">maximumDictionarySearchResults</a></li>
+          <li><a href="../dictionary/DictionarySearchParams/maximumDictionaryTermsInResult.html">maximumDictionaryTermsInResult</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></li>
+          <li><a href="../dictionary/DictionarySearchParams/searchTerm.html">searchTerm</a></li>
+          <li><a href="../dictionary/DictionarySearchParams/searchWithWildcards.html">searchWithWildcards</a></li>
+          <li class="inherited"><a href="../dictionary/IsolateParams/sendPort.html">sendPort</a></li>
+
+        <li class="section-title inherited"><a href="../dictionary/DictionarySearchParams-class.html#instance-methods">Methods</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></li>
+          <li class="inherited"><a href="../dictionary/IsolateParams/send.html">send</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/toString.html">toString</a></li>
+
+        <li class="section-title"><a href="../dictionary/DictionarySearchParams-class.html#operators">Operators</a></li>
+          <li><a href="../dictionary/DictionarySearchParams/operator_equals.html">operator ==</a></li>
+
+
+
+
+</ol>
+
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    yuuna
+      2.6.7+81
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+

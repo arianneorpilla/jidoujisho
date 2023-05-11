@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the JapaneseLanguage class from the language library, for the Dart programming language.">
+  <title>JapaneseLanguage class - language library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../index.html">yuuna</a></li>
+    <li><a href="../language/language-library.html">language</a></li>
+    <li class="self-crumb">JapaneseLanguage class</li>
+  </ol>
+  <div class="self-name">JapaneseLanguage</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span class="material-symbols-outlined">
+        brightness_4
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+  <div id="dartdoc-main-content" class="main-content">
+      <div>
+<h1><span class="kind-class">JapaneseLanguage</span> class 
+    <a href="https://dart.dev/null-safety" class="feature feature-null-safety" title="Supports the null safety language feature.">Null safety</a>
+ 
+</h1></div>
+
+    
+<section class="desc markdown">
+  <p>Language implementation of the Japanese language.</p>
+</section>
+
+
+    <section>
+      <dl class="dl-horizontal">
+        
+  <dt>Inheritance</dt>
+  <dd>
+    <ul class="gt-separated dark clazz-relationships">
+      <li><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></li>
+        <li><a href="../language/Language-class.html">Language</a></li>
+      <li>JapaneseLanguage</li>
+    </ul>
+  </dd>
+
+        
+        
+
+
+
+        
+
+
+      </dl>
+    </section>
+
+    
+
+    <section class="summary offset-anchor" id="instance-properties">
+      <h2>Properties</h2>
+
+      <dl class="properties">
+        <dt id="countryCode" class="property inherited">
+  <span class="name"><a href="../language/Language/countryCode.html">countryCode</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> 
+
+</dt>
+<dd class="inherited">
+  The ISO 3166-1 code or the international standard name of country.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="defaultFontFamily" class="property inherited">
+  <span class="name"><a href="../language/Language/defaultFontFamily.html">defaultFontFamily</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> 
+
+</dt>
+<dd class="inherited">
+  Default font for a language.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="hashCode" class="property inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> 
+
+</dt>
+<dd class="inherited">
+  The hash code for this object.
+  <div class="features"><span class="feature">read-only</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="helloWorld" class="property inherited">
+  <span class="name"><a href="../language/Language/helloWorld.html">helloWorld</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> 
+
+</dt>
+<dd class="inherited">
+  Testing text for the language's basic use. This is useful for testing
+and pre-loading the database for use.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="indexMaxDistance" class="property inherited">
+  <span class="name"><a href="../language/Language/indexMaxDistance.html">indexMaxDistance</a></span>
+  <span class="signature">&#8596; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> 
+
+</dt>
+<dd class="inherited">
+  Some implementations of tap-to-select are very unoptimised for a high
+length of text. It is impractical to run text segmentation in some cases.
+This value sets a length from the center from which input text for
+<a href="../language/Language/wordFromIndex.html">wordFromIndex</a> should be cut if longer. If null, the limit will not be
+used.
+  <div class="features"><span class="feature">read / write</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="isSpaceDelimited" class="property inherited">
+  <span class="name"><a href="../language/Language/isSpaceDelimited.html">isSpaceDelimited</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> 
+
+</dt>
+<dd class="inherited">
+  Whether or not this language essentially relies on spaces to  commonly
+separate and discern words.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="languageCode" class="property inherited">
+  <span class="name"><a href="../language/Language/languageCode.html">languageCode</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> 
+
+</dt>
+<dd class="inherited">
+  The ISO 639-1 code or the international standard language code.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="languageCountryCode" class="property inherited">
+  <span class="name"><a href="../language/Language/languageCountryCode.html">languageCountryCode</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> 
+
+</dt>
+<dd class="inherited">
+  The language and country code separated by a dash.
+  <div class="features"><span class="feature">read-only</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="languageName" class="property inherited">
+  <span class="name"><a href="../language/Language/languageName.html">languageName</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> 
+
+</dt>
+<dd class="inherited">
+  The name of the language, as known to native speakers.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="locale" class="property inherited">
+  <span class="name"><a href="../language/Language/locale.html">locale</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-ui/Locale-class.html">Locale</a></span> 
+
+</dt>
+<dd class="inherited">
+  Extract a <a href="https://api.flutter.dev/flutter/dart-ui/Locale-class.html">Locale</a> from the language code and country code.
+  <div class="features"><span class="feature">read-only</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="preferVerticalReading" class="property inherited">
+  <span class="name"><a href="../language/Language/preferVerticalReading.html">preferVerticalReading</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> 
+
+</dt>
+<dd class="inherited">
+  Whether or not this language should prefer vertical reading.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="prepareSearchResults" class="property inherited">
+  <span class="name"><a href="../language/Language/prepareSearchResults.html">prepareSearchResults</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span>&gt;</span> Function<span class="signature">(<span class="parameter" id="param-params"><span class="type-annotation"><a href="../dictionary/DictionarySearchParams-class.html">DictionarySearchParams</a></span> <span class="parameter-name">params</span></span>)</span></span> 
+
+</dt>
+<dd class="inherited">
+  Overrides the base search function and implements search specific to
+a language.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="runtimeType" class="property inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a></span> 
+
+</dt>
+<dd class="inherited">
+  A representation of the runtime type of the object.
+  <div class="features"><span class="feature">read-only</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="segmentsCache" class="property">
+  <span class="name"><a href="../language/JapaneseLanguage/segmentsCache.html">segmentsCache</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../dictionary/DictionaryHeading-class.html">DictionaryHeading</a></span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter">RubyTextData</span>&gt;</span>?</span>&gt;</span></span> 
+
+</dt>
+<dd>
+  Used to cache furigana segments for already generated <code>DictionaryHeading</code>
+items.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="standardFormat" class="property inherited">
+  <span class="name"><a href="../language/Language/standardFormat.html">standardFormat</a></span>
+  <span class="signature">&#8594; <a href="../dictionary/DictionaryFormat-class.html">DictionaryFormat</a></span> 
+
+</dt>
+<dd class="inherited">
+  A standard format that dictionaries of this language can be found in.
+This is only to set this as the default last selected format on first
+time setup.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="textBaseline" class="property inherited">
+  <span class="name"><a href="../language/Language/textBaseline.html">textBaseline</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-ui/TextBaseline.html">TextBaseline</a></span> 
+
+</dt>
+<dd class="inherited">
+  If this language uses an alphabetic or ideographic text baseline.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="textDirection" class="property inherited">
+  <span class="name"><a href="../language/Language/textDirection.html">textDirection</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-ui/TextDirection.html">TextDirection</a></span> 
+
+</dt>
+<dd class="inherited">
+  The reading direction of the language, for which reading should be
+given a specific format by default. For example, Arabic is RTL, while
+English is LTR.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="threeLetterCode" class="property inherited">
+  <span class="name"><a href="../language/Language/threeLetterCode.html">threeLetterCode</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> 
+
+</dt>
+<dd class="inherited">
+  The ISO 639-3 code or the international standard language code.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+      </dl>
+    </section>
+
+    
+  <section
+      class="summary offset-anchor"
+      id="instance-methods">
+    <h2>Methods</h2>
+    <dl class="callables">
+        <dt id="fetchFurigana" class="callable">
+  <span class="name"><a href="../language/JapaneseLanguage/fetchFurigana.html">fetchFurigana</a></span><span class="signature">(<wbr><span class="parameter" id="fetchFurigana-param-heading">{<span>required</span> <span class="type-annotation"><a href="../dictionary/DictionaryHeading-class.html">DictionaryHeading</a></span> <span class="parameter-name">heading</span>}</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter">RubyTextData</span>&gt;</span>?</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Fetch furigana for a certain term and reading. If already obtained,
+use the cache.
+  
+
+</dd>
+
+        <dt id="getPitchWidget" class="callable">
+  <span class="name"><a href="../language/JapaneseLanguage/getPitchWidget.html">getPitchWidget</a></span><span class="signature">(<wbr><span class="parameter" id="getPitchWidget-param-appModel">{<span>required</span> <span class="type-annotation"><a href="../models/AppModel-class.html">AppModel</a></span> <span class="parameter-name">appModel</span>, </span><span class="parameter" id="getPitchWidget-param-context"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a></span> <span class="parameter-name">context</span>, </span><span class="parameter" id="getPitchWidget-param-reading"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">reading</span>, </span><span class="parameter" id="getPitchWidget-param-downstep"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">downstep</span>}</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/widgets/Widget-class.html">Widget</a></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Some languages may have custom widgets for generating pronunciation
+diagrams.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="getSearchTermFromIndex" class="callable inherited">
+  <span class="name"><a href="../language/Language/getSearchTermFromIndex.html">getSearchTermFromIndex</a></span><span class="signature">(<wbr><span class="parameter" id="getSearchTermFromIndex-param-text">{<span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">text</span>, </span><span class="parameter" id="getSearchTermFromIndex-param-index"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">index</span>}</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Gets a search term and for a space-delimited language, assumes the index
+is within the range of the first word, with remainder words included.
+For a language that is not space-delimited, this is simply the substring
+function.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="getSentenceFromParagraph" class="callable inherited">
+  <span class="name"><a href="../language/Language/getSentenceFromParagraph.html">getSentenceFromParagraph</a></span><span class="signature">(<wbr><span class="parameter" id="getSentenceFromParagraph-param-paragraph">{<span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">paragraph</span>, </span><span class="parameter" id="getSentenceFromParagraph-param-index"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">index</span>}</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Given paragraph text and an index, yield the part of the text such that
+the result is a sentence. Different languages may decide to use different
+delimiters.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="getSentences" class="callable inherited">
+  <span class="name"><a href="../language/Language/getSentences.html">getSentences</a></span><span class="signature">(<wbr><span class="parameter" id="getSentences-param-text"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">text</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Returns a list of sentences for a block of text.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="getStartingIndex" class="callable inherited">
+  <span class="name"><a href="../language/Language/getStartingIndex.html">getStartingIndex</a></span><span class="signature">(<wbr><span class="parameter" id="getStartingIndex-param-text">{<span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">text</span>, </span><span class="parameter" id="getStartingIndex-param-index"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">index</span>}</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Returns the starting index from which the search term should be chopped
+from, given a clicked index and full text. For a space-delimited language,
+this will return the starting index of a clicked word. Otherwise, this
+returns the clicked index itself.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="getTermReadingOverrideWidget" class="callable">
+  <span class="name"><a href="../language/JapaneseLanguage/getTermReadingOverrideWidget.html">getTermReadingOverrideWidget</a></span><span class="signature">(<wbr><span class="parameter" id="getTermReadingOverrideWidget-param-context">{<span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a></span> <span class="parameter-name">context</span>, </span><span class="parameter" id="getTermReadingOverrideWidget-param-appModel"><span>required</span> <span class="type-annotation"><a href="../models/AppModel-class.html">AppModel</a></span> <span class="parameter-name">appModel</span>, </span><span class="parameter" id="getTermReadingOverrideWidget-param-heading"><span>required</span> <span class="type-annotation"><a href="../dictionary/DictionaryHeading-class.html">DictionaryHeading</a></span> <span class="parameter-name">heading</span>, </span><span class="parameter" id="getTermReadingOverrideWidget-param-onSearch"><span>required</span> <span class="type-annotation">dynamic</span> <span class="parameter-name">onSearch</span>(<span class="parameter" id="param-"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span></span>)}</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/widgets/Widget-class.html">Widget</a></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Some languages may want to display custom widgets rather than the built
+in term and reading text that is there by default. For example, Japanese
+may want to display a furigana widget instead.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="initialise" class="callable inherited">
+  <span class="name"><a href="../language/Language/initialise.html">initialise</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  This function is run at startup or when changing languages. It is not
+called again if already run.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="noSuchMethod" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></span><span class="signature">(<wbr><span class="parameter" id="noSuchMethod-param-invocation"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Invocation-class.html">Invocation</a></span> <span class="parameter-name">invocation</span></span>)
+    <span class="returntype parameter">&#8594; dynamic</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Invoked when a non-existent method or property is accessed.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="prepareResources" class="callable">
+  <span class="name"><a href="../language/JapaneseLanguage/prepareResources.html">prepareResources</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Prepare text segmentation tools and other dependencies necessary for this
+langauge to function.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="textToWords" class="callable">
+  <span class="name"><a href="../language/JapaneseLanguage/textToWords.html">textToWords</a></span><span class="signature">(<wbr><span class="parameter" id="textToWords-param-text"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">text</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Given unsegmented <code>text</code>, perform text segmentation particular to the
+language and return a list of parsed words.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="toString" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/toString.html">toString</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  A string representation of this object.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="wordFromIndex" class="callable inherited">
+  <span class="name"><a href="../language/Language/wordFromIndex.html">wordFromIndex</a></span><span class="signature">(<wbr><span class="parameter" id="wordFromIndex-param-text">{<span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">text</span>, </span><span class="parameter" id="wordFromIndex-param-index"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">index</span>}</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Given an <code>index</code> or a character position in given <code>text</code>, return a word
+such that it corresponds to a whole word from the parsed list of words
+from <a href="../language/JapaneseLanguage/textToWords.html">textToWords</a>.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor inherited"
+      id="operators">
+    <h2>Operators</h2>
+    <dl class="callables">
+        <dt id="operator ==" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/operator_equals.html">operator ==</a></span><span class="signature">(<wbr><span class="parameter" id="==-param-other"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">other</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  The equality operator.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+  <section class="summary offset-anchor" id="static-properties">
+    <h2>Static Properties</h2>
+
+    <dl class="properties">
+        <dt id="instance" class="property">
+  <span class="name"><a href="../language/JapaneseLanguage/instance.html">instance</a></span>
+  <span class="signature">&#8594; <a href="../language/JapaneseLanguage-class.html">JapaneseLanguage</a></span> 
+
+</dt>
+<dd>
+  Get the singleton instance of this language.
+  <div class="features"><span class="feature">read-only</span></div>
+
+</dd>
+
+        <dt id="kanaKit" class="property">
+  <span class="name"><a href="../language/JapaneseLanguage/kanaKit.html">kanaKit</a></span>
+  <span class="signature">&#8596; <a href="https://pub.dev/documentation/kana_kit/2.0.0/kana_kit/KanaKit-class.html">KanaKit</a></span> 
+
+</dt>
+<dd>
+  Used for processing Japanese characters from Kana to Romaji and so on.
+  <div class="features"><span class="feature">read / write</span></div>
+
+</dd>
+
+        <dt id="mecab" class="property">
+  <span class="name"><a href="../language/JapaneseLanguage/mecab.html">mecab</a></span>
+  <span class="signature">&#8596; <a href="https://pub.dev/documentation/mecab_dart/0.1.3/mecab_dart/Mecab-class.html">Mecab</a></span> 
+
+</dt>
+<dd>
+  Used for text segmentation and deinflection.
+  <div class="features"><span class="feature">read / write</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+    
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+  <li><a href="../index.html">yuuna</a></li>
+  <li><a href="../language/language-library.html">language</a></li>
+  <li class="self-crumb">JapaneseLanguage class</li>
+</ol>
+
+
+    <h5>language library</h5>
+    <ol>
+      <li class="section-title"><a href="../language/language-library.html#classes">Classes</a></li>
+        <li><a href="../language/Deinflection-class.html">Deinflection</a></li>
+        <li><a href="../language/Deinflector-class.html">Deinflector</a></li>
+        <li><a href="../language/DeinflectRule-class.html">DeinflectRule</a></li>
+        <li><a href="../language/EnglishLanguage-class.html">EnglishLanguage</a></li>
+        <li><a href="../language/FuriganaDistributionGroup-class.html">FuriganaDistributionGroup</a></li>
+        <li><a href="../language/JapaneseLanguage-class.html">JapaneseLanguage</a></li>
+        <li><a href="../language/Language-class.html">Language</a></li>
+        <li><a href="../language/LanguageUtils-class.html">LanguageUtils</a></li>
+        <li><a href="../language/NormalizedReason-class.html">NormalizedReason</a></li>
+        <li><a href="../language/Variant-class.html">Variant</a></li>
+
+      <li class="section-title"><a href="../language/language-library.html#extensions">Extensions</a></li>
+        <li><a href="../language/RegExpExtension.html">RegExpExtension</a></li>
+        <li><a href="../language/StringExtension.html">StringExtension</a></li>
+
+
+
+      <li class="section-title"><a href="../language/language-library.html#properties">Properties</a></li>
+        <li><a href="../language/deinflectRules.html">deinflectRules</a></li>
+
+      <li class="section-title"><a href="../language/language-library.html#functions">Functions</a></li>
+        <li><a href="../language/prepareSearchResultsEnglishLanguage.html">prepareSearchResultsEnglishLanguage</a></li>
+        <li><a href="../language/prepareSearchResultsJapaneseLanguage.html">prepareSearchResultsJapaneseLanguage</a></li>
+        <li><a href="../language/prepareSearchResultsStandard.html">prepareSearchResultsStandard</a></li>
+
+
+
+</ol>
+
+  </div>
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+    <ol>
+
+
+
+        <li class="section-title">
+          <a href="../language/JapaneseLanguage-class.html#instance-properties">Properties</a>
+        </li>
+          <li class="inherited"><a href="../language/Language/countryCode.html">countryCode</a></li>
+          <li class="inherited"><a href="../language/Language/defaultFontFamily.html">defaultFontFamily</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></li>
+          <li class="inherited"><a href="../language/Language/helloWorld.html">helloWorld</a></li>
+          <li class="inherited"><a href="../language/Language/indexMaxDistance.html">indexMaxDistance</a></li>
+          <li class="inherited"><a href="../language/Language/isSpaceDelimited.html">isSpaceDelimited</a></li>
+          <li class="inherited"><a href="../language/Language/languageCode.html">languageCode</a></li>
+          <li class="inherited"><a href="../language/Language/languageCountryCode.html">languageCountryCode</a></li>
+          <li class="inherited"><a href="../language/Language/languageName.html">languageName</a></li>
+          <li class="inherited"><a href="../language/Language/locale.html">locale</a></li>
+          <li class="inherited"><a href="../language/Language/preferVerticalReading.html">preferVerticalReading</a></li>
+          <li class="inherited"><a href="../language/Language/prepareSearchResults.html">prepareSearchResults</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></li>
+          <li><a href="../language/JapaneseLanguage/segmentsCache.html">segmentsCache</a></li>
+          <li class="inherited"><a href="../language/Language/standardFormat.html">standardFormat</a></li>
+          <li class="inherited"><a href="../language/Language/textBaseline.html">textBaseline</a></li>
+          <li class="inherited"><a href="../language/Language/textDirection.html">textDirection</a></li>
+          <li class="inherited"><a href="../language/Language/threeLetterCode.html">threeLetterCode</a></li>
+
+        <li class="section-title"><a href="../language/JapaneseLanguage-class.html#instance-methods">Methods</a></li>
+          <li><a href="../language/JapaneseLanguage/fetchFurigana.html">fetchFurigana</a></li>
+          <li><a href="../language/JapaneseLanguage/getPitchWidget.html">getPitchWidget</a></li>
+          <li class="inherited"><a href="../language/Language/getSearchTermFromIndex.html">getSearchTermFromIndex</a></li>
+          <li class="inherited"><a href="../language/Language/getSentenceFromParagraph.html">getSentenceFromParagraph</a></li>
+          <li class="inherited"><a href="../language/Language/getSentences.html">getSentences</a></li>
+          <li class="inherited"><a href="../language/Language/getStartingIndex.html">getStartingIndex</a></li>
+          <li><a href="../language/JapaneseLanguage/getTermReadingOverrideWidget.html">getTermReadingOverrideWidget</a></li>
+          <li class="inherited"><a href="../language/Language/initialise.html">initialise</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></li>
+          <li><a href="../language/JapaneseLanguage/prepareResources.html">prepareResources</a></li>
+          <li><a href="../language/JapaneseLanguage/textToWords.html">textToWords</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/toString.html">toString</a></li>
+          <li class="inherited"><a href="../language/Language/wordFromIndex.html">wordFromIndex</a></li>
+
+        <li class="section-title inherited"><a href="../language/JapaneseLanguage-class.html#operators">Operators</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/operator_equals.html">operator ==</a></li>
+
+
+        <li class="section-title"><a href="../language/JapaneseLanguage-class.html#static-properties">Static properties</a></li>
+          <li><a href="../language/JapaneseLanguage/instance.html">instance</a></li>
+          <li><a href="../language/JapaneseLanguage/kanaKit.html">kanaKit</a></li>
+          <li><a href="../language/JapaneseLanguage/mecab.html">mecab</a></li>
+
+
+</ol>
+
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    yuuna
+      2.6.7+81
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+
