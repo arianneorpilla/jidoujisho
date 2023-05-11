@@ -111,7 +111,7 @@
    <img src="https://i.postimg.cc/Ls9Dv3FP/Screenshot-20230406-152827.png" width="24%">
    <img src="https://i.postimg.cc/7ZDnYn6R/Screenshot-20230406-152649.png" width="24%">
    <img src="https://i.postimg.cc/gJDPQDxP/Screenshot-20230406-152331.png" width="24%">
-   <img src="https://i.postimg.cc/26Jxkpbd/Screenshot-20230406-152042.png" width="24%">
+   <img src="https://i.postimg.cc/x1WFhfrZ/Screenshot-20230406-152042.png" width="24%">
 </p>
 <p align="center" style="margin:0">
   <img src="https://i.postimg.cc/yxYnpYzP/Screenshot-20230406-153303.png" width="32%">
