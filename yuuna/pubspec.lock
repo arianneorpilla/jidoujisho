@@ -668,10 +668,11 @@ packages:
   flutter_vlc_player:
     dependency: "direct main"
     description:
-      name: flutter_vlc_player
-      sha256: "0fbe714db09646617e46610195f5d81086d41d065a6301f2bb728a07f09f96b9"
-      url: "https://pub.dev"
-    source: hosted
+      path: flutter_vlc_player
+      ref: jidoujisho
+      resolved-ref: "667c7f74b43fcd596e567e45342bee0d299f6e08"
+      url: "https://github.com/lrorpilla/flutter_vlc_player"
+    source: git
     version: "7.2.0"
   flutter_vlc_player_platform_interface:
     dependency: transitive

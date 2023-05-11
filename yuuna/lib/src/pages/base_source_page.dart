@@ -39,9 +39,6 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
   final ValueNotifier<DictionarySearchResult?> _dictionaryResultNotifier =
       ValueNotifier<DictionarySearchResult?>(null);
 
-  /// Notifies the popup dictionary to refresh positions.
-  final ValueNotifier<bool> _popupPositionNotifier = ValueNotifier<bool>(false);
-
   /// Notifies the progress bar whether or not to refresh.
   final ValueNotifier<bool> _isSearchingNotifier = ValueNotifier<bool>(false);
 
@@ -49,7 +46,8 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
   bool get isDictionaryShown => _dictionaryResultNotifier.value != null;
 
   /// The popup position for the [buildDictionary] widget.
-  JidoujishoPopupPosition _popupPosition = JidoujishoPopupPosition.topHalf;
+  final _popupPositionNotifier =
+      ValueNotifier<JidoujishoPopupPosition?>(JidoujishoPopupPosition.topHalf);
 
   /// Standard warning dialog for leaving a source page. All sources should
   /// use this and wrap their [build] function with a [WillPopScope].
@@ -107,8 +105,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
     required JidoujishoPopupPosition position,
   }) async {
     late DictionarySearchResult dictionaryResult;
-    _popupPosition = position;
-    _popupPositionNotifier.value = true;
+    _popupPositionNotifier.value = position;
     try {
       _isSearchingNotifier.value = true;
       dictionaryResult = await appModel.searchDictionary(
@@ -126,7 +123,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
   /// Hide the dictionary and dispose of the current result.
   void clearDictionaryResult() async {
     _dictionaryResultNotifier.value = null;
-    _popupPositionNotifier.value = false;
+    _popupPositionNotifier.value = null;
     appModel.currentMediaSource?.clearCurrentSentence();
     appModel.currentMediaSource?.clearExtraData();
   }
@@ -138,7 +135,6 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
       data: appModel.overrideDictionaryTheme ?? theme,
       child: MultiValueListenableBuilder(
         valueListenables: [
-          _dictionaryResultNotifier,
           _popupPositionNotifier,
         ],
         builder: (context, result, _) {
@@ -147,7 +143,9 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
             return const SizedBox.shrink();
           }
 
-          switch (_popupPosition) {
+          switch (_popupPositionNotifier.value) {
+            case null:
+              return const SizedBox.shrink();
             case JidoujishoPopupPosition.topHalf:
               return buildTopHalfDictionary();
 
@@ -244,6 +242,9 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
     );
   }
 
+  /// Used to check if the pop-up is open.
+  bool get dictionaryPopupShown => _popupPositionNotifier.value != null;
+
   /// The dictionary result unpositioned. See [buildDictionary] for the
   /// positioned version.
   Widget buildDictionaryResult() {
@@ -258,11 +259,14 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
 
     return Dismissible(
       key: ValueKey(_dictionaryResultNotifier.value),
-      onDismissed: (dismissDirection) {
-        clearDictionaryResult();
+      onDismissed: (dismissDirection) {},
+      onUpdate: (details) {
+        if (details.reached) {
+          clearDictionaryResult();
+        }
       },
       dismissThresholds: const {DismissDirection.horizontal: 0.05},
-      movementDuration: const Duration(milliseconds: 50),
+      movementDuration: const Duration(milliseconds: 20),
       child: Container(
         padding: Spacing.of(context).insets.all.semiSmall,
         margin: Spacing.of(context).insets.all.normal,
@@ -310,38 +314,43 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
 
   /// Displays the dictionary entries.
   Widget buildSearchResult() {
-    if (_dictionaryResultNotifier.value == null) {
-      return SizedBox(
-        height: double.infinity,
-        width: double.infinity,
-        child: Card(
-          color: appModel.overrideDictionaryColor
-                  ?.withOpacity(dictionaryEntryOpacity) ??
-              (Theme.of(context).brightness == Brightness.dark
-                  ? Color.fromRGBO(16, 16, 16, dictionaryEntryOpacity)
-                  : Color.fromRGBO(249, 249, 249, dictionaryEntryOpacity)),
-          elevation: 0,
-          shape: const RoundedRectangleBorder(),
-          child: Column(
-            children: [Container()],
-          ),
-        ),
-      );
-    }
+    return ValueListenableBuilder(
+      valueListenable: _dictionaryResultNotifier,
+      builder: (_, __, ___) {
+        if (_dictionaryResultNotifier.value == null) {
+          return SizedBox(
+            height: double.infinity,
+            width: double.infinity,
+            child: Card(
+              color: appModel.overrideDictionaryColor
+                      ?.withOpacity(dictionaryEntryOpacity) ??
+                  (Theme.of(context).brightness == Brightness.dark
+                      ? Color.fromRGBO(16, 16, 16, dictionaryEntryOpacity)
+                      : Color.fromRGBO(249, 249, 249, dictionaryEntryOpacity)),
+              elevation: 0,
+              shape: const RoundedRectangleBorder(),
+              child: Column(
+                children: [Container()],
+              ),
+            ),
+          );
+        }
 
-    if (_dictionaryResultNotifier.value!.headings.isEmpty) {
-      return buildNoSearchResultsPlaceholderMessage();
-    }
+        if (_dictionaryResultNotifier.value!.headings.isEmpty) {
+          return buildNoSearchResultsPlaceholderMessage();
+        }
 
-    return DictionaryResultPage(
-      cardColor: appModel.overrideDictionaryColor,
-      opacity: dictionaryEntryOpacity,
-      key: ValueKey(_dictionaryResultNotifier.value),
-      onSearch: onSearch,
-      onStash: onStash,
-      onShare: onShare,
-      result: _dictionaryResultNotifier.value!,
-      spaceBeforeFirstResult: false,
+        return DictionaryResultPage(
+          cardColor: appModel.overrideDictionaryColor,
+          opacity: dictionaryEntryOpacity,
+          key: ValueKey(_dictionaryResultNotifier.value),
+          onSearch: onSearch,
+          onStash: onStash,
+          onShare: onShare,
+          result: _dictionaryResultNotifier.value!,
+          spaceBeforeFirstResult: false,
+        );
+      },
     );
   }
 

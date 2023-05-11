@@ -318,9 +318,11 @@ class _PlayerTranscriptPageState
             ? Icons.timer_off_outlined
             : Icons.timer,
         action: () {
+          int index = _selectedIndexNotifier.value ?? 0;
+
           appModel.toggleSubtitleTimingsShown();
           _itemScrollController.jumpTo(
-            index: max((widget.currentSubtitle.value?.index ?? 0) - 2, 0),
+            index: max(index - 1, 0),
           );
           setState(() {});
         },

@@ -517,7 +517,7 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
           searchDictionaryResult(
             searchTerm: searchTerm,
             position: position,
-          ).then((_) {
+          ).then((_) async {
             int length = isSpaceDelimited
                 ? appModel.targetLanguage
                     .textToWords(searchTerm)
@@ -526,7 +526,7 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
                 : max(1, currentResult?.bestLength ?? 0);
 
             if (mediaSource.highlightOnTap) {
-              selectTextOnwards(
+              await selectTextOnwards(
                 cursorX: x,
                 cursorY: y,
                 offsetIndex: offsetIndex,
@@ -534,6 +534,10 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
                 whitespaceOffset: whitespaceOffset,
                 isSpaceDelimited: isSpaceDelimited,
               );
+
+              if (!dictionaryPopupShown) {
+                unselectWebViewTextSelection(_controller);
+              }
             }
           });
           String sentence = appModel.targetLanguage.getSentenceFromParagraph(

@@ -9,7 +9,7 @@ import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/language.dart';
 import 'package:yuuna/models.dart';
 
-/// Language implementation of the Japanese language.
+/// Language implementation of the English language.
 class EnglishLanguage extends Language {
   EnglishLanguage._privateConstructor()
       : super(
