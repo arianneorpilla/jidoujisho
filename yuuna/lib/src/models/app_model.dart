@@ -1125,8 +1125,9 @@ class AppModel with ChangeNotifier {
   /// Get whether or not the current theme is dark mode.
   bool get isDarkMode {
     bool isDarkMode = _preferences.get('is_dark_mode',
-        defaultValue: WidgetsBinding.instance.window.platformBrightness ==
-            Brightness.dark);
+        defaultValue:
+            WidgetsBinding.instance.platformDispatcher.platformBrightness ==
+                Brightness.dark);
     return isDarkMode;
   }
 

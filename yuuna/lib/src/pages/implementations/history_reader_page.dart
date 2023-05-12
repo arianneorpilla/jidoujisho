@@ -117,7 +117,7 @@ class HistoryReaderPageState<T extends BaseHistoryPage>
             );
           }),
           LinearProgressIndicator(
-            value: (item.position / item.duration) == double.nan ||
+            value: (item.position / item.duration).isNaN ||
                     (item.position / item.duration) == double.infinity ||
                     (item.position == 0 && item.duration == 0)
                 ? 0

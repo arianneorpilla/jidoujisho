@@ -97,9 +97,7 @@ class _DictionaryEntryPageState extends ConsumerState<DictionaryEntryPage> {
                 return;
               }
 
-              if (!selection.isCollapsed &&
-                  cause == SelectionChangedCause.tap &&
-                  !_isSearching) {
+              if (cause == SelectionChangedCause.doubleTap && !_isSearching) {
                 _isSearching = true;
                 try {
                   String searchTerm = widget.entry.compactDefinitions

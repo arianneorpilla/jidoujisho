@@ -45,7 +45,7 @@ void main() {
 
     /// Ensure no pop-in for the app icon.
     binding.addPostFrameCallback((_) async {
-      final context = binding.renderViewElement;
+      final context = binding.rootElement;
       if (context != null) {
         precacheImage(const AssetImage('assets/meta/icon.png'), context);
       }

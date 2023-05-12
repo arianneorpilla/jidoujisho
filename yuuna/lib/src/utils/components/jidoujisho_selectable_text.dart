@@ -85,7 +85,7 @@ class _JidoujishoSelectableTextSelectionGestureDetectorBuilder
   }
 
   @override
-  void onSingleTapUp(TapUpDetails details) {
+  void onSingleTapUp(TapDragUpDetails details) {
     editableText.hideToolbar();
     if (delegate.selectionEnabled) {
       switch (Theme.of(_state.context).platform) {
@@ -110,6 +110,11 @@ class _JidoujishoSelectableTextSelectionGestureDetectorBuilder
       renderEditable.selectWord(cause: SelectionChangedCause.longPress);
       Feedback.forLongPress(_state.context);
     }
+  }
+
+  @override
+  void onTripleTapDown(TapDragDownDetails details) {
+    return;
   }
 }
 
@@ -256,6 +261,7 @@ class JidoujishoSelectableText extends StatefulWidget {
     this.enableInteractiveSelection = true,
     this.selectionControls,
     this.onTap,
+    this.onDoubleTap,
     this.scrollPhysics,
     this.semanticsLabel,
     this.textHeightBehavior,
@@ -306,6 +312,7 @@ class JidoujishoSelectableText extends StatefulWidget {
     this.enableInteractiveSelection = true,
     this.selectionControls,
     this.onTap,
+    this.onDoubleTap,
     this.scrollPhysics,
     this.semanticsLabel,
     this.textHeightBehavior,
@@ -459,6 +466,23 @@ class JidoujishoSelectableText extends StatefulWidget {
   /// To listen to arbitrary pointer events without competing with the
   /// selectable text's internal gesture detector, use a [Listener].
   final GestureTapCallback? onTap;
+
+  /// Called when the user taps on this selectable text.
+  ///
+  /// The selectable text builds a [GestureDetector] to handle input events like tap,
+  /// to trigger focus requests, to move the caret, adjust the selection, etc.
+  /// Handling some of those events by wrapping the selectable text with a competing
+  /// GestureDetector is problematic.
+  ///
+  /// To unconditionally handle taps, without interfering with the selectable text's
+  /// internal gesture detector, provide this callback.
+  ///
+  /// To be notified when the text field gains or loses the focus, provide a
+  /// [focusNode] and add a listener to that.
+  ///
+  /// To listen to arbitrary pointer events without competing with the
+  /// selectable text's internal gesture detector, use a [Listener].
+  final Function()? onDoubleTap;
 
   /// {@macro flutter.widgets.editableText.scrollPhysics}
   final ScrollPhysics? scrollPhysics;
@@ -801,7 +825,7 @@ class _JidoujishoSelectableTextState extends State<JidoujishoSelectableText>
       effectiveTextStyle = defaultTextStyle.style
           .merge(widget.style ?? _controller._textSpan.style);
     }
-    if (MediaQuery.boldTextOverride(context)) {
+    if (MediaQuery.boldTextOf(context)) {
       effectiveTextStyle = effectiveTextStyle
           .merge(const TextStyle(fontWeight: FontWeight.bold));
     }

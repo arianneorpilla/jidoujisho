@@ -676,7 +676,7 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
           }
         }
       } else {
-        int freqSumCompare = (bValues.values.sum).compareTo(aValues.values.sum);
+        int freqSumCompare = bValues.values.sum.compareTo(aValues.values.sum);
         if (freqSumCompare != 0) {
           return freqSumCompare;
         }
@@ -687,7 +687,7 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
         }
       }
 
-      int entriesCompare = (b.entries.length).compareTo(a.entries.length);
+      int entriesCompare = b.entries.length.compareTo(a.entries.length);
       if (entriesCompare != 0) {
         return entriesCompare;
       }

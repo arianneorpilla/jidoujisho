@@ -605,15 +605,31 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
   }
 
   Widget buildDeckDropdown() {
-    return JidoujishoDropdown<String>(
-      enabled: !widget.editEnhancements,
-      options: widget.decks,
-      initialOption: appModel.lastSelectedDeckName,
-      generateLabel: (deckName) => deckName,
-      onChanged: (deckName) {
-        appModel.setLastSelectedDeck(deckName!);
-        setState(() {});
-      },
+    return Stack(
+      alignment: Alignment.bottomCenter,
+      children: [
+        JidoujishoDropdown<String>(
+          enabled: !widget.editEnhancements,
+          options: widget.decks,
+          initialOption: appModel.lastSelectedDeckName,
+          generateLabel: (deckName) => deckName,
+          onChanged: (deckName) {
+            appModel.setLastSelectedDeck(deckName!);
+            setState(() {});
+          },
+        ),
+        Container(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            border: Border.fromBorderSide(
+              BorderSide(
+                width: 0.5,
+                color: Theme.of(context).unselectedWidgetColor,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

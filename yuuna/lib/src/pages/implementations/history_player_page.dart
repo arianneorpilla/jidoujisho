@@ -164,7 +164,7 @@ class HistoryPlayerPageState<T extends HistoryPlayerPage>
           child: Container(
             alignment: Alignment.bottomCenter,
             child: LinearProgressIndicator(
-              value: (item.position / item.duration) == double.nan ||
+              value: (item.position / item.duration).isNaN ||
                       (item.position / item.duration) == double.infinity ||
                       (item.position == 0 && item.duration == 0)
                   ? 0
