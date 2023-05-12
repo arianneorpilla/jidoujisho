@@ -566,7 +566,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               : EdgeInsets.zero,
           child: MediaQuery.of(context).orientation == Orientation.landscape
               ? buildDictionary()
-              : SafeArea(child: buildDictionary()),
+              : Padding(
+                  padding: Spacing.of(context).insets.onlyTop.big,
+                  child: buildDictionary(),
+                ),
         ),
         buildTranscriptCover(),
       ],

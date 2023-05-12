@@ -173,9 +173,14 @@ class _DictionaryTermActionsRowState
   Map<String, Color?>? _lastColors;
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    AppModel appModel = ref.watch(appProvider);
-    CreatorModel creatorModel = ref.watch(creatorProvider);
+    AppModel appModel = ref.read(appProvider);
+    CreatorModel creatorModel = ref.read(creatorProvider);
 
     AsyncValue<Map<String, Color?>> colors =
         ref.watch(quickActionColorProvider(widget.heading));
@@ -259,6 +264,7 @@ class _DictionaryTermActionsRowState
                 heading: widget.heading,
                 dictionaryName: null,
               );
+
               ref.refresh(quickActionColorProvider(widget.heading));
             },
           ),

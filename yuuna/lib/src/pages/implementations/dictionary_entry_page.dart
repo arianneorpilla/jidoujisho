@@ -214,8 +214,8 @@ class _DictionaryEntryTagsWrap extends ConsumerWidget {
     required WidgetRef ref,
     required DictionaryHeading heading,
   }) {
-    AppModel appModel = ref.watch(appProvider);
-    CreatorModel creatorModel = ref.watch(creatorProvider);
+    AppModel appModel = ref.read(appProvider);
+    CreatorModel creatorModel = ref.read(creatorProvider);
 
     List<QuickAction> filteredActions = appModel.lastSelectedMapping
         .getActions(appModel: appModel)

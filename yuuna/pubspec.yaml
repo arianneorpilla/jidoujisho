@@ -4,6 +4,7 @@ publish_to: 'none'
 version: 2.6.8+82
 environment:
   sdk: ">=3.0.0<4.0.0"
+  flutter: "^3.10.0"
 
 dependencies:
   audio_service: ^0.18.9

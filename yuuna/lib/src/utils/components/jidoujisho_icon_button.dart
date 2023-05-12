@@ -116,15 +116,17 @@ class _JidoujishoIconButtonState extends State<JidoujishoIconButton> {
             ? () async {
                 if (widget.busy) {
                   if (enabled) {
-                    setState(() {
-                      enabled = false;
-                    });
+                    enabled = false;
+                    if (mounted) {
+                      setState(() {});
+                    }
                     try {
                       await widget.onTap?.call();
                     } finally {
-                      setState(() {
-                        enabled = true;
-                      });
+                      enabled = true;
+                      if (mounted) {
+                        setState(() {});
+                      }
                     }
                   }
                 } else {
@@ -155,15 +157,17 @@ class _JidoujishoIconButtonState extends State<JidoujishoIconButton> {
             ? () async {
                 if (widget.busy) {
                   if (enabled) {
-                    setState(() {
-                      enabled = false;
-                    });
+                    enabled = false;
+                    if (mounted) {
+                      setState(() {});
+                    }
                     try {
                       await widget.onTap?.call();
                     } finally {
-                      setState(() {
-                        enabled = true;
-                      });
+                      enabled = true;
+                      if (mounted) {
+                        setState(() {});
+                      }
                     }
                   }
                 } else {
