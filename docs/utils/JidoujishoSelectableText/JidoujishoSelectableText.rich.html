@@ -40,8 +40,11 @@
   <div class="toggle" id="theme-button">
     <label for="theme">
       <input type="checkbox" id="theme" value="light-theme">
-      <span class="material-symbols-outlined">
+      <span id="dark-theme-button" class="material-symbols-outlined">
         brightness_4
+      </span>
+      <span id="light-theme-button" class="material-symbols-outlined">
+        brightness_5
       </span>
     </label>
   </div>
@@ -51,7 +54,6 @@
   <div id="dartdoc-main-content" class="main-content">
       <div>
 <h1><span class="kind-constructor">JidoujishoSelectableText.rich</span> constructor 
-    <a href="https://dart.dev/null-safety" class="feature feature-null-safety" title="Supports the null safety language feature.">Null safety</a>
 </h1></div>
 
     <section class="multi-line-signature">
@@ -80,6 +82,8 @@
 <li><span class="parameter" id="rich-param-enableInteractiveSelection"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">enableInteractiveSelection</span> = <span class="default-value">true</span>, </span></li>
 <li><span class="parameter" id="rich-param-selectionControls"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/widgets/TextSelectionControls-class.html">TextSelectionControls</a>?</span> <span class="parameter-name">selectionControls</span>, </span></li>
 <li><span class="parameter" id="rich-param-onTap"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/gestures/GestureTapCallback.html">GestureTapCallback</a>?</span> <span class="parameter-name">onTap</span>, </span></li>
+<li><span class="parameter" id="rich-param-onDoubleTap"><span class="type-annotation">dynamic</span> <span class="parameter-name">onDoubleTap</span>(<ol class="parameter-list"></ol>
+)?, </span></li>
 <li><span class="parameter" id="rich-param-scrollPhysics"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/widgets/ScrollPhysics-class.html">ScrollPhysics</a>?</span> <span class="parameter-name">scrollPhysics</span>, </span></li>
 <li><span class="parameter" id="rich-param-semanticsLabel"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">semanticsLabel</span>, </span></li>
 <li><span class="parameter" id="rich-param-textHeightBehavior"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/TextHeightBehavior-class.html">TextHeightBehavior</a>?</span> <span class="parameter-name">textHeightBehavior</span>, </span></li>
@@ -131,6 +135,7 @@
   this.enableInteractiveSelection = true,
   this.selectionControls,
   this.onTap,
+  this.onDoubleTap,
   this.scrollPhysics,
   this.semanticsLabel,
   this.textHeightBehavior,
@@ -192,6 +197,7 @@
           <li><a href="../../utils/JidoujishoSelectableText/magnifierConfiguration.html">magnifierConfiguration</a></li>
           <li><a href="../../utils/JidoujishoSelectableText/maxLines.html">maxLines</a></li>
           <li><a href="../../utils/JidoujishoSelectableText/minLines.html">minLines</a></li>
+          <li><a href="../../utils/JidoujishoSelectableText/onDoubleTap.html">onDoubleTap</a></li>
           <li><a href="../../utils/JidoujishoSelectableText/onSelectionChanged.html">onSelectionChanged</a></li>
           <li><a href="../../utils/JidoujishoSelectableText/onTap.html">onTap</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></li>
@@ -242,7 +248,7 @@
 <footer>
   <span class="no-break">
     yuuna
-      2.6.7+81
+      2.6.8+82
   </span>
 
   

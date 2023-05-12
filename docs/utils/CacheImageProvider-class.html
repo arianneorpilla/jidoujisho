@@ -39,8 +39,11 @@
   <div class="toggle" id="theme-button">
     <label for="theme">
       <input type="checkbox" id="theme" value="light-theme">
-      <span class="material-symbols-outlined">
+      <span id="dark-theme-button" class="material-symbols-outlined">
         brightness_4
+      </span>
+      <span id="light-theme-button" class="material-symbols-outlined">
+        brightness_5
       </span>
     </label>
   </div>
@@ -50,14 +53,13 @@
   <div id="dartdoc-main-content" class="main-content">
       <div>
 <h1><span class="kind-class">CacheImageProvider</span> class 
-    <a href="https://dart.dev/null-safety" class="feature feature-null-safety" title="Supports the null safety language feature.">Null safety</a>
  
 </h1></div>
 
     
 <section class="desc markdown">
   <p><a href="https://stackoverflow.com/questions/67963713/how-to-cache-memory-image-using-image-memory-or-memoryimage-flutter">https://stackoverflow.com/questions/67963713/how-to-cache-memory-image-using-image-memory-or-memoryimage-flutter</a>
-<a href="https://gist.github.com/darmawan01/9be266df44594ea59f07032e325ffa3b">https://gist.github.com/darmawan01/9be266df44594ea59f07032e325ffa3b</a></p>
+https://gist.github.com/darmawan01/9be266df44594ea59f07032e325ffa3b</p>
 </section>
 
 
@@ -196,7 +198,21 @@ image.
 </dd>
 
         <dt id="loadBuffer" class="callable inherited">
-  <span class="name"><a href="https://api.flutter.dev/flutter/painting/ImageProvider/loadBuffer.html">loadBuffer</a></span><span class="signature">(<wbr><span class="parameter" id="loadBuffer-param-key"><span class="type-annotation"><a href="../utils/CacheImageProvider-class.html">CacheImageProvider</a></span> <span class="parameter-name">key</span>, </span><span class="parameter" id="loadBuffer-param-decode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/painting/DecoderBufferCallback.html">DecoderBufferCallback</a></span> <span class="parameter-name">decode</span></span>)
+  <span class="name deprecated"><a class="deprecated" href="https://api.flutter.dev/flutter/painting/ImageProvider/loadBuffer.html">loadBuffer</a></span><span class="signature">(<wbr><span class="parameter" id="loadBuffer-param-key"><span class="type-annotation"><a href="../utils/CacheImageProvider-class.html">CacheImageProvider</a></span> <span class="parameter-name">key</span>, </span><span class="parameter" id="loadBuffer-param-decode"><span class="type-annotation"><a class="deprecated" href="https://api.flutter.dev/flutter/painting/DecoderBufferCallback.html">DecoderBufferCallback</a></span> <span class="parameter-name">decode</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/painting/ImageStreamCompleter-class.html">ImageStreamCompleter</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Converts a key into an <a href="https://api.flutter.dev/flutter/painting/ImageStreamCompleter-class.html">ImageStreamCompleter</a>, and begins fetching the
+image.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="loadImage" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/painting/ImageProvider/loadImage.html">loadImage</a></span><span class="signature">(<wbr><span class="parameter" id="loadImage-param-key"><span class="type-annotation"><a href="../utils/CacheImageProvider-class.html">CacheImageProvider</a></span> <span class="parameter-name">key</span>, </span><span class="parameter" id="loadImage-param-decode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/painting/ImageDecoderCallback.html">ImageDecoderCallback</a></span> <span class="parameter-name">decode</span></span>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/painting/ImageStreamCompleter-class.html">ImageStreamCompleter</a></span>
   </span>
   
@@ -217,7 +233,7 @@ image.
 
 </dt>
 <dd class="inherited">
-  Invoked when a non-existent method or property is accessed.
+  Invoked when a nonexistent method or property is accessed.
   <div class="features"><span class="feature">inherited</span></div>
 
 </dd>
@@ -467,7 +483,8 @@ an <a href="https://api.flutter.dev/flutter/painting/ImageStream-class.html">Ima
           <li class="inherited"><a href="https://api.flutter.dev/flutter/painting/ImageProvider/createStream.html">createStream</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/painting/ImageProvider/evict.html">evict</a></li>
           <li><a href="../utils/CacheImageProvider/load.html">load</a></li>
-          <li class="inherited"><a href="https://api.flutter.dev/flutter/painting/ImageProvider/loadBuffer.html">loadBuffer</a></li>
+          <li class="inherited"><a class="deprecated" href="https://api.flutter.dev/flutter/painting/ImageProvider/loadBuffer.html">loadBuffer</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/painting/ImageProvider/loadImage.html">loadImage</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/painting/ImageProvider/obtainCacheStatus.html">obtainCacheStatus</a></li>
           <li><a href="../utils/CacheImageProvider/obtainKey.html">obtainKey</a></li>
@@ -490,7 +507,7 @@ an <a href="https://api.flutter.dev/flutter/painting/ImageStream-class.html">Ima
 <footer>
   <span class="no-break">
     yuuna
-      2.6.7+81
+      2.6.8+82
   </span>
 
   

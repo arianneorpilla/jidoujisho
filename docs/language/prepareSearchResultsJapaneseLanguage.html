@@ -39,8 +39,11 @@
   <div class="toggle" id="theme-button">
     <label for="theme">
       <input type="checkbox" id="theme" value="light-theme">
-      <span class="material-symbols-outlined">
+      <span id="dark-theme-button" class="material-symbols-outlined">
         brightness_4
+      </span>
+      <span id="light-theme-button" class="material-symbols-outlined">
+        brightness_5
       </span>
     </label>
   </div>
@@ -50,7 +53,6 @@
   <div id="dartdoc-main-content" class="main-content">
       <div>
 <h1><span class="kind-function">prepareSearchResultsJapaneseLanguage</span> function 
-    <a href="https://dart.dev/null-safety" class="feature feature-null-safety" title="Supports the null safety language feature.">Null safety</a>
  
 </h1></div>
 
@@ -472,7 +474,7 @@ Credits to Matthew Chan for their port of the Yomichan parser to Dart.</p>
           }
         }
       } else {
-        int freqSumCompare = (bValues.values.sum).compareTo(aValues.values.sum);
+        int freqSumCompare = bValues.values.sum.compareTo(aValues.values.sum);
         if (freqSumCompare != 0) {
           return freqSumCompare;
         }
@@ -483,7 +485,7 @@ Credits to Matthew Chan for their port of the Yomichan parser to Dart.</p>
         }
       }
 
-      int entriesCompare = (b.entries.length).compareTo(a.entries.length);
+      int entriesCompare = b.entries.length.compareTo(a.entries.length);
       if (entriesCompare != 0) {
         return entriesCompare;
       }
@@ -592,7 +594,7 @@ Credits to Matthew Chan for their port of the Yomichan parser to Dart.</p>
 <footer>
   <span class="no-break">
     yuuna
-      2.6.7+81
+      2.6.8+82
   </span>
 
   

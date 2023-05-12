@@ -40,8 +40,11 @@
   <div class="toggle" id="theme-button">
     <label for="theme">
       <input type="checkbox" id="theme" value="light-theme">
-      <span class="material-symbols-outlined">
+      <span id="dark-theme-button" class="material-symbols-outlined">
         brightness_4
+      </span>
+      <span id="light-theme-button" class="material-symbols-outlined">
+        brightness_5
       </span>
     </label>
   </div>
@@ -51,7 +54,6 @@
   <div id="dartdoc-main-content" class="main-content">
       <div>
 <h1><span class="kind-method">debugFillProperties</span> method 
-    <a href="https://dart.dev/null-safety" class="feature feature-null-safety" title="Supports the null safety language feature.">Null safety</a>
 </h1></div>
 
     <section class="multi-line-signature">
@@ -72,6 +74,17 @@
     
 <section class="desc markdown">
   <p>Add additional properties associated with the node.</p>
+<iframe src="https://www.youtube.com/embed/DnC7eT-vh1k?rel=0" title="YouTube video player" frameborder="0" allow="accelerometer; 
+autoplay; 
+clipboard-write; 
+encrypted-media; 
+gyroscope; 
+picture-in-picture" allowfullscreen="" style="max-width: 560px;
+max-height: 315px;
+width: 100%;
+height: 100%;
+aspect-ratio: 560 / 315;">
+</iframe>
 <p>Use the most specific <a href="https://api.flutter.dev/flutter/foundation/DiagnosticsProperty-class.html">DiagnosticsProperty</a> existing subclass to describe
 each property instead of the <a href="https://api.flutter.dev/flutter/foundation/DiagnosticsProperty-class.html">DiagnosticsProperty</a> base class. There are
 only a small number of <a href="https://api.flutter.dev/flutter/foundation/DiagnosticsProperty-class.html">DiagnosticsProperty</a> subclasses each covering a
@@ -93,10 +106,12 @@ as a flag.</li>
 <li>Specify <code>showName</code> and <code>showSeparator</code> in rare cases where the string
 output would look clumsy if they were not set.
 <pre class="language-dart"><code class="language-dart">DiagnosticsProperty&lt;Object&gt;('child(3, 4)', null, ifNull: 'is null', showSeparator: false).toString()
-</code></pre>Shows using <code>showSeparator</code> to get output <code>child(3, 4) is null</code> which
+</code></pre>
+Shows using <code>showSeparator</code> to get output <code>child(3, 4) is null</code> which
 is more polished than <code>child(3, 4): is null</code>.
 <pre class="language-dart"><code class="language-dart">DiagnosticsProperty&lt;IconData&gt;('icon', icon, ifNull: '&lt;empty&gt;', showName: false).toString()
-</code></pre>Shows using <code>showName</code> to omit the property name as in this context the
+</code></pre>
+Shows using <code>showName</code> to omit the property name as in this context the
 property name does not add useful information.</li>
 </ul>
 <p><code>ifNull</code>, <code>ifEmpty</code>, <code>unit</code>, and <code>tooltip</code> make property
@@ -190,7 +205,7 @@ common <a href="https://api.flutter.dev/flutter/foundation/DiagnosticsProperty-c
     // without a space.
     properties.add(DoubleProperty(
       'device pixel ratio',
-      ui.window.devicePixelRatio,
+      devicePixelRatio,
       tooltip: 'physical pixels per logical pixel',
     ));
 
@@ -363,6 +378,7 @@ void debugFillProperties(DiagnosticPropertiesBuilder properties) {
           <li><a href="../../utils/JidoujishoSelectableText/magnifierConfiguration.html">magnifierConfiguration</a></li>
           <li><a href="../../utils/JidoujishoSelectableText/maxLines.html">maxLines</a></li>
           <li><a href="../../utils/JidoujishoSelectableText/minLines.html">minLines</a></li>
+          <li><a href="../../utils/JidoujishoSelectableText/onDoubleTap.html">onDoubleTap</a></li>
           <li><a href="../../utils/JidoujishoSelectableText/onSelectionChanged.html">onSelectionChanged</a></li>
           <li><a href="../../utils/JidoujishoSelectableText/onTap.html">onTap</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></li>
@@ -413,7 +429,7 @@ void debugFillProperties(DiagnosticPropertiesBuilder properties) {
 <footer>
   <span class="no-break">
     yuuna
-      2.6.7+81
+      2.6.8+82
   </span>
 
   

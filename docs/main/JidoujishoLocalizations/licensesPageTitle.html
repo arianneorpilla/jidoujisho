@@ -40,8 +40,11 @@
   <div class="toggle" id="theme-button">
     <label for="theme">
       <input type="checkbox" id="theme" value="light-theme">
-      <span class="material-symbols-outlined">
+      <span id="dark-theme-button" class="material-symbols-outlined">
         brightness_4
+      </span>
+      <span id="light-theme-button" class="material-symbols-outlined">
+        brightness_5
       </span>
     </label>
   </div>
@@ -51,7 +54,6 @@
   <div id="dartdoc-main-content" class="main-content">
       <div>
 <h1><span class="kind-property">licensesPageTitle</span> property 
-    <a href="https://dart.dev/null-safety" class="feature feature-null-safety" title="Supports the null safety language feature.">Null safety</a>
 </h1></div>
 
 
@@ -116,6 +118,7 @@ String get licensesPageTitle =&gt; t.options_attribution;</code></pre>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/alertDialogLabel.html">alertDialogLabel</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/anteMeridiemAbbreviation.html">anteMeridiemAbbreviation</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/backButtonTooltip.html">backButtonTooltip</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/bottomSheetLabel.html">bottomSheetLabel</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/calendarModeButtonLabel.html">calendarModeButtonLabel</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/cancelButtonLabel.html">cancelButtonLabel</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/closeButtonLabel.html">closeButtonLabel</a></li>
@@ -123,6 +126,7 @@ String get licensesPageTitle =&gt; t.options_attribution;</code></pre>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/collapsedIconTapHint.html">collapsedIconTapHint</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/continueButtonLabel.html">continueButtonLabel</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/copyButtonLabel.html">copyButtonLabel</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/currentDateLabel.html">currentDateLabel</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/cutButtonLabel.html">cutButtonLabel</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/dateHelpText.html">dateHelpText</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/dateInputLabel.html">dateInputLabel</a></li>
@@ -191,6 +195,7 @@ String get licensesPageTitle =&gt; t.options_attribution;</code></pre>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/keyboardKeyPrintScreen.html">keyboardKeyPrintScreen</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/keyboardKeyScrollLock.html">keyboardKeyScrollLock</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/keyboardKeySelect.html">keyboardKeySelect</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/keyboardKeyShift.html">keyboardKeyShift</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/keyboardKeySpace.html">keyboardKeySpace</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/lastPageTooltip.html">lastPageTooltip</a></li>
           <li><a href="../../main/JidoujishoLocalizations/licensesPageTitle.html">licensesPageTitle</a></li>
@@ -217,6 +222,7 @@ String get licensesPageTitle =&gt; t.options_attribution;</code></pre>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/rowsPerPageTitle.html">rowsPerPageTitle</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/saveButtonLabel.html">saveButtonLabel</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/scrimLabel.html">scrimLabel</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/scriptCategory.html">scriptCategory</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/searchFieldLabel.html">searchFieldLabel</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/selectAllButtonLabel.html">selectAllButtonLabel</a></li>
@@ -254,6 +260,7 @@ String get licensesPageTitle =&gt; t.options_attribution;</code></pre>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/pageRowsInfoTitle.html">pageRowsInfoTitle</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/parseCompactDate.html">parseCompactDate</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/remainingTextFieldCharacterCount.html">remainingTextFieldCharacterCount</a></li>
+          <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/scrimOnTapHint.html">scrimOnTapHint</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/selectedRowCountTitle.html">selectedRowCountTitle</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/tabLabel.html">tabLabel</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/material/DefaultMaterialLocalizations/timeOfDayFormat.html">timeOfDayFormat</a></li>
@@ -277,7 +284,7 @@ String get licensesPageTitle =&gt; t.options_attribution;</code></pre>
 <footer>
   <span class="no-break">
     yuuna
-      2.6.7+81
+      2.6.8+82
   </span>
 
   
