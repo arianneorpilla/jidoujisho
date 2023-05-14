@@ -50,6 +50,7 @@ class AnkiMapping {
         AudioField.key,
         PitchAccentField.key,
         FuriganaField.key,
+        FrequencyField.key,
         ExpandedMeaningField.key,
         CollapsedMeaningField.key,
         AudioSentenceField.key,
@@ -114,6 +115,7 @@ class AnkiMapping {
       ContextField.key: {0: ClearFieldEnhancement.key},
       PitchAccentField.key: {0: ClearFieldEnhancement.key},
       FuriganaField.key: {0: ClearFieldEnhancement.key},
+      FrequencyField.key: {0: ClearFieldEnhancement.key},
       CollapsedMeaningField.key: {0: ClearFieldEnhancement.key},
       ExpandedMeaningField.key: {0: ClearFieldEnhancement.key},
       HiddenMeaningField.key: {0: ClearFieldEnhancement.key},
@@ -160,6 +162,7 @@ class AnkiMapping {
       ContextField.key: {0: ClearFieldEnhancement.key},
       PitchAccentField.key: {0: ClearFieldEnhancement.key},
       FuriganaField.key: {0: ClearFieldEnhancement.key},
+      FrequencyField.key: {0: ClearFieldEnhancement.key},
       CollapsedMeaningField.key: {0: ClearFieldEnhancement.key},
       ExpandedMeaningField.key: {0: ClearFieldEnhancement.key},
       HiddenMeaningField.key: {0: ClearFieldEnhancement.key},
@@ -182,6 +185,7 @@ class AnkiMapping {
   static const List<String> defaultCreatorCollapsedFieldKeys = [
     TagsField.key,
     FuriganaField.key,
+    FrequencyField.key,
     PitchAccentField.key,
   ];
 

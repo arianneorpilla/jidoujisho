@@ -30,7 +30,8 @@ class DictionaryFrequency {
   final IsarLink<Dictionary> dictionary = IsarLink<Dictionary>();
 
   @override
-  bool operator ==(Object other) => other is DictionaryPitch && id == other.id;
+  bool operator ==(Object other) =>
+      other is DictionaryFrequency && id == other.id;
 
   @override
   int get hashCode => id.hashCode;

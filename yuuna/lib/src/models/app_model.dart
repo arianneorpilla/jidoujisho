@@ -69,6 +69,7 @@ final List<Field> globalFields = List<Field>.unmodifiable(
     AudioSentenceField.instance,
     PitchAccentField.instance,
     FuriganaField.instance,
+    FrequencyField.instance,
     ContextField.instance,
     ExpandedMeaningField.instance,
     CollapsedMeaningField.instance,
@@ -878,6 +879,9 @@ class AppModel with ChangeNotifier {
       ],
       FuriganaField.instance: [
         ClearFieldEnhancement(field: FuriganaField.instance),
+      ],
+      FrequencyField.instance: [
+        ClearFieldEnhancement(field: FrequencyField.instance),
       ],
       CollapsedMeaningField.instance: [
         ClearFieldEnhancement(field: CollapsedMeaningField.instance),
