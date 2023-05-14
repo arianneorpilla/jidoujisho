@@ -5,6 +5,8 @@ import 'package:yuuna/language.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/utils.dart';
 
+import 'package:yuuna/src/creator/fields/frequency_field.dart';
+
 part 'anki_mapping.g.dart';
 
 /// A user-generated mapping to allow customisation of the fields exported from
@@ -50,6 +52,7 @@ class AnkiMapping {
         AudioField.key,
         PitchAccentField.key,
         FuriganaField.key,
+        FrequencyField.key,
         ExpandedMeaningField.key,
         CollapsedMeaningField.key,
         AudioSentenceField.key,
@@ -114,6 +117,7 @@ class AnkiMapping {
       ContextField.key: {0: ClearFieldEnhancement.key},
       PitchAccentField.key: {0: ClearFieldEnhancement.key},
       FuriganaField.key: {0: ClearFieldEnhancement.key},
+      FrequencyField.key: {0: ClearFieldEnhancement.key},
       CollapsedMeaningField.key: {0: ClearFieldEnhancement.key},
       ExpandedMeaningField.key: {0: ClearFieldEnhancement.key},
       HiddenMeaningField.key: {0: ClearFieldEnhancement.key},
@@ -160,6 +164,7 @@ class AnkiMapping {
       ContextField.key: {0: ClearFieldEnhancement.key},
       PitchAccentField.key: {0: ClearFieldEnhancement.key},
       FuriganaField.key: {0: ClearFieldEnhancement.key},
+      FrequencyField.key: {0: ClearFieldEnhancement.key},
       CollapsedMeaningField.key: {0: ClearFieldEnhancement.key},
       ExpandedMeaningField.key: {0: ClearFieldEnhancement.key},
       HiddenMeaningField.key: {0: ClearFieldEnhancement.key},
@@ -182,6 +187,7 @@ class AnkiMapping {
   static const List<String> defaultCreatorCollapsedFieldKeys = [
     TagsField.key,
     FuriganaField.key,
+    FrequencyField.key,
     PitchAccentField.key,
   ];
 

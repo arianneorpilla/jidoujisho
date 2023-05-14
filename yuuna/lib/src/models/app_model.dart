@@ -38,6 +38,7 @@ import 'package:yuuna/language.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/pages.dart';
+import 'package:yuuna/src/creator/fields/frequency_field.dart';
 import 'package:yuuna/utils.dart';
 
 /// Schemas used in Isar database.
@@ -69,6 +70,7 @@ final List<Field> globalFields = List<Field>.unmodifiable(
     AudioSentenceField.instance,
     PitchAccentField.instance,
     FuriganaField.instance,
+    FrequencyField.instance,
     ContextField.instance,
     ExpandedMeaningField.instance,
     CollapsedMeaningField.instance,
@@ -873,6 +875,9 @@ class AppModel with ChangeNotifier {
       ],
       FuriganaField.instance: [
         ClearFieldEnhancement(field: FuriganaField.instance),
+      ],
+      FrequencyField.instance: [
+        ClearFieldEnhancement(field: FrequencyField.instance),
       ],
       CollapsedMeaningField.instance: [
         ClearFieldEnhancement(field: CollapsedMeaningField.instance),
